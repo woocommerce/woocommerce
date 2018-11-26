@@ -216,7 +216,7 @@ class ProductSpecificSearchResults extends Component {
 			return '';
 		}
 
-		return '/wc/v2/products?per_page=10&search=' + this.props.searchString;
+		return '/wc/v2/products?per_page=10&status=publish&search=' + this.props.searchString;
 	}
 
 	/**

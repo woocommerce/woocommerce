@@ -83,6 +83,7 @@ describe( 'getQuery', () => {
 			expect( query ).toEqual( {
 				orderby: 'date',
 				per_page: 12,
+				status: 'publish',
 			} );
 		} );
 
@@ -93,6 +94,7 @@ describe( 'getQuery', () => {
 				category: '',
 				orderby: 'date',
 				per_page: 12,
+				status: 'publish',
 			} );
 		} );
 
@@ -103,6 +105,7 @@ describe( 'getQuery', () => {
 				category: '1',
 				orderby: 'date',
 				per_page: 12,
+				status: 'publish',
 			} );
 		} );
 
@@ -113,6 +116,7 @@ describe( 'getQuery', () => {
 				category: '1,2',
 				orderby: 'date',
 				per_page: 12,
+				status: 'publish',
 			} );
 		} );
 	} );
