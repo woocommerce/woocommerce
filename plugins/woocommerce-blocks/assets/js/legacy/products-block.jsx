@@ -412,6 +412,7 @@ class ProductsBlockPreview extends Component {
 		const { columns, rows, display, display_setting, orderby } = this.props.attributes;
 
 		const query = {
+			status: 'publish',
 			per_page: rows * columns,
 		};
 

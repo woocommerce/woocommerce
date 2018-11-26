@@ -2,6 +2,7 @@ export default function getQuery( attributes ) {
 	const { categories, columns, orderby, rows } = attributes;
 
 	const query = {
+		status: 'publish',
 		per_page: rows * columns,
 	};
 
