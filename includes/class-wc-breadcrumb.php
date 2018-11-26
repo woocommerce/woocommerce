@@ -164,6 +164,8 @@ class WC_Breadcrumb {
 				$this->term_ancestors( $main_term->term_id, 'product_cat' );
 				$this->add_crumb( $main_term->name, get_term_link( $main_term ) );
 			}
+
+			return;
 		} elseif ( 'post' !== get_post_type( $post ) ) {
 			$post_type = get_post_type_object( get_post_type( $post ) );
 
