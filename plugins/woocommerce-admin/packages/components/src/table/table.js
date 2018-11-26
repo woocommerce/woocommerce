@@ -98,7 +98,7 @@ class Table extends Component {
 		this.setState( {
 			isScrollable: ! scrolledToEnd,
 		} );
-	};
+	}
 
 	render() {
 		const {

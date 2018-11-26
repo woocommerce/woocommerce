@@ -5,26 +5,30 @@
 import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { format as formatDate } from '@wordpress/date';
-import { compose } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
-import { get, map, orderBy } from 'lodash';
+import { map } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
 import { getIntervalForQuery, getDateFormatsForInterval } from '@woocommerce/date';
-import { Link, TableCard } from '@woocommerce/components';
+import { Link } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
-import { onQueryChange } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
-import ReportError from 'analytics/components/report-error';
-import { getReportChartData, getReportTableData } from 'store/reports/utils';
+import ReportTable from 'analytics/components/report-table';
 import { numberFormat } from 'lib/number';
 
-class CouponsReportTable extends Component {
+export default class CouponsReportTable extends Component {
+	constructor() {
+		super();
+
+		this.getHeadersContent = this.getHeadersContent.bind( this );
+		this.getRowsContent = this.getRowsContent.bind( this );
+		this.getSummary = this.getSummary.bind( this );
+	}
+
 	getHeadersContent() {
 		return [
 			{
@@ -145,51 +149,20 @@ class CouponsReportTable extends Component {
 	}
 
 	render() {
-		const { tableData, primaryData } = this.props;
-		const { items, query } = tableData;
-
-		const isError = tableData.isError || primaryData.isError;
-
-		if ( isError ) {
-			return <ReportError isError />;
-		}
-
-		const isRequesting = tableData.isRequesting || primaryData.isRequesting;
-
-		const headers = this.getHeadersContent();
-		const orderedCoupons = orderBy( items, query.orderby, query.order );
-		const rows = this.getRowsContent( orderedCoupons );
-		const totalRows = get( primaryData, [ 'data', 'totals', 'coupons_count' ], items.length );
-		const summary = primaryData.data.totals ? this.getSummary( primaryData.data.totals ) : null;
+		const { query } = this.props;
 
 		return (
-			<TableCard
-				title={ __( 'Coupons', 'wc-admin' ) }
-				compareBy={ 'coupons' }
-				ids={ orderedCoupons.map( coupon => coupon.coupon_id ) }
-				rows={ rows }
-				totalRows={ totalRows }
-				rowsPerPage={ query.per_page }
-				headers={ headers }
-				isLoading={ isRequesting }
-				onQueryChange={ onQueryChange }
+			<ReportTable
+				compareBy="coupons"
+				endpoint="coupons"
+				getHeadersContent={ this.getHeadersContent }
+				getRowsContent={ this.getRowsContent }
+				getSummary={ this.getSummary }
+				itemIdField="coupon_id"
 				query={ query }
-				summary={ summary }
-				downloadable
+				totalsCountField="coupons_count"
+				title={ __( 'Coupons', 'wc-admin' ) }
 			/>
 		);
 	}
 }
-
-export default compose(
-	withSelect( ( select, props ) => {
-		const { query } = props;
-		const primaryData = getReportChartData( 'coupons', 'primary', query, select );
-		const tableData = getReportTableData( 'coupons', query, select );
-
-		return {
-			primaryData,
-			tableData,
-		};
-	} )
-)( CouponsReportTable );

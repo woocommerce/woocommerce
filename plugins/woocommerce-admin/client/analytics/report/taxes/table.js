@@ -4,25 +4,29 @@
  */
 import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import { compose } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
-import { get, map, orderBy } from 'lodash';
+import { map } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
-import { Link, TableCard } from '@woocommerce/components';
+import { Link } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
-import { onQueryChange } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
-import ReportError from 'analytics/components/report-error';
-import { getReportChartData, getReportTableData } from 'store/reports/utils';
+import ReportTable from 'analytics/components/report-table';
 import { numberFormat } from 'lib/number';
 
-class TaxesReportTable extends Component {
+export default class TaxesReportTable extends Component {
+	constructor() {
+		super();
+
+		this.getHeadersContent = this.getHeadersContent.bind( this );
+		this.getRowsContent = this.getRowsContent.bind( this );
+		this.getSummary = this.getSummary.bind( this );
+	}
+
 	getHeadersContent() {
 		return [
 			{
@@ -138,51 +142,20 @@ class TaxesReportTable extends Component {
 	}
 
 	render() {
-		const { primaryData, tableData } = this.props;
-		const { items, query } = tableData;
-
-		const isError = tableData.isError || primaryData.isError;
-
-		if ( isError ) {
-			return <ReportError isError />;
-		}
-
-		const isRequesting = tableData.isLoading || primaryData.isRequesting;
-
-		const headers = this.getHeadersContent();
-		const orderedTaxes = orderBy( items, query.orderby, query.order );
-		const rows = this.getRowsContent( orderedTaxes );
-		const totalRows = get( primaryData, [ 'data', 'totals', 'taxes_count' ], items.length );
-		const summary = primaryData.data.totals ? this.getSummary( primaryData.data.totals ) : null;
+		const { query } = this.props;
 
 		return (
-			<TableCard
-				title={ __( 'Taxes', 'wc-admin' ) }
-				compareBy={ 'taxes' }
-				ids={ orderedTaxes.map( tax => tax.tax_rate_id ) }
-				rows={ rows }
-				totalRows={ totalRows }
-				rowsPerPage={ query.per_page }
-				headers={ headers }
-				isLoading={ isRequesting }
-				onQueryChange={ onQueryChange }
+			<ReportTable
+				compareBy="taxes"
+				endpoint="taxes"
+				getHeadersContent={ this.getHeadersContent }
+				getRowsContent={ this.getRowsContent }
+				getSummary={ this.getSummary }
+				itemIdField="tax_rate_id"
 				query={ query }
-				summary={ summary }
-				downloadable
+				totalsCountField="taxes_count"
+				title={ __( 'Taxes', 'wc-admin' ) }
 			/>
 		);
 	}
 }
-
-export default compose(
-	withSelect( ( select, props ) => {
-		const { query } = props;
-		const primaryData = getReportChartData( 'taxes', 'primary', query, select );
-		const tableData = getReportTableData( 'taxes', query, select );
-
-		return {
-			primaryData,
-			tableData,
-		};
-	} )
-)( TaxesReportTable );

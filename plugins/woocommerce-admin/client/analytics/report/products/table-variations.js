@@ -4,24 +4,28 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import { compose } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
-import { map, orderBy } from 'lodash';
+import { map } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
-import { Link, TableCard } from '@woocommerce/components';
+import { Link } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
-import { getNewPath, getPersistedQuery, onQueryChange } from '@woocommerce/navigation';
+import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
-import ReportError from 'analytics/components/report-error';
-import { getReportChartData, getReportTableData } from 'store/reports/utils';
+import ReportTable from 'analytics/components/report-table';
 
-class VariationsReportTable extends Component {
+export default class VariationsReportTable extends Component {
+	constructor() {
+		super();
+
+		this.getHeadersContent = this.getHeadersContent.bind( this );
+		this.getRowsContent = this.getRowsContent.bind( this );
+	}
+
 	getVariationName( variation ) {
 		return variation.attributes.reduce( ( desc, attribute, index, arr ) => {
 			desc += `${ attribute.option }${ arr.length === index + 1 ? '' : ', ' }`;
@@ -128,16 +132,7 @@ class VariationsReportTable extends Component {
 	}
 
 	render() {
-		const { tableData } = this.props;
-		const { isError, isRequesting, items, query } = tableData;
-
-		if ( isError ) {
-			return <ReportError isError />;
-		}
-
-		const headers = this.getHeadersContent();
-		const orderedVariations = orderBy( items, query.orderby, query.order );
-		const rows = this.getRowsContent( orderedVariations );
+		const { query } = this.props;
 
 		const labels = {
 			helpText: __( 'Select at least two variations to compare', 'wc-admin' ),
@@ -145,38 +140,21 @@ class VariationsReportTable extends Component {
 		};
 
 		return (
-			<TableCard
-				title={ __( 'Variations', 'wc-admin' ) }
-				rows={ rows }
-				totalRows={ items.length }
-				rowsPerPage={ query.per_page }
-				headers={ headers }
-				labels={ labels }
-				ids={ orderedVariations.map( p => p.product_id ) }
-				isLoading={ isRequesting }
+			<ReportTable
 				compareBy={ 'variations' }
 				compareParam={ 'filter-variations' }
-				onQueryChange={ onQueryChange }
+				endpoint="variations"
+				getHeadersContent={ this.getHeadersContent }
+				getRowsContent={ this.getRowsContent }
+				itemIdField="product_id"
+				labels={ labels }
 				query={ query }
-				summary={ null } // @TODO
-				downloadable
+				tableQuery={ {
+					orderby: query.orderby || 'items_sold',
+					order: query.order || 'desc',
+				} }
+				title={ __( 'Variations', 'wc-admin' ) }
 			/>
 		);
 	}
 }
-
-export default compose(
-	withSelect( ( select, props ) => {
-		const { query } = props;
-		const primaryData = getReportChartData( 'products', 'primary', query, select );
-		const tableData = getReportTableData( 'variations', query, select, {
-			orderby: query.orderby || 'items_sold',
-			order: query.order || 'desc',
-		} );
-
-		return {
-			primaryData,
-			tableData,
-		};
-	} )
-)( VariationsReportTable );
