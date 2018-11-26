@@ -28,6 +28,7 @@ import { getAdminLink, onQueryChange } from '@woocommerce/navigation';
 import ReportError from 'analytics/components/report-error';
 import { QUERY_DEFAULTS } from 'store/constants';
 import { getReportChartData, getFilterQuery } from 'store/reports/utils';
+import { numberFormat } from 'lib/number';
 import './style.scss';
 
 class OrdersReportTable extends Component {
@@ -184,7 +185,7 @@ class OrdersReportTable extends Component {
 					value: products.map( product => product.label ).join( ' ' ),
 				},
 				{
-					display: items_sold,
+					display: numberFormat( items_sold ),
 					value: items_sold,
 				},
 				{
@@ -206,11 +207,11 @@ class OrdersReportTable extends Component {
 		return [
 			{
 				label: _n( 'order', 'orders', totals.num_items_sold, 'wc-admin' ),
-				value: totals.orders_count,
+				value: numberFormat( totals.orders_count ),
 			},
 			{
 				label: _n( 'new customer', 'new customers', totals.num_new_customers, 'wc-admin' ),
-				value: totals.num_new_customers,
+				value: numberFormat( totals.num_new_customers ),
 			},
 			{
 				label: _n(
@@ -219,19 +220,19 @@ class OrdersReportTable extends Component {
 					totals.num_returning_customers,
 					'wc-admin'
 				),
-				value: totals.num_returning_customers,
+				value: numberFormat( totals.num_returning_customers ),
 			},
 			{
 				label: _n( 'product', 'products', totals.products, 'wc-admin' ),
-				value: totals.products,
+				value: numberFormat( totals.products ),
 			},
 			{
 				label: _n( 'item sold', 'items sold', totals.num_items_sold, 'wc-admin' ),
-				value: totals.num_items_sold,
+				value: numberFormat( totals.num_items_sold ),
 			},
 			{
 				label: _n( 'coupon', 'coupons', totals.coupons, 'wc-admin' ),
-				value: totals.coupons,
+				value: numberFormat( totals.coupons ),
 			},
 			{
 				label: __( 'net revenue', 'wc-admin' ),

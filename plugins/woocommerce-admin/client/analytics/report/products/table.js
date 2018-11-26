@@ -20,6 +20,7 @@ import { getNewPath, getPersistedQuery, onQueryChange } from '@woocommerce/navig
  */
 import ReportError from 'analytics/components/report-error';
 import { getReportChartData, getReportTableData } from 'store/reports/utils';
+import { numberFormat } from 'lib/number';
 
 class ProductsReportTable extends Component {
 	getHeadersContent() {
@@ -117,7 +118,7 @@ class ProductsReportTable extends Component {
 					value: sku,
 				},
 				{
-					display: items_sold,
+					display: numberFormat( items_sold ),
 					value: items_sold,
 				},
 				{
@@ -139,7 +140,7 @@ class ProductsReportTable extends Component {
 					value: Array.isArray( categories ) ? categories.map( cat => cat.name ).join( ', ' ) : '',
 				},
 				{
-					display: variations.length,
+					display: numberFormat( variations.length ),
 					value: variations.length,
 				},
 				{
@@ -151,7 +152,7 @@ class ProductsReportTable extends Component {
 					value: stockStatuses[ stock_status ],
 				},
 				{
-					display: stock_quantity,
+					display: numberFormat( stock_quantity ),
 					value: stock_quantity,
 				},
 			];
