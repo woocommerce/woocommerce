@@ -301,7 +301,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
 			}
 
-			$unique_products       = $this->get_unique_product_count( $totals_query['where_clause'] );
+			$unique_products       = $this->get_unique_product_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
 			$totals[0]['products'] = $unique_products;
 
 			$totals = (object) $this->cast_numbers( $totals[0] );
@@ -384,19 +384,25 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	/**
 	 * Get unique products based on user time query
 	 *
-	 * @param string $where_clause Where clause with date query.
+	 * @param string $from_clause       From clause with date query.
+	 * @param string $where_time_clause Where clause with date query.
+	 * @param string $where_clause      Where clause with date query.
 	 * @return integer Unique product count.
 	 */
-	public function get_unique_product_count( $where_clause ) {
+	public function get_unique_product_count( $from_clause, $where_time_clause, $where_clause ) {
 		global $wpdb;
+
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
 
 		return $wpdb->get_var(
 			"SELECT
 					COUNT( DISTINCT {$wpdb->prefix}wc_order_product_lookup.product_id )
 				FROM
-					{$wpdb->prefix}wc_order_product_lookup JOIN {$wpdb->prefix}posts ON {$wpdb->prefix}wc_order_product_lookup.order_id = {$wpdb->prefix}posts.ID
+				    {$wpdb->prefix}wc_order_product_lookup JOIN {$table_name} ON {$wpdb->prefix}wc_order_product_lookup.order_id = {$table_name}.order_id
+					{$from_clause}
 				WHERE
 					1=1
+					{$where_time_clause}
 					{$where_clause}"
 		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 	}
