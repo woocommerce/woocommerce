@@ -32,6 +32,15 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 	protected $rest_base = 'reports/products';
 
 	/**
+	 * Mapping between external parameter name and name used in query class.
+	 *
+	 * @var array
+	 */
+	protected $param_mapping = array(
+		'products' => 'product_includes',
+	);
+
+	/**
 	 * Get items.
 	 *
 	 * @param WP_REST_Request $request Request data.
@@ -43,7 +52,11 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 		$registered = array_keys( $this->get_collection_params() );
 		foreach ( $registered as $param_name ) {
 			if ( isset( $request[ $param_name ] ) ) {
-				$args[ $param_name ] = $request[ $param_name ];
+				if ( isset( $this->param_mapping[ $param_name ] ) ) {
+					$args[ $this->param_mapping[ $param_name ] ] = $request[ $param_name ];
+				} else {
+					$args[ $param_name ] = $request[ $param_name ];
+				}
 			}
 		}
 
@@ -243,44 +256,15 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['status_is']             = array(
-			'description'       => __( 'Limit result set to items that have the specified order status.', 'wc-admin' ),
+		$params['products']              = array(
+			'description'       => __( 'Limit result to items with specified product ids.', 'wc-admin' ),
 			'type'              => 'array',
-			'sanitize_callback' => 'wp_parse_slug_list',
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
-			'items'             => array(
-				'enum' => $this->get_order_statuses(),
-				'type' => 'string',
-			),
-		);
-		$params['status_is_not']         = array(
-			'description'       => __( 'Limit result set to items that don\'t have the specified order status.', 'wc-admin' ),
-			'type'              => 'array',
-			'sanitize_callback' => 'wp_parse_slug_list',
-			'validate_callback' => 'rest_validate_request_arg',
-			'items'             => array(
-				'enum' => $this->get_order_statuses(),
-				'type' => 'string',
-			),
-		);
-		$params['product_includes']      = array(
-			'description'       => __( 'Limit result set to items that have the specified product(s) assigned.', 'wc-admin' ),
-			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
 			),
-			'default'           => array(),
-			'sanitize_callback' => 'wp_parse_id_list',
 
-		);
-		$params['product_excludes']      = array(
-			'description'       => __( 'Limit result set to items that don\'t have the specified product(s) assigned.', 'wc-admin' ),
-			'type'              => 'array',
-			'items'             => array(
-				'type' => 'integer',
-			),
-			'default'           => array(),
-			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['extended_product_info'] = array(
 			'description'       => __( 'Add additional piece of info about each product to the report.', 'wc-admin' ),
@@ -291,20 +275,5 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 		);
 
 		return $params;
-	}
-
-	/**
-	 * Get order statuses without prefixes.
-	 *
-	 * @return array
-	 */
-	protected function get_order_statuses() {
-		$order_statuses = array();
-
-		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
-			$order_statuses[] = str_replace( 'wc-', '', $status );
-		}
-
-		return $order_statuses;
 	}
 }
