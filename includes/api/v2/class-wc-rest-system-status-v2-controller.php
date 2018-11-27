@@ -835,7 +835,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 									'changelog' => $body->sections['changelog'],
 								);
 								set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
-								break;
 							}
 						}
 					}
