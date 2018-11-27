@@ -105,6 +105,9 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 							}
 						}
 						break;
+					case 'payment_method_title' :
+						$order->set_payment_method_title( sanitize_text_field( $value ) );
+						break;
 					case 'meta_data':
 						if ( is_array( $value ) ) {
 							foreach ( $value as $meta ) {
