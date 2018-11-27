@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Component, createRef, Fragment } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -18,15 +18,13 @@ import { withViewportMatch } from '@wordpress/viewport';
  * WooCommerce dependencies
  */
 import { updateQueryString } from '@woocommerce/navigation';
-import { H, Section } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import './style.scss';
-import D3Chart from 'components/d3chart';
-import Legend from 'components/d3chart/legend';
 import ChartPlaceholder from './placeholder';
+import { H, Section } from '../section';
+import { D3Chart, D3Legend } from './d3chart';
 
 d3FormatDefaultLocale( {
 	decimal: '.',
@@ -235,14 +233,14 @@ class Chart extends Component {
 
 		const chartHeight = this.getChartHeight();
 		const legend = (
-			<Legend
+			<D3Legend
 				colorScheme={ d3InterpolateViridis }
 				data={ orderedKeys }
 				handleLegendHover={ this.handleLegendHover }
 				handleLegendToggle={ this.handleLegendToggle }
 				legendDirection={ legendDirection }
-				itemsLabel={ itemsLabel }
-				valueType={ valueType }
+				legendValueFormat={ tooltipValueFormat }
+				totalLabel={ sprintf( itemsLabel, orderedKeys.length ) }
 			/>
 		);
 		const margin = {

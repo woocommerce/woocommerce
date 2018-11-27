@@ -5,38 +5,16 @@
 import classNames from 'classnames';
 import { Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { sprintf } from '@wordpress/i18n';
-
-/**
- * WooCommerce dependencies
- */
-import { formatCurrency } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
-import './legend.scss';
-import { getColor } from './utils';
-
-function getFormatedTotal( total, valueType ) {
-	let rowTotal = total;
-	switch ( valueType ) {
-		case 'average':
-			rowTotal = Math.round( total );
-			break;
-		case 'currency':
-			rowTotal = formatCurrency( total );
-			break;
-		case 'number':
-			break;
-	}
-	return rowTotal;
-}
+import { getColor, getFormatter } from './utils';
 
 /**
  * A legend specifically designed for the WooCommerce admin charts.
  */
-class Legend extends Component {
+class D3Legend extends Component {
 	constructor() {
 		super();
 
@@ -56,13 +34,13 @@ class Legend extends Component {
 		window.removeEventListener( 'resize', this.updateListScroll );
 	}
 
-	updateListScroll = () => {
+	updateListScroll() {
 		const list = this.listRef.current;
 		const scrolledToEnd = list.scrollHeight - list.scrollTop <= list.offsetHeight;
 		this.setState( {
 			isScrollable: ! scrolledToEnd,
 		} );
-	};
+	}
 
 	render() {
 		const {
@@ -70,9 +48,9 @@ class Legend extends Component {
 			data,
 			handleLegendHover,
 			handleLegendToggle,
-			itemsLabel,
 			legendDirection,
-			valueType,
+			legendValueFormat,
+			totalLabel,
 		} = this.props;
 		const { isScrollable } = this.state;
 		const colorParams = {
@@ -80,7 +58,7 @@ class Legend extends Component {
 			colorScheme,
 		};
 		const numberOfRowsVisible = data.filter( row => row.visible ).length;
-		const showTotalLabel = legendDirection === 'column' && data.length > 5 && itemsLabel;
+		const showTotalLabel = legendDirection === 'column' && data.length > 5 && totalLabel;
 
 		return (
 			<div
@@ -128,7 +106,7 @@ class Legend extends Component {
 										{ row.key }
 									</span>
 									<span className="woocommerce-legend__item-total" id={ row.key }>
-										{ getFormatedTotal( row.total, valueType ) }
+										{ getFormatter( legendValueFormat )( row.total ) }
 									</span>
 								</div>
 							</button>
@@ -136,14 +114,14 @@ class Legend extends Component {
 					) ) }
 				</ul>
 				{ showTotalLabel && (
-					<div className="woocommerce-legend__total">{ sprintf( itemsLabel, data.length ) }</div>
+					<div className="woocommerce-legend__total">{ totalLabel }</div>
 				) }
 			</div>
 		);
 	}
 }
 
-Legend.propTypes = {
+D3Legend.propTypes = {
 	/**
 	 * Additional CSS classes.
 	 */
@@ -169,18 +147,19 @@ Legend.propTypes = {
 	 */
 	legendDirection: PropTypes.oneOf( [ 'row', 'column' ] ),
 	/**
+	 * A number formatting string or function to format the value displayed in the legend.
+	 */
+	legendValueFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
+	/**
 	 * Label to describe the legend items. It will be displayed in the legend of
 	 * comparison charts when there are many.
 	 */
-	itemsLabel: PropTypes.string,
-	/**
-	 * What type of data is to be displayed? Number, Average, String?
-	 */
-	valueType: PropTypes.string,
+	totalLabel: PropTypes.string,
 };
 
-Legend.defaultProps = {
+D3Legend.defaultProps = {
 	legendDirection: 'row',
+	legendValueFormat: ',',
 };
 
-export default Legend;
+export default D3Legend;

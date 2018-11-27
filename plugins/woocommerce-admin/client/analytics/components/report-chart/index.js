@@ -21,11 +21,11 @@ import {
 	getChartTypeForQuery,
 	getPreviousDate,
 } from '@woocommerce/date';
+import { Chart } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import { Chart } from 'components';
 import { getReportChartData, getTooltipValueFormat } from 'store/reports/utils';
 import ReportError from 'analytics/components/report-error';
 

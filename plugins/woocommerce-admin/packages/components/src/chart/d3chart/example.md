@@ -1,7 +1,5 @@
 ```jsx
-import { D3Chart, Legend } from 'components';
-
-const noop = () => {};
+import { D3Chart, D3Legend } from 'react-d3-chart';
 
 const data =  [
 	{
@@ -32,7 +30,7 @@ const data =  [
 
 const MyChart = () => (
 	<div>
-		<Chart data={ data } title="Example Chart" layout="comparison" />
+		<D3Chart data={ data } title="Example Chart" layout="item-comparison" />
 	</div>
 );
 ```

@@ -13,8 +13,7 @@ import { select as d3Select } from 'd3-selection';
 /**
  * Internal dependencies
  */
-import './style.scss';
-import D3Base from './d3-base';
+import D3Base from './d3base';
 import {
 	drawAxis,
 	drawBars,
