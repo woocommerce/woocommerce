@@ -193,7 +193,6 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			FROM
 				{$wpdb->prefix}wc_order_product_lookup
 			WHERE
-				1=1 AND
 				{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$included_products})
 			)";
 		}
@@ -205,7 +204,6 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			FROM
 				{$wpdb->prefix}wc_order_product_lookup
 			WHERE
-				1=1 AND
 				{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$excluded_products})
 			)";
 		}
@@ -220,7 +218,6 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				FROM
 					{$wpdb->prefix}wc_order_coupon_lookup
 				WHERE
-					1=1 AND
 					{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$included_coupons})
 				)";
 		}
@@ -232,7 +229,6 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				FROM
 					{$wpdb->prefix}wc_order_coupon_lookup
 				WHERE
-					1=1 AND
 					{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$excluded_coupons})
 				)";
 		}
