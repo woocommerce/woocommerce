@@ -1,6 +1,6 @@
 {
   "name": "@woocommerce/components",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "UI components for WooCommerce.",
   "author": "Automattic",
   "license": "GPL-2.0-or-later",
@@ -24,8 +24,8 @@
     "@babel/runtime-corejs2": "7.1.5",
     "@woocommerce/csv-export": "^1.0.0",
     "@woocommerce/currency": "^1.0.0",
-    "@woocommerce/date": "^1.0.1",
-    "@woocommerce/navigation": "^1.0.0",
+    "@woocommerce/date": "^1.0.2",
+    "@woocommerce/navigation": "^1.1.0",
     "@wordpress/components": "3.0.0",
     "@wordpress/compose": "3.0.0",
     "@wordpress/date": "2.1.0",
