@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -162,7 +162,7 @@ class D3Chart extends Component {
 	}
 
 	render() {
-		if ( ! this.props.data ) {
+		if ( isEmpty( this.props.data ) ) {
 			return null; // TODO: improve messaging
 		}
 		return (
