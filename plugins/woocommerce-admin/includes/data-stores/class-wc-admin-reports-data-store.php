@@ -444,6 +444,10 @@ class WC_Admin_Reports_Data_Store {
 	 * @return array
 	 */
 	protected function get_time_period_sql_params( $query_args ) {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . $this::TABLE_NAME;
+
 		$sql_query = array(
 			'from_clause'       => '',
 			'where_time_clause' => '',
@@ -453,14 +457,14 @@ class WC_Admin_Reports_Data_Store {
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
 			$datetime                        = new DateTime( $query_args['before'] );
 			$datetime_str                    = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
-			$sql_query['where_time_clause'] .= " AND date_created <= '$datetime_str'";
+			$sql_query['where_time_clause'] .= " AND {$table_name}.date_created <= '$datetime_str'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
 			$datetime                        = new DateTime( $query_args['after'] );
 			$datetime_str                    = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
-			$sql_query['where_time_clause'] .= " AND date_created >= '$datetime_str'";
+			$sql_query['where_time_clause'] .= " AND {$table_name}.date_created >= '$datetime_str'";
 		}
 
 		return $sql_query;
