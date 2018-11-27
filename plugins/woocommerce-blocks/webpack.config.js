@@ -13,9 +13,12 @@ const externals = {
 	'@wordpress/blocks': { this: [ 'wp', 'blocks' ] },
 	'@wordpress/components': { this: [ 'wp', 'components' ] },
 	'@wordpress/compose': { this: [ 'wp', 'compose' ] },
-	'@wordpress/editor': { this: [ 'wp', 'editor' ] },
+	'@wordpress/data': { this: [ 'wp', 'data' ] },
 	'@wordpress/element': { this: [ 'wp', 'element' ] },
+	'@wordpress/editor': { this: [ 'wp', 'editor' ] },
 	'@wordpress/i18n': { this: [ 'wp', 'i18n' ] },
+	'@wordpress/url': { this: [ 'wp', 'url' ] },
+	lodash: 'lodash',
 };
 
 /**
@@ -58,7 +61,7 @@ const GutenbergBlocksConfig = {
 								'@import "_breakpoints"; ' +
 								'@import "_mixins"; ',
 						},
-					}
+					},
 				],
 			},
 		],
