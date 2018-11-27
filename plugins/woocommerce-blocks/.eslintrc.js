@@ -44,6 +44,9 @@ module.exports = {
 		eqeqeq: 'error',
 		'func-call-spacing': 'error',
 		indent: [ 'error', 'tab', { SwitchCase: 1 } ],
+		'jsx-a11y/label-has-for': [ 'error', {
+			required: 'id',
+		} ],
 		'jsx-quotes': 'error',
 		'key-spacing': 'error',
 		'keyword-spacing': 'error',
