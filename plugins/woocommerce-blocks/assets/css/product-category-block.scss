@@ -1,6 +1,6 @@
 // Import the woocommerce components stylesheet
 // @todo Move this to a separate file so we can build a cacheable single stylesheet for all blocks.
-@import '../../node_modules/@woocommerce/components/build-style/style.css';
+@import "../../node_modules/@woocommerce/components/build-style/style.css";
 
 .wc-block-products-category {
 	overflow: hidden;
