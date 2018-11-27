@@ -180,9 +180,13 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		$orders_stats_table = $wpdb->prefix . self::TABLE_NAME;
 		$operator           = $this->get_match_operator( $query_args );
 
-		$where_filters     = array();
-		$products_subquery = $this->get_products_subquery( $query_args, $operator );
-		if ( $products_subquery ) {
+		$where_filters = array();
+
+		// TODO: maybe move the sql inside the get_included/excluded functions?
+		// Products filters.
+		$included_products = $this->get_included_products( $query_args );
+		$excluded_products = $this->get_excluded_products( $query_args );
+		if ( $included_products ) {
 			$where_filters[] = " {$orders_stats_table}.order_id IN (
 			SELECT
 				DISTINCT {$wpdb->prefix}wc_order_product_lookup.order_id
@@ -190,12 +194,26 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				{$wpdb->prefix}wc_order_product_lookup
 			WHERE
 				1=1 AND
-				{$products_subquery}
+				{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$included_products})
 			)";
 		}
 
-		$coupons_subquery = $this->get_coupon_subquery( $query_args, $operator );
-		if ( $coupons_subquery ) {
+		if ( $excluded_products ) {
+			$where_filters[] = " {$orders_stats_table}.order_id NOT IN (
+			SELECT
+				DISTINCT {$wpdb->prefix}wc_order_product_lookup.order_id
+			FROM
+				{$wpdb->prefix}wc_order_product_lookup
+			WHERE
+				1=1 AND
+				{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$excluded_products})
+			)";
+		}
+
+		// Coupons filters.
+		$included_coupons = $this->get_included_coupons( $query_args );
+		$excluded_coupons = $this->get_excluded_coupons( $query_args );
+		if ( $included_coupons ) {
 			$where_filters[] = " {$orders_stats_table}.order_id IN (
 				SELECT
 					DISTINCT {$wpdb->prefix}wc_order_coupon_lookup.order_id
@@ -203,10 +221,23 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 					{$wpdb->prefix}wc_order_coupon_lookup
 				WHERE
 					1=1 AND
-					{$coupons_subquery}
+					{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$included_coupons})
 				)";
 		}
 
+		if ( $excluded_coupons ) {
+			$where_filters[] = " {$orders_stats_table}.order_id NOT IN (
+				SELECT
+					DISTINCT {$wpdb->prefix}wc_order_coupon_lookup.order_id
+				FROM
+					{$wpdb->prefix}wc_order_coupon_lookup
+				WHERE
+					1=1 AND
+					{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$excluded_coupons})
+				)";
+		}
+
+		// TODO: move order status to wc_order_stats so that JOIN is not necessary.
 		$order_status_filter = $this->get_status_subquery( $query_args, $operator );
 		if ( $order_status_filter ) {
 			$from_clause    .= " JOIN {$wpdb->prefix}posts ON {$orders_stats_table}.order_id = {$wpdb->prefix}posts.ID";
