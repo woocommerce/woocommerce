@@ -72,19 +72,28 @@ function wc_admin_register_script() {
 	wp_register_script(
 		WC_ADMIN_APP,
 		wc_admin_url( "dist/{$entry}/index.js" ),
-		array( 'wc-components', 'wc-navigation', 'wp-date', 'wp-html-entities', 'wp-keycodes' ),
+		array( 'wc-components', 'wc-navigation', 'wp-date', 'wp-html-entities', 'wp-keycodes', 'wp-i18n' ),
 		filemtime( wc_admin_dir_path( "dist/{$entry}/index.js" ) ),
 		true
 	);
 
 	// Set up the text domain and translations.
+	// The old way (pre WP5 RC1).
 	if ( function_exists( 'wp_get_jed_locale_data' ) ) {
 		$locale_data = wp_get_jed_locale_data( 'wc-admin' );
-	} else {
+	} elseif ( function_exists( 'gutenberg_get_jed_locale_data' ) ) {
 		$locale_data = gutenberg_get_jed_locale_data( 'wc-admin' );
+	} else {
+		$locale_data = '';
 	}
-	$content = 'wp.i18n.setLocaleData( ' . json_encode( $locale_data ) . ', "wc-admin" );';
-	wp_add_inline_script( 'wp-i18n', $content, 'after' );
+	if ( ! empty( $locale_data ) ) {
+		$content = 'wp.i18n.setLocaleData( ' . wp_json_encode( $locale_data ) . ', "wc-admin" );';
+		wp_add_inline_script( 'wp-i18n', $content, 'after' );
+	}
+	// The new way (WP5 RC1 and later).
+	if ( function_exists( 'wp_set_script_translations' ) ) {
+		wp_set_script_translations( WC_ADMIN_APP, 'wc-admin' );
+	}
 
 	// Resets lodash to wp-admin's version of lodash.
 	wp_add_inline_script(
