@@ -13,7 +13,6 @@ import { stringifyQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { computeSuggestionMatch } from './utils';
-import { NAMESPACE } from 'store/constants';
 
 /**
  * A tax completer.
@@ -33,7 +32,7 @@ export default {
 			};
 			payload = stringifyQuery( query );
 		}
-		return apiFetch( { path: `${ NAMESPACE }taxes${ payload }` } );
+		return apiFetch( { path: `/wc/v3/taxes${ payload }` } );
 	},
 	isDebounced: true,
 	getOptionKeywords( tax ) {
