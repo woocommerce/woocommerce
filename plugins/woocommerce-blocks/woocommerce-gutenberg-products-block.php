@@ -26,7 +26,6 @@ function wgpb_initialize() {
 
 	if ( $files_exist && function_exists( 'register_block_type' ) ) {
 		add_action( 'init', 'wgpb_register_products_block' );
-		add_action( 'rest_api_init', 'wgpb_register_api_routes' );
 		add_action( 'enqueue_block_editor_assets', 'wgpb_extra_gutenberg_scripts' );
 	}
 
@@ -34,6 +33,7 @@ function wgpb_initialize() {
 		add_action( 'admin_notices', 'wgpb_plugins_notice' );
 	}
 
+	add_action( 'rest_api_init', 'wgpb_register_api_routes' );
 }
 add_action( 'woocommerce_loaded', 'wgpb_initialize' );
 

@@ -1,0 +1,34 @@
+sudo: required
+
+dist: trusty
+
+language: php
+
+before_install:
+  - nvm install && nvm use
+  - npm install npm -g
+
+before_script:
+  - phpenv config-rm xdebug.ini
+  - bash tests/bin/install-wp-tests.sh wgpb_admin root '' localhost $WP_VERSION
+  - node --version
+  - npm --version
+  - timedatectl
+
+jobs:
+  include:
+    - stage: test
+      env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress
+      php: 7.1
+      script:
+        - npm install
+        - npm run lint
+        - npm run build
+        - npm test
+        - bash tests/bin/phpunit.sh
+
+    - stage: test
+      env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress
+      php: 5.6
+      script:
+        - bash tests/bin/phpunit.sh
