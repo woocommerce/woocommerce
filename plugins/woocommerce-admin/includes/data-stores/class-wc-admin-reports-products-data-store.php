@@ -77,12 +77,9 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_sql_params( $query_args ) );
 
 		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
-		$allowed_products           = $this->get_included_products( $query_args );
-
-		// To support categories query.
-		$products_subquery = $this->get_products_subquery( $query_args );
-		if ( $products_subquery ) {
-			$sql_query_params['where_clause'] .= " AND ( {$products_subquery} )";
+		$included_products          = $this->get_included_products( $query_args );
+		if ( $included_products ) {
+			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";
 		}
 
 		$order_status_filter = $this->get_status_subquery( $query_args );
@@ -150,7 +147,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			'after'                 => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
 			'fields'                => '*',
 			'categories'            => array(),
-			'products'              => array(),
+			'product_includes'      => array(),
 			'extended_product_info' => false,
 			// This is not a parameter for products reports per se, but we want to only take into account selected order types.
 			'order_status'          => parent::get_report_order_statuses(),
@@ -181,6 +178,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 								{$sql_query_params['from_clause']}
 							WHERE
 								1=1
+								{$sql_query_params['where_time_clause']}
 								{$sql_query_params['where_clause']}
 							GROUP BY
 								product_id
@@ -200,6 +198,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 						{$sql_query_params['from_clause']}
 					WHERE
 						1=1
+						{$sql_query_params['where_time_clause']}
 						{$sql_query_params['where_clause']}
 					GROUP BY
 						product_id

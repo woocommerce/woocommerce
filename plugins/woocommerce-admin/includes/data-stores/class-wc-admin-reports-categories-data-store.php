@@ -74,10 +74,10 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 
 		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
 
-		// To support categories query.
-		$products_subquery = $this->get_products_subquery( $query_args );
-		if ( $products_subquery ) {
-			$sql_query_params['where_clause'] .= " AND ( {$products_subquery} )";
+		// TODO: only products in the category C or orders with products from category C (and, possibly others?).
+		$included_products = $this->get_included_products( $query_args );
+		if ( $included_products ) {
+			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";
 		}
 
 		$order_status_filter = $this->get_status_subquery( $query_args );
@@ -202,6 +202,7 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 						{$sql_query_params['from_clause']}
 					WHERE
 						1=1
+						{$sql_query_params['where_time_clause']}
 						{$sql_query_params['where_clause']}
 					GROUP BY
 						product_id
