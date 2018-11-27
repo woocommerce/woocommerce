@@ -76,7 +76,18 @@ function wgpb_extra_gutenberg_scripts() {
 	wp_register_script(
 		'woocommerce-products-category-block',
 		plugins_url( 'build/product-category-block.js', __FILE__ ),
-		array( 'wp-element', 'wp-blocks', 'wp-i18n' ),
+		array(
+			'wp-api-fetch',
+			'wp-blocks',
+			'wp-components',
+			'wp-compose',
+			'wp-data',
+			'wp-element',
+			'wp-editor',
+			'wp-i18n',
+			'wp-url',
+			'lodash',
+		),
 		defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? filemtime( plugin_dir_path( __FILE__ ) . '/build/product-category-block.js' ) : WGPB_VERSION,
 		true
 	);
