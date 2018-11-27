@@ -14,6 +14,7 @@ import { ReportFilters } from '@woocommerce/components';
  * Internal dependencies
  */
 import { charts, filters } from './config';
+import CategoriesReportTable from './table';
 import getSelectedChart from 'lib/get-selected-chart';
 import ReportChart from 'analytics/components/report-chart';
 import ReportSummary from 'analytics/components/report-summary';
@@ -38,6 +39,7 @@ export default class CategoriesReport extends Component {
 					query={ query }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
+				<CategoriesReportTable query={ query } />
 			</Fragment>
 		);
 	}
