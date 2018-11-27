@@ -614,52 +614,35 @@ class WC_Admin_Reports_Data_Store {
 	}
 
 	/**
-	 * Returns products subquery to be used in WHERE SQL query, based on query arguments from the user.
+	 * Returns comma separated ids of included coupons, based on query arguments from the user.
 	 *
-	 * @param array  $query_args Parameters supplied by the user.
-	 * @param string $operator   AND or OR, based on match query argument.
+	 * @param array $query_args Parameters supplied by the user.
 	 * @return string
 	 */
-	protected function get_products_subquery( $query_args, $operator = 'AND' ) {
-		global $wpdb;
+	protected function get_included_coupons( $query_args ) {
+		$included_coupons_str = '';
 
-		$included_products = $this->get_included_products( $query_args );
-		$excluded_products = $this->get_excluded_products( $query_args );
-		$subqueries        = array();
-		if ( $included_products ) {
-			$subqueries[] = "{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$included_products})";
+		if ( isset( $query_args['coupon_includes'] ) && is_array( $query_args['coupon_includes'] ) && count( $query_args['coupon_includes'] ) > 0 ) {
+			$included_coupons_str = implode( ',', $query_args['coupon_includes'] );
 		}
-
-		if ( $excluded_products ) {
-			$subqueries[] = "{$wpdb->prefix}wc_order_product_lookup.product_id NOT IN ({$excluded_products})";
-		}
-
-		return implode( " $operator ", $subqueries );
+		return $included_coupons_str;
 	}
 
 	/**
-	 * Returns coupons subquery to be used in WHERE SQL query, based on query arguments from the user.
+	 * Returns comma separated ids of excluded coupons, based on query arguments from the user.
 	 *
-	 * @param array  $query_args Parameters supplied by the user.
-	 * @param string $operator   AND or OR, based on match query argument.
+	 * @param array $query_args Parameters supplied by the user.
 	 * @return string
 	 */
-	protected function get_coupon_subquery( $query_args, $operator ) {
-		global $wpdb;
+	protected function get_excluded_coupons( $query_args ) {
+		$excluded_coupons_str = '';
 
-		$subqueries = array();
-		if ( isset( $query_args['coupons_includes'] ) && is_array( $query_args['coupons_includes'] ) && count( $query_args['coupons_includes'] ) > 0 ) {
-			$include_coupons = implode( ', ', $query_args['coupons_includes'] );
-			$subqueries[]    = "{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$include_coupons})";
+		if ( isset( $query_args['coupon_excludes'] ) && is_array( $query_args['coupon_excludes'] ) && count( $query_args['coupon_excludes'] ) > 0 ) {
+			$excluded_coupons_str = implode( ',', $query_args['coupon_excludes'] );
 		}
-
-		if ( isset( $query_args['coupons_excludes'] ) && is_array( $query_args['coupons_excludes'] ) && count( $query_args['coupons_excludes'] ) > 0 ) {
-			$exclude_coupons = implode( ', ', $query_args['coupons_excludes'] );
-			$subqueries[]    = "{$wpdb->prefix}wc_order_coupon_lookup.coupon_id NOT IN ({$exclude_coupons})";
-		}
-
-		return implode( " $operator ", $subqueries );
+		return $excluded_coupons_str;
 	}
+
 
 	/**
 	 * Returns order status subquery to be used in WHERE SQL query, based on query arguments from the user.
