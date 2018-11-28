@@ -82,7 +82,7 @@ if ( $show_downloads ) {
 					?>
 					<tr>
 						<th scope="row"><?php echo $total['label']; ?></th>
-						<td><?php echo $value ?></td>
+						<td><?php echo ( 'payment_method' === $key ) ? esc_html( $value ) : $value; ?></td>
 					</tr>
 					<?php
 				}
