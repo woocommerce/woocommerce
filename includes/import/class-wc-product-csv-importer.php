@@ -895,7 +895,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			do_action( 'woocommerce_product_import_before_import', $parsed_data );
 
 			$id         = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
-			$sku        = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
+			$sku        = isset( $parsed_data['sku'] ) ? $parsed_data['sku'] : '';
 			$id_exists  = false;
 			$sku_exists = false;
 
@@ -927,7 +927,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					'woocommerce_product_importer_error',
 					__( 'A product with this SKU already exists.', 'woocommerce' ),
 					array(
-						'sku' => $sku,
+						'sku' => esc_attr( $sku ),
 						'row' => $this->get_row_id( $parsed_data ),
 					)
 				);
@@ -940,7 +940,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					__( 'No matching product exists to update.', 'woocommerce' ),
 					array(
 						'id'  => $id,
-						'sku' => $sku,
+						'sku' => esc_attr( $sku ),
 						'row' => $this->get_row_id( $parsed_data ),
 					)
 				);
