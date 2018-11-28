@@ -481,9 +481,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 							}
 						}
 						break;
-					case 'payment_method_title' :
-						$order->set_payment_method_title( sanitize_text_field( $value ) );
-						break;
 					default :
 						if ( is_callable( array( $order, "set_{$key}" ) ) ) {
 							$order->{"set_{$key}"}( $value );
