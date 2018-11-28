@@ -71,18 +71,10 @@ if ( $show_downloads ) {
 		<tfoot>
 			<?php
 				foreach ( $order->get_order_item_totals() as $key => $total ) {
-					switch ( $key ) {
-						case 'payment_method':
-							$value = esc_html( $total['value'] );
-							break;
-						default:
-							$value = $total['value'];
-							break;
-					}
 					?>
 					<tr>
 						<th scope="row"><?php echo $total['label']; ?></th>
-						<td><?php echo ( 'payment_method' === $key ) ? esc_html( $value ) : $value; ?></td>
+						<td><?php echo ( 'payment_method' === $key ) ? esc_html( $total['value'] ) : $total['value']; ?></td>
 					</tr>
 					<?php
 				}
