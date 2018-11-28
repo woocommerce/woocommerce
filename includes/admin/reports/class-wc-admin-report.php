@@ -129,7 +129,7 @@ class WC_Admin_Report {
 					$get_key = "order_items.{$key}";
 					break;
 				default:
-					continue;
+					break;
 			}
 
 			if ( $value['function'] ) {
@@ -338,7 +338,7 @@ class WC_Admin_Report {
 				$wpdb->query( 'SET SESSION SQL_BIG_SELECTS=1' );
 				$big_selects = true;
 			}
-			
+
 			$cached_results[ $query_hash ] = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 			set_transient( strtolower( get_class( $this ) ), $cached_results, DAY_IN_SECONDS );
 		}
