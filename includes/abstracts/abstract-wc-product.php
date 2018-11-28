@@ -1821,15 +1821,18 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return string
 	 */
 	public function get_image( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
+		$image = '';
 		if ( $this->get_image_id() ) {
 			$image = wp_get_attachment_image( $this->get_image_id(), $size, false, $attr );
 		} elseif ( $this->get_parent_id() ) {
 			$parent_product = wc_get_product( $this->get_parent_id() );
-			$image          = $parent_product->get_image( $size, $attr, $placeholder );
-		} elseif ( $placeholder ) {
+			if ( $parent_product ) {
+				$image = $parent_product->get_image( $size, $attr, $placeholder );
+			}
+		}
+
+		if ( ! $image && $placeholder ) {
 			$image = wc_placeholder_img( $size );
-		} else {
-			$image = '';
 		}
 
 		return apply_filters( 'woocommerce_product_get_image', $image, $this, $size, $attr, $placeholder, $image );
