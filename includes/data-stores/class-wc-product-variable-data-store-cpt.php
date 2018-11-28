@@ -175,24 +175,28 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			return $cached_data;
 		}
 
-		if ( ! empty( $child_ids ) && ! empty( $attributes ) ) {
+		if ( ! empty( $attributes ) ) {
 			foreach ( $attributes as $attribute ) {
 				if ( empty( $attribute['is_variation'] ) ) {
 					continue;
 				}
 
 				// Get possible values for this attribute, for only visible variations.
-				$format   = array_fill( 0, count( $child_ids ), '%d' );
-				$query_in = '(' . implode( ',', $format ) . ')';
-				$values   = array_unique(
-					$wpdb->get_col(
-						$wpdb->prepare( // wpcs: PreparedSQLPlaceholders replacement count ok.
-							"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN ({$query_in})", // @codingStandardsIgnoreLine.
-							wc_variation_attribute_name( $attribute['name'] ),
-							$child_ids
+				if ( ! empty( $child_ids ) ) {
+					$format   = array_fill( 0, count( $child_ids ), '%d' );
+					$query_in = '(' . implode( ',', $format ) . ')';
+					$values   = array_unique(
+						$wpdb->get_col(
+							$wpdb->prepare( // wpcs: PreparedSQLPlaceholders replacement count ok.
+								"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN ({$query_in})", // @codingStandardsIgnoreLine.
+								wc_variation_attribute_name( $attribute['name'] ),
+								$child_ids
+							)
 						)
-					)
-				);
+					);
+				} else {
+					$values = array();
+				}
 
 				// Empty value indicates that all options for given attribute are available.
 				if ( in_array( null, $values, true ) || in_array( '', $values, true ) || empty( $values ) ) {
