@@ -445,7 +445,7 @@ class WC_Query {
 			}
 
 			// Get order + orderby args from string.
-			$orderby_value = explode( '-', $orderby_value );
+			$orderby_value = is_array( $orderby_value ) ? $orderby_value : explode( '-', $orderby_value );
 			$orderby       = esc_attr( $orderby_value[0] );
 			$order         = ! empty( $orderby_value[1] ) ? $orderby_value[1] : $order;
 		}
