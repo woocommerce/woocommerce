@@ -158,6 +158,52 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
+= 3.5.2 - 2018-11-29 =
+* Enhancement - Added compatibility for Twenty Nineteen theme. #21970
+* Update - Prepare WooCommerce for PHP 7.3. #22009
+* Tweak - Updates the signature field type to "password" in PayPal settings for increased security. #21715
+* Tweak - Change the filter name in the /myaccount/lost-password-confirmation.php template to differentiate between other filter with same name and different message. #21829
+* Tweak - Reintroduce Preview button by popular demand with the understanding that the Preview will only work on some product fields. It was removed from pubished products in 3.5.0 to prevent confusion. #21838
+* Tweak - Add tool to systems status tools for running the DB update routine. #21923
+* Tweak - Revert default behavior for `woocommerce_formatted_address_force_country_display` filter to maintain backwards compatibility. #21865
+* Tweak - Update products block notice for WP 5.0. #21930
+* Tweak - Use wp_kses_post instead of esc_html for sanitizing product titles to allow minimal HTML in product titles. #21936
+* Tweak - Use dedicated woocommerce_add_order_again_cart_item to filter cart item data when ordering again. Prevents issues with applying woocommerce_add_cart_item out of context. #21947
+* Tweak - Remove postal code for Angola, São Tomé and Príncipe since they don't use postal codes and update locale info. #21984 #21985 #21987
+* Fix - Metadata with array key of 0 can save properly. #21641
+* Fix - Prevent deleting the default product category via REST API. #21696
+* Fix - Fix 'Table does not exist' messages on System Status Report in multisite. #21706
+* Fix - Add dynamic SSL check to dashboard SSL notice to prevent misdiagnosing that sites aren't set up with SSL. #21738
+* Fix - Don't show escaped HTML in admin order item details for fees. #21769
+* Fix - Don't include draft variable products in on sale product results. #21778
+* Fix - Add woocommerce_hold_stock_minutes check back to stock check in cart/checkout. #21797 #22050
+* Fix - Fix potential undefined index notice on checkout fields when comparing the sort order. #21801
+* Fix - Throw an error when trying to set a variation as the parent of a variation in the CSV importer. #21810
+* Fix - Make "account erasure request" text translatable. #21812
+* Fix - Display notices on Order Pay page. #21821
+* Fix - Fix tax rate uploading by file path. #21831
+* Fix - Make wc_download_log_permission_id constraint creation work better on multisites and multiple sites using the same DB. #21836 #21940
+* Fix - Don't render undecoded HTML entities in variations dimensions. #21844
+* Fix - Do not check for stock when not managing stock or have backorders enabled when paying through the order-pay page. #21849
+* Fix - Apply priority field sorting on additional filters to make it apply on the edit address pages as well. #21856
+* Fix - Fix export and edit of attribute labels with html encoded special characters in product CSV exporter. #21864
+* Fix - Prevent fatal error when rendering plaintext customer invoice email. #21879
+* Fix - Prevent fatal error when delivering webhooks using v3 API. #21921
+* Fix - Prevent undefined variable notice in wc_increase_stock_levels. #21928
+* Fix - Fix overescaping image output on product widget. #21929
+* Fix - Croatian Kuna symbol should be lowercase. #21934
+* Fix - Fixed an error when deleting logged entries when using the 'WC_Log_Handler_DB' handler. #21949
+* Fix - Update ShipStation plugin info so install works through setup wizard. #21953
+* Fix - Use dynamic DB table name in product list table shipping class query. #21954
+* Fix - Log file date/time should be in UTC and not site timezone as per the +00:00:00 string appended to it. #21981
+* Fix - Set customer's country to selling country when only selling to one country and default customer location is 'none'. #21995
+* Fix - Change new account email copy to be compatible with auto-generated accounts. #21999
+* Fix - Correct Aria-Labelledby attribute for quantity selectors. #22000
+* Fix - Show notices on lost password page. #22001
+* Fix - Fix authentication errors when using the REST API with 3rd-party authentication. #22013
+* Fix - Fix issues where potentially not all active plugins were included on the system status report. #22057
+* Fix - Make PDT validation use the same rounding as the IPN validation to prevent erroneous totals mismatch. #21729
+
 = 3.5.1 - 2018-10-31 =
 * Fix - Use CRUD method to get product images to fix custom tables missing images. #21608
 * Fix - Use HTML entity for times sign when outputting dimensions to fix RTL support. #21633
