@@ -128,6 +128,7 @@ class Search extends Component {
 				<Autocomplete
 					completer={ autocompleter }
 					onSelect={ this.selectResult }
+					selected={ selected.map( s => s.id ) }
 					staticResults={ staticResults }
 				>
 					{ ( { listBoxId, activeId, onChange } ) =>

@@ -6,14 +6,18 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { Button, withFocusOutside, withSpokenMessages } from '@wordpress/components';
 import classnames from 'classnames';
 import { Component } from '@wordpress/element';
-import { escapeRegExp, map, debounce } from 'lodash';
+import { debounce, escapeRegExp } from 'lodash';
 import { ENTER, ESCAPE, UP, DOWN, LEFT, TAB, RIGHT } from '@wordpress/keycodes';
 import { withInstanceId, compose } from '@wordpress/compose';
 
-function filterOptions( search, options = [], maxResults = 10 ) {
+function filterOptions( search, options = [], exclude = [], maxResults = 10 ) {
 	const filtered = [];
 	for ( let i = 0; i < options.length; i++ ) {
 		const option = options[ i ];
+
+		if ( exclude.includes( option.value.id ) ) {
+			continue;
+		}
 
 		// Merge label into keywords
 		let { keywords = [] } = option;
@@ -142,6 +146,7 @@ export class Autocomplete extends Component {
 		const promise = ( this.activePromise = Promise.resolve(
 			typeof options === 'function' ? options( query ) : options
 		).then( optionsData => {
+			const { selected } = this.props;
 			if ( promise !== this.activePromise ) {
 				// Another promise has become active since this one was asked to resolve, so do nothing,
 				// or else we might end triggering a race condition updating the state.
@@ -155,7 +160,7 @@ export class Autocomplete extends Component {
 				isDisabled: completer.isOptionDisabled ? completer.isOptionDisabled( optionData ) : false,
 			} ) );
 
-			const filteredOptions = filterOptions( this.state.search, keyedOptions );
+			const filteredOptions = filterOptions( this.state.search, keyedOptions, selected );
 			const selectedIndex =
 				filteredOptions.length === this.state.filteredOptions.length ? this.state.selectedIndex : 0;
 			this.setState( {
@@ -171,7 +176,7 @@ export class Autocomplete extends Component {
 
 	search( event ) {
 		const { query: wasQuery } = this.state;
-		const { completer = {} } = this.props;
+		const { completer = {}, selected } = this.props;
 		const container = event.target;
 
 		// look for the trigger prefix and search query just before the cursor location
@@ -187,7 +192,7 @@ export class Autocomplete extends Component {
 		// create a regular expression to filter the options
 		const search = new RegExp( escapeRegExp( query ), 'i' );
 		// filter the options we already have
-		const filteredOptions = filterOptions( search, this.state.options );
+		const filteredOptions = filterOptions( search, this.state.options, selected );
 		// update the state
 		this.setState( { selectedIndex: 0, filteredOptions, search, query } );
 		// announce the count of filtered options but only if they have loaded
@@ -276,8 +281,7 @@ export class Autocomplete extends Component {
 				{ children( { isExpanded, listBoxId, activeId, onChange: this.search } ) }
 				{ isExpanded && (
 					<div id={ listBoxId } role="listbox" className={ resultsClasses }>
-						{ isExpanded &&
-							map( filteredOptions, ( option, index ) => (
+						{ filteredOptions.map( ( option, index ) => (
 								<Button
 									key={ option.key }
 									id={ `woocommerce-search__autocomplete-${ instanceId }-${ option.key }` }
