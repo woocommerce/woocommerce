@@ -515,11 +515,13 @@ class WC_Query {
 		global $wpdb, $wp_query;
 
 		if ( isset( $wp_query->queried_object, $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy ) && is_a( $wp_query->queried_object, 'WP_Term' ) ) {
-			$search_within_terms = get_terms( array(
-				'taxonomy' => $wp_query->queried_object->taxonomy,
-				'child_of' => $wp_query->queried_object->term_id,
-				'fields'   => 'tt_ids',
-			) );
+			$search_within_terms = get_terms(
+				array(
+					'taxonomy' => $wp_query->queried_object->taxonomy,
+					'child_of' => $wp_query->queried_object->term_id,
+					'fields'   => 'tt_ids',
+				)
+			);
 			$search_within_terms[] = $wp_query->queried_object->term_taxonomy_id;
 			$args['join']         .= " INNER JOIN (
 				SELECT post_id, min( meta_value+0 ) price
@@ -548,11 +550,13 @@ class WC_Query {
 		global $wpdb, $wp_query;
 
 		if ( isset( $wp_query->queried_object, $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy ) && is_a( $wp_query->queried_object, 'WP_Term' ) ) {
-			$search_within_terms = get_terms( array(
-				'taxonomy' => $wp_query->queried_object->taxonomy,
-				'child_of' => $wp_query->queried_object->term_id,
-				'fields'   => 'tt_ids',
-			) );
+			$search_within_terms = get_terms(
+				array(
+					'taxonomy' => $wp_query->queried_object->taxonomy,
+					'child_of' => $wp_query->queried_object->term_id,
+					'fields'   => 'tt_ids',
+				)
+			);
 			$search_within_terms[] = $wp_query->queried_object->term_taxonomy_id;
 			$args['join']         .= " INNER JOIN (
 				SELECT post_id, max( meta_value+0 ) price
