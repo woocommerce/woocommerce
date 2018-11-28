@@ -344,7 +344,7 @@ $inner-border: $core-grey-light-500;
 		// !important to override button styles
 		margin-top: -1px;
 		height: calc(100% + 1px); // Hack to avoid double border
-		box-shadow: inset -1px -1px 0 $black, inset 1px 1px 0 $core-grey-dark-300 !important;
+		box-shadow: inset -1px -1px 0 $core-grey-dark-300, inset 1px 1px 0 $core-grey-dark-300 !important;
 	}
 
 	&.is-selected {
