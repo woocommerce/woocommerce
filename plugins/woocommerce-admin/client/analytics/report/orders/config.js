@@ -116,7 +116,7 @@ export const advancedFilters = {
 				} ) ),
 			},
 		},
-		code: {
+		coupon: {
 			labels: {
 				add: __( 'Coupon Codes', 'wc-admin' ),
 				placeholder: __( 'Search coupons', 'wc-admin' ),
