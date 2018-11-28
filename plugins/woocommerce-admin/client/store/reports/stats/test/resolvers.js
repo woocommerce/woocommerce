@@ -6,6 +6,7 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
+import { dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -14,6 +15,11 @@ import resolvers from '../resolvers';
 
 const { getReportStats } = resolvers;
 
+jest.mock( '@wordpress/data', () => ( {
+	dispatch: jest.fn().mockReturnValue( {
+		setReportStats: jest.fn(),
+	} ),
+} ) );
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 
 describe( 'getReportStats', () => {
@@ -23,6 +29,10 @@ describe( 'getReportStats', () => {
 			num_items_sold: 9,
 		},
 		interval: [ 0, 1, 2 ],
+	};
+	const REPORT_1_TOTALS = {
+		'x-wp-total': 10,
+		'x-wp-totalpages': 2,
 	};
 
 	const REPORT_2 = {
@@ -38,25 +48,60 @@ describe( 'getReportStats', () => {
 			},
 		],
 	};
+	const REPORT_2_TOTALS = {
+		'x-wp-total': 20,
+		'x-wp-totalpages': 4,
+	};
 
 	beforeAll( () => {
 		apiFetch.mockImplementation( options => {
 			if ( options.path === '/wc/v3/reports/revenue/stats' ) {
-				return Promise.resolve( REPORT_1 );
+				return Promise.resolve( {
+					headers: {
+						get: header => REPORT_1_TOTALS[ header ],
+					},
+					json: () => Promise.resolve( REPORT_1 ),
+				} );
 			}
 			if ( options.path === '/wc/v3/reports/products/stats?interval=week' ) {
-				return Promise.resolve( REPORT_2 );
+				return Promise.resolve( {
+					headers: {
+						get: header => REPORT_2_TOTALS[ header ],
+					},
+					json: () => Promise.resolve( REPORT_2 ),
+				} );
 			}
 		} );
 	} );
 
 	it( 'returns requested report data', async () => {
-		getReportStats( 'revenue' ).then( data => expect( data ).toEqual( REPORT_1 ) );
+		expect.assertions( 1 );
+		const endpoint = 'revenue';
+
+		await getReportStats( endpoint, undefined );
+
+		expect( dispatch().setReportStats ).toHaveBeenCalledWith(
+			endpoint,
+			REPORT_1,
+			undefined,
+			REPORT_1_TOTALS[ 'x-wp-total' ],
+			REPORT_1_TOTALS[ 'x-wp-totalpages' ]
+		);
 	} );
 
 	it( 'returns requested report data for a specific query', async () => {
-		getReportStats( 'products', { interval: 'week' } ).then( data =>
-			expect( data ).toEqual( REPORT_2 )
+		expect.assertions( 1 );
+		const endpoint = 'products';
+		const query = { interval: 'week' };
+
+		await getReportStats( endpoint, query );
+
+		expect( dispatch().setReportStats ).toHaveBeenCalledWith(
+			endpoint,
+			REPORT_2,
+			query,
+			REPORT_2_TOTALS[ 'x-wp-total' ],
+			REPORT_2_TOTALS[ 'x-wp-totalpages' ]
 		);
 	} );
 } );
