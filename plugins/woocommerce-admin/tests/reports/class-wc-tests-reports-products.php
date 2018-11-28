@@ -62,4 +62,109 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_data, $query->get_data() );
 	}
 
+	public function test_order_by_product_name() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Populate all of the data.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'A Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$product_2 = new WC_Product_Simple();
+		$product_2->set_name( 'B Test Product' );
+		$product_2->set_regular_price( 20 );
+		$product_2->save();
+
+		$date_created = time();
+		$date_created_2 = $date_created + 5;
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( 'completed' );
+		$order->set_shipping_total( 10 );
+		$order->set_discount_total( 20 );
+		$order->set_discount_tax( 0 );
+		$order->set_cart_tax( 5 );
+		$order->set_shipping_tax( 2 );
+		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
+		$order->set_date_created( $date_created );
+		$order->save();
+
+		$order_2 = WC_Helper_Order::create_order( 1, $product_2 );
+		$order_2->set_status( 'completed' );
+		$order_2->set_shipping_total( 10 );
+		$order_2->set_discount_total( 20 );
+		$order_2->set_discount_tax( 0 );
+		$order_2->set_cart_tax( 5 );
+		$order_2->set_shipping_tax( 2 );
+		$order_2->set_total( 77 ); // $20x4 products + $10 shipping - $20 discount + $7 tax.
+		$order_2->set_date_created( $date_created_2 );
+		$order_2->save();
+
+		$data_store = new WC_Admin_Reports_Products_Data_Store();
+		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = date( 'Y-m-d H:00:00', $order_2->get_date_created()->getOffsetTimestamp() + HOUR_IN_SECONDS );
+		// Test retrieving the stats through the data store, default order by date/time desc.
+		$args = array(
+			'after'  => $start_time,
+			'before' => $end_time,
+		);
+
+		$data          = $data_store->get_data( $args );
+		$expected_data = (object) array(
+			'total'   => 2,
+			'pages'   => 1,
+			'page_no' => 1,
+			'data'    => array(
+				0 => array(
+					'product_id'    => $product_2->get_id(),
+					'items_sold'    => 4,
+					'gross_revenue' => 80.0, // $20 * 4.
+					'orders_count'  => 1,
+				),
+				1 => array(
+					'product_id'    => $product->get_id(),
+					'items_sold'    => 4,
+					'gross_revenue' => 100.0, // $25 * 4.
+					'orders_count'  => 1,
+				),
+			),
+		);
+		$this->assertEquals( $expected_data, $data );
+
+		// Test retrieving the stats through the data store, order by product name asc.
+		$args = array(
+			'after'    => $start_time,
+			'before'   => $end_time,
+			'order_by' => 'product_name',
+			'order'    => 'asc',
+		);
+
+		$data          = $data_store->get_data( $args );
+		$expected_data = (object) array(
+			'total'   => 2,
+			'pages'   => 1,
+			'page_no' => 1,
+			'data'    => array(
+				0 => array(
+					'product_id'    => $product->get_id(),
+					'items_sold'    => 4,
+					'gross_revenue' => 100.0, // $25 * 4.
+					'orders_count'  => 1,
+				),
+				1 => array(
+					'product_id'    => $product_2->get_id(),
+					'items_sold'    => 4,
+					'gross_revenue' => 80.0, // $20 * 4.
+					'orders_count'  => 1,
+				),
+			),
+		);
+		$this->assertEquals( $expected_data, $data );
+
+		// Test retrieving the stats through the query class.
+		$query = new WC_Admin_Reports_Products_Query( $args );
+		$this->assertEquals( $expected_data, $query->get_data() );
+	}
+
 }
