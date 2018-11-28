@@ -247,7 +247,7 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 			),
 		);
 		$params['match']                 = array(
-			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, code_includes, code_excludes, customer, categories', 'wc-admin' ),
+			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'all',
 			'enum'              => array(
