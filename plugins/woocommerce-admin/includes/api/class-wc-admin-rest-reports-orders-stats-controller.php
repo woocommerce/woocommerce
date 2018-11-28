@@ -52,8 +52,8 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 		$args['status_is_not']    = (array) $request['status_is_not'];
 		$args['product_includes'] = (array) $request['product_includes'];
 		$args['product_excludes'] = (array) $request['product_excludes'];
-		$args['code_includes']    = (array) $request['code_includes'];
-		$args['code_excludes']    = (array) $request['code_excludes'];
+		$args['coupon_includes']    = (array) $request['coupon_includes'];
+		$args['coupon_excludes']    = (array) $request['coupon_excludes'];
 		$args['customer']         = $request['customer'];
 		$args['categories']       = (array) $request['categories'];
 
@@ -305,7 +305,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['match']            = array(
-			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, code_includes, code_excludes, customer, categories', 'wc-admin' ),
+			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'all',
 			'enum'              => array(
@@ -353,7 +353,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['code_includes']    = array(
+		$params['coupon_includes']    = array(
 			'description'       => __( 'Limit result set to items that have the specified coupon(s) assigned.', 'wc-admin' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -362,7 +362,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['code_excludes']    = array(
+		$params['coupon_excludes']    = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified coupon(s) assigned.', 'wc-admin' ),
 			'type'              => 'array',
 			'items'             => array(

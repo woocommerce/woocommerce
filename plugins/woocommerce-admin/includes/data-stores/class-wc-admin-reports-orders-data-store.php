@@ -286,8 +286,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			'status_is_not'    => array(),
 			'product_includes' => array(),
 			'product_excludes' => array(),
-			'code_includes'    => array(),
-			'code_excludes'    => array(),
+			'coupon_includes'  => array(),
+			'coupon_excludes'  => array(),
 			'customer'         => '',
 			'categories'       => array(),
 		);
