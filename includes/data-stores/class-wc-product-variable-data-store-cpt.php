@@ -183,14 +183,14 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 				// Get possible values for this attribute, for only visible variations.
 				if ( ! empty( $child_ids ) ) {
-					$format   = array_fill( 0, count( $child_ids ), '%d' );
-					$query_in = '(' . implode( ',', $format ) . ')';
-					$values   = array_unique(
+					$format     = array_fill( 0, count( $child_ids ), '%d' );
+					$query_in   = '(' . implode( ',', $format ) . ')';
+					$query_args = array( 'attribute_name' => wc_variation_attribute_name( $attribute['name'] ) ) + $child_ids;
+					$values     = array_unique(
 						$wpdb->get_col(
 							$wpdb->prepare( // wpcs: PreparedSQLPlaceholders replacement count ok.
-								"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN ({$query_in})", // @codingStandardsIgnoreLine.
-								wc_variation_attribute_name( $attribute['name'] ),
-								$child_ids
+								"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN {$query_in}", // @codingStandardsIgnoreLine.
+								$query_args
 							)
 						)
 					);
@@ -408,10 +408,14 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	public function child_has_weight( $product ) {
 		global $wpdb;
 		$children = $product->get_visible_children();
+		if ( ! $children ) {
+			return false;
+		}
+
 		$format   = array_fill( 0, count( $children ), '%d' );
 		$query_in = '(' . implode( ',', $format ) . ')';
 
-		return $children ? null !== $wpdb->get_var( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN ({$query_in})", $children ) : false; // @codingStandardsIgnoreLine.
+		return null !== $wpdb->get_var( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN {$query_in}", $children ); // @codingStandardsIgnoreLine.
 	}
 
 	/**
@@ -424,10 +428,14 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	public function child_has_dimensions( $product ) {
 		global $wpdb;
 		$children = $product->get_visible_children();
+		if ( ! $children ) {
+			return false;
+		}
+
 		$format   = array_fill( 0, count( $children ), '%d' );
 		$query_in = '(' . implode( ',', $format ) . ')';
 
-		return $children ? null !== $wpdb->get_var( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND meta_value > 0 AND post_id IN ({$query_in})", $children ) : false; // @codingStandardsIgnoreLine.
+		return null !== $wpdb->get_var( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND meta_value > 0 AND post_id IN {$query_in}", $children ); // @codingStandardsIgnoreLine.
 	}
 
 	/**
@@ -453,15 +461,15 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		global $wpdb;
 
 		$children = $product->get_children();
-		$format   = array_fill( 0, count( $children ), '%d' );
-		$query_in = '(' . implode( ',', $format ) . ')';
 
 		if ( $children ) {
+			$format               = array_fill( 0, count( $children ), '%d' );
+			$query_in             = '(' . implode( ',', $format ) . ')';
+			$query_args           = array( 'stock_status' => $status ) + $children;
 			$children_with_status = $wpdb->get_var(
 				$wpdb->prepare( // wpcs: PreparedSQLPlaceholders replacement count ok.
-					"SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = %s AND post_id IN ({$query_in})", // @codingStandardsIgnoreLine.
-					$status,
-					$children
+					"SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = %s AND post_id IN {$query_in}", // @codingStandardsIgnoreLine.
+					$query_args
 				)
 			);
 		} else {
@@ -508,17 +516,21 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		global $wpdb;
 
 		if ( $product->get_manage_stock() ) {
-			$status           = $product->get_stock_status();
-			$children         = $product->get_children();
-			$format           = array_fill( 0, count( $children ), '%d' );
-			$query_in         = '(' . implode( ',', $format ) . ')';
-			$managed_children = $children ? array_unique( $wpdb->get_col( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN ({$query_in})", $children ) ) : array(); // @codingStandardsIgnoreLine.
-			$changed          = false;
-			foreach ( $managed_children as $managed_child ) {
-				if ( update_post_meta( $managed_child, '_stock_status', $status ) ) {
-					$changed = true;
+			$children = $product->get_children();
+			$changed  = false;
+
+			if ( $children ) {
+				$status           = $product->get_stock_status();
+				$format           = array_fill( 0, count( $children ), '%d' );
+				$query_in         = '(' . implode( ',', $format ) . ')';
+				$managed_children = array_unique( $wpdb->get_col( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN {$query_in}", $children ) ); // @codingStandardsIgnoreLine.
+				foreach ( $managed_children as $managed_child ) {
+					if ( update_post_meta( $managed_child, '_stock_status', $status ) ) {
+						$changed = true;
+					}
 				}
 			}
+
 			if ( $changed ) {
 				$children = $this->read_children( $product, true );
 				$product->set_children( $children['all'] );
@@ -539,7 +551,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$children = $product->get_visible_children();
 		$format   = array_fill( 0, count( $children ), '%d' );
 		$query_in = '(' . implode( ',', $format ) . ')';
-		$prices   = $children ? array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN ({$query_in})", $children ) ) : array(); // @codingStandardsIgnoreLine.
+		$prices   = $children ? array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN {$query_in}", $children ) ) : array(); // @codingStandardsIgnoreLine.
 
 		delete_post_meta( $product->get_id(), '_price' );
 		delete_post_meta( $product->get_id(), '_sale_price' );
