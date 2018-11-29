@@ -171,7 +171,7 @@ abstract class WC_CSV_Exporter {
 	 */
 	public function send_headers() {
 		if ( function_exists( 'gc_enable' ) ) {
-			gc_enable(); // phpcs:ignore PHPCompatibility.PHP.NewFunctions.gc_enableFound
+			gc_enable(); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.gc_enableFound
 		}
 		if ( function_exists( 'apache_setenv' ) ) {
 			@apache_setenv( 'no-gzip', 1 ); // @codingStandardsIgnoreLine

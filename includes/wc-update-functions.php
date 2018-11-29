@@ -1872,3 +1872,25 @@ function wc_update_350_reviews_comment_type() {
 function wc_update_350_db_version() {
 	WC_Install::update_db_version( '3.5.0' );
 }
+
+/**
+ * Drop the fk_wc_download_log_permission_id FK as we use a new one with the table and blog prefix for MS compatability.
+ *
+ * @return void
+ */
+function wc_update_352_drop_download_log_fk() {
+	global $wpdb;
+	$results = $wpdb->get_results( "
+		SELECT CONSTRAINT_NAME
+		FROM information_schema.TABLE_CONSTRAINTS
+		WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
+		AND CONSTRAINT_NAME = 'fk_wc_download_log_permission_id'
+		AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+		AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'
+	" );
+
+	// We only need to drop the old key as WC_Install::create_tables() takes care of creating the new FK.
+	if ( $results ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY fk_wc_download_log_permission_id" ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+	}
+}
