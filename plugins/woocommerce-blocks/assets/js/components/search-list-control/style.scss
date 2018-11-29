@@ -1,0 +1,67 @@
+.woocommerce-search-list {
+	width: 100%;
+	padding: 0 0 $gap;
+	text-align: left;
+}
+
+.woocommerce-search-list__selected {
+	margin: $gap 0;
+	padding: $gap 0 0;
+	border-top: 1px solid $core-grey-light-500;
+
+	.woocommerce-search-list__selected-header {
+		margin-bottom: $gap-smaller;
+
+		button {
+			margin-left: $gap-small;
+		}
+	}
+
+	.woocommerce-tag__text {
+		max-width: 13em;
+	}
+}
+
+.woocommerce-search-list__search {
+	margin: $gap 0;
+	padding: $gap 0 0;
+	border-top: 1px solid $core-grey-light-500;
+
+	.components-base-control__field {
+		margin-bottom: $gap;
+	}
+}
+
+.woocommerce-search-list__list {
+	padding: 0;
+	max-height: 20em;
+	overflow-x: scroll;
+	border-top: 1px solid $core-grey-light-500;
+	border-bottom: 1px solid $core-grey-light-500;
+
+	.components-menu-group__label {
+		@include visually-hidden;
+	}
+
+	& > [role="menu"] {
+		border: 1px solid $core-grey-light-500;
+		border-bottom: none;
+	}
+
+	.woocommerce-search-list__item {
+		margin-bottom: 0;
+		padding: $gap;
+		background: $white;
+		// !important to keep the border around on hover
+		border-bottom: 1px solid $core-grey-light-500 !important;
+		color: $core-grey-dark-500;
+
+		@include hover-state {
+			background: $core-grey-light-100;
+		}
+
+		&:last-of-type {
+			border-bottom: none !important;
+		}
+	}
+}

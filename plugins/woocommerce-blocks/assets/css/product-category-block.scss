@@ -4,15 +4,28 @@
 
 .wc-block-products-category {
 	overflow: hidden;
+
+	&.components-placeholder {
+		padding: 2em 1em;
+	}
 }
 
 .wc-block-products-category__selection {
-	margin-top: 16px;
-	padding: 16px;
 	width: 100%;
-	border-top: 1px solid $core-grey-light-500;
+}
 
-	.components-spinner {
-		float: none;
+.components-panel {
+	.woocommerce-search-list {
+		padding: 0;
+	}
+	.woocommerce-search-list__selected {
+		margin: 0 0 $gap;
+		padding: 0;
+		border-top: none;
+	}
+	.woocommerce-search-list__search {
+		margin: 0 0 $gap;
+		padding: 0;
+		border-top: none;
 	}
 }
