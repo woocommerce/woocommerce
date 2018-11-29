@@ -6,7 +6,6 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { format as formatDate } from '@wordpress/date';
 import { compose } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
 import { get, map, orderBy } from 'lodash';
 
 /**
@@ -29,6 +28,7 @@ import ReportError from 'analytics/components/report-error';
 import { QUERY_DEFAULTS } from 'store/constants';
 import { getReportChartData, getFilterQuery } from 'store/reports/utils';
 import { numberFormat } from 'lib/number';
+import withSelect from 'wc-api/with-select';
 import './style.scss';
 
 class OrdersReportTable extends Component {
@@ -306,7 +306,8 @@ export default compose(
 		const primaryData = getReportChartData( 'orders', 'primary', query, select );
 		const filterQuery = getFilterQuery( 'orders', query );
 
-		const { getOrders, isGetOrdersError, isGetOrdersRequesting } = select( 'wc-admin' );
+		const { getOrders, isGetOrdersError, isGetOrdersRequesting } = select( 'wc-api' );
+
 		const tableQuery = {
 			orderby: query.orderby || 'date',
 			order: query.order || 'asc',
