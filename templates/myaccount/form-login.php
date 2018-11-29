@@ -46,14 +46,14 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 
 			<?php do_action( 'woocommerce_login_form' ); ?>
 
-			<p class="form-row">
+			<p class="woocommerce-form-row form-row">
 				<?php wp_nonce_field( 'woocommerce-login', 'woocommerce-login-nonce' ); ?>
 				<button type="submit" class="woocommerce-Button button" name="login" value="<?php esc_attr_e( 'Log in', 'woocommerce' ); ?>"><?php esc_html_e( 'Log in', 'woocommerce' ); ?></button>
 				<label class="woocommerce-form__label woocommerce-form__label-for-checkbox inline">
 					<input class="woocommerce-form__input woocommerce-form__input-checkbox" name="rememberme" type="checkbox" id="rememberme" value="forever" /> <span><?php esc_html_e( 'Remember me', 'woocommerce' ); ?></span>
 				</label>
 			</p>
-			<p class="woocommerce-LostPassword lost_password">
+			<p class="woocommerce-lost-password lost_password">
 				<a href="<?php echo esc_url( wp_lostpassword_url() ); ?>"><?php esc_html_e( 'Lost your password?', 'woocommerce' ); ?></a>
 			</p>
 
@@ -98,7 +98,7 @@ do_action( 'woocommerce_before_customer_login_form' ); ?>
 
 			<?php do_action( 'woocommerce_register_form' ); ?>
 
-			<p class="woocommerce-FormRow form-row">
+			<p class="woocommerce-form-row form-row">
 				<?php wp_nonce_field( 'woocommerce-register', 'woocommerce-register-nonce' ); ?>
 				<button type="submit" class="woocommerce-Button button" name="register" value="<?php esc_attr_e( 'Register', 'woocommerce' ); ?>"><?php esc_html_e( 'Register', 'woocommerce' ); ?></button>
 			</p>
