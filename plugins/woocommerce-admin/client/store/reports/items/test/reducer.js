@@ -27,17 +27,22 @@ describe( 'reportItemsReducer()', () => {
 		const query = {
 			orderby: 'orders_count',
 		};
-		const items = [ { id: 1214 }, { id: 1215 }, { id: 1216 } ];
+		const itemsData = [ { id: 1214 }, { id: 1215 }, { id: 1216 } ];
+		const itemsTotalCount = 50;
 
 		const state = reportItemsReducer( originalState, {
 			type: 'SET_REPORT_ITEMS',
 			endpoint,
 			query,
-			items,
+			data: itemsData,
+			totalCount: itemsTotalCount,
 		} );
 
 		const queryKey = getJsonString( query );
-		expect( state[ endpoint ][ queryKey ] ).toEqual( items );
+		expect( state[ endpoint ][ queryKey ] ).toEqual( {
+			data: itemsData,
+			totalCount: itemsTotalCount,
+		} );
 	} );
 
 	it( 'tracks multiple queries in items data', () => {
@@ -45,28 +50,40 @@ describe( 'reportItemsReducer()', () => {
 			orderby: 'id',
 		};
 		const otherQueryKey = getJsonString( otherQuery );
-		const otherItems = [ { id: 1 }, { id: 2 }, { id: 3 } ];
+		const otherItemsData = [ { id: 1 }, { id: 2 }, { id: 3 } ];
+		const otherItemsTotalCount = 70;
 		const otherQueryState = {
 			[ endpoint ]: {
-				[ otherQueryKey ]: otherItems,
+				[ otherQueryKey ]: {
+					data: otherItemsData,
+					totalCount: otherItemsTotalCount,
+				},
 			},
 		};
 		const originalState = deepFreeze( otherQueryState );
 		const query = {
 			orderby: 'orders_count',
 		};
-		const items = [ { id: 1214 }, { id: 1215 }, { id: 1216 } ];
+		const itemsData = [ { id: 1214 }, { id: 1215 }, { id: 1216 } ];
+		const itemsTotalCount = 50;
 
 		const state = reportItemsReducer( originalState, {
 			type: 'SET_REPORT_ITEMS',
 			endpoint,
 			query,
-			items,
+			data: itemsData,
+			totalCount: itemsTotalCount,
 		} );
 
 		const queryKey = getJsonString( query );
-		expect( state[ endpoint ][ queryKey ] ).toEqual( items );
-		expect( state[ endpoint ][ otherQueryKey ] ).toEqual( otherItems );
+		expect( state[ endpoint ][ queryKey ] ).toEqual( {
+			data: itemsData,
+			totalCount: itemsTotalCount,
+		} );
+		expect( state[ endpoint ][ otherQueryKey ] ).toEqual( {
+			data: otherItemsData,
+			totalCount: otherItemsTotalCount,
+		} );
 	} );
 
 	it( 'returns with received error data', () => {

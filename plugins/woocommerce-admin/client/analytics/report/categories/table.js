@@ -133,7 +133,6 @@ export default class CategoriesReportTable extends Component {
 				getSummary={ this.getSummary }
 				itemIdField="category_id"
 				query={ query }
-				totalsCountField="categories_count"
 				title={ __( 'Categories', 'wc-admin' ) }
 			/>
 		);

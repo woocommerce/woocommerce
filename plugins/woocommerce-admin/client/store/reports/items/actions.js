@@ -1,12 +1,13 @@
 /** @format */
 
 export default {
-	setReportItems( endpoint, items, query ) {
+	setReportItems( endpoint, query, data, totalCount ) {
 		return {
 			type: 'SET_REPORT_ITEMS',
 			endpoint,
-			items,
 			query: query || {},
+			data,
+			totalCount,
 		};
 	},
 	setReportItemsError( endpoint, query ) {

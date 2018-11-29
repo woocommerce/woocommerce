@@ -160,7 +160,6 @@ export default class CouponsReportTable extends Component {
 				getSummary={ this.getSummary }
 				itemIdField="coupon_id"
 				query={ query }
-				totalsCountField="coupons_count"
 				title={ __( 'Coupons', 'wc-admin' ) }
 			/>
 		);

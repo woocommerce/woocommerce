@@ -153,7 +153,6 @@ export default class TaxesReportTable extends Component {
 				getSummary={ this.getSummary }
 				itemIdField="tax_rate_id"
 				query={ query }
-				totalsCountField="taxes_count"
 				title={ __( 'Taxes', 'wc-admin' ) }
 			/>
 		);

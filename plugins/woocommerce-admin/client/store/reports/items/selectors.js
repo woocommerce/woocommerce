@@ -21,7 +21,7 @@ import { getJsonString } from 'store/utils';
  * @return {Object}           Report details
  */
 function getReportItems( state, endpoint, query = {} ) {
-	return get( state, [ 'reports', 'items', endpoint, getJsonString( query ) ], [] );
+	return get( state, [ 'reports', 'items', endpoint, getJsonString( query ) ], { data: [] } );
 }
 
 export default {

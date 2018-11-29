@@ -210,7 +210,6 @@ export default class ProductsReportTable extends Component {
 					order: query.order || 'desc',
 					extended_product_info: true,
 				} }
-				totalsCountField="products_count"
 				title={ __( 'Products', 'wc-admin' ) }
 			/>
 		);
