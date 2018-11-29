@@ -51,7 +51,7 @@ $calculator_text          = '';
 						printf( esc_html__( 'Estimate for %s.', 'woocommerce' ) . ' ', '<strong>' . esc_html( $formatted_destination ) . '</strong>' );
 						$calculator_text = __( 'Change address', 'woocommerce' );
 					} else {
-						echo esc_html__( 'This is only an estimate. Prices will be updated during checkout.', 'woocommerce' );
+						echo wp_kses_post( apply_filters( 'woocommerce_shipping_estimate_html', __( 'This is only an estimate. Prices will be updated during checkout.', 'woocommerce' ) ) );
 					}
 					?>
 				</p>
