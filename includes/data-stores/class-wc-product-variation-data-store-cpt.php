@@ -118,6 +118,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 					'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
 					'post_author'    => get_current_user_id(),
 					'post_title'     => $product->get_name( 'edit' ),
+					'post_excerpt'   => wc_get_formatted_variation( $product, true, false ),
 					'post_content'   => '',
 					'post_parent'    => $product->get_parent_id(),
 					'comment_status' => 'closed',
@@ -177,9 +178,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$changes = $product->get_changes();
 
 		// Only update the post when the post data changes.
-		if ( array_intersect( array( 'name', 'parent_id', 'status', 'menu_order', 'date_created', 'date_modified' ), array_keys( $changes ) ) ) {
+		if ( array_intersect( array( 'name', 'parent_id', 'status', 'menu_order', 'date_created', 'date_modified', 'attributes' ), array_keys( $changes ) ) ) {
 			$post_data = array(
 				'post_title'        => $product->get_name( 'edit' ),
+				'post_excerpt'      => wc_get_formatted_variation( $product, true, false ),
 				'post_parent'       => $product->get_parent_id( 'edit' ),
 				'comment_status'    => 'closed',
 				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
