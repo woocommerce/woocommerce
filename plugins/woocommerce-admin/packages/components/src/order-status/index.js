@@ -18,7 +18,7 @@ const OrderStatus = ( { order, className } ) => {
 	const indicatorClasses = classnames( 'woocommerce-order-status__indicator', {
 		[ 'is-' + status ]: true,
 	} );
-	const label = orderStatuses[ 'wc-' + status ] || status;
+	const label = orderStatuses[ status ] || status;
 	return (
 		<div className={ classes }>
 			<span className={ indicatorClasses } />
