@@ -1,0 +1,21 @@
+.woocommerce-product-categories {
+	.woocommerce-product-categories__item {
+		display: flex;
+		align-items: center;
+	}
+
+	.woocommerce-product-categories__item-name {
+		flex: 1;
+	}
+
+	.woocommerce-product-categories__item-count {
+		flex: 0;
+		padding: $gap-smallest/2 $gap-smaller;
+		border: 1px solid $core-grey-light-500;
+		border-radius: 12px;
+		font-size: 0.8em;
+		line-height: 1.4;
+		color: $core-grey-dark-300;
+		background: $white;
+	}
+}

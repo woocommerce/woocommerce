@@ -58,6 +58,7 @@ const GutenbergBlocksConfig = {
 							includePaths: [ 'assets/css/abstracts' ],
 							data:
 								'@import "_colors"; ' +
+								'@import "_variables"; ' +
 								'@import "_breakpoints"; ' +
 								'@import "_mixins"; ',
 						},
