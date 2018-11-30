@@ -119,6 +119,10 @@ class WC_Install {
 		),
 		'3.5.2' => array(
 			'wc_update_352_drop_download_log_fk',
+		),
+		'3.5.3' => array(
+			'wc_update_353_db_version',
+			'wc_update_353_set_attrib_values_to_excerpt',
 		)
 	);
 
