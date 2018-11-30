@@ -187,7 +187,7 @@ class ProductsBlockSettingsEditorDisplayOptions extends Component {
 
 		const display_settings = [];
 		for ( const setting_key in PRODUCTS_BLOCK_DISPLAY_SETTINGS ) {
-			display_settings.push( <ProductsBlockSettingsEditorDisplayOption { ...PRODUCTS_BLOCK_DISPLAY_SETTINGS[ setting_key ] } update_display_callback={ this.props.update_display_callback } extended={ this.props.extended } current={ this.props.current } /> );
+			display_settings.push( <ProductsBlockSettingsEditorDisplayOption { ...PRODUCTS_BLOCK_DISPLAY_SETTINGS[ setting_key ] } update_display_callback={ this.props.update_display_callback } extended={ this.props.extended } current={ this.props.current } key={ setting_key } /> );
 		}
 
 		const arrow = <span className="wc-products-display-options--popover__arrow"></span>;
@@ -878,7 +878,7 @@ class ProductsBlock extends Component {
 	 * @return Component
 	 */
 	getPreview() {
-		return <ProductsBlockPreview attributes={ this.props.attributes } />;
+		return <ProductsBlockPreview key="preview" attributes={ this.props.attributes } />;
 	}
 
 	/**
@@ -905,6 +905,8 @@ class ProductsBlock extends Component {
 
 		return (
 			<ProductsBlockSettingsEditor
+				key="settings-editor"
+				attributes={ attributes }
 				selected_display={ display }
 				selected_display_setting={ display_setting }
 				update_display_callback={ update_display_callback }
