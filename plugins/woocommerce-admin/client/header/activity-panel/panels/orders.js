@@ -28,7 +28,7 @@ import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency'
 /**
  * Internal dependencies
  */
-import { ActivityCard } from '../activity-card';
+import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
 import ActivityHeader from '../activity-header';
 import ActivityOutboundLink from '../activity-outbound-link';
 import { getOrderRefundTotal } from 'lib/order-values';
@@ -75,7 +75,12 @@ function OrdersPanel( { orders, isRequesting } ) {
 			<ActivityHeader title={ __( 'Orders', 'wc-admin' ) } menu={ menu } />
 			<Section>
 				{ isRequesting ? (
-					<p>Loading</p>
+					<ActivityCardPlaceholder
+						className="woocommerce-order-activity-card"
+						hasAction
+						hasDate
+						lines={ 2 }
+					/>
 				) : (
 					<Fragment>
 						{ orders.map( ( order, i ) => {
