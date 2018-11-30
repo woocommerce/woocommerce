@@ -44,6 +44,7 @@ class OrdersReportTable extends Component {
 			},
 			{
 				label: __( 'Order #', 'wc-admin' ),
+				screenReaderLabel: __( 'Order ID', 'wc-admin' ),
 				key: 'id',
 				required: true,
 				isSortable: true,
@@ -62,6 +63,7 @@ class OrdersReportTable extends Component {
 			},
 			{
 				label: __( 'Product(s)', 'wc-admin' ),
+				screenReaderLabel: __( 'Products', 'wc-admin' ),
 				key: 'products',
 				required: false,
 				isSortable: false,
@@ -75,12 +77,14 @@ class OrdersReportTable extends Component {
 			},
 			{
 				label: __( 'Coupon(s)', 'wc-admin' ),
+				screenReaderLabel: __( 'Coupons', 'wc-admin' ),
 				key: 'coupons',
 				required: false,
 				isSortable: false,
 			},
 			{
 				label: __( 'N. Revenue', 'wc-admin' ),
+				screenReaderLabel: __( 'Net Revenue', 'wc-admin' ),
 				key: 'net_revenue',
 				required: true,
 				isSortable: false,

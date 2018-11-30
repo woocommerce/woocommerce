@@ -49,6 +49,7 @@ export default class CouponsReportTable extends Component {
 			},
 			{
 				label: __( 'G. Discounted', 'wc-admin' ),
+				screenReaderLabel: __( 'Gross Discounted', 'wc-admin' ),
 				key: 'gross_discount',
 				isSortable: true,
 				isNumeric: true,

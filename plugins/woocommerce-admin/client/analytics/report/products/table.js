@@ -50,6 +50,7 @@ export default class ProductsReportTable extends Component {
 			},
 			{
 				label: __( 'G. Revenue', 'wc-admin' ),
+				screenReaderLabel: __( 'Gross Revenue', 'wc-admin' ),
 				key: 'gross_revenue',
 				required: true,
 				isSortable: true,
