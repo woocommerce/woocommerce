@@ -25,6 +25,7 @@ import {
 	Section,
 } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+import { getAdminLink } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -141,7 +142,10 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 										</div>
 									}
 									actions={
-										<Button isDefault onClick={ noop }>
+										<Button
+											isDefault
+											href={ getAdminLink( 'post.php?action=edit&post=' + order.id ) }
+										>
 											Begin fulfillment
 										</Button>
 									}
