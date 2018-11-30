@@ -4,6 +4,25 @@ global.wp = {};
 // Set up our settings global.
 global.wc_product_block_data = {};
 
+// wcSettings is required by @woocommerce/* packages
+global.wcSettings = {
+	adminUrl: 'https://vagrant.local/wp/wp-admin/',
+	locale: 'en-US',
+	currency: { code: 'USD', precision: 2, symbol: '&#36;' },
+	date: {
+		dow: 0,
+	},
+	orderStatuses: {
+		pending: 'Pending payment',
+		processing: 'Processing',
+		'on-hold': 'On hold',
+		completed: 'Completed',
+		cancelled: 'Cancelled',
+		refunded: 'Refunded',
+		failed: 'Failed',
+	},
+};
+
 const wordPressPackages = [
 	'blocks',
 	'components',

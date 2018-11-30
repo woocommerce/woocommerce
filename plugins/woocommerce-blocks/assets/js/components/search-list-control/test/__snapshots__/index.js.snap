@@ -1,0 +1,1113 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SearchListControl should render a search box and list of options 1`] = `
+<div
+  className="woocommerce-search-list "
+>
+  <div
+    className="woocommerce-search-list__search"
+  >
+    <div
+      className="components-base-control"
+    >
+      <div
+        className="components-base-control__field"
+      >
+        <label
+          className="components-base-control__label"
+          htmlFor="inspector-text-control-0"
+        >
+          Search for items
+        </label>
+        <input
+          className="components-text-control__input"
+          id="inspector-text-control-0"
+          onChange={[Function]}
+          type="search"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="woocommerce-search-list__list components-menu-group"
+  >
+    <div
+      className="components-menu-group__label"
+      id="components-menu-group-label-0"
+    >
+      Results
+    </div>
+    <div
+      aria-labelledby="components-menu-group-label-0"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
+    >
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Apricots",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Clementine",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Elderberry",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Guava",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Lychee",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Mulberry",
+            }
+          }
+        />
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SearchListControl should render a search box and list of options with a custom className 1`] = `
+<div
+  className="woocommerce-search-list test-search"
+>
+  <div
+    className="woocommerce-search-list__search"
+  >
+    <div
+      className="components-base-control"
+    >
+      <div
+        className="components-base-control__field"
+      >
+        <label
+          className="components-base-control__label"
+          htmlFor="inspector-text-control-1"
+        >
+          Search for items
+        </label>
+        <input
+          className="components-text-control__input"
+          id="inspector-text-control-1"
+          onChange={[Function]}
+          type="search"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="woocommerce-search-list__list components-menu-group"
+  >
+    <div
+      className="components-menu-group__label"
+      id="components-menu-group-label-1"
+    >
+      Results
+    </div>
+    <div
+      aria-labelledby="components-menu-group-label-1"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
+    >
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Apricots",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Clementine",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Elderberry",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Guava",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Lychee",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Mulberry",
+            }
+          }
+        />
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SearchListControl should render a search box and list of options, with a custom render callback for each item 1`] = `
+<div
+  className="woocommerce-search-list "
+>
+  <div
+    className="woocommerce-search-list__search"
+  >
+    <div
+      className="components-base-control"
+    >
+      <div
+        className="components-base-control__field"
+      >
+        <label
+          className="components-base-control__label"
+          htmlFor="inspector-text-control-9"
+        >
+          Search for items
+        </label>
+        <input
+          className="components-text-control__input"
+          id="inspector-text-control-9"
+          onChange={[Function]}
+          type="search"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="woocommerce-search-list__list components-menu-group"
+  >
+    <div
+      className="components-menu-group__label"
+      id="components-menu-group-label-7"
+    >
+      Results
+    </div>
+    <div
+      aria-labelledby="components-menu-group-label-7"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
+    >
+      <div>
+        Apricots
+        !
+      </div>
+      <div>
+        Clementine
+        !
+      </div>
+      <div>
+        Elderberry
+        !
+      </div>
+      <div>
+        Guava
+        !
+      </div>
+      <div>
+        Lychee
+        !
+      </div>
+      <div>
+        Mulberry
+        !
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SearchListControl should render a search box and list of options, with a custom search input message 1`] = `
+<div
+  className="woocommerce-search-list "
+>
+  <div
+    className="woocommerce-search-list__search"
+  >
+    <div
+      className="components-base-control"
+    >
+      <div
+        className="components-base-control__field"
+      >
+        <label
+          className="components-base-control__label"
+          htmlFor="inspector-text-control-8"
+        >
+          Testing search label
+        </label>
+        <input
+          className="components-text-control__input"
+          id="inspector-text-control-8"
+          onChange={[Function]}
+          type="search"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="woocommerce-search-list__list components-menu-group"
+  >
+    <div
+      className="components-menu-group__label"
+      id="components-menu-group-label-6"
+    >
+      Results
+    </div>
+    <div
+      aria-labelledby="components-menu-group-label-6"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
+    >
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Apricots",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Clementine",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Elderberry",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Guava",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Lychee",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Mulberry",
+            }
+          }
+        />
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SearchListControl should render a search box and no options 1`] = `
+<div
+  className="woocommerce-search-list "
+>
+  <div
+    className="woocommerce-search-list__search"
+  >
+    <div
+      className="components-base-control"
+    >
+      <div
+        className="components-base-control__field"
+      >
+        <label
+          className="components-base-control__label"
+          htmlFor="inspector-text-control-4"
+        >
+          Search for items
+        </label>
+        <input
+          className="components-text-control__input"
+          id="inspector-text-control-4"
+          onChange={[Function]}
+          type="search"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SearchListControl should render a search box with a search term, and no matching options 1`] = `
+<div
+  className="woocommerce-search-list "
+>
+  <div
+    className="woocommerce-search-list__search"
+  >
+    <div
+      className="components-base-control"
+    >
+      <div
+        className="components-base-control__field"
+      >
+        <label
+          className="components-base-control__label"
+          htmlFor="inspector-text-control-7"
+        >
+          Search for items
+        </label>
+        <input
+          className="components-text-control__input"
+          id="inspector-text-control-7"
+          onChange={[Function]}
+          type="search"
+          value="no matches"
+        />
+      </div>
+    </div>
+  </div>
+  No results for no matches
+</div>
+`;
+
+exports[`SearchListControl should render a search box with a search term, and only matching options 1`] = `
+<div
+  className="woocommerce-search-list "
+>
+  <div
+    className="woocommerce-search-list__search"
+  >
+    <div
+      className="components-base-control"
+    >
+      <div
+        className="components-base-control__field"
+      >
+        <label
+          className="components-base-control__label"
+          htmlFor="inspector-text-control-5"
+        >
+          Search for items
+        </label>
+        <input
+          className="components-text-control__input"
+          id="inspector-text-control-5"
+          onChange={[Function]}
+          type="search"
+          value="berry"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="woocommerce-search-list__list components-menu-group"
+  >
+    <div
+      className="components-menu-group__label"
+      id="components-menu-group-label-4"
+    >
+      Results
+    </div>
+    <div
+      aria-labelledby="components-menu-group-label-4"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
+    >
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Elder<strong>berry</strong>",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Mul<strong>berry</strong>",
+            }
+          }
+        />
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SearchListControl should render a search box with a search term, and only matching options, regardless of case sensitivity 1`] = `
+<div
+  className="woocommerce-search-list "
+>
+  <div
+    className="woocommerce-search-list__search"
+  >
+    <div
+      className="components-base-control"
+    >
+      <div
+        className="components-base-control__field"
+      >
+        <label
+          className="components-base-control__label"
+          htmlFor="inspector-text-control-6"
+        >
+          Search for items
+        </label>
+        <input
+          className="components-text-control__input"
+          id="inspector-text-control-6"
+          onChange={[Function]}
+          type="search"
+          value="bERry"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="woocommerce-search-list__list components-menu-group"
+  >
+    <div
+      className="components-menu-group__label"
+      id="components-menu-group-label-5"
+    >
+      Results
+    </div>
+    <div
+      aria-labelledby="components-menu-group-label-5"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
+    >
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Elder<strong>berry</strong>",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Mul<strong>berry</strong>",
+            }
+          }
+        />
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SearchListControl should render a search box, a list of options, and 1 selected item 1`] = `
+<div
+  className="woocommerce-search-list "
+>
+  <div
+    className="woocommerce-search-list__selected"
+  >
+    <div
+      className="woocommerce-search-list__selected-header"
+    >
+      <strong>
+        1 item selected
+      </strong>
+      <button
+        aria-label="Clear all selected items"
+        className="components-button is-link is-destructive"
+        onClick={[Function]}
+        type="button"
+      >
+        Clear all
+      </button>
+    </div>
+    <span
+      className="woocommerce-tag has-remove"
+    >
+      <span
+        className="woocommerce-tag__text"
+        id="woocommerce-tag__label-0"
+      >
+        <span
+          className="screen-reader-text"
+        >
+          Clementine
+        </span>
+        <span
+          aria-hidden="true"
+        >
+          Clementine
+        </span>
+      </span>
+      <button
+        aria-describedby="woocommerce-tag__label-0"
+        aria-label="Remove Clementine"
+        className="components-button components-icon-button woocommerce-tag__remove"
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onMouseEnter={[Function]}
+        onMouseLeave={[Function]}
+        type="button"
+      >
+        <svg
+          aria-hidden={true}
+          className="dashicon dashicons-dismiss"
+          focusable="false"
+          height={20}
+          role="img"
+          viewBox="0 0 20 20"
+          width={20}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M10 2c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8zm5 11l-3-3 3-3-2-2-3 3-3-3-2 2 3 3-3 3 2 2 3-3 3 3z"
+          />
+        </svg>
+      </button>
+    </span>
+  </div>
+  <div
+    className="woocommerce-search-list__search"
+  >
+    <div
+      className="components-base-control"
+    >
+      <div
+        className="components-base-control__field"
+      >
+        <label
+          className="components-base-control__label"
+          htmlFor="inspector-text-control-2"
+        >
+          Search for items
+        </label>
+        <input
+          className="components-text-control__input"
+          id="inspector-text-control-2"
+          onChange={[Function]}
+          type="search"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="woocommerce-search-list__list components-menu-group"
+  >
+    <div
+      className="components-menu-group__label"
+      id="components-menu-group-label-2"
+    >
+      Results
+    </div>
+    <div
+      aria-labelledby="components-menu-group-label-2"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
+    >
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Apricots",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Elderberry",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Guava",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Lychee",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Mulberry",
+            }
+          }
+        />
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SearchListControl should render a search box, a list of options, and 2 selected item 1`] = `
+<div
+  className="woocommerce-search-list "
+>
+  <div
+    className="woocommerce-search-list__selected"
+  >
+    <div
+      className="woocommerce-search-list__selected-header"
+    >
+      <strong>
+        2 items selected
+      </strong>
+      <button
+        aria-label="Clear all selected items"
+        className="components-button is-link is-destructive"
+        onClick={[Function]}
+        type="button"
+      >
+        Clear all
+      </button>
+    </div>
+    <span
+      className="woocommerce-tag has-remove"
+    >
+      <span
+        className="woocommerce-tag__text"
+        id="woocommerce-tag__label-1"
+      >
+        <span
+          className="screen-reader-text"
+        >
+          Clementine
+        </span>
+        <span
+          aria-hidden="true"
+        >
+          Clementine
+        </span>
+      </span>
+      <button
+        aria-describedby="woocommerce-tag__label-1"
+        aria-label="Remove Clementine"
+        className="components-button components-icon-button woocommerce-tag__remove"
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onMouseEnter={[Function]}
+        onMouseLeave={[Function]}
+        type="button"
+      >
+        <svg
+          aria-hidden={true}
+          className="dashicon dashicons-dismiss"
+          focusable="false"
+          height={20}
+          role="img"
+          viewBox="0 0 20 20"
+          width={20}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M10 2c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8zm5 11l-3-3 3-3-2-2-3 3-3-3-2 2 3 3-3 3 2 2 3-3 3 3z"
+          />
+        </svg>
+      </button>
+    </span>
+    <span
+      className="woocommerce-tag has-remove"
+    >
+      <span
+        className="woocommerce-tag__text"
+        id="woocommerce-tag__label-2"
+      >
+        <span
+          className="screen-reader-text"
+        >
+          Guava
+        </span>
+        <span
+          aria-hidden="true"
+        >
+          Guava
+        </span>
+      </span>
+      <button
+        aria-describedby="woocommerce-tag__label-2"
+        aria-label="Remove Guava"
+        className="components-button components-icon-button woocommerce-tag__remove"
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onMouseEnter={[Function]}
+        onMouseLeave={[Function]}
+        type="button"
+      >
+        <svg
+          aria-hidden={true}
+          className="dashicon dashicons-dismiss"
+          focusable="false"
+          height={20}
+          role="img"
+          viewBox="0 0 20 20"
+          width={20}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M10 2c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8zm5 11l-3-3 3-3-2-2-3 3-3-3-2 2 3 3-3 3 2 2 3-3 3 3z"
+          />
+        </svg>
+      </button>
+    </span>
+  </div>
+  <div
+    className="woocommerce-search-list__search"
+  >
+    <div
+      className="components-base-control"
+    >
+      <div
+        className="components-base-control__field"
+      >
+        <label
+          className="components-base-control__label"
+          htmlFor="inspector-text-control-3"
+        >
+          Search for items
+        </label>
+        <input
+          className="components-text-control__input"
+          id="inspector-text-control-3"
+          onChange={[Function]}
+          type="search"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="woocommerce-search-list__list components-menu-group"
+  >
+    <div
+      className="components-menu-group__label"
+      id="components-menu-group-label-3"
+    >
+      Results
+    </div>
+    <div
+      aria-labelledby="components-menu-group-label-3"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
+    >
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Apricots",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Elderberry",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Lychee",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Mulberry",
+            }
+          }
+        />
+      </button>
+    </div>
+  </div>
+</div>
+`;
