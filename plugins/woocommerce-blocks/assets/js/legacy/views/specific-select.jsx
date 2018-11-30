@@ -216,7 +216,7 @@ class ProductSpecificSearchResults extends Component {
 			return '';
 		}
 
-		return '/wc/v2/products?per_page=10&status=publish&search=' + this.props.searchString;
+		return '/wc-pb/v3/products?per_page=10&status=publish&search=' + this.props.searchString;
 	}
 
 	/**
@@ -412,7 +412,7 @@ class ProductSpecificSelectedProducts extends Component {
 			}
 		}
 
-		return uncachedProducts.length ? '/wc/v2/products?include=' + uncachedProducts.join( ',' ) : '';
+		return uncachedProducts.length ? '/wc-pb/v3/products?include=' + uncachedProducts.join( ',' ) : '';
 	}
 
 	/**
