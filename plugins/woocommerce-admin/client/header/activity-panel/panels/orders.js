@@ -178,6 +178,7 @@ export default compose(
 		const ordersQuery = {
 			page: 1,
 			per_page: QUERY_DEFAULTS.pageSize,
+			status: 'processing',
 		};
 
 		const orders = getOrders( ordersQuery );
