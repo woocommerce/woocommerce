@@ -5,6 +5,8 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
+import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import { noop } from 'lodash';
 
@@ -29,10 +31,9 @@ import { ActivityCard } from '../activity-card';
 import ActivityHeader from '../activity-header';
 import ActivityOutboundLink from '../activity-outbound-link';
 import { getOrderRefundTotal } from 'lib/order-values';
+import { QUERY_DEFAULTS } from 'store/constants';
 
-function OrdersPanel( { orders } ) {
-	const { data = [], isLoading } = orders;
-
+function OrdersPanel( { orders, isRequesting } ) {
 	const menu = (
 		<EllipsisMenu label="Demo Menu">
 			<MenuTitle>Test</MenuTitle>
@@ -53,11 +54,11 @@ function OrdersPanel( { orders } ) {
 		<Fragment>
 			<ActivityHeader title={ __( 'Orders', 'wc-admin' ) } menu={ menu } />
 			<Section>
-				{ isLoading ? (
+				{ isRequesting ? (
 					<p>Loading</p>
 				) : (
 					<Fragment>
-						{ data.map( ( order, i ) => {
+						{ orders.map( ( order, i ) => {
 							// We want the billing address, but shipping can be used as a fallback.
 							const address = { ...order.shipping, ...order.billing };
 							const name = `${ address.first_name } ${ address.last_name }`;
@@ -116,14 +117,29 @@ function OrdersPanel( { orders } ) {
 }
 
 OrdersPanel.propTypes = {
-	orders: PropTypes.object.isRequired,
+	orders: PropTypes.array.isRequired,
+	isError: PropTypes.bool,
+	isRequesting: PropTypes.bool,
 };
 
 OrdersPanel.defaultProps = {
-	orders: {
-		data: [],
-		isLoading: false,
-	},
+	orders: [],
+	isError: false,
+	isRequesting: false,
 };
 
-export default OrdersPanel;
+export default compose(
+	withSelect( select => {
+		const { getOrders, isGetOrdersError, isGetOrdersRequesting } = select( 'wc-admin' );
+		const ordersQuery = {
+			page: 1,
+			per_page: QUERY_DEFAULTS.pageSize,
+		};
+
+		const orders = getOrders( ordersQuery );
+		const isError = isGetOrdersError( ordersQuery );
+		const isRequesting = isGetOrdersRequesting( ordersQuery );
+
+		return { orders, isError, isRequesting };
+	} )
+)( OrdersPanel );
