@@ -1116,7 +1116,7 @@ class WC_Checkout {
 			return wc_clean( wp_unslash( $_POST[ $input ] ) ); // WPCS: input var ok, CSRF OK.
 		}
 
-		$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
+		$value = apply_filters( 'woocommerce_checkout_get_value', $input );
 
 		if ( null !== $value ) {
 			return $value;
