@@ -3,9 +3,63 @@
 		display: flex;
 		align-items: center;
 	}
+}
 
+.woocommerce-product-categories__item-label {
+	display: flex;
+	flex: 1;
+
+	// Anything deeper than 5 levels will use this fallback depth
+	[class*="depth-"] & {
+		padding-left: $gap-small * 5;
+	}
+
+	.depth-0 & {
+		padding-left: 0;
+	}
+
+	.depth-1 & {
+		padding-left: $gap-small;
+	}
+
+	.depth-2 & {
+		padding-left: $gap-small * 2;
+	}
+
+	.depth-3 & {
+		padding-left: $gap-small * 3;
+	}
+
+	.depth-4 & {
+		padding-left: $gap-small * 4;
+	}
+}
+
+.woocommerce-product-categories__item {
 	.woocommerce-product-categories__item-name {
-		flex: 1;
+		display: inline-block;
+	}
+
+	.woocommerce-product-categories__item-prefix {
+		display: none;
+		color: $core-grey-dark-300;
+	}
+
+	&.is-searching, &.is-skip-level {
+		.woocommerce-product-categories__item-prefix {
+			display: inline-block;
+			margin-right: $gap-smallest;
+
+			&:after {
+				content: ' ›';
+			}
+		}
+	}
+
+	&.is-searching {
+		.woocommerce-product-categories__item-name {
+			color: $core-grey-dark-900;
+		}
 	}
 
 	.woocommerce-product-categories__item-count {

@@ -1,5 +1,143 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`SearchListControl should render a search box and list of hierarchical options 1`] = `
+<div
+  className="woocommerce-search-list "
+>
+  <div
+    className="woocommerce-search-list__search"
+  >
+    <div
+      className="components-base-control"
+    >
+      <div
+        className="components-base-control__field"
+      >
+        <label
+          className="components-base-control__label"
+          htmlFor="inspector-text-control-10"
+        >
+          Search for items
+        </label>
+        <input
+          className="components-text-control__input"
+          id="inspector-text-control-10"
+          onChange={[Function]}
+          type="search"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    className="woocommerce-search-list__list components-menu-group"
+  >
+    <div
+      className="components-menu-group__label"
+      id="components-menu-group-label-8"
+    >
+      Results
+    </div>
+    <div
+      aria-labelledby="components-menu-group-label-8"
+      aria-orientation="vertical"
+      onKeyDown={[Function]}
+      role="menu"
+    >
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item depth-0"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Apricots",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item depth-1"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Clementine",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item depth-1"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Elderberry",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item depth-2"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Guava",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item depth-0"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Lychee",
+            }
+          }
+        />
+      </button>
+      <button
+        className="components-button components-menu-item__button woocommerce-search-list__item depth-0"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Mulberry",
+            }
+          }
+        />
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`SearchListControl should render a search box and list of options 1`] = `
 <div
   className="woocommerce-search-list "

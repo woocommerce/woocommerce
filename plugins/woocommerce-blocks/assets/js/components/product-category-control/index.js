@@ -5,7 +5,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import { Component } from '@wordpress/element';
-import { find } from 'lodash';
+import { find, last } from 'lodash';
 import { MenuItem } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
@@ -36,11 +36,27 @@ class ProductCategoryControl extends Component {
 			} );
 	}
 
-	renderItem( { getHighlightedName, item, onSelect, search } ) {
+	renderItem( { getHighlightedName, item, onSelect, search, depth = 0 } ) {
+		const classes = [
+			'woocommerce-search-list__item',
+			'woocommerce-product-categories__item',
+			`depth-${ depth }`,
+		];
+		if ( search.length ) {
+			classes.push( 'is-searching' );
+		}
+		if ( depth === 0 && item.parent !== 0 ) {
+			classes.push( 'is-skip-level' );
+		}
+
+		const accessibleName = ! item.breadcrumbs.length ?
+			item.name :
+			`${ item.breadcrumbs.join( ', ' ) }, ${ item.name }`;
+
 		return (
 			<MenuItem
 				key={ item.id }
-				className="woocommerce-product-categories__item woocommerce-search-list__item"
+				className={ classes.join( ' ' ) }
 				onClick={ onSelect( item ) }
 				aria-label={ sprintf(
 					_n(
@@ -49,16 +65,24 @@ class ProductCategoryControl extends Component {
 						item.count,
 						'woocommerce'
 					),
-					item.name,
+					accessibleName,
 					item.count
 				) }
 			>
-				<span
-					className="woocommerce-product-categories__item-name"
-					dangerouslySetInnerHTML={ {
-						__html: getHighlightedName( item.name, search ),
-					} }
-				/>
+				<span className="woocommerce-product-categories__item-label">
+					{ !! item.breadcrumbs.length && (
+						<span className="woocommerce-product-categories__item-prefix">
+							{ item.breadcrumbs.length > 1 ? '… ' : null }
+							{ last( item.breadcrumbs ) }
+						</span>
+					) }
+					<span
+						className="woocommerce-product-categories__item-name"
+						dangerouslySetInnerHTML={ {
+							__html: getHighlightedName( item.name, search ),
+						} }
+					/>
+				</span>
 				<span className="woocommerce-product-categories__item-count">
 					{ item.count }
 				</span>
@@ -95,6 +119,7 @@ class ProductCategoryControl extends Component {
 				onChange={ onChange }
 				renderItem={ this.renderItem }
 				messages={ messages }
+				isHierarchical
 			/>
 		);
 	}
