@@ -558,7 +558,8 @@ class WC_Countries {
 		// Substitute address parts into the string.
 		$replace = array_map(
 			'esc_html', apply_filters(
-				'woocommerce_formatted_address_replacements', array(
+				'woocommerce_formatted_address_replacements',
+				array(
 					'{first_name}'       => $args['first_name'],
 					'{last_name}'        => $args['last_name'],
 					'{name}'             => $args['first_name'] . ' ' . $args['last_name'],
@@ -569,18 +570,19 @@ class WC_Countries {
 					'{state}'            => $full_state,
 					'{postcode}'         => $args['postcode'],
 					'{country}'          => $full_country,
-					'{first_name_upper}' => strtoupper( $args['first_name'] ),
-					'{last_name_upper}'  => strtoupper( $args['last_name'] ),
-					'{name_upper}'       => strtoupper( $args['first_name'] . ' ' . $args['last_name'] ),
-					'{company_upper}'    => strtoupper( $args['company'] ),
-					'{address_1_upper}'  => strtoupper( $args['address_1'] ),
-					'{address_2_upper}'  => strtoupper( $args['address_2'] ),
-					'{city_upper}'       => strtoupper( $args['city'] ),
-					'{state_upper}'      => strtoupper( $full_state ),
-					'{state_code}'       => strtoupper( $state ),
-					'{postcode_upper}'   => strtoupper( $args['postcode'] ),
-					'{country_upper}'    => strtoupper( $full_country ),
-				), $args
+					'{first_name_upper}' => wc_strtoupper( $args['first_name'] ),
+					'{last_name_upper}'  => wc_strtoupper( $args['last_name'] ),
+					'{name_upper}'       => wc_strtoupper( $args['first_name'] . ' ' . $args['last_name'] ),
+					'{company_upper}'    => wc_strtoupper( $args['company'] ),
+					'{address_1_upper}'  => wc_strtoupper( $args['address_1'] ),
+					'{address_2_upper}'  => wc_strtoupper( $args['address_2'] ),
+					'{city_upper}'       => wc_strtoupper( $args['city'] ),
+					'{state_upper}'      => wc_strtoupper( $full_state ),
+					'{state_code}'       => wc_strtoupper( $state ),
+					'{postcode_upper}'   => wc_strtoupper( $args['postcode'] ),
+					'{country_upper}'    => wc_strtoupper( $full_country ),
+				),
+				$args
 			)
 		);
 
