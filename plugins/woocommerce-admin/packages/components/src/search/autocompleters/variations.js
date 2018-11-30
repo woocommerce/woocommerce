@@ -43,7 +43,7 @@ export default {
 		let payload = '';
 		if ( search ) {
 			const query = {
-				search: encodeURIComponent( search ),
+				search,
 				per_page: 10,
 			};
 			payload = stringifyQuery( query );
