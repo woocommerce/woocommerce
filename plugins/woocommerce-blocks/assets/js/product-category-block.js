@@ -85,7 +85,7 @@ export default class ProductByCategoryBlock extends Component {
 
 		return (
 			<InspectorControls key="inspector">
-				<PanelBody title={ __( 'Product Category', 'woocommerce' ) } initialOpen>
+				<PanelBody title={ __( 'Product Category', 'woocommerce' ) } initialOpen={ false }>
 					<ProductCategoryControl
 						selected={ attributes.categories }
 						onChange={ ( value = [] ) => {
@@ -94,7 +94,7 @@ export default class ProductByCategoryBlock extends Component {
 						} }
 					/>
 				</PanelBody>
-				<PanelBody title={ __( 'Layout', 'woocommerce' ) } initialOpen={ false }>
+				<PanelBody title={ __( 'Layout', 'woocommerce' ) } initialOpen>
 					<RangeControl
 						label={ __( 'Columns', 'woocommerce' ) }
 						value={ columns }
