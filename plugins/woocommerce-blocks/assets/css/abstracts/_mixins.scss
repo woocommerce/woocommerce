@@ -37,7 +37,6 @@
 
 // Hide an element from sighted users, but availble to screen reader users.
 @mixin visually-hidden() {
-	border: 0;
 	clip: rect(1px, 1px, 1px, 1px);
 	clip-path: inset(50%);
 	height: 1px;
@@ -45,5 +44,16 @@
 	margin: -1px;
 	overflow: hidden;
 	/* Many screen reader and browser combinations announce broken words as they would appear visually. */
+	overflow-wrap: normal !important;
 	word-wrap: normal !important;
+}
+
+// Unhide a visually hidden element
+@mixin visually-shown() {
+	clip: auto;
+	clip-path: none;
+	height: auto;
+	width: auto;
+	margin: unset;
+	overflow: hidden;
 }
