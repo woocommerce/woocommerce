@@ -29,6 +29,11 @@ module.exports = {
 		'jsx-a11y',
 		'jest',
 	],
+	settings: {
+		react: {
+			"version": "16.6",
+		}
+	},
 	rules: {
 		'array-bracket-spacing': [ 'error', 'always' ],
 		'arrow-parens': [ 'error', 'always' ],
