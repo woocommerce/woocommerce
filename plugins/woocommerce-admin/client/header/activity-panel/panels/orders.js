@@ -16,6 +16,7 @@ import interpolateComponents from 'interpolate-components';
  */
 import {
 	EllipsisMenu,
+	EmptyContent,
 	Flag,
 	Link,
 	MenuTitle,
@@ -34,7 +35,27 @@ import ActivityOutboundLink from '../activity-outbound-link';
 import { getOrderRefundTotal } from 'lib/order-values';
 import { QUERY_DEFAULTS } from 'store/constants';
 
-function OrdersPanel( { orders, isRequesting } ) {
+function OrdersPanel( { orders, isRequesting, isError } ) {
+	if ( isError ) {
+		const title = __( 'There was an error getting your orders. Please try again.', 'wc-admin' );
+		const actionLabel = __( 'Reload', 'wc-admin' );
+		const actionCallback = () => {
+			// TODO Add tracking for how often an error is displayed, and the reload action is clicked.
+			window.location.reload();
+		};
+
+		return (
+			<Fragment>
+				<EmptyContent
+					title={ title }
+					actionLabel={ actionLabel }
+					actionURL={ null }
+					actionCallback={ actionCallback }
+				/>
+			</Fragment>
+		);
+	}
+
 	const menu = (
 		<EllipsisMenu label="Demo Menu">
 			<MenuTitle>Test</MenuTitle>
