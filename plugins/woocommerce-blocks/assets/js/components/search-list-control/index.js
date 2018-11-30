@@ -20,6 +20,7 @@ import { Tag } from '@woocommerce/components';
  */
 import './style.scss';
 import { buildTermsTree } from './hierarchy';
+import { CheckedIcon, UncheckedIcon } from './icons';
 
 const defaultMessages = {
 	clear: __( 'Clear all selected items', 'woocommerce' ),
@@ -115,6 +116,7 @@ export class SearchListControl extends Component {
 				onClick={ onSelect( item ) }
 				aria-selected={ isSelected }
 			>
+				{ isSelected ? <CheckedIcon /> : <UncheckedIcon /> }
 				<span
 					className="woocommerce-search-list__item-name"
 					dangerouslySetInnerHTML={ {
