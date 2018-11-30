@@ -1,3 +1,7 @@
+# 1.1.1
+
+- Fix incorrectly loaded `proptype-validator`
+
 # 1.1.0
 
 - Add `interpolate-components` as an explicit dependency, fixes issue with
