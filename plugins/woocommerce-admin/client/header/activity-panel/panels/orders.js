@@ -9,14 +9,15 @@ import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import { noop } from 'lodash';
+import interpolateComponents from 'interpolate-components';
 
 /**
  * WooCommerce dependencies
  */
 import {
 	EllipsisMenu,
-	Gravatar,
 	Flag,
+	Link,
 	MenuTitle,
 	MenuItem,
 	OrderStatus,
@@ -41,12 +42,31 @@ function OrdersPanel( { orders, isRequesting } ) {
 		</EllipsisMenu>
 	);
 
-	const gravatarWithFlag = ( order, address ) => {
+	const orderCardTitle = ( order, address ) => {
+		const name = `${ address.first_name } ${ address.last_name }`;
+
 		return (
-			<div className="woocommerce-layout__activity-panel-avatar-flag-overlay">
-				<Flag order={ order } />
-				<Gravatar user={ address.email } />
-			</div>
+			<Fragment>
+				{ interpolateComponents( {
+					mixedString: sprintf(
+						__(
+							/* eslint-disable-next-line max-len */
+							'Order {{orderLink}}#%(orderNumber)s{{/orderLink}} placed by {{customerLink}}%(customerName)s{{/customerLink}} {{destinationFlag/}}',
+							'wc-admin'
+						),
+						{
+							orderNumber: order.number,
+							customerName: name,
+						}
+					),
+					components: {
+						orderLink: <Link href={ 'post.php?action=edit&post=' + order.id } type="wp-admin" />,
+						// @TODO: Hook up customer name link
+						customerLink: <Link href={ '#' } type="wp-admin" />,
+						destinationFlag: <Flag order={ order } round={ false } height={ 9 } width={ 12 } />,
+					},
+				} ) }
+			</Fragment>
 		);
 	};
 
@@ -61,7 +81,6 @@ function OrdersPanel( { orders, isRequesting } ) {
 						{ orders.map( ( order, i ) => {
 							// We want the billing address, but shipping can be used as a fallback.
 							const address = { ...order.shipping, ...order.billing };
-							const name = `${ address.first_name } ${ address.last_name }`;
 							const productsCount = order.line_items.reduce(
 								( total, line ) => total + line.quantity,
 								0
@@ -75,8 +94,7 @@ function OrdersPanel( { orders, isRequesting } ) {
 								<ActivityCard
 									key={ i }
 									className="woocommerce-order-activity-card"
-									title={ sprintf( __( '%s placed order #%d', 'wc-admin' ), name, order.id ) }
-									icon={ gravatarWithFlag( order, address ) }
+									title={ orderCardTitle( order, address ) }
 									date={ order.date_created }
 									subtitle={
 										<div>
