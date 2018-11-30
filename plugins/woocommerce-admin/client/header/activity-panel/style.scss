@@ -239,9 +239,20 @@
 	}
 }
 
-.woocommerce-order-activity-card {
-	.woocommerce-activity-card__title {
-		font-weight: normal;
+// Needs the double-class for specificity
+.woocommerce-activity-card.woocommerce-order-activity-card {
+	grid-template-columns: 1fr;
+	grid-template-areas:
+		'header'
+		'body'
+		'actions';
+
+	.woocommerce-activity-card__icon {
+		display: none;
+	}
+
+	.woocommerce-flag {
+		display: inline-block;
 	}
 
 	.woocommerce-activity-card__subtitle {
