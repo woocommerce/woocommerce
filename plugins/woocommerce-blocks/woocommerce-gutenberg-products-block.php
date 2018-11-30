@@ -161,14 +161,25 @@ function wgpb_print_script_settings() {
 add_action( 'admin_print_footer_scripts', 'wgpb_print_script_settings', 1 );
 
 /**
- * Register extra API routes with functionality not available in WC core yet.
- *
- * @todo Remove this function when merging into core because it won't be necessary.
+ * Register extra API routes with functionality specific for product blocks.
  */
 function wgpb_register_api_routes() {
-	include_once( dirname( __FILE__ ) . '/includes/class-wgpb-products-controller.php' );
-	$controller = new WGPB_Products_Controller();
-	$controller->register_routes();
+	include_once dirname( __FILE__ ) . '/includes/class-wgpb-products-controller.php';
+	include_once dirname( __FILE__ ) . '/includes/class-wgpb-product-categories-controller.php';
+	include_once dirname( __FILE__ ) . '/includes/class-wgpb-product-attributes-controller.php';
+	include_once dirname( __FILE__ ) . '/includes/class-wgpb-product-attribute-terms-controller.php';
+
+	$products = new WGPB_Products_Controller();
+	$products->register_routes();
+
+	$categories = new WGPB_Product_Categories_Controller();
+	$categories->register_routes();
+
+	$attributes = new WGPB_Product_Attributes_Controller();
+	$attributes->register_routes();
+
+	$attribute_terms = new WGPB_Product_Attribute_Terms_Controller();
+	$attribute_terms->register_routes();
 }
 
 /**

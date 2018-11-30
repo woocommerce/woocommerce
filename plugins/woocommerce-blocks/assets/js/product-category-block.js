@@ -69,7 +69,7 @@ export default class ProductByCategoryBlock extends Component {
 	getProducts() {
 		this.setState( { products: [], loaded: false } );
 		apiFetch( {
-			path: addQueryArgs( '/wgbp/v3/products', getQuery( this.props.attributes ) ),
+			path: addQueryArgs( '/wc-pb/v3/products', getQuery( this.props.attributes ) ),
 		} )
 			.then( ( products ) => {
 				this.setState( { products, loaded: true } );
