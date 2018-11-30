@@ -104,7 +104,7 @@ export class SearchListControl extends Component {
 	}
 
 	render() {
-		const { className, search, selected, setState } = this.props;
+		const { className = '', search, selected, setState } = this.props;
 		const messages = { ...defaultMessages, ...this.props.messages };
 		const list = this.getFilteredList( this.props.list, search );
 		const noResults = search ? sprintf( messages.noResults, search ) : null;
