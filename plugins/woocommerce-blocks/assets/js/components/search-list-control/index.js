@@ -41,6 +41,7 @@ export class SearchListControl extends Component {
 		this.onSelect = this.onSelect.bind( this );
 		this.onRemove = this.onRemove.bind( this );
 		this.onClear = this.onClear.bind( this );
+		this.isSelected = this.isSelected.bind( this );
 		this.defaultRenderItem = this.defaultRenderItem.bind( this );
 		this.renderList = this.renderList.bind( this );
 	}
@@ -56,6 +57,10 @@ export class SearchListControl extends Component {
 	onSelect( item ) {
 		const { selected, onChange } = this.props;
 		return () => {
+			if ( this.isSelected( item ) ) {
+				this.onRemove( item.id )();
+				return;
+			}
 			onChange( [ ...selected, item ] );
 		};
 	}
@@ -70,20 +75,15 @@ export class SearchListControl extends Component {
 
 	getFilteredList( list, search ) {
 		const { isHierarchical } = this.props;
-		if ( ! search && isHierarchical ) {
-			return buildTermsTree(
-				list.filter( ( item ) => item && ! this.isSelected( item ) ),
-				list
-			);
-		} else if ( ! search ) {
-			return list.filter( ( item ) => item && ! this.isSelected( item ) );
+		if ( ! search ) {
+			return isHierarchical ? buildTermsTree( list ) : list;
 		}
 		const messages = { ...defaultMessages, ...this.props.messages };
 		const re = new RegExp( escapeRegExp( search ), 'i' );
 		this.props.debouncedSpeak( messages.updated );
 		const filteredList = list
 			.map( ( item ) => ( re.test( item.name ) ? item : false ) )
-			.filter( ( item ) => item && ! this.isSelected( item ) );
+			.filter( Boolean );
 		return isHierarchical ? buildTermsTree( filteredList, list ) : filteredList;
 	}
 
@@ -95,10 +95,15 @@ export class SearchListControl extends Component {
 		return name.replace( re, '<strong>$&</strong>' );
 	}
 
-	defaultRenderItem( { depth = 0, getHighlightedName, item, onSelect, search = '' } ) {
-		const classes = [
-			'woocommerce-search-list__item',
-		];
+	defaultRenderItem( {
+		depth = 0,
+		getHighlightedName,
+		item,
+		isSelected,
+		onSelect,
+		search = '',
+	} ) {
+		const classes = [ 'woocommerce-search-list__item' ];
 		if ( this.props.isHierarchical ) {
 			classes.push( `depth-${ depth }` );
 		}
@@ -108,6 +113,7 @@ export class SearchListControl extends Component {
 				key={ item.id }
 				className={ classes.join( ' ' ) }
 				onClick={ onSelect( item ) }
+				aria-selected={ isSelected }
 			>
 				<span
 					className="woocommerce-search-list__item-name"
@@ -130,6 +136,7 @@ export class SearchListControl extends Component {
 				{ renderItem( {
 					getHighlightedName: this.getHighlightedName,
 					item,
+					isSelected: this.isSelected( item ),
 					onSelect: this.onSelect,
 					search,
 					depth,
