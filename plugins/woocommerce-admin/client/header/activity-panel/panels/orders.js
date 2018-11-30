@@ -146,7 +146,7 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 											isDefault
 											href={ getAdminLink( 'post.php?action=edit&post=' + order.id ) }
 										>
-											Begin fulfillment
+											{ __( 'Begin fulfillment' ) }
 										</Button>
 									}
 								>
