@@ -44,11 +44,47 @@ exports[`SearchListControl should render a search box and list of hierarchical o
       role="menu"
     >
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -59,11 +95,47 @@ exports[`SearchListControl should render a search box and list of hierarchical o
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item depth-1"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -74,11 +146,47 @@ exports[`SearchListControl should render a search box and list of hierarchical o
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item depth-1"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -89,11 +197,47 @@ exports[`SearchListControl should render a search box and list of hierarchical o
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item depth-2"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -104,11 +248,47 @@ exports[`SearchListControl should render a search box and list of hierarchical o
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -119,11 +299,47 @@ exports[`SearchListControl should render a search box and list of hierarchical o
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -182,11 +398,47 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
       role="menu"
     >
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -197,11 +449,47 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -212,11 +500,47 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -227,11 +551,47 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -242,11 +602,47 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -257,11 +653,47 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -320,11 +752,47 @@ exports[`SearchListControl should render a search box and list of options with a
       role="menu"
     >
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -335,11 +803,47 @@ exports[`SearchListControl should render a search box and list of options with a
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -350,11 +854,47 @@ exports[`SearchListControl should render a search box and list of options with a
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -365,11 +905,47 @@ exports[`SearchListControl should render a search box and list of options with a
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -380,11 +956,47 @@ exports[`SearchListControl should render a search box and list of options with a
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -395,11 +1007,47 @@ exports[`SearchListControl should render a search box and list of options with a
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -530,11 +1178,47 @@ exports[`SearchListControl should render a search box and list of options, with 
       role="menu"
     >
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -545,11 +1229,47 @@ exports[`SearchListControl should render a search box and list of options, with 
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -560,11 +1280,47 @@ exports[`SearchListControl should render a search box and list of options, with 
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -575,11 +1331,47 @@ exports[`SearchListControl should render a search box and list of options, with 
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -590,11 +1382,47 @@ exports[`SearchListControl should render a search box and list of options, with 
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -605,11 +1433,47 @@ exports[`SearchListControl should render a search box and list of options, with 
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -733,11 +1597,47 @@ exports[`SearchListControl should render a search box with a search term, and on
       role="menu"
     >
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -748,11 +1648,47 @@ exports[`SearchListControl should render a search box with a search term, and on
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -812,11 +1748,47 @@ exports[`SearchListControl should render a search box with a search term, and on
       role="menu"
     >
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -827,11 +1799,47 @@ exports[`SearchListControl should render a search box with a search term, and on
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -954,11 +1962,47 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
       role="menu"
     >
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -969,11 +2013,98 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
         />
       </button>
       <button
+        aria-selected={true}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 1H2.7778C1.791 1 1 1.8 1 2.7778v12.4444C1 16.2 1.7911 17 2.7778 17h12.4444C16.209 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2089 1 15.2222 1zm-8 12.4444L2.7778 9 4.031 7.7467l3.1911 3.1822 6.7467-6.7467 1.2533 1.2622-8 8z"
+              id="checked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="checked-mask"
+            >
+              <use
+                xlinkHref="#checked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#1E8CBE"
+              mask="url(#checked-mask)"
+            />
+          </g>
+        </svg>
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Clementine",
+            }
+          }
+        />
+      </button>
+      <button
+        aria-selected={false}
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -984,11 +2115,47 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -999,11 +2166,47 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -1014,11 +2217,47 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -1186,11 +2425,47 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
       role="menu"
     >
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -1201,11 +2476,98 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         />
       </button>
       <button
+        aria-selected={true}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 1H2.7778C1.791 1 1 1.8 1 2.7778v12.4444C1 16.2 1.7911 17 2.7778 17h12.4444C16.209 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2089 1 15.2222 1zm-8 12.4444L2.7778 9 4.031 7.7467l3.1911 3.1822 6.7467-6.7467 1.2533 1.2622-8 8z"
+              id="checked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="checked-mask"
+            >
+              <use
+                xlinkHref="#checked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#1E8CBE"
+              mask="url(#checked-mask)"
+            />
+          </g>
+        </svg>
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Clementine",
+            }
+          }
+        />
+      </button>
+      <button
+        aria-selected={false}
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -1216,11 +2578,98 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         />
       </button>
       <button
+        aria-selected={true}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 1H2.7778C1.791 1 1 1.8 1 2.7778v12.4444C1 16.2 1.7911 17 2.7778 17h12.4444C16.209 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2089 1 15.2222 1zm-8 12.4444L2.7778 9 4.031 7.7467l3.1911 3.1822 6.7467-6.7467 1.2533 1.2622-8 8z"
+              id="checked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="checked-mask"
+            >
+              <use
+                xlinkHref="#checked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#1E8CBE"
+              mask="url(#checked-mask)"
+            />
+          </g>
+        </svg>
+        <span
+          className="woocommerce-search-list__item-name"
+          dangerouslySetInnerHTML={
+            Object {
+              "__html": "Guava",
+            }
+          }
+        />
+      </button>
+      <button
+        aria-selected={false}
+        className="components-button components-menu-item__button woocommerce-search-list__item"
+        onClick={[Function]}
+        role="menuitem"
+        type="button"
+      >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
@@ -1231,11 +2680,47 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         />
       </button>
       <button
+        aria-selected={false}
         className="components-button components-menu-item__button woocommerce-search-list__item"
         onClick={[Function]}
         role="menuitem"
         type="button"
       >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          height="16"
+          role="img"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <defs>
+            <path
+              d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
+              id="unchecked"
+            />
+          </defs>
+          <g
+            fill="none"
+            fillRule="evenodd"
+            transform="translate(-1 -1)"
+          >
+            <mask
+              fill="#fff"
+              id="unchecked-mask"
+            >
+              <use
+                xlinkHref="#unchecked"
+              />
+            </mask>
+            <path
+              d="M0 0h18v18H0z"
+              fill="#6C7781"
+              mask="url(#unchecked-mask)"
+            />
+          </g>
+        </svg>
         <span
           className="woocommerce-search-list__item-name"
           dangerouslySetInnerHTML={
