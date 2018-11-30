@@ -67,7 +67,7 @@
     "npm": "6.4.1"
   },
   "dependencies": {
-    "@woocommerce/components": "1.0.1"
+    "@woocommerce/components": "1.2.0"
   },
   "husky": {
     "hooks": {
