@@ -5,6 +5,17 @@ exports[`SearchListControl should render a search box and list of hierarchical o
   className="woocommerce-search-list "
 >
   <div
+    className="woocommerce-search-list__selected"
+  >
+    <div
+      className="woocommerce-search-list__selected-header"
+    >
+      <strong>
+        0 items selected
+      </strong>
+    </div>
+  </div>
+  <div
     className="woocommerce-search-list__search"
   >
     <div
@@ -382,6 +393,17 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
 <div
   className="woocommerce-search-list "
 >
+  <div
+    className="woocommerce-search-list__selected"
+  >
+    <div
+      className="woocommerce-search-list__selected-header"
+    >
+      <strong>
+        0 items selected
+      </strong>
+    </div>
+  </div>
   <div
     className="woocommerce-search-list__search"
   >
@@ -761,6 +783,17 @@ exports[`SearchListControl should render a search box and list of options with a
   className="woocommerce-search-list test-search"
 >
   <div
+    className="woocommerce-search-list__selected"
+  >
+    <div
+      className="woocommerce-search-list__selected-header"
+    >
+      <strong>
+        0 items selected
+      </strong>
+    </div>
+  </div>
+  <div
     className="woocommerce-search-list__search"
   >
     <div
@@ -1139,6 +1172,17 @@ exports[`SearchListControl should render a search box and list of options, with 
   className="woocommerce-search-list "
 >
   <div
+    className="woocommerce-search-list__selected"
+  >
+    <div
+      className="woocommerce-search-list__selected-header"
+    >
+      <strong>
+        0 items selected
+      </strong>
+    </div>
+  </div>
+  <div
     className="woocommerce-search-list__search"
   >
     <div
@@ -1210,6 +1254,17 @@ exports[`SearchListControl should render a search box and list of options, with 
 <div
   className="woocommerce-search-list "
 >
+  <div
+    className="woocommerce-search-list__selected"
+  >
+    <div
+      className="woocommerce-search-list__selected-header"
+    >
+      <strong>
+        0 items selected
+      </strong>
+    </div>
+  </div>
   <div
     className="woocommerce-search-list__search"
   >
@@ -1589,6 +1644,17 @@ exports[`SearchListControl should render a search box and no options 1`] = `
   className="woocommerce-search-list "
 >
   <div
+    className="woocommerce-search-list__selected"
+  >
+    <div
+      className="woocommerce-search-list__selected-header"
+    >
+      <strong>
+        0 items selected
+      </strong>
+    </div>
+  </div>
+  <div
     className="woocommerce-search-list__search"
   >
     <div
@@ -1619,6 +1685,17 @@ exports[`SearchListControl should render a search box with a search term, and no
 <div
   className="woocommerce-search-list "
 >
+  <div
+    className="woocommerce-search-list__selected"
+  >
+    <div
+      className="woocommerce-search-list__selected-header"
+    >
+      <strong>
+        0 items selected
+      </strong>
+    </div>
+  </div>
   <div
     className="woocommerce-search-list__search"
   >
@@ -1652,6 +1729,17 @@ exports[`SearchListControl should render a search box with a search term, and on
 <div
   className="woocommerce-search-list "
 >
+  <div
+    className="woocommerce-search-list__selected"
+  >
+    <div
+      className="woocommerce-search-list__selected-header"
+    >
+      <strong>
+        0 items selected
+      </strong>
+    </div>
+  </div>
   <div
     className="woocommerce-search-list__search"
   >
@@ -1811,6 +1899,17 @@ exports[`SearchListControl should render a search box with a search term, and on
 <div
   className="woocommerce-search-list "
 >
+  <div
+    className="woocommerce-search-list__selected"
+  >
+    <div
+      className="woocommerce-search-list__selected-header"
+    >
+      <strong>
+        0 items selected
+      </strong>
+    </div>
+  </div>
   <div
     className="woocommerce-search-list__search"
   >

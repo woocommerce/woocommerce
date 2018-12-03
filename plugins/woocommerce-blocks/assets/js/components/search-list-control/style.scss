@@ -7,6 +7,8 @@
 .woocommerce-search-list__selected {
 	margin: $gap 0;
 	padding: $gap 0 0;
+	// 76px is the height of 1 row of tags.
+	min-height: 76px;
 	border-top: 1px solid $core-grey-light-500;
 
 	.woocommerce-search-list__selected-header {

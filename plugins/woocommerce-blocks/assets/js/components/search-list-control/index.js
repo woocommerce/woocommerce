@@ -160,10 +160,10 @@ export class SearchListControl extends Component {
 
 		return (
 			<div className={ `woocommerce-search-list ${ className }` }>
-				{ selectedCount > 0 ? (
-					<div className="woocommerce-search-list__selected">
-						<div className="woocommerce-search-list__selected-header">
-							<strong>{ messages.selected( selectedCount ) }</strong>
+				<div className="woocommerce-search-list__selected">
+					<div className="woocommerce-search-list__selected-header">
+						<strong>{ messages.selected( selectedCount ) }</strong>
+						{ selectedCount > 0 ? (
 							<Button
 								isLink
 								isDestructive
@@ -172,17 +172,17 @@ export class SearchListControl extends Component {
 							>
 								{ __( 'Clear all', 'woocommerce' ) }
 							</Button>
-						</div>
-						{ selected.map( ( item, i ) => (
-							<Tag
-								key={ i }
-								label={ item.name }
-								id={ item.id }
-								remove={ this.onRemove }
-							/>
-						) ) }
+						) : null }
 					</div>
-				) : null }
+					{ selected.map( ( item, i ) => (
+						<Tag
+							key={ i }
+							label={ item.name }
+							id={ item.id }
+							remove={ this.onRemove }
+						/>
+					) ) }
+				</div>
 
 				<div className="woocommerce-search-list__search">
 					<TextControl
