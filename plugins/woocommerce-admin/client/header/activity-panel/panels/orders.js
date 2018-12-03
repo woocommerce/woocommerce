@@ -6,7 +6,6 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import { noop } from 'lodash';
 import interpolateComponents from 'interpolate-components';
@@ -35,6 +34,7 @@ import ActivityHeader from '../activity-header';
 import ActivityOutboundLink from '../activity-outbound-link';
 import { getOrderRefundTotal } from 'lib/order-values';
 import { QUERY_DEFAULTS } from 'store/constants';
+import withSelect from 'wc-api/with-select';
 
 function OrdersPanel( { orders, isRequesting, isError } ) {
 	if ( isError ) {
@@ -178,7 +178,7 @@ OrdersPanel.defaultProps = {
 
 export default compose(
 	withSelect( select => {
-		const { getOrders, isGetOrdersError, isGetOrdersRequesting } = select( 'wc-admin' );
+		const { getOrders, isGetOrdersError, isGetOrdersRequesting } = select( 'wc-api' );
 		const ordersQuery = {
 			page: 1,
 			per_page: QUERY_DEFAULTS.pageSize,
