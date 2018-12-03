@@ -175,6 +175,56 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 					'context'     => array( 'view', 'edit' ),
 					'description' => __( 'Number of orders product appeared in.', 'wc-admin' ),
 				),
+				'extended_info' => array(
+					'name'       => array(
+						'type'        => 'string',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Product name.', 'wc-admin' ),
+					),
+					'price'      => array(
+						'type'        => 'number',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Product price.', 'wc-admin' ),
+					),
+					'image'      => array(
+						'type'        => 'string',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Product image.', 'wc-admin' ),
+					),
+					'permalink'  => array(
+						'type'        => 'string',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Product link.', 'wc-admin' ),
+					),
+					'attributes' => array(
+						'type'        => 'array',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Product attributes.', 'wc-admin' ),
+					),
+					'stock_status'  => array(
+						'type'        => 'string',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Product inventory status.', 'wc-admin' ),
+					),
+					'stock_quantity'  => array(
+						'type'        => 'integer',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Product inventory quantity.', 'wc-admin' ),
+					),
+					'low_stock_amount'  => array(
+						'type'        => 'integer',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Product inventory threshold for low stock.', 'wc-admin' ),
+					),
+				),
 			),
 		);
 

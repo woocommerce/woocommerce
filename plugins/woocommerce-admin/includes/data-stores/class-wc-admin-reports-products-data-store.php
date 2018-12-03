@@ -60,6 +60,9 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		'price',
 		'image',
 		'permalink',
+		'stock_status',
+		'stock_quantity',
+		'low_stock_amount',
 	);
 
 	/**
@@ -153,6 +156,10 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 						$value                                = $product->{$function}();
 						$extended_info[ $extended_attribute ] = $value;
 					}
+				}
+				// If there is no set low_stock_amount, use the one in user settings.
+				if ( '' === $extended_info['low_stock_amount'] ) {
+					$extended_info['low_stock_amount'] = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 				}
 				$extended_info = $this->cast_numbers( $extended_info );
 			}

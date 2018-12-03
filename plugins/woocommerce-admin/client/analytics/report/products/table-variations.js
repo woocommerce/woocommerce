@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __, _n } from '@wordpress/i18n';
+import { __, _n, _x } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { map, get } from 'lodash';
 
@@ -18,6 +18,7 @@ import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
  */
 import ReportTable from 'analytics/components/report-table';
 import { numberFormat } from 'lib/number';
+import { isLowStock } from './utils';
 
 export default class VariationsReportTable extends Component {
 	constructor() {
@@ -25,13 +26,6 @@ export default class VariationsReportTable extends Component {
 
 		this.getHeadersContent = this.getHeadersContent.bind( this );
 		this.getRowsContent = this.getRowsContent.bind( this );
-	}
-
-	getVariationName( row ) {
-		const extendedInfo = get( row, 'extended_info', {} );
-		const attributes = get( extendedInfo, 'attributes', {} );
-
-		return extendedInfo.name + ' / ' + attributes.map( a => a.option ).join( ', ' );
 	}
 
 	getHeadersContent() {
@@ -82,15 +76,9 @@ export default class VariationsReportTable extends Component {
 		const persistedQuery = getPersistedQuery( query );
 
 		return map( data, row => {
-			const {
-				items_sold,
-				gross_revenue,
-				orders_count,
-				stock_status = 'outofstock',
-				stock_quantity = '0',
-				product_id,
-			} = row;
-			const name = this.getVariationName( row );
+			const { items_sold, gross_revenue, orders_count, extended_info, product_id } = row;
+			const { stock_status, stock_quantity, low_stock_amount } = extended_info;
+			const name = get( row, [ 'extended_info', 'name' ], '' ).replace( ' - ', ' / ' );
 			const ordersLink = getNewPath( persistedQuery, 'orders', {
 				filter: 'advanced',
 				product_includes: query.products,
@@ -123,10 +111,12 @@ export default class VariationsReportTable extends Component {
 					value: orders_count,
 				},
 				{
-					display: (
+					display: isLowStock( stock_status, stock_quantity, low_stock_amount ) ? (
 						<Link href={ editPostLink } type="wp-admin">
-							{ stockStatuses[ stock_status ] }
+							{ _x( 'Low', 'Indication of a low quantity', 'wc-admin' ) }
 						</Link>
+					) : (
+						stockStatuses[ stock_status ]
 					),
 					value: stockStatuses[ stock_status ],
 				},

@@ -32,6 +32,15 @@ class WC_Admin_REST_Reports_Variations_Controller extends WC_REST_Reports_Contro
 	protected $rest_base = 'reports/variations';
 
 	/**
+	 * Mapping between external parameter name and name used in query class.
+	 *
+	 * @var array
+	 */
+	protected $param_mapping = array(
+		'products' => 'product_includes',
+	);
+
+	/**
 	 * Get items.
 	 *
 	 * @param WP_REST_Request $request Request data.
@@ -43,7 +52,11 @@ class WC_Admin_REST_Reports_Variations_Controller extends WC_REST_Reports_Contro
 		$registered = array_keys( $this->get_collection_params() );
 		foreach ( $registered as $param_name ) {
 			if ( isset( $request[ $param_name ] ) ) {
-				$args[ $param_name ] = $request[ $param_name ];
+				if ( isset( $this->param_mapping[ $param_name ] ) ) {
+					$args[ $this->param_mapping[ $param_name ] ] = $request[ $param_name ];
+				} else {
+					$args[ $param_name ] = $request[ $param_name ];
+				}
 			}
 		}
 
@@ -201,6 +214,24 @@ class WC_Admin_REST_Reports_Variations_Controller extends WC_REST_Reports_Contro
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
 						'description' => __( 'Product attributes.', 'wc-admin' ),
+					),
+					'stock_status'  => array(
+						'type'        => 'string',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Product inventory status.', 'wc-admin' ),
+					),
+					'stock_quantity'  => array(
+						'type'        => 'integer',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Product inventory quantity.', 'wc-admin' ),
+					),
+					'low_stock_amount'  => array(
+						'type'        => 'integer',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Product inventory threshold for low stock.', 'wc-admin' ),
 					),
 				),
 			),
