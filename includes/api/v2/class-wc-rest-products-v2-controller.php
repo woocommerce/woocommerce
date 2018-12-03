@@ -58,7 +58,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -76,7 +78,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+			array(
 				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
@@ -118,7 +122,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/batch', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/batch',
+			array(
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
@@ -259,7 +265,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 			}
 
 			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args, array(
+				$args,
+				array(
 					'key'     => '_sku',
 					'value'   => $skus,
 					'compare' => 'IN',
@@ -270,7 +277,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 		// Filter by tax class.
 		if ( ! empty( $request['tax_class'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args, array(
+				$args,
+				array(
 					'key'   => '_tax_class',
 					'value' => 'standard' !== $request['tax_class'] ? $request['tax_class'] : '',
 				)
@@ -285,7 +293,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 		// Filter product in stock or out of stock.
 		if ( is_bool( $request['in_stock'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args, array(
+				$args,
+				array(
 					'key'   => '_stock_status',
 					'value' => true === $request['in_stock'] ? 'instock' : 'outofstock',
 				)
@@ -444,7 +453,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 		$attributes = $product->get_attributes();
 
 		if ( ! isset( $attributes[ $slug ] ) ) {
-			return str_replace( 'pa_', '', $slug );
+			return wc_attribute_taxonomy_name_raw( $slug );
 		}
 
 		$attribute = $attributes[ $slug ];
@@ -499,7 +508,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 	protected function get_attribute_options( $product_id, $attribute ) {
 		if ( isset( $attribute['is_taxonomy'] ) && $attribute['is_taxonomy'] ) {
 			return wc_get_product_terms(
-				$product_id, $attribute['name'], array(
+				$product_id,
+				$attribute['name'],
+				array(
 					'fields' => 'names',
 				)
 			);
@@ -697,7 +708,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 
 		if ( 'variation' === $product->get_type() ) {
 			return new WP_Error(
-				"woocommerce_rest_invalid_{$this->post_type}_id", __( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ), array(
+				"woocommerce_rest_invalid_{$this->post_type}_id",
+				__( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ),
+				array(
 					'status' => 404,
 				)
 			);
@@ -1311,7 +1324,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 
 		if ( ! $object || 0 === $object->get_id() ) {
 			return new WP_Error(
-				"woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array(
+				"woocommerce_rest_{$this->post_type}_invalid_id",
+				__( 'Invalid ID.', 'woocommerce' ),
+				array(
 					'status' => 404,
 				)
 			);
@@ -1319,7 +1334,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 
 		if ( 'variation' === $object->get_type() ) {
 			return new WP_Error(
-				"woocommerce_rest_invalid_{$this->post_type}_id", __( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ), array(
+				"woocommerce_rest_invalid_{$this->post_type}_id",
+				__( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ),
+				array(
 					'status' => 404,
 				)
 			);
@@ -1339,8 +1356,10 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
 			return new WP_Error(
+				"woocommerce_rest_user_cannot_delete_{$this->post_type}",
 				/* translators: %s: post type */
-				"woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array(
+				sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ),
+				array(
 					'status' => rest_authorization_required_code(),
 				)
 			);
@@ -1375,8 +1394,10 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
 				return new WP_Error(
+					'woocommerce_rest_trash_not_supported',
 					/* translators: %s: post type */
-					'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ), array(
+					sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ),
+					array(
 						'status' => 501,
 					)
 				);
@@ -1386,8 +1407,10 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 			if ( is_callable( array( $object, 'get_status' ) ) ) {
 				if ( 'trash' === $object->get_status() ) {
 					return new WP_Error(
+						'woocommerce_rest_already_trashed',
 						/* translators: %s: post type */
-						'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array(
+						sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ),
+						array(
 							'status' => 410,
 						)
 					);
@@ -1400,8 +1423,10 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 
 		if ( ! $result ) {
 			return new WP_Error(
+				'woocommerce_rest_cannot_delete',
 				/* translators: %s: post type */
-				'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array(
+				sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ),
+				array(
 					'status' => 500,
 				)
 			);
