@@ -39,6 +39,10 @@
 
 	<rule ref="Generic.Commenting">
 		<exclude-pattern>tests/</exclude-pattern>
+		<exclude name="Generic.Commenting.DocComment.ParamGroup"/>
+		<exclude name="Generic.Commenting.DocComment.NonParamGroup"/>
+		<exclude name="Generic.Commenting.DocComment.TagsNotGrouped"/>
+		<exclude name="Generic.Commenting.DocComment.TagValueIndent"/>
 	</rule>
 
 	<rule ref="PEAR.Functions.FunctionCallSignature.EmptyLine">
