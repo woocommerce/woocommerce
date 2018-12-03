@@ -91,7 +91,7 @@ export default class ProductsReportTable extends Component {
 			const {
 				product_id,
 				sku = '', // @TODO
-				name,
+				extended_info,
 				items_sold,
 				gross_revenue,
 				orders_count,
@@ -100,6 +100,7 @@ export default class ProductsReportTable extends Component {
 				stock_status = 'outofstock', // @TODO
 				stock_quantity = '0', // @TODO
 			} = row;
+			const { name } = extended_info;
 			const ordersLink = getNewPath( persistedQuery, 'orders', {
 				filter: 'advanced',
 				product_includes: product_id,
@@ -209,7 +210,7 @@ export default class ProductsReportTable extends Component {
 				tableQuery={ {
 					orderby: query.orderby || 'items_sold',
 					order: query.order || 'desc',
-					extended_product_info: true,
+					extended_info: true,
 				} }
 				title={ __( 'Products', 'wc-admin' ) }
 			/>

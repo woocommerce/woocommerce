@@ -68,7 +68,7 @@ describe( 'TopSellingProducts', () => {
 		const topSellingProducts = topSellingProductsWrapper.root.findByType( TopSellingProducts );
 
 		const endpoint = '/wc/v3/reports/products';
-		const query = { orderby: 'items_sold', per_page: 5, extended_product_info: 1 };
+		const query = { orderby: 'items_sold', per_page: 5, extended_info: 1 };
 
 		expect( getReportStatsMock.mock.calls[ 0 ][ 1 ] ).toBe( endpoint );
 		expect( getReportStatsMock.mock.calls[ 0 ][ 2 ] ).toEqual( query );

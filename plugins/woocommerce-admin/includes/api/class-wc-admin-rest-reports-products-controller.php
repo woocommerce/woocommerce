@@ -243,7 +243,7 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 				'type' => 'integer',
 			),
 		);
-		$params['extended_product_info'] = array(
+		$params['extended_info'] = array(
 			'description'       => __( 'Add additional piece of info about each product to the report.', 'wc-admin' ),
 			'type'              => 'boolean',
 			'default'           => false,
