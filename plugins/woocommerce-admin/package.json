@@ -56,7 +56,7 @@
     "@wordpress/custom-templated-path-webpack-plugin": "1.1.5",
     "@wordpress/jest-preset-default": "2.0.6",
     "@wordpress/postcss-themes": "1.0.4",
-    "ast-types": "0.11.6",
+    "ast-types": "0.11.7",
     "autoprefixer": "9.3.1",
     "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "10.0.1",
