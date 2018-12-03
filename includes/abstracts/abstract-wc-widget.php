@@ -225,7 +225,7 @@ abstract class WC_Widget extends WP_Widget {
 				case 'text':
 					?>
 					<p>
-						<label for="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>"><?php echo $setting['label']; ?></label><?php // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+						<label for="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>"><?php echo $setting['label']; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></label>
 						<input class="widefat <?php echo esc_attr( $class ); ?>" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $key ) ); ?>" type="text" value="<?php echo esc_attr( $value ); ?>" />
 					</p>
 					<?php
@@ -299,7 +299,7 @@ abstract class WC_Widget extends WP_Widget {
 			$link = get_term_link( get_query_var( 'product_tag' ), 'product_tag' );
 		} else {
 			$queried_object = get_queried_object();
-			$link = get_term_link( $queried_object->slug, $queried_object->taxonomy );
+			$link           = get_term_link( $queried_object->slug, $queried_object->taxonomy );
 		}
 
 		// Min/Max.
@@ -337,7 +337,7 @@ abstract class WC_Widget extends WP_Widget {
 		// All current filters.
 		if ( $_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes() ) { // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found, WordPress.CodeAnalysis.AssignmentInCondition.Found
 			foreach ( $_chosen_attributes as $name => $data ) {
-				$filter_name = sanitize_title( str_replace( 'pa_', '', $name ) );
+				$filter_name = wc_attribute_taxonomy_name_raw( $name );
 				if ( ! empty( $data['terms'] ) ) {
 					$link = add_query_arg( 'filter_' . $filter_name, implode( ',', $data['terms'] ), $link );
 				}
