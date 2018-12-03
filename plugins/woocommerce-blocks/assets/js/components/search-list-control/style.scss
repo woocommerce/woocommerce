@@ -49,12 +49,23 @@
 	}
 
 	.woocommerce-search-list__item {
+		display: flex;
+		align-items: center;
 		margin-bottom: 0;
 		padding: $gap;
 		background: $white;
 		// !important to keep the border around on hover
 		border-bottom: 1px solid $core-grey-light-500 !important;
 		color: $core-grey-dark-500;
+
+		.woocommerce-search-list__item-state {
+			flex: 0 0 16px;
+			margin-right: $gap-smaller;
+		}
+
+		.woocommerce-search-list__item-name {
+			flex: 1;
+		}
 
 		@include hover-state {
 			background: $core-grey-light-100;

@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import './style.scss';
+import { CheckedIcon, UncheckedIcon } from '../search-list-control/icons';
 import SearchListControl from '../search-list-control';
 
 class ProductCategoryControl extends Component {
@@ -36,7 +37,7 @@ class ProductCategoryControl extends Component {
 			} );
 	}
 
-	renderItem( { getHighlightedName, item, onSelect, search, depth = 0 } ) {
+	renderItem( { getHighlightedName, isSelected, item, onSelect, search, depth = 0 } ) {
 		const classes = [
 			'woocommerce-search-list__item',
 			'woocommerce-product-categories__item',
@@ -56,8 +57,10 @@ class ProductCategoryControl extends Component {
 		return (
 			<MenuItem
 				key={ item.id }
+				role="menuitemcheckbox"
 				className={ classes.join( ' ' ) }
 				onClick={ onSelect( item ) }
+				isSelected={ isSelected }
 				aria-label={ sprintf(
 					_n(
 						'%s, has %d product',
@@ -69,6 +72,9 @@ class ProductCategoryControl extends Component {
 					item.count
 				) }
 			>
+				<span className="woocommerce-search-list__item-state">
+					{ isSelected ? <CheckedIcon /> : <UncheckedIcon /> }
+				</span>
 				<span className="woocommerce-product-categories__item-label">
 					{ !! item.breadcrumbs.length && (
 						<span className="woocommerce-product-categories__item-prefix">
