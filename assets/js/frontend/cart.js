@@ -71,7 +71,7 @@ jQuery( function( $ ) {
 
 		// No form, cannot do this.
 		if ( $( '.woocommerce-cart-form' ).length === 0 ) {
-			window.location.href = window.location.href;
+			window.location.reload();
 			return;
 		}
 
