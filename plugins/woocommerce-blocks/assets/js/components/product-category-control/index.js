@@ -5,7 +5,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import { Component } from '@wordpress/element';
-import { find, last } from 'lodash';
+import { find, first, last } from 'lodash';
 import { MenuItem } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
@@ -35,6 +35,17 @@ class ProductCategoryControl extends Component {
 			.catch( () => {
 				this.setState( { list: [] } );
 			} );
+	}
+
+	getBreadcrumbsForDisplay( breadcrumbs ) {
+		if ( breadcrumbs.length === 1 ) {
+			return first( breadcrumbs );
+		}
+		if ( breadcrumbs.length === 2 ) {
+			return first( breadcrumbs ) + ' › ' + last( breadcrumbs );
+		}
+
+		return first( breadcrumbs ) + ' … ' + last( breadcrumbs );
 	}
 
 	renderItem( { getHighlightedName, isSelected, item, onSelect, search, depth = 0 } ) {
@@ -78,8 +89,7 @@ class ProductCategoryControl extends Component {
 				<span className="woocommerce-product-categories__item-label">
 					{ !! item.breadcrumbs.length && (
 						<span className="woocommerce-product-categories__item-prefix">
-							{ item.breadcrumbs.length > 1 ? '… ' : null }
-							{ last( item.breadcrumbs ) }
+							{ this.getBreadcrumbsForDisplay( item.breadcrumbs ) }
 						</span>
 					) }
 					<span
