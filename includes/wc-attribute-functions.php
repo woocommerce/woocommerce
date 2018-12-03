@@ -97,7 +97,8 @@ function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
 		SELECT attribute_name
 		FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
 		WHERE attribute_id = %d
-	", $attribute_id
+	",
+			$attribute_id
 		)
 	);
 
@@ -116,7 +117,7 @@ function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
  * @return int
  */
 function wc_attribute_taxonomy_id_by_name( $name ) {
-	$name       = str_replace( 'pa_', '', wc_sanitize_taxonomy_name( $name ) );
+	$name       = wc_attribute_taxonomy_name_raw( $name );
 	$taxonomies = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_id', 'attribute_name' );
 
 	return isset( $taxonomies[ $name ] ) ? (int) $taxonomies[ $name ] : 0;
@@ -131,7 +132,7 @@ function wc_attribute_taxonomy_id_by_name( $name ) {
  */
 function wc_attribute_label( $name, $product = '' ) {
 	if ( taxonomy_is_product_attribute( $name ) ) {
-		$name       = wc_sanitize_taxonomy_name( str_replace( 'pa_', '', $name ) );
+		$name       = wc_attribute_taxonomy_name_raw( $name );
 		$all_labels = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_label', 'attribute_name' );
 		$label      = isset( $all_labels[ $name ] ) ? $all_labels[ $name ] : $name;
 	} elseif ( $product ) {
@@ -166,7 +167,7 @@ function wc_attribute_label( $name, $product = '' ) {
 function wc_attribute_orderby( $name ) {
 	global $wc_product_attributes, $wpdb;
 
-	$name = str_replace( 'pa_', '', sanitize_title( $name ) );
+	$name = wc_attribute_taxonomy_name_raw( $name );
 
 	if ( isset( $wc_product_attributes[ 'pa_' . $name ] ) ) {
 		$orderby = $wc_product_attributes[ 'pa_' . $name ]->attribute_orderby;
@@ -201,7 +202,8 @@ function wc_get_attribute_taxonomy_names() {
  */
 function wc_get_attribute_types() {
 	return (array) apply_filters(
-		'product_attributes_type_selector', array(
+		'product_attributes_type_selector',
+		array(
 			'select' => __( 'Select', 'woocommerce' ),
 		)
 	);
@@ -385,7 +387,8 @@ function wc_get_attribute( $id ) {
 		SELECT *
 		FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
 		WHERE attribute_id = %d
-	 ", $id
+	 ",
+			$id
 		)
 	);
 
@@ -543,7 +546,8 @@ function wc_create_attribute( $args ) {
 					"SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_product_attributes' AND meta_value LIKE %s",
 					'%' . $wpdb->esc_like( $old_taxonomy_name ) . '%'
 				),
-			ARRAY_A );
+				ARRAY_A
+			);
 			foreach ( $metadatas as $metadata ) {
 				$product_id        = $metadata['post_id'];
 				$unserialized_data = maybe_unserialize( $metadata['meta_value'] );
@@ -600,7 +604,8 @@ function wc_update_attribute( $id, $args ) {
 				SELECT attribute_name
 				FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
 				WHERE attribute_id = %d
-			", $args['id']
+			",
+			$args['id']
 		)
 	);
 
@@ -623,7 +628,8 @@ function wc_delete_attribute( $id ) {
 		SELECT attribute_name
 		FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
 		WHERE attribute_id = %d
-	", $id
+	",
+			$id
 		)
 	);
 
@@ -661,4 +667,17 @@ function wc_delete_attribute( $id ) {
 	}
 
 	return false;
+}
+
+/**
+ * Get an unprefixed product attribute name.
+ *
+ * @since 3.5.3
+ *
+ * @param  string $attribute_name Attribute name.
+ * @return string
+ */
+function wc_attribute_taxonomy_name_raw( $attribute_name ) {
+	$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
+	return 0 === strpos( $attribute_name, 'pa_' ) ? substr( $attribute_name, 3 ) : $attribute_name;
 }
