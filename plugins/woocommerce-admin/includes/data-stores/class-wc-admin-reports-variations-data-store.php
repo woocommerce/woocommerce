@@ -72,12 +72,12 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 	 */
 	protected function get_sql_query_params( $query_args ) {
 		global $wpdb;
+		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
 
-		$sql_query_params = $this->get_time_period_sql_params( $query_args );
+		$sql_query_params = $this->get_time_period_sql_params( $query_args, $order_product_lookup_table );
 		$sql_query_params = array_merge( $sql_query_params, $this->get_limit_sql_params( $query_args ) );
 		$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_sql_params( $query_args ) );
 
-		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
 		$allowed_products           = $this->get_allowed_products( $query_args );
 
 		if ( count( $allowed_products ) > 0 ) {
