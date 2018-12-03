@@ -18,8 +18,16 @@ New for 1.2.0: We've added a stand-alone Product Category block to simplify the 
 
 = Minimum Requirements =
 
-* The latest version of the Gutenberg plugin
-* WooCommerce 3.3.0 or greater
+* WordPress 4.9.x
+* Gutenberg plugin 4.6 or greater
+* WooCommerce 3.3.1 or greater
+* PHP version 5.2.4 or greater (PHP 7.2 or greater is recommended)
+* MySQL version 5.0 or greater (MySQL 5.6 or greater is recommended)
+
+OR
+
+* WordPress 5.0.x
+* WooCommerce 3.5.1 or greater
 * PHP version 5.2.4 or greater (PHP 7.2 or greater is recommended)
 * MySQL version 5.0 or greater (MySQL 5.6 or greater is recommended)
 
