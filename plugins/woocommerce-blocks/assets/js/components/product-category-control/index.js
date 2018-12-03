@@ -57,9 +57,10 @@ class ProductCategoryControl extends Component {
 		return (
 			<MenuItem
 				key={ item.id }
+				role="menuitemcheckbox"
 				className={ classes.join( ' ' ) }
 				onClick={ onSelect( item ) }
-				aria-selected={ isSelected }
+				isSelected={ isSelected }
 				aria-label={ sprintf(
 					_n(
 						'%s, has %d product',
@@ -72,7 +73,7 @@ class ProductCategoryControl extends Component {
 				) }
 			>
 				<span className="woocommerce-search-list__item-state">
-				{ isSelected ? <CheckedIcon /> : <UncheckedIcon /> }
+					{ isSelected ? <CheckedIcon /> : <UncheckedIcon /> }
 				</span>
 				<span className="woocommerce-product-categories__item-label">
 					{ !! item.breadcrumbs.length && (
