@@ -82,7 +82,7 @@
     "grunt": "1.0.3",
     "grunt-checktextdomain": "1.0.1",
     "grunt-wp-i18n": "1.0.2",
-    "husky": "1.1.4",
+    "husky": "1.2.0",
     "lerna": "3.4.3",
     "node-sass": "4.10.0",
     "postcss-color-function": "4.0.1",
