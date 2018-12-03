@@ -7,10 +7,11 @@ import { find } from 'lodash';
 import { __ } from '@wordpress/i18n';
 import { getSettings, format as formatDate } from '@wordpress/date';
 
-/**
- * Internal dependencies
- */
-import { QUERY_DEFAULTS } from 'store/constants';
+const QUERY_DEFAULTS = {
+	pageSize: 25,
+	period: 'month',
+	compare: 'previous_year',
+};
 
 export const isoDateFormat = 'YYYY-MM-DD';
 
@@ -411,6 +412,19 @@ export function getIntervalForQuery( query ) {
 	return current;
 }
 
+/**
+ * Returns the current chart type to use.
+ *
+ * @param  {Object} query Current query
+ * @return {String} Current chart type.
+ */
+export function getChartTypeForQuery( { type } ) {
+	if ( [ 'line', 'bar' ].includes( type ) ) {
+		return type;
+	}
+	return 'line';
+}
+
 export const dayTicksThreshold = 63;
 export const weekTicksThreshold = 9;
 
@@ -423,16 +437,14 @@ export const weekTicksThreshold = 9;
  * @return {String} Current interval.
  */
 export function getDateFormatsForInterval( interval, ticks = 0 ) {
-	let pointLabelFormat = 'F j, Y';
-	let tooltipFormat = '%B %d %Y';
+	let tooltipLabelFormat = '%B %d %Y';
 	let xFormat = '%Y-%m-%d';
 	let x2Format = '%b %Y';
 	let tableFormat = 'm/d/Y';
 
 	switch ( interval ) {
 		case 'hour':
-			pointLabelFormat = 'h A';
-			tooltipFormat = '%I %p';
+			tooltipLabelFormat = '%I %p';
 			xFormat = '%I %p';
 			tableFormat = 'h A';
 			break;
@@ -452,25 +464,22 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
 				xFormat = '%b';
 				x2Format = '%Y';
 			}
-			tooltipFormat = __( 'Week of %B %d %Y', 'wc-admin' );
+			tooltipLabelFormat = __( 'Week of %B %d %Y', 'wc-admin' );
 			break;
 		case 'quarter':
 		case 'month':
-			pointLabelFormat = 'F Y';
-			tooltipFormat = '%B %Y';
+			tooltipLabelFormat = '%B %Y';
 			xFormat = '%b';
 			x2Format = '%Y';
 			break;
 		case 'year':
-			pointLabelFormat = 'Y';
-			tooltipFormat = '%Y';
+			tooltipLabelFormat = '%Y';
 			xFormat = '%Y';
 			break;
 	}
 
 	return {
-		pointLabelFormat,
-		tooltipFormat,
+		tooltipLabelFormat,
 		xFormat,
 		x2Format,
 		tableFormat,

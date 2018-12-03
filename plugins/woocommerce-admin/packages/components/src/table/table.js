@@ -98,7 +98,7 @@ class Table extends Component {
 		this.setState( {
 			isScrollable: ! scrolledToEnd,
 		} );
-	};
+	}
 
 	render() {
 		const {
@@ -139,7 +139,7 @@ class Table extends Component {
 					<tbody>
 						<tr>
 							{ headers.map( ( header, i ) => {
-								const { cellClassName, isLeftAligned, isSortable, isNumeric, key, label } = header;
+								const { cellClassName, isLeftAligned, isSortable, isNumeric, key, label, screenReaderLabel } = header;
 								const labelId = `header-${ instanceId } -${ i }`;
 								const thProps = {
 									className: classnames( 'woocommerce-table__header', cellClassName, {
@@ -158,8 +158,8 @@ class Table extends Component {
 								// We only sort by ascending if the col is already sorted descending
 								const iconLabel =
 									sortedBy === key && sortDir !== ASC
-										? sprintf( __( 'Sort by %s in ascending order', 'wc-admin' ), label )
-										: sprintf( __( 'Sort by %s in descending order', 'wc-admin' ), label );
+										? sprintf( __( 'Sort by %s in ascending order', 'wc-admin' ), screenReaderLabel )
+										: sprintf( __( 'Sort by %s in descending order', 'wc-admin' ), screenReaderLabel );
 
 								return (
 									<th role="columnheader" scope="col" key={ i } { ...thProps }>
@@ -177,7 +177,10 @@ class Table extends Component {
 													onClick={ this.sortBy( key ) }
 													isDefault
 												>
-													{ label }
+													<span aria-hidden={ Boolean( screenReaderLabel ) }>{ label }</span>
+													{ screenReaderLabel && (
+														<span className="screen-reader-text">{ screenReaderLabel }</span>
+													) }
 												</IconButton>
 												<span className="screen-reader-text" id={ labelId }>
 													{ iconLabel }
@@ -263,6 +266,10 @@ Table.propTypes = {
 			 * Boolean, true if this column should always display in the table (not shown in toggle-able list).
 			 */
 			required: PropTypes.bool,
+			/**
+			 * The label used for screen readers for this column.
+			 */
+			screenReaderLabel: PropTypes.string,
 		} )
 	),
 	/**

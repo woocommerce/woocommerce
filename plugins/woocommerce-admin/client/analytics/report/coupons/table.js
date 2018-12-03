@@ -5,31 +5,30 @@
 import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { format as formatDate } from '@wordpress/date';
-import { compose } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
-import { get, map, orderBy } from 'lodash';
+import { map } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
-import {
-	appendTimestamp,
-	getCurrentDates,
-	getIntervalForQuery,
-	getDateFormatsForInterval,
-} from '@woocommerce/date';
-import { Link, TableCard } from '@woocommerce/components';
+import { getIntervalForQuery, getDateFormatsForInterval } from '@woocommerce/date';
+import { Link } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
-import { onQueryChange } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
-import ReportError from 'analytics/components/report-error';
-import { QUERY_DEFAULTS } from 'store/constants';
-import { getReportChartData, getFilterQuery } from 'store/reports/utils';
+import ReportTable from 'analytics/components/report-table';
+import { numberFormat } from 'lib/number';
 
-class CouponsReportTable extends Component {
+export default class CouponsReportTable extends Component {
+	constructor() {
+		super();
+
+		this.getHeadersContent = this.getHeadersContent.bind( this );
+		this.getRowsContent = this.getRowsContent.bind( this );
+		this.getSummary = this.getSummary.bind( this );
+	}
+
 	getHeadersContent() {
 		return [
 			{
@@ -50,6 +49,7 @@ class CouponsReportTable extends Component {
 			},
 			{
 				label: __( 'G. Discounted', 'wc-admin' ),
+				screenReaderLabel: __( 'Gross Discounted', 'wc-admin' ),
 				key: 'gross_discount',
 				isSortable: true,
 				isNumeric: true,
@@ -92,7 +92,7 @@ class CouponsReportTable extends Component {
 					href={ '/analytics/orders?filter=advanced&code_includes=' + coupon_id }
 					type="wc-admin"
 				>
-					{ orders_count }
+					{ numberFormat( orders_count ) }
 				</Link>
 			);
 
@@ -136,11 +136,11 @@ class CouponsReportTable extends Component {
 		return [
 			{
 				label: _n( 'coupon', 'coupons', totals.coupons_count, 'wc-admin' ),
-				value: totals.coupons_count,
+				value: numberFormat( totals.coupons_count ),
 			},
 			{
 				label: _n( 'order', 'orders', totals.orders_count, 'wc-admin' ),
-				value: totals.orders_count,
+				value: numberFormat( totals.orders_count ),
 			},
 			{
 				label: __( 'gross discounted', 'wc-admin' ),
@@ -150,74 +150,19 @@ class CouponsReportTable extends Component {
 	}
 
 	render() {
-		const { coupons, isTableDataError, isTableDataRequesting, primaryData, query } = this.props;
-
-		const isError = isTableDataError || primaryData.isError;
-
-		if ( isError ) {
-			return <ReportError isError />;
-		}
-
-		const isRequesting = isTableDataRequesting || primaryData.isRequesting;
-
-		const tableQuery = {
-			...query,
-			orderby: query.orderby || 'date',
-			order: query.order || 'asc',
-		};
-
-		const headers = this.getHeadersContent();
-		const orderedCoupons = orderBy( coupons, tableQuery.orderby, tableQuery.order );
-		const rows = this.getRowsContent( orderedCoupons );
-		const rowsPerPage = parseInt( tableQuery.per_page ) || QUERY_DEFAULTS.pageSize;
-		const totalRows = get( primaryData, [ 'data', 'totals', 'coupons_count' ], coupons.length );
-		const summary = primaryData.data.totals ? this.getSummary( primaryData.data.totals ) : null;
+		const { query } = this.props;
 
 		return (
-			<TableCard
+			<ReportTable
+				compareBy="coupons"
+				endpoint="coupons"
+				getHeadersContent={ this.getHeadersContent }
+				getRowsContent={ this.getRowsContent }
+				getSummary={ this.getSummary }
+				itemIdField="coupon_id"
+				query={ query }
 				title={ __( 'Coupons', 'wc-admin' ) }
-				compareBy={ 'coupons' }
-				ids={ orderedCoupons.map( coupon => coupon.coupon_id ) }
-				rows={ rows }
-				totalRows={ totalRows }
-				rowsPerPage={ rowsPerPage }
-				headers={ headers }
-				isLoading={ isRequesting }
-				onQueryChange={ onQueryChange }
-				query={ tableQuery }
-				summary={ summary }
-				downloadable
 			/>
 		);
 	}
 }
-
-export default compose(
-	withSelect( ( select, props ) => {
-		const { query } = props;
-		const datesFromQuery = getCurrentDates( query );
-		const primaryData = getReportChartData( 'coupons', 'primary', query, select );
-		const filterQuery = getFilterQuery( 'coupons', query );
-
-		const { getCoupons, isGetCouponsError, isGetCouponsRequesting } = select( 'wc-admin' );
-		const tableQuery = {
-			orderby: query.orderby || 'date',
-			order: query.order || 'asc',
-			page: query.page || 1,
-			per_page: query.per_page || QUERY_DEFAULTS.pageSize,
-			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
-			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
-			...filterQuery,
-		};
-		const coupons = getCoupons( tableQuery );
-		const isTableDataError = isGetCouponsError( tableQuery );
-		const isTableDataRequesting = isGetCouponsRequesting( tableQuery );
-
-		return {
-			isTableDataError,
-			isTableDataRequesting,
-			coupons,
-			primaryData,
-		};
-	} )
-)( CouponsReportTable );

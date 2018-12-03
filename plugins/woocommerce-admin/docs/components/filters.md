@@ -178,6 +178,7 @@ Props
   - param: String - The url paramter this filter will modify.
   - showFilters: Function - Determine if the filter should be shown. Supply a function with the query object as an argument returning a boolean.
   - filters: Array
+  - chartMode: One of: 'item-comparison', 'time-comparison'
   - component: String - A custom component used instead of a button, might have special handling for filtering. TBD, not yet implemented.
   - label: String - The label for this filter. Optional only for custom component filters.
   - path: String - An array representing the "path" to this filter, if nested.

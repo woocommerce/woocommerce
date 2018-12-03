@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
  */
 import EllipsisMenu from '../ellipsis-menu';
 import { H } from '../section';
-import { validateComponent } from '../../lib/proptype-validator';
+import { validateComponent } from '../lib/proptype-validator';
 
 /**
  * A header component. The header can contain a title, actions via children, and an `EllipsisMenu` menu.

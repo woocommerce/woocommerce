@@ -2,56 +2,73 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { format as formatDate } from '@wordpress/date';
 import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
+import { find, get } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
+import { flattenFilters } from '@woocommerce/navigation';
 import {
 	getAllowedIntervalsForQuery,
 	getCurrentDates,
 	getDateFormatsForInterval,
 	getIntervalForQuery,
+	getChartTypeForQuery,
 	getPreviousDate,
 } from '@woocommerce/date';
 
 /**
  * Internal dependencies
  */
-import { Chart, ChartPlaceholder } from 'components';
-import { getReportChartData } from 'store/reports/utils';
+import { Chart } from 'components';
+import { getReportChartData, getTooltipValueFormat } from 'store/reports/utils';
 import ReportError from 'analytics/components/report-error';
 
-class ReportChart extends Component {
+export const DEFAULT_FILTER = 'all';
+
+export class ReportChart extends Component {
+	getSelectedFilter( filters, query ) {
+		if ( filters.length === 0 ) {
+			return null;
+		}
+
+		const filterConfig = filters.pop();
+
+		if ( filterConfig.showFilters( query ) ) {
+			const allFilters = flattenFilters( filterConfig.filters );
+			const value = query[ filterConfig.param ] || DEFAULT_FILTER;
+			const selectedFilter = find( allFilters, { value } );
+			const selectedFilterParam = get( selectedFilter, [ 'settings', 'param' ] );
+
+			if ( ! selectedFilterParam || Object.keys( query ).includes( selectedFilterParam ) ) {
+				return selectedFilter;
+			}
+		}
+
+		return this.getSelectedFilter( filters, query );
+	}
+
+	getChartMode() {
+		const { filters, query } = this.props;
+		if ( ! filters ) {
+			return;
+		}
+		const clonedFilters = filters.slice( 0 );
+		const selectedFilter = this.getSelectedFilter( clonedFilters, query );
+
+		return get( selectedFilter, [ 'chartMode' ] );
+	}
+
 	render() {
-		const {
-			comparisonChart,
-			query,
-			itemsLabel,
-			path,
-			primaryData,
-			secondaryData,
-			selectedChart,
-		} = this.props;
+		const { query, itemsLabel, path, primaryData, secondaryData, selectedChart } = this.props;
 
 		if ( primaryData.isError || secondaryData.isError ) {
 			return <ReportError isError />;
-		}
-
-		if ( primaryData.isRequesting || secondaryData.isRequesting ) {
-			return (
-				<Fragment>
-					<span className="screen-reader-text">
-						{ __( 'Your requested data is loading', 'wc-admin' ) }
-					</span>
-					<ChartPlaceholder />
-				</Fragment>
-			);
 		}
 
 		const currentInterval = getIntervalForQuery( query );
@@ -78,7 +95,7 @@ class ReportChart extends Component {
 					value: interval.subtotals[ selectedChart.key ] || 0,
 				},
 				[ secondaryKey ]: {
-					labelDate: secondaryDate,
+					labelDate: secondaryDate.format( 'YYYY-MM-DD HH:mm:ss' ),
 					value: ( secondaryInterval && secondaryInterval.subtotals[ selectedChart.key ] ) || 0,
 				},
 			};
@@ -91,23 +108,25 @@ class ReportChart extends Component {
 				data={ chartData }
 				title={ selectedChart.label }
 				interval={ currentInterval }
+				type={ getChartTypeForQuery( query ) }
 				allowedIntervals={ allowedIntervals }
 				itemsLabel={ itemsLabel }
-				layout={ comparisonChart ? 'comparison' : 'standard' }
-				mode={ comparisonChart ? 'item-comparison' : 'time-comparison' }
-				pointLabelFormat={ formats.pointLabelFormat }
+				mode={ this.getChartMode() }
+				tooltipLabelFormat={ formats.tooltipLabelFormat }
+				tooltipValueFormat={ getTooltipValueFormat( selectedChart.type ) }
 				tooltipTitle={ selectedChart.label }
 				xFormat={ formats.xFormat }
 				x2Format={ formats.x2Format }
 				dateParser={ '%Y-%m-%dT%H:%M:%S' }
 				valueType={ selectedChart.type }
+				isRequesting={ primaryData.isRequesting || secondaryData.isRequesting }
 			/>
 		);
 	}
 }
 
 ReportChart.propTypes = {
-	comparisonChart: PropTypes.bool,
+	filters: PropTypes.array,
 	itemsLabel: PropTypes.string,
 	path: PropTypes.string.isRequired,
 	primaryData: PropTypes.object.isRequired,

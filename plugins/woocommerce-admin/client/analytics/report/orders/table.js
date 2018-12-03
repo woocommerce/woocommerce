@@ -6,8 +6,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { format as formatDate } from '@wordpress/date';
 import { compose } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
-import { get, map, orderBy } from 'lodash';
+import { map } from 'lodash';
 
 /**
  * WooCommerce dependencies
@@ -18,19 +17,30 @@ import {
 	getIntervalForQuery,
 	getDateFormatsForInterval,
 } from '@woocommerce/date';
-import { Link, OrderStatus, TableCard, ViewMoreList } from '@woocommerce/components';
-import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
-import { getAdminLink, onQueryChange } from '@woocommerce/navigation';
+import { Link, OrderStatus, ViewMoreList } from '@woocommerce/components';
+import { formatCurrency } from '@woocommerce/currency';
+import { getAdminLink } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
-import ReportError from 'analytics/components/report-error';
 import { QUERY_DEFAULTS } from 'store/constants';
-import { getReportChartData, getFilterQuery } from 'store/reports/utils';
+import { getFilterQuery } from 'store/reports/utils';
+import { numberFormat } from 'lib/number';
+import withSelect from 'wc-api/with-select';
+import ReportTable from 'analytics/components/report-table';
+import { formatTableOrders } from './utils';
 import './style.scss';
 
 class OrdersReportTable extends Component {
+	constructor() {
+		super();
+
+		this.getHeadersContent = this.getHeadersContent.bind( this );
+		this.getRowsContent = this.getRowsContent.bind( this );
+		this.getSummary = this.getSummary.bind( this );
+	}
+
 	getHeadersContent() {
 		return [
 			{
@@ -43,6 +53,7 @@ class OrdersReportTable extends Component {
 			},
 			{
 				label: __( 'Order #', 'wc-admin' ),
+				screenReaderLabel: __( 'Order ID', 'wc-admin' ),
 				key: 'id',
 				required: true,
 				isSortable: true,
@@ -61,6 +72,7 @@ class OrdersReportTable extends Component {
 			},
 			{
 				label: __( 'Product(s)', 'wc-admin' ),
+				screenReaderLabel: __( 'Products', 'wc-admin' ),
 				key: 'products',
 				required: false,
 				isSortable: false,
@@ -74,50 +86,20 @@ class OrdersReportTable extends Component {
 			},
 			{
 				label: __( 'Coupon(s)', 'wc-admin' ),
+				screenReaderLabel: __( 'Coupons', 'wc-admin' ),
 				key: 'coupons',
 				required: false,
 				isSortable: false,
 			},
 			{
 				label: __( 'N. Revenue', 'wc-admin' ),
+				screenReaderLabel: __( 'Net Revenue', 'wc-admin' ),
 				key: 'net_revenue',
 				required: true,
 				isSortable: false,
 				isNumeric: true,
 			},
 		];
-	}
-
-	formatTableData( data ) {
-		return map( data, row => {
-			const {
-				date_created,
-				id,
-				status,
-				customer_id,
-				line_items,
-				coupon_lines,
-				currency,
-				total,
-				total_tax,
-				shipping_total,
-				discount_total,
-			} = row;
-
-			return {
-				date: date_created,
-				id,
-				status,
-				customer_id,
-				line_items,
-				items_sold: line_items.reduce( ( acc, item ) => item.quantity + acc, 0 ),
-				coupon_lines,
-				currency,
-				net_revenue: getCurrencyFormatDecimal(
-					total - total_tax - shipping_total - discount_total
-				),
-			};
-		} );
 	}
 
 	getRowsContent( tableData ) {
@@ -184,7 +166,7 @@ class OrdersReportTable extends Component {
 					value: products.map( product => product.label ).join( ' ' ),
 				},
 				{
-					display: items_sold,
+					display: numberFormat( items_sold ),
 					value: items_sold,
 				},
 				{
@@ -206,11 +188,11 @@ class OrdersReportTable extends Component {
 		return [
 			{
 				label: _n( 'order', 'orders', totals.num_items_sold, 'wc-admin' ),
-				value: totals.orders_count,
+				value: numberFormat( totals.orders_count ),
 			},
 			{
 				label: _n( 'new customer', 'new customers', totals.num_new_customers, 'wc-admin' ),
-				value: totals.num_new_customers,
+				value: numberFormat( totals.num_new_customers ),
 			},
 			{
 				label: _n(
@@ -219,19 +201,19 @@ class OrdersReportTable extends Component {
 					totals.num_returning_customers,
 					'wc-admin'
 				),
-				value: totals.num_returning_customers,
+				value: numberFormat( totals.num_returning_customers ),
 			},
 			{
 				label: _n( 'product', 'products', totals.products, 'wc-admin' ),
-				value: totals.products,
+				value: numberFormat( totals.products ),
 			},
 			{
 				label: _n( 'item sold', 'items sold', totals.num_items_sold, 'wc-admin' ),
-				value: totals.num_items_sold,
+				value: numberFormat( totals.num_items_sold ),
 			},
 			{
 				label: _n( 'coupon', 'coupons', totals.coupons, 'wc-admin' ),
-				value: totals.coupons,
+				value: numberFormat( totals.coupons ),
 			},
 			{
 				label: __( 'net revenue', 'wc-admin' ),
@@ -258,41 +240,17 @@ class OrdersReportTable extends Component {
 	}
 
 	render() {
-		const { isTableDataError, isTableDataRequesting, primaryData, query, orders } = this.props;
-		const isError = isTableDataError || primaryData.isError;
-
-		if ( isError ) {
-			return <ReportError isError />;
-		}
-
-		const isRequesting = isTableDataRequesting || primaryData.isRequesting;
-
-		const tableQuery = {
-			...query,
-			orderby: query.orderby || 'date',
-			order: query.order || 'asc',
-		};
-
-		const headers = this.getHeadersContent();
-		const rows = this.getRowsContent(
-			orderBy( this.formatTableData( orders ), tableQuery.orderby, tableQuery.order )
-		);
-		const rowsPerPage = parseInt( tableQuery.per_page ) || QUERY_DEFAULTS.pageSize;
-		const totalRows = get( primaryData, [ 'data', 'totals', 'orders_count' ], orders.length );
-		const summary = primaryData.data.totals ? this.getSummary( primaryData.data.totals ) : null;
+		const { query, tableData } = this.props;
 
 		return (
-			<TableCard
+			<ReportTable
+				endpoint="orders"
+				getHeadersContent={ this.getHeadersContent }
+				getRowsContent={ this.getRowsContent }
+				getSummary={ this.getSummary }
+				query={ query }
+				tableData={ tableData }
 				title={ __( 'Orders', 'wc-admin' ) }
-				rows={ rows }
-				totalRows={ totalRows }
-				rowsPerPage={ rowsPerPage }
-				headers={ headers }
-				isLoading={ isRequesting }
-				onQueryChange={ onQueryChange }
-				query={ tableQuery }
-				summary={ summary }
-				downloadable
 			/>
 		);
 	}
@@ -302,10 +260,12 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
 		const datesFromQuery = getCurrentDates( query );
-		const primaryData = getReportChartData( 'orders', 'primary', query, select );
 		const filterQuery = getFilterQuery( 'orders', query );
 
-		const { getOrders, isGetOrdersError, isGetOrdersRequesting } = select( 'wc-admin' );
+		const { getOrders, getOrdersTotalCount, isGetOrdersError, isGetOrdersRequesting } = select(
+			'wc-api'
+		);
+
 		const tableQuery = {
 			orderby: query.orderby || 'date',
 			order: query.order || 'asc',
@@ -317,14 +277,20 @@ export default compose(
 			...filterQuery,
 		};
 		const orders = getOrders( tableQuery );
-		const isTableDataError = isGetOrdersError( tableQuery );
-		const isTableDataRequesting = isGetOrdersRequesting( tableQuery );
+		const ordersTotalCount = getOrdersTotalCount( tableQuery );
+		const isError = isGetOrdersError( tableQuery );
+		const isRequesting = isGetOrdersRequesting( tableQuery );
 
 		return {
-			isTableDataError,
-			isTableDataRequesting,
-			orders,
-			primaryData,
+			tableData: {
+				items: {
+					data: formatTableOrders( orders ),
+					totalCount: ordersTotalCount,
+				},
+				isError,
+				isRequesting,
+				query: tableQuery,
+			},
 		};
 	} )
 )( OrdersReportTable );

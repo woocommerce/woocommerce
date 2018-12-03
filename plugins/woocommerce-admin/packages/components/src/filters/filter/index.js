@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 /**
  * WooCommerce dependencies
  */
-import { flattenFilters, getTimeRelatedQuery, updateQueryString } from '@woocommerce/navigation';
+import { flattenFilters, getPersistedQuery, updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -48,6 +48,20 @@ class FilterPicker extends Component {
 			const { query } = this.props;
 			const { param: filterParam, getLabels } = selectedFilter.settings;
 			getLabels( query[ filterParam ], query ).then( this.updateSelectedTag );
+		}
+	}
+
+	componentDidUpdate( { query: prevQuery } ) {
+		const { query: nextQuery, config } = this.props;
+		if ( prevQuery[ config.param ] !== nextQuery[ [ config.param ] ] ) {
+			const selectedFilter = this.getFilter();
+			if ( selectedFilter && 'Search' === selectedFilter.component ) {
+				/* eslint-disable react/no-did-update-set-state */
+				this.setState( { nav: selectedFilter.path || [] } );
+				/* eslint-enable react/no-did-update-set-state */
+				const { param: filterParam, getLabels } = selectedFilter.settings;
+				getLabels( nextQuery[ filterParam ], nextQuery ).then( this.updateSelectedTag );
+			}
 		}
 	}
 
@@ -92,7 +106,7 @@ class FilterPicker extends Component {
 	update( value, additionalQueries = {} ) {
 		const { path, query, config } = this.props;
 		// Keep only time related queries when updating to a new filter
-		const timeRelatedQuery = getTimeRelatedQuery( query );
+		const persistedQuery = getPersistedQuery( query );
 		const update = {
 			[ config.param ]: 'all' === value ? undefined : value,
 			...additionalQueries,
@@ -101,7 +115,7 @@ class FilterPicker extends Component {
 		config.staticParams.forEach( param => {
 			update[ param ] = query[ param ];
 		} );
-		updateQueryString( update, path, timeRelatedQuery );
+		updateQueryString( update, path, persistedQuery );
 	}
 
 	onTagChange( filter, onClose, tags ) {
@@ -129,6 +143,7 @@ class FilterPicker extends Component {
 					selected={ selectedTag ? [ selectedTag ] : [] }
 					onChange={ partial( this.onTagChange, filter, onClose ) }
 					inlineTags
+					staticResults
 				/>
 			);
 		}
@@ -235,6 +250,10 @@ FilterPicker.propTypes = {
 		 */
 		filters: PropTypes.arrayOf(
 			PropTypes.shape( {
+				/**
+				 * The chart display mode to use for charts displayed when this filter is active.
+				 */
+				chartMode: PropTypes.oneOf( [ 'item-comparison', 'time-comparison' ] ),
 				/**
 				 * A custom component used instead of a button, might have special handling for filtering. TBD, not yet implemented.
 				 */

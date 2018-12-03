@@ -5,8 +5,22 @@
 /**
  * Internal dependencies
  */
-import { isReportDataEmpty, getReportChartData, getSummaryNumbers, getFilterQuery } from '../utils';
+import {
+	isReportDataEmpty,
+	getReportChartData,
+	getSummaryNumbers,
+	getFilterQuery,
+	getReportTableData,
+} from '../utils';
 import * as ordersConfig from 'analytics/report/orders/config';
+
+jest.mock( '../utils', () => ( {
+	...require.requireActual( '../utils' ),
+	getReportTableQuery: () => ( {
+		after: '2018-10-10',
+		before: '2018-10-10',
+	} ),
+} ) );
 
 describe( 'isReportDataEmpty()', () => {
 	it( 'returns false if report is valid', () => {
@@ -429,5 +443,97 @@ describe( 'getFilterQuery', () => {
 		const filterQuery = getFilterQuery( 'orders', query );
 
 		expect( filterQuery ).toEqual( { european_cities: 'paris,rome,barcelona' } );
+	} );
+} );
+
+describe( 'getReportTableData()', () => {
+	const select = jest.fn().mockReturnValue( {} );
+	const response = {
+		isError: false,
+		isRequesting: false,
+		items: [],
+	};
+
+	const query = {
+		after: '2018-10-10',
+		before: '2018-10-10',
+	};
+
+	beforeAll( () => {
+		select( 'wc-admin' ).getReportItems = jest.fn().mockReturnValue( {} );
+		select( 'wc-admin' ).isGetReportItemsRequesting = jest.fn().mockReturnValue( false );
+		select( 'wc-admin' ).isGetReportItemsError = jest.fn().mockReturnValue( false );
+	} );
+
+	afterAll( () => {
+		select( 'wc-admin' ).getReportItems.mockRestore();
+		select( 'wc-admin' ).isGetReportItemsRequesting.mockRestore();
+		select( 'wc-admin' ).isGetReportItemsError.mockRestore();
+	} );
+
+	function setGetReportItems( func ) {
+		select( 'wc-admin' ).getReportItems.mockImplementation( ( ...args ) => func( ...args ) );
+	}
+
+	function setIsGetReportItemsRequesting( func ) {
+		select( 'wc-admin' ).isGetReportItemsRequesting.mockImplementation( ( ...args ) =>
+			func( ...args )
+		);
+	}
+
+	function setIsGetReportItemsError( func ) {
+		select( 'wc-admin' ).isGetReportItemsError.mockImplementation( ( ...args ) => func( ...args ) );
+	}
+
+	it( 'returns isRequesting if a request is in progress', () => {
+		setIsGetReportItemsRequesting( () => true );
+
+		const result = getReportTableData( 'coupons', query, select );
+
+		expect( result ).toEqual( { ...response, query, isRequesting: true } );
+		expect( select( 'wc-admin' ).getReportItems ).toHaveBeenLastCalledWith( 'coupons', query );
+		expect( select( 'wc-admin' ).isGetReportItemsRequesting ).toHaveBeenLastCalledWith(
+			'coupons',
+			query
+		);
+		expect( select( 'wc-admin' ).isGetReportItemsError ).toHaveBeenCalledTimes( 0 );
+	} );
+
+	it( 'returns isError if request errors', () => {
+		setIsGetReportItemsRequesting( () => false );
+		setIsGetReportItemsError( () => true );
+
+		const result = getReportTableData( 'coupons', query, select );
+
+		expect( result ).toEqual( { ...response, query, isError: true } );
+		expect( select( 'wc-admin' ).getReportItems ).toHaveBeenLastCalledWith( 'coupons', query );
+		expect( select( 'wc-admin' ).isGetReportItemsRequesting ).toHaveBeenLastCalledWith(
+			'coupons',
+			query
+		);
+		expect( select( 'wc-admin' ).isGetReportItemsError ).toHaveBeenLastCalledWith(
+			'coupons',
+			query
+		);
+	} );
+
+	it( 'returns results after queries finish', () => {
+		const items = [ { id: 1 }, { id: 2 }, { id: 3 } ];
+		setIsGetReportItemsRequesting( () => false );
+		setIsGetReportItemsError( () => false );
+		setGetReportItems( () => items );
+
+		const result = getReportTableData( 'coupons', query, select );
+
+		expect( result ).toEqual( { ...response, query, items } );
+		expect( select( 'wc-admin' ).getReportItems ).toHaveBeenLastCalledWith( 'coupons', query );
+		expect( select( 'wc-admin' ).isGetReportItemsRequesting ).toHaveBeenLastCalledWith(
+			'coupons',
+			query
+		);
+		expect( select( 'wc-admin' ).isGetReportItemsError ).toHaveBeenLastCalledWith(
+			'coupons',
+			query
+		);
 	} );
 } );

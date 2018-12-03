@@ -32,7 +32,7 @@ export default {
 	 * Returns true if a stats query is pending.
 	 *
 	 * @param  {Object} state  Current state
-	 * @return {Boolean}        True if the `getReportRevenueStats` request is pending, false otherwise
+	 * @return {Boolean}        True if the `getReportStats` request is pending, false otherwise
 	 */
 	isReportStatsRequesting( state, ...args ) {
 		return select( 'core/data' ).isResolving( 'wc-admin', 'getReportStats', args );

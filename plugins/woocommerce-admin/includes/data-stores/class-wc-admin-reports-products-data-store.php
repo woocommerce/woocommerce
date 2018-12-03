@@ -62,6 +62,33 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		'permalink',
 	);
 
+	/**
+	 * Fills ORDER BY clause of SQL request based on user supplied parameters.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return array
+	 */
+	protected function get_order_by_sql_params( $query_args ) {
+		global $wpdb;
+		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
+
+		$sql_query['order_by_clause'] = '';
+		if ( isset( $query_args['orderby'] ) ) {
+			$sql_query['order_by_clause'] = $this->normalize_order_by( $query_args['orderby'] );
+		}
+		// Order by product name requires extra JOIN.
+		if ( false !== strpos( $sql_query['order_by_clause'], '_products' ) ) {
+			$sql_query['from_clause'] .= " JOIN {$wpdb->prefix}posts AS _products ON {$order_product_lookup_table}.product_id = _products.ID";
+		}
+
+		if ( isset( $query_args['order'] ) ) {
+			$sql_query['order_by_clause'] .= ' ' . $query_args['order'];
+		} else {
+			$sql_query['order_by_clause'] .= ' DESC';
+		}
+
+		return $sql_query;
+	}
 
 	/**
 	 * Updates the database query with parameters used for Products report: categories and order status.
@@ -100,6 +127,9 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 	protected function normalize_order_by( $order_by ) {
 		if ( 'date' === $order_by ) {
 			return 'date_created';
+		}
+		if ( 'product_name' === $order_by ) {
+			return '_products.post_title';
 		}
 
 		return $order_by;

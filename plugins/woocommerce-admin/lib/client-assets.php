@@ -12,7 +12,7 @@ function wc_admin_register_script() {
 	// Are we displaying the full React app or just embedding the header on a classic screen?
 	$screen_id = wc_admin_get_current_screen_id();
 
-	if ( in_array( $screen_id, wc_admin_get_embed_enabled_screen_ids() ) ) {
+	if ( in_array( $screen_id, wc_admin_get_embed_enabled_screen_ids(), true ) ) {
 		$entry = 'embedded';
 	} else {
 		$entry = 'app';
@@ -119,12 +119,27 @@ function wc_admin_register_script() {
 add_action( 'admin_enqueue_scripts', 'wc_admin_register_script' );
 
 /**
+ * Format order statuses by removing a leading 'wc-' if present.
+ *
+ * @param array $statuses Order statuses.
+ * @return array formatted statuses.
+ */
+function format_order_statuses( $statuses ) {
+	$formatted_statuses = array();
+	foreach ( $statuses as $key => $value ) {
+		$formatted_key                        = preg_replace( '/^wc-/', '', $key );
+		$formatted_statuses[ $formatted_key ] = $value;
+	}
+	return $formatted_statuses;
+}
+
+/**
  * Output the wcSettings global before printing any script tags.
  */
 function wc_admin_print_script_settings() {
 	// Add Tracks script to the DOM if tracking is opted in, and Jetpack is installed/activated.
 	$tracking_enabled = 'yes' === get_option( 'woocommerce_allow_tracking', 'no' );
-	$tracking_script = '';
+	$tracking_script  = '';
 	if ( $tracking_enabled && defined( 'JETPACK__VERSION' ) ) {
 		$tracking_script  = "var wc_tracking_script = document.createElement( 'script' );\n";
 		$tracking_script .= "wc_tracking_script.src = '//stats.wp.com/w.js';\n"; // TODO Version/cache buster.
@@ -150,7 +165,7 @@ function wc_admin_print_script_settings() {
 		'date'             => array(
 			'dow' => get_option( 'start_of_week', 0 ),
 		),
-		'orderStatuses'    => wc_get_order_statuses(),
+		'orderStatuses'    => format_order_statuses( wc_get_order_statuses() ),
 		'stockStatuses'    => wc_get_product_stock_status_options(),
 		'siteTitle'        => get_bloginfo( 'name' ),
 		'trackingEnabled'  => $tracking_enabled,
@@ -160,7 +175,7 @@ function wc_admin_print_script_settings() {
 		<?php
 		echo $tracking_script; // WPCS: XSS ok.
 		?>
-		var wcSettings = <?php echo json_encode( $settings ); ?>;
+		var wcSettings = <?php echo wp_json_encode( $settings ); ?>;
 	</script>
 	<?php
 }

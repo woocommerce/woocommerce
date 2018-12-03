@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 /**
  * WooCommerce dependencies
  */
-import { getNewPath, getTimeRelatedQuery } from '@woocommerce/navigation';
+import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
 
 /**
@@ -89,7 +89,7 @@ class Header extends Component {
 					{ _sections.map( ( section, i ) => {
 						const sectionPiece = Array.isArray( section ) ? (
 							<Link
-								href={ getNewPath( getTimeRelatedQuery(), section[ 0 ], {} ) }
+								href={ getNewPath( getPersistedQuery(), section[ 0 ], {} ) }
 								type={ isEmbedded ? 'wp-admin' : 'wc-admin' }
 							>
 								{ section[ 1 ] }

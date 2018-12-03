@@ -27,6 +27,7 @@ import { onQueryChange } from '@woocommerce/navigation';
  */
 import ReportError from 'analytics/components/report-error';
 import { QUERY_DEFAULTS } from 'store/constants';
+import { numberFormat } from 'lib/number';
 
 class RevenueReportTable extends Component {
 	getHeadersContent() {
@@ -114,7 +115,7 @@ class RevenueReportTable extends Component {
 					href={ 'edit.php?post_type=shop_order&m=' + formatDate( 'Ymd', row.date_start ) }
 					type="wp-admin"
 				>
-					{ orders_count }
+					{ numberFormat( orders_count ) }
 				</Link>
 			);
 			return [

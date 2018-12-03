@@ -46,6 +46,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-revenue-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-orders-stats-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-products-query.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-variations-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-products-stats-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-categories-query.php';
 
@@ -53,6 +54,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-orders-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-products-data-store.php';
+		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-variations-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-products-stats-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-categories-data-store.php';
 
@@ -81,6 +83,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-orders-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-products-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-variations-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-products-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-revenue-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-controller.php';
@@ -91,6 +94,7 @@ class WC_Admin_Api_Init {
 			'WC_Admin_REST_Reports_Controller',
 			'WC_Admin_REST_System_Status_Tools_Controller',
 			'WC_Admin_REST_Reports_Products_Controller',
+			'WC_Admin_REST_Reports_Variations_Controller',
 			'WC_Admin_REST_Reports_Products_Stats_Controller',
 			'WC_Admin_REST_Reports_Revenue_Stats_Controller',
 			'WC_Admin_REST_Reports_Orders_Stats_Controller',
@@ -214,12 +218,14 @@ class WC_Admin_Api_Init {
 						'order_item_id'         => $order_item->get_id(),
 						'order_id'              => $order->get_id(),
 						'product_id'            => $order_item->get_product_id( 'edit' ),
+						'variation_id'          => $order_item->get_variation_id( 'edit' ),
 						'customer_id'           => ( 0 < $order->get_customer_id( 'edit' ) ) ? $order->get_customer_id( 'edit' ) : null,
 						'product_qty'           => $order_item->get_quantity( 'edit' ),
 						'product_gross_revenue' => $order_item->get_subtotal( 'edit' ),
 						'date_created'          => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 					),
 					array(
+						'%d',
 						'%d',
 						'%d',
 						'%d',
@@ -255,6 +261,7 @@ class WC_Admin_Api_Init {
 				'report-revenue-stats'  => 'WC_Admin_Reports_Orders_Data_Store',
 				'report-orders-stats'   => 'WC_Admin_Reports_Orders_Data_Store',
 				'report-products'       => 'WC_Admin_Reports_Products_Data_Store',
+				'report-variations'     => 'WC_Admin_Reports_Variations_Data_Store',
 				'report-products-stats' => 'WC_Admin_Reports_Products_Stats_Data_Store',
 				'report-categories'     => 'WC_Admin_Reports_Categories_Data_Store',
 				'admin-note'            => 'WC_Admin_Notes_Data_Store',
@@ -316,6 +323,7 @@ class WC_Admin_Api_Init {
 			order_item_id BIGINT UNSIGNED NOT NULL,
 			order_id BIGINT UNSIGNED NOT NULL,
 			product_id BIGINT UNSIGNED NOT NULL,
+			variation_id BIGINT UNSIGNED NOT NULL,
 			customer_id BIGINT UNSIGNED NULL,
 			date_created timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			product_qty INT UNSIGNED NOT NULL,

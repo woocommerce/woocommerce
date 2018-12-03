@@ -234,6 +234,7 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 				'gross_revenue',
 				'orders_count',
 				'items_sold',
+				'product_name',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);

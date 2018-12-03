@@ -49,13 +49,13 @@ global.wcSettings = {
 		dow: 0,
 	},
 	orderStatuses: {
-		'wc-pending': 'Pending payment',
-		'wc-processing': 'Processing',
-		'wc-on-hold': 'On hold',
-		'wc-completed': 'Completed',
-		'wc-cancelled': 'Cancelled',
-		'wc-refunded': 'Refunded',
-		'wc-failed': 'Failed',
+		pending: 'Pending payment',
+		processing: 'Processing',
+		'on-hold': 'On hold',
+		completed: 'Completed',
+		cancelled: 'Cancelled',
+		refunded: 'Refunded',
+		failed: 'Failed',
 	},
 };
 

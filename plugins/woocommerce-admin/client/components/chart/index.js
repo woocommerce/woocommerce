@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
-import { Component, createRef } from '@wordpress/element';
+import { Component, createRef, Fragment } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
 import { get, isEqual, partial } from 'lodash';
@@ -23,8 +23,10 @@ import { H, Section } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import D3Chart from './charts';
-import Legend from './legend';
+import './style.scss';
+import D3Chart from 'components/d3chart';
+import Legend from 'components/d3chart/legend';
+import ChartPlaceholder from './placeholder';
 
 d3FormatDefaultLocale( {
 	decimal: '.',
@@ -33,7 +35,7 @@ d3FormatDefaultLocale( {
 	currency: [ decodeEntities( get( wcSettings, 'currency.symbol', '' ) ), '' ],
 } );
 
-function getOrderedKeys( props ) {
+function getOrderedKeys( props, previousOrderedKeys = [] ) {
 	const updatedKeys = [
 		...new Set(
 			props.data.reduce( ( accum, curr ) => {
@@ -41,13 +43,16 @@ function getOrderedKeys( props ) {
 				return accum;
 			}, [] )
 		),
-	].map( key => ( {
-		key,
-		total: props.data.reduce( ( a, c ) => a + c[ key ].value, 0 ),
-		visible: true,
-		focus: true,
-	} ) );
-	if ( props.layout === 'comparison' ) {
+	].map( key => {
+		const previousKey = previousOrderedKeys.find( item => key === item.key );
+		return {
+			key,
+			total: props.data.reduce( ( a, c ) => a + c[ key ].value, 0 ),
+			visible: previousKey ? previousKey.visible : true,
+			focus: true,
+		};
+	} );
+	if ( props.mode === 'item-comparison' ) {
 		updatedKeys.sort( ( a, b ) => b.total - a.total );
 	}
 	return updatedKeys;
@@ -63,7 +68,6 @@ class Chart extends Component {
 		this.state = {
 			data: props.data,
 			orderedKeys: getOrderedKeys( props ),
-			type: props.type,
 			visibleData: [ ...props.data ],
 			width: 0,
 		};
@@ -77,11 +81,17 @@ class Chart extends Component {
 
 	componentDidUpdate( prevProps ) {
 		const { data } = this.props;
-		const orderedKeys = getOrderedKeys( this.props );
 		if ( ! isEqual( [ ...data ].sort(), [ ...prevProps.data ].sort() ) ) {
+			/**
+			 * Only update the orderedKeys when data is present so that
+			 * selection may persist while requesting new data.
+			 */
+			const orderedKeys = data.length
+				? getOrderedKeys( this.props, this.state.orderedKeys )
+				: this.state.orderedKeys;
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( {
-				orderedKeys: orderedKeys,
+				orderedKeys,
 				visibleData: this.getVisibleData( data, orderedKeys ),
 			} );
 			/* eslint-enable react/no-did-update-set-state */
@@ -98,8 +108,9 @@ class Chart extends Component {
 	}
 
 	handleTypeToggle( type ) {
-		if ( this.state.type !== type ) {
-			this.setState( { type } );
+		if ( this.props.type !== type ) {
+			const { path, query } = this.props;
+			updateQueryString( { type }, path, query );
 		}
 	}
 
@@ -200,26 +211,28 @@ class Chart extends Component {
 	}
 
 	render() {
-		const { orderedKeys, type, visibleData, width } = this.state;
+		const { orderedKeys, visibleData, width } = this.state;
 		const {
 			dateParser,
 			itemsLabel,
-			layout,
 			mode,
-			pointLabelFormat,
 			isViewportLarge,
 			isViewportWide,
 			title,
-			tooltipFormat,
+			tooltipLabelFormat,
+			tooltipValueFormat,
 			tooltipTitle,
 			xFormat,
 			x2Format,
 			interval,
 			valueType,
+			type,
+			isRequesting,
 		} = this.props;
 		let { yFormat } = this.props;
-		const legendDirection = layout === 'standard' && isViewportWide ? 'row' : 'column';
-		const chartDirection = layout === 'comparison' && isViewportWide ? 'row' : 'column';
+		const legendDirection = mode === 'time-comparison' && isViewportWide ? 'row' : 'column';
+		const chartDirection = mode === 'item-comparison' && isViewportWide ? 'row' : 'column';
+
 		const chartHeight = this.getChartHeight();
 		const legend = (
 			<Legend
@@ -294,28 +307,37 @@ class Chart extends Component {
 						ref={ this.chartBodyRef }
 					>
 						{ isViewportWide && legendDirection === 'column' && legend }
-						{ width > 0 && (
-							<D3Chart
-								colorScheme={ d3InterpolateViridis }
-								data={ visibleData }
-								dateParser={ dateParser }
-								height={ chartHeight }
-								margin={ margin }
-								mode={ mode }
-								orderedKeys={ orderedKeys }
-								pointLabelFormat={ pointLabelFormat }
-								tooltipFormat={ tooltipFormat }
-								tooltipPosition={ isViewportLarge ? 'over' : 'below' }
-								tooltipTitle={ tooltipTitle }
-								type={ type }
-								interval={ interval }
-								width={ chartDirection === 'row' ? width - 320 : width }
-								xFormat={ xFormat }
-								x2Format={ x2Format }
-								yFormat={ yFormat }
-								valueType={ valueType }
-							/>
+						{ isRequesting && (
+							<Fragment>
+								<span className="screen-reader-text">
+									{ __( 'Your requested data is loading', 'wc-admin' ) }
+								</span>
+								<ChartPlaceholder height={ chartHeight } />
+							</Fragment>
 						) }
+						{ ! isRequesting &&
+							width > 0 && (
+								<D3Chart
+									colorScheme={ d3InterpolateViridis }
+									data={ visibleData }
+									dateParser={ dateParser }
+									height={ chartHeight }
+									interval={ interval }
+									margin={ margin }
+									mode={ mode }
+									orderedKeys={ orderedKeys }
+									tooltipLabelFormat={ tooltipLabelFormat }
+									tooltipValueFormat={ tooltipValueFormat }
+									tooltipPosition={ isViewportLarge ? 'over' : 'below' }
+									tooltipTitle={ tooltipTitle }
+									type={ type }
+									width={ chartDirection === 'row' ? width - 320 : width }
+									xFormat={ xFormat }
+									x2Format={ x2Format }
+									yFormat={ yFormat }
+									valueType={ valueType }
+								/>
+							) }
 					</div>
 					{ ! isViewportWide && <div className="woocommerce-chart__footer">{ legend }</div> }
 				</Section>
@@ -338,20 +360,19 @@ Chart.propTypes = {
 	 */
 	path: PropTypes.string,
 	/**
-	 * Date format of the point labels (might be used in tooltips and ARIA properties).
-	 */
-	pointLabelFormat: PropTypes.string,
-	/**
 	 * The query string represented in object form
 	 */
 	query: PropTypes.object,
 	/**
-	 * A datetime formatting string to format the date displayed as the title of the toolip
-	 * if `tooltipTitle` is missing, passed to d3TimeFormat.
+	 * A datetime formatting string or overriding function to format the tooltip label.
 	 */
-	tooltipFormat: PropTypes.string,
+	tooltipLabelFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
 	/**
-	 * A string to use as a title for the tooltip. Takes preference over `tooltipFormat`.
+	 * A number formatting string or function to format the value displayed in the tooltips.
+	 */
+	tooltipValueFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
+	/**
+	 * A string to use as a title for the tooltip. Takes preference over `tooltipLabelFormat`.
 	 */
 	tooltipTitle: PropTypes.string,
 	/**
@@ -366,11 +387,6 @@ Chart.propTypes = {
 	 * A number formatting string, passed to d3Format.
 	 */
 	yFormat: PropTypes.string,
-	/**
-	 * `standard` (default) legend layout in the header or `comparison` moves legend layout
-	 * to the left or 'compact' has the legend below
-	 */
-	layout: PropTypes.oneOf( [ 'standard', 'comparison', 'compact' ] ),
 	/**
 	 * `item-comparison` (default) or `time-comparison`, this is used to generate correct
 	 * ARIA properties.
@@ -400,19 +416,24 @@ Chart.propTypes = {
 	 * What type of data is to be displayed? Number, Average, String?
 	 */
 	valueType: PropTypes.string,
+	/**
+	 * Render a chart placeholder to signify an in-flight data request.
+	 */
+	isRequesting: PropTypes.bool,
 };
 
 Chart.defaultProps = {
 	data: [],
 	dateParser: '%Y-%m-%dT%H:%M:%S',
-	tooltipFormat: '%B %d, %Y',
+	tooltipLabelFormat: '%B %d, %Y',
+	tooltipValueFormat: ',',
 	xFormat: '%d',
 	x2Format: '%b %Y',
 	yFormat: '$.3s',
-	layout: 'standard',
-	mode: 'item-comparison',
+	mode: 'time-comparison',
 	type: 'line',
 	interval: 'day',
+	isRequesting: false,
 };
 
 export default withViewportMatch( {

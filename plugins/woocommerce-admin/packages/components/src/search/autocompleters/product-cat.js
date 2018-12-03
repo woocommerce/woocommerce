@@ -13,7 +13,6 @@ import { stringifyQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { computeSuggestionMatch } from './utils';
-import { NAMESPACE } from 'store/constants';
 
 /**
  * A product categories completer.
@@ -28,13 +27,13 @@ export default {
 		let payload = '';
 		if ( search ) {
 			const query = {
-				search: encodeURIComponent( search ),
+				search,
 				per_page: 10,
 				orderby: 'count',
 			};
 			payload = stringifyQuery( query );
 		}
-		return apiFetch( { path: `${ NAMESPACE }products/categories${ payload }` } );
+		return apiFetch( { path: `/wc/v3/products/categories${ payload }` } );
 	},
 	isDebounced: true,
 	getOptionKeywords( cat ) {

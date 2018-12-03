@@ -1,0 +1,117 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Tag <Tag label="foo" /> should render a tag with the label foo 1`] = `
+<span
+  className="woocommerce-tag"
+>
+  <span
+    className="woocommerce-tag__text"
+    id="woocommerce-tag__label-0"
+  >
+    <span
+      className="screen-reader-text"
+    >
+      foo
+    </span>
+    <span
+      aria-hidden="true"
+    >
+      foo
+    </span>
+  </span>
+</span>
+`;
+
+exports[`Tag <Tag label="foo" popoverContents={ <p>This is a popover</p> } /> should render a tag with a popover 1`] = `
+<span
+  className="woocommerce-tag"
+>
+  <button
+    className="components-button woocommerce-tag__text"
+    id="woocommerce-tag__label-2"
+    onClick={[Function]}
+    type="button"
+  >
+    <span
+      className="screen-reader-text"
+    >
+      foo
+    </span>
+    <span
+      aria-hidden="true"
+    >
+      foo
+    </span>
+  </button>
+</span>
+`;
+
+exports[`Tag <Tag label="foo" remove={ noop } /> should render a tag with a close button 1`] = `
+<span
+  className="woocommerce-tag has-remove"
+>
+  <span
+    className="woocommerce-tag__text"
+    id="woocommerce-tag__label-1"
+  >
+    <span
+      className="screen-reader-text"
+    >
+      foo
+    </span>
+    <span
+      aria-hidden="true"
+    >
+      foo
+    </span>
+  </span>
+  <button
+    aria-describedby="woocommerce-tag__label-1"
+    aria-label="Remove foo"
+    className="components-button components-icon-button woocommerce-tag__remove"
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    type="button"
+  >
+    <svg
+      aria-hidden={true}
+      className="dashicon dashicons-dismiss"
+      focusable="false"
+      height={20}
+      role="img"
+      viewBox="0 0 20 20"
+      width={20}
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M10 2c4.42 0 8 3.58 8 8s-3.58 8-8 8-8-3.58-8-8 3.58-8 8-8zm5 11l-3-3 3-3-2-2-3 3-3-3-2 2 3 3-3 3 2 2 3-3 3 3z"
+      />
+    </svg>
+  </button>
+</span>
+`;
+
+exports[`Tag <Tag label="foo" screenReaderLabel="FooBar" /> should render a tag with a screen reader label 1`] = `
+<span
+  className="woocommerce-tag"
+>
+  <span
+    className="woocommerce-tag__text"
+    id="woocommerce-tag__label-3"
+  >
+    <span
+      className="screen-reader-text"
+    >
+      FooBar
+    </span>
+    <span
+      aria-hidden="true"
+    >
+      foo
+    </span>
+  </span>
+</span>
+`;

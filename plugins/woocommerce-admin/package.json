@@ -1,6 +1,6 @@
 {
   "name": "wc-admin",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "main": "js/index.js",
   "author": "Automattic",
   "license": "GPL-2.0-or-later",
@@ -64,7 +64,7 @@
     "babel-plugin-transform-class-properties": "6.24.1",
     "buble": "0.19.6",
     "chalk": "2.4.1",
-    "concurrently": "4.0.1",
+    "concurrently": "4.1.0",
     "copy-webpack-plugin": "4.6.0",
     "cross-env": "5.2.0",
     "css-loader": "1.0.1",
@@ -92,17 +92,18 @@
     "raw-loader": "0.5.1",
     "react-docgen": "2.21.0",
     "readline-sync": "1.4.9",
-    "recast": "0.16.0",
+    "recast": "0.16.1",
     "rimraf": "2.6.2",
     "rtlcss": "2.4.0",
     "sass-loader": "7.1.0",
     "style-loader": "0.23.1",
     "stylelint": "9.8.0",
     "stylelint-config-wordpress": "13.1.0",
-    "webpack": "4.25.1",
+    "webpack": "4.26.0",
     "webpack-cli": "3.1.2"
   },
   "dependencies": {
+    "@fresh-data/framework": "^0.5.0",
     "@wordpress/api-fetch": "2.2.2",
     "@wordpress/components": "3.0.0",
     "@wordpress/data": "3.1.0",
@@ -140,7 +141,8 @@
     "react-router-dom": "4.3.1",
     "react-slot-fill": "^2.0.1",
     "react-transition-group": "^2.4.0",
-    "react-world-flags": "1.2.4"
+    "react-world-flags": "1.2.4",
+    "redux": "^4.0.0"
   },
   "husky": {
     "hooks": {

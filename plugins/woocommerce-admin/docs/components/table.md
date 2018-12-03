@@ -295,6 +295,7 @@ Additional CSS classes.
   - key: String - The API parameter name for this column, passed to `orderby` when sorting via API.
   - label: ReactNode - The display label for this column.
   - required: Boolean - Boolean, true if this column should always display in the table (not shown in toggle-able list).
+  - screenReaderLabel: String - The label used for screen readers for this column.
 - Default: `[]`
 
 An array of column headers, as objects.

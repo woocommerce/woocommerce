@@ -111,6 +111,14 @@ function wc_admin_register_pages() {
 
 	wc_admin_register_page(
 		array(
+			'title'  => __( 'Categories', 'wc-admin' ),
+			'parent' => '/analytics/revenue',
+			'path'   => '/analytics/categories',
+		)
+	);
+
+	wc_admin_register_page(
+		array(
 			'title'  => __( 'Coupons', 'wc-admin' ),
 			'parent' => '/analytics/revenue',
 			'path'   => '/analytics/coupons',

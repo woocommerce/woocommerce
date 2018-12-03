@@ -54,6 +54,10 @@
 		&:empty {
 			display: none;
 		}
+
+		&.is-static-results {
+			position: static;
+		}
 	}
 
 	// This a single `button` in the autocomplete popover

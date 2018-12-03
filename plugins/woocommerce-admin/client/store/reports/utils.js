@@ -10,17 +10,21 @@ import { find, forEach, isNull } from 'lodash';
  */
 import { appendTimestamp, getCurrentDates, getIntervalForQuery } from '@woocommerce/date';
 import { flattenFilters, getActiveFiltersFromQuery, getUrlKey } from '@woocommerce/navigation';
+import { formatCurrency } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
-import { MAX_PER_PAGE } from 'store/constants';
+import { MAX_PER_PAGE, QUERY_DEFAULTS } from 'store/constants';
+import * as categoriesConfig from 'analytics/report/categories/config';
 import * as couponsConfig from 'analytics/report/coupons/config';
 import * as ordersConfig from 'analytics/report/orders/config';
 import * as productsConfig from 'analytics/report/products/config';
 import * as taxesConfig from 'analytics/report/taxes/config';
+import * as reportsUtils from './utils';
 
 const reportConfigs = {
+	categories: categoriesConfig,
 	coupons: couponsConfig,
 	orders: ordersConfig,
 	products: productsConfig,
@@ -223,12 +227,11 @@ export function getReportChartData( endpoint, dataType, query, select ) {
 				isFetching = false;
 				break;
 			}
-			if ( ! isReportStatsRequesting( endpoint, nextQuery ) ) {
-				pagedData.push( _data );
-				if ( i === totalPages ) {
-					isFetching = false;
-					break;
-				}
+
+			pagedData.push( _data );
+			if ( i === totalPages ) {
+				isFetching = false;
+				break;
 			}
 		}
 
@@ -244,4 +247,73 @@ export function getReportChartData( endpoint, dataType, query, select ) {
 	}
 
 	return { ...response, data: { totals, intervals } };
+}
+
+/**
+ * Returns a formatting function or string to be used by d3-format
+ *
+ * @param  {String} type Type of number, 'currency', 'number', 'percent', 'average'
+ * @return {String|Function}  returns a number format based on the type or an overriding formatting function
+ */
+export function getTooltipValueFormat( type ) {
+	switch ( type ) {
+		case 'currency':
+			return formatCurrency;
+		case 'percent':
+			return '.0%';
+		case 'number':
+			return ',';
+		case 'average':
+			return ',.2r';
+		default:
+			return ',';
+	}
+}
+
+export function getReportTableQuery( urlQuery, query ) {
+	const filterQuery = getFilterQuery( 'products', urlQuery );
+	const datesFromQuery = getCurrentDates( urlQuery );
+
+	return {
+		orderby: urlQuery.orderby || 'date',
+		order: urlQuery.order || 'asc',
+		after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
+		before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
+		page: urlQuery.page || 1,
+		per_page: urlQuery.per_page || QUERY_DEFAULTS.pageSize,
+		...filterQuery,
+		...query,
+	};
+}
+
+/**
+ * Returns table data needed to render a report page.
+ *
+ * @param  {String} endpoint  Report API Endpoint
+ * @param  {Object} urlQuery  Query parameters in the url
+ * @param  {object} select    Instance of @wordpress/select
+ * @param  {Object} query     Query parameters specific for that endpoint
+ * @return {Object} Object    Table data response
+ */
+export function getReportTableData( endpoint, urlQuery, select, query = {} ) {
+	const { getReportItems, isGetReportItemsRequesting, isGetReportItemsError } = select(
+		'wc-admin'
+	);
+
+	const tableQuery = reportsUtils.getReportTableQuery( urlQuery, query );
+	const response = {
+		query: tableQuery,
+		isRequesting: false,
+		isError: false,
+		items: [],
+	};
+
+	const items = getReportItems( endpoint, tableQuery );
+	if ( isGetReportItemsRequesting( endpoint, tableQuery ) ) {
+		return { ...response, isRequesting: true };
+	} else if ( isGetReportItemsError( endpoint, tableQuery ) ) {
+		return { ...response, isError: true };
+	}
+
+	return { ...response, items };
 }
