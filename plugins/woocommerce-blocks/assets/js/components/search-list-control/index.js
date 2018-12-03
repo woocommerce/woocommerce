@@ -116,7 +116,9 @@ export class SearchListControl extends Component {
 				onClick={ onSelect( item ) }
 				aria-selected={ isSelected }
 			>
+				<span className="woocommerce-search-list__item-state">
 				{ isSelected ? <CheckedIcon /> : <UncheckedIcon /> }
+				</span>
 				<span
 					className="woocommerce-search-list__item-name"
 					dangerouslySetInnerHTML={ {

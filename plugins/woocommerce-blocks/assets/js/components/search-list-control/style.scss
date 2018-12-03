@@ -58,7 +58,7 @@
 		border-bottom: 1px solid $core-grey-light-500 !important;
 		color: $core-grey-dark-500;
 
-		svg {
+		.woocommerce-search-list__item-state {
 			flex: 0 0 16px;
 			margin-right: $gap-smaller;
 		}

@@ -71,7 +71,9 @@ class ProductCategoryControl extends Component {
 					item.count
 				) }
 			>
+				<span className="woocommerce-search-list__item-state">
 				{ isSelected ? <CheckedIcon /> : <UncheckedIcon /> }
+				</span>
 				<span className="woocommerce-product-categories__item-label">
 					{ !! item.breadcrumbs.length && (
 						<span className="woocommerce-product-categories__item-prefix">
