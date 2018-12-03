@@ -12,7 +12,7 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 WooCommerce Product Blocks are the easiest, most flexible way to display your products on posts and pages! Using the original "Products Block", your displayed products can be filtered by category, sale status, or a variety of other fields. You can even make a custom list of hand-picked products to display.
 
-New for 1.2.0: We've added a stand-alone Product Category block to simplify the expereince and improve the category search and selection UI. Be on the lookout for additional stand-alone blocks in future releases. 
+New for 1.2.0: We've added a stand-alone Product Category block to simplify the experience and improve the category search and selection UI. Be on the lookout for additional stand-alone blocks in future releases. 
 
 == Getting Started ==
 
@@ -57,11 +57,12 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 == Changelog ==
 
 == 1.2.0 - 2018-12-04 =
-* Feature - Stand-alone product category block with improved category selection interface 
-* Fix - All users who can edit posts can now use these blocks thanks to a new set of API endpoints allowing view access to products, product categories, and product attributes. Fixed: Compatibility with WP 5.0, “Cannot read property Toolbar of undefined”
-* Fix - Only published products are shown in previews
-* Enhancement - Translations should now load into the block (for WP 5.0+)
-* Enhancement - Modernized build process and developer tools, and added tests for faster future development
+* Feature - Stand-alone product category block with improved category selection interface.
+* Fix - All users who can edit posts can now use these blocks thanks to a new set of API endpoints allowing view access to products, product categories, and product attributes.
+* Fix - Compatibility with WP 5.0, fixed error “Cannot read property Toolbar of undefined”.
+* Fix - Only published products are shown in previews.
+* Enhancement - Translations should now load into the block (for WP 5.0+).
+* Enhancement - Modernized build process and developer tools, and added tests for faster future development.
 
 == 1.1.2 - 2018-09-07 =
 * Fix - Refactor to remove withAPIData usage, as the class was removed in Gutenberg 3.7. 
