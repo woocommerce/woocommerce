@@ -13,8 +13,8 @@ Currently we have a small set of public-facing packages that can be dowloaded fr
 - You can make changes to packages files as normal, and running `npm start` will compile and watch both app files and packages.
 - :warning: Make sure any dependencies you add to a package are also added to that package's `package.json`, not just the wc-admin package.json
 - :warning: Make sure you're not importing from any wc-admin files outside of the package (you can import from other packages, just use the `import from @woocommerce/package` syntax).
-- Add your change to the CHANGELOG for that package.
-- If you want to release an update for the package, also bump the version number (we use semantic versioning for packages, [see these guidelines](https://github.com/WordPress/gutenberg/blob/master/CONTRIBUTING.md#maintaining-changelogs)).
+- Add your change to the CHANGELOG for that package under the next version number, creating one if necessary (we use semantic versioning for packages, [see these guidelines](https://github.com/WordPress/gutenberg/blob/master/CONTRIBUTING.md#maintaining-changelogs)).
+- Don't change the version in `package.json`.
 - Label your PR with the `Packages` label.
 - Once merged, you can wait for the next package release roundup, or you can publish a release now (see below, "Publishing packages").
 
@@ -77,7 +77,7 @@ To create a new package, add a new folder to `/packages`, containing…
 - Run `npm run publish:prod` to publish the package
 - _OR_ Run `npm run publish:dev` to publish "next" releases (installed as `npm i @woocommerce/package@next`). Currently packages are published this way, but we should be using prod in the future. Only use `:dev` if you have a reason to.
 - Both commands will run `build:packages` before the lerna task, just to catch any last updates.
-- If the version has not been manually updated in each package.json, Lerna will ask you what version you want to release, for example:
+- Lerna will ask you what version you want to release, for example:
 
 ```
 Select a new version for @woocommerce/components (currently 1.0.1) (Use arrow keys)

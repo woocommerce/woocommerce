@@ -1,6 +1,9 @@
-# 1.1.1
+# 1.2.0
 
+- Update `Search` to exclude already-selected items
 - Fix incorrectly loaded `proptype-validator`
+- Update focus style on `SummaryNumber`
+- Remove prefixes from order statuses
 
 # 1.1.0
 
