@@ -112,12 +112,13 @@ export class SearchListControl extends Component {
 		return (
 			<MenuItem
 				key={ item.id }
+				role="menuitemcheckbox"
 				className={ classes.join( ' ' ) }
 				onClick={ onSelect( item ) }
-				aria-selected={ isSelected }
+				isSelected={ isSelected }
 			>
 				<span className="woocommerce-search-list__item-state">
-				{ isSelected ? <CheckedIcon /> : <UncheckedIcon /> }
+					{ isSelected ? <CheckedIcon /> : <UncheckedIcon /> }
 				</span>
 				<span
 					className="woocommerce-search-list__item-name"
