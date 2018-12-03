@@ -67,12 +67,11 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 	 */
 	protected function get_sql_query_params( $query_args ) {
 		global $wpdb;
+		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
 
-		$sql_query_params = $this->get_time_period_sql_params( $query_args );
+		$sql_query_params = $this->get_time_period_sql_params( $query_args, $order_product_lookup_table );
 		// Limit is left out here so that the grouping in code by PHP can be applied correctly.
 		$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_sql_params( $query_args ) );
-
-		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
 
 		// TODO: only products in the category C or orders with products from category C (and, possibly others?).
 		$included_products = $this->get_included_products( $query_args );

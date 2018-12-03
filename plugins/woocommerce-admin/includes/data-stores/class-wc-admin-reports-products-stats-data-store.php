@@ -66,11 +66,11 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 			$products_where_clause .= " AND ( {$order_status_filter} )";
 		}
 
-		$totals_params                  = array_merge( $totals_params, $this->get_time_period_sql_params( $query_args ) );
+		$totals_params                  = array_merge( $totals_params, $this->get_time_period_sql_params( $query_args, $order_product_lookup_table ) );
 		$totals_params['where_clause'] .= $products_where_clause;
 		$totals_params['from_clause']  .= $products_from_clause;
 
-		$intervals_params                  = array_merge( $intervals_params, $this->get_intervals_sql_params( $query_args ) );
+		$intervals_params                  = array_merge( $intervals_params, $this->get_intervals_sql_params( $query_args, $order_product_lookup_table ) );
 		$intervals_params['where_clause'] .= $products_where_clause;
 		$intervals_params['from_clause']  .= $products_from_clause;
 	}

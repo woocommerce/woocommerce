@@ -306,8 +306,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			);
 
 			$selections      = $this->selected_columns( $query_args );
-			$totals_query    = $this->get_time_period_sql_params( $query_args );
-			$intervals_query = $this->get_intervals_sql_params( $query_args );
+			$totals_query    = $this->get_time_period_sql_params( $query_args, $table_name );
+			$intervals_query = $this->get_intervals_sql_params( $query_args, $table_name );
 
 			// Additional filtering for Orders report.
 			$this->orders_stats_sql_filter( $query_args, $totals_query, $intervals_query );

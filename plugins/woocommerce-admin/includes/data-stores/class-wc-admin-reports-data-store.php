@@ -438,16 +438,13 @@ class WC_Admin_Reports_Data_Store {
 	}
 
 	/**
-	 * Fills WHERE clause of SQL request for 'Totals' section of data response based on user supplied parameters.
+	 * Fills WHERE clause of SQL request with date-related constraints.
 	 *
-	 * @param array $query_args Parameters supplied by the user.
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $table_name Name of the db table relevant for the date constraint.
 	 * @return array
 	 */
-	protected function get_time_period_sql_params( $query_args ) {
-		global $wpdb;
-
-		$table_name = $wpdb->prefix . $this::TABLE_NAME;
-
+	protected function get_time_period_sql_params( $query_args, $table_name ) {
 		$sql_query = array(
 			'from_clause'       => '',
 			'where_time_clause' => '',
@@ -515,17 +512,18 @@ class WC_Admin_Reports_Data_Store {
 	/**
 	 * Fills FROM and WHERE clauses of SQL request for 'Intervals' section of data response based on user supplied parameters.
 	 *
-	 * @param array $query_args Parameters supplied by the user.
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $table_name Name of the db table relevant for the date constraint.
 	 * @return array
 	 */
-	protected function get_intervals_sql_params( $query_args ) {
+	protected function get_intervals_sql_params( $query_args, $table_name ) {
 		$intervals_query = array(
 			'from_clause'       => '',
 			'where_time_clause' => '',
 			'where_clause'      => '',
 		);
 
-		$intervals_query = array_merge( $intervals_query, $this->get_time_period_sql_params( $query_args ) );
+		$intervals_query = array_merge( $intervals_query, $this->get_time_period_sql_params( $query_args, $table_name ) );
 
 		if ( isset( $query_args['interval'] ) && '' !== $query_args['interval'] ) {
 			$interval                         = $query_args['interval'];
