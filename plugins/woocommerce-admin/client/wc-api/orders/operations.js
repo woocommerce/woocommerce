@@ -22,26 +22,34 @@ function read( resourceNames, fetch = apiFetch ) {
 function readOrderQueries( resourceNames, fetch ) {
 	const filteredNames = resourceNames.filter( name => isResourcePrefix( name, 'order-query' ) );
 
-	return filteredNames.map( resourceName => {
+	return filteredNames.map( async resourceName => {
 		const query = getResourceIdentifier( resourceName );
 		const url = `${ NAMESPACE }/orders${ stringifyQuery( query ) }`;
 
-		return fetch( { path: url } )
-			.then( orders => {
-				const ids = orders.map( order => order.id );
-				const orderResources = orders.reduce( ( resources, order ) => {
-					resources[ getResourceName( 'order', order.id ) ] = { data: order };
-					return resources;
-				}, {} );
-
-				return {
-					[ resourceName ]: { data: ids },
-					...orderResources,
-				};
-			} )
-			.catch( error => {
-				return { [ resourceName ]: { error } };
+		try {
+			const response = await fetch( {
+				parse: false,
+				path: url,
 			} );
+
+			const orders = await response.json();
+			const totalCount = parseInt( response.headers.get( 'x-wp-total' ) );
+			const ids = orders.map( order => order.id );
+			const orderResources = orders.reduce( ( resources, order ) => {
+				resources[ getResourceName( 'order', order.id ) ] = { data: order };
+				return resources;
+			}, {} );
+
+			return {
+				[ resourceName ]: {
+					data: ids,
+					totalCount,
+				},
+				...orderResources,
+			};
+		} catch ( error ) {
+			return { [ resourceName ]: { error } };
+		}
 	} );
 }
 

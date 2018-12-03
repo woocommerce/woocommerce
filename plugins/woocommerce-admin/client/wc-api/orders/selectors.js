@@ -15,6 +15,14 @@ const getOrders = ( getResource, requireResource ) => (
 	return orders;
 };
 
+const getOrdersTotalCount = ( getResource, requireResource ) => (
+	query = {},
+	requirement = DEFAULT_REQUIREMENT
+) => {
+	const resourceName = getResourceName( 'order-query', query );
+	return requireResource( requirement, resourceName ).totalCount || 0;
+};
+
 const isGetOrdersRequesting = getResource => ( query = {} ) => {
 	const resourceName = getResourceName( 'order-query', query );
 	const { lastRequested, lastReceived } = getResource( resourceName );
@@ -28,6 +36,7 @@ const isGetOrdersError = getResource => ( query = {} ) => {
 
 export default {
 	getOrders,
+	getOrdersTotalCount,
 	isGetOrdersRequesting,
 	isGetOrdersError,
 };

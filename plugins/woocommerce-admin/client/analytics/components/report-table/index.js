@@ -48,7 +48,7 @@ class ReportTable extends Component {
 
 		const headers = getHeadersContent();
 		const orderedItems = orderBy( items.data, query.orderby, query.order );
-		const ids = orderedItems.map( item => item[ itemIdField ] );
+		const ids = itemIdField ? orderedItems.map( item => item[ itemIdField ] ) : null;
 		const rows = getRowsContent( orderedItems );
 		const totals = get( primaryData, [ 'data', 'totals' ], null );
 		const summary = getSummary ? getSummary( totals ) : null;
@@ -74,7 +74,7 @@ ReportTable.propTypes = {
 	/**
 	 * The endpoint to use in API calls.
 	 */
-	endpoint: PropTypes.string.isRequired,
+	endpoint: PropTypes.string,
 	/**
 	 * A function that returns the headers object to build the table.
 	 */
@@ -90,7 +90,7 @@ ReportTable.propTypes = {
 	/**
 	 * The name of the property in the item object which contains the id.
 	 */
-	itemIdField: PropTypes.string.isRequired,
+	itemIdField: PropTypes.string,
 	/**
 	 * Primary data of that report.
 	 */
@@ -110,19 +110,22 @@ ReportTable.propTypes = {
 };
 
 ReportTable.defaultProps = {
+	tableData: null,
 	tableQuery: {},
 };
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { endpoint, getSummary, query, tableQuery } = props;
+		const { endpoint, getSummary, query, tableData, tableQuery } = props;
 		const chartEndpoint = 'variations' === endpoint ? 'products' : endpoint;
-		const primaryData = getSummary ? getReportChartData( chartEndpoint, 'primary', query, select ) : {};
-		const tableData = getReportTableData( endpoint, query, select, tableQuery );
+		const primaryData = getSummary
+			? getReportChartData( chartEndpoint, 'primary', query, select )
+			: {};
+		const queriedTableData = tableData || getReportTableData( endpoint, query, select, tableQuery );
 
 		return {
 			primaryData,
-			tableData,
+			tableData: queriedTableData,
 		};
 	} )
 )( ReportTable );
