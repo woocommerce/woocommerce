@@ -1,23 +1,33 @@
-=== WooCommerce Gutenberg Products Block ===
-Contributors: automattic, claudiulodro, tiagonoronha, jameskoster
+=== WooCommerce Product Blocks ===
+Contributors: automattic, claudiulodro, tiagonoronha, jameskoster, ryelle, levinmedia
 Tags: gutenberg, woocommerce, woo commerce, products
 Requires at least: 4.7
 Tested up to: 5.0
 Requires PHP: 5.2
-Stable tag: 1.1.2
+Stable tag: 1.2.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 == Description ==
 
-The WooCommerce Gutenberg Products block is a new block for the Gutenberg post editor. This block is a custom products area that features your WooCommerce products. The products featured can be filtered by categories, sale status, or a variety of other fields, and you can even make a custom list of hand-picked products to display. The Products block is the easiest and most flexible way to feature your products on your posts and pages!
+WooCommerce Product Blocks are the easiest, most flexible way to display your products on posts and pages! Using the original "Products Block", your displayed products can be filtered by category, sale status, or a variety of other fields. You can even make a custom list of hand-picked products to display.
+
+New for 1.2.0: We've added a stand-alone Product Category block to simplify the experience and improve the category search and selection UI. Be on the lookout for additional stand-alone blocks in future releases. 
 
 == Getting Started ==
 
 = Minimum Requirements =
 
-* The latest version of the Gutenberg plugin
-* WooCommerce 3.3.0 or greater
+* WordPress 4.9.x
+* Gutenberg plugin 4.6 or greater
+* WooCommerce 3.3.1 or greater
+* PHP version 5.2.4 or greater (PHP 7.2 or greater is recommended)
+* MySQL version 5.0 or greater (MySQL 5.6 or greater is recommended)
+
+OR
+
+* WordPress 5.0.x
+* WooCommerce 3.5.1 or greater
 * PHP version 5.2.4 or greater (PHP 7.2 or greater is recommended)
 * MySQL version 5.0 or greater (MySQL 5.6 or greater is recommended)
 
@@ -50,8 +60,17 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 1. The initial Products block.
 2. Selecting hand-picked products for the Products block.
 3. The completed Products block when inserted into a post.
+4. New: Stand-alone Product Category block
 
 == Changelog ==
+
+== 1.2.0 - 2018-12-04 =
+* Feature - Stand-alone product category block with improved category selection interface.
+* Fix - All users who can edit posts can now use these blocks thanks to a new set of API endpoints allowing view access to products, product categories, and product attributes.
+* Fix - Compatibility with WP 5.0, fixed error “Cannot read property Toolbar of undefined”.
+* Fix - Only published products are shown in previews.
+* Enhancement - Translations should now load into the block (for WP 5.0+).
+* Enhancement - Modernized build process and developer tools, and added tests for faster future development.
 
 == 1.1.2 - 2018-09-07 =
 * Fix - Refactor to remove withAPIData usage, as the class was removed in Gutenberg 3.7. 
