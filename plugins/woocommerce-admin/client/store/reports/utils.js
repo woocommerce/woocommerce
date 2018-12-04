@@ -182,7 +182,7 @@ export function getSummaryNumbers( endpoint, query, select ) {
  * @return {Object}  Object containing API request information (response, fetching, and error details)
  */
 export function getReportChartData( endpoint, dataType, query, select ) {
-	const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
+	const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-api' );
 
 	const response = {
 		isEmpty: false,
