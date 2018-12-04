@@ -1,7 +1,21 @@
 /** @format */
+/**
+ * External dependencies
+ */
+import { isObject } from 'lodash';
 
 export function getResourceName( prefix, identifier ) {
-	const identifierString = JSON.stringify( identifier, Object.keys( identifier ).sort() );
+	const keyList = [];
+	Object.keys( identifier ).forEach( key => {
+		keyList.push( key );
+
+		// whitelist nested object keys
+		if ( isObject( identifier[ key ] ) ) {
+			Array.prototype.push.apply( keyList, Object.keys( identifier[ key ] ) );
+		}
+	} );
+
+	const identifierString = JSON.stringify( identifier, keyList.sort() );
 	return `${ prefix }:${ identifierString }`;
 }
 
