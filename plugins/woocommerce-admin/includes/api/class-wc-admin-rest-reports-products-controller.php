@@ -32,6 +32,15 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 	protected $rest_base = 'reports/products';
 
 	/**
+	 * Mapping between external parameter name and name used in query class.
+	 *
+	 * @var array
+	 */
+	protected $param_mapping = array(
+		'products' => 'product_includes',
+	);
+
+	/**
 	 * Get items.
 	 *
 	 * @param WP_REST_Request $request Request data.
@@ -43,7 +52,11 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 		$registered = array_keys( $this->get_collection_params() );
 		foreach ( $registered as $param_name ) {
 			if ( isset( $request[ $param_name ] ) ) {
-				$args[ $param_name ] = $request[ $param_name ];
+				if ( isset( $this->param_mapping[ $param_name ] ) ) {
+					$args[ $this->param_mapping[ $param_name ] ] = $request[ $param_name ];
+				} else {
+					$args[ $param_name ] = $request[ $param_name ];
+				}
 			}
 		}
 
@@ -234,6 +247,16 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 				'type' => 'integer',
 			),
 		);
+		$params['match']                 = array(
+			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'wc-admin' ),
+			'type'              => 'string',
+			'default'           => 'all',
+			'enum'              => array(
+				'all',
+				'any',
+			),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 		$params['products']              = array(
 			'description'       => __( 'Limit result to items with specified product ids.', 'wc-admin' ),
 			'type'              => 'array',
@@ -242,6 +265,7 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 			'items'             => array(
 				'type' => 'integer',
 			),
+
 		);
 		$params['extended_info'] = array(
 			'description'       => __( 'Add additional piece of info about each product to the report.', 'wc-admin' ),

@@ -72,17 +72,15 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 	 */
 	protected function get_sql_query_params( $query_args ) {
 		global $wpdb;
+		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
 
-		$sql_query_params = $this->get_time_period_sql_params( $query_args );
+		$sql_query_params = $this->get_time_period_sql_params( $query_args, $order_product_lookup_table );
 		$sql_query_params = array_merge( $sql_query_params, $this->get_limit_sql_params( $query_args ) );
 		$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_sql_params( $query_args ) );
 
-		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
-		$allowed_products           = $this->get_allowed_products( $query_args );
-
-		if ( count( $allowed_products ) > 0 ) {
-			$allowed_products_str              = implode( ',', $allowed_products );
-			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$allowed_products_str})";
+		$included_products = $this->get_included_products( $query_args );
+		if ( $included_products ) {
+			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";
 		}
 
 		if ( count( $query_args['variations'] ) > 0 ) {

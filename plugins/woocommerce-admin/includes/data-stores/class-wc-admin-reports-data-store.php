@@ -121,6 +121,8 @@ class WC_Admin_Reports_Data_Store {
 		foreach ( $totals_arr as $key => $val ) {
 			$totals_arr[ $key ] = 0;
 		}
+		// TODO: should 'products' be in intervals?
+		unset( $totals_arr['products'] );
 		while ( $datetime <= $end_datetime ) {
 			$next_start = WC_Admin_Reports_Interval::iterate( $datetime, $time_interval );
 			$time_id    = WC_Admin_Reports_Interval::time_interval_id( $time_interval, $datetime );
@@ -258,12 +260,12 @@ class WC_Admin_Reports_Data_Store {
 					$new_start_date->setTimestamp( $new_start_date_timestamp );
 				}
 			}
-			$query_args['adj_after']          = $new_start_date->format( WC_Admin_Reports_Interval::$iso_datetime_format );
-			$query_args['adj_before']         = $new_end_date->format( WC_Admin_Reports_Interval::$iso_datetime_format );
-			$intervals_query['where_clause']  = '';
-			$intervals_query['where_clause'] .= " AND date_created <= '{$query_args['adj_before']}'";
-			$intervals_query['where_clause'] .= " AND date_created >= '{$query_args['adj_after']}'";
-			$intervals_query['limit']         = 'LIMIT 0,' . $intervals_query['per_page'];
+			$query_args['adj_after']               = $new_start_date->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+			$query_args['adj_before']              = $new_end_date->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+			$intervals_query['where_time_clause']  = '';
+			$intervals_query['where_time_clause'] .= " AND date_created <= '{$query_args['adj_before']}'";
+			$intervals_query['where_time_clause'] .= " AND date_created >= '{$query_args['adj_after']}'";
+			$intervals_query['limit']              = 'LIMIT 0,' . $intervals_query['per_page'];
 		} else {
 			if ( 'asc' === $query_args['order'] ) {
 				$offset = ( ( $query_args['page'] - 1 ) * $intervals_query['per_page'] ) - ( $expected_interval_count - $db_interval_count );
@@ -425,28 +427,30 @@ class WC_Admin_Reports_Data_Store {
 	}
 
 	/**
-	 * Fills WHERE clause of SQL request for 'Totals' section of data response based on user supplied parameters.
+	 * Fills WHERE clause of SQL request with date-related constraints.
 	 *
-	 * @param array $query_args Parameters supplied by the user.
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $table_name Name of the db table relevant for the date constraint.
 	 * @return array
 	 */
-	protected function get_time_period_sql_params( $query_args ) {
+	protected function get_time_period_sql_params( $query_args, $table_name ) {
 		$sql_query = array(
-			'from_clause'  => '',
-			'where_clause' => '',
+			'from_clause'       => '',
+			'where_time_clause' => '',
+			'where_clause'      => '',
 		);
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
-			$datetime                   = new DateTime( $query_args['before'] );
-			$datetime_str               = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
-			$sql_query['where_clause'] .= " AND date_created <= '$datetime_str'";
+			$datetime                        = new DateTime( $query_args['before'] );
+			$datetime_str                    = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+			$sql_query['where_time_clause'] .= " AND {$table_name}.date_created <= '$datetime_str'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
-			$datetime                   = new DateTime( $query_args['after'] );
-			$datetime_str               = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
-			$sql_query['where_clause'] .= " AND date_created >= '$datetime_str'";
+			$datetime                        = new DateTime( $query_args['after'] );
+			$datetime_str                    = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+			$sql_query['where_time_clause'] .= " AND {$table_name}.date_created >= '$datetime_str'";
 		}
 
 		return $sql_query;
@@ -497,16 +501,18 @@ class WC_Admin_Reports_Data_Store {
 	/**
 	 * Fills FROM and WHERE clauses of SQL request for 'Intervals' section of data response based on user supplied parameters.
 	 *
-	 * @param array $query_args Parameters supplied by the user.
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $table_name Name of the db table relevant for the date constraint.
 	 * @return array
 	 */
-	protected function get_intervals_sql_params( $query_args ) {
+	protected function get_intervals_sql_params( $query_args, $table_name ) {
 		$intervals_query = array(
-			'from_clause'  => '',
-			'where_clause' => '',
+			'from_clause'       => '',
+			'where_time_clause' => '',
+			'where_clause'      => '',
 		);
 
-		$intervals_query = array_merge( $intervals_query, $this->get_time_period_sql_params( $query_args ) );
+		$intervals_query = array_merge( $intervals_query, $this->get_time_period_sql_params( $query_args, $table_name ) );
 
 		if ( isset( $query_args['interval'] ) && '' !== $query_args['interval'] ) {
 			$interval                         = $query_args['interval'];
@@ -548,26 +554,151 @@ class WC_Admin_Reports_Data_Store {
 	}
 
 	/**
-	 * Returns ids of allowed products, based on query arguments from the user.
+	 * Returns comma separated ids of allowed products, based on query arguments from the user.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
-	 * @return array
+	 * @return string
 	 */
-	protected function get_allowed_products( $query_args ) {
-		$allowed_products = array();
+	protected function get_included_products( $query_args ) {
+		$included_products = array();
+		$operator          = $this->get_match_operator( $query_args );
+
 		if ( isset( $query_args['categories'] ) && is_array( $query_args['categories'] ) && count( $query_args['categories'] ) > 0 ) {
-			$allowed_products = $this->get_products_by_cat_ids( $query_args['categories'] );
-			$allowed_products = wc_list_pluck( $allowed_products, 'get_id' );
+			$included_products = $this->get_products_by_cat_ids( $query_args['categories'] );
+			$included_products = wc_list_pluck( $included_products, 'get_id' );
 		}
 
-		if ( isset( $query_args['products'] ) && is_array( $query_args['products'] ) && count( $query_args['products'] ) > 0 ) {
-			if ( count( $allowed_products ) > 0 ) {
-				$allowed_products = array_intersect( $allowed_products, $query_args['products'] );
+		if ( isset( $query_args['product_includes'] ) && is_array( $query_args['product_includes'] ) && count( $query_args['product_includes'] ) > 0 ) {
+			if ( count( $included_products ) > 0 ) {
+				if ( 'AND' === $operator ) {
+					$included_products = array_intersect( $included_products, $query_args['product_includes'] );
+				} elseif ( 'OR' === $operator ) {
+					// Union of products from selected categories and manually included products.
+					$included_products = array_unique( array_merge( $included_products, $query_args['product_includes'] ) );
+				}
 			} else {
-				$allowed_products = $query_args['products'];
+				$included_products = $query_args['product_includes'];
 			}
 		}
-		return $allowed_products;
+
+		$included_products_str = implode( ',', $included_products );
+		return $included_products_str;
+	}
+
+	/**
+	 * Returns comma separated ids of excluded products, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_excluded_products( $query_args ) {
+		$excluded_products_str = '';
+
+		if ( isset( $query_args['product_excludes'] ) && is_array( $query_args['product_excludes'] ) && count( $query_args['product_excludes'] ) > 0 ) {
+			$excluded_products_str = implode( ',', $query_args['product_excludes'] );
+		}
+		return $excluded_products_str;
+	}
+
+	/**
+	 * Returns comma separated ids of included coupons, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_included_coupons( $query_args ) {
+		$included_coupons_str = '';
+
+		if ( isset( $query_args['coupon_includes'] ) && is_array( $query_args['coupon_includes'] ) && count( $query_args['coupon_includes'] ) > 0 ) {
+			$included_coupons_str = implode( ',', $query_args['coupon_includes'] );
+		}
+		return $included_coupons_str;
+	}
+
+	/**
+	 * Returns comma separated ids of excluded coupons, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_excluded_coupons( $query_args ) {
+		$excluded_coupons_str = '';
+
+		if ( isset( $query_args['coupon_excludes'] ) && is_array( $query_args['coupon_excludes'] ) && count( $query_args['coupon_excludes'] ) > 0 ) {
+			$excluded_coupons_str = implode( ',', $query_args['coupon_excludes'] );
+		}
+		return $excluded_coupons_str;
+	}
+
+
+	/**
+	 * Returns order status subquery to be used in WHERE SQL query, based on query arguments from the user.
+	 *
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $operator   AND or OR, based on match query argument.
+	 * @return string
+	 */
+	protected function get_status_subquery( $query_args, $operator = 'AND' ) {
+		global $wpdb;
+
+		$subqueries = array();
+		if ( isset( $query_args['status_is'] ) && is_array( $query_args['status_is'] ) && count( $query_args['status_is'] ) > 0 ) {
+			$allowed_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is'] );
+			if ( $allowed_statuses ) {
+				$subqueries[] = "{$wpdb->prefix}posts.post_status IN ( '" . implode( "','", $allowed_statuses ) . "' )";
+			}
+		}
+
+		if ( isset( $query_args['status_is_not'] ) && is_array( $query_args['status_is_not'] ) && count( $query_args['status_is_not'] ) > 0 ) {
+			$forbidden_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is_not'] );
+			if ( $forbidden_statuses ) {
+				$subqueries[] = "{$wpdb->prefix}posts.post_status NOT IN ( '" . implode( "','", $forbidden_statuses ) . "' )";
+			}
+		}
+
+		return implode( " $operator ", $subqueries );
+	}
+
+	/**
+	 * Returns customer subquery to be used in WHERE SQL query, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_customer_subquery( $query_args ) {
+		global $wpdb;
+
+		$customer_filter = '';
+		if ( isset( $query_args['customer'] ) ) {
+			if ( 'new' === strtolower( $query_args['customer'] ) ) {
+				$customer_filter = " {$wpdb->prefix}wc_order_stats.returning_customer = 0";
+			} elseif ( 'returning' === strtolower( $query_args['customer'] ) ) {
+				$customer_filter = " {$wpdb->prefix}wc_order_stats.returning_customer = 1";
+			}
+		}
+
+		return $customer_filter;
+	}
+
+	/**
+	 * Returns logic operator for WHERE subclause based on 'match' query argument.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_match_operator( $query_args ) {
+		$operator = 'AND';
+
+		if ( ! isset( $query_args['match'] ) ) {
+			return $operator;
+		}
+
+		if ( 'all' === strtolower( $query_args['match'] ) ) {
+			$operator = 'AND';
+		} elseif ( 'any' === strtolower( $query_args['match'] ) ) {
+			$operator = 'OR';
+		}
+		return $operator;
 	}
 
 }

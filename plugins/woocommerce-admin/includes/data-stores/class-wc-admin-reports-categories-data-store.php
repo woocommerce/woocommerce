@@ -67,25 +67,22 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 	 */
 	protected function get_sql_query_params( $query_args ) {
 		global $wpdb;
+		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
 
-		$sql_query_params = $this->get_time_period_sql_params( $query_args );
+		$sql_query_params = $this->get_time_period_sql_params( $query_args, $order_product_lookup_table );
 		// Limit is left out here so that the grouping in code by PHP can be applied correctly.
 		$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_sql_params( $query_args ) );
 
-		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
-
-		$allowed_products = $this->get_allowed_products( $query_args );
-
-		if ( count( $allowed_products ) > 0 ) {
-			$allowed_products_str              = implode( ',', $allowed_products );
-			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$allowed_products_str})";
+		// TODO: only products in the category C or orders with products from category C (and, possibly others?).
+		$included_products = $this->get_included_products( $query_args );
+		if ( $included_products ) {
+			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";
 		}
 
-		if ( is_array( $query_args['order_status'] ) && count( $query_args['order_status'] ) > 0 ) {
-			$statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['order_status'] );
-
+		$order_status_filter = $this->get_status_subquery( $query_args );
+		if ( $order_status_filter ) {
 			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}posts ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}posts.ID";
-			$sql_query_params['where_clause'] .= " AND {$wpdb->prefix}posts.post_status IN ( '" . implode( "','", $statuses ) . "' ) ";
+			$sql_query_params['where_clause'] .= " AND ( {$order_status_filter} )";
 		}
 
 		return $sql_query_params;
@@ -204,6 +201,7 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 						{$sql_query_params['from_clause']}
 					WHERE
 						1=1
+						{$sql_query_params['where_time_clause']}
 						{$sql_query_params['where_clause']}
 					GROUP BY
 						product_id

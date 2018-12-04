@@ -38,18 +38,24 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args                 = array();
-		$args['before']       = $request['before'];
-		$args['after']        = $request['after'];
-		$args['interval']     = $request['interval'];
-		$args['page']         = $request['page'];
-		$args['per_page']     = $request['per_page'];
-		$args['orderby']      = $request['orderby'];
-		$args['order']        = $request['order'];
-		$args['categories']   = (array) $request['categories'];
-		$args['coupons']      = (array) $request['coupons'];
-		$args['products']     = (array) $request['products'];
-		$args['order_status'] = (array) $request['order_status'];
+		$args             = array();
+		$args['before']   = $request['before'];
+		$args['after']    = $request['after'];
+		$args['interval'] = $request['interval'];
+		$args['page']     = $request['page'];
+		$args['per_page'] = $request['per_page'];
+		$args['orderby']  = $request['orderby'];
+		$args['order']    = $request['order'];
+
+		$args['match']            = $request['match'];
+		$args['status_is']        = (array) $request['status_is'];
+		$args['status_is_not']    = (array) $request['status_is_not'];
+		$args['product_includes'] = (array) $request['product_includes'];
+		$args['product_excludes'] = (array) $request['product_excludes'];
+		$args['coupon_includes']    = (array) $request['coupon_includes'];
+		$args['coupon_excludes']    = (array) $request['coupon_excludes'];
+		$args['customer']         = $request['customer'];
+		$args['categories']       = (array) $request['categories'];
 
 		return $args;
 	}
@@ -234,9 +240,9 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                 = array();
-		$params['context']      = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']         = array(
+		$params                     = array();
+		$params['context']          = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['page']             = array(
 			'description'       => __( 'Current page of the collection.', 'wc-admin' ),
 			'type'              => 'integer',
 			'default'           => 1,
@@ -244,7 +250,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 			'validate_callback' => 'rest_validate_request_arg',
 			'minimum'           => 1,
 		);
-		$params['per_page']     = array(
+		$params['per_page']         = array(
 			'description'       => __( 'Maximum number of items to be returned in result set.', 'wc-admin' ),
 			'type'              => 'integer',
 			'default'           => 10,
@@ -253,26 +259,26 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after']        = array(
+		$params['after']            = array(
 			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before']       = array(
+		$params['before']           = array(
 			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order']        = array(
+		$params['order']            = array(
 			'description'       => __( 'Order sort attribute ascending or descending.', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby']      = array(
+		$params['orderby']          = array(
 			'description'       => __( 'Sort collection by object attribute.', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'date',
@@ -284,7 +290,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['interval']     = array(
+		$params['interval']         = array(
 			'description'       => __( 'Time interval to use for buckets in the returned data.', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'week',
@@ -298,27 +304,18 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['categories']   = array(
-			'description'       => __( 'Limit result set to all items that have the specified term assigned in the categories taxonomy.', 'wc-admin' ),
+		$params['match']            = array(
+			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'wc-admin' ),
 			'type'              => 'string',
-			'sanitize_callback' => 'wp_parse_id_list',
+			'default'           => 'all',
+			'enum'              => array(
+				'all',
+				'any',
+			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['coupons']      = array(
-			'description'       => __( 'Limit result set to all items that have the specified coupon assigned.', 'wc-admin' ),
-			'type'              => 'string',
-			'sanitize_callback' => 'wp_parse_id_list',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['products']     = array(
-			'description'       => __( 'Limit result set to all items that have the specified product assigned.', 'wc-admin' ),
-			'type'              => 'string',
-			'sanitize_callback' => 'wp_parse_id_list',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['order_status'] = array(
-			'default'           => array( 'completed', 'processing', 'on-hold' ),
-			'description'       => __( 'Limit result set to orders assigned one or more statuses', 'wc-admin' ),
+		$params['status_is']        = array(
+			'description'       => __( 'Limit result set to items that have the specified order status.', 'wc-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -326,6 +323,62 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 				'enum' => $this->get_order_statuses(),
 				'type' => 'string',
 			),
+		);
+		$params['status_is_not']    = array(
+			'description'       => __( 'Limit result set to items that don\'t have the specified order status.', 'wc-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_slug_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'enum' => $this->get_order_statuses(),
+				'type' => 'string',
+			),
+		);
+		$params['product_includes'] = array(
+			'description'       => __( 'Limit result set to items that have the specified product(s) assigned.', 'wc-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
+
+		);
+		$params['product_excludes'] = array(
+			'description'       => __( 'Limit result set to items that don\'t have the specified product(s) assigned.', 'wc-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
+		);
+		$params['coupon_includes']    = array(
+			'description'       => __( 'Limit result set to items that have the specified coupon(s) assigned.', 'wc-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
+		);
+		$params['coupon_excludes']    = array(
+			'description'       => __( 'Limit result set to items that don\'t have the specified coupon(s) assigned.', 'wc-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
+		);
+		$params['customer']         = array(
+			'description'       => __( 'Limit result set to items that don\'t have the specified coupon(s) assigned.', 'wc-admin' ),
+			'type'              => 'string',
+			'enum'              => array(
+				'new',
+				'returning',
+			),
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;

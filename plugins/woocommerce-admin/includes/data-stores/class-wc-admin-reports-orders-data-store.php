@@ -48,6 +48,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		'avg_order_value'         => 'floatval',
 		'num_returning_customers' => 'intval',
 		'num_new_customers'       => 'intval',
+		'products'                => 'intval',
 	);
 
 	/**
@@ -91,6 +92,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	 */
 	public static function init() {
 		add_action( 'save_post', array( __CLASS__, 'sync_order' ) );
+		// TODO: this is required as order update skips save_post.
+		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order' ) );
 
 		if ( ! self::$background_process ) {
 			self::$background_process = new WC_Admin_Order_Stats_Background_Process();
@@ -173,50 +176,84 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		// TODO: performance of all of this?
 		global $wpdb;
 
-		$where_clause = '';
-		$from_clause  = '';
-
+		$from_clause        = '';
 		$orders_stats_table = $wpdb->prefix . self::TABLE_NAME;
-		$allowed_products   = $this->get_allowed_products( $query_args );
+		$operator           = $this->get_match_operator( $query_args );
 
-		if ( count( $allowed_products ) > 0 ) {
-			$allowed_products_str = implode( ',', $allowed_products );
+		$where_filters = array();
 
-			$where_clause .= " AND {$orders_stats_table}.order_id IN (
+		// TODO: maybe move the sql inside the get_included/excluded functions?
+		// Products filters.
+		$included_products = $this->get_included_products( $query_args );
+		$excluded_products = $this->get_excluded_products( $query_args );
+		if ( $included_products ) {
+			$where_filters[] = " {$orders_stats_table}.order_id IN (
 			SELECT
 				DISTINCT {$wpdb->prefix}wc_order_product_lookup.order_id
 			FROM
 				{$wpdb->prefix}wc_order_product_lookup
 			WHERE
-				{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$allowed_products_str})
+				{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$included_products})
 			)";
 		}
 
-		if ( is_array( $query_args['coupons'] ) && count( $query_args['coupons'] ) > 0 ) {
-			$allowed_coupons_str = implode( ', ', $query_args['coupons'] );
-
-			$where_clause .= " AND {$orders_stats_table}.order_id IN (
+		if ( $excluded_products ) {
+			$where_filters[] = " {$orders_stats_table}.order_id NOT IN (
 			SELECT
-				DISTINCT {$wpdb->prefix}wc_order_coupon_lookup.order_id
+				DISTINCT {$wpdb->prefix}wc_order_product_lookup.order_id
 			FROM
-				{$wpdb->prefix}wc_order_coupon_lookup
+				{$wpdb->prefix}wc_order_product_lookup
 			WHERE
-				{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$allowed_coupons_str})
+				{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$excluded_products})
 			)";
 		}
 
-		if ( is_array( $query_args['order_status'] ) && count( $query_args['order_status'] ) > 0 ) {
-			$statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['order_status'] );
-
-			$from_clause  .= " JOIN {$wpdb->prefix}posts ON {$orders_stats_table}.order_id = {$wpdb->prefix}posts.ID";
-			$where_clause .= " AND {$wpdb->prefix}posts.post_status IN ( '" . implode( "','", $statuses ) . "' ) ";
+		// Coupons filters.
+		$included_coupons = $this->get_included_coupons( $query_args );
+		$excluded_coupons = $this->get_excluded_coupons( $query_args );
+		if ( $included_coupons ) {
+			$where_filters[] = " {$orders_stats_table}.order_id IN (
+				SELECT
+					DISTINCT {$wpdb->prefix}wc_order_coupon_lookup.order_id
+				FROM
+					{$wpdb->prefix}wc_order_coupon_lookup
+				WHERE
+					{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$included_coupons})
+				)";
 		}
+
+		if ( $excluded_coupons ) {
+			$where_filters[] = " {$orders_stats_table}.order_id NOT IN (
+				SELECT
+					DISTINCT {$wpdb->prefix}wc_order_coupon_lookup.order_id
+				FROM
+					{$wpdb->prefix}wc_order_coupon_lookup
+				WHERE
+					{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$excluded_coupons})
+				)";
+		}
+
+		// TODO: move order status to wc_order_stats so that JOIN is not necessary.
+		$order_status_filter = $this->get_status_subquery( $query_args, $operator );
+		if ( $order_status_filter ) {
+			$from_clause    .= " JOIN {$wpdb->prefix}posts ON {$orders_stats_table}.order_id = {$wpdb->prefix}posts.ID";
+			$where_filters[] = $order_status_filter;
+		}
+
+		$customer_filter = $this->get_customer_subquery( $query_args );
+		if ( $customer_filter ) {
+			$where_filters[] = $customer_filter;
+		}
+
+		$where_subclause = implode( " $operator ", $where_filters );
 
 		// To avoid requesting the subqueries twice, the result is applied to all queries passed to the method.
-		$totals_query['where_clause']    .= $where_clause;
-		$totals_query['from_clause']     .= $from_clause;
-		$intervals_query['where_clause'] .= $where_clause;
-		$intervals_query['from_clause']  .= $from_clause;
+		if ( $where_subclause ) {
+			$totals_query['where_clause']    .= " AND ( $where_subclause )";
+			$totals_query['from_clause']     .= $from_clause;
+			$intervals_query['where_clause'] .= " AND ( $where_subclause )";
+			$intervals_query['from_clause']  .= $from_clause;
+		}
 	}
 
 	/**
@@ -235,18 +272,24 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 
 		// These defaults are only applied when not using REST API, as the API has its own defaults that overwrite these for most values (except before, after, etc).
 		$defaults   = array(
-			'per_page'     => get_option( 'posts_per_page' ),
-			'page'         => 1,
-			'order'        => 'DESC',
-			'orderby'      => 'date',
-			'before'       => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
-			'after'        => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
-			'interval'     => 'week',
-			'fields'       => '*',
-			'categories'   => array(),
-			'coupons'      => array(),
-			'order_status' => parent::get_report_order_statuses(),
-			'products'     => array(),
+			'per_page'         => get_option( 'posts_per_page' ),
+			'page'             => 1,
+			'order'            => 'DESC',
+			'orderby'          => 'date',
+			'before'           => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
+			'after'            => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
+			'interval'         => 'week',
+			'fields'           => '*',
+
+			'match'            => 'all',
+			'status_is'        => array(),
+			'status_is_not'    => array(),
+			'product_includes' => array(),
+			'product_excludes' => array(),
+			'coupon_includes'  => array(),
+			'coupon_excludes'  => array(),
+			'customer'         => '',
+			'categories'       => array(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 
@@ -263,8 +306,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			);
 
 			$selections      = $this->selected_columns( $query_args );
-			$totals_query    = $this->get_time_period_sql_params( $query_args );
-			$intervals_query = $this->get_intervals_sql_params( $query_args );
+			$totals_query    = $this->get_time_period_sql_params( $query_args, $table_name );
+			$intervals_query = $this->get_intervals_sql_params( $query_args, $table_name );
 
 			// Additional filtering for Orders report.
 			$this->orders_stats_sql_filter( $query_args, $totals_query, $intervals_query );
@@ -277,6 +320,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 						{$totals_query['from_clause']}
 					WHERE
 						1=1
+						{$totals_query['where_time_clause']}
 						{$totals_query['where_clause']}",
 				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
@@ -284,12 +328,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
 			}
 
-			$unique_products = $this->get_unique_products( $totals_query['where_clause'] );
+			$unique_products       = $this->get_unique_product_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
 			$totals[0]['products'] = $unique_products;
-
-			// Specification says these are not included in totals.
-			unset( $totals[0]['date_start'] );
-			unset( $totals[0]['date_end'] );
 
 			$totals = (object) $this->cast_numbers( $totals[0] );
 
@@ -301,6 +341,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 							{$intervals_query['from_clause']}
 						WHERE
 							1=1
+							{$intervals_query['where_time_clause']}
 							{$intervals_query['where_clause']}
 						GROUP BY
 							time_interval"
@@ -330,6 +371,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 							{$intervals_query['from_clause']}
 						WHERE
 							1=1
+							{$intervals_query['where_time_clause']}
 							{$intervals_query['where_clause']}
 						GROUP BY
 							time_interval
@@ -369,19 +411,25 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	/**
 	 * Get unique products based on user time query
 	 *
-	 * @param string $where_clause Where clause with date query.
+	 * @param string $from_clause       From clause with date query.
+	 * @param string $where_time_clause Where clause with date query.
+	 * @param string $where_clause      Where clause with date query.
 	 * @return integer Unique product count.
 	 */
-	public function get_unique_products( $where_clause ) {
+	public function get_unique_product_count( $from_clause, $where_time_clause, $where_clause ) {
 		global $wpdb;
+
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
 
 		return $wpdb->get_var(
 			"SELECT
 					COUNT( DISTINCT {$wpdb->prefix}wc_order_product_lookup.product_id )
 				FROM
-					{$wpdb->prefix}wc_order_product_lookup JOIN {$wpdb->prefix}posts ON {$wpdb->prefix}wc_order_product_lookup.order_id = {$wpdb->prefix}posts.ID
+				    {$wpdb->prefix}wc_order_product_lookup JOIN {$table_name} ON {$wpdb->prefix}wc_order_product_lookup.order_id = {$table_name}.order_id
+					{$from_clause}
 				WHERE
 					1=1
+					{$where_time_clause}
 					{$where_clause}"
 		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 	}

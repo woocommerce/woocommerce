@@ -131,49 +131,64 @@ class WC_Admin_REST_Reports_Revenue_Stats_Controller extends WC_REST_Reports_Con
 	 */
 	public function get_item_schema() {
 		$totals = array(
-			'gross_revenue' => array(
+			'gross_revenue'  => array(
 				'description' => __( 'Gross revenue.', 'wc-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'net_revenue'   => array(
+			'net_revenue'    => array(
 				'description' => __( 'Net revenue.', 'wc-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'coupons'       => array(
+			'coupons'        => array(
 				'description' => __( 'Total of coupons.', 'wc-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'shipping'      => array(
+			'shipping'       => array(
 				'description' => __( 'Total of shipping.', 'wc-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'taxes'         => array(
+			'taxes'          => array(
 				'description' => __( 'Total of taxes.', 'wc-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'refunds'       => array(
+			'refunds'        => array(
 				'description' => __( 'Total of refunds.', 'wc-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'orders_count'  => array(
+			'orders_count'   => array(
+				'description' => __( 'Amount of orders', 'wc-admin' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'num_items_sold' => array(
+				'description' => __( 'Amount of orders', 'wc-admin' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'products'       => array(
 				'description' => __( 'Amount of orders', 'wc-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 		);
+
+		$intervals = $totals;
+		unset( $intervals['products'] );
 
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
@@ -231,7 +246,7 @@ class WC_Admin_REST_Reports_Revenue_Stats_Controller extends WC_REST_Reports_Con
 								'type'        => 'object',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
-								'properties'  => $totals,
+								'properties'  => $intervals,
 							),
 						),
 					),

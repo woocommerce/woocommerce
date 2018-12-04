@@ -32,6 +32,15 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 	protected $rest_base = 'reports/products/stats';
 
 	/**
+	 * Mapping between external parameter name and name used in query class.
+	 *
+	 * @var array
+	 */
+	protected $param_mapping = array(
+		'products' => 'product_includes',
+	);
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -54,9 +63,14 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 			),
 		);
 
-		foreach ( array_keys( $this->get_collection_params() ) as $arg ) {
-			if ( isset( $request[ $arg ] ) ) {
-				$query_args[ $arg ] = $request[ $arg ];
+		$registered = array_keys( $this->get_collection_params() );
+		foreach ( $registered as $param_name ) {
+			if ( isset( $request[ $param_name ] ) ) {
+				if ( isset( $this->param_mapping[ $param_name ] ) ) {
+					$query_args[ $this->param_mapping[ $param_name ] ] = $request[ $param_name ];
+				} else {
+					$query_args[ $param_name ] = $request[ $param_name ];
+				}
 			}
 		}
 

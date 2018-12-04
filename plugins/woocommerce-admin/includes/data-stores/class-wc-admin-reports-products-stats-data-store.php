@@ -50,28 +50,27 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 	protected function update_sql_query_params( $query_args, &$totals_params, &$intervals_params ) {
 		global $wpdb;
 
-		$allowed_products      = $this->get_allowed_products( $query_args );
 		$products_where_clause = '';
 		$products_from_clause  = '';
 
 		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
-		if ( count( $allowed_products ) > 0 ) {
-			$allowed_products_str   = implode( ',', $allowed_products );
-			$products_where_clause .= " AND {$order_product_lookup_table}.product_id IN ({$allowed_products_str})";
+
+		$included_products = $this->get_included_products( $query_args );
+		if ( $included_products ) {
+			$products_where_clause .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";
 		}
 
-		if ( is_array( $query_args['order_status'] ) && count( $query_args['order_status'] ) > 0 ) {
-			$statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['order_status'] );
-
+		$order_status_filter = $this->get_status_subquery( $query_args );
+		if ( $order_status_filter ) {
 			$products_from_clause  .= " JOIN {$wpdb->prefix}posts ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}posts.ID";
-			$products_where_clause .= " AND {$wpdb->prefix}posts.post_status IN ( '" . implode( "','", $statuses ) . "' ) ";
+			$products_where_clause .= " AND ( {$order_status_filter} )";
 		}
 
-		$totals_params                  = array_merge( $totals_params, $this->get_time_period_sql_params( $query_args ) );
+		$totals_params                  = array_merge( $totals_params, $this->get_time_period_sql_params( $query_args, $order_product_lookup_table ) );
 		$totals_params['where_clause'] .= $products_where_clause;
 		$totals_params['from_clause']  .= $products_from_clause;
 
-		$intervals_params                  = array_merge( $intervals_params, $this->get_intervals_sql_params( $query_args ) );
+		$intervals_params                  = array_merge( $intervals_params, $this->get_intervals_sql_params( $query_args, $order_product_lookup_table ) );
 		$intervals_params['where_clause'] .= $products_where_clause;
 		$intervals_params['from_clause']  .= $products_from_clause;
 	}
@@ -91,19 +90,19 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 		$week_back  = $now - WEEK_IN_SECONDS;
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
-		$defaults = array(
-			'per_page'     => get_option( 'posts_per_page' ),
-			'page'         => 1,
-			'order'        => 'DESC',
-			'orderby'      => 'date',
-			'before'       => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
-			'after'        => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
-			'fields'       => '*',
-			'categories'   => array(),
-			'interval'     => 'week',
-			'products'     => array(),
+		$defaults   = array(
+			'per_page'         => get_option( 'posts_per_page' ),
+			'page'             => 1,
+			'order'            => 'DESC',
+			'orderby'          => 'date',
+			'before'           => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
+			'after'            => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
+			'fields'           => '*',
+			'categories'       => array(),
+			'interval'         => 'week',
+			'product_includes' => array(),
 			// This is not a parameter for products reports per se, but we should probably restricts order statuses here, too.
-			'order_status' => parent::get_report_order_statuses(),
+			'order_status'     => parent::get_report_order_statuses(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 
@@ -125,6 +124,7 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 								{$intervals_query['from_clause']}
 							WHERE
 								1=1
+								{$intervals_query['where_time_clause']}
 								{$intervals_query['where_clause']}
 							GROUP BY
 								time_interval
@@ -144,6 +144,7 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 						{$totals_query['from_clause']}
 					WHERE
 						1=1
+						{$totals_query['where_time_clause']}
 						{$totals_query['where_clause']}",
 				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
@@ -166,6 +167,7 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 							{$intervals_query['from_clause']}
 						WHERE
 							1=1
+							{$intervals_query['where_time_clause']}
 							{$intervals_query['where_clause']}
 						GROUP BY
 							time_interval

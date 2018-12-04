@@ -46,7 +46,9 @@ function wc_admin_order_product_lookup_entry( $order_id ) {
 		);
 	}
 }
+// TODO: maybe replace these with woocommerce_create_order, woocommerce_update_order, woocommerce_trash_order, woocommerce_delete_order, as clean_post_cache might be called in other circumstances and trigger too many updates?
 add_action( 'save_post', 'wc_admin_order_product_lookup_entry', 10, 1 );
+add_action( 'clean_post_cache', 'wc_admin_order_product_lookup_entry', 10, 1 );
 
 /**
  * Make an entry in the wc_order_tax_lookup table for an order.
@@ -84,6 +86,7 @@ function wc_order_tax_lookup_entry( $order_id ) {
 	}
 }
 add_action( 'save_post', 'wc_order_tax_lookup_entry', 10, 1 );
+add_action( 'clean_post_cache', 'wc_order_tax_lookup_entry', 10, 1 );
 
 /**
  * Make an entry in the wc_order_coupon_lookup table for an order.
@@ -106,7 +109,7 @@ function wc_order_coupon_lookup_entry( $order_id ) {
 			$wpdb->prefix . 'wc_order_coupon_lookup',
 			array(
 				'order_id'              => $order_id,
-				'coupon_id'             => $coupon_item->get_id(),
+				'coupon_id'             => wc_get_coupon_id_by_code( $coupon_item->get_code() ),
 				'coupon_gross_discount' => $coupon_item->get_discount(),
 				'date_created'          => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 			),
@@ -120,3 +123,4 @@ function wc_order_coupon_lookup_entry( $order_id ) {
 	}
 }
 add_action( 'save_post', 'wc_order_coupon_lookup_entry', 10, 1 );
+add_action( 'clean_post_cache', 'wc_order_coupon_lookup_entry', 10, 1 );

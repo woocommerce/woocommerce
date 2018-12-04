@@ -47,6 +47,8 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 		$args['orderby']    = $request['orderby'];
 		$args['order']      = $request['order'];
 		$args['categories'] = (array) $request['categories'];
+		$args['status_is']     = (array) $request['status_is'];
+		$args['status_is_not'] = (array) $request['status_is_not'];
 
 		return $args;
 	}
@@ -265,6 +267,26 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+		$params['status_is']        = array(
+			'description'       => __( 'Limit result set to items that have the specified order status.', 'wc-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_slug_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'enum' => $this->get_order_statuses(),
+				'type' => 'string',
+			),
+		);
+		$params['status_is_not']    = array(
+			'description'       => __( 'Limit result set to items that don\'t have the specified order status.', 'wc-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_slug_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'enum' => $this->get_order_statuses(),
+				'type' => 'string',
+			),
+		);
 		$params['categories'] = array(
 			'description'       => __( 'Limit result set to all items that have the specified term assigned in the categories taxonomy.', 'wc-admin' ),
 			'type'              => 'array',
@@ -276,5 +298,20 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 		);
 
 		return $params;
+	}
+
+	/**
+	 * Get order statuses without prefixes.
+	 *
+	 * @return array
+	 */
+	protected function get_order_statuses() {
+		$order_statuses = array();
+
+		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
+			$order_statuses[] = str_replace( 'wc-', '', $status );
+		}
+
+		return $order_statuses;
 	}
 }

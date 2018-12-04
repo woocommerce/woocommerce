@@ -98,24 +98,21 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 	 */
 	protected function get_sql_query_params( $query_args ) {
 		global $wpdb;
+		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
 
-		$sql_query_params = $this->get_time_period_sql_params( $query_args );
+		$sql_query_params = $this->get_time_period_sql_params( $query_args, $order_product_lookup_table );
 		$sql_query_params = array_merge( $sql_query_params, $this->get_limit_sql_params( $query_args ) );
 		$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_sql_params( $query_args ) );
 
-		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
-		$allowed_products           = $this->get_allowed_products( $query_args );
-
-		if ( count( $allowed_products ) > 0 ) {
-			$allowed_products_str              = implode( ',', $allowed_products );
-			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$allowed_products_str})";
+		$included_products = $this->get_included_products( $query_args );
+		if ( $included_products ) {
+			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";
 		}
 
-		if ( is_array( $query_args['order_status'] ) && count( $query_args['order_status'] ) > 0 ) {
-			$statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['order_status'] );
-
-			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}posts AS _orders ON {$order_product_lookup_table}.order_id = _orders.ID";
-			$sql_query_params['where_clause'] .= " AND _orders.post_status IN ( '" . implode( "','", $statuses ) . "' ) ";
+		$order_status_filter = $this->get_status_subquery( $query_args );
+		if ( $order_status_filter ) {
+			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}posts ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}posts.ID";
+			$sql_query_params['where_clause'] .= " AND ( {$order_status_filter} )";
 		}
 
 		return $sql_query_params;
@@ -178,18 +175,18 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults = array(
-			'per_page'      => get_option( 'posts_per_page' ),
-			'page'          => 1,
-			'order'         => 'DESC',
-			'orderby'       => 'date',
-			'before'        => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
-			'after'         => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
-			'fields'        => '*',
-			'categories'    => array(),
-			'products'      => array(),
-			'extended_info' => false,
+			'per_page'         => get_option( 'posts_per_page' ),
+			'page'             => 1,
+			'order'            => 'DESC',
+			'orderby'          => 'date',
+			'before'           => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
+			'after'            => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
+			'fields'           => '*',
+			'categories'       => array(),
+			'product_includes' => array(),
+			'extended_info'    => false,
 			// This is not a parameter for products reports per se, but we want to only take into account selected order types.
-			'order_status'  => parent::get_report_order_statuses(),
+			'order_status'     => parent::get_report_order_statuses(),
 
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
@@ -217,6 +214,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 								{$sql_query_params['from_clause']}
 							WHERE
 								1=1
+								{$sql_query_params['where_time_clause']}
 								{$sql_query_params['where_clause']}
 							GROUP BY
 								product_id
@@ -236,6 +234,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 						{$sql_query_params['from_clause']}
 					WHERE
 						1=1
+						{$sql_query_params['where_time_clause']}
 						{$sql_query_params['where_clause']}
 					GROUP BY
 						product_id
