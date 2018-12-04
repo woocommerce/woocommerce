@@ -85,7 +85,7 @@ export default class ProductByCategoryBlock extends Component {
 
 		return (
 			<InspectorControls key="inspector">
-				<PanelBody title={ __( 'Product Category', 'woocommerce' ) } initialOpen={ false }>
+				<PanelBody title={ __( 'Product Category', 'woo-gutenberg-products-block' ) } initialOpen={ false }>
 					<ProductCategoryControl
 						selected={ attributes.categories }
 						onChange={ ( value = [] ) => {
@@ -94,53 +94,53 @@ export default class ProductByCategoryBlock extends Component {
 						} }
 					/>
 				</PanelBody>
-				<PanelBody title={ __( 'Layout', 'woocommerce' ) } initialOpen>
+				<PanelBody title={ __( 'Layout', 'woo-gutenberg-products-block' ) } initialOpen>
 					<RangeControl
-						label={ __( 'Columns', 'woocommerce' ) }
+						label={ __( 'Columns', 'woo-gutenberg-products-block' ) }
 						value={ columns }
 						onChange={ ( value ) => setAttributes( { columns: value } ) }
 						min={ wc_product_block_data.min_columns }
 						max={ wc_product_block_data.max_columns }
 					/>
 					<RangeControl
-						label={ __( 'Rows', 'woocommerce' ) }
+						label={ __( 'Rows', 'woo-gutenberg-products-block' ) }
 						value={ rows }
 						onChange={ ( value ) => setAttributes( { rows: value } ) }
 						min={ wc_product_block_data.min_rows }
 						max={ wc_product_block_data.max_rows }
 					/>
 				</PanelBody>
-				<PanelBody title={ __( 'Order By', 'woocommerce' ) } initialOpen={ false }>
+				<PanelBody title={ __( 'Order By', 'woo-gutenberg-products-block' ) } initialOpen={ false }>
 					<SelectControl
-						label={ __( 'Order products by', 'woocommerce' ) }
+						label={ __( 'Order products by', 'woo-gutenberg-products-block' ) }
 						value={ orderby }
 						options={ [
 							{
-								label: __( 'Newness - newest first', 'woocommerce' ),
+								label: __( 'Newness - newest first', 'woo-gutenberg-products-block' ),
 								value: 'date',
 							},
 							{
-								label: __( 'Price - low to high', 'woocommerce' ),
+								label: __( 'Price - low to high', 'woo-gutenberg-products-block' ),
 								value: 'price_asc',
 							},
 							{
-								label: __( 'Price - high to low', 'woocommerce' ),
+								label: __( 'Price - high to low', 'woo-gutenberg-products-block' ),
 								value: 'price_desc',
 							},
 							{
-								label: __( 'Rating - highest first', 'woocommerce' ),
+								label: __( 'Rating - highest first', 'woo-gutenberg-products-block' ),
 								value: 'rating',
 							},
 							{
-								label: __( 'Sales - most first', 'woocommerce' ),
+								label: __( 'Sales - most first', 'woo-gutenberg-products-block' ),
 								value: 'popularity',
 							},
 							{
-								label: __( 'Title - alphabetical', 'woocommerce' ),
+								label: __( 'Title - alphabetical', 'woo-gutenberg-products-block' ),
 								value: 'title',
 							},
 							{
-								label: __( 'Menu Order', 'woocommerce' ),
+								label: __( 'Menu Order', 'woo-gutenberg-products-block' ),
 								value: 'menu_order',
 							},
 						] }
@@ -155,18 +155,18 @@ export default class ProductByCategoryBlock extends Component {
 		const { attributes, debouncedSpeak, setAttributes } = this.props;
 		const onDone = () => {
 			setAttributes( { editMode: false } );
-			debouncedSpeak( __( 'Showing product block preview.', 'woocommerce' ) );
+			debouncedSpeak( __( 'Showing product block preview.', 'woo-gutenberg-products-block' ) );
 		};
 
 		return (
 			<Placeholder
 				icon="category"
-				label={ __( 'Products by Category', 'woocommerce' ) }
+				label={ __( 'Products by Category', 'woo-gutenberg-products-block' ) }
 				className="wc-block-products-category"
 			>
 				{ __(
 					'Display a grid of products from your selected categories',
-					'woocommerce'
+					'woo-gutenberg-products-block'
 				) }
 				<div className="wc-block-products-category__selection">
 					<ProductCategoryControl
@@ -180,7 +180,7 @@ export default class ProductByCategoryBlock extends Component {
 						isDefault
 						onClick={ onDone }
 					>
-						{ __( 'Done', 'woocommerce' ) }
+						{ __( 'Done', 'woo-gutenberg-products-block' ) }
 					</Button>
 				</div>
 			</Placeholder>
@@ -223,12 +223,12 @@ export default class ProductByCategoryBlock extends Component {
 						) : (
 							<Placeholder
 								icon="category"
-								label={ __( 'Products by Category', 'woocommerce' ) }
+								label={ __( 'Products by Category', 'woo-gutenberg-products-block' ) }
 							>
 								{ ! loaded ? (
 									<Spinner />
 								) : (
-									__( 'No products in this category.', 'woocommerce' )
+									__( 'No products in this category.', 'woo-gutenberg-products-block' )
 								) }
 							</Placeholder>
 						) }
@@ -258,13 +258,13 @@ const WrappedProductByCategoryBlock = withSpokenMessages( ProductByCategoryBlock
  * Register and run the "Products by Category" block.
  */
 registerBlockType( 'woocommerce/product-category', {
-	title: __( 'Products by Category', 'woocommerce' ),
+	title: __( 'Products by Category', 'woo-gutenberg-products-block' ),
 	icon: 'category',
 	category: 'widgets',
-	keywords: [ 'woocommerce' ],
+	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
 		'Display a grid of products from your selected categories.',
-		'woocommerce'
+		'woo-gutenberg-products-block'
 	),
 	attributes: {
 		...sharedAttributes,
