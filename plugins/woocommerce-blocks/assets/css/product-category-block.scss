@@ -2,11 +2,47 @@
 // @todo Move this to a separate file so we can build a cacheable single stylesheet for all blocks.
 @import "../../node_modules/@woocommerce/components/build-style/style.css";
 
+// Hack to hide preview overflow.
+.editor-block-preview__content {
+	overflow: hidden;
+}
+
 .wc-block-products-category {
 	overflow: hidden;
 
 	&.components-placeholder {
 		padding: 2em 1em;
+	}
+
+	.editor-block-preview & {
+		min-width: 5em;
+
+		.wc-product-preview__title,
+		.wc-product-preview__price,
+		.wc-product-preview__add-to-cart {
+			font-size: 0.6em;
+		}
+
+		&.cols-2 {
+			min-width: 2 * 5em;
+		}
+		&.cols-3 {
+			min-width: 3 * 5em;
+		}
+		&.cols-4 {
+			min-width: 4 * 5em;
+		}
+		&.cols-5 {
+			min-width: 5 * 5em;
+		}
+		&.cols-6 {
+			min-width: 6 * 5em;
+		}
+
+		&.is-loading,
+		&.is-not-found {
+			min-width: auto;
+		}
 	}
 }
 
