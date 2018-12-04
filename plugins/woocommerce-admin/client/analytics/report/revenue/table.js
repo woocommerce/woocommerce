@@ -6,8 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { format as formatDate } from '@wordpress/date';
 import { compose } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
-import { get, map } from 'lodash';
+import { get } from 'lodash';
 
 /**
  * WooCommerce dependencies
@@ -18,18 +17,25 @@ import {
 	getDateFormatsForInterval,
 	getIntervalForQuery,
 } from '@woocommerce/date';
-import { Link, TableCard } from '@woocommerce/components';
+import { Link } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
-import { onQueryChange } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
-import ReportError from 'analytics/components/report-error';
 import { QUERY_DEFAULTS } from 'store/constants';
 import { numberFormat } from 'lib/number';
+import ReportTable from 'analytics/components/report-table';
+import withSelect from 'wc-api/with-select';
 
 class RevenueReportTable extends Component {
+	constructor() {
+		super();
+
+		this.getHeadersContent = this.getHeadersContent.bind( this );
+		this.getRowsContent = this.getRowsContent.bind( this );
+	}
+
 	getHeadersContent() {
 		return [
 			{
@@ -97,7 +103,7 @@ class RevenueReportTable extends Component {
 		const currentInterval = getIntervalForQuery( query );
 		const formats = getDateFormatsForInterval( currentInterval );
 
-		return map( data, row => {
+		return data.map( row => {
 			const {
 				coupons,
 				gross_revenue,
@@ -156,37 +162,16 @@ class RevenueReportTable extends Component {
 	}
 
 	render() {
-		const { isTableDataError, isTableDataRequesting, query, tableData } = this.props;
-
-		if ( isTableDataError ) {
-			return <ReportError isError />;
-		}
-
-		const tableQuery = {
-			...query,
-			orderby: query.orderby || 'date',
-			order: query.order || 'asc',
-		};
-
-		const headers = this.getHeadersContent();
-		const rows = this.getRowsContent( get( tableData, [ 'data', 'intervals' ], [] ) );
-		const rowsPerPage =
-			( tableQuery && tableQuery.per_page && parseInt( tableQuery.per_page ) ) ||
-			QUERY_DEFAULTS.pageSize;
-		const totalRows = get( tableData, [ 'totalResults' ], Object.keys( rows ).length );
+		const { query, tableData } = this.props;
 
 		return (
-			<TableCard
+			<ReportTable
+				endpoint="revenue"
+				getHeadersContent={ this.getHeadersContent }
+				getRowsContent={ this.getRowsContent }
+				query={ query }
+				tableData={ tableData }
 				title={ __( 'Revenue', 'wc-admin' ) }
-				rows={ rows }
-				totalRows={ totalRows }
-				rowsPerPage={ rowsPerPage }
-				headers={ headers }
-				isLoading={ isTableDataRequesting }
-				onQueryChange={ onQueryChange }
-				query={ tableQuery }
-				summary={ null }
-				downloadable
 			/>
 		);
 	}
@@ -208,15 +193,20 @@ export default compose(
 			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
 			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
 		};
-		const tableData = getReportStats( 'revenue', tableQuery );
-		const isTableDataError = isReportStatsError( 'revenue', tableQuery );
-		const isTableDataRequesting = isReportStatsRequesting( 'revenue', tableQuery );
+		const revenueData = getReportStats( 'revenue', tableQuery );
+		const isError = isReportStatsError( 'revenue', tableQuery );
+		const isRequesting = isReportStatsRequesting( 'revenue', tableQuery );
 
 		return {
-			isTableDataError,
-			isTableDataRequesting,
-			tableQuery,
-			tableData,
+			tableData: {
+				items: {
+					data: get( revenueData, [ 'data', 'intervals' ] ),
+					totalCount: get( revenueData, [ 'totalResults' ] ),
+				},
+				isError,
+				isRequesting,
+				query: tableQuery,
+			},
 		};
 	} )
 )( RevenueReportTable );
