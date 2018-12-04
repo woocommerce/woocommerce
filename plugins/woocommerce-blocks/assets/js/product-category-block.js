@@ -261,6 +261,7 @@ registerBlockType( 'woocommerce/product-category', {
 	title: __( 'Products by Category', 'woocommerce' ),
 	icon: 'category',
 	category: 'widgets',
+	keywords: [ 'woocommerce' ],
 	description: __(
 		'Display a grid of products from your selected categories.',
 		'woocommerce'
