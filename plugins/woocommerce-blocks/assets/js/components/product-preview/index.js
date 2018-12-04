@@ -27,7 +27,7 @@ const ProductPreview = ( { product } ) => {
 				dangerouslySetInnerHTML={ { __html: product.price_html } }
 			/>
 			<span className="wc-product-preview__add-to-cart">
-				{ __( 'Add to cart', 'woocommerce' ) }
+				{ __( 'Add to cart', 'woo-gutenberg-products-block' ) }
 			</span>
 		</div>
 	);

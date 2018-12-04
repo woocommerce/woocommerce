@@ -78,7 +78,7 @@ class ProductCategoryControl extends Component {
 						'%s, has %d product',
 						'%s, has %d products',
 						item.count,
-						'woocommerce'
+						'woo-gutenberg-products-block'
 					),
 					accessibleName,
 					item.count
@@ -112,21 +112,21 @@ class ProductCategoryControl extends Component {
 		const { selected, onChange } = this.props;
 
 		const messages = {
-			clear: __( 'Clear all product categories', 'woocommerce' ),
-			list: __( 'Product Categories', 'woocommerce' ),
-			noItems: __( 'Your store doesn\'t have any product categories.', 'woocommerce' ),
-			search: __( 'Search for product categories', 'woocommerce' ),
+			clear: __( 'Clear all product categories', 'woo-gutenberg-products-block' ),
+			list: __( 'Product Categories', 'woo-gutenberg-products-block' ),
+			noItems: __( 'Your store doesn\'t have any product categories.', 'woo-gutenberg-products-block' ),
+			search: __( 'Search for product categories', 'woo-gutenberg-products-block' ),
 			selected: ( n ) =>
 				sprintf(
 					_n(
 						'%d category selected',
 						'%d categories selected',
 						n,
-						'woocommerce'
+						'woo-gutenberg-products-block'
 					),
 					n
 				),
-			updated: __( 'Category search results updated.', 'woocommerce' ),
+			updated: __( 'Category search results updated.', 'woo-gutenberg-products-block' ),
 		};
 
 		return (

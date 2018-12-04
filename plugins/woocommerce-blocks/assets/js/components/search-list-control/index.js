@@ -25,14 +25,14 @@ import { buildTermsTree } from './hierarchy';
 import { CheckedIcon, UncheckedIcon } from './icons';
 
 const defaultMessages = {
-	clear: __( 'Clear all selected items', 'woocommerce' ),
-	list: __( 'Results', 'woocommerce' ),
-	noItems: __( 'No items found.', 'woocommerce' ),
-	noResults: __( 'No results for %s', 'woocommerce' ),
-	search: __( 'Search for items', 'woocommerce' ),
+	clear: __( 'Clear all selected items', 'woo-gutenberg-products-block' ),
+	list: __( 'Results', 'woo-gutenberg-products-block' ),
+	noItems: __( 'No items found.', 'woo-gutenberg-products-block' ),
+	noResults: __( 'No results for %s', 'woo-gutenberg-products-block' ),
+	search: __( 'Search for items', 'woo-gutenberg-products-block' ),
 	selected: ( n ) =>
-		sprintf( _n( '%d item selected', '%d items selected', n, 'woocommerce' ), n ),
-	updated: __( 'Search results updated.', 'woocommerce' ),
+		sprintf( _n( '%d item selected', '%d items selected', n, 'woo-gutenberg-products-block' ), n ),
+	updated: __( 'Search results updated.', 'woo-gutenberg-products-block' ),
 };
 
 /**
@@ -212,7 +212,7 @@ export class SearchListControl extends Component {
 								onClick={ this.onClear }
 								aria-label={ messages.clear }
 							>
-								{ __( 'Clear all', 'woocommerce' ) }
+								{ __( 'Clear all', 'woo-gutenberg-products-block' ) }
 							</Button>
 						) : null }
 					</div>
