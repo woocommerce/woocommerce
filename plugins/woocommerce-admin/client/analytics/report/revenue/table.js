@@ -6,7 +6,7 @@ import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { format as formatDate } from '@wordpress/date';
 import { compose } from '@wordpress/compose';
-import { get } from 'lodash';
+import { get, map } from 'lodash';
 
 /**
  * WooCommerce dependencies
@@ -224,7 +224,7 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
 		const datesFromQuery = getCurrentDates( query );
-		const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
+		const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-api' );
 
 		// TODO Support hour here when viewing a single day
 		const tableQuery = {
