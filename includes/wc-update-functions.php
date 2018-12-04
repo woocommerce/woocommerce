@@ -1892,14 +1892,14 @@ function wc_update_350_db_version() {
  */
 function wc_update_352_drop_download_log_fk() {
 	global $wpdb;
-	$results = $wpdb->get_results( "
-		SELECT CONSTRAINT_NAME
+	$results = $wpdb->get_results(
+		"SELECT CONSTRAINT_NAME
 		FROM information_schema.TABLE_CONSTRAINTS
 		WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
 		AND CONSTRAINT_NAME = 'fk_wc_download_log_permission_id'
 		AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-		AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'
-	" );
+		AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'"
+	);
 
 	// We only need to drop the old key as WC_Install::create_tables() takes care of creating the new FK.
 	if ( $results ) {

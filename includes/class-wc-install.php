@@ -119,7 +119,7 @@ class WC_Install {
 		),
 		'3.5.2' => array(
 			'wc_update_352_drop_download_log_fk',
-		)
+		),
 	);
 
 	/**
