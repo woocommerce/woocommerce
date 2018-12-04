@@ -12,18 +12,19 @@ import { getResourceName } from '../../utils';
 import { DEFAULT_REQUIREMENT } from '../../constants';
 
 const getReportStats = ( getResource, requireResource ) => (
-	endpoint,
+	type,
 	query = {},
 	requirement = DEFAULT_REQUIREMENT
 ) => {
-	const resourceName = getResourceName( 'report-stats-query', { endpoint, query } );
+	const resourceName = getResourceName( `report-stats-query-${ type }`, query );
+	console.log( 'getReportStats', type, query, resourceName );
 	const data = requireResource( requirement, resourceName ) || {};
 
 	return data;
 };
 
-const isReportStatsRequesting = getResource => ( endpoint, query = {} ) => {
-	const resourceName = getResourceName( 'report-stats-query', { endpoint, query } );
+const isReportStatsRequesting = getResource => ( type, query = {} ) => {
+	const resourceName = getResourceName( `report-stats-query-${ type }`, query );
 	const { lastRequested, lastReceived } = getResource( resourceName );
 
 	if ( isNil( lastRequested ) ) {
@@ -37,8 +38,8 @@ const isReportStatsRequesting = getResource => ( endpoint, query = {} ) => {
 	return lastRequested > lastReceived;
 };
 
-const isReportStatsError = getResource => ( endpoint, query = {} ) => {
-	const resourceName = getResourceName( 'report-stats-query', { endpoint, query } );
+const isReportStatsError = getResource => ( type, query = {} ) => {
+	const resourceName = getResourceName( `report-stats-query-${ type }`, query );
 	return getResource( resourceName ).error;
 };
 

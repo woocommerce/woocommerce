@@ -12,7 +12,7 @@ import { stringifyQuery } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { isResourcePrefix, getResourceIdentifier } from '../../utils';
+import { getResourceIdentifier, getResourcePrefix } from '../../utils';
 import { NAMESPACE } from '../../constants';
 import { SWAGGERNAMESPACE } from 'store/constants';
 
@@ -20,14 +20,27 @@ const statEndpoints = [ 'orders', 'revenue', 'products' ];
 // TODO: Remove once swagger endpoints are phased out.
 const swaggerEndpoints = [ 'categories', 'coupons', 'taxes' ];
 
+const typeEndpointMap = {
+	'report-stats-query-orders': 'orders',
+	'report-stats-query-revenue': 'revenue',
+	'report-stats-query-products': 'products',
+	'report-stats-query-categories': 'categories',
+	'report-stats-query-coupons': 'coupons',
+	'report-stats-query-taxes': 'taxes',
+};
+
 function read( resourceNames, fetch = apiFetch ) {
-	const filteredNames = resourceNames.filter( name =>
-		isResourcePrefix( name, 'report-stats-query' )
-	);
+	console.log( 'stats read', resourceNames );
+	const filteredNames = resourceNames.filter( name => {
+		const prefix = getResourcePrefix( name );
+		return Boolean( typeEndpointMap[ prefix ] );
+	} );
 
 	return filteredNames.map( async resourceName => {
-		const { endpoint, query } = getResourceIdentifier( resourceName );
-
+		const prefix = getResourcePrefix( resourceName );
+		const endpoint = typeEndpointMap[ prefix ];
+		const query = getResourceIdentifier( resourceName );
+		console.log( '::filtered:: read', resourceName, endpoint, query );
 		let apiPath = endpoint + stringifyQuery( query );
 
 		if ( swaggerEndpoints.indexOf( endpoint ) >= 0 ) {

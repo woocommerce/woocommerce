@@ -139,7 +139,7 @@ function getRequestQuery( endpoint, dataType, query ) {
  * @return {Object}  Object containing summary number responses.
  */
 export function getSummaryNumbers( endpoint, query, select ) {
-	const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
+	const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-api' );
 	const response = {
 		isRequesting: false,
 		isError: false,

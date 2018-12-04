@@ -17,7 +17,7 @@ import { charts } from './config';
 import getSelectedChart from 'lib/get-selected-chart';
 import ReportChart from 'analytics/components/report-chart';
 import ReportSummary from 'analytics/components/report-summary';
-import RevenueReportTable from './table';
+// import RevenueReportTable from './table';
 
 export default class RevenueReport extends Component {
 	render() {
@@ -39,7 +39,7 @@ export default class RevenueReport extends Component {
 					query={ query }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
-				<RevenueReportTable query={ query } />
+				{ /* <RevenueReportTable query={ query } /> */ }
 			</Fragment>
 		);
 	}
