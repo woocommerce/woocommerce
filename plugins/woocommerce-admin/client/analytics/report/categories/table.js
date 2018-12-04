@@ -98,14 +98,15 @@ export default class CategoriesReportTable extends Component {
 		} );
 	}
 
-	getSummary( totals ) {
+	getSummary( totals, totalCount ) {
 		if ( ! totals ) {
 			return [];
 		}
+
 		return [
 			{
-				label: _n( 'category', 'categories', totals.categories_count, 'wc-admin' ),
-				value: numberFormat( totals.categories_count ),
+				label: _n( 'category', 'categories', totalCount, 'wc-admin' ),
+				value: numberFormat( totalCount ),
 			},
 			{
 				label: _n( 'item sold', 'items sold', totals.items_sold, 'wc-admin' ),

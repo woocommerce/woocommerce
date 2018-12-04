@@ -162,18 +162,15 @@ class RevenueReportTable extends Component {
 		} );
 	}
 
-	getSummary( totals ) {
+	getSummary( totals, totalCount ) {
 		if ( ! totals ) {
 			return [];
 		}
 
-		const { tableData } = this.props;
-		const daysCount = tableData.items.totalCount;
-
 		return [
 			{
-				label: _n( 'day', 'days', daysCount, 'wc-admin' ),
-				value: numberFormat( daysCount ),
+				label: _n( 'day', 'days', totalCount, 'wc-admin' ),
+				value: numberFormat( totalCount ),
 			},
 			{
 				label: _n( 'order', 'orders', totals.orders_count, 'wc-admin' ),

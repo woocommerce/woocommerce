@@ -51,7 +51,8 @@ class ReportTable extends Component {
 		const ids = itemIdField ? orderedItems.map( item => item[ itemIdField ] ) : null;
 		const rows = getRowsContent( orderedItems );
 		const totals = get( primaryData, [ 'data', 'totals' ], null );
-		const summary = getSummary ? getSummary( totals ) : null;
+		const totalCount = items.totalCount || 0;
+		const summary = getSummary ? getSummary( totals, totalCount ) : null;
 
 		return (
 			<TableCard
@@ -63,7 +64,7 @@ class ReportTable extends Component {
 				rows={ rows }
 				rowsPerPage={ parseInt( query.per_page ) }
 				summary={ summary }
-				totalRows={ items.totalCount || 0 }
+				totalRows={ totalCount }
 				{ ...tableProps }
 			/>
 		);
