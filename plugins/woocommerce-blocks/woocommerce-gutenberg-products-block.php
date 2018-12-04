@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: WooCommerce Gutenberg Products Block
+ * Plugin Name: WooCommerce Blocks
  * Plugin URI: https://github.com/woocommerce/woocommerce-gutenberg-products-block
- * Description: WooCommerce Products block for the Gutenberg editor.
- * Version: 1.1.2
+ * Description: WooCommerce blocks for the Gutenberg editor.
+ * Version: 1.2.0
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Text Domain:  woo-gutenberg-products-block
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || die();
 
-define( 'WGPB_VERSION', '1.1.2' );
+define( 'WGPB_VERSION', '1.2.0' );
 
 define( 'WGPB_DEVELOPMENT_MODE', true );
 

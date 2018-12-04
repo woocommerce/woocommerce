@@ -1,7 +1,7 @@
-=== WooCommerce Product Blocks ===
+=== WooCommerce Blocks ===
 Contributors: automattic, claudiulodro, tiagonoronha, jameskoster, ryelle, levinmedia
 Tags: gutenberg, woocommerce, woo commerce, products
-Requires at least: 4.7
+Requires at least: 4.9
 Tested up to: 5.0
 Requires PHP: 5.2
 Stable tag: 1.2.0
@@ -10,7 +10,7 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 == Description ==
 
-WooCommerce Product Blocks are the easiest, most flexible way to display your products on posts and pages! Using the original "Products Block", your displayed products can be filtered by category, sale status, or a variety of other fields. You can even make a custom list of hand-picked products to display.
+WooCommerce Blocks are the easiest, most flexible way to display your products on posts and pages! Using the original "Products Block", your displayed products can be filtered by category, sale status, or a variety of other fields. You can even make a custom list of hand-picked products to display.
 
 New for 1.2.0: We've added a stand-alone Product Category block to simplify the experience and improve the category search and selection UI. Be on the lookout for additional stand-alone blocks in future releases. 
 
