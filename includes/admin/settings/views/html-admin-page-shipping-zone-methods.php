@@ -44,14 +44,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 						foreach ( $continents as $continent_code => $continent ) {
 							echo '<option value="continent:' . esc_attr( $continent_code ) . '"' . wc_selected( "continent:$continent_code", $locations ) . ' alt="">' . esc_html( $continent['name'] ) . '</option>';
 
-							$countries = array_intersect( array_keys( $allowed_countries ), $continent['countries'] );
+							$countries = array_intersect( array_keys( $shipping_countries ), $continent['countries'] );
 
 							foreach ( $countries as $country_code ) {
-								echo '<option value="country:' . esc_attr( $country_code ) . '"' . wc_selected( "country:$country_code", $locations ) . ' alt="' . esc_attr( $continent['name'] ) . '">' . esc_html( '&nbsp;&nbsp; ' . $allowed_countries[ $country_code ] ) . '</option>';
+								echo '<option value="country:' . esc_attr( $country_code ) . '"' . wc_selected( "country:$country_code", $locations ) . ' alt="' . esc_attr( $continent['name'] ) . '">' . esc_html( '&nbsp;&nbsp; ' . $shipping_countries[ $country_code ] ) . '</option>';
 
 								if ( $states = WC()->countries->get_states( $country_code ) ) {
 									foreach ( $states as $state_code => $state_name ) {
-										echo '<option value="state:' . esc_attr( $country_code . ':' . $state_code ) . '"' . wc_selected( "state:$country_code:$state_code", $locations ) . ' alt="' . esc_attr( $continent['name'] . ' ' . $allowed_countries[ $country_code ] ) . '">' . esc_html( '&nbsp;&nbsp;&nbsp;&nbsp; ' . $state_name ) . '</option>';
+										echo '<option value="state:' . esc_attr( $country_code . ':' . $state_code ) . '"' . wc_selected( "state:$country_code:$state_code", $locations ) . ' alt="' . esc_attr( $continent['name'] . ' ' . $shipping_countries[ $country_code ] ) . '">' . esc_html( '&nbsp;&nbsp;&nbsp;&nbsp; ' . $state_name ) . '</option>';
 									}
 								}
 							}
