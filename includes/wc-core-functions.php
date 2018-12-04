@@ -1071,6 +1071,12 @@ function wc_get_customer_default_location() {
 				$location = WC_Geolocation::geolocate_ip( '', true, false );
 			}
 
+			// When selling to only one country, force customer location to that country.
+			$countries = WC()->countries->get_allowed_countries();
+			if ( 1 === count( $countries ) ) {
+				$location  = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', key( $countries ) ) );
+			}
+
 			// Base fallback.
 			if ( empty( $location['country'] ) ) {
 				$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
