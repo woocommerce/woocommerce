@@ -184,3 +184,84 @@
 		}
 	}
 }
+
+// Needs the double-class for specificity
+.woocommerce-activity-card.woocommerce-order-activity-card {
+	grid-template-columns: 1fr;
+	grid-template-areas:
+		'header'
+		'body'
+		'actions';
+
+	.woocommerce-activity-card__icon {
+		display: none;
+	}
+
+	.woocommerce-flag {
+		display: inline-block;
+	}
+
+	.woocommerce-activity-card__subtitle {
+		span + span::before {
+			content: ' \2022 ';
+		}
+	}
+}
+
+// Needs the double-class for specificity
+.woocommerce-activity-card.woocommerce-inbox-activity-card {
+	grid-template-columns: 72px 1fr;
+
+	@include breakpoint( '<782px' ) {
+		grid-template-columns: 64px 1fr;
+	}
+
+	.woocommerce-activity-card__header {
+		margin-bottom: $gap-small;
+	}
+}
+
+.woocommerce-review-activity-card {
+	.woocommerce-review-activity-card__verified {
+		margin-left: $gap-small;
+		display: inline-flex;
+		position: relative;
+		top: $gap-smallest;
+		color: $valid-green;
+		@include font-size( 12 );
+
+		.gridicon {
+			margin-right: $gap-smallest;
+			fill: $valid-green;
+		}
+	}
+
+	.woocommerce-review-activity-card__image-overlay {
+		margin-left: -$gap-large;
+		img.woocommerce-gravatar {
+			left: $gap-large;
+			position: relative;
+			top: -42px;
+			border: 2px solid $white;
+		}
+	}
+
+	@include breakpoint( '<782px' ) {
+		.woocommerce-review-activity-card__image-overlay {
+			margin-top: $gap-smallest;
+		}
+
+		.woocommerce-activity-card__icon img.woocommerce-gravatar {
+			margin-left: 0;
+			width: 18px;
+			height: 18px;
+			left: 32px;
+			top: -28px;
+		}
+
+		.woocommerce-activity-card__icon img.woocommerce-product-image {
+			width: 38px;
+			height: 38px;
+		}
+	}
+}
