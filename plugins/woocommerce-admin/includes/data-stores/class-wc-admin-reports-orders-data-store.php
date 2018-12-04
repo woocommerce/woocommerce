@@ -579,4 +579,14 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 
 		return count( $customer_orders ) > 1;
 	}
+
+	/**
+	 * Returns string to be used as cache key for the data.
+	 *
+	 * @param array $params Query parameters.
+	 * @return string
+	 */
+	protected function get_cache_key( $params ) {
+		return 'woocommerce_' . self::TABLE_NAME . '_' . md5( wp_json_encode( $params ) );
+	}
 }

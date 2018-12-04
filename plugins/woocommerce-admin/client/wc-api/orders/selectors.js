@@ -1,4 +1,10 @@
 /** @format */
+
+/**
+ * External dependencies
+ */
+import { isNil } from 'lodash';
+
 /**
  * Internal dependencies
  */
@@ -26,7 +32,16 @@ const getOrdersTotalCount = ( getResource, requireResource ) => (
 const isGetOrdersRequesting = getResource => ( query = {} ) => {
 	const resourceName = getResourceName( 'order-query', query );
 	const { lastRequested, lastReceived } = getResource( resourceName );
-	return lastRequested && lastRequested > lastReceived;
+
+	if ( isNil( lastRequested ) ) {
+		return false;
+	}
+
+	if ( isNil( lastReceived ) ) {
+		return true;
+	}
+
+	return lastRequested > lastReceived;
 };
 
 const isGetOrdersError = getResource => ( query = {} ) => {

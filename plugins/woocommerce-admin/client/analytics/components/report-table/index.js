@@ -61,7 +61,7 @@ class ReportTable extends Component {
 				isLoading={ isRequesting }
 				onQueryChange={ onQueryChange }
 				rows={ rows }
-				rowsPerPage={ query.per_page }
+				rowsPerPage={ parseInt( query.per_page ) }
 				summary={ summary }
 				totalRows={ items.totalCount || 0 }
 				{ ...tableProps }
