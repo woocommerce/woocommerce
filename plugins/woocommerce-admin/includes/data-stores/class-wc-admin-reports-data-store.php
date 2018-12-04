@@ -283,17 +283,6 @@ class WC_Admin_Reports_Data_Store {
 	}
 
 	/**
-	 * Returns string to be used as cache key for the data.
-	 *
-	 * @param array $params Query parameters.
-	 * @return string
-	 */
-	protected function get_cache_key( $params ) {
-		// TODO: this is not working in PHP 5.2 (but revenue class has static methods, so it cannot use object property).
-		return 'woocommerce_' . $this::TABLE_NAME . '_' . md5( wp_json_encode( $params ) ); // phpcs:ignore PHPCompatibility.Syntax.NewDynamicAccessToStatic
-	}
-
-	/**
 	 * Casts strings returned from the database to appropriate data types for output.
 	 *
 	 * @param array $array Associative array of values extracted from the database.
