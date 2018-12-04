@@ -2,5 +2,6 @@
   "extends": [
     "config:base"
   ],
-  "lockFileMaintenance": { "enabled": true }
+  "lockFileMaintenance": { "enabled": true },
+  "ignoreDeps": ["phpunit/phpunit"]
 }
