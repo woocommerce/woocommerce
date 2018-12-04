@@ -42,6 +42,36 @@
 	border-top: 1px solid $core-grey-light-500;
 	border-bottom: 1px solid $core-grey-light-500;
 
+	&.is-loading {
+		padding: $gap-small 0;
+		text-align: center;
+		border: none;
+	}
+
+	&.is-not-found {
+		padding: $gap-small 0;
+		text-align: center;
+		border: none;
+
+		.woocommerce-search-list__not-found-icon,
+		.woocommerce-search-list__not-found-text {
+			display: inline-block;
+		}
+
+		.woocommerce-search-list__not-found-icon {
+			margin-right: $gap;
+
+			.gridicon {
+				vertical-align: top;
+				margin-top: -1px;
+			}
+		}
+	}
+
+	.components-spinner {
+		float: none;
+	}
+
 	.components-menu-group__label {
 		@include visually-hidden;
 	}

@@ -1678,6 +1678,35 @@ exports[`SearchListControl should render a search box and no options 1`] = `
       </div>
     </div>
   </div>
+  <div
+    className="woocommerce-search-list__list is-not-found"
+  >
+    <span
+      className="woocommerce-search-list__not-found-icon"
+    >
+      <svg
+        aria-hidden="true"
+        className="gridicon gridicons-notice-outline"
+        focusable="false"
+        height={24}
+        role="img"
+        viewBox="0 0 24 24"
+        width={24}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+          />
+        </g>
+      </svg>
+    </span>
+    <span
+      className="woocommerce-search-list__not-found-text"
+    >
+      No items found.
+    </span>
+  </div>
 </div>
 `;
 
@@ -1721,7 +1750,35 @@ exports[`SearchListControl should render a search box with a search term, and no
       </div>
     </div>
   </div>
-  No results for no matches
+  <div
+    className="woocommerce-search-list__list is-not-found"
+  >
+    <span
+      className="woocommerce-search-list__not-found-icon"
+    >
+      <svg
+        aria-hidden="true"
+        className="gridicon gridicons-notice-outline"
+        focusable="false"
+        height={24}
+        role="img"
+        viewBox="0 0 24 24"
+        width={24}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <path
+            d="M12 4c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8m0-2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm1 13h-2v2h2v-2zm-2-2h2l.5-6h-3l.5 6z"
+          />
+        </g>
+      </svg>
+    </span>
+    <span
+      className="woocommerce-search-list__not-found-text"
+    >
+      No results for no matches
+    </span>
+  </div>
 </div>
 `;
 

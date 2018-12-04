@@ -21,6 +21,7 @@ class ProductCategoryControl extends Component {
 		super( ...arguments );
 		this.state = {
 			list: [],
+			loading: true,
 		};
 		this.renderItem = this.renderItem.bind( this );
 	}
@@ -30,10 +31,10 @@ class ProductCategoryControl extends Component {
 			path: addQueryArgs( '/wc-pb/v3/products/categories', { per_page: -1 } ),
 		} )
 			.then( ( list ) => {
-				this.setState( { list } );
+				this.setState( { list, loading: false } );
 			} )
 			.catch( () => {
-				this.setState( { list: [] } );
+				this.setState( { list: [], loading: false } );
 			} );
 	}
 
@@ -107,12 +108,13 @@ class ProductCategoryControl extends Component {
 	}
 
 	render() {
-		const { list } = this.state;
+		const { list, loading } = this.state;
 		const { selected, onChange } = this.props;
 
 		const messages = {
 			clear: __( 'Clear all product categories', 'woocommerce' ),
 			list: __( 'Product Categories', 'woocommerce' ),
+			noItems: __( 'Your store doesn\'t have any product categories.', 'woocommerce' ),
 			search: __( 'Search for product categories', 'woocommerce' ),
 			selected: ( n ) =>
 				sprintf(
@@ -131,6 +133,7 @@ class ProductCategoryControl extends Component {
 			<SearchListControl
 				className="woocommerce-product-categories"
 				list={ list }
+				isLoading={ loading }
 				selected={ selected.map( ( id ) => find( list, { id } ) ).filter( Boolean ) }
 				onChange={ onChange }
 				renderItem={ this.renderItem }
