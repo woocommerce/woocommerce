@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { format as formatDate } from '@wordpress/date';
 import { compose } from '@wordpress/compose';
@@ -34,6 +34,7 @@ class RevenueReportTable extends Component {
 
 		this.getHeadersContent = this.getHeadersContent.bind( this );
 		this.getRowsContent = this.getRowsContent.bind( this );
+		this.getSummary = this.getSummary.bind( this );
 	}
 
 	getHeadersContent() {
@@ -161,6 +162,50 @@ class RevenueReportTable extends Component {
 		} );
 	}
 
+	getSummary( totals ) {
+		if ( ! totals ) {
+			return [];
+		}
+
+		const { tableData } = this.props;
+		const daysCount = tableData.items.totalCount;
+
+		return [
+			{
+				label: _n( 'day', 'days', daysCount, 'wc-admin' ),
+				value: numberFormat( daysCount ),
+			},
+			{
+				label: _n( 'order', 'orders', totals.orders_count, 'wc-admin' ),
+				value: numberFormat( totals.orders_count ),
+			},
+			{
+				label: __( 'gross revenue', 'wc-admin' ),
+				value: formatCurrency( totals.gross_revenue ),
+			},
+			{
+				label: __( 'refunds', 'wc-admin' ),
+				value: formatCurrency( totals.refunds ),
+			},
+			{
+				label: __( 'coupons', 'wc-admin' ),
+				value: formatCurrency( totals.coupons ),
+			},
+			{
+				label: __( 'taxes', 'wc-admin' ),
+				value: formatCurrency( totals.taxes ),
+			},
+			{
+				label: __( 'shipping', 'wc-admin' ),
+				value: formatCurrency( totals.shipping ),
+			},
+			{
+				label: __( 'net revenue', 'wc-admin' ),
+				value: formatCurrency( totals.net_revenue ),
+			},
+		];
+	}
+
 	render() {
 		const { query, tableData } = this.props;
 
@@ -169,6 +214,7 @@ class RevenueReportTable extends Component {
 				endpoint="revenue"
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
+				getSummary={ this.getSummary }
 				query={ query }
 				tableData={ tableData }
 				title={ __( 'Revenue', 'wc-admin' ) }
