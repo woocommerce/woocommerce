@@ -61,7 +61,7 @@
     "style-loader": "0.23.1",
     "stylelint": "9.9.0",
     "stylelint-config-wordpress": "13.1.0",
-    "webpack": "4.26.1",
+    "webpack": "4.27.0",
     "webpack-cli": "3.1.2"
   },
   "engines": {
