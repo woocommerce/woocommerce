@@ -38,15 +38,16 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args               = array();
-		$args['before']     = $request['before'];
-		$args['after']      = $request['after'];
-		$args['interval']   = $request['interval'];
-		$args['page']       = $request['page'];
-		$args['per_page']   = $request['per_page'];
-		$args['orderby']    = $request['orderby'];
-		$args['order']      = $request['order'];
-		$args['categories'] = (array) $request['categories'];
+		$args                  = array();
+		$args['before']        = $request['before'];
+		$args['after']         = $request['after'];
+		$args['interval']      = $request['interval'];
+		$args['page']          = $request['page'];
+		$args['per_page']      = $request['per_page'];
+		$args['orderby']       = $request['orderby'];
+		$args['order']         = $request['order'];
+		$args['extended_info'] = $request['extended_info'];
+		$args['categories']    = (array) $request['categories'];
 		$args['status_is']     = (array) $request['status_is'];
 		$args['status_is_not'] = (array) $request['status_is_not'];
 
@@ -190,6 +191,14 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'extended_info' => array(
+					'name'       => array(
+						'type'        => 'string',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Category name.', 'wc-admin' ),
+					),
+				),
 			),
 		);
 
@@ -202,9 +211,9 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params               = array();
-		$params['context']    = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']       = array(
+		$params                  = array();
+		$params['context']       = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['page']          = array(
 			'description'       => __( 'Current page of the collection.', 'wc-admin' ),
 			'type'              => 'integer',
 			'default'           => 1,
@@ -212,7 +221,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 			'validate_callback' => 'rest_validate_request_arg',
 			'minimum'           => 1,
 		);
-		$params['per_page']   = array(
+		$params['per_page']      = array(
 			'description'       => __( 'Maximum number of items to be returned in result set.', 'wc-admin' ),
 			'type'              => 'integer',
 			'default'           => 10,
@@ -221,26 +230,26 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after']      = array(
+		$params['after']         = array(
 			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before']     = array(
+		$params['before']        = array(
 			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order']      = array(
+		$params['order']         = array(
 			'description'       => __( 'Order sort attribute ascending or descending.', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby']    = array(
+		$params['orderby']       = array(
 			'description'       => __( 'Sort collection by object attribute.', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'date',
@@ -250,10 +259,11 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 				'gross_revenue',
 				'orders_count',
 				'products_count',
+				'category',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['interval']   = array(
+		$params['interval']      = array(
 			'description'       => __( 'Time interval to use for buckets in the returned data.', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'week',
@@ -267,7 +277,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['status_is']        = array(
+		$params['status_is']     = array(
 			'description'       => __( 'Limit result set to items that have the specified order status.', 'wc-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
@@ -277,7 +287,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 				'type' => 'string',
 			),
 		);
-		$params['status_is_not']    = array(
+		$params['status_is_not'] = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified order status.', 'wc-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
@@ -287,7 +297,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 				'type' => 'string',
 			),
 		);
-		$params['categories'] = array(
+		$params['categories']    = array(
 			'description'       => __( 'Limit result set to all items that have the specified term assigned in the categories taxonomy.', 'wc-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -295,6 +305,13 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 			'items'             => array(
 				'type' => 'integer',
 			),
+		);
+		$params['extended_info'] = array(
+			'description'       => __( 'Add additional piece of info about each category to the report.', 'wc-admin' ),
+			'type'              => 'boolean',
+			'default'           => false,
+			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;
