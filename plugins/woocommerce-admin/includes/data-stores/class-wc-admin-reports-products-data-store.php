@@ -142,18 +142,24 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 	 * Enriches the product data with attributes specified by the extended_attributes.
 	 *
 	 * @param array $products_data Product data.
+	 * @param array $query_args  Query parameters.
 	 */
-	protected function include_extended_product_info( &$products_data ) {
+	protected function include_extended_info( &$products_data, $query_args ) {
 		foreach ( $products_data as $key => $product_data ) {
-			$product             = wc_get_product( $product_data['product_id'] );
-			$extended_attributes = apply_filters( 'woocommerce_rest_reports_products_extended_attributes', $this->extended_attributes, $product_data );
-			foreach ( $extended_attributes as $extended_attribute ) {
-				$function = 'get_' . $extended_attribute;
-				if ( is_callable( array( $product, $function ) ) ) {
-					$value                                        = $product->{$function}();
-					$products_data[ $key ][ $extended_attribute ] = $value;
+			$extended_info = new ArrayObject();
+			if ( $query_args['extended_info'] ) {
+				$product             = wc_get_product( $product_data['product_id'] );
+				$extended_attributes = apply_filters( 'woocommerce_rest_reports_products_extended_attributes', $this->extended_attributes, $product_data );
+				foreach ( $extended_attributes as $extended_attribute ) {
+					$function = 'get_' . $extended_attribute;
+					if ( is_callable( array( $product, $function ) ) ) {
+						$value                                = $product->{$function}();
+						$extended_info[ $extended_attribute ] = $value;
+					}
 				}
+				$extended_info = $this->cast_numbers( $extended_info );
 			}
+			$products_data[ $key ]['extended_info'] = $extended_info;
 		}
 	}
 
@@ -172,18 +178,18 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults = array(
-			'per_page'              => get_option( 'posts_per_page' ),
-			'page'                  => 1,
-			'order'                 => 'DESC',
-			'orderby'               => 'date',
-			'before'                => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
-			'after'                 => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
-			'fields'                => '*',
-			'categories'            => array(),
-			'products'              => array(),
-			'extended_product_info' => false,
+			'per_page'      => get_option( 'posts_per_page' ),
+			'page'          => 1,
+			'order'         => 'DESC',
+			'orderby'       => 'date',
+			'before'        => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
+			'after'         => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
+			'fields'        => '*',
+			'categories'    => array(),
+			'products'      => array(),
+			'extended_info' => false,
 			// This is not a parameter for products reports per se, but we want to only take into account selected order types.
-			'order_status'          => parent::get_report_order_statuses(),
+			'order_status'  => parent::get_report_order_statuses(),
 
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
@@ -192,7 +198,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		$data      = wp_cache_get( $cache_key, $this->cache_group );
 
 		if ( false === $data ) {
-			$data         = (object) array(
+			$data = (object) array(
 				'data'    => array(),
 				'total'   => 0,
 				'pages'   => 0,
@@ -244,9 +250,8 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 				return $data;
 			}
 
-			if ( $query_args['extended_product_info'] ) {
-				$this->include_extended_product_info( $product_data );
-			}
+			$this->include_extended_info( $product_data, $query_args );
+
 			$product_data = array_map( array( $this, 'cast_numbers' ), $product_data );
 			$data         = (object) array(
 				'data'    => $product_data,
