@@ -6,12 +6,14 @@ import {
 	Button,
 	MenuItem,
 	MenuGroup,
+	Spinner,
 	TextControl,
 	withSpokenMessages,
 } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose, withInstanceId, withState } from '@wordpress/compose';
 import { escapeRegExp, findIndex } from 'lodash';
+import Gridicon from 'gridicons';
 import PropTypes from 'prop-types';
 import { Tag } from '@woocommerce/components';
 
@@ -25,6 +27,7 @@ import { CheckedIcon, UncheckedIcon } from './icons';
 const defaultMessages = {
 	clear: __( 'Clear all selected items', 'woocommerce' ),
 	list: __( 'Results', 'woocommerce' ),
+	noItems: __( 'No items found.', 'woocommerce' ),
 	noResults: __( 'No results for %s', 'woocommerce' ),
 	search: __( 'Search for items', 'woocommerce' ),
 	selected: ( n ) =>
@@ -151,11 +154,50 @@ export class SearchListControl extends Component {
 		) );
 	}
 
+	renderListSection() {
+		const { isLoading, search } = this.props;
+		const list = this.getFilteredList( this.props.list, search );
+		const messages = { ...defaultMessages, ...this.props.messages };
+
+		if ( isLoading ) {
+			return (
+				<div className="woocommerce-search-list__list is-loading">
+					<Spinner />
+				</div>
+			);
+		}
+
+		if ( ! list.length ) {
+			return (
+				<div className="woocommerce-search-list__list is-not-found">
+					<span className="woocommerce-search-list__not-found-icon">
+						<Gridicon
+							icon="notice-outline"
+							role="img"
+							aria-hidden="true"
+							focusable="false"
+						/>
+					</span>
+					<span className="woocommerce-search-list__not-found-text">
+						{ search ? sprintf( messages.noResults, search ) : messages.noItems }
+					</span>
+				</div>
+			);
+		}
+
+		return (
+			<MenuGroup
+				label={ messages.list }
+				className="woocommerce-search-list__list"
+			>
+				{ this.renderList( list ) }
+			</MenuGroup>
+		);
+	}
+
 	render() {
 		const { className = '', search, selected, setState } = this.props;
 		const messages = { ...defaultMessages, ...this.props.messages };
-		const list = this.getFilteredList( this.props.list, search );
-		const noResults = search ? sprintf( messages.noResults, search ) : null;
 		const selectedCount = selected.length;
 
 		return (
@@ -193,16 +235,7 @@ export class SearchListControl extends Component {
 					/>
 				</div>
 
-				{ ! list.length ? (
-					noResults
-				) : (
-					<MenuGroup
-						label={ messages.list }
-						className="woocommerce-search-list__list"
-					>
-						{ this.renderList( list ) }
-					</MenuGroup>
-				) }
+				{ this.renderListSection() }
 			</div>
 		);
 	}
@@ -218,6 +251,10 @@ SearchListControl.propTypes = {
 	 * have a parent property.
 	 */
 	isHierarchical: PropTypes.bool,
+	/**
+	 * Whether the list of items is still loading.
+	 */
+	isLoading: PropTypes.bool,
 	/**
 	 * A complete list of item objects, each with id, name properties. This is displayed as a
 	 * clickable/keyboard-able list, and possibly filtered by the search term (searches name).
@@ -241,6 +278,11 @@ SearchListControl.propTypes = {
 		 * Label for the list of selectable items, only read to screen reader users.
 		 */
 		list: PropTypes.string,
+		/**
+		 * Message to display when the list is empty (implies nothing loaded from the server
+		 * or parent component).
+		 */
+		noItems: PropTypes.string,
 		/**
 		 * Message to display when no matching results are found. %s is the search term.
 		 */
