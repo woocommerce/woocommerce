@@ -43,7 +43,7 @@
     "css-loader": "1.0.1",
     "eslint": "5.9.0",
     "eslint-config-wordpress": "2.0.0",
-    "eslint-plugin-jest": "22.1.0",
+    "eslint-plugin-jest": "22.1.1",
     "eslint-plugin-jsx-a11y": "6.1.2",
     "eslint-plugin-react": "7.11.1",
     "eslint-plugin-wordpress": "git://github.com/WordPress-Coding-Standards/eslint-plugin-wordpress.git#1774343f6226052a46b081e01db3fca8793cc9f1",
