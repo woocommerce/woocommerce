@@ -46,7 +46,7 @@ class WC_Admin_Post_Types {
 		// Extra post data and screen elements.
 		add_action( 'edit_form_top', array( $this, 'edit_form_top' ) );
 		add_filter( 'enter_title_here', array( $this, 'enter_title_here' ), 1, 2 );
-		add_action( 'edit_form_after_title', array( $this, 'edit_form_after_title' ) );
+		add_action( 'edit_form_after_editor', array( $this, 'edit_form_after_title' ) );
 		add_filter( 'default_hidden_meta_boxes', array( $this, 'hidden_meta_boxes' ), 10, 2 );
 		add_action( 'post_submitbox_misc_actions', array( $this, 'product_data_visibility' ) );
 
