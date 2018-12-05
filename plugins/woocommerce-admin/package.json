@@ -103,7 +103,7 @@
     "webpack-cli": "3.1.2"
   },
   "dependencies": {
-    "@fresh-data/framework": "^0.5.0",
+    "@fresh-data/framework": "^0.5.1",
     "@wordpress/api-fetch": "2.2.2",
     "@wordpress/components": "3.0.0",
     "@wordpress/data": "3.1.0",
