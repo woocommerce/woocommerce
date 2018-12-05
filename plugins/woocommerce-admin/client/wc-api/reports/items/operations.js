@@ -26,6 +26,7 @@ const typeEndpointMap = {
 	'report-items-query-categories': 'categories',
 	'report-items-query-coupons': 'coupons',
 	'report-items-query-taxes': 'taxes',
+	'report-items-query-variations': 'variations',
 };
 
 function read( resourceNames, fetch = apiFetch ) {
