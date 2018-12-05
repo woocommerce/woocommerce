@@ -41,7 +41,6 @@ class WC_Admin_REST_Reports_Coupons_Controller extends WC_REST_Reports_Controlle
 		$args             = array();
 		$args['before']   = $request['before'];
 		$args['after']    = $request['after'];
-		$args['interval'] = $request['interval'];
 		$args['page']     = $request['page'];
 		$args['per_page'] = $request['per_page'];
 		$args['orderby']  = $request['orderby'];
