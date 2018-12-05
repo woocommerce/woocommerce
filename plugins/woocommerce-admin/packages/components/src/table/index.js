@@ -47,8 +47,8 @@ class TableCard extends Component {
 		super( props );
 		const { compareBy, query } = props;
 		this.state = {
-			showCols: props.headers.map( ( { hiddenByDefault } ) => ! hiddenByDefault ),
 			selectedRows: getIdsFromQuery( query[ compareBy ] ),
+			showCols: props.headers.map( ( { hiddenByDefault } ) => ! hiddenByDefault ),
 		};
 		this.toggleCols = this.toggleCols.bind( this );
 		this.onClickDownload = this.onClickDownload.bind( this );
@@ -58,13 +58,22 @@ class TableCard extends Component {
 		this.selectAllRows = this.selectAllRows.bind( this );
 	}
 
-	componentDidUpdate( { query: prevQuery } ) {
-		const { compareBy, query } = this.props;
+	componentDidUpdate( { query: prevQuery, headers: prevHeaders } ) {
+		const { compareBy, headers, query } = this.props;
 		const prevIds = getIdsFromQuery( prevQuery[ compareBy ] );
 		const currentIds = getIdsFromQuery( query[ compareBy ] );
 		if ( ! isEqual( prevIds.sort(), currentIds.sort() ) ) {
 			/* eslint-disable react/no-did-update-set-state */
-			this.setState( { selectedRows: currentIds } );
+			this.setState( {
+				selectedRows: currentIds,
+			} );
+			/* eslint-enable react/no-did-update-set-state */
+		}
+		if ( ! isEqual( headers, prevHeaders ) ) {
+			/* eslint-disable react/no-did-update-set-state */
+			this.setState( {
+				showCols: headers.map( ( { hiddenByDefault } ) => ! hiddenByDefault ),
+			} );
 			/* eslint-enable react/no-did-update-set-state */
 		}
 	}

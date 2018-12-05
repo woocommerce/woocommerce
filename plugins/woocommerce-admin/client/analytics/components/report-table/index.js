@@ -2,6 +2,7 @@
 /**
  * External dependencies
  */
+import { applyFilters } from '@wordpress/hooks';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
@@ -19,6 +20,8 @@ import { onQueryChange } from '@woocommerce/navigation';
  */
 import ReportError from 'analytics/components/report-error';
 import { getReportChartData, getReportTableData } from 'store/reports/utils';
+
+const TABLE_FILTER = 'woocommerce_admin_report_table';
 
 class ReportTable extends Component {
 	render() {
@@ -45,14 +48,18 @@ class ReportTable extends Component {
 		}
 
 		const isRequesting = tableData.isRequesting || primaryData.isRequesting;
-
-		const headers = getHeadersContent();
 		const orderedItems = orderBy( items.data, query.orderby, query.order );
-		const ids = itemIdField ? orderedItems.map( item => item[ itemIdField ] ) : null;
-		const rows = getRowsContent( orderedItems );
 		const totals = get( primaryData, [ 'data', 'totals' ], null );
 		const totalCount = items.totalCount || 0;
-		const summary = getSummary ? getSummary( totals, totalCount ) : null;
+		const { headers, ids, rows, summary } = applyFilters( TABLE_FILTER, {
+			endpoint: endpoint,
+			headers: getHeadersContent(),
+			orderedItems: orderedItems,
+			ids: itemIdField ? orderedItems.map( item => item[ itemIdField ] ) : null,
+			rows: getRowsContent( orderedItems ),
+			totals: totals,
+			summary: getSummary ? getSummary( totals, totalCount ) : null,
+		} );
 
 		return (
 			<TableCard
