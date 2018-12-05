@@ -409,4 +409,69 @@ class WC_Admin_Reports_Interval {
 		return call_user_func( array( __CLASS__, "next_{$time_interval}_start" ), $datetime, $reversed );
 	}
 
+	/**
+	 * Returns expected number of items on the page in case of date ordering.
+	 *
+	 * @param int $expected_interval_count Expected number of intervals in total.
+	 * @param int $items_per_page          Number of items per page.
+	 * @param int $page_no                 Page number.
+	 *
+	 * @return float|int
+	 */
+	public static function expected_intervals_on_page( $expected_interval_count, $items_per_page, $page_no ) {
+		$total_pages = (int) ceil( $expected_interval_count / $items_per_page );
+		if ( $page_no < $total_pages ) {
+			return $items_per_page;
+		} elseif ( $page_no === $total_pages ) {
+			return $expected_interval_count - ( $page_no - 1 ) * $items_per_page;
+		} else {
+			return 0;
+		}
+	}
+
+	/**
+	 * Returns true if there are any intervals that need to be filled in the response.
+	 *
+	 * @param int    $expected_interval_count Expected number of intervals in total.
+	 * @param int    $db_records              Total number of records for given period in the database.
+	 * @param int    $items_per_page          Number of items per page.
+	 * @param int    $page_no                 Page number.
+	 * @param string $order                   asc or desc.
+	 * @param string $order_by                Column by which the result will be sorted.
+	 * @param int    $intervals_count         Number of records for given (possibly shortened) time interval.
+	 *
+	 * @return bool
+	 */
+	public static function intervals_missing( $expected_interval_count, $db_records, $items_per_page, $page_no, $order, $order_by, $intervals_count ) {
+		if ( $expected_interval_count > $db_records ) {
+			if ( 'date' === $order_by ) {
+				$expected_intervals_on_page = self::expected_intervals_on_page( $expected_interval_count, $items_per_page, $page_no );
+				if ( $intervals_count < $expected_intervals_on_page ) {
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				if ( 'desc' === $order ) {
+					if ( $page_no > floor( $db_records / $items_per_page ) ) {
+						return true;
+					} else {
+						return false;
+					}
+				} elseif ( 'asc' === $order ) {
+					if ( $page_no <= ceil( ( $expected_interval_count - $db_records ) / $items_per_page ) ) {
+						return true;
+					} else {
+						return false;
+					}
+				} else {
+					// Invalid ordering.
+					return false;
+				}
+			}
+		} else {
+			return false;
+		}
+	}
+
 }
