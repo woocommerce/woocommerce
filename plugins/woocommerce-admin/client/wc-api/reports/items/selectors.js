@@ -17,12 +17,10 @@ const getReportItems = ( getResource, requireResource ) => (
 	requirement = DEFAULT_REQUIREMENT
 ) => {
 	const resourceName = getResourceName( `report-items-query-${ type }`, query );
-	const data = requireResource( requirement, resourceName ) || {};
-
-	return data;
+	return requireResource( requirement, resourceName ) || {};
 };
 
-const isGetReportItemsRequesting = getResource => ( type, query = {} ) => {
+const isReportItemsRequesting = getResource => ( type, query = {} ) => {
 	const resourceName = getResourceName( `report-items-query-${ type }`, query );
 	const { lastRequested, lastReceived } = getResource( resourceName );
 
@@ -33,13 +31,13 @@ const isGetReportItemsRequesting = getResource => ( type, query = {} ) => {
 	return lastRequested > lastReceived;
 };
 
-const isGetReportItemsError = getResource => ( type, query = {} ) => {
+const isReportItemsError = getResource => ( type, query = {} ) => {
 	const resourceName = getResourceName( `report-items-query-${ type }`, query );
 	return getResource( resourceName ).error;
 };
 
 export default {
 	getReportItems,
-	isGetReportItemsRequesting,
-	isGetReportItemsError,
+	isReportItemsRequesting,
+	isReportItemsError,
 };

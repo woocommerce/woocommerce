@@ -461,57 +461,57 @@ describe( 'getReportTableData()', () => {
 
 	beforeAll( () => {
 		select( 'wc-api' ).getReportItems = jest.fn().mockReturnValue( {} );
-		select( 'wc-api' ).isGetReportItemsRequesting = jest.fn().mockReturnValue( false );
-		select( 'wc-api' ).isGetReportItemsError = jest.fn().mockReturnValue( false );
+		select( 'wc-api' ).isReportItemsRequesting = jest.fn().mockReturnValue( false );
+		select( 'wc-api' ).isReportItemsError = jest.fn().mockReturnValue( false );
 	} );
 
 	afterAll( () => {
 		select( 'wc-api' ).getReportItems.mockRestore();
-		select( 'wc-api' ).isGetReportItemsRequesting.mockRestore();
-		select( 'wc-api' ).isGetReportItemsError.mockRestore();
+		select( 'wc-api' ).isReportItemsRequesting.mockRestore();
+		select( 'wc-api' ).isReportItemsError.mockRestore();
 	} );
 
 	function setGetReportItems( func ) {
 		select( 'wc-api' ).getReportItems.mockImplementation( ( ...args ) => func( ...args ) );
 	}
 
-	function setIsGetReportItemsRequesting( func ) {
-		select( 'wc-api' ).isGetReportItemsRequesting.mockImplementation( ( ...args ) =>
+	function setisReportItemsRequesting( func ) {
+		select( 'wc-api' ).isReportItemsRequesting.mockImplementation( ( ...args ) =>
 			func( ...args )
 		);
 	}
 
-	function setIsGetReportItemsError( func ) {
-		select( 'wc-api' ).isGetReportItemsError.mockImplementation( ( ...args ) => func( ...args ) );
+	function setisReportItemsError( func ) {
+		select( 'wc-api' ).isReportItemsError.mockImplementation( ( ...args ) => func( ...args ) );
 	}
 
 	it( 'returns isRequesting if a request is in progress', () => {
-		setIsGetReportItemsRequesting( () => true );
+		setisReportItemsRequesting( () => true );
 
 		const result = getReportTableData( 'coupons', query, select );
 
 		expect( result ).toEqual( { ...response, query, isRequesting: true } );
 		expect( select( 'wc-api' ).getReportItems ).toHaveBeenLastCalledWith( 'coupons', query );
-		expect( select( 'wc-api' ).isGetReportItemsRequesting ).toHaveBeenLastCalledWith(
+		expect( select( 'wc-api' ).isReportItemsRequesting ).toHaveBeenLastCalledWith(
 			'coupons',
 			query
 		);
-		expect( select( 'wc-api' ).isGetReportItemsError ).toHaveBeenCalledTimes( 0 );
+		expect( select( 'wc-api' ).isReportItemsError ).toHaveBeenCalledTimes( 0 );
 	} );
 
 	it( 'returns isError if request errors', () => {
-		setIsGetReportItemsRequesting( () => false );
-		setIsGetReportItemsError( () => true );
+		setisReportItemsRequesting( () => false );
+		setisReportItemsError( () => true );
 
 		const result = getReportTableData( 'coupons', query, select );
 
 		expect( result ).toEqual( { ...response, query, isError: true } );
 		expect( select( 'wc-api' ).getReportItems ).toHaveBeenLastCalledWith( 'coupons', query );
-		expect( select( 'wc-api' ).isGetReportItemsRequesting ).toHaveBeenLastCalledWith(
+		expect( select( 'wc-api' ).isReportItemsRequesting ).toHaveBeenLastCalledWith(
 			'coupons',
 			query
 		);
-		expect( select( 'wc-api' ).isGetReportItemsError ).toHaveBeenLastCalledWith(
+		expect( select( 'wc-api' ).isReportItemsError ).toHaveBeenLastCalledWith(
 			'coupons',
 			query
 		);
@@ -519,19 +519,19 @@ describe( 'getReportTableData()', () => {
 
 	it( 'returns results after queries finish', () => {
 		const items = [ { id: 1 }, { id: 2 }, { id: 3 } ];
-		setIsGetReportItemsRequesting( () => false );
-		setIsGetReportItemsError( () => false );
+		setisReportItemsRequesting( () => false );
+		setisReportItemsError( () => false );
 		setGetReportItems( () => items );
 
 		const result = getReportTableData( 'coupons', query, select );
 
 		expect( result ).toEqual( { ...response, query, items } );
 		expect( select( 'wc-api' ).getReportItems ).toHaveBeenLastCalledWith( 'coupons', query );
-		expect( select( 'wc-api' ).isGetReportItemsRequesting ).toHaveBeenLastCalledWith(
+		expect( select( 'wc-api' ).isReportItemsRequesting ).toHaveBeenLastCalledWith(
 			'coupons',
 			query
 		);
-		expect( select( 'wc-api' ).isGetReportItemsError ).toHaveBeenLastCalledWith(
+		expect( select( 'wc-api' ).isReportItemsError ).toHaveBeenLastCalledWith(
 			'coupons',
 			query
 		);

@@ -296,7 +296,7 @@ export function getReportTableQuery( urlQuery, query ) {
  * @return {Object} Object    Table data response
  */
 export function getReportTableData( endpoint, urlQuery, select, query = {} ) {
-	const { getReportItems, isGetReportItemsRequesting, isGetReportItemsError } = select(
+	const { getReportItems, isReportItemsRequesting, isReportItemsError } = select(
 		'wc-api'
 	);
 
@@ -309,9 +309,9 @@ export function getReportTableData( endpoint, urlQuery, select, query = {} ) {
 	};
 
 	const items = getReportItems( endpoint, tableQuery );
-	if ( isGetReportItemsRequesting( endpoint, tableQuery ) ) {
+	if ( isReportItemsRequesting( endpoint, tableQuery ) ) {
 		return { ...response, isRequesting: true };
-	} else if ( isGetReportItemsError( endpoint, tableQuery ) ) {
+	} else if ( isReportItemsError( endpoint, tableQuery ) ) {
 		return { ...response, isError: true };
 	}
 
