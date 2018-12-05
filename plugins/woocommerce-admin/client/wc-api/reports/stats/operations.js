@@ -30,7 +30,6 @@ const typeEndpointMap = {
 };
 
 function read( resourceNames, fetch = apiFetch ) {
-	console.log( 'stats read', resourceNames );
 	const filteredNames = resourceNames.filter( name => {
 		const prefix = getResourcePrefix( name );
 		return Boolean( typeEndpointMap[ prefix ] );
@@ -40,7 +39,7 @@ function read( resourceNames, fetch = apiFetch ) {
 		const prefix = getResourcePrefix( resourceName );
 		const endpoint = typeEndpointMap[ prefix ];
 		const query = getResourceIdentifier( resourceName );
-		console.log( '::filtered:: read', resourceName, endpoint, query );
+
 		let apiPath = endpoint + stringifyQuery( query );
 
 		if ( swaggerEndpoints.indexOf( endpoint ) >= 0 ) {

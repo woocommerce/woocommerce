@@ -17,7 +17,6 @@ const getReportStats = ( getResource, requireResource ) => (
 	requirement = DEFAULT_REQUIREMENT
 ) => {
 	const resourceName = getResourceName( `report-stats-query-${ type }`, query );
-	console.log( 'getReportStats', type, query, resourceName );
 	const data = requireResource( requirement, resourceName ) || {};
 
 	return data;

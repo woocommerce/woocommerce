@@ -6,7 +6,7 @@ import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { format as formatDate } from '@wordpress/date';
 import { compose } from '@wordpress/compose';
-import { get, map } from 'lodash';
+import { get } from 'lodash';
 
 /**
  * WooCommerce dependencies
