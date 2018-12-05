@@ -33,11 +33,7 @@ const isGetOrdersRequesting = getResource => ( query = {} ) => {
 	const resourceName = getResourceName( 'order-query', query );
 	const { lastRequested, lastReceived } = getResource( resourceName );
 
-	if ( isNil( lastRequested ) ) {
-		return false;
-	}
-
-	if ( isNil( lastReceived ) ) {
+	if ( isNil( lastRequested ) || isNil( lastReceived ) ) {
 		return true;
 	}
 

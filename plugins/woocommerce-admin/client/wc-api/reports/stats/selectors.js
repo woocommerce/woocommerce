@@ -26,11 +26,7 @@ const isReportStatsRequesting = getResource => ( type, query = {} ) => {
 	const resourceName = getResourceName( `report-stats-query-${ type }`, query );
 	const { lastRequested, lastReceived } = getResource( resourceName );
 
-	if ( isNil( lastRequested ) ) {
-		return false;
-	}
-
-	if ( isNil( lastReceived ) ) {
+	if ( isNil( lastRequested ) || isNil( lastReceived ) ) {
 		return true;
 	}
 
