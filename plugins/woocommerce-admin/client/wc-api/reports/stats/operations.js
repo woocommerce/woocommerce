@@ -40,22 +40,20 @@ function read( resourceNames, fetch = apiFetch ) {
 		const endpoint = typeEndpointMap[ prefix ];
 		const query = getResourceIdentifier( resourceName );
 
-		let apiPath = endpoint + stringifyQuery( query );
+		const fetchArgs = {
+			parse: false,
+		};
 
 		if ( swaggerEndpoints.indexOf( endpoint ) >= 0 ) {
-			apiPath = SWAGGERNAMESPACE + 'reports/' + endpoint + '/stats' + stringifyQuery( query );
-		}
-
-		if ( statEndpoints.indexOf( endpoint ) >= 0 ) {
-			apiPath = NAMESPACE + '/reports/' + endpoint + '/stats' + stringifyQuery( query );
+			fetchArgs.url = SWAGGERNAMESPACE + 'reports/' + endpoint + '/stats' + stringifyQuery( query );
+		} else if ( statEndpoints.indexOf( endpoint ) >= 0 ) {
+			fetchArgs.path = NAMESPACE + '/reports/' + endpoint + '/stats' + stringifyQuery( query );
+		} else {
+			fetchArgs.path = endpoint + stringifyQuery( query );
 		}
 
 		try {
-			const response = await fetch( {
-				parse: false,
-				path: apiPath,
-			} );
-
+			const response = await fetch( fetchArgs );
 			const report = await response.json();
 			// TODO: exclude these if using swagger?
 			const totalResults = parseInt( response.headers.get( 'x-wp-total' ) );

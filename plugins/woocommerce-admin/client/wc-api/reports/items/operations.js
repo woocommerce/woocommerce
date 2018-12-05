@@ -39,18 +39,18 @@ function read( resourceNames, fetch = apiFetch ) {
 		const endpoint = typeEndpointMap[ prefix ];
 		const query = getResourceIdentifier( resourceName );
 
-		let apiPath = NAMESPACE + '/reports/' + endpoint + stringifyQuery( query );
+		const fetchArgs = {
+			parse: false,
+		};
 
 		if ( swaggerEndpoints.indexOf( endpoint ) >= 0 ) {
-			apiPath = SWAGGERNAMESPACE + 'reports/' + endpoint + stringifyQuery( query );
+			fetchArgs.url = SWAGGERNAMESPACE + 'reports/' + endpoint + stringifyQuery( query );
+		} else {
+			fetchArgs.path = NAMESPACE + '/reports/' + endpoint + stringifyQuery( query );
 		}
 
 		try {
-			const response = await fetch( {
-				parse: false,
-				path: apiPath,
-			} );
-
+			const response = await fetch( fetchArgs );
 			const report = await response.json();
 			// TODO: exclude these if using swagger?
 			const totalResults = parseInt( response.headers.get( 'x-wp-total' ) );
