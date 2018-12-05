@@ -297,7 +297,7 @@ export function getReportTableQuery( urlQuery, query ) {
  */
 export function getReportTableData( endpoint, urlQuery, select, query = {} ) {
 	const { getReportItems, isGetReportItemsRequesting, isGetReportItemsError } = select(
-		'wc-admin'
+		'wc-api'
 	);
 
 	const tableQuery = reportsUtils.getReportTableQuery( urlQuery, query );

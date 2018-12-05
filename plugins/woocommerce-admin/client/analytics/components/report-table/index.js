@@ -5,7 +5,6 @@
 import { applyFilters } from '@wordpress/hooks';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
 import { get, orderBy } from 'lodash';
 import PropTypes from 'prop-types';
 
@@ -20,6 +19,7 @@ import { onQueryChange } from '@woocommerce/navigation';
  */
 import ReportError from 'analytics/components/report-error';
 import { getReportChartData, getReportTableData } from 'store/reports/utils';
+import withSelect from 'wc-api/with-select';
 
 const TABLE_FILTER = 'woocommerce_admin_report_table';
 
