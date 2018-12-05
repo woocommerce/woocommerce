@@ -33,8 +33,8 @@ import ProductCategoryControl from './components/product-category-control';
 import ProductPreview from './components/product-preview';
 import sharedAttributes from './utils/shared-attributes';
 
-// Only enable center, wide, and full alignments
-const validAlignments = [ 'center', 'wide', 'full' ];
+// Only enable wide and full alignments
+const validAlignments = [ 'wide', 'full' ];
 
 /**
  * Component to handle edit mode of "Products by Category".
