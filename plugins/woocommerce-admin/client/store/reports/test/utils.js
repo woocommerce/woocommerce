@@ -62,29 +62,29 @@ describe( 'getReportChartData()', () => {
 	};
 
 	beforeAll( () => {
-		select( 'wc-admin' ).getReportStats = jest.fn().mockReturnValue( {} );
-		select( 'wc-admin' ).isReportStatsRequesting = jest.fn().mockReturnValue( false );
-		select( 'wc-admin' ).isReportStatsError = jest.fn().mockReturnValue( false );
+		select( 'wc-api' ).getReportStats = jest.fn().mockReturnValue( {} );
+		select( 'wc-api' ).isReportStatsRequesting = jest.fn().mockReturnValue( false );
+		select( 'wc-api' ).isReportStatsError = jest.fn().mockReturnValue( false );
 	} );
 
 	afterAll( () => {
-		select( 'wc-admin' ).getReportStats.mockRestore();
-		select( 'wc-admin' ).isReportStatsRequesting.mockRestore();
-		select( 'wc-admin' ).isReportStatsError.mockRestore();
+		select( 'wc-api' ).getReportStats.mockRestore();
+		select( 'wc-api' ).isReportStatsRequesting.mockRestore();
+		select( 'wc-api' ).isReportStatsError.mockRestore();
 	} );
 
 	function setGetReportStats( func ) {
-		select( 'wc-admin' ).getReportStats.mockImplementation( ( ...args ) => func( ...args ) );
+		select( 'wc-api' ).getReportStats.mockImplementation( ( ...args ) => func( ...args ) );
 	}
 
 	function setIsReportStatsRequesting( func ) {
-		select( 'wc-admin' ).isReportStatsRequesting.mockImplementation( ( ...args ) =>
+		select( 'wc-api' ).isReportStatsRequesting.mockImplementation( ( ...args ) =>
 			func( ...args )
 		);
 	}
 
 	function setIsReportStatsError( func ) {
-		select( 'wc-admin' ).isReportStatsError.mockImplementation( ( ...args ) => func( ...args ) );
+		select( 'wc-api' ).isReportStatsError.mockImplementation( ( ...args ) => func( ...args ) );
 	}
 
 	it( 'returns isRequesting if first request is in progress', () => {
@@ -262,29 +262,29 @@ describe( 'getSummaryNumbers()', () => {
 	};
 
 	beforeAll( () => {
-		select( 'wc-admin' ).getReportStats = jest.fn().mockReturnValue( {} );
-		select( 'wc-admin' ).isReportStatsRequesting = jest.fn().mockReturnValue( false );
-		select( 'wc-admin' ).isReportStatsError = jest.fn().mockReturnValue( false );
+		select( 'wc-api' ).getReportStats = jest.fn().mockReturnValue( {} );
+		select( 'wc-api' ).isReportStatsRequesting = jest.fn().mockReturnValue( false );
+		select( 'wc-api' ).isReportStatsError = jest.fn().mockReturnValue( false );
 	} );
 
 	afterAll( () => {
-		select( 'wc-admin' ).getReportStats.mockRestore();
-		select( 'wc-admin' ).isReportStatsRequesting.mockRestore();
-		select( 'wc-admin' ).isReportStatsError.mockRestore();
+		select( 'wc-api' ).getReportStats.mockRestore();
+		select( 'wc-api' ).isReportStatsRequesting.mockRestore();
+		select( 'wc-api' ).isReportStatsError.mockRestore();
 	} );
 
 	function setGetReportStats( func ) {
-		select( 'wc-admin' ).getReportStats.mockImplementation( ( ...args ) => func( ...args ) );
+		select( 'wc-api' ).getReportStats.mockImplementation( ( ...args ) => func( ...args ) );
 	}
 
 	function setIsReportStatsRequesting( func ) {
-		select( 'wc-admin' ).isReportStatsRequesting.mockImplementation( ( ...args ) =>
+		select( 'wc-api' ).isReportStatsRequesting.mockImplementation( ( ...args ) =>
 			func( ...args )
 		);
 	}
 
 	function setIsReportStatsError( func ) {
-		select( 'wc-admin' ).isReportStatsError.mockImplementation( ( ...args ) => func( ...args ) );
+		select( 'wc-api' ).isReportStatsError.mockImplementation( ( ...args ) => func( ...args ) );
 	}
 
 	it( 'returns isRequesting if a request is in progress', () => {
@@ -460,29 +460,29 @@ describe( 'getReportTableData()', () => {
 	};
 
 	beforeAll( () => {
-		select( 'wc-admin' ).getReportItems = jest.fn().mockReturnValue( {} );
-		select( 'wc-admin' ).isGetReportItemsRequesting = jest.fn().mockReturnValue( false );
-		select( 'wc-admin' ).isGetReportItemsError = jest.fn().mockReturnValue( false );
+		select( 'wc-api' ).getReportItems = jest.fn().mockReturnValue( {} );
+		select( 'wc-api' ).isGetReportItemsRequesting = jest.fn().mockReturnValue( false );
+		select( 'wc-api' ).isGetReportItemsError = jest.fn().mockReturnValue( false );
 	} );
 
 	afterAll( () => {
-		select( 'wc-admin' ).getReportItems.mockRestore();
-		select( 'wc-admin' ).isGetReportItemsRequesting.mockRestore();
-		select( 'wc-admin' ).isGetReportItemsError.mockRestore();
+		select( 'wc-api' ).getReportItems.mockRestore();
+		select( 'wc-api' ).isGetReportItemsRequesting.mockRestore();
+		select( 'wc-api' ).isGetReportItemsError.mockRestore();
 	} );
 
 	function setGetReportItems( func ) {
-		select( 'wc-admin' ).getReportItems.mockImplementation( ( ...args ) => func( ...args ) );
+		select( 'wc-api' ).getReportItems.mockImplementation( ( ...args ) => func( ...args ) );
 	}
 
 	function setIsGetReportItemsRequesting( func ) {
-		select( 'wc-admin' ).isGetReportItemsRequesting.mockImplementation( ( ...args ) =>
+		select( 'wc-api' ).isGetReportItemsRequesting.mockImplementation( ( ...args ) =>
 			func( ...args )
 		);
 	}
 
 	function setIsGetReportItemsError( func ) {
-		select( 'wc-admin' ).isGetReportItemsError.mockImplementation( ( ...args ) => func( ...args ) );
+		select( 'wc-api' ).isGetReportItemsError.mockImplementation( ( ...args ) => func( ...args ) );
 	}
 
 	it( 'returns isRequesting if a request is in progress', () => {
@@ -491,12 +491,12 @@ describe( 'getReportTableData()', () => {
 		const result = getReportTableData( 'coupons', query, select );
 
 		expect( result ).toEqual( { ...response, query, isRequesting: true } );
-		expect( select( 'wc-admin' ).getReportItems ).toHaveBeenLastCalledWith( 'coupons', query );
-		expect( select( 'wc-admin' ).isGetReportItemsRequesting ).toHaveBeenLastCalledWith(
+		expect( select( 'wc-api' ).getReportItems ).toHaveBeenLastCalledWith( 'coupons', query );
+		expect( select( 'wc-api' ).isGetReportItemsRequesting ).toHaveBeenLastCalledWith(
 			'coupons',
 			query
 		);
-		expect( select( 'wc-admin' ).isGetReportItemsError ).toHaveBeenCalledTimes( 0 );
+		expect( select( 'wc-api' ).isGetReportItemsError ).toHaveBeenCalledTimes( 0 );
 	} );
 
 	it( 'returns isError if request errors', () => {
@@ -506,12 +506,12 @@ describe( 'getReportTableData()', () => {
 		const result = getReportTableData( 'coupons', query, select );
 
 		expect( result ).toEqual( { ...response, query, isError: true } );
-		expect( select( 'wc-admin' ).getReportItems ).toHaveBeenLastCalledWith( 'coupons', query );
-		expect( select( 'wc-admin' ).isGetReportItemsRequesting ).toHaveBeenLastCalledWith(
+		expect( select( 'wc-api' ).getReportItems ).toHaveBeenLastCalledWith( 'coupons', query );
+		expect( select( 'wc-api' ).isGetReportItemsRequesting ).toHaveBeenLastCalledWith(
 			'coupons',
 			query
 		);
-		expect( select( 'wc-admin' ).isGetReportItemsError ).toHaveBeenLastCalledWith(
+		expect( select( 'wc-api' ).isGetReportItemsError ).toHaveBeenLastCalledWith(
 			'coupons',
 			query
 		);
@@ -526,12 +526,12 @@ describe( 'getReportTableData()', () => {
 		const result = getReportTableData( 'coupons', query, select );
 
 		expect( result ).toEqual( { ...response, query, items } );
-		expect( select( 'wc-admin' ).getReportItems ).toHaveBeenLastCalledWith( 'coupons', query );
-		expect( select( 'wc-admin' ).isGetReportItemsRequesting ).toHaveBeenLastCalledWith(
+		expect( select( 'wc-api' ).getReportItems ).toHaveBeenLastCalledWith( 'coupons', query );
+		expect( select( 'wc-api' ).isGetReportItemsRequesting ).toHaveBeenLastCalledWith(
 			'coupons',
 			query
 		);
-		expect( select( 'wc-admin' ).isGetReportItemsError ).toHaveBeenLastCalledWith(
+		expect( select( 'wc-api' ).isGetReportItemsError ).toHaveBeenLastCalledWith(
 			'coupons',
 			query
 		);
