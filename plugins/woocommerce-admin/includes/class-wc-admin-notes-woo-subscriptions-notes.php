@@ -19,6 +19,16 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 	const NOTIFY_WHEN_DAYS_LEFT   = 60;
 
 	/**
+	 * We want to bubble up expiration notices when they cross certain age
+	 * thresholds. PHP 5.2 doesn't support constant arrays, so we do this.
+	 *
+	 * @return array
+	 */
+	private function get_bump_thresholds() {
+		return array( 60, 45, 20, 7, 1 ); // days.
+	}
+
+	/**
 	 * Hook all the things.
 	 */
 	public function __construct() {
@@ -70,7 +80,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 			$refresh_notes = false;
 
 			// Did the user just do something on the helper page?.
-			if ( isset( $_GET['wc-helper-status'] ) ) {
+			if ( isset( $_GET['wc-helper-status'] ) ) { // @codingStandardsIgnoreLine.
 				$refresh_notes = true;
 			}
 
@@ -274,10 +284,24 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 		if ( $note ) {
 			$content_data = $note->get_content_data();
 			if ( property_exists( $content_data, 'days_until_expiration' ) ) {
+				// Note: There is no reason this property should not exist. This is just defensive programming.
 				$note_days_until_expiration = intval( $content_data->days_until_expiration );
 				if ( $days_until_expiration === $note_days_until_expiration ) {
 					// Note is already up to date. Bail.
 					return;
+				}
+
+				// If we have a note and we are at or have crossed a threshold, we should delete
+				// the old note and create a new one, thereby "bumping" the note to the top of the inbox.
+				$bump_thresholds    = $this->get_bump_thresholds();
+				$crossing_threshold = false;
+
+				foreach ( (array) $bump_thresholds as $bump_threshold ) {
+					if ( ( $note_days_until_expiration > $bump_threshold ) && ( $days_until_expiration <= $bump_threshold ) ) {
+						$note->delete();
+						$note = false;
+						continue;
+					}
 				}
 			}
 		}
@@ -410,10 +434,12 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 				continue;
 			}
 
-			// If the subscription is not expiring soon, clean up and exit.
-			$expires      = intval( $subscription['expires'] );
-			$time_now_gmt = current_time( 'timestamp', 0 );
-			if ( $expires > $time_now_gmt + self::NOTIFY_WHEN_DAYS_LEFT * DAY_IN_SECONDS ) {
+			// If the subscription is not expiring by the first threshold, clean up and exit.
+			$bump_thresholds = $this->get_bump_thresholds();
+			$first_threshold = DAY_IN_SECONDS * $bump_thresholds[0];
+			$expires         = intval( $subscription['expires'] );
+			$time_now_gmt    = current_time( 'timestamp', 0 );
+			if ( $expires > $time_now_gmt + $first_threshold ) {
 				$this->delete_any_note_for_product_id( $product_id );
 				continue;
 			}
