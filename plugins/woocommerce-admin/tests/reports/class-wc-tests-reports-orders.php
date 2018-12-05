@@ -32,6 +32,13 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
 		$order->save();
 
+		$refund = wc_create_refund(
+			array(
+				'amount'         => 12,
+				'order_id'       => $order->get_id(),
+			)
+		);
+
 		$data_store = new WC_Admin_Reports_Orders_Data_Store();
 		$data_store::update( $order );
 
@@ -51,10 +58,10 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 				'avg_order_value'         => 97,
 				'gross_revenue'           => 97,
 				'coupons'                 => 20,
-				'refunds'                 => 0,
+				'refunds'                 => 12,
 				'taxes'                   => 7,
 				'shipping'                => 10,
-				'net_revenue'             => 80,
+				'net_revenue'             => 68,
 				'num_returning_customers' => 0,
 				'num_new_customers'       => 1,
 				'products'                => '1',
@@ -68,11 +75,11 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 					'date_end_gmt'   => $end_time,
 					'subtotals'      => array(
 						'gross_revenue'           => 97,
-						'net_revenue'             => 80,
+						'net_revenue'             => 68,
 						'coupons'                 => 20,
 						'shipping'                => 10,
 						'taxes'                   => 7,
-						'refunds'                 => 0,
+						'refunds'                 => 12,
 						'orders_count'            => 1,
 						'num_items_sold'          => 4,
 						'avg_items_per_order'     => 4,
@@ -94,7 +101,7 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		$query          = new WC_Admin_Reports_Orders_Stats_Query( $args );
 		$expected_stats = array(
 			'totals'    => array(
-				'net_revenue'             => 80,
+				'net_revenue'             => 68,
 				'avg_order_value'         => 97,
 				'orders_count'            => 1,
 				'avg_items_per_order'     => 4,
@@ -112,7 +119,7 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 					'date_end'       => $end_time,
 					'date_end_gmt'   => $end_time,
 					'subtotals'      => array(
-						'net_revenue'             => 80,
+						'net_revenue'             => 68,
 						'avg_order_value'         => 97,
 						'orders_count'            => 1,
 						'avg_items_per_order'     => 4,
