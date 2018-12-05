@@ -9,8 +9,8 @@ import { shallow } from 'enzyme';
  */
 import { ReportChart } from '../';
 
-jest.mock( 'components', () => ( {
-	...require.requireActual( 'components' ),
+jest.mock( '@woocommerce/components', () => ( {
+	...require.requireActual( '@woocommerce/components' ),
 	Chart: () => null,
 } ) );
 

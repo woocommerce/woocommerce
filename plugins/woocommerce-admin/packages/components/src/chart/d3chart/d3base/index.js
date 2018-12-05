@@ -10,11 +10,6 @@ import { isEqual } from 'lodash';
 import { select as d3Select } from 'd3-selection';
 
 /**
- * Internal dependencies
- */
-import './style.scss';
-
-/**
  * Provides foundation to use D3 within React.
  *
  * React is responsible for determining when a chart should be updated (e.g. whenever data changes or the browser is
