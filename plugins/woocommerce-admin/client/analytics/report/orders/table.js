@@ -186,7 +186,7 @@ class OrdersReportTable extends Component {
 		}
 		return [
 			{
-				label: _n( 'order', 'orders', totals.num_items_sold, 'wc-admin' ),
+				label: _n( 'order', 'orders', totals.orders_count, 'wc-admin' ),
 				value: numberFormat( totals.orders_count ),
 			},
 			{
