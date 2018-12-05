@@ -5,7 +5,7 @@
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { Component } from '@wordpress/element';
-import { find, findIndex, first, isEqual, noop, partial, uniq } from 'lodash';
+import { find, first, includes, isEqual, noop, partial, uniq, without } from 'lodash';
 import { IconButton, ToggleControl } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
@@ -46,11 +46,12 @@ class TableCard extends Component {
 	constructor( props ) {
 		super( props );
 		const { compareBy, query } = props;
-		this.state = {
-			selectedRows: getIdsFromQuery( query[ compareBy ] ),
-			showCols: props.headers.map( ( { hiddenByDefault } ) => ! hiddenByDefault ),
-		};
-		this.toggleCols = this.toggleCols.bind( this );
+
+		const showCols = props.headers.map( ( { key, hiddenByDefault } ) => ! hiddenByDefault && key ).filter( Boolean );
+		const selectedRows = getIdsFromQuery( query[ compareBy ] );
+
+		this.state = { showCols, selectedRows };
+		this.onColumnToggle = this.onColumnToggle.bind( this );
 		this.onClickDownload = this.onClickDownload.bind( this );
 		this.onCompare = this.onCompare.bind( this );
 		this.onSearch = this.onSearch.bind( this );
@@ -78,37 +79,55 @@ class TableCard extends Component {
 		}
 	}
 
-	toggleCols( selected ) {
-		const { headers, query, onQueryChange } = this.props;
-		return () => {
-			// Handle hiding a sorted column
-			if ( query.orderby ) {
-				const sortBy = findIndex( headers, { key: query.orderby } );
-				if ( sortBy === selected ) {
-					const defaultSort = find( headers, { defaultSort: true } ) || first( headers ) || {};
-					onQueryChange( 'sort' )( defaultSort.key, 'desc' );
-				}
-			}
+	getVisibleHeaders() {
+		const { headers } = this.props;
+		const { showCols } = this.state;
+		return headers.filter( ( { key } ) => includes( showCols, key ) );
+	}
 
-			this.setState( prevState => ( {
-				showCols: prevState.showCols.map(
-					( toggled, i ) => ( selected === i ? ! toggled : toggled )
-				),
-			} ) );
+	getVisibleRows() {
+		const { headers, rows } = this.props;
+		const { showCols } = this.state;
+
+		return rows.map( row => {
+			return headers.map( ( { key }, i ) => {
+				return includes( showCols, key ) && row[ i ];
+			} ).filter( Boolean );
+		} );
+	}
+
+	onColumnToggle( key ) {
+		const { headers, query, onQueryChange } = this.props;
+
+		return ( visible ) => {
+			this.setState( prevState => {
+				const hasKey = includes( prevState.showCols, key );
+
+				if ( visible && ! hasKey ) {
+					return { showCols: [ ...prevState.showCols, key ] };
+				}
+				if ( ! visible && hasKey ) {
+					// Handle hiding a sorted column
+					if ( query.orderby === key ) {
+						const defaultSort = find( headers, { defaultSort: true } ) || first( headers ) || {};
+						onQueryChange( 'sort' )( defaultSort.key, 'desc' );
+					}
+
+					return { showCols: without( prevState.showCols, key ) };
+				}
+				return {};
+			} );
 		};
 	}
 
 	onClickDownload() {
-		const { headers, query, onClickDownload, rows, title } = this.props;
-		const { showCols } = this.state;
-		const visibleHeaders = headers.filter( ( header, i ) => showCols[ i ] );
-		const visibleRows = rows.map( row => row.filter( ( cell, i ) => showCols[ i ] ) );
+		const { query, onClickDownload, title } = this.props;
 
 		// @TODO The current implementation only downloads the contents displayed in the table.
 		// Another solution is required when the data set is larger (see #311).
 		downloadCSVFile(
 			generateCSVFileName( title, query ),
-			generateCSVDataFromTable( visibleHeaders, visibleRows )
+			generateCSVDataFromTable( this.getVisibleHeaders(), this.getVisibleRows() )
 		);
 
 		if ( onClickDownload ) {
@@ -135,16 +154,6 @@ class TableCard extends Component {
 				[ ...selectedRows, ...ids ].join( ',' )
 			);
 		}
-	}
-
-	filterCols( rows = [] ) {
-		const { showCols } = this.state;
-		// Header is a 1d array
-		if ( ! Array.isArray( first( rows ) ) ) {
-			return rows.filter( ( col, i ) => showCols[ i ] );
-		}
-		// Rows is a 2d array
-		return rows.map( row => row.filter( ( col, i ) => showCols[ i ] ) );
 	}
 
 	selectAllRows( event ) {
@@ -223,8 +232,8 @@ class TableCard extends Component {
 		} = this.props;
 		const { selectedRows, showCols } = this.state;
 		const allHeaders = this.props.headers;
-		let headers = this.filterCols( this.props.headers );
-		let rows = this.filterCols( this.props.rows );
+		let headers = this.getVisibleHeaders();
+		let rows = this.getVisibleRows();
 		if ( compareBy ) {
 			rows = rows.map( ( row, i ) => {
 				return [ this.getCheckbox( i ), ...row ];
@@ -281,16 +290,16 @@ class TableCard extends Component {
 				menu={
 					<EllipsisMenu label={ __( 'Choose which values to display', 'wc-admin' ) }>
 						<MenuTitle>{ __( 'Columns:', 'wc-admin' ) }</MenuTitle>
-						{ allHeaders.map( ( { label, required }, i ) => {
+						{ allHeaders.map( ( { key, label, required } ) => {
 							if ( required ) {
 								return null;
 							}
 							return (
-								<MenuItem key={ i } onInvoke={ this.toggleCols( i ) }>
+								<MenuItem key={ key } onInvoke={ this.onColumnToggle( key ) }>
 									<ToggleControl
 										label={ label }
-										checked={ !! showCols[ i ] }
-										onChange={ this.toggleCols( i ) }
+										checked={ includes( showCols, key ) }
+										onChange={ this.onColumnToggle( key ) }
 									/>
 								</MenuItem>
 							);

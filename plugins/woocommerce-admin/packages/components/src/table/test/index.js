@@ -75,7 +75,7 @@ describe( 'TableCard', () => {
 			/>
 		);
 		tableCard.setState( {
-			showCols: [ true, true, true, true, false, true, true, true ],
+			showCols: [ 'date', 'orders_count', 'gross_revenue', 'refunds', 'taxes', 'shipping', 'net_revenue' ],
 		} );
 
 		const downloadButton = tableCard.findWhere(

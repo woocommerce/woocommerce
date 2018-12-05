@@ -1,3 +1,7 @@
+# 1.3.0
+
+- Update `<Table />` to use header keys to denote which columns are shown
+
 # 1.2.0
 
 - Update `Search` to exclude already-selected items
