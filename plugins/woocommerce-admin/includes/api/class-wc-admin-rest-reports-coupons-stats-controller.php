@@ -60,7 +60,7 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 	 */
 	public function get_items( $request ) {
 		$query_args    = $this->prepare_reports_query( $request );
-		$coupons_query = new WC_Reports_Orders_Stats_Query( $query_args ); // @todo change to correct class.
+		$coupons_query = new WC_Admin_Reports_Coupons_Stats_Query( $query_args );
 		$report_data   = $coupons_query->get_data();
 
 		$out_data = array(
@@ -270,10 +270,9 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 			'default'           => 'date',
 			'enum'              => array(
 				'date',
-				'items_sold',
-				'gross_revenue',
+				'gross_discount',
+				'coupons_count',
 				'orders_count',
-				'products_count',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
@@ -291,7 +290,7 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['coupons']  = array(
+		$params['code']  = array(
 			'description'       => __( 'Limit result set to items assigned one or more code.', 'wc-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',

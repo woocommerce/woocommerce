@@ -51,6 +51,8 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-categories-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-taxes-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-taxes-stats-query.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-coupons-query.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-coupons-stats-query.php';
 
 		// Data stores.
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-data-store.php';
@@ -61,6 +63,8 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-categories-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-taxes-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-taxes-stats-data-store.php';
+		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-coupons-data-store.php';
+		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-coupons-stats-data-store.php';
 
 		// Data triggers.
 		require_once dirname( __FILE__ ) . '/wc-admin-order-functions.php';
@@ -326,7 +330,7 @@ class WC_Admin_Api_Init {
 				'report-taxes'          => 'WC_Admin_Reports_Taxes_Data_Store',
 				'report-taxes-stats'    => 'WC_Admin_Reports_Taxes_Stats_Data_Store',
 				'report-coupons'        => 'WC_Admin_Reports_Coupons_Data_Store',
-				'report-coupons-stats'  => 'WC_Admin_Reports_Coupons_Stats_Store',
+				'report-coupons-stats'  => 'WC_Admin_Reports_Coupons_Stats_Data_Store',
 				'admin-note'            => 'WC_Admin_Notes_Data_Store',
 			)
 		);
