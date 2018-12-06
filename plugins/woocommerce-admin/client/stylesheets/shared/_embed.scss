@@ -80,4 +80,16 @@
 			margin-top: 32px;
 		}
 	}
+
+	.woocommerce-layout__activity-panel-mobile-toggle {
+		@include breakpoint( '>782px' ) {
+			display: none;
+		}
+	}
+
+	.woocommerce-activity-card__actions {
+		a.components-button.is-button {
+			color: $gray-text;
+		}
+	}
 }

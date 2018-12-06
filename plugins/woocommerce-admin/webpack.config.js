@@ -65,6 +65,11 @@ const webpackConfig = {
 	module: {
 		rules: [
 			{
+				parser: {
+					amd: false,
+				},
+			},
+			{
 				test: /\.jsx?$/,
 				loader: 'babel-loader',
 				exclude: /node_modules/,
