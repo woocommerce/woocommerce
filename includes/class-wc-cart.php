@@ -1512,7 +1512,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			// Go through the allowed emails and return true if the email matches a wildcard.
 			foreach ( $restrictions as $restriction ) {
 				// Convert to PHP-regex syntax.
-				$regex = '/' . str_replace( '*', '(.+)?', $restriction ) . '/';
+				$regex = '/^' . str_replace( '*', '(.+)?', $restriction ) . '$/';
 				preg_match( $regex, $check_email, $match );
 				if ( ! empty( $match ) ) {
 					return true;
