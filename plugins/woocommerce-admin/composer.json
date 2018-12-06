@@ -10,12 +10,8 @@
     "composer/installers": "~1.6"
   },
   "require-dev": {
-    "squizlabs/php_codesniffer": "*",
-    "wp-coding-standards/wpcs": "1.2.0",
     "phpunit/phpunit": "6.5.13",
-    "woocommerce/woocommerce-sniffs": "*",
-    "wimg/php-compatibility": "9.0.0",
-    "dealerdirect/phpcodesniffer-composer-installer": "0.5.0"
+    "woocommerce/woocommerce-sniffs": "0.0.5"
   },
   "scripts": {
     "test": [
