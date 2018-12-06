@@ -13,6 +13,7 @@ import { stringifyQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { computeSuggestionMatch } from './utils';
+import { getTaxCode } from 'analytics/report/taxes/utils';
 
 /**
  * A tax completer.
@@ -21,7 +22,7 @@ import { computeSuggestionMatch } from './utils';
  * @type {Completer}
  */
 export default {
-	name: 'taxes$',
+	name: 'taxes',
 	className: 'woocommerce-search__tax-result',
 	options( search ) {
 		let payload = '';
@@ -36,10 +37,10 @@ export default {
 	},
 	isDebounced: true,
 	getOptionKeywords( tax ) {
-		return [ tax.code ];
+		return [ tax.id, getTaxCode( tax ) ];
 	},
 	getOptionLabel( tax, query ) {
-		const match = computeSuggestionMatch( tax.code, query ) || {};
+		const match = computeSuggestionMatch( getTaxCode( tax ), query ) || {};
 		return [
 			<span key="name" className="woocommerce-search__result-name" aria-label={ tax.code }>
 				{ match.suggestionBeforeMatch }
@@ -54,8 +55,8 @@ export default {
 	// of replace/insertion, so we can just return the value.
 	getOptionCompletion( tax ) {
 		const value = {
-			id: tax.tax_rate_id,
-			label: tax.code,
+			id: tax.id,
+			label: getTaxCode( tax ),
 		};
 		return value;
 	},
