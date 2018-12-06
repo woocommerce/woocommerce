@@ -1392,6 +1392,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function search_products( $term, $type = '', $include_variations = false, $all_statuses = false, $limit = null ) {
 		global $wpdb;
 
+		$custom_results = apply_filters( 'woocommerce_product_pre_search_products', false, $term, $type, $include_variations, $all_statuses, $limit );
+
+		if ( is_array( $custom_results ) ) {
+			return $custom_results;
+		}
+
 		$post_types    = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
 		$post_statuses = current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' );
 		$type_join     = '';
