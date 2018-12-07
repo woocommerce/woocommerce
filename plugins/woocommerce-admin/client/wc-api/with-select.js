@@ -57,16 +57,39 @@ const withSelect = mapSelectToProps =>
 			 * @return {Object} Props to merge into rendered wrapped element.
 			 */
 			getNextMergeProps( props ) {
-				const context = { component: this };
-				const select = reducerKey => {
-					const selectors = props.registry.select( reducerKey );
-					if ( isFunction( selectors ) ) {
-						return selectors( context );
+				const storeSelectors = {};
+				const onCompletes = [];
+				const componentContext = { component: this };
+
+				const getStoreFromRegistry = ( key, registry, context ) => {
+					// This is our first time selecting from this store.
+					// Do some lazy-loading of handling at this time.
+					const selectorsForKey = registry.select( key );
+
+					if ( isFunction( selectorsForKey ) ) {
+						// This store has special handling for its selectors.
+						// We give it a context, and we check for a "resolve"
+						const { selectors, onComplete } = selectorsForKey( context );
+						onComplete && onCompletes.push( onComplete );
+						storeSelectors[ key ] = selectors;
+					} else {
+						storeSelectors[ key ] = selectorsForKey;
 					}
-					return selectors;
 				};
 
-				return mapSelectToProps( select, props.ownProps ) || DEFAULT_MERGE_PROPS;
+				const select = key => {
+					if ( ! storeSelectors[ key ] ) {
+						getStoreFromRegistry( key, props.registry, componentContext );
+					}
+
+					return storeSelectors[ key ];
+				};
+
+				const selectedProps = mapSelectToProps( select, props.ownProps ) || DEFAULT_MERGE_PROPS;
+
+				// Complete the select for those stores which support it.
+				onCompletes.forEach( onComplete => onComplete() );
+				return selectedProps;
 			}
 
 			componentDidMount() {
