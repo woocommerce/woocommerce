@@ -38,7 +38,7 @@ export { default as SegmentedSelection } from './segmented-selection';
 export { default as SplitButton } from './split-button';
 export { default as SummaryList } from './summary';
 export { default as SummaryListPlaceholder } from './summary/placeholder';
-export { default as SummaryNumber } from './summary/item';
+export { default as SummaryNumber } from './summary/number';
 export { default as Table } from './table/table';
 export { default as TableCard } from './table';
 export { default as EmptyTable } from './table/empty';

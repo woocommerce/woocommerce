@@ -6,7 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import classnames from 'classnames';
 import Gridicon from 'gridicons';
-import { isUndefined } from 'lodash';
+import { isNil } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -79,7 +79,7 @@ const SummaryNumber = ( {
 					>
 						<Gridicon className="woocommerce-summary__item-delta-icon" icon={ icon } size={ 18 } />
 						<span className="woocommerce-summary__item-delta-value">
-							{ ! isUndefined( delta )
+							{ ! isNil( delta )
 								? sprintf( __( '%d%%', 'wc-admin' ), delta )
 								: __( 'N/A', 'wc-admin' ) }
 						</span>
@@ -88,7 +88,7 @@ const SummaryNumber = ( {
 				<span className="woocommerce-summary__item-prev-label">{ prevLabel }</span>
 				{ ' ' /* Add a real space so the line breaks here, and not in the label text. */ }
 				<span className="woocommerce-summary__item-prev-value">
-					{ ! isUndefined( prevValue ) ? prevValue : __( 'N/A', 'wc-admin' ) }
+					{ ! isNil( prevValue ) ? prevValue : __( 'N/A', 'wc-admin' ) }
 				</span>
 
 				{ onToggle ? (
@@ -143,7 +143,7 @@ SummaryNumber.propTypes = {
 	/**
 	 * A string or number value to display - a string is allowed so we can accept currency formatting.
 	 */
-	value: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ).isRequired,
+	value: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ),
 };
 
 SummaryNumber.defaultProps = {

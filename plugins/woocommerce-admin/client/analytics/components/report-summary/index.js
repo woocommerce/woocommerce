@@ -5,14 +5,12 @@
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { map } from 'lodash';
 import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 
 /**
  * WooCommerce dependencies
  */
-import { formatCurrency } from '@woocommerce/currency';
 import { getDateParamsFromQuery } from '@woocommerce/date';
 import { getNewPath } from '@woocommerce/navigation';
 import { SummaryList, SummaryListPlaceholder, SummaryNumber } from '@woocommerce/components';
@@ -21,68 +19,48 @@ import { SummaryList, SummaryListPlaceholder, SummaryNumber } from '@woocommerce
  * Internal dependencies
  */
 import { getSummaryNumbers } from 'store/reports/utils';
-import { numberFormat } from 'lib/number';
 import ReportError from 'analytics/components/report-error';
+import { calculateDelta, formatValue } from './utils';
 
-class ReportSummary extends Component {
+export class ReportSummary extends Component {
 	render() {
-		const { selectedChart, charts } = this.props;
+		const { charts, query, selectedChart, summaryData } = this.props;
+		const { totals, isError, isRequesting } = summaryData;
 
-		if ( this.props.summaryNumbers.isError ) {
+		if ( isError ) {
 			return <ReportError isError />;
 		}
 
-		if ( this.props.summaryNumbers.isRequesting ) {
+		if ( isRequesting ) {
 			return <SummaryListPlaceholder numberOfItems={ charts.length } />;
 		}
 
-		const totals = this.props.summaryNumbers.totals.primary || {};
-		const secondaryTotals = this.props.summaryNumbers.totals.secondary || {};
-		const { compare } = getDateParamsFromQuery( this.props.query );
+		const primaryTotals = totals.primary || {};
+		const secondaryTotals = totals.secondary || {};
+		const { compare } = getDateParamsFromQuery( query );
 
-		const summaryNumbers = map( charts, chart => {
+		const summaryNumbers = charts.map( chart => {
 			const { key, label, type } = chart;
-			const isSelected = selectedChart.key === key;
-			let value = parseFloat( totals[ key ] );
-			let secondaryValue =
-				( secondaryTotals[ key ] && parseFloat( secondaryTotals[ key ] ) ) || undefined;
-
-			let delta = 0;
-			if ( secondaryValue && secondaryValue !== 0 ) {
-				delta = Math.round( ( value - secondaryValue ) / secondaryValue * 100 );
-			}
-
-			switch ( type ) {
-				case 'average':
-					value = Math.round( value );
-					secondaryValue = secondaryValue && Math.round( secondaryValue );
-					break;
-				case 'currency':
-					value = formatCurrency( value );
-					secondaryValue = secondaryValue && formatCurrency( secondaryValue );
-					break;
-				case 'number':
-					value = numberFormat( value );
-					secondaryValue = secondaryValue && numberFormat( secondaryValue );
-					break;
-			}
-
+			const delta = calculateDelta( primaryTotals[ key ], secondaryTotals[ key ] );
 			const href = getNewPath( { chart: key } );
+			const prevValue = formatValue( type, secondaryTotals[ key ] );
+			const isSelected = selectedChart.key === key;
+			const value = formatValue( type, primaryTotals[ key ] );
 
 			return (
 				<SummaryNumber
 					key={ key }
-					value={ value }
+					delta={ delta }
+					href={ href }
 					label={ label }
-					selected={ isSelected }
-					prevValue={ secondaryValue }
 					prevLabel={
 						'previous_period' === compare
 							? __( 'Previous Period:', 'wc-admin' )
 							: __( 'Previous Year:', 'wc-admin' )
 					}
-					delta={ delta }
-					href={ href }
+					prevValue={ prevValue }
+					selected={ isSelected }
+					value={ value }
 				/>
 			);
 		} );
@@ -101,10 +79,10 @@ ReportSummary.propTypes = {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { query, endpoint } = props;
-		const summaryNumbers = getSummaryNumbers( endpoint, query, select );
+		const summaryData = getSummaryNumbers( endpoint, query, select );
 
 		return {
-			summaryNumbers,
+			summaryData,
 		};
 	} )
 )( ReportSummary );
