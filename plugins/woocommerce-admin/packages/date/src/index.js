@@ -5,7 +5,7 @@
 import moment from 'moment';
 import { find } from 'lodash';
 import { __ } from '@wordpress/i18n';
-import { getSettings, format as formatDate } from '@wordpress/date';
+import { __experimentalGetSettings, format as formatDate } from '@wordpress/date';
 
 const QUERY_DEFAULTS = {
 	pageSize: 25,
@@ -492,7 +492,7 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
  */
 export function loadLocaleData() {
 	const { date } = wcSettings;
-	const settings = getSettings();
+	const settings = __experimentalGetSettings();
 	const userLocale = settings.l10n.locale;
 	const { weekdaysShort } = settings.l10n;
 
