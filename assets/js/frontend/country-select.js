@@ -52,7 +52,7 @@ jQuery( function( $ ) {
 	}
 
 	// Select2 Enhancement if it exists
-	if ( $().select2 ) {
+	if ( $().selectWoo ) {
 		var wc_country_select_select2 = function() {
 			$( 'select.country_select:visible, select.state_select:visible' ).each( function() {
 				var select2_args = $.extend({
@@ -60,7 +60,7 @@ jQuery( function( $ ) {
 					width: '100%'
 				}, getEnhancedSelectFormatString() );
 
-				$( this ).select2( select2_args );
+				$( this ).selectWoo( select2_args );
 				// Maintain focus after select https://github.com/select2/select2/issues/4384
 				$( this ).on( 'select2:select', function() {
 					$( this ).focus();
@@ -89,7 +89,7 @@ jQuery( function( $ ) {
 
 		var country     = $( this ).val(),
 			$statebox   = $wrapper.find( '#billing_state, #shipping_state, #calc_shipping_state' ),
-			$parent     = $statebox.parent(),
+			$parent     = $statebox.closest( 'p.form-row' ),
 			input_name  = $statebox.attr( 'name' ),
 			input_id    = $statebox.attr( 'id' ),
 			value       = $statebox.val(),
@@ -98,7 +98,7 @@ jQuery( function( $ ) {
 		if ( states[ country ] ) {
 			if ( $.isEmptyObject( states[ country ] ) ) {
 
-				$statebox.parent().hide().find( '.select2-container' ).remove();
+				$statebox.closest( 'p.form-row' ).hide().find( '.select2-container' ).remove();
 				$statebox.replaceWith( '<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" placeholder="' + placeholder + '" />' );
 
 				$( document.body ).trigger( 'country_to_state_changed', [ country, $wrapper ] );
@@ -114,7 +114,7 @@ jQuery( function( $ ) {
 					}
 				}
 
-				$statebox.parent().show();
+				$statebox.closest( 'p.form-row' ).show();
 
 				if ( $statebox.is( 'input' ) ) {
 					// Change for select
@@ -148,10 +148,6 @@ jQuery( function( $ ) {
 
 		$( document.body ).trigger( 'country_to_state_changing', [country, $wrapper ] );
 
-	});
-
-	$(function() {
-		$( ':input.country_to_state' ).change();
 	});
 
 });

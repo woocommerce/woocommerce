@@ -4,30 +4,26 @@
  *
  * Handles requests to the /customers endpoint.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
- * @since    2.6.0
+ * @package WooCommerce/API
+ * @since   2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Customers controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Customers_V1_Controller
+ * @extends WC_REST_Customers_V2_Controller
  */
-class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
+class WC_REST_Customers_Controller extends WC_REST_Customers_V2_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v2';
+	protected $namespace = 'wc/v3';
 
 	/**
 	 * Get formatted item data.
@@ -61,56 +57,9 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 			'billing'            => $data['billing'],
 			'shipping'           => $data['shipping'],
 			'is_paying_customer' => $data['is_paying_customer'],
-			'orders_count'       => $object->get_order_count(),
-			'total_spent'        => $object->get_total_spent(),
 			'avatar_url'         => $object->get_avatar_url(),
 			'meta_data'          => $data['meta_data'],
 		);
-	}
-
-	/**
-	 * Prepare a single customer output for response.
-	 *
-	 * @param  WP_User          $user_data User object.
-	 * @param  WP_REST_Request  $request   Request object.
-	 * @return WP_REST_Response $response  Response data.
-	 */
-	public function prepare_item_for_response( $user_data, $request ) {
-		$customer    = new WC_Customer( $user_data->ID );
-		$data        = $this->get_formatted_item_data( $customer );
-		$context     = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data        = $this->add_additional_fields_to_object( $data, $request );
-		$data        = $this->filter_response_by_context( $data, $context );
-		$response    = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $user_data ) );
-
-		/**
-		 * Filter customer data returned from the REST API.
-		 *
-		 * @param WP_REST_Response $response   The response object.
-		 * @param WP_User          $user_data  User object used to create response.
-		 * @param WP_REST_Request  $request    Request object.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_customer', $response, $user_data, $request );
-	}
-
-	/**
-	 * Update customer meta fields.
-	 *
-	 * @param WC_Customer $customer
-	 * @param WP_REST_Request $request
-	 */
-	protected function update_customer_meta_fields( $customer, $request ) {
-		parent::update_customer_meta_fields( $customer, $request );
-
-		// Meta data.
-		if ( isset( $request['meta_data'] ) ) {
-			if ( is_array( $request['meta_data'] ) ) {
-				foreach ( $request['meta_data'] as $meta ) {
-					$customer->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-				}
-			}
-		}
 	}
 
 	/**
@@ -124,43 +73,43 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 			'title'      => 'customer',
 			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
+				'id'                 => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'date_created' => array(
+				'date_created'       => array(
 					'description' => __( "The date the customer was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'date_created_gmt' => array(
-					'description' => __( 'The date the order was created, as GMT.', 'woocommerce' ),
+				'date_created_gmt'   => array(
+					'description' => __( 'The date the customer was created, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'date_modified' => array(
+				'date_modified'      => array(
 					'description' => __( "The date the customer was last modified, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'date_modified_gmt' => array(
+				'date_modified_gmt'  => array(
 					'description' => __( 'The date the customer was last modified, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'email' => array(
+				'email'              => array(
 					'description' => __( 'The email address for the customer.', 'woocommerce' ),
 					'type'        => 'string',
 					'format'      => 'email',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'first_name' => array(
+				'first_name'         => array(
 					'description' => __( 'Customer first name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -168,7 +117,7 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'last_name' => array(
+				'last_name'          => array(
 					'description' => __( 'Customer last name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -176,13 +125,13 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'role' => array(
+				'role'               => array(
 					'description' => __( 'Customer role.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'username' => array(
+				'username'           => array(
 					'description' => __( 'Customer login name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -190,120 +139,120 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 						'sanitize_callback' => 'sanitize_user',
 					),
 				),
-				'password' => array(
+				'password'           => array(
 					'description' => __( 'Customer password.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'edit' ),
 				),
-				'billing' => array(
+				'billing'            => array(
 					'description' => __( 'List of billing address data.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
-					'properties' => array(
+					'properties'  => array(
 						'first_name' => array(
 							'description' => __( 'First name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'last_name' => array(
+						'last_name'  => array(
 							'description' => __( 'Last name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'company' => array(
+						'company'    => array(
 							'description' => __( 'Company name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'address_1' => array(
+						'address_1'  => array(
 							'description' => __( 'Address line 1', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'address_2' => array(
+						'address_2'  => array(
 							'description' => __( 'Address line 2', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'city' => array(
+						'city'       => array(
 							'description' => __( 'City name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'state' => array(
+						'state'      => array(
 							'description' => __( 'ISO code or name of the state, province or district.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'postcode' => array(
+						'postcode'   => array(
 							'description' => __( 'Postal code.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'country' => array(
+						'country'    => array(
 							'description' => __( 'ISO code of the country.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'email' => array(
+						'email'      => array(
 							'description' => __( 'Email address.', 'woocommerce' ),
 							'type'        => 'string',
 							'format'      => 'email',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'phone' => array(
+						'phone'      => array(
 							'description' => __( 'Phone number.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 					),
 				),
-				'shipping' => array(
+				'shipping'           => array(
 					'description' => __( 'List of shipping address data.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
-					'properties' => array(
+					'properties'  => array(
 						'first_name' => array(
 							'description' => __( 'First name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'last_name' => array(
+						'last_name'  => array(
 							'description' => __( 'Last name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'company' => array(
+						'company'    => array(
 							'description' => __( 'Company name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'address_1' => array(
+						'address_1'  => array(
 							'description' => __( 'Address line 1', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'address_2' => array(
+						'address_2'  => array(
 							'description' => __( 'Address line 2', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'city' => array(
+						'city'       => array(
 							'description' => __( 'City name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'state' => array(
+						'state'      => array(
 							'description' => __( 'ISO code or name of the state, province or district.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'postcode' => array(
+						'postcode'   => array(
 							'description' => __( 'Postal code.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'country' => array(
+						'country'    => array(
 							'description' => __( 'ISO code of the country.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
@@ -316,45 +265,33 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'orders_count' => array(
-					'description' => __( 'Quantity of orders made by the customer.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'total_spent' => array(
-					'description' => __( 'Total amount spent.', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'avatar_url' => array(
+				'avatar_url'         => array(
 					'description' => __( 'Avatar URL.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'meta_data' => array(
+				'meta_data'          => array(
 					'description' => __( 'Meta data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
-							'id' => array(
+							'id'    => array(
 								'description' => __( 'Meta ID.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'key' => array(
+							'key'   => array(
 								'description' => __( 'Meta key.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'value' => array(
 								'description' => __( 'Meta value.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 						),

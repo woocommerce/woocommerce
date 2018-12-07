@@ -38,16 +38,19 @@ class WC_Meta_Box_Order_Items {
 		$order = $theorder;
 		$data  = get_post_meta( $post->ID );
 
-		include( 'views/html-order-items.php' );
+		include 'views/html-order-items.php';
 	}
 
 	/**
 	 * Save meta box data.
 	 *
 	 * @param int $post_id
-	 * @param WP_Post $post
 	 */
-	public static function save( $post_id, $post ) {
+	public static function save( $post_id ) {
+		/**
+		 * This $_POST variable's data has been validated and escaped
+		 * inside `wc_save_order_items()` function.
+		 */
 		wc_save_order_items( $post_id, $_POST );
 	}
 }

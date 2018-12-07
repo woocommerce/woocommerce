@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /*
  * Copyright (c) 2013 - 2015 MasterCard International Incorporated
  * All rights reserved.
@@ -48,7 +52,7 @@ class Simplify_Constants
 	const API_BASE_SANDBOX_URL = 'https://sandbox.simplify.com/v1/api';
 
 	/**
-	 * @var string OAUTH_BASE_URL URL for the oauth enpoint
+	 * @var string OAUTH_BASE_URL URL for the oauth endpoint
 	 */
 	const OAUTH_BASE_URL = 'https://www.simplify.com/commerce/oauth';
 }

@@ -1,8 +1,8 @@
 /**
  * Twenty Seventeen integration styles
  */
-
-@import 'bourbon';
+@import 'mixins';
+@import 'animation';
 
 /**
  * Fonts
@@ -34,7 +34,7 @@
  */
 @mixin link() {
 	box-shadow: 0 1px 0 rgba(15, 15, 15, 1);
-	@include transition( box-shadow ease-in-out 130ms );
+	transition: box-shadow ease-in-out 130ms;
 
 	&:hover {
 		box-shadow: 0 3px 0 rgba(15, 15, 15, 1);
@@ -44,7 +44,7 @@
 @mixin link_white() {
 	color: #fff;
 	box-shadow: 0 1px 0 rgba(#fff, 1) !important;
-	@include transition( box-shadow ease-in-out 130ms );
+	transition: box-shadow ease-in-out 130ms;
 
 	&:hover {
 		color: #fff !important;
@@ -55,6 +55,33 @@
 /**
  * Global elements
  */
+ .woocommerce {
+	.blockUI.blockOverlay {
+		position: relative;
+		@include loader();
+	}
+
+	.loader {
+		@include loader();
+	}
+
+	form .form-row {
+		.required {
+			color: firebrick;
+			text-decoration: none;
+			visibility: hidden; // Only show optional by default.
+
+			&[title] {
+				border: 0 !important;
+			}
+		}
+
+		.optional {
+			visibility: visible;
+		 }
+	}
+}
+
 .woocommerce-breadcrumb {
 	padding-bottom: 2em;
 	margin-bottom: 4em;
@@ -90,7 +117,7 @@
 		float: none;
 		line-height: 1.5;
 		border-radius: 2px;
-		@include transition( background-color ease-in-out .3s );
+		transition: background-color ease-in-out .3s;
 	}
 
 	span.page-numbers {
@@ -119,14 +146,10 @@
 .price {
 	del {
 		opacity: .5;
+		display: inline-block;
 	}
-}
-
-.required {
-	color: firebrick;
-
-	&[title] {
-		border-bottom: none;
+	ins {
+		display: inline-block;
 	}
 }
 
@@ -206,6 +229,10 @@ ul.products {
 			margin-bottom: .75em;
 		}
 
+		.woocommerce-placeholder {
+			border: 1px solid #F2F2F2;
+		}
+
 		.button {
 			@include link();
 
@@ -272,7 +299,6 @@ a.remove {
 	text-align: center;
 	border-radius: 100%;
 	box-shadow: none !important;
-	-webkit-box-shadow: none !important;
 	border: 1px solid #000;
 
 	&:hover {
@@ -370,10 +396,21 @@ table.variations {
 
 	figure {
 		margin: 0;
+		padding: 0;
+	}
+
+	.woocommerce-product-gallery__wrapper {
+		margin: 0;
+		padding: 0;
 	}
 
 	.zoomImg {
 		background-color: #fff;
+		opacity: 0;
+	}
+
+	.woocommerce-product-gallery__image--placeholder {
+		border: 1px solid #F2F2F2;
 	}
 
 	.woocommerce-product-gallery__image:nth-child(n+2) {
@@ -384,8 +421,8 @@ table.variations {
 	.flex-control-thumbs {
 		li {
 			list-style: none;
-			float: left;
 			cursor: pointer;
+			float: left;
 		}
 
 		img {
@@ -400,6 +437,7 @@ table.variations {
 
 	img {
 		display: block;
+		height: auto;
 	}
 }
 
@@ -407,17 +445,26 @@ table.variations {
 	.flex-control-thumbs li {
 		width: 33.3333%;
 	}
+	.flex-control-thumbs li:nth-child(3n+1) {
+		clear: left;
+	}
 }
 
 .woocommerce-product-gallery--columns-4 {
 	.flex-control-thumbs li {
 		width: 25%;
 	}
+	.flex-control-thumbs li:nth-child(4n+1) {
+		clear: left;
+	}
 }
 
 .woocommerce-product-gallery--columns-5 {
 	.flex-control-thumbs li {
 		width: 20%;
+	}
+	.flex-control-thumbs li:nth-child(5n+1) {
+		clear: left;
 	}
 }
 
@@ -533,26 +580,6 @@ table.variations {
 			}
 		}
 	}
-}
-
-/**
- * Photoswipe
- * 1. These styles are required to overwrite default theme button styles (Twenty Twelve adds gradients via background-image).
- */
-
-button.pswp__button,
-button.pswp__button:hover,
-button.pswp__button--arrow--left::before,
-button.pswp__button--arrow--right::before {
-	background-color: transparent !important; /* 1 */
-}
-
-button.pswp__button--close:hover {
-	background-position: 0 -44px;
-}
-
-button.pswp__button--zoom:hover {
-	background-position: -88px 0;
 }
 
 /**
@@ -794,19 +821,43 @@ button.pswp__button--zoom:hover {
 	}
 }
 
+.cart_totals {
+	th, td {
+		vertical-align: top;
+		padding: 1em 0;
+		line-height: 1.5em;
+	}
+	th {
+		padding-right: 1em;
+	}
+	.woocommerce-shipping-destination {
+		margin-bottom: 0;
+	}
+}
+
+.shipping-calculator-button {
+	margin-top: .5em;
+	display: inline-block;
+}
+
+.shipping-calculator-form {
+	margin: 1em 0 0 0;
+}
+
 #shipping_method {
 	list-style: none;
-	margin-top: 1em;
+	margin: 0;
 
 	li {
 		margin-bottom: .5em;
 
 		input {
 			float: left;
+			margin-top: 0.17em;
 		}
 
 		label {
-			line-height: 1.15;
+			line-height: 1.5em;
 		}
 	}
 }
@@ -818,11 +869,9 @@ button.pswp__button--zoom:hover {
 	text-align: center;
 	font-weight: 800;
 	box-shadow: none !important;
-	-webkit-box-shadow: none !important;
 
 	&:hover {
 		box-shadow: none !important;
-		-webkit-box-shadow: none !important;
 		border-color: #999;
 	}
 
@@ -852,7 +901,7 @@ button.pswp__button--zoom:hover {
 				background: #bbb;
 				border-radius: 13em;
 				box-sizing: content-box;
-				@include transition(all,ease-in-out,.3s);
+				transition: all ease-in-out .3s;
 				position: absolute;
 				top: 4px;
 				right: 0;
@@ -868,7 +917,7 @@ button.pswp__button--zoom:hover {
 				top: 7px;
 				right: 17px;
 				border-radius: 13em;
-				@include transition(all,ease-in-out,.3s);
+				transition: all ease-in-out .3s;
 			}
 		}
 
@@ -887,21 +936,95 @@ button.pswp__button--zoom:hover {
 	}
 }
 
+.woocommerce-no-js {
+	form.woocommerce-form-login,
+	form.woocommerce-form-coupon {
+		display: block !important;
+	}
+	.woocommerce-form-login-toggle,
+	.woocommerce-form-coupon-toggle,
+	.showcoupon {
+		display: none !important;
+	}
+}
+
 .woocommerce-terms-and-conditions {
 	border: 1px solid rgba(0,0,0,.2);
 	box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
 	background: rgba(0,0,0,.05);
 }
 
+.woocommerce-terms-and-conditions-link {
+	display: inline-block;
+
+	&:after {
+		content: "";
+		display: inline-block;
+		border-style: solid;
+		margin-bottom: 2px;
+		margin-left: .25em;
+		border-width: 6px 6px 0 6px;
+		border-color: #111 transparent transparent transparent;
+	}
+	&.woocommerce-terms-and-conditions-link--open:after {
+		border-width: 0 6px 6px 6px;
+		border-color: transparent transparent #111 transparent;
+	}
+}
+
 .woocommerce-checkout {
+	.woocommerce-input-wrapper {
+		.description {
+			background: royalblue;
+			color: #fff;
+			border-radius: 3px;
+			padding: 1em;
+			margin: .5em 0 0;
+			clear: both;
+			display: none;
+			position: relative;
+
+			a {
+				color: #fff;
+				text-decoration: underline;
+				border: 0;
+				box-shadow: none;
+			}
+
+			&:before {
+				left: 50%;
+				top: 0%;
+				margin-top: -4px;
+				transform: translatex(-50%) rotate(180deg);
+				content: "";
+				position: absolute;
+				border-width: 4px 6px 0 6px;
+				border-style: solid;
+				border-color: royalblue transparent transparent transparent;
+				z-index: 100;
+				display: block;
+			}
+		}
+	}
+
 	.select2-choice,
 	.select2-choice:hover {
 		box-shadow: none !important;
-		-webkit-box-shadow: none !important;
 	}
-
 	.select2-choice {
 		padding: .7em 0 .7em .7em;
+	}
+	.select2-container .select2-selection--single {
+		height: 48px;
+	}
+	.select2-container .select2-selection--single .select2-selection__rendered {
+		line-height: 48px;
+	}
+	.select2-container--default .select2-selection--single .select2-selection__arrow {
+		height: 46px;
+	}
+	.select2-container--focus .select2-selection {
+		border-color: black;
 	}
 }
 
@@ -964,7 +1087,7 @@ button.pswp__button--zoom:hover {
 		cursor: pointer;
 	}
 
-	input[type=radio] {
+	input.input-radio[name=payment_method] {
 		display: none;
 
 		& + label {
@@ -979,7 +1102,7 @@ button.pswp__button--zoom:hover {
 				margin-left: 4px;
 				margin-right: .5em;
 				border-radius: 100%;
-				@include transform(translateY(2px));
+				transform: translateY(2px);
 			}
 		}
 
@@ -991,21 +1114,39 @@ button.pswp__button--zoom:hover {
 	}
 }
 
-.colors-dark.woocommerce-checkout {
+.colors-dark {
+	.page-numbers {
+		color: #444;
+
+		&.next, &.prev {
+			color: #ddd;
+		}
+	}
+
+	.checkout-button {
+		border: 2px solid #555;
+
+		&:hover {
+			border-color: #fff;
+		}
+	}
+
 	.wc_payment_method {
 		.payment_box {
 			background: #333;
 		}
 	}
+
 	.select2-container--default {
 		.select2-results {
 			.select2-results__options {
 				background:#333;
 			}
-			.select2-results__option[aria-selected="true"]{
+			.select2-results__option[data-selected="true"]{
 				color: #333;
 			}
 		}
+
 		.select2-selection--single {
 			background-color: #333;
 			border: 1px solid #555;
@@ -1014,6 +1155,10 @@ button.pswp__button--zoom:hover {
 				color: #ccc;
 			}
 		}
+	}
+
+	.select2-container--focus .select2-selection {
+		border-color: white;
 	}
 }
 

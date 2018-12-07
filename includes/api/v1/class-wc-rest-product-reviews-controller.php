@@ -199,7 +199,8 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	 * Get all reviews from a product.
 	 *
 	 * @param WP_REST_Request $request
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
 		$product_id = (int) $request['product_id'];
@@ -353,7 +354,8 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 	 * Delete a product review.
 	 *
 	 * @param WP_REST_Request $request Full details about the request
-	 * @return WP_Error|boolean
+	 *
+	 * @return bool|WP_Error|WP_REST_Response
 	 */
 	public function delete_item( $request ) {
 		$product_review_id = absint( is_array( $request['id'] ) ? $request['id']['id'] : $request['id'] );
@@ -471,6 +473,14 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 
 		if ( isset( $request['email'] ) ) {
 			$prepared_review['comment_author_email'] = $request['email'];
+		}
+
+		if ( isset( $request['date_created'] ) ) {
+			$prepared_review['comment_date'] = $request['date_created'];
+		}
+
+		if ( isset( $request['date_created_gmt'] ) ) {
+			$prepared_review['comment_date_gmt'] = $request['date_created_gmt'];
 		}
 
 		return apply_filters( 'rest_preprocess_product_review', $prepared_review, $request );

@@ -88,7 +88,7 @@ jQuery( function( $ ) {
 		return false;
 	});
 
-	// PRODUCT TYPE SPECIFIC OPTIONS.
+	// Product type specific options.
 	$( 'select#product-type' ).change( function() {
 
 		// Get value.
@@ -228,32 +228,43 @@ jQuery( function( $ ) {
 		return false;
 	});
 
-	// STOCK OPTIONS.
+	// Stock options.
 	$( 'input#_manage_stock' ).change( function() {
 		if ( $( this ).is( ':checked' ) ) {
 			$( 'div.stock_fields' ).show();
+			$( 'p.stock_status_field' ).hide();
 		} else {
+			var product_type = $( 'select#product-type' ).val();
+
 			$( 'div.stock_fields' ).hide();
+			$( 'p.stock_status_field:not( .hide_if_' + product_type + ' )' ).show();
 		}
 	}).change();
 
-	// DATE PICKER FIELDS.
+	// Date picker fields.
+	function date_picker_select( datepicker ) {
+		var option         = $( datepicker ).next().is( '.hasDatepicker' ) ? 'minDate' : 'maxDate',
+			otherDateField = 'minDate' === option ? $( datepicker ).next() : $( datepicker ).prev(),
+			date           = $( datepicker ).datepicker( 'getDate' );
+
+		$( otherDateField ).datepicker( 'option', option, date );
+		$( datepicker ).change();
+	}
+
 	$( '.sale_price_dates_fields' ).each( function() {
-		var dates = $( this ).find( 'input' ).datepicker({
+		$( this ).find( 'input' ).datepicker({
 			defaultDate: '',
 			dateFormat: 'yy-mm-dd',
 			numberOfMonths: 1,
 			showButtonPanel: true,
-			onSelect: function( selectedDate ) {
-				var option   = $( this ).is( '#_sale_price_dates_from, .sale_price_dates_from' ) ? 'minDate' : 'maxDate';
-				var instance = $( this ).data( 'datepicker' );
-				var date     = $.datepicker.parseDate( instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings );
-				dates.not( this ).datepicker( 'option', option, date );
+			onSelect: function() {
+				date_picker_select( $( this ) );
 			}
 		});
+		$( this ).find( 'input' ).each( function() { date_picker_select( $( this ) ); } );
 	});
 
-	// ATTRIBUTE TABLES.
+	// Attribute Tables.
 
 	// Initial order.
 	var woocommerce_attribute_items = $( '.product_attributes' ).find( '.woocommerce_attribute' ).get();
@@ -309,7 +320,11 @@ jQuery( function( $ ) {
 			}
 
 			$( document.body ).trigger( 'wc-enhanced-select-init' );
+
 			attribute_row_indexes();
+
+			$attributes.find( '.woocommerce_attribute' ).last().find( 'h3' ).click();
+
 			$wrapper.unblock();
 
 			$( document.body ).trigger( 'woocommerce_added_attribute' );
@@ -424,31 +439,47 @@ jQuery( function( $ ) {
 	// Save attributes and update variations.
 	$( '.save_attributes' ).on( 'click', function() {
 
-		$( '#woocommerce-product-data' ).block({
+		$( '.product_attributes' ).block({
 			message: null,
 			overlayCSS: {
 				background: '#fff',
 				opacity: 0.6
 			}
 		});
-
+		var original_data = $( '.product_attributes' ).find( 'input, select, textarea' );
 		var data = {
 			post_id     : woocommerce_admin_meta_boxes.post_id,
 			product_type: $( '#product-type' ).val(),
-			data        : $( '.product_attributes' ).find( 'input, select, textarea' ).serialize(),
+			data        : original_data.serialize(),
 			action      : 'woocommerce_save_attributes',
 			security    : woocommerce_admin_meta_boxes.save_attributes_nonce
 		};
 
-		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function() {
-			// Reload variations panel.
-			var this_page = window.location.toString();
-			this_page = this_page.replace( 'post-new.php?', 'post.php?post=' + woocommerce_admin_meta_boxes.post_id + '&action=edit&' );
+		$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
+			if ( response.error ) {
+				// Error.
+				window.alert( response.error );
+			} else if ( response.data ) {
+				// Success.
+				$( '.product_attributes' ).html( response.data.html );
+				$( '.product_attributes' ).unblock();
 
-			// Load variations panel.
-			$( '#variable_product_options' ).load( this_page + ' #variable_product_options_inner', function() {
-				$( '#variable_product_options' ).trigger( 'reload' );
-			});
+				// Make sure the dropdown is not disabled for empty value attributes.
+				var nr_elements = original_data.length / 6;
+				for ( var i = 0; i < nr_elements; i++ ) {
+					if ( typeof( original_data ) !== 'undefined' && original_data[ i * 6 + 2 ].value === '' ) {
+						$( 'select.attribute_taxonomy' ).find( 'option[value="' + original_data[ i * 6 ].value + '"]' ).removeAttr( 'disabled' );
+					}
+				}
+
+				// Reload variations panel.
+				var this_page = window.location.toString();
+				this_page = this_page.replace( 'post-new.php?', 'post.php?post=' + woocommerce_admin_meta_boxes.post_id + '&action=edit&' );
+
+				$( '#variable_product_options' ).load( this_page + ' #variable_product_options_inner', function() {
+					$( '#variable_product_options' ).trigger( 'reload' );
+				} );
+			}
 		});
 	});
 

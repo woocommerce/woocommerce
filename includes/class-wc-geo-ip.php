@@ -4,10 +4,9 @@
  *
  * This class is a fork of GeoIP class from MaxMind LLC.
  *
- * @author 	 WooThemes
- * @category Admin
- * @package  WooCommerce/Classes
- * @version  2.4.0
+ * @package    WooCommerce/Classes
+ * @version    2.4.0
+ * @deprecated 3.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -16,6 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * WC_Geo_IP Class.
+ *
+ * @deprecated 3.4.0
  */
 class WC_Geo_IP {
 
@@ -1616,7 +1617,8 @@ class WC_Geo_IP {
 	 * Record by addr.
 	 *
 	 * @param  string $addr
-	 * @return int
+	 *
+	 * @return WC_Geo_IP_Record
 	 */
 	public function geoip_record_by_addr( $addr ) {
 		if ( null == $addr ) {

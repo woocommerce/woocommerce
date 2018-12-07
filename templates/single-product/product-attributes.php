@@ -13,9 +13,8 @@
  * the readme will list any important changes.
  *
  * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     3.0.0
+ * @version     3.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -60,7 +59,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					$values = $attribute->get_options();
 
 					foreach ( $values as &$value ) {
-						$value = esc_html( $value );
+						$value = make_clickable( esc_html( $value ) );
 					}
 				}
 

@@ -11,7 +11,6 @@
  * the readme will list any important changes.
  *
  * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @author 		WooThemes
  * @package 	WooCommerce/Templates
  * @version     3.0.0
  */
@@ -31,7 +30,7 @@ if ( $upsells ) : ?>
 			<?php foreach ( $upsells as $upsell ) : ?>
 
 				<?php
-				 	$post_object = get_post( $upsell->get_id() );
+					$post_object = get_post( $upsell->get_id() );
 
 					setup_postdata( $GLOBALS['post'] =& $post_object );
 

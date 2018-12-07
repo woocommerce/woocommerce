@@ -137,7 +137,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param int $id The order ID.
 	 * @param array $fields Request fields.
 	 * @param array $filter Request filters.
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_order( $id, $fields = null, $filter = array() ) {
 
@@ -243,8 +243,8 @@ class WC_API_Orders extends WC_API_Resource {
 				'meta'         => array_values( $item_meta ),
 			);
 
-			if ( in_array( 'products', $expand ) ) {
-				$_product_data = WC()->api->WC_API_Products->get_product( $product_id );
+			if ( in_array( 'products', $expand ) && is_object( $product ) ) {
+				$_product_data = WC()->api->WC_API_Products->get_product( $product->get_id() );
 
 				if ( isset( $_product_data['product'] ) ) {
 					$line_item['product_data'] = $_product_data['product'];
@@ -323,9 +323,11 @@ class WC_API_Orders extends WC_API_Resource {
 	 * Get the total number of orders
 	 *
 	 * @since 2.4
+	 *
 	 * @param string $status
 	 * @param array $filter
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_orders_count( $status = null, $filter = array() ) {
 
@@ -388,12 +390,10 @@ class WC_API_Orders extends WC_API_Resource {
 	 *
 	 * @since 2.2
 	 * @param array $data raw order data
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function create_order( $data ) {
 		global $wpdb;
-
-		wc_transaction_query( 'start' );
 
 		try {
 			if ( ! isset( $data['order'] ) ) {
@@ -473,7 +473,7 @@ class WC_API_Orders extends WC_API_Resource {
 				}
 
 				update_post_meta( $order->get_id(), '_payment_method', $data['payment_details']['method_id'] );
-				update_post_meta( $order->get_id(), '_payment_method_title', $data['payment_details']['method_title'] );
+				update_post_meta( $order->get_id(), '_payment_method_title', sanitize_text_field( $data['payment_details']['method_title'] ) );
 
 				// mark as paid if set
 				if ( isset( $data['payment_details']['paid'] ) && true === $data['payment_details']['paid'] ) {
@@ -502,16 +502,12 @@ class WC_API_Orders extends WC_API_Resource {
 			wc_delete_shop_order_transients( $order );
 
 			do_action( 'woocommerce_api_create_order', $order->get_id(), $data, $this );
-
-			wc_transaction_query( 'commit' );
+			do_action( 'woocommerce_new_order', $order->get_id() );
 
 			return $this->get_order( $order->get_id() );
-
 		} catch ( WC_Data_Exception $e ) {
-			wc_transaction_query( 'rollback' );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( WC_API_Exception $e ) {
-			wc_transaction_query( 'rollback' );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -522,7 +518,10 @@ class WC_API_Orders extends WC_API_Resource {
 	 * Requires a separate function for classes that extend WC_API_Orders.
 	 *
 	 * @since 2.3
+	 *
 	 * @param $args array
+	 * @param $data
+	 *
 	 * @return WC_Order
 	 */
 	protected function create_base_order( $args, $data ) {
@@ -535,7 +534,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @since 2.2
 	 * @param int $id the order ID
 	 * @param array $data
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function edit_order( $id, $data ) {
 		try {
@@ -623,7 +622,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 				// Method title.
 				if ( isset( $data['payment_details']['method_title'] ) ) {
-					update_post_meta( $order->get_id(), '_payment_method_title', $data['payment_details']['method_title'] );
+					update_post_meta( $order->get_id(), '_payment_method_title', sanitize_text_field( $data['payment_details']['method_title'] ) );
 				}
 
 				// Mark as paid if set.
@@ -664,6 +663,7 @@ class WC_API_Orders extends WC_API_Resource {
 			wc_delete_shop_order_transients( $order );
 
 			do_action( 'woocommerce_api_edit_order', $order->get_id(), $data, $this );
+			do_action( 'woocommerce_update_order', $order->get_id() );
 
 			return $this->get_order( $id );
 		} catch ( WC_Data_Exception $e ) {
@@ -678,7 +678,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 *
 	 * @param int $id the order ID
 	 * @param bool $force true to permanently delete order, false to move to trash
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function delete_order( $id, $force = false ) {
 
@@ -988,10 +988,15 @@ class WC_API_Orders extends WC_API_Resource {
 			$line_item->set_variation( $item['variations'] );
 		}
 
-		$item_id = $line_item->save();
+		// Save or add to order.
+		if ( $creating ) {
+			$order->add_item( $line_item );
+		} else {
+			$item_id = $line_item->save();
 
-		if ( ! $item_id ) {
-			throw new WC_API_Exception( 'woocommerce_cannot_create_line_item', __( 'Cannot create line item, try again.', 'woocommerce' ), 500 );
+			if ( ! $item_id ) {
+				throw new WC_API_Exception( 'woocommerce_cannot_create_line_item', __( 'Cannot create line item, try again.', 'woocommerce' ), 500 );
+			}
 		}
 	}
 
@@ -1001,7 +1006,9 @@ class WC_API_Orders extends WC_API_Resource {
 	 * the cheapest variation ID but provide other information so we have to look up the variation ID.
 	 *
 	 * @param  WC_Product $product Product instance
-	 * @return int                 Returns an ID if a valid variation was found for this product
+	 * @param array $variations
+	 *
+	 * @return int Returns an ID if a valid variation was found for this product
 	 */
 	public function get_variation_id( $product, $variations = array() ) {
 		$variation_id = null;
@@ -1036,6 +1043,11 @@ class WC_API_Orders extends WC_API_Resource {
 
 	/**
 	 * Utility function to see if the meta array contains data from variations
+	 *
+	 * @param array $needles
+	 * @param array $haystack
+	 *
+	 * @return bool
 	 */
 	protected function array_contains( $needles, $haystack ) {
 		foreach ( $needles as $key => $value ) {
@@ -1073,11 +1085,7 @@ class WC_API_Orders extends WC_API_Resource {
 			$item = new WC_Order_Item_Shipping();
 			$item->set_order_id( $order->get_id() );
 			$item->set_shipping_rate( $rate );
-			$shipping_id = $item->save();
-
-			if ( ! $shipping_id ) {
-				throw new WC_API_Exception( 'woocommerce_cannot_create_shipping', __( 'Cannot create shipping method, try again.', 'woocommerce' ), 500 );
-			}
+			$order->add_item( $item );
 		} else {
 
 			$item = new WC_Order_Item_Shipping( $shipping['id'] );
@@ -1144,11 +1152,7 @@ class WC_API_Orders extends WC_API_Resource {
 				}
 			}
 
-			$fee_id = $item->save();
-
-			if ( ! $fee_id ) {
-				throw new WC_API_Exception( 'woocommerce_cannot_create_fee', __( 'Cannot create fee, try again.', 'woocommerce' ), 500 );
-			}
+			$order->add_item( $item );
 		} else {
 
 			$item = new WC_Order_Item_Fee( $fee['id'] );
@@ -1207,11 +1211,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'discount_tax' => 0,
 				'order_id'     => $order->get_id(),
 			) );
-			$coupon_id = $item->save();
-
-			if ( ! $coupon_id ) {
-				throw new WC_API_Exception( 'woocommerce_cannot_create_order_coupon', __( 'Cannot create coupon, try again.', 'woocommerce' ), 500 );
-			}
+			$order->add_item( $item );
 		} else {
 
 			$item = new WC_Order_Item_Coupon( $coupon['id'] );
@@ -1238,7 +1238,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @since 2.1
 	 * @param string $order_id order ID
 	 * @param string|null $fields fields to include in response
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_order_notes( $order_id, $fields = null ) {
 
@@ -1275,10 +1275,12 @@ class WC_API_Orders extends WC_API_Resource {
 	 * Get an order note for the given order ID and ID
 	 *
 	 * @since 2.2
+	 *
 	 * @param string $order_id order ID
 	 * @param string $id order note ID
 	 * @param string|null $fields fields to limit response to
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function get_order_note( $order_id, $id, $fields = null ) {
 		try {
@@ -1305,7 +1307,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'            => $note->comment_ID,
 				'created_at'    => $this->server->format_datetime( $note->comment_date_gmt ),
 				'note'          => $note->comment_content,
-				'customer_note' => get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? true : false,
+				'customer_note' => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
 			);
 
 			return array( 'order_note' => apply_filters( 'woocommerce_api_order_note_response', $order_note, $id, $fields, $note, $order_id, $this ) );
@@ -1482,7 +1484,7 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 
 			// Force delete since trashed order notes could not be managed through comments list table
-			$result = wp_delete_comment( $note->comment_ID, true );
+			$result = wc_delete_order_note( $note->comment_ID );
 
 			if ( ! $result ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_order_note', __( 'This order note cannot be deleted', 'woocommerce' ), 500 );
@@ -1502,7 +1504,7 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @since 2.2
 	 * @param string $order_id order ID
 	 * @param string|null $fields fields to include in response
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public function get_order_refunds( $order_id, $fields = null ) {
 
@@ -1532,11 +1534,15 @@ class WC_API_Orders extends WC_API_Resource {
 	 * Get an order refund for the given order ID and ID
 	 *
 	 * @since 2.2
+	 *
 	 * @param string $order_id order ID
+	 * @param int $id
 	 * @param string|null $fields fields to limit response to
-	 * @return array
+	 * @param array $filter
+	 *
+	 * @return array|WP_Error
 	 */
-	public function get_order_refund( $order_id, $id, $fields = null ) {
+	public function get_order_refund( $order_id, $id, $fields = null, $filter = array() ) {
 		try {
 			// Validate order ID
 			$order_id = $this->validate_request( $order_id, $this->post_type, 'read' );
@@ -1590,7 +1596,7 @@ class WC_API_Orders extends WC_API_Resource {
 			}
 
 			$order_refund = array(
-				'id'         => $refund->id,
+				'id'         => $refund->get_id(),
 				'created_at' => $this->server->format_datetime( $refund->get_date_created() ? $refund->get_date_created()->getTimestamp() : 0, false, false ),
 				'amount'     => wc_format_decimal( $refund->get_amount(), 2 ),
 				'reason'     => $refund->get_reason(),
@@ -1672,9 +1678,9 @@ class WC_API_Orders extends WC_API_Resource {
 			// HTTP 201 Created
 			$this->server->send_status( 201 );
 
-			do_action( 'woocommerce_api_create_order_refund', $refund->id, $order_id, $this );
+			do_action( 'woocommerce_api_create_order_refund', $refund->get_id(), $order_id, $this );
 
-			return $this->get_order_refund( $order_id, $refund->id );
+			return $this->get_order_refund( $order_id, $refund->get_id() );
 		} catch ( WC_Data_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( WC_API_Exception $e ) {
@@ -1802,8 +1808,10 @@ class WC_API_Orders extends WC_API_Resource {
 	 * WC_API_Orders->create_order() and WC_API_Orders->edit_order()
 	 *
 	 * @since 2.4.0
+	 *
 	 * @param array $data
-	 * @return array
+	 *
+	 * @return array|WP_Error
 	 */
 	public function bulk( $data ) {
 

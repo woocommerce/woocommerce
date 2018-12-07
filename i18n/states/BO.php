@@ -2,12 +2,13 @@
 /**
  * Bolivian states
  *
- * @author      Roman Random
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     3.1.0
+ * @package WooCommerce/i18n
+ * @version 3.1.0
  */
+
 global $states;
+
+defined( 'ABSPATH' ) || exit;
 
 $states['BO'] = array(
 	'B' => __( 'Chuquisaca', 'woocommerce' ),

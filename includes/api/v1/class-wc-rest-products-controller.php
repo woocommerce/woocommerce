@@ -273,7 +273,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 		$attachment_ids = array();
 
 		// Add featured image.
-		if ( has_post_thumbnail( $product->get_id() ) ) {
+		if ( $product->get_image_id() ) {
 			$attachment_ids[] = $product->get_image_id();
 		}
 
@@ -932,11 +932,9 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Shipping class.
 		if ( isset( $data['shipping_class'] ) ) {
-			$shipping_class_term = get_term_by( 'slug', wc_clean( $data['shipping_class'] ), 'product_shipping_class' );
-
-			if ( $shipping_class_term ) {
-				$product->set_shipping_class_id( $shipping_class_term->term_id );
-			}
+			$data_store        = $product->get_data_store();
+			$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $data['shipping_class'] ) );
+			$product->set_shipping_class_id( $shipping_class_id );
 		}
 
 		return $product;
@@ -962,7 +960,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 			}
 
 			$download = new WC_Product_Download();
-			$download->set_id( $key );
+			$download->set_id( ! empty( $file['id'] ) ? $file['id'] : wp_generate_uuid4() );
 			$download->set_name( $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['file'] ) );
 			$download->set_file( apply_filters( 'woocommerce_file_download_path', $file['file'], $product, $key ) );
 			$files[]  = $download;
@@ -1099,7 +1097,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Purchase Note.
 		if ( isset( $request['purchase_note'] ) ) {
-			$product->set_purchase_note( wc_clean( $request['purchase_note'] ) );
+			$product->set_purchase_note( wp_kses_post( wp_unslash( $request['purchase_note'] ) ) );
 		}
 
 		// Featured Product.
@@ -1666,18 +1664,23 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 			if ( $product->is_type( 'variable' ) ) {
 				foreach ( $product->get_children() as $child_id ) {
 					$child = wc_get_product( $child_id );
-					$child->delete( true );
+					if ( ! empty( $child ) ) {
+						$child->delete( true );
+					}
 				}
-			} elseif ( $product->is_type( 'grouped' ) ) {
+			} else {
+				// For other product types, if the product has children, remove the relationship.
 				foreach ( $product->get_children() as $child_id ) {
 					$child = wc_get_product( $child_id );
-					$child->set_parent_id( 0 );
-					$child->save();
+					if ( ! empty( $child ) ) {
+						$child->set_parent_id( 0 );
+						$child->save();
+					}
 				}
 			}
 
 			$product->delete( true );
-			$result = $product->get_id() > 0 ? false : true;
+			$result = ! ( $product->get_id() > 0 );
 		} else {
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
@@ -1831,7 +1834,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_to' => array(
-					'description' => __( 'End data of sale price.', 'woocommerce' ),
+					'description' => __( 'End date of sale price.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
@@ -1879,10 +1882,9 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 						'type'       => 'object',
 						'properties' => array(
 							'id' => array(
-								'description' => __( 'File MD5 hash.', 'woocommerce' ),
+								'description' => __( 'File ID.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
 							),
 							'name' => array(
 								'description' => __( 'File name.', 'woocommerce' ),
@@ -2031,7 +2033,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 				),
 				'shipping_class_id' => array(
 					'description' => __( 'Shipping class ID.', 'woocommerce' ),
-					'type'        => 'string',
+					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
@@ -2063,7 +2065,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 					'readonly'    => true,
 				),
 				'upsell_ids' => array(
-					'description' => __( 'List of up-sell products IDs.', 'woocommerce' ),
+					'description' => __( 'List of upsell products IDs.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'    => 'integer',
@@ -2316,7 +2318,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 								'context'     => array( 'view', 'edit' ),
 							),
 							'date_on_sale_to' => array(
-								'description' => __( 'End data of sale price.', 'woocommerce' ),
+								'description' => __( 'End date of sale price.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
@@ -2357,10 +2359,9 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 									'type'       => 'object',
 									'properties' => array(
 										'id' => array(
-											'description' => __( 'File MD5 hash.', 'woocommerce' ),
+											'description' => __( 'File ID.', 'woocommerce' ),
 											'type'        => 'string',
 											'context'     => array( 'view', 'edit' ),
-											'readonly'    => true,
 										),
 										'name' => array(
 											'description' => __( 'File name.', 'woocommerce' ),
@@ -2473,7 +2474,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 							),
 							'shipping_class_id' => array(
 								'description' => __( 'Shipping class ID.', 'woocommerce' ),
-								'type'        => 'string',
+								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),

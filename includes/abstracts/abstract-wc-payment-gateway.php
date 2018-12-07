@@ -1,4 +1,13 @@
 <?php
+/**
+ * Abstract payment gateway
+ *
+ * Hanldes generic payment gateway functionality which is extended by idividual payment gateways.
+ *
+ * @class WC_Payment_Gateway
+ * @version 2.1.0
+ * @package WooCommerce/Abstracts
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -13,91 +22,103 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @extends     WC_Settings_API
  * @version     2.1.0
  * @package     WooCommerce/Abstracts
- * @category    Abstract Class
- * @author      WooThemes
  */
 abstract class WC_Payment_Gateway extends WC_Settings_API {
 
 	/**
 	 * Set if the place order button should be renamed on selection.
+	 *
 	 * @var string
 	 */
 	public $order_button_text;
 
 	/**
-	 * yes or no based on whether the method is enabled.
+	 * Yes or no based on whether the method is enabled.
+	 *
 	 * @var string
 	 */
 	public $enabled = 'yes';
 
 	/**
 	 * Payment method title for the frontend.
+	 *
 	 * @var string
 	 */
 	public $title;
 
 	/**
 	 * Payment method description for the frontend.
+	 *
 	 * @var string
 	 */
 	public $description;
 
 	/**
 	 * Chosen payment method id.
+	 *
 	 * @var bool
 	 */
 	public $chosen;
 
 	/**
 	 * Gateway title.
+	 *
 	 * @var string
 	 */
 	public $method_title = '';
 
 	/**
 	 * Gateway description.
+	 *
 	 * @var string
 	 */
 	public $method_description = '';
 
 	/**
 	 * True if the gateway shows fields on the checkout.
+	 *
 	 * @var bool
 	 */
 	public $has_fields;
 
 	/**
 	 * Countries this gateway is allowed for.
+	 *
 	 * @var array
 	 */
 	public $countries;
 
 	/**
 	 * Available for all counties or specific.
+	 *
 	 * @var string
 	 */
 	public $availability;
 
 	/**
 	 * Icon for the gateway.
+	 *
 	 * @var string
 	 */
 	public $icon;
 
 	/**
 	 * Supported features such as 'default_credit_card_form', 'refunds'.
+	 *
 	 * @var array
 	 */
 	public $supports = array( 'products' );
 
 	/**
 	 * Maximum transaction amount, zero does not define a maximum.
+	 *
 	 * @var int
 	 */
 	public $max_amount = 0;
 
 	/**
 	 * Optional URL to view a transaction.
+	 *
 	 * @var string
 	 */
 	public $view_transaction_url = '';
@@ -105,23 +126,26 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * Optional label to show for "new payment method" in the payment
 	 * method/token selection radio selection.
+	 *
 	 * @var string
 	 */
 	public $new_method_label = '';
 
 	/**
 	 * Contains a users saved tokens for this gateway.
+	 *
 	 * @var array
 	 */
 	protected $tokens = array();
 
 	/**
 	 * Returns a users saved tokens for this gateway.
+	 *
 	 * @since 2.6.0
 	 * @return array
 	 */
 	public function get_tokens() {
-		if ( sizeof( $this->tokens ) > 0 ) {
+		if ( count( $this->tokens ) > 0 ) {
 			return $this->tokens;
 		}
 
@@ -134,6 +158,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 
 	/**
 	 * Return the title for admin screens.
+	 *
 	 * @return string
 	 */
 	public function get_method_title() {
@@ -142,6 +167,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 
 	/**
 	 * Return the description for admin screens.
+	 *
 	 * @return string
 	 */
 	public function get_method_description() {
@@ -152,7 +178,9 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * Output the gateway settings screen.
 	 */
 	public function admin_options() {
-		echo '<h2>' . esc_html( $this->get_method_title() ) . '</h2>';
+		echo '<h2>' . esc_html( $this->get_method_title() );
+		wc_back_link( __( 'Return to payments', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=checkout' ) );
+		echo '</h2>';
 		echo wp_kses_post( wpautop( $this->get_method_description() ) );
 		parent::admin_options();
 	}
@@ -166,9 +194,22 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
+	 * Return whether or not this gateway still requires setup to function.
+	 *
+	 * When this gateway is toggled on via AJAX, if this returns true a
+	 * redirect will occur to the settings page instead.
+	 *
+	 * @since 3.4.0
+	 * @return bool
+	 */
+	public function needs_setup() {
+		return false;
+	}
+
+	/**
 	 * Get the return url (thank you page).
 	 *
-	 * @param WC_Order $order
+	 * @param WC_Order $order Order object.
 	 * @return string
 	 */
 	public function get_return_url( $order = null ) {
@@ -218,7 +259,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			$order = wc_get_order( $order_id );
 			$total = (float) $order->get_total();
 
-		// Gets order total from cart/checkout.
+			// Gets order total from cart/checkout.
 		} elseif ( 0 < WC()->cart->total ) {
 			$total = (float) WC()->cart->total;
 		}
@@ -247,7 +288,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function has_fields() {
-		return $this->has_fields ? true : false;
+		return (bool) $this->has_fields;
 	}
 
 	/**
@@ -300,7 +341,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 *            'redirect' => $this->get_return_url( $order )
 	 *        );
 	 *
-	 * @param int $order_id
+	 * @param int $order_id Order ID.
 	 * @return array
 	 */
 	public function process_payment( $order_id ) {
@@ -313,9 +354,9 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * If the gateway declares 'refunds' support, this will allow it to refund.
 	 * a passed in amount.
 	 *
-	 * @param  int $order_id
-	 * @param  float $amount
-	 * @param  string $reason
+	 * @param  int    $order_id Order ID.
+	 * @param  float  $amount Refund amount.
+	 * @param  string $reason Refund reason.
 	 * @return boolean True or false based on success, or a WP_Error object.
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
@@ -329,15 +370,18 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 *
 	 * @return bool
 	 */
-	public function validate_fields() { return true; }
+	public function validate_fields() {
+		return true;
+	}
 
 	/**
 	 * If There are no payment fields show the description if set.
 	 * Override this in your gateway if you have some.
 	 */
 	public function payment_fields() {
-		if ( $description = $this->get_description() ) {
-			echo wpautop( wptexturize( $description ) );
+		$description = $this->get_description();
+		if ( $description ) {
+			echo wpautop( wptexturize( $description ) ); // @codingStandardsIgnoreLine.
 		}
 
 		if ( $this->supports( 'default_credit_card_form' ) ) {
@@ -356,17 +400,30 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @since 1.5.7
 	 */
 	public function supports( $feature ) {
-		return apply_filters( 'woocommerce_payment_gateway_supports', in_array( $feature, $this->supports ) ? true : false, $feature, $this );
+		return apply_filters( 'woocommerce_payment_gateway_supports', in_array( $feature, $this->supports ), $feature, $this );
 	}
 
 	/**
-	 * Core credit card form which gateways can used if needed. Deprecated - inheirt WC_Payment_Gateway_CC instead.
-	 * @param  array $args
-	 * @param  array $fields
+	 * Can the order be refunded via this gateway?
+	 *
+	 * Should be extended by gateways to do their own checks.
+	 *
+	 * @param  WC_Order $order Order object.
+	 * @return bool If false, the automatic refund button is hidden in the UI.
+	 */
+	public function can_refund_order( $order ) {
+		return $order && $this->supports( 'refunds' );
+	}
+
+	/**
+	 * Core credit card form which gateways can used if needed. Deprecated - inherit WC_Payment_Gateway_CC instead.
+	 *
+	 * @param  array $args Arguments.
+	 * @param  array $fields Fields.
 	 */
 	public function credit_card_form( $args = array(), $fields = array() ) {
 		wc_deprecated_function( 'credit_card_form', '2.6', 'WC_Payment_Gateway_CC->form' );
-		$cc_form = new WC_Payment_Gateway_CC;
+		$cc_form           = new WC_Payment_Gateway_CC();
 		$cc_form->id       = $this->id;
 		$cc_form->supports = $this->supports;
 		$cc_form->form();
@@ -374,6 +431,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 
 	/**
 	 * Enqueues our tokenization script to handle some of the new form options.
+	 *
 	 * @since 2.6.0
 	 */
 	public function tokenization_script() {
@@ -383,10 +441,18 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			array( 'jquery' ),
 			WC()->version
 		);
+
+		wp_localize_script(
+			'woocommerce-tokenization-form', 'wc_tokenization_form_params', array(
+				'is_registration_required' => WC()->checkout()->is_registration_required(),
+				'is_logged_in'             => is_user_logged_in(),
+			)
+		);
 	}
 
 	/**
 	 * Grab and display our saved payment methods.
+	 *
 	 * @since 2.6.0
 	 */
 	public function saved_payment_methods() {
@@ -399,14 +465,15 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		$html .= $this->get_new_payment_method_option_html();
 		$html .= '</ul>';
 
-		echo apply_filters( 'wc_payment_gateway_form_saved_payment_methods_html', $html, $this );
+		echo apply_filters( 'wc_payment_gateway_form_saved_payment_methods_html', $html, $this ); // @codingStandardsIgnoreLine
 	}
 
 	/**
 	 * Gets saved payment method HTML from a token.
+	 *
 	 * @since 2.6.0
-	 * @param  WC_Payment_Token $token Payment Token
-	 * @return string                  Generated payment method HTML
+	 * @param  WC_Payment_Token $token Payment Token.
+	 * @return string Generated payment method HTML
 	 */
 	public function get_saved_payment_method_option_html( $token ) {
 		$html = sprintf(
@@ -426,6 +493,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * Displays a radio button for entering a new payment method (new CC details) instead of using a saved method.
 	 * Only displayed when a gateway supports tokenization.
+	 *
 	 * @since 2.6.0
 	 */
 	public function get_new_payment_method_option_html() {
@@ -444,6 +512,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 
 	/**
 	 * Outputs a checkbox for saving a new payment method to the database.
+	 *
 	 * @since 2.6.0
 	 */
 	public function save_payment_method_checkbox() {
@@ -454,6 +523,19 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 			</p>',
 			esc_attr( $this->id ),
 			esc_html__( 'Save to account', 'woocommerce' )
+		);
+	}
+
+	/**
+	 * Add payment method via account screen. This should be extended by gateway plugins.
+	 *
+	 * @since 3.2.0 Included here from 3.2.0, but supported from 3.0.0.
+	 * @return array
+	 */
+	public function add_payment_method() {
+		return array(
+			'result'   => 'failure',
+			'redirect' => wc_get_endpoint_url( 'payment-methods' ),
 		);
 	}
 }

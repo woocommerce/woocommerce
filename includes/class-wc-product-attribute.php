@@ -1,18 +1,19 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
- * Represents a product attribute.
+ * Represents a product attribute
  *
  * Attributes can be global (taxonomy based) or local to the product itself.
  * Uses ArrayAccess to be BW compatible with previous ways of reading attributes.
  *
- * @version     3.0.0
- * @since       3.0.0
- * @package     WooCommerce/Classes
- * @author      WooThemes
+ * @package WooCommerce/Classes
+ * @version 3.0.0
+ * @since   3.0.0
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Product attribute class.
  */
 class WC_Product_Attribute implements ArrayAccess {
 
@@ -73,6 +74,7 @@ class WC_Product_Attribute implements ArrayAccess {
 			if ( is_int( $option ) ) {
 				$term = get_term_by( 'id', $option, $this->get_name() );
 			} else {
+				// Term names get escaped in WP. See sanitize_term_field.
 				$term = get_term_by( 'name', $option, $this->get_name() );
 
 				if ( ! $term || is_wp_error( $term ) ) {
@@ -121,12 +123,14 @@ class WC_Product_Attribute implements ArrayAccess {
 	 * @return array
 	 */
 	public function get_data() {
-		return array_merge( $this->data, array(
-			'is_visible'   => $this->get_visible() ? 1   : 0,
-			'is_variation' => $this->get_variation() ? 1 : 0,
-			'is_taxonomy'  => $this->is_taxonomy() ? 1   : 0,
-			'value'        => $this->is_taxonomy() ? ''  : wc_implode_text_attributes( $this->get_options() ),
-		) );
+		return array_merge(
+			$this->data, array(
+				'is_visible'   => $this->get_visible() ? 1 : 0,
+				'is_variation' => $this->get_variation() ? 1 : 0,
+				'is_taxonomy'  => $this->is_taxonomy() ? 1 : 0,
+				'value'        => $this->is_taxonomy() ? '' : wc_implode_text_attributes( $this->get_options() ),
+			)
+		);
 	}
 
 	/*
@@ -138,7 +142,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	/**
 	 * Set ID (this is the attribute ID).
 	 *
-	 * @param int $value
+	 * @param int $value Attribute ID.
 	 */
 	public function set_id( $value ) {
 		$this->data['id'] = absint( $value );
@@ -147,7 +151,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	/**
 	 * Set name (this is the attribute name or taxonomy).
 	 *
-	 * @param int $value
+	 * @param int $value Attribute name.
 	 */
 	public function set_name( $value ) {
 		$this->data['name'] = $value;
@@ -156,7 +160,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	/**
 	 * Set options.
 	 *
-	 * @param array $value
+	 * @param array $value Attribute options.
 	 */
 	public function set_options( $value ) {
 		$this->data['options'] = $value;
@@ -165,7 +169,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	/**
 	 * Set position.
 	 *
-	 * @param int $value
+	 * @param int $value Attribute position.
 	 */
 	public function set_position( $value ) {
 		$this->data['position'] = absint( $value );
@@ -174,7 +178,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	/**
 	 * Set if visible.
 	 *
-	 * @param bool $value
+	 * @param bool $value If is visible on Product's additional info tab.
 	 */
 	public function set_visible( $value ) {
 		$this->data['visible'] = wc_string_to_bool( $value );
@@ -183,7 +187,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	/**
 	 * Set if variation.
 	 *
-	 * @param bool $value
+	 * @param bool $value If is used for variations.
 	 */
 	public function set_variation( $value ) {
 		$this->data['variation'] = wc_string_to_bool( $value );
@@ -256,26 +260,22 @@ class WC_Product_Attribute implements ArrayAccess {
 	*/
 
 	/**
-	 * offsetGet.
+	 * OffsetGet.
 	 *
-	 * @param string $offset
+	 * @param string $offset Offset.
 	 * @return mixed
 	 */
 	public function offsetGet( $offset ) {
 		switch ( $offset ) {
-			case 'is_variation' :
+			case 'is_variation':
 				return $this->get_variation() ? 1 : 0;
-				break;
-			case 'is_visible' :
+			case 'is_visible':
 				return $this->get_visible() ? 1 : 0;
-				break;
-			case 'is_taxonomy' :
+			case 'is_taxonomy':
 				return $this->is_taxonomy() ? 1 : 0;
-				break;
-			case 'value' :
+			case 'value':
 				return $this->is_taxonomy() ? '' : wc_implode_text_attributes( $this->get_options() );
-				break;
-			default :
+			default:
 				if ( is_callable( array( $this, "get_$offset" ) ) ) {
 					return $this->{"get_$offset"}();
 				}
@@ -285,23 +285,23 @@ class WC_Product_Attribute implements ArrayAccess {
 	}
 
 	/**
-	 * offsetSet.
+	 * OffsetSet.
 	 *
-	 * @param string $offset
-	 * @param mixed $value
+	 * @param string $offset Offset.
+	 * @param mixed  $value  Value.
 	 */
 	public function offsetSet( $offset, $value ) {
 		switch ( $offset ) {
-			case 'is_variation' :
+			case 'is_variation':
 				$this->set_variation( $value );
 				break;
-			case 'is_visible' :
+			case 'is_visible':
 				$this->set_visible( $value );
 				break;
-			case 'value' :
+			case 'value':
 				$this->set_options( $value );
 				break;
-			default :
+			default:
 				if ( is_callable( array( $this, "set_$offset" ) ) ) {
 					return $this->{"set_$offset"}( $value );
 				}
@@ -310,19 +310,19 @@ class WC_Product_Attribute implements ArrayAccess {
 	}
 
 	/**
-	 * offsetUnset.
+	 * OffsetUnset.
 	 *
-	 * @param string $offset
+	 * @param string $offset Offset.
 	 */
 	public function offsetUnset( $offset ) {}
 
 	/**
-	 * offsetExists.
+	 * OffsetExists.
 	 *
-	 * @param string $offset
+	 * @param string $offset Offset.
 	 * @return bool
 	 */
 	public function offsetExists( $offset ) {
-		return in_array( $offset, array_merge( array( 'is_variation', 'is_visible', 'is_taxonomy', 'value' ), array_keys( $this->data ) ) );
+		return in_array( $offset, array_merge( array( 'is_variation', 'is_visible', 'is_taxonomy', 'value' ), array_keys( $this->data ) ), true );
 	}
 }

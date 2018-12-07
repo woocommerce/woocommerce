@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /*
  * Copyright (c) 2013 - 2015 MasterCard International Incorporated
  * All rights reserved.
@@ -43,6 +47,11 @@ class Simplify_PaymentsApi
 
 	/**
 	 * @ignore
+	 *
+	 * @param object $object
+	 * @param object $authentication
+	 *
+	 * @return mixed
 	 */
 	static public function createObject($object, $authentication = null)
 	{
@@ -57,6 +66,11 @@ class Simplify_PaymentsApi
 
 	/**
 	 * @ignore
+	 *
+	 * @param object $object
+	 * @param object $authentication
+	 *
+	 * @return mixed
 	 */
 	static public function findObject($object, $authentication = null)
 	{
@@ -70,6 +84,11 @@ class Simplify_PaymentsApi
 
 	/**
 	 * @ignore
+	 *
+	 * @param object $object
+	 * @param object $authentication
+	 *
+	 * @return mixed
 	 */
 	static public function updateObject($object, $authentication = null) {
 		$paymentsApi = new Simplify_PaymentsApi();
@@ -82,6 +101,11 @@ class Simplify_PaymentsApi
 
 	/**
 	 * @ignore
+	 *
+	 * @param object $object
+	 * @param object $authentication
+	 *
+	 * @return mixed
 	 */
 	static public function deleteObject($object, $authentication = null) {
 		$paymentsApi = new Simplify_PaymentsApi();
@@ -93,8 +117,14 @@ class Simplify_PaymentsApi
 
 	/**
 	 * @ignore
+	 *
+	 * @param object $object
+	 * @param array $criteria
+	 * @param object $authentication
+	 *
+	 * @return Simplify_ResourceList
 	 */
-	static public function listObject($object, $criteria = null, $authentication =null) {
+	static public function listObject($object, $criteria = null, $authentication = null) {
 		if ($criteria != null) {
 			if (isset($criteria['max'])) {
 				$object->max = $criteria['max'];
@@ -126,6 +156,11 @@ class Simplify_PaymentsApi
 
 	/**
 	 * @ignore
+	 *
+	 * @param array $from
+	 * @param string $toClazz
+	 *
+	 * @return mixed
 	 */
 	public function convertFromHashToObject($from, $toClazz)
 	{
@@ -154,6 +189,12 @@ class Simplify_PaymentsApi
 
 	/**
 	 * @ignore
+	 *
+	 * @param string $publicKey
+	 * @param string $action
+	 * @param object $object
+	 *
+	 * @return string
 	 */
 	public function getUrl($publicKey, $action, $object)
 	{
@@ -195,6 +236,10 @@ class Simplify_PaymentsApi
 
 	/**
 	 * @ignore
+	 *
+	 * @param string $action
+	 *
+	 * @return string
 	 */
 	public function getMethod($action)
 	{
@@ -206,6 +251,12 @@ class Simplify_PaymentsApi
 
 	/**
 	 * @ignore
+	 *
+	 * @param string $action
+	 * @param object $object
+	 * @param object $authentication
+	 *
+	 * @return mixed
 	 */
 	private function execute($action, $object, $authentication)
 	{
@@ -217,6 +268,11 @@ class Simplify_PaymentsApi
 
 	/**
 	 * @ignore
+	 *
+	 * @param string $hash
+	 * @param object $authentication
+	 *
+	 * @return mixed
 	 */
 	public function jwsDecode($hash, $authentication)
 	{
@@ -229,6 +285,10 @@ class Simplify_PaymentsApi
 
 	/**
 	 * @ignore
+	 *
+	 * @param string $url
+	 *
+	 * @return string
 	 */
 	private function fixUrl($url)
 	{
@@ -240,6 +300,10 @@ class Simplify_PaymentsApi
 
 	/**
 	 * @ignore
+	 *
+	 * @param string $k
+	 *
+	 * @return bool
 	 */
 	private function isLiveKey($k) {
 		return strpos($k, "lvpb") === 0;
@@ -247,6 +311,11 @@ class Simplify_PaymentsApi
 
 	/**
 	 * @ignore
+	 *
+	 * @param string $s
+	 * @param string $c
+	 *
+	 * @return bool
 	 */
 	private function endsWith($s, $c)
 	{
@@ -287,4 +356,3 @@ class Simplify_PaymentsApi
 	}
 
 }
-
