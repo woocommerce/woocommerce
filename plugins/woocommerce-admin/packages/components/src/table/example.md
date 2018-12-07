@@ -2,7 +2,11 @@
 import { TableCard } from '@woocommerce/components';
 
 const noop = () => {};
-const headers = [ { label: 'Month' }, { label: 'Orders' }, { label: 'Revenue' } ];
+const headers = [
+	{ key: 'month', label: 'Month' },
+	{ key: 'orders', label: 'Orders' },
+	{ key: 'revenue', label: 'Revenue' },
+];
 const rows = [
 	[
 		{ display: 'January', value: 1 },
