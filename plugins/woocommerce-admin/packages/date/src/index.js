@@ -437,7 +437,7 @@ export const weekTicksThreshold = 9;
  * @return {String} Current interval.
  */
 export function getDateFormatsForInterval( interval, ticks = 0 ) {
-	let tooltipLabelFormat = '%B %d %Y';
+	let tooltipLabelFormat = '%B %d, %Y';
 	let xFormat = '%Y-%m-%d';
 	let x2Format = '%b %Y';
 	let tableFormat = 'm/d/Y';
@@ -464,7 +464,7 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
 				xFormat = '%b';
 				x2Format = '%Y';
 			}
-			tooltipLabelFormat = __( 'Week of %B %d %Y', 'wc-admin' );
+			tooltipLabelFormat = __( 'Week of %B %d, %Y', 'wc-admin' );
 			break;
 		case 'quarter':
 		case 'month':
