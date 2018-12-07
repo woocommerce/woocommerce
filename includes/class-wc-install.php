@@ -1230,7 +1230,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 */
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
 		// Explicitly clear the event.
-		wp_clear_scheduled_hook( 'woocommerce_plugin_background_installer', func_get_args() );
+		$args = func_get_args();
+		wp_clear_scheduled_hook( 'woocommerce_plugin_background_installer', $args );
 
 		if ( ! empty( $plugin_to_install['repo-slug'] ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -1242,7 +1243,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 			$skin              = new Automatic_Upgrader_Skin();
 			$upgrader          = new WP_Upgrader( $skin );
-			$installed_plugins = array_reduce( array_keys( get_plugins() ), array( __CLASS__, 'associate_plugin_file' ), array() );
+			$installed_plugins = array_reduce( array_keys( get_plugins() ), array( __CLASS__, 'associate_plugin_file' ) );
+			if ( empty( $installed_plugins ) ) {
+				$installed_plugins = array();
+			}
 			$plugin_slug       = $plugin_to_install['repo-slug'];
 			$plugin_file       = isset( $plugin_to_install['file'] ) ? $plugin_to_install['file'] : $plugin_slug . '.php';
 			$installed         = false;
@@ -1386,7 +1390,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 */
 	public static function theme_background_installer( $theme_slug ) {
 		// Explicitly clear the event.
-		wp_clear_scheduled_hook( 'woocommerce_theme_background_installer', func_get_args() );
+		$args = func_get_args();
+		wp_clear_scheduled_hook( 'woocommerce_theme_background_installer', $args );
 
 		if ( ! empty( $theme_slug ) ) {
 			// Suppress feedback.
