@@ -139,7 +139,7 @@ function getRequestQuery( endpoint, dataType, query ) {
  * @return {Object}  Object containing summary number responses.
  */
 export function getSummaryNumbers( endpoint, query, select ) {
-	const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
+	const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-api' );
 	const response = {
 		isRequesting: false,
 		isError: false,
@@ -182,7 +182,7 @@ export function getSummaryNumbers( endpoint, query, select ) {
  * @return {Object}  Object containing API request information (response, fetching, and error details)
  */
 export function getReportChartData( endpoint, dataType, query, select ) {
-	const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
+	const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-api' );
 
 	const response = {
 		isEmpty: false,
@@ -296,8 +296,8 @@ export function getReportTableQuery( urlQuery, query ) {
  * @return {Object} Object    Table data response
  */
 export function getReportTableData( endpoint, urlQuery, select, query = {} ) {
-	const { getReportItems, isGetReportItemsRequesting, isGetReportItemsError } = select(
-		'wc-admin'
+	const { getReportItems, isReportItemsRequesting, isReportItemsError } = select(
+		'wc-api'
 	);
 
 	const tableQuery = reportsUtils.getReportTableQuery( urlQuery, query );
@@ -309,9 +309,9 @@ export function getReportTableData( endpoint, urlQuery, select, query = {} ) {
 	};
 
 	const items = getReportItems( endpoint, tableQuery );
-	if ( isGetReportItemsRequesting( endpoint, tableQuery ) ) {
+	if ( isReportItemsRequesting( endpoint, tableQuery ) ) {
 		return { ...response, isRequesting: true };
-	} else if ( isGetReportItemsError( endpoint, tableQuery ) ) {
+	} else if ( isReportItemsError( endpoint, tableQuery ) ) {
 		return { ...response, isError: true };
 	}
 

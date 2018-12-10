@@ -5,7 +5,6 @@
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { format as formatDate } from '@wordpress/date';
-import { withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import { find, get } from 'lodash';
 
@@ -28,6 +27,7 @@ import { Chart } from '@woocommerce/components';
  */
 import { getReportChartData, getTooltipValueFormat } from 'store/reports/utils';
 import ReportError from 'analytics/components/report-error';
+import withSelect from 'wc-api/with-select';
 
 export const DEFAULT_FILTER = 'all';
 

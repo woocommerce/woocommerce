@@ -5,8 +5,12 @@ export function getResourceName( prefix, identifier ) {
 	return `${ prefix }:${ identifierString }`;
 }
 
+export function getResourcePrefix( resourceName ) {
+	return resourceName.substring( 0, resourceName.indexOf( ':' ) );
+}
+
 export function isResourcePrefix( resourceName, prefix ) {
-	const resourcePrefix = resourceName.substring( 0, resourceName.indexOf( ':' ) );
+	const resourcePrefix = getResourcePrefix( resourceName );
 	return resourcePrefix === prefix;
 }
 

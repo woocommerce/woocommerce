@@ -224,7 +224,7 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
 		const datesFromQuery = getCurrentDates( query );
-		const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
+		const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-api' );
 
 		// TODO Support hour here when viewing a single day
 		const tableQuery = {
