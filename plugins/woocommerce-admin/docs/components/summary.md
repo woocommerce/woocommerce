@@ -104,7 +104,6 @@ A boolean used to show a highlight style on this number.
 
 ### `value`
 
-- **Required**
 - Type: One of type: number, string
 - Default: null
 

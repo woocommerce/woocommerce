@@ -38,6 +38,13 @@ The `path` parameter supplied by React-Router
 
 The query string represented in object form
 
+### `showDatePicker`
+
+- Type: Boolean
+- Default: `true`
+
+Whether the date picker must be shown..
+
 `AdvancedFilters` (component)
 =============================
 

@@ -12,7 +12,6 @@ const { parse, resolver } = require( 'react-docgen' );
  */
 const { getDescription, getProps, getTitle } = require( './lib/formatting' );
 const {
-	COMPONENTS_FOLDER,
 	PACKAGES_FOLDER,
 	deleteExistingDocs,
 	getExportedFileList,
@@ -26,7 +25,6 @@ deleteExistingDocs();
 
 // Read components file to get a list of exported files, convert that to a list of absolute paths to public components.
 const files = [
-	...getRealFilePaths( getExportedFileList( path.resolve( COMPONENTS_FOLDER, 'index.js' ) ) ),
 	...getRealFilePaths( getExportedFileList( path.resolve( PACKAGES_FOLDER, 'index.js' ) ), PACKAGES_FOLDER ),
 ];
 
