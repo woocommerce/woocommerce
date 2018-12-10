@@ -14,7 +14,7 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import Autocomplete from './autocomplete';
-import { coupons, product, productCategory, taxes, variations } from './autocompleters';
+import { coupons, customers, product, productCategory, taxes, variations } from './autocompleters';
 import Tag from '../tag';
 
 /**
@@ -76,6 +76,8 @@ class Search extends Component {
 				return taxes;
 			case 'variations':
 				return variations;
+			case 'customers':
+				return customers;
 			default:
 				return {};
 		}
