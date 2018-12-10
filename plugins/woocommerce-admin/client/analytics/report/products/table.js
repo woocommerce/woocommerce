@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __, _n } from '@wordpress/i18n';
+import { __, _n, _x } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { map } from 'lodash';
 
@@ -18,6 +18,7 @@ import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
  */
 import ReportTable from 'analytics/components/report-table';
 import { numberFormat } from 'lib/number';
+import { isLowStock } from './utils';
 
 export default class ProductsReportTable extends Component {
 	constructor() {
@@ -97,10 +98,8 @@ export default class ProductsReportTable extends Component {
 				orders_count,
 				categories = [], // @TODO
 				variations = [], // @TODO
-				stock_status = 'outofstock', // @TODO
-				stock_quantity = '0', // @TODO
 			} = row;
-			const { name } = extended_info;
+			const { name, stock_status, stock_quantity, low_stock_amount } = extended_info;
 			const ordersLink = getNewPath( persistedQuery, 'orders', {
 				filter: 'advanced',
 				product_includes: product_id,
@@ -150,10 +149,12 @@ export default class ProductsReportTable extends Component {
 					value: variations.length,
 				},
 				{
-					display: (
+					display: isLowStock( stock_status, stock_quantity, low_stock_amount ) ? (
 						<Link href={ 'post.php?action=edit&post=' + product_id } type="wp-admin">
-							{ stockStatuses[ stock_status ] }
+							{ _x( 'Low', 'Indication of a low quantity', 'wc-admin' ) }
 						</Link>
+					) : (
+						stockStatuses[ stock_status ]
 					),
 					value: stockStatuses[ stock_status ],
 				},

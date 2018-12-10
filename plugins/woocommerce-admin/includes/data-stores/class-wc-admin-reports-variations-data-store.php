@@ -61,6 +61,9 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 		'price',
 		'image',
 		'permalink',
+		'stock_status',
+		'stock_quantity',
+		'low_stock_amount',
 	);
 
 
@@ -123,20 +126,23 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 		foreach ( $products_data as $key => $product_data ) {
 			$extended_info = new ArrayObject();
 			if ( $query_args['extended_info'] ) {
+				$extended_attributes = apply_filters( 'woocommerce_rest_reports_variations_extended_attributes', $this->extended_attributes, $product_data );
 				$product             = wc_get_product( $product_data['product_id'] );
-				$extended_attributes = apply_filters( 'woocommerce_rest_reports_products_extended_attributes', $this->extended_attributes, $product_data );
-				foreach ( $extended_attributes as $extended_attribute ) {
-					$function = 'get_' . $extended_attribute;
-					if ( is_callable( array( $product, $function ) ) && 'get_price' !== $function ) {
-						$value                                = $product->{$function}();
-						$extended_info[ $extended_attribute ] = $value;
-					}
+				$variations          = array();
+				if ( method_exists( $product, 'get_available_variations' ) ) {
+					$variations = $product->get_available_variations();
 				}
-				$variations = $product->get_available_variations();
 				foreach ( $variations as $variation ) {
 					if ( (int) $variation['variation_id'] === (int) $product_data['variation_id'] ) {
 						$attributes        = array();
 						$variation_product = wc_get_product( $variation['variation_id'] );
+						foreach ( $extended_attributes as $extended_attribute ) {
+							$function = 'get_' . $extended_attribute;
+							if ( is_callable( array( $variation_product, $function ) ) ) {
+								$value                                = $variation_product->{$function}();
+								$extended_info[ $extended_attribute ] = $value;
+							}
+						}
 						foreach ( $variation['attributes'] as $attribute_name => $attribute ) {
 							$name         = str_replace( 'attribute_', '', $attribute_name );
 							$option_term  = get_term_by( 'slug', $attribute, $name );
@@ -147,8 +153,11 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 							);
 						}
 						$extended_info['attributes'] = $attributes;
-						$extended_info['price']      = $variation_product->get_price();
 					}
+				}
+				// If there is no set low_stock_amount, use the one in user settings.
+				if ( '' === $extended_info['low_stock_amount'] ) {
+					$extended_info['low_stock_amount'] = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 				}
 				$extended_info = $this->cast_numbers( $extended_info );
 			}

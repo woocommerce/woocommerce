@@ -1,7 +1,13 @@
 <?php
-
 /**
  * Reports order stats tests.
+ *
+ * @package WooCommerce\Tests\Orders
+ * @todo Finish up unit testing to verify bug-free order reports.
+ */
+
+/**
+ * Reports order stats tests class.
  *
  * @package WooCommerce\Tests\Orders
  * @todo Finish up unit testing to verify bug-free order reports.
@@ -91,6 +97,8 @@ class WC_Tests_Reports_Variations extends WC_Unit_Test_Case {
 		$variation->set_parent_id( $product->get_id() );
 		$variation->set_regular_price( 10 );
 		$variation->set_attributes( array( 'pa_color' => 'green' ) );
+		$variation->set_manage_stock( true );
+		$variation->set_stock_quantity( 25 );
 		$variation->save();
 
 		$order = WC_Helper_Order::create_order( 1, $variation );
@@ -120,11 +128,14 @@ class WC_Tests_Reports_Variations extends WC_Unit_Test_Case {
 					'gross_revenue' => 40.0, // $10 * 4.
 					'orders_count'  => 1,
 					'extended_info' => array(
-						'name'       => $product->get_name(),
-						'image'      => $variation->get_image(),
-						'permalink'  => $product->get_permalink(),
-						'price'      => (float) $variation->get_price(),
-						'attributes' => array(
+						'name'             => $variation->get_name(),
+						'image'            => $variation->get_image(),
+						'permalink'        => $variation->get_permalink(),
+						'price'            => (float) $variation->get_price(),
+						'stock_status'     => $variation->get_stock_status(),
+						'stock_quantity'   => $variation->get_stock_quantity() - 4, // subtract the ones purchased.
+						'low_stock_amount' => get_option( 'woocommerce_notify_low_stock_amount' ),
+						'attributes'       => array(
 							0 => array(
 								'id'     => 0,
 								'name'   => 'color',

@@ -1,7 +1,13 @@
 <?php
-
 /**
  * Reports product stats tests.
+ *
+ * @package WooCommerce\Tests\Orders
+ * @todo Finish up unit testing to verify bug-free product reports.
+ */
+
+/**
+ * Reports product stats tests class
  *
  * @package WooCommerce\Tests\Orders
  * @todo Finish up unit testing to verify bug-free product reports.
@@ -63,6 +69,11 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_data, $query->get_data() );
 	}
 
+	/**
+	 * Test the ordering of results by product name
+	 *
+	 * @since 3.5.0
+	 */
 	public function test_order_by_product_name() {
 		WC_Helper_Reports::reset_stats_dbs();
 
@@ -183,7 +194,11 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$product = new WC_Product_Simple();
 		$product->set_name( 'Test Product' );
 		$product->set_regular_price( 25 );
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 25 );
+		$product->set_low_stock_amount( 5 );
 		$product->save();
+
 		$order = WC_Helper_Order::create_order( 1, $product );
 		$order->set_status( 'completed' );
 		$order->set_shipping_total( 10 );
@@ -214,10 +229,13 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 					'gross_revenue' => 100.0, // $25 * 4.
 					'orders_count'  => 1,
 					'extended_info' => array(
-						'name'      => $product->get_name(),
-						'image'     => $product->get_image(),
-						'permalink' => $product->get_permalink(),
-						'price'     => (float) $product->get_price(),
+						'name'             => $product->get_name(),
+						'image'            => $product->get_image(),
+						'permalink'        => $product->get_permalink(),
+						'price'            => (float) $product->get_price(),
+						'stock_status'     => $product->get_stock_status(),
+						'stock_quantity'   => $product->get_stock_quantity() - 4, // subtract the ones purchased.
+						'low_stock_amount' => $product->get_low_stock_amount(),
 					),
 				),
 			),
