@@ -53,7 +53,6 @@ function read( resourceNames, fetch = apiFetch ) {
 		try {
 			const response = await fetch( fetchArgs );
 			const report = await response.json();
-			// TODO: exclude these if using swagger?
 			const totalResults = parseInt( response.headers.get( 'x-wp-total' ) );
 			const totalPages = parseInt( response.headers.get( 'x-wp-totalpages' ) );
 
