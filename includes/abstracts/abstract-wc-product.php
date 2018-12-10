@@ -1494,7 +1494,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 				$on_sale = false;
 			}
 
-			if ( $this->get_date_on_sale_to( $context ) && $this->get_date_on_sale_to( $context )->getTimestamp() < current_time( 'timestamp', true ) ) {
+			if ( $this->get_date_on_sale_to( $context ) && $this->get_date_on_sale_to( $context )->getTimestamp() + DAY_IN_SECONDS < current_time( 'timestamp', true ) ) {
 				$on_sale = false;
 			}
 		} else {
