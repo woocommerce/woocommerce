@@ -305,7 +305,9 @@ export function getReportTableData( endpoint, urlQuery, select, query = {} ) {
 		query: tableQuery,
 		isRequesting: false,
 		isError: false,
-		items: [],
+		items: {
+			data: [],
+		},
 	};
 
 	const items = getReportItems( endpoint, tableQuery );

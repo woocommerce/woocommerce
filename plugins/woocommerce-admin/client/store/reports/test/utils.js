@@ -451,7 +451,9 @@ describe( 'getReportTableData()', () => {
 	const response = {
 		isError: false,
 		isRequesting: false,
-		items: [],
+		items: {
+			data: [],
+		},
 	};
 
 	const query = {

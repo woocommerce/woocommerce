@@ -118,7 +118,7 @@ ReportTable.propTypes = {
 };
 
 ReportTable.defaultProps = {
-	tableData: null,
+	tableData: {},
 	tableQuery: {},
 };
 
