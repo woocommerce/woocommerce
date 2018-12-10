@@ -5,7 +5,7 @@
 import moment from 'moment';
 import { find } from 'lodash';
 import { __ } from '@wordpress/i18n';
-import { __experimentalGetSettings, format as formatDate } from '@wordpress/date';
+import { format as formatDate } from '@wordpress/date';
 
 const QUERY_DEFAULTS = {
 	pageSize: 25,
@@ -491,10 +491,8 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
  * we can use that data and enhance it with additional translations
  */
 export function loadLocaleData() {
-	const { date } = wcSettings;
-	const settings = __experimentalGetSettings();
-	const userLocale = settings.l10n.locale;
-	const { weekdaysShort } = settings.l10n;
+	const { date, l10n } = wcSettings;
+	const { userLocale, weekdaysShort } = l10n;
 
 	// Keep the default Momentjs English settings for any English
 	if ( ! userLocale.match( /en_/ ) ) {
