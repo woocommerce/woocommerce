@@ -21,6 +21,7 @@ import * as couponsConfig from 'analytics/report/coupons/config';
 import * as ordersConfig from 'analytics/report/orders/config';
 import * as productsConfig from 'analytics/report/products/config';
 import * as taxesConfig from 'analytics/report/taxes/config';
+import * as customersConfig from 'analytics/report/customers/config';
 import * as reportsUtils from './utils';
 
 const reportConfigs = {
@@ -29,6 +30,7 @@ const reportConfigs = {
 	orders: ordersConfig,
 	products: productsConfig,
 	taxes: taxesConfig,
+	customers: customersConfig,
 };
 
 export function getFilterQuery( endpoint, query ) {
@@ -270,8 +272,8 @@ export function getTooltipValueFormat( type ) {
 	}
 }
 
-export function getReportTableQuery( urlQuery, query ) {
-	const filterQuery = getFilterQuery( 'products', urlQuery );
+export function getReportTableQuery( endpoint, urlQuery, query ) {
+	const filterQuery = getFilterQuery( endpoint, urlQuery );
 	const datesFromQuery = getCurrentDates( urlQuery );
 
 	return {
@@ -296,11 +298,9 @@ export function getReportTableQuery( urlQuery, query ) {
  * @return {Object} Object    Table data response
  */
 export function getReportTableData( endpoint, urlQuery, select, query = {} ) {
-	const { getReportItems, isReportItemsRequesting, isReportItemsError } = select(
-		'wc-api'
-	);
+	const { getReportItems, isReportItemsRequesting, isReportItemsError } = select( 'wc-api' );
 
-	const tableQuery = reportsUtils.getReportTableQuery( urlQuery, query );
+	const tableQuery = reportsUtils.getReportTableQuery( endpoint, urlQuery, query );
 	const response = {
 		query: tableQuery,
 		isRequesting: false,
