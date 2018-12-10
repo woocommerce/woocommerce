@@ -1,56 +1,91 @@
 ```jsx
 import { ReportFilters } from '@woocommerce/components';
+const { orderStatuses } = wcSettings;
 
 const path = '';
 const query = {};
 const filters = [
-	{ label: 'All Products', value: 'all' },
-	{ label: 'Top Products by Items Sold', value: 'top_items' },
-	{ label: 'Top Products by Gross Sales', value: 'top_sales' },
+	{
+		label: 'Show',
+		staticParams: [ 'chart' ],
+		param: 'filter',
+		showFilters: () => true,
+		filters: [
+			{ label: 'All Orders', value: 'all' },
+			{ label: 'Advanced Filters', value: 'advanced' },
+		],
+	},
 ];
 
 const advancedFilters = {
-	status: {
-		labels: {
-			add: 'Order Status',
-			remove: 'Remove order status filter',
-			rule: 'Select an order status filter match',
-			title: 'Order Status',
-		},
-		rules: [
-			{ value: 'is', label: 'Is' },
-			{ value: 'is_not', label: 'Is Not' },
-		],
-		input: {
-			component: 'SelectControl',
-			options: [
-				{ value: 'pending', label: 'Pending' },
-				{ value: 'processing', label: 'Processing' },
-				{ value: 'on-hold', label: 'On Hold' },
-				{ value: 'completed', label: 'Completed' },
-				{ value: 'refunded', label: 'Refunded' },
-				{ value: 'cancelled', label: 'Cancelled' },
-				{ value: 'failed', label: 'Failed' },
+	title: 'Orders Match {{select /}} Filters',
+	filters: {
+		status: {
+			labels: {
+				add: 'Order Status',
+				remove: 'Remove order status filter',
+				rule: 'Select an order status filter match',
+				title: 'Order Status {{rule /}} {{filter /}}',
+				filter: 'Select an order status',
+			},
+			rules: [
+				{
+					value: 'is',
+					label: 'Is',
+				},
+				{
+					value: 'is_not',
+					label: 'Is Not',
+				},
 			],
+			input: {
+				component: 'SelectControl',
+				options: Object.keys( orderStatuses ).map( key => ( {
+					value: key,
+					label: orderStatuses[ key ],
+				} ) ),
+			},
 		},
-	},
-	product_id: {
-		labels: {
-			add: 'Products',
-			placeholder: 'Search products',
-			remove: 'Remove products filter',
-			rule: 'Select a product filter match',
-			title: 'Product',
+		product: {
+			labels: {
+				add: 'Products',
+				placeholder: 'Search products',
+				remove: 'Remove products filter',
+				rule: 'Select a product filter match',
+				title: 'Product {{rule /}} {{filter /}}',
+				filter:'Select products',
+			},
+			rules: [
+				{
+					value: 'includes',
+					label: 'Includes',
+				},
+				{
+					value: 'excludes',
+					label: 'Excludes',
+				},
+			],
+			input: {
+				component: 'Search',
+				type: 'products',
+				getLabels: () => Promise.resolve( [] ),
+			},
 		},
-		rules: [
-			{ value: 'includes', label: 'Includes' },
-			{ value: 'excludes', label: 'Excludes' },
-		],
-		input: {
-			component: 'Search',
-			type: 'products',
-			getLabels: function() {
-				return Promise.resolve( [] );
+		customer: {
+			labels: {
+				add: 'Customer Type',
+				remove: 'Remove customer filter',
+				rule: 'Select a customer filter match',
+				title: 'Customer is {{filter /}}',
+				filter: 'Select a customer type',
+			},
+			input: {
+				component: 'SelectControl',
+				options: [
+					{ value: 'new', label: 'New', },
+					{ value: 'returning', label: 'Returning', },
+				],
+				defaultOption: 'new',
 			},
 		},
 	},
