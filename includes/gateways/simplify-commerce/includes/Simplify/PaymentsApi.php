@@ -205,9 +205,9 @@ class Simplify_PaymentsApi
 		$url = $this->fixUrl($url) . urlencode(lcfirst($object->getClazz())) . '/';
 
 		$queryParams = array();
-		if ($action == "show") {
+		if ( 'show' == $action ) {
 			$url .= urlencode($object->id);
-		} elseif ($action == "list") {
+		} elseif ( 'list' == $action ) {
 			$queryParams = array_merge($queryParams, array('max' => $object->max, 'offset' => $object->offset));
 			if (is_array($object->filter) && count(array_keys($object->filter))) {
 				foreach ($object->filter as $key => $value) {
@@ -225,11 +225,11 @@ class Simplify_PaymentsApi
 				$url .= $query;
 			}
 
-		} elseif ($action == "delete") {
+		} elseif ( 'delete' == $action ) {
 			$url .= urlencode($object->id);
-		} elseif ($action == "update") {
+		} elseif ( 'update' == $action ) {
 			$url .= urlencode($object->id);
-		} elseif ($action == "create") {
+		} elseif ( 'create' == $action ) {
 		}
 		return $url;
 	}
