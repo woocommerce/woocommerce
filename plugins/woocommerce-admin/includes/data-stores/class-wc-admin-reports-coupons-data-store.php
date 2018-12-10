@@ -152,7 +152,7 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 			'per_page'      => get_option( 'posts_per_page' ),
 			'page'          => 1,
 			'order'         => 'DESC',
-			'orderby'       => 'date',
+			'orderby'       => 'coupon_id',
 			'before'        => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
 			'after'         => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
 			'fields'        => '*',
