@@ -95,15 +95,6 @@ function wc_admin_register_script() {
 		wp_set_script_translations( WC_ADMIN_APP, 'wc-admin' );
 	}
 
-	// Resets lodash to wp-admin's version of lodash.
-	if ( 'embedded' === $entry ) {
-		wp_add_inline_script(
-			WC_ADMIN_APP,
-			'_ = _.noConflict();',
-			'after'
-		);
-	}
-
 	wp_register_style(
 		'wc-components',
 		wc_admin_url( 'dist/components/style.css' ),
