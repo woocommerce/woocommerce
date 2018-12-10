@@ -13,7 +13,7 @@ import { ReportFilters } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { dateRangeFilter, filters } from './config';
+import { filters, showDatePicker } from './config';
 import CustomersReportTable from './table';
 
 export default class CustomersReport extends Component {
@@ -25,8 +25,8 @@ export default class CustomersReport extends Component {
 				<ReportFilters
 					query={ query }
 					path={ path }
-					dateRangeFilter={ dateRangeFilter }
 					filters={ filters }
+					showDatePicker={ showDatePicker }
 				/>
 				<CustomersReportTable query={ query } />
 			</Fragment>

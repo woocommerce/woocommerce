@@ -57,13 +57,13 @@ class ReportFilters extends Component {
 	}
 
 	render() {
-		const { dateRangeFilter, filters, query, path } = this.props;
+		const { filters, query, path, showDatePicker } = this.props;
 		return (
 			<Fragment>
 				<H className="screen-reader-text">{ __( 'Filters', 'wc-admin' ) }</H>
 				<Section component="div" className="woocommerce-filters">
 					<div className="woocommerce-filters__basic-filters">
-						{ dateRangeFilter.show && (
+						{ showDatePicker && (
 							<DatePicker key={ JSON.stringify( query ) } query={ query } path={ path } />
 						) }
 						{ filters.map( config => {
@@ -92,15 +92,6 @@ ReportFilters.propTypes = {
 	 */
 	advancedFilters: PropTypes.object,
 	/**
-	 * Config options for the date range picker.
-	 */
-	dateRangeFilter: PropTypes.shape( {
-		/**
-		 * Whether the date range filter must be shown.
-		 */
-		show: PropTypes.bool,
-	} ),
-	/**
 	 * Config option passed through to `FilterPicker` - if not used, `FilterPicker` is not displayed.
 	 */
 	filters: PropTypes.array,
@@ -112,15 +103,17 @@ ReportFilters.propTypes = {
 	 * The query string represented in object form
 	 */
 	query: PropTypes.object,
+	/**
+	 * Whether the date picker must be shown..
+	 */
+	showDatePicker: PropTypes.bool,
 };
 
 ReportFilters.defaultProps = {
 	advancedFilters: {},
-	dateRangeFilter: {
-		show: true,
-	},
 	filters: [],
 	query: {},
+	showDatePicker: true,
 };
 
 export default ReportFilters;

@@ -4,9 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 
-export const dateRangeFilter = {
-	show: false,
-};
+export const showDatePicker = false;
 
 export const filters = [
 	{
