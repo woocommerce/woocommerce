@@ -93,8 +93,9 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 	 * @param array $query_args Query parameters.
 	 */
 	protected function include_extended_info( &$coupon_data, $query_args ) {
-		if ( $query_args['extended_info'] ) {
-			foreach ( $coupon_data as $idx => $coupon_datum ) {
+		foreach ( $coupon_data as $idx => $coupon_datum ) {
+			$extended_info = new ArrayObject();
+			if ( $query_args['extended_info'] ) {
 				$coupon_id = $coupon_datum['coupon_id'];
 				$coupon    = new WC_Coupon( $coupon_id );
 
@@ -122,7 +123,7 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 					$date_created_gmt = $date_created_gmt->format( WC_Admin_Reports_Interval::$iso_datetime_format );
 				}
 
-				$coupon_data[ $idx ]['extended_info'] = array(
+				$extended_info = array(
 					'code'             => $coupon->get_code(),
 					'date_created'     => $date_created,
 					'date_created_gmt' => $date_created_gmt,
@@ -131,6 +132,7 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 					'discount_type'    => $coupon->get_discount_type(),
 				);
 			}
+			$coupon_data[ $idx ]['extended_info'] = $extended_info;
 		}
 	}
 
