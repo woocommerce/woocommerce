@@ -294,6 +294,10 @@ class WC_Admin_Reports_Data_Store {
 		$retyped_array = array();
 		$column_types  = apply_filters( 'woocommerce_rest_reports_column_types', $this->column_types, $array );
 		foreach ( $array as $column_name => $value ) {
+			if ( is_array( $value ) ) {
+				$value = $this->cast_numbers( $value );
+			}
+
 			if ( isset( $column_types[ $column_name ] ) ) {
 				$retyped_array[ $column_name ] = $column_types[ $column_name ]( $value );
 			} else {

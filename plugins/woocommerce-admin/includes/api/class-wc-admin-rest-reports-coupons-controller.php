@@ -38,15 +38,15 @@ class WC_Admin_REST_Reports_Coupons_Controller extends WC_REST_Reports_Controlle
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args             = array();
-		$args['before']   = $request['before'];
-		$args['after']    = $request['after'];
-		$args['page']     = $request['page'];
-		$args['per_page'] = $request['per_page'];
-		$args['orderby']  = $request['orderby'];
-		$args['order']    = $request['order'];
-		$args['code']     = (array) $request['code'];
-
+		$args                  = array();
+		$args['before']        = $request['before'];
+		$args['after']         = $request['after'];
+		$args['page']          = $request['page'];
+		$args['per_page']      = $request['per_page'];
+		$args['orderby']       = $request['orderby'];
+		$args['order']         = $request['order'];
+		$args['code']          = (array) $request['code'];
+		$args['extended_info'] = $request['extended_info'];
 		return $args;
 	}
 
@@ -167,6 +167,45 @@ class WC_Admin_REST_Reports_Coupons_Controller extends WC_REST_Reports_Controlle
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'extended_info'  => array(
+					'code'             => array(
+						'type'        => 'string',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Coupon code.', 'wc-admin' ),
+					),
+					'date_created'     => array(
+						'type'        => 'string',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Coupon creation date.', 'wc-admin' ),
+					),
+					'date_created_gmt' => array(
+						'type'        => 'string',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Coupon creation date in GMT.', 'wc-admin' ),
+					),
+					'date_expires'     => array(
+						'type'        => 'string',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Coupon expiration date.', 'wc-admin' ),
+					),
+					'date_expires_gmt' => array(
+						'type'        => 'string',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Coupon expiration date in GMT.', 'wc-admin' ),
+					),
+					'discount_type'    => array(
+						'type'        => 'string',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'enum'        => array_keys( wc_get_coupon_types() ),
+						'description' => __( 'Coupon discount type.', 'wc-admin' ),
+					),
+				),
 			),
 		);
 
@@ -179,9 +218,9 @@ class WC_Admin_REST_Reports_Coupons_Controller extends WC_REST_Reports_Controlle
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params             = array();
-		$params['context']  = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']     = array(
+		$params                  = array();
+		$params['context']       = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['page']          = array(
 			'description'       => __( 'Current page of the collection.', 'wc-admin' ),
 			'type'              => 'integer',
 			'default'           => 1,
@@ -189,7 +228,7 @@ class WC_Admin_REST_Reports_Coupons_Controller extends WC_REST_Reports_Controlle
 			'validate_callback' => 'rest_validate_request_arg',
 			'minimum'           => 1,
 		);
-		$params['per_page'] = array(
+		$params['per_page']      = array(
 			'description'       => __( 'Maximum number of items to be returned in result set.', 'wc-admin' ),
 			'type'              => 'integer',
 			'default'           => 10,
@@ -198,26 +237,26 @@ class WC_Admin_REST_Reports_Coupons_Controller extends WC_REST_Reports_Controlle
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after']    = array(
+		$params['after']         = array(
 			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before']   = array(
+		$params['before']        = array(
 			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order']    = array(
+		$params['order']         = array(
 			'description'       => __( 'Order sort attribute ascending or descending.', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby']  = array(
+		$params['orderby']       = array(
 			'description'       => __( 'Sort collection by object attribute.', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'coupon_id',
@@ -228,7 +267,7 @@ class WC_Admin_REST_Reports_Coupons_Controller extends WC_REST_Reports_Controlle
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['interval'] = array(
+		$params['interval']      = array(
 			'description'       => __( 'Time interval to use for buckets in the returned data.', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'week',
@@ -242,7 +281,7 @@ class WC_Admin_REST_Reports_Coupons_Controller extends WC_REST_Reports_Controlle
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['code']  = array(
+		$params['code']          = array(
 			'description'       => __( 'Limit result set to items assigned one or more code.', 'wc-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
@@ -250,6 +289,13 @@ class WC_Admin_REST_Reports_Coupons_Controller extends WC_REST_Reports_Controlle
 			'items'             => array(
 				'type' => 'string',
 			),
+		);
+		$params['extended_info'] = array(
+			'description'       => __( 'Add additional piece of info about each coupon to the report.', 'wc-admin' ),
+			'type'              => 'boolean',
+			'default'           => false,
+			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;

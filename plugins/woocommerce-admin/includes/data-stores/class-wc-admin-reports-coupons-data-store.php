@@ -87,6 +87,54 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 	}
 
 	/**
+	 * Enriches the coupon data with extra attributes.
+	 *
+	 * @param array $coupon_data Coupon data.
+	 * @param array $query_args Query parameters.
+	 */
+	protected function include_extended_info( &$coupon_data, $query_args ) {
+		if ( $query_args['extended_info'] ) {
+			foreach ( $coupon_data as $idx => $coupon_datum ) {
+				$coupon_id = $coupon_datum['coupon_id'];
+				$coupon    = new WC_Coupon( $coupon_id );
+
+				$gmt_timzone = new DateTimeZone( 'UTC' );
+
+				$date_expires = $coupon->get_date_expires();
+				if ( null === $date_expires ) {
+					$date_expires     = '';
+					$date_expires_gmt = '';
+				} else {
+					$date_expires     = $date_expires->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+					$date_expires_gmt = new DateTime( $date_expires );
+					$date_expires_gmt->setTimezone( $gmt_timzone );
+					$date_expires_gmt = $date_expires_gmt->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+				}
+
+				$date_created = $coupon->get_date_created();
+				if ( null === $date_created ) {
+					$date_created     = '';
+					$date_created_gmt = '';
+				} else {
+					$date_created     = $date_created->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+					$date_created_gmt = new DateTime( $date_created );
+					$date_created_gmt->setTimezone( $gmt_timzone );
+					$date_created_gmt = $date_created_gmt->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+				}
+
+				$coupon_data[ $idx ]['extended_info'] = array(
+					'code'             => $coupon->get_code(),
+					'date_created'     => $date_created,
+					'date_created_gmt' => $date_created_gmt,
+					'date_expires'     => $date_expires,
+					'date_expires_gmt' => $date_expires_gmt,
+					'discount_type'    => $coupon->get_discount_type(),
+				);
+			}
+		}
+	}
+
+	/**
 	 * Returns the report data based on parameters supplied by the user.
 	 *
 	 * @param array $query_args  Query parameters.
@@ -101,16 +149,17 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
-			'per_page'     => get_option( 'posts_per_page' ),
-			'page'         => 1,
-			'order'        => 'DESC',
-			'orderby'      => 'date',
-			'before'       => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
-			'after'        => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
-			'fields'       => '*',
-			'code'         => array(),
+			'per_page'      => get_option( 'posts_per_page' ),
+			'page'          => 1,
+			'order'         => 'DESC',
+			'orderby'       => 'date',
+			'before'        => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
+			'after'         => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
+			'fields'        => '*',
+			'code'          => array(),
+			'extended_info' => false,
 			// This is not a parameter for coupons reports per se, but we want to only take into account selected order types.
-			'order_status' => parent::get_report_order_statuses(),
+			'order_status'  => parent::get_report_order_statuses(),
 
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
@@ -172,6 +221,8 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 			if ( null === $coupon_data ) {
 				return $data;
 			}
+
+			$this->include_extended_info( $coupon_data, $query_args );
 
 			$coupon_data = array_map( array( $this, 'cast_numbers' ), $coupon_data );
 			$data         = (object) array(
