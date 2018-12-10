@@ -267,20 +267,6 @@ class WC_Admin_REST_Reports_Coupons_Controller extends WC_REST_Reports_Controlle
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['interval']      = array(
-			'description'       => __( 'Time interval to use for buckets in the returned data.', 'wc-admin' ),
-			'type'              => 'string',
-			'default'           => 'week',
-			'enum'              => array(
-				'hour',
-				'day',
-				'week',
-				'month',
-				'quarter',
-				'year',
-			),
-			'validate_callback' => 'rest_validate_request_arg',
-		);
 		$params['code']          = array(
 			'description'       => __( 'Limit result set to items assigned one or more code.', 'wc-admin' ),
 			'type'              => 'array',
