@@ -17,7 +17,7 @@ class WC_Admin_Reports_Interval {
 	 *
 	 * @var string
 	 */
-	public static $iso_datetime_format = 'Y-m-d\TH:i:s\Z';
+	public static $iso_datetime_format = 'Y-m-d\TH:i:s';
 
 	/**
 	 * Format string for use in SQL queries.
