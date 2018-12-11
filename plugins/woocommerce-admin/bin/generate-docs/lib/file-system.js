@@ -14,7 +14,6 @@ const { namedTypes } = types;
  */
 const { camelCaseDash } = require( './formatting' );
 
-const COMPONENTS_FOLDER = path.resolve( __dirname, '../../../client/components/' );
 const PACKAGES_FOLDER = path.resolve( __dirname, '../../../packages/components/src/' );
 const DOCS_FOLDER = path.resolve( __dirname, '../../../docs/components/' );
 
@@ -93,7 +92,7 @@ function getMdFileName( filepath, absolute = true ) {
  * @param { string } basePath The absolute path to the components directory.
  * @return { array } Updated array with absolute paths to all files.
  */
-function getRealFilePaths( files, basePath = COMPONENTS_FOLDER ) {
+function getRealFilePaths( files, basePath = PACKAGES_FOLDER ) {
 	files.sort();
 	return files.map( file => {
 		const fullPath = path.resolve( basePath, file );
@@ -160,7 +159,6 @@ function writeTableOfContents( files ) {
 }
 
 module.exports = {
-	COMPONENTS_FOLDER,
 	DOCS_FOLDER,
 	PACKAGES_FOLDER,
 	deleteExistingDocs,
