@@ -1,6 +1,8 @@
 <?php
 /**
  * PHPUnit bootstrap file
+ *
+ * @package WooCommerce\Blocks
  */
 
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
@@ -30,7 +32,9 @@ function wc_dir() {
  * Install wc admin.
  */
 function wgpb_admin_install() {
-	// Clean existing install first.L_DATA', true );
+	// Clean existing install first.
+	define( 'WP_UNINSTALL_PLUGIN', true );
+	define( 'WC_REMOVE_ALL_DATA', true );
 
 	// Initialize the WC API extensions.
 	require_once dirname( dirname( __FILE__ ) ) . '/woocommerce-gutenberg-products-block.php';
