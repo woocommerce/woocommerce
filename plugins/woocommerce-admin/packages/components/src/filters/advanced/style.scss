@@ -171,3 +171,12 @@
 		}
 	}
 }
+
+.woocommerce-filters-advanced__input-numeric-range {
+	display: inline-block;
+
+	input {
+		height: 38px;
+		border-radius: 4px;
+	}
+}

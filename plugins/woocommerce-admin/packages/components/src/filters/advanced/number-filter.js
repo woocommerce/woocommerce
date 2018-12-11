@@ -33,6 +33,7 @@ class NumberFilter extends Component {
 
 		return (
 			<TextControl
+				className="woocommerce-filters-advanced__input-numeric-range"
 				type="number"
 				value={ value }
 				onChange={ partial( onFilterChange, filter.key, 'value' ) }
@@ -64,6 +65,7 @@ class NumberFilter extends Component {
 			components: {
 				lessThan: (
 					<TextControl
+						className="woocommerce-filters-advanced__input-numeric-range"
 						type="number"
 						value={ lessThan }
 						onChange={ lessThanOnChange }
@@ -71,6 +73,7 @@ class NumberFilter extends Component {
 				),
 				moreThan: (
 					<TextControl
+						className="woocommerce-filters-advanced__input-numeric-range"
 						type="number"
 						value={ moreThan }
 						onChange={ moreThanOnChange }
