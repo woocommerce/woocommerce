@@ -5,7 +5,7 @@
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { Component } from '@wordpress/element';
-import { find, first, includes, isEqual, noop, partial, uniq, without } from 'lodash';
+import { find, first, isEqual, noop, partial, uniq, without } from 'lodash';
 import { IconButton, ToggleControl } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
@@ -73,7 +73,7 @@ class TableCard extends Component {
 		if ( ! isEqual( headers, prevHeaders ) ) {
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( {
-				showCols: headers.map( ( { hiddenByDefault } ) => ! hiddenByDefault ),
+				showCols: headers.map( ( { key, hiddenByDefault } ) => ! hiddenByDefault && key ).filter( Boolean ),
 			} );
 			/* eslint-enable react/no-did-update-set-state */
 		}
@@ -82,7 +82,7 @@ class TableCard extends Component {
 	getVisibleHeaders() {
 		const { headers } = this.props;
 		const { showCols } = this.state;
-		return headers.filter( ( { key } ) => includes( showCols, key ) );
+		return headers.filter( ( { key } ) => showCols.includes( key ) );
 	}
 
 	getVisibleRows() {
@@ -91,20 +91,22 @@ class TableCard extends Component {
 
 		return rows.map( row => {
 			return headers.map( ( { key }, i ) => {
-				return includes( showCols, key ) && row[ i ];
+				return showCols.includes( key ) && row[ i ];
 			} ).filter( Boolean );
 		} );
 	}
 
 	onColumnToggle( key ) {
-		const { headers, query, onQueryChange } = this.props;
+		const { headers, query, onQueryChange, onColumnsChange } = this.props;
 
 		return ( visible ) => {
 			this.setState( prevState => {
-				const hasKey = includes( prevState.showCols, key );
+				const hasKey = prevState.showCols.includes( key );
 
 				if ( visible && ! hasKey ) {
-					return { showCols: [ ...prevState.showCols, key ] };
+					const showCols = [ ...prevState.showCols, key ];
+					onColumnsChange( showCols );
+					return { showCols };
 				}
 				if ( ! visible && hasKey ) {
 					// Handle hiding a sorted column
@@ -113,7 +115,9 @@ class TableCard extends Component {
 						onQueryChange( 'sort' )( defaultSort.key, 'desc' );
 					}
 
-					return { showCols: without( prevState.showCols, key ) };
+					const showCols = without( prevState.showCols, key );
+					onColumnsChange( showCols );
+					return { showCols };
 				}
 				return {};
 			} );
@@ -298,7 +302,7 @@ class TableCard extends Component {
 								<MenuItem key={ key } onInvoke={ this.onColumnToggle( key ) }>
 									<ToggleControl
 										label={ label }
-										checked={ includes( showCols, key ) }
+										checked={ showCols.includes( key ) }
 										onChange={ this.onColumnToggle( key ) }
 									/>
 								</MenuItem>
@@ -382,6 +386,10 @@ TableCard.propTypes = {
 	 */
 	onQueryChange: PropTypes.func,
 	/**
+	 * A function which returns a callback function which is called upon the user changing the visiblity of columns.
+	 */
+	onColumnsChange: PropTypes.func,
+	/**
 	 * Whether the table must be downloadable. If true, the download button will appear.
 	 */
 	downloadable: PropTypes.bool,
@@ -440,6 +448,7 @@ TableCard.defaultProps = {
 	downloadable: false,
 	isLoading: false,
 	onQueryChange: noop,
+	onColumnsChange: noop,
 	query: {},
 	rowHeader: 0,
 	rows: [],

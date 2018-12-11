@@ -1,6 +1,7 @@
 # 1.3.0
 
 - Update `<Table />` to use header keys to denote which columns are shown
+- Add `onColumnsChange` property to `<Table />` which is called when columns are shown/hidden
 
 # 1.2.0
 
