@@ -10,29 +10,6 @@ import classnames from 'classnames';
 import { _x } from '@wordpress/i18n';
 
 class NumberFilter extends Component {
-	constructor( { config } ) {
-		super( ...arguments );
-
-		this.rules = config.rules || [
-			{
-				value: 'lessthan',
-				/* translators: Sentence fragment, logical "Less Than" (x < 10). Screenshot for context: https://cloudup.com/cZaDYBpzqsN */
-				label: _x( 'Less Than', 'number', 'wc-admin' ),
-			},
-			{
-				value: 'morethan',
-				/* translators: Sentence fragment, logical "More Than" (x > 10). Screenshot for context: https://cloudup.com/cZaDYBpzqsN */
-				label: _x( 'More Than', 'number', 'wc-admin' ),
-			},
-			{
-				value: 'between',
-				/* eslint-disable-next-line max-len */
-				/* translators: Sentence fragment, logical "Between" (1 < x < 10). Screenshot for context: https://cloudup.com/cZaDYBpzqsN */
-				label: _x( 'Between', 'number', 'wc-admin' ),
-			},
-		];
-	}
-
 	getLegend( filter, config ) {
 		const rule = find( config.rules, { value: filter.rule } ) || {};
 		const filterStr = '';
@@ -79,7 +56,11 @@ class NumberFilter extends Component {
 		};
 
 		return interpolateComponents( {
-			mixedString: '{{moreThan /}} and {{lessThan /}}',
+			mixedString: _x(
+				'{{moreThan /}} and {{lessThan /}}',
+				'Numerical range inputs arranged on a single line',
+				'wc-admin'
+			),
 			components: {
 				lessThan: (
 					<TextControl
@@ -102,7 +83,7 @@ class NumberFilter extends Component {
 	render() {
 		const { config, filter, onFilterChange, isEnglish } = this.props;
 		const { key, rule } = filter;
-		const { labels } = config;
+		const { labels, rules } = config;
 
 		const children = interpolateComponents( {
 			mixedString: labels.title,
@@ -111,7 +92,7 @@ class NumberFilter extends Component {
 					<Fragment>
 						<SelectControl
 							className="woocommerce-filters-advanced__rule"
-							options={ this.rules }
+							options={ rules }
 							value={ rule }
 							onChange={ partial( onFilterChange, key, 'rule' ) }
 							aria-label={ labels.rule }
