@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 == Changelog ==
 
 = 3.5.3 - 2019-01-xx =
+* Tweak - Allow limited html in woocommerce_rating_filter_count filter. #21904
 * Fix - Remove use of non-existing `WC_REST_Dev_Setting_Options_Controller` class. #22121
 * Fix - Fix edge case where `get_plugins` would not have the custom WooCommerce plugin headers if `get_plugins` was called early. #21669
 * Fix - Prevent PHP warning when deprecated user meta starts with uppercase. #21943
