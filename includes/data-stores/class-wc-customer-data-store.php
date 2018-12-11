@@ -158,7 +158,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		// Load meta but exclude deprecated props.
 		$user_meta = array_diff_key(
-			array_map( 'wc_flatten_meta_callback', get_user_meta( $customer_id ) ),
+			array_change_key_case( array_map( 'wc_flatten_meta_callback', get_user_meta( $customer_id ) ) ),
 			array_flip( array( 'country', 'state', 'postcode', 'city', 'address', 'address_2', 'default', 'location' ) )
 		);
 
