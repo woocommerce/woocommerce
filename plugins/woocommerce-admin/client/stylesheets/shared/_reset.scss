@@ -72,6 +72,10 @@
 	}
 }
 
+#adminmenuwrap {
+	z-index: 99992;
+}
+
 // Temporary fix for compability with the Jetpack masterbar
 // See https://github.com/Automattic/jetpack/issues/9608
 // !important rules overwrite some existing !important rules
