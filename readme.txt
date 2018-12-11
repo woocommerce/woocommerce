@@ -158,6 +158,9 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
+= 3.5.3 - 2019-01-xx =
+* Fix - Remove use of non-existing `WC_REST_Dev_Setting_Options_Controller` class. #22121
+
 = 3.5.2 - 2018-11-29 =
 * Enhancement - Added compatibility for Twenty Nineteen theme. #21970
 * Update - Prepare WooCommerce for PHP 7.3. #22009
