@@ -5,6 +5,10 @@
  * @package WooCommerce\Tests\API
  * @since 3.5.0
  */
+
+/**
+ * Class WC_Tests_API_Reports_Products_Stats
+ */
 class WC_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 
 	/**
