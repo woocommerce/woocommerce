@@ -10,9 +10,27 @@ import classnames from 'classnames';
 import { _x } from '@wordpress/i18n';
 
 class NumberFilter extends Component {
+	getBetweenString() {
+		return _x(
+			'{{moreThan /}} and {{lessThan /}}',
+			'Numerical range inputs arranged on a single line',
+			'wc-admin'
+		);
+	}
 	getLegend( filter, config ) {
 		const rule = find( config.rules, { value: filter.rule } ) || {};
-		const filterStr = '';
+		let filterStr = filter.value || '';
+
+		if ( 'between' === rule.value ) {
+			const [ moreThan, lessThan ] = filterStr.split( ',' );
+			filterStr = interpolateComponents( {
+				mixedString: this.getBetweenString(),
+				components: {
+					moreThan: <Fragment>{ moreThan }</Fragment>,
+					lessThan: <Fragment>{ lessThan }</Fragment>,
+				},
+			} );
+		}
 
 		return interpolateComponents( {
 			mixedString: config.labels.title,
@@ -57,11 +75,7 @@ class NumberFilter extends Component {
 		};
 
 		return interpolateComponents( {
-			mixedString: _x(
-				'{{moreThan /}} and {{lessThan /}}',
-				'Numerical range inputs arranged on a single line',
-				'wc-admin'
-			),
+			mixedString: this.getBetweenString(),
 			components: {
 				lessThan: (
 					<TextControl
@@ -91,17 +105,17 @@ class NumberFilter extends Component {
 		const children = interpolateComponents( {
 			mixedString: labels.title,
 			components: {
+				rule: (
+					<SelectControl
+						className="woocommerce-filters-advanced__rule"
+						options={ rules }
+						value={ rule }
+						onChange={ partial( onFilterChange, key, 'rule' ) }
+						aria-label={ labels.rule }
+					/>
+				),
 				filter: (
-					<Fragment>
-						<SelectControl
-							className="woocommerce-filters-advanced__rule"
-							options={ rules }
-							value={ rule }
-							onChange={ partial( onFilterChange, key, 'rule' ) }
-							aria-label={ labels.rule }
-						/>
-						<div>{ this.getFilterInput() }</div>
-					</Fragment>
+					<div>{ this.getFilterInput() }</div>
 				),
 			},
 		} );
