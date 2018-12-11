@@ -42,7 +42,6 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 		);
 
 		$data_store = new WC_Admin_Reports_Orders_Data_Store();
-		$data_store::update( $order );
 
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
