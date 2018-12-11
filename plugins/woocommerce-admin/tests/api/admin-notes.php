@@ -3,7 +3,10 @@
  * Admin notes REST API Test
  *
  * @package WooCommerce\Tests\API
- * @since 3.5.0
+ */
+
+/**
+ * Class WC_Tests_API_Admin_Notes
  */
 class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 
