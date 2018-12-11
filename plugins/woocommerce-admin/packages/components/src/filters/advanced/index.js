@@ -27,6 +27,7 @@ import Card from '../../card';
 import Link from '../../link';
 import SelectFilter from './select-filter';
 import SearchFilter from './search-filter';
+import NumberFilter from './number-filter';
 
 const matches = [
 	{ value: 'all', label: __( 'All', 'wc-admin' ) },
@@ -171,6 +172,15 @@ class AdvancedFilters extends Component {
 								) }
 								{ 'Search' === input.component && (
 									<SearchFilter
+										filter={ filter }
+										config={ config.filters[ key ] }
+										onFilterChange={ this.onFilterChange }
+										isEnglish={ isEnglish }
+										query={ query }
+									/>
+								) }
+								{ 'Number' === input.component && (
+									<NumberFilter
 										filter={ filter }
 										config={ config.filters[ key ] }
 										onFilterChange={ this.onFilterChange }
