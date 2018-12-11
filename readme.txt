@@ -160,6 +160,9 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 = 3.5.3 - 2019-01-xx =
 * Fix - Remove use of non-existing `WC_REST_Dev_Setting_Options_Controller` class. #22121
+* Fix - Fix edge case where `get_plugins` would not have the custom WooCommerce plugin headers if `get_plugins` was called early. #21669
+* Fix - Prevent PHP warning when deprecated user meta starts with uppercase. #21943
+* Fix - Fixed support for multiple query parameters translated to meta queries via REST API requests. #22108
 
 = 3.5.2 - 2018-11-29 =
 * Enhancement - Added compatibility for Twenty Nineteen theme. #21970
