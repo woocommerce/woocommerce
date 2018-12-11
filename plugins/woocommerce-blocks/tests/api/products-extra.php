@@ -1,8 +1,11 @@
 <?php
 /**
+ * @package WooCommerce\Tests\API
+ */
+
+/**
  * Product Controller "extras" REST API Test
  *
- * @package WooCommerce\Tests\API
  * @since 1.2.0
  */
 class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
@@ -22,7 +25,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 
-		$this->user = $this->factory->user->create(
+		$this->user        = $this->factory->user->create(
 			array(
 				'role' => 'author',
 			)
@@ -32,7 +35,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 				'role' => 'contributor',
 			)
 		);
-		$this->subscriber = $this->factory->user->create(
+		$this->subscriber  = $this->factory->user->create(
 			array(
 				'role' => 'subscriber',
 			)
@@ -60,7 +63,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		WC_Helper_Product::create_external_product();
 		sleep( 1 ); // So both products have different timestamps.
-		$product = WC_Helper_Product::create_simple_product();
+		$product  = WC_Helper_Product::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc-pb/v3/products' ) );
 		$products = $response->get_data();
 
@@ -108,10 +111,12 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 		sleep( 1 ); // So both products have different timestamps.
 		$product = WC_Helper_Product::create_simple_product( false ); // Prevent saving, since we save here.
 		// Customize the price, otherwise both are 10.
-		$product->set_props( array(
-			'regular_price' => 15,
-			'price'         => 15,
-		) );
+		$product->set_props(
+			array(
+				'regular_price' => 15,
+				'price'         => 15,
+			)
+		);
 		$product->save();
 
 		$request = new WP_REST_Request( 'GET', '/wc-pb/v3/products' );
@@ -123,7 +128,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $products ) );
 
-		// The external product should be first, then the simple product
+		// The external product should be first, then the simple product.
 		$this->assertEquals( 'Dummy External Product', $products[0]['name'] );
 		$this->assertEquals( 'Dummy Product', $products[1]['name'] );
 		$this->assertEquals( '10', $products[0]['price'] );
