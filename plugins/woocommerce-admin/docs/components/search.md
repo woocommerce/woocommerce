@@ -24,7 +24,7 @@ Function called when selected results change, passed result list.
 ### `type`
 
 - **Required**
-- Type: One of: 'products', 'product_cats', 'orders', 'customers', 'coupons', 'taxes', 'variations'
+- Type: One of: 'countries', 'coupons', 'customers', 'emails', 'orders', 'products', 'product_cats', 'taxes', 'usernames', 'variations'
 - Default: null
 
 The object type to be used in searching.
@@ -39,7 +39,7 @@ A placeholder for the search input.
 ### `selected`
 
 - Type: Array
-  - id: Number
+  - id: One of type: number, string
   - label: String
 - Default: `[]`
 

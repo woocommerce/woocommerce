@@ -1,30 +1,60 @@
 ```jsx
-import { DateRange } from '@woocommerce/components';
+import { DateRange, DatePicker } from '@woocommerce/components';
 import moment from 'moment';
 
 const dateFormat = 'MM/DD/YYYY';
 
 const MyDateRange =  withState( {
-	after: moment( '2018-09-10' ),
-	afterText: '09/10/2018',
-	before: moment( '2018-09-20' ),
-	beforeText: '09/20/2018',
-} )( ( { after, afterText, before, beforeText, setState } ) => {
-	function onUpdate( { after, afterText, before, beforeText } ) {
-		setState( { after, afterText, before, beforeText } );
+	after: null,
+	afterText: '',
+	before: null,
+	beforeText: '',
+	afterError: null,
+	beforeError: null,
+	focusedInput: 'startDate',
+} )( ( { after, afterText, before, beforeText, afterError, beforeError, focusedInput, setState } ) => {
+	function onRangeUpdate( update ) {
+		setState( update );
 	}
-
+	
+	function onDatePickerUpdate( { date, text, error } ) {
+		setState( { 
+			after: date, 
+			afterText: text,
+			afterError: error,
+		} );
+	}
+	
 	return (
-		<DateRange
-			after={ after }
-			afterText={ afterText }
-			before={ before }
-			beforeText={ beforeText }
-			onUpdate={ onUpdate }
-			shortDateFormat={ dateFormat }
-			focusedInput="startDate"
-			invalidDays="none"
-		/>
+		<div>
+			<H>Date Range Picker</H>
+			<Section component={ false }>
+				<DateRange
+					after={ after }
+					afterText={ afterText }
+					before={ before }
+					beforeText={ beforeText }
+					onUpdate={ onRangeUpdate }
+					shortDateFormat={ dateFormat }
+					focusedInput={ focusedInput }
+					invalidDays="future"
+				/>
+			</Section>
+	
+			<H>Date Picker</H>
+			<Section component={ false }>
+				<DatePicker
+					date={ after }
+					text={ afterText }
+					error={ afterError } 
+					onUpdate={ onDatePickerUpdate }
+					dateFormat={ dateFormat }
+					invalidDays="none"
+					onUpdate={ onDatePickerUpdate }
+					invalidDays="future"
+				/>
+			</Section>
+		</div>
 	)
 } );
 ```

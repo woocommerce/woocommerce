@@ -11,7 +11,7 @@ Props
 
 ### `id`
 
-- Type: Number
+- Type: One of type: number, string
 - Default: null
 
 The ID for this item, used in the remove function.

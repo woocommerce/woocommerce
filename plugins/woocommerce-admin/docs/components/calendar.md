@@ -1,3 +1,56 @@
+`DatePicker` (component)
+========================
+
+
+
+Props
+-----
+
+### `date`
+
+- Type: Object
+- Default: null
+
+A moment date object representing the selected date. `null` for no selection.
+
+### `text`
+
+- Type: String
+- Default: null
+
+The date in human-readable format. Displayed in the text input.
+
+### `error`
+
+- Type: String
+- Default: null
+
+A string error message, shown to the user.
+
+### `invalidDays`
+
+- Type: One of type: enum, func
+- Default: null
+
+(Coming Soon) Optionally invalidate certain days. `past`, `future`, `none`, or function are accepted.
+A function will be passed to react-dates' `isOutsideRange` prop
+
+### `onUpdate`
+
+- **Required**
+- Type: Function
+- Default: null
+
+A function called upon selection of a date or input change.
+
+### `dateFormat`
+
+- **Required**
+- Type: String
+- Default: null
+
+The date format in moment.js-style tokens.
+
 `DateRange` (component)
 =======================
 

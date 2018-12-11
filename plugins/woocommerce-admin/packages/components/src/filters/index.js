@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
  */
 import AdvancedFilters from './advanced';
 import CompareFilter from './compare';
-import DatePicker from './date';
+import DateRangeFilterPicker from './date';
 import FilterPicker from './filter';
 import { H, Section } from '../section';
 
@@ -64,7 +64,7 @@ class ReportFilters extends Component {
 				<Section component="div" className="woocommerce-filters">
 					<div className="woocommerce-filters__basic-filters">
 						{ showDatePicker && (
-							<DatePicker key={ JSON.stringify( query ) } query={ query } path={ path } />
+							<DateRangeFilterPicker key={ JSON.stringify( query ) } query={ query } path={ path } />
 						) }
 						{ filters.map( config => {
 							if ( config.showFilters( query ) ) {
