@@ -105,6 +105,24 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test getting notes of a certain type.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_warning_notes() {
+		wp_set_current_user( $this->user );
+
+		$request  = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params( array( 'type' => 'warning' ) );
+		$response = $this->server->dispatch( $request );
+		$notes    = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $notes ) );
+		$this->assertEquals( $notes[0]['title'], 'PHPUNIT_TEST_NOTE_2_TITLE' );
+	}
+
+	/**
 	 * Test getting lots of notes without permission. It should fail.
 	 *
 	 * @since 3.5.0

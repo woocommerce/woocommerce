@@ -109,6 +109,12 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 			'page'     => $page,
 		);
 
+		$type = isset( $request['type'] ) ? $request['type'] : '';
+		$type = sanitize_text_field( $type );
+		if ( ! empty( $type ) ) {
+			$args['type'] = $type;
+		}
+
 		$notes = WC_Admin_Notes::get_notes( 'edit', $args );
 
 		$data = array();

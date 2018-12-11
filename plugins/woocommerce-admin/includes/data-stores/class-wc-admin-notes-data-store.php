@@ -227,16 +227,37 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 			$page = 1;
 		}
 
-		$offset     = $per_page * ( $page - 1 );
-		$pagination = sprintf( ' LIMIT %d, %d', $offset, $per_page );
+		$offset = $per_page * ( $page - 1 );
 
-		return $wpdb->get_results(
-			$wpdb->prepare(
+		$allowed_types    = WC_Admin_Note::get_allowed_types();
+		$where_type_array = array();
+		if ( isset( $args['type'] ) ) {
+			$args_types = explode( ',', $args['type'] );
+			foreach ( (array) $args_types as $args_type ) {
+				$args_type = trim( $args_type );
+				if ( in_array( $args_type, $allowed_types, true ) ) {
+					$where_type_array[] = "'" . esc_sql( $args_type ) . "'";
+				}
+			}
+		}
+		$escaped_where_types = implode( ',', $where_type_array );
+
+		if ( empty( $escaped_where_types ) ) {
+			$query = $wpdb->prepare(
 				"SELECT note_id, title, content FROM {$wpdb->prefix}woocommerce_admin_notes ORDER BY note_id DESC LIMIT %d, %d",
 				$offset,
 				$per_page
-			)
-		);
+			);
+		} else {
+			$query = $wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				"SELECT note_id, title, content FROM {$wpdb->prefix}woocommerce_admin_notes WHERE type IN ($escaped_where_types) ORDER BY note_id DESC LIMIT %d, %d",
+				$offset,
+				$per_page
+			);
+		}
+
+		return $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -246,7 +267,6 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function get_notes_count() {
 		global $wpdb;
-		// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 		return $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_admin_notes" );
 	}
 
