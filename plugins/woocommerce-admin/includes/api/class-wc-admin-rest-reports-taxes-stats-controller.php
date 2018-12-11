@@ -46,7 +46,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 		$args['per_page'] = $request['per_page'];
 		$args['orderby']  = $request['orderby'];
 		$args['order']    = $request['order'];
-		$args['code']     = (array) $request['code'];
+		$args['taxes']    = (array) $request['taxes'];
 
 		return $args;
 	}
@@ -59,7 +59,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 	 */
 	public function get_items( $request ) {
 		$query_args  = $this->prepare_reports_query( $request );
-		$taxes_query = new WC_Reports_Orders_Stats_Query( $query_args ); // @todo change to correct class.
+		$taxes_query = new WC_Admin_Reports_Taxes_Stats_Query( $query_args );
 		$report_data = $taxes_query->get_data();
 
 		$out_data = array(
@@ -150,8 +150,14 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'orders_count' => array(
-				'description' => __( 'Amount of orders', 'wc-admin' ),
+			'order_count' => array(
+				'description' => __( 'Amount of orders.', 'wc-admin' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'tax_codes' => array(
+				'description' => __( 'Amount of tax codes.', 'wc-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
