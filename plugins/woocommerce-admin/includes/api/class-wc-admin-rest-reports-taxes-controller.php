@@ -32,6 +32,25 @@ class WC_Admin_REST_Reports_Taxes_Controller extends WC_REST_Reports_Controller 
 	protected $rest_base = 'reports/taxes';
 
 	/**
+	 * Maps query arguments from the REST request.
+	 *
+	 * @param array $request Request array.
+	 * @return array
+	 */
+	protected function prepare_reports_query( $request ) {
+		$args             = array();
+		$args['before']   = $request['before'];
+		$args['after']    = $request['after'];
+		$args['page']     = $request['page'];
+		$args['per_page'] = $request['per_page'];
+		$args['orderby']  = $request['orderby'];
+		$args['order']    = $request['order'];
+		$args['taxes']    = $request['taxes'];
+
+		return $args;
+	}
+
+	/**
 	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request Request data.
@@ -39,20 +58,17 @@ class WC_Admin_REST_Reports_Taxes_Controller extends WC_REST_Reports_Controller 
 	 */
 	public function get_items( $request ) {
 		$query_args  = $this->prepare_reports_query( $request );
-		$taxes_query = new WC_Reports_Orders_Stats_Query( $query_args ); // @todo change to correct class.
+		$taxes_query = new WC_Admin_Reports_Taxes_Query( $query_args );
 		$report_data = $taxes_query->get_data();
 
-		$out_data = array(
-			'totals'    => get_object_vars( $report_data->totals ),
-			'intervals' => array(),
-		);
+		$data = array();
 
-		foreach ( $report_data->intervals as $interval_data ) {
-			$item                    = $this->prepare_item_for_response( (object) $interval_data, $request );
-			$out_data['intervals'][] = $this->prepare_response_for_collection( $item );
+		foreach ( $report_data->data as $tax_data ) {
+			$item   = $this->prepare_item_for_response( (object) $tax_data, $request );
+			$data[] = $this->prepare_response_for_collection( $item );
 		}
 
-		$response = rest_ensure_response( $out_data );
+		$response = rest_ensure_response( $data );
 		$response->header( 'X-WP-Total', (int) $report_data->total );
 		$response->header( 'X-WP-TotalPages', (int) $report_data->pages );
 
@@ -84,14 +100,12 @@ class WC_Admin_REST_Reports_Taxes_Controller extends WC_REST_Reports_Controller 
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$data = get_object_vars( $report );
-
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
+		$report  = $this->add_additional_fields_to_object( $report, $request );
+		$report  = $this->filter_response_by_context( $report, $context );
 
 		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
+		$response = rest_ensure_response( $report );
 		$response->add_links( $this->prepare_links( $report ) );
 
 		/**
@@ -115,7 +129,7 @@ class WC_Admin_REST_Reports_Taxes_Controller extends WC_REST_Reports_Controller 
 	protected function prepare_links( $object ) {
 		$links = array(
 			'tax' => array(
-				'href' => rest_url( sprintf( '/%s/taxes/%d', $this->namespace, $object->category_id ) ),
+				'href' => rest_url( sprintf( '/%s/taxes/%d', $this->namespace, $object->tax_rate_id ) ),
 			),
 		);
 
@@ -135,6 +149,36 @@ class WC_Admin_REST_Reports_Taxes_Controller extends WC_REST_Reports_Controller 
 			'properties' => array(
 				'tax_rate_id'  => array(
 					'description' => __( 'Tax rate ID.', 'wc-admin' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'name'         => array(
+					'description' => __( 'Tax rate name.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'tax_rate'     => array(
+					'description' => __( 'Tax rate.', 'wc-admin' ),
+					'type'        => 'number',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'country'      => array(
+					'description' => __( 'Country.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'state'        => array(
+					'description' => __( 'State.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'priority'        => array(
+					'description' => __( 'Priority.', 'wc-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -216,33 +260,22 @@ class WC_Admin_REST_Reports_Taxes_Controller extends WC_REST_Reports_Controller 
 		$params['orderby']  = array(
 			'description'       => __( 'Sort collection by object attribute.', 'wc-admin' ),
 			'type'              => 'string',
-			'default'           => 'date',
+			'default'           => 'tax_rate_id',
 			'enum'              => array(
-				'date',
 				'name',
 				'tax_rate_id',
+				'rate',
+				'order_tax',
+				'total_tax',
+				'shipping_tax',
 				'orders_count',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['interval'] = array(
-			'description'       => __( 'Time interval to use for buckets in the returned data.', 'wc-admin' ),
-			'type'              => 'string',
-			'default'           => 'week',
-			'enum'              => array(
-				'hour',
-				'day',
-				'week',
-				'month',
-				'quarter',
-				'year',
-			),
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['code']     = array(
-			'description'       => __( 'Limit result set to items assigned one or more code.', 'wc-admin' ),
+		$params['taxes']    = array(
+			'description'       => __( 'Limit result set to items assigned one or more tax rates.', 'wc-admin' ),
 			'type'              => 'array',
-			'sanitize_callback' => 'wp_parse_slug_list',
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 			'items'             => array(
 				'type' => 'string',
