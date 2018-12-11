@@ -65,7 +65,7 @@
     "webpack-cli": "3.1.2"
   },
   "engines": {
-    "node": "10.14.1",
+    "node": "10.14.2",
     "npm": "6.5.0"
   },
   "dependencies": {
