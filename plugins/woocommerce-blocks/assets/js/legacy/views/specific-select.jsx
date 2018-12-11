@@ -307,6 +307,7 @@ class ProductSpecificSearchResultsDropdown extends Component {
 					product={ product }
 					addOrRemoveProductCallback={ addOrRemoveProductCallback }
 					selected={ selectedProducts.includes( product.id ) }
+					key={ product.id }
 				/>
 			);
 		}
