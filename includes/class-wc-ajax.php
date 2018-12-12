@@ -1940,7 +1940,7 @@ class WC_AJAX {
 					$reduced = $order_item->get_meta( '_reduced_stock', true );
 					if ( ! $reduced ) {
 						$reduced = $net_stock_change;
-					} elseif ( $net_stock_change <= 								$reduced ) {
+					} elseif ( $net_stock_change <= $reduced ) {
 					// Don't reduce if the item has already been reduced by at least this amount.
 						continue;
 					} else {
