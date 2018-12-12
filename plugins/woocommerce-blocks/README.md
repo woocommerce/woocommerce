@@ -20,7 +20,7 @@ Feature plugin for the Gutenberg Products block.
 
 The source code is in the `assets/js/products-block.jsx` file and the compiled code is in `build/products-block.js`.
 
-**Gutenberg Tutorial and Docs**: https://wordpress.org/gutenberg/handbook/blocks/
+**Gutenberg Tutorial and Docs**: https://wordpress.org/gutenberg/handbook/designers-developers/developers/tutorials/block-tutorial/introducing-attributes-and-editable-fields/
 
 **Using API in Gutenberg**: https://github.com/WordPress/gutenberg/tree/master/packages/api-fetch
 
