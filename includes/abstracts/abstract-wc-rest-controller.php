@@ -203,10 +203,12 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 				}
 
 				$_item = new WP_REST_Request( 'DELETE' );
-				$_item->set_query_params( array(
-					'id'    => $id,
-					'force' => true,
-				) );
+				$_item->set_query_params(
+					array(
+						'id'    => $id,
+						'force' => true,
+					)
+				);
 				$_response = $this->delete_item( $_item );
 
 				if ( is_wp_error( $_response ) ) {
@@ -350,7 +352,8 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 */
 	public function validate_setting_textarea_field( $value, $setting ) {
 		$value = is_null( $value ) ? '' : $value;
-		return wp_kses( trim( stripslashes( $value ) ),
+		return wp_kses(
+			trim( stripslashes( $value ) ),
 			array_merge(
 				array(
 					'iframe' => array(
