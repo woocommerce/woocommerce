@@ -4,10 +4,15 @@
  */
 import { Component, Fragment } from '@wordpress/element';
 import { SelectControl, TextControl } from '@wordpress/components';
-import { find, partial } from 'lodash';
+import { get, find, partial } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import classnames from 'classnames';
 import { _x } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import TextControlWithAffixes from '../../text-control-with-affixes';
 
 class NumberFilter extends Component {
 	getBetweenString() {
@@ -42,15 +47,24 @@ class NumberFilter extends Component {
 	}
 
 	getFilterInput() {
-		const { filter, onFilterChange } = this.props;
+		const { config, filter, onFilterChange } = this.props;
 		const { rule, value } = filter;
+		const inputType = get( config, [ 'input', 'type' ], 'number' );
 
 		if ( 'between' === rule ) {
 			return this.getRangeInput();
 		}
 
 		return (
-			<TextControl
+			'currency' === inputType
+			? <TextControlWithAffixes
+				prefix="$"
+				className="woocommerce-filters-advanced__input-numeric-range"
+				type="number"
+				value={ value }
+				onChange={ partial( onFilterChange, filter.key, 'value' ) }
+			/>
+			: <TextControl
 				className="woocommerce-filters-advanced__input-numeric-range"
 				type="number"
 				value={ value }
