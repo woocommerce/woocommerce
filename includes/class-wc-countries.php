@@ -473,7 +473,8 @@ class WC_Countries {
 	public function get_address_formats() {
 		if ( empty( $this->address_formats ) ) {
 			$this->address_formats = apply_filters(
-				'woocommerce_localisation_address_formats', array(
+				'woocommerce_localisation_address_formats',
+				array(
 					'default' => "{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}\n{postcode}\n{country}",
 					'AU'      => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {state} {postcode}\n{country}",
 					'AT'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
@@ -548,7 +549,7 @@ class WC_Countries {
 		$full_country = ( isset( $this->countries[ $country ] ) ) ? $this->countries[ $country ] : $country;
 
 		// Country is not needed if the same as base.
-		if ( $country === $this->get_base_country() && ! apply_filters( 'woocommerce_formatted_address_force_country_display', true ) ) {
+		if ( $country === $this->get_base_country() && ! apply_filters( 'woocommerce_formatted_address_force_country_display', false ) ) {
 			$format = str_replace( '{country}', '', $format );
 		}
 
@@ -557,8 +558,10 @@ class WC_Countries {
 
 		// Substitute address parts into the string.
 		$replace = array_map(
-			'esc_html', apply_filters(
-				'woocommerce_formatted_address_replacements', array(
+			'esc_html',
+			apply_filters(
+				'woocommerce_formatted_address_replacements',
+				array(
 					'{first_name}'       => $args['first_name'],
 					'{last_name}'        => $args['last_name'],
 					'{name}'             => $args['first_name'] . ' ' . $args['last_name'],
@@ -580,7 +583,8 @@ class WC_Countries {
 					'{state_code}'       => strtoupper( $state ),
 					'{postcode_upper}'   => strtoupper( $args['postcode'] ),
 					'{country_upper}'    => strtoupper( $full_country ),
-				), $args
+				),
+				$args
 			)
 		);
 
@@ -737,7 +741,8 @@ class WC_Countries {
 	public function get_country_locale() {
 		if ( empty( $this->locale ) ) {
 			$this->locale = apply_filters(
-				'woocommerce_get_country_locale', array(
+				'woocommerce_get_country_locale',
+				array(
 					'AE' => array(
 						'postcode' => array(
 							'required' => false,
@@ -750,6 +755,15 @@ class WC_Countries {
 					'AF' => array(
 						'state' => array(
 							'required' => false,
+						),
+					),
+					'AO' => array(
+						'postcode' => array(
+							'required' => false,
+							'hidden'   => true,
+						),
+						'state' => array(
+							'label' => __( 'Province', 'woocommerce' ),
 						),
 					),
 					'AT' => array(
@@ -1167,6 +1181,15 @@ class WC_Countries {
 						'state'    => array(
 							'label'    => __( 'County', 'woocommerce' ),
 							'required' => false,
+						),
+					),
+					'ST' => array(
+						'postcode' => array(
+							'required' => false,
+							'hidden'   => true,
+						),
+						'state'    => array(
+							'label' => __( 'District', 'woocommerce' ),
 						),
 					),
 					'VN' => array(

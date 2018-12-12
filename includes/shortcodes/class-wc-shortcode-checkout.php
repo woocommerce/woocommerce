@@ -84,8 +84,9 @@ class WC_Shortcode_Checkout {
 		// Pay for existing order.
 		if ( isset( $_GET['pay_for_order'], $_GET['key'] ) && $order_id ) { // WPCS: input var ok, CSRF ok.
 			try {
-				$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // WPCS: input var ok, CSRF ok.
-				$order     = wc_get_order( $order_id );
+				$order_key          = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // WPCS: input var ok, CSRF ok.
+				$order              = wc_get_order( $order_id );
+ 				$hold_stock_minutes = (int) get_option( 'woocommerce_hold_stock_minutes', 0 );
 
 				// Order or payment link is invalid.
 				if ( ! $order || $order->get_id() !== $order_id || $order->get_order_key() !== $order_key ) {
@@ -143,8 +144,13 @@ class WC_Shortcode_Checkout {
 								throw new Exception( sprintf( __( 'Sorry, "%s" is no longer in stock so this order cannot be paid for. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name() ) );
 							}
 
+							// We only need to check products managing stock, with a limited stock qty.
+							if ( ! $product->managing_stock() || $product->backorders_allowed() ) {
+								continue;
+							}
+
 							// Check stock based on all items in the cart and consider any held stock within pending orders.
-							$held_stock     = wc_get_held_stock_quantity( $product, $order->get_id() );
+							$held_stock     = ( $hold_stock_minutes > 0 ) ? wc_get_held_stock_quantity( $product, $order->get_id() ) : 0;
 							$required_stock = $quantities[ $product->get_stock_managed_by_id() ];
 
 							if ( $product->get_stock_quantity() < ( $held_stock + $required_stock ) ) {

@@ -83,17 +83,16 @@ class WC_Admin_Notices {
 	public static function reset_admin_notices() {
 		$simplify_options = get_option( 'woocommerce_simplify_commerce_settings', array() );
 		$location         = wc_get_base_location();
-		$shop_page        = 0 < wc_get_page_id( 'shop' ) ? get_permalink( wc_get_page_id( 'shop' ) ) : get_home_url();
 
 		if ( ! class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) && ! empty( $simplify_options['enabled'] ) && 'yes' === $simplify_options['enabled'] && in_array( $location['country'], apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) ), true ) ) {
-			WC_Admin_Notices::add_notice( 'simplify_commerce' );
+			self::add_notice( 'simplify_commerce' );
 		}
 
-		if ( ! is_ssl() || 'https' !== substr( $shop_page, 0, 5 ) ) {
-			WC_Admin_Notices::add_notice( 'no_secure_connection' );
+		if ( ! self::is_ssl() ) {
+			self::add_notice( 'no_secure_connection' );
 		}
 
-		WC_Admin_Notices::add_wootenberg_feature_plugin_notice();
+		self::add_wootenberg_feature_plugin_notice();
 		self::add_notice( 'template_files' );
 	}
 
@@ -119,7 +118,8 @@ class WC_Admin_Notices {
 	/**
 	 * See if a notice is being shown.
 	 *
-	 * @param  string $name Notice name.
+	 * @param string $name Notice name.
+	 *
 	 * @return boolean
 	 */
 	public static function has_notice( $name ) {
@@ -354,7 +354,7 @@ class WC_Admin_Notices {
 	 * Notice about secure connection.
 	 */
 	public static function secure_connection_notice() {
-		if ( get_user_meta( get_current_user_id(), 'dismissed_no_secure_connection_notice', true ) ) {
+		if ( self::is_ssl() || get_user_meta( get_current_user_id(), 'dismissed_no_secure_connection_notice', true ) ) {
 			return;
 		}
 
@@ -365,10 +365,10 @@ class WC_Admin_Notices {
 	 * If Gutenberg is active, tell people about the Products block feature plugin.
 	 *
 	 * @since 3.4.3
-	 * @todo Remove this notice and associated code once the feature plugin has been merged into core.
+	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
 	 */
 	public static function add_wootenberg_feature_plugin_notice() {
-		if ( is_plugin_active( 'gutenberg/gutenberg.php' ) && ! is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) {
+		if ( ( is_plugin_active( 'gutenberg/gutenberg.php' ) || version_compare( get_bloginfo( 'version' ), '5.0', '>=' ) ) && ! is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) {
 			self::add_notice( 'wootenberg' );
 		}
 	}
@@ -377,10 +377,10 @@ class WC_Admin_Notices {
 	 * Tell people about the Products block feature plugin when they activate Gutenberg.
 	 *
 	 * @since 3.4.3
-	 * @todo Remove this notice and associated code once the feature plugin has been merged into core.
+	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
 	 */
 	public static function add_wootenberg_feature_plugin_notice_on_gutenberg_activate() {
-		if ( ! is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) {
+		if ( ! is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) && version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			self::add_notice( 'wootenberg' );
 		}
 	}
@@ -396,6 +396,19 @@ class WC_Admin_Notices {
 
 		include dirname( __FILE__ ) . '/views/html-notice-wootenberg.php';
 	}
+
+	/**
+	 * Determine if the store is running SSL.
+	 *
+	 * @return bool Flag SSL enabled.
+	 * @since  3.5.1
+	 */
+	protected static function is_ssl() {
+		$shop_page = 0 < wc_get_page_id( 'shop' ) ? get_permalink( wc_get_page_id( 'shop' ) ) : get_home_url();
+
+		return ( is_ssl() && 'https' === substr( $shop_page, 0, 5 ) );
+	}
+
 }
 
 WC_Admin_Notices::init();

@@ -85,7 +85,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 */
 	public function apply_changes() {
 		if ( function_exists( 'array_replace' ) ) {
-			$this->data = array_replace( $this->data, $this->changes ); // phpcs:ignore PHPCompatibility.PHP.NewFunctions.array_replaceFound
+			$this->data = array_replace( $this->data, $this->changes ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.array_replaceFound
 		} else { // PHP 5.2 compatibility.
 			foreach ( $this->changes as $key => $change ) {
 				$this->data[ $key ] = $change;

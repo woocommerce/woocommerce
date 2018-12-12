@@ -171,7 +171,7 @@ abstract class WC_CSV_Exporter {
 	 */
 	public function send_headers() {
 		if ( function_exists( 'gc_enable' ) ) {
-			gc_enable(); // phpcs:ignore PHPCompatibility.PHP.NewFunctions.gc_enableFound
+			gc_enable(); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.gc_enableFound
 		}
 		if ( function_exists( 'apache_setenv' ) ) {
 			@apache_setenv( 'no-gzip', 1 ); // @codingStandardsIgnoreLine
@@ -379,7 +379,6 @@ abstract class WC_CSV_Exporter {
 		}
 
 		$use_mb = function_exists( 'mb_convert_encoding' );
-		$data   = (string) urldecode( $data );
 
 		if ( $use_mb ) {
 			$encoding = mb_detect_encoding( $data, 'UTF-8, ISO-8859-1', true );
