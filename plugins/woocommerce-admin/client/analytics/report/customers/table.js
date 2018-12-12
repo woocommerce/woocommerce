@@ -66,7 +66,7 @@ export default class CustomersReportTable extends Component {
 			{
 				label: __( 'AOV', 'wc-admin' ),
 				screenReaderLabel: __( 'Average Order Value', 'wc-admin' ),
-				key: 'average_order_value',
+				key: 'avg_order_value',
 				isNumeric: true,
 			},
 			{
@@ -98,7 +98,7 @@ export default class CustomersReportTable extends Component {
 
 		return customers.map( customer => {
 			const {
-				average_order_value,
+				avg_order_value,
 				billing,
 				date_last_active,
 				date_sign_up,
@@ -145,8 +145,8 @@ export default class CustomersReportTable extends Component {
 					value: getCurrencyFormatDecimal( total_spend ),
 				},
 				{
-					display: average_order_value,
-					value: getCurrencyFormatDecimal( average_order_value ),
+					display: formatCurrency( avg_order_value ),
+					value: getCurrencyFormatDecimal( avg_order_value ),
 				},
 				{
 					display: formatDate( formats.tableFormat, date_last_active ),
