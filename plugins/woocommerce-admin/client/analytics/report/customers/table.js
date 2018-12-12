@@ -99,18 +99,19 @@ export default class CustomersReportTable extends Component {
 		return customers.map( customer => {
 			const {
 				average_order_value,
-				id,
-				city,
-				country,
+				billing,
 				date_last_active,
 				date_sign_up,
 				email,
-				name,
+				first_name,
+				id,
+				last_name,
 				orders_count,
-				postal_code,
 				username,
 				total_spend,
 			} = customer;
+			const { postcode, city, country } = billing || {};
+			const name = `${ first_name } ${ last_name }`;
 
 			const customerNameLink = (
 				<Link href={ 'user-edit.php?user_id=' + id } type="wp-admin">
@@ -160,8 +161,8 @@ export default class CustomersReportTable extends Component {
 					value: city,
 				},
 				{
-					display: postal_code,
-					value: postal_code,
+					display: postcode,
+					value: postcode,
 				},
 			];
 		} );
@@ -174,6 +175,11 @@ export default class CustomersReportTable extends Component {
 			<ReportTable
 				compareBy="customers"
 				endpoint="customers"
+				extendItemsMethodNames={ {
+					load: 'getCustomers',
+					isError: 'isGetCustomersError',
+					isRequesting: 'isGetCustomersRequesting',
+				} }
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				itemIdField="id"

@@ -5,7 +5,7 @@
 import { applyFilters } from '@wordpress/hooks';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { get, orderBy } from 'lodash';
+import { first, get, orderBy } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -84,6 +84,15 @@ ReportTable.propTypes = {
 	 */
 	endpoint: PropTypes.string,
 	/**
+	 * Method names used to load more data for table items. If omitted, no call will
+	 * be made and only the data returned by the reports endpoint will be used.
+	 */
+	extendItemsMethodNames: PropTypes.shape( {
+		isError: PropTypes.string,
+		isRequesting: PropTypes.string,
+		load: PropTypes.string,
+	} ),
+	/**
 	 * A function that returns the headers object to build the table.
 	 */
 	getHeadersContent: PropTypes.func.isRequired,
@@ -122,6 +131,56 @@ ReportTable.defaultProps = {
 	tableQuery: {},
 };
 
+const extendTableData = ( select, props, queriedTableData ) => {
+	const { extendItemsMethodNames, itemIdField, query } = props;
+	const itemsData = queriedTableData.items.data;
+	if (
+		! Array.isArray( itemsData ) ||
+		! itemsData.length ||
+		! extendItemsMethodNames ||
+		! itemIdField
+	) {
+		return queriedTableData;
+	}
+
+	const {
+		[ extendItemsMethodNames.isError ]: isErrorMethod,
+		[ extendItemsMethodNames.isRequesting ]: isRequestingMethod,
+		[ extendItemsMethodNames.load ]: loadMethod,
+	} = select( 'wc-api' );
+	const extendQuery = {
+		include: itemsData.map( item => item[ itemIdField ] ).join( ',' ),
+		per_page: itemsData.length,
+		...query,
+	};
+	const extendedItems = loadMethod( extendQuery );
+	const isExtendedItemsRequesting = isRequestingMethod ? isRequestingMethod( extendQuery ) : false;
+	const isExtendedItemsError = isErrorMethod ? isErrorMethod( extendQuery ) : false;
+
+	const extendedItemsData = itemsData.map( item => {
+		const extendedItemData = first(
+			extendedItems.filter( extendedItem => item.id === extendedItem.id )
+		);
+		return {
+			...item,
+			...extendedItemData,
+		};
+	} );
+
+	const isRequesting = queriedTableData.isRequesting || isExtendedItemsRequesting;
+	const isError = queriedTableData.isError || isExtendedItemsError;
+
+	return {
+		...queriedTableData,
+		isRequesting,
+		isError,
+		items: {
+			...queriedTableData.items,
+			data: extendedItemsData,
+		},
+	};
+};
+
 export default compose(
 	withSelect( ( select, props ) => {
 		const { endpoint, getSummary, query, tableData, tableQuery } = props;
@@ -130,10 +189,11 @@ export default compose(
 			? getReportChartData( chartEndpoint, 'primary', query, select )
 			: {};
 		const queriedTableData = tableData || getReportTableData( endpoint, query, select, tableQuery );
+		const extendedTableData = extendTableData( select, props, queriedTableData );
 
 		return {
 			primaryData,
-			tableData: queriedTableData,
+			tableData: extendedTableData,
 		};
 	} )
 )( ReportTable );
