@@ -23,5 +23,6 @@
   { "component": "Summary", "render": "MySummaryList" },
   { "component": "Table" },
   { "component": "Tag" },
+  { "component": "TextControlWithAffixes" },
   { "component": "ViewMoreList" }
 ]
