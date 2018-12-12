@@ -161,6 +161,15 @@ class Table extends Component {
 										? sprintf( __( 'Sort by %s in ascending order', 'wc-admin' ), screenReaderLabel )
 										: sprintf( __( 'Sort by %s in descending order', 'wc-admin' ), screenReaderLabel );
 
+								const textLabel = (
+									<Fragment>
+										<span aria-hidden={ Boolean( screenReaderLabel ) }>{ label }</span>
+										{ screenReaderLabel && (
+											<span className="screen-reader-text">{ screenReaderLabel }</span>
+										) }
+									</Fragment>
+								);
+
 								return (
 									<th role="columnheader" scope="col" key={ i } { ...thProps }>
 										{ isSortable ? (
@@ -177,17 +186,14 @@ class Table extends Component {
 													onClick={ this.sortBy( key ) }
 													isDefault
 												>
-													<span aria-hidden={ Boolean( screenReaderLabel ) }>{ label }</span>
-													{ screenReaderLabel && (
-														<span className="screen-reader-text">{ screenReaderLabel }</span>
-													) }
+													{ textLabel }
 												</IconButton>
 												<span className="screen-reader-text" id={ labelId }>
 													{ iconLabel }
 												</span>
 											</Fragment>
 										) : (
-											label
+											textLabel
 										) }
 									</th>
 								);
