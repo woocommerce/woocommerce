@@ -101,7 +101,7 @@ function wc_is_webhook_valid_topic( $topic ) {
  * @return bool
  */
 function wc_is_webhook_valid_status( $status ) {
-	return in_array( $status, wc_get_webhook_statuses(), true );
+	return in_array( $status, array_keys( wc_get_webhook_statuses() ), true );
 }
 
 /**
