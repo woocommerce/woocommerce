@@ -4,6 +4,10 @@
  *
  * @package WooCommerce\Tests\API
  */
+
+/**
+ * Class WC_Tests_API_Reports_Coupons
+ */
 class WC_Tests_API_Reports_Coupons extends WC_REST_Unit_Test_Case {
 
 	/**

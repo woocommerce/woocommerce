@@ -5,6 +5,10 @@
  * @package WC Admin
  * @since x.x.0
  */
+
+/**
+ * Class WC_Tests_Reports_Interval_Stats
+ */
 class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 
 	/**

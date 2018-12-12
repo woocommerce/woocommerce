@@ -1,9 +1,12 @@
 <?php
-
 /**
  * Reports coupons tests.
  *
  * @package WooCommerce\Tests\Coupons
+ */
+
+/**
+ * Class WC_Tests_Reports_Coupons
  */
 class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 
