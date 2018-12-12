@@ -5,7 +5,7 @@
 import { first } from 'lodash';
 
 export function extendTableData( select, props, queriedTableData ) {
-	const { extendItemsMethodNames, itemIdField, query } = props;
+	const { extendItemsMethodNames, itemIdField } = props;
 	const itemsData = queriedTableData.items.data;
 	if (
 		! Array.isArray( itemsData ) ||
@@ -24,7 +24,6 @@ export function extendTableData( select, props, queriedTableData ) {
 	const extendQuery = {
 		include: itemsData.map( item => item[ itemIdField ] ).join( ',' ),
 		per_page: itemsData.length,
-		...query,
 	};
 	const extendedItems = loadMethod( extendQuery );
 	const isExtendedItemsRequesting = isRequestingMethod ? isRequestingMethod( extendQuery ) : false;
