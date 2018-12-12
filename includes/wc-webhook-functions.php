@@ -21,10 +21,14 @@ function wc_webhook_process_delivery( $webhook, $arg ) {
 	// user who triggered it.
 	if ( apply_filters( 'woocommerce_webhook_deliver_async', true, $webhook, $arg ) ) {
 		// Deliver in background.
-		WC()->queue()->add( 'woocommerce_deliver_webhook_async', array(
-			'webhook_id' => $webhook->get_id(),
-			'arg'        => $arg,
-		), 'woocommerce-webhooks' );
+		WC()->queue()->add(
+			'woocommerce_deliver_webhook_async',
+			array(
+				'webhook_id' => $webhook->get_id(),
+				'arg'        => $arg,
+			),
+			'woocommerce-webhooks'
+		);
 	} else {
 		// Deliver immediately.
 		$webhook->deliver( $arg );
@@ -90,17 +94,31 @@ function wc_is_webhook_valid_topic( $topic ) {
 }
 
 /**
+ * Check if given status is a valid webhook status.
+ *
+ * @since 3.5.3
+ * @param string $status Status to check.
+ * @return bool
+ */
+function wc_is_webhook_valid_status( $status ) {
+	return in_array( $status, wc_get_webhook_statuses(), true );
+}
+
+/**
  * Get Webhook statuses.
  *
  * @since  2.3.0
  * @return array
  */
 function wc_get_webhook_statuses() {
-	return apply_filters( 'woocommerce_webhook_statuses', array(
-		'active'   => __( 'Active', 'woocommerce' ),
-		'paused'   => __( 'Paused', 'woocommerce' ),
-		'disabled' => __( 'Disabled', 'woocommerce' ),
-	) );
+	return apply_filters(
+		'woocommerce_webhook_statuses',
+		array(
+			'active'   => __( 'Active', 'woocommerce' ),
+			'paused'   => __( 'Paused', 'woocommerce' ),
+			'disabled' => __( 'Disabled', 'woocommerce' ),
+		)
+	);
 }
 
 /**

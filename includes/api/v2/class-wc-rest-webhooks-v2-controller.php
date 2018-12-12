@@ -112,7 +112,7 @@ class WC_REST_Webhooks_V2_Controller extends WC_REST_Webhooks_V1_Controller {
 					'enum'        => array( 'active', 'paused', 'disabled' ),
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
-						'sanitize_callback' => 'wc_is_webhook_valid_topic',
+						'sanitize_callback' => 'wc_is_webhook_valid_status',
 					),
 				),
 				'topic'             => array(
