@@ -50,6 +50,33 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for test_wc_is_webhook_valid_status.
+	 *
+	 * @since 3.5.3
+	 */
+	public function data_provider_test_wc_is_webhook_valid_status() {
+		return array(
+			array( true, wc_is_webhook_valid_status( 'active' ) ),
+			array( true, wc_is_webhook_valid_status( 'paused' ) ),
+			array( true, wc_is_webhook_valid_status( 'disabled' ) ),
+			array( false, wc_is_webhook_valid_status( 'pending' ) ),
+		);
+	}
+
+	/**
+	 * Test wc_is_webhook_valid_status
+	 *
+	 * @dataProvider data_provider_test_wc_is_webhook_valid_status
+	 * @since 3.5.3
+	 * @param bool  $assert Expected outcome.
+	 * @param array $values Values to test.
+	 * @return void
+	 */
+	public function test_wc_is_webhook_valid_status( $assert, $values ) {
+		$this->assertEquals( $assert, $values );
+	}
+
+	/**
 	 * Test wc_get_webhook_statuses().
 	 *
 	 * @since 3.2.0
