@@ -4,16 +4,17 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
 import Gridicon from 'gridicons';
 import interpolateComponents from 'interpolate-components';
-import { noop } from 'lodash';
+import { noop, isNull } from 'lodash';
+import PropTypes from 'prop-types';
 
 /**
- * Internal dependencies
+ * WooCommerce dependencies
  */
-import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
-import ActivityHeader from '../activity-header';
 import {
+	EmptyContent,
 	Gravatar,
 	Link,
 	ProductImage,
@@ -22,61 +23,23 @@ import {
 	SplitButton,
 } from '@woocommerce/components';
 
-// TODO Pull proper data from the API
-const demoReviews = [
-	{
-		id: 1,
-		product_id: 1,
-		reviewer: 'Justin Shreve',
-		reviewer_email: 'justin@automattic.com',
-		rating: 3,
-		verified: true,
-		review:
-			'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque finibus hendrerit finibus.' +
-			'Integer tristique turpis a aliquam aliquam. Phasellus sapien lectus, sodales in sagittis nec, placerat a augue.',
-		status: 'pending',
-		date_created: '2018-07-10T02:49:00Z',
-	},
-];
-
-const demoProducts = [
-	{
-		id: 1,
-		name: 'WordPress Shirt',
-		permalink: '#',
-		images: [
-			{
-				id: 1,
-				src: 'https://cldup.com/5QyaPgyfFo-3000x3000.png',
-			},
-		],
-	},
-];
+/**
+ * Internal dependencies
+ */
+import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
+import ActivityHeader from '../activity-header';
+import { QUERY_DEFAULTS } from 'store/constants';
+import sanitizeHTML from 'lib/sanitize-html';
+import withSelect from 'wc-api/with-select';
 
 class ReviewsPanel extends Component {
-	constructor( props ) {
-		super( props );
-		this.state = {
-			loading: true,
-			reviews: [],
-		};
-	}
-
-	componentDidMount() {
-		this.interval = setTimeout( () => {
-			this.setState( {
-				loading: false,
-				reviews: demoReviews,
-			} );
-		}, 5000 );
-	}
-
-	componentWillUnmount() {
-		clearTimeout( this.interval );
-	}
-
 	renderReview( review ) {
-		const product = demoProducts[ 0 ];
+		const product =
+			( review && review._embedded && review._embedded.up && review._embedded.up[ 0 ] ) || null;
+
+		if ( isNull( product ) ) {
+			return null;
+		}
 
 		const title = interpolateComponents( {
 			mixedString: sprintf(
@@ -148,21 +111,46 @@ class ReviewsPanel extends Component {
 				icon={ icon }
 				actions={ cardActions() }
 			>
-				{ review.review }
+				<span dangerouslySetInnerHTML={ sanitizeHTML( review.review ) } />
 			</ActivityCard>
 		);
 	}
 
 	render() {
-		const { loading = true, reviews = [] } = this.state;
+		const { isError, isRequesting, reviews } = this.props;
+
+		if ( isError ) {
+			const title = __( 'There was an error getting your reviews. Please try again.', 'wc-admin' );
+			const actionLabel = __( 'Reload', 'wc-admin' );
+			const actionCallback = () => {
+				window.location.reload();
+			};
+
+			return (
+				<Fragment>
+					<EmptyContent
+						title={ title }
+						actionLabel={ actionLabel }
+						actionURL={ null }
+						actionCallback={ actionCallback }
+					/>
+				</Fragment>
+			);
+		}
+
 		return (
 			<Fragment>
 				<ActivityHeader title={ __( 'Reviews', 'wc-admin' ) } />
 				<Section>
-					{ loading ? (
-						<ActivityCardPlaceholder hasAction hasSubtitle hasDate lines={ 2 } />
+					{ isRequesting ? (
+						<ActivityCardPlaceholder
+							className="woocommerce-review-activity-card"
+							hasAction
+							hasDate
+							lines={ 2 }
+						/>
 					) : (
-						reviews.map( this.renderReview )
+						<Fragment>{ reviews.map( this.renderReview ) }</Fragment>
 					) }
 				</Section>
 			</Fragment>
@@ -170,4 +158,31 @@ class ReviewsPanel extends Component {
 	}
 }
 
-export default ReviewsPanel;
+ReviewsPanel.propTypes = {
+	reviews: PropTypes.array.isRequired,
+	isError: PropTypes.bool,
+	isRequesting: PropTypes.bool,
+};
+
+ReviewsPanel.defaultProps = {
+	reviews: [],
+	isError: false,
+	isRequesting: false,
+};
+
+export default compose(
+	withSelect( select => {
+		const { getReviews, isGetReviewsError, isGetReviewsRequesting } = select( 'wc-api' );
+		const reviewsQuery = {
+			page: 1,
+			per_page: QUERY_DEFAULTS.pageSize,
+			_embed: 1,
+		};
+
+		const reviews = getReviews( reviewsQuery );
+		const isError = isGetReviewsError( reviewsQuery );
+		const isRequesting = isGetReviewsRequesting( reviewsQuery );
+
+		return { reviews, isError, isRequesting };
+	} )
+)( ReviewsPanel );
