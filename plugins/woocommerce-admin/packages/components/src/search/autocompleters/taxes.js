@@ -12,8 +12,7 @@ import { stringifyQuery } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { computeSuggestionMatch } from './utils';
-import { getTaxCode } from 'analytics/report/taxes/utils';
+import { computeSuggestionMatch, getTaxCode } from './utils';
 
 /**
  * A tax completer.
