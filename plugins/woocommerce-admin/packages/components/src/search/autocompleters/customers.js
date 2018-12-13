@@ -13,6 +13,9 @@ import { stringifyQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { computeSuggestionMatch } from './utils';
+import { SWAGGERNAMESPACE } from 'store/constants';
+
+const getName = customer => customer.first_name + ' ' + customer.last_name;
 
 /**
  * A customer completer.
@@ -23,25 +26,35 @@ import { computeSuggestionMatch } from './utils';
 export default {
 	name: 'customers',
 	className: 'woocommerce-search__customers-result',
-	options( search ) {
+	async options( name ) {
 		let payload = '';
-		if ( search ) {
+		if ( name ) {
 			const query = {
-				search,
+				name,
 				per_page: 10,
 			};
 			payload = stringifyQuery( query );
 		}
-		return apiFetch( { path: `/wc/v3/customers${ payload }` } );
+		// TODO: Use wc endpoint when it's ready
+		const response = await fetch( SWAGGERNAMESPACE + 'reports/customers' + payload );
+		// const customers = await apiFetch( { path: `/wc/v3/reports/customers${ payload }` } );
+		const customers = await response.json();
+		const ids = customers.map( customer => customer.id );
+		// @TODO load customers names from WC endpoint
+		return ids.map( id => ( {
+			id,
+			first_name: 'Customer ' + id,
+			last_name: '',
+		} ) );
 	},
 	isDebounced: true,
 	getOptionKeywords( customer ) {
-		return [ customer.name ];
+		return [ getName( customer ) ];
 	},
 	getOptionLabel( customer, query ) {
-		const match = computeSuggestionMatch( customer.name, query ) || {};
+		const match = computeSuggestionMatch( getName( customer ), query ) || {};
 		return [
-			<span key="name" className="woocommerce-search__result-name" aria-label={ customer.name }>
+			<span key="name" className="woocommerce-search__result-name" aria-label={ getName( customer ) }>
 				{ match.suggestionBeforeMatch }
 				<strong className="components-form-token-field__suggestion-match">
 					{ match.suggestionMatch }
@@ -53,10 +66,9 @@ export default {
 	// This is slightly different than gutenberg/Autocomplete, we don't support different methods
 	// of replace/insertion, so we can just return the value.
 	getOptionCompletion( customer ) {
-		const value = {
+		return {
 			id: customer.id,
-			label: customer.name,
+			label: getName( customer ),
 		};
-		return value;
 	},
 };
