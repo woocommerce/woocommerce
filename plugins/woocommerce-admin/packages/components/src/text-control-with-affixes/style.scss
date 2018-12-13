@@ -1,7 +1,7 @@
 .text-control-with-affixes {
 	display: inline-flex;
 	flex-direction: row;
-    width: 100%;
+	width: 100%;
 
 	:nth-child(1) {
 		border-top-right-radius: 0;
@@ -15,13 +15,13 @@
 		border-bottom-right-radius: 4px;
 	}
 
-    input[type="email"],
-    input[type="password"],
-    input[type="url"],
-    input[type="text"],
-    input[type="number"] {
-        flex-grow: 1;
-        margin: 0;
+	input[type='email'],
+	input[type='password'],
+	input[type='url'],
+	input[type='text'],
+	input[type='number'] {
+		flex-grow: 1;
+		margin: 0;
 
 		&:disabled {
 			border-right-width: 0;
@@ -30,7 +30,7 @@
 				border-left: 1px solid $core-grey-light-500;
 			}
 		}
-    }
+	}
 }
 
 .text-control-with-affixes__prefix,
@@ -49,11 +49,11 @@
 .text-control-with-affixes__prefix {
 	border-right: none;
 
-	& + input[type="email"],
-	& + input[type="password"],
-	& + input[type="url"],
-	& + input[type="text"],
-	& + input[type="number"] {
+	& + input[type='email'],
+	& + input[type='password'],
+	& + input[type='url'],
+	& + input[type='text'],
+	& + input[type='number'] {
 		&:disabled {
 			border-left-color: $core-grey-light-500;
 			border-right-width: 1px;
