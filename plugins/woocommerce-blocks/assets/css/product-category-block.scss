@@ -9,6 +9,28 @@
 
 .wc-block-products-category {
 	overflow: hidden;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+
+	&.is-loading,
+	&.is-not-found,
+	&.cols-1 {
+		display: block;
+	}
+
+	.wc-product-preview {
+		flex: 1;
+		padding: $gap/2;
+	}
+
+	@for $i from 2 to 7 {
+		&.cols-#{$i} .wc-product-preview {
+			max-width: calc(#{ 100% / $i });
+			min-width: calc(#{ 100% / $i });
+			flex: 1;
+		}
+	}
 
 	&.components-placeholder {
 		padding: 2em 1em;
@@ -17,26 +39,10 @@
 	.editor-block-preview & {
 		min-width: 5em;
 
-		.wc-product-preview__title,
-		.wc-product-preview__price,
-		.wc-product-preview__add-to-cart {
-			font-size: 0.6em;
-		}
-
-		&.cols-2 {
-			min-width: 2 * 5em;
-		}
-		&.cols-3 {
-			min-width: 3 * 5em;
-		}
-		&.cols-4 {
-			min-width: 4 * 5em;
-		}
-		&.cols-5 {
-			min-width: 5 * 5em;
-		}
-		&.cols-6 {
-			min-width: 6 * 5em;
+		@for $i from 1 to 7 {
+			&.cols-#{$i} {
+				min-width: $i * 5em;
+			}
 		}
 
 		&.is-loading,

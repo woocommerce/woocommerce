@@ -1,5 +1,3 @@
 module.exports = {
-	plugins: [
-		require( 'autoprefixer' )( { grid: true } ),
-	]
-}
+	plugins: [ require( 'autoprefixer' )( { browsers: [ '>1%' ] } ) ],
+};
