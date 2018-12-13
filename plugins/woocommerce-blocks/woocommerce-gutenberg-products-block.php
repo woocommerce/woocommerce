@@ -51,13 +51,9 @@ function wgpb_plugins_notice() {
  * Register the Products block and its scripts.
  */
 function wgpb_register_products_block() {
-	register_block_type(
-		'woocommerce/products',
-		array(
-			'editor_script' => 'woocommerce-products-block-editor',
-			'editor_style'  => 'woocommerce-products-block-editor',
-		)
-	);
+	register_block_type( 'woocommerce/products' );
+	register_block_type( 'woocommerce/product-category' );
+	register_block_type( 'woocommerce/product-best-sellers' );
 }
 
 /**
@@ -78,8 +74,8 @@ function wgpb_extra_gutenberg_scripts() {
 	);
 
 	wp_register_script(
-		'woocommerce-products-category-block',
-		plugins_url( 'build/product-category-block.js', __FILE__ ),
+		'woocommerce-blocks',
+		plugins_url( 'build/blocks.js', __FILE__ ),
 		array(
 			'wp-api-fetch',
 			'wp-blocks',
@@ -92,7 +88,7 @@ function wgpb_extra_gutenberg_scripts() {
 			'wp-url',
 			'lodash',
 		),
-		defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? filemtime( plugin_dir_path( __FILE__ ) . '/build/product-category-block.js' ) : WGPB_VERSION,
+		defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? filemtime( plugin_dir_path( __FILE__ ) . '/build/blocks.js' ) : WGPB_VERSION,
 		true
 	);
 
@@ -104,22 +100,12 @@ function wgpb_extra_gutenberg_scripts() {
 		true
 	);
 
-	$product_block_data = array(
-		'min_columns'     => wc_get_theme_support( 'product_grid::min_columns', 1 ),
-		'max_columns'     => wc_get_theme_support( 'product_grid::max_columns', 6 ),
-		'default_columns' => wc_get_default_products_per_row(),
-		'min_rows'        => wc_get_theme_support( 'product_grid::min_rows', 1 ),
-		'max_rows'        => wc_get_theme_support( 'product_grid::max_rows', 6 ),
-		'default_rows'    => wc_get_default_product_rows_per_page(),
-	);
-	wp_localize_script( 'woocommerce-products-block-editor', 'wc_product_block_data', $product_block_data );
-
 	if ( function_exists( 'wp_set_script_translations' ) ) {
-		wp_set_script_translations( 'woocommerce-products-category-block', 'woo-gutenberg-products-block' );
+		wp_set_script_translations( 'woocommerce-blocks', 'woo-gutenberg-products-block' );
 	}
 
 	wp_enqueue_script( 'woocommerce-products-block-editor' );
-	wp_enqueue_script( 'woocommerce-products-category-block' );
+	wp_enqueue_script( 'woocommerce-blocks' );
 
 	wp_enqueue_style(
 		'woocommerce-products-block-editor',
@@ -129,11 +115,13 @@ function wgpb_extra_gutenberg_scripts() {
 	);
 
 	wp_enqueue_style(
-		'woocommerce-products-category-block',
-		plugins_url( 'build/product-category-block.css', __FILE__ ),
+		'woocommerce-blocks',
+		plugins_url( 'build/blocks.css', __FILE__ ),
 		array( 'wp-edit-blocks' ),
-		defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? filemtime( plugin_dir_path( __FILE__ ) . '/build/product-category-block.css' ) : WGPB_VERSION
+		defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? filemtime( plugin_dir_path( __FILE__ ) . '/build/blocks.css' ) : WGPB_VERSION
 	);
+
+	add_action( 'admin_print_footer_scripts', 'wgpb_print_script_settings', 1 );
 }
 
 /**
@@ -156,13 +144,23 @@ function wgpb_print_script_settings() {
 			'dow' => get_option( 'start_of_week', 0 ),
 		),
 	);
+
+	// Global settings used in each block.
+	$block_settings = array(
+		'min_columns'     => wc_get_theme_support( 'product_grid::min_columns', 1 ),
+		'max_columns'     => wc_get_theme_support( 'product_grid::max_columns', 6 ),
+		'default_columns' => wc_get_default_products_per_row(),
+		'min_rows'        => wc_get_theme_support( 'product_grid::min_rows', 1 ),
+		'max_rows'        => wc_get_theme_support( 'product_grid::max_rows', 6 ),
+		'default_rows'    => wc_get_default_product_rows_per_page(),
+	);
 	?>
 	<script type="text/javascript">
 		var wcSettings = <?php echo wp_json_encode( $settings ); ?>;
+		var wc_product_block_data = <?php echo wp_json_encode( $block_settings ); ?>;
 	</script>
 	<?php
 }
-add_action( 'admin_print_footer_scripts', 'wgpb_print_script_settings', 1 );
 
 /**
  * Register extra API routes with functionality specific for product blocks.
