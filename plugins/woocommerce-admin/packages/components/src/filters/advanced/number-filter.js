@@ -77,9 +77,17 @@ class NumberFilter extends Component {
 			return this.getRangeInput();
 		}
 
+		let inputValue = value;
+
+		if ( value && value.indexOf( ',' ) > -1 ) {
+			const [ moreThan, lessThan ] = value.split( ',' );
+			inputValue = 'lessthan' === rule ? lessThan : moreThan;
+			onFilterChange( filter.key, 'value', inputValue );
+		}
+
 		return this.getFormControl(
 			inputType,
-			value,
+			inputValue,
 			partial( onFilterChange, filter.key, 'value' )
 		);
 	}
