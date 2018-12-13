@@ -1,64 +1,69 @@
-Text Control With Affixes
-============================
+`TextControlWithAffixes` (component)
+====================================
 
-This component is essentially a wrapper (really a reimplementation) around the TextControl component that adds support for affixes, i.e. the ability to display a fixed part either at the beginning or at the end of the text input.
-
-
+This component is essentially a wrapper (really a reimplementation) around the
+TextControl component that adds support for affixes, i.e. the ability to display
+a fixed part either at the beginning or at the end of the text input.
 
 Props
 -----
 
-The set of props accepted by the component will be specified below.
-Props not included in this set will be applied to the input element.
-
 ### `label`
+
+- Type: String
+- Default: null
 
 If this property is added, a label will be generated using label property as the content.
 
-- Type: `String`
-
 ### `help`
+
+- Type: String
+- Default: null
 
 If this property is added, a help text will be generated using help property as the content.
 
-- Type: `String`
-
 ### `type`
+
+- Type: String
+- Default: `'text'`
 
 Type of the input element to render. Defaults to "text".
 
-- Type: `String`
-- Default: "text"
-
 ### `value`
+
+- **Required**
+- Type: String
+- Default: null
 
 The current value of the input.
 
-- **Required**
-- Type: `String`
-
 ### `className`
+
+- Type: String
+- Default: null
 
 The class that will be added with "components-base-control" to the classes of the wrapper div.
 If no className is passed only components-base-control is used.
 
-- Type: `String`
-
 ### `onChange`
+
+- **Required**
+- Type: Function
+- Default: null
 
 A function that receives the value of the input.
 
-- **Required**
-- Type: `function`
-
 ### `prefix`
+
+- Type: ReactNode
+- Default: null
 
 Markup to be inserted at the beginning of the input.
 
-- Type: ReactNode
-
 ### `suffix`
+
+- Type: ReactNode
+- Default: null
 
 Markup to be appended at the end of the input.
 
-- Type: ReactNode
