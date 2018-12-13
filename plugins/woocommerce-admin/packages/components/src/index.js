@@ -45,5 +45,6 @@ export { default as EmptyTable } from './table/empty';
 export { default as TablePlaceholder } from './table/placeholder';
 export { default as TableSummary } from './table/summary';
 export { default as Tag } from './tag';
+export { default as TextControlWithAffixes } from './text-control-with-affixes';
 export { default as useFilters } from './higher-order/use-filters';
 export { default as ViewMoreList } from './view-more-list';

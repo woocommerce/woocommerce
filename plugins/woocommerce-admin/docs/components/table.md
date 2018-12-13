@@ -65,6 +65,13 @@ It will display `TablePlaceholder` component instead of `Table` if that's the ca
 
 A function which returns a callback function to update the query string for a given `param`.
 
+### `onColumnsChange`
+
+- Type: Function
+- Default: `noop`
+
+A function which returns a callback function which is called upon the user changing the visiblity of columns.
+
 ### `downloadable`
 
 - Type: Boolean
