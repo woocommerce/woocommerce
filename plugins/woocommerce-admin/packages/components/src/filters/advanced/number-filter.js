@@ -22,6 +22,7 @@ class NumberFilter extends Component {
 			'wc-admin'
 		);
 	}
+
 	getLegend( filter, config ) {
 		const rule = find( config.rules, { value: filter.rule } ) || {};
 		let filterStr = filter.value || '';
@@ -46,7 +47,28 @@ class NumberFilter extends Component {
 		} );
 	}
 
-	getFilterInput() {
+	getFormControl( type, value, onChange ) {
+		const currencySymbol = get( wcSettings, [ 'currency', 'symbol' ] );
+
+		return (
+			'currency' === type
+			? <TextControlWithAffixes
+				prefix={ <span dangerouslySetInnerHTML={ { __html: currencySymbol } } /> }
+				className="woocommerce-filters-advanced__input-numeric-range"
+				type="number"
+				value={ value }
+				onChange={ onChange }
+			/>
+			: <TextControl
+				className="woocommerce-filters-advanced__input-numeric-range"
+				type="number"
+				value={ value }
+				onChange={ onChange }
+			/>
+		);
+	}
+
+	getFilterInputs() {
 		const { config, filter, onFilterChange } = this.props;
 		const { rule, value } = filter;
 		const inputType = get( config, [ 'input', 'type' ], 'number' );
@@ -55,26 +77,16 @@ class NumberFilter extends Component {
 			return this.getRangeInput();
 		}
 
-		return (
-			'currency' === inputType
-			? <TextControlWithAffixes
-				prefix="$"
-				className="woocommerce-filters-advanced__input-numeric-range"
-				type="number"
-				value={ value }
-				onChange={ partial( onFilterChange, filter.key, 'value' ) }
-			/>
-			: <TextControl
-				className="woocommerce-filters-advanced__input-numeric-range"
-				type="number"
-				value={ value }
-				onChange={ partial( onFilterChange, filter.key, 'value' ) }
-			/>
+		return this.getFormControl(
+			inputType,
+			value,
+			partial( onFilterChange, filter.key, 'value' )
 		);
 	}
 
 	getRangeInput() {
-		const { filter, onFilterChange } = this.props;
+		const { config, filter, onFilterChange } = this.props;
+		const inputType = get( config, [ 'input', 'type' ], 'number' );
 		const { value } = filter;
 		const [ moreThan, lessThan ] = ( value || '' ).split( ',' );
 
@@ -91,22 +103,8 @@ class NumberFilter extends Component {
 		return interpolateComponents( {
 			mixedString: this.getBetweenString(),
 			components: {
-				lessThan: (
-					<TextControl
-						className="woocommerce-filters-advanced__input-numeric-range"
-						type="number"
-						value={ lessThan }
-						onChange={ lessThanOnChange }
-					/>
-				),
-				moreThan: (
-					<TextControl
-						className="woocommerce-filters-advanced__input-numeric-range"
-						type="number"
-						value={ moreThan }
-						onChange={ moreThanOnChange }
-					/>
-				),
+				lessThan: this.getFormControl( inputType, lessThan, lessThanOnChange ),
+				moreThan: this.getFormControl( inputType, moreThan, moreThanOnChange ),
 			},
 		} );
 	}
@@ -129,7 +127,7 @@ class NumberFilter extends Component {
 					/>
 				),
 				filter: (
-					<div>{ this.getFilterInput() }</div>
+					<div>{ this.getFilterInputs() }</div>
 				),
 			},
 		} );
