@@ -29,22 +29,47 @@ class TextControlWithAffixes extends Component {
 
 		const id = `inspector-text-control-with-affixes-${ instanceId }`;
 		const onChangeValue = ( event ) => onChange( event.target.value );
+		const describedby = [];
+		if ( help ) {
+			describedby.push( `${ id }__help` );
+		}
+		if ( prefix ) {
+			describedby.push( `${ id }__prefix` );
+		}
+		if ( suffix ) {
+			describedby.push( `${ id }__suffix` );
+		}
 
 		return (
 			<BaseControl label={ label } id={ id } help={ help } className={ className }>
 				<div className="text-control-with-affixes">
-					{ prefix && <span className="text-control-with-affixes__prefix">{ prefix }</span> }
+					{ prefix && (
+						<span
+							id={ `${ id }__prefix` }
+							className="text-control-with-affixes__prefix"
+						>
+							{ prefix }
+						</span>
+					) }
 
-					<input className="components-text-control__input"
+					<input
+						className="components-text-control__input"
 						type={ type }
 						id={ id }
 						value={ value }
 						onChange={ onChangeValue }
-						aria-describedby={ !! help ? id + '__help' : undefined }
+						aria-describedby={ describedby.join( ' ' ) }
 						{ ...props }
 					/>
 
-					{ suffix && <span className="text-control-with-affixes__suffix">{ suffix }</span> }
+					{ suffix && (
+						<span
+							id={ `${ id }__suffix` }
+							className="text-control-with-affixes__suffix"
+						>
+							{ suffix }
+						</span>
+					) }
 				</div>
 			</BaseControl>
 		);
