@@ -30,7 +30,7 @@ const GutenbergBlocksConfig = {
 		// Legacy block
 		'products-block': './assets/js/legacy/products-block.jsx',
 		// New blocks
-		'product-category-block': './assets/js/product-category-block.js',
+		blocks: './assets/js/index.js',
 	},
 	output: {
 		path: path.resolve( __dirname, './build/' ),

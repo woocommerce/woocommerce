@@ -91,7 +91,6 @@ describe( 'getQuery', () => {
 			attributes.categories = [];
 			const query = getQuery( attributes );
 			expect( query ).toEqual( {
-				category: '',
 				orderby: 'date',
 				per_page: 12,
 				status: 'publish',

@@ -23,10 +23,10 @@ export default {
 	},
 
 	/**
-	 * How to order the products: 'date', 'popularity', 'price_asc', 'price_desc' 'rating', 'title'.
+	 * Product category, used to display only products in the given categories.
 	 */
-	orderby: {
-		type: 'string',
-		default: 'date',
+	categories: {
+		type: 'array',
+		default: [],
 	},
 };

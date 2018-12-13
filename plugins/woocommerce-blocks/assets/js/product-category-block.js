@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-import { Component, Fragment, RawHTML } from '@wordpress/element';
+import { Component, Fragment } from '@wordpress/element';
 import {
 	BlockAlignmentToolbar,
 	BlockControls,
@@ -21,25 +21,18 @@ import {
 	withSpokenMessages,
 } from '@wordpress/components';
 import PropTypes from 'prop-types';
-import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import '../css/product-category-block.scss';
 import getQuery from './utils/get-query';
-import getShortcode from './utils/get-shortcode';
 import ProductCategoryControl from './components/product-category-control';
 import ProductPreview from './components/product-preview';
-import sharedAttributes from './utils/shared-attributes';
-
-// Only enable wide and full alignments
-const validAlignments = [ 'wide', 'full' ];
 
 /**
  * Component to handle edit mode of "Products by Category".
  */
-export default class ProductByCategoryBlock extends Component {
+class ProductByCategoryBlock extends Component {
 	constructor() {
 		super( ...arguments );
 		this.state = {
@@ -67,9 +60,8 @@ export default class ProductByCategoryBlock extends Component {
 	}
 
 	getProducts() {
-		this.setState( { products: [], loaded: false } );
 		apiFetch( {
-			path: addQueryArgs( '/wc-pb/v3/products', getQuery( this.props.attributes ) ),
+			path: addQueryArgs( '/wc-pb/v3/products', getQuery( this.props.attributes, this.props.name ) ),
 		} )
 			.then( ( products ) => {
 				this.setState( { products, loaded: true } );
@@ -214,7 +206,7 @@ export default class ProductByCategoryBlock extends Component {
 		const { setAttributes } = this.props;
 		const { columns, align, editMode } = this.props.attributes;
 		const { loaded, products } = this.state;
-		const classes = [ 'wc-block-products-category' ];
+		const classes = [ 'wc-block-products-grid', 'wc-block-products-category' ];
 		if ( columns ) {
 			classes.push( `cols-${ columns }` );
 		}
@@ -230,7 +222,7 @@ export default class ProductByCategoryBlock extends Component {
 			<Fragment>
 				<BlockControls>
 					<BlockAlignmentToolbar
-						controls={ validAlignments }
+						controls={ [ 'wide', 'full' ] }
 						value={ align }
 						onChange={ ( nextAlign ) => setAttributes( { align: nextAlign } ) }
 					/>
@@ -285,6 +277,10 @@ ProductByCategoryBlock.propTypes = {
 	 */
 	attributes: PropTypes.object.isRequired,
 	/**
+	 * The register block name.
+	 */
+	name: PropTypes.string.isRequired,
+	/**
 	 * A callback to update attributes
 	 */
 	setAttributes: PropTypes.func.isRequired,
@@ -292,61 +288,6 @@ ProductByCategoryBlock.propTypes = {
 	debouncedSpeak: PropTypes.func.isRequired,
 };
 
-const WrappedProductByCategoryBlock = withSpokenMessages(
+export default withSpokenMessages(
 	ProductByCategoryBlock
 );
-
-/**
- * Register and run the "Products by Category" block.
- */
-registerBlockType( 'woocommerce/product-category', {
-	title: __( 'Products by Category', 'woo-gutenberg-products-block' ),
-	icon: 'category',
-	category: 'widgets',
-	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
-	description: __(
-		'Display a grid of products from your selected categories.',
-		'woo-gutenberg-products-block'
-	),
-	attributes: {
-		...sharedAttributes,
-		editMode: {
-			type: 'boolean',
-			default: true,
-		},
-		categories: {
-			type: 'array',
-			default: [],
-		},
-	},
-
-	getEditWrapperProps( attributes ) {
-		const { align } = attributes;
-		if ( -1 !== validAlignments.indexOf( align ) ) {
-			return { 'data-align': align };
-		}
-	},
-
-	/**
-	 * Renders and manages the block.
-	 */
-	edit( props ) {
-		return <WrappedProductByCategoryBlock { ...props } />;
-	},
-
-	/**
-	 * Save the block content in the post content. Block content is saved as a products shortcode.
-	 *
-	 * @return string
-	 */
-	save( props ) {
-		const {
-			align,
-		} = props.attributes; /* eslint-disable-line react/prop-types */
-		return (
-			<RawHTML className={ align ? `align${ align }` : '' }>
-				{ getShortcode( props ) }
-			</RawHTML>
-		);
-	},
-} );
