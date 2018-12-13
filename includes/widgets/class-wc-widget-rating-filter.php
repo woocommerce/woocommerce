@@ -121,7 +121,14 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			$class       = in_array( $rating, $rating_filter, true ) ? 'wc-layered-nav-rating chosen' : 'wc-layered-nav-rating';
 			$link        = apply_filters( 'woocommerce_rating_filter_link', $link_ratings ? add_query_arg( 'rating_filter', $link_ratings ) : remove_query_arg( 'rating_filter' ) );
 			$rating_html = wc_get_star_rating_html( $rating );
-			$count_html  = esc_html( apply_filters( 'woocommerce_rating_filter_count', "({$count})", $count, $rating ) );
+			$count_html  = wp_kses(
+				apply_filters( 'woocommerce_rating_filter_count', "({$count})", $count, $rating ),
+				array(
+					'em'     => array(),
+					'span'   => array(),
+					'strong' => array(),
+				)
+			);
 
 			printf( '<li class="%s"><a href="%s"><span class="star-rating">%s</span> %s</a></li>', esc_attr( $class ), esc_url( $link ), $rating_html, $count_html ); // WPCS: XSS ok.
 		}

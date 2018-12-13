@@ -549,9 +549,13 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		global $wpdb;
 
 		$children = $product->get_visible_children();
-		$format   = array_fill( 0, count( $children ), '%d' );
-		$query_in = '(' . implode( ',', $format ) . ')';
-		$prices   = $children ? array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN {$query_in}", $children ) ) : array(); // @codingStandardsIgnoreLine.
+		if ( $children ) {
+			$format   = array_fill( 0, count( $children ), '%d' );
+			$query_in = '(' . implode( ',', $format ) . ')';
+			$prices   = array_unique( $wpdb->get_col( $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN {$query_in}", $children ) ) ); // @codingStandardsIgnoreLine.
+		} else {
+			$prices = array();
+		}
 
 		delete_post_meta( $product->get_id(), '_price' );
 		delete_post_meta( $product->get_id(), '_sale_price' );
