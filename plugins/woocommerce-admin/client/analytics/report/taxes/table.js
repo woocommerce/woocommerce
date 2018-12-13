@@ -154,6 +154,7 @@ export default class TaxesReportTable extends Component {
 				itemIdField="tax_rate_id"
 				query={ query }
 				title={ __( 'Taxes', 'wc-admin' ) }
+				columnPrefsKey="taxes_report_columns"
 			/>
 		);
 	}

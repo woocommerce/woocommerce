@@ -179,6 +179,7 @@ export default class CustomersReportTable extends Component {
 				itemIdField="id"
 				query={ query }
 				title={ __( 'Registered Customers', 'wc-admin' ) }
+				columnPrefsKey="customers_report_columns"
 			/>
 		);
 	}

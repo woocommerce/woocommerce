@@ -250,6 +250,7 @@ class OrdersReportTable extends Component {
 				query={ query }
 				tableData={ tableData }
 				title={ __( 'Orders', 'wc-admin' ) }
+				columnPrefsKey="orders_report_columns"
 			/>
 		);
 	}

@@ -214,6 +214,7 @@ export default class ProductsReportTable extends Component {
 					extended_info: true,
 				} }
 				title={ __( 'Products', 'wc-admin' ) }
+				columnPrefsKey="products_report_columns"
 			/>
 		);
 	}

@@ -20,12 +20,9 @@ function readCurrentUserData( resourceNames, fetch ) {
 
 		return [
 			fetch( { path: url } )
-				.then( user => {
-					const userData = mapValues( user.woocommerce_meta, JSON.parse );
-					return { [ 'current-user-data' ]: { data: userData } };
-				} )
+				.then( userToUserDataResource )
 				.catch( error => {
-					return { [ 'current-user-data' ]: { error } };
+					return { [ 'current-user-data' ]: { error: String( error.message ) } };
 				} ),
 		];
 	}
@@ -34,7 +31,16 @@ function readCurrentUserData( resourceNames, fetch ) {
 
 function updateCurrentUserData( resourceNames, data, fetch ) {
 	const resourceName = 'current-user-data';
-	const userDataFields = [ 'revenue_report_columns' ];
+	const userDataFields = [
+		'categories_report_columns',
+		'coupons_report_columns',
+		'customers_report_columns',
+		'orders_report_columns',
+		'products_report_columns',
+		'revenue_report_columns',
+		'taxes_report_columns',
+		'variations_report_columns',
+	];
 
 	if ( resourceNames.includes( resourceName ) ) {
 		const url = '/wp/v2/users/me';
@@ -44,15 +50,23 @@ function updateCurrentUserData( resourceNames, data, fetch ) {
 
 		return [
 			fetch( { path: url, method: 'POST', data: user } )
-				.then( updatedUserData => {
-					return { [ resourceName ]: { data: updatedUserData.woocommerce_meta } };
-				} )
+				.then( userToUserDataResource )
 				.catch( error => {
 					return { [ resourceName ]: { error } };
 				} ),
 		];
 	}
 	return [];
+}
+
+function userToUserDataResource( user ) {
+	const userData = mapValues( user.woocommerce_meta, data => {
+		if ( ! data || 0 === data.length ) {
+			return '';
+		}
+		return JSON.parse( data );
+	} );
+	return { [ 'current-user-data' ]: { data: userData } };
 }
 
 export default {

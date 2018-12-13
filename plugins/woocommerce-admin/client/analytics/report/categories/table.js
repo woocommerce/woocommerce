@@ -136,6 +136,7 @@ export default class CategoriesReportTable extends Component {
 				itemIdField="category_id"
 				query={ query }
 				title={ __( 'Categories', 'wc-admin' ) }
+				columnPrefsKey="categories_report_columns"
 			/>
 		);
 	}

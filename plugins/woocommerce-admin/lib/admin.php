@@ -365,7 +365,14 @@ function wc_admin_register_user_data() {
  */
 function wc_admin_get_user_data_fields() {
 	$user_data_fields = array(
+		'categories_report_columns',
+		'coupons_report_columns',
+		'customers_report_columns',
+		'orders_report_columns',
+		'products_report_columns',
 		'revenue_report_columns',
+		'taxes_report_columns',
+		'variations_report_columns',
 	);
 
 	return apply_filters( 'wc_admin_get_user_data_fields', $user_data_fields );

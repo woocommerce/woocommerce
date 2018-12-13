@@ -42,10 +42,8 @@ class ReportTable extends Component {
 		}
 
 		return headers.map( header => {
-			if ( shownKeys.includes( header.key ) ) {
-				return header;
-			}
-			return { ...header, hiddenByDefault: true };
+			const hidden = ! shownKeys.includes( header.key );
+			return { ...header, hiddenByDefault: hidden };
 		} );
 	};
 
