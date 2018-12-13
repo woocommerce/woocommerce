@@ -1,49 +1,19 @@
 .text-control-with-affixes {
 	display: inline-flex;
-	flex-direction: column;
+	flex-direction: row;
     width: 100%;
 
-    :nth-child(1) {
-        border-top-left-radius: 4px;
-        border-top-right-radius: 4px;
-    }
+	:nth-child(1) {
+		border-top-right-radius: 0;
+		border-top-left-radius: 4px;
+		border-bottom-left-radius: 4px;
+	}
 
-    :nth-last-child(1) {
-        border-bottom-left-radius: 4px;
-        border-bottom-right-radius: 4px;
-    }
-    
-    &.no-wrap {
-        flex-direction: row;
-        
-        :nth-child(1) {
-            border-top-right-radius: 0;
-            border-top-left-radius: 4px;
-            border-bottom-left-radius: 4px;
-        }
-    
-        :nth-last-child(1) {
-            border-bottom-left-radius: 0;
-            border-top-right-radius: 4px;
-            border-bottom-right-radius: 4px;
-        }
-    }
-
-    @include breakpoint( ">400px" ) {
-        flex-direction: row;
-        
-        :nth-child(1) {
-            border-top-right-radius: 0;
-            border-top-left-radius: 4px;
-            border-bottom-left-radius: 4px;
-        }
-    
-        :nth-last-child(1) {
-            border-bottom-left-radius: 0;
-            border-top-right-radius: 4px;
-            border-bottom-right-radius: 4px;
-        }
-    }
+	:nth-last-child(1) {
+		border-bottom-left-radius: 0;
+		border-top-right-radius: 4px;
+		border-bottom-right-radius: 4px;
+	}
 
     input[type="email"],
     input[type="password"],
@@ -63,18 +33,10 @@
     }
 }
 
-@mixin no-prefix-wrap() {
-	border-right: none;
-}
-
-@mixin no-suffix-wrap() {
-	border-left: none;
-}
-
 .text-control-with-affixes__prefix,
 .text-control-with-affixes__suffix {
 	position: relative;
-	background: $core-grey-light-100;
+	background: $white;
 	border: 1px solid $core-grey-light-500;
 	color: $gray-text;
 	padding: 7px 14px;
@@ -85,19 +47,7 @@
 }
 
 .text-control-with-affixes__prefix {
-	@include breakpoint( "<400px" ) {
-		:not( .no-wrap ) > & {
-			border-bottom: none;
-		}
-	}
-
-	.no-wrap > & {
-		@include no-prefix-wrap();
-	}
-
-	@include breakpoint( ">400px" ) {
-		@include no-prefix-wrap();
-	}
+	border-right: none;
 
 	& + input[type="email"],
 	& + input[type="password"],
@@ -112,17 +62,5 @@
 }
 
 .text-control-with-affixes__suffix {
-	@include breakpoint( "<400px" ) {
-		:not( .no-wrap ) > & {
-			border-top: none;
-		}
-	}
-
-	.no-wrap > & {
-		@include no-suffix-wrap();
-	}
-
-	@include breakpoint( ">400px" ) {
-		@include no-suffix-wrap();
-    }
+	border-left: none;
 }

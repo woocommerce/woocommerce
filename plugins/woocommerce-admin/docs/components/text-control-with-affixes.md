@@ -62,10 +62,3 @@ Markup to be inserted at the beginning of the input.
 Markup to be appended at the end of the input.
 
 - Type: ReactNode
-
-### `noWrap`
-
-A flag that prevents the prefix and suffix from wrapping when the component is displayed on small viewports. This basically disables the corresponding breakpoint.
-
-- Type: Boolean
-- Default: null
