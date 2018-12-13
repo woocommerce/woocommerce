@@ -140,7 +140,7 @@ class Table extends Component {
 						<tr>
 							{ headers.map( ( header, i ) => {
 								const { cellClassName, isLeftAligned, isSortable, isNumeric, key, label, screenReaderLabel } = header;
-								const labelId = `header-${ instanceId } -${ i }`;
+								const labelId = `header-${ instanceId }-${ i }`;
 								const thProps = {
 									className: classnames( 'woocommerce-table__header', cellClassName, {
 										'is-left-aligned': isLeftAligned,
