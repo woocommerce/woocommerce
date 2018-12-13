@@ -53,13 +53,6 @@
         flex-grow: 1;
         margin: 0;
 
-        &:focus {
-			// Fixes the right border of the box shadow displayed when this input element is focused which appears as
-			// cut off when this input has a suffix, or is stuck to another element that has a higher stacking order
-			// (fix found at http://stackoverflow.com/a/24728957)
-			transform: scale( 1 );
-		}
-
 		&:disabled {
 			border-right-width: 0;
 
