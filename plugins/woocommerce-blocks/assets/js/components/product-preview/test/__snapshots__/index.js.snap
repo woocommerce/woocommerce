@@ -22,9 +22,13 @@ exports[`ProductPreview should render a single product preview with an image 1`]
     }
   />
   <span
-    className="wc-product-preview__add-to-cart"
+    className="wp-block-button"
   >
-    Add to cart
+    <span
+      className="wc-product-preview__add-to-cart wp-block-button__link"
+    >
+      Add to cart
+    </span>
   </span>
 </div>
 `;
@@ -47,9 +51,13 @@ exports[`ProductPreview should render a single product preview without an image 
     }
   />
   <span
-    className="wc-product-preview__add-to-cart"
+    className="wp-block-button"
   >
-    Add to cart
+    <span
+      className="wc-product-preview__add-to-cart wp-block-button__link"
+    >
+      Add to cart
+    </span>
   </span>
 </div>
 `;
