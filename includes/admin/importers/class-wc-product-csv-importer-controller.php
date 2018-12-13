@@ -114,6 +114,7 @@ class WC_Product_CSV_Importer_Controller {
 			'woocommerce_csv_product_import_valid_filetypes',
 			array(
 				'csv' => 'text/csv',
+				'csv' => 'text/plain',
 				'txt' => 'text/plain',
 			)
 		);
