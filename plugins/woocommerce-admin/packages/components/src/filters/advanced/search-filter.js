@@ -30,11 +30,11 @@ class SearchFilter extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { query } = this.props;
-		const { filter, config, query: prevQuery } = prevProps;
+		const { config, filter, query } = this.props;
+		const { filter: prevFilter } = prevProps;
 
-		if ( filter.value.length && ! isEqual( prevQuery, query ) ) {
-			config.input.getLabels( filter.value, prevQuery ).then( this.updateLabels );
+		if ( filter.value.length && ! isEqual( prevFilter, filter ) ) {
+			config.input.getLabels( filter.value, query ).then( this.updateLabels );
 		}
 	}
 

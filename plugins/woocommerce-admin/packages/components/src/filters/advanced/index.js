@@ -5,7 +5,7 @@
 import { __ } from '@wordpress/i18n';
 import { Component, createRef } from '@wordpress/element';
 import { SelectControl, Button, Dropdown, IconButton } from '@wordpress/components';
-import { partial, findIndex, difference } from 'lodash';
+import { partial, findIndex, difference, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import Gridicon from 'gridicons';
 import interpolateComponents from 'interpolate-components';
@@ -55,11 +55,17 @@ class AdvancedFilters extends Component {
 		this.getUpdateHref = this.getUpdateHref.bind( this );
 	}
 
-	static getDerivedStateFromProps( props ) {
-		const { query, config } = props;
-		return {
-			activeFilters: getActiveFiltersFromQuery( query, config.filters ),
-		};
+	componentDidUpdate( prevProps ) {
+		const { config, query } = this.props;
+		const { query: prevQuery } = prevProps;
+
+		if ( ! isEqual( prevQuery, query ) ) {
+			/* eslint-disable react/no-did-update-set-state */
+			this.setState( {
+				activeFilters: getActiveFiltersFromQuery( query, config.filters ),
+			} );
+			/* eslint-enable react/no-did-update-set-state */
+		}
 	}
 
 	onMatchChange( match ) {
