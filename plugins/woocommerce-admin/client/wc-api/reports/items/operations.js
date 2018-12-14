@@ -28,6 +28,7 @@ const typeEndpointMap = {
 	'report-items-query-taxes': 'taxes',
 	'report-items-query-variations': 'variations',
 	'report-items-query-customers': 'customers',
+	'report-items-query-stock': 'stock',
 };
 
 function read( resourceNames, fetch = apiFetch ) {

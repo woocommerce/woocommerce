@@ -24,6 +24,7 @@ import RevenueReport from './revenue';
 import CategoriesReport from './categories';
 import CouponsReport from './coupons';
 import TaxesReport from './taxes';
+import StockReport from './stock';
 import CustomersReport from './customers';
 
 const REPORTS_FILTER = 'woocommerce-reports-list';
@@ -59,6 +60,11 @@ const getReports = () => {
 			report: 'taxes',
 			title: __( 'Taxes', 'wc-admin' ),
 			component: TaxesReport,
+		},
+		{
+			report: 'stock',
+			title: __( 'Stock', 'wc-admin' ),
+			component: StockReport,
 		},
 		{
 			report: 'customers',

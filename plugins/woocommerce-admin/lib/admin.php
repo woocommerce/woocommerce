@@ -135,6 +135,14 @@ function wc_admin_register_pages() {
 
 	wc_admin_register_page(
 		array(
+			'title'  => __( 'Stock', 'wc-admin' ),
+			'parent' => '/analytics/revenue',
+			'path'   => '/analytics/stock',
+		)
+	);
+
+	wc_admin_register_page(
+		array(
 			'title'  => __( 'Customers', 'wc-admin' ),
 			'parent' => '/analytics/revenue',
 			'path'   => '/analytics/customers',
