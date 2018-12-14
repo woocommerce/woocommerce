@@ -235,6 +235,7 @@ class TableCard extends Component {
 			rowHeader,
 			rowsPerPage,
 			searchBy,
+			searchParam,
 			summary,
 			title,
 			totalRows,
@@ -280,6 +281,7 @@ class TableCard extends Component {
 							placeholder={ labels.placeholder || __( 'Search by item name', 'wc-admin' ) }
 							type={ compareBy || searchBy }
 							onChange={ this.onSearch }
+							selected={ searchParam && getIdsFromQuery( query[ searchParam ] ).map( id => ( { id } ) ) }
 						/>
 					),
 					( downloadable || onClickDownload ) && (

@@ -83,11 +83,20 @@ class Search extends Component {
 		}
 	}
 
+	shouldRenderTags() {
+		const { selected } = this.props;
+		return selected.some( item => Boolean( item.label ) );
+	}
+
 	renderTags() {
 		const { selected } = this.props;
-		return selected.length ? (
+
+		return this.shouldRenderTags() ? (
 			<div className="woocommerce-search__token-list">
 				{ selected.map( ( item, i ) => {
+					if ( ! item.label ) {
+						return null;
+					}
 					const screenReaderLabel = sprintf(
 						__( '%1$s (%2$s of %3$s)', 'wc-admin' ),
 						item.label,
@@ -158,7 +167,7 @@ class Search extends Component {
 											value.length ) + 1
 									}
 									value={ value }
-									placeholder={ ( selected.length === 0 && placeholder ) || '' }
+									placeholder={ ( ! this.shouldRenderTags() && placeholder ) || '' }
 									className="woocommerce-search__inline-input"
 									onChange={ this.updateSearch( onChange ) }
 									aria-owns={ listBoxId }
@@ -166,7 +175,7 @@ class Search extends Component {
 									onFocus={ this.onFocus }
 									onBlur={ this.onBlur }
 									aria-describedby={
-										selected.length ? `search-inline-input-${ instanceId }` : null
+										this.shouldRenderTags() ? `search-inline-input-${ instanceId }` : null
 									}
 									{ ...aria }
 								/>
@@ -221,12 +230,14 @@ Search.propTypes = {
 	 */
 	placeholder: PropTypes.string,
 	/**
-	 * An array of objects describing selected values.
+	 * An array of objects describing selected values. If the label of the selected
+	 * value is ommitted, the Tag of that value will not be rendered inside the
+	 * search box.
 	 */
 	selected: PropTypes.arrayOf(
 		PropTypes.shape( {
 			id: PropTypes.number.isRequired,
-			label: PropTypes.string.isRequired,
+			label: PropTypes.string,
 		} )
 	),
 	/**
