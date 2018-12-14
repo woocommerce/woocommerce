@@ -43,7 +43,13 @@ add_action( 'woocommerce_loaded', 'wgpb_initialize' );
  */
 function wgpb_plugins_notice() {
 	echo '<div class="error"><p>';
-	esc_html_e( 'WooCommerce Product Blocks development mode requires files to be built. From the plugin directory, run <code>npm install</code> to install dependencies, <code>npm run build</code> to build the files or <code>npm start</code> to build the files and watch for changes.', 'woo-gutenberg-products-block' );
+	printf(
+		/* Translators: %1$s is the install command, %2$s is the build command, %3$s is the watch command. */
+		esc_html__( 'WooCommerce Blocks development mode requires files to be built. From the plugin directory, run %1$s to install dependencies, %2$s to build the files or %3$s to build the files and watch for changes.', 'woo-gutenberg-products-block' ),
+		'<code>npm install</code>',
+		'<code>npm run build</code>',
+		'<code>npm start</code>'
+	);
 	echo '</p></div>';
 }
 
