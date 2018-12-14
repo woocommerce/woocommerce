@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { __, _x } from '@wordpress/i18n';
+import { decodeEntities } from '@wordpress/html-entities';
 import { getRequestByIdString } from '../../../lib/async-requests';
 import { NAMESPACE } from '../../../store/constants';
 
@@ -30,7 +31,7 @@ export const advancedFilters = {
 		name: {
 			labels: {
 				add: __( 'Name', 'wc-admin' ),
-				placeholder: __( 'Search customer name', 'wc-admin' ),
+				placeholder: __( 'Search', 'wc-admin' ),
 				remove: __( 'Remove customer name filter', 'wc-admin' ),
 				rule: __( 'Select a customer name filter match', 'wc-admin' ),
 				/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
@@ -57,6 +58,47 @@ export const advancedFilters = {
 					id: product.id,
 					label: product.name,
 				} ) ),
+			},
+		},
+		country: {
+			labels: {
+				add: __( 'Country', 'wc-admin' ),
+				placeholder: __( 'Search', 'wc-admin' ),
+				remove: __( 'Remove country filter', 'wc-admin' ),
+				rule: __( 'Select a country filter match', 'wc-admin' ),
+				/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
+				title: __( 'Country {{rule /}} {{filter /}}', 'wc-admin' ),
+				filter: __( 'Select country', 'wc-admin' ),
+			},
+			rules: [
+				{
+					value: 'includes',
+					/* translators: Sentence fragment, logical, "Includes" refers to countries including a given country or countries. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'Includes', 'countries', 'wc-admin' ),
+				},
+				{
+					value: 'excludes',
+					/* translators: Sentence fragment, logical, "Excludes" refers to countries excluding a given country or countries. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'Excludes', 'countries', 'wc-admin' ),
+				},
+			],
+			input: {
+				component: 'Search',
+				type: 'countries',
+				getLabels: async value => {
+					const countries =
+						( wcSettings.dataEndpoints && wcSettings.dataEndpoints.countries ) || [];
+
+					const allLabels = countries.map( country => ( {
+						id: country.code,
+						label: decodeEntities( country.name ),
+					} ) );
+
+					const labels = value.split( ',' );
+					return await allLabels.filter( label => {
+						return labels.includes( label.id );
+					} );
+				},
 			},
 		},
 	},

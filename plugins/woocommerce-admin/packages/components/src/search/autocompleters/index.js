@@ -2,6 +2,7 @@
 /**
  * Export all autocompleters
  */
+export { default as countries } from './countries';
 export { default as coupons } from './coupons';
 export { default as customers } from './customers';
 export { default as product } from './product';

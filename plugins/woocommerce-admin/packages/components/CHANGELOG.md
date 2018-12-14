@@ -2,6 +2,7 @@
 
 - Update `<Table />` to use header keys to denote which columns are shown
 - Add `onColumnsChange` property to `<Table />` which is called when columns are shown/hidden
+- Add country autocompleter to search component
 
 # 1.2.0
 
