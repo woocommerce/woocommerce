@@ -4,7 +4,7 @@
  */
 import { Component } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
-import { find, partial } from 'lodash';
+import { find, isEqual, partial } from 'lodash';
 import PropTypes from 'prop-types';
 import interpolateComponents from 'interpolate-components';
 import classnames from 'classnames';
@@ -29,14 +29,12 @@ class SearchFilter extends Component {
 		}
 	}
 
-	// Given that `getLabels` is async, we can't use `getDerivedStateFromProps` here.
-	// `componentDidUpdate` will trigger an extra render once the labels are loaded,
-	// but that's a small trade-off.
-	componentDidUpdate( props ) {
-		const { filter, config, query } = props;
+	componentDidUpdate( prevProps ) {
+		const { query } = this.props;
+		const { filter, config, query: prevQuery } = prevProps;
 
-		if ( filter.value.length ) {
-			config.input.getLabels( filter.value, query ).then( this.updateLabels );
+		if ( filter.value.length && ! isEqual( prevQuery, query ) ) {
+			config.input.getLabels( filter.value, prevQuery ).then( this.updateLabels );
 		}
 	}
 
