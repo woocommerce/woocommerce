@@ -50,6 +50,19 @@ function wc_admin_plugins_notice() {
 }
 
 /**
+ * Notify users that the plugin needs to be built
+ */
+function wc_admin_build_notice() {
+	$message_one = __( 'You have installed a development version of WooCommerce Admin which requires files to be built. From the plugin directory, run <code>npm install</code> to install dependencies, <code>npm run build</code> to build the files.', 'wc-admin' );
+	$message_two = sprintf(
+		/* translators: 1: URL of GitHub Repository build page */
+		__( 'Or you can download a pre-built version of the plugin by visiting <a href="%1$s">the releases page in the repository</a>.', 'wc-admin' ),
+		'https://github.com/woocommerce/wc-admin/releases'
+	);
+	printf( '<div class="error"><p>%s %s</p></div>', $message_one, $message_two ); /* WPCS: xss ok. */
+}
+
+/**
  * Returns true if all dependencies for the wc-admin plugin are loaded.
  *
  * @return bool
@@ -65,6 +78,15 @@ function dependencies_satisfied() {
 	$gutenberg_plugin_active      = defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' );
 
 	return $wordpress_includes_gutenberg || $gutenberg_plugin_active;
+}
+
+/**
+ * Returns true if build file exists.
+ *
+ * @return bool
+ */
+function wc_admin_build_file_exists() {
+	return file_exists( plugin_dir_path( __FILE__ ) . '/dist/app/index.js' );
 }
 
 /**
@@ -123,7 +145,7 @@ function wc_admin_init() {
 	}
 
 	// Only create/update tables on init if WP_DEBUG is true.
-	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG && wc_admin_build_file_exists() ) {
 		WC_Admin_Api_Init::create_db_tables();
 	}
 }
@@ -144,16 +166,22 @@ function wc_admin_plugins_loaded() {
 	// Some common utilities.
 	require_once dirname( __FILE__ ) . '/lib/common.php';
 
+	// Admin note providers.
+	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-new-sales-record.php';
+	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-settings-notes.php';
+	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-woo-subscriptions-notes.php';
+
+	// Verify we have a proper build.
+	if ( ! wc_admin_build_file_exists() ) {
+		add_action( 'admin_notices', 'wc_admin_build_notice' );
+		return;
+	}
+
 	// Register script files.
 	require_once dirname( __FILE__ ) . '/lib/client-assets.php';
 
 	// Create the Admin pages.
 	require_once dirname( __FILE__ ) . '/lib/admin.php';
-
-	// Admin note providers.
-	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-new-sales-record.php';
-	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-settings-notes.php';
-	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-woo-subscriptions-notes.php';
 }
 add_action( 'plugins_loaded', 'wc_admin_plugins_loaded' );
 
