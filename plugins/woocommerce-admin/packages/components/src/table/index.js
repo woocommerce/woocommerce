@@ -147,16 +147,20 @@ class TableCard extends Component {
 		}
 	}
 
-	onSearch( value ) {
-		const { compareBy, compareParam, onQueryChange } = this.props;
-		const { selectedRows } = this.state;
+	onSearch( values ) {
+		const { compareBy, compareParam, onQueryChange, query, searchBy, searchParam } = this.props;
+		const ids = values.map( v => v.id );
 		if ( compareBy ) {
-			const ids = value.map( v => v.id );
+			const { selectedRows } = this.state;
 			onQueryChange( 'compare' )(
 				compareBy,
 				compareParam,
 				[ ...selectedRows, ...ids ].join( ',' )
 			);
+		} else if ( searchBy ) {
+			const currentSearchIds = getIdsFromQuery( query[ searchParam ] );
+			const newSearchIds = currentSearchIds.concat( ids );
+			onQueryChange( searchParam )( newSearchIds.join( ',' ) );
 		}
 	}
 
@@ -230,6 +234,7 @@ class TableCard extends Component {
 			query,
 			rowHeader,
 			rowsPerPage,
+			searchBy,
 			summary,
 			title,
 			totalRows,
@@ -248,6 +253,7 @@ class TableCard extends Component {
 		const className = classnames( {
 			'woocommerce-table': true,
 			'has-compare': !! compareBy,
+			'has-search': !! searchBy,
 		} );
 
 		return (
@@ -268,11 +274,11 @@ class TableCard extends Component {
 							{ labels.compareButton || __( 'Compare', 'wc-admin' ) }
 						</CompareButton>
 					),
-					compareBy && (
+					( compareBy || searchBy ) && (
 						<Search
 							key="search"
 							placeholder={ labels.placeholder || __( 'Search by item name', 'wc-admin' ) }
-							type={ compareBy }
+							type={ compareBy || searchBy }
 							onChange={ this.onSearch }
 						/>
 					),
@@ -351,6 +357,10 @@ TableCard.propTypes = {
 	 */
 	compareBy: PropTypes.string,
 	/**
+	 * Url query parameter compare function operates on
+	 */
+	compareParam: PropTypes.string,
+	/**
 	 * An array of column headers (see `Table` props).
 	 */
 	headers: PropTypes.arrayOf(
@@ -421,6 +431,14 @@ TableCard.propTypes = {
 	 */
 	rowsPerPage: PropTypes.number.isRequired,
 	/**
+	 * The string to use as a query parameter when searching row items.
+	 */
+	searchBy: PropTypes.string,
+	/**
+	 * Url query parameter search function operates on
+	 */
+	searchParam: PropTypes.string,
+	/**
 	 * An array of objects with `label` & `value` properties, which display in a line under the table.
 	 * Optional, can be left off to show no summary.
 	 */
@@ -438,13 +456,10 @@ TableCard.propTypes = {
 	 * The total number of rows (across all pages).
 	 */
 	totalRows: PropTypes.number.isRequired,
-	/**
-	 * Url query parameter compare function operates on
-	 */
-	compareParam: PropTypes.string,
 };
 
 TableCard.defaultProps = {
+	compareParam: 'filter',
 	downloadable: false,
 	isLoading: false,
 	onQueryChange: noop,
@@ -452,7 +467,6 @@ TableCard.defaultProps = {
 	query: {},
 	rowHeader: 0,
 	rows: [],
-	compareParam: 'filter',
 };
 
 export default TableCard;

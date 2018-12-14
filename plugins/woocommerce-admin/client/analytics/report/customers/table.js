@@ -172,12 +172,13 @@ export default class CustomersReportTable extends Component {
 
 		return (
 			<ReportTable
-				compareBy="customers"
 				endpoint="customers"
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				itemIdField="id"
 				query={ query }
+				searchBy="customers"
+				searchParam="name_includes"
 				title={ __( 'Registered Customers', 'wc-admin' ) }
 			/>
 		);
