@@ -15,7 +15,6 @@ import {
 	PanelBody,
 	Placeholder,
 	RangeControl,
-	SelectControl,
 	Spinner,
 	Toolbar,
 	withSpokenMessages,
@@ -27,6 +26,7 @@ import PropTypes from 'prop-types';
  */
 import getQuery from './utils/get-query';
 import ProductCategoryControl from './components/product-category-control';
+import ProductOrderbyControl from './components/product-orderby-control';
 import ProductPreview from './components/product-preview';
 
 /**
@@ -112,56 +112,7 @@ class ProductByCategoryBlock extends Component {
 					title={ __( 'Order By', 'woo-gutenberg-products-block' ) }
 					initialOpen={ false }
 				>
-					<SelectControl
-						label={ __( 'Order products by', 'woo-gutenberg-products-block' ) }
-						value={ orderby }
-						options={ [
-							{
-								label: __(
-									'Newness - newest first',
-									'woo-gutenberg-products-block'
-								),
-								value: 'date',
-							},
-							{
-								label: __(
-									'Price - low to high',
-									'woo-gutenberg-products-block'
-								),
-								value: 'price_asc',
-							},
-							{
-								label: __(
-									'Price - high to low',
-									'woo-gutenberg-products-block'
-								),
-								value: 'price_desc',
-							},
-							{
-								label: __(
-									'Rating - highest first',
-									'woo-gutenberg-products-block'
-								),
-								value: 'rating',
-							},
-							{
-								label: __( 'Sales - most first', 'woo-gutenberg-products-block' ),
-								value: 'popularity',
-							},
-							{
-								label: __(
-									'Title - alphabetical',
-									'woo-gutenberg-products-block'
-								),
-								value: 'title',
-							},
-							{
-								label: __( 'Menu Order', 'woo-gutenberg-products-block' ),
-								value: 'menu_order',
-							},
-						] }
-						onChange={ ( value ) => setAttributes( { orderby: value } ) }
-					/>
+					<ProductOrderbyControl setAttributes={ setAttributes } value={ orderby } />
 				</PanelBody>
 			</InspectorControls>
 		);
