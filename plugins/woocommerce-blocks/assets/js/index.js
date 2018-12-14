@@ -13,7 +13,7 @@ import '../css/product-category-block.scss';
 import getShortcode from './utils/get-shortcode';
 import ProductBestSellersBlock from './product-best-sellers';
 import ProductByCategoryBlock from './product-category-block';
-import ProductOnSaleBlock from './product-on-sale';
+import ProductTopRatedBlock from './product-top-rated';
 import sharedAttributes from './utils/shared-attributes';
 
 const validAlignments = [ 'wide', 'full' ];
@@ -120,24 +120,17 @@ registerBlockType( 'woocommerce/product-best-sellers', {
 	},
 } );
 
-registerBlockType( 'woocommerce/product-on-sale', {
-	title: __( 'On Sale Products', 'woo-gutenberg-products-block' ),
-	icon: <Gridicon icon="tag" />,
+registerBlockType( 'woocommerce/product-top-rated', {
+	title: __( 'Top Rated Products', 'woo-gutenberg-products-block' ),
+	icon: <Gridicon icon="trophy" />,
 	category: 'widgets',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
-		'Display a grid of on sale products.',
+		'Display a grid of your top rated products.',
 		'woo-gutenberg-products-block'
 	),
 	attributes: {
 		...sharedAttributes,
-		/**
-		 * How to order the products: 'date', 'popularity', 'price_asc', 'price_desc' 'rating', 'title'.
-		 */
-		orderby: {
-			type: 'string',
-			default: 'date',
-		},
 	},
 	getEditWrapperProps,
 
@@ -145,7 +138,7 @@ registerBlockType( 'woocommerce/product-on-sale', {
 	 * Renders and manages the block.
 	 */
 	edit( props ) {
-		return <ProductOnSaleBlock { ...props } />;
+		return <ProductTopRatedBlock { ...props } />;
 	},
 
 	/**
@@ -159,7 +152,7 @@ registerBlockType( 'woocommerce/product-on-sale', {
 		} = props.attributes; /* eslint-disable-line react/prop-types */
 		return (
 			<RawHTML className={ align ? `align${ align }` : '' }>
-				{ getShortcode( props, 'woocommerce/product-on-sale' ) }
+				{ getShortcode( props, 'woocommerce/product-top-rated' ) }
 			</RawHTML>
 		);
 	},
