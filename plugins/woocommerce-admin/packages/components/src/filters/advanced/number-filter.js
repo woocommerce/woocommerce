@@ -18,7 +18,7 @@ import { formatCurrency } from '../../../../currency/src';
 class NumberFilter extends Component {
 	getBetweenString() {
 		return _x(
-			'{{moreThan /}} and {{lessThan /}}',
+			'{{moreThan /}}{{span}}and{{/span}}{{lessThan /}}',
 			'Numerical range inputs arranged on a single line',
 			'wc-admin'
 		);
@@ -42,6 +42,7 @@ class NumberFilter extends Component {
 				components: {
 					moreThan: <Fragment>{ moreThan }</Fragment>,
 					lessThan: <Fragment>{ lessThan }</Fragment>,
+					span: <Fragment />,
 				},
 			} );
 		} else if ( 'currency' === inputType ) { // need to format a single input value as currency
@@ -66,14 +67,14 @@ class NumberFilter extends Component {
 				0 === symbolPosition.indexOf( 'right' )
 				? <TextControlWithAffixes
 					suffix={ <span dangerouslySetInnerHTML={ { __html: currencySymbol } } /> }
-					className="woocommerce-filters-advanced__input-numeric-range"
+					className="woocommerce-filters-advanced__input"
 					type="number"
 					value={ value }
 					onChange={ onChange }
 				/>
 				: <TextControlWithAffixes
 					prefix={ <span dangerouslySetInnerHTML={ { __html: currencySymbol } } /> }
-					className="woocommerce-filters-advanced__input-numeric-range"
+					className="woocommerce-filters-advanced__input"
 					type="number"
 					value={ value }
 					onChange={ onChange }
@@ -83,7 +84,7 @@ class NumberFilter extends Component {
 
 		return (
 			<TextControl
-				className="woocommerce-filters-advanced__input-numeric-range"
+				className="woocommerce-filters-advanced__input"
 				type="number"
 				value={ value }
 				onChange={ onChange }
@@ -136,6 +137,7 @@ class NumberFilter extends Component {
 			components: {
 				lessThan: this.getFormControl( inputType, lessThan, lessThanOnChange ),
 				moreThan: this.getFormControl( inputType, moreThan, moreThanOnChange ),
+				span: <span className="separator" />,
 			},
 		} );
 	}
@@ -158,7 +160,13 @@ class NumberFilter extends Component {
 					/>
 				),
 				filter: (
-					<div>{ this.getFilterInputs() }</div>
+					<div
+						className={ classnames( 'woocommerce-filters-advanced__input-numeric-range', {
+							'is-between': 'between' === rule,
+						} ) }
+					>
+						{ this.getFilterInputs() }
+					</div>
 				),
 			},
 		} );
