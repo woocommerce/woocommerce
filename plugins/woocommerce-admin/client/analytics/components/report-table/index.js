@@ -85,8 +85,9 @@ ReportTable.propTypes = {
 	 */
 	endpoint: PropTypes.string,
 	/**
-	 * Method names used to load more data for table items. If omitted, no call will
-	 * be made and only the data returned by the reports endpoint will be used.
+	 * Name of the methods available via `select( 'wc-api' )` that will be used to
+	 * load more data for table items. If omitted, no call will be made and only
+	 * the data returned by the reports endpoint will be used.
 	 */
 	extendItemsMethodNames: PropTypes.shape( {
 		isError: PropTypes.string,
