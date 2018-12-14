@@ -13,6 +13,7 @@ import { _x } from '@wordpress/i18n';
  * Internal dependencies
  */
 import TextControlWithAffixes from '../../text-control-with-affixes';
+import { formatCurrency } from '../../../../currency/src';
 
 class NumberFilter extends Component {
 	getBetweenString() {
@@ -24,11 +25,18 @@ class NumberFilter extends Component {
 	}
 
 	getLegend( filter, config ) {
+		const inputType = get( config, [ 'input', 'type' ], 'number' );
 		const rule = find( config.rules, { value: filter.rule } ) || {};
 		let filterStr = filter.value || '';
 
 		if ( 'between' === rule.value ) {
-			const [ moreThan, lessThan ] = filterStr.split( ',' );
+			let [ moreThan, lessThan ] = filterStr.split( ',' );
+
+			if ( 'currency' === inputType ) {
+				moreThan = formatCurrency( moreThan );
+				lessThan = formatCurrency( lessThan );
+			}
+
 			filterStr = interpolateComponents( {
 				mixedString: this.getBetweenString(),
 				components: {
@@ -36,6 +44,8 @@ class NumberFilter extends Component {
 					lessThan: <Fragment>{ lessThan }</Fragment>,
 				},
 			} );
+		} else if ( 'currency' === inputType ) { // need to format a single input value as currency
+			filterStr = formatCurrency( filterStr );
 		}
 
 		return interpolateComponents( {
