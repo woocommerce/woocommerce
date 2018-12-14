@@ -24,12 +24,13 @@ import PropTypes from 'prop-types';
  */
 import getQuery from './utils/get-query';
 import ProductCategoryControl from './components/product-category-control';
+import ProductOrderbyControl from './components/product-orderby-control';
 import ProductPreview from './components/product-preview';
 
 /**
- * Component to handle edit mode of "Best Selling Products".
+ * Component to handle edit mode of "On Sale Products".
  */
-class ProductBestSellersBlock extends Component {
+class ProductOnSaleBlock extends Component {
 	constructor() {
 		super( ...arguments );
 		this.state = {
@@ -43,9 +44,12 @@ class ProductBestSellersBlock extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const hasChange = [ 'rows', 'columns', 'categories' ].reduce( ( acc, key ) => {
-			return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
-		}, false );
+		const hasChange = [ 'rows', 'columns', 'orderby', 'categories' ].reduce(
+			( acc, key ) => {
+				return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
+			},
+			false
+		);
 		if ( hasChange ) {
 			this.getProducts();
 		}
@@ -68,7 +72,7 @@ class ProductBestSellersBlock extends Component {
 
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
-		const { columns, rows } = attributes;
+		const { columns, rows, orderby } = attributes;
 
 		return (
 			<InspectorControls key="inspector">
@@ -90,6 +94,12 @@ class ProductBestSellersBlock extends Component {
 						min={ wc_product_block_data.min_rows }
 						max={ wc_product_block_data.max_rows }
 					/>
+				</PanelBody>
+				<PanelBody
+					title={ __( 'Order By', 'woo-gutenberg-products-block' ) }
+					initialOpen={ false }
+				>
+					<ProductOrderbyControl setAttributes={ setAttributes } value={ orderby } />
 				</PanelBody>
 				<PanelBody
 					title={ __(
@@ -116,7 +126,7 @@ class ProductBestSellersBlock extends Component {
 		const { loaded, products } = this.state;
 		const classes = [
 			'wc-block-products-grid',
-			'wc-block-best-selling-products',
+			'wc-block-on-sale-products',
 		];
 		if ( columns ) {
 			classes.push( `cols-${ columns }` );
@@ -146,9 +156,9 @@ class ProductBestSellersBlock extends Component {
 						) )
 					) : (
 						<Placeholder
-							icon={ <Gridicon icon="stats-up-alt" /> }
+							icon={ <Gridicon icon="tag" /> }
 							label={ __(
-								'Best Selling Products',
+								'On Sale Products',
 								'woo-gutenberg-products-block'
 							) }
 						>
@@ -165,7 +175,7 @@ class ProductBestSellersBlock extends Component {
 	}
 }
 
-ProductBestSellersBlock.propTypes = {
+ProductOnSaleBlock.propTypes = {
 	/**
 	 * The attributes for this block
 	 */
@@ -180,4 +190,4 @@ ProductBestSellersBlock.propTypes = {
 	setAttributes: PropTypes.func.isRequired,
 };
 
-export default ProductBestSellersBlock;
+export default ProductOnSaleBlock;
