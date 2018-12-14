@@ -148,7 +148,7 @@ class TableCard extends Component {
 	}
 
 	onSearch( values ) {
-		const { compareBy, compareParam, onQueryChange, query, searchBy, searchParam } = this.props;
+		const { compareBy, compareParam, onQueryChange, searchBy, searchParam } = this.props;
 		const ids = values.map( v => v.id );
 		if ( compareBy ) {
 			const { selectedRows } = this.state;
@@ -158,9 +158,7 @@ class TableCard extends Component {
 				[ ...selectedRows, ...ids ].join( ',' )
 			);
 		} else if ( searchBy ) {
-			const currentSearchIds = getIdsFromQuery( query[ searchParam ] );
-			const newSearchIds = currentSearchIds.concat( ids );
-			onQueryChange( searchParam )( newSearchIds.join( ',' ) );
+			onQueryChange( searchParam )( ids.join( ',' ) );
 		}
 	}
 
