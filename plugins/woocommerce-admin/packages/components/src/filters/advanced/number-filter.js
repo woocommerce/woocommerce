@@ -48,18 +48,31 @@ class NumberFilter extends Component {
 	}
 
 	getFormControl( type, value, onChange ) {
-		const currencySymbol = get( wcSettings, [ 'currency', 'symbol' ] );
+		if ( 'currency' === type ) {
+			const currencySymbol = get( wcSettings, [ 'currency', 'symbol' ] );
+			const symbolPosition = get( wcSettings, [ 'currency', 'position' ] );
+
+			return (
+				0 === symbolPosition.indexOf( 'right' )
+				? <TextControlWithAffixes
+					suffix={ <span dangerouslySetInnerHTML={ { __html: currencySymbol } } /> }
+					className="woocommerce-filters-advanced__input-numeric-range"
+					type="number"
+					value={ value }
+					onChange={ onChange }
+				/>
+				: <TextControlWithAffixes
+					prefix={ <span dangerouslySetInnerHTML={ { __html: currencySymbol } } /> }
+					className="woocommerce-filters-advanced__input-numeric-range"
+					type="number"
+					value={ value }
+					onChange={ onChange }
+				/>
+			);
+		}
 
 		return (
-			'currency' === type
-			? <TextControlWithAffixes
-				prefix={ <span dangerouslySetInnerHTML={ { __html: currencySymbol } } /> }
-				className="woocommerce-filters-advanced__input-numeric-range"
-				type="number"
-				value={ value }
-				onChange={ onChange }
-			/>
-			: <TextControl
+			<TextControl
 				className="woocommerce-filters-advanced__input-numeric-range"
 				type="number"
 				value={ value }
