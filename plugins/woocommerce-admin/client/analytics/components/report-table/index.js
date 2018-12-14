@@ -74,7 +74,7 @@ class ReportTable extends Component {
 		const isRequesting = tableData.isRequesting || primaryData.isRequesting;
 		const orderedItems = orderBy( items.data, query.orderby, query.order );
 		const totals = get( primaryData, [ 'data', 'totals' ], null );
-		const totalCount = items.totalCount || 0;
+		const totalResults = items.totalResults || 0;
 		const { headers, ids, rows, summary } = applyFilters( TABLE_FILTER, {
 			endpoint: endpoint,
 			headers: getHeadersContent(),
@@ -82,7 +82,7 @@ class ReportTable extends Component {
 			ids: itemIdField ? orderedItems.map( item => item[ itemIdField ] ) : null,
 			rows: getRowsContent( orderedItems ),
 			totals: totals,
-			summary: getSummary ? getSummary( totals, totalCount ) : null,
+			summary: getSummary ? getSummary( totals, totalResults ) : null,
 		} );
 
 		// Hide any headers based on user prefs, if loaded.
@@ -99,7 +99,7 @@ class ReportTable extends Component {
 				rows={ rows }
 				rowsPerPage={ parseInt( query.per_page ) }
 				summary={ summary }
-				totalRows={ totalCount }
+				totalRows={ totalResults }
 				{ ...tableProps }
 			/>
 		);

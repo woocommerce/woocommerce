@@ -162,15 +162,15 @@ class RevenueReportTable extends Component {
 		} );
 	}
 
-	getSummary( totals, totalCount ) {
+	getSummary( totals, totalResults ) {
 		if ( ! totals ) {
 			return [];
 		}
 
 		return [
 			{
-				label: _n( 'day', 'days', totalCount, 'wc-admin' ),
-				value: numberFormat( totalCount ),
+				label: _n( 'day', 'days', totalResults, 'wc-admin' ),
+				value: numberFormat( totalResults ),
 			},
 			{
 				label: _n( 'order', 'orders', totals.orders_count, 'wc-admin' ),
@@ -245,7 +245,7 @@ export default compose(
 			tableData: {
 				items: {
 					data: get( revenueData, [ 'data', 'intervals' ] ),
-					totalCount: get( revenueData, [ 'totalResults' ] ),
+					totalResults: get( revenueData, [ 'totalResults' ] ),
 				},
 				isError,
 				isRequesting,

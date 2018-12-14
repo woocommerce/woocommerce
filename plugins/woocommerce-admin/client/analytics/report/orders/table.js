@@ -285,7 +285,7 @@ export default compose(
 			tableData: {
 				items: {
 					data: formatTableOrders( orders ),
-					totalCount: ordersTotalCount,
+					totalResults: ordersTotalCount,
 				},
 				isError,
 				isRequesting,
