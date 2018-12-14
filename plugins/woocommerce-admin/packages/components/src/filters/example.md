@@ -88,6 +88,57 @@ const advancedFilters = {
 				defaultOption: 'new',
 			},
 		},
+		quantity: {
+			labels: {
+				add: 'Item Quantity',
+				remove: 'Remove item quantity filter',
+				rule: 'Select an item quantity filter match',
+				title: 'Item Quantity is {{rule /}} {{filter /}}',
+			},
+			rules: [
+				{
+					value: 'lessthan',
+					label: 'Less Than',
+				},
+				{
+					value: 'morethan',
+					label: 'More Than',
+				},
+				{
+					value: 'between',
+					label: 'Between',
+				},
+			],
+			input: {
+				component: 'Number',
+			},
+		},
+		subtotal: {
+			labels: {
+				add: 'Subtotal',
+				remove: 'Remove subtotal filter',
+				rule: 'Select a subtotal filter match',
+				title: 'Subtotal is {{rule /}} {{filter /}}',
+			},
+			rules: [
+				{
+					value: 'lessthan',
+					label: 'Less Than',
+				},
+				{
+					value: 'morethan',
+					label: 'More Than',
+				},
+				{
+					value: 'between',
+					label: 'Between',
+				},
+			],
+			input: {
+				component: 'Number',
+				type: 'currency',
+			},
+		},
 	},
 };
 
