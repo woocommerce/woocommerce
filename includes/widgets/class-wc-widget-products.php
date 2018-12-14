@@ -127,7 +127,7 @@ class WC_Widget_Products extends WC_Widget {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-			$query_args['tax_query'] = array(
+			$query_args['tax_query'][] = array(
 				array(
 					'taxonomy' => 'product_visibility',
 					'field'    => 'term_taxonomy_id',
