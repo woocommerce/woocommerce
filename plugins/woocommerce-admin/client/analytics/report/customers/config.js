@@ -50,7 +50,6 @@ export const advancedFilters = {
 				},
 			],
 			input: {
-				// Use products autocompleter for now, see https://github.com/woocommerce/wc-admin/issues/1029 for progress
 				component: 'Search',
 				type: 'customers',
 				getLabels: getRequestByIdString( NAMESPACE + 'customers', customer => ( {
