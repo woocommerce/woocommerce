@@ -21,6 +21,8 @@ jobs:
       env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress
       php: 7.1
       script:
+        - composer install
+        - composer run-script phpcs .
         - npm install
         - npm run lint
         - npm run build

@@ -14,7 +14,7 @@
   },
   "scripts": {
     "phpcs": [
-      "phpcs -s -p"
+      "phpcs --extensions=php -s -p"
     ],
     "phpcbf": [
       "phpcbf -p"
