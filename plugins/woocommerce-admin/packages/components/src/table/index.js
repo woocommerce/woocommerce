@@ -17,7 +17,7 @@ import {
 	generateCSVDataFromTable,
 	generateCSVFileName,
 } from '@woocommerce/csv-export';
-import { getIdsFromQuery } from '@woocommerce/navigation';
+import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -158,7 +158,10 @@ class TableCard extends Component {
 				[ ...selectedRows, ...ids ].join( ',' )
 			);
 		} else if ( searchBy ) {
-			onQueryChange( searchParam )( ids.join( ',' ) );
+			updateQueryString( {
+				filter: 'advanced',
+				[ searchParam ]: ids.join( ',' ),
+			} );
 		}
 	}
 
