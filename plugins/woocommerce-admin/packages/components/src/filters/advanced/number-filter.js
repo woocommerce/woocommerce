@@ -18,7 +18,7 @@ import { formatCurrency } from '@woocommerce/currency';
 class NumberFilter extends Component {
 	getBetweenString() {
 		return _x(
-			'{{moreThan /}}{{span}}and{{/span}}{{lessThan /}}',
+			'{{rangeStart /}}{{span}}and{{/span}}{{rangeEnd /}}',
 			'Numerical range inputs arranged on a single line',
 			'wc-admin'
 		);
@@ -27,26 +27,24 @@ class NumberFilter extends Component {
 	getLegend( filter, config ) {
 		const inputType = get( config, [ 'input', 'type' ], 'number' );
 		const rule = find( config.rules, { value: filter.rule } ) || {};
-		let filterStr = filter.value || '';
+		let [ rangeStart, rangeEnd ] = ( filter.value || '' ).split( ',' );
+
+		if ( 'currency' === inputType ) {
+			rangeStart = formatCurrency( rangeStart );
+			rangeEnd = formatCurrency( rangeEnd );
+		}
+
+		let filterStr = rangeStart;
 
 		if ( 'between' === rule.value ) {
-			let [ moreThan, lessThan ] = filterStr.split( ',' );
-
-			if ( 'currency' === inputType ) {
-				moreThan = formatCurrency( moreThan );
-				lessThan = formatCurrency( lessThan );
-			}
-
 			filterStr = interpolateComponents( {
 				mixedString: this.getBetweenString(),
 				components: {
-					moreThan: <Fragment>{ moreThan }</Fragment>,
-					lessThan: <Fragment>{ lessThan }</Fragment>,
+					rangeStart: <Fragment>{ rangeStart }</Fragment>,
+					rangeEnd: <Fragment>{ rangeEnd }</Fragment>,
 					span: <Fragment />,
 				},
 			} );
-		} else if ( 'currency' === inputType ) { // need to format a single input value as currency
-			filterStr = formatCurrency( filterStr );
 		}
 
 		return interpolateComponents( {
@@ -94,24 +92,22 @@ class NumberFilter extends Component {
 
 	getFilterInputs() {
 		const { config, filter, onFilterChange } = this.props;
-		const { rule, value } = filter;
 		const inputType = get( config, [ 'input', 'type' ], 'number' );
 
-		if ( 'between' === rule ) {
+		if ( 'between' === filter.rule ) {
 			return this.getRangeInput();
 		}
 
-		let inputValue = value;
-
-		if ( value && value.indexOf( ',' ) > -1 ) {
-			const [ moreThan, lessThan ] = value.split( ',' );
-			inputValue = 'lessthan' === rule ? lessThan : moreThan;
-			onFilterChange( filter.key, 'value', inputValue );
+		const [ rangeStart, rangeEnd ] = ( filter.value || '' ).split( ',' );
+		if ( Boolean( rangeEnd ) ) {
+			// If there's a value for rangeEnd, we've just changed from "between"
+			// to "less than" or "more than" and need to transition the value
+			onFilterChange( filter.key, 'value', rangeStart || rangeEnd );
 		}
 
 		return this.getFormControl(
 			inputType,
-			inputValue,
+			rangeStart || rangeEnd,
 			partial( onFilterChange, filter.key, 'value' )
 		);
 	}
@@ -119,24 +115,23 @@ class NumberFilter extends Component {
 	getRangeInput() {
 		const { config, filter, onFilterChange } = this.props;
 		const inputType = get( config, [ 'input', 'type' ], 'number' );
-		const { value } = filter;
-		const [ moreThan, lessThan ] = ( value || '' ).split( ',' );
+		const [ rangeStart, rangeEnd ] = ( filter.value || '' ).split( ',' );
 
-		const moreThanOnChange = ( newMoreThan ) => {
-			const newValue = [ newMoreThan, lessThan ].join( ',' );
+		const rangeStartOnChange = ( newRangeStart ) => {
+			const newValue = [ newRangeStart, rangeEnd ].join( ',' );
 			onFilterChange( filter.key, 'value', newValue );
 		};
 
-		const lessThanOnChange = ( newLessThan ) => {
-			const newValue = [ moreThan, newLessThan ].join( ',' );
+		const rangeEndOnChange = ( newRangeEnd ) => {
+			const newValue = [ rangeStart, newRangeEnd ].join( ',' );
 			onFilterChange( filter.key, 'value', newValue );
 		};
 
 		return interpolateComponents( {
 			mixedString: this.getBetweenString(),
 			components: {
-				lessThan: this.getFormControl( inputType, lessThan, lessThanOnChange ),
-				moreThan: this.getFormControl( inputType, moreThan, moreThanOnChange ),
+				rangeStart: this.getFormControl( inputType, rangeStart, rangeStartOnChange ),
+				rangeEnd: this.getFormControl( inputType, rangeEnd, rangeEndOnChange ),
 				span: <span className="separator" />,
 			},
 		} );
