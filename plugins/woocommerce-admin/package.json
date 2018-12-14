@@ -70,7 +70,7 @@
     "css-loader": "2.0.0",
     "deasync": "0.1.14",
     "deep-freeze": "0.0.1",
-    "docsify-cli": "^4.3.0",
+    "docsify-cli": "4.3.0",
     "eslint": "5.10.0",
     "eslint-config-wpcalypso": "4.0.1",
     "eslint-loader": "2.1.1",
