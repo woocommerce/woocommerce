@@ -13,7 +13,6 @@ import { stringifyQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { computeSuggestionMatch } from './utils';
-import { SWAGGERNAMESPACE } from 'store/constants';
 
 const getName = customer => customer.first_name + ' ' + customer.last_name;
 
@@ -26,7 +25,7 @@ const getName = customer => customer.first_name + ' ' + customer.last_name;
 export default {
 	name: 'customers',
 	className: 'woocommerce-search__customers-result',
-	async options( name ) {
+	options( name ) {
 		let payload = '';
 		if ( name ) {
 			const query = {
@@ -35,17 +34,7 @@ export default {
 			};
 			payload = stringifyQuery( query );
 		}
-		// TODO: Use wc endpoint when it's ready
-		const response = await fetch( SWAGGERNAMESPACE + 'reports/customers' + payload );
-		// const customers = await apiFetch( { path: `/wc/v3/reports/customers${ payload }` } );
-		const customers = await response.json();
-		const ids = customers.map( customer => customer.id );
-		// @TODO load customers names from WC endpoint
-		return ids.map( id => ( {
-			id,
-			first_name: 'Customer ' + id,
-			last_name: '',
-		} ) );
+		return apiFetch( { path: `/wc/v3/customers${ payload }` } );
 	},
 	isDebounced: true,
 	getOptionKeywords( customer ) {
