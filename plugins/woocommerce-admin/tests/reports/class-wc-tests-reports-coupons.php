@@ -64,16 +64,16 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 
 		// Test retrieving the stats through the data store.
 		$coupon_1_response = array(
-			'coupon_id'      => $coupon_1->get_id(),
-			'gross_discount' => floatval( $coupon_1_amount * 2 ),
-			'orders_count'   => 2,
-			'extended_info'  => new ArrayObject(),
+			'coupon_id'     => $coupon_1->get_id(),
+			'amount'        => floatval( $coupon_1_amount * 2 ),
+			'orders_count'  => 2,
+			'extended_info' => new ArrayObject(),
 		);
 		$coupon_2_response = array(
-			'coupon_id'      => $coupon_2->get_id(),
-			'gross_discount' => floatval( $coupon_2_amount ),
-			'orders_count'   => 1,
-			'extended_info'  => new ArrayObject(),
+			'coupon_id'     => $coupon_2->get_id(),
+			'amount'        => floatval( $coupon_2_amount ),
+			'orders_count'  => 1,
+			'extended_info' => new ArrayObject(),
 		);
 
 		// Order by coupon id DESC is the default.
@@ -113,11 +113,11 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected_data, $data );
 
-		// Test order by gross_discount ASC.
+		// Test order by amount ASC.
 		$args = array(
 			'after'   => $start_time,
 			'before'  => $end_time,
-			'orderby' => 'gross_discount',
+			'orderby' => 'amount',
 			'order'   => 'asc',
 		);
 
@@ -197,10 +197,10 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		}
 
 		$coupon_1_response = array(
-			'coupon_id'      => $coupon_1->get_id(),
-			'gross_discount' => $coupon_1_amount * 2,
-			'orders_count'   => 2,
-			'extended_info'  => array(
+			'coupon_id'     => $coupon_1->get_id(),
+			'amount'        => $coupon_1_amount * 2,
+			'orders_count'  => 2,
+			'extended_info' => array(
 				'code'             => $coupon_1->get_code(),
 				'date_created'     => $c1_date_created,
 				'date_created_gmt' => $c1_date_created_gmt,
@@ -235,10 +235,10 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		}
 
 		$coupon_2_response = array(
-			'coupon_id'      => $coupon_2->get_id(),
-			'gross_discount' => $coupon_2_amount,
-			'orders_count'   => 1,
-			'extended_info'  => array(
+			'coupon_id'     => $coupon_2->get_id(),
+			'amount'        => $coupon_2_amount,
+			'orders_count'  => 1,
+			'extended_info' => array(
 				'code'             => $coupon_2->get_code(),
 				'date_created'     => $c2_date_created,
 				'date_created_gmt' => $c2_date_created_gmt,

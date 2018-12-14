@@ -89,13 +89,13 @@ class WC_Tests_API_Reports_Coupons extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 2, count( $coupon_reports ) );
 
 		$this->assertEquals( $coupon_2->get_id(), $coupon_reports[0]['coupon_id'] );
-		$this->assertEquals( 1 * $coupon_2_amount, $coupon_reports[0]['gross_discount'] );
+		$this->assertEquals( 1 * $coupon_2_amount, $coupon_reports[0]['amount'] );
 		$this->assertEquals( 1, $coupon_reports[0]['orders_count'] );
 		$this->assertArrayHasKey( '_links', $coupon_reports[0] );
 		$this->assertArrayHasKey( 'coupon', $coupon_reports[0]['_links'] );
 
 		$this->assertEquals( $coupon_1->get_id(), $coupon_reports[1]['coupon_id'] );
-		$this->assertEquals( 2 * $coupon_1_amount, $coupon_reports[1]['gross_discount'] );
+		$this->assertEquals( 2 * $coupon_1_amount, $coupon_reports[1]['amount'] );
 		$this->assertEquals( 2, $coupon_reports[1]['orders_count'] );
 		$this->assertArrayHasKey( '_links', $coupon_reports[1] );
 		$this->assertArrayHasKey( 'coupon', $coupon_reports[1]['_links'] );
@@ -123,7 +123,7 @@ class WC_Tests_API_Reports_Coupons extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 4, count( $properties ) );
 		$this->assertArrayHasKey( 'coupon_id', $properties );
-		$this->assertArrayHasKey( 'gross_discount', $properties );
+		$this->assertArrayHasKey( 'amount', $properties );
 		$this->assertArrayHasKey( 'orders_count', $properties );
 		$this->assertArrayHasKey( 'extended_info', $properties );
 	}

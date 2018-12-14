@@ -149,25 +149,25 @@ class WC_Admin_REST_Reports_Coupons_Controller extends WC_REST_Reports_Controlle
 			'title'      => 'report_coupons',
 			'type'       => 'object',
 			'properties' => array(
-				'coupon_id'      => array(
+				'coupon_id'     => array(
 					'description' => __( 'Coupon ID.', 'wc-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'gross_discount' => array(
-					'description' => __( 'Gross discount.', 'wc-admin' ),
+				'amount'        => array(
+					'description' => __( 'Net discount amount.', 'wc-admin' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'orders_count'   => array(
+				'orders_count'  => array(
 					'description' => __( 'Amount of orders.', 'wc-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'extended_info'  => array(
+				'extended_info' => array(
 					'code'             => array(
 						'type'        => 'string',
 						'readonly'    => true,
@@ -262,7 +262,7 @@ class WC_Admin_REST_Reports_Coupons_Controller extends WC_REST_Reports_Controlle
 			'default'           => 'coupon_id',
 			'enum'              => array(
 				'coupon_id',
-				'gross_discount',
+				'amount',
 				'orders_count',
 			),
 			'validate_callback' => 'rest_validate_request_arg',

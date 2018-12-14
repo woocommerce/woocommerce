@@ -416,7 +416,7 @@ class WC_Admin_Api_Init {
 			order_id BIGINT UNSIGNED NOT NULL,
 			coupon_id BIGINT UNSIGNED NOT NULL,
 			date_created timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
-			coupon_gross_discount double DEFAULT 0 NOT NULL,
+			discount_amount double DEFAULT 0 NOT NULL,
 			PRIMARY KEY (order_id, coupon_id),
 			KEY coupon_id (coupon_id),
 			KEY date_created (date_created)

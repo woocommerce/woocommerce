@@ -25,9 +25,9 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 	 * @var array
 	 */
 	protected $column_types = array(
-		'coupon_id'      => 'intval',
-		'gross_discount' => 'floatval',
-		'orders_count'   => 'intval',
+		'coupon_id'    => 'intval',
+		'amount'       => 'floatval',
+		'orders_count' => 'intval',
 	);
 
 	/**
@@ -36,9 +36,9 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 	 * @var array
 	 */
 	protected $report_columns = array(
-		'coupon_id'      => 'coupon_id',
-		'gross_discount' => 'SUM(coupon_gross_discount) as gross_discount',
-		'orders_count'   => 'COUNT(DISTINCT order_id) as orders_count',
+		'coupon_id'    => 'coupon_id',
+		'amount'       => 'SUM(discount_amount) as amount',
+		'orders_count' => 'COUNT(DISTINCT order_id) as orders_count',
 	);
 
 	/**

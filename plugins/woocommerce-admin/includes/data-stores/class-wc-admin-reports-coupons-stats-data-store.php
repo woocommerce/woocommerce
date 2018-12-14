@@ -23,7 +23,7 @@ class WC_Admin_Reports_Coupons_Stats_Data_Store extends WC_Admin_Reports_Coupons
 		'date_end'       => 'strval',
 		'date_start_gmt' => 'strval',
 		'date_end_gmt'   => 'strval',
-		'gross_discount' => 'floatval',
+		'amount'         => 'floatval',
 		'coupons_count'  => 'intval',
 		'orders_count'   => 'intval',
 	);
@@ -34,9 +34,9 @@ class WC_Admin_Reports_Coupons_Stats_Data_Store extends WC_Admin_Reports_Coupons
 	 * @var array
 	 */
 	protected $report_columns = array(
-		'gross_discount' => 'SUM(coupon_gross_discount) as gross_discount',
-		'coupons_count'  => 'COUNT(DISTINCT coupon_id) as coupons_count',
-		'orders_count'   => 'COUNT(DISTINCT order_id) as orders_count',
+		'amount'        => 'SUM(discount_amount) as amount',
+		'coupons_count' => 'COUNT(DISTINCT coupon_id) as coupons_count',
+		'orders_count'  => 'COUNT(DISTINCT order_id) as orders_count',
 	);
 
 	/**

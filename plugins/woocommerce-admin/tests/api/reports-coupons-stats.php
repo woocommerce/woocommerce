@@ -101,9 +101,9 @@ class WC_Tests_API_Reports_Coupons_Stats extends WC_REST_Unit_Test_Case {
 
 		$expected_reports = array(
 			'totals'    => array(
-				'gross_discount' => 4,
-				'coupons_count'  => 2,
-				'orders_count'   => 2,
+				'amount'        => 4,
+				'coupons_count' => 2,
+				'orders_count'  => 2,
 			),
 			'intervals' => array(
 				array(
@@ -113,9 +113,9 @@ class WC_Tests_API_Reports_Coupons_Stats extends WC_REST_Unit_Test_Case {
 					'date_end'       => date( 'Y-m-d 23:59:59', $time ),
 					'date_end_gmt'   => date( 'Y-m-d 23:59:59', $time ),
 					'subtotals'      => (object) array(
-						'gross_discount' => 4,
-						'coupons_count'  => 2,
-						'orders_count'   => 2,
+						'amount'        => 4,
+						'coupons_count' => 2,
+						'orders_count'  => 2,
 					),
 				),
 			),
@@ -151,7 +151,7 @@ class WC_Tests_API_Reports_Coupons_Stats extends WC_REST_Unit_Test_Case {
 
 		$totals = $properties['totals']['properties'];
 		$this->assertEquals( 3, count( $totals ) );
-		$this->assertArrayHasKey( 'gross_discount', $totals );
+		$this->assertArrayHasKey( 'amount', $totals );
 		$this->assertArrayHasKey( 'coupons_count', $totals );
 		$this->assertArrayHasKey( 'orders_count', $totals );
 
@@ -166,7 +166,7 @@ class WC_Tests_API_Reports_Coupons_Stats extends WC_REST_Unit_Test_Case {
 
 		$subtotals = $properties['intervals']['items']['properties']['subtotals']['properties'];
 		$this->assertEquals( 3, count( $subtotals ) );
-		$this->assertArrayHasKey( 'gross_discount', $totals );
+		$this->assertArrayHasKey( 'amount', $totals );
 		$this->assertArrayHasKey( 'coupons_count', $totals );
 		$this->assertArrayHasKey( 'orders_count', $totals );
 	}

@@ -133,19 +133,19 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 	 */
 	public function get_item_schema() {
 		$totals = array(
-			'gross_discount' => array(
-				'description' => __( 'Gross discount.', 'wc-admin' ),
+			'amount'        => array(
+				'description' => __( 'Net discount amount.', 'wc-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'coupons_count'  => array(
+			'coupons_count' => array(
 				'description' => __( 'Amount of coupons.', 'wc-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'orders_count'   => array(
+			'orders_count'  => array(
 				'description' => __( 'Amount of orders.', 'wc-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
@@ -270,7 +270,7 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 			'default'           => 'date',
 			'enum'              => array(
 				'date',
-				'gross_discount',
+				'amount',
 				'coupons_count',
 				'orders_count',
 			),
