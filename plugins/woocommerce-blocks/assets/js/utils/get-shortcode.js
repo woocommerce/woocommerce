@@ -29,6 +29,9 @@ export default function getShortcode( { attributes }, name ) {
 		case 'woocommerce/product-best-sellers':
 			shortcodeAtts.set( 'best_selling', '1' );
 			break;
+		case 'woocommerce/product-top-rated':
+		shortcodeAtts.set( 'rating', '1' );
+		break;
 	}
 
 	// Build the shortcode string out of the set shortcode attributes.

@@ -33,6 +33,9 @@ export default function getQuery( attributes, name ) {
 		case 'woocommerce/product-best-sellers':
 			query.orderby = 'popularity';
 			break;
+		case 'woocommerce/product-top-rated':
+		query.orderby = 'rating';
+		break;
 	}
 
 	return query;
