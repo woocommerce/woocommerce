@@ -29,6 +29,17 @@ class SearchFilter extends Component {
 		}
 	}
 
+	// Given that `getLabels` is async, we can't use `getDerivedStateFromProps` here.
+	// `componentDidUpdate` will trigger an extra render once the labels are loaded,
+	// but that's a small trade-off.
+	componentDidUpdate( props ) {
+		const { filter, config, query } = props;
+
+		if ( filter.value.length ) {
+			config.input.getLabels( filter.value, query ).then( this.updateLabels );
+		}
+	}
+
 	updateLabels( selected ) {
 		this.setState( { selected } );
 	}

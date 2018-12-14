@@ -55,6 +55,13 @@ class AdvancedFilters extends Component {
 		this.getUpdateHref = this.getUpdateHref.bind( this );
 	}
 
+	static getDerivedStateFromProps( props ) {
+		const { query, config } = props;
+		return {
+			activeFilters: getActiveFiltersFromQuery( query, config.filters ),
+		};
+	}
+
 	onMatchChange( match ) {
 		this.setState( { match } );
 	}
