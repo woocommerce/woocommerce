@@ -7,7 +7,7 @@ import { SelectControl, TextControl } from '@wordpress/components';
 import { get, find, partial } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import classnames from 'classnames';
-import { _x } from '@wordpress/i18n';
+import { sprintf, __, _x } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -28,6 +28,14 @@ class NumberFilter extends Component {
 		const inputType = get( config, [ 'input', 'type' ], 'number' );
 		const rule = find( config.rules, { value: filter.rule } ) || {};
 		let [ rangeStart, rangeEnd ] = ( filter.value || '' ).split( ',' );
+
+		// Return the filter label if we're missing input(s)
+		if (
+			! rangeStart ||
+			( 'between' === rule.value && ! rangeEnd )
+		) {
+			return get( config, [ 'labels', 'add' ] );
+		}
 
 		if ( 'currency' === inputType ) {
 			rangeStart = formatCurrency( rangeStart );
@@ -50,13 +58,14 @@ class NumberFilter extends Component {
 		return interpolateComponents( {
 			mixedString: config.labels.title,
 			components: {
+				ariaHide: <span />,
 				filter: <span>{ filterStr }</span>,
 				rule: <span>{ rule.label }</span>,
 			},
 		} );
 	}
 
-	getFormControl( type, value, onChange ) {
+	getFormControl( { type, value, label, onChange } ) {
 		if ( 'currency' === type ) {
 			const currencySymbol = get( wcSettings, [ 'currency', 'symbol' ] );
 			const symbolPosition = get( wcSettings, [ 'currency', 'position' ] );
@@ -68,6 +77,7 @@ class NumberFilter extends Component {
 					className="woocommerce-filters-advanced__input"
 					type="number"
 					value={ value || '' }
+					aria-label={ label }
 					onChange={ onChange }
 				/>
 				: <TextControlWithAffixes
@@ -75,6 +85,7 @@ class NumberFilter extends Component {
 					className="woocommerce-filters-advanced__input"
 					type="number"
 					value={ value || '' }
+					aria-label={ label }
 					onChange={ onChange }
 				/>
 			);
@@ -85,6 +96,7 @@ class NumberFilter extends Component {
 				className="woocommerce-filters-advanced__input"
 				type="number"
 				value={ value || '' }
+				aria-label={ label }
 				onChange={ onChange }
 			/>
 		);
@@ -105,11 +117,24 @@ class NumberFilter extends Component {
 			onFilterChange( filter.key, 'value', rangeStart || rangeEnd );
 		}
 
-		return this.getFormControl(
-			inputType,
-			rangeStart || rangeEnd,
-			partial( onFilterChange, filter.key, 'value' )
-		);
+		let labelFormat = '';
+
+		if ( 'lessthan' === filter.rule ) {
+			/* eslint-disable-next-line max-len */
+			/* translators: Sentence fragment, "maximum amount" refers to a numeric value the field must be less than. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
+			labelFormat = _x( '%(field)s maximum amount', 'maximum value input', 'wc-admin' );
+		} else {
+			/* eslint-disable-next-line max-len */
+			/* translators: Sentence fragment, "minimum amount" refers to a numeric value the field must be more than. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
+			labelFormat = _x( '%(field)s minimum amount', 'minimum value input', 'wc-admin' );
+		}
+
+		return this.getFormControl( {
+			type: inputType,
+			value: rangeStart || rangeEnd,
+			label: sprintf( labelFormat, { field: get( config, [ 'labels', 'add' ] ) } ),
+			onChange: partial( onFilterChange, filter.key, 'value' ),
+		} );
 	}
 
 	getRangeInput() {
@@ -130,9 +155,29 @@ class NumberFilter extends Component {
 		return interpolateComponents( {
 			mixedString: this.getBetweenString(),
 			components: {
-				rangeStart: this.getFormControl( inputType, rangeStart, rangeStartOnChange ),
-				rangeEnd: this.getFormControl( inputType, rangeEnd, rangeEndOnChange ),
-				span: <span className="separator" />,
+				rangeStart: this.getFormControl( {
+					type: inputType,
+					value: rangeStart,
+					label: sprintf(
+						/* eslint-disable-next-line max-len */
+						/* translators: Sentence fragment, "range start" refers to the first of two numeric values the field must be between. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
+						__( '%(field)s range start', 'wc-admin' ),
+						{ field: get( config, [ 'labels', 'add' ] ) }
+					),
+					onChange: rangeStartOnChange,
+				} ),
+				rangeEnd: this.getFormControl( {
+					type: inputType,
+					value: rangeEnd,
+					label: sprintf(
+						/* eslint-disable-next-line max-len */
+						/* translators: Sentence fragment, "range end" refers to the second of two numeric values the field must be between. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
+						__( '%(field)s range end', 'wc-admin' ),
+						{ field: get( config, [ 'labels', 'add' ] ) }
+					),
+					onChange: rangeEndOnChange,
+				} ),
+				span: <span aria-hidden className="separator" />,
 			},
 		} );
 	}
@@ -145,6 +190,7 @@ class NumberFilter extends Component {
 		const children = interpolateComponents( {
 			mixedString: labels.title,
 			components: {
+				ariaHide: <span aria-hidden />,
 				rule: (
 					<SelectControl
 						className="woocommerce-filters-advanced__rule"
