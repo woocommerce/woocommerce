@@ -39,9 +39,7 @@ class ProductBestSellersBlock extends Component {
 	}
 
 	componentDidMount() {
-		if ( this.props.attributes.categories ) {
-			this.getProducts();
-		}
+		this.getProducts();
 	}
 
 	componentDidUpdate( prevProps ) {
@@ -55,7 +53,10 @@ class ProductBestSellersBlock extends Component {
 
 	getProducts() {
 		apiFetch( {
-			path: addQueryArgs( '/wc-pb/v3/products', getQuery( this.props.attributes, this.props.name ) ),
+			path: addQueryArgs(
+				'/wc-pb/v3/products',
+				getQuery( this.props.attributes, this.props.name )
+			),
 		} )
 			.then( ( products ) => {
 				this.setState( { products, loaded: true } );
@@ -113,7 +114,10 @@ class ProductBestSellersBlock extends Component {
 		const { setAttributes } = this.props;
 		const { columns, align } = this.props.attributes;
 		const { loaded, products } = this.state;
-		const classes = [ 'wc-block-products-grid', 'wc-block-best-selling-products' ];
+		const classes = [
+			'wc-block-products-grid',
+			'wc-block-best-selling-products',
+		];
 		if ( columns ) {
 			classes.push( `cols-${ columns }` );
 		}

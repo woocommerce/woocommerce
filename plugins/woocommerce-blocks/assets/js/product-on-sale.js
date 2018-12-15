@@ -4,20 +4,18 @@
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-import { Component, Fragment } from '@wordpress/element';
 import {
 	BlockAlignmentToolbar,
 	BlockControls,
 	InspectorControls,
 } from '@wordpress/editor';
+import { Component, Fragment } from '@wordpress/element';
+import Gridicon from 'gridicons';
 import {
-	Button,
 	PanelBody,
 	Placeholder,
 	RangeControl,
 	Spinner,
-	Toolbar,
-	withSpokenMessages,
 } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
@@ -30,9 +28,9 @@ import ProductOrderbyControl from './components/product-orderby-control';
 import ProductPreview from './components/product-preview';
 
 /**
- * Component to handle edit mode of "Products by Category".
+ * Component to handle edit mode of "On Sale Products".
  */
-class ProductByCategoryBlock extends Component {
+class ProductOnSaleBlock extends Component {
 	constructor() {
 		super( ...arguments );
 		this.state = {
@@ -42,9 +40,7 @@ class ProductByCategoryBlock extends Component {
 	}
 
 	componentDidMount() {
-		if ( this.props.attributes.categories ) {
-			this.getProducts();
-		}
+		this.getProducts();
 	}
 
 	componentDidUpdate( prevProps ) {
@@ -61,7 +57,10 @@ class ProductByCategoryBlock extends Component {
 
 	getProducts() {
 		apiFetch( {
-			path: addQueryArgs( '/wc-pb/v3/products', getQuery( this.props.attributes, this.props.name ) ),
+			path: addQueryArgs(
+				'/wc-pb/v3/products',
+				getQuery( this.props.attributes, this.props.name )
+			),
 		} )
 			.then( ( products ) => {
 				this.setState( { products, loaded: true } );
@@ -73,22 +72,10 @@ class ProductByCategoryBlock extends Component {
 
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
-		const { columns, orderby, rows } = attributes;
+		const { columns, rows, orderby } = attributes;
 
 		return (
 			<InspectorControls key="inspector">
-				<PanelBody
-					title={ __( 'Product Category', 'woo-gutenberg-products-block' ) }
-					initialOpen={ false }
-				>
-					<ProductCategoryControl
-						selected={ attributes.categories }
-						onChange={ ( value = [] ) => {
-							const ids = value.map( ( { id } ) => id );
-							setAttributes( { categories: ids } );
-						} }
-					/>
-				</PanelBody>
 				<PanelBody
 					title={ __( 'Layout', 'woo-gutenberg-products-block' ) }
 					initialOpen
@@ -114,30 +101,13 @@ class ProductByCategoryBlock extends Component {
 				>
 					<ProductOrderbyControl setAttributes={ setAttributes } value={ orderby } />
 				</PanelBody>
-			</InspectorControls>
-		);
-	}
-
-	renderEditMode() {
-		const { attributes, debouncedSpeak, setAttributes } = this.props;
-		const onDone = () => {
-			setAttributes( { editMode: false } );
-			debouncedSpeak(
-				__( 'Showing product block preview.', 'woo-gutenberg-products-block' )
-			);
-		};
-
-		return (
-			<Placeholder
-				icon="category"
-				label={ __( 'Products by Category', 'woo-gutenberg-products-block' ) }
-				className="wc-block-products-category"
-			>
-				{ __(
-					'Display a grid of products from your selected categories',
-					'woo-gutenberg-products-block'
-				) }
-				<div className="wc-block-products-category__selection">
+				<PanelBody
+					title={ __(
+						'Filter by Product Category',
+						'woo-gutenberg-products-block'
+					) }
+					initialOpen={ false }
+				>
 					<ProductCategoryControl
 						selected={ attributes.categories }
 						onChange={ ( value = [] ) => {
@@ -145,19 +115,19 @@ class ProductByCategoryBlock extends Component {
 							setAttributes( { categories: ids } );
 						} }
 					/>
-					<Button isDefault onClick={ onDone }>
-						{ __( 'Done', 'woo-gutenberg-products-block' ) }
-					</Button>
-				</div>
-			</Placeholder>
+				</PanelBody>
+			</InspectorControls>
 		);
 	}
 
 	render() {
 		const { setAttributes } = this.props;
-		const { columns, align, editMode } = this.props.attributes;
+		const { columns, align } = this.props.attributes;
 		const { loaded, products } = this.state;
-		const classes = [ 'wc-block-products-grid', 'wc-block-products-category' ];
+		const classes = [
+			'wc-block-products-grid',
+			'wc-block-on-sale-products',
+		];
 		if ( columns ) {
 			classes.push( `cols-${ columns }` );
 		}
@@ -177,52 +147,35 @@ class ProductByCategoryBlock extends Component {
 						value={ align }
 						onChange={ ( nextAlign ) => setAttributes( { align: nextAlign } ) }
 					/>
-					<Toolbar
-						controls={ [
-							{
-								icon: 'edit',
-								title: __( 'Edit' ),
-								onClick: () => setAttributes( { editMode: ! editMode } ),
-								isActive: editMode,
-							},
-						] }
-					/>
 				</BlockControls>
 				{ this.getInspectorControls() }
-				{ editMode ? (
-					this.renderEditMode()
-				) : (
-					<div className={ classes.join( ' ' ) }>
-						{ products.length ? (
-							products.map( ( product ) => (
-								<ProductPreview product={ product } key={ product.id } />
-							) )
-						) : (
-							<Placeholder
-								icon="category"
-								label={ __(
-									'Products by Category',
-									'woo-gutenberg-products-block'
-								) }
-							>
-								{ ! loaded ? (
-									<Spinner />
-								) : (
-									__(
-										'No products in this category.',
-										'woo-gutenberg-products-block'
-									)
-								) }
-							</Placeholder>
-						) }
-					</div>
-				) }
+				<div className={ classes.join( ' ' ) }>
+					{ products.length ? (
+						products.map( ( product ) => (
+							<ProductPreview product={ product } key={ product.id } />
+						) )
+					) : (
+						<Placeholder
+							icon={ <Gridicon icon="tag" /> }
+							label={ __(
+								'On Sale Products',
+								'woo-gutenberg-products-block'
+							) }
+						>
+							{ ! loaded ? (
+								<Spinner />
+							) : (
+								__( 'No products found.', 'woo-gutenberg-products-block' )
+							) }
+						</Placeholder>
+					) }
+				</div>
 			</Fragment>
 		);
 	}
 }
 
-ProductByCategoryBlock.propTypes = {
+ProductOnSaleBlock.propTypes = {
 	/**
 	 * The attributes for this block
 	 */
@@ -235,10 +188,6 @@ ProductByCategoryBlock.propTypes = {
 	 * A callback to update attributes
 	 */
 	setAttributes: PropTypes.func.isRequired,
-	// from withSpokenMessages
-	debouncedSpeak: PropTypes.func.isRequired,
 };
 
-export default withSpokenMessages(
-	ProductByCategoryBlock
-);
+export default ProductOnSaleBlock;
