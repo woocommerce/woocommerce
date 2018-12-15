@@ -225,7 +225,7 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
 		const datesFromQuery = getCurrentDates( query );
-		const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-api' );
+		const { getReportStats, getReportStatsError, isReportStatsRequesting } = select( 'wc-api' );
 
 		// TODO Support hour here when viewing a single day
 		const tableQuery = {
@@ -238,7 +238,7 @@ export default compose(
 			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
 		};
 		const revenueData = getReportStats( 'revenue', tableQuery );
-		const isError = isReportStatsError( 'revenue', tableQuery );
+		const isError = Boolean( getReportStatsError( 'revenue', tableQuery ) );
 		const isRequesting = isReportStatsRequesting( 'revenue', tableQuery );
 
 		return {

@@ -262,7 +262,7 @@ export default compose(
 		const datesFromQuery = getCurrentDates( query );
 		const filterQuery = getFilterQuery( 'orders', query );
 
-		const { getOrders, getOrdersTotalCount, isGetOrdersError, isGetOrdersRequesting } = select(
+		const { getOrders, getOrdersTotalCount, getOrdersError, isGetOrdersRequesting } = select(
 			'wc-api'
 		);
 
@@ -278,7 +278,7 @@ export default compose(
 		};
 		const orders = getOrders( tableQuery );
 		const ordersTotalCount = getOrdersTotalCount( tableQuery );
-		const isError = isGetOrdersError( tableQuery );
+		const isError = Boolean( getOrdersError( tableQuery ) );
 		const isRequesting = isGetOrdersRequesting( tableQuery );
 
 		return {

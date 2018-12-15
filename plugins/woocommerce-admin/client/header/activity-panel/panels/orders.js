@@ -178,7 +178,7 @@ OrdersPanel.defaultProps = {
 
 export default compose(
 	withSelect( select => {
-		const { getOrders, isGetOrdersError, isGetOrdersRequesting } = select( 'wc-api' );
+		const { getOrders, getOrdersError, isGetOrdersRequesting } = select( 'wc-api' );
 		const ordersQuery = {
 			page: 1,
 			per_page: QUERY_DEFAULTS.pageSize,
@@ -186,7 +186,7 @@ export default compose(
 		};
 
 		const orders = getOrders( ordersQuery );
-		const isError = isGetOrdersError( ordersQuery );
+		const isError = Boolean( getOrdersError( ordersQuery ) );
 		const isRequesting = isGetOrdersRequesting( ordersQuery );
 
 		return { orders, isError, isRequesting };

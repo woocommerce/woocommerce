@@ -89,7 +89,7 @@ class InboxPanel extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getNotes, isGetNotesError, isGetNotesRequesting } = select( 'wc-api' );
+		const { getNotes, getNotesError, isGetNotesRequesting } = select( 'wc-api' );
 		const inboxQuery = {
 			page: 1,
 			per_page: QUERY_DEFAULTS.pageSize,
@@ -97,7 +97,7 @@ export default compose(
 		};
 
 		const notes = getNotes( inboxQuery );
-		const isError = isGetNotesError( inboxQuery );
+		const isError = Boolean( getNotesError( inboxQuery ) );
 		const isRequesting = isGetNotesRequesting( inboxQuery );
 
 		return { notes, isError, isRequesting };
