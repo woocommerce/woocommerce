@@ -179,13 +179,15 @@ registerBlockType( 'woocommerce/product-on-sale', {
 		},
 	},
 	getEditWrapperProps,
- 	/**
+
+	/**
 	 * Renders and manages the block.
 	 */
 	edit( props ) {
 		return <ProductOnSaleBlock { ...props } />;
 	},
- 	/**
+
+	/**
 	 * Save the block content in the post content. Block content is saved as a products shortcode.
 	 *
 	 * @return string
