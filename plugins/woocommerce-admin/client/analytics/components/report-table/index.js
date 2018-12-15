@@ -90,7 +90,7 @@ ReportTable.propTypes = {
 	 * the data returned by the reports endpoint will be used.
 	 */
 	extendItemsMethodNames: PropTypes.shape( {
-		isError: PropTypes.string,
+		getError: PropTypes.string,
 		isRequesting: PropTypes.string,
 		load: PropTypes.string,
 	} ),

@@ -17,7 +17,7 @@ export function extendTableData( select, props, queriedTableData ) {
 	}
 
 	const {
-		[ extendItemsMethodNames.isError ]: isErrorMethod,
+		[ extendItemsMethodNames.getError ]: getErrorMethod,
 		[ extendItemsMethodNames.isRequesting ]: isRequestingMethod,
 		[ extendItemsMethodNames.load ]: loadMethod,
 	} = select( 'wc-api' );
@@ -27,7 +27,7 @@ export function extendTableData( select, props, queriedTableData ) {
 	};
 	const extendedItems = loadMethod( extendQuery );
 	const isExtendedItemsRequesting = isRequestingMethod ? isRequestingMethod( extendQuery ) : false;
-	const isExtendedItemsError = isErrorMethod ? isErrorMethod( extendQuery ) : false;
+	const isExtendedItemsError = getErrorMethod ? getErrorMethod( extendQuery ) : false;
 
 	const extendedItemsData = itemsData.map( item => {
 		const extendedItemData = first(
