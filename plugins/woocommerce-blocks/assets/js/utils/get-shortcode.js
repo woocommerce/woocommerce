@@ -30,7 +30,7 @@ export default function getShortcode( { attributes }, name ) {
 			shortcodeAtts.set( 'best_selling', '1' );
 			break;
 		case 'woocommerce/product-top-rated':
-			shortcodeAtts.set( 'orderby', 'rating', '1' );
+			shortcodeAtts.set( 'orderby', 'rating');
 			break;
 	}
 
