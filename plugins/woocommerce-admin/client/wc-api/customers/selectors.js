@@ -20,6 +20,11 @@ const getCustomers = ( getResource, requireResource ) => (
 	return ids.map( id => getResource( getResourceName( 'customer', id ) ).data || {} );
 };
 
+const getCustomersError = getResource => ( query = {} ) => {
+	const resourceName = getResourceName( 'customers-query', query );
+	return getResource( resourceName ).error;
+};
+
 const isGetCustomersRequesting = getResource => ( query = {} ) => {
 	const resourceName = getResourceName( 'customers-query', query );
 	const { lastRequested, lastReceived } = getResource( resourceName );
@@ -31,13 +36,8 @@ const isGetCustomersRequesting = getResource => ( query = {} ) => {
 	return lastRequested > lastReceived;
 };
 
-const isGetCustomersError = getResource => ( query = {} ) => {
-	const resourceName = getResourceName( 'customers-query', query );
-	return getResource( resourceName ).error;
-};
-
 export default {
 	getCustomers,
+	getCustomersError,
 	isGetCustomersRequesting,
-	isGetCustomersError,
 };

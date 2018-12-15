@@ -177,7 +177,7 @@ export default class CustomersReportTable extends Component {
 				endpoint="customers"
 				extendItemsMethodNames={ {
 					load: 'getCustomers',
-					isError: 'isGetCustomersError',
+					isError: 'getCustomersError',
 					isRequesting: 'isGetCustomersRequesting',
 				} }
 				getHeadersContent={ this.getHeadersContent }
