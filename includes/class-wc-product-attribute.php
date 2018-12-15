@@ -211,7 +211,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	/**
 	 * Get name.
 	 *
-	 * @return int
+	 * @return string
 	 */
 	public function get_name() {
 		return $this->data['name'];
