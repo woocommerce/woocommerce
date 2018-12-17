@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import './style.scss';
-import { CheckedIcon, UncheckedIcon } from '../search-list-control/icons';
+import { IconChecked, IconUnchecked } from '../icons';
 import SearchListControl from '../search-list-control';
 
 class ProductCategoryControl extends Component {
@@ -92,7 +92,7 @@ class ProductCategoryControl extends Component {
 				) }
 			>
 				<span className="woocommerce-search-list__item-state">
-					{ isSelected ? <CheckedIcon /> : <UncheckedIcon /> }
+					{ isSelected ? <IconChecked /> : <IconUnchecked /> }
 				</span>
 				<span className="woocommerce-product-categories__item-label">
 					{ !! item.breadcrumbs.length && (
