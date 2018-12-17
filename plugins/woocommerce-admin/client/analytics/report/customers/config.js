@@ -105,6 +105,37 @@ export const advancedFilters = {
 				},
 			},
 		},
+		username: {
+			labels: {
+				add: __( 'Username', 'wc-admin' ),
+				placeholder: __( 'Search customer username', 'wc-admin' ),
+				remove: __( 'Remove customer username filter', 'wc-admin' ),
+				rule: __( 'Select a customer username filter match', 'wc-admin' ),
+				/* translators: A sentence describing a customer username filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
+				title: __( 'Username {{rule /}} {{filter /}}', 'wc-admin' ),
+				filter: __( 'Select customer username', 'wc-admin' ),
+			},
+			rules: [
+				{
+					value: 'includes',
+					/* translators: Sentence fragment, logical, "Includes" refers to customer usernames including a given username(s). Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'Includes', 'customer usernames', 'wc-admin' ),
+				},
+				{
+					value: 'excludes',
+					/* translators: Sentence fragment, logical, "Excludes" refers to customer usernames excluding a given username(s). Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'Excludes', 'customer usernames', 'wc-admin' ),
+				},
+			],
+			input: {
+				component: 'Search',
+				type: 'usernames',
+				getLabels: getRequestByIdString( NAMESPACE + 'customers', customer => ( {
+					id: customer.id,
+					label: customer.username,
+				} ) ),
+			},
+		},
 		email: {
 			labels: {
 				add: __( 'Email', 'wc-admin' ),

@@ -4,6 +4,7 @@
 - Add `onColumnsChange` property to `<Table />` which is called when columns are shown/hidden
 - Add country autocompleter to search component
 - Add customer email autocompleter to search component
+- Add customer username autocompleter to search component
 - Adding new `<Chart />` component.
 - Added new `showDatePicker` prop to `<Filters />` component which allows to use the filters component without the date picker.
 - Added new taxes and customers autocompleters, and added support for using them within `<Filters />`.
