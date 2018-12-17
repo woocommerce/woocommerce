@@ -133,6 +133,8 @@ class Search extends Component {
 			'aria-labelledby': this.props[ 'aria-labelledby' ],
 			'aria-label': this.props[ 'aria-label' ],
 		};
+		const shouldRenderTags = this.shouldRenderTags();
+
 		return (
 			<div className={ classnames( 'woocommerce-search', className ) }>
 				<Gridicon className="woocommerce-search__icon" icon="search" size={ 18 } />
@@ -167,7 +169,7 @@ class Search extends Component {
 											value.length ) + 1
 									}
 									value={ value }
-									placeholder={ ( ! this.shouldRenderTags() && placeholder ) || '' }
+									placeholder={ ( ! shouldRenderTags && placeholder ) || '' }
 									className="woocommerce-search__inline-input"
 									onChange={ this.updateSearch( onChange ) }
 									aria-owns={ listBoxId }
@@ -175,7 +177,7 @@ class Search extends Component {
 									onFocus={ this.onFocus }
 									onBlur={ this.onBlur }
 									aria-describedby={
-										this.shouldRenderTags() ? `search-inline-input-${ instanceId }` : null
+										shouldRenderTags ? `search-inline-input-${ instanceId }` : null
 									}
 									{ ...aria }
 								/>
