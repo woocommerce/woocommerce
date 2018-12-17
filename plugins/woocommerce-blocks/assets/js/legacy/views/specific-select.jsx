@@ -348,13 +348,15 @@ class ProductSpecificSearchResultsDropdownElement extends Component {
 	render() {
 		const product = this.props.product;
 		const icon = this.props.selected ? <Dashicon icon="yes" /> : null;
+		const productImage = product.images.length !== 0 ? 
+			(<img src={ product.images[ 0 ].src } alt={ product.name } />) : null;
 
 		/* eslint-disable jsx-a11y/click-events-have-key-events */
 		/* eslint-disable jsx-a11y/no-static-element-interactions */
 		/* reason: This interface will be deprecated, the new component is accessible. */
 		return (
 			<div className={ 'wc-products-list-card__content' + ( this.props.selected ? ' wc-products-list-card__content--added' : '' ) } onClick={ this.handleClick }>
-				<img src={ product.images[ 0 ].src } alt="" />
+				{ productImage }
 				<span className="wc-products-list-card__content-item-name">{ product.name }</span>
 				{ icon }
 			</div>
@@ -458,11 +460,13 @@ class ProductSpecificSelectedProducts extends Component {
 			}
 
 			const productData = PRODUCT_DATA[ productId ];
+			const productImage = productData.images.length !== 0 ? 
+				(<img src={ productData.images[ 0 ].src } alt={ productData.name } />) : null;
 
 			productElements.push(
 				<li className="wc-products-list-card__item" key={ productData.id + '-specific-select-edit' } >
 					<div className="wc-products-list-card__content">
-						<img src={ productData.images[ 0 ].src } alt="" />
+						{ productImage }
 						<span className="wc-products-list-card__content-item-name">{ productData.name }</span>
 						<button
 							type="button"
