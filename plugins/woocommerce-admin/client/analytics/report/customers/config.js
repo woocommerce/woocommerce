@@ -4,8 +4,12 @@
  */
 import { __, _x } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
-import { getRequestByIdString } from '../../../lib/async-requests';
-import { NAMESPACE } from '../../../store/constants';
+
+/**
+ * Internal dependencies
+ */
+import { getRequestByIdString } from 'lib/async-requests';
+import { NAMESPACE } from 'store/constants';
 
 export const filters = [
 	{

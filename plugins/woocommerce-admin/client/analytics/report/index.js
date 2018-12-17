@@ -24,6 +24,7 @@ import RevenueReport from './revenue';
 import CategoriesReport from './categories';
 import CouponsReport from './coupons';
 import TaxesReport from './taxes';
+import DownloadsReport from './downloads';
 import StockReport from './stock';
 import CustomersReport from './customers';
 
@@ -60,6 +61,11 @@ const getReports = () => {
 			report: 'taxes',
 			title: __( 'Taxes', 'wc-admin' ),
 			component: TaxesReport,
+		},
+		{
+			report: 'downloads',
+			title: __( 'Downloads', 'wc-admin' ),
+			component: DownloadsReport,
 		},
 		{
 			report: 'stock',
