@@ -231,7 +231,7 @@ Search.propTypes = {
 	placeholder: PropTypes.string,
 	/**
 	 * An array of objects describing selected values. If the label of the selected
-	 * value is ommitted, the Tag of that value will not be rendered inside the
+	 * value is omitted, the Tag of that value will not be rendered inside the
 	 * search box.
 	 */
 	selected: PropTypes.arrayOf(
