@@ -808,12 +808,12 @@ function wc_get_min_max_price_meta_query( $args ) {
 		$max = $class_max;
 	}
 
-	return array(
+	return apply_filters( 'woocommerce_get_min_max_price_meta_query', array(
 		'key'     => '_price',
 		'value'   => array( $min, $max ),
 		'compare' => 'BETWEEN',
 		'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
-	);
+	), $args );
 }
 
 /**
