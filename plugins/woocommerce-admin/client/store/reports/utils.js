@@ -141,7 +141,7 @@ function getRequestQuery( endpoint, dataType, query ) {
  * @return {Object}  Object containing summary number responses.
  */
 export function getSummaryNumbers( endpoint, query, select ) {
-	const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-api' );
+	const { getReportStats, getReportStatsError, isReportStatsRequesting } = select( 'wc-api' );
 	const response = {
 		isRequesting: false,
 		isError: false,
@@ -155,7 +155,7 @@ export function getSummaryNumbers( endpoint, query, select ) {
 	const primary = getReportStats( endpoint, primaryQuery );
 	if ( isReportStatsRequesting( endpoint, primaryQuery ) ) {
 		return { ...response, isRequesting: true };
-	} else if ( isReportStatsError( endpoint, primaryQuery ) ) {
+	} else if ( getReportStatsError( endpoint, primaryQuery ) ) {
 		return { ...response, isError: true };
 	}
 
@@ -165,7 +165,7 @@ export function getSummaryNumbers( endpoint, query, select ) {
 	const secondary = getReportStats( endpoint, secondaryQuery );
 	if ( isReportStatsRequesting( endpoint, secondaryQuery ) ) {
 		return { ...response, isRequesting: true };
-	} else if ( isReportStatsError( endpoint, secondaryQuery ) ) {
+	} else if ( getReportStatsError( endpoint, secondaryQuery ) ) {
 		return { ...response, isError: true };
 	}
 
@@ -184,7 +184,7 @@ export function getSummaryNumbers( endpoint, query, select ) {
  * @return {Object}  Object containing API request information (response, fetching, and error details)
  */
 export function getReportChartData( endpoint, dataType, query, select ) {
-	const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-api' );
+	const { getReportStats, getReportStatsError, isReportStatsRequesting } = select( 'wc-api' );
 
 	const response = {
 		isEmpty: false,
@@ -201,7 +201,7 @@ export function getReportChartData( endpoint, dataType, query, select ) {
 
 	if ( isReportStatsRequesting( endpoint, requestQuery ) ) {
 		return { ...response, isRequesting: true };
-	} else if ( isReportStatsError( endpoint, requestQuery ) ) {
+	} else if ( getReportStatsError( endpoint, requestQuery ) ) {
 		return { ...response, isError: true };
 	} else if ( isReportDataEmpty( stats ) ) {
 		return { ...response, isEmpty: true };
@@ -224,7 +224,7 @@ export function getReportChartData( endpoint, dataType, query, select ) {
 			if ( isReportStatsRequesting( endpoint, nextQuery ) ) {
 				continue;
 			}
-			if ( isReportStatsError( endpoint, nextQuery ) ) {
+			if ( getReportStatsError( endpoint, nextQuery ) ) {
 				isError = true;
 				isFetching = false;
 				break;
@@ -298,7 +298,7 @@ export function getReportTableQuery( endpoint, urlQuery, query ) {
  * @return {Object} Object    Table data response
  */
 export function getReportTableData( endpoint, urlQuery, select, query = {} ) {
-	const { getReportItems, isReportItemsRequesting, isReportItemsError } = select( 'wc-api' );
+	const { getReportItems, getReportItemsError, isReportItemsRequesting } = select( 'wc-api' );
 
 	const tableQuery = reportsUtils.getReportTableQuery( endpoint, urlQuery, query );
 	const response = {
@@ -313,7 +313,7 @@ export function getReportTableData( endpoint, urlQuery, select, query = {} ) {
 	const items = getReportItems( endpoint, tableQuery );
 	if ( isReportItemsRequesting( endpoint, tableQuery ) ) {
 		return { ...response, isRequesting: true };
-	} else if ( isReportItemsError( endpoint, tableQuery ) ) {
+	} else if ( getReportItemsError( endpoint, tableQuery ) ) {
 		return { ...response, isError: true };
 	}
 

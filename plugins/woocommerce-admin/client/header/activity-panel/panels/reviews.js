@@ -172,7 +172,7 @@ ReviewsPanel.defaultProps = {
 
 export default compose(
 	withSelect( select => {
-		const { getReviews, isGetReviewsError, isGetReviewsRequesting } = select( 'wc-api' );
+		const { getReviews, getReviewsError, isGetReviewsRequesting } = select( 'wc-api' );
 		const reviewsQuery = {
 			page: 1,
 			per_page: QUERY_DEFAULTS.pageSize,
@@ -180,7 +180,7 @@ export default compose(
 		};
 
 		const reviews = getReviews( reviewsQuery );
-		const isError = isGetReviewsError( reviewsQuery );
+		const isError = Boolean( getReviewsError( reviewsQuery ) );
 		const isRequesting = isGetReviewsRequesting( reviewsQuery );
 
 		return { reviews, isError, isRequesting };

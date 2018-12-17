@@ -21,6 +21,11 @@ const getNotes = ( getResource, requireResource ) => (
 	return notes;
 };
 
+const getNotesError = getResource => ( query = {} ) => {
+	const resourceName = getResourceName( 'note-query', query );
+	return getResource( resourceName ).error;
+};
+
 const isGetNotesRequesting = getResource => ( query = {} ) => {
 	const resourceName = getResourceName( 'note-query', query );
 	const { lastRequested, lastReceived } = getResource( resourceName );
@@ -36,13 +41,8 @@ const isGetNotesRequesting = getResource => ( query = {} ) => {
 	return lastRequested > lastReceived;
 };
 
-const isGetNotesError = getResource => ( query = {} ) => {
-	const resourceName = getResourceName( 'note-query', query );
-	return getResource( resourceName ).error;
-};
-
 export default {
 	getNotes,
+	getNotesError,
 	isGetNotesRequesting,
-	isGetNotesError,
 };
