@@ -8,7 +8,6 @@ import { LiveError, LivePreview, LiveProvider } from 'react-live';
 // Used to provide scope in LivePreview
 import { addFilter } from '@wordpress/hooks';
 import { withState } from '@wordpress/compose';
-import { __experimentalGetSettings } from '@wordpress/date';
 import * as wpComponents from '@wordpress/components';
 import Gridicon from 'gridicons';
 import PropTypes from 'prop-types';
@@ -59,7 +58,6 @@ class Example extends Component {
 			...pkgComponents,
 			Component,
 			withState,
-			getSettings: __experimentalGetSettings,
 			PropTypes,
 			addFilter,
 			Gridicon,
