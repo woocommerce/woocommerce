@@ -22,7 +22,7 @@ import { Tag } from '@woocommerce/components';
  */
 import './style.scss';
 import { buildTermsTree } from './hierarchy';
-import { CheckedIcon, UncheckedIcon } from './icons';
+import { IconChecked, IconUnchecked } from '../icons';
 
 const defaultMessages = {
 	clear: __( 'Clear all selected items', 'woo-gutenberg-products-block' ),
@@ -121,7 +121,7 @@ export class SearchListControl extends Component {
 				isSelected={ isSelected }
 			>
 				<span className="woocommerce-search-list__item-state">
-					{ isSelected ? <CheckedIcon /> : <UncheckedIcon /> }
+					{ isSelected ? <IconChecked /> : <IconUnchecked /> }
 				</span>
 				<span
 					className="woocommerce-search-list__item-name"
