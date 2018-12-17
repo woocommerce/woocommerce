@@ -101,6 +101,37 @@ export const advancedFilters = {
 				},
 			},
 		},
+		email: {
+			labels: {
+				add: __( 'Email', 'wc-admin' ),
+				placeholder: __( 'Search customer email', 'wc-admin' ),
+				remove: __( 'Remove customer email filter', 'wc-admin' ),
+				rule: __( 'Select a customer email filter match', 'wc-admin' ),
+				/* translators: A sentence describing a customer email filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
+				title: __( 'Email {{rule /}} {{filter /}}', 'wc-admin' ),
+				filter: __( 'Select customer email', 'wc-admin' ),
+			},
+			rules: [
+				{
+					value: 'includes',
+					/* translators: Sentence fragment, logical, "Includes" refers to customer emails including a given email(s). Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'Includes', 'customer emails', 'wc-admin' ),
+				},
+				{
+					value: 'excludes',
+					/* translators: Sentence fragment, logical, "Excludes" refers to customer emails excluding a given email(s). Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'Excludes', 'customer emails', 'wc-admin' ),
+				},
+			],
+			input: {
+				component: 'Search',
+				type: 'emails',
+				getLabels: getRequestByIdString( NAMESPACE + 'customers', customer => ( {
+					id: customer.id,
+					label: customer.email,
+				} ) ),
+			},
+		},
 	},
 };
 /*eslint-enable max-len*/
