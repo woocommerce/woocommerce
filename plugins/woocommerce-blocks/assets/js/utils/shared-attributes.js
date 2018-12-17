@@ -29,4 +29,12 @@ export default {
 		type: 'array',
 		default: [],
 	},
+
+	/**
+	 * Product category operator, used to restrict to products in all or any selected categories.
+	 */
+	catOperator: {
+		type: 'string',
+		default: 'any',
+	},
 };

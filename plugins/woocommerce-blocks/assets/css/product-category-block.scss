@@ -60,6 +60,7 @@
 	.woocommerce-search-list {
 		padding: 0;
 	}
+
 	.woocommerce-search-list__selected {
 		margin: 0 0 $gap;
 		padding: 0;
@@ -67,9 +68,19 @@
 		// 54px is the height of 1 row of tags in the sidebar.
 		min-height: 54px;
 	}
+
 	.woocommerce-search-list__search {
 		margin: 0 0 $gap;
 		padding: 0;
 		border-top: none;
+	}
+
+	.woocommerce-product-categories__operator.components-base-control {
+		margin-top: $gap;
+
+		.components-select-control__input {
+			margin-left: 0;
+			min-width: 100%;
+		}
 	}
 }

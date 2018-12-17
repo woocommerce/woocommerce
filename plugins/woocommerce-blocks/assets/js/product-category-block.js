@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import { Component, Fragment } from '@wordpress/element';
@@ -48,7 +48,7 @@ class ProductByCategoryBlock extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const hasChange = [ 'rows', 'columns', 'orderby', 'categories' ].reduce(
+		const hasChange = [ 'categories', 'catOperator', 'columns', 'orderby', 'rows' ].reduce(
 			( acc, key ) => {
 				return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
 			},
@@ -73,7 +73,7 @@ class ProductByCategoryBlock extends Component {
 
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
-		const { columns, orderby, rows } = attributes;
+		const { columns, catOperator, orderby, rows } = attributes;
 
 		return (
 			<InspectorControls key="inspector">
@@ -87,6 +87,8 @@ class ProductByCategoryBlock extends Component {
 							const ids = value.map( ( { id } ) => id );
 							setAttributes( { categories: ids } );
 						} }
+						operator={ catOperator }
+						onOperatorChange={ ( value = 'any' ) => setAttributes( { catOperator: value } ) }
 					/>
 				</PanelBody>
 				<PanelBody
@@ -144,6 +146,8 @@ class ProductByCategoryBlock extends Component {
 							const ids = value.map( ( { id } ) => id );
 							setAttributes( { categories: ids } );
 						} }
+						operator={ attributes.catOperator }
+						onOperatorChange={ ( value = 'any' ) => setAttributes( { catOperator: value } ) }
 					/>
 					<Button isDefault onClick={ onDone }>
 						{ __( 'Done', 'woo-gutenberg-products-block' ) }
@@ -155,7 +159,7 @@ class ProductByCategoryBlock extends Component {
 
 	render() {
 		const { setAttributes } = this.props;
-		const { columns, align, editMode } = this.props.attributes;
+		const { align, categories, columns, editMode } = this.props.attributes;
 		const { loaded, products } = this.state;
 		const classes = [ 'wc-block-products-grid', 'wc-block-products-category' ];
 		if ( columns ) {
@@ -208,8 +212,10 @@ class ProductByCategoryBlock extends Component {
 								{ ! loaded ? (
 									<Spinner />
 								) : (
-									__(
+									_n(
 										'No products in this category.',
+										'No products in these categories.',
+										categories.length,
 										'woo-gutenberg-products-block'
 									)
 								) }

@@ -1,5 +1,5 @@
 export default function getShortcode( { attributes }, name ) {
-	const { rows, columns, categories, orderby } = attributes;
+	const { categories, catOperator, columns, orderby, rows } = attributes;
 
 	const shortcodeAtts = new Map();
 	shortcodeAtts.set( 'limit', rows * columns );
@@ -7,6 +7,9 @@ export default function getShortcode( { attributes }, name ) {
 
 	if ( categories && categories.length ) {
 		shortcodeAtts.set( 'category', categories.join( ',' ) );
+		if ( catOperator && 'all' === catOperator ) {
+			shortcodeAtts.set( 'cat_operator', 'AND' );
+		}
 	}
 
 	if ( orderby ) {

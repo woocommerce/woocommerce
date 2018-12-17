@@ -43,9 +43,12 @@ class ProductBestSellersBlock extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const hasChange = [ 'rows', 'columns', 'categories' ].reduce( ( acc, key ) => {
-			return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
-		}, false );
+		const hasChange = [ 'categories', 'catOperator', 'columns', 'rows' ].reduce(
+			( acc, key ) => {
+				return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
+			},
+			false
+		);
 		if ( hasChange ) {
 			this.getProducts();
 		}
@@ -68,7 +71,7 @@ class ProductBestSellersBlock extends Component {
 
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
-		const { columns, rows } = attributes;
+		const { categories, catOperator, columns, rows } = attributes;
 
 		return (
 			<InspectorControls key="inspector">
@@ -99,11 +102,15 @@ class ProductBestSellersBlock extends Component {
 					initialOpen={ false }
 				>
 					<ProductCategoryControl
-						selected={ attributes.categories }
+						selected={ categories }
 						onChange={ ( value = [] ) => {
 							const ids = value.map( ( { id } ) => id );
 							setAttributes( { categories: ids } );
 						} }
+						operator={ catOperator }
+						onOperatorChange={ ( value = 'any' ) =>
+							setAttributes( { catOperator: value } )
+						}
 					/>
 				</PanelBody>
 			</InspectorControls>

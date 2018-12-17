@@ -5,7 +5,8 @@
 
 // Think very carefully before adding a new breakpoint.
 // The list below is based on wp-admin's main breakpoints
-$breakpoints: 320px, 400px, 600px, 782px, 960px, 1280px, 1440px;
+// See https://github.com/WordPress/gutenberg/tree/master/packages/viewport#breakpoints
+$breakpoints: 480px, 600px, 782px, 960px, 1280px, 1440px;
 
 @mixin breakpoint( $sizes... ) {
 	@each $size in $sizes {

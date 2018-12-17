@@ -1,5 +1,5 @@
 export default function getQuery( attributes, name ) {
-	const { categories, columns, orderby, rows } = attributes;
+	const { categories, catOperator, columns, orderby, rows } = attributes;
 
 	const query = {
 		status: 'publish',
@@ -8,6 +8,9 @@ export default function getQuery( attributes, name ) {
 
 	if ( categories && categories.length ) {
 		query.category = categories.join( ',' );
+		if ( catOperator && 'all' === catOperator ) {
+			query.cat_operator = 'AND';
+		}
 	}
 
 	if ( orderby ) {
