@@ -73,3 +73,25 @@
 		background: $white;
 	}
 }
+
+.woocommerce-product-categories__operator {
+	margin-bottom: $gap;
+	text-align: left;
+
+	.components-base-control__label,
+	.components-select-control__input {
+		display: inline-block;
+		margin-bottom: 0;
+	}
+
+	.components-select-control__input {
+		margin-left: $gap;
+		width: auto;
+		min-width: 15em;
+
+		@include breakpoint( '<480px' ) {
+			margin-left: 0;
+			min-width: 100%;
+		}
+	}
+}

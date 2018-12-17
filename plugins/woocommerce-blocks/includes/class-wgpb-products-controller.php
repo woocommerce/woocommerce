@@ -230,14 +230,23 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 	protected function prepare_objects_query( $request ) {
 		$args = parent::prepare_objects_query( $request );
 
-		$orderby = $request->get_param( 'orderby' );
-		$order   = $request->get_param( 'order' );
+		$orderby      = $request->get_param( 'orderby' );
+		$order        = $request->get_param( 'order' );
+		$cat_operator = $request->get_param( 'cat_operator' );
 
 		$ordering_args   = WC()->query->get_catalog_ordering_args( $orderby, $order );
 		$args['orderby'] = $ordering_args['orderby'];
 		$args['order']   = $ordering_args['order'];
 		if ( $ordering_args['meta_key'] ) {
 			$args['meta_key'] = $ordering_args['meta_key']; // WPCS: slow query ok.
+		}
+
+		if ( $cat_operator && isset( $args['tax_query'] ) ) {
+			foreach ( $args['tax_query'] as $i => $tax_query ) {
+				if ( 'product_cat' === $tax_query['taxonomy'] ) {
+					$args['tax_query'][ $i ]['operator'] = $cat_operator;
+				}
+			}
 		}
 
 		return $args;
@@ -266,13 +275,22 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 	}
 
 	/**
-	 * Add new options for 'orderby' to the collection params.
+	 * Update the collection params.
+	 *
+	 * Adds new options for 'orderby', and new parameter 'cat_operator'.
 	 *
 	 * @return array
 	 */
 	public function get_collection_params() {
 		$params                    = parent::get_collection_params();
 		$params['orderby']['enum'] = array_merge( $params['orderby']['enum'], array( 'price', 'popularity', 'rating', 'menu_order' ) );
+		$params['cat_operator']    = array(
+			'description'       => __( 'Operator to compare product category terms.', 'woo-gutenberg-products-block' ),
+			'type'              => 'string',
+			'enum'              => array( 'IN', 'NOT IN', 'AND' ),
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 		return $params;
 	}
 

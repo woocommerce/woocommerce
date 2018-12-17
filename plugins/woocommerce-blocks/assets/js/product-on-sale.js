@@ -44,12 +44,15 @@ class ProductOnSaleBlock extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const hasChange = [ 'rows', 'columns', 'orderby', 'categories' ].reduce(
-			( acc, key ) => {
-				return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
-			},
-			false
-		);
+		const hasChange = [
+			'categories',
+			'catOperator',
+			'columns',
+			'orderby',
+			'rows',
+		].reduce( ( acc, key ) => {
+			return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
+		}, false );
 		if ( hasChange ) {
 			this.getProducts();
 		}
@@ -72,7 +75,7 @@ class ProductOnSaleBlock extends Component {
 
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
-		const { columns, rows, orderby } = attributes;
+		const { categories, catOperator, columns, rows, orderby } = attributes;
 
 		return (
 			<InspectorControls key="inspector">
@@ -99,7 +102,10 @@ class ProductOnSaleBlock extends Component {
 					title={ __( 'Order By', 'woo-gutenberg-products-block' ) }
 					initialOpen={ false }
 				>
-					<ProductOrderbyControl setAttributes={ setAttributes } value={ orderby } />
+					<ProductOrderbyControl
+						setAttributes={ setAttributes }
+						value={ orderby }
+					/>
 				</PanelBody>
 				<PanelBody
 					title={ __(
@@ -109,11 +115,15 @@ class ProductOnSaleBlock extends Component {
 					initialOpen={ false }
 				>
 					<ProductCategoryControl
-						selected={ attributes.categories }
+						selected={ categories }
 						onChange={ ( value = [] ) => {
 							const ids = value.map( ( { id } ) => id );
 							setAttributes( { categories: ids } );
 						} }
+						operator={ catOperator }
+						onOperatorChange={ ( value = 'any' ) =>
+							setAttributes( { catOperator: value } )
+						}
 					/>
 				</PanelBody>
 			</InspectorControls>
@@ -124,10 +134,7 @@ class ProductOnSaleBlock extends Component {
 		const { setAttributes } = this.props;
 		const { columns, align } = this.props.attributes;
 		const { loaded, products } = this.state;
-		const classes = [
-			'wc-block-products-grid',
-			'wc-block-on-sale-products',
-		];
+		const classes = [ 'wc-block-products-grid', 'wc-block-on-sale-products' ];
 		if ( columns ) {
 			classes.push( `cols-${ columns }` );
 		}
@@ -157,10 +164,7 @@ class ProductOnSaleBlock extends Component {
 					) : (
 						<Placeholder
 							icon={ <Gridicon icon="tag" /> }
-							label={ __(
-								'On Sale Products',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'On Sale Products', 'woo-gutenberg-products-block' ) }
 						>
 							{ ! loaded ? (
 								<Spinner />
