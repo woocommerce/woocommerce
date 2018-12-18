@@ -1,3 +1,7 @@
+# 1.0.4
+
+- Remove deprecated @wordpress/date::getSettings() usage.
+
 # 1.0.3
 
 - Fix missing comma seperator in date inside tooltips.
