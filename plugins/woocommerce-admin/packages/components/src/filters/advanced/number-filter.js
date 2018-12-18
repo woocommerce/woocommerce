@@ -67,14 +67,14 @@ class NumberFilter extends Component {
 					suffix={ <span dangerouslySetInnerHTML={ { __html: currencySymbol } } /> }
 					className="woocommerce-filters-advanced__input"
 					type="number"
-					value={ value }
+					value={ value || '' }
 					onChange={ onChange }
 				/>
 				: <TextControlWithAffixes
 					prefix={ <span dangerouslySetInnerHTML={ { __html: currencySymbol } } /> }
 					className="woocommerce-filters-advanced__input"
 					type="number"
-					value={ value }
+					value={ value || '' }
 					onChange={ onChange }
 				/>
 			);
@@ -84,7 +84,7 @@ class NumberFilter extends Component {
 			<TextControl
 				className="woocommerce-filters-advanced__input"
 				type="number"
-				value={ value }
+				value={ value || '' }
 				onChange={ onChange }
 			/>
 		);
