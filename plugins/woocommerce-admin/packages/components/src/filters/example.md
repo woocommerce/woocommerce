@@ -93,7 +93,7 @@ const advancedFilters = {
 				add: 'Item Quantity',
 				remove: 'Remove item quantity filter',
 				rule: 'Select an item quantity filter match',
-				title: '{{ariaHide}}Item Quantity is {{/ariaHide}}{{rule /}} {{filter /}}',
+				title: 'Item Quantity is {{rule /}} {{filter /}}',
 			},
 			rules: [
 				{

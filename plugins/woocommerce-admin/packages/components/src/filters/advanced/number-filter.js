@@ -14,6 +14,7 @@ import { sprintf, __, _x } from '@wordpress/i18n';
  */
 import TextControlWithAffixes from '../../text-control-with-affixes';
 import { formatCurrency } from '@woocommerce/currency';
+import { ariaHideStrings } from './utils';
 
 class NumberFilter extends Component {
 	getBetweenString() {
@@ -58,7 +59,6 @@ class NumberFilter extends Component {
 		return interpolateComponents( {
 			mixedString: config.labels.title,
 			components: {
-				ariaHide: <span />,
 				filter: <span>{ filterStr }</span>,
 				rule: <span>{ rule.label }</span>,
 			},
@@ -187,10 +187,9 @@ class NumberFilter extends Component {
 		const { key, rule } = filter;
 		const { labels, rules } = config;
 
-		const children = interpolateComponents( {
+		const children = ariaHideStrings( interpolateComponents( {
 			mixedString: labels.title,
 			components: {
-				ariaHide: <span aria-hidden />,
 				rule: (
 					<SelectControl
 						className="woocommerce-filters-advanced__rule"
@@ -210,7 +209,7 @@ class NumberFilter extends Component {
 					</div>
 				),
 			},
-		} );
+		} ) );
 		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (
 			<fieldset tabIndex="0">
