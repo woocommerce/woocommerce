@@ -502,7 +502,7 @@ class WC_Query {
 				break;
 		}
 
-		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args );
+		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args, $orderby, $order );
 	}
 
 	/**
