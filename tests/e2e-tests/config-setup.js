@@ -11,7 +11,7 @@ const assert = chai.assert;
 let manager;
 let driver;
 
-test.describe( 'Check for functional theme', function() {
+test.describe( 'Check for functional WordPress installation', function() {
 	// open browser
 	test.before( function() {
 		this.timeout( config.get( 'startBrowserTimeoutMs' ) );
@@ -33,7 +33,7 @@ test.describe( 'Check for functional theme', function() {
 	// Update the database to the current version of WP
 	test.it( 'update WordPress database', () => {
 		const updateArgs = { url: manager.getPageUrl( '/wp-admin/upgrade.php?step=upgrade_db' ), visit: true };
-		const themes = new WPAdmin( driver, updateArgs );
+		const update = new WPAdmin( driver, updateArgs );
 
 	} );
 
