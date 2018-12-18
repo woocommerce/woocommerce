@@ -30,6 +30,13 @@ test.describe( 'Check for functional theme', function() {
 		wpLogin.login( config.get( 'users.admin.username' ), config.get( 'users.admin.password' ) );
 	} );
 
+	// Update the database to the current version of WP
+	test.it( 'update WordPress database', () => {
+		const updateArgs = { url: manager.getPageUrl( '/wp-admin/upgrade.php?step=upgrade_db' ), visit: true };
+		const themes = new WPAdmin( driver, updateArgs );
+
+	} );
+
 	// Check theme status after conditionally attempting to revert to the default theme
 	test.it( 'have working theme', () => {
 		const themesArgs = { url: manager.getPageUrl( '/wp-admin/themes.php' ), visit: true };
