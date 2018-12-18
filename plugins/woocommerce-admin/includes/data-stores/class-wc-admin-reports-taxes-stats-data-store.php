@@ -30,7 +30,7 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 		'total_tax'    => 'floatval',
 		'order_tax'    => 'floatval',
 		'shipping_tax' => 'floatval',
-		'order_count'  => 'intval',
+		'orders_count' => 'intval',
 	);
 
 	/**
@@ -43,7 +43,7 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 		'total_tax'    => 'SUM(total_tax) AS total_tax',
 		'order_tax'    => 'SUM(order_tax) as order_tax',
 		'shipping_tax' => 'SUM(shipping_tax) as shipping_tax',
-		'order_count'  => 'COUNT(DISTINCT order_id) as orders',
+		'orders_count' => 'COUNT(DISTINCT order_id) as orders_count',
 	);
 
 	/**
@@ -198,6 +198,10 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 			}
 
 			$totals = (object) $this->cast_numbers( $totals[0] );
+
+			$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $intervals );
+			$this->create_interval_subtotals( $intervals );
+
 			$data     = (object) array(
 				'totals'    => $totals,
 				'intervals' => $intervals,

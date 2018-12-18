@@ -114,7 +114,7 @@ class WC_Tests_API_Reports_Taxes_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 16, $tax_report['total_tax'] );
 		$this->assertEquals( 13, $tax_report['order_tax'] );
 		$this->assertEquals( 3, $tax_report['shipping_tax'] );
-		$this->assertEquals( 2, $tax_report['orders'] );
+		$this->assertEquals( 2, $tax_report['orders_count'] );
 	}
 
 	/**
@@ -145,7 +145,7 @@ class WC_Tests_API_Reports_Taxes_Stats extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 5, count( $totals ) );
 		$this->assertArrayHasKey( 'order_tax', $totals );
-		$this->assertArrayHasKey( 'order_count', $totals );
+		$this->assertArrayHasKey( 'orders_count', $totals );
 		$this->assertArrayHasKey( 'shipping_tax', $totals );
 		$this->assertArrayHasKey( 'tax_codes', $totals );
 		$this->assertArrayHasKey( 'total_tax', $totals );
@@ -162,7 +162,7 @@ class WC_Tests_API_Reports_Taxes_Stats extends WC_REST_Unit_Test_Case {
 		$subtotals = $properties['intervals']['items']['properties']['subtotals']['properties'];
 		$this->assertEquals( 5, count( $subtotals ) );
 		$this->assertArrayHasKey( 'order_tax', $totals );
-		$this->assertArrayHasKey( 'order_count', $totals );
+		$this->assertArrayHasKey( 'orders_count', $totals );
 		$this->assertArrayHasKey( 'shipping_tax', $totals );
 		$this->assertArrayHasKey( 'tax_codes', $totals );
 		$this->assertArrayHasKey( 'total_tax', $totals );

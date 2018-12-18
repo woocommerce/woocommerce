@@ -16,9 +16,9 @@ import { getResourceIdentifier, getResourcePrefix } from '../../utils';
 import { NAMESPACE } from '../../constants';
 import { SWAGGERNAMESPACE } from 'store/constants';
 
-const statEndpoints = [ 'orders', 'revenue', 'products' ];
+const statEndpoints = [ 'orders', 'revenue', 'products', 'taxes' ];
 // TODO: Remove once swagger endpoints are phased out.
-const swaggerEndpoints = [ 'categories', 'coupons', 'taxes' ];
+const swaggerEndpoints = [ 'categories', 'coupons' ];
 
 const typeEndpointMap = {
 	'report-stats-query-orders': 'orders',
