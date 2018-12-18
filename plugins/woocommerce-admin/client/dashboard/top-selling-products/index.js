@@ -123,7 +123,7 @@ export class TopSellingProducts extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getReportStats, getReportStatsError, isReportStatsRequesting } = select( 'wc-admin' );
+		const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
 		const endpoint = NAMESPACE + 'reports/products';
 		// @TODO We will need to add the date parameters from the Date Picker
 		// { after: '2018-04-22', before: '2018-05-06' }
@@ -131,7 +131,7 @@ export default compose(
 
 		const stats = getReportStats( endpoint, query );
 		const isRequesting = isReportStatsRequesting( endpoint, query );
-		const isError = Boolean( getReportStatsError( endpoint, query ) );
+		const isError = isReportStatsError( endpoint, query );
 
 		return { data: get( stats, 'data', [] ), isRequesting, isError };
 	} )
