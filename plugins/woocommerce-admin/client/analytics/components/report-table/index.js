@@ -21,6 +21,7 @@ import { onQueryChange } from '@woocommerce/navigation';
 import ReportError from 'analytics/components/report-error';
 import { getReportChartData, getReportTableData } from 'store/reports/utils';
 import withSelect from 'wc-api/with-select';
+import { extendTableData } from './utils';
 
 const TABLE_FILTER = 'woocommerce_admin_report_table';
 
@@ -116,6 +117,16 @@ ReportTable.propTypes = {
 	 */
 	endpoint: PropTypes.string,
 	/**
+	 * Name of the methods available via `select( 'wc-api' )` that will be used to
+	 * load more data for table items. If omitted, no call will be made and only
+	 * the data returned by the reports endpoint will be used.
+	 */
+	extendItemsMethodNames: PropTypes.shape( {
+		getError: PropTypes.string,
+		isRequesting: PropTypes.string,
+		load: PropTypes.string,
+	} ),
+	/**
 	 * A function that returns the headers object to build the table.
 	 */
 	getHeadersContent: PropTypes.func.isRequired,
@@ -162,10 +173,11 @@ export default compose(
 			? getReportChartData( chartEndpoint, 'primary', query, select )
 			: {};
 		const queriedTableData = tableData || getReportTableData( endpoint, query, select, tableQuery );
+		const extendedTableData = extendTableData( select, props, queriedTableData );
 
 		const selectProps = {
 			primaryData,
-			tableData: queriedTableData,
+			tableData: extendedTableData,
 		};
 
 		if ( columnPrefsKey ) {
