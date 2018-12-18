@@ -25,3 +25,9 @@ There are also some helper scripts:
 
  - `npm run lint` : Run eslint over the javascript files
  - `npm run i18n` : Create a PHP file with the strings from the javascript files, [used to get around lack of JS support in WordPress.org](https://github.com/WordPress/packages/tree/master/packages/i18n#build).
+
+## Dev Docs
+
+There is a "devdocs" page which is useful for displaying components individually outside of the application. It can be viewed via a normal `npm start` build at `http://<your-wp-site>/wp-admin/admin.php?page=wc-admin#/devdocs`.
+
+This is useful for viewing of [WooCommerce components](https://woocommerce.github.io/wc-admin/#/components/) components and ad-hoc testing.
