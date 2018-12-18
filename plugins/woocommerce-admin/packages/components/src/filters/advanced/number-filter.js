@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { Component, Fragment } from '@wordpress/element';
-import { withSpokenMessages, SelectControl, TextControl } from '@wordpress/components';
+import { SelectControl, TextControl } from '@wordpress/components';
 import { get, find, partial } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import classnames from 'classnames';
@@ -14,24 +14,9 @@ import { sprintf, __, _x } from '@wordpress/i18n';
  */
 import TextControlWithAffixes from '../../text-control-with-affixes';
 import { formatCurrency } from '@woocommerce/currency';
-import { ariaHideStrings, textContent } from './utils';
+import { textContent } from './utils';
 
 class NumberFilter extends Component {
-	componentDidUpdate() {
-		const { config, debouncedSpeak, filter } = this.props;
-		const [ rangeStart, rangeEnd ] = ( filter.value || '' ).split( ',' );
-
-		if ( 'between' === filter.rule && ( ! rangeStart || ! rangeEnd ) ) {
-			return;
-		}
-
-		if ( ! rangeStart ) {
-			return;
-		}
-
-		debouncedSpeak( this.getScreenReaderText( filter, config ) );
-	}
-
 	getBetweenString() {
 		return _x(
 			'{{rangeStart /}}{{span}} and {{/span}}{{rangeEnd /}}',
@@ -45,7 +30,7 @@ class NumberFilter extends Component {
 		const rule = find( config.rules, { value: filter.rule } ) || {};
 		let [ rangeStart, rangeEnd ] = ( filter.value || '' ).split( ',' );
 
-		// Return the filter label if we're missing input(s)
+		// Return nothing if we're missing input(s)
 		if (
 			! rangeStart ||
 			( 'between' === rule.value && ! rangeEnd )
@@ -192,7 +177,7 @@ class NumberFilter extends Component {
 					),
 					onChange: rangeEndOnChange,
 				} ),
-				span: <span aria-hidden className="separator" />,
+				span: <span className="separator" />,
 			},
 		} );
 	}
@@ -202,7 +187,7 @@ class NumberFilter extends Component {
 		const { key, rule } = filter;
 		const { labels, rules } = config;
 
-		const children = ariaHideStrings( interpolateComponents( {
+		const children = interpolateComponents( {
 			mixedString: labels.title,
 			components: {
 				rule: (
@@ -224,7 +209,10 @@ class NumberFilter extends Component {
 					</div>
 				),
 			},
-		} ) );
+		} );
+
+		const screenReaderText = this.getScreenReaderText( filter, config );
+
 		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (
 			<fieldset tabIndex="0">
@@ -238,10 +226,15 @@ class NumberFilter extends Component {
 				>
 					{ children }
 				</div>
+				{ screenReaderText && (
+					<span className="screen-reader-text">
+						{ screenReaderText }
+					</span>
+				) }
 			</fieldset>
 		);
 		/*eslint-enable jsx-a11y/no-noninteractive-tabindex*/
 	}
 }
 
-export default withSpokenMessages( NumberFilter );
+export default NumberFilter;
