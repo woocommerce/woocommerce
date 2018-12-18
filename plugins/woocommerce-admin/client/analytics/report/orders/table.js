@@ -19,7 +19,6 @@ import {
 } from '@woocommerce/date';
 import { Link, OrderStatus, ViewMoreList } from '@woocommerce/components';
 import { formatCurrency } from '@woocommerce/currency';
-import { getAdminLink } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -139,7 +138,11 @@ class OrdersReportTable extends Component {
 					value: date,
 				},
 				{
-					display: <a href={ getAdminLink( 'post.php?post=' + id + '&action=edit' ) }>{ id }</a>,
+					display: (
+						<Link href={ 'post.php?post=' + id + '&action=edit' } type="wp-admin">
+							{ id }
+						</Link>
+					),
 					value: id,
 				},
 				{
