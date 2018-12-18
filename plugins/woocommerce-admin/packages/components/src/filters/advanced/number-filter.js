@@ -13,8 +13,12 @@ import { sprintf, __, _x } from '@wordpress/i18n';
  * Internal dependencies
  */
 import TextControlWithAffixes from '../../text-control-with-affixes';
-import { formatCurrency } from '@woocommerce/currency';
 import { textContent } from './utils';
+
+/**
+ * WooCommerce dependencies
+ */
+import { formatCurrency } from '@woocommerce/currency';
 
 class NumberFilter extends Component {
 	getBetweenString() {

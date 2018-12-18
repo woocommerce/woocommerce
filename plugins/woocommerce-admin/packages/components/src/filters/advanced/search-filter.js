@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { Component } from '@wordpress/element';
+import { Component, Fragment } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
 import { find, isEqual, partial } from 'lodash';
 import PropTypes from 'prop-types';
@@ -13,6 +13,7 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import Search from '../../search';
+import { textContent } from './utils';
 
 class SearchFilter extends Component {
 	constructor( { filter, config, query } ) {
@@ -51,18 +52,23 @@ class SearchFilter extends Component {
 		onFilterChange( filter.key, 'value', idList );
 	}
 
-	getLegend( filter, config ) {
+	getScreenReaderText( filter, config ) {
 		const { selected } = this.state;
+
+		if ( 0 === selected.length ) {
+			return '';
+		}
+
 		const rule = find( config.rules, { value: filter.rule } ) || {};
 		const filterStr = selected.map( item => item.label ).join( ', ' );
 
-		return interpolateComponents( {
+		return textContent( interpolateComponents( {
 			mixedString: config.labels.title,
 			components: {
-				filter: <span>{ filterStr }</span>,
-				rule: <span>{ rule.label }</span>,
+				filter: <Fragment>{ filterStr }</Fragment>,
+				rule: <Fragment>{ rule.label }</Fragment>,
 			},
-		} );
+		} ) );
 	}
 
 	render() {
@@ -95,11 +101,14 @@ class SearchFilter extends Component {
 				),
 			},
 		} );
+
+		const screenReaderText = this.getScreenReaderText( filter, config );
+
 		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (
 			<fieldset tabIndex="0">
 				<legend className="screen-reader-text">
-					{ this.getLegend( filter, config, selected ) }
+					{ labels.add || '' }
 				</legend>
 				<div
 					className={ classnames( 'woocommerce-filters-advanced__fieldset', {
@@ -108,6 +117,11 @@ class SearchFilter extends Component {
 				>
 					{ children }
 				</div>
+				{ screenReaderText && (
+					<span className="screen-reader-text">
+						{ screenReaderText }
+					</span>
+				) }
 			</fieldset>
 		);
 		/*eslint-enable jsx-a11y/no-noninteractive-tabindex*/

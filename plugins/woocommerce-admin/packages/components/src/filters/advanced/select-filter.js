@@ -2,12 +2,17 @@
 /**
  * External dependencies
  */
-import { Component } from '@wordpress/element';
+import { Component, Fragment } from '@wordpress/element';
 import { SelectControl, Spinner } from '@wordpress/components';
 import { find, partial } from 'lodash';
 import PropTypes from 'prop-types';
 import interpolateComponents from 'interpolate-components';
 import classnames from 'classnames';
+
+/**
+ * Internal dependencies
+ */
+import { textContent } from './utils';
 
 /**
  * WooCommerce dependencies
@@ -41,16 +46,21 @@ class SelectFilter extends Component {
 		return options;
 	}
 
-	getLegend( filter, config ) {
+	getScreenReaderText( filter, config ) {
+		if ( '' === filter.value ) {
+			return '';
+		}
+
 		const rule = find( config.rules, { value: filter.rule } ) || {};
 		const value = find( config.input.options, { value: filter.value } ) || {};
-		return interpolateComponents( {
+
+		return textContent( interpolateComponents( {
 			mixedString: config.labels.title,
 			components: {
-				filter: <span>{ value.label }</span>,
-				rule: <span>{ rule.label }</span>,
+				filter: <Fragment>{ value.label }</Fragment>,
+				rule: <Fragment>{ rule.label }</Fragment>,
 			},
-		} );
+		} ) );
 	}
 
 	render() {
@@ -83,10 +93,15 @@ class SelectFilter extends Component {
 				),
 			},
 		} );
+
+		const screenReaderText = this.getScreenReaderText( filter, config );
+
 		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (
 			<fieldset tabIndex="0">
-				<legend className="screen-reader-text">{ this.getLegend( filter, config ) }</legend>
+				<legend className="screen-reader-text">
+					{ labels.add || '' }
+				</legend>
 				<div
 					className={ classnames( 'woocommerce-filters-advanced__fieldset', {
 						'is-english': isEnglish,
@@ -94,6 +109,11 @@ class SelectFilter extends Component {
 				>
 					{ children }
 				</div>
+				{ screenReaderText && (
+					<span className="screen-reader-text">
+						{ screenReaderText }
+					</span>
+				) }
 			</fieldset>
 		);
 		/*eslint-enable jsx-a11y/no-noninteractive-tabindex*/
