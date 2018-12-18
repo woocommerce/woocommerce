@@ -20,7 +20,7 @@ export default {
 	async getReportItems( ...args ) {
 		const [ endpoint, query ] = args.slice( -2 );
 
-		const swaggerEndpoints = [ 'categories', 'coupons' ];
+		const swaggerEndpoints = [ 'coupons' ];
 		if ( swaggerEndpoints.indexOf( endpoint ) >= 0 ) {
 			try {
 				const response = await fetch(
