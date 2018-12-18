@@ -14,7 +14,7 @@ import { stringifyQuery } from '@woocommerce/navigation';
  */
 import { computeSuggestionMatch } from './utils';
 
-const getName = customer => customer.first_name + ' ' + customer.last_name;
+const getName = customer => [ customer.first_name, customer.last_name ].filter( Boolean ).join( ' ' );
 
 /**
  * A customer completer.

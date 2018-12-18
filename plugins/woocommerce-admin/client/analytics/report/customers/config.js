@@ -54,7 +54,7 @@ export const advancedFilters = {
 				type: 'customers',
 				getLabels: getRequestByIdString( NAMESPACE + 'customers', customer => ( {
 					id: customer.id,
-					label: customer.first_name + ' ' + customer.last_name,
+					label: [ customer.first_name, customer.last_name ].filter( Boolean ).join( ' ' ),
 				} ) ),
 			},
 		},
