@@ -38,6 +38,10 @@ export default function getShortcode( { attributes }, name ) {
 		case 'woocommerce/product-on-sale':
 			shortcodeAtts.set( 'on_sale', '1' );
 			break;
+		case 'woocommerce/product-new':
+			shortcodeAtts.set( 'orderby', 'date' );
+			shortcodeAtts.set( 'order', 'DESC' );
+			break;
 	}
 
 	// Build the shortcode string out of the set shortcode attributes.

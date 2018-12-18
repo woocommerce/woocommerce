@@ -42,6 +42,9 @@ export default function getQuery( attributes, name ) {
 		case 'woocommerce/product-on-sale':
 			query.on_sale = 1;
 			break;
+		case 'woocommerce/product-new':
+			query.orderby = 'date';
+			break;
 	}
 
 	return query;

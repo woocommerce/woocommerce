@@ -54,6 +54,26 @@ function wgpb_plugins_notice() {
 }
 
 /**
+ * Adds a WooCommerce category to the block inserter.
+ *
+ * @param array $categories Array of categories.
+ * @return array Array of block categories.
+ */
+function wgpb_add_block_category( $categories ) {
+	return array_merge(
+		$categories,
+		array(
+			array(
+				'slug'  => 'woocommerce',
+				'title' => __( 'WooCommerce', 'woo-gutenberg-products-block' ),
+				'icon'  => 'woocommerce',
+			),
+		)
+	);
+}
+add_filter( 'block_categories', 'wgpb_add_block_category' );
+
+/**
  * Register the Products block and its scripts.
  */
 function wgpb_register_products_block() {

@@ -15,6 +15,7 @@ import ProductBestSellersBlock from './product-best-sellers';
 import ProductByCategoryBlock from './product-category-block';
 import ProductTopRatedBlock from './product-top-rated';
 import ProductOnSaleBlock from './product-on-sale';
+import ProductNewestBlock from './product-new';
 import sharedAttributes from './utils/shared-attributes';
 
 const validAlignments = [ 'wide', 'full' ];
@@ -32,7 +33,7 @@ const getEditWrapperProps = ( attributes ) => {
 registerBlockType( 'woocommerce/product-category', {
 	title: __( 'Products by Category', 'woo-gutenberg-products-block' ),
 	icon: 'category',
-	category: 'widgets',
+	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
 		'Display a grid of products from your selected categories.',
@@ -86,7 +87,7 @@ registerBlockType( 'woocommerce/product-category', {
 registerBlockType( 'woocommerce/product-best-sellers', {
 	title: __( 'Best Selling Products', 'woo-gutenberg-products-block' ),
 	icon: <Gridicon icon="stats-up-alt" />,
-	category: 'widgets',
+	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
 		'Display a grid of your all-time best selling products.',
@@ -124,7 +125,7 @@ registerBlockType( 'woocommerce/product-best-sellers', {
 registerBlockType( 'woocommerce/product-top-rated', {
 	title: __( 'Top Rated Products', 'woo-gutenberg-products-block' ),
 	icon: <Gridicon icon="trophy" />,
-	category: 'widgets',
+	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
 		'Display a grid of your top rated products.',
@@ -162,7 +163,7 @@ registerBlockType( 'woocommerce/product-top-rated', {
 registerBlockType( 'woocommerce/product-on-sale', {
 	title: __( 'On Sale Products', 'woo-gutenberg-products-block' ),
 	icon: <Gridicon icon="tag" />,
-	category: 'widgets',
+	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
 		'Display a grid of on sale products.',
@@ -199,6 +200,44 @@ registerBlockType( 'woocommerce/product-on-sale', {
 		return (
 			<RawHTML className={ align ? `align${ align }` : '' }>
 				{ getShortcode( props, 'woocommerce/product-on-sale' ) }
+			</RawHTML>
+		);
+	},
+} );
+
+registerBlockType( 'woocommerce/product-new', {
+	title: __( 'Newest Products', 'woo-gutenberg-products-block' ),
+	icon: <Gridicon icon="notice" />,
+	category: 'woocommerce',
+	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
+	description: __(
+		'Display a grid of your newest products.',
+		'woo-gutenberg-products-block'
+	),
+	attributes: {
+		...sharedAttributes,
+	},
+	getEditWrapperProps,
+
+	/**
+	 * Renders and manages the block.
+	 */
+	edit( props ) {
+		return <ProductNewestBlock { ...props } />;
+	},
+
+	/**
+	 * Save the block content in the post content. Block content is saved as a products shortcode.
+	 *
+	 * @return string
+	 */
+	save( props ) {
+		const {
+			align,
+		} = props.attributes; /* eslint-disable-line react/prop-types */
+		return (
+			<RawHTML className={ align ? `align${ align }` : '' }>
+				{ getShortcode( props, 'woocommerce/product-new' ) }
 			</RawHTML>
 		);
 	},

@@ -903,7 +903,7 @@ class ProductsBlock extends Component {
 registerBlockType( 'woocommerce/products', {
 	title: __( 'Products' ),
 	icon: 'screenoptions',
-	category: 'widgets',
+	category: 'woocommerce',
 	description: __( 'Display a grid of products from a variety of sources.' ),
 
 	attributes: {
