@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { Component, Fragment } from '@wordpress/element';
-import { SelectControl, TextControl } from '@wordpress/components';
+import { withSpokenMessages, SelectControl, TextControl } from '@wordpress/components';
 import { get, find, partial } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import classnames from 'classnames';
@@ -14,18 +14,33 @@ import { sprintf, __, _x } from '@wordpress/i18n';
  */
 import TextControlWithAffixes from '../../text-control-with-affixes';
 import { formatCurrency } from '@woocommerce/currency';
-import { ariaHideStrings } from './utils';
+import { ariaHideStrings, textContent } from './utils';
 
 class NumberFilter extends Component {
+	componentDidUpdate() {
+		const { config, debouncedSpeak, filter } = this.props;
+		const [ rangeStart, rangeEnd ] = ( filter.value || '' ).split( ',' );
+
+		if ( 'between' === filter.rule && ( ! rangeStart || ! rangeEnd ) ) {
+			return;
+		}
+
+		if ( ! rangeStart ) {
+			return;
+		}
+
+		debouncedSpeak( this.getScreenReaderText( filter, config ) );
+	}
+
 	getBetweenString() {
 		return _x(
-			'{{rangeStart /}}{{span}}and{{/span}}{{rangeEnd /}}',
+			'{{rangeStart /}}{{span}} and {{/span}}{{rangeEnd /}}',
 			'Numerical range inputs arranged on a single line',
 			'wc-admin'
 		);
 	}
 
-	getLegend( filter, config ) {
+	getScreenReaderText( filter, config ) {
 		const inputType = get( config, [ 'input', 'type' ], 'number' );
 		const rule = find( config.rules, { value: filter.rule } ) || {};
 		let [ rangeStart, rangeEnd ] = ( filter.value || '' ).split( ',' );
@@ -35,7 +50,7 @@ class NumberFilter extends Component {
 			! rangeStart ||
 			( 'between' === rule.value && ! rangeEnd )
 		) {
-			return get( config, [ 'labels', 'add' ] );
+			return '';
 		}
 
 		if ( 'currency' === inputType ) {
@@ -56,13 +71,13 @@ class NumberFilter extends Component {
 			} );
 		}
 
-		return interpolateComponents( {
+		return textContent( interpolateComponents( {
 			mixedString: config.labels.title,
 			components: {
-				filter: <span>{ filterStr }</span>,
-				rule: <span>{ rule.label }</span>,
+				filter: <Fragment>{ filterStr }</Fragment>,
+				rule: <Fragment>{ rule.label }</Fragment>,
 			},
-		} );
+		} ) );
 	}
 
 	getFormControl( { type, value, label, onChange } ) {
@@ -229,4 +244,4 @@ class NumberFilter extends Component {
 	}
 }
 
-export default NumberFilter;
+export default withSpokenMessages( NumberFilter );
