@@ -1,5 +1,10 @@
 /** @format */
 /**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
  * Parse a string suggestion, split apart by where the first matching query is.
  * Used to display matched partial in bold.
  *
@@ -18,4 +23,16 @@ export function computeSuggestionMatch( suggestion, query ) {
 		suggestionMatch: suggestion.substring( indexOfMatch, indexOfMatch + query.length ),
 		suggestionAfterMatch: suggestion.substring( indexOfMatch + query.length ),
 	};
+}
+
+export function getTaxCode( tax ) {
+	return [ tax.country, tax.state, tax.name || __( 'TAX', 'wc-admin' ), tax.priority ]
+		.map( item =>
+			item
+				.toString()
+				.toUpperCase()
+				.trim()
+		)
+		.filter( Boolean )
+		.join( '-' );
 }

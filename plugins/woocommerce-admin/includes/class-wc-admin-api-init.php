@@ -76,6 +76,7 @@ class WC_Admin_Api_Init {
 	 */
 	public function rest_api_init() {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-admin-notes-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-customers-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-products-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-reviews-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-controller.php';
@@ -94,9 +95,11 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-revenue-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-stats-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-stock-controller.php';
 
 		$controllers = array(
 			'WC_Admin_REST_Admin_Notes_Controller',
+			'WC_Admin_REST_Customers_Controller',
 			'WC_Admin_REST_Products_Controller',
 			'WC_Admin_REST_Product_Reviews_Controller',
 			'WC_Admin_REST_Reports_Controller',
@@ -111,6 +114,7 @@ class WC_Admin_Api_Init {
 			'WC_Admin_REST_Reports_Taxes_Stats_Controller',
 			'WC_Admin_REST_Reports_Coupons_Controller',
 			'WC_Admin_REST_Reports_Coupons_Stats_Controller',
+			'WC_Admin_REST_Reports_Stock_Controller',
 		);
 
 		foreach ( $controllers as $controller ) {
@@ -163,6 +167,17 @@ class WC_Admin_Api_Init {
 		) {
 			$endpoints['/wc/v3/products'][0] = $endpoints['/wc/v3/products'][2];
 			$endpoints['/wc/v3/products'][1] = $endpoints['/wc/v3/products'][3];
+		}
+
+		// Override /wc/v3/customers.
+		if ( isset( $endpoints['/wc/v3/customers'] )
+			&& isset( $endpoints['/wc/v3/customers'][3] )
+			&& isset( $endpoints['/wc/v3/customers'][2] )
+			&& $endpoints['/wc/v3/customers'][2]['callback'][0] instanceof WC_Admin_REST_Customers_Controller
+			&& $endpoints['/wc/v3/customers'][3]['callback'][0] instanceof WC_Admin_REST_Customers_Controller
+		) {
+			$endpoints['/wc/v3/customers'][0] = $endpoints['/wc/v3/customers'][2];
+			$endpoints['/wc/v3/customers'][1] = $endpoints['/wc/v3/customers'][3];
 		}
 
 		// Override /wc/v3/products/$id.

@@ -272,6 +272,7 @@ function wc_admin_currency_settings() {
 			'code'      => $code,
 			'precision' => wc_get_price_decimals(),
 			'symbol'    => get_woocommerce_currency_symbol( $code ),
+			'position'  => get_option( 'woocommerce_currency_pos' ),
 		)
 	);
 }

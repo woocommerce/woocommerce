@@ -178,6 +178,7 @@ export default class VariationsReportTable extends Component {
 					extended_info: true,
 				} }
 				title={ __( 'Variations', 'wc-admin' ) }
+				columnPrefsKey="variations_report_columns"
 			/>
 		);
 	}

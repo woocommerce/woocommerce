@@ -82,7 +82,11 @@ Tag.propTypes = {
 	/**
 	 * The ID for this item, used in the remove function.
 	 */
-	id: PropTypes.number,
+	id: PropTypes.oneOfType( [
+		PropTypes.number,
+		PropTypes.string,
+	] ),
+
 	/**
 	 * The name for this item, displayed as the tag's text.
 	 */

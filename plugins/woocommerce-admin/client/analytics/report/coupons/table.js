@@ -162,6 +162,7 @@ export default class CouponsReportTable extends Component {
 				itemIdField="coupon_id"
 				query={ query }
 				title={ __( 'Coupons', 'wc-admin' ) }
+				columnPrefsKey="coupons_report_columns"
 			/>
 		);
 	}

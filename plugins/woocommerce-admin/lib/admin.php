@@ -135,6 +135,22 @@ function wc_admin_register_pages() {
 
 	wc_admin_register_page(
 		array(
+			'title'  => __( 'Downloads', 'wc-admin' ),
+			'parent' => '/analytics/revenue',
+			'path'   => '/analytics/downloads',
+		)
+	);
+
+	wc_admin_register_page(
+		array(
+			'title'  => __( 'Stock', 'wc-admin' ),
+			'parent' => '/analytics/revenue',
+			'path'   => '/analytics/stock',
+		)
+	);
+
+	wc_admin_register_page(
+		array(
 			'title'  => __( 'Customers', 'wc-admin' ),
 			'parent' => '/analytics/revenue',
 			'path'   => '/analytics/customers',
@@ -338,5 +354,80 @@ function woocommerce_embed_page_header() {
 	</div>
 	<?php
 }
-
 add_action( 'in_admin_header', 'woocommerce_embed_page_header' );
+
+/**
+ * Registers WooCommerce specific user data to the WordPress user API.
+ */
+function wc_admin_register_user_data() {
+	register_rest_field(
+		'user',
+		'woocommerce_meta',
+		array(
+			'get_callback'    => 'wc_admin_get_user_data_values',
+			'update_callback' => 'wc_admin_update_user_data_values',
+			'schema'          => null,
+		)
+	);
+}
+ add_action( 'rest_api_init', 'wc_admin_register_user_data' );
+
+/**
+ * We store some WooCommerce specific user meta attached to users endpoint,
+ * so that we can track certain preferences or values such as the inbox activity panel last open time.
+ * Additional fields can be added in the function below, and then used via wc-admin's currentUser data.
+ *
+ * @return array Fields to expose over the WP user endpoint.
+ */
+function wc_admin_get_user_data_fields() {
+	$user_data_fields = array(
+		'categories_report_columns',
+		'coupons_report_columns',
+		'customers_report_columns',
+		'orders_report_columns',
+		'products_report_columns',
+		'revenue_report_columns',
+		'taxes_report_columns',
+		'variations_report_columns',
+	);
+
+	return apply_filters( 'wc_admin_get_user_data_fields', $user_data_fields );
+}
+
+/**
+ * For all the registered user data fields (  wc_admin_get_user_data_fields ), fetch the data
+ * for returning via the REST API.
+ *
+ * @param WP_User $user Current user.
+ */
+function wc_admin_get_user_data_values( $user ) {
+	$values = array();
+	foreach ( wc_admin_get_user_data_fields() as $field ) {
+		$values[ $field ] = get_user_meta( $user['id'], 'wc_admin_' . $field, true );
+	}
+	return $values;
+}
+
+/**
+ * For all the registered user data fields (  wc_admin_get_user_data_fields ), update the data
+ * for the REST API.
+ *
+ * @param array   $values   The new values for the meta.
+ * @param WP_User $user     The current user.
+ * @param string  $field_id The field id for the user meta.
+ */
+function wc_admin_update_user_data_values( $values, $user, $field_id ) {
+	if ( empty( $values ) || ! is_array( $values ) || 'woocommerce_meta' !== $field_id ) {
+		return;
+	}
+	$fields  = wc_admin_get_user_data_fields();
+	$updates = array();
+	foreach ( $values as $field => $value ) {
+		if ( in_array( $field, $fields, true ) ) {
+			$updates[ $field ] = $value;
+			update_user_meta( $user->ID, 'wc_admin_' . $field, $value );
+		}
+	}
+
+	return $updates;
+}

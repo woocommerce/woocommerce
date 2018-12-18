@@ -66,7 +66,7 @@ export default class CustomersReportTable extends Component {
 			{
 				label: __( 'AOV', 'wc-admin' ),
 				screenReaderLabel: __( 'Average Order Value', 'wc-admin' ),
-				key: 'average_order_value',
+				key: 'avg_order_value',
 				isNumeric: true,
 			},
 			{
@@ -98,19 +98,20 @@ export default class CustomersReportTable extends Component {
 
 		return customers.map( customer => {
 			const {
-				average_order_value,
-				id,
-				city,
-				country,
+				avg_order_value,
+				billing,
 				date_last_active,
 				date_sign_up,
 				email,
-				name,
+				first_name,
+				id,
+				last_name,
 				orders_count,
-				postal_code,
 				username,
 				total_spend,
 			} = customer;
+			const { postcode, city, country } = billing || {};
+			const name = `${ first_name } ${ last_name }`;
 
 			const customerNameLink = (
 				<Link href={ 'user-edit.php?user_id=' + id } type="wp-admin">
@@ -144,8 +145,8 @@ export default class CustomersReportTable extends Component {
 					value: getCurrencyFormatDecimal( total_spend ),
 				},
 				{
-					display: average_order_value,
-					value: getCurrencyFormatDecimal( average_order_value ),
+					display: formatCurrency( avg_order_value ),
+					value: getCurrencyFormatDecimal( avg_order_value ),
 				},
 				{
 					display: formatDate( formats.tableFormat, date_last_active ),
@@ -160,8 +161,8 @@ export default class CustomersReportTable extends Component {
 					value: city,
 				},
 				{
-					display: postal_code,
-					value: postal_code,
+					display: postcode,
+					value: postcode,
 				},
 			];
 		} );
@@ -173,6 +174,11 @@ export default class CustomersReportTable extends Component {
 		return (
 			<ReportTable
 				endpoint="customers"
+				extendItemsMethodNames={ {
+					load: 'getCustomers',
+					getError: 'getCustomersError',
+					isRequesting: 'isGetCustomersRequesting',
+				} }
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				itemIdField="id"
@@ -181,6 +187,7 @@ export default class CustomersReportTable extends Component {
 				searchBy="customers"
 				searchParam="name_includes"
 				title={ __( 'Registered Customers', 'wc-admin' ) }
+				columnPrefsKey="customers_report_columns"
 			/>
 		);
 	}

@@ -1,6 +1,7 @@
 * [Overview](/)
 * [Components](components/)
 * [Data](data)
+* [Documentation](documentation)
 * [Layout](layout)
 * [CSS Structure](stylesheets)
 * [Examples](examples/)

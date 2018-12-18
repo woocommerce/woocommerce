@@ -5,6 +5,7 @@
 import { applyFilters } from '@wordpress/hooks';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
+import { withDispatch } from '@wordpress/data';
 import { get, orderBy } from 'lodash';
 import PropTypes from 'prop-types';
 
@@ -20,10 +21,33 @@ import { onQueryChange } from '@woocommerce/navigation';
 import ReportError from 'analytics/components/report-error';
 import { getReportChartData, getReportTableData } from 'store/reports/utils';
 import withSelect from 'wc-api/with-select';
+import { extendTableData } from './utils';
 
 const TABLE_FILTER = 'woocommerce_admin_report_table';
 
 class ReportTable extends Component {
+	onColumnsChange = columns => {
+		const { columnPrefsKey } = this.props;
+
+		if ( columnPrefsKey ) {
+			const userDataFields = {
+				[ columnPrefsKey ]: columns,
+			};
+			this.props.updateCurrentUserData( userDataFields );
+		}
+	};
+
+	filterShownHeaders = ( headers, shownKeys ) => {
+		if ( ! shownKeys ) {
+			return headers;
+		}
+
+		return headers.map( header => {
+			const hidden = ! shownKeys.includes( header.key );
+			return { ...header, hiddenByDefault: hidden };
+		} );
+	};
+
 	render() {
 		const {
 			getHeadersContent,
@@ -36,6 +60,7 @@ class ReportTable extends Component {
 			// so they are not included in the `tableProps` variable.
 			endpoint,
 			tableQuery,
+			userPrefColumns,
 			...tableProps
 		} = this.props;
 
@@ -50,7 +75,7 @@ class ReportTable extends Component {
 		const isRequesting = tableData.isRequesting || primaryData.isRequesting;
 		const orderedItems = orderBy( items.data, query.orderby, query.order );
 		const totals = get( primaryData, [ 'data', 'totals' ], null );
-		const totalCount = items.totalCount || 0;
+		const totalResults = items.totalResults || 0;
 		const { headers, ids, rows, summary } = applyFilters( TABLE_FILTER, {
 			endpoint: endpoint,
 			headers: getHeadersContent(),
@@ -58,20 +83,24 @@ class ReportTable extends Component {
 			ids: itemIdField ? orderedItems.map( item => item[ itemIdField ] ) : null,
 			rows: getRowsContent( orderedItems ),
 			totals: totals,
-			summary: getSummary ? getSummary( totals, totalCount ) : null,
+			summary: getSummary ? getSummary( totals, totalResults ) : null,
 		} );
+
+		// Hide any headers based on user prefs, if loaded.
+		const filteredHeaders = this.filterShownHeaders( headers, userPrefColumns );
 
 		return (
 			<TableCard
 				downloadable
-				headers={ headers }
+				headers={ filteredHeaders }
 				ids={ ids }
 				isLoading={ isRequesting }
 				onQueryChange={ onQueryChange }
+				onColumnsChange={ this.onColumnsChange }
 				rows={ rows }
 				rowsPerPage={ parseInt( query.per_page ) }
 				summary={ summary }
-				totalRows={ totalCount }
+				totalRows={ totalResults }
 				{ ...tableProps }
 			/>
 		);
@@ -80,9 +109,23 @@ class ReportTable extends Component {
 
 ReportTable.propTypes = {
 	/**
+	 * The key for user preferences settings for column visibility.
+	 */
+	columnPrefsKey: PropTypes.string,
+	/**
 	 * The endpoint to use in API calls.
 	 */
 	endpoint: PropTypes.string,
+	/**
+	 * Name of the methods available via `select( 'wc-api' )` that will be used to
+	 * load more data for table items. If omitted, no call will be made and only
+	 * the data returned by the reports endpoint will be used.
+	 */
+	extendItemsMethodNames: PropTypes.shape( {
+		getError: PropTypes.string,
+		isRequesting: PropTypes.string,
+		load: PropTypes.string,
+	} ),
 	/**
 	 * A function that returns the headers object to build the table.
 	 */
@@ -124,16 +167,33 @@ ReportTable.defaultProps = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { endpoint, getSummary, query, tableData, tableQuery } = props;
+		const { endpoint, getSummary, query, tableData, tableQuery, columnPrefsKey } = props;
 		const chartEndpoint = 'variations' === endpoint ? 'products' : endpoint;
 		const primaryData = getSummary
 			? getReportChartData( chartEndpoint, 'primary', query, select )
 			: {};
 		const queriedTableData = tableData || getReportTableData( endpoint, query, select, tableQuery );
+		const extendedTableData = extendTableData( select, props, queriedTableData );
+
+		const selectProps = {
+			primaryData,
+			tableData: extendedTableData,
+		};
+
+		if ( columnPrefsKey ) {
+			const { getCurrentUserData } = select( 'wc-api' );
+			const userData = getCurrentUserData();
+
+			selectProps.userPrefColumns = userData[ columnPrefsKey ];
+		}
+
+		return selectProps;
+	} ),
+	withDispatch( dispatch => {
+		const { updateCurrentUserData } = dispatch( 'wc-api' );
 
 		return {
-			primaryData,
-			tableData: queriedTableData,
+			updateCurrentUserData,
 		};
 	} )
 )( ReportTable );

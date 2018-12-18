@@ -162,15 +162,15 @@ class RevenueReportTable extends Component {
 		} );
 	}
 
-	getSummary( totals, totalCount ) {
+	getSummary( totals, totalResults ) {
 		if ( ! totals ) {
 			return [];
 		}
 
 		return [
 			{
-				label: _n( 'day', 'days', totalCount, 'wc-admin' ),
-				value: numberFormat( totalCount ),
+				label: _n( 'day', 'days', totalResults, 'wc-admin' ),
+				value: numberFormat( totalResults ),
 			},
 			{
 				label: _n( 'order', 'orders', totals.orders_count, 'wc-admin' ),
@@ -215,6 +215,7 @@ class RevenueReportTable extends Component {
 				query={ query }
 				tableData={ tableData }
 				title={ __( 'Revenue', 'wc-admin' ) }
+				columnPrefsKey="revenue_report_columns"
 			/>
 		);
 	}
@@ -224,7 +225,7 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
 		const datesFromQuery = getCurrentDates( query );
-		const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-api' );
+		const { getReportStats, getReportStatsError, isReportStatsRequesting } = select( 'wc-api' );
 
 		// TODO Support hour here when viewing a single day
 		const tableQuery = {
@@ -237,14 +238,14 @@ export default compose(
 			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
 		};
 		const revenueData = getReportStats( 'revenue', tableQuery );
-		const isError = isReportStatsError( 'revenue', tableQuery );
+		const isError = Boolean( getReportStatsError( 'revenue', tableQuery ) );
 		const isRequesting = isReportStatsRequesting( 'revenue', tableQuery );
 
 		return {
 			tableData: {
 				items: {
 					data: get( revenueData, [ 'data', 'intervals' ] ),
-					totalCount: get( revenueData, [ 'totalResults' ] ),
+					totalResults: get( revenueData, [ 'totalResults' ] ),
 				},
 				isError,
 				isRequesting,

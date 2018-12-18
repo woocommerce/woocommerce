@@ -27,4 +27,5 @@
   * [Summary](components/summary.md)
   * [Table](components/table.md)
   * [Tag](components/tag.md)
+  * [TextControlWithAffixes](components/text-control-with-affixes.md)
   * [ViewMoreList](components/view-more-list.md)

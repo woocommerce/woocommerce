@@ -14,7 +14,7 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import Autocomplete from './autocomplete';
-import { coupons, customers, product, productCategory, taxes, variations } from './autocompleters';
+import { countries, coupons, customers, emails, product, productCategory, taxes, variations } from './autocompleters';
 import Tag from '../tag';
 
 /**
@@ -66,18 +66,22 @@ class Search extends Component {
 
 	getAutocompleter() {
 		switch ( this.props.type ) {
+			case 'countries':
+				return countries;
+			case 'coupons':
+				return coupons;
+			case 'customers':
+				return customers;
+			case 'emails':
+				return emails;
 			case 'products':
 				return product;
 			case 'product_cats':
 				return productCategory;
-			case 'coupons':
-				return coupons;
 			case 'taxes':
 				return taxes;
 			case 'variations':
 				return variations;
-			case 'customers':
-				return customers;
 			default:
 				return {};
 		}
@@ -219,11 +223,13 @@ Search.propTypes = {
 	 * The object type to be used in searching.
 	 */
 	type: PropTypes.oneOf( [
+		'countries',
+		'coupons',
+		'customers',
+		'emails',
+		'orders',
 		'products',
 		'product_cats',
-		'orders',
-		'customers',
-		'coupons',
 		'taxes',
 		'variations',
 	] ).isRequired,
@@ -238,7 +244,10 @@ Search.propTypes = {
 	 */
 	selected: PropTypes.arrayOf(
 		PropTypes.shape( {
-			id: PropTypes.number.isRequired,
+			id: PropTypes.oneOfType( [
+				PropTypes.number,
+				PropTypes.string,
+			] ).isRequired,
 			label: PropTypes.string,
 		} )
 	),

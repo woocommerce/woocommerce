@@ -39,8 +39,8 @@ function createWcApiStore() {
 			return getComponentSelectors( component );
 		},
 		getActions() {
-			// TODO: Add mutations here.
-			return {};
+			const mutations = apiClient.getMutations();
+			return mutations;
 		},
 		subscribe: apiClient.subscribe,
 	};

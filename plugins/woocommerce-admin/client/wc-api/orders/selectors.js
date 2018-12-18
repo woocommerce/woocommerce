@@ -21,6 +21,11 @@ const getOrders = ( getResource, requireResource ) => (
 	return orders;
 };
 
+const getOrdersError = getResource => ( query = {} ) => {
+	const resourceName = getResourceName( 'order-query', query );
+	return getResource( resourceName ).error;
+};
+
 const getOrdersTotalCount = ( getResource, requireResource ) => (
 	query = {},
 	requirement = DEFAULT_REQUIREMENT
@@ -40,14 +45,9 @@ const isGetOrdersRequesting = getResource => ( query = {} ) => {
 	return lastRequested > lastReceived;
 };
 
-const isGetOrdersError = getResource => ( query = {} ) => {
-	const resourceName = getResourceName( 'order-query', query );
-	return getResource( resourceName ).error;
-};
-
 export default {
 	getOrders,
+	getOrdersError,
 	getOrdersTotalCount,
 	isGetOrdersRequesting,
-	isGetOrdersError,
 };

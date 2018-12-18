@@ -32,6 +32,36 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 	protected $rest_base = 'reports/taxes/stats';
 
 	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		add_filter( 'woocommerce_reports_taxes_stats_select_query', array( $this, 'set_default_report_data' ) );
+	}
+
+	/**
+	 * Set the default results to 0 if API returns an empty array
+	 *
+	 * @param Mixed $results Report data.
+	 * @return object
+	 */
+	public function set_default_report_data( $results ) {
+		if ( empty( $results ) ) {
+			$results                       = new stdClass();
+			$results->total                = 0;
+			$results->totals               = new stdClass();
+			$results->totals->tax_codes    = 0;
+			$results->totals->total_tax    = 0;
+			$results->totals->order_tax    = 0;
+			$results->totals->shipping_tax = 0;
+			$results->totals->orders       = 0;
+			$results->intervals            = array();
+			$results->pages                = 1;
+			$results->page_no              = 1;
+		}
+		return $results;
+	}
+
+	/**
 	 * Maps query arguments from the REST request.
 	 *
 	 * @param array $request Request array.
@@ -150,7 +180,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'order_count' => array(
+			'orders_count' => array(
 				'description' => __( 'Amount of orders.', 'wc-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),

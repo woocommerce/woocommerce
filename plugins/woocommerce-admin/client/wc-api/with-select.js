@@ -43,9 +43,9 @@ const withSelect = mapSelectToProps =>
 				super( props );
 
 				this.onStoreChange = this.onStoreChange.bind( this );
-
 				this.subscribe( props.registry );
 
+				this.onUnmounts = {};
 				this.mergeProps = this.getNextMergeProps( props );
 			}
 
@@ -59,6 +59,7 @@ const withSelect = mapSelectToProps =>
 			getNextMergeProps( props ) {
 				const storeSelectors = {};
 				const onCompletes = [];
+				const onUnmounts = {};
 				const componentContext = { component: this };
 
 				const getStoreFromRegistry = ( key, registry, context ) => {
@@ -69,8 +70,9 @@ const withSelect = mapSelectToProps =>
 					if ( isFunction( selectorsForKey ) ) {
 						// This store has special handling for its selectors.
 						// We give it a context, and we check for a "resolve"
-						const { selectors, onComplete } = selectorsForKey( context );
+						const { selectors, onComplete, onUnmount } = selectorsForKey( context );
 						onComplete && onCompletes.push( onComplete );
+						onUnmount && ( onUnmounts[ key ] = onUnmount );
 						storeSelectors[ key ] = selectors;
 					} else {
 						storeSelectors[ key ] = selectorsForKey;
@@ -107,6 +109,7 @@ const withSelect = mapSelectToProps =>
 			componentWillUnmount() {
 				this.canRunSelection = false;
 				this.unsubscribe();
+				Object.keys( this.onUnmounts ).forEach( key => this.onUnmounts[ key ]() );
 			}
 
 			shouldComponentUpdate( nextProps, nextState ) {

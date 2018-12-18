@@ -142,6 +142,22 @@ function wc_admin_print_script_settings() {
 		$tracking_script .= "window._tkq = window._tkq || [];\n";
 		$tracking_script .= "document.head.appendChild( wc_tracking_script );\n";
 	}
+
+	$preload_data_endpoints = array(
+		'countries' => '/wc/v3/data/countries',
+	);
+
+	if ( function_exists( 'gutenberg_preload_api_request' ) ) {
+		$preload_function = 'gutenberg_preload_api_request';
+	} else {
+		$preload_function = 'rest_preload_api_request';
+	}
+
+	$preload_data = array_reduce(
+		array_values( $preload_data_endpoints ),
+		$preload_function
+	);
+
 	/**
 	 * TODO: On merge, once plugin images are added to core WooCommerce, `wcAdminAssetUrl` can be retired, and
 	 * `wcAssetUrl` can be used in its place throughout the codebase.
@@ -163,6 +179,10 @@ function wc_admin_print_script_settings() {
 		'siteTitle'        => get_bloginfo( 'name' ),
 		'trackingEnabled'  => $tracking_enabled,
 	);
+
+	foreach ( $preload_data_endpoints as $key => $endpoint ) {
+		$settings['dataEndpoints'][ $key ] = $preload_data[ $endpoint ]['body'];
+	}
 	?>
 	<script type="text/javascript">
 		<?php

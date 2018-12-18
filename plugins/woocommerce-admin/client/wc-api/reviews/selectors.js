@@ -29,6 +29,11 @@ const getReviewsTotalCount = ( getResource, requireResource ) => (
 	return requireResource( requirement, resourceName ).totalCount || 0;
 };
 
+const getReviewsError = getResource => ( query = {} ) => {
+	const resourceName = getResourceName( 'review-query', query );
+	return getResource( resourceName ).error;
+};
+
 const isGetReviewsRequesting = getResource => ( query = {} ) => {
 	const resourceName = getResourceName( 'review-query', query );
 	const { lastRequested, lastReceived } = getResource( resourceName );
@@ -40,14 +45,9 @@ const isGetReviewsRequesting = getResource => ( query = {} ) => {
 	return lastRequested > lastReceived;
 };
 
-const isGetReviewsError = getResource => ( query = {} ) => {
-	const resourceName = getResourceName( 'review-query', query );
-	return getResource( resourceName ).error;
-};
-
 export default {
 	getReviews,
+	getReviewsError,
 	getReviewsTotalCount,
 	isGetReviewsRequesting,
-	isGetReviewsError,
 };

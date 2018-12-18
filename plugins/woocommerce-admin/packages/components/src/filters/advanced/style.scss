@@ -171,3 +171,26 @@
 		}
 	}
 }
+
+.woocommerce-filters-advanced__input-numeric-range {
+	align-items: center;
+	display: grid;
+	grid-template-columns: 1fr;
+
+	&.is-between {
+		grid-template-columns: 1fr 36px 1fr;
+	}
+
+	input {
+		height: 38px;
+		margin: 0;
+	}
+
+	.separator {
+		padding: 0 8px;
+
+		@include breakpoint( '<782px' ) {
+			padding: 0;
+		}
+	}
+}
