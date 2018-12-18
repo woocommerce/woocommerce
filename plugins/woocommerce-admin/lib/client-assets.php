@@ -178,6 +178,7 @@ function wc_admin_print_script_settings() {
 		'stockStatuses'    => wc_get_product_stock_status_options(),
 		'siteTitle'        => get_bloginfo( 'name' ),
 		'trackingEnabled'  => $tracking_enabled,
+		'dataEndpoints'    => array(),
 	);
 
 	foreach ( $preload_data_endpoints as $key => $endpoint ) {
