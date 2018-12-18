@@ -349,7 +349,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 							</button>
 						</header>
 						<article>
-							<?php do_action( 'woocommerce_admin_order_preview_start' ); ?>
+							<?php do_action( 'woocommerce_admin_order_preview_start', $this->object ); ?>
 
 							<div class="wc-order-preview-addresses">
 								<div class="wc-order-preview-address">
@@ -397,7 +397,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 							{{{ data.item_html }}}
 
-							<?php do_action( 'woocommerce_admin_order_preview_end' ); ?>
+							<?php do_action( 'woocommerce_admin_order_preview_end', $this->object ); ?>
 						</article>
 						<footer>
 							<div class="inner">
