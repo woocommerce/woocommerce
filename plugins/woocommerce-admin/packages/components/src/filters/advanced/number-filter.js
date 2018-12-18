@@ -214,7 +214,7 @@ class NumberFilter extends Component {
 		return (
 			<fieldset tabIndex="0">
 				<legend className="screen-reader-text">
-					{ this.getLegend( filter, config ) }
+					{ labels.add || '' }
 				</legend>
 				<div
 					className={ classnames( 'woocommerce-filters-advanced__fieldset', {
