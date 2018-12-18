@@ -4,7 +4,7 @@
 import { textContent } from '../utils';
 
 describe( 'textContent()', () => {
-	test( 'should be got text `Hello World`', () => {
+	test( 'should get text `Hello World`', () => {
 		const component = (
 			<div>
 				<h1>Hello</h1> World
