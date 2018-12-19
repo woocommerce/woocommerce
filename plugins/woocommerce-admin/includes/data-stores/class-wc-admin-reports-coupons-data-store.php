@@ -50,9 +50,8 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 	protected function get_included_coupons( $query_args ) {
 		$included_coupons_str = '';
 
-		if ( isset( $query_args['code'] ) && is_array( $query_args['code'] ) && count( $query_args['code'] ) > 0 ) {
-			$coupon_ids           = array_map( 'wc_get_coupon_id_by_code', $query_args['code'] );
-			$included_coupons_str = implode( ',', $coupon_ids );
+		if ( isset( $query_args['coupons'] ) && is_array( $query_args['coupons'] ) && count( $query_args['coupons'] ) > 0 ) {
+			$included_coupons_str = implode( ',', $query_args['coupons'] );
 		}
 		return $included_coupons_str;
 	}
@@ -158,7 +157,7 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 			'before'        => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
 			'after'         => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
 			'fields'        => '*',
-			'code'          => array(),
+			'coupons'       => array(),
 			'extended_info' => false,
 			// This is not a parameter for coupons reports per se, but we want to only take into account selected order types.
 			'order_status'  => parent::get_report_order_statuses(),

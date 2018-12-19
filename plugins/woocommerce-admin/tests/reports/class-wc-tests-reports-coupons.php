@@ -135,9 +135,9 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 
 		// Test filtering by coupon id: coupon_1.
 		$args = array(
-			'after'  => $start_time,
-			'before' => $end_time,
-			'code'   => array( 'coupon_1' ),
+			'after'   => $start_time,
+			'before'  => $end_time,
+			'coupons' => array( $coupon_1->get_id() ),
 		);
 
 		$data          = $data_store->get_data( $args );
@@ -153,9 +153,9 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 
 		// Test filtering by coupon id: coupon_1 & coupon_2.
 		$args = array(
-			'after'  => $start_time,
-			'before' => $end_time,
-			'code'   => array( 'coupon_1', 'coupon_2' ),
+			'after'   => $start_time,
+			'before'  => $end_time,
+			'coupons' => array( $coupon_1->get_id(), $coupon_2->get_id() ),
 		);
 
 		$data          = $data_store->get_data( $args );

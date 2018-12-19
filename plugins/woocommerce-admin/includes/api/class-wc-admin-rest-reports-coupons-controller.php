@@ -45,7 +45,7 @@ class WC_Admin_REST_Reports_Coupons_Controller extends WC_REST_Reports_Controlle
 		$args['per_page']      = $request['per_page'];
 		$args['orderby']       = $request['orderby'];
 		$args['order']         = $request['order'];
-		$args['code']          = (array) $request['code'];
+		$args['coupons']       = (array) $request['coupons'];
 		$args['extended_info'] = $request['extended_info'];
 		return $args;
 	}
@@ -267,13 +267,13 @@ class WC_Admin_REST_Reports_Coupons_Controller extends WC_REST_Reports_Controlle
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['code']          = array(
-			'description'       => __( 'Limit result set to items assigned one or more code.', 'wc-admin' ),
+		$params['coupons']       = array(
+			'description'       => __( 'Limit result set to coupons assigned specific coupon IDs.', 'wc-admin' ),
 			'type'              => 'array',
-			'sanitize_callback' => 'wp_parse_slug_list',
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 			'items'             => array(
-				'type' => 'string',
+				'type' => 'integer',
 			),
 		);
 		$params['extended_info'] = array(

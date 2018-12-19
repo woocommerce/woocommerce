@@ -98,7 +98,7 @@ class WC_Admin_Reports_Coupons_Stats_Data_Store extends WC_Admin_Reports_Coupons
 			'after'        => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
 			'fields'       => '*',
 			'interval'     => 'week',
-			'code'         => array(),
+			'coupons'      => array(),
 			// This is not a parameter for products reports per se, but we should probably restricts order statuses here, too.
 			'order_status' => parent::get_report_order_statuses(),
 		);

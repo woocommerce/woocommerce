@@ -4,10 +4,10 @@
  *
  * Example usage:
  * $args = array(
- *          'before' => '2018-07-19 00:00:00',
- *          'after'  => '2018-07-05 00:00:00',
- *          'page'   => 2,
- *          'code'   => array('COUPON1', 'XMAS2018'),
+ *          'before'  => '2018-07-19 00:00:00',
+ *          'after'   => '2018-07-05 00:00:00',
+ *          'page'    => 2,
+ *          'coupons' => array(5, 120),
  *         );
  * $report = new WC_Admin_Reports_Coupons_Stats_Query( $args );
  * $mydata = $report->get_data();
