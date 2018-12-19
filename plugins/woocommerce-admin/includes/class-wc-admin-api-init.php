@@ -467,6 +467,25 @@ class WC_Admin_Api_Init {
 				PRIMARY KEY (action_id),
 				KEY note_id (note_id)
 				) $collate;
+			CREATE TABLE {$wpdb->prefix}wc_customer_lookup (
+				customer_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+				user_id BIGINT UNSIGNED DEFAULT NULL,
+				first_name varchar(255) NOT NULL,
+				last_name varchar(255) NOT NULL,
+				email varchar(100) NOT NULL,
+				order_count BIGINT UNSIGNED NOT NULL,
+				total_spend double DEFAULT 0 NOT NULL,
+				average_order double DEFAULT 0 NOT NULL,
+				last_active timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
+				last_order timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
+				date_registered timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
+				country char(2) DEFAULT '' NOT NULL,
+				postal_code varchar(20) DEFAULT '' NOT NULL,
+				city varchar(100) DEFAULT '' NOT NULL,
+				PRIMARY KEY (customer_id),
+				KEY user_id (user_id),
+				KEY email (email)
+				) $collate;
 			";
 
 		return $tables;
