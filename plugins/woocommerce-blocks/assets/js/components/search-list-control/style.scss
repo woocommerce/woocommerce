@@ -110,13 +110,19 @@
 		}
 
 		// Anything deeper than 5 levels will use this fallback depth
-		&[class*="depth-"] .woocommerce-search-list__item-label {
-			padding-left: $gap-small * 5;
+		&[class*="depth-"] .woocommerce-search-list__item-label:before {
+			margin-right: $gap-smallest;
+			content: repeat( '— ', 5 );
 		}
 
-		@for $i from 0 to 5 {
-			&.depth-#{$i} .woocommerce-search-list__item-label {
-				padding-left: $gap-small * $i;
+		&.depth-0 .woocommerce-search-list__item-label:before {
+			margin-right: 0;
+			content: '';
+		}
+
+		@for $i from 1 to 5 {
+			&.depth-#{$i} .woocommerce-search-list__item-label:before {
+				content: repeat( '— ', $i );
 			}
 		}
 
@@ -131,11 +137,16 @@
 
 		&.is-searching,
 		&.is-skip-level {
-			.woocommerce-search-list__item-prefix {
+			.woocommerce-search-list__item-label {
+				// Un-flex the label, so the prefix (breadcrumbs) and name are aligned.
 				display: inline-block;
-				margin-right: $gap-smallest;
+			}
+
+			.woocommerce-search-list__item-prefix {
+				display: inline;
 
 				&:after {
+					margin-right: $gap-smallest;
 					content: " ›";
 				}
 			}
