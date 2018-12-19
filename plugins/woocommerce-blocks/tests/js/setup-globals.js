@@ -21,6 +21,10 @@ global.wcSettings = {
 		refunded: 'Refunded',
 		failed: 'Failed',
 	},
+	l10n: {
+		userLocale: 'en_US',
+		weekdaysShort: [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ],
+	},
 };
 
 const wordPressPackages = [

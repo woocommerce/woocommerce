@@ -155,6 +155,7 @@ function wgpb_extra_gutenberg_scripts() {
  * Output the wcSettings global before printing any script tags.
  */
 function wgpb_print_script_settings() {
+	global $wp_locale;
 	$code = get_woocommerce_currency();
 
 	// Settings and variables can be passed here for access in the app.
@@ -169,6 +170,10 @@ function wgpb_print_script_settings() {
 		),
 		'date'       => array(
 			'dow' => get_option( 'start_of_week', 0 ),
+		),
+		'l10n'       => array(
+			'userLocale'    => get_user_locale(),
+			'weekdaysShort' => array_values( $wp_locale->weekday_abbrev ),
 		),
 	);
 
