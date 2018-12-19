@@ -4,7 +4,6 @@
 import { __, _n } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-import { Component, Fragment } from '@wordpress/element';
 import {
 	BlockAlignmentToolbar,
 	BlockControls,
@@ -19,6 +18,8 @@ import {
 	Toolbar,
 	withSpokenMessages,
 } from '@wordpress/components';
+import { Component, Fragment } from '@wordpress/element';
+import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -39,6 +40,8 @@ class ProductByCategoryBlock extends Component {
 			products: [],
 			loaded: false,
 		};
+
+		this.debouncedGetProducts = debounce( this.getProducts.bind( this ), 200 );
 	}
 
 	componentDidMount() {
@@ -48,20 +51,26 @@ class ProductByCategoryBlock extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const hasChange = [ 'categories', 'catOperator', 'columns', 'orderby', 'rows' ].reduce(
-			( acc, key ) => {
-				return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
-			},
-			false
-		);
+		const hasChange = [
+			'categories',
+			'catOperator',
+			'columns',
+			'orderby',
+			'rows',
+		].reduce( ( acc, key ) => {
+			return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
+		}, false );
 		if ( hasChange ) {
-			this.getProducts();
+			this.debouncedGetProducts();
 		}
 	}
 
 	getProducts() {
 		apiFetch( {
-			path: addQueryArgs( '/wc-pb/v3/products', getQuery( this.props.attributes, this.props.name ) ),
+			path: addQueryArgs(
+				'/wc-pb/v3/products',
+				getQuery( this.props.attributes, this.props.name )
+			),
 		} )
 			.then( ( products ) => {
 				this.setState( { products, loaded: true } );
@@ -88,7 +97,9 @@ class ProductByCategoryBlock extends Component {
 							setAttributes( { categories: ids } );
 						} }
 						operator={ catOperator }
-						onOperatorChange={ ( value = 'any' ) => setAttributes( { catOperator: value } ) }
+						onOperatorChange={ ( value = 'any' ) =>
+							setAttributes( { catOperator: value } )
+						}
 					/>
 				</PanelBody>
 				<PanelBody
@@ -114,7 +125,10 @@ class ProductByCategoryBlock extends Component {
 					title={ __( 'Order By', 'woo-gutenberg-products-block' ) }
 					initialOpen={ false }
 				>
-					<ProductOrderbyControl setAttributes={ setAttributes } value={ orderby } />
+					<ProductOrderbyControl
+						setAttributes={ setAttributes }
+						value={ orderby }
+					/>
 				</PanelBody>
 			</InspectorControls>
 		);
@@ -147,7 +161,9 @@ class ProductByCategoryBlock extends Component {
 							setAttributes( { categories: ids } );
 						} }
 						operator={ attributes.catOperator }
-						onOperatorChange={ ( value = 'any' ) => setAttributes( { catOperator: value } ) }
+						onOperatorChange={ ( value = 'any' ) =>
+							setAttributes( { catOperator: value } )
+						}
 					/>
 					<Button isDefault onClick={ onDone }>
 						{ __( 'Done', 'woo-gutenberg-products-block' ) }
@@ -245,6 +261,4 @@ ProductByCategoryBlock.propTypes = {
 	debouncedSpeak: PropTypes.func.isRequired,
 };
 
-export default withSpokenMessages(
-	ProductByCategoryBlock
-);
+export default withSpokenMessages( ProductByCategoryBlock );
