@@ -56,7 +56,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
     >
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item depth-0"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -101,17 +101,21 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Apricots",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Apricots",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item depth-1"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-1"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -156,17 +160,26 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Clementine",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-prefix"
+          >
+            Apricots
+          </span>
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Clementine",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item depth-1"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-1"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -211,17 +224,26 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Elderberry",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-prefix"
+          >
+            Apricots
+          </span>
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Elderberry",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item depth-2"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-2"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -266,17 +288,26 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Guava",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-prefix"
+          >
+            Apricots › Elderberry
+          </span>
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Guava",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item depth-0"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -321,17 +352,21 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Lychee",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Lychee",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item depth-0"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -376,13 +411,17 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Mulberry",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Mulberry",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
     </div>
   </div>
@@ -445,7 +484,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
     >
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -490,17 +529,21 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Apricots",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Apricots",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -545,17 +588,21 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Clementine",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Clementine",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -600,17 +647,21 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Elderberry",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Elderberry",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -655,17 +706,21 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Guava",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Guava",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -710,17 +765,21 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Lychee",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Lychee",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -765,13 +824,17 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Mulberry",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Mulberry",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
     </div>
   </div>
@@ -834,7 +897,7 @@ exports[`SearchListControl should render a search box and list of options with a
     >
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -879,17 +942,21 @@ exports[`SearchListControl should render a search box and list of options with a
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Apricots",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Apricots",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -934,17 +1001,21 @@ exports[`SearchListControl should render a search box and list of options with a
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Clementine",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Clementine",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -989,17 +1060,21 @@ exports[`SearchListControl should render a search box and list of options with a
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Elderberry",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Elderberry",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1044,17 +1119,21 @@ exports[`SearchListControl should render a search box and list of options with a
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Guava",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Guava",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1099,17 +1178,21 @@ exports[`SearchListControl should render a search box and list of options with a
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Lychee",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Lychee",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1154,13 +1237,17 @@ exports[`SearchListControl should render a search box and list of options with a
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Mulberry",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Mulberry",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
     </div>
   </div>
@@ -1306,7 +1393,7 @@ exports[`SearchListControl should render a search box and list of options, with 
     >
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1351,17 +1438,21 @@ exports[`SearchListControl should render a search box and list of options, with 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Apricots",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Apricots",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1406,17 +1497,21 @@ exports[`SearchListControl should render a search box and list of options, with 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Clementine",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Clementine",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1461,17 +1556,21 @@ exports[`SearchListControl should render a search box and list of options, with 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Elderberry",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Elderberry",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1516,17 +1615,21 @@ exports[`SearchListControl should render a search box and list of options, with 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Guava",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Guava",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1571,17 +1674,21 @@ exports[`SearchListControl should render a search box and list of options, with 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Lychee",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Lychee",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1626,13 +1733,17 @@ exports[`SearchListControl should render a search box and list of options, with 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Mulberry",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Mulberry",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
     </div>
   </div>
@@ -1839,7 +1950,7 @@ exports[`SearchListControl should render a search box with a search term, and on
     >
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1884,17 +1995,21 @@ exports[`SearchListControl should render a search box with a search term, and on
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Elder<strong>berry</strong>",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Elder<strong>berry</strong>",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -1939,13 +2054,17 @@ exports[`SearchListControl should render a search box with a search term, and on
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Mul<strong>berry</strong>",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Mul<strong>berry</strong>",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
     </div>
   </div>
@@ -2009,7 +2128,7 @@ exports[`SearchListControl should render a search box with a search term, and on
     >
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2054,17 +2173,21 @@ exports[`SearchListControl should render a search box with a search term, and on
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Elder<strong>berry</strong>",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Elder<strong>berry</strong>",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2109,13 +2232,17 @@ exports[`SearchListControl should render a search box with a search term, and on
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Mul<strong>berry</strong>",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Mul<strong>berry</strong>",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
     </div>
   </div>
@@ -2231,7 +2358,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
     >
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2276,17 +2403,21 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Apricots",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Apricots",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={true}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2331,17 +2462,21 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Clementine",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Clementine",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2386,17 +2521,21 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Elderberry",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Elderberry",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2441,17 +2580,21 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Guava",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Guava",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2496,17 +2639,21 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Lychee",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Lychee",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2551,13 +2698,17 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Mulberry",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Mulberry",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
     </div>
   </div>
@@ -2718,7 +2869,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
     >
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2763,17 +2914,21 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Apricots",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Apricots",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={true}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2818,17 +2973,21 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Clementine",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Clementine",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2873,17 +3032,21 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Elderberry",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Elderberry",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={true}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2928,17 +3091,21 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Guava",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Guava",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -2983,17 +3150,21 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Lychee",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Lychee",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
       <button
         aria-checked={false}
-        className="components-button components-menu-item__button woocommerce-search-list__item"
+        className="components-button components-menu-item__button  woocommerce-search-list__item depth-0"
         onClick={[Function]}
         role="menuitemcheckbox"
         type="button"
@@ -3038,13 +3209,17 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           </svg>
         </span>
         <span
-          className="woocommerce-search-list__item-name"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": "Mulberry",
+          className="woocommerce-search-list__item-label"
+        >
+          <span
+            className="woocommerce-search-list__item-name"
+            dangerouslySetInnerHTML={
+              Object {
+                "__html": "Mulberry",
+              }
             }
-          }
-        />
+          />
+        </span>
       </button>
     </div>
   </div>

@@ -91,21 +91,71 @@
 		border-bottom: 1px solid $core-grey-light-500 !important;
 		color: $core-grey-dark-500;
 
-		.woocommerce-search-list__item-state {
-			flex: 0 0 16px;
-			margin-right: $gap-smaller;
-		}
-
-		.woocommerce-search-list__item-name {
-			flex: 1;
-		}
-
 		@include hover-state {
 			background: $core-grey-light-100;
 		}
 
 		&:last-of-type {
 			border-bottom: none !important;
+		}
+
+		.woocommerce-search-list__item-state {
+			flex: 0 0 16px;
+			margin-right: $gap-smaller;
+		}
+
+		.woocommerce-search-list__item-label {
+			display: flex;
+			flex: 1;
+		}
+
+		// Anything deeper than 5 levels will use this fallback depth
+		&[class*="depth-"] .woocommerce-search-list__item-label {
+			padding-left: $gap-small * 5;
+		}
+
+		@for $i from 0 to 5 {
+			&.depth-#{$i} .woocommerce-search-list__item-label {
+				padding-left: $gap-small * $i;
+			}
+		}
+
+		.woocommerce-search-list__item-name {
+			display: inline-block;
+		}
+
+		.woocommerce-search-list__item-prefix {
+			display: none;
+			color: $core-grey-dark-300;
+		}
+
+		&.is-searching,
+		&.is-skip-level {
+			.woocommerce-search-list__item-prefix {
+				display: inline-block;
+				margin-right: $gap-smallest;
+
+				&:after {
+					content: " ›";
+				}
+			}
+		}
+
+		&.is-searching {
+			.woocommerce-search-list__item-name {
+				color: $core-grey-dark-900;
+			}
+		}
+
+		.woocommerce-search-list__item-count {
+			flex: 0;
+			padding: $gap-smallest/2 $gap-smaller;
+			border: 1px solid $core-grey-light-500;
+			border-radius: 12px;
+			font-size: 0.8em;
+			line-height: 1.4;
+			color: $core-grey-dark-300;
+			background: $white;
 		}
 	}
 }
