@@ -102,71 +102,6 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	}
 
 	/**
-	 * Returns expected number of items on the page in case of date ordering.
-	 *
-	 * @param int $expected_interval_count Expected number of intervals in total.
-	 * @param int $items_per_page          Number of items per page.
-	 * @param int $page_no                 Page number.
-	 *
-	 * @return float|int
-	 */
-	protected function expected_intervals_on_page( $expected_interval_count, $items_per_page, $page_no ) {
-		$total_pages = (int) ceil( $expected_interval_count / $items_per_page );
-		if ( $page_no < $total_pages ) {
-			return $items_per_page;
-		} elseif ( $page_no === $total_pages ) {
-			return $expected_interval_count - ( $page_no - 1 ) * $items_per_page;
-		} else {
-			return 0;
-		}
-	}
-
-	/**
-	 * Returns true if there are any intervals that need to be filled in the response.
-	 *
-	 * @param int    $expected_interval_count Expected number of intervals in total.
-	 * @param int    $db_records              Total number of records for given period in the database.
-	 * @param int    $items_per_page          Number of items per page.
-	 * @param int    $page_no                 Page number.
-	 * @param string $order                   asc or desc.
-	 * @param string $order_by                Column by which the result will be sorted.
-	 * @param int    $intervals_count         Number of records for given (possibly shortened) time interval.
-	 *
-	 * @return bool
-	 */
-	protected function intervals_missing( $expected_interval_count, $db_records, $items_per_page, $page_no, $order, $order_by, $intervals_count ) {
-		if ( $expected_interval_count > $db_records ) {
-			if ( 'date' === $order_by ) {
-				$expected_intervals_on_page = $this->expected_intervals_on_page( $expected_interval_count, $items_per_page, $page_no );
-				if ( $intervals_count < $expected_intervals_on_page ) {
-					return true;
-				} else {
-					return false;
-				}
-			} else {
-				if ( 'desc' === $order ) {
-					if ( $page_no > floor( $db_records / $items_per_page ) ) {
-						return true;
-					} else {
-						return false;
-					}
-				} elseif ( 'asc' === $order ) {
-					if ( $page_no <= ceil( ( $expected_interval_count - $db_records ) / $items_per_page ) ) {
-						return true;
-					} else {
-						return false;
-					}
-				} else {
-					// Invalid ordering.
-					return false;
-				}
-			}
-		} else {
-			return false;
-		}
-	}
-
-	/**
 	 * Updates the totals and intervals database queries with parameters used for Orders report: categories, coupons and order status.
 	 *
 	 * @param array $query_args      Query arguments supplied by the user.
@@ -394,7 +329,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				'page_no'   => (int) $query_args['page'],
 			);
 
-			if ( $this->intervals_missing( $expected_interval_count, $db_interval_count, $intervals_query['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
+			if ( WC_Admin_Reports_Interval::intervals_missing( $expected_interval_count, $db_interval_count, $intervals_query['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
 				$this->fill_in_missing_intervals( $db_intervals, $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
 				$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
 				$this->remove_extra_records( $data, $query_args['page'], $intervals_query['per_page'], $db_interval_count, $expected_interval_count, $query_args['orderby'] );

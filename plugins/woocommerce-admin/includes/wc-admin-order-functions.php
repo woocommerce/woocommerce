@@ -108,10 +108,10 @@ function wc_order_coupon_lookup_entry( $order_id ) {
 		$wpdb->replace(
 			$wpdb->prefix . 'wc_order_coupon_lookup',
 			array(
-				'order_id'              => $order_id,
-				'coupon_id'             => wc_get_coupon_id_by_code( $coupon_item->get_code() ),
-				'coupon_gross_discount' => $coupon_item->get_discount(),
-				'date_created'          => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+				'order_id'        => $order_id,
+				'coupon_id'       => wc_get_coupon_id_by_code( $coupon_item->get_code() ),
+				'discount_amount' => $coupon_item->get_discount(),
+				'date_created'    => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 			),
 			array(
 				'%d',
