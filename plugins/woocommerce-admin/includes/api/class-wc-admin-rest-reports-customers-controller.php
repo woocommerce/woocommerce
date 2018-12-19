@@ -154,15 +154,57 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 			'title'      => 'report_customers',
 			'type'       => 'object',
 			'properties' => array(
-				'id'                   => array(
-					'description' => __( 'ID.', 'wc-admin' ),
+				'customer_id'          => array(
+					'description' => __( 'Customer ID.', 'wc-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'customer_id'          => array(
-					'description' => __( 'Customer ID.', 'wc-admin' ),
+				'user_id'              => array(
+					'description' => __( 'User ID.', 'wc-admin' ),
 					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'name'                 => array(
+					'description' => __( 'Name.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'username'             => array(
+					'description' => __( 'Username.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'country'              => array(
+					'description' => __( 'Country.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'city'                 => array(
+					'description' => __( 'City.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'postcode'             => array(
+					'description' => __( 'Postal code.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_registered'      => array(
+					'description' => __( 'Date registered.', 'wc-admin' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_registered_gmt'  => array(
+					'description' => __( 'Date registered GMT.', 'wc-admin' ),
+					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
