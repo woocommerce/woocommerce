@@ -39,8 +39,8 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 	 */
 	protected function prepare_reports_query( $request ) {
 		$args                            = array();
-		$args['before']                  = $request['before'];
-		$args['after']                   = $request['after'];
+		$args['registered_before']       = $request['registered_before'];
+		$args['registered_after']        = $request['registered_after'];
 		$args['page']                    = $request['page'];
 		$args['per_page']                = $request['per_page'];
 		$args['name']                    = $request['name'];
@@ -209,14 +209,14 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 	public function get_collection_params() {
 		$params                            = array();
 		$params['context']                 = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['before']                  = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'wc-admin' ),
+		$params['registered_before']       = array(
+			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after']                   = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'wc-admin' ),
+		$params['registered_after']        = array(
+			'description'       => __( 'Limit response to objects registered after (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -315,6 +315,18 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		$params['avg_order_value_between'] = array(
 			'description'       => __( 'Limit response to objects with an average order spend between two given numbers.', 'wc-admin' ),
 			'type'              => 'array',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['last_order_before']       = array(
+			'description'       => __( 'Limit response to objects with last order before (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['last_order_after']        = array(
+			'description'       => __( 'Limit response to objects with last order after (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		return $params;
