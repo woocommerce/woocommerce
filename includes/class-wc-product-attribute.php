@@ -124,7 +124,8 @@ class WC_Product_Attribute implements ArrayAccess {
 	 */
 	public function get_data() {
 		return array_merge(
-			$this->data, array(
+			$this->data,
+			array(
 				'is_visible'   => $this->get_visible() ? 1 : 0,
 				'is_variation' => $this->get_variation() ? 1 : 0,
 				'is_taxonomy'  => $this->is_taxonomy() ? 1 : 0,
