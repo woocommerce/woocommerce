@@ -14,6 +14,8 @@ import { stringifyQuery } from '@woocommerce/navigation';
  */
 import { computeSuggestionMatch } from './utils';
 
+const getName = customer => [ customer.first_name, customer.last_name ].filter( Boolean ).join( ' ' );
+
 /**
  * A customer completer.
  * See https://github.com/WordPress/gutenberg/tree/master/packages/components/src/autocomplete#the-completer-interface
@@ -23,11 +25,11 @@ import { computeSuggestionMatch } from './utils';
 export default {
 	name: 'customers',
 	className: 'woocommerce-search__customers-result',
-	options( search ) {
+	options( name ) {
 		let payload = '';
-		if ( search ) {
+		if ( name ) {
 			const query = {
-				search,
+				name,
 				per_page: 10,
 			};
 			payload = stringifyQuery( query );
@@ -36,12 +38,12 @@ export default {
 	},
 	isDebounced: true,
 	getOptionKeywords( customer ) {
-		return [ customer.name ];
+		return [ getName( customer ) ];
 	},
 	getOptionLabel( customer, query ) {
-		const match = computeSuggestionMatch( customer.name, query ) || {};
+		const match = computeSuggestionMatch( getName( customer ), query ) || {};
 		return [
-			<span key="name" className="woocommerce-search__result-name" aria-label={ customer.name }>
+			<span key="name" className="woocommerce-search__result-name" aria-label={ getName( customer ) }>
 				{ match.suggestionBeforeMatch }
 				<strong className="components-form-token-field__suggestion-match">
 					{ match.suggestionMatch }
@@ -53,10 +55,9 @@ export default {
 	// This is slightly different than gutenberg/Autocomplete, we don't support different methods
 	// of replace/insertion, so we can just return the value.
 	getOptionCompletion( customer ) {
-		const value = {
+		return {
 			id: customer.id,
-			label: customer.name,
+			label: getName( customer ),
 		};
-		return value;
 	},
 };

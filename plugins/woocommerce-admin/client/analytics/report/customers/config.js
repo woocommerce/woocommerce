@@ -55,12 +55,11 @@ export const advancedFilters = {
 				},
 			],
 			input: {
-				// Use products autocompleter for now, see https://github.com/woocommerce/wc-admin/issues/1029 for progress
 				component: 'Search',
-				type: 'products',
-				getLabels: getRequestByIdString( NAMESPACE + 'products', product => ( {
-					id: product.id,
-					label: product.name,
+				type: 'customers',
+				getLabels: getRequestByIdString( NAMESPACE + 'customers', customer => ( {
+					id: customer.id,
+					label: [ customer.first_name, customer.last_name ].filter( Boolean ).join( ' ' ),
 				} ) ),
 			},
 		},

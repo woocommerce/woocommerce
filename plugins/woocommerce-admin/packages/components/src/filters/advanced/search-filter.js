@@ -4,7 +4,7 @@
  */
 import { Component } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
-import { find, partial } from 'lodash';
+import { find, isEqual, partial } from 'lodash';
 import PropTypes from 'prop-types';
 import interpolateComponents from 'interpolate-components';
 import classnames from 'classnames';
@@ -25,6 +25,15 @@ class SearchFilter extends Component {
 		this.updateLabels = this.updateLabels.bind( this );
 
 		if ( filter.value.length ) {
+			config.input.getLabels( filter.value, query ).then( this.updateLabels );
+		}
+	}
+
+	componentDidUpdate( prevProps ) {
+		const { config, filter, query } = this.props;
+		const { filter: prevFilter } = prevProps;
+
+		if ( filter.value.length && ! isEqual( prevFilter, filter ) ) {
 			config.input.getLabels( filter.value, query ).then( this.updateLabels );
 		}
 	}

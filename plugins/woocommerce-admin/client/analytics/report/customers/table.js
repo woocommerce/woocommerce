@@ -173,7 +173,6 @@ export default class CustomersReportTable extends Component {
 
 		return (
 			<ReportTable
-				compareBy="customers"
 				endpoint="customers"
 				extendItemsMethodNames={ {
 					load: 'getCustomers',
@@ -184,6 +183,9 @@ export default class CustomersReportTable extends Component {
 				getRowsContent={ this.getRowsContent }
 				itemIdField="id"
 				query={ query }
+				labels={ { placeholder: __( 'Search by customer name', 'wc-admin' ) } }
+				searchBy="customers"
+				searchParam="name_includes"
 				title={ __( 'Registered Customers', 'wc-admin' ) }
 				columnPrefsKey="customers_report_columns"
 			/>

@@ -18,6 +18,13 @@ Props
 
 The string to use as a query parameter when comparing row items.
 
+### `compareParam`
+
+- Type: String
+- Default: `'filter'`
+
+Url query parameter compare function operates on
+
 ### `headers`
 
 - Type: Array
@@ -118,6 +125,20 @@ Which column should be the row header, defaults to the first item (`0`) (see `Ta
 
 The total number of rows to display per page.
 
+### `searchBy`
+
+- Type: String
+- Default: null
+
+The string to use as a query parameter when searching row items.
+
+### `searchParam`
+
+- Type: String
+- Default: null
+
+Url query parameter search function operates on
+
 ### `summary`
 
 - Type: Array
@@ -143,13 +164,6 @@ The title used in the card header, also used as the caption for the content in t
 - Default: null
 
 The total number of rows (across all pages).
-
-### `compareParam`
-
-- Type: String
-- Default: `'filter'`
-
-Url query parameter compare function operates on
 
 `EmptyTable` (component)
 ========================

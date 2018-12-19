@@ -43,7 +43,9 @@ A placeholder for the search input.
   - label: String
 - Default: `[]`
 
-An array of objects describing selected values.
+An array of objects describing selected values. If the label of the selected
+value is omitted, the Tag of that value will not be rendered inside the
+search box.
 
 ### `inlineTags`
 
