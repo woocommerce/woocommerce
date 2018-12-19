@@ -147,7 +147,7 @@ class ProductByCategoryBlock extends Component {
 			<Placeholder
 				icon="category"
 				label={ __( 'Products by Category', 'woo-gutenberg-products-block' ) }
-				className="wc-block-products-category"
+				className="wc-block-products-grid wc-block-products-category"
 			>
 				{ __(
 					'Display a grid of products from your selected categories',
