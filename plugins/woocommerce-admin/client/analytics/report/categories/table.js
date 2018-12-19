@@ -45,7 +45,7 @@ export default class CategoriesReportTable extends Component {
 			{
 				label: __( 'G. Revenue', 'wc-admin' ),
 				screenReaderLabel: __( 'Gross Revenue', 'wc-admin' ),
-				key: 'gross_revenue',
+				key: 'net_revenue',
 				isSortable: true,
 				isNumeric: true,
 			},
@@ -69,7 +69,7 @@ export default class CategoriesReportTable extends Component {
 			const {
 				category_id,
 				items_sold,
-				gross_revenue,
+				net_revenue,
 				products_count,
 				orders_count,
 				extended_info,
@@ -93,8 +93,8 @@ export default class CategoriesReportTable extends Component {
 					value: items_sold,
 				},
 				{
-					display: formatCurrency( gross_revenue ),
-					value: getCurrencyFormatDecimal( gross_revenue ),
+					display: formatCurrency( net_revenue ),
+					value: getCurrencyFormatDecimal( net_revenue ),
 				},
 				{
 					display: numberFormat( products_count ),
@@ -124,7 +124,7 @@ export default class CategoriesReportTable extends Component {
 			},
 			{
 				label: __( 'gross revenue', 'wc-admin' ),
-				value: formatCurrency( totals.gross_revenue ),
+				value: formatCurrency( totals.net_revenue ),
 			},
 			{
 				label: _n( 'orders', 'orders', totals.orders_count, 'wc-admin' ),

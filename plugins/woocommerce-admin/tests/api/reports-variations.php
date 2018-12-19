@@ -5,6 +5,10 @@
  * @package WooCommerce\Tests\API
  * @since 3.5.0
  */
+
+/**
+ * Class WC_Tests_API_Reports_Variations
+ */
 class WC_Tests_API_Reports_Variations extends WC_REST_Unit_Test_Case {
 
 	/**
@@ -106,7 +110,7 @@ class WC_Tests_API_Reports_Variations extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'product_id', $properties );
 		$this->assertArrayHasKey( 'variation_id', $properties );
 		$this->assertArrayHasKey( 'items_sold', $properties );
-		$this->assertArrayHasKey( 'gross_revenue', $properties );
+		$this->assertArrayHasKey( 'net_revenue', $properties );
 		$this->assertArrayHasKey( 'orders_count', $properties );
 		$this->assertArrayHasKey( 'extended_info', $properties );
 	}

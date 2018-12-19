@@ -42,7 +42,7 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 	protected $column_types = array(
 		'category_id'    => 'intval',
 		'items_sold'     => 'intval',
-		'gross_revenue'  => 'floatval',
+		'net_revenue'    => 'floatval',
 		'orders_count'   => 'intval',
 		'products_count' => 'intval',
 	);
@@ -53,9 +53,9 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 	 * @var array
 	 */
 	protected $report_columns = array(
-		'items_sold'    => 'SUM(product_qty) as items_sold',
-		'gross_revenue' => 'SUM(product_gross_revenue) AS gross_revenue',
-		'orders_count'  => 'COUNT(DISTINCT order_id) as orders_count',
+		'items_sold'   => 'SUM(product_qty) as items_sold',
+		'net_revenue'  => 'SUM(product_net_revenue) AS net_revenue',
+		'orders_count' => 'COUNT(DISTINCT order_id) as orders_count',
 		// 'products_count' is not a SQL column at the moment, see below.
 	);
 
@@ -241,16 +241,16 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 						$categories_data[ $cat_id ] = array(
 							'category_id'    => 0,
 							'items_sold'     => 0,
-							'gross_revenue'  => 0.0,
+							'net_revenue'    => 0.0,
 							'orders_count'   => 0,
 							'products_count' => 0,
 						);
 					}
 
-					$categories_data[ $cat_id ]['category_id']    = $cat_id;
-					$categories_data[ $cat_id ]['items_sold']    += $product_data['items_sold'];
-					$categories_data[ $cat_id ]['gross_revenue'] += $product_data['gross_revenue'];
-					$categories_data[ $cat_id ]['orders_count']  += $product_data['orders_count'];
+					$categories_data[ $cat_id ]['category_id']   = $cat_id;
+					$categories_data[ $cat_id ]['items_sold']   += $product_data['items_sold'];
+					$categories_data[ $cat_id ]['net_revenue']  += $product_data['net_revenue'];
+					$categories_data[ $cat_id ]['orders_count'] += $product_data['orders_count'];
 					$categories_data[ $cat_id ]['products_count'] ++;
 				}
 			}

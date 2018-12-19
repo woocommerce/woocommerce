@@ -173,7 +173,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'gross_revenue'  => array(
+				'net_revenue'  => array(
 					'description' => __( 'Gross revenue.', 'wc-admin' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
@@ -256,7 +256,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 			'enum'              => array(
 				'date',
 				'items_sold',
-				'gross_revenue',
+				'net_revenue',
 				'orders_count',
 				'products_count',
 				'category',

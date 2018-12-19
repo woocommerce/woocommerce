@@ -50,9 +50,9 @@ export default class ProductsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'G. Revenue', 'wc-admin' ),
-				screenReaderLabel: __( 'Gross Revenue', 'wc-admin' ),
-				key: 'gross_revenue',
+				label: __( 'N. Revenue', 'wc-admin' ),
+				screenReaderLabel: __( 'Net Revenue', 'wc-admin' ),
+				key: 'net_revenue',
 				required: true,
 				isSortable: true,
 				isNumeric: true,
@@ -94,7 +94,7 @@ export default class ProductsReportTable extends Component {
 				sku = '', // @TODO
 				extended_info,
 				items_sold,
-				gross_revenue,
+				net_revenue,
 				orders_count,
 				categories = [], // @TODO
 				variations = [], // @TODO
@@ -127,8 +127,8 @@ export default class ProductsReportTable extends Component {
 					value: items_sold,
 				},
 				{
-					display: formatCurrency( gross_revenue ),
-					value: getCurrencyFormatDecimal( gross_revenue ),
+					display: formatCurrency( net_revenue ),
+					value: getCurrencyFormatDecimal( net_revenue ),
 				},
 				{
 					display: (
@@ -180,8 +180,8 @@ export default class ProductsReportTable extends Component {
 				value: numberFormat( totals.items_sold ),
 			},
 			{
-				label: __( 'gross revenue', 'wc-admin' ),
-				value: formatCurrency( totals.gross_revenue ),
+				label: __( 'net revenue', 'wc-admin' ),
+				value: formatCurrency( totals.net_revenue ),
 			},
 			{
 				label: _n( 'orders', 'orders', totals.orders_count, 'wc-admin' ),

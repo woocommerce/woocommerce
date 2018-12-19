@@ -45,9 +45,9 @@ export default class VariationsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'G. Revenue', 'wc-admin' ),
-				screenReaderLabel: __( 'Gross Revenue', 'wc-admin' ),
-				key: 'gross_revenue',
+				label: __( 'N. Revenue', 'wc-admin' ),
+				screenReaderLabel: __( 'Net Revenue', 'wc-admin' ),
+				key: 'net_revenue',
 				required: true,
 				isSortable: true,
 				isNumeric: true,
@@ -76,7 +76,7 @@ export default class VariationsReportTable extends Component {
 		const persistedQuery = getPersistedQuery( query );
 
 		return map( data, row => {
-			const { items_sold, gross_revenue, orders_count, extended_info, product_id } = row;
+			const { items_sold, net_revenue, orders_count, extended_info, product_id } = row;
 			const { stock_status, stock_quantity, low_stock_amount } = extended_info;
 			const name = get( row, [ 'extended_info', 'name' ], '' ).replace( ' - ', ' / ' );
 			const ordersLink = getNewPath( persistedQuery, 'orders', {
@@ -99,8 +99,8 @@ export default class VariationsReportTable extends Component {
 					value: items_sold,
 				},
 				{
-					display: formatCurrency( gross_revenue ),
-					value: getCurrencyFormatDecimal( gross_revenue ),
+					display: formatCurrency( net_revenue ),
+					value: getCurrencyFormatDecimal( net_revenue ),
 				},
 				{
 					display: (
@@ -143,8 +143,8 @@ export default class VariationsReportTable extends Component {
 				value: numberFormat( totals.items_sold ),
 			},
 			{
-				label: __( 'gross revenue', 'wc-admin' ),
-				value: formatCurrency( totals.gross_revenue ),
+				label: __( 'net revenue', 'wc-admin' ),
+				value: formatCurrency( totals.net_revenue ),
 			},
 			{
 				label: _n( 'orders', 'orders', totals.orders_count, 'wc-admin' ),

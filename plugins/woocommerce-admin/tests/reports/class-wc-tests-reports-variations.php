@@ -57,7 +57,7 @@ class WC_Tests_Reports_Variations extends WC_Unit_Test_Case {
 					'product_id'    => $product->get_id(),
 					'variation_id'  => $variation->get_id(),
 					'items_sold'    => 4,
-					'gross_revenue' => 40.0, // $10 * 4.
+					'net_revenue'   => 40.0, // $10 * 4.
 					'orders_count'  => 1,
 					'extended_info' => new ArrayObject(),
 				),
@@ -125,7 +125,7 @@ class WC_Tests_Reports_Variations extends WC_Unit_Test_Case {
 					'product_id'    => $product->get_id(),
 					'variation_id'  => $variation->get_id(),
 					'items_sold'    => 4,
-					'gross_revenue' => 40.0, // $10 * 4.
+					'net_revenue'   => 40.0, // $10 * 4.
 					'orders_count'  => 1,
 					'extended_info' => array(
 						'name'             => $variation->get_name(),

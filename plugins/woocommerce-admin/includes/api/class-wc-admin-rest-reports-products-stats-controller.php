@@ -57,7 +57,7 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 		$query_args = array(
 			'fields' => array(
 				'items_sold',
-				'gross_revenue',
+				'net_revenue',
 				'orders_count',
 				'products_count',
 			),
@@ -153,8 +153,8 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'gross_revenue' => array(
-				'description' => __( 'Gross revenue.', 'wc-admin' ),
+			'net_revenue' => array(
+				'description' => __( 'Net revenue.', 'wc-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -246,7 +246,7 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 			$results->total                 = 0;
 			$results->totals                = new stdClass();
 			$results->totals->items_sold    = 0;
-			$results->totals->gross_revenue = 0;
+			$results->totals->net_revenue = 0;
 			$results->totals->orders_count  = 0;
 			$results->intervals             = array();
 			$results->pages                 = 1;
@@ -305,7 +305,7 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 			'default'           => 'date',
 			'enum'              => array(
 				'date',
-				'gross_revenue',
+				'net_revenue',
 				'coupons',
 				'refunds',
 				'shipping',

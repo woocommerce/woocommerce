@@ -17,8 +17,8 @@ export const charts = [
 		type: 'number',
 	},
 	{
-		key: 'gross_revenue',
-		label: __( 'Gross Revenue', 'wc-admin' ),
+		key: 'net_revenue',
+		label: __( 'Net Revenue', 'wc-admin' ),
 		type: 'currency',
 	},
 	{
@@ -105,10 +105,10 @@ const filterConfig = {
 			query: { orderby: 'items_sold', order: 'desc' },
 		},
 		{
-			label: __( 'Top Products by Gross Revenue', 'wc-admin' ),
+			label: __( 'Top Products by Net Revenue', 'wc-admin' ),
 			value: 'top_sales',
 			chartMode: 'item-comparison',
-			query: { orderby: 'gross_revenue', order: 'desc' },
+			query: { orderby: 'net_revenue', order: 'desc' },
 		},
 	],
 };
@@ -154,10 +154,10 @@ const variationsConfig = {
 			query: { orderby: 'items_sold', order: 'desc' },
 		},
 		{
-			label: __( 'Top Variations by Gross Revenue', 'wc-admin' ),
+			label: __( 'Top Variations by Net Revenue', 'wc-admin' ),
 			chartMode: 'item-comparison',
 			value: 'top_sales',
-			query: { orderby: 'gross_revenue', order: 'desc' },
+			query: { orderby: 'net_revenue', order: 'desc' },
 		},
 	],
 };

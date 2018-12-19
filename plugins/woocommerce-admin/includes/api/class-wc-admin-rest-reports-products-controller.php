@@ -163,11 +163,11 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 					'context'     => array( 'view', 'edit' ),
 					'description' => __( 'Number of items sold.', 'wc-admin' ),
 				),
-				'gross_revenue' => array(
+				'net_revenue' => array(
 					'type'        => 'number',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'Total gross revenue of all items sold.', 'wc-admin' ),
+					'description' => __( 'Total net revenue of all items sold.', 'wc-admin' ),
 				),
 				'orders_count'  => array(
 					'type'        => 'integer',
@@ -281,7 +281,7 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 			'default'           => 'date',
 			'enum'              => array(
 				'date',
-				'gross_revenue',
+				'net_revenue',
 				'orders_count',
 				'items_sold',
 				'product_name',

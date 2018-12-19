@@ -48,8 +48,8 @@ export class TopSellingProducts extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Gross Revenue', 'wc-admin' ),
-				key: 'gross_revenue',
+				label: __( 'Net Revenue', 'wc-admin' ),
+				key: 'net_revenue',
 				required: true,
 				isSortable: false,
 				isNumeric: true,
@@ -59,7 +59,7 @@ export class TopSellingProducts extends Component {
 
 	getRowsContent( data ) {
 		return map( data, row => {
-			const { product_id, items_sold, gross_revenue, orders_count, name } = row;
+			const { product_id, items_sold, net_revenue, orders_count, name } = row;
 
 			const productLink = (
 				<a href={ getAdminLink( `/post.php?post=${ product_id }&action=edit` ) }>{ name }</a>
@@ -78,8 +78,8 @@ export class TopSellingProducts extends Component {
 					value: orders_count,
 				},
 				{
-					display: formatCurrency( gross_revenue ),
-					value: getCurrencyFormatDecimal( gross_revenue ),
+					display: formatCurrency( net_revenue ),
+					value: getCurrencyFormatDecimal( net_revenue ),
 				},
 			];
 		} );

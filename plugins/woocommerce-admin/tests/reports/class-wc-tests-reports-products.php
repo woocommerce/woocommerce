@@ -56,7 +56,7 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 				0 => array(
 					'product_id'    => $product->get_id(),
 					'items_sold'    => 4,
-					'gross_revenue' => 100.0, // $25 * 4.
+					'net_revenue'   => 100.0, // $25 * 4.
 					'orders_count'  => 1,
 					'extended_info' => new ArrayObject(),
 				),
@@ -131,14 +131,14 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 				0 => array(
 					'product_id'    => $product_2->get_id(),
 					'items_sold'    => 4,
-					'gross_revenue' => 80.0, // $20 * 4.
+					'net_revenue'   => 80.0, // $20 * 4.
 					'orders_count'  => 1,
 					'extended_info' => new ArrayObject(),
 				),
 				1 => array(
 					'product_id'    => $product->get_id(),
 					'items_sold'    => 4,
-					'gross_revenue' => 100.0, // $25 * 4.
+					'net_revenue'   => 100.0, // $25 * 4.
 					'orders_count'  => 1,
 					'extended_info' => new ArrayObject(),
 				),
@@ -163,14 +163,14 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 				0 => array(
 					'product_id'    => $product->get_id(),
 					'items_sold'    => 4,
-					'gross_revenue' => 100.0, // $25 * 4.
+					'net_revenue'   => 100.0, // $25 * 4.
 					'orders_count'  => 1,
 					'extended_info' => new ArrayObject(),
 				),
 				1 => array(
 					'product_id'    => $product_2->get_id(),
 					'items_sold'    => 4,
-					'gross_revenue' => 80.0, // $20 * 4.
+					'net_revenue'   => 80.0, // $20 * 4.
 					'orders_count'  => 1,
 					'extended_info' => new ArrayObject(),
 				),
@@ -226,7 +226,7 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 				0 => array(
 					'product_id'    => $product->get_id(),
 					'items_sold'    => 4,
-					'gross_revenue' => 100.0, // $25 * 4.
+					'net_revenue'   => 100.0, // $25 * 4.
 					'orders_count'  => 1,
 					'extended_info' => array(
 						'name'             => $product->get_name(),

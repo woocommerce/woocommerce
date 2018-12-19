@@ -43,8 +43,8 @@ describe( 'TopSellingProducts', () => {
 		expect( firstRow[ 1 ].value ).toBe( mockData[ 0 ].items_sold );
 		expect( firstRow[ 2 ].display ).toBe( numberFormat( mockData[ 0 ].orders_count ) );
 		expect( firstRow[ 2 ].value ).toBe( mockData[ 0 ].orders_count );
-		expect( firstRow[ 3 ].display ).toBe( formatCurrency( mockData[ 0 ].gross_revenue ) );
-		expect( firstRow[ 3 ].value ).toBe( getCurrencyFormatDecimal( mockData[ 0 ].gross_revenue ) );
+		expect( firstRow[ 3 ].display ).toBe( formatCurrency( mockData[ 0 ].net_revenue ) );
+		expect( firstRow[ 3 ].value ).toBe( getCurrencyFormatDecimal( mockData[ 0 ].net_revenue ) );
 	} );
 
 	test( 'should load report stats from API', () => {

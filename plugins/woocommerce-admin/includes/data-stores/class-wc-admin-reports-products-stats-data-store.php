@@ -23,7 +23,7 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 		'date_end'       => 'strval',
 		'product_id'     => 'intval',
 		'items_sold'     => 'intval',
-		'gross_revenue'  => 'floatval',
+		'net_revenue'    => 'floatval',
 		'orders_count'   => 'intval',
 		'products_count' => 'intval',
 	);
@@ -35,7 +35,7 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 	 */
 	protected $report_columns = array(
 		'items_sold'     => 'SUM(product_qty) as items_sold',
-		'gross_revenue'  => 'SUM(product_gross_revenue) AS gross_revenue',
+		'net_revenue'    => 'SUM(product_net_revenue) AS net_revenue',
 		'orders_count'   => 'COUNT(DISTINCT order_id) as orders_count',
 		'products_count' => 'COUNT(DISTINCT product_id) as products_count',
 	);

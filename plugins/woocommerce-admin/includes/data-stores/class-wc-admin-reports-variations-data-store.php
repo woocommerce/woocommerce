@@ -30,7 +30,7 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 		'product_id'    => 'intval',
 		'variation_id'  => 'intval',
 		'items_sold'    => 'intval',
-		'gross_revenue' => 'floatval',
+		'net_revenue'   => 'floatval',
 		'orders_count'  => 'intval',
 		'name'          => 'strval',
 		'price'         => 'floatval',
@@ -44,11 +44,11 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 	 * @var array
 	 */
 	protected $report_columns = array(
-		'product_id'    => 'product_id',
-		'variation_id'  => 'variation_id',
-		'items_sold'    => 'SUM(product_qty) as items_sold',
-		'gross_revenue' => 'SUM(product_gross_revenue) AS gross_revenue',
-		'orders_count'  => 'COUNT(DISTINCT order_id) as orders_count',
+		'product_id'   => 'product_id',
+		'variation_id' => 'variation_id',
+		'items_sold'   => 'SUM(product_qty) as items_sold',
+		'net_revenue'  => 'SUM(product_net_revenue) AS net_revenue',
+		'orders_count' => 'COUNT(DISTINCT order_id) as orders_count',
 	);
 
 	/**

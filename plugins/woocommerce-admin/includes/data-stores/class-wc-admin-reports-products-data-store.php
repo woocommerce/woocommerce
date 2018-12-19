@@ -25,17 +25,17 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 	 * @var array
 	 */
 	protected $column_types = array(
-		'date_start'    => 'strval',
-		'date_end'      => 'strval',
-		'product_id'    => 'intval',
-		'items_sold'    => 'intval',
-		'gross_revenue' => 'floatval',
-		'orders_count'  => 'intval',
+		'date_start'   => 'strval',
+		'date_end'     => 'strval',
+		'product_id'   => 'intval',
+		'items_sold'   => 'intval',
+		'net_revenue'  => 'floatval',
+		'orders_count' => 'intval',
 		// Extended attributes.
-		'name'          => 'strval',
-		'price'         => 'floatval',
-		'image'         => 'strval',
-		'permalink'     => 'strval',
+		'name'         => 'strval',
+		'price'        => 'floatval',
+		'image'        => 'strval',
+		'permalink'    => 'strval',
 	);
 
 	/**
@@ -44,10 +44,10 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 	 * @var array
 	 */
 	protected $report_columns = array(
-		'product_id'    => 'product_id',
-		'items_sold'    => 'SUM(product_qty) as items_sold',
-		'gross_revenue' => 'SUM(product_gross_revenue) AS gross_revenue',
-		'orders_count'  => 'COUNT(DISTINCT order_id) as orders_count',
+		'product_id'   => 'product_id',
+		'items_sold'   => 'SUM(product_qty) as items_sold',
+		'net_revenue'  => 'SUM(product_net_revenue) AS net_revenue',
+		'orders_count' => 'COUNT(DISTINCT order_id) as orders_count',
 	);
 
 	/**
