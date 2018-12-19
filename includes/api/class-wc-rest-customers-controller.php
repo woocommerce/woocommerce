@@ -28,8 +28,9 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V2_Controller {
 	/**
 	 * Get formatted item data.
 	 *
+	 * @param WC_Data $object WC_Data instance.
+	 *
 	 * @since  3.0.0
-	 * @param  WC_Data $object WC_Data instance.
 	 * @return array
 	 */
 	protected function get_formatted_item_data( $object ) {
@@ -38,7 +39,7 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V2_Controller {
 
 		// Format date values.
 		foreach ( $format_date as $key ) {
-			$datetime              = $data[ $key ];
+			$datetime              = 'date_created' == $key ? get_date_from_gmt( $data[ $key ] ) : $data[ $key ];
 			$data[ $key ]          = wc_rest_prepare_date_response( $datetime, false );
 			$data[ $key . '_gmt' ] = wc_rest_prepare_date_response( $datetime );
 		}
