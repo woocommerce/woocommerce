@@ -10,6 +10,7 @@ import {
 	InspectorControls,
 } from '@wordpress/editor';
 import { Component, Fragment } from '@wordpress/element';
+import { debounce } from 'lodash';
 import Gridicon from 'gridicons';
 import {
 	PanelBody,
@@ -37,6 +38,8 @@ class ProductOnSaleBlock extends Component {
 			products: [],
 			loaded: false,
 		};
+
+		this.debouncedGetProducts = debounce( this.getProducts.bind( this ), 200 );
 	}
 
 	componentDidMount() {
@@ -54,7 +57,7 @@ class ProductOnSaleBlock extends Component {
 			return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
 		}, false );
 		if ( hasChange ) {
-			this.getProducts();
+			this.debouncedGetProducts();
 		}
 	}
 

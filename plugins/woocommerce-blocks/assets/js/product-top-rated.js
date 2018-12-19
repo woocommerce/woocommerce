@@ -10,6 +10,7 @@ import {
 	InspectorControls,
 } from '@wordpress/editor';
 import { Component, Fragment } from '@wordpress/element';
+import { debounce } from 'lodash';
 import Gridicon from 'gridicons';
 import {
 	PanelBody,
@@ -36,6 +37,8 @@ class ProductTopRatedBlock extends Component {
 			products: [],
 			loaded: false,
 		};
+
+		this.debouncedGetProducts = debounce( this.getProducts.bind( this ), 200 );
 	}
 
 	componentDidMount() {
@@ -49,13 +52,16 @@ class ProductTopRatedBlock extends Component {
 			return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
 		}, false );
 		if ( hasChange ) {
-			this.getProducts();
+			this.debouncedGetProducts();
 		}
 	}
 
 	getProducts() {
 		apiFetch( {
-			path: addQueryArgs( '/wc-pb/v3/products', getQuery( this.props.attributes, this.props.name ) ),
+			path: addQueryArgs(
+				'/wc-pb/v3/products',
+				getQuery( this.props.attributes, this.props.name )
+			),
 		} )
 			.then( ( products ) => {
 				this.setState( { products, loaded: true } );
@@ -143,10 +149,7 @@ class ProductTopRatedBlock extends Component {
 					) : (
 						<Placeholder
 							icon={ <Gridicon icon="trophy" /> }
-							label={ __(
-								'Top Rated Products',
-								'woo-gutenberg-products-block'
-							) }
+							label={ __( 'Top Rated Products', 'woo-gutenberg-products-block' ) }
 						>
 							{ ! loaded ? (
 								<Spinner />
