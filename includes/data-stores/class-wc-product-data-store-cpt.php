@@ -753,6 +753,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 						$value = wc_implode_text_attributes( $attribute->get_options() );
 					}
 
+					// Encode attribute key name.
+					$attribute_key = urldecode($attribute_key);
+					
 					// Store in format WC uses in meta.
 					$meta_values[ $attribute_key ] = array(
 						'name'         => $attribute->get_name(),
