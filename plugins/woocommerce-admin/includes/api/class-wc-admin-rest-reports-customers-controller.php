@@ -69,7 +69,7 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 	 */
 	public function get_items( $request ) {
 		$query_args      = $this->prepare_reports_query( $request );
-		$customers_query = new WC_Reports_Orders_Stats_Query( $query_args ); // @todo change to correct class.
+		$customers_query = new WC_Reports_Customers_Query( $query_args ); // @todo change to correct class.
 		$report_data     = $customers_query->get_data();
 		$out_data        = array(
 			'totals'    => get_object_vars( $report_data->totals ),
