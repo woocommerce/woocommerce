@@ -462,6 +462,7 @@ class WC_Admin_Api_Init {
 				"{$wpdb->prefix}wc_order_coupon_lookup",
 				"{$wpdb->prefix}woocommerce_admin_notes",
 				"{$wpdb->prefix}woocommerce_admin_note_actions",
+				"{$wpdb->prefix}wc_customer_lookup",
 			)
 		);
 	}
