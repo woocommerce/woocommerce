@@ -4,7 +4,6 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import {
 	Button,
-	MenuItem,
 	MenuGroup,
 	Spinner,
 	TextControl,
@@ -22,7 +21,7 @@ import { Tag } from '@woocommerce/components';
  */
 import './style.scss';
 import { buildTermsTree } from './hierarchy';
-import { IconChecked, IconUnchecked } from '../icons';
+import SearchListItem from './item';
 
 const defaultMessages = {
 	clear: __( 'Clear all selected items', 'woo-gutenberg-products-block' ),
@@ -91,45 +90,9 @@ export class SearchListControl extends Component {
 		return isHierarchical ? buildTermsTree( filteredList, list ) : filteredList;
 	}
 
-	getHighlightedName( name, search ) {
-		if ( ! search ) {
-			return name;
-		}
-		const re = new RegExp( escapeRegExp( search ), 'ig' );
-		return name.replace( re, '<strong>$&</strong>' );
-	}
-
-	defaultRenderItem( {
-		depth = 0,
-		getHighlightedName,
-		item,
-		isSelected,
-		onSelect,
-		search = '',
-	} ) {
-		const classes = [ 'woocommerce-search-list__item' ];
-		if ( this.props.isHierarchical ) {
-			classes.push( `depth-${ depth }` );
-		}
-
+	defaultRenderItem( args ) {
 		return (
-			<MenuItem
-				key={ item.id }
-				role="menuitemcheckbox"
-				className={ classes.join( ' ' ) }
-				onClick={ onSelect( item ) }
-				isSelected={ isSelected }
-			>
-				<span className="woocommerce-search-list__item-state">
-					{ isSelected ? <IconChecked /> : <IconUnchecked /> }
-				</span>
-				<span
-					className="woocommerce-search-list__item-name"
-					dangerouslySetInnerHTML={ {
-						__html: getHighlightedName( item.name, search ),
-					} }
-				/>
-			</MenuItem>
+			<SearchListItem { ...args } />
 		);
 	}
 
@@ -142,7 +105,6 @@ export class SearchListControl extends Component {
 		return list.map( ( item ) => (
 			<Fragment key={ item.id }>
 				{ renderItem( {
-					getHighlightedName: this.getHighlightedName,
 					item,
 					isSelected: this.isSelected( item ),
 					onSelect: this.onSelect,

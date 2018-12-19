@@ -5,16 +5,15 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import { Component, Fragment } from '@wordpress/element';
-import { find, first, last } from 'lodash';
-import { MenuItem, SelectControl } from '@wordpress/components';
+import { find } from 'lodash';
 import PropTypes from 'prop-types';
+import { SelectControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import './style.scss';
-import { IconChecked, IconUnchecked } from '../icons';
 import SearchListControl from '../search-list-control';
+import SearchListItem from '../search-list-control/item';
 
 class ProductCategoryControl extends Component {
 	constructor() {
@@ -38,29 +37,10 @@ class ProductCategoryControl extends Component {
 			} );
 	}
 
-	getBreadcrumbsForDisplay( breadcrumbs ) {
-		if ( breadcrumbs.length === 1 ) {
-			return first( breadcrumbs );
-		}
-		if ( breadcrumbs.length === 2 ) {
-			return first( breadcrumbs ) + ' › ' + last( breadcrumbs );
-		}
-
-		return first( breadcrumbs ) + ' … ' + last( breadcrumbs );
-	}
-
-	renderItem( {
-		getHighlightedName,
-		isSelected,
-		item,
-		onSelect,
-		search,
-		depth = 0,
-	} ) {
+	renderItem( args ) {
+		const { item, search, depth = 0 } = args;
 		const classes = [
-			'woocommerce-search-list__item',
 			'woocommerce-product-categories__item',
-			`depth-${ depth }`,
 		];
 		if ( search.length ) {
 			classes.push( 'is-searching' );
@@ -74,12 +54,10 @@ class ProductCategoryControl extends Component {
 			`${ item.breadcrumbs.join( ', ' ) }, ${ item.name }`;
 
 		return (
-			<MenuItem
-				key={ item.id }
-				role="menuitemcheckbox"
+			<SearchListItem
 				className={ classes.join( ' ' ) }
-				onClick={ onSelect( item ) }
-				isSelected={ isSelected }
+				{ ...args }
+				showCount
 				aria-label={ sprintf(
 					_n(
 						'%s, has %d product',
@@ -90,27 +68,7 @@ class ProductCategoryControl extends Component {
 					accessibleName,
 					item.count
 				) }
-			>
-				<span className="woocommerce-search-list__item-state">
-					{ isSelected ? <IconChecked /> : <IconUnchecked /> }
-				</span>
-				<span className="woocommerce-product-categories__item-label">
-					{ !! item.breadcrumbs.length && (
-						<span className="woocommerce-product-categories__item-prefix">
-							{ this.getBreadcrumbsForDisplay( item.breadcrumbs ) }
-						</span>
-					) }
-					<span
-						className="woocommerce-product-categories__item-name"
-						dangerouslySetInnerHTML={ {
-							__html: getHighlightedName( item.name, search ),
-						} }
-					/>
-				</span>
-				<span className="woocommerce-product-categories__item-count">
-					{ item.count }
-				</span>
-			</MenuItem>
+			/>
 		);
 	}
 
