@@ -77,6 +77,11 @@ const getReports = () => {
 			title: __( 'Customers', 'wc-admin' ),
 			component: CustomersReport,
 		},
+		{
+			report: 'downloads',
+			title: __( 'Downloads', 'wc-admin' ),
+			component: DownloadsReport,
+		},
 	] );
 
 	return reports;

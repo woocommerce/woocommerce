@@ -10,6 +10,14 @@ import { __, _x } from '@wordpress/i18n';
 import { getRequestByIdString } from 'lib/async-requests';
 import { NAMESPACE } from 'store/constants';
 
+export const charts = [
+	{
+		key: 'downloads_count',
+		label: __( 'Downloads', 'wc-admin' ),
+		type: 'number',
+	},
+];
+
 export const filters = [
 	{
 		label: __( 'Show', 'wc-admin' ),

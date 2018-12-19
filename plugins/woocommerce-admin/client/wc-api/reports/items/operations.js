@@ -17,7 +17,7 @@ import { NAMESPACE } from '../../constants';
 import { SWAGGERNAMESPACE } from 'store/constants';
 
 // TODO: Remove once swagger endpoints are phased out.
-const swaggerEndpoints = [ 'coupons', 'customers' ];
+const swaggerEndpoints = [ 'coupons', 'customers', 'downloads' ];
 
 const typeEndpointMap = {
 	'report-items-query-orders': 'orders',
@@ -27,6 +27,7 @@ const typeEndpointMap = {
 	'report-items-query-coupons': 'coupons',
 	'report-items-query-taxes': 'taxes',
 	'report-items-query-variations': 'variations',
+	'report-items-query-downloads': 'downloads',
 	'report-items-query-customers': 'customers',
 	'report-items-query-stock': 'stock',
 };

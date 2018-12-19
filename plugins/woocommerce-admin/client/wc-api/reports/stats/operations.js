@@ -18,13 +18,14 @@ import { SWAGGERNAMESPACE } from 'store/constants';
 
 const statEndpoints = [ 'orders', 'revenue', 'products', 'taxes' ];
 // TODO: Remove once swagger endpoints are phased out.
-const swaggerEndpoints = [ 'categories', 'coupons' ];
+const swaggerEndpoints = [ 'categories', 'coupons', 'downloads' ];
 
 const typeEndpointMap = {
 	'report-stats-query-orders': 'orders',
 	'report-stats-query-revenue': 'revenue',
 	'report-stats-query-products': 'products',
 	'report-stats-query-categories': 'categories',
+	'report-stats-query-downloads': 'downloads',
 	'report-stats-query-coupons': 'coupons',
 	'report-stats-query-taxes': 'taxes',
 };
