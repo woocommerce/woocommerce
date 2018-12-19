@@ -371,6 +371,7 @@ class WC_Admin_Api_Init {
 				$wpdb->prefix . 'wc_customer_lookup',
 				array(
 					'user_id'         => $customer_id,
+					'username'        => $customer->get_username( 'edit' ),
 					'first_name'      => $customer->get_first_name( 'edit' ),
 					'last_name'       => $customer->get_last_name( 'edit' ),
 					'email'           => $customer->get_email( 'edit' ),
@@ -386,6 +387,7 @@ class WC_Admin_Api_Init {
 				),
 				array(
 					'%d',
+					'%s',
 					'%s',
 					'%s',
 					'%s',
@@ -554,6 +556,7 @@ class WC_Admin_Api_Init {
 			CREATE TABLE {$wpdb->prefix}wc_customer_lookup (
 				customer_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 				user_id BIGINT UNSIGNED DEFAULT NULL,
+				username varchar(60) DEFAULT '' NOT NULL,
 				first_name varchar(255) NOT NULL,
 				last_name varchar(255) NOT NULL,
 				email varchar(100) NOT NULL,
