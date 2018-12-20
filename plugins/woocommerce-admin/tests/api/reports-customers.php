@@ -47,6 +47,28 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Asserts the report item schema is correct.
+	 *
+	 * @param array $schema Item to check schema.
+	 */
+	public function assert_report_item_schema( $schema ) {
+		$this->assertArrayHasKey( 'customer_id', $schema );
+		$this->assertArrayHasKey( 'user_id', $schema );
+		$this->assertArrayHasKey( 'name', $schema );
+		$this->assertArrayHasKey( 'username', $schema );
+		$this->assertArrayHasKey( 'country', $schema );
+		$this->assertArrayHasKey( 'city', $schema );
+		$this->assertArrayHasKey( 'postcode', $schema );
+		$this->assertArrayHasKey( 'date_registered', $schema );
+		$this->assertArrayHasKey( 'date_registered_gmt', $schema );
+		$this->assertArrayHasKey( 'date_last_active', $schema );
+		$this->assertArrayHasKey( 'date_last_active_gmt', $schema );
+		$this->assertArrayHasKey( 'orders_count', $schema );
+		$this->assertArrayHasKey( 'total_spend', $schema );
+		$this->assertArrayHasKey( 'avg_order_value', $schema );
+	}
+
+	/**
 	 * Test reports schema.
 	 *
 	 * @since 3.5.0
@@ -59,21 +81,8 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 14, count( $properties ) );
-		$this->assertArrayHasKey( 'customer_id', $properties );
-		$this->assertArrayHasKey( 'user_id', $properties );
-		$this->assertArrayHasKey( 'name', $properties );
-		$this->assertArrayHasKey( 'username', $properties );
-		$this->assertArrayHasKey( 'country', $properties );
-		$this->assertArrayHasKey( 'city', $properties );
-		$this->assertArrayHasKey( 'postcode', $properties );
-		$this->assertArrayHasKey( 'date_registered', $properties );
-		$this->assertArrayHasKey( 'date_registered_gmt', $properties );
-		$this->assertArrayHasKey( 'date_last_active', $properties );
-		$this->assertArrayHasKey( 'date_last_active_gmt', $properties );
-		$this->assertArrayHasKey( 'orders_count', $properties );
-		$this->assertArrayHasKey( 'total_spend', $properties );
-		$this->assertArrayHasKey( 'avg_order_value', $properties );
+		$this->assertCount( 14, $properties );
+		$this->assert_report_item_schema( $properties );
 	}
 
 	/**
@@ -141,5 +150,6 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $test_customers[0]->get_id(), $reports[0]['user_id'] );
 		$this->assertEquals( 1, $reports[0]['orders_count'] );
 		$this->assertEquals( 100, $reports[0]['total_spend'] );
+		$this->assert_report_item_schema( $reports[0] );
 	}
 }
