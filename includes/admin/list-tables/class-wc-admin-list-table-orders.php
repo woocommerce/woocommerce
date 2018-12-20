@@ -802,7 +802,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		}
 
 		// Status.
-		if ( ! isset( $query_vars['post_status'] ) ) {
+		if ( empty( $query_vars['post_status'] ) ) {
 			$post_statuses = wc_get_order_statuses();
 
 			foreach ( $post_statuses as $status => $value ) {
