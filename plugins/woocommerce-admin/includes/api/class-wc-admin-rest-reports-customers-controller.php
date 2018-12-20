@@ -74,19 +74,20 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 	 */
 	public function get_items( $request ) {
 		$query_args      = $this->prepare_reports_query( $request );
-		$customers_query = new WC_Reports_Customers_Query( $query_args ); // @todo change to correct class.
+		$customers_query = new WC_Admin_Reports_Customers_Query( $query_args );
 		$report_data     = $customers_query->get_data();
-		$out_data        = array(
-			'totals'    => get_object_vars( $report_data->totals ),
-			'customers' => array(),
-		);
-		foreach ( $report_data->customers as $customer_data ) {
-			$item_data               = $this->prepare_item_for_response( (object) $customer_data, $request );
-			$out_data['customers'][] = $item_data;
+
+		$data = array();
+
+		foreach ( $report_data->data as $customer_data ) {
+			$item   = $this->prepare_item_for_response( $customer_data, $request );
+			$data[] = $this->prepare_response_for_collection( $item );
 		}
-		$response = rest_ensure_response( $out_data );
+
+		$response = rest_ensure_response( $data );
 		$response->header( 'X-WP-Total', (int) $report_data->total );
 		$response->header( 'X-WP-TotalPages', (int) $report_data->pages );
+
 		$page      = $report_data->page_no;
 		$max_pages = $report_data->pages;
 		$base      = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
@@ -103,20 +104,20 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 			$next_link = add_query_arg( 'page', $next_page, $base );
 			$response->link_header( 'next', $next_link );
 		}
+
 		return $response;
 	}
 
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param stdClass        $report  Report data.
+	 * @param array           $report  Report data.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$data    = get_object_vars( $report );
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
+		$data    = $this->add_additional_fields_to_object( $report, $request );
 		$data    = $this->filter_response_by_context( $data, $context );
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
@@ -136,14 +137,16 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Reports_Query $object Object data.
+	 * @param array $object Object data.
 	 * @return array
 	 */
 	protected function prepare_links( $object ) {
 		$links = array(
 			'customer' => array(
-				'href' => rest_url( sprintf( '/%s/customers/%d', $this->namespace, $object->customer_id ) ),
+				// TODO: is this meant to be a core WC link?
+				'href' => rest_url( sprintf( '/%s/customers/%d', $this->namespace, $object['customer_id'] ) ),
 			),
+			// TODO: add user link?
 		);
 		return $links;
 	}
