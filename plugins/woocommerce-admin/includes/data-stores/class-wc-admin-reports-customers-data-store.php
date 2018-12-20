@@ -56,6 +56,15 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	);
 
 	/**
+	 * Set up all the hooks for maintaining and populating table data.
+	 */
+	public static function init() {
+		add_action( 'woocommerce_new_order', array( __CLASS__, 'sync_order' ) );
+		add_action( 'woocommerce_update_order', array( __CLASS__, 'sync_order' ) );
+		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order' ) );
+	}
+
+	/**
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
 	 *
 	 * @param string $order_by Sorting criterion.
@@ -297,6 +306,29 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Add customer information to the lookup table when orders are created or modified.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public static function sync_order( $post_id ) {
+		if ( 'shop_order' !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		$order = wc_get_order( $post_id );
+		if ( ! $order ) {
+			return;
+		}
+
+		$customer_id = $order->get_customer_id();
+		if ( 0 === $customer_id ) {
+			return;
+		}
+
+		self::update_registered_customer( $customer_id );
 	}
 
 	/**
