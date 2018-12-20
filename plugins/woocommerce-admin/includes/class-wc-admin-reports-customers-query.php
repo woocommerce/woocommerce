@@ -29,7 +29,13 @@ class WC_Admin_Reports_Customers_Query extends WC_Admin_Reports_Query {
 	 * @return array
 	 */
 	protected function get_default_query_vars() {
-		return array();
+		return array(
+			'per_page' => get_option( 'posts_per_page' ), // not sure if this should be the default.
+			'page'     => 1,
+			'order'    => 'DESC',
+			'orderby'  => 'date_registered',
+			'fields'   => '*',
+		);
 	}
 
 	/**
