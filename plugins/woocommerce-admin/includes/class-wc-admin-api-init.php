@@ -575,7 +575,7 @@ class WC_Admin_Api_Init {
 				postcode varchar(20) DEFAULT '' NOT NULL,
 				city varchar(100) DEFAULT '' NOT NULL,
 				PRIMARY KEY (customer_id),
-				KEY user_id (user_id),
+				UNIQUE KEY user_id (user_id),
 				KEY email (email)
 				) $collate;
 			";
