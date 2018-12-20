@@ -176,6 +176,8 @@ export default class VariationsReportTable extends Component {
 					orderby: query.orderby || 'items_sold',
 					order: query.order || 'desc',
 					extended_info: true,
+					products: query.products,
+					variations: query.variations,
 				} }
 				title={ __( 'Variations', 'wc-admin' ) }
 				columnPrefsKey="variations_report_columns"
