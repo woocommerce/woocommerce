@@ -248,18 +248,14 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			$sql_query_params = $this->get_sql_query_params( $query_args );
 
 			$db_records_count = (int) $wpdb->get_var(
-				"SELECT COUNT(*) FROM (
-							SELECT
-								customer_id
-							FROM
-								{$table_name}
-								{$sql_query_params['from_clause']}
-							WHERE
-								{$sql_query_params['where_time_clause']}
-								{$sql_query_params['where_clause']}
-							GROUP BY
-								customer_id
-					  		) AS tt"
+				"SELECT COUNT(*)
+					FROM
+						{$table_name}
+						{$sql_query_params['from_clause']}
+					WHERE
+						{$sql_query_params['where_time_clause']}
+						{$sql_query_params['where_clause']}
+				"
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			$total_pages = (int) ceil( $db_records_count / $sql_query_params['per_page'] );
