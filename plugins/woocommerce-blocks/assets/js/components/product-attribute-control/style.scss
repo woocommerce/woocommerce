@@ -1,0 +1,14 @@
+.woocommerce-search-list__item.woocommerce-product-attributes__item {
+	&.is-searching,
+	&.is-skip-level {
+		.woocommerce-search-list__item-prefix:after {
+			content: ":";
+		}
+	}
+
+	&.is-not-active {
+		@include hover-state {
+			background: transparent;
+		}
+	}
+}
