@@ -251,10 +251,13 @@ function wgpb_extra_shortcode_features( $args, $attributes, $type ) {
 			$field      = 'term_id';
 		}
 		$args['tax_query'][] = array(
-			'taxonomy' => 'product_cat',
-			'terms'    => $categories,
-			'field'    => $field,
-			'operator' => $attributes['cat_operator'],
+			'taxonomy'         => 'product_cat',
+			'terms'            => $categories,
+			'field'            => $field,
+			'operator'         => $attributes['cat_operator'],
+
+			// See https://github.com/woocommerce/woocommerce/pull/20207/files#diff-9982e2749834d5232f1ed411b6c20312.
+			'include_children' => 'AND' === $attributes['cat_operator'] ? false : true,
 		);
 	}
 
