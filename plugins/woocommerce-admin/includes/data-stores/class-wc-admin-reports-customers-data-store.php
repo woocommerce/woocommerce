@@ -144,7 +144,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		}
 
 		if ( $where_time_clauses ) {
-			$sql_query['where_time_clause'] = implode( " {$match_operator} ", $where_time_clauses );
+			$sql_query['where_time_clause'] = ' AND ' . implode( " {$match_operator} ", $where_time_clauses );
 		}
 
 		return $sql_query;
@@ -214,7 +214,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		}
 
 		if ( $where_clauses ) {
-			$preceding_match = empty( $sql_query_params['where_time_clause'] ) ? '' : " {$match_operator} ";
+			$preceding_match = empty( $sql_query_params['where_time_clause'] ) ? ' AND ' : " {$match_operator} ";
 			$sql_query_params['where_clause'] = $preceding_match . implode( " {$match_operator} ", $where_clauses );
 		}
 
@@ -262,6 +262,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 						{$table_name}
 						{$sql_query_params['from_clause']}
 					WHERE
+						1=1
 						{$sql_query_params['where_time_clause']}
 						{$sql_query_params['where_clause']}
 				"
@@ -279,6 +280,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 						{$table_name}
 						{$sql_query_params['from_clause']}
 					WHERE
+						1=1
 						{$sql_query_params['where_time_clause']}
 						{$sql_query_params['where_clause']}
 					GROUP BY
