@@ -20,5 +20,6 @@ class WC_Helper_Reports {
 		$wpdb->query( "DELETE FROM $wpdb->prefix" . WC_Admin_Reports_Orders_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
 		$wpdb->query( "DELETE FROM $wpdb->prefix" . WC_Admin_Reports_Products_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
 		$wpdb->query( "DELETE FROM $wpdb->prefix" . WC_Admin_Reports_Coupons_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
+		$wpdb->query( "DELETE FROM $wpdb->prefix" . WC_Admin_Reports_Customers_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
 	}
 }
