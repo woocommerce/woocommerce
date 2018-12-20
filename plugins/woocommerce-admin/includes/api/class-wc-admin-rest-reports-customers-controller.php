@@ -141,14 +141,15 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 	 * @return array
 	 */
 	protected function prepare_links( $object ) {
-		$links = array(
+		if ( empty( $object['user_id'] ) ) {
+			return array();
+		}
+
+		return array(
 			'customer' => array(
-				// TODO: is this meant to be a core WC link?
-				'href' => rest_url( sprintf( '/%s/customers/%d', $this->namespace, $object['customer_id'] ) ),
+				'href' => rest_url( sprintf( '/%s/customers/%d', $this->namespace, $object['user_id'] ) ),
 			),
-			// TODO: add user link?
 		);
-		return $links;
 	}
 
 	/**
