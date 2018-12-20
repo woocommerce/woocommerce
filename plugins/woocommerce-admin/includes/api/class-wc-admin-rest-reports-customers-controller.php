@@ -43,21 +43,26 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		$args['registered_after']        = $request['registered_after'];
 		$args['page']                    = $request['page'];
 		$args['per_page']                = $request['per_page'];
+		$args['order']                   = $request['order'];
+		$args['orderby']                 = $request['orderby'];
+		$args['match']                   = $request['match'];
 		$args['name']                    = $request['name'];
 		$args['username']                = $request['username'];
 		$args['email']                   = $request['email'];
 		$args['country']                 = $request['country'];
 		$args['last_active_before']      = $request['last_active_before'];
 		$args['last_active_after']       = $request['last_active_after'];
-		$args['order_count_min']         = $request['order_count_min'];
-		$args['order_count_max']         = $request['order_count_max'];
-		$args['order_count_between']     = $request['order_count_between'];
+		$args['orders_count_min']        = $request['orders_count_min'];
+		$args['orders_count_max']        = $request['orders_count_max'];
+		$args['orders_count_between']    = $request['orders_count_between'];
 		$args['total_spend_min']         = $request['total_spend_min'];
 		$args['total_spend_max']         = $request['total_spend_max'];
 		$args['total_spend_between']     = $request['total_spend_between'];
 		$args['avg_order_value_min']     = $request['avg_order_value_min'];
 		$args['avg_order_value_max']     = $request['avg_order_value_max'];
 		$args['avg_order_value_between'] = $request['avg_order_value_between'];
+		$args['last_order_before']       = $request['last_order_before'];
+		$args['last_order_after']        = $request['last_order_after'];
 		return $args;
 	}
 
@@ -280,7 +285,42 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['name']                    = array(
+		$params['order']               = array(
+			'description'       => __( 'Order sort attribute ascending or descending.', 'wc-admin' ),
+			'type'              => 'string',
+			'default'           => 'desc',
+			'enum'              => array( 'asc', 'desc' ),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['orderby']             = array(
+			'description'       => __( 'Sort collection by object attribute.', 'wc-admin' ),
+			'type'              => 'string',
+			'default'           => 'date_registered',
+			'enum'              => array(
+				'username',
+				'name',
+				'country',
+				'city',
+				'postcode',
+				'date_registered',
+				'date_last_active',
+				'orders_count',
+				'total_spend',
+				'avg_order_value',
+			),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['match']               = array(
+			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'wc-admin' ),
+			'type'              => 'string',
+			'default'           => 'all',
+			'enum'              => array(
+				'all',
+				'any',
+			),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['name']                = array(
 			'description'       => __( 'Limit response to objects with a specfic customer name.', 'wc-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -312,19 +352,31 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order_count_min']         = array(
+		$params['registered_before']  = array(
+			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['registered_after']   = array(
+			'description'       => __( 'Limit response to objects registered after (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['orders_count_min']    = array(
 			'description'       => __( 'Limit response to objects with an order count greater than or equal to given integer.', 'wc-admin' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order_count_max']         = array(
+		$params['orders_count_max']    = array(
 			'description'       => __( 'Limit response to objects with an order count less than or equal to given integer.', 'wc-admin' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order_count_between']     = array(
+		$params['orders_count_between']     = array(
 			'description'       => __( 'Limit response to objects with an order count between two given integers.', 'wc-admin' ),
 			'type'              => 'array',
 			'validate_callback' => 'rest_validate_request_arg',
