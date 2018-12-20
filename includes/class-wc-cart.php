@@ -139,7 +139,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Gets cart contents.
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return array of cart items
 	 */
 	public function get_cart_contents() {
@@ -149,7 +149,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Return items removed from the cart.
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return array
 	 */
 	public function get_removed_cart_contents() {
@@ -168,7 +168,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Return all calculated coupon totals.
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return array
 	 */
 	public function get_coupon_discount_totals() {
@@ -177,7 +177,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Return all calculated coupon tax totals.
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return array
 	 */
 	public function get_coupon_discount_tax_totals() {
@@ -187,7 +187,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Return all calculated totals.
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return array
 	 */
 	public function get_totals() {
@@ -197,8 +197,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get a total.
 	 *
-	 * @since 3.2.0
 	 * @param string $key Key of element in $totals array.
+	 *
+	 * @since  3.2.0
 	 * @return mixed
 	 */
 	protected function get_totals_var( $key ) {
@@ -208,7 +209,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get subtotal.
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return float
 	 */
 	public function get_subtotal() {
@@ -218,7 +219,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get subtotal.
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return float
 	 */
 	public function get_subtotal_tax() {
@@ -228,7 +229,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get discount_total.
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return float
 	 */
 	public function get_discount_total() {
@@ -238,7 +239,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get discount_tax.
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return float
 	 */
 	public function get_discount_tax() {
@@ -248,7 +249,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get shipping_total.
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return float
 	 */
 	public function get_shipping_total() {
@@ -258,7 +259,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get shipping_tax.
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return float
 	 */
 	public function get_shipping_tax() {
@@ -268,7 +269,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Gets cart total. This is the total of items in the cart, but after discounts. Subtotal is before discounts.
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return float
 	 */
 	public function get_cart_contents_total() {
@@ -278,7 +279,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Gets cart tax amount.
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return float
 	 */
 	public function get_cart_contents_tax() {
@@ -288,8 +289,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Gets cart total after calculation.
 	 *
-	 * @since 3.2.0
 	 * @param string $context If the context is view, the value will be formatted for display. This keeps it compatible with pre-3.2 versions.
+	 *
+	 * @since  3.2.0
 	 * @return float
 	 */
 	public function get_total( $context = 'view' ) {
@@ -300,7 +302,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get total tax amount.
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return float
 	 */
 	public function get_total_tax() {
@@ -310,7 +312,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get total fee amount.
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return float
 	 */
 	public function get_fee_total() {
@@ -320,7 +322,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get total fee tax amount.
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return float
 	 */
 	public function get_fee_tax() {
@@ -357,7 +359,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Return whether or not the cart is displaying prices including tax, rather than excluding tax.
 	 *
-	 * @since 3.3.0
+	 * @since  3.3.0
 	 * @return bool
 	 */
 	public function display_prices_including_tax() {
@@ -384,8 +386,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set items removed from the cart.
 	 *
-	 * @since 3.2.0
 	 * @param array $value Item array.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_removed_cart_contents( $value = array() ) {
 		$this->removed_cart_contents = (array) $value;
@@ -403,8 +406,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Sets the array of calculated coupon totals.
 	 *
-	 * @since 3.2.0
 	 * @param array $value Value to set.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_coupon_discount_totals( $value = array() ) {
 		$this->coupon_discount_totals = (array) $value;
@@ -412,8 +416,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Sets the array of calculated coupon tax totals.
 	 *
-	 * @since 3.2.0
 	 * @param array $value Value to set.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_coupon_discount_tax_totals( $value = array() ) {
 		$this->coupon_discount_tax_totals = (array) $value;
@@ -422,8 +427,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set all calculated totals.
 	 *
-	 * @since 3.2.0
 	 * @param array $value Value to set.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_totals( $value = array() ) {
 		$this->totals = wp_parse_args( $value, $this->default_totals );
@@ -432,8 +438,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set subtotal.
 	 *
-	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_subtotal( $value ) {
 		$this->totals['subtotal'] = wc_format_decimal( $value, wc_get_price_decimals() );
@@ -442,8 +449,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set subtotal.
 	 *
-	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_subtotal_tax( $value ) {
 		$this->totals['subtotal_tax'] = wc_round_tax_total( $value );
@@ -452,8 +460,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set discount_total.
 	 *
-	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_discount_total( $value ) {
 		$this->totals['discount_total'] = wc_cart_round_discount( $value, wc_get_price_decimals() );
@@ -462,8 +471,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set discount_tax.
 	 *
-	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_discount_tax( $value ) {
 		$this->totals['discount_tax'] = wc_round_tax_total( $value );
@@ -472,8 +482,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set shipping_total.
 	 *
-	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_shipping_total( $value ) {
 		$this->totals['shipping_total'] = wc_format_decimal( $value, wc_get_price_decimals() );
@@ -482,8 +493,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set shipping_tax.
 	 *
-	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_shipping_tax( $value ) {
 		$this->totals['shipping_tax'] = wc_round_tax_total( $value );
@@ -492,8 +504,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set cart_contents_total.
 	 *
-	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_cart_contents_total( $value ) {
 		$this->totals['cart_contents_total'] = wc_format_decimal( $value, wc_get_price_decimals() );
@@ -502,8 +515,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set cart tax amount.
 	 *
-	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_cart_contents_tax( $value ) {
 		$this->totals['cart_contents_tax'] = wc_round_tax_total( $value );
@@ -512,8 +526,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set cart total.
 	 *
-	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_total( $value ) {
 		$this->totals['total'] = wc_format_decimal( $value, wc_get_price_decimals() );
@@ -522,8 +537,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set total tax amount.
 	 *
-	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_total_tax( $value ) {
 		$this->totals['total_tax'] = wc_round_tax_total( $value );
@@ -532,8 +548,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set fee amount.
 	 *
-	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_fee_total( $value ) {
 		$this->totals['fee_total'] = wc_format_decimal( $value, wc_get_price_decimals() );
@@ -542,8 +559,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set fee tax.
 	 *
-	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_fee_tax( $value ) {
 		$this->totals['fee_tax'] = wc_round_tax_total( $value );
@@ -552,8 +570,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set taxes.
 	 *
-	 * @since 3.2.0
 	 * @param array $value Tax values.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_shipping_taxes( $value ) {
 		$this->totals['shipping_taxes'] = (array) $value;
@@ -562,8 +581,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set taxes.
 	 *
-	 * @since 3.2.0
 	 * @param array $value Tax values.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_cart_contents_taxes( $value ) {
 		$this->totals['cart_contents_taxes'] = (array) $value;
@@ -572,8 +592,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Set taxes.
 	 *
-	 * @since 3.2.0
 	 * @param array $value Tax values.
+	 *
+	 * @since 3.2.0
 	 */
 	public function set_fee_taxes( $value ) {
 		$this->totals['fee_taxes'] = (array) $value;
@@ -613,6 +634,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Returns a specific item in the cart.
 	 *
 	 * @param string $item_key Cart item key.
+	 *
 	 * @return array Item data
 	 */
 	public function get_cart_item( $item_key ) {
@@ -663,7 +685,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get weight of items in the cart.
 	 *
-	 * @since 2.5.0
+	 * @since  2.5.0
 	 * @return int
 	 */
 	public function get_cart_contents_weight() {
@@ -796,6 +818,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @param array $cart_item Cart item object.
 	 * @param bool  $flat Should the data be returned flat or in a list.
+	 *
 	 * @return string
 	 */
 	public function get_item_data( $cart_item, $flat = false ) {
@@ -828,6 +851,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Gets the url to remove an item from the cart.
 	 *
 	 * @param string $cart_item_key contains the id of the cart item.
+	 *
 	 * @return string url to page
 	 */
 	public function get_remove_url( $cart_item_key ) {
@@ -839,7 +863,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Gets the url to re-add an item into the cart.
 	 *
-	 * @param  string $cart_item_key Cart item key to undo.
+	 * @param string $cart_item_key Cart item key to undo.
+	 *
 	 * @return string url to page
 	 */
 	public function get_undo_url( $cart_item_key ) {
@@ -926,7 +951,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * If cart totals are shown excluding tax, use the subtotal ex tax
 	 * (tax is shown after coupons).
 	 *
-	 * @since 2.6.0
+	 * @since  2.6.0
 	 * @return string
 	 */
 	public function get_displayed_subtotal() {
@@ -939,6 +964,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Cart item key will be unique based on the item and its properties, such as variations.
 	 *
 	 * @param mixed $cart_id id of product to find in the cart.
+	 *
 	 * @return string cart item key
 	 */
 	public function find_product_in_cart( $cart_id = false ) {
@@ -957,6 +983,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param int   $variation_id of the product the key is being generated for.
 	 * @param array $variation data for the cart item.
 	 * @param array $cart_item_data other cart item data passed which affects this items uniqueness in the cart.
+	 *
 	 * @return string cart item key
 	 */
 	public function generate_cart_id( $product_id, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
@@ -992,12 +1019,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Add a product to the cart.
 	 *
-	 * @throws Exception Plugins can throw an exception to prevent adding to cart.
 	 * @param int   $product_id contains the id of the product to add to the cart.
 	 * @param int   $quantity contains the quantity of the item to add.
 	 * @param int   $variation_id ID of the variation being added to the cart.
 	 * @param array $variation attribute values.
 	 * @param array $cart_item_data extra cart item data we want to pass into the item.
+	 *
+	 * @throws Exception Plugins can throw an exception to prevent adding to cart.
 	 * @return string|bool $cart_item_key
 	 */
 	public function add_to_cart( $product_id = 0, $quantity = 1, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
@@ -1110,8 +1138,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Remove a cart item.
 	 *
+	 * @param string $cart_item_key Cart item key to remove from the cart.
+	 *
 	 * @since  2.3.0
-	 * @param  string $cart_item_key Cart item key to remove from the cart.
 	 * @return bool
 	 */
 	public function remove_cart_item( $cart_item_key ) {
@@ -1134,7 +1163,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Restore a cart item.
 	 *
-	 * @param  string $cart_item_key Cart item key to restore to the cart.
+	 * @param string $cart_item_key Cart item key to restore to the cart.
+	 *
 	 * @return bool
 	 */
 	public function restore_cart_item( $cart_item_key ) {
@@ -1160,6 +1190,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $cart_item_key contains the id of the cart item.
 	 * @param int    $quantity contains the quantity of the item.
 	 * @param bool   $refresh_totals whether or not to calculate totals after setting the new qty.
+	 *
 	 * @return bool
 	 */
 	public function set_quantity( $cart_item_key, $quantity = 1, $refresh_totals = true ) {
@@ -1249,8 +1280,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Given a set of packages with rates, get the chosen ones only.
 	 *
-	 * @since 3.2.0
 	 * @param array $calculated_shipping_packages Array of packages.
+	 *
+	 * @since  3.2.0
 	 * @return array
 	 */
 	protected function get_chosen_shipping_methods( $calculated_shipping_packages = array() ) {
@@ -1268,8 +1300,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Filter items needing shipping callback.
 	 *
+	 * @param array $item Item to check for shipping.
+	 *
 	 * @since  3.0.0
-	 * @param  array $item Item to check for shipping.
 	 * @return bool
 	 */
 	protected function filter_items_needing_shipping( $item ) {
@@ -1297,7 +1330,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * By default we pass the cart itself as a package - plugins can change this.
 	 * through the filter and break it up.
 	 *
-	 * @since 1.5.4
+	 * @since  1.5.4
 	 * @return array of cart items
 	 */
 	public function get_shipping_packages() {
@@ -1494,6 +1527,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @param array $check_emails Array of customer email addresses.
 	 * @param array $restrictions Array of allowed email addresses.
+	 *
 	 * @return bool
 	 */
 	public function is_coupon_emails_allowed( $check_emails, $restrictions ) {
@@ -1524,6 +1558,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Returns whether or not a discount has been applied.
 	 *
 	 * @param string $coupon_code Coupon code to check.
+	 *
 	 * @return bool
 	 */
 	public function has_discount( $coupon_code = '' ) {
@@ -1534,6 +1569,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Applies a coupon code passed to the method.
 	 *
 	 * @param string $coupon_code - The code to apply.
+	 *
 	 * @return bool True if the coupon is applied, false if it does not exist or cannot be applied.
 	 */
 	public function apply_coupon( $coupon_code ) {
@@ -1625,6 +1661,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Get array of applied coupon objects and codes.
 	 *
 	 * @param null $deprecated No longer used.
+	 *
 	 * @return array of applied coupons
 	 */
 	public function get_coupons( $deprecated = null ) {
@@ -1645,8 +1682,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get the discount amount for a used coupon.
 	 *
-	 * @param  string $code coupon code.
-	 * @param  bool   $ex_tax inc or ex tax.
+	 * @param string $code coupon code.
+	 * @param bool   $ex_tax inc or ex tax.
+	 *
 	 * @return float discount amount
 	 */
 	public function get_coupon_discount_amount( $code, $ex_tax = true ) {
@@ -1663,7 +1701,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get the discount tax amount for a used coupon (for tax inclusive prices).
 	 *
-	 * @param  string $code coupon code.
+	 * @param string $code coupon code.
+	 *
 	 * @return float discount amount
 	 */
 	public function get_coupon_discount_tax_amount( $code ) {
@@ -1686,7 +1725,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Remove a single coupon by code.
 	 *
-	 * @param  string $coupon_code Code of the coupon to remove.
+	 * @param string $coupon_code Code of the coupon to remove.
+	 *
 	 * @return bool
 	 */
 	public function remove_coupon( $coupon_code ) {
@@ -1730,11 +1770,12 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * woocommerce_cart_calculate_fees action during cart/checkout. Fees do not
 	 * persist.
 	 *
-	 * @uses WC_Cart_Fees::add_fee
 	 * @param string $name      Unique name for the fee. Multiple fees of the same name cannot be added.
 	 * @param float  $amount    Fee amount (do not enter negative amounts).
 	 * @param bool   $taxable   Is the fee taxable? (default: false).
 	 * @param string $tax_class The tax class for the fee if taxable. A blank string is standard tax class. (default: '').
+	 *
+	 * @uses WC_Cart_Fees::add_fee
 	 */
 	public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
 		$this->fees_api()->add_fee(
@@ -1750,7 +1791,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Return all added fees from the Fees API.
 	 *
-	 * @uses WC_Cart_Fees::get_fees
+	 * @uses   WC_Cart_Fees::get_fees
 	 * @return array
 	 */
 	public function get_fees() {
@@ -1784,6 +1825,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Gets the sub total (after calculation).
 	 *
 	 * @param bool $compound whether to include compound taxes.
+	 *
 	 * @return string formatted price
 	 */
 	public function get_cart_subtotal( $compound = false ) {
@@ -1814,6 +1856,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Get the product row price per item.
 	 *
 	 * @param WC_Product $product Product object.
+	 *
 	 * @return string formatted price
 	 */
 	public function get_product_price( $product ) {
@@ -1834,6 +1877,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @param WC_Product $product Product object.
 	 * @param int        $quantity Quantity being purchased.
+	 *
 	 * @return string formatted price
 	 */
 	public function get_product_subtotal( $product, $quantity ) {
@@ -1878,7 +1922,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get a tax amount.
 	 *
-	 * @param  string $tax_rate_id ID of the tax rate to get taxes for.
+	 * @param string $tax_rate_id ID of the tax rate to get taxes for.
+	 *
 	 * @return float amount
 	 */
 	public function get_tax_amount( $tax_rate_id ) {
@@ -1889,7 +1934,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get a tax amount.
 	 *
-	 * @param  string $tax_rate_id ID of the tax rate to get taxes for.
+	 * @param string $tax_rate_id ID of the tax rate to get taxes for.
+	 *
 	 * @return float amount
 	 */
 	public function get_shipping_tax_amount( $tax_rate_id ) {
@@ -1900,8 +1946,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Get tax row amounts with or without compound taxes includes.
 	 *
-	 * @param  bool $compound True if getting compound taxes.
-	 * @param  bool $display  True if getting total to display.
+	 * @param bool $compound True if getting compound taxes.
+	 * @param bool $display  True if getting total to display.
+	 *
 	 * @return float price
 	 */
 	public function get_taxes_total( $compound = true, $display = true ) {
