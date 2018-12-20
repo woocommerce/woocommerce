@@ -99,33 +99,43 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 * @return array
 	 */
 	protected function get_time_period_sql_params( $query_args, $table_name ) {
-		$sql_query          = array(
+		$sql_query           = array(
 			'from_clause'       => '',
 			'where_time_clause' => '',
 			'where_clause'      => '',
 		);
-		$date_param_mapping = array(
+		$date_param_mapping  = array(
 			'registered'  => 'date_registered',
 			'last_active' => 'date_last_active',
 			'last_order'  => 'date_last_order',
 		);
+		$match_operator      = $this->get_match_operator( $query_args );
+		$where_time_clauses  = array();
 
-		// TODO: handle any/or match?
 		foreach ( $date_param_mapping as $query_param => $column_name ) {
+			$subclauses = array();
 			$before_arg = $query_param . '_before';
 			$after_arg  = $query_param . '_after';
 
 			if ( ! empty( $query_args[ $before_arg ] ) ) {
-				$datetime                        = new DateTime( $query_args[ $before_arg ] );
-				$datetime_str                    = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
-				$sql_query['where_time_clause'] .= " AND {$table_name}.{$column_name} <= '$datetime_str'";
+				$datetime     = new DateTime( $query_args[ $before_arg ] );
+				$datetime_str = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+				$subclauses[] = "{$table_name}.{$column_name} <= '$datetime_str'";
 			}
 
 			if ( ! empty( $query_args[ $after_arg ] ) ) {
-				$datetime                        = new DateTime( $query_args[ $after_arg ] );
-				$datetime_str                    = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
-				$sql_query['where_time_clause'] .= " AND {$table_name}.{$column_name} >= '$datetime_str'";
+				$datetime     = new DateTime( $query_args[ $after_arg ] );
+				$datetime_str = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+				$subclauses[] = "{$table_name}.{$column_name} <= '$datetime_str'";
 			}
+
+			if ( $subclauses ) {
+				$where_time_clauses[] = '(' . implode( ' AND ', $subclauses ) . ')';
+			}
+		}
+
+		if ( $where_time_clauses ) {
+			$sql_query['where_time_clause'] = implode( " {$match_operator} ", $where_time_clauses );
 		}
 
 		return $sql_query;
@@ -157,7 +167,10 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 
 		foreach ( $exact_match_params as $exact_match_param ) {
 			if ( ! empty( $query_args[ $exact_match_param ] ) ) {
-				$where_clauses[] = $wpdb->prepare( "{$order_product_lookup_table}.{$exact_match_param} = %s", $query_args[ $exact_match_param ] );
+				$where_clauses[] = $wpdb->prepare(
+					"{$order_product_lookup_table}.{$exact_match_param} = %s",
+					$query_args[ $exact_match_param ]
+				); // WPCS: unprepared SQL ok.
 			}
 		}
 
@@ -173,20 +186,27 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			$max_param  = $numeric_param . '_max';
 
 			if ( isset( $query_args[ $min_param ] ) ) {
-				$subclauses[] = $wpdb->prepare( "{$order_product_lookup_table}.{$numeric_param} >= {$sql_format}", $query_args[ $min_param ] );
+				$subclauses[] = $wpdb->prepare(
+					"{$order_product_lookup_table}.{$numeric_param} >= {$sql_format}",
+					$query_args[ $min_param ]
+				); // WPCS: unprepared SQL ok.
 			}
 
 			if ( isset( $query_args[ $max_param ] ) ) {
-				$subclauses[] = $wpdb->prepare( "{$order_product_lookup_table}.{$numeric_param} <= {$sql_format}", $query_args[ $max_param ] );
+				$subclauses[] = $wpdb->prepare(
+					"{$order_product_lookup_table}.{$numeric_param} <= {$sql_format}",
+					$query_args[ $max_param ]
+				); // WPCS: unprepared SQL ok.
 			}
 
 			if ( $subclauses ) {
-				$where_clauses[] = '(' . implode( " {$match_operator} ", $subclauses ) . ')';
+				$where_clauses[] = '(' . implode( ' AND ', $subclauses ) . ')';
 			}
 		}
 
 		if ( $where_clauses ) {
-			$sql_query_params['where_clause'] = implode( " {$match_operator} ", $where_clauses );
+			$preceding_match = empty( $sql_query_params['where_time_clause'] ) ? '' : " {$match_operator} ";
+			$sql_query_params['where_clause'] = $preceding_match . implode( " {$match_operator} ", $where_clauses );
 		}
 
 		return $sql_query_params;
