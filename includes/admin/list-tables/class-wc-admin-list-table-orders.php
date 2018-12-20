@@ -422,7 +422,8 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 */
 	public static function get_order_preview_item_html( $order ) {
 		$hidden_order_itemmeta = apply_filters(
-			'woocommerce_hidden_order_itemmeta', array(
+			'woocommerce_hidden_order_itemmeta',
+			array(
 				'_qty',
 				'_tax_class',
 				'_product_id',
@@ -439,12 +440,14 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 		$line_items = apply_filters( 'woocommerce_admin_order_preview_line_items', $order->get_items(), $order );
 		$columns    = apply_filters(
-			'woocommerce_admin_order_preview_line_item_columns', array(
+			'woocommerce_admin_order_preview_line_item_columns',
+			array(
 				'product'  => __( 'Product', 'woocommerce' ),
 				'quantity' => __( 'Quantity', 'woocommerce' ),
 				'tax'      => __( 'Tax', 'woocommerce' ),
 				'total'    => __( 'Total', 'woocommerce' ),
-			), $order
+			),
+			$order
 		);
 
 		if ( ! wc_tax_enabled() ) {
@@ -602,11 +605,12 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$shipping_address = $order->get_formatted_shipping_address();
 
 		return apply_filters(
-			'woocommerce_admin_order_preview_get_order_details', array(
+			'woocommerce_admin_order_preview_get_order_details',
+			array(
 				'data'                       => $order->get_data(),
 				'order_number'               => $order->get_order_number(),
-				'item_html'                  => WC_Admin_List_Table_Orders::get_order_preview_item_html( $order ),
-				'actions_html'               => WC_Admin_List_Table_Orders::get_order_preview_actions_html( $order ),
+				'item_html'                  => self::get_order_preview_item_html( $order ),
+				'actions_html'               => self::get_order_preview_actions_html( $order ),
 				'ship_to_billing'            => wc_ship_to_billing_address_only(),
 				'needs_shipping'             => $order->needs_shipping_address(),
 				'formatted_billing_address'  => $billing_address ? $billing_address : __( 'N/A', 'woocommerce' ),
@@ -616,7 +620,8 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 				'shipping_via'               => $order->get_shipping_method(),
 				'status'                     => $order->get_status(),
 				'status_name'                => wc_get_order_status_name( $order->get_status() ),
-			), $order
+			),
+			$order
 		);
 	}
 
@@ -669,7 +674,8 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 					'bulk_action' => $report_action,
 					'changed'     => $changed,
 					'ids'         => join( ',', $ids ),
-				), $redirect_to
+				),
+				$redirect_to
 			);
 		}
 
