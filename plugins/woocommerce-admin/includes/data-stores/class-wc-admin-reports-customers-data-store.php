@@ -300,6 +300,59 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	}
 
 	/**
+	 * Update the database with customer data.
+	 *
+	 * @param int $user_id WP User ID to update customer data for.
+	 * @return int|bool|null Number or rows modified or false on failure.
+	 */
+	public static function update_registered_customer( $user_id ) {
+		global $wpdb;
+
+		$customer    = new WC_Customer( $user_id );
+		$order_count = $customer->get_order_count( 'edit' );
+		$total_spend = $customer->get_total_spent( 'edit' );
+		$last_order  = $customer->get_last_order();
+		$last_active = $customer->get_meta( 'wc_last_active', true, 'edit' );
+
+		// TODO: try to preserve customer_id for existing user_id?
+		return $wpdb->replace(
+			$wpdb->prefix . self::TABLE_NAME,
+			array(
+				'user_id'          => $user_id,
+				'username'         => $customer->get_username( 'edit' ),
+				'first_name'       => $customer->get_first_name( 'edit' ),
+				'last_name'        => $customer->get_last_name( 'edit' ),
+				'email'            => $customer->get_email( 'edit' ),
+				'city'             => $customer->get_billing_city( 'edit' ),
+				'postcode'         => $customer->get_billing_postcode( 'edit' ),
+				'country'          => $customer->get_billing_country( 'edit' ),
+				'orders_count'     => $order_count,
+				'total_spend'      => $total_spend,
+				'avg_order_value'  => $order_count ? ( $total_spend / $order_count ) : 0,
+				'date_last_order'  => $last_order ? date( 'Y-m-d H:i:s', $last_order->get_date_created( 'edit' )->getTimestamp() ) : '',
+				'date_registered'  => date( 'Y-m-d H:i:s', $customer->get_date_created( 'edit' )->getTimestamp() ),
+				'date_last_active' => $last_active ? date( 'Y-m-d H:i:s', $last_active ) : '',
+			),
+			array(
+				'%d',
+				'%s',
+				'%s',
+				'%s',
+				'%s',
+				'%s',
+				'%s',
+				'%s',
+				'%d',
+				'%f',
+				'%f',
+				'%s',
+				'%s',
+				'%s',
+			)
+		);
+	}
+
+	/**
 	 * Returns string to be used as cache key for the data.
 	 *
 	 * @param array $params Query parameters.

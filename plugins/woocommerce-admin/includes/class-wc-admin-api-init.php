@@ -363,51 +363,13 @@ class WC_Admin_Api_Init {
 
 		// Process customers until close to running out of memory timeouts on large sites then requeue.
 		foreach ( $customer_ids as $customer_id ) {
-			$customer    = new WC_Customer( $customer_id );
-			$order_count = $customer->get_order_count( 'edit' );
-			$total_spend = $customer->get_total_spent( 'edit' );
-			$last_order  = $customer->get_last_order();
-			$last_active = $customer->get_meta( 'wc_last_active', true, 'edit' );
+			$result = WC_Admin_Reports_Customers_Data_Store::update_registered_customer( $customer_id );
 
-			// TODO: handle existing row in lookup table.
-			$wpdb->replace(
-				$wpdb->prefix . 'wc_customer_lookup',
-				array(
-					'user_id'          => $customer_id,
-					'username'         => $customer->get_username( 'edit' ),
-					'first_name'       => $customer->get_first_name( 'edit' ),
-					'last_name'        => $customer->get_last_name( 'edit' ),
-					'email'            => $customer->get_email( 'edit' ),
-					'city'             => $customer->get_billing_city( 'edit' ),
-					'postcode'         => $customer->get_billing_postcode( 'edit' ),
-					'country'          => $customer->get_billing_country( 'edit' ),
-					'orders_count'     => $order_count,
-					'total_spend'      => $total_spend,
-					'avg_order_value'  => $order_count ? ( $total_spend / $order_count ) : 0,
-					'date_last_order'  => $last_order ? date( 'Y-m-d H:i:s', $last_order->get_date_created( 'edit' )->getTimestamp() ) : '',
-					'date_registered'  => date( 'Y-m-d H:i:s', $customer->get_date_created( 'edit' )->getTimestamp() ),
-					'date_last_active' => $last_active ? date( 'Y-m-d H:i:s', $last_active ) : '',
-				),
-				array(
-					'%d',
-					'%s',
-					'%s',
-					'%s',
-					'%s',
-					'%s',
-					'%s',
-					'%s',
-					'%d',
-					'%f',
-					'%f',
-					'%s',
-					'%s',
-					'%s',
-				)
-			);
+			if ( $result ) {
+				// Pop the customer ID from the array for updating the transient later should we near memory exhaustion.
+				unset( $customer_ids[ $customer_id ] );
+			}
 
-			// Pop the customer ID from the array for updating the transient later should we near memory exhaustion.
-			unset( $customer_ids[ $customer_id ] );
 			if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
 				// Update the transient for the next run to avoid processing the same orders again.
 				set_transient( 'wc_update_350_all_customers', $customer_ids, DAY_IN_SECONDS );
