@@ -1691,7 +1691,9 @@ class WC_Cart extends WC_Legacy_Cart {
 		$totals          = $this->get_coupon_discount_totals();
 		$discount_amount = isset( $totals[ $code ] ) ? $totals[ $code ] : 0;
 
-		if ( ! $ex_tax ) {
+		if ( $ex_tax ) {
+			$discount_amount -= $this->get_coupon_discount_tax_amount( $code );
+		} else {
 			$discount_amount += $this->get_coupon_discount_tax_amount( $code );
 		}
 
