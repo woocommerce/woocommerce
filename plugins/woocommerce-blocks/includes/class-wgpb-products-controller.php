@@ -244,7 +244,8 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 		if ( $cat_operator && isset( $args['tax_query'] ) ) {
 			foreach ( $args['tax_query'] as $i => $tax_query ) {
 				if ( 'product_cat' === $tax_query['taxonomy'] ) {
-					$args['tax_query'][ $i ]['operator'] = $cat_operator;
+					$args['tax_query'][ $i ]['operator']         = $cat_operator;
+					$args['tax_query'][ $i ]['include_children'] = 'AND' === $cat_operator ? false : true;
 				}
 			}
 		}
