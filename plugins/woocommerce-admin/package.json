@@ -45,8 +45,8 @@
     "publish:prod": "npm run build:packages && lerna publish from-package"
   },
   "devDependencies": {
-    "@babel/cli": "7.2.0",
-    "@babel/core": "7.2.0",
+    "@babel/cli": "7.2.3",
+    "@babel/core": "7.2.2",
     "@babel/plugin-transform-async-to-generator": "7.2.0",
     "@babel/plugin-transform-react-jsx": "7.2.0",
     "@babel/runtime-corejs2": "7.2.0",
