@@ -53,10 +53,10 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 	 * @var array
 	 */
 	protected $report_columns = array(
-		'items_sold'   => 'SUM(product_qty) as items_sold',
-		'net_revenue'  => 'SUM(product_net_revenue) AS net_revenue',
-		'orders_count' => 'COUNT(DISTINCT order_id) as orders_count',
-		// 'products_count' is not a SQL column at the moment, see below.
+		'items_sold'     => 'SUM(product_qty) as items_sold',
+		'net_revenue'    => 'SUM(product_net_revenue) AS net_revenue',
+		'orders_count'   => 'COUNT(DISTINCT order_id) as orders_count',
+		'products_count' => 'COUNT(DISTINCT product_id) as products_count',
 	);
 
 	/**
@@ -73,6 +73,11 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 		// Limit is left out here so that the grouping in code by PHP can be applied correctly.
 		$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_sql_params( $query_args ) );
 
+		// join wp_order_product_lookup_table with relationships and taxonomies
+		// @TODO: How to handle custom product tables?
+		$sql_query_params['from_clause'] .= " LEFT JOIN {$wpdb->prefix}term_relationships ON {$order_product_lookup_table}.product_id = {$wpdb->prefix}term_relationships.object_id";
+		$sql_query_params['from_clause'] .= " LEFT JOIN {$wpdb->prefix}term_taxonomy ON {$wpdb->prefix}term_relationships.term_taxonomy_id = {$wpdb->prefix}term_taxonomy.term_taxonomy_id";
+
 		// TODO: only products in the category C or orders with products from category C (and, possibly others?).
 		$included_products = $this->get_included_products( $query_args );
 		if ( $included_products ) {
@@ -84,6 +89,8 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}posts ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}posts.ID";
 			$sql_query_params['where_clause'] .= " AND ( {$order_status_filter} )";
 		}
+
+		$sql_query_params['where_clause'] .= " AND taxonomy = 'product_cat' ";
 
 		return $sql_query_params;
 	}
@@ -208,10 +215,9 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 			$selections       = $this->selected_columns( $query_args );
 			$sql_query_params = $this->get_sql_query_params( $query_args );
 
-			$products_data = $wpdb->get_results(
+			$categories_data = $wpdb->get_results(
 				"SELECT
-						product_id,
-						date_created,
+						term_id as category_id,
 						{$selections}
 					FROM
 						{$table_name}
@@ -221,39 +227,15 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 						{$sql_query_params['where_time_clause']}
 						{$sql_query_params['where_clause']}
 					GROUP BY
-						product_id
+						category_id
 					",
 				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
-			if ( null === $products_data ) {
+			if ( null === $categories_data ) {
 				return new WP_Error( 'woocommerce_reports_categories_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ), array( 'status' => 500 ) );
 			}
 
-			// Group by category without a helper table, worst case we add it and change the SQL afterwards.
-			// Other option would be a join with wp_post and taxonomies, but a) performance might be bad, b) how to handle custom product tables?
-			$categories_data = array();
-			foreach ( $products_data as $product_data ) {
-				$categories = get_the_terms( $product_data['product_id'], 'product_cat' );
-				foreach ( $categories as $category ) {
-					$cat_id = $category->term_id;
-					if ( ! key_exists( $cat_id, $categories_data ) ) {
-						$categories_data[ $cat_id ] = array(
-							'category_id'    => 0,
-							'items_sold'     => 0,
-							'net_revenue'    => 0.0,
-							'orders_count'   => 0,
-							'products_count' => 0,
-						);
-					}
-
-					$categories_data[ $cat_id ]['category_id']   = $cat_id;
-					$categories_data[ $cat_id ]['items_sold']   += $product_data['items_sold'];
-					$categories_data[ $cat_id ]['net_revenue']  += $product_data['net_revenue'];
-					$categories_data[ $cat_id ]['orders_count'] += $product_data['orders_count'];
-					$categories_data[ $cat_id ]['products_count'] ++;
-				}
-			}
 			$record_count = count( $categories_data );
 			$total_pages  = (int) ceil( $record_count / $query_args['per_page'] );
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
