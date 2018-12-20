@@ -52,10 +52,11 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 		$args['status_is_not']    = (array) $request['status_is_not'];
 		$args['product_includes'] = (array) $request['product_includes'];
 		$args['product_excludes'] = (array) $request['product_excludes'];
-		$args['coupon_includes']    = (array) $request['coupon_includes'];
-		$args['coupon_excludes']    = (array) $request['coupon_excludes'];
+		$args['coupon_includes']  = (array) $request['coupon_includes'];
+		$args['coupon_excludes']  = (array) $request['coupon_excludes'];
 		$args['customer']         = $request['customer'];
 		$args['categories']       = (array) $request['categories'];
+		$args['segmentby']        = $request['segmentby'];
 
 		return $args;
 	}
@@ -140,32 +141,89 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$totals = array(
-			'net_revenue'         => array(
+		$data_values = array(
+			'net_revenue'             => array(
 				'description' => __( 'Net revenue.', 'wc-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'avg_order_value'     => array(
+			'avg_order_value'         => array(
 				'description' => __( 'Average order value.', 'wc-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'orders_count'        => array(
+			'orders_count'            => array(
 				'description' => __( 'Amount of orders', 'wc-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'avg_items_per_order' => array(
+			'avg_items_per_order'     => array(
 				'description' => __( 'Average items per order', 'wc-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
+			'coupons'                 => array(
+				'description' => __( 'Amount discounted by coupons', 'wc-admin' ),
+				'type'        => 'number',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'num_returning_customers' => array(
+				'description' => __( 'Number of orders done by returning customers', 'wc-admin' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'num_new_customers'       => array(
+				'description' => __( 'Number of orders done by new customers', 'wc-admin' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'products'                => array(
+				'description' => __( 'Number of distinct products sold.', 'wc-admin' ),
+				'type'        => 'number',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
 		);
+
+		$segments = array(
+			'segments' => array(
+				'description' => __( 'Reports data grouped by segment condition.', 'wc-admin' ),
+				'type'        => 'array',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+				'items'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'segment_id' => array(
+							'description' => __( 'Segment identificator.', 'wc-admin' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'enum'        => array( 'day', 'week', 'month', 'year' ),
+						),
+						'subtotals'  => array(
+							'description' => __( 'Interval subtotals.', 'wc-admin' ),
+							'type'        => 'object',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'properties'  => $data_values,
+						),
+					),
+				),
+			),
+		);
+
+		$totals = array_merge( $data_values, $segments );
+
+		// Products is not shown in intervals.
+		unset( $data_values['products'] );
 
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
@@ -223,7 +281,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 								'type'        => 'object',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
-								'properties'  => $totals,
+								'properties'  => $data_values,
 							),
 						),
 					),
@@ -353,7 +411,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['coupon_includes']    = array(
+		$params['coupon_includes']  = array(
 			'description'       => __( 'Limit result set to items that have the specified coupon(s) assigned.', 'wc-admin' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -362,7 +420,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['coupon_excludes']    = array(
+		$params['coupon_excludes']  = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified coupon(s) assigned.', 'wc-admin' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -377,6 +435,20 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 			'enum'              => array(
 				'new',
 				'returning',
+			),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['segmentby']        = array(
+			'description'       => __( 'Segment the response by additional constraint.', 'wc-admin' ),
+			'type'              => 'string',
+			'enum'              => array(
+				'product',
+				'category',
+				'variation',
+				'tax',
+				'coupon',
+				'billing_country', // just to test out if it's possible.
+				'customer_type', // new vs returning.
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
