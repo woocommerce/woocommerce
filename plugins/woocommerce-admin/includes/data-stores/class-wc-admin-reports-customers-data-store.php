@@ -168,7 +168,6 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		$where_clauses  = array();
 
 		$exact_match_params = array(
-			'name',
 			'username',
 			'email',
 			'country',
@@ -181,6 +180,10 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 					$query_args[ $exact_match_param ]
 				); // WPCS: unprepared SQL ok.
 			}
+		}
+
+		if ( ! empty( $query_args['name'] ) ) {
+			$where_clauses[] = $wpdb->prepare( "CONCAT_WS( ' ', first_name, last_name ) = %s", $query_args['name'] );
 		}
 
 		$numeric_params = array(
