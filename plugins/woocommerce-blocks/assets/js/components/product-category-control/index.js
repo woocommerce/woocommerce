@@ -12,6 +12,7 @@ import { SelectControl } from '@wordpress/components';
 /**
  * Internal dependencies
  */
+import './style.scss';
 import SearchListControl from '../search-list-control';
 import SearchListItem from '../search-list-control/item';
 
@@ -116,22 +117,25 @@ class ProductCategoryControl extends Component {
 					isHierarchical
 				/>
 				{ ( !! onOperatorChange ) && (
-					<SelectControl
-						className="woocommerce-product-categories__operator"
-						label={ __( 'Display products matching', 'woo-gutenberg-products-block' ) }
-						value={ operator }
-						onChange={ onOperatorChange }
-						options={ [
-							{
-								label: __( 'Any selected categories', 'woo-gutenberg-products-block' ),
-								value: 'any',
-							},
-							{
-								label: __( 'All selected categories', 'woo-gutenberg-products-block' ),
-								value: 'all',
-							},
-						] }
-					/>
+					<div className={ selected.length < 2 ? 'screen-reader-text' : '' }>
+						<SelectControl
+							className="woocommerce-product-categories__operator"
+							label={ __( 'Display products matching', 'woo-gutenberg-products-block' ) }
+							help={ __( 'Pick at least two categories to use this setting.', 'woo-gutenberg-products-block' ) }
+							value={ operator }
+							onChange={ onOperatorChange }
+							options={ [
+								{
+									label: __( 'Any selected categories', 'woo-gutenberg-products-block' ),
+									value: 'any',
+								},
+								{
+									label: __( 'All selected categories', 'woo-gutenberg-products-block' ),
+									value: 'all',
+								},
+							] }
+						/>
+					</div>
 				) }
 			</Fragment>
 		);
