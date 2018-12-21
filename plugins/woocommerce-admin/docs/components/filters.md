@@ -144,8 +144,8 @@ The query string represented in object form
 
 Which type of autocompleter should be used in the Search
 
-`DatePicker` (component)
-========================
+`DateRangeFilterPicker` (component)
+===================================
 
 Select a range of dates or single dates.
 
