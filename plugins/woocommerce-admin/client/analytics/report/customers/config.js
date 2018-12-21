@@ -166,6 +166,91 @@ export const advancedFilters = {
 				} ) ),
 			},
 		},
+		order_count: {
+			labels: {
+				add: __( 'No. of Orders', 'wc-admin' ),
+				remove: __( 'Remove order  filter', 'wc-admin' ),
+				rule: __( 'Select an order count filter match', 'wc-admin' ),
+				title: __( 'No. of Orders {{rule /}} {{filter /}}', 'wc-admin' ),
+			},
+			rules: [
+				{
+					value: 'max',
+					/* translators: Sentence fragment, logical, "Less Than" refers to number of orders a customer has placed, less than a given amount. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'Less Than', 'number of orders', 'wc-admin' ),
+				},
+				{
+					value: 'min',
+					/* translators: Sentence fragment, logical, "More Than" refers to number of orders a customer has placed, more than a given amount. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'More Than', 'number of orders', 'wc-admin' ),
+				},
+				{
+					value: 'between',
+					/* translators: Sentence fragment, logical, "Between" refers to number of orders a customer has placed, between two given integers. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'Between', 'number of orders', 'wc-admin' ),
+				},
+			],
+			input: {
+				component: 'Number',
+			},
+		},
+		total_spend: {
+			labels: {
+				add: __( 'Total Spend', 'wc-admin' ),
+				remove: __( 'Remove total spend filter', 'wc-admin' ),
+				rule: __( 'Select a total spend filter match', 'wc-admin' ),
+				title: __( 'Total Spend {{rule /}} {{filter /}}', 'wc-admin' ),
+			},
+			rules: [
+				{
+					value: 'max',
+					/* translators: Sentence fragment, logical, "Less Than" refers to total spending by a customer, less than a given amount. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'Less Than', 'total spend by customer', 'wc-admin' ),
+				},
+				{
+					value: 'min',
+					/* translators: Sentence fragment, logical, "Less Than" refers to total spending by a customer, more than a given amount. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'More Than', 'total spend by customer', 'wc-admin' ),
+				},
+				{
+					value: 'between',
+					/* translators: Sentence fragment, logical, "Between" refers to total spending by a customer, between two given amounts. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'Between', 'total spend by customer', 'wc-admin' ),
+				},
+			],
+			input: {
+				component: 'Currency',
+			},
+		},
+		avg_order_value: {
+			labels: {
+				add: __( 'AOV', 'wc-admin' ),
+				remove: __( 'Remove average older value filter', 'wc-admin' ),
+				rule: __( 'Select an average order value filter match', 'wc-admin' ),
+				title: __( 'AOV {{rule /}} {{filter /}}', 'wc-admin' ),
+			},
+			rules: [
+				{
+					value: 'max',
+					/* translators: Sentence fragment, logical, "Less Than" refers to average order value of a customer, more than a given amount. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'Less Than', 'average order value of customer', 'wc-admin' ),
+				},
+				{
+					value: 'min',
+					/* translators: Sentence fragment, logical, "Less Than" refers to average order value of a customer, less than a given amount. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+
+					label: _x( 'More Than', 'average order value of customer', 'wc-admin' ),
+				},
+				{
+					value: 'between',
+					/* translators: Sentence fragment, logical, "Between" refers to average order value of a customer, between two given amounts. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'Between', 'average order value of customer', 'wc-admin' ),
+				},
+			],
+			input: {
+				component: 'Currency',
+			},
+		},
 	},
 };
 /*eslint-enable max-len*/
