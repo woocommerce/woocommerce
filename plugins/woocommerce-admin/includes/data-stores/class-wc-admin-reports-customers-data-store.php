@@ -135,7 +135,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			if ( ! empty( $query_args[ $after_arg ] ) ) {
 				$datetime     = new DateTime( $query_args[ $after_arg ] );
 				$datetime_str = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
-				$subclauses[] = "{$table_name}.{$column_name} <= '$datetime_str'";
+				$subclauses[] = "{$table_name}.{$column_name} >= '$datetime_str'";
 			}
 
 			if ( $subclauses ) {
