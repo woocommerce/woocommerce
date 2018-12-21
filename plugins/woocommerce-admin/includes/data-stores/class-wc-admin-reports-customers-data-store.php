@@ -337,6 +337,127 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	}
 
 	/**
+	 * Updates a guest (no user_id) customer data with new order data.
+	 *
+	 * @param WC_Order $order Order to update guest customer data with.
+	 * @return int|false The number of rows affected, or false on error.
+	 */
+	public function update_guest_customer_by_order( $order ) {
+		global $wpdb;
+
+		$email = $order->get_billing_email( 'edit' );
+
+		if ( empty( $email ) ) {
+			return true;
+		}
+
+		$existing_guest = $this->get_guest_by_email( $email );
+
+		if ( $existing_guest ) {
+			$order_timestamp  = date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() );
+			$new_orders_count = $existing_guest['orders_count'] + 1;
+			$new_total_spend  = $existing_guest['total_spend'] + (float) $order->get_total( 'edit' );
+
+			return $wpdb->update(
+				$wpdb->prefix . self::TABLE_NAME,
+				array(
+					'orders_count'     => $new_orders_count,
+					'total_spend'      => $new_total_spend,
+					'avg_order_value'  => $new_total_spend / $new_orders_count,
+					'date_last_order'  => $order_timestamp,
+					'date_last_active' => $order_timestamp,
+				),
+				array(
+					'customer_id' => $existing_guest['customer_id'],
+				),
+				array( '%d', '%f', '%f', '%s', '%s' ),
+				array( '%d' )
+			);
+		}
+
+		return $this->insert_guest_customer(
+			array(
+				'first_name'       => $order->get_billing_first_name( 'edit' ),
+				'last_name'        => $order->get_billing_last_name( 'edit' ),
+				'email'            => $email,
+				'city'             => $order->get_billing_city( 'edit' ),
+				'postcode'         => $order->get_billing_postcode( 'edit' ),
+				'country'          => $order->get_billing_country( 'edit' ),
+				'orders_count'     => 1,
+				'total_spend'      => (float) $order->get_total( 'edit' ),
+				'avg_order_value'  => (float) $order->get_total( 'edit' ),
+				'date_last_order'  => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+				'date_last_active' => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+			)
+		);
+	}
+
+	/**
+	 * Insert a guest (no user_id) customer into lookup table.
+	 *
+	 * @param array $customer_data Array of guest customer data to insert.
+	 * @return int|false The number of rows affected, or false on error.
+	 */
+	public static function insert_guest_customer( $customer_data ) {
+		global $wpdb;
+
+		return $wpdb->insert(
+			$wpdb->prefix . self::TABLE_NAME,
+			array(
+				'first_name'       => $customer_data['first_name'],
+				'last_name'        => $customer_data['last_name'],
+				'email'            => $customer_data['email'],
+				'city'             => $customer_data['city'],
+				'postcode'         => $customer_data['postcode'],
+				'country'          => $customer_data['country'],
+				'orders_count'     => $customer_data['orders_count'],
+				'total_spend'      => $customer_data['total_spend'],
+				'avg_order_value'  => $customer_data['avg_order_value'],
+				'date_last_order'  => $customer_data['date_last_order'],
+				'date_last_active' => $customer_data['date_last_active'],
+			),
+			array(
+				'%s',
+				'%s',
+				'%s',
+				'%s',
+				'%s',
+				'%s',
+				'%d',
+				'%f',
+				'%f',
+				'%s',
+				'%s',
+			)
+		);
+	}
+
+	/**
+	 * Retrieve a guest (no user_id) customer row by email.
+	 *
+	 * @param string $email Email address.
+	 * @returns false|array Customer array if found, boolean false if not.
+	 */
+	public function get_guest_by_email( $email ) {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		$guest_row  = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$table_name} WHERE email = %s AND user_id IS NULL LIMIT 1",
+				$email
+			),
+			ARRAY_A
+		); // WPCS: unprepared SQL ok.
+
+		if ( $guest_row ) {
+			return $this->cast_numbers( $guest_row );
+		}
+
+		return false;
+	}
+
+	/**
 	 * Update the database with customer data.
 	 *
 	 * @param int $user_id WP User ID to update customer data for.

@@ -386,7 +386,48 @@ class WC_Admin_Api_Init {
 			}
 		}
 
-		// TODO: Backfill customer lookup table with guests.
+		// Backfill customer lookup table with guests.
+		$guest_order_ids = get_transient( 'wc_update_350_all_guest_orders' );
+
+		if ( false === $guest_order_ids ) {
+			$guest_order_ids = wc_get_orders(
+				// TODO: restrict to certain order status?
+				array(
+					'fields'         => 'ids',
+					'customer_id'    => 0,
+					'order'          => 'asc',
+					'orderby'        => 'date',
+					'posts_per_page' => -1,
+				)
+			);
+
+			set_transient( 'wc_update_350_all_guest_orders', $guest_order_ids, DAY_IN_SECONDS );
+		}
+
+		$customers_report_data_store = new WC_Admin_Reports_Customers_Data_Store();
+
+		foreach ( $guest_order_ids as $idx => $order_id ) {
+			$order = wc_get_order( $order_id );
+
+			if ( ! $order ) {
+				unset( $guest_order_ids[ $idx ] );
+			} elseif ( ! $order->get_billing_email( 'edit' ) ) {
+				unset( $guest_order_ids[ $idx ] );
+			} else {
+				$result = $customers_report_data_store->update_guest_customer_by_order( $order );
+
+				if ( $result ) {
+					unset( $guest_order_ids[ $idx ] );
+				}
+			}
+
+			if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
+				// Update the transient for the next run to avoid processing the same orders again.
+				set_transient( 'wc_update_350_all_guest_orders', $guest_order_ids, DAY_IN_SECONDS );
+				return true;
+			}
+		}
+
 		return true;
 	}
 
