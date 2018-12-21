@@ -142,7 +142,7 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$headers  = $response->get_headers();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 5, count( $reports ) );
+		$this->assertCount( 5, $reports );
 		$this->assertArrayHasKey( 'X-WP-Total', $headers );
 		$this->assertEquals( 10, $headers['X-WP-Total'] );
 		$this->assertArrayHasKey( 'X-WP-TotalPages', $headers );
@@ -151,5 +151,33 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 1, $reports[0]['orders_count'] );
 		$this->assertEquals( 100, $reports[0]['total_spend'] );
 		$this->assert_report_item_schema( $reports[0] );
+
+		// Test name parameter (case with no matches).
+		$request->set_query_params(
+			array(
+				'name' => 'Nota Customername',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 0, $reports );
+
+		// Test name and last_order parameters.
+		$request->set_query_params(
+			array(
+				'name'             => 'Justin',
+				'last_order_after' => date( 'Y-m-d' ) . 'T00:00:00Z',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+		$this->assertEquals( $test_customers[0]->get_id(), $reports[0]['user_id'] );
+		$this->assertEquals( 1, $reports[0]['orders_count'] );
+		$this->assertEquals( 100, $reports[0]['total_spend'] );
 	}
 }
