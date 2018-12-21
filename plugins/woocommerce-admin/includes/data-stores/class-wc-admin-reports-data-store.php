@@ -634,6 +634,65 @@ class WC_Admin_Reports_Data_Store {
 		return $excluded_coupons_str;
 	}
 
+	/**
+	 * Returns comma separated ids of included orders, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_included_orders( $query_args ) {
+		$included_orders_str = '';
+
+		if ( isset( $query_args['order_includes'] ) && is_array( $query_args['order_includes'] ) && count( $query_args['order_includes'] ) > 0 ) {
+			$included_orders_str = implode( ',', $query_args['order_includes'] );
+		}
+		return $included_orders_str;
+	}
+
+	/**
+	 * Returns comma separated ids of excluded orders, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_excluded_orders( $query_args ) {
+		$excluded_orders_str = '';
+
+		if ( isset( $query_args['order_excludes'] ) && is_array( $query_args['order_excludes'] ) && count( $query_args['order_excludes'] ) > 0 ) {
+			$excluded_orders_str = implode( ',', $query_args['order_excludes'] );
+		}
+		return $excluded_orders_str;
+	}
+
+	/**
+	 * Returns comma separated ids of included users, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_included_users( $query_args ) {
+		$included_users_str = '';
+
+		if ( isset( $query_args['user_includes'] ) && is_array( $query_args['user_includes'] ) && count( $query_args['user_includes'] ) > 0 ) {
+			$included_users_str = implode( ',', $query_args['user_includes'] );
+		}
+		return $included_users_str;
+	}
+
+	/**
+	 * Returns comma separated ids of excluded users, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_excluded_users( $query_args ) {
+		$excluded_users_str = '';
+
+		if ( isset( $query_args['user_excludes'] ) && is_array( $query_args['user_excludes'] ) && count( $query_args['user_excludes'] ) > 0 ) {
+			$excluded_users_str = implode( ',', $query_args['user_excludes'] );
+		}
+		return $excluded_users_str;
+	}
 
 	/**
 	 * Returns order status subquery to be used in WHERE SQL query, based on query arguments from the user.
