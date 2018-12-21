@@ -199,6 +199,9 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$product->set_low_stock_amount( 5 );
 		$product->save();
 
+		$term = wp_insert_term( 'Test Category', 'product_cat' );
+		wp_set_object_terms( $product->get_id(), $term['term_id'], 'product_cat' );
+
 		$order = WC_Helper_Order::create_order( 1, $product );
 		$order->set_status( 'completed' );
 		$order->set_shipping_total( 10 );
@@ -217,7 +220,9 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 			'extended_info' => 1,
 		);
 		// Test retrieving the stats through the data store.
-		$data          = $data_store->get_data( $args );
+		$data = $data_store->get_data( $args );
+		// Get updated product data.
+		$product       = wc_get_product( $product->get_id() );
 		$expected_data = (object) array(
 			'total'   => 1,
 			'pages'   => 1,
@@ -234,8 +239,9 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 						'permalink'        => $product->get_permalink(),
 						'price'            => (float) $product->get_price(),
 						'stock_status'     => $product->get_stock_status(),
-						'stock_quantity'   => $product->get_stock_quantity() - 4, // subtract the ones purchased.
+						'stock_quantity'   => $product->get_stock_quantity(),
 						'low_stock_amount' => $product->get_low_stock_amount(),
+						'category_ids'     => array_values( $product->get_category_ids() ),
 					),
 				),
 			),

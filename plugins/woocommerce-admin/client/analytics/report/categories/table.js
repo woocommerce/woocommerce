@@ -4,21 +4,23 @@
  */
 import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
 import { map } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
-import { Link } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
-import ReportTable from 'analytics/components/report-table';
+import CategoryBreacrumbs from './breadcrumbs';
 import { numberFormat } from 'lib/number';
+import ReportTable from 'analytics/components/report-table';
+import withSelect from 'wc-api/with-select';
 
-export default class CategoriesReportTable extends Component {
+class CategoriesReportTable extends Component {
 	constructor( props ) {
 		super( props );
 
@@ -64,29 +66,16 @@ export default class CategoriesReportTable extends Component {
 		];
 	}
 
-	getRowsContent( categories ) {
-		return map( categories, category => {
-			const {
-				category_id,
-				items_sold,
-				net_revenue,
-				products_count,
-				orders_count,
-				extended_info,
-			} = category;
-			const { name } = extended_info;
+	getRowsContent( categoryStats ) {
+		return map( categoryStats, categoryStat => {
+			const { category_id, items_sold, net_revenue, products_count, orders_count } = categoryStat;
+			const categories = this.props.categories;
+			const category = categories[ category_id ];
 
 			return [
 				{
-					display: (
-						<Link
-							href={ 'term.php?taxonomy=product_cat&post_type=product&tag_ID=' + category_id }
-							type="wp-admin"
-						>
-							{ name }
-						</Link>
-					),
-					value: name,
+					display: <CategoryBreacrumbs category={ category } categories={ categories } />,
+					value: category && category.name,
 				},
 				{
 					display: numberFormat( items_sold ),
@@ -156,3 +145,15 @@ export default class CategoriesReportTable extends Component {
 		);
 	}
 }
+
+export default compose(
+	withSelect( select => {
+		const { getCategories, getCategoriesError, isGetCategoriesRequesting } = select( 'wc-api' );
+
+		const categories = getCategories();
+		const isError = Boolean( getCategoriesError() );
+		const isRequesting = isGetCategoriesRequesting();
+
+		return { categories, isError, isRequesting };
+	} )
+)( CategoriesReportTable );

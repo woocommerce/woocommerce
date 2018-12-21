@@ -2,25 +2,29 @@
 /**
  * External dependencies
  */
-import { __, _n, _x } from '@wordpress/i18n';
+import { __, _n, _x, sprintf } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
 import { map } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
-import { Link } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
+import { Link, Tag } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import ReportTable from 'analytics/components/report-table';
-import { numberFormat } from 'lib/number';
+import CategoryBreacrumbs from '../categories/breadcrumbs';
 import { isLowStock } from './utils';
+import { numberFormat } from 'lib/number';
+import ReportTable from 'analytics/components/report-table';
+import withSelect from 'wc-api/with-select';
+import './style.scss';
 
-export default class ProductsReportTable extends Component {
+class ProductsReportTable extends Component {
 	constructor() {
 		super();
 
@@ -96,10 +100,9 @@ export default class ProductsReportTable extends Component {
 				items_sold,
 				net_revenue,
 				orders_count,
-				categories = [], // @TODO
 				variations = [], // @TODO
 			} = row;
-			const { name, stock_status, stock_quantity, low_stock_amount } = extended_info;
+			const { category_ids, low_stock_amount, name, stock_status, stock_quantity } = extended_info;
 			const ordersLink = getNewPath( persistedQuery, 'orders', {
 				filter: 'advanced',
 				product_includes: product_id,
@@ -108,6 +111,8 @@ export default class ProductsReportTable extends Component {
 				filter: 'single_product',
 				products: product_id,
 			} );
+			const categories = this.props.categories;
+			const productCategories = category_ids.map( category_id => categories[ category_id ] );
 
 			return [
 				{
@@ -139,10 +144,29 @@ export default class ProductsReportTable extends Component {
 					value: orders_count,
 				},
 				{
-					display: Array.isArray( categories )
-						? categories.map( cat => cat.name ).join( ', ' )
-						: '',
-					value: Array.isArray( categories ) ? categories.map( cat => cat.name ).join( ', ' ) : '',
+					display: (
+						<div className="woocommerce-table__product-categories">
+							{ productCategories[ 0 ] && (
+								<CategoryBreacrumbs category={ productCategories[ 0 ] } categories={ categories } />
+							) }
+							{ productCategories.length > 1 && (
+								<Tag
+									label={ sprintf(
+										_x( '+%d more', 'categories', 'wc-admin' ),
+										productCategories.length - 1
+									) }
+									popoverContents={ productCategories.map( category => (
+										<CategoryBreacrumbs
+											category={ category }
+											categories={ categories }
+											key={ category.id }
+										/>
+									) ) }
+								/>
+							) }
+						</div>
+					),
+					value: productCategories.map( category => category.name ).join( ', ' ),
 				},
 				{
 					display: numberFormat( variations.length ),
@@ -219,3 +243,15 @@ export default class ProductsReportTable extends Component {
 		);
 	}
 }
+
+export default compose(
+	withSelect( select => {
+		const { getCategories, getCategoriesError, isGetCategoriesRequesting } = select( 'wc-api' );
+
+		const categories = getCategories();
+		const isError = Boolean( getCategoriesError() );
+		const isRequesting = isGetCategoriesRequesting();
+
+		return { categories, isError, isRequesting };
+	} )
+)( ProductsReportTable );
