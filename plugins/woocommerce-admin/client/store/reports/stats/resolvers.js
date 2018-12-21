@@ -28,7 +28,7 @@ export default {
 		let apiPath = endpoint + stringifyQuery( query );
 
 		// TODO: Remove once swagger endpoints are phased out.
-		const swaggerEndpoints = [ 'categories', 'coupons' ];
+		const swaggerEndpoints = [ 'categories' ];
 		if ( swaggerEndpoints.indexOf( endpoint ) >= 0 ) {
 			apiPath = SWAGGERNAMESPACE + 'reports/' + endpoint + '/stats' + stringifyQuery( query );
 			try {

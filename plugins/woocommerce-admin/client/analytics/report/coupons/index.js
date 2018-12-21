@@ -28,13 +28,13 @@ export default class CouponsReport extends Component {
 				<ReportFilters query={ query } path={ path } filters={ filters } />
 				<ReportSummary
 					charts={ charts }
-					endpoint="orders"
+					endpoint="coupons"
 					query={ query }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
 				<ReportChart
 					charts={ charts }
-					endpoint="orders"
+					endpoint="coupons"
 					path={ path }
 					query={ query }
 					selectedChart={ getSelectedChart( query.chart, charts ) }

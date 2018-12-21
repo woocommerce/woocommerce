@@ -12,13 +12,13 @@ import { NAMESPACE } from 'store/constants';
 
 export const charts = [
 	{
-		key: 'discounted_orders',
+		key: 'orders_count',
 		label: __( 'Discounted Orders', 'wc-admin' ),
 		type: 'number',
 	},
 	{
-		key: 'coupons',
-		label: __( 'Gross Discounted', 'wc-admin' ),
+		key: 'amount',
+		label: __( 'Amount', 'wc-admin' ),
 		type: 'currency',
 	},
 ];
@@ -48,7 +48,7 @@ export const filters = [
 				},
 			},
 			{ label: __( 'Top Coupons by Discounted Orders', 'wc-admin' ), value: 'top_orders' },
-			{ label: __( 'Top Coupons by Gross Discounted', 'wc-admin' ), value: 'top_discount' },
+			{ label: __( 'Top Coupons by Amount Discounted', 'wc-admin' ), value: 'top_discount' },
 		],
 	},
 ];
