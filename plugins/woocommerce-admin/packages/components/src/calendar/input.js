@@ -4,7 +4,7 @@
  */
 import { Dashicon, Popover } from '@wordpress/components';
 import classnames from 'classnames';
-import { uniqueId } from 'lodash';
+import { uniqueId, noop } from 'lodash';
 import PropTypes from 'prop-types';
 
 const DateInput = ( {
@@ -63,11 +63,13 @@ DateInput.propTypes = {
 	error: PropTypes.string,
 	errorPosition: PropTypes.string,
 	onFocus: PropTypes.func,
+	onKeyDown: PropTypes.func,
 };
 
 DateInput.defaultProps = {
 	onFocus: () => {},
 	errorPosition: 'bottom center',
+	onKeyDown: noop,
 };
 
 export default DateInput;
