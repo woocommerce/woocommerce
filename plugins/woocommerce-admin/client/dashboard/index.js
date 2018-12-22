@@ -12,6 +12,7 @@ import './style.scss';
 import Header from 'header';
 import StorePerformance from './store-performance';
 import TopSellingProducts from './top-selling-products';
+import DashboardCharts from './dashboard-charts';
 import { ReportFilters } from '@woocommerce/components';
 
 export default class Dashboard extends Component {
@@ -27,6 +28,7 @@ export default class Dashboard extends Component {
 						<TopSellingProducts />
 					</div>
 				</div>
+				<DashboardCharts query={ query } path={ path } />
 			</Fragment>
 		);
 	}

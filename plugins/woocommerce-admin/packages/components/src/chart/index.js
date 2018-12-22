@@ -113,7 +113,10 @@ class Chart extends Component {
 	}
 
 	handleLegendToggle( event ) {
-		const { data } = this.props;
+		const { data, mode } = this.props;
+		if ( mode ) {
+			return;
+		}
 		const orderedKeys = this.state.orderedKeys.map( d => ( {
 			...d,
 			visible: d.key === event.target.id ? ! d.visible : d.visible,
@@ -229,7 +232,7 @@ class Chart extends Component {
 		} = this.props;
 		let { yFormat } = this.props;
 		const legendDirection = mode === 'time-comparison' && isViewportWide ? 'row' : 'column';
-		const chartDirection = mode === 'item-comparison' && isViewportWide ? 'row' : 'column';
+		const chartDirection = ( mode === 'item-comparison' ) && isViewportWide ? 'row' : 'column';
 
 		const chartHeight = this.getChartHeight();
 		const legend = (
@@ -238,6 +241,7 @@ class Chart extends Component {
 				data={ orderedKeys }
 				handleLegendHover={ this.handleLegendHover }
 				handleLegendToggle={ this.handleLegendToggle }
+				interactive={ mode !== 'block' }
 				legendDirection={ legendDirection }
 				legendValueFormat={ tooltipValueFormat }
 				totalLabel={ sprintf( itemsLabel, orderedKeys.length ) }
@@ -263,39 +267,41 @@ class Chart extends Component {
 		}
 		return (
 			<div className="woocommerce-chart">
-				<div className="woocommerce-chart__header">
-					<H className="woocommerce-chart__title">{ title }</H>
-					{ isViewportWide && legendDirection === 'row' && legend }
-					{ this.renderIntervalSelector() }
-					<NavigableMenu
-						className="woocommerce-chart__types"
-						orientation="horizontal"
-						role="menubar"
-					>
-						<IconButton
-							className={ classNames( 'woocommerce-chart__type-button', {
-								'woocommerce-chart__type-button-selected': type === 'line',
-							} ) }
-							icon={ <Gridicon icon="line-graph" /> }
-							title={ __( 'Line chart', 'wc-admin' ) }
-							aria-checked={ type === 'line' }
-							role="menuitemradio"
-							tabIndex={ type === 'line' ? 0 : -1 }
-							onClick={ partial( this.handleTypeToggle, 'line' ) }
-						/>
-						<IconButton
-							className={ classNames( 'woocommerce-chart__type-button', {
-								'woocommerce-chart__type-button-selected': type === 'bar',
-							} ) }
-							icon={ <Gridicon icon="stats-alt" /> }
-							title={ __( 'Bar chart', 'wc-admin' ) }
-							aria-checked={ type === 'bar' }
-							role="menuitemradio"
-							tabIndex={ type === 'bar' ? 0 : -1 }
-							onClick={ partial( this.handleTypeToggle, 'bar' ) }
-						/>
-					</NavigableMenu>
-				</div>
+				{ mode !== 'block' &&
+					<div className="woocommerce-chart__header">
+						<H className="woocommerce-chart__title">{ title }</H>
+						{ isViewportWide && legendDirection === 'row' && legend }
+						{ this.renderIntervalSelector() }
+						<NavigableMenu
+							className="woocommerce-chart__types"
+							orientation="horizontal"
+							role="menubar"
+						>
+							<IconButton
+								className={ classNames( 'woocommerce-chart__type-button', {
+									'woocommerce-chart__type-button-selected': type === 'line',
+								} ) }
+								icon={ <Gridicon icon="line-graph" /> }
+								title={ __( 'Line chart', 'wc-admin' ) }
+								aria-checked={ type === 'line' }
+								role="menuitemradio"
+								tabIndex={ type === 'line' ? 0 : -1 }
+								onClick={ partial( this.handleTypeToggle, 'line' ) }
+							/>
+							<IconButton
+								className={ classNames( 'woocommerce-chart__type-button', {
+									'woocommerce-chart__type-button-selected': type === 'bar',
+								} ) }
+								icon={ <Gridicon icon="stats-alt" /> }
+								title={ __( 'Bar chart', 'wc-admin' ) }
+								aria-checked={ type === 'bar' }
+								role="menuitemradio"
+								tabIndex={ type === 'bar' ? 0 : -1 }
+								onClick={ partial( this.handleTypeToggle, 'bar' ) }
+							/>
+						</NavigableMenu>
+					</div>
+				}
 				<Section component={ false }>
 					<div
 						className={ classNames(
@@ -304,7 +310,7 @@ class Chart extends Component {
 						) }
 						ref={ this.chartBodyRef }
 					>
-						{ isViewportWide && legendDirection === 'column' && legend }
+						{ isViewportWide && legendDirection === 'column' && mode !== 'block' && legend }
 						{ isRequesting && (
 							<Fragment>
 								<span className="screen-reader-text">
@@ -322,7 +328,7 @@ class Chart extends Component {
 									height={ chartHeight }
 									interval={ interval }
 									margin={ margin }
-									mode={ mode }
+									mode={ mode === 'block' ? 'item-comparison' : mode }
 									orderedKeys={ orderedKeys }
 									tooltipLabelFormat={ tooltipLabelFormat }
 									tooltipValueFormat={ tooltipValueFormat }
@@ -337,7 +343,7 @@ class Chart extends Component {
 								/>
 							) }
 					</div>
-					{ ! isViewportWide && <div className="woocommerce-chart__footer">{ legend }</div> }
+					{ ( ! isViewportWide || mode === 'block' ) && <div className="woocommerce-chart__footer">{ legend }</div> }
 				</Section>
 			</div>
 		);
@@ -389,7 +395,7 @@ Chart.propTypes = {
 	 * `item-comparison` (default) or `time-comparison`, this is used to generate correct
 	 * ARIA properties.
 	 */
-	mode: PropTypes.oneOf( [ 'item-comparison', 'time-comparison' ] ),
+	mode: PropTypes.oneOf( [ 'block', 'item-comparison', 'time-comparison' ] ),
 	/**
 	 * A title describing this chart.
 	 */

@@ -1,3 +1,7 @@
+# 1.3.1
+
+- Added `interactive` prop for `d3chart/legend` to signal if legend items are clickable or not.
+
 # 1.3.0
 
 - Update `<Table />` to use header keys to denote which columns are shown

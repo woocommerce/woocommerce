@@ -65,7 +65,7 @@ export class ReportChart extends Component {
 	}
 
 	render() {
-		const { query, itemsLabel, path, primaryData, secondaryData, selectedChart } = this.props;
+		const { query, itemsLabel, mode, path, primaryData, secondaryData, selectedChart } = this.props;
 
 		if ( primaryData.isError || secondaryData.isError ) {
 			return <ReportError isError />;
@@ -111,7 +111,7 @@ export class ReportChart extends Component {
 				type={ getChartTypeForQuery( query ) }
 				allowedIntervals={ allowedIntervals }
 				itemsLabel={ itemsLabel }
-				mode={ this.getChartMode() }
+				mode={ mode || this.getChartMode() }
 				tooltipLabelFormat={ formats.tooltipLabelFormat }
 				tooltipValueFormat={ getTooltipValueFormat( selectedChart.type ) }
 				tooltipTitle={ selectedChart.label }
@@ -128,6 +128,7 @@ export class ReportChart extends Component {
 ReportChart.propTypes = {
 	filters: PropTypes.array,
 	itemsLabel: PropTypes.string,
+	mode: PropTypes.string,
 	path: PropTypes.string.isRequired,
 	primaryData: PropTypes.object.isRequired,
 	query: PropTypes.object.isRequired,

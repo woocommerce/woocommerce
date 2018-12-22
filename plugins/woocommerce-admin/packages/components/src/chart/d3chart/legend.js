@@ -48,6 +48,7 @@ class D3Legend extends Component {
 			data,
 			handleLegendHover,
 			handleLegendToggle,
+			interactive,
 			legendDirection,
 			legendValueFormat,
 			totalLabel,
@@ -92,7 +93,7 @@ class D3Legend extends Component {
 							<button
 								onClick={ handleLegendToggle }
 								id={ row.key }
-								disabled={ row.visible && numberOfRowsVisible <= 1 }
+								disabled={ ( row.visible && numberOfRowsVisible <= 1 ) || ! interactive }
 							>
 								<div className="woocommerce-legend__item-container" id={ row.key }>
 									<span
@@ -143,6 +144,10 @@ D3Legend.propTypes = {
 	 */
 	handleLegendHover: PropTypes.func,
 	/**
+	 * Determines whether or not you can click on the legend
+	 */
+	interactive: PropTypes.bool,
+	/**
 	 * Display legend items as a `row` or `column` inside a flex-box.
 	 */
 	legendDirection: PropTypes.oneOf( [ 'row', 'column' ] ),
@@ -158,6 +163,7 @@ D3Legend.propTypes = {
 };
 
 D3Legend.defaultProps = {
+	interactive: true,
 	legendDirection: 'row',
 	legendValueFormat: ',',
 };
