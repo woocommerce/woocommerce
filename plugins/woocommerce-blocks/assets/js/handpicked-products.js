@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, _n } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import {
@@ -26,15 +26,15 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import getQuery from './utils/get-query';
-import ProductAttributeControl from './components/product-attribute-control';
-import ProductCategoryControl from './components/product-category-control';
+import { IconWidgets } from './components/icons';
+import ProductsControl from './components/products-control';
 import ProductOrderbyControl from './components/product-orderby-control';
 import ProductPreview from './components/product-preview';
 
 /**
- * Component to handle edit mode of "Products by Category".
+ * Component to handle edit mode of "Hand-picked Products".
  */
-class ProductByCategoryBlock extends Component {
+class ProductsBlock extends Component {
 	constructor() {
 		super( ...arguments );
 		this.state = {
@@ -46,27 +46,27 @@ class ProductByCategoryBlock extends Component {
 	}
 
 	componentDidMount() {
-		if ( this.props.attributes.categories ) {
-			this.getProducts();
-		}
+		this.getProducts();
 	}
 
 	componentDidUpdate( prevProps ) {
-		const hasChange = [
-			'categories',
-			'catOperator',
-			'columns',
-			'orderby',
-			'rows',
-		].reduce( ( acc, key ) => {
-			return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
-		}, false );
+		const hasChange = [ 'products', 'columns', 'orderby' ].reduce(
+			( acc, key ) => {
+				return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
+			},
+			false
+		);
 		if ( hasChange ) {
 			this.debouncedGetProducts();
 		}
 	}
 
 	getProducts() {
+		if ( ! this.props.attributes.products.length ) {
+			// We've removed all selected products, or products haven't been selected yet.
+			this.setState( { products: [], loaded: true } );
+			return;
+		}
 		apiFetch( {
 			path: addQueryArgs(
 				'/wc-pb/v3/products',
@@ -83,26 +83,10 @@ class ProductByCategoryBlock extends Component {
 
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
-		const { columns, catOperator, orderby, rows } = attributes;
+		const { columns, orderby } = attributes;
 
 		return (
 			<InspectorControls key="inspector">
-				<PanelBody
-					title={ __( 'Product Category', 'woo-gutenberg-products-block' ) }
-					initialOpen={ false }
-				>
-					<ProductCategoryControl
-						selected={ attributes.categories }
-						onChange={ ( value = [] ) => {
-							const ids = value.map( ( { id } ) => id );
-							setAttributes( { categories: ids } );
-						} }
-						operator={ catOperator }
-						onOperatorChange={ ( value = 'any' ) =>
-							setAttributes( { catOperator: value } )
-						}
-					/>
-				</PanelBody>
 				<PanelBody
 					title={ __( 'Layout', 'woo-gutenberg-products-block' ) }
 					initialOpen
@@ -113,13 +97,6 @@ class ProductByCategoryBlock extends Component {
 						onChange={ ( value ) => setAttributes( { columns: value } ) }
 						min={ wc_product_block_data.min_columns }
 						max={ wc_product_block_data.max_columns }
-					/>
-					<RangeControl
-						label={ __( 'Rows', 'woo-gutenberg-products-block' ) }
-						value={ rows }
-						onChange={ ( value ) => setAttributes( { rows: value } ) }
-						min={ wc_product_block_data.min_rows }
-						max={ wc_product_block_data.max_rows }
 					/>
 				</PanelBody>
 				<PanelBody
@@ -132,14 +109,14 @@ class ProductByCategoryBlock extends Component {
 					/>
 				</PanelBody>
 				<PanelBody
-					title={ __( 'Filter by Attribute', 'woo-gutenberg-products-block' ) }
+					title={ __( 'Products', 'woo-gutenberg-products-block' ) }
 					initialOpen={ false }
 				>
-					<ProductAttributeControl
-						selected={ attributes.attributes }
+					<ProductsControl
+						selected={ attributes.products }
 						onChange={ ( value = [] ) => {
-							const selected = value.map( ( { id, attr_slug } ) => ( { id, attr_slug } ) ); // eslint-disable-line camelcase
-							setAttributes( { attributes: selected } );
+							const ids = value.map( ( { id } ) => id );
+							setAttributes( { products: ids } );
 						} }
 					/>
 				</PanelBody>
@@ -152,31 +129,27 @@ class ProductByCategoryBlock extends Component {
 		const onDone = () => {
 			setAttributes( { editMode: false } );
 			debouncedSpeak(
-				__( 'Showing Products by Category block preview.', 'woo-gutenberg-products-block' )
+				__( 'Showing Hand-picked Products block preview.', 'woo-gutenberg-products-block' )
 			);
 		};
 
 		return (
 			<Placeholder
-				icon="category"
-				label={ __( 'Products by Category', 'woo-gutenberg-products-block' ) }
-				className="wc-block-products-grid wc-block-products-category"
+				icon={ <IconWidgets /> }
+				label={ __( 'Hand-picked Products', 'woo-gutenberg-products-block' ) }
+				className="wc-block-products-grid wc-block-handpicked-products"
 			>
 				{ __(
-					'Display a grid of products from your selected categories',
+					'Display a selection of hand-picked products in a grid',
 					'woo-gutenberg-products-block'
 				) }
-				<div className="wc-block-products-category__selection">
-					<ProductCategoryControl
-						selected={ attributes.categories }
+				<div className="wc-block-handpicked-products__selection">
+					<ProductsControl
+						selected={ attributes.products }
 						onChange={ ( value = [] ) => {
 							const ids = value.map( ( { id } ) => id );
-							setAttributes( { categories: ids } );
+							setAttributes( { products: ids } );
 						} }
-						operator={ attributes.catOperator }
-						onOperatorChange={ ( value = 'any' ) =>
-							setAttributes( { catOperator: value } )
-						}
 					/>
 					<Button isDefault onClick={ onDone }>
 						{ __( 'Done', 'woo-gutenberg-products-block' ) }
@@ -188,13 +161,14 @@ class ProductByCategoryBlock extends Component {
 
 	render() {
 		const { setAttributes } = this.props;
-		const { align, categories, columns, editMode } = this.props.attributes;
+		const { align, columns, editMode } = this.props.attributes;
 		const { loaded, products } = this.state;
-		const classes = [ 'wc-block-products-grid', 'wc-block-products-category' ];
+		const hasSelectedProducts = products && products.length;
+		const classes = [ 'wc-block-products-grid', 'wc-block-handpicked-products' ];
 		if ( columns ) {
 			classes.push( `cols-${ columns }` );
 		}
-		if ( products && ! products.length ) {
+		if ( ! hasSelectedProducts ) {
 			if ( ! loaded ) {
 				classes.push( 'is-loading' );
 			} else {
@@ -226,25 +200,23 @@ class ProductByCategoryBlock extends Component {
 					this.renderEditMode()
 				) : (
 					<div className={ classes.join( ' ' ) }>
-						{ products.length ? (
+						{ hasSelectedProducts ? (
 							products.map( ( product ) => (
 								<ProductPreview product={ product } key={ product.id } />
 							) )
 						) : (
 							<Placeholder
-								icon="category"
+								icon={ <IconWidgets /> }
 								label={ __(
-									'Products by Category',
+									'Hand-picked Products',
 									'woo-gutenberg-products-block'
 								) }
 							>
 								{ ! loaded ? (
 									<Spinner />
 								) : (
-									_n(
-										'No products in this category.',
-										'No products in these categories.',
-										categories.length,
+									__(
+										'No products are selected.',
 										'woo-gutenberg-products-block'
 									)
 								) }
@@ -257,7 +229,7 @@ class ProductByCategoryBlock extends Component {
 	}
 }
 
-ProductByCategoryBlock.propTypes = {
+ProductsBlock.propTypes = {
 	/**
 	 * The attributes for this block
 	 */
@@ -274,4 +246,4 @@ ProductByCategoryBlock.propTypes = {
 	debouncedSpeak: PropTypes.func.isRequired,
 };
 
-export default withSpokenMessages( ProductByCategoryBlock );
+export default withSpokenMessages( ProductsBlock );

@@ -1,5 +1,5 @@
 export default function getShortcode( { attributes }, name ) {
-	const { categories, catOperator, columns, orderby, rows } = attributes;
+	const { categories, catOperator, columns, orderby, products, rows } = attributes;
 
 	const shortcodeAtts = new Map();
 	shortcodeAtts.set( 'limit', rows * columns );
@@ -41,6 +41,13 @@ export default function getShortcode( { attributes }, name ) {
 		case 'woocommerce/product-new':
 			shortcodeAtts.set( 'orderby', 'date' );
 			shortcodeAtts.set( 'order', 'DESC' );
+			break;
+		case 'woocommerce/handpicked-products':
+			if ( ! products.length ) {
+				return '';
+			}
+			shortcodeAtts.set( 'ids', products.join( ',' ) );
+			shortcodeAtts.set( 'limit', products.length );
 			break;
 	}
 

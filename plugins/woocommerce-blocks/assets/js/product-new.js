@@ -11,7 +11,6 @@ import {
 } from '@wordpress/editor';
 import { Component, Fragment } from '@wordpress/element';
 import { debounce } from 'lodash';
-import Gridicon from 'gridicons';
 import {
 	PanelBody,
 	Placeholder,
@@ -24,6 +23,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import getQuery from './utils/get-query';
+import { IconNewReleases } from './components/icons';
 import ProductCategoryControl from './components/product-category-control';
 import ProductPreview from './components/product-preview';
 
@@ -148,7 +148,7 @@ class ProductNewestBlock extends Component {
 						) )
 					) : (
 						<Placeholder
-							icon={ <Gridicon icon="notice-outline" /> }
+							icon={ <IconNewReleases /> }
 							label={ __( 'Newest Products', 'woo-gutenberg-products-block' ) }
 						>
 							{ ! loaded ? (
