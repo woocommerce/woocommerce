@@ -360,6 +360,10 @@ Chart.propTypes = {
 	 */
 	dateParser: PropTypes.string.isRequired,
 	/**
+	 * Label describing the legend items.
+	 */
+	itemsLabel: PropTypes.string,
+	/**
 	 * Current path
 	 */
 	path: PropTypes.string,

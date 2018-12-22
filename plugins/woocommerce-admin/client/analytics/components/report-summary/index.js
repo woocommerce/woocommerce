@@ -22,6 +22,9 @@ import ReportError from 'analytics/components/report-error';
 import { calculateDelta, formatValue } from './utils';
 import withSelect from 'wc-api/with-select';
 
+/**
+ * Component to render summary numbers in reports.
+ */
 export class ReportSummary extends Component {
 	render() {
 		const { charts, query, selectedChart, summaryData } = this.props;
@@ -70,10 +73,30 @@ export class ReportSummary extends Component {
 }
 
 ReportSummary.propTypes = {
+	/**
+	 * Properties of all the charts available for that report.
+	 */
 	charts: PropTypes.array.isRequired,
+	/**
+	 * The endpoint to use in API calls to populate the Summary Numbers.
+	 * For example, if `taxes` is provided, data will be fetched from the report
+	 * `taxes` endpoint (ie: `/wc/v3/reports/taxes/stats`). If the provided endpoint
+	 * doesn't exist, an error will be shown to the user with `ReportError`.
+	 */
 	endpoint: PropTypes.string.isRequired,
+	/**
+	 * The query string represented in object form.
+	 */
 	query: PropTypes.object.isRequired,
-	selectedChart: PropTypes.object.isRequired,
+	/**
+	 * Properties of the selected chart.
+	 */
+	selectedChart: PropTypes.shape( {
+		/**
+		 * Key of the selected chart.
+		 */
+		key: PropTypes.string.isRequired,
+	} ).isRequired,
 };
 
 export default compose(

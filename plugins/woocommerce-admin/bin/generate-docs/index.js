@@ -12,45 +12,82 @@ const { parse, resolver } = require( 'react-docgen' );
  */
 const { getDescription, getProps, getTitle } = require( './lib/formatting' );
 const {
+	ANALYTICS_FOLDER,
 	PACKAGES_FOLDER,
+	DOCS_FOLDER,
 	deleteExistingDocs,
 	getExportedFileList,
 	getMdFileName,
 	getRealFilePaths,
-	writeTableOfContents,
+	getTocSection,
 } = require( './lib/file-system' );
 
-// Start by wiping the existing docs. **Change this if we end up manually editing docs**
-deleteExistingDocs();
-
-// Read components file to get a list of exported files, convert that to a list of absolute paths to public components.
-const files = [
-	...getRealFilePaths( getExportedFileList( path.resolve( PACKAGES_FOLDER, 'index.js' ) ), PACKAGES_FOLDER ),
+const fileCollections = [
+	{
+		folder: ANALYTICS_FOLDER,
+		route: 'analytics',
+		title: 'Analytics components',
+	},
+	{
+		folder: PACKAGES_FOLDER,
+		route: 'packages',
+		title: 'Package components',
+	},
 ];
 
-// Build the documentation by reading each file.
-files.forEach( file => {
-	try {
-		const content = fs.readFileSync( file );
-		buildDocs( file, content );
-	} catch ( readErr ) {
-		console.warn( file, readErr );
-	}
+const tocSections = [];
+
+fileCollections.forEach( fileCollection => {
+	// Start by wiping the existing docs. **Change this if we end up manually editing docs**
+	deleteExistingDocs( fileCollection.route );
+
+	// Read components file to get a list of exported files, convert that to a list of absolute paths to public components.
+	const files = getRealFilePaths( getExportedFileList( path.resolve( fileCollection.folder, 'index.js' ) ), fileCollection.folder );
+
+	// Build documentation
+	buildComponentDocs( files, fileCollection.route );
+
+	// Concatenate TOC contents
+	tocSections.push( ...getTocSection( files, fileCollection.route, fileCollection.title ) );
 } );
 
-writeTableOfContents( files );
+// Write TOC file
+const tocFile = path.resolve( DOCS_FOLDER, '_sidebar.md' );
+const tocHeader = '* [Home](/)\n\n* [Components](components/)\n\n';
+fs.writeFileSync( tocFile, tocHeader + tocSections.join( '\n' ) );
 
-console.log( `Wrote docs for ${ files.length } files.` );
+// Sum the number of TOC lines and substract the titles
+const numberOfFiles = tocSections.length - fileCollections.length;
+console.log( `Wrote docs for ${ numberOfFiles } files.` );
+
+/**
+ * Parse each file's content & build up a markdown file.
+ *
+ * @param { Array } files The absolute path of this file.
+ * @param { string } route Folder where the docs must be stored.
+ */
+function buildComponentDocs( files, route ) {
+	// Build the documentation by reading each file.
+	files.forEach( file => {
+		try {
+			const content = fs.readFileSync( file );
+			buildDocs( file, route, content );
+		} catch ( readErr ) {
+			console.warn( file, readErr );
+		}
+	} );
+}
 
 /**
  * Parse each file's content & build up a markdown file.
  *
  * @param { string } fileName The absolute path of this file.
+ * @param { string } route Folder where the docs must be stored.
  * @param { string } content Content of this file.
  * @param { boolean } multiple If there are multiple exports in this file, we need to use a different resolver.
  */
-function buildDocs( fileName, content, multiple = false ) {
-	const mdFileName = getMdFileName( fileName );
+function buildDocs( fileName, route, content, multiple = false ) {
+	const mdFileName = getMdFileName( fileName, route );
 	let markdown;
 
 	try {
@@ -65,7 +102,7 @@ function buildDocs( fileName, content, multiple = false ) {
 	} catch ( parseErr ) {
 		if ( ! multiple ) {
 			// The most likely error is that there are multiple exported components
-			buildDocs( fileName, content, true );
+			buildDocs( fileName, route, content, true );
 			return;
 		}
 		console.warn( fileName, parseErr );

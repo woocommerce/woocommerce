@@ -14,24 +14,28 @@ const { namedTypes } = types;
  */
 const { camelCaseDash } = require( './formatting' );
 
+const ANALYTICS_FOLDER = path.resolve( __dirname, '../../../client/analytics/components/' );
 const PACKAGES_FOLDER = path.resolve( __dirname, '../../../packages/components/src/' );
 const DOCS_FOLDER = path.resolve( __dirname, '../../../docs/components/' );
 
 /**
  * Remove all files in existing docs folder.
+ * @param { String } route Route of the folder to clean.
  */
-function deleteExistingDocs() {
-	if ( ! isDirectory( DOCS_FOLDER ) ) {
-		fs.mkdirSync( DOCS_FOLDER );
+function deleteExistingDocs( route ) {
+	const folderRoute = path.resolve( DOCS_FOLDER, route );
+
+	if ( ! isDirectory( folderRoute ) ) {
+		fs.mkdirSync( folderRoute );
 		return;
 	}
 
-	const files = fs.readdirSync( DOCS_FOLDER );
+	const files = fs.readdirSync( folderRoute );
 	files.map( file => {
 		if ( 'README.md' === file ) {
 			return;
 		}
-		fs.unlinkSync( path.resolve( DOCS_FOLDER, file ) );
+		fs.unlinkSync( path.resolve( folderRoute, file ) );
 	} );
 }
 
@@ -70,10 +74,11 @@ function getExportedFileList( filePath ) {
  * Return the markdown file name for a given component file.
  *
  * @param { string } filepath File path for this component.
+ * @param { string } route Folder where the docs must be stored.
  * @param { boolean } absolute Whether to return full path (true) or just filename (false).
  * @return { string } Markdown file name.
  */
-function getMdFileName( filepath, absolute = true ) {
+function getMdFileName( filepath, route, absolute = true ) {
 	const fileParts = filepath.split( '/components/' );
 	if ( ! fileParts || ! fileParts[ 1 ] ) {
 		return;
@@ -82,7 +87,7 @@ function getMdFileName( filepath, absolute = true ) {
 	if ( ! absolute ) {
 		return name + '.md';
 	}
-	return path.resolve( DOCS_FOLDER, name + '.md' );
+	return path.resolve( DOCS_FOLDER + '/' + route + '/', name + '.md' );
 }
 
 /**
@@ -145,25 +150,32 @@ function isFile( file ) {
 /**
  * Create a table of contents given a list of markdown files.
  *
- * @param { array } files A list of readme files.
+ * @param { array } files A list of files, presumably in the components directory.
+ * @param { string } route Folder where the docs are stored.
+ * @param { string } title Title of the TOC section
+ * @return { string } TOC contents.
  */
-function writeTableOfContents( files ) {
-	const mdFiles = files.map( f => getMdFileName( f, false ) ).sort();
-	const TOC = uniq( mdFiles ).map( doc => {
-		const name = camelCaseDash( doc.replace( '.md', '' ) );
-		return `  * [${ name }](components/${ doc })`;
-	} ).join( '\n' );
+function getTocSection( files, route, title ) {
+	const mdFiles = files.map( f => getMdFileName( f, route, false ) ).sort();
 
-	const TocFile = path.resolve( DOCS_FOLDER, '_sidebar.md' );
-	fs.writeFileSync( TocFile, '* [Home](/)\n\n* [Components](components/)\n\n' + TOC + '\n' );
+	const toc = uniq( mdFiles ).map( doc => {
+		const name = camelCaseDash( doc.replace( '.md', '' ) );
+		return `    * [${ name }](components/${ route }/${ doc })`;
+	} );
+
+	return [
+		'  * [' + title + '](components/' + route + '/)',
+		...toc,
+	];
 }
 
 module.exports = {
 	DOCS_FOLDER,
+	ANALYTICS_FOLDER,
 	PACKAGES_FOLDER,
 	deleteExistingDocs,
 	getExportedFileList,
 	getMdFileName,
 	getRealFilePaths,
-	writeTableOfContents,
+	getTocSection,
 };

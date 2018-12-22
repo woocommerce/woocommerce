@@ -25,8 +25,17 @@ import { extendTableData } from './utils';
 
 const TABLE_FILTER = 'woocommerce_admin_report_table';
 
+/**
+ * Component that extends `TableCard` to facilitate its usage in reports.
+ */
 class ReportTable extends Component {
-	onColumnsChange = shownColumns => {
+	constructor( props ) {
+		super( props );
+
+		this.onColumnsChange = this.onColumnsChange.bind( this );
+	}
+
+	onColumnsChange( shownColumns ) {
 		const { columnPrefsKey, getHeadersContent } = this.props;
 		const columns = getHeadersContent().map( header => header.key );
 		const hiddenColumns = columns.filter( column => ! shownColumns.includes( column ) );
@@ -37,9 +46,9 @@ class ReportTable extends Component {
 			};
 			this.props.updateCurrentUserData( userDataFields );
 		}
-	};
+	}
 
-	filterShownHeaders = ( headers, hiddenKeys ) => {
+	filterShownHeaders( headers, hiddenKeys ) {
 		if ( ! hiddenKeys ) {
 			return headers;
 		}
@@ -48,7 +57,7 @@ class ReportTable extends Component {
 			const hidden = hiddenKeys.includes( header.key ) && ! header.required;
 			return { ...header, hiddenByDefault: hidden };
 		} );
-	};
+	}
 
 	render() {
 		const {
@@ -58,7 +67,7 @@ class ReportTable extends Component {
 			itemIdField,
 			primaryData,
 			tableData,
-			// These two props are not used in the render function, but are destructured
+			// These props are not used in the render function, but are destructured
 			// so they are not included in the `tableProps` variable.
 			endpoint,
 			tableQuery,
@@ -115,7 +124,11 @@ ReportTable.propTypes = {
 	 */
 	columnPrefsKey: PropTypes.string,
 	/**
-	 * The endpoint to use in API calls.
+	 * The endpoint to use in API calls to populate the table rows and summary.
+	 * For example, if `taxes` is provided, data will be fetched from the report
+	 * `taxes` endpoint (ie: `/wc/v3/reports/taxes` and `/wc/v3/reports/taxes/stats`).
+	 * If the provided endpoint doesn't exist, an error will be shown to the user
+	 * with `ReportError`.
 	 */
 	endpoint: PropTypes.string,
 	/**
@@ -145,11 +158,13 @@ ReportTable.propTypes = {
 	 */
 	itemIdField: PropTypes.string,
 	/**
-	 * Primary data of that report.
+	 * Primary data of that report. If it's not provided, it will be automatically
+	 * loaded via the provided `endpoint`.
 	 */
 	primaryData: PropTypes.object.isRequired,
 	/**
-	 * Table data of that report.
+	 * Table data of that report. If it's not provided, it will be automatically
+	 * loaded via the provided `endpoint`.
 	 */
 	tableData: PropTypes.object.isRequired,
 	/**

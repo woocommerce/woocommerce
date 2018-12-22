@@ -31,6 +31,9 @@ import withSelect from 'wc-api/with-select';
 
 export const DEFAULT_FILTER = 'all';
 
+/**
+ * Component that renders the chart in reports.
+ */
 export class ReportChart extends Component {
 	getSelectedFilter( filters, query ) {
 		if ( filters.length === 0 ) {
@@ -126,13 +129,38 @@ export class ReportChart extends Component {
 }
 
 ReportChart.propTypes = {
+	/**
+	 * Filters available for that report.
+	 */
 	filters: PropTypes.array,
+	/**
+	 * Label describing the legend items.
+	 */
 	itemsLabel: PropTypes.string,
+	/**
+	 * `items-comparison` (default) or `time-comparison`, this is used to generate correct
+	 * ARIA properties.
+	 */
 	mode: PropTypes.string,
+	/**
+	 * Current path
+	 */
 	path: PropTypes.string.isRequired,
+	/**
+	 * Primary data to display in the chart.
+	 */
 	primaryData: PropTypes.object.isRequired,
+	/**
+	 * The query string represented in object form.
+	 */
 	query: PropTypes.object.isRequired,
+	/**
+	 * Secondary data to display in the chart.
+	 */
 	secondaryData: PropTypes.object.isRequired,
+	/**
+	 * Properties of the selected chart.
+	 */
 	selectedChart: PropTypes.object.isRequired,
 };
 
