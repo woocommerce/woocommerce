@@ -1,5 +1,5 @@
 export default function getQuery( attributes, name ) {
-	const { categories, catOperator, columns, orderby, rows } = attributes;
+	const { categories, catOperator, columns, orderby, products, rows } = attributes;
 
 	const query = {
 		status: 'publish',
@@ -31,7 +31,7 @@ export default function getQuery( attributes, name ) {
 		}
 	}
 
-	// Toggle shortcode atts depending on block type.
+	// Toggle query parameters depending on block type.
 	switch ( name ) {
 		case 'woocommerce/product-best-sellers':
 			query.orderby = 'popularity';
@@ -44,6 +44,10 @@ export default function getQuery( attributes, name ) {
 			break;
 		case 'woocommerce/product-new':
 			query.orderby = 'date';
+			break;
+		case 'woocommerce/handpicked-products':
+			query.include = products;
+			query.per_page = products.length;
 			break;
 	}
 
