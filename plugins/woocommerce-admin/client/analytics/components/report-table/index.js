@@ -26,24 +26,26 @@ import { extendTableData } from './utils';
 const TABLE_FILTER = 'woocommerce_admin_report_table';
 
 class ReportTable extends Component {
-	onColumnsChange = columns => {
-		const { columnPrefsKey } = this.props;
+	onColumnsChange = shownColumns => {
+		const { columnPrefsKey, getHeadersContent } = this.props;
+		const columns = getHeadersContent().map( header => header.key );
+		const hiddenColumns = columns.filter( column => ! shownColumns.includes( column ) );
 
 		if ( columnPrefsKey ) {
 			const userDataFields = {
-				[ columnPrefsKey ]: columns,
+				[ columnPrefsKey ]: hiddenColumns,
 			};
 			this.props.updateCurrentUserData( userDataFields );
 		}
 	};
 
-	filterShownHeaders = ( headers, shownKeys ) => {
-		if ( ! shownKeys ) {
+	filterShownHeaders = ( headers, hiddenKeys ) => {
+		if ( ! hiddenKeys ) {
 			return headers;
 		}
 
 		return headers.map( header => {
-			const hidden = ! shownKeys.includes( header.key );
+			const hidden = hiddenKeys.includes( header.key ) && ! header.required;
 			return { ...header, hiddenByDefault: hidden };
 		} );
 	};
