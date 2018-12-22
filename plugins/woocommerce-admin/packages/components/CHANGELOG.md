@@ -1,5 +1,7 @@
-# 1.3.1
-
+# 1.4.0 ( unreleased )
+- Add download log ip address autocompleter to search component
+- Add order number autocompleter to search component
+- Add order number, username, and IP address filters to the downloads report.
 - Added `interactive` prop for `d3chart/legend` to signal if legend items are clickable or not.
 
 # 1.3.0
