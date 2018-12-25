@@ -78,6 +78,8 @@ class Search extends Component {
 
 	getAutocompleter() {
 		switch ( this.props.type ) {
+			case 'categories':
+				return productCategory;
 			case 'countries':
 				return countries;
 			case 'coupons':
@@ -92,8 +94,6 @@ class Search extends Component {
 				return orders;
 			case 'products':
 				return product;
-			case 'product_cats':
-				return productCategory;
 			case 'taxes':
 				return taxes;
 			case 'usernames':
@@ -241,6 +241,7 @@ Search.propTypes = {
 	 * The object type to be used in searching.
 	 */
 	type: PropTypes.oneOf( [
+		'categories',
 		'countries',
 		'coupons',
 		'customers',
@@ -248,7 +249,6 @@ Search.propTypes = {
 		'emails',
 		'orders',
 		'products',
-		'product_cats',
 		'taxes',
 		'usernames',
 		'variations',

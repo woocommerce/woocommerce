@@ -81,10 +81,10 @@ const filterConfig = {
 		},
 		{
 			label: __( 'Product Category Comparison', 'wc-admin' ),
-			value: 'compare-product_cats',
+			value: 'compare-categories',
 			chartMode: 'item-comparison',
 			settings: {
-				type: 'product_cats',
+				type: 'categories',
 				param: 'categories',
 				getLabels: getRequestByIdString( NAMESPACE + 'products/categories', category => ( {
 					id: category.id,

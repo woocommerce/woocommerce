@@ -21,7 +21,7 @@ import { computeSuggestionMatch } from './utils';
  * @type {Completer}
  */
 export default {
-	name: 'product_cats',
+	name: 'categories',
 	className: 'woocommerce-search__product-result',
 	options( search ) {
 		let payload = '';

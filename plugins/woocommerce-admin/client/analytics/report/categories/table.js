@@ -34,7 +34,6 @@ class CategoriesReportTable extends Component {
 				key: 'category',
 				required: true,
 				isLeftAligned: true,
-				isSortable: true,
 			},
 			{
 				label: __( 'Items sold', 'wc-admin' ),
@@ -45,8 +44,7 @@ class CategoriesReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'G. Revenue', 'wc-admin' ),
-				screenReaderLabel: __( 'Gross Revenue', 'wc-admin' ),
+				label: __( 'Net Revenue', 'wc-admin' ),
 				key: 'net_revenue',
 				isSortable: true,
 				isNumeric: true,
@@ -125,15 +123,21 @@ class CategoriesReportTable extends Component {
 	render() {
 		const { query } = this.props;
 
+		const labels = {
+			helpText: __( 'Select at least two categories to compare', 'wc-admin' ),
+			placeholder: __( 'Search by category name', 'wc-admin' ),
+		};
+
 		return (
 			<ReportTable
-				compareBy="product_cats"
+				compareBy="categories"
 				endpoint="categories"
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
 				itemIdField="category_id"
 				query={ query }
+				labels={ labels }
 				tableQuery={ {
 					orderby: query.orderby || 'items_sold',
 					order: query.order || 'desc',
