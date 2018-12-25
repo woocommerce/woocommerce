@@ -176,14 +176,14 @@ export const getXLineScale = ( uniqueDates, width ) =>
 		.rangeRound( [ 0, width ] );
 
 /**
- * Describes and rounds the maximum y value to the nearest thousadn, ten-thousand, million etc.
+ * Describes and rounds the maximum y value to the nearest thousand, ten-thousand, million etc. In case it is a decimal number, ceils it.
  * @param {array} lineData - from `getLineData`
  * @returns {number} the maximum value in the timeseries multiplied by 4/3
  */
 export const getYMax = lineData => {
 	const yMax = 4 / 3 * d3Max( lineData, d => d3Max( d.values.map( date => date.value ) ) );
 	const pow3Y = Math.pow( 10, ( ( Math.log( yMax ) * Math.LOG10E + 1 ) | 0 ) - 2 ) * 3;
-	return Math.ceil( yMax / pow3Y ) * pow3Y;
+	return Math.ceil( Math.ceil( yMax / pow3Y ) * pow3Y );
 };
 
 /**
@@ -395,7 +395,14 @@ export const drawAxis = ( node, params ) => {
 
 	const yGrids = [];
 	for ( let i = 0; i < 4; i++ ) {
-		yGrids.push( i / 3 * params.yMax );
+		if ( params.yMax > 1 ) {
+			const roundedValue = Math.round( i / 3 * params.yMax );
+			if ( yGrids[ yGrids.length - 1 ] !== roundedValue ) {
+				yGrids.push( roundedValue );
+			}
+		} else {
+			yGrids.push( i / 3 * params.yMax );
+		}
 	}
 
 	const ticks = params.xTicks.map( d => ( params.type === 'line' ? new Date( d ) : d ) );
