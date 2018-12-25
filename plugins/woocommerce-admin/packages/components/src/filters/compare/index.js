@@ -39,13 +39,11 @@ class CompareFilter extends Component {
 		}
 	}
 
-	componentDidUpdate( { param: prevParam, query: prevQuery } ) {
-		const { getLabels, param, path, query } = this.props;
-		if ( prevParam !== param ) {
-			/* eslint-disable react/no-did-update-set-state */
-			this.setState( { selected: [] } );
-			/* eslint-enable react/no-did-update-set-state */
-			updateQueryString( { [ param ]: undefined }, path, query );
+	componentDidUpdate( { param: prevParam, query: prevQuery }, { selected: prevSelected } ) {
+		const { getLabels, param, query } = this.props;
+		const { selected } = this.state;
+		if ( prevParam !== param || ( prevSelected.length > 0 && selected.length === 0 ) ) {
+			this.clearQuery();
 			return;
 		}
 
