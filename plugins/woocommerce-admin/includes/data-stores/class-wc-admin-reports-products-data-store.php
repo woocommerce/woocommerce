@@ -40,6 +40,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		'stock_quantity'   => 'intval',
 		'low_stock_amount' => 'intval',
 		'category_ids'     => 'array_values',
+		'sku'              => 'strval',
 	);
 
 	/**
@@ -68,6 +69,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		'stock_quantity',
 		'low_stock_amount',
 		'category_ids',
+		'sku',
 	);
 
 	/**

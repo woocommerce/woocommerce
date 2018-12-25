@@ -95,14 +95,20 @@ class ProductsReportTable extends Component {
 		return map( data, row => {
 			const {
 				product_id,
-				sku = '', // @TODO
 				extended_info,
 				items_sold,
 				net_revenue,
 				orders_count,
 				variations = [], // @TODO
 			} = row;
-			const { category_ids, low_stock_amount, name, stock_status, stock_quantity } = extended_info;
+			const {
+				category_ids,
+				low_stock_amount,
+				name,
+				sku,
+				stock_status,
+				stock_quantity,
+			} = extended_info;
 			const ordersLink = getNewPath( persistedQuery, 'orders', {
 				filter: 'advanced',
 				product_includes: product_id,

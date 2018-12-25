@@ -224,6 +224,12 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 						'context'     => array( 'view', 'edit' ),
 						'description' => __( 'Product inventory threshold for low stock.', 'wc-admin' ),
 					),
+					'sku'              => array(
+						'type'        => 'string',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Product SKU.', 'wc-admin' ),
+					),
 				),
 			),
 		);
