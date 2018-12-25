@@ -118,7 +118,9 @@ class ProductsReportTable extends Component {
 				products: product_id,
 			} );
 			const categories = this.props.categories;
-			const productCategories = category_ids.map( category_id => categories[ category_id ] );
+			const productCategories = category_ids
+				.map( category_id => categories[ category_id ] )
+				.filter( Boolean );
 
 			return [
 				{
