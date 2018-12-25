@@ -379,7 +379,7 @@ class WC_Discounts {
 				}
 			}
 
-			$discount       = wc_round_discount( min( $discounted_price, $discount ), 0 );
+			$discount       = wc_round_discount( max( $discounted_price, $discount ), 0 );
 			$cart_total     = $cart_total + $price_to_discount;
 			$total_discount = $total_discount + $discount;
 			$applied_count  = $applied_count + $apply_quantity;
