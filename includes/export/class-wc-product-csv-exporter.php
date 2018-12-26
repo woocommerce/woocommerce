@@ -2,8 +2,8 @@
 /**
  * Handles product CSV export.
  *
- * @package  WooCommerce/Export
- * @version  3.1.0
+ * @package WooCommerce/Export
+ * @version 3.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -61,8 +61,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Should meta be exported?
 	 *
-	 * @since 3.1.0
 	 * @param bool $enable_meta_export Should meta be exported.
+	 *
+	 * @since 3.1.0
 	 */
 	public function enable_meta_export( $enable_meta_export ) {
 		$this->enable_meta_export = (bool) $enable_meta_export;
@@ -71,8 +72,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Product types to export.
 	 *
-	 * @since 3.1.0
 	 * @param array $product_types_to_export List of types to export.
+	 *
+	 * @since 3.1.0
 	 */
 	public function set_product_types_to_export( $product_types_to_export ) {
 		$this->product_types_to_export = array_map( 'wc_clean', $product_types_to_export );
@@ -81,8 +83,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Product category to export
 	 *
-	 * @since 3.5.0
 	 * @param string $product_category_to_export Product category slug to export, empty string exports all.
+	 *
+	 * @since  3.5.0
 	 * @return void
 	 */
 	public function set_product_category_to_export( $product_category_to_export ) {
@@ -92,7 +95,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Return an array of columns to export.
 	 *
-	 * @since 3.1.0
+	 * @since  3.1.0
 	 * @return array
 	 */
 	public function get_default_column_names() {
@@ -204,6 +207,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Take a product and generate row data from it for export.
 	 *
 	 * @param WC_Product $product WC_Product object.
+	 *
 	 * @return array
 	 */
 	protected function generate_row_data( $product ) {
@@ -243,8 +247,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Get published value.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
 	 * @return int
 	 */
 	protected function get_column_value_published( $product ) {
@@ -263,6 +268,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get formatted sale price.
 	 *
 	 * @param WC_Product $product Product being exported.
+	 *
 	 * @return string
 	 */
 	protected function get_column_value_sale_price( $product ) {
@@ -273,6 +279,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get formatted regular price.
 	 *
 	 * @param WC_Product $product Product being exported.
+	 *
 	 * @return string
 	 */
 	protected function get_column_value_regular_price( $product ) {
@@ -282,8 +289,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Get product_cat value.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_category_ids( $product ) {
@@ -294,8 +302,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Get product_tag value.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_tag_ids( $product ) {
@@ -306,8 +315,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Get product_shipping_class value.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_shipping_class_id( $product ) {
@@ -318,8 +328,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Get images value.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_images( $product ) {
@@ -340,8 +351,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Prepare linked products for export.
 	 *
-	 * @since 3.1.0
 	 * @param int[] $linked_products Array of linked product ids.
+	 *
+	 * @since  3.1.0
 	 * @return string
 	 */
 	protected function prepare_linked_products_for_export( $linked_products ) {
@@ -361,8 +373,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Get cross_sell_ids value.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_cross_sell_ids( $product ) {
@@ -372,8 +385,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Get upsell_ids value.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_upsell_ids( $product ) {
@@ -383,8 +397,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Get parent_id value.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_parent_id( $product ) {
@@ -402,8 +417,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Get grouped_products value.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_grouped_products( $product ) {
@@ -427,8 +443,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Get download_limit value.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_download_limit( $product ) {
@@ -438,8 +455,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Get download_expiry value.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_download_expiry( $product ) {
@@ -449,8 +467,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Get stock value.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_stock( $product ) {
@@ -469,8 +488,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Get stock status value.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_stock_status( $product ) {
@@ -486,8 +506,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Get backorders.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_backorders( $product ) {
@@ -505,7 +526,8 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Get low stock amount value.
 	 *
 	 * @param WC_Product $product Product being exported.
-	 * @since 3.5.0
+	 *
+	 * @since  3.5.0
 	 * @return int|string Empty string if value not set
 	 */
 	protected function get_column_value_low_stock_amount( $product ) {
@@ -515,8 +537,9 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Get type value.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
+	 *
+	 * @since  3.1.0
 	 * @return string
 	 */
 	protected function get_column_value_type( $product ) {
@@ -537,9 +560,10 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Export downloads.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
 	 * @param array      $row     Row being exported.
+	 *
+	 * @since 3.1.0
 	 */
 	protected function prepare_downloads_for_export( $product, &$row ) {
 		if ( $product->is_downloadable() && $this->is_column_exporting( 'downloads' ) ) {
@@ -563,9 +587,10 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Export attributes data.
 	 *
+	 * @param WC_Product $product Product being exported.
+	 * @param array      $row     Row being exported.
+	 *
 	 * @since 3.1.0
-	 * @param  WC_Product $product Product being exported.
-	 * @param  array      $row     Row being exported.
 	 */
 	protected function prepare_attributes_for_export( $product, &$row ) {
 		if ( $this->is_column_exporting( 'attributes' ) ) {
@@ -639,9 +664,10 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	/**
 	 * Export meta data.
 	 *
-	 * @since 3.1.0
 	 * @param WC_Product $product Product being exported.
 	 * @param array      $row Row data.
+	 *
+	 * @since 3.1.0
 	 */
 	protected function prepare_meta_for_export( $product, &$row ) {
 		if ( $this->enable_meta_export ) {
