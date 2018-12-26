@@ -3,6 +3,7 @@
 - Add order number autocompleter to search component
 - Add order number, username, and IP address filters to the downloads report.
 - Added `interactive` prop for `d3chart/legend` to signal if legend items are clickable or not.
+- Fix for undefined ref in `d3chart/legend`
 
 # 1.3.0
 

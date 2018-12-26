@@ -35,6 +35,9 @@ class D3Legend extends Component {
 	}
 
 	updateListScroll() {
+		if ( ! this.listRef ) {
+			return;
+		}
 		const list = this.listRef.current;
 		const scrolledToEnd = list.scrollHeight - list.scrollTop <= list.offsetHeight;
 		this.setState( {
