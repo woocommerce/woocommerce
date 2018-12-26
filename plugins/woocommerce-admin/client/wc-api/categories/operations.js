@@ -23,13 +23,10 @@ function read( resourceNames, fetch = apiFetch ) {
 		const url = `/wc/v3/products/categories${ stringifyQuery( query ) }`;
 
 		try {
-			const response = await fetch( {
-				parse: false,
+			const categories = await fetch( {
 				path: url,
 			} );
 
-			const categories = await response.json();
-			const totalCount = parseInt( response.headers.get( 'x-wp-total' ) );
 			const ids = categories.map( category => category.id );
 			const categoryResources = categories.reduce( ( resources, category ) => {
 				resources[ getResourceName( 'category', category.id ) ] = { data: category };
@@ -39,7 +36,7 @@ function read( resourceNames, fetch = apiFetch ) {
 			return {
 				[ resourceName ]: {
 					data: ids,
-					totalCount,
+					totalCount: ids.length,
 				},
 				...categoryResources,
 			};

@@ -255,10 +255,13 @@ class ProductsReportTable extends Component {
 export default compose(
 	withSelect( select => {
 		const { getCategories, getCategoriesError, isGetCategoriesRequesting } = select( 'wc-api' );
+		const tableQuery = {
+			per_page: -1,
+		};
 
-		const categories = getCategories();
-		const isError = Boolean( getCategoriesError() );
-		const isRequesting = isGetCategoriesRequesting();
+		const categories = getCategories( tableQuery );
+		const isError = Boolean( getCategoriesError( tableQuery ) );
+		const isRequesting = isGetCategoriesRequesting( tableQuery );
 
 		return { categories, isError, isRequesting };
 	} )
