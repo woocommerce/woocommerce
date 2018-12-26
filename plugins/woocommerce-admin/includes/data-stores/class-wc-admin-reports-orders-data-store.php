@@ -66,7 +66,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		'shipping'                => 'SUM(shipping_total) AS shipping',
 		'net_revenue'             => '( SUM(net_total) - SUM(refund_total) ) AS net_revenue',
 		'avg_items_per_order'     => 'AVG(num_items_sold) AS avg_items_per_order',
-		'avg_order_value'         => 'AVG(gross_total) AS avg_order_value',
+		'avg_order_value'         => '( SUM(net_total) - SUM(refund_total) ) / COUNT(*) AS avg_order_value',
 		'num_returning_customers' => 'SUM(returning_customer = 1) AS num_returning_customers',
 		'num_new_customers'       => 'SUM(returning_customer = 0) AS num_new_customers',
 	);
