@@ -572,6 +572,22 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse a description value field
+	 *
+	 * @param string $description field value.
+	 *
+	 * @return string
+	 */
+	public function parse_description_field( $description ) {
+		$parts = explode( "\\\\n", $description );
+		foreach ( $parts as $key => $part ) {
+			$parts[ $key ] = str_replace( '\n', "\n", $part );
+		}
+
+		return implode( '\\\n', $parts );
+	}
+
+	/**
 	 * Get formatting callback.
 	 *
 	 * @return array
@@ -590,8 +606,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'date_on_sale_from' => array( $this, 'parse_date_field' ),
 			'date_on_sale_to'   => array( $this, 'parse_date_field' ),
 			'name'              => array( $this, 'parse_skip_field' ),
-			'short_description' => array( $this, 'parse_skip_field' ),
-			'description'       => array( $this, 'parse_skip_field' ),
+			'short_description' => array( $this, 'parse_description_field' ),
+			'description'       => array( $this, 'parse_description_field' ),
 			'manage_stock'      => array( $this, 'parse_bool_field' ),
 			'low_stock_amount'  => array( $this, 'parse_stock_quantity_field' ),
 			'backorders'        => array( $this, 'parse_backorders_field' ),

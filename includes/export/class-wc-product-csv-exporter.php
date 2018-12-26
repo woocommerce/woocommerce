@@ -235,6 +235,10 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 				$value = $product->{"get_{$column_id}"}( 'edit' );
 			}
 
+			if ( 'description' == $column_id || 'short_description' == $column_id ) {
+				$value = $this->filter_description_field( $value );
+			}
+
 			$row[ $column_id ] = $value;
 		}
 
@@ -557,6 +561,20 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		return $this->implode_values( $types );
 	}
 
+	/**
+	 * Filter description field for export.
+	 * Convert newlines to '\n'.
+	 *
+	 * @param string $description Product description text to filter.
+	 *
+	 * @since  3.5.4
+	 * @return string
+	 */
+	protected function filter_description_field( $description ) {
+		$description = str_replace( '\n', "\\\\n", $description );
+		$description = str_replace( "\n", '\n', $description );
+		return $description;
+	}
 	/**
 	 * Export downloads.
 	 *
