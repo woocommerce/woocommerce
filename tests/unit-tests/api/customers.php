@@ -3,9 +3,15 @@
  * Tests for the Customers REST API.
  *
  * @package WooCommerce\Tests\API
- * @since 3.5.0
+ * @since   3.5.0
  */
 
+/**
+ * Tests for the Customers REST API.
+ *
+ * @package WooCommerce\Tests\API
+ * @extends WC_REST_Unit_Test_Case
+ */
 class Customers extends WC_REST_Unit_Test_Case {
 
 	/**
@@ -41,9 +47,11 @@ class Customers extends WC_REST_Unit_Test_Case {
 		WC_Helper_Customer::create_customer( 'test2', 'test2', 'test2@woo.local' );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/customers' );
-		$request->set_query_params( array(
-			'orderby' => 'id',
-		) );
+		$request->set_query_params(
+			array(
+				'orderby' => 'id',
+			)
+		);
 		$response     = $this->server->dispatch( $request );
 		$customers    = $response->get_data();
 		$date_created = get_date_from_gmt( $customer_1->get_date_created() );
@@ -51,57 +59,60 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $customers ) );
 
-		$this->assertContains( array(
-			'id'                 => $customer_1->get_id(),
-			'date_created'       => wc_rest_prepare_date_response( $date_created, false ),
-			'date_created_gmt'   => wc_rest_prepare_date_response( $date_created ),
-			'date_modified'      => wc_rest_prepare_date_response( $customer_1->get_date_modified(), false ),
-			'date_modified_gmt'  => wc_rest_prepare_date_response( $customer_1->get_date_modified() ),
-			'email'              => 'test@woo.local',
-			'first_name'         => 'Justin',
-			'last_name'          => '',
-			'role'               => 'customer',
-			'username'           => 'testcustomer',
-			'billing'            => array(
-				'first_name' => '',
-				'last_name'  => '',
-				'company'    => '',
-				'address_1'  => '123 South Street',
-				'address_2'  => 'Apt 1',
-				'city'       => 'Philadelphia',
-				'state'      => 'PA',
-				'postcode'   => '19123',
-				'country'    => 'US',
-				'email'      => '',
-				'phone'      => '',
-			),
-			'shipping'           => array(
-				'first_name' => '',
-				'last_name'  => '',
-				'company'    => '',
-				'address_1'  => '123 South Street',
-				'address_2'  => 'Apt 1',
-				'city'       => 'Philadelphia',
-				'state'      => 'PA',
-				'postcode'   => '19123',
-				'country'    => 'US',
-			),
-			'is_paying_customer' => false,
-			'avatar_url'         => $customer_1->get_avatar_url(),
-			'meta_data'          => array(),
-			'_links'             => array(
-				'self'       => array(
-					array(
-						'href' => rest_url( '/wc/v3/customers/' . $customer_1->get_id() . '' ),
+		$this->assertContains(
+			array(
+				'id'                 => $customer_1->get_id(),
+				'date_created'       => wc_rest_prepare_date_response( $date_created, false ),
+				'date_created_gmt'   => wc_rest_prepare_date_response( $date_created ),
+				'date_modified'      => wc_rest_prepare_date_response( $customer_1->get_date_modified(), false ),
+				'date_modified_gmt'  => wc_rest_prepare_date_response( $customer_1->get_date_modified() ),
+				'email'              => 'test@woo.local',
+				'first_name'         => 'Justin',
+				'last_name'          => '',
+				'role'               => 'customer',
+				'username'           => 'testcustomer',
+				'billing'            => array(
+					'first_name' => '',
+					'last_name'  => '',
+					'company'    => '',
+					'address_1'  => '123 South Street',
+					'address_2'  => 'Apt 1',
+					'city'       => 'Philadelphia',
+					'state'      => 'PA',
+					'postcode'   => '19123',
+					'country'    => 'US',
+					'email'      => '',
+					'phone'      => '',
+				),
+				'shipping'           => array(
+					'first_name' => '',
+					'last_name'  => '',
+					'company'    => '',
+					'address_1'  => '123 South Street',
+					'address_2'  => 'Apt 1',
+					'city'       => 'Philadelphia',
+					'state'      => 'PA',
+					'postcode'   => '19123',
+					'country'    => 'US',
+				),
+				'is_paying_customer' => false,
+				'avatar_url'         => $customer_1->get_avatar_url(),
+				'meta_data'          => array(),
+				'_links'             => array(
+					'self'       => array(
+						array(
+							'href' => rest_url( '/wc/v3/customers/' . $customer_1->get_id() . '' ),
+						),
+					),
+					'collection' => array(
+						array(
+							'href' => rest_url( '/wc/v3/customers' ),
+						),
 					),
 				),
-				'collection' => array(
-					array(
-						'href' => rest_url( '/wc/v3/customers' ),
-					),
-				),
 			),
-		), $customers );
+			$customers
+		);
 	}
 
 	/**
@@ -125,125 +136,137 @@ class Customers extends WC_REST_Unit_Test_Case {
 
 		// Test just the basics first..
 		$request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
-		$request->set_body_params( array(
-			'username' => 'create_customer_test',
-			'password' => 'test123',
-			'email'    => 'create_customer_test@woo.local',
-		) );
+		$request->set_body_params(
+			array(
+				'username' => 'create_customer_test',
+				'password' => 'test123',
+				'email'    => 'create_customer_test@woo.local',
+			)
+		);
 		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 201, $response->get_status() );
-		$this->assertEquals( array(
-			'id'                 => $data['id'],
-			'date_created'       => $data['date_created'],
-			'date_created_gmt'   => $data['date_created_gmt'],
-			'date_modified'      => $data['date_modified'],
-			'date_modified_gmt'  => $data['date_modified_gmt'],
-			'email'              => 'create_customer_test@woo.local',
-			'first_name'         => '',
-			'last_name'          => '',
-			'role'               => 'customer',
-			'username'           => 'create_customer_test',
-			'billing'            => array(
-				'first_name' => '',
-				'last_name'  => '',
-				'company'    => '',
-				'address_1'  => '',
-				'address_2'  => '',
-				'city'       => '',
-				'state'      => '',
-				'postcode'   => '',
-				'country'    => '',
-				'email'      => '',
-				'phone'      => '',
+		$this->assertEquals(
+			array(
+				'id'                 => $data['id'],
+				'date_created'       => $data['date_created'],
+				'date_created_gmt'   => $data['date_created_gmt'],
+				'date_modified'      => $data['date_modified'],
+				'date_modified_gmt'  => $data['date_modified_gmt'],
+				'email'              => 'create_customer_test@woo.local',
+				'first_name'         => '',
+				'last_name'          => '',
+				'role'               => 'customer',
+				'username'           => 'create_customer_test',
+				'billing'            => array(
+					'first_name' => '',
+					'last_name'  => '',
+					'company'    => '',
+					'address_1'  => '',
+					'address_2'  => '',
+					'city'       => '',
+					'state'      => '',
+					'postcode'   => '',
+					'country'    => '',
+					'email'      => '',
+					'phone'      => '',
+				),
+				'shipping'           => array(
+					'first_name' => '',
+					'last_name'  => '',
+					'company'    => '',
+					'address_1'  => '',
+					'address_2'  => '',
+					'city'       => '',
+					'state'      => '',
+					'postcode'   => '',
+					'country'    => '',
+				),
+				'is_paying_customer' => false,
+				'meta_data'          => array(),
+				'avatar_url'         => $data['avatar_url'],
 			),
-			'shipping'           => array(
-				'first_name' => '',
-				'last_name'  => '',
-				'company'    => '',
-				'address_1'  => '',
-				'address_2'  => '',
-				'city'       => '',
-				'state'      => '',
-				'postcode'   => '',
-				'country'    => '',
-			),
-			'is_paying_customer' => false,
-			'meta_data'          => array(),
-			'avatar_url'         => $data['avatar_url'],
-		), $data );
+			$data
+		);
 
-		// Test extra data
+		// Test extra data.
 		$request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
-		$request->set_body_params( array(
-			'username' => 'create_customer_test2',
-			'password' => 'test123',
-			'email'    => 'create_customer_test2@woo.local',
-			'first_name' => 'Test',
-			'last_name' => 'McTestFace',
-			'billing' => array(
-				'country' => 'US',
-				'state'   => 'WA',
-			),
-			'shipping' => array(
-				'state'   => 'CA',
-				'country' => 'US',
-			),
-		) );
+		$request->set_body_params(
+			array(
+				'username'   => 'create_customer_test2',
+				'password'   => 'test123',
+				'email'      => 'create_customer_test2@woo.local',
+				'first_name' => 'Test',
+				'last_name'  => 'McTestFace',
+				'billing'    => array(
+					'country' => 'US',
+					'state'   => 'WA',
+				),
+				'shipping'   => array(
+					'state'   => 'CA',
+					'country' => 'US',
+				),
+			)
+		);
 		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 201, $response->get_status() );
-		$this->assertEquals( array(
-			'id'                 => $data['id'],
-			'date_created'       => $data['date_created'],
-			'date_created_gmt'   => $data['date_created_gmt'],
-			'date_modified'      => $data['date_modified'],
-			'date_modified_gmt'  => $data['date_modified_gmt'],
-			'email'              => 'create_customer_test2@woo.local',
-			'first_name'         => 'Test',
-			'last_name'          => 'McTestFace',
-			'role'               => 'customer',
-			'username'           => 'create_customer_test2',
-			'billing'            => array(
-				'first_name' => '',
-				'last_name'  => '',
-				'company'    => '',
-				'address_1'  => '',
-				'address_2'  => '',
-				'city'       => '',
-				'state'      => 'WA',
-				'postcode'   => '',
-				'country'    => 'US',
-				'email'      => '',
-				'phone'      => '',
+		$this->assertEquals(
+			array(
+				'id'                 => $data['id'],
+				'date_created'       => $data['date_created'],
+				'date_created_gmt'   => $data['date_created_gmt'],
+				'date_modified'      => $data['date_modified'],
+				'date_modified_gmt'  => $data['date_modified_gmt'],
+				'email'              => 'create_customer_test2@woo.local',
+				'first_name'         => 'Test',
+				'last_name'          => 'McTestFace',
+				'role'               => 'customer',
+				'username'           => 'create_customer_test2',
+				'billing'            => array(
+					'first_name' => '',
+					'last_name'  => '',
+					'company'    => '',
+					'address_1'  => '',
+					'address_2'  => '',
+					'city'       => '',
+					'state'      => 'WA',
+					'postcode'   => '',
+					'country'    => 'US',
+					'email'      => '',
+					'phone'      => '',
+				),
+				'shipping'           => array(
+					'first_name' => '',
+					'last_name'  => '',
+					'company'    => '',
+					'address_1'  => '',
+					'address_2'  => '',
+					'city'       => '',
+					'state'      => 'CA',
+					'postcode'   => '',
+					'country'    => 'US',
+				),
+				'is_paying_customer' => false,
+				'meta_data'          => array(),
+				'avatar_url'         => $data['avatar_url'],
 			),
-			'shipping'           => array(
-				'first_name' => '',
-				'last_name'  => '',
-				'company'    => '',
-				'address_1'  => '',
-				'address_2'  => '',
-				'city'       => '',
-				'state'      => 'CA',
-				'postcode'   => '',
-				'country'    => 'US',
-			),
-			'is_paying_customer' => false,
-			'meta_data'          => array(),
-			'avatar_url'         => $data['avatar_url'],
-		), $data );
+			$data
+		);
 
-		// Test without required field
+		// Test without required field.
 		$request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
-		$request->set_body_params( array(
-			'username' => 'create_customer_test3',
-			'first_name' => 'Test',
-			'last_name' => 'McTestFace',
-		) );
+		$request->set_body_params(
+			array(
+				'username'   => 'create_customer_test3',
+				'first_name' => 'Test',
+				'last_name'  => 'McTestFace',
+			)
+		);
 		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 400, $response->get_status() );
 	}
@@ -256,11 +279,13 @@ class Customers extends WC_REST_Unit_Test_Case {
 	public function test_create_customer_without_permission() {
 		wp_set_current_user( 0 );
 		$request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
-		$request->set_body_params( array(
-			'username' => 'create_customer_test_without_permission',
-			'password' => 'test123',
-			'email'    => 'create_customer_test_without_permission@woo.local',
-		) );
+		$request->set_body_params(
+			array(
+				'username' => 'create_customer_test_without_permission',
+				'password' => 'test123',
+				'email'    => 'create_customer_test_without_permission@woo.local',
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
 	}
@@ -274,47 +299,50 @@ class Customers extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( 1 );
 		$customer = WC_Helper_Customer::create_customer( 'get_customer_test', 'test123', 'get_customer_test@woo.local' );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $customer->get_id() ) );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
-		$this->assertEquals( array(
-			'id'                 => $data['id'],
-			'date_created'       => $data['date_created'],
-			'date_created_gmt'   => $data['date_created_gmt'],
-			'date_modified'      => $data['date_modified'],
-			'date_modified_gmt'  => $data['date_modified_gmt'],
-			'email'              => 'get_customer_test@woo.local',
-			'first_name'         => 'Justin',
-			'billing'            => array(
-				'first_name' => '',
-				'last_name'  => '',
-				'company'    => '',
-				'address_1'  => '123 South Street',
-				'address_2'  => 'Apt 1',
-				'city'       => 'Philadelphia',
-				'state'      => 'PA',
-				'postcode'   => '19123',
-				'country'    => 'US',
-				'email'      => '',
-				'phone'      => '',
+		$this->assertEquals(
+			array(
+				'id'                 => $data['id'],
+				'date_created'       => $data['date_created'],
+				'date_created_gmt'   => $data['date_created_gmt'],
+				'date_modified'      => $data['date_modified'],
+				'date_modified_gmt'  => $data['date_modified_gmt'],
+				'email'              => 'get_customer_test@woo.local',
+				'first_name'         => 'Justin',
+				'billing'            => array(
+					'first_name' => '',
+					'last_name'  => '',
+					'company'    => '',
+					'address_1'  => '123 South Street',
+					'address_2'  => 'Apt 1',
+					'city'       => 'Philadelphia',
+					'state'      => 'PA',
+					'postcode'   => '19123',
+					'country'    => 'US',
+					'email'      => '',
+					'phone'      => '',
+				),
+				'shipping'           => array(
+					'first_name' => '',
+					'last_name'  => '',
+					'company'    => '',
+					'address_1'  => '123 South Street',
+					'address_2'  => 'Apt 1',
+					'city'       => 'Philadelphia',
+					'state'      => 'PA',
+					'postcode'   => '19123',
+					'country'    => 'US',
+				),
+				'is_paying_customer' => false,
+				'meta_data'          => array(),
+				'last_name'          => '',
+				'role'               => 'customer',
+				'username'           => 'get_customer_test',
+				'avatar_url'         => $data['avatar_url'],
 			),
-			'shipping'           => array(
-				'first_name' => '',
-				'last_name'  => '',
-				'company'    => '',
-				'address_1'  => '123 South Street',
-				'address_2'  => 'Apt 1',
-				'city'       => 'Philadelphia',
-				'state'      => 'PA',
-				'postcode'   => '19123',
-				'country'    => 'US',
-			),
-			'is_paying_customer' => false,
-			'meta_data'          => array(),
-			'last_name'          => '',
-			'role'               => 'customer',
-			'username'           => 'get_customer_test',
-			'avatar_url'         => $data['avatar_url'],
-		), $data );
+			$data
+		);
 	}
 
 	/**
@@ -355,10 +383,12 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'update_customer_test@woo.local', $data['email'] );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/customers/' . $customer->get_id() );
-		$request->set_body_params( array(
-			'email'      => 'updated_email@woo.local',
-			'first_name' => 'UpdatedTest',
-		) );
+		$request->set_body_params(
+			array(
+				'email'      => 'updated_email@woo.local',
+				'first_name' => 'UpdatedTest',
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -411,7 +441,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_customer_invalid_id() {
 		wp_set_current_user( 1 );
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v3/customers/0' );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v3/customers/0' );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 400, $response->get_status() );
@@ -445,27 +475,29 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$customer_4 = WC_Helper_Customer::create_customer( 'test_batch_customer4', 'test123', 'test_batch_customer4@woo.local' );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/customers/batch' );
-		$request->set_body_params( array(
-			'update' => array(
-				array(
-					'id'        => $customer_1->get_id(),
-					'last_name' => 'McTest',
+		$request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'        => $customer_1->get_id(),
+						'last_name' => 'McTest',
+					),
 				),
-			),
-			'delete' => array(
-				$customer_2->get_id(),
-				$customer_3->get_id(),
-			),
-			'create' => array(
-				array(
-					'username' => 'newuser',
-					'password'   => 'test123',
-					'email'  => 'newuser@woo.local',
+				'delete' => array(
+					$customer_2->get_id(),
+					$customer_3->get_id(),
 				),
-			),
-		) );
+				'create' => array(
+					array(
+						'username' => 'newuser',
+						'password' => 'test123',
+						'email'    => 'newuser@woo.local',
+					),
+				),
+			)
+		);
 		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 'McTest', $data['update'][0]['last_name'] );
 		$this->assertEquals( 'newuser', $data['create'][0]['username'] );
@@ -473,9 +505,9 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $customer_2->get_id(), $data['delete'][0]['id'] );
 		$this->assertEquals( $customer_3->get_id(), $data['delete'][1]['id'] );
 
-		$request = new WP_REST_Request( 'GET', '/wc/v3/customers' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/customers' );
 		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$data     = $response->get_data();
 
 		$this->assertEquals( 3, count( $data ) );
 	}
@@ -487,9 +519,9 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_customer_schema() {
 		wp_set_current_user( 1 );
-		$request = new WP_REST_Request( 'OPTIONS', '/wc/v3/customers' );
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v3/customers' );
+		$response   = $this->server->dispatch( $request );
+		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
 		$this->assertEquals( 16, count( $properties ) );
