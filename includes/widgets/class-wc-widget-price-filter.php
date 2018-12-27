@@ -66,7 +66,9 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			return;
 		}
 
-		if ( ! wc()->query->get_main_query()->post_count ) {
+		$min_price = isset( $_GET['min_price'] ) ? wc_clean( wp_unslash( $_GET['min_price'] ) ) : null; // WPCS: input var ok, CSRF ok.
+		$max_price = isset( $_GET['max_price'] ) ? wc_clean( wp_unslash( $_GET['max_price'] ) ) : null; // WPCS: input var ok, CSRF ok.
+		if ( ! wc()->query->get_main_query()->post_count && null === $min_price && null === $max_price ) {
 			return;
 		}
 
@@ -89,8 +91,8 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( trailingslashit( $wp->request ) ) );
 		}
 
-		$min_price = isset( $_GET['min_price'] ) ? wc_clean( wp_unslash( $_GET['min_price'] ) ) : apply_filters( 'woocommerce_price_filter_widget_min_amount', $min ); // WPCS: input var ok, CSRF ok.
-		$max_price = isset( $_GET['max_price'] ) ? wc_clean( wp_unslash( $_GET['max_price'] ) ) : apply_filters( 'woocommerce_price_filter_widget_max_amount', $max ); // WPCS: input var ok, CSRF ok.
+		$min_price = null !== $min_price ? $min_price : apply_filters( 'woocommerce_price_filter_widget_min_amount', $min );
+		$max_price = null !== $max_price ? $max_price : apply_filters( 'woocommerce_price_filter_widget_max_amount', $max );
 
 		echo '<form method="get" action="' . esc_url( $form_action ) . '">
 			<div class="price_slider_wrapper">
