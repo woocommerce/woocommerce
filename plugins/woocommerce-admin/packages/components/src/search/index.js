@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Component, createRef } from '@wordpress/element';
+import { Component, createRef, Fragment } from '@wordpress/element';
 import { withInstanceId } from '@wordpress/compose';
 import { findIndex, noop } from 'lodash';
 import Gridicon from 'gridicons';
@@ -114,7 +114,7 @@ class Search extends Component {
 		const { selected } = this.props;
 
 		return this.shouldRenderTags() ? (
-			<div className="woocommerce-search__token-list">
+			<Fragment>
 				{ selected.map( ( item, i ) => {
 					if ( ! item.label ) {
 						return null;
@@ -135,7 +135,7 @@ class Search extends Component {
 						/>
 					);
 				} ) }
-			</div>
+			</Fragment>
 		) : null;
 	}
 
@@ -182,30 +182,32 @@ class Search extends Component {
 									this.input.current.focus();
 								} }
 							>
-								{ this.renderTags() }
-								<input
-									ref={ this.input }
-									type="text"
-									size={
-										( ( value.length === 0 && placeholder && placeholder.length ) ||
-											value.length ) + 1
-									}
-									value={ value }
-									placeholder={ ( ! shouldRenderTags && placeholder ) || '' }
-									className="woocommerce-search__inline-input"
-									onChange={ this.updateSearch( onChange ) }
-									aria-owns={ listBoxId }
-									aria-activedescendant={ activeId }
-									onFocus={ this.onFocus }
-									onBlur={ this.onBlur }
-									aria-describedby={
-										shouldRenderTags ? `search-inline-input-${ instanceId }` : null
-									}
-									{ ...aria }
-								/>
-								<span id={ `search-inline-input-${ instanceId }` } className="screen-reader-text">
-									{ __( 'Move backward for selected items' ) }
-								</span>
+								<div className="woocommerce-search__token-list">
+									{ this.renderTags() }
+									<input
+										ref={ this.input }
+										type="text"
+										size={
+											( ( value.length === 0 && placeholder && placeholder.length ) ||
+												value.length ) + 1
+										}
+										value={ value }
+										placeholder={ ( ! shouldRenderTags && placeholder ) || '' }
+										className="woocommerce-search__inline-input"
+										onChange={ this.updateSearch( onChange ) }
+										aria-owns={ listBoxId }
+										aria-activedescendant={ activeId }
+										onFocus={ this.onFocus }
+										onBlur={ this.onBlur }
+										aria-describedby={
+											shouldRenderTags ? `search-inline-input-${ instanceId }` : null
+										}
+										{ ...aria }
+									/>
+									<span id={ `search-inline-input-${ instanceId }` } className="screen-reader-text">
+										{ __( 'Move backward for selected items' ) }
+									</span>
+								</div>
 							</div>
 						) : (
 							<input
