@@ -220,10 +220,12 @@ class WC_Widget_Product_Categories extends WC_Widget {
 		$this->widget_start( $args, $instance );
 
 		if ( $dropdown ) {
+			include_once WC()->plugin_path() . '/includes/walkers/class-wc-product-cat-dropdown-walker.php';
 			wc_product_dropdown_categories(
 				apply_filters(
 					'woocommerce_product_categories_widget_dropdown_args', wp_parse_args(
 						$dropdown_args, array(
+							'walker' => new WC_Product_Cat_Dropdown_Walker(),
 							'show_count'         => $count,
 							'hierarchical'       => $hierarchical,
 							'show_uncategorized' => 0,
