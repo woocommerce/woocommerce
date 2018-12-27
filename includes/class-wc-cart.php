@@ -1107,8 +1107,10 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				// Add item after merging with $cart_item_data - hook to allow plugins to modify cart item.
 				$this->cart_contents[ $cart_item_key ] = apply_filters(
-					'woocommerce_add_cart_item', array_merge(
-						$cart_item_data, array(
+					'woocommerce_add_cart_item',
+					array_merge(
+						$cart_item_data,
+						array(
 							'key'          => $cart_item_key,
 							'product_id'   => $product_id,
 							'variation_id' => $variation_id,
@@ -1117,7 +1119,8 @@ class WC_Cart extends WC_Legacy_Cart {
 							'data'         => $product_data,
 							'data_hash'    => wc_get_cart_item_data_hash( $product_data ),
 						)
-					), $cart_item_key
+					),
+					$cart_item_key
 				);
 			}
 
@@ -1453,15 +1456,16 @@ class WC_Cart extends WC_Legacy_Cart {
 			$coupon = new WC_Coupon( $code );
 
 			if ( $coupon->is_valid() ) {
-
 				// Get user and posted emails to compare.
-				$current_user = wp_get_current_user();
+				$current_user  = wp_get_current_user();
 				$billing_email = isset( $posted['billing_email'] ) ? $posted['billing_email'] : '';
 				$check_emails  = array_unique(
 					array_filter(
 						array_map(
-							'strtolower', array_map(
-								'sanitize_email', array(
+							'strtolower',
+							array_map(
+								'sanitize_email',
+								array(
 									$billing_email,
 									$current_user->user_email,
 								)
