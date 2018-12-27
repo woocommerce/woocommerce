@@ -83,7 +83,7 @@ export class ReportChart extends Component {
 
 		const chartData = primaryData.data.intervals.map( function( interval, index ) {
 			const secondaryDate = getPreviousDate(
-				formatDate( 'Y-m-d', interval.date_start ),
+				interval.date_start,
 				primary.after,
 				secondary.after,
 				query.compare,

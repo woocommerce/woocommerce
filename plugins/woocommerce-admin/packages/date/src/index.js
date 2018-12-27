@@ -5,7 +5,6 @@
 import moment from 'moment';
 import { find } from 'lodash';
 import { __ } from '@wordpress/i18n';
-import { format as formatDate } from '@wordpress/date';
 
 const QUERY_DEFAULTS = {
 	pageSize: 25,
@@ -314,8 +313,8 @@ export const getCurrentDates = query => {
  * @return {Int}  - Difference in days.
  */
 export const getDateDifferenceInDays = ( date, date2 ) => {
-	const _date = toMoment( isoDateFormat, formatDate( 'Y-m-d', date ) );
-	const _date2 = toMoment( isoDateFormat, formatDate( 'Y-m-d', date2 ) );
+	const _date = moment( date );
+	const _date2 = moment( date2 );
 	return _date.diff( _date2, 'days' );
 };
 
@@ -330,14 +329,14 @@ export const getDateDifferenceInDays = ( date, date2 ) => {
  * @return {String}  - Calculated date
  */
 export const getPreviousDate = ( date, date1, date2, compare, interval ) => {
-	const dateMoment = toMoment( isoDateFormat, formatDate( 'Y-m-d', date ) );
+	const dateMoment = moment( date );
 
 	if ( 'previous_year' === compare ) {
 		return dateMoment.clone().subtract( 1, 'years' );
 	}
 
-	const _date1 = toMoment( isoDateFormat, formatDate( 'Y-m-d', date1 ) );
-	const _date2 = toMoment( isoDateFormat, formatDate( 'Y-m-d', date2 ) );
+	const _date1 = moment( date1 );
+	const _date2 = moment( date2 );
 	const difference = _date1.diff( _date2, interval );
 
 	return dateMoment.clone().subtract( difference, interval );
@@ -345,8 +344,6 @@ export const getPreviousDate = ( date, date1, date2, compare, interval ) => {
 
 /**
  * Returns the allowed selectable intervals for a specific query.
- * TODO Add support for hours. `` if ( differenceInDays <= 1 ) { allowed = [ 'hour' ]; }
- * Today/yesterday/default: allowed = [ 'hour' ];
  *
  * @param  {Object} query Current query
  * @return {Array} Array containing allowed intervals.
@@ -365,12 +362,16 @@ export function getAllowedIntervalsForQuery( query ) {
 		} else if ( differenceInDays > 7 ) {
 			allowed = [ 'day', 'week' ];
 		} else if ( differenceInDays > 1 && differenceInDays <= 7 ) {
-			allowed = [ 'day' ];
+			allowed = [ 'day', 'hour' ];
 		} else {
-			allowed = [ 'day' ];
+			allowed = [ 'hour' ];
 		}
 	} else {
 		switch ( query.period ) {
+			case 'today':
+			case 'yesterday':
+				allowed = [ 'hour' ];
+				break;
 			case 'week':
 			case 'last_week':
 				allowed = [ 'day' ];
@@ -444,8 +445,9 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
 
 	switch ( interval ) {
 		case 'hour':
-			tooltipLabelFormat = '%I %p';
-			xFormat = '%I %p';
+			tooltipLabelFormat = '%_I%p';
+			xFormat = '%_I%p';
+			x2Format = '%b %d, %Y';
 			tableFormat = 'h A';
 			break;
 		case 'day':
