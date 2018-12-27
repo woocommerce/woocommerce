@@ -78,6 +78,11 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 		$sql_query_params['from_clause'] .= " LEFT JOIN {$wpdb->prefix}term_relationships ON {$order_product_lookup_table}.product_id = {$wpdb->prefix}term_relationships.object_id";
 		$sql_query_params['from_clause'] .= " LEFT JOIN {$wpdb->prefix}term_taxonomy ON {$wpdb->prefix}term_relationships.term_taxonomy_id = {$wpdb->prefix}term_taxonomy.term_taxonomy_id";
 
+		$included_categories = $this->get_included_categories( $query_args );
+		if ( $included_categories ) {
+			$sql_query_params['where_clause'] .= " AND {$wpdb->prefix}term_taxonomy.term_id IN ({$included_categories})";
+		}
+
 		// TODO: only products in the category C or orders with products from category C (and, possibly others?).
 		$included_products = $this->get_included_products( $query_args );
 		if ( $included_products ) {
@@ -93,6 +98,21 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 		$sql_query_params['where_clause'] .= " AND taxonomy = 'product_cat' ";
 
 		return $sql_query_params;
+	}
+
+	/**
+	 * Returns comma separated ids of included categories, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_included_categories( $query_args ) {
+		$included_categories_str = '';
+
+		if ( isset( $query_args['categories'] ) && is_array( $query_args['categories'] ) && count( $query_args['categories'] ) > 0 ) {
+			$included_categories_str = implode( ',', $query_args['categories'] );
+		}
+		return $included_categories_str;
 	}
 
 	/**
