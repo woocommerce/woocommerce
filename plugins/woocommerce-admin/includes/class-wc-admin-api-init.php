@@ -69,7 +69,6 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-downloads-data-store.php';
 
 		// Data triggers.
-		require_once dirname( __FILE__ ) . '/wc-admin-order-functions.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-notes-data-store.php';
 
 		// CRUD classes.
@@ -258,7 +257,7 @@ class WC_Admin_Api_Init {
 	/**
 	 * Regenerate data for reports.
 	 */
-	public static function regenrate_report_data() {
+	public static function regenerate_report_data() {
 		WC_Admin_Reports_Orders_Data_Store::queue_order_stats_repopulate_database();
 		self::order_product_lookup_store_init();
 	}
@@ -277,7 +276,7 @@ class WC_Admin_Api_Init {
 					'name'     => __( 'Rebuild reports data', 'wc-admin' ),
 					'button'   => __( 'Rebuild reports', 'wc-admin' ),
 					'desc'     => __( 'This tool will rebuild all of the information used by the reports.', 'wc-admin' ),
-					'callback' => array( 'WC_Admin_Api_Init', 'regenrate_report_data' ),
+					'callback' => array( 'WC_Admin_Api_Init', 'regenerate_report_data' ),
 				),
 			)
 		);
@@ -288,6 +287,9 @@ class WC_Admin_Api_Init {
 	 */
 	public static function orders_data_store_init() {
 		WC_Admin_Reports_Orders_Data_Store::init();
+		WC_Admin_Reports_Products_Data_Store::init();
+		WC_Admin_Reports_Taxes_Data_Store::init();
+		WC_Admin_Reports_Coupons_Data_Store::init();
 	}
 
 	/**
@@ -313,35 +315,7 @@ class WC_Admin_Api_Init {
 
 		// Process orders until close to running out of memory timeouts on large sites then requeue.
 		foreach ( $orders as $order_id ) {
-			$order = wc_get_order( $order_id );
-			if ( ! $order ) {
-				continue;
-			}
-			foreach ( $order->get_items() as $order_item ) {
-				$wpdb->replace(
-					$wpdb->prefix . 'wc_order_product_lookup',
-					array(
-						'order_item_id'       => $order_item->get_id(),
-						'order_id'            => $order->get_id(),
-						'product_id'          => $order_item->get_product_id( 'edit' ),
-						'variation_id'        => $order_item->get_variation_id( 'edit' ),
-						'customer_id'         => ( 0 < $order->get_customer_id( 'edit' ) ) ? $order->get_customer_id( 'edit' ) : null,
-						'product_qty'         => $order_item->get_quantity( 'edit' ),
-						'product_net_revenue' => $order_item->get_subtotal( 'edit' ),
-						'date_created'        => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
-					),
-					array(
-						'%d',
-						'%d',
-						'%d',
-						'%d',
-						'%d',
-						'%d',
-						'%f',
-						'%s',
-					)
-				);
-			}
+			WC_Admin_Reports_Products_Data_Store::sync_order_products( $order_id );
 			// Pop the order ID from the array for updating the transient later should we near memory exhaustion.
 			unset( $orders[ $order_id ] );
 			if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {

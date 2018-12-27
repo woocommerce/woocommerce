@@ -73,6 +73,15 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 	);
 
 	/**
+	 * Set up all the hooks for maintaining and populating table data.
+	 */
+	public static function init() {
+		add_action( 'save_post', array( __CLASS__, 'sync_order_products' ) );
+		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order_products' ) );
+		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order_products' ) );
+	}
+
+	/**
 	 * Fills ORDER BY clause of SQL request based on user supplied parameters.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
@@ -287,6 +296,95 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 	 */
 	protected function get_cache_key( $params ) {
 		return 'woocommerce_' . self::TABLE_NAME . '_' . md5( wp_json_encode( $params ) );
+	}
+
+	/**
+	 * Create or update an entry in the wc_admin_order_product_lookup table for an order.
+	 *
+	 * @since 3.5.0
+	 * @param int $order_id Order ID.
+	 * @return void
+	 */
+	public static function sync_order_products( $order_id ) {
+		global $wpdb;
+
+		$order = wc_get_order( $order_id );
+
+		// This hook gets called on refunds as well, so return early to avoid errors.
+		if ( ! $order || 'shop_order_refund' === $order->get_type() ) {
+			return;
+		}
+
+		if ( ! in_array( $order->get_status(), parent::get_report_order_statuses(), true ) ) {
+			$wpdb->delete(
+				$wpdb->prefix . self::TABLE_NAME,
+				array( 'order_id' => $order->get_id() ),
+				array( '%d' )
+			);
+			return;
+		}
+
+		$refunds = self::get_order_refund_items( $order );
+
+		foreach ( $order->get_items() as $order_item ) {
+			$order_item_id     = $order_item->get_id();
+			$quantity_refunded = isset( $refunds[ $order_item_id ] ) ? $refunds[ $order_item_id ]['quantity'] : 0;
+			$amount_refunded   = isset( $refunds[ $order_item_id ] ) ? $refunds[ $order_item_id ]['subtotal'] : 0;
+			if ( $quantity_refunded >= $order_item->get_quantity( 'edit' ) ) {
+				$wpdb->delete(
+					$wpdb->prefix . self::TABLE_NAME,
+					array( 'order_item_id' => $order_item_id ),
+					array( '%d' )
+				);
+			} else {
+				$wpdb->replace(
+					$wpdb->prefix . self::TABLE_NAME,
+					array(
+						'order_item_id'       => $order_item_id,
+						'order_id'            => $order->get_id(),
+						'product_id'          => $order_item->get_product_id( 'edit' ),
+						'variation_id'        => $order_item->get_variation_id( 'edit' ),
+						'customer_id'         => ( 0 < $order->get_customer_id( 'edit' ) ) ? $order->get_customer_id( 'edit' ) : null,
+						'product_qty'         => $order_item->get_quantity( 'edit' ) - $quantity_refunded,
+						'product_net_revenue' => $order_item->get_subtotal( 'edit' ) - $amount_refunded,
+						'date_created'        => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+					),
+					array(
+						'%d',
+						'%d',
+						'%d',
+						'%d',
+						'%d',
+						'%d',
+						'%f',
+						'%s',
+					)
+				);
+			}
+		}
+	}
+
+	/**
+	 * Get order refund items quantity and subtotal
+	 *
+	 * @param object $order WC Order object.
+	 * @return array
+	 */
+	public static function get_order_refund_items( $order ) {
+		$refunds             = $order->get_refunds();
+		$refunded_line_items = array();
+		foreach ( $refunds as $refund ) {
+			foreach ( $refund->get_items() as $refunded_item ) {
+				$line_item_id = wc_get_order_item_meta( $refunded_item->get_id(), '_refunded_item_id', true );
+				if ( ! isset( $refunded_line_items[ $line_item_id ] ) ) {
+					$refunded_line_items[ $line_item_id ]['quantity'] = 0;
+					$refunded_line_items[ $line_item_id ]['subtotal'] = 0;
+				}
+				$refunded_line_items[ $line_item_id ]['quantity'] += absint( $refunded_item['quantity'] );
+				$refunded_line_items[ $line_item_id ]['subtotal'] += abs( $refunded_item['subtotal'] );
+			}
+		}
+		return $refunded_line_items;
 	}
 
 }
