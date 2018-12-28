@@ -17,6 +17,6 @@ module.exports = [
 			},
 		},
 	} ),
-	require( 'autoprefixer' ),
+	require( 'autoprefixer' )( { grid: true } ),
 	require( 'postcss-color-function' ),
 ];
