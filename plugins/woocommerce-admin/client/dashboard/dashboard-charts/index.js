@@ -80,7 +80,7 @@ class DashboardCharts extends Component {
 						>
 							<IconButton
 								className={ classNames( 'woocommerce-chart__type-button', {
-									'woocommerce-chart__type-button-selected': query.type === 'line',
+									'woocommerce-chart__type-button-selected': ! query.type || query.type === 'line',
 								} ) }
 								icon={ <Gridicon icon="line-graph" /> }
 								title={ __( 'Line chart', 'wc-admin' ) }
