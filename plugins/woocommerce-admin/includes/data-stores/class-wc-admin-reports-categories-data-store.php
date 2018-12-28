@@ -116,20 +116,6 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 	}
 
 	/**
-	 * Maps ordering specified by the user to columns in the database/fields in the data.
-	 *
-	 * @param string $order_by Sorting criterion.
-	 * @return string
-	 */
-	protected function normalize_order_by( $order_by ) {
-		if ( 'date' === $order_by ) {
-			return 'date_created';
-		}
-
-		return $order_by;
-	}
-
-	/**
 	 * Compares values in 2 arrays based on criterion specified when called via sort_records.
 	 *
 	 * @param array $a Array 1 to compare.
