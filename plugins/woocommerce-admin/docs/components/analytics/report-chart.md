@@ -20,6 +20,14 @@ Filters available for that report.
 
 Label describing the legend items.
 
+### `mode`
+
+- Type: String
+- Default: null
+
+`items-comparison` (default) or `time-comparison`, this is used to generate correct
+ARIA properties.
+
 ### `path`
 
 - **Required**

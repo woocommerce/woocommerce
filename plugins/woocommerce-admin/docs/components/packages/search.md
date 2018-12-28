@@ -24,7 +24,7 @@ Function called when selected results change, passed result list.
 ### `type`
 
 - **Required**
-- Type: One of: 'countries', 'coupons', 'customers', 'emails', 'orders', 'products', 'product_cats', 'taxes', 'usernames', 'variations'
+- Type: One of: 'categories', 'countries', 'coupons', 'customers', 'downloadIps', 'emails', 'orders', 'products', 'taxes', 'usernames', 'variations'
 - Default: null
 
 The object type to be used in searching.
