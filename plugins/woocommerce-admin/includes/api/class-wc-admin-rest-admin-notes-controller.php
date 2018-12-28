@@ -76,6 +76,15 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 	 */
 	public function get_item( $request ) {
 		$note = WC_Admin_Notes::get_note( $request->get_param( 'id' ) );
+
+		if ( ! $note ) {
+			return new WP_Error(
+				'woocommerce_admin_notes_invalid_id',
+				__( 'Sorry, there is no resouce with that ID.', 'wc-admin' ),
+				array( 'status' => 404 )
+			);
+		}
+
 		if ( is_wp_error( $note ) ) {
 			return $note;
 		}
