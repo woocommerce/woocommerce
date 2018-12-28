@@ -172,14 +172,14 @@ export function getLastPeriod( period, compare ) {
  */
 export function getCurrentPeriod( period, compare ) {
 	const primaryStart = moment().startOf( period );
-	const primaryEnd = moment();
-	const daysSoFar = primaryEnd.diff( primaryStart, 'days' );
+	const primaryEnd = moment().add( 1, 'hour' );
+	const hoursSoFar = primaryEnd.diff( primaryStart, 'hours' );
 	let secondaryStart;
 	let secondaryEnd;
 
 	if ( 'previous_period' === compare ) {
 		secondaryStart = primaryStart.clone().subtract( 1, period );
-		secondaryEnd = primaryEnd.clone().subtract( 1, period );
+		secondaryEnd = primaryEnd.clone().subtract( 1, period ).add( 1, 'hour' );
 	} else {
 		secondaryStart =
 			'week' === period
@@ -189,7 +189,7 @@ export function getCurrentPeriod( period, compare ) {
 						.week( primaryStart.week() )
 						.startOf( 'week' )
 				: primaryStart.clone().subtract( 1, 'years' );
-		secondaryEnd = secondaryStart.clone().add( daysSoFar, 'days' );
+		secondaryEnd = secondaryStart.clone().add( hoursSoFar + 1, 'hours' );
 	}
 	return {
 		primaryStart,
@@ -278,9 +278,10 @@ export const getDateParamsFromQuery = ( { period, compare, after, before } ) => 
  * @property {string} [compare] - compare valuer, ie previous_year
  * @property {string} [after] - date in iso date format, ie 2018-07-03
  * @property {string} [before] - date in iso date format, ie 2018-07-03
+ * @param {String} dateFormat - format of the dates to return
  * @return {{primary: DateValue, secondary: DateValue}} - Primary and secondary DateValue objects
  */
-export const getCurrentDates = query => {
+export const getCurrentDates = ( query, dateFormat = isoDateFormat ) => {
 	const { period, compare, after, before } = getDateParamsFromQuery( query );
 	const { primaryStart, primaryEnd, secondaryStart, secondaryEnd } = getDateValue(
 		period,
@@ -293,14 +294,14 @@ export const getCurrentDates = query => {
 		primary: {
 			label: find( presetValues, item => item.value === period ).label,
 			range: getRangeLabel( primaryStart, primaryEnd ),
-			after: primaryStart.format( isoDateFormat ),
-			before: primaryEnd.format( isoDateFormat ),
+			after: primaryStart.format( dateFormat ),
+			before: primaryEnd.format( dateFormat ),
 		},
 		secondary: {
 			label: find( periods, item => item.value === compare ).label,
 			range: getRangeLabel( secondaryStart, secondaryEnd ),
-			after: secondaryStart.format( isoDateFormat ),
-			before: secondaryEnd.format( isoDateFormat ),
+			after: secondaryStart.format( dateFormat ),
+			before: secondaryEnd.format( dateFormat ),
 		},
 	};
 };
