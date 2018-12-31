@@ -74,8 +74,8 @@ class WC_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'before'   => date( 'Y-m-d H:00:00', $time + DAY_IN_SECONDS ),
-				'after'    => date( 'Y-m-d H:00:00', $time - DAY_IN_SECONDS ),
+				'before'   => date( 'Y-m-d 23:59:59', $time ),
+				'after'    => date( 'Y-m-d 00:00:00', $time ),
 				'interval' => 'day',
 			)
 		);
