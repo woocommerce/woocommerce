@@ -14,7 +14,7 @@ import { stringifyQuery } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { NAMESPACE, SWAGGERNAMESPACE } from 'store/constants';
+import { NAMESPACE } from 'store/constants';
 
 export default {
 	async getReportItems( ...args ) {

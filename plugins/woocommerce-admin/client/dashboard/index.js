@@ -25,7 +25,7 @@ export default class Dashboard extends Component {
 				<StorePerformance />
 				<div className="woocommerce-dashboard__columns">
 					<div>
-						<TopSellingProducts />
+						<TopSellingProducts query={ query } />
 					</div>
 				</div>
 				<DashboardCharts query={ query } path={ path } />
