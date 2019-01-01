@@ -232,7 +232,7 @@ class Chart extends Component {
 		} = this.props;
 		let { yFormat } = this.props;
 		const legendDirection = mode === 'time-comparison' && isViewportWide ? 'row' : 'column';
-		const chartDirection = ( mode === 'item-comparison' ) && isViewportWide ? 'row' : 'column';
+		const chartDirection = mode === 'item-comparison' && isViewportWide ? 'row' : 'column';
 
 		const chartHeight = this.getChartHeight();
 		const legend = (
@@ -267,7 +267,7 @@ class Chart extends Component {
 		}
 		return (
 			<div className="woocommerce-chart">
-				{ mode !== 'block' &&
+				{ mode !== 'block' && (
 					<div className="woocommerce-chart__header">
 						<H className="woocommerce-chart__title">{ title }</H>
 						{ isViewportWide && legendDirection === 'row' && legend }
@@ -301,7 +301,7 @@ class Chart extends Component {
 							/>
 						</NavigableMenu>
 					</div>
-				}
+				) }
 				<Section component={ false }>
 					<div
 						className={ classNames(
@@ -343,7 +343,9 @@ class Chart extends Component {
 								/>
 							) }
 					</div>
-					{ ( ! isViewportWide || mode === 'block' ) && <div className="woocommerce-chart__footer">{ legend }</div> }
+					{ ( ! isViewportWide || mode === 'block' ) && (
+						<div className="woocommerce-chart__footer">{ legend }</div>
+					) }
 				</Section>
 			</div>
 		);
