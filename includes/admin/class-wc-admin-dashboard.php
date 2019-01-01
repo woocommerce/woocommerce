@@ -42,7 +42,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce Status', 'woocommerce' ), array( $this, 'status_widget' ) );
 
 			// Network Order Widget.
-			if ( is_multisite() ) {
+			if ( is_multisite() && is_main_site() ) {
 				$this->register_network_order_widget();
 			}
 		}
