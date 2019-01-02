@@ -70,13 +70,13 @@
 		.CalendarDay__default {
 			background-color: transparent;
 		}
-		
+
 		.CalendarDay__selected {
 			background: $woocommerce-700;
 			border: none;
 		}
 	}
- }
+}
 
 .woocommerce-calendar__inputs {
 	padding: 1em;
@@ -190,7 +190,7 @@
 		&:not(.no-arrow):not(.is-mobile).is-top::after {
 			border-top-color: $core-grey-dark-400;
 			z-index: 1;
-			top: 0px;
+			top: 0;
 		}
 	}
 }
