@@ -423,6 +423,13 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 						'%d',
 						'%f',
 						'%s',
+						'%f',
+						'%f',
+						'%f',
+						'%f',
+						'%f',
+						'%f',
+						'%f',
 					)
 				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 			}
