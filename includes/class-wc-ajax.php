@@ -884,7 +884,7 @@ class WC_AJAX {
 					throw new Exception( __( 'Invalid product ID', 'woocommerce' ) . ' ' . $product_id );
 				}
 
-				$item_id                 = $order->add_product( $product, $qty );
+				$item_id                 = $order->add_product( $product, $qty, array(), true );
 				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
 				$added_items[ $item_id ] = $item;
 
@@ -1130,7 +1130,7 @@ class WC_AJAX {
 
 			if ( sizeof( $order_item_ids ) > 0 ) {
 				foreach ( $order_item_ids as $id ) {
-					wc_delete_order_item( absint( $id ) );
+					wc_delete_order_item( absint( $id ), true );
 				}
 			}
 
