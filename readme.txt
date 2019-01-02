@@ -160,10 +160,16 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 = 3.5.4 - 2019-01-xx =
 * Tweak - Allow limited html in woocommerce_rating_filter_count filter. #21904
+* Fix - Unescape CSV formulas in product attributes in CSV importer/exporter. #21938
 * Fix - Remove use of non-existing `WC_REST_Dev_Setting_Options_Controller` class. #22121
 * Fix - Fix edge case where `get_plugins` would not have the custom WooCommerce plugin headers if `get_plugins` was called early. #21669
 * Fix - Prevent PHP warning when deprecated user meta starts with uppercase. #21943
 * Fix - Fixed support for multiple query parameters translated to meta queries via REST API requests. #22108
+* Fix - Prevent PHP errors when trying to access non-existant report tabs. #22183
+* Fix - Filter by attributes dropdown placeholder text should not be wrapped in quotes. #22185
+* Fix - Apply sale price until end of closing sale date. #22189
+* Fix - Allow empty schema again when registering a custom field for the API. #22204
+* Fix - Don't display escaped html on checkout when javascript is disabled. #22214
 
 = 3.5.3 - 2018-12-20 =
 * Fix - Fix orders list in the admin after a change introduced in WordPress 5.0.2. #22273
