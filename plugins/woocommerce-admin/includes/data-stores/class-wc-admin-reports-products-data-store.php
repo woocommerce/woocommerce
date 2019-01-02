@@ -320,7 +320,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 				$wpdb->prefix . self::TABLE_NAME,
 				array( 'order_id' => $order->get_id() ),
 				array( '%d' )
-			);
+			); // WPCS: cache ok, DB call ok.
 			return;
 		}
 
@@ -330,24 +330,89 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			$order_item_id     = $order_item->get_id();
 			$quantity_refunded = isset( $refunds[ $order_item_id ] ) ? $refunds[ $order_item_id ]['quantity'] : 0;
 			$amount_refunded   = isset( $refunds[ $order_item_id ] ) ? $refunds[ $order_item_id ]['subtotal'] : 0;
+
+			// Shipping amount based on woocommerce code in includes/admin/meta-boxes/views/html-order-item(s).php
+			// distributed simply based on number of line items.
+			$order_items = $order->get_item_count();
+			$refunded    = $order->get_total_shipping_refunded();
+			if ( $refunded > 0 ) {
+				$total_shipping_amount = $order->get_shipping_total() - $refunded;
+			} else {
+				$total_shipping_amount = $order->get_shipping_total();
+			}
+			$shipping_amount = $total_shipping_amount / $order_items;
+
+			// Shipping amount tax based on woocommerce code in includes/admin/meta-boxes/views/html-order-item(s).php
+			// distribute simply based on number of line items.
+			$shipping_tax_amount = 0;
+			// TODO: if WC is currently not tax enabled, but it was before (or vice versa), would this work correctly?
+			if ( wc_tax_enabled() ) {
+				$order_taxes               = $order->get_taxes();
+				$line_items_shipping       = $order->get_items( 'shipping' );
+				$total_shipping_tax_amount = 0;
+				foreach ( $line_items_shipping as $item_id => $item ) {
+					$tax_data = $item->get_taxes();
+					if ( $tax_data ) {
+						foreach ( $order_taxes as $tax_item ) {
+							$tax_item_id    = $tax_item->get_rate_id();
+							$tax_item_total = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : '';
+							$refunded       = $order->get_tax_refunded_for_item( $item_id, $tax_item_id, 'shipping' );
+							if ( $refunded ) {
+								$total_shipping_tax_amount += $tax_item_total - $refunded;
+							} else {
+								$total_shipping_tax_amount += $tax_item_total;
+							}
+						}
+					}
+				}
+				$shipping_tax_amount = $total_shipping_tax_amount / $order_items;
+			}
+
+			// Tax amount.
+			// TODO: check if this calculates tax correctly with refunds.
+			$tax_amount = 0;
+			if ( wc_tax_enabled() ) {
+				$order_taxes = $order->get_taxes();
+				$tax_data    = $order_item->get_taxes();
+				foreach ( $order_taxes as $tax_item ) {
+					$tax_item_id = $tax_item->get_rate_id();
+					$tax_amount += isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : 0;
+				}
+			}
+
+			// TODO: should net revenue be affected by refunds, as refunds are tracked separately?
+			$net_revenue = $order_item->get_subtotal( 'edit' ) - $amount_refunded;
+
+			// Coupon calculation based on woocommerce code in includes/admin/meta-boxes/views/html-order-item.php.
+			$coupon_amount = $order_item->get_subtotal( 'edit' ) - $order_item->get_total( 'edit' );
+
 			if ( $quantity_refunded >= $order_item->get_quantity( 'edit' ) ) {
 				$wpdb->delete(
 					$wpdb->prefix . self::TABLE_NAME,
 					array( 'order_item_id' => $order_item_id ),
 					array( '%d' )
-				);
+				); // WPCS: cache ok, DB call ok.
 			} else {
 				$wpdb->replace(
 					$wpdb->prefix . self::TABLE_NAME,
 					array(
-						'order_item_id'       => $order_item_id,
-						'order_id'            => $order->get_id(),
-						'product_id'          => $order_item->get_product_id( 'edit' ),
-						'variation_id'        => $order_item->get_variation_id( 'edit' ),
-						'customer_id'         => ( 0 < $order->get_customer_id( 'edit' ) ) ? $order->get_customer_id( 'edit' ) : null,
-						'product_qty'         => $order_item->get_quantity( 'edit' ) - $quantity_refunded,
-						'product_net_revenue' => $order_item->get_subtotal( 'edit' ) - $amount_refunded,
-						'date_created'        => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+						'order_item_id'         => $order_item_id,
+						'order_id'              => $order->get_id(),
+						'product_id'            => $order_item->get_product_id( 'edit' ),
+						'variation_id'          => $order_item->get_variation_id( 'edit' ),
+						'customer_id'           => ( 0 < $order->get_customer_id( 'edit' ) ) ? $order->get_customer_id( 'edit' ) : null,
+						'product_qty'           => $order_item->get_quantity( 'edit' ) - $quantity_refunded,
+						'product_net_revenue'   => $net_revenue,
+						'date_created'          => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+						// TODO: is it needed? can we even recover the info?
+						'price'                 => $order_item->get_subtotal( 'edit' ) / $order_item->get_quantity( 'edit' ),
+						'coupon_amount'         => $coupon_amount,
+						'tax_amount'            => $tax_amount,
+						'shipping_amount'       => $shipping_amount,
+						'shipping_tax_amount'   => $shipping_tax_amount,
+						// TODO: can this be incorrect if modified by filters?
+						'product_gross_revenue' => $net_revenue + $tax_amount + $shipping_amount + $shipping_tax_amount,
+						'refund_amount'         => $amount_refunded,
 					),
 					array(
 						'%d',
@@ -359,7 +424,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 						'%f',
 						'%s',
 					)
-				);
+				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 			}
 		}
 	}
