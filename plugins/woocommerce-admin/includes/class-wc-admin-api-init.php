@@ -401,6 +401,7 @@ class WC_Admin_Api_Init {
 			tax_amount double DEFAULT 0 NOT NULL,
 			shipping_amount double DEFAULT 0 NOT NULL,
 			shipping_tax_amount double DEFAULT 0 NOT NULL,
+			refund_amount double DEFAULT 0 NOT NULL,
 			PRIMARY KEY  (order_item_id),
 			KEY order_id (order_id),
 			KEY product_id (product_id),
