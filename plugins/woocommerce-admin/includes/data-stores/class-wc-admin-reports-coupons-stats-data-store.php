@@ -160,7 +160,7 @@ class WC_Admin_Reports_Coupons_Stats_Data_Store extends WC_Admin_Reports_Coupons
 			$totals = (object) $this->cast_numbers( $totals[0] );
 
 			// Intervals.
-			$this->update_intervals_sql_params( $intervals_query, $query_args, $db_interval_count, $expected_interval_count );
+			$this->update_intervals_sql_params( $intervals_query, $query_args, $db_interval_count, $expected_interval_count, $table_name );
 
 			if ( '' !== $selections ) {
 				$selections = ', ' . $selections;

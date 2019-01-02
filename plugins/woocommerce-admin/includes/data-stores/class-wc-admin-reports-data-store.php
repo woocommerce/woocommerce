@@ -186,12 +186,13 @@ class WC_Admin_Reports_Data_Store {
 	 * If there are less records in the database than time intervals, then we need to remap offset in SQL query
 	 * to fetch correct records.
 	 *
-	 * @param array $intervals_query Array with clauses for the Intervals SQL query.
-	 * @param array $query_args Query arguements.
-	 * @param int   $db_interval_count Database interval count.
-	 * @param int   $expected_interval_count Expected interval count on the output.
+	 * @param array  $intervals_query Array with clauses for the Intervals SQL query.
+	 * @param array  $query_args Query arguements.
+	 * @param int    $db_interval_count Database interval count.
+	 * @param int    $expected_interval_count Expected interval count on the output.
+	 * @param string $table_name Name of SQL table where the date_created column (used for time filtering) exists.
 	 */
-	protected function update_intervals_sql_params( &$intervals_query, &$query_args, $db_interval_count, $expected_interval_count ) {
+	protected function update_intervals_sql_params( &$intervals_query, &$query_args, $db_interval_count, $expected_interval_count, $table_name ) {
 		if ( $db_interval_count === $expected_interval_count ) {
 			return;
 		}
@@ -263,8 +264,8 @@ class WC_Admin_Reports_Data_Store {
 			$query_args['adj_after']               = $new_start_date->format( WC_Admin_Reports_Interval::$iso_datetime_format );
 			$query_args['adj_before']              = $new_end_date->format( WC_Admin_Reports_Interval::$iso_datetime_format );
 			$intervals_query['where_time_clause']  = '';
-			$intervals_query['where_time_clause'] .= " AND date_created <= '{$query_args['adj_before']}'";
-			$intervals_query['where_time_clause'] .= " AND date_created >= '{$query_args['adj_after']}'";
+			$intervals_query['where_time_clause'] .= " AND $table_name.date_created <= '{$query_args['adj_before']}'";
+			$intervals_query['where_time_clause'] .= " AND $table_name.date_created >= '{$query_args['adj_after']}'";
 			$intervals_query['limit']              = 'LIMIT 0,' . $intervals_query['per_page'];
 		} else {
 			if ( 'asc' === $query_args['order'] ) {
@@ -520,7 +521,7 @@ class WC_Admin_Reports_Data_Store {
 
 		if ( isset( $query_args['interval'] ) && '' !== $query_args['interval'] ) {
 			$interval                         = $query_args['interval'];
-			$intervals_query['select_clause'] = WC_Admin_Reports_Interval::db_datetime_format( $interval );
+			$intervals_query['select_clause'] = WC_Admin_Reports_Interval::db_datetime_format( $interval, $table_name );
 		}
 
 		$intervals_query = array_merge( $intervals_query, $this->get_limit_sql_params( $query_args ) );
