@@ -86,7 +86,7 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * @return void
 	 */
 	public function set_product_category_to_export( $product_category_to_export ) {
-		$this->product_category_to_export = array_map( 'wc_clean', $product_category_to_export );
+		$this->product_category_to_export = array_map( 'sanitize_title_with_dashes', $product_category_to_export );
 	}
 
 	/**
