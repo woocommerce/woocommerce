@@ -118,6 +118,7 @@ class DateRange extends Component {
 							),
 							shortDateFormat
 						) }
+						onFocus={ () => this.onFocusChange( 'startDate' ) }
 					/>
 					<div className="woocommerce-calendar__inputs-to">{ __( 'to', 'wc-admin' ) }</div>
 					<DateInput
@@ -133,6 +134,7 @@ class DateRange extends Component {
 							),
 							shortDateFormat
 						) }
+						onFocus={ () => this.onFocusChange( 'endDate' ) }
 					/>
 				</div>
 				<div className="woocommerce-calendar__react-dates">
