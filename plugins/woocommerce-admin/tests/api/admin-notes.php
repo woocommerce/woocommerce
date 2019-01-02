@@ -83,6 +83,20 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test getting a 404 from invalid ID.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_invalid_note() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/999' ) );
+		$note     = $response->get_data();
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
 	 * Test getting a single note without permission. It should fail.
 	 *
 	 * @since 3.5.0

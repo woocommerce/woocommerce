@@ -20,6 +20,13 @@ An array of data.
 
 Format to parse dates into d3 time format
 
+### `itemsLabel`
+
+- Type: String
+- Default: null
+
+Label describing the legend items.
+
 ### `path`
 
 - Type: String

@@ -252,9 +252,9 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_REST_Reports_Contro
 		$params['orderby']       = array(
 			'description'       => __( 'Sort collection by object attribute.', 'wc-admin' ),
 			'type'              => 'string',
-			'default'           => 'date',
+			'default'           => 'category_id',
 			'enum'              => array(
-				'date',
+				'category_id',
 				'items_sold',
 				'net_revenue',
 				'orders_count',

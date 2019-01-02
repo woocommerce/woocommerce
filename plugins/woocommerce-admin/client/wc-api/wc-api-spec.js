@@ -3,6 +3,7 @@
 /**
  * Internal dependencies
  */
+import categories from './categories';
 import customers from './customers';
 import notes from './notes';
 import orders from './orders';
@@ -17,6 +18,7 @@ function createWcApiSpec() {
 			...user.mutations,
 		},
 		selectors: {
+			...categories.selectors,
 			...customers.selectors,
 			...notes.selectors,
 			...orders.selectors,
@@ -28,6 +30,7 @@ function createWcApiSpec() {
 		operations: {
 			read( resourceNames ) {
 				return [
+					...categories.operations.read( resourceNames ),
 					...customers.operations.read( resourceNames ),
 					...notes.operations.read( resourceNames ),
 					...orders.operations.read( resourceNames ),

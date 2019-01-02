@@ -119,15 +119,15 @@ export function isReportDataEmpty( report ) {
  * @returns {Object} data request query parameters.
  */
 function getRequestQuery( endpoint, dataType, query ) {
-	const datesFromQuery = getCurrentDates( query );
+	const datesFromQuery = getCurrentDates( query, 'YYYY-MM-DDTHH:00:00' );
 	const interval = getIntervalForQuery( query );
 	const filterQuery = getFilterQuery( endpoint, query );
 	return {
 		order: 'asc',
 		interval,
 		per_page: MAX_PER_PAGE,
-		after: appendTimestamp( datesFromQuery[ dataType ].after, 'start' ),
-		before: appendTimestamp( datesFromQuery[ dataType ].before, 'end' ),
+		after: datesFromQuery[ dataType ].after,
+		before: datesFromQuery[ dataType ].before,
 		...filterQuery,
 	};
 }

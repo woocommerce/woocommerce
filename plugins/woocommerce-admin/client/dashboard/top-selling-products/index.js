@@ -5,13 +5,10 @@
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { get, map } from 'lodash';
-import { compose } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
  */
-import { Card, EmptyTable, TableCard } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import { getAdminLink } from '@woocommerce/navigation';
 
@@ -19,11 +16,16 @@ import { getAdminLink } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { numberFormat } from 'lib/number';
-import ReportError from 'analytics/components/report-error';
-import { NAMESPACE } from 'store/constants';
-import './style.scss';
+import Leaderboard from 'dashboard/leaderboard';
 
 export class TopSellingProducts extends Component {
+	constructor( props ) {
+		super( props );
+
+		this.getRowsContent = this.getRowsContent.bind( this );
+		this.getHeadersContent = this.getHeadersContent.bind( this );
+	}
+
 	getHeadersContent() {
 		return [
 			{
@@ -59,8 +61,8 @@ export class TopSellingProducts extends Component {
 
 	getRowsContent( data ) {
 		return map( data, row => {
-			const { product_id, items_sold, net_revenue, orders_count, name } = row;
-
+			const { product_id, items_sold, net_revenue, orders_count, extended_info } = row;
+			const name = get( extended_info, [ 'name' ] );
 			const productLink = (
 				<a href={ getAdminLink( `/post.php?post=${ product_id }&action=edit` ) }>{ name }</a>
 			);
@@ -86,53 +88,24 @@ export class TopSellingProducts extends Component {
 	}
 
 	render() {
-		const { data, isRequesting, isError } = this.props;
-
-		const rows = isRequesting || isError ? [] : this.getRowsContent( data );
-		const title = __( 'Top Selling Products', 'wc-admin' );
-
-		if ( isError ) {
-			return <ReportError className="woocommerce-top-selling-products" isError />;
-		}
-
-		if ( ! isRequesting && rows.length === 0 ) {
-			return (
-				<Card title={ title } className="woocommerce-top-selling-products">
-					<EmptyTable>
-						{ __( 'When new orders arrive, popular products will be listed here.', 'wc-admin' ) }
-					</EmptyTable>
-				</Card>
-			);
-		}
-
-		const headers = this.getHeadersContent();
+		const tableQuery = {
+			orderby: 'items_sold',
+			order: 'desc',
+			per_page: 5, //TODO replace with user configured leaderboard per page value.
+			extended_info: true,
+		};
 
 		return (
-			<TableCard
-				className="woocommerce-top-selling-products"
-				headers={ headers }
-				isLoading={ isRequesting }
-				rows={ rows }
-				rowsPerPage={ 5 }
-				title={ title }
-				totalRows={ 5 }
+			<Leaderboard
+				endpoint="products"
+				getHeadersContent={ this.getHeadersContent }
+				getRowsContent={ this.getRowsContent }
+				query={ this.props.query }
+				tableQuery={ tableQuery }
+				title={ __( 'Top Selling Products', 'wc-admin' ) }
 			/>
 		);
 	}
 }
 
-export default compose(
-	withSelect( select => {
-		const { getReportStats, isReportStatsRequesting, isReportStatsError } = select( 'wc-admin' );
-		const endpoint = NAMESPACE + 'reports/products';
-		// @TODO We will need to add the date parameters from the Date Picker
-		// { after: '2018-04-22', before: '2018-05-06' }
-		const query = { orderby: 'items_sold', per_page: 5, extended_info: 1 };
-
-		const stats = getReportStats( endpoint, query );
-		const isRequesting = isReportStatsRequesting( endpoint, query );
-		const isError = isReportStatsError( endpoint, query );
-
-		return { data: get( stats, 'data', [] ), isRequesting, isError };
-	} )
-)( TopSellingProducts );
+export default TopSellingProducts;

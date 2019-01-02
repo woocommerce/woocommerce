@@ -12,6 +12,10 @@ import PropTypes from 'prop-types';
 import { EmptyContent } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/navigation';
 
+/**
+ * Component to render when there is an error in a report component due to data
+ * not being loaded or being invalid.
+ */
 class ReportError extends Component {
 	render() {
 		const { className, isError, isEmpty } = this.props;
@@ -42,8 +46,17 @@ class ReportError extends Component {
 }
 
 ReportError.propTypes = {
+	/**
+	 * Additional class name to style the component.
+	 */
 	className: PropTypes.string,
+	/**
+	 * Boolean representing whether there was an error.
+	 */
 	isError: PropTypes.bool,
+	/**
+	 * Boolean representing whether the issue is that there is no data.
+	 */
 	isEmpty: PropTypes.bool,
 };
 

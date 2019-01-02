@@ -60,6 +60,22 @@
 			outline: 2px solid #bfe7f3;
 		}
 	}
+
+	// Make exceptions for wp Core DatePicker.
+	&.is-core-datepicker {
+		.components-datetime__date {
+			padding-left: 0;
+		}
+
+		.CalendarDay__default {
+			background-color: transparent;
+		}
+
+		.CalendarDay__selected {
+			background: $woocommerce-700;
+			border: none;
+		}
+	}
 }
 
 .woocommerce-calendar__inputs {
@@ -143,32 +159,50 @@
 }
 
 .woocommerce-filters-date__content {
-	.woocommerce-calendar__input-error {
-		display: none;
-
-		.components-popover__content {
-			background-color: $core-grey-dark-400;
-			color: $white;
-			padding: 0.5em;
-			border: none;
-		}
-
-		&.components-popover {
-			.components-popover__content {
-				min-width: 100px;
-				width: 100px;
-				text-align: center;
-			}
-
-			&:not(.no-arrow):not(.is-mobile).is-bottom::before {
-				border-bottom-color: $core-grey-dark-400;
-				z-index: 1;
-				top: -6px;
-			}
-		}
-	}
-
 	&.is-mobile .woocommerce-calendar__input-error .components-popover__content {
 		height: initial;
 	}
+}
+
+.woocommerce-calendar__input-error {
+	display: none;
+
+	.components-popover__content {
+		background-color: $core-grey-dark-400;
+		color: $white;
+		padding: 0.5em;
+		border: none;
+	}
+
+	&.components-popover {
+		.components-popover__content {
+			min-width: 100px;
+			width: 100px;
+			text-align: center;
+		}
+
+		&:not(.no-arrow):not(.is-mobile).is-bottom::before {
+			border-bottom-color: $core-grey-dark-400;
+			z-index: 1;
+			top: -6px;
+		}
+
+		&:not(.no-arrow):not(.is-mobile).is-top::after {
+			border-top-color: $core-grey-dark-400;
+			z-index: 1;
+			top: 0;
+		}
+	}
+}
+
+.woocommerce-calendar__date-picker-title {
+	@include font-size( 12 );
+	font-weight: 100;
+	text-transform: uppercase;
+	text-align: center;
+	color: $core-grey-dark-300;
+	width: 100%;
+	margin: 0;
+	padding: 1em;
+	background-color: $white;
 }

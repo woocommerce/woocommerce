@@ -24,7 +24,7 @@ const shortDateFormat = __( 'MM/DD/YYYY', 'wc-admin' );
 /**
  * Select a range of dates or single dates.
  */
-class DatePicker extends Component {
+class DateRangeFilterPicker extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = this.getResetState();
@@ -156,7 +156,7 @@ class DatePicker extends Component {
 	}
 }
 
-DatePicker.propTypes = {
+DateRangeFilterPicker.propTypes = {
 	/**
 	 * The `path` parameter supplied by React-Router.
 	 */
@@ -167,8 +167,8 @@ DatePicker.propTypes = {
 	query: PropTypes.object,
 };
 
-DatePicker.defaultProps = {
+DateRangeFilterPicker.defaultProps = {
 	query: {},
 };
 
-export default DatePicker;
+export default DateRangeFilterPicker;

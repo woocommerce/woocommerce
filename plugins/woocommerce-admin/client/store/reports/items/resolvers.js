@@ -14,27 +14,11 @@ import { stringifyQuery } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { NAMESPACE, SWAGGERNAMESPACE } from 'store/constants';
+import { NAMESPACE } from 'store/constants';
 
 export default {
 	async getReportItems( ...args ) {
 		const [ endpoint, query ] = args.slice( -2 );
-
-		const swaggerEndpoints = [ 'coupons' ];
-		if ( swaggerEndpoints.indexOf( endpoint ) >= 0 ) {
-			try {
-				const response = await fetch(
-					SWAGGERNAMESPACE + 'reports/' + endpoint + stringifyQuery( query )
-				);
-				const itemsData = await response.json();
-
-				dispatch( 'wc-admin' ).setReportItems( endpoint, query, itemsData );
-			} catch ( error ) {
-				dispatch( 'wc-admin' ).setReportItemsError( endpoint, query );
-			}
-
-			return;
-		}
 
 		try {
 			const response = await apiFetch( {

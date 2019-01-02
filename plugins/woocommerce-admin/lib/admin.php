@@ -214,6 +214,16 @@ function wc_admin_enqueue_script() {
 
 	wp_enqueue_script( WC_ADMIN_APP );
 	wp_enqueue_style( WC_ADMIN_APP );
+
+	// Use server-side detection to prevent unneccessary stylesheet loading in other browsers.
+	$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : ''; // WPCS: sanitization ok.
+	preg_match( '/MSIE (.*?);/', $user_agent, $matches );
+	if ( count( $matches ) < 2 ) {
+		preg_match( '/Trident\/\d{1,2}.\d{1,2}; rv:([0-9]*)/', $user_agent, $matches );
+	}
+	if ( count( $matches ) > 1 ) {
+		wp_enqueue_style( 'wc-components-ie' );
+	}
 }
 add_action( 'admin_enqueue_scripts', 'wc_admin_enqueue_script' );
 

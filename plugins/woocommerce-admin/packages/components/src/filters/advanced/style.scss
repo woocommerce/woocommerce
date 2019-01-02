@@ -94,7 +94,6 @@
 
 	display: flex;
 	align-items: center;
-	white-space: nowrap;
 
 	@include breakpoint( '<782px' ) {
 		display: block;

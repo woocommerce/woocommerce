@@ -42,6 +42,15 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 	);
 
 	/**
+	 * Set up all the hooks for maintaining and populating table data.
+	 */
+	public static function init() {
+		add_action( 'save_post', array( __CLASS__, 'sync_order_coupons' ) );
+		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order_coupons' ) );
+		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order_coupons' ) );
+	}
+
+	/**
 	 * Returns comma separated ids of included coupons, based on query arguments from the user.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
@@ -247,6 +256,50 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 	 */
 	protected function get_cache_key( $params ) {
 		return 'woocommerce_' . self::TABLE_NAME . '_' . md5( wp_json_encode( $params ) );
+	}
+
+	/**
+	 * Create or update an an entry in the wc_order_coupon_lookup table for an order.
+	 *
+	 * @since 3.5.0
+	 * @param int $order_id Order ID.
+	 * @return void
+	 */
+	public static function sync_order_coupons( $order_id ) {
+		global $wpdb;
+
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			return;
+		}
+
+		if ( ! in_array( $order->get_status(), parent::get_report_order_statuses(), true ) ) {
+			$wpdb->delete(
+				$wpdb->prefix . self::TABLE_NAME,
+				array( 'order_id' => $order->get_id() ),
+				array( '%d' )
+			);
+			return;
+		}
+
+		$coupon_items = $order->get_items( 'coupon' );
+		foreach ( $coupon_items as $coupon_item ) {
+			$wpdb->replace(
+				$wpdb->prefix . self::TABLE_NAME,
+				array(
+					'order_id'        => $order_id,
+					'coupon_id'       => wc_get_coupon_id_by_code( $coupon_item->get_code() ),
+					'discount_amount' => $coupon_item->get_discount(),
+					'date_created'    => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+				),
+				array(
+					'%d',
+					'%d',
+					'%f',
+					'%s',
+				)
+			);
+		}
 	}
 
 }

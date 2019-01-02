@@ -53,6 +53,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-taxes-stats-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-coupons-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-coupons-stats-query.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-downloads-query.php';
 
 		// Data stores.
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-data-store.php';
@@ -65,9 +66,9 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-taxes-stats-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-coupons-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-coupons-stats-data-store.php';
+		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-downloads-data-store.php';
 
 		// Data triggers.
-		require_once dirname( __FILE__ ) . '/wc-admin-order-functions.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-notes-data-store.php';
 
 		// CRUD classes.
@@ -81,6 +82,9 @@ class WC_Admin_Api_Init {
 	public function rest_api_init() {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-admin-notes-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-customers-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-data-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-data-download-ips-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-orders-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-products-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-reviews-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-controller.php';
@@ -100,10 +104,14 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-stock-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-controller.php';
 
 		$controllers = array(
 			'WC_Admin_REST_Admin_Notes_Controller',
 			'WC_Admin_REST_Customers_Controller',
+			'WC_Admin_REST_Data_Controller',
+			'WC_Admin_REST_Data_Download_Ips_Controller',
+			'WC_Admin_REST_Orders_Controller',
 			'WC_Admin_REST_Products_Controller',
 			'WC_Admin_REST_Product_Reviews_Controller',
 			'WC_Admin_REST_Reports_Controller',
@@ -119,6 +127,7 @@ class WC_Admin_Api_Init {
 			'WC_Admin_REST_Reports_Coupons_Controller',
 			'WC_Admin_REST_Reports_Coupons_Stats_Controller',
 			'WC_Admin_REST_Reports_Stock_Controller',
+			'WC_Admin_REST_Reports_Downloads_Controller',
 		);
 
 		foreach ( $controllers as $controller ) {
@@ -162,17 +171,6 @@ class WC_Admin_Api_Init {
 			$endpoints['/wc/v3/reports'][0] = $endpoints['/wc/v3/reports'][1];
 		}
 
-		// Override /wc/v3/products.
-		if ( isset( $endpoints['/wc/v3/products'] )
-			&& isset( $endpoints['/wc/v3/products'][3] )
-			&& isset( $endpoints['/wc/v3/products'][2] )
-			&& $endpoints['/wc/v3/products'][2]['callback'][0] instanceof WC_Admin_REST_Products_Controller
-			&& $endpoints['/wc/v3/products'][3]['callback'][0] instanceof WC_Admin_REST_Products_Controller
-		) {
-			$endpoints['/wc/v3/products'][0] = $endpoints['/wc/v3/products'][2];
-			$endpoints['/wc/v3/products'][1] = $endpoints['/wc/v3/products'][3];
-		}
-
 		// Override /wc/v3/customers.
 		if ( isset( $endpoints['/wc/v3/customers'] )
 			&& isset( $endpoints['/wc/v3/customers'][3] )
@@ -182,6 +180,50 @@ class WC_Admin_Api_Init {
 		) {
 			$endpoints['/wc/v3/customers'][0] = $endpoints['/wc/v3/customers'][2];
 			$endpoints['/wc/v3/customers'][1] = $endpoints['/wc/v3/customers'][3];
+		}
+
+		// Override /wc/v3/orders/$id.
+		if ( isset( $endpoints['/wc/v3/orders/(?P<id>[\d]+)'] )
+			&& isset( $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][5] )
+			&& isset( $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][4] )
+			&& isset( $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][3] )
+			&& $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][4]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][5]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+		) {
+			$endpoints['/wc/v3/orders/(?P<id>[\d]+)'][0] = $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][3];
+			$endpoints['/wc/v3/orders/(?P<id>[\d]+)'][1] = $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][4];
+			$endpoints['/wc/v3/orders/(?P<id>[\d]+)'][2] = $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][5];
+		}
+
+		// Override /wc/v3orders.
+		if ( isset( $endpoints['/wc/v3/orders'] )
+			&& isset( $endpoints['/wc/v3/orders'][3] )
+			&& isset( $endpoints['/wc/v3/orders'][2] )
+			&& $endpoints['/wc/v3/orders'][2]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v3/orders'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+		) {
+			$endpoints['/wc/v3/orders'][0] = $endpoints['/wc/v3/orders'][2];
+			$endpoints['/wc/v3/orders'][1] = $endpoints['/wc/v3/orders'][3];
+		}
+
+		// Override /wc/v3/data.
+		if ( isset( $endpoints['/wc/v3/data'] )
+			&& isset( $endpoints['/wc/v3/data'][1] )
+			&& $endpoints['/wc/v3/data'][1]['callback'][0] instanceof WC_Admin_REST_Data_Controller
+		) {
+			$endpoints['/wc/v3/data'][0] = $endpoints['/wc/v3/data'][1];
+		}
+
+		// Override /wc/v3/products.
+		if ( isset( $endpoints['/wc/v3/products'] )
+			&& isset( $endpoints['/wc/v3/products'][3] )
+			&& isset( $endpoints['/wc/v3/products'][2] )
+			&& $endpoints['/wc/v3/products'][2]['callback'][0] instanceof WC_Admin_REST_Products_Controller
+			&& $endpoints['/wc/v3/products'][3]['callback'][0] instanceof WC_Admin_REST_Products_Controller
+		) {
+			$endpoints['/wc/v3/products'][0] = $endpoints['/wc/v3/products'][2];
+			$endpoints['/wc/v3/products'][1] = $endpoints['/wc/v3/products'][3];
 		}
 
 		// Override /wc/v3/products/$id.
@@ -215,7 +257,7 @@ class WC_Admin_Api_Init {
 	/**
 	 * Regenerate data for reports.
 	 */
-	public static function regenrate_report_data() {
+	public static function regenerate_report_data() {
 		WC_Admin_Reports_Orders_Data_Store::queue_order_stats_repopulate_database();
 		self::order_product_lookup_store_init();
 	}
@@ -234,7 +276,7 @@ class WC_Admin_Api_Init {
 					'name'     => __( 'Rebuild reports data', 'wc-admin' ),
 					'button'   => __( 'Rebuild reports', 'wc-admin' ),
 					'desc'     => __( 'This tool will rebuild all of the information used by the reports.', 'wc-admin' ),
-					'callback' => array( 'WC_Admin_Api_Init', 'regenrate_report_data' ),
+					'callback' => array( 'WC_Admin_Api_Init', 'regenerate_report_data' ),
 				),
 			)
 		);
@@ -245,6 +287,9 @@ class WC_Admin_Api_Init {
 	 */
 	public static function orders_data_store_init() {
 		WC_Admin_Reports_Orders_Data_Store::init();
+		WC_Admin_Reports_Products_Data_Store::init();
+		WC_Admin_Reports_Taxes_Data_Store::init();
+		WC_Admin_Reports_Coupons_Data_Store::init();
 	}
 
 	/**
@@ -270,35 +315,7 @@ class WC_Admin_Api_Init {
 
 		// Process orders until close to running out of memory timeouts on large sites then requeue.
 		foreach ( $orders as $order_id ) {
-			$order = wc_get_order( $order_id );
-			if ( ! $order ) {
-				continue;
-			}
-			foreach ( $order->get_items() as $order_item ) {
-				$wpdb->replace(
-					$wpdb->prefix . 'wc_order_product_lookup',
-					array(
-						'order_item_id'       => $order_item->get_id(),
-						'order_id'            => $order->get_id(),
-						'product_id'          => $order_item->get_product_id( 'edit' ),
-						'variation_id'        => $order_item->get_variation_id( 'edit' ),
-						'customer_id'         => ( 0 < $order->get_customer_id( 'edit' ) ) ? $order->get_customer_id( 'edit' ) : null,
-						'product_qty'         => $order_item->get_quantity( 'edit' ),
-						'product_net_revenue' => $order_item->get_subtotal( 'edit' ),
-						'date_created'        => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
-					),
-					array(
-						'%d',
-						'%d',
-						'%d',
-						'%d',
-						'%d',
-						'%d',
-						'%f',
-						'%s',
-					)
-				);
-			}
+			WC_Admin_Reports_Products_Data_Store::sync_order_products( $order_id );
 			// Pop the order ID from the array for updating the transient later should we near memory exhaustion.
 			unset( $orders[ $order_id ] );
 			if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
@@ -331,6 +348,7 @@ class WC_Admin_Api_Init {
 				'report-taxes-stats'    => 'WC_Admin_Reports_Taxes_Stats_Data_Store',
 				'report-coupons'        => 'WC_Admin_Reports_Coupons_Data_Store',
 				'report-coupons-stats'  => 'WC_Admin_Reports_Coupons_Stats_Data_Store',
+				'report-downloads'      => 'WC_Admin_Reports_Downloads_Data_Store',
 				'admin-note'            => 'WC_Admin_Notes_Data_Store',
 			)
 		);
@@ -475,6 +493,17 @@ class WC_Admin_Api_Init {
 
 		// Initialize report tables.
 		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'order_product_lookup_store_init' ), 20 );
+	}
+
+	/**
+	 * Enables the WP REST API for product categories
+	 *
+	 * @param array $args Default arguments for product_cat taxonomy.
+	 * @return array
+	 */
+	public static function show_product_categories_in_rest( $args ) {
+		$args['show_in_rest'] = true;
+		return $args;
 	}
 
 }

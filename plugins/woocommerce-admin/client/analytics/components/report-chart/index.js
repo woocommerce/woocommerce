@@ -31,6 +31,9 @@ import withSelect from 'wc-api/with-select';
 
 export const DEFAULT_FILTER = 'all';
 
+/**
+ * Component that renders the chart in reports.
+ */
 export class ReportChart extends Component {
 	getSelectedFilter( filters, query ) {
 		if ( filters.length === 0 ) {
@@ -65,7 +68,7 @@ export class ReportChart extends Component {
 	}
 
 	render() {
-		const { query, itemsLabel, path, primaryData, secondaryData, selectedChart } = this.props;
+		const { query, itemsLabel, mode, path, primaryData, secondaryData, selectedChart } = this.props;
 
 		if ( primaryData.isError || secondaryData.isError ) {
 			return <ReportError isError />;
@@ -80,7 +83,7 @@ export class ReportChart extends Component {
 
 		const chartData = primaryData.data.intervals.map( function( interval, index ) {
 			const secondaryDate = getPreviousDate(
-				formatDate( 'Y-m-d', interval.date_start ),
+				interval.date_start,
 				primary.after,
 				secondary.after,
 				query.compare,
@@ -111,7 +114,7 @@ export class ReportChart extends Component {
 				type={ getChartTypeForQuery( query ) }
 				allowedIntervals={ allowedIntervals }
 				itemsLabel={ itemsLabel }
-				mode={ this.getChartMode() }
+				mode={ mode || this.getChartMode() }
 				tooltipLabelFormat={ formats.tooltipLabelFormat }
 				tooltipValueFormat={ getTooltipValueFormat( selectedChart.type ) }
 				tooltipTitle={ selectedChart.label }
@@ -126,12 +129,38 @@ export class ReportChart extends Component {
 }
 
 ReportChart.propTypes = {
+	/**
+	 * Filters available for that report.
+	 */
 	filters: PropTypes.array,
+	/**
+	 * Label describing the legend items.
+	 */
 	itemsLabel: PropTypes.string,
+	/**
+	 * `items-comparison` (default) or `time-comparison`, this is used to generate correct
+	 * ARIA properties.
+	 */
+	mode: PropTypes.string,
+	/**
+	 * Current path
+	 */
 	path: PropTypes.string.isRequired,
+	/**
+	 * Primary data to display in the chart.
+	 */
 	primaryData: PropTypes.object.isRequired,
+	/**
+	 * The query string represented in object form.
+	 */
 	query: PropTypes.object.isRequired,
+	/**
+	 * Secondary data to display in the chart.
+	 */
 	secondaryData: PropTypes.object.isRequired,
+	/**
+	 * Properties of the selected chart.
+	 */
 	selectedChart: PropTypes.object.isRequired,
 };
 

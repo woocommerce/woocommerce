@@ -66,7 +66,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		'shipping'                => 'SUM(shipping_total) AS shipping',
 		'net_revenue'             => '( SUM(net_total) - SUM(refund_total) ) AS net_revenue',
 		'avg_items_per_order'     => 'AVG(num_items_sold) AS avg_items_per_order',
-		'avg_order_value'         => 'AVG(gross_total) AS avg_order_value',
+		'avg_order_value'         => '( SUM(net_total) - SUM(refund_total) ) / COUNT(*) AS avg_order_value',
 		'num_returning_customers' => 'SUM(returning_customer = 1) AS num_returning_customers',
 		'num_new_customers'       => 'SUM(returning_customer = 0) AS num_new_customers',
 	);
@@ -95,6 +95,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		// TODO: this is required as order update skips save_post.
 		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order' ) );
 		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order' ) );
+		add_action( 'woocommerce_refund_deleted', array( __CLASS__, 'sync_on_refund_delete' ), 10, 2 );
 
 		if ( ! self::$background_process ) {
 			self::$background_process = new WC_Admin_Order_Stats_Background_Process();
@@ -709,6 +710,16 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		}
 
 		self::update( $order );
+	}
+
+	/**
+	 * Syncs order information when a refund is deleted.
+	 *
+	 * @param int $refund_id Refund ID.
+	 * @param int $order_id Order ID.
+	 */
+	public static function sync_on_refund_delete( $refund_id, $order_id ) {
+		self::sync_order( $order_id );
 	}
 
 	/**

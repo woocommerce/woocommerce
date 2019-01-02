@@ -11,7 +11,7 @@
 	height: 80px;
 	position: fixed;
 	width: 100%;
-	top: 32px;
+	top: $adminbar-height;
 	z-index: 99991; /* higher than component-popover (99990), lower than notification dropdown at 99999 */
 
 	&.is-scrolled {
@@ -19,7 +19,7 @@
 	}
 
 	@include breakpoint( '<782px' ) {
-		top: 46px;
+		top: $adminbar-height-mobile;
 		height: 50px;
 		flex-flow: row wrap;
 	}

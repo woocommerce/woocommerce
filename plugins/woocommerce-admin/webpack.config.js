@@ -74,6 +74,25 @@ const webpackConfig = {
 				loader: 'babel-loader',
 				exclude: /node_modules/,
 			},
+			{
+				test: /\.js?$/,
+				use: {
+					loader: 'babel-loader',
+					options: {
+						presets: [
+							[ '@babel/preset-env', { loose: true, modules: 'commonjs' } ],
+						],
+						plugins: [ 'transform-es2015-template-literals' ],
+					},
+				},
+				include: new RegExp( '/node_modules\/(' +
+					'|d3-array' +
+					'|debug' +
+					'|regexpu-core' +
+					'|unicode-match-property-ecmascript' +
+					'|unicode-match-property-value-ecmascript)/'
+				),
+			},
 			{ test: /\.md$/, use: 'raw-loader' },
 			{
 				test: /\.s?css$/,

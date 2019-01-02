@@ -103,6 +103,13 @@ function wc_admin_register_script() {
 	);
 
 	wp_register_style(
+		'wc-components-ie',
+		wc_admin_url( 'dist/components/ie.css' ),
+		array( 'wp-edit-blocks' ),
+		filemtime( wc_admin_dir_path( 'dist/components/ie.css' ) )
+	);
+
+	wp_register_style(
 		WC_ADMIN_APP,
 		wc_admin_url( "dist/{$entry}/style.css" ),
 		array( 'wc-components' ),

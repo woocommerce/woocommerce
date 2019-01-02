@@ -201,6 +201,15 @@ class AdvancedFilters extends Component {
 										query={ query }
 									/>
 								) }
+								{ 'Currency' === input.component && (
+									<NumberFilter
+										filter={ filter }
+										config={ { ...config.filters[ key ], ...{ input: { type: 'currency', component: 'Currency' } } } }
+										onFilterChange={ this.onFilterChange }
+										isEnglish={ isEnglish }
+										query={ query }
+									/>
+								) }
 								<IconButton
 									className="woocommerce-filters-advanced__remove"
 									label={ labels.remove }

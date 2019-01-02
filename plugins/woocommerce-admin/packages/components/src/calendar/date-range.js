@@ -7,11 +7,7 @@ import 'core-js/fn/array/from';
 import { __, sprintf } from '@wordpress/i18n';
 import classnames from 'classnames';
 import { Component } from '@wordpress/element';
-import {
-	DayPickerRangeController,
-	isInclusivelyAfterDay,
-	isInclusivelyBeforeDay,
-} from 'react-dates';
+import { DayPickerRangeController } from 'react-dates';
 import moment from 'moment';
 import { partial } from 'lodash';
 import PropTypes from 'prop-types';
@@ -27,6 +23,7 @@ import { validateDateInputForRange } from '@woocommerce/date';
  */
 import DateInput from './input';
 import phrases from './phrases';
+import { getOutsideRange } from './utils';
 
 /**
  * This is wrapper for a [react-dates](https://github.com/airbnb/react-dates) powered calendar.
@@ -38,7 +35,6 @@ class DateRange extends Component {
 		this.onDatesChange = this.onDatesChange.bind( this );
 		this.onFocusChange = this.onFocusChange.bind( this );
 		this.onInputChange = this.onInputChange.bind( this );
-		this.getOutsideRange = this.getOutsideRange.bind( this );
 	}
 
 	onDatesChange( { startDate, endDate } ) {
@@ -76,22 +72,6 @@ class DateRange extends Component {
 		} );
 	}
 
-	getOutsideRange() {
-		const { invalidDays } = this.props;
-		if ( 'string' === typeof invalidDays ) {
-			switch ( invalidDays ) {
-				case 'past':
-					return day => isInclusivelyBeforeDay( day, moment() );
-				case 'future':
-					return day => isInclusivelyAfterDay( day, moment() );
-				case 'none':
-				default:
-					return undefined;
-			}
-		}
-		return 'function' === typeof invalidDays ? invalidDays : undefined;
-	}
-
 	setTnitialVisibleMonth( isDoubleCalendar, before ) {
 		return () => {
 			const visibleDate = before || moment();
@@ -114,8 +94,9 @@ class DateRange extends Component {
 			shortDateFormat,
 			isViewportMobile,
 			isViewportSmall,
+			invalidDays,
 		} = this.props;
-		const isOutsideRange = this.getOutsideRange();
+		const isOutsideRange = getOutsideRange( invalidDays );
 		const isDoubleCalendar = isViewportMobile && ! isViewportSmall;
 		return (
 			<div

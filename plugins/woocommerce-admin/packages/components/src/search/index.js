@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Component, createRef } from '@wordpress/element';
+import { Component, createRef, Fragment } from '@wordpress/element';
 import { withInstanceId } from '@wordpress/compose';
 import { findIndex, noop } from 'lodash';
 import Gridicon from 'gridicons';
@@ -14,7 +14,19 @@ import classnames from 'classnames';
  * Internal dependencies
  */
 import Autocomplete from './autocomplete';
-import { countries, coupons, customers, emails, product, productCategory, taxes, usernames, variations } from './autocompleters';
+import {
+	countries,
+	coupons,
+	customers,
+	downloadIps,
+	emails,
+	orders,
+	product,
+	productCategory,
+	taxes,
+	usernames,
+	variations,
+} from './autocompleters';
 import Tag from '../tag';
 
 /**
@@ -66,18 +78,22 @@ class Search extends Component {
 
 	getAutocompleter() {
 		switch ( this.props.type ) {
+			case 'categories':
+				return productCategory;
 			case 'countries':
 				return countries;
 			case 'coupons':
 				return coupons;
 			case 'customers':
 				return customers;
+			case 'downloadIps':
+				return downloadIps;
 			case 'emails':
 				return emails;
+			case 'orders':
+				return orders;
 			case 'products':
 				return product;
-			case 'product_cats':
-				return productCategory;
 			case 'taxes':
 				return taxes;
 			case 'usernames':
@@ -98,7 +114,7 @@ class Search extends Component {
 		const { selected } = this.props;
 
 		return this.shouldRenderTags() ? (
-			<div className="woocommerce-search__token-list">
+			<Fragment>
 				{ selected.map( ( item, i ) => {
 					if ( ! item.label ) {
 						return null;
@@ -119,7 +135,7 @@ class Search extends Component {
 						/>
 					);
 				} ) }
-			</div>
+			</Fragment>
 		) : null;
 	}
 
@@ -142,7 +158,9 @@ class Search extends Component {
 		const shouldRenderTags = this.shouldRenderTags();
 
 		return (
-			<div className={ classnames( 'woocommerce-search', className ) }>
+			<div className={ classnames( 'woocommerce-search', className, {
+				'has-inline-tags': inlineTags,
+			} ) }>
 				<Gridicon className="woocommerce-search__icon" icon="search" size={ 18 } />
 				<Autocomplete
 					completer={ autocompleter }
@@ -166,30 +184,32 @@ class Search extends Component {
 									this.input.current.focus();
 								} }
 							>
-								{ this.renderTags() }
-								<input
-									ref={ this.input }
-									type="text"
-									size={
-										( ( value.length === 0 && placeholder && placeholder.length ) ||
-											value.length ) + 1
-									}
-									value={ value }
-									placeholder={ ( ! shouldRenderTags && placeholder ) || '' }
-									className="woocommerce-search__inline-input"
-									onChange={ this.updateSearch( onChange ) }
-									aria-owns={ listBoxId }
-									aria-activedescendant={ activeId }
-									onFocus={ this.onFocus }
-									onBlur={ this.onBlur }
-									aria-describedby={
-										shouldRenderTags ? `search-inline-input-${ instanceId }` : null
-									}
-									{ ...aria }
-								/>
-								<span id={ `search-inline-input-${ instanceId }` } className="screen-reader-text">
-									{ __( 'Move backward for selected items' ) }
-								</span>
+								<div className="woocommerce-search__token-list">
+									{ this.renderTags() }
+									<input
+										ref={ this.input }
+										type="text"
+										size={
+											( ( value.length === 0 && placeholder && placeholder.length ) ||
+												value.length ) + 1
+										}
+										value={ value }
+										placeholder={ ( ! shouldRenderTags && placeholder ) || '' }
+										className="woocommerce-search__inline-input"
+										onChange={ this.updateSearch( onChange ) }
+										aria-owns={ listBoxId }
+										aria-activedescendant={ activeId }
+										onFocus={ this.onFocus }
+										onBlur={ this.onBlur }
+										aria-describedby={
+											shouldRenderTags ? `search-inline-input-${ instanceId }` : null
+										}
+										{ ...aria }
+									/>
+									<span id={ `search-inline-input-${ instanceId }` } className="screen-reader-text">
+										{ __( 'Move backward for selected items' ) }
+									</span>
+								</div>
 							</div>
 						) : (
 							<input
@@ -225,13 +245,14 @@ Search.propTypes = {
 	 * The object type to be used in searching.
 	 */
 	type: PropTypes.oneOf( [
+		'categories',
 		'countries',
 		'coupons',
 		'customers',
+		'downloadIps',
 		'emails',
 		'orders',
 		'products',
-		'product_cats',
 		'taxes',
 		'usernames',
 		'variations',

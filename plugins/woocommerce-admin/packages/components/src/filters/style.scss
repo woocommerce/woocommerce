@@ -59,6 +59,10 @@
 		background-color: $white;
 	}
 
+	.woocommerce-calendar__input-error .components-popover__content {
+		background-color: $core-grey-dark-400;
+	}
+
 	&.is-mobile {
 		.components-popover__content {
 			width: 100%;

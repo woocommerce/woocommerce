@@ -10,9 +10,24 @@
 		fill: $core-grey-light-900;
 	}
 
+	.woocommerce-tag {
+		margin: 8px 6px 0 0;
+	}
+
+	&.has-inline-tags {
+		.woocommerce-search__icon {
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+		.woocommerce-tag {
+			margin: initial;
+		}
+	}
+
 	.woocommerce-search__inline-container {
 		width: 100%;
-		padding: 2px 2px 2px 36px;
+		padding: 4px 2px 4px 36px;
 		border: 1px solid $core-grey-light-700;
 		background-color: $white;
 		display: flex;
@@ -25,6 +40,7 @@
 
 		.woocommerce-search__token-list {
 			display: inline-block;
+			padding: 1px 0;
 		}
 	}
 
@@ -33,7 +49,11 @@
 		border: none;
 		outline: none;
 		box-shadow: none;
-		padding: 6px 0;
+		padding: 2px 0;
+		line-height: 20px;
+		min-width: 70px;
+		font-size: inherit;
+		vertical-align: middle;
 	}
 
 	.woocommerce-search__input {
@@ -48,7 +68,6 @@
 		align-items: stretch;
 		border: 1px solid $core-grey-light-700;
 		position: absolute;
-		top: 36px;
 		left: 0;
 		right: 0;
 		z-index: 10;
