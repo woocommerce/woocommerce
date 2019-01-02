@@ -5,10 +5,24 @@
 
 	.woocommerce-search__icon {
 		position: absolute;
-		top: 50%;
+		top: 10px;
 		left: 10px;
 		fill: $core-grey-light-900;
-		transform: translateY(-50%);
+	}
+
+	.woocommerce-tag {
+		margin: 8px 6px 0 0;
+	}
+
+	&.has-inline-tags {
+		.woocommerce-search__icon {
+			top: 50%;
+			transform: translateY(-50%);
+		}
+
+		.woocommerce-tag {
+			margin: initial;
+		}
 	}
 
 	.woocommerce-search__inline-container {

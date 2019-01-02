@@ -158,7 +158,9 @@ class Search extends Component {
 		const shouldRenderTags = this.shouldRenderTags();
 
 		return (
-			<div className={ classnames( 'woocommerce-search', className ) }>
+			<div className={ classnames( 'woocommerce-search', className, {
+				'has-inline-tags': inlineTags,
+			} ) }>
 				<Gridicon className="woocommerce-search__icon" icon="search" size={ 18 } />
 				<Autocomplete
 					completer={ autocompleter }
