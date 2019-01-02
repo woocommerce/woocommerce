@@ -558,7 +558,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			$unique_products       = $this->get_unique_product_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
 			$totals[0]['products'] = $unique_products;
 
-			$totals[0]['segments'] = $this->get_totals_segments( $query_args, $totals_query, $totals, $table_name );
+			$totals[0]['segments'] = $this->get_totals_segments( $query_args, $totals_query, $table_name );
 
 			$totals = (object) $this->cast_numbers( $totals[0] );
 
@@ -614,7 +614,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
 			}
 
-			$intervals_segments = $this->get_intervals_segments( $query_args, $intervals_query, $intervals, $table_name );
+			$intervals_segments = $this->get_intervals_segments( $query_args, $intervals_query, $table_name );
 
 			// Pigeon hole segments.
 			$this->assign_segments_to_intervals( $intervals, $intervals_segments );
