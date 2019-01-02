@@ -193,9 +193,298 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	}
 
 	/**
+	 * Returns SELECT clause statements to be used for segmenting query.
+	 *
+	 * @param array  $query_args Query arguments supplied by the user.
+	 * @param string $segmenting_table SQL table containing the segmenting info.
+	 *
+	 * @return string SELECT clause statements.
+	 */
+	protected function segment_selections( $query_args, $segmenting_table ) {
+		global $wpdb;
+		$order_stats_table = $wpdb->prefix . 'wc_order_stats';
+		// TODO: confirm with TeamX where to use numbers for full orders and where to use partial numbers for products within orders.
+		$columns_mapping = array(
+			'orders_count'            => "COUNT(DISTINCT($segmenting_table.order_id)) as orders_count",
+			'num_items_sold'          => "SUM($segmenting_table.product_qty) as num_items_sold",
+			'gross_revenue'           => "SUM($segmenting_table.product_gross_revenue) AS gross_revenue",
+			'coupons'                 => "SUM($segmenting_table.coupon_amount) AS coupons",
+			'refunds'                 => "SUM($segmenting_table.refund_amount) AS refunds",
+			'taxes'                   => "SUM($segmenting_table.tax_amount) AS taxes",
+			'shipping'                => "SUM($segmenting_table.shipping_amount) AS shipping",
+			'net_revenue'             => "SUM($order_stats_table.net_total) AS net_revenue", // $segmenting_table.product_net_revenue.
+			'avg_items_per_order'     => "SUM($order_stats_table.num_items_sold) / COUNT(DISTINCT($order_stats_table.order_id)) AS avg_items_per_order",
+			'avg_order_value'         => "SUM($order_stats_table.net_total) / COUNT(DISTINCT($order_stats_table.order_id)) AS avg_order_value",
+			'num_returning_customers' => "SUM($order_stats_table.returning_customer = 1) AS num_returning_customers",
+			'num_new_customers'       => "SUM($order_stats_table.returning_customer = 0) AS num_new_customers",
+		);
+
+		if ( isset( $query_args['fields'] ) && is_array( $query_args['fields'] ) ) {
+			$keep = array();
+			foreach ( $query_args['fields'] as $field ) {
+				if ( isset( $columns_mapping[ $field ] ) ) {
+					$keep[ $field ] = $columns_mapping[ $field ];
+				}
+			}
+			$selections = implode( ', ', $keep );
+		} else {
+			$selections = implode( ', ', $columns_mapping );
+		}
+		return $selections;
+	}
+
+	/**
+	 * Update row-level db result for segments in 'totals' section to the format used for output.
+	 *
+	 * @param array  $segments_db_result Results from the SQL db query for segmenting.
+	 * @param string $segment_dimension Name of column used for grouping the result.
+	 *
+	 * @return array Reformatted array.
+	 */
+	protected function reformat_totals_segments( $segments_db_result, $segment_dimension ) {
+		$segment_result = array();
+
+		if ( strpos( $segment_dimension, '.' ) ) {
+			$segment_dimension = substr( strstr( $segment_dimension, '.' ), 1 );
+		}
+
+		foreach ( $segments_db_result as $segment_data ) {
+			$segment_id = $segment_data[ $segment_dimension ];
+			unset( $segment_data[ $segment_dimension ] );
+			$segment_datum    = array(
+				'segment_id' => $segment_id,
+				'subtotals'  => $this->cast_numbers( $segment_data ),
+			);
+			$segment_result[] = $segment_datum;
+		}
+
+		return $segment_result;
+	}
+
+	/**
+	 * Update row-level db result for segments in 'intervals' section to the format used for output.
+	 *
+	 * @param array  $segments_db_result Results from the SQL db query for segmenting.
+	 * @param string $segment_dimension Name of column used for grouping the result.
+	 *
+	 * @return array Reformatted array.
+	 */
+	protected function reformat_intervals_segments( $segments_db_result, $segment_dimension ) {
+		$aggregated_segment_result = array();
+
+		if ( strpos( $segment_dimension, '.' ) ) {
+			$segment_dimension = substr( strstr( $segment_dimension, '.' ), 1 );
+		}
+
+		foreach ( $segments_db_result as $segment_data ) {
+			$time_interval = $segment_data['time_interval'];
+			if ( ! isset( $aggregated_segment_result[ $time_interval ] ) ) {
+				$aggregated_segment_result[ $time_interval ]             = array();
+				$aggregated_segment_result[ $time_interval ]['segments'] = array();
+			}
+			unset( $segment_data['time_interval'] );
+			unset( $segment_data['datetime_anchor'] );
+			$segment_id = $segment_data[ $segment_dimension ];
+			unset( $segment_data[ $segment_dimension ] );
+			$segment_datum = array(
+				'segment_id' => $segment_id,
+				'subtotals'  => $this->cast_numbers( $segment_data ),
+			);
+			$aggregated_segment_result[ $time_interval ]['segments'][] = $segment_datum;
+		}
+
+		return $aggregated_segment_result;
+	}
+
+	/**
+	 * Retrieves and returns segments for 'totals' section of the result.
+	 *
+	 * @param array  $query_args Query arguments provided by the user.
+	 * @param array  $totals_query Array containing the SQL clauses for 'totals' section of the result.
+	 * @param string $table_name SQL table name used by the data store.
+	 *
+	 * @return array|void Array of segments for totals section of the result.
+	 */
+	protected function get_totals_segments( $query_args, $totals_query, $table_name ) {
+		global $wpdb;
+		if ( ! isset( $query_args['segmentby'] ) ) {
+			return;
+		}
+
+		$segmenting_table   = $wpdb->prefix . 'wc_order_product_lookup';
+		$segmenting_from    = '';
+		$segmenting_where   = '';
+		$segmenting_groupby = '';
+		if ( 'product' === $query_args['segmentby'] ) {
+			$segmenting_groupby = $segmenting_table . '.product_id';
+		} elseif ( 'variation' === $query_args['segmentby'] ) {
+			$segmenting_groupby = $segmenting_table . '.variation_id';
+		} elseif ( 'category' === $query_args['segmentby'] ) {
+			// If we wanted category name as well, then we need to add the following:
+			// LEFT JOIN wp_terms ON wp_term_taxonomy.term_id = wp_terms.term_id, then wp_terms.name is category name
+			// RIGHT JOIN so that all categories are added.
+			$segmenting_from    = "
+			LEFT JOIN {$wpdb->prefix}term_relationships ON {$segmenting_table}.product_id = {$wpdb->prefix}term_relationships.object_id
+			RIGHT JOIN {$wpdb->prefix}term_taxonomy ON {$wpdb->prefix}term_relationships.term_taxonomy_id = {$wpdb->prefix}term_taxonomy.term_taxonomy_id
+			";
+			$segmenting_where   = " AND taxonomy = 'product_cat'";
+			$segmenting_groupby = 'wp_term_taxonomy.term_taxonomy_id';
+		} elseif ( 'tax' === $query_args['segmentby'] ) {
+			$segmenting_from    = "
+			LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ($segmenting_table.order_id = order_items.order_id) 
+			";
+			$segmenting_where   = " AND (order_items.order_item_type = 'tax')";
+			$segmenting_groupby = 'order_items.order_item_name';
+		} elseif ( 'coupon' === $query_args['segmentby'] ) {
+			$segmenting_from    = "
+			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ($segmenting_table.order_id = order_items.order_id)
+            ";
+			$segmenting_where   = " AND order_items.order_item_type = 'coupon'";
+			$segmenting_groupby = 'order_items.order_item_name';
+		} elseif ( 'customer_type' === $query_args['segmentby'] ) {
+			$segmenting_from    = "
+			LEFT JOIN {$wpdb->prefix}wc_order_stats AS customer_type_tbl ON ($segmenting_table.order_id = customer_type_tbl.order_id) 
+			";
+			$segmenting_groupby = 'customer_type_tbl.returning_customer';
+		}
+
+		$segment_selections = $this->segment_selections( $query_args, $segmenting_table );
+		$totals_segments    = $wpdb->get_results(
+			"SELECT
+						$segment_selections,
+						$segmenting_groupby
+					FROM
+						$table_name
+						INNER JOIN $segmenting_table ON ($table_name.order_id = $segmenting_table.order_id)
+						$segmenting_from
+						{$totals_query['from_clause']}
+					WHERE
+						1=1
+						{$totals_query['where_time_clause']}
+						{$totals_query['where_clause']}
+						$segmenting_where
+					GROUP BY
+						$segmenting_groupby",
+			ARRAY_A
+		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		// Reformat result.
+		$totals_segments = $this->reformat_totals_segments( $totals_segments, $segmenting_groupby );
+
+		// TODO: Fill in zeroes for second dimension.
+		return $totals_segments;
+	}
+
+	/**
+	 * Assign segments to time intervals by updating original $intervals array.
+	 *
+	 * @param array $intervals Result array from intervals SQL query.
+	 * @param array $intervals_segments Result array from interval segments SQL query.
+	 */
+	protected function assign_segments_to_intervals( &$intervals, $intervals_segments ) {
+		$old_keys = array_keys( $intervals );
+		foreach ( $intervals as $interval ) {
+			$intervals[ $interval['time_interval'] ] = $interval;
+		}
+		foreach ( $old_keys as $key ) {
+			unset( $intervals[ $key ] );
+		}
+
+		foreach ( $intervals_segments as $time_interval => $segment ) {
+			if ( ! isset( $intervals[ $time_interval ] ) ) {
+				$intervals[ $time_interval ]['segments'] = array();
+			}
+			$intervals[ $time_interval ]['segments'] = $segment['segments'];
+		}
+	}
+
+	/**
+	 * Retrieves and returns segments for 'intervals' section of the result.
+	 *
+	 * @param array  $query_args Query arguments provided by the user.
+	 * @param array  $intervals_query Array containing the SQL clauses for 'intervals' section of the result.
+	 * @param string $table_name SQL table name used by the data store.
+	 *
+	 * @return array|void Array of segments for intervals section of the result.
+	 */
+	protected function get_intervals_segments( $query_args, $intervals_query, $table_name ) {
+		global $wpdb;
+		if ( ! isset( $query_args['segmentby'] ) ) {
+			return;
+		}
+
+		$segmenting_table   = $wpdb->prefix . 'wc_order_product_lookup';
+		$segmenting_from    = '';
+		$segmenting_where   = '';
+		$segmenting_groupby = '';
+		if ( 'product' === $query_args['segmentby'] ) {
+			$segmenting_groupby = $segmenting_table . '.product_id';
+		} elseif ( 'variation' === $query_args['segmentby'] ) {
+			$segmenting_groupby = $segmenting_table . '.variation_id';
+		} elseif ( 'category' === $query_args['segmentby'] ) {
+			// If we wanted category name as well, then we need to add the following:
+			// LEFT JOIN wp_terms ON wp_term_taxonomy.term_id = wp_terms.term_id, then wp_terms.name is category name
+			// RIGHT JOIN so that all categories are added.
+			$segmenting_from    = "
+			LEFT JOIN {$wpdb->prefix}term_relationships ON {$segmenting_table}.product_id = {$wpdb->prefix}term_relationships.object_id
+			RIGHT JOIN {$wpdb->prefix}term_taxonomy ON {$wpdb->prefix}term_relationships.term_taxonomy_id = {$wpdb->prefix}term_taxonomy.term_taxonomy_id
+			";
+			$segmenting_where   = " AND taxonomy = 'product_cat'";
+			$segmenting_groupby = 'wp_term_taxonomy.term_taxonomy_id';
+		} elseif ( 'tax' === $query_args['segmentby'] ) {
+			$segmenting_from    = "
+			LEFT JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ($segmenting_table.order_id = order_items.order_id) 
+			";
+			$segmenting_where   = " AND (order_items.order_item_type = 'tax')";
+			$segmenting_groupby = 'order_items.order_item_name';
+		} elseif ( 'coupon' === $query_args['segmentby'] ) {
+			$segmenting_from    = "
+			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ($segmenting_table.order_id = order_items.order_id)
+            ";
+			$segmenting_where   = " AND order_items.order_item_type = 'coupon'";
+			$segmenting_groupby = 'order_items.order_item_name';
+		} elseif ( 'customer_type' === $query_args['segmentby'] ) {
+			$segmenting_from    = "
+			LEFT JOIN {$wpdb->prefix}wc_order_stats AS customer_type_tbl ON ($segmenting_table.order_id = customer_type_tbl.order_id) 
+			";
+			$segmenting_groupby = 'customer_type_tbl.returning_customer';
+		}
+
+		// TODO: finish limit update.
+		$segmenting_limit = '';
+
+		$segment_selections = $this->segment_selections( $query_args, $segmenting_table );
+		$intervals_segments = $wpdb->get_results(
+			"SELECT
+						MAX($table_name.date_created) AS datetime_anchor,
+						{$intervals_query['select_clause']} AS time_interval,
+						$segment_selections,
+						$segmenting_groupby
+					FROM
+						$table_name
+						INNER JOIN $segmenting_table ON ($table_name.order_id = $segmenting_table.order_id)
+						$segmenting_from
+						{$intervals_query['from_clause']}
+					WHERE
+						1=1
+						{$intervals_query['where_time_clause']}
+						{$intervals_query['where_clause']}
+						$segmenting_where
+					GROUP BY
+						time_interval, $segmenting_groupby
+					$segmenting_limit",
+			ARRAY_A
+		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+
+		// Reformat result.
+		$intervals_segments = $this->reformat_intervals_segments( $intervals_segments, $segmenting_groupby );
+
+		// TODO: Fill in zeroes for second dimension.
+		return $intervals_segments;
+	}
+
+	/**
 	 * Returns the report data based on parameters supplied by the user.
 	 *
-	 * @since 3.5.0
 	 * @param array $query_args  Query parameters.
 	 * @return stdClass|WP_Error Data.
 	 */
@@ -216,6 +505,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			'after'            => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
 			'interval'         => 'week',
 			'fields'           => '*',
+			'segmentby'        => '',
 
 			'match'            => 'all',
 			'status_is'        => array(),
@@ -267,6 +557,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			$unique_products       = $this->get_unique_product_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
 			$totals[0]['products'] = $unique_products;
 
+			$totals[0]['segments'] = $this->get_totals_segments( $query_args, $totals_query, $totals, $table_name );
+
 			$totals = (object) $this->cast_numbers( $totals[0] );
 
 			$db_intervals = $wpdb->get_col(
@@ -291,7 +583,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				return $data;
 			}
 
-			$this->update_intervals_sql_params( $intervals_query, $query_args, $db_interval_count, $expected_interval_count );
+			$this->update_intervals_sql_params( $intervals_query, $query_args, $db_interval_count, $expected_interval_count, $table_name );
 
 			if ( '' !== $selections ) {
 				$selections = ', ' . $selections;
@@ -320,6 +612,11 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			if ( null === $intervals ) {
 				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
 			}
+
+			$intervals_segments = $this->get_intervals_segments( $query_args, $intervals_query, $intervals, $table_name );
+
+			// Pigeon hole segments.
+			$this->assign_segments_to_intervals( $intervals, $intervals_segments );
 
 			$data = (object) array(
 				'totals'    => $totals,
