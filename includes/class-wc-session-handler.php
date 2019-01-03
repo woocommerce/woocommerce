@@ -96,6 +96,15 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
+	 * Suffix for cart key names
+	 *
+	 * @return string value of suffix
+	 */
+	public function get_cart_key_suffix() {
+		return apply_filters( 'woocommerce_cart_key_suffix', '_' . get_current_blog_id() );
+	}
+
+	/**
 	 * Sets the session cookie on-demand (usually after adding an item to the cart).
 	 *
 	 * Since the cookie name (as of 2.1) is prepended with wp, cache systems like batcache will not cache pages when set.

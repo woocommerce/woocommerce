@@ -48,7 +48,8 @@ function wc_load_persistent_cart( $user_login, $user ) {
 		return;
 	}
 
-	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+	$suffix     = WC()->session->get_cart_key_suffix();
+	$saved_cart = get_user_meta( $user->ID, '_woocommerce_persistent_cart' . $suffix, true );
 
 	if ( ! $saved_cart ) {
 		return;

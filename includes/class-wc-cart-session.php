@@ -218,8 +218,9 @@ final class WC_Cart_Session {
 	 */
 	public function persistent_cart_update() {
 		if ( get_current_user_id() && apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
+			$suffix = WC()->session->get_cart_key_suffix();
 			update_user_meta(
-				get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), array(
+				get_current_user_id(), '_woocommerce_persistent_cart' . $suffix, array(
 					'cart' => $this->get_cart_for_session(),
 				)
 			);
@@ -231,7 +232,8 @@ final class WC_Cart_Session {
 	 */
 	public function persistent_cart_destroy() {
 		if ( get_current_user_id() ) {
-			delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id() );
+			$suffix = WC()->session->get_cart_key_suffix();
+			delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart' . $suffix );
 		}
 	}
 
@@ -261,7 +263,8 @@ final class WC_Cart_Session {
 		$saved_cart = array();
 
 		if ( apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
-			$saved_cart_meta = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+			$suffix = WC()->session->get_cart_key_suffix();
+			$saved_cart_meta = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart' . $suffix, true );
 
 			if ( isset( $saved_cart_meta['cart'] ) ) {
 				$saved_cart = array_filter( (array) $saved_cart_meta['cart'] );
