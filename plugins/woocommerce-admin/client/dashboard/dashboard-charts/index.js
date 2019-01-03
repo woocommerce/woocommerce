@@ -22,11 +22,11 @@ import { getChartFromKey, showCharts } from './config';
 import './style.scss';
 
 class DashboardCharts extends Component {
-	constructor( props ) {
+	constructor() {
 		super( ...arguments );
 		this.state = {
+			chartType: 'line', // @TODO: Remove this and use from props containing persisted user preferences.
 			showCharts,
-			query: props.query,
 		};
 
 		this.toggle = this.toggle.bind( this );
@@ -44,7 +44,9 @@ class DashboardCharts extends Component {
 
 	handleTypeToggle( type ) {
 		return () => {
-			this.setState( state => ( { query: { ...state.query, type } } ) );
+			this.setState( {
+				chartType: type,
+			} );
 		};
 	}
 
@@ -68,7 +70,7 @@ class DashboardCharts extends Component {
 
 	render() {
 		const { path } = this.props;
-		const { query } = this.state;
+		const query = { ...this.props.query, type: this.state.chartType };
 		return (
 			<Fragment>
 				<div className="woocommerce-dashboard__dashboard-charts">
