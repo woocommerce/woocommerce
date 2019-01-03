@@ -158,35 +158,43 @@ export class SearchListControl extends Component {
 	}
 
 	render() {
-		const { className = '', search, selected, setState } = this.props;
+		const {
+			className = '',
+			isLoading,
+			search,
+			selected,
+			setState,
+		} = this.props;
 		const messages = { ...defaultMessages, ...this.props.messages };
 		const selectedCount = selected.length;
 
 		return (
 			<div className={ `woocommerce-search-list ${ className }` }>
-				<div className="woocommerce-search-list__selected">
-					<div className="woocommerce-search-list__selected-header">
-						<strong>{ messages.selected( selectedCount ) }</strong>
-						{ selectedCount > 0 ? (
-							<Button
-								isLink
-								isDestructive
-								onClick={ this.onClear }
-								aria-label={ messages.clear }
-							>
-								{ __( 'Clear all', 'woo-gutenberg-products-block' ) }
-							</Button>
-						) : null }
+				{ ! isLoading && (
+					<div className="woocommerce-search-list__selected">
+						<div className="woocommerce-search-list__selected-header">
+							<strong>{ messages.selected( selectedCount ) }</strong>
+							{ selectedCount > 0 ? (
+								<Button
+									isLink
+									isDestructive
+									onClick={ this.onClear }
+									aria-label={ messages.clear }
+								>
+									{ __( 'Clear all', 'woo-gutenberg-products-block' ) }
+								</Button>
+							) : null }
+						</div>
+						{ selected.map( ( item, i ) => (
+							<Tag
+								key={ i }
+								label={ item.name }
+								id={ item.id }
+								remove={ this.onRemove }
+							/>
+						) ) }
 					</div>
-					{ selected.map( ( item, i ) => (
-						<Tag
-							key={ i }
-							label={ item.name }
-							id={ item.id }
-							remove={ this.onRemove }
-						/>
-					) ) }
-				</div>
+				) }
 
 				<div className="woocommerce-search-list__search">
 					<TextControl
