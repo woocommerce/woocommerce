@@ -251,6 +251,9 @@ class WC_Shortcode_Checkout {
 	 * Show the checkout.
 	 */
 	private static function checkout() {
+		// Show non-cart errors.
+		do_action( 'woocommerce_before_checkout_form_cart_notices' );
+
 		// Check cart has contents.
 		if ( WC()->cart->is_empty() && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_redirect_empty_cart', true ) ) {
 			return;
