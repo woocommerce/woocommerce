@@ -56,6 +56,12 @@
 	@include placeholder();
 	padding: 0;
 	width: 100%;
+	display: flex;
+    align-items: center;
+	justify-content: center;
+	.components-spinner {
+		margin: 0;
+	}
 }
 
 .woocommerce-chart__interval-select {
