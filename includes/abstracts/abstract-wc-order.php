@@ -1139,11 +1139,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param  WC_Product $product Product object.
 	 * @param  int        $qty Quantity to add.
 	 * @param  array      $args Args for the added product.
-	 * @param  bool       $adjust_stock True or false. Should the product stock also be reduced whilst adding to the order?
 	 * @return int
 	 * @throws WC_Data_Exception Exception thrown if the item cannot be added to the cart.
 	 */
-	public function add_product( $product, $qty = 1, $args = array(), $adjust_stock = false ) {
+	public function add_product( $product, $qty = 1, $args = array() ) {
 		if ( $product ) {
 			$default_args = array(
 				'name'         => $product->get_name(),
@@ -1180,25 +1179,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$item->set_props( $args );
 		$item->set_backorder_meta();
 		$item->set_order_id( $this->get_id() );
-
-		if ( $adjust_stock && $product && $product->managing_stock() ) {
-			$item_name = $product->get_formatted_name();
-			$new_stock = wc_update_product_stock( $product, $item->get_quantity(), 'decrease' );
-
-			if ( is_wp_error( $new_stock ) ) {
-				/* translators: %s item name. */
-				$this->add_order_note( sprintf( __( 'Unable to reduce stock for item %s.', 'woocommerce' ), $item_name ) );
-			} else {
-				/* translators: %1$s: item name, %2$s stock change */
-				$this->add_order_note( sprintf( __( '%1$s stock reduced %2$s.', 'woocommerce' ), $item_name, $new_stock . '&rarr;' . ( $new_stock - $item->get_quantity() ) ) );
-			}
-
-			$item->add_meta_data( '_reduced_stock', $item->get_quantity(), true );
-		}
-
 		$item->save();
 		$this->add_item( $item );
-
 		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '3.0', 'woocommerce_new_order_item action instead' );
 		delete_transient( 'wc_order_' . $this->get_id() . '_needs_processing' );
 		return $item->get_id();
