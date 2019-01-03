@@ -582,7 +582,7 @@ class WC_Admin_Api_Init {
 				avg_order_value double DEFAULT 0 NOT NULL,
 				date_last_active timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
 				date_last_order timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
-				date_registered timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
+				date_registered timestamp NULL default null,
 				country char(2) DEFAULT '' NOT NULL,
 				postcode varchar(20) DEFAULT '' NOT NULL,
 				city varchar(100) DEFAULT '' NOT NULL,
