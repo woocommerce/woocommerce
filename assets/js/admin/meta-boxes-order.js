@@ -687,10 +687,22 @@ jQuery( function ( $ ) {
 				data: data,
 				type: 'POST',
 				success: function( response ) {
-					$( '#woocommerce-order-items' ).find( '.inside' ).empty();
-					$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
-					wc_meta_boxes_order_items.reloaded_items();
-					wc_meta_boxes_order_items.unblock();
+					if ( response.success ) {
+						$( '#woocommerce-order-items' ).find( '.inside' ).empty();
+						$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
+
+						// Update notes.
+						if ( response.data.notes_html ) {
+							$( 'ul.order_notes' ).empty();
+							$( 'ul.order_notes' ).append( $( response.data.notes_html ).find( 'li' ) );
+						}
+
+						wc_meta_boxes_order_items.reloaded_items();
+						wc_meta_boxes_order_items.unblock();
+					} else {
+						wc_meta_boxes_order_items.unblock();
+						window.alert( response.data.error );
+					}
 				}
 			});
 
