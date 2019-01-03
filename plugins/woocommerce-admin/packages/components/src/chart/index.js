@@ -114,7 +114,7 @@ class Chart extends Component {
 
 	handleLegendToggle( event ) {
 		const { data, mode } = this.props;
-		if ( mode ) {
+		if ( mode === 'block' ) {
 			return;
 		}
 		const orderedKeys = this.state.orderedKeys.map( d => ( {
