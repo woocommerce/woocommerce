@@ -30,9 +30,9 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $current_session_data->session_id + 1, $updated_session_data->session_id );
 		$this->assertEquals( $this->session_key, $updated_session_data->session_key );
-		$this->assertEquals( maybe_serialize( array( 'cart' => 'new cart' ) ), $updated_session_data->session_value );
+		$this->assertEquals( maybe_serialize( array( 'cart_1' => 'new cart' ) ), $updated_session_data->session_value );
 		$this->assertTrue( is_numeric( $updated_session_data->session_expiry ) );
-		$this->assertEquals( array( 'cart' => 'new cart' ), wp_cache_get( $this->cache_prefix . $this->session_key, WC_SESSION_CACHE_GROUP ) );
+		$this->assertEquals( array( 'cart_1' => 'new cart' ), wp_cache_get( $this->cache_prefix . $this->session_key, WC_SESSION_CACHE_GROUP ) );
 	}
 
 	public function test_save_data_should_replace_existing_row() {
@@ -45,19 +45,19 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $current_session_data->session_id, $updated_session_data->session_id );
 		$this->assertEquals( $this->session_key, $updated_session_data->session_key );
-		$this->assertEquals( maybe_serialize( array( 'cart' => 'new cart' ) ), $updated_session_data->session_value );
+		$this->assertEquals( maybe_serialize( array( 'cart_1' => 'new cart' ) ), $updated_session_data->session_value );
 		$this->assertTrue( is_numeric( $updated_session_data->session_expiry ) );
 	}
 
 	public function test_get_session_should_use_cache() {
 		$session = $this->handler->get_session( $this->session_key );
-		$this->assertEquals( array( 'cart' => 'fake cart' ), $session );
+		$this->assertEquals( array( 'cart_1' => 'fake cart' ), $session );
 	}
 
 	public function test_get_session_should_not_use_cache() {
 		wp_cache_delete( $this->cache_prefix . $this->session_key, WC_SESSION_CACHE_GROUP );
 		$session = $this->handler->get_session( $this->session_key );
-		$this->assertEquals( array( 'cart' => 'fake cart' ), $session );
+		$this->assertEquals( array( 'cart_1' => 'fake cart' ), $session );
 	}
 
 	public function test_get_session_should_return_default_value() {
