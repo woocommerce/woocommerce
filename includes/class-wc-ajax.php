@@ -1164,14 +1164,11 @@ class WC_AJAX {
 
 					// Before deleting the item, adjust any stock values already reduced.
 					if ( $item->is_type( 'line_item' ) ) {
-						$product            = $item->get_product();
-						$item_stock_reduced = $item->get_meta( '_reduced_stock', true );
+						$changed_stock = wc_maybe_adjust_line_item_product_stock( $item, 0 );
 
-						if ( $item_stock_reduced && $product->managing_stock() ) {
-							$new_stock  = wc_update_product_stock( $product, $item_stock_reduced, 'increase' );
-
+						if ( $changed_stock && ! is_wp_error( $changed_stock ) ) {
 							/* translators: %1$s: item name %2$s: stock change */
-							$order->add_order_note( sprintf( __( 'Deleted %1$s and restored stock (%2$s)', 'woocommerce' ), $item->get_name(), ( ( $new_stock - $item_stock_reduced ) . '&rarr;' . $new_stock ) ), false, true );
+							$order->add_order_note( sprintf( __( 'Deleted %1$s and adjusted stock (%2$s)', 'woocommerce' ), $item->get_name(), $changed_stock['from'] . '&rarr;' . $changed_stock['to'] ), false, true );
 						} else {
 							/* translators: %s item name. */
 							$order->add_order_note( sprintf( __( 'Deleted %s', 'woocommerce' ), $item->get_name() ), false, true );
@@ -1294,7 +1291,23 @@ class WC_AJAX {
 
 			// Return HTML items
 			$order = wc_get_order( $order_id );
+
+			// Get HTML to return.
+			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
+			$items_html = ob_get_clean();
+
+			ob_start();
+			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			include 'admin/meta-boxes/views/html-order-notes.php';
+			$notes_html = ob_get_clean();
+
+			wp_send_json_success(
+				array(
+					'html'       => $items_html,
+					'notes_html' => $notes_html,
+				)
+			);
 		}
 		wp_die();
 	}
