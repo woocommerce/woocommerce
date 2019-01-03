@@ -256,7 +256,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				'segment_id' => $segment_id,
 				'subtotals'  => $this->cast_numbers( $segment_data ),
 			);
-			$segment_result[] = $segment_datum;
+			$segment_result[ $segment_id ] = $segment_datum;
 		}
 
 		return $segment_result;
@@ -291,10 +291,124 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				'segment_id' => $segment_id,
 				'subtotals'  => $this->cast_numbers( $segment_data ),
 			);
-			$aggregated_segment_result[ $time_interval ]['segments'][] = $segment_datum;
+			$aggregated_segment_result[ $time_interval ]['segments'][ $segment_id ] = $segment_datum;
 		}
 
 		return $aggregated_segment_result;
+	}
+
+	/**
+	 * Return all segments for given segmentby parameter.
+	 *
+	 * @param array $query_args Query args provided by the user.
+	 *
+	 * @return array|void
+	 */
+	protected function get_all_segments( $query_args ) {
+		global $wpdb;
+		if ( ! isset( $query_args['segmentby'] ) ) {
+			return;
+		}
+
+		if ( 'product' === $query_args['segmentby'] ) {
+			$segments = wc_get_products(
+				array(
+					'return' => 'ids',
+					'limit'  => -1,
+				)
+			);
+		} elseif ( 'variation' === $query_args['segmentby'] ) {
+			// TODO: assuming that this will only be used for one product, check assumption.
+			if ( ! isset( $query_args['products'] ) || count( $query_args['products'] ) !== 1 ) {
+				return;
+			}
+
+			$segments = wc_get_products(
+				array(
+					'return' => 'ids',
+					'limit'  => - 1,
+					'type'   => 'variation',
+					'parent' => $query_args['products'][0],
+				)
+			);
+		} elseif ( 'category' === $query_args['segmentby'] ) {
+			$categories = get_categories(
+				array(
+					'taxonomy' => 'product_cat',
+				)
+			);
+			$segments   = wp_list_pluck( $categories, 'cat_ID' );
+		} elseif ( 'tax' === $query_args['segmentby'] ) {
+			// There are two types of taxes: taxes that are currently in the db and taxes that were used in sold products before.
+			// Taxes from the db.
+			$current_taxes = $wpdb->get_results( "SELECT tax_rate_id FROM {$wpdb->prefix}woocommerce_tax_rates", ARRAY_A ); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			$current_taxes = wp_list_pluck( $current_taxes, 'tax_rate_id' );
+			// taxes from sold products.
+			$sold_taxes = $wpdb->get_results( "SELECT DISTINCT meta_value FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_key='rate_id'", ARRAY_A ); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			$sold_taxes = wp_list_pluck( $sold_taxes, 'meta_value' );
+			$segments   = array_unique( array_merge( $current_taxes, $sold_taxes ) );
+		} elseif ( 'coupon' === $query_args['segmentby'] ) {
+			$coupon_ids = $wpdb->get_results( "SELECT ID FROM {$wpdb->prefix}posts WHERE post_type='shop_coupon' AND post_status='publish'", ARRAY_A ); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			$segments   = wp_list_pluck( $coupon_ids, 'ID' );
+		} elseif ( 'customer_type' === $query_args['segmentby'] ) {
+			// 0 -- new customer
+			// 1 -- returning customer
+			$segments = array( 0, 1 );
+		}
+
+		return $segments;
+	}
+
+	/**
+	 * Adds zeroes for segments not present in the data selection.
+	 *
+	 * @param array $query_args Query arguments provided by the user.
+	 * @param array $segments Array of segments from the database for given data points.
+	 * @param array $all_segment_ids Array of all possible segment ids.
+	 *
+	 * @return array
+	 */
+	protected function fill_in_missing_segments( $query_args, $segments, $all_segment_ids ) {
+
+		$segment_subtotals = array();
+		if ( isset( $query_args['fields'] ) && is_array( $query_args['fields'] ) ) {
+			foreach ( $query_args['fields'] as $field ) {
+				if ( isset( $this->report_columns[ $field ] ) ) {
+					$segment_subtotals[ $field ] = 0;
+				}
+			}
+		} else {
+			foreach ( $this->report_columns as $field ) {
+				$segment_subtotals[ $field ] = 0;
+			}
+		}
+		if ( ! is_array( $segments ) ) {
+			$segments = array();
+		}
+		foreach ( $all_segment_ids as $segment_id ) {
+			if ( ! isset( $segments[ $segment_id ] ) ) {
+				$segments[ $segment_id ] = array(
+					'segment_id' => $segment_id,
+					'subtotals'  => $segment_subtotals,
+				);
+			}
+		}
+
+		// Using array_values to remove custom keys, so that it gets later converted to JSON as an array.
+		return array_values( $segments );
+	}
+
+	/**
+	 * Adds missing segments to intervals, modifies $data.
+	 *
+	 * @param array    $query_args Query arguments provided by the user.
+	 * @param stdClass $data Response data.
+	 * @param array    $all_segment_ids Array of all possible segment ids.
+	 */
+	protected function fill_in_missing_interval_segments( $query_args, &$data, $all_segment_ids ) {
+		foreach ( $data->intervals as $order_id => $interval_data ) {
+			$data->intervals[ $order_id ]['segments'] = $this->fill_in_missing_segments( $query_args, $data->intervals[ $order_id ]['segments'], $all_segment_ids );
+		}
 	}
 
 	/**
@@ -303,10 +417,11 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	 * @param array  $query_args Query arguments provided by the user.
 	 * @param array  $totals_query Array containing the SQL clauses for 'totals' section of the result.
 	 * @param string $table_name SQL table name used by the data store.
+	 * @param array  $all_segments Array of all possible segment ids.
 	 *
 	 * @return array|void Array of segments for totals section of the result.
 	 */
-	protected function get_totals_segments( $query_args, $totals_query, $table_name ) {
+	protected function get_totals_segments( $query_args, $totals_query, $table_name, $all_segments ) {
 		global $wpdb;
 		if ( ! isset( $query_args['segmentby'] ) ) {
 			return;
@@ -338,10 +453,9 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			$segmenting_groupby = 'order_items.order_item_name';
 		} elseif ( 'coupon' === $query_args['segmentby'] ) {
 			$segmenting_from    = "
-			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ($segmenting_table.order_id = order_items.order_id)
+			INNER JOIN {$wpdb->prefix}wc_order_coupon_lookup AS coupon_lookup ON ($segmenting_table.order_id = coupon_lookup.order_id)
             ";
-			$segmenting_where   = " AND order_items.order_item_type = 'coupon'";
-			$segmenting_groupby = 'order_items.order_item_name';
+			$segmenting_groupby = 'coupon_lookup.coupon_id';
 		} elseif ( 'customer_type' === $query_args['segmentby'] ) {
 			$segmenting_from    = "
 			LEFT JOIN {$wpdb->prefix}wc_order_stats AS customer_type_tbl ON ($segmenting_table.order_id = customer_type_tbl.order_id) 
@@ -371,7 +485,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		// Reformat result.
 		$totals_segments = $this->reformat_totals_segments( $totals_segments, $segmenting_groupby );
 
-		// TODO: Fill in zeroes for second dimension.
+		$totals_segments = $this->fill_in_missing_segments( $query_args, $totals_segments, $all_segments );
+
 		return $totals_segments;
 	}
 
@@ -439,10 +554,9 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			$segmenting_groupby = 'order_items.order_item_name';
 		} elseif ( 'coupon' === $query_args['segmentby'] ) {
 			$segmenting_from    = "
-			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ($segmenting_table.order_id = order_items.order_id)
+			INNER JOIN {$wpdb->prefix}wc_order_coupon_lookup AS coupon_lookup ON ($segmenting_table.order_id = coupon_lookup.order_id)
             ";
-			$segmenting_where   = " AND order_items.order_item_type = 'coupon'";
-			$segmenting_groupby = 'order_items.order_item_name';
+			$segmenting_groupby = 'coupon_lookup.coupon_id';
 		} elseif ( 'customer_type' === $query_args['segmentby'] ) {
 			$segmenting_from    = "
 			LEFT JOIN {$wpdb->prefix}wc_order_stats AS customer_type_tbl ON ($segmenting_table.order_id = customer_type_tbl.order_id) 
@@ -479,7 +593,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		// Reformat result.
 		$intervals_segments = $this->reformat_intervals_segments( $intervals_segments, $segmenting_groupby );
 
-		// TODO: Fill in zeroes for second dimension.
+		// Missing segments will be filled once all the intervals are added.
 		return $intervals_segments;
 	}
 
@@ -558,7 +672,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			$unique_products       = $this->get_unique_product_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
 			$totals[0]['products'] = $unique_products;
 
-			$totals[0]['segments'] = $this->get_totals_segments( $query_args, $totals_query, $table_name );
+			$all_segments = $this->get_all_segments( $query_args );
+			$totals[0]['segments'] = $this->get_totals_segments( $query_args, $totals_query, $table_name, $all_segments );
 
 			$totals = (object) $this->cast_numbers( $totals[0] );
 
@@ -631,6 +746,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				$this->fill_in_missing_intervals( $db_intervals, $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
 				$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
 				$this->remove_extra_records( $data, $query_args['page'], $intervals_query['per_page'], $db_interval_count, $expected_interval_count, $query_args['orderby'] );
+				$this->fill_in_missing_interval_segments( $query_args, $data, $all_segments );
 			} else {
 				$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data->intervals );
 			}
