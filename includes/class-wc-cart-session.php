@@ -312,6 +312,11 @@ final class WC_Cart_Session {
 				continue;
 			}
 
+			// Prevent reordering items specifically out of stock.
+			if ( ! $product->is_in_stock() ) {
+				continue;
+			}
+
 			foreach ( $item->get_meta_data() as $meta ) {
 				if ( taxonomy_is_product_attribute( $meta->key ) ) {
 					$term                     = get_term_by( 'slug', $meta->value, $meta->key );
