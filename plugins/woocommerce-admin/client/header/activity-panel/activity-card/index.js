@@ -5,7 +5,7 @@
 import classnames from 'classnames';
 import { cloneElement, Component } from '@wordpress/element';
 import Gridicon from 'gridicons';
-import { moment } from '@wordpress/date';
+import moment from 'moment';
 import PropTypes from 'prop-types';
 
 /**
