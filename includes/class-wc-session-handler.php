@@ -105,6 +105,46 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
+	 * We need to suffix the cart session variable to avoid ambiguous lookup in multisite setups.
+	 *
+	 * @param string $key Key to get.
+	 * @param mixed $default used if the session variable isn't set.
+	 *
+	 * @return array|string value of session variable
+	 */
+	private function maybe_suffix_cart_key( $key ) {
+		$suffix = $this->get_cart_key_suffix();
+
+		return ( 'cart' === $key ) ? $key . $suffix : $key;
+	}
+
+	/**
+	 * Get a session variable.
+	 *
+	 * @param string $key Key to get.
+	 * @param mixed $default used if the session variable isn't set.
+	 *
+	 * @return array|string value of session variable
+	 */
+	public function get( $key, $default = NULL ) {
+		$key = $this->maybe_suffix_cart_key( $key );
+
+		return parent::get( $key, $default );
+	}
+
+	/**
+	 * Set a session variable.
+	 *
+	 * @param string $key Key to set.
+	 * @param mixed $value Value to set.
+	 */
+	public function set( $key, $value ) {
+		$key = $this->maybe_suffix_cart_key( $key );
+
+		parent::set( $key, $value );
+	}
+
+	/**
 	 * Sets the session cookie on-demand (usually after adding an item to the cart).
 	 *
 	 * Since the cookie name (as of 2.1) is prepended with wp, cache systems like batcache will not cache pages when set.
