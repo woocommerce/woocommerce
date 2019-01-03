@@ -1932,15 +1932,14 @@ function wc_update_354_rename_session_cart_keys() {
 			unset( $session_data['cart'] );
 			$new_data = maybe_serialize( $session_data );
 
-			// Update
 			$wpdb->query(
 				$wpdb->prepare(
-					"UPDATE $session_table
+					"UPDATE {$session_table}
 						SET session_value = %s
 						WHERE session_id = %d",
 					array(
 						$new_data,
-						$session->session_id
+						$session->session_id,
 					)
 				)
 			);

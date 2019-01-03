@@ -110,7 +110,7 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 
 	foreach ( $products as $product_id => $qty ) {
 		/* translators: %s: product name */
-		$titles[] = ( $qty > 1 ? absint( $qty ) . ' &times; ' : '' ) . apply_filters( 'woocommerce_add_to_cart_item_name_in_quotes', sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), strip_tags( get_the_title( $product_id ) ) ), $product_id );
+		$titles[] = ( $qty > 1 ? absint( $qty ) . ' &times; ' : '' ) . apply_filters( 'woocommerce_add_to_cart_item_name_in_quotes', sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), wp_strip_all_tags( get_the_title( $product_id ) ) ), $product_id );
 		$count   += $qty;
 	}
 
@@ -207,8 +207,8 @@ function wc_cart_totals_subtotal_html() {
  * Get shipping methods.
  */
 function wc_cart_totals_shipping_html() {
-	$packages           = WC()->shipping->get_packages();
-	$first              = true;
+	$packages = WC()->shipping->get_packages();
+	$first    = true;
 
 	foreach ( $packages as $i => $package ) {
 		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
@@ -222,7 +222,8 @@ function wc_cart_totals_shipping_html() {
 		}
 
 		wc_get_template(
-			'cart/cart-shipping.php', array(
+			'cart/cart-shipping.php',
+			array(
 				'package'                  => $package,
 				'available_methods'        => $package['rates'],
 				'show_package_details'     => count( $packages ) > 1,

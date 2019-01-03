@@ -72,8 +72,8 @@ final class WC_Cart_Session {
 		$update_cart_session = false; // Flag to indicate the stored cart should be updated.
 		$order_again         = false; // Flag to indicate whether this is a re-order.
 
-		$cart                = WC()->session->get( 'cart', null );
-		$merge_saved_cart    = (bool) get_user_meta( get_current_user_id(), '_woocommerce_load_saved_cart_after_login', true );
+		$cart             = WC()->session->get( 'cart', null );
+		$merge_saved_cart = (bool) get_user_meta( get_current_user_id(), '_woocommerce_load_saved_cart_after_login', true );
 
 		// Merge saved cart with current cart.
 		if ( is_null( $cart ) || $merge_saved_cart ) {
@@ -122,7 +122,8 @@ final class WC_Cart_Session {
 				} else {
 					// Put session data into array. Run through filter so other plugins can load their own session data.
 					$session_data = array_merge(
-						$values, array(
+						$values,
+						array(
 							'data' => $product,
 						)
 					);
@@ -149,7 +150,7 @@ final class WC_Cart_Session {
 
 		// If this is a re-order, redirect to the cart page to get rid of the `order_again` query string.
 		if ( $order_again ) {
-			wp_redirect( wc_get_page_permalink( 'cart' ) );
+			wp_safe_redirect( wc_get_page_permalink( 'cart' ) );
 			exit;
 		}
 	}
@@ -221,7 +222,9 @@ final class WC_Cart_Session {
 		if ( get_current_user_id() && apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			$suffix = WC()->session->get_cart_key_suffix();
 			update_user_meta(
-				get_current_user_id(), '_woocommerce_persistent_cart' . $suffix, array(
+				get_current_user_id(),
+				'_woocommerce_persistent_cart' . $suffix,
+				array(
 					'cart' => $this->get_cart_for_session(),
 				)
 			);
@@ -264,7 +267,7 @@ final class WC_Cart_Session {
 		$saved_cart = array();
 
 		if ( apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
-			$suffix = WC()->session->get_cart_key_suffix();
+			$suffix          = WC()->session->get_cart_key_suffix();
 			$saved_cart_meta = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart' . $suffix, true );
 
 			if ( isset( $saved_cart_meta['cart'] ) ) {
@@ -278,7 +281,7 @@ final class WC_Cart_Session {
 	/**
 	 * Get a cart from an order, if user has permission.
 	 *
-	 * @param int $order_id Order ID to try to load.
+	 * @param int   $order_id Order ID to try to load.
 	 * @param array $cart Current cart array.
 	 *
 	 * @since 3.5.0
@@ -333,8 +336,10 @@ final class WC_Cart_Session {
 			$cart_id          = WC()->cart->generate_cart_id( $product_id, $variation_id, $variations, $cart_item_data );
 			$product_data     = wc_get_product( $variation_id ? $variation_id : $product_id );
 			$cart[ $cart_id ] = apply_filters(
-				'woocommerce_add_order_again_cart_item', array_merge(
-					$cart_item_data, array(
+				'woocommerce_add_order_again_cart_item',
+				array_merge(
+					$cart_item_data,
+					array(
 						'key'          => $cart_id,
 						'product_id'   => $product_id,
 						'variation_id' => $variation_id,
@@ -343,7 +348,8 @@ final class WC_Cart_Session {
 						'data'         => $product_data,
 						'data_hash'    => wc_get_cart_item_data_hash( $product_data ),
 					)
-				), $cart_id
+				),
+				$cart_id
 			);
 		}
 

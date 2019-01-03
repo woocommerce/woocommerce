@@ -108,7 +108,6 @@ class WC_Session_Handler extends WC_Session {
 	 * We need to suffix the cart session variable to avoid ambiguous lookup in multisite setups.
 	 *
 	 * @param string $key Key to get.
-	 * @param mixed $default used if the session variable isn't set.
 	 *
 	 * @return array|string value of session variable
 	 */
@@ -122,11 +121,11 @@ class WC_Session_Handler extends WC_Session {
 	 * Get a session variable.
 	 *
 	 * @param string $key Key to get.
-	 * @param mixed $default used if the session variable isn't set.
+	 * @param mixed  $default used if the session variable isn't set.
 	 *
 	 * @return array|string value of session variable
 	 */
-	public function get( $key, $default = NULL ) {
+	public function get( $key, $default = null ) {
 		$key = $this->maybe_suffix_cart_key( $key );
 
 		return parent::get( $key, $default );
@@ -136,7 +135,7 @@ class WC_Session_Handler extends WC_Session {
 	 * Set a session variable.
 	 *
 	 * @param string $key Key to set.
-	 * @param mixed $value Value to set.
+	 * @param mixed  $value Value to set.
 	 */
 	public function set( $key, $value ) {
 		$key = $this->maybe_suffix_cart_key( $key );
