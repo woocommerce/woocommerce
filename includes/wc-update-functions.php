@@ -1906,3 +1906,53 @@ function wc_update_352_drop_download_log_fk() {
 		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY fk_wc_download_log_permission_id" ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 	}
 }
+
+/**
+ * Rename the session key for cart contents from "cart" to new "cart_1"
+ *
+ * @return void
+ */
+// FIXME: correct woo version string!
+function wc_update_354_rename_session_cart_keys() {
+
+	global $wpdb;
+
+	$session_table = $wpdb->prefix . 'woocommerce_sessions';
+
+	$sessions = $wpdb->get_results(
+		"SELECT session_id, session_value FROM {$session_table}"
+	);
+
+	foreach ( $sessions as $session ) {
+
+		$session_data = (array) maybe_unserialize( $session->session_value );
+
+		if ( isset( $session_data['cart'] ) ) {
+			$session_data['cart_1'] = $session_data['cart'];
+			unset( $session_data['cart'] );
+			$new_data = maybe_serialize( $session_data );
+
+			// Update
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE $session_table
+						SET session_value = %s
+						WHERE session_id = %d",
+					array(
+						$new_data,
+						$session->session_id
+					)
+				)
+			);
+		}
+	}
+}
+
+/**
+ * Update DB Version.
+ */
+
+// FIXME: correct db/woo version string!
+function wc_update_354_db_version() {
+	WC_Install::update_db_version( '3.5.4' );
+}

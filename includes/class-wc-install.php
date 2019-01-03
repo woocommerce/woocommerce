@@ -120,6 +120,10 @@ class WC_Install {
 		'3.5.2' => array(
 			'wc_update_352_drop_download_log_fk',
 		),
+		'3.5.4' => array(
+			'wc_update_354_rename_session_cart_keys',
+			'wc_update_354_db_version',
+		),
 	);
 
 	/**
