@@ -21,16 +21,17 @@ final class WC_Cart_Session {
 	 * Reference to cart object.
 	 *
 	 * @since 3.2.0
-	 * @var WC_Cart
+	 * @var   WC_Cart
 	 */
 	protected $cart;
 
 	/**
 	 * Sets up the items provided, and calculate totals.
 	 *
-	 * @since 3.2.0
-	 * @throws Exception If missing WC_Cart object.
 	 * @param WC_Cart $cart Cart object to calculate totals for.
+	 *
+	 * @since  3.2.0
+	 * @throws Exception If missing WC_Cart object.
 	 */
 	public function __construct( &$cart ) {
 		if ( ! is_a( $cart, 'WC_Cart' ) ) {
@@ -277,9 +278,11 @@ final class WC_Cart_Session {
 	/**
 	 * Get a cart from an order, if user has permission.
 	 *
-	 * @since  3.5.0
-	 * @param int   $order_id Order ID to try to load.
+	 * @param int $order_id Order ID to try to load.
 	 * @param array $cart Current cart array.
+	 *
+	 * @since 3.5.0
+	 *
 	 * @return array
 	 */
 	private function populate_cart_from_order( $order_id, $cart ) {

@@ -13,8 +13,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Prevent password protected products being added to the cart.
  *
- * @param  bool $passed     Validation.
- * @param  int  $product_id Product ID.
+ * @param bool $passed     Validation.
+ * @param int  $product_id Product ID.
+ *
  * @return bool
  */
 function wc_protected_product_add_to_cart( $passed, $product_id ) {
@@ -41,6 +42,7 @@ function wc_empty_cart() {
  *
  * @param string  $user_login User login.
  * @param WP_User $user       User data.
+ *
  * @deprecated 2.3
  */
 function wc_load_persistent_cart( $user_login, $user ) {
@@ -67,7 +69,7 @@ function wc_load_persistent_cart( $user_login, $user ) {
  *
  * Do not use for redirects, use {@see wp_get_referer()} instead.
  *
- * @since 2.6.1
+ * @since  2.6.1
  * @return string|false Referer URL on success, false on failure.
  */
 function wc_get_raw_referer() {
@@ -141,7 +143,8 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 /**
  * Comma separate a list of item names, and replace final comma with 'and'.
  *
- * @param  array $items Cart items.
+ * @param array $items Cart items.
+ *
  * @return string
  */
 function wc_format_list_of_items( $items ) {
@@ -338,7 +341,8 @@ function wc_cart_totals_fee_html( $fee ) {
 /**
  * Get a shipping methods full label including price.
  *
- * @param  WC_Shipping_Rate $method Shipping method rate data.
+ * @param WC_Shipping_Rate $method Shipping method rate data.
+ *
  * @return string
  */
 function wc_cart_totals_shipping_method_label( $method ) {
@@ -364,8 +368,9 @@ function wc_cart_totals_shipping_method_label( $method ) {
 /**
  * Round discount.
  *
- * @param  double $value Amount to round.
- * @param  int    $precision DP to round.
+ * @param double $value Amount to round.
+ * @param int    $precision DP to round.
+ *
  * @return float
  */
 function wc_cart_round_discount( $value, $precision ) {
@@ -391,9 +396,11 @@ function wc_get_chosen_shipping_method_ids() {
 /**
  * Get chosen method for package from session.
  *
- * @since  3.2.0
- * @param  int   $key Key of package.
- * @param  array $package Package data array.
+ * @param int   $key Key of package.
+ * @param array $package Package data array.
+ *
+ * @since 3.2.0
+ *
  * @return string|bool
  */
 function wc_get_chosen_shipping_method_for_package( $key, $package ) {
@@ -427,10 +434,12 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 /**
  * Choose the default method for a package.
  *
- * @since  3.2.0
- * @param  int    $key Key of package.
- * @param  array  $package Package data array.
- * @param  string $chosen_method Chosen method id.
+ * @param int    $key Key of package.
+ * @param array  $package Package data array.
+ * @param string $chosen_method Chosen method id.
+ *
+ * @since 3.2.0
+ *
  * @return string
  */
 function wc_get_default_shipping_method_for_package( $key, $package, $chosen_method ) {
@@ -454,9 +463,11 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 /**
  * See if the methods have changed since the last request.
  *
- * @since  3.2.0
- * @param  int   $key Key of package.
- * @param  array $package Package data array.
+ * @param int   $key Key of package.
+ * @param array $package Package data array.
+ *
+ * @since 3.2.0
+ *
  * @return bool
  */
 function wc_shipping_methods_have_changed( $key, $package ) {
@@ -477,6 +488,7 @@ function wc_shipping_methods_have_changed( $key, $package ) {
  * The woocommerce_cart_item_data_to_validate filter can be used to add custom properties.
  *
  * @param WC_Product $product Product object.
+ *
  * @return string
  */
 function wc_get_cart_item_data_hash( $product ) {

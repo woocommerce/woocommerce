@@ -5,9 +5,9 @@
  *
  * From 2.5 this uses a custom table for session storage. Based on https://github.com/kloon/woocommerce-large-sessions.
  *
- * @class    WC_Session_Handler
- * @version  2.5.0
- * @package  WooCommerce/Classes
+ * @class   WC_Session_Handler
+ * @version 2.5.0
+ * @package WooCommerce/Classes
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -255,6 +255,7 @@ class WC_Session_Handler extends WC_Session {
 	 * When a user is logged out, ensure they have a unique nonce by using the customer/session ID.
 	 *
 	 * @param int $uid User ID.
+	 *
 	 * @return string
 	 */
 	public function nonce_user_logged_out( $uid ) {
@@ -279,6 +280,7 @@ class WC_Session_Handler extends WC_Session {
 	 *
 	 * @param string $customer_id Custo ID.
 	 * @param mixed  $default Default session value.
+	 *
 	 * @return string|array
 	 */
 	public function get_session( $customer_id, $default = false ) {
