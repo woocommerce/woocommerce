@@ -292,7 +292,6 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_REST_Reports_Control
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
-
 		);
 		$params['product_excludes'] = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified product(s) assigned.', 'wc-admin' ),
