@@ -212,6 +212,7 @@ class WC_Admin_Taxonomies {
 		} else {
 			$image = wc_placeholder_img_src();
 		}
+		$image = apply_filters('wc_edit_category_fields_image', $image, $term );
 		?>
 		<tr class="form-field term-display-type-wrap">
 			<th scope="row" valign="top"><label><?php _e( 'Display type', 'woocommerce' ); ?></label></th>
