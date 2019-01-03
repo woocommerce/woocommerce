@@ -43,6 +43,7 @@ add_filter( 'woocommerce_attribute_label', 'wp_kses_post', 100 );
 /**
  * Short Description (excerpt).
  */
+add_filter( 'woocommerce_short_description', 'do_blocks', 9 );
 add_filter( 'woocommerce_short_description', 'wptexturize' );
 add_filter( 'woocommerce_short_description', 'convert_smilies' );
 add_filter( 'woocommerce_short_description', 'convert_chars' );
