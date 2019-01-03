@@ -85,7 +85,7 @@ A number formatting string, passed to d3Format.
 
 ### `mode`
 
-- Type: One of: 'item-comparison', 'time-comparison'
+- Type: One of: 'block', 'item-comparison', 'time-comparison'
 - Default: `'time-comparison'`
 
 `item-comparison` (default) or `time-comparison`, this is used to generate correct
