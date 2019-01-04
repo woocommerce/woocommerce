@@ -762,7 +762,7 @@ class WC_Countries {
 							'required' => false,
 							'hidden'   => true,
 						),
-						'state' => array(
+						'state'    => array(
 							'label' => __( 'Province', 'woocommerce' ),
 						),
 					),
