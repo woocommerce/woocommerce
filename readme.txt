@@ -170,6 +170,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Apply sale price until end of closing sale date. #22189
 * Fix - Allow empty schema again when registering a custom field for the API. #22204
 * Fix - Don't display escaped html on checkout when javascript is disabled. #22214
+* Fix - Fixed formatted address in uppercase for languages that use accents. #22096
 
 = 3.5.3 - 2018-12-20 =
 * Fix - Fix orders list in the admin after a change introduced in WordPress 5.0.2. #22273
