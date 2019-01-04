@@ -30,7 +30,7 @@
     "chromedriver": "^2.40.0",
     "config": "^1.24.0",
     "cross-env": "^5.1.6",
-    "eslint": "5.8.0",
+    "eslint": "5.12.0",
     "eslint-config-wpcalypso": "4.0.1",
     "eslint-plugin-wpcalypso": "4.0.2",
     "grunt": "^1.0.3",
