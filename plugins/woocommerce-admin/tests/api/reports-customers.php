@@ -97,6 +97,16 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test calling update_registered_customer() with a bad user id.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_update_registered_customer_with_bad_user_id() {
+		$result = WC_Admin_Reports_Customers_Data_Store::update_registered_customer( 2 );
+		$this->assertFalse( $result );
+	}
+
+	/**
 	 * Test getting reports.
 	 *
 	 * @since 3.5.0

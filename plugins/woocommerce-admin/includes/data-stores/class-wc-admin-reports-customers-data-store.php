@@ -466,7 +466,12 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	public static function update_registered_customer( $user_id ) {
 		global $wpdb;
 
-		$customer    = new WC_Customer( $user_id );
+		$customer = new WC_Customer( $user_id );
+
+		if ( $customer->get_id() != $user_id ) {
+			return false;
+		}
+
 		$order_count = $customer->get_order_count( 'edit' );
 		$total_spend = $customer->get_total_spent( 'edit' );
 		$last_order  = $customer->get_last_order();
