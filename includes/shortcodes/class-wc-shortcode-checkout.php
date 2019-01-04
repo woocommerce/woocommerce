@@ -86,7 +86,7 @@ class WC_Shortcode_Checkout {
 			try {
 				$order_key          = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // WPCS: input var ok, CSRF ok.
 				$order              = wc_get_order( $order_id );
- 				$hold_stock_minutes = (int) get_option( 'woocommerce_hold_stock_minutes', 0 );
+				$hold_stock_minutes = (int) get_option( 'woocommerce_hold_stock_minutes', 0 );
 
 				// Order or payment link is invalid.
 				if ( ! $order || $order->get_id() !== $order_id || $order->get_order_key() !== $order_key ) {
@@ -177,7 +177,8 @@ class WC_Shortcode_Checkout {
 				}
 
 				wc_get_template(
-					'checkout/form-pay.php', array(
+					'checkout/form-pay.php',
+					array(
 						'order'              => $order,
 						'available_gateways' => $available_gateways,
 						'order_button_text'  => apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) ),
