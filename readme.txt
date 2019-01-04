@@ -172,6 +172,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Don't display escaped html on checkout when javascript is disabled. #22214
 * Fix - Fixed formatted address in uppercase for languages that use accents. #22096
 * Fix - Reload the cart page when the cart is empty when there is a hash in the URL. #22114
+* Fix - Do not schedule duplicate webhooks within 10 minutes of each other to maintain previous behavior. #22088
+* Fix - Return correct next scheduled date for items in queue by fixing date instantiation in WC_Action_Queue::get_next(). #22104
 
 = 3.5.3 - 2018-12-20 =
 * Fix - Fix orders list in the admin after a change introduced in WordPress 5.0.2. #22273
