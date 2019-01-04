@@ -67,6 +67,11 @@ class ProductByCategoryBlock extends Component {
 	}
 
 	getProducts() {
+		if ( ! this.props.attributes.categories.length ) {
+			// We've removed all selected categories, or no categories have been selected yet.
+			this.setState( { products: [], loaded: true } );
+			return;
+		}
 		apiFetch( {
 			path: addQueryArgs(
 				'/wc-pb/v3/products',
@@ -202,6 +207,18 @@ class ProductByCategoryBlock extends Component {
 			}
 		}
 
+		const nothingFound = ! categories.length ?
+			__(
+				'Select at least one category to display its products.',
+				'woo-gutenberg-products-block'
+			) :
+			_n(
+				'No products in this category.',
+				'No products in these categories.',
+				categories.length,
+				'woo-gutenberg-products-block'
+			);
+
 		return (
 			<Fragment>
 				<BlockControls>
@@ -238,16 +255,7 @@ class ProductByCategoryBlock extends Component {
 									'woo-gutenberg-products-block'
 								) }
 							>
-								{ ! loaded ? (
-									<Spinner />
-								) : (
-									_n(
-										'No products in this category.',
-										'No products in these categories.',
-										categories.length,
-										'woo-gutenberg-products-block'
-									)
-								) }
+								{ ! loaded ? <Spinner /> : nothingFound }
 							</Placeholder>
 						) }
 					</div>

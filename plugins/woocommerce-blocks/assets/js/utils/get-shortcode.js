@@ -49,6 +49,11 @@ export default function getShortcode( { attributes }, name ) {
 			shortcodeAtts.set( 'ids', products.join( ',' ) );
 			shortcodeAtts.set( 'limit', products.length );
 			break;
+		case 'woocommerce/product-category':
+			if ( ! categories || ! categories.length ) {
+				return '';
+			}
+			break;
 	}
 
 	// Build the shortcode string out of the set shortcode attributes.
