@@ -152,7 +152,6 @@ class DateRange extends Component {
 						noBorder
 						initialVisibleMonth={ this.setTnitialVisibleMonth( isDoubleCalendar, before ) }
 						phrases={ phrases }
-						firstDayOfWeek={ Number( wcSettings.date.dow ) }
 					/>
 				</div>
 			</div>

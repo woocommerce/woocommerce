@@ -455,28 +455,23 @@ describe( 'getRangeLabel', () => {
 describe( 'loadLocaleData', () => {
 	beforeEach( () => {
 		// Reset to default settings
-		wcSettings.date.dow = 0;
 		wcSettings.l10n = {
 			userLocale: 'en_US',
 			weekdaysShort: [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ],
 		};
 	} );
 
-	it( 'should leave default momentjs data unchanged for english languages', () => {
-		loadLocaleData();
-		expect( moment.locale() ).toBe( 'en' );
-	} );
-
-	it( "should load locale data on user locale other than 'en-*'", () => {
-		wcSettings.date.dow = 5;
+	it( 'should load locale data on user locale', () => {
 		wcSettings.l10n = {
 			userLocale: 'fr_FR',
 			weekdaysShort: [ 'dim', 'lun', 'mar', 'mer', 'jeu', 'ven', 'sam' ],
 		};
 
+		// initialize locale. Gutenberg normaly does this, but not in test environment.
+		moment.locale( 'fr_FR', {} );
+
 		loadLocaleData();
 		expect( moment.localeData().weekdaysMin() ).toEqual( wcSettings.l10n.weekdaysShort );
-		expect( moment.localeData().firstDayOfWeek() ).toBe( wcSettings.date.dow );
 	} );
 } );
 

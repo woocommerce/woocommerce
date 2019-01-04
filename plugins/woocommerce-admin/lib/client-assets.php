@@ -180,9 +180,6 @@ function wc_admin_print_script_settings() {
 		'embedBreadcrumbs' => wc_admin_get_embed_breadcrumbs(),
 		'siteLocale'       => esc_attr( get_bloginfo( 'language' ) ),
 		'currency'         => wc_admin_currency_settings(),
-		'date'             => array(
-			'dow' => get_option( 'start_of_week', 0 ),
-		),
 		'orderStatuses'    => format_order_statuses( wc_get_order_statuses() ),
 		'stockStatuses'    => wc_get_product_stock_status_options(),
 		'siteTitle'        => get_bloginfo( 'name' ),

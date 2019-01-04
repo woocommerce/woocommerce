@@ -490,15 +490,14 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
 }
 
 /**
- * Gutenberg's moment instance is loaded with i18n values. If the locale isn't english
- * we can use that data and enhance it with additional translations
+ * Gutenberg's moment instance is loaded with i18n values, which are
+ * PHP date formats, ie 'LLL: "F j, Y g:i a"'. Override those with translations
+ * of moment style js formats.
  */
 export function loadLocaleData() {
-	const { date, l10n } = wcSettings;
-	const { userLocale, weekdaysShort } = l10n;
-
-	// Keep the default Momentjs English settings for any English
-	if ( ! userLocale.match( /en_/ ) ) {
+	const { userLocale, weekdaysShort } = wcSettings.l10n;
+	// Don't update if the wp locale hasn't been set yet, like in unit tests, for instance.
+	if ( 'en' !== moment.locale() ) {
 		moment.updateLocale( userLocale, {
 			longDateFormat: {
 				L: __( 'MM/DD/YYYY', 'wc-admin' ),
@@ -506,17 +505,6 @@ export function loadLocaleData() {
 				LLL: __( 'D MMMM YYYY LT', 'wc-admin' ),
 				LLLL: __( 'dddd, D MMMM YYYY LT', 'wc-admin' ),
 				LT: __( 'HH:mm', 'wc-admin' ),
-			},
-			calendar: {
-				lastDay: __( '[Yesterday at] LT', 'wc-admin' ),
-				lastWeek: __( '[Last] dddd [at] LT', 'wc-admin' ),
-				nextDay: __( '[Tomorrow at] LT', 'wc-admin' ),
-				nextWeek: __( 'dddd [at] LT', 'wc-admin' ),
-				sameDay: __( '[Today at] LT', 'wc-admin' ),
-				sameElse: __( 'L', 'wc-admin' ),
-			},
-			week: {
-				dow: Number( date.dow ),
 			},
 			weekdaysMin: weekdaysShort,
 		} );
