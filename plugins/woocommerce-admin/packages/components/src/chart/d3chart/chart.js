@@ -15,24 +15,25 @@ import { select as d3Select } from 'd3-selection';
  */
 import D3Base from './d3base';
 import {
-	drawAxis,
-	drawBars,
-	drawLines,
 	getDateSpaces,
 	getOrderedKeys,
 	getLine,
 	getLineData,
-	getXTicks,
 	getUniqueKeys,
 	getUniqueDates,
+	getFormatter,
+} from './utils';
+import {
 	getXScale,
 	getXGroupScale,
 	getXLineScale,
 	getYMax,
 	getYScale,
 	getYTickOffset,
-	getFormatter,
-} from './utils';
+} from './utils/scales';
+import { drawAxis, getXTicks } from './utils/axis';
+import { drawBars } from './utils/bar-chart';
+import { drawLines } from './utils/line-chart';
 
 /**
  * A simple D3 line and bar chart component for timeseries data in React.
