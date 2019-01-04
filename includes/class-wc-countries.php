@@ -135,11 +135,11 @@ class WC_Countries {
 			'YT' => array(),
 		);
 
-		// Load only the state files the shop owner wants/needs.
-		$allowed = array_merge( $this->get_allowed_countries(), $this->get_shipping_countries() );
+		// Load states for all other countries from our locale files.
+		$countries = $this->get_countries();
 
-		if ( ! empty( $allowed ) ) {
-			foreach ( $allowed as $code => $country ) {
+		if ( ! empty( $countries ) ) {
+			foreach ( $countries as $code => $country ) {
 				if ( ! isset( $states[ $code ] ) && file_exists( WC()->plugin_path() . '/i18n/states/' . $code . '.php' ) ) {
 					include WC()->plugin_path() . '/i18n/states/' . $code . '.php';
 				}
@@ -434,7 +434,7 @@ class WC_Countries {
 	 *
 	 * @param string $selected_country Selected country.
 	 * @param string $selected_state   Selected state.
-	 * @param bool   $escape           If should escape HTML.
+	 * @param bool   $escape           If we should escape HTML.
 	 */
 	public function country_dropdown_options( $selected_country = '', $selected_state = '', $escape = false ) {
 		if ( $this->countries ) {
