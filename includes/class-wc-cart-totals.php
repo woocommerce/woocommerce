@@ -421,7 +421,15 @@ final class WC_Cart_Totals {
 	 */
 	protected function remove_item_base_taxes( $item ) {
 		if ( $item->price_includes_tax && $item->taxable ) {
-			$base_tax_rates = WC_Tax::get_base_tax_rates( $item->product->get_tax_class( 'unfiltered' ) );
+			if ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
+				$base_tax_rates = WC_Tax::get_base_tax_rates( $item->product->get_tax_class( 'unfiltered' ) );
+			} else {
+				/**
+				 * If we want all customers to pay the same price on this store, we should not remove base taxes from a VAT exempt user's price,
+				 * but just the relevent tax rate. See issue #20911.
+				 */
+				$base_tax_rates = $item->tax_rates;
+			}
 
 			// Work out a new base price without the shop's base tax.
 			$taxes = WC_Tax::calc_tax( $item->price, $base_tax_rates, true );
