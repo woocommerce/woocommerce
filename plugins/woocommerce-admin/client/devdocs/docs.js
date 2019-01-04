@@ -18,7 +18,8 @@ class Docs extends Component {
 	}
 
 	getReadme() {
-		const readme = require( `../../docs/components/${ this.props.filePath }.md` );
+		const { filePath, docPath } = this.props;
+		const readme = require( `../../docs/components/${ docPath }/${ filePath }.md` );
 		if ( ! readme ) {
 			return;
 		}
@@ -36,5 +37,9 @@ class Docs extends Component {
 		return <div className="woocommerce-devdocs__docs">{ readme }</div>;
 	}
 }
+
+Docs.defaultProps = {
+	docPath: 'packages',
+};
 
 export default Docs;
