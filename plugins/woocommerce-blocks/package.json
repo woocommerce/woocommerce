@@ -43,7 +43,7 @@
     "core-js": "2.6.1",
     "cross-env": "5.2.0",
     "css-loader": "2.1.0",
-    "eslint": "5.11.1",
+    "eslint": "5.12.0",
     "eslint-config-wordpress": "2.0.0",
     "eslint-plugin-jest": "22.1.2",
     "eslint-plugin-jsx-a11y": "6.1.2",
