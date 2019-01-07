@@ -37,7 +37,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base,
+			$this->namespace,
+			'/' . $this->rest_base,
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
@@ -835,7 +836,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 									'changelog' => $body->sections['changelog'],
 								);
 								set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
-								break;
 							}
 						}
 					}

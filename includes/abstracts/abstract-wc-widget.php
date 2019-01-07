@@ -59,8 +59,8 @@ abstract class WC_Widget extends WP_Widget {
 	 */
 	public function __construct() {
 		$widget_ops = array(
-			'classname'   => $this->widget_cssclass,
-			'description' => $this->widget_description,
+			'classname'                   => $this->widget_cssclass,
+			'description'                 => $this->widget_description,
 			'customize_selective_refresh' => true,
 		);
 
@@ -299,7 +299,7 @@ abstract class WC_Widget extends WP_Widget {
 			$link = get_term_link( get_query_var( 'product_tag' ), 'product_tag' );
 		} else {
 			$queried_object = get_queried_object();
-			$link = get_term_link( $queried_object->slug, $queried_object->taxonomy );
+			$link           = get_term_link( $queried_object->slug, $queried_object->taxonomy );
 		}
 
 		// Min/Max.

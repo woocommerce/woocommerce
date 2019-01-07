@@ -1148,6 +1148,9 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					'description' => __( 'Payment method title.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 				'set_paid' => array(
 					'description' => __( 'Define if the order is paid. It will set the status to processing and reduce stock items.', 'woocommerce' ),

@@ -541,7 +541,7 @@ add_filter( 'terms_clauses', 'wc_terms_clauses', 99, 3 );
  * Function for recounting product terms, ignoring hidden products.
  *
  * @param array  $terms                       List of terms.
- * @param string $taxonomy                    Taxonomy.
+ * @param object $taxonomy                    Taxonomy.
  * @param bool   $callback                    Callback.
  * @param bool   $terms_are_term_taxonomy_ids If terms are from term_taxonomy_id column.
  */

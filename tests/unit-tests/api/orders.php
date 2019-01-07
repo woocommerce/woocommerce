@@ -209,6 +209,82 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test the sanitization of the payment_method_title field through the API.
+	 *
+	 * @since 3.5.2
+	 */
+	public function test_create_update_order_payment_method_title_sanitize() {
+		wp_set_current_user( $this->user );
+		$product = WC_Helper_Product::create_simple_product();
+
+		// Test when creating order.
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params(
+			array(
+				'payment_method'       => 'bacs',
+				'payment_method_title' => '<h1>Sanitize this <script>alert(1);</script></h1>',
+				'set_paid'             => true,
+				'billing'              => array(
+					'first_name' => 'John',
+					'last_name'  => 'Doe',
+					'address_1'  => '969 Market',
+					'address_2'  => '',
+					'city'       => 'San Francisco',
+					'state'      => 'CA',
+					'postcode'   => '94103',
+					'country'    => 'US',
+					'email'      => 'john.doe@example.com',
+					'phone'      => '(555) 555-5555',
+				),
+				'shipping'             => array(
+					'first_name' => 'John',
+					'last_name'  => 'Doe',
+					'address_1'  => '969 Market',
+					'address_2'  => '',
+					'city'       => 'San Francisco',
+					'state'      => 'CA',
+					'postcode'   => '94103',
+					'country'    => 'US',
+				),
+				'line_items'           => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 2,
+					),
+				),
+				'shipping_lines'       => array(
+					array(
+						'method_id'    => 'flat_rate',
+						'method_title' => 'Flat rate',
+						'total'        => '10',
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+		$order    = wc_get_order( $data['id'] );
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEquals( $order->get_payment_method(), $data['payment_method'] );
+		$this->assertEquals( $order->get_payment_method_title(), 'Sanitize this' );
+
+		// Test when updating order.
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $data['id'] );
+		$request->set_body_params(
+			array(
+				'payment_method'       => 'bacs',
+				'payment_method_title' => '<h1>Sanitize this too <script>alert(1);</script></h1>'
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+		$order    = wc_get_order( $data['id'] );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $order->get_payment_method(), $data['payment_method'] );
+		$this->assertEquals( $order->get_payment_method_title(), 'Sanitize this too' );
+	}
+
+	/**
 	 * Tests creating an order without required fields.
 	 * @since 3.5.0
 	 */

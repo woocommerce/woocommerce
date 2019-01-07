@@ -43,7 +43,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						'is_visible'   => 0,
 						'is_variation' => 0,
 						'is_taxonomy'  => 0,
-					), (array) $meta_attribute_value
+					),
+					(array) $meta_attribute_value
 				);
 
 				// Maintain data integrity. 4.9 changed sanitization functions - update the values here so variations function correctly.
@@ -184,7 +185,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$values = array_unique(
 					$wpdb->get_col(
 						$wpdb->prepare(
-							"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',', array_map( 'absint', $child_ids ) ) . ')', // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+							// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+							"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN (" . implode( ',', array_map( 'absint', $child_ids ) ) . ')',
 							wc_variation_attribute_name( $attribute['name'] )
 						)
 					)
@@ -286,38 +288,44 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						if ( $for_display ) {
 							if ( 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) {
 								$price         = '' === $price ? '' : wc_get_price_including_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $price,
 									)
 								);
 								$regular_price = '' === $regular_price ? '' : wc_get_price_including_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $regular_price,
 									)
 								);
 								$sale_price    = '' === $sale_price ? '' : wc_get_price_including_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $sale_price,
 									)
 								);
 							} else {
 								$price         = '' === $price ? '' : wc_get_price_excluding_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $price,
 									)
 								);
 								$regular_price = '' === $regular_price ? '' : wc_get_price_excluding_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $regular_price,
 									)
 								);
 								$sale_price    = '' === $sale_price ? '' : wc_get_price_excluding_tax(
-									$variation, array(
+									$variation,
+									array(
 										'qty'   => 1,
 										'price' => $sale_price,
 									)
@@ -394,7 +402,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	public function child_has_weight( $product ) {
 		global $wpdb;
 		$children = $product->get_visible_children();
-		return $children ? null !== $wpdb->get_var( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : false; // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		return $children ? null !== $wpdb->get_var( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : false; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -407,7 +415,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	public function child_has_dimensions( $product ) {
 		global $wpdb;
 		$children = $product->get_visible_children();
-		return $children ? null !== $wpdb->get_var( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND meta_value > 0 AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : false; // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		return $children ? null !== $wpdb->get_var( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND meta_value > 0 AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) : false; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -437,7 +445,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		if ( $children ) {
 			$children_with_status = $wpdb->get_var(
 				$wpdb->prepare(
-					"SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = %s AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )', // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+					"SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = %s AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )',
 					$status
 				)
 			);
@@ -487,7 +496,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		if ( $product->get_manage_stock() ) {
 			$status           = $product->get_stock_status();
 			$children         = $product->get_children();
-			$managed_children = $children ? array_unique( $wpdb->get_col( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) ) : array(); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+			$managed_children = $children ? array_unique( $wpdb->get_col( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) ) : array(); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$changed          = false;
 			foreach ( $managed_children as $managed_child ) {
 				if ( update_post_meta( $managed_child, '_stock_status', $status ) ) {
@@ -512,7 +521,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		global $wpdb;
 
 		$children = $product->get_visible_children();
-		$prices   = $children ? array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) ) : array(); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		$prices   = $children ? array_unique( $wpdb->get_col( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN ( " . implode( ',', array_map( 'absint', $children ) ) . ' )' ) ) : array(); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 		delete_post_meta( $product->get_id(), '_price' );
 		delete_post_meta( $product->get_id(), '_sale_price' );

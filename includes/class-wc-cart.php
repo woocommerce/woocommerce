@@ -778,7 +778,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 
 			// Check stock based on all items in the cart and consider any held stock within pending orders.
-			$held_stock     = wc_get_held_stock_quantity( $product, $current_session_order_id );
+			$held_stock     = ( $hold_stock_minutes > 0 ) ? wc_get_held_stock_quantity( $product, $current_session_order_id ) : 0;
 			$required_stock = $product_qty_in_cart[ $product->get_stock_managed_by_id() ];
 
 			if ( $product->get_stock_quantity() < ( $held_stock + $required_stock ) ) {
@@ -1226,7 +1226,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Uses the shipping class to calculate shipping then gets the totals when its finished.
 	 */
 	public function calculate_shipping() {
-		$this->shipping_methods = $this->needs_shipping() ? $this->get_chosen_shipping_methods( WC()->shipping->calculate_shipping( $this->get_shipping_packages() ) ) : array();
+		$this->shipping_methods = $this->needs_shipping() ? $this->get_chosen_shipping_methods( WC()->shipping()->calculate_shipping( $this->get_shipping_packages() ) ) : array();
 
 		$shipping_taxes = wp_list_pluck( $this->shipping_methods, 'taxes' );
 		$merged_taxes   = array();
@@ -1604,7 +1604,7 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		// Choose free shipping.
 		if ( $the_coupon->get_free_shipping() ) {
-			$packages                = WC()->shipping->get_packages();
+			$packages                = WC()->shipping()->get_packages();
 			$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
 			foreach ( $packages as $i => $package ) {
