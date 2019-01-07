@@ -178,6 +178,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Fix 0 value attribute permalink calculation, property population in REST api. #22026
 * Fix - Ensure cache delete on coupon trash or delete. #22053
 * Fix - Ensure product parent exists before getting its image. #22074
+* Dev - REST API - Fixed support to order results by slugs. #22168
 
 = 3.5.3 - 2018-12-20 =
 * Fix - Fix orders list in the admin after a change introduced in WordPress 5.0.2. #22273
