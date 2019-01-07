@@ -612,6 +612,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$response = array();
+
 		try {
 			parse_str( $_POST['data'], $data );
 
@@ -623,8 +625,6 @@ class WC_AJAX {
 
 			$product->set_attributes( $attributes );
 			$product->save();
-
-			$response = array();
 
 			ob_start();
 			$attributes = $product->get_attributes( 'edit' );
@@ -847,6 +847,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$response = array();
+
 		try {
 			if ( ! isset( $_POST['order_id'] ) ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
@@ -916,6 +918,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$response = array();
+
 		try {
 			$order_id           = absint( $_POST['order_id'] );
 			$amount             = wc_clean( $_POST['amount'] );
@@ -971,6 +975,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$response = array();
+
 		try {
 			$order_id         = absint( $_POST['order_id'] );
 			$order            = wc_get_order( $order_id );
@@ -1003,6 +1009,8 @@ class WC_AJAX {
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			wp_die( -1 );
 		}
+
+		$response = array();
 
 		try {
 			$order_id = absint( $_POST['order_id'] );
@@ -1037,6 +1045,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$response = array();
+
 		try {
 			$order_id = absint( $_POST['order_id'] );
 			$order    = wc_get_order( $order_id );
@@ -1067,6 +1077,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$response = array();
+
 		try {
 			$order_id = absint( $_POST['order_id'] );
 			$order    = wc_get_order( $order_id );
@@ -1093,6 +1105,8 @@ class WC_AJAX {
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			wp_die( -1 );
 		}
+
+		$response = array();
 
 		try {
 			$order_id           = absint( $_POST['order_id'] );
@@ -1147,6 +1161,8 @@ class WC_AJAX {
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			wp_die( -1 );
 		}
+
+		$response = array();
 
 		try {
 			$order_id = absint( $_POST['order_id'] );
@@ -1618,7 +1634,7 @@ class WC_AJAX {
 		$api_refund             = 'true' === $_POST['api_refund'];
 		$restock_refunded_items = 'true' === $_POST['restock_refunded_items'];
 		$refund                 = false;
-		$response_data          = array();
+		$response               = array();
 
 		try {
 			$order       = wc_get_order( $order_id );
@@ -1671,14 +1687,14 @@ class WC_AJAX {
 			}
 
 			if ( did_action( 'woocommerce_order_fully_refunded' ) ) {
-				$response_data['status'] = 'fully_refunded';
+				$response['status'] = 'fully_refunded';
 			}
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
 
 		// wp_send_json_success must be outside the try block not to break phpunit tests.
-		wp_send_json_success( $response_data );
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -1728,6 +1744,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$response = array();
+
 		try {
 			if ( empty( $_POST['description'] ) ) {
 				throw new Exception( __( 'Description is missing.', 'woocommerce' ) );
@@ -1763,9 +1781,10 @@ class WC_AJAX {
 					array( '%d' )
 				);
 
-				$data['consumer_key']    = '';
-				$data['consumer_secret'] = '';
-				$data['message']         = __( 'API Key updated successfully.', 'woocommerce' );
+				$response                    = $data;
+				$response['consumer_key']    = '';
+				$response['consumer_secret'] = '';
+				$response['message']         = __( 'API Key updated successfully.', 'woocommerce' );
 			} else {
 				$consumer_key    = 'ck_' . wc_rand_hash();
 				$consumer_secret = 'cs_' . wc_rand_hash();
@@ -1792,18 +1811,19 @@ class WC_AJAX {
 					)
 				);
 
-				$key_id                  = $wpdb->insert_id;
-				$data['consumer_key']    = $consumer_key;
-				$data['consumer_secret'] = $consumer_secret;
-				$data['message']         = __( 'API Key generated successfully. Make sure to copy your new keys now as the secret key will be hidden once you leave this page.', 'woocommerce' );
-				$data['revoke_url']      = '<a style="color: #a00; text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke key', 'woocommerce' ) . '</a>';
+				$key_id                      = $wpdb->insert_id;
+				$response                    = $data;
+				$response['consumer_key']    = $consumer_key;
+				$response['consumer_secret'] = $consumer_secret;
+				$response['message']         = __( 'API Key generated successfully. Make sure to copy your new keys now as the secret key will be hidden once you leave this page.', 'woocommerce' );
+				$response['revoke_url']      = '<a style="color: #a00; text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke key', 'woocommerce' ) . '</a>';
 			}
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
 		}
 
 		// wp_send_json_success must be outside the try block not to break phpunit tests.
-		wp_send_json_success( $data );
+		wp_send_json_success( $response );
 	}
 
 	/**
