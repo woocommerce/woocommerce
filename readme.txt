@@ -182,6 +182,9 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Avoids Warnings in Action Scheduler Library for PHP 5.2. #22160
 * Fix - Don't include product in BreadcrumbList structured data so Google will recognize stand-alone Product structured data. #22344
 * Fix - Fix Product widget showing hidden products when hide out of stock was enabled. #22230
+* Fix - Correct quote handling in tax class names. #22270
+* Fix - Prevent style side-effects on notices on the Extensions pages. #22330
+* Fix - Check stock status of items when 'ordering again' from the account page. #22331
 * Dev - REST API - Fixed support to order results by slugs. #22168
 
 = 3.5.3 - 2018-12-20 =
