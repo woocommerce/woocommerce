@@ -16,6 +16,7 @@
 * Fix - Only suppress comments number on unsupported theme shop page. #21191
 * Fix - Don't allow users without manage_product_terms permissions to create categories using the product importer. #21192
 * Fix - Correct sale coupon restriction logic. #21219
+* Fix - Fix styling of H2 headings on product descriptions in Twenty Nineteen theme. #22225
 
 = 3.4.4 - 2018-07-25 =
 * Fix - Only wordwrap plain email content. #20723
@@ -217,7 +218,7 @@
 * Fix - Delete orphaned variations after product import. #19378
 * Fix - Ensure API credentials exist before defining PayPal refund support. #19380
 * Fix - Force word-wrapping in the log viewer to prevent layout-breaking long lines. #19503
-* Fix - Removes permission checks that were preventing webhooks from displaying properly when no post object existed. #19508 
+* Fix - Removes permission checks that were preventing webhooks from displaying properly when no post object existed. #19508
 * Fix - Empty cart after completing PayPal payment. #19509
 * Fix - Strip tags on aria-labels in Add to Cart template to prevent broken HTML. #19522
 * Fix - Update post_modified date when saving products and variations but no other product data. #19595
@@ -239,7 +240,7 @@
 * Fix - WC API should not try to create a product image when creating a product variation if an empty image is passed. #19971
 * Fix - Force settings API settings to autoload by default. #19998
 * Fix - Cart html5 validation events when using keyboard. #20001
-* Fix - Don't show stock status fields in external product quick-edit. #20005 
+* Fix - Don't show stock status fields in external product quick-edit. #20005
 * Fix - Prevent an infinite loop if 2 grouped products are linked. #20020
 * Fix - Switch stock_status when manage stock gets changed to prevent being out of stock if stock quantity is > 0. #20021
 * Fix - When duplicating variation, set the date to null. #20083
@@ -495,7 +496,7 @@
 * Fix - is_visible should ensure product is is not trashed before returning true.
 * Fix - Return packages with no rates back to the cart so the shipping calculator is displayed even when the current country is not shippable.
 * Fix - Merge session and persistent carts when both exists after login.
-* Fix - Remove "wc_error" query string after login. 
+* Fix - Remove "wc_error" query string after login.
 * Fix - Allow woocommerce_form_field() have 'custom_attributes' equal 0.
 * Fix - Bulk actions in status logs table.
 * Fix - Exclude add-to-cart from pagination links.
@@ -536,19 +537,19 @@
 * Fix - Removed class within class in admin meta boxes HTML.
 * Fix - Fixed wrong `flex-control-nav` selector scope in `add-to-cart-variation.js`
 * Fix - Allow variations to be added to cart from query string.
-* Fix - Use `add_filter` for `comment_feed_where` hook. 
+* Fix - Use `add_filter` for `comment_feed_where` hook.
 * Fix - Change nocache_headers hook firing in the cache helper.
 * Fix - Coupon min/max spend based on displayed subtotal.
 * Fix - Fix event propagation on click in setup wizard and improve validation.
 * Fix - API - Change how line items are saved in API so calculations are correct.
-* Tweak - Hide downloads from admin emails. 
+* Tweak - Hide downloads from admin emails.
 * Tweak - Set placeholder for variation lxwxh field to that of the parent.
 * Tweak - Improve the Add Payment Methods display so buttons are not shown when no payment methods support the feature.
 * Localization - Update NJ tax rate.
 * Localization - Add Belarusian ruble BYN.
 
 = 3.2.3 - 2017-11-02 =
-* Fix - Fixed a conflict with some slider plugins due to sanitization of archive/term descriptions. 
+* Fix - Fixed a conflict with some slider plugins due to sanitization of archive/term descriptions.
 * Fix - Fixed a flexslider bug when there is only 1 image on the product page (no gallery).
 * Fix - Prevent potential notices when someone extends product tabs wrongly.
 * Fix - Fixed display of shipping calculator under some conditions.
