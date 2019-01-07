@@ -163,6 +163,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Only include order erasure bulk action if erasure is enabled in settings. #22354
 * Dev - Introduce `woocommerce_reviews_title` filter. #22216
 * Dev - Added `woocommerce_cheque_process_payment_order_status` filter allowing plugins to change the order status to the Cheque gateway. #21402
+* Dev - Add the current coupon object to the `woocommerce_get_shop_coupon_data` filter. #21442
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
