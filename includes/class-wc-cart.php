@@ -1079,8 +1079,10 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				// Add item after merging with $cart_item_data - hook to allow plugins to modify cart item.
 				$this->cart_contents[ $cart_item_key ] = apply_filters(
-					'woocommerce_add_cart_item', array_merge(
-						$cart_item_data, array(
+					'woocommerce_add_cart_item',
+					array_merge(
+						$cart_item_data,
+						array(
 							'key'          => $cart_item_key,
 							'product_id'   => $product_id,
 							'variation_id' => $variation_id,
@@ -1089,7 +1091,8 @@ class WC_Cart extends WC_Legacy_Cart {
 							'data'         => $product_data,
 							'data_hash'    => wc_get_cart_item_data_hash( $product_data ),
 						)
-					), $cart_item_key
+					),
+					$cart_item_key
 				);
 			}
 
@@ -1427,8 +1430,10 @@ class WC_Cart extends WC_Legacy_Cart {
 				$check_emails  = array_unique(
 					array_filter(
 						array_map(
-							'strtolower', array_map(
-								'sanitize_email', array(
+							'strtolower',
+							array_map(
+								'sanitize_email',
+								array(
 									$billing_email,
 									$current_user->user_email,
 								)
@@ -1507,7 +1512,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			// Go through the allowed emails and return true if the email matches a wildcard.
 			foreach ( $restrictions as $restriction ) {
 				// Convert to PHP-regex syntax.
-				$regex = '/' . str_replace( '*', '(.+)?', $restriction ) . '/';
+				$regex = '/^' . str_replace( '*', '(.+)?', $restriction ) . '$/';
 				preg_match( $regex, $check_email, $match );
 				if ( ! empty( $match ) ) {
 					return true;
