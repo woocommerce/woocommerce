@@ -179,6 +179,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Ensure cache delete on coupon trash or delete. #22053
 * Fix - Ensure product parent exists before getting its image. #22074
 * Fix - Correctly use wildcard character on email restrictions on coupons. #22167
+* Fix - Avoids Warnings in Action Scheduler Library for PHP 5.2. #22160
 * Dev - REST API - Fixed support to order results by slugs. #22168
 
 = 3.5.3 - 2018-12-20 =
