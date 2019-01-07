@@ -1291,7 +1291,7 @@ function wc_get_checkout_url() {
  * @param string|object $shipping_method class name (string) or a class object.
  */
 function woocommerce_register_shipping_method( $shipping_method ) {
-	WC()->shipping->register_shipping_method( $shipping_method );
+	WC()->shipping()->register_shipping_method( $shipping_method );
 }
 
 if ( ! function_exists( 'wc_get_shipping_zone' ) ) {
@@ -1462,7 +1462,7 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 
 		if ( $include_legacy ) {
 			// Count activated methods that don't support shipping zones.
-			$methods = WC()->shipping->get_shipping_methods();
+			$methods = WC()->shipping()->get_shipping_methods();
 
 			foreach ( $methods as $method ) {
 				if ( isset( $method->enabled ) && 'yes' === $method->enabled && ! $method->supports( 'shipping-zones' ) ) {

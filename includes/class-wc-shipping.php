@@ -151,7 +151,7 @@ class WC_Shipping {
 	 * If a $package is passed some methods may add themselves conditionally and zones will be used.
 	 *
 	 * @param array $package Package information.
-	 * @return array
+	 * @return WC_Shipping_Method[]
 	 */
 	public function load_shipping_methods( $package = array() ) {
 		if ( ! empty( $package ) ) {
@@ -209,7 +209,7 @@ class WC_Shipping {
 	/**
 	 * Returns all registered shipping methods for usage.
 	 *
-	 * @return array
+	 * @return WC_Shipping_Method[]
 	 */
 	public function get_shipping_methods() {
 		if ( is_null( $this->shipping_methods ) ) {
