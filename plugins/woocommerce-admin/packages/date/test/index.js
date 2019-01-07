@@ -25,15 +25,20 @@ import {
 
 describe( 'appendTimestamp', () => {
 	it( 'should append `start` timestamp', () => {
-		expect( appendTimestamp( '2018-01-01', 'start' ) ).toEqual( '2018-01-01T00:00:00+00:00' );
+		expect( appendTimestamp( moment( '2018-01-01' ), 'start' ) ).toEqual( '2018-01-01T00:00:00+00:00' );
+	} );
+
+	it( 'should append `now` timestamp', () => {
+		const nowTimestamp = moment().format( 'HH:mm:00' );
+		expect( appendTimestamp( moment( '2018-01-01' ), 'now' ) ).toEqual( '2018-01-01T' + nowTimestamp + '+00:00' );
 	} );
 
 	it( 'should append `end` timestamp', () => {
-		expect( appendTimestamp( '2018-01-01', 'end' ) ).toEqual( '2018-01-01T23:59:59+00:00' );
+		expect( appendTimestamp( moment( '2018-01-01' ), 'end' ) ).toEqual( '2018-01-01T23:59:59+00:00' );
 	} );
 
 	it( 'should throw and error if `timeOfDay` is not valid', () => {
-		expect( () => appendTimestamp( '2018-01-01' ) ).toThrow( Error );
+		expect( () => appendTimestamp( moment( '2018-01-01' ) ) ).toThrow( Error );
 	} );
 } );
 
@@ -481,16 +486,16 @@ describe( 'getCurrentDates', () => {
 		const currentDates = getCurrentDates( query );
 
 		expect( currentDates.primary ).toBeDefined();
-		expect( 'string' === typeof currentDates.primary.label ).toBe( true );
-		expect( 'string' === typeof currentDates.primary.range ).toBe( true );
-		expect( 'string' === typeof currentDates.primary.after ).toBe( true );
-		expect( 'string' === typeof currentDates.primary.before ).toBe( true );
+		expect( typeof currentDates.primary.label ).toBe( 'string' );
+		expect( typeof currentDates.primary.range ).toBe( 'string' );
+		expect( moment.isMoment( currentDates.primary.after ) ).toBe( true );
+		expect( moment.isMoment( currentDates.primary.before ) ).toBe( true );
 
 		expect( currentDates.secondary ).toBeDefined();
-		expect( 'string' === typeof currentDates.secondary.label ).toBe( true );
-		expect( 'string' === typeof currentDates.secondary.range ).toBe( true );
-		expect( 'string' === typeof currentDates.secondary.after ).toBe( true );
-		expect( 'string' === typeof currentDates.secondary.before ).toBe( true );
+		expect( typeof currentDates.secondary.label ).toBe( 'string' );
+		expect( typeof currentDates.secondary.range ).toBe( 'string' );
+		expect( moment.isMoment( currentDates.secondary.after ) ).toBe( true );
+		expect( moment.isMoment( currentDates.secondary.before ) ).toBe( true );
 	} );
 
 	it( 'should correctly apply default values', () => {
@@ -509,12 +514,12 @@ describe( 'getCurrentDates', () => {
 		const currentDates = getCurrentDates( query );
 
 		// Ensure default period is 'month'
-		expect( currentDates.primary.after ).toBe( startOfMonth );
-		expect( currentDates.primary.before ).toBe( today );
+		expect( currentDates.primary.after.format( isoDateFormat ) ).toBe( startOfMonth );
+		expect( currentDates.primary.before.format( isoDateFormat ) ).toBe( today );
 
 		// Ensure default compare is `previous_period`
-		expect( currentDates.secondary.after ).toBe( startOfMonthYearAgo );
-		expect( currentDates.secondary.before ).toBe( todayLastYear );
+		expect( currentDates.secondary.after.format( isoDateFormat ) ).toBe( startOfMonthYearAgo );
+		expect( currentDates.secondary.before.format( isoDateFormat ) ).toBe( todayLastYear );
 	} );
 } );
 
