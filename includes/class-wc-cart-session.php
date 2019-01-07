@@ -364,10 +364,10 @@ final class WC_Cart_Session {
 					_n(
 						'%d item from your previous order is currently unavailable and could not be added to your cart.',
 						'%d items from your previous order are currently unavailable and could not be added to your cart.',
-						$num_items_added,
+						$num_items_in_original_order - $num_items_added,
 						'woocommerce'
 					),
-					$num_items_added
+					$num_items_in_original_order - $num_items_added
 				),
 				'error'
 			);
