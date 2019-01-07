@@ -2365,7 +2365,7 @@ class WC_AJAX {
 			wp_die();
 		}
 
-		$changes = $_POST['changes'];
+		$changes = stripslashes_deep( $_POST['changes'] );
 		foreach ( $changes as $tax_rate_id => $data ) {
 			if ( isset( $data['deleted'] ) ) {
 				if ( isset( $data['newRow'] ) ) {
