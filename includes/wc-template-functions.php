@@ -910,9 +910,9 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 				<?php do_action( 'woocommerce_no_products_found' ); ?>
 
-			<?php
-			endif;
+			<?php endif; ?>
 
+			<?php
 		}
 	}
 }
@@ -1066,7 +1066,7 @@ if ( ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
 	 * Show the product title in the product loop. By default this is an H2.
 	 */
 	function woocommerce_template_loop_product_title() {
-		echo '<h2 class="woocommerce-loop-product__title">' . get_the_title() . '</h2>';
+		echo '<h2 class="woocommerce-loop-product__title">' . get_the_title() . '</h2>'; // @codingStandardsIgnoreLine.
 	}
 }
 if ( ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
@@ -2651,7 +2651,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				} elseif ( ! is_null( $for_country ) && is_array( $states ) ) {
 
-					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="state_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ) . '">
+					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="state_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ? $args['placeholder'] : esc_html__( 'Select a state&hellip;', 'woocommerce' ) ) . '">
 						<option value="">' . esc_html__( 'Select a state&hellip;', 'woocommerce' ) . '</option>';
 
 					foreach ( $states as $ckey => $cvalue ) {
