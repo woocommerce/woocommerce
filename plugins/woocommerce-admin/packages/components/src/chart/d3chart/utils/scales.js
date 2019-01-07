@@ -25,25 +25,29 @@ export const getYMax = lineData => {
  * Describes getXScale
  * @param {array} uniqueDates - from `getUniqueDates`
  * @param {number} width - calculated width of the charting space
+ * @param {boolean} compact - whether the chart must be compact (without padding
+ between days)
  * @returns {function} a D3 scale of the dates
  */
-export const getXScale = ( uniqueDates, width ) =>
+export const getXScale = ( uniqueDates, width, compact = false ) =>
 	d3ScaleBand()
 		.domain( uniqueDates )
 		.rangeRound( [ 0, width ] )
-		.paddingInner( 0.1 );
+		.paddingInner( compact ? 0 : 0.1 );
 
 /**
  * Describes getXGroupScale
  * @param {array} orderedKeys - from `getOrderedKeys`
  * @param {function} xScale - from `getXScale`
+ * @param {boolean} compact - whether the chart must be compact (without padding
+ between days)
  * @returns {function} a D3 scale for each category within the xScale range
  */
-export const getXGroupScale = ( orderedKeys, xScale ) =>
+export const getXGroupScale = ( orderedKeys, xScale, compact = false ) =>
 	d3ScaleBand()
 		.domain( orderedKeys.filter( d => d.visible ).map( d => d.key ) )
 		.rangeRound( [ 0, xScale.bandwidth() ] )
-		.padding( 0.07 );
+		.padding( compact ? 0 : 0.07 );
 
 /**
  * Describes getXLineScale

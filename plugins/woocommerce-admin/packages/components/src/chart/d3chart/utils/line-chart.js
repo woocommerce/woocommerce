@@ -10,20 +10,13 @@ import { smallBreak, wideBreak } from './breakpoints';
  * Internal dependencies
  */
 import { getColor } from './color';
-import { calculateTooltipPosition, showTooltip } from './tooltip';
+import { calculateTooltipPosition, hideTooltip, showTooltip } from './tooltip';
 
 const handleMouseOverLineChart = ( date, parentNode, node, data, params, position ) => {
 	d3Select( parentNode )
 		.select( '.focus-grid' )
 		.attr( 'opacity', '1' );
 	showTooltip( params, data.find( e => e.date === date ), position );
-};
-
-const handleMouseOutLineChart = ( parentNode, params ) => {
-	d3Select( parentNode )
-		.select( '.focus-grid' )
-		.attr( 'opacity', '0' );
-	params.tooltip.style( 'visibility', 'hidden' );
 };
 
 export const drawLines = ( node, data, params ) => {
@@ -88,7 +81,7 @@ export const drawLines = ( node, data, params ) => {
 				);
 				handleMouseOverLineChart( d.date, nodes[ i ].parentNode, node, data, params, position );
 			} )
-			.on( 'blur', ( d, i, nodes ) => handleMouseOutLineChart( nodes[ i ].parentNode, params ) );
+			.on( 'blur', ( d, i, nodes ) => hideTooltip( nodes[ i ].parentNode, params.tooltip ) );
 
 	const focus = node
 		.append( 'g' )
@@ -141,5 +134,5 @@ export const drawLines = ( node, data, params ) => {
 			);
 			handleMouseOverLineChart( d.date, nodes[ i ].parentNode, node, data, params, position );
 		} )
-		.on( 'mouseout', ( d, i, nodes ) => handleMouseOutLineChart( nodes[ i ].parentNode, params ) );
+		.on( 'mouseout', ( d, i, nodes ) => hideTooltip( nodes[ i ].parentNode, params.tooltip ) );
 };

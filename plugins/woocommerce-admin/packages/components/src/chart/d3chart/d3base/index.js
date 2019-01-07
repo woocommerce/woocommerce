@@ -6,8 +6,13 @@
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import { Component, createRef } from '@wordpress/element';
-import { isEqual } from 'lodash';
+import { isEqual, throttle } from 'lodash';
 import { select as d3Select } from 'd3-selection';
+
+/**
+ * Internal dependencies
+ */
+import { hideTooltip } from '../utils/tooltip';
 
 /**
  * Provides foundation to use D3 within React.
@@ -25,6 +30,10 @@ export default class D3Base extends Component {
 		super( props );
 
 		this.chartRef = createRef();
+
+		this.delayedScroll = throttle( () => {
+			hideTooltip( this.chartRef.current, props.tooltipRef.current );
+		}, 300 );
 	}
 
 	componentDidMount() {
@@ -86,7 +95,7 @@ export default class D3Base extends Component {
 
 	render() {
 		return (
-			<div className={ classNames( 'd3-base', this.props.className ) } ref={ this.chartRef } />
+			<div className={ classNames( 'd3-base', this.props.className ) } ref={ this.chartRef } onScroll={ this.delayedScroll } />
 		);
 	}
 }
