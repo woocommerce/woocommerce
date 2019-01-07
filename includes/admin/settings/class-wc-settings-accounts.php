@@ -37,7 +37,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 		}
 
 		$settings = apply_filters(
-			'woocommerce_' . $this->id . '_settings', array(
+			'woocommerce_' . $this->id . '_settings',
+			array(
 				array(
 					'title' => '',
 					'type'  => 'title',
@@ -96,7 +97,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				),
 				array(
 					'title'         => __( 'Account erasure requests', 'woocommerce' ),
-					'desc'          => __( 'Remove personal data from orders', 'woocommerce' ),
+					'desc'          => __( 'Remove personal data from orders on request', 'woocommerce' ),
 					/* Translators: %s URL to erasure request screen. */
 					'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should personal data within orders be retained or removed?', 'woocommerce' ), $erasure_text ),
 					'id'            => 'woocommerce_erasure_request_removes_order_data',
@@ -106,13 +107,23 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'autoload'      => false,
 				),
 				array(
-					'desc'          => __( 'Remove access to downloads', 'woocommerce' ),
+					'desc'          => __( 'Remove access to downloads on request', 'woocommerce' ),
 					/* Translators: %s URL to erasure request screen. */
 					'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should access to downloadable files be revoked and download logs cleared?', 'woocommerce' ), $erasure_text ),
 					'id'            => 'woocommerce_erasure_request_removes_download_data',
 					'type'          => 'checkbox',
 					'default'       => 'no',
 					'checkboxgroup' => 'end',
+					'autoload'      => false,
+				),
+				array(
+					'title'         => __( 'Personal data removal', 'woocommerce' ),
+					'desc'          => __( 'Allow personal data to be removed in bulk from orders', 'woocommerce' ),
+					'desc_tip'      => __( 'Adds an option to the orders screen for removing personal in bulk. Note that removing personal data cannot be undone.', 'woocommerce' ),
+					'id'            => 'woocommerce_allow_bulk_remove_personal_data',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'start',
+					'default'       => 'no',
 					'autoload'      => false,
 				),
 				array(
