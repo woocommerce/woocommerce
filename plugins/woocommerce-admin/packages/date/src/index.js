@@ -262,9 +262,9 @@ function getDateValue( period, compare, after, before ) {
  * Add default date-related parameters to a query object
  *
  * @param {string} [period] - period value, ie `last_week`
- * @param {string} [compare] - compare valuer, ie previous_year
- * @param {string} [after] - date in iso date format, ie 2018-07-03
- * @param {string} [before] - date in iso date format, ie 2018-07-03
+ * @param {string} [compare] - compare value, ie `previous_year`
+ * @param {string} [after] - date in iso date format, ie `2018-07-03`
+ * @param {string} [before] - date in iso date format, ie `2018-07-03`
  * @return {DateParams} - date parameters derived from query parameters with added defaults
  */
 export const getDateParamsFromQuery = ( { period, compare, after, before } ) => {
@@ -281,9 +281,9 @@ export const getDateParamsFromQuery = ( { period, compare, after, before } ) => 
  *
  * @param {Object} query - date parameters derived from query parameters
  * @property {string} [period] - period value, ie `last_week`
- * @property {string} [compare] - compare valuer, ie previous_year
- * @property {string} [after] - date in iso date format, ie 2018-07-03
- * @property {string} [before] - date in iso date format, ie 2018-07-03
+ * @property {string} [compare] - compare value, ie `previous_year`
+ * @property {string} [after] - date in iso date format, ie `2018-07-03`
+ * @property {string} [before] - date in iso date format, ie `2018-07-03`
  * @return {{primary: DateValue, secondary: DateValue}} - Primary and secondary DateValue objects
  */
 export const getCurrentDates = query => {

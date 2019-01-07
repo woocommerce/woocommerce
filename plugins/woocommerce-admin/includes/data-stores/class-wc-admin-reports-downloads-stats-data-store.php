@@ -13,6 +13,15 @@ defined( 'ABSPATH' ) || exit;
 class WC_Admin_Reports_Downloads_Stats_Data_Store extends WC_Admin_Reports_Downloads_Data_Store implements WC_Admin_Reports_Data_Store_Interface {
 
 	/**
+	 * Mapping columns to data type to return correct response types.
+	 *
+	 * @var array
+	 */
+	protected $column_types = array(
+		'download_count' => 'intval',
+	);
+
+	/**
 	 * SQL columns to select in the db query and their mapping to SQL code.
 	 *
 	 * @var array

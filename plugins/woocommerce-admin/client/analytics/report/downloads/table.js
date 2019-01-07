@@ -6,11 +6,12 @@ import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { format as formatDate } from '@wordpress/date';
 import { map } from 'lodash';
+import moment from 'moment';
 
 /**
  * WooCommerce dependencies
  */
-import { getIntervalForQuery, getDateFormatsForInterval } from '@woocommerce/date';
+import { getIntervalForQuery, getCurrentDates, getDateFormatsForInterval } from '@woocommerce/date';
 import { Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 
@@ -71,7 +72,9 @@ export default class CouponsReportTable extends Component {
 		const persistedQuery = getPersistedQuery( query );
 
 		return map( downloads, download => {
-			const { date, file_name, ip_address, order_id, product_id, user_id } = download;
+			const { _embedded, date, file_name, ip_address, order_id, product_id } = download;
+			const { name: productName } = _embedded.product[ 0 ];
+			const { name: userName } = _embedded.user[ 0 ];
 
 			const productLink = getNewPath( persistedQuery, 'products', {
 				filter: 'single_product',
@@ -86,10 +89,10 @@ export default class CouponsReportTable extends Component {
 				{
 					display: (
 						<Link href={ productLink } type="wc-admin">
-							{ product_id }
+							{ productName }
 						</Link>
 					),
-					value: product_id,
+					value: productName,
 				},
 				{
 					display: file_name,
@@ -104,8 +107,8 @@ export default class CouponsReportTable extends Component {
 					value: order_id,
 				},
 				{
-					display: user_id,
-					value: user_id,
+					display: userName,
+					value: userName,
 				},
 				{
 					display: ip_address,
@@ -119,14 +122,20 @@ export default class CouponsReportTable extends Component {
 		if ( ! totals ) {
 			return [];
 		}
+		const { query } = this.props;
+		const dates = getCurrentDates( query );
+		const after = moment( dates.primary.after );
+		const before = moment( dates.primary.before );
+		const days = before.diff( after, 'days' ) + 1;
+
 		return [
 			{
-				label: _n( 'day', 'days', totals.days, 'wc-admin' ),
-				value: numberFormat( totals.days ), // @TODO it's not defined
+				label: _n( 'day', 'days', days, 'wc-admin' ),
+				value: numberFormat( days ),
 			},
 			{
-				label: _n( 'download', 'downloads', totals.downloads_count, 'wc-admin' ),
-				value: numberFormat( totals.downloads_count ),
+				label: _n( 'download', 'downloads', totals.download_count, 'wc-admin' ),
+				value: numberFormat( totals.download_count ),
 			},
 		];
 	}
@@ -141,6 +150,9 @@ export default class CouponsReportTable extends Component {
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
 				query={ query }
+				tableQuery={ {
+					_embed: true,
+				} }
 				title={ __( 'Downloads', 'wc-admin' ) }
 				columnPrefsKey="downloads_report_columns"
 			/>

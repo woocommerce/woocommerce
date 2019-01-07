@@ -19,19 +19,21 @@ import { formatCurrency } from '@woocommerce/currency';
 import { MAX_PER_PAGE, QUERY_DEFAULTS } from 'store/constants';
 import * as categoriesConfig from 'analytics/report/categories/config';
 import * as couponsConfig from 'analytics/report/coupons/config';
+import * as customersConfig from 'analytics/report/customers/config';
+import * as downloadsConfig from 'analytics/report/downloads/config';
 import * as ordersConfig from 'analytics/report/orders/config';
 import * as productsConfig from 'analytics/report/products/config';
 import * as taxesConfig from 'analytics/report/taxes/config';
-import * as customersConfig from 'analytics/report/customers/config';
 import * as reportsUtils from './utils';
 
 const reportConfigs = {
 	categories: categoriesConfig,
 	coupons: couponsConfig,
+	customers: customersConfig,
+	downloads: downloadsConfig,
 	orders: ordersConfig,
 	products: productsConfig,
 	taxes: taxesConfig,
-	customers: customersConfig,
 };
 
 export function getFilterQuery( endpoint, query ) {
