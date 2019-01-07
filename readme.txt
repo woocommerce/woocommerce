@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Reload the cart page when the cart is empty when there is a hash in the URL. #22114
 * Fix - Do not schedule duplicate webhooks within 10 minutes of each other to maintain previous behavior. #22088
 * Fix - Return correct next scheduled date for items in queue by fixing date instantiation in WC_Action_Queue::get_next(). #22104
+* Fix - Allow products to use default low stock threshold. #22084
 
 = 3.5.3 - 2018-12-20 =
 * Fix - Fix orders list in the admin after a change introduced in WordPress 5.0.2. #22273
