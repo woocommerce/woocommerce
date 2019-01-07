@@ -251,7 +251,7 @@ class WC_Meta_Box_Product_Data {
 					$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute_name );
 				}
 
-				$options = isset( $attribute_values[ $i ] ) ? $attribute_values[ $i ] : '';
+				$options = isset( $attribute_values[ $i ] ) ? str_replace( "\'", "'", $attribute_values[ $i ] ) : '';
 
 				if ( is_array( $options ) ) {
 					// Term ids sent as array.
