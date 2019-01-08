@@ -58,10 +58,12 @@ class ChartBlock extends Component {
 					<ReportChart
 						charts={ charts }
 						endpoint={ endpoint }
-						mode="block"
-						path={ path }
 						query={ query }
+						interactiveLegend={ false }
+						legendPosition="bottom"
+						path={ path }
 						selectedChart={ charts[ 0 ] }
+						showHeaderControls={ false }
 					/>
 				</Card>
 			</div>

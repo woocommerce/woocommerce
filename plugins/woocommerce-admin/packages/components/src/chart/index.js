@@ -113,8 +113,8 @@ class Chart extends Component {
 	}
 
 	handleLegendToggle( event ) {
-		const { data, mode } = this.props;
-		if ( mode === 'block' ) {
+		const { data, interactiveLegend } = this.props;
+		if ( ! interactiveLegend ) {
 			return;
 		}
 		const orderedKeys = this.state.orderedKeys.map( d => ( {
@@ -211,28 +211,44 @@ class Chart extends Component {
 		return 220;
 	}
 
+	getLegendPosition() {
+		const { legendPosition, mode, isViewportWide } = this.props;
+		if ( legendPosition ) {
+			return legendPosition;
+		}
+		if ( isViewportWide && mode === 'time-comparison' ) {
+			return 'top';
+		}
+		if ( isViewportWide && mode === 'item-comparison' ) {
+			return 'side';
+		}
+		return 'bottom';
+	}
+
 	render() {
-		const { orderedKeys, visibleData, width } = this.state;
+		const { interactiveLegend, orderedKeys, visibleData, width } = this.state;
 		const {
 			dateParser,
+			interval,
+			isRequesting,
+			isViewportLarge,
 			itemsLabel,
 			mode,
-			isViewportLarge,
-			isViewportWide,
+			showHeaderControls,
 			title,
 			tooltipLabelFormat,
 			tooltipValueFormat,
 			tooltipTitle,
+			type,
+			valueType,
 			xFormat,
 			x2Format,
-			interval,
-			valueType,
-			type,
-			isRequesting,
 		} = this.props;
 		let { yFormat } = this.props;
-		const legendDirection = mode === 'time-comparison' && isViewportWide ? 'row' : 'column';
-		const chartDirection = mode === 'item-comparison' && isViewportWide ? 'row' : 'column';
+
+		const legendPosition = this.getLegendPosition();
+		const legendDirection = legendPosition === 'top' ? 'row' : 'column';
+		const chartDirection = legendPosition === 'side' ? 'row' : 'column';
 
 		const chartHeight = this.getChartHeight();
 		const legend = (
@@ -241,7 +257,7 @@ class Chart extends Component {
 				data={ orderedKeys }
 				handleLegendHover={ this.handleLegendHover }
 				handleLegendToggle={ this.handleLegendToggle }
-				interactive={ mode !== 'block' }
+				interactive={ interactiveLegend }
 				legendDirection={ legendDirection }
 				legendValueFormat={ tooltipValueFormat }
 				totalLabel={ sprintf( itemsLabel, orderedKeys.length ) }
@@ -267,10 +283,10 @@ class Chart extends Component {
 		}
 		return (
 			<div className="woocommerce-chart">
-				{ mode !== 'block' && (
+				{ showHeaderControls && (
 					<div className="woocommerce-chart__header">
 						<H className="woocommerce-chart__title">{ title }</H>
-						{ isViewportWide && legendDirection === 'row' && legend }
+						{ legendPosition === 'top' && legend }
 						{ this.renderIntervalSelector() }
 						<NavigableMenu
 							className="woocommerce-chart__types"
@@ -310,7 +326,7 @@ class Chart extends Component {
 						) }
 						ref={ this.chartBodyRef }
 					>
-						{ isViewportWide && legendDirection === 'column' && mode !== 'block' && legend }
+						{ legendPosition === 'side' && legend }
 						{ isRequesting && (
 							<Fragment>
 								<span className="screen-reader-text">
@@ -328,7 +344,7 @@ class Chart extends Component {
 									height={ chartHeight }
 									interval={ interval }
 									margin={ margin }
-									mode={ mode === 'block' ? 'item-comparison' : mode }
+									mode={ mode }
 									orderedKeys={ orderedKeys }
 									tooltipLabelFormat={ tooltipLabelFormat }
 									tooltipValueFormat={ tooltipValueFormat }
@@ -343,7 +359,7 @@ class Chart extends Component {
 								/>
 							) }
 					</div>
-					{ ( ! isViewportWide || mode === 'block' ) && (
+					{ ( legendPosition === 'bottom' ) && (
 						<div className="woocommerce-chart__footer">{ legend }</div>
 					) }
 				</Section>
@@ -353,6 +369,10 @@ class Chart extends Component {
 }
 
 Chart.propTypes = {
+	/**
+	 * Allowed intervals to show in a dropdown.
+	 */
+	allowedIntervals: PropTypes.array,
 	/**
 	 * An array of data.
 	 */
@@ -366,6 +386,11 @@ Chart.propTypes = {
 	 */
 	itemsLabel: PropTypes.string,
 	/**
+	 * `item-comparison` (default) or `time-comparison`, this is used to generate correct
+	 * ARIA properties.
+	 */
+	mode: PropTypes.oneOf( [ 'item-comparison', 'time-comparison' ] ),
+	/**
 	 * Current path
 	 */
 	path: PropTypes.string,
@@ -373,6 +398,35 @@ Chart.propTypes = {
 	 * The query string represented in object form
 	 */
 	query: PropTypes.object,
+	/**
+	 * Whether the legend items can be activated/deactivated.
+	 */
+	interactiveLegend: PropTypes.bool,
+	/**
+	 * Interval specification (hourly, daily, weekly etc).
+	 */
+	interval: PropTypes.oneOf( [ 'hour', 'day', 'week', 'month', 'quarter', 'year' ] ),
+	/**
+	 * Information about the currently selected interval, and set of allowed intervals for the chart. See `getIntervalsForQuery`.
+	 */
+	intervalData: PropTypes.object,
+	/**
+	 * Render a chart placeholder to signify an in-flight data request.
+	 */
+	isRequesting: PropTypes.bool,
+	/**
+	 * Position the legend must be displayed in. If it's not defined, it's calculated
+	 * depending on the viewport width and the mode.
+	 */
+	legendPosition: PropTypes.oneOf( [ 'bottom', 'side', 'top' ] ),
+	/**
+	 * Wether header UI controls must be displayed.
+	 */
+	showHeaderControls: PropTypes.bool,
+	/**
+	 * A title describing this chart.
+	 */
+	title: PropTypes.string,
 	/**
 	 * A datetime formatting string or overriding function to format the tooltip label.
 	 */
@@ -386,6 +440,14 @@ Chart.propTypes = {
 	 */
 	tooltipTitle: PropTypes.string,
 	/**
+	 * Chart type of either `line` or `bar`.
+	 */
+	type: PropTypes.oneOf( [ 'bar', 'line' ] ),
+	/**
+	 * What type of data is to be displayed? Number, Average, String?
+	 */
+	valueType: PropTypes.string,
+	/**
 	 * A datetime formatting string, passed to d3TimeFormat.
 	 */
 	xFormat: PropTypes.string,
@@ -397,53 +459,22 @@ Chart.propTypes = {
 	 * A number formatting string, passed to d3Format.
 	 */
 	yFormat: PropTypes.string,
-	/**
-	 * `item-comparison` (default) or `time-comparison`, this is used to generate correct
-	 * ARIA properties.
-	 */
-	mode: PropTypes.oneOf( [ 'block', 'item-comparison', 'time-comparison' ] ),
-	/**
-	 * A title describing this chart.
-	 */
-	title: PropTypes.string,
-	/**
-	 * Chart type of either `line` or `bar`.
-	 */
-	type: PropTypes.oneOf( [ 'bar', 'line' ] ),
-	/**
-	 * Information about the currently selected interval, and set of allowed intervals for the chart. See `getIntervalsForQuery`.
-	 */
-	intervalData: PropTypes.object,
-	/**
-	 * Interval specification (hourly, daily, weekly etc).
-	 */
-	interval: PropTypes.oneOf( [ 'hour', 'day', 'week', 'month', 'quarter', 'year' ] ),
-	/**
-	 * Allowed intervals to show in a dropdown.
-	 */
-	allowedIntervals: PropTypes.array,
-	/**
-	 * What type of data is to be displayed? Number, Average, String?
-	 */
-	valueType: PropTypes.string,
-	/**
-	 * Render a chart placeholder to signify an in-flight data request.
-	 */
-	isRequesting: PropTypes.bool,
 };
 
 Chart.defaultProps = {
 	data: [],
 	dateParser: '%Y-%m-%dT%H:%M:%S',
+	interactiveLegend: true,
+	interval: 'day',
+	isRequesting: false,
+	mode: 'time-comparison',
+	showHeaderControls: true,
 	tooltipLabelFormat: '%B %d, %Y',
 	tooltipValueFormat: ',',
+	type: 'line',
 	xFormat: '%d',
 	x2Format: '%b %Y',
 	yFormat: '$.3s',
-	mode: 'time-comparison',
-	type: 'line',
-	interval: 'day',
-	isRequesting: false,
 };
 
 export default withViewportMatch( {
