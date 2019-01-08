@@ -492,17 +492,6 @@ class WC_Admin_Api_Init {
 		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'order_product_lookup_store_init' ), 20 );
 	}
 
-	/**
-	 * Enables the WP REST API for product categories
-	 *
-	 * @param array $args Default arguments for product_cat taxonomy.
-	 * @return array
-	 */
-	public static function show_product_categories_in_rest( $args ) {
-		$args['show_in_rest'] = true;
-		return $args;
-	}
-
 }
 
 new WC_Admin_Api_Init();
