@@ -72,7 +72,7 @@ export default class CouponsReportTable extends Component {
 		const persistedQuery = getPersistedQuery( query );
 
 		return map( downloads, download => {
-			const { _embedded, date, file_name, ip_address, order_id, product_id } = download;
+			const { _embedded, date, file_name, file_path, ip_address, order_id, product_id } = download;
 			const { name: productName } = _embedded.product[ 0 ];
 			const { name: userName } = _embedded.user[ 0 ];
 
@@ -95,7 +95,11 @@ export default class CouponsReportTable extends Component {
 					value: productName,
 				},
 				{
-					display: file_name,
+					display: (
+						<Link href={ file_path } type="external">
+							{ file_name }
+						</Link>
+					),
 					value: file_name,
 				},
 				{

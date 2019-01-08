@@ -132,7 +132,7 @@ export const advancedFilters = {
 				} ) ),
 			},
 		},
-		downloadIp: {
+		ip_address: {
 			labels: {
 				add: __( 'IP Address', 'wc-admin' ),
 				placeholder: __( 'Search IP address', 'wc-admin' ),
