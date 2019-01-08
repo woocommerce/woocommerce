@@ -186,6 +186,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Correct quote handling in tax class names. #22270
 * Fix - Prevent style side-effects on notices on the Extensions pages. #22330
 * Fix - Check stock status of items when 'ordering again' from the account page. #22331
+* Fix - Restores an opportunity to print non-cart related notices that a few extensions are relying on. #22337
+* Fix - Correct order item meta alignment in order emails when using an RTL language. #22376
 * Dev - REST API - Fixed support to order results by slugs. #22168
 
 = 3.5.3 - 2018-12-20 =
