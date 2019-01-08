@@ -50,10 +50,21 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		'postcode'         => 'postcode',
 		'date_registered'  => 'date_registered',
 		'date_last_active' => 'date_last_active',
-		'orders_count'     => 'orders_count',
-		'total_spend'      => 'total_spend',
-		'avg_order_value'  => 'avg_order_value',
+		'orders_count'     => 'COUNT( order_id ) as orders_count',
+		'total_spend'      => 'SUM( gross_total ) as total_spend',
+		'avg_order_value'  => '( SUM( gross_total ) / COUNT( order_id ) ) as avg_order_value',
 	);
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		global $wpdb;
+
+		// Initialize some report columns that need disambiguation.
+		$this->report_columns['customer_id'] = $wpdb->prefix . self::TABLE_NAME . '.customer_id';
+		$this->report_columns['date_last_order'] = "MAX( {$wpdb->prefix}wc_order_stats.date_created ) as date_last_order";
+	}
 
 	/**
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
@@ -99,43 +110,64 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 * @return array
 	 */
 	protected function get_time_period_sql_params( $query_args, $table_name ) {
+		global $wpdb;
+
 		$sql_query           = array(
-			'from_clause'       => '',
 			'where_time_clause' => '',
 			'where_clause'      => '',
+			'having_clause'     => '',
 		);
 		$date_param_mapping  = array(
-			'registered'  => 'date_registered',
-			'last_active' => 'date_last_active',
-			'last_order'  => 'date_last_order',
+			'registered'  => array(
+				'clause' => 'where',
+				'column' => $table_name . '.date_registered',
+			),
+			'last_active' => array(
+				'clause' => 'where',
+				'column' => $table_name . '.date_last_active',
+			),
+			'last_order'  => array(
+				'clause' => 'having',
+				'column' => "MAX( {$wpdb->prefix}wc_order_stats.date_created )",
+			),
 		);
 		$match_operator      = $this->get_match_operator( $query_args );
 		$where_time_clauses  = array();
+		$having_time_clauses = array();
 
-		foreach ( $date_param_mapping as $query_param => $column_name ) {
-			$subclauses = array();
-			$before_arg = $query_param . '_before';
-			$after_arg  = $query_param . '_after';
+		foreach ( $date_param_mapping as $query_param => $param_info ) {
+			$subclauses  = array();
+			$before_arg  = $query_param . '_before';
+			$after_arg   = $query_param . '_after';
+			$column_name = $param_info['column'];
 
 			if ( ! empty( $query_args[ $before_arg ] ) ) {
 				$datetime     = new DateTime( $query_args[ $before_arg ] );
 				$datetime_str = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
-				$subclauses[] = "{$table_name}.{$column_name} <= '$datetime_str'";
+				$subclauses[] = "{$column_name} <= '$datetime_str'";
 			}
 
 			if ( ! empty( $query_args[ $after_arg ] ) ) {
 				$datetime     = new DateTime( $query_args[ $after_arg ] );
 				$datetime_str = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
-				$subclauses[] = "{$table_name}.{$column_name} >= '$datetime_str'";
+				$subclauses[] = "{$column_name} >= '$datetime_str'";
 			}
 
-			if ( $subclauses ) {
+			if ( $subclauses && ( 'where' === $param_info['clause'] ) ) {
 				$where_time_clauses[] = '(' . implode( ' AND ', $subclauses ) . ')';
+			}
+
+			if ( $subclauses && ( 'having' === $param_info['clause'] ) ) {
+				$having_time_clauses[] = '(' . implode( ' AND ', $subclauses ) . ')';
 			}
 		}
 
 		if ( $where_time_clauses ) {
 			$sql_query['where_time_clause'] = ' AND ' . implode( " {$match_operator} ", $where_time_clauses );
+		}
+
+		if ( $having_time_clauses ) {
+			$sql_query['having_clause'] = ' AND ' . implode( " {$match_operator} ", $having_time_clauses );
 		}
 
 		return $sql_query;
@@ -149,14 +181,15 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 */
 	protected function get_sql_query_params( $query_args ) {
 		global $wpdb;
-		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
+		$customer_lookup_table = $wpdb->prefix . self::TABLE_NAME;
 
-		$sql_query_params = $this->get_time_period_sql_params( $query_args, $order_product_lookup_table );
+		$sql_query_params = $this->get_time_period_sql_params( $query_args, $customer_lookup_table );
 		$sql_query_params = array_merge( $sql_query_params, $this->get_limit_sql_params( $query_args ) );
 		$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_sql_params( $query_args ) );
 
 		$match_operator = $this->get_match_operator( $query_args );
 		$where_clauses  = array();
+		$having_clauses = array();
 
 		$exact_match_params = array(
 			'username',
@@ -167,7 +200,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		foreach ( $exact_match_params as $exact_match_param ) {
 			if ( ! empty( $query_args[ $exact_match_param ] ) ) {
 				$where_clauses[] = $wpdb->prepare(
-					"{$order_product_lookup_table}.{$exact_match_param} = %s",
+					"{$customer_lookup_table}.{$exact_match_param} = %s",
 					$query_args[ $exact_match_param ]
 				); // WPCS: unprepared SQL ok.
 			}
@@ -178,38 +211,52 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		}
 
 		$numeric_params = array(
-			'orders_count'    => '%d',
-			'total_spend'     => '%f',
-			'avg_order_value' => '%f',
+			'orders_count'    => array(
+				'column' => 'COUNT( order_id )',
+				'format' => '%d',
+			),
+			'total_spend'     => array(
+				'column' => 'SUM( gross_total )',
+				'format' => '%f',
+			),
+			'avg_order_value' => array(
+				'column' => '( SUM( gross_total ) / COUNT( order_id ) )',
+				'format' => '%f',
+			),
 		);
 
-		foreach ( $numeric_params as $numeric_param => $sql_format ) {
+		foreach ( $numeric_params as $numeric_param => $param_info ) {
 			$subclauses = array();
 			$min_param  = $numeric_param . '_min';
 			$max_param  = $numeric_param . '_max';
 
 			if ( isset( $query_args[ $min_param ] ) ) {
 				$subclauses[] = $wpdb->prepare(
-					"{$order_product_lookup_table}.{$numeric_param} >= {$sql_format}",
+					"{$param_info['column']} >= {$param_info['format']}",
 					$query_args[ $min_param ]
 				); // WPCS: unprepared SQL ok.
 			}
 
 			if ( isset( $query_args[ $max_param ] ) ) {
 				$subclauses[] = $wpdb->prepare(
-					"{$order_product_lookup_table}.{$numeric_param} <= {$sql_format}",
+					"{$param_info['column']} <= {$param_info['format']}",
 					$query_args[ $max_param ]
 				); // WPCS: unprepared SQL ok.
 			}
 
 			if ( $subclauses ) {
-				$where_clauses[] = '(' . implode( ' AND ', $subclauses ) . ')';
+				$having_clauses[] = '(' . implode( ' AND ', $subclauses ) . ')';
 			}
 		}
 
 		if ( $where_clauses ) {
 			$preceding_match = empty( $sql_query_params['where_time_clause'] ) ? ' AND ' : " {$match_operator} ";
 			$sql_query_params['where_clause'] = $preceding_match . implode( " {$match_operator} ", $where_clauses );
+		}
+
+		if ( $having_clauses ) {
+			$preceding_match = empty( $sql_query_params['having_clause'] ) ? ' AND ' : " {$match_operator} ";
+			$sql_query_params['having_clause'] .= $preceding_match . implode( " {$match_operator} ", $having_clauses );
 		}
 
 		return $sql_query_params;
@@ -224,7 +271,8 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	public function get_data( $query_args ) {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		$customers_table_name = $wpdb->prefix . self::TABLE_NAME;
+		$order_stats_table_name = $wpdb->prefix . 'wc_order_stats';
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults = array(
@@ -251,14 +299,24 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			$sql_query_params = $this->get_sql_query_params( $query_args );
 
 			$db_records_count = (int) $wpdb->get_var(
-				"SELECT COUNT(*)
+				"SELECT COUNT(*) FROM (
+					SELECT {$customers_table_name}.customer_id
 					FROM
-						{$table_name}
-						{$sql_query_params['from_clause']}
+						{$customers_table_name}
+					JOIN
+						{$order_stats_table_name}
+					ON
+						{$customers_table_name}.customer_id = {$order_stats_table_name}.customer_id
 					WHERE
 						1=1
 						{$sql_query_params['where_time_clause']}
 						{$sql_query_params['where_clause']}
+					GROUP BY
+						{$customers_table_name}.customer_id
+					HAVING
+						1=1
+						{$sql_query_params['having_clause']}
+				) as tt
 				"
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
@@ -271,14 +329,20 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 				"SELECT
 						{$selections}
 					FROM
-						{$table_name}
-						{$sql_query_params['from_clause']}
+						{$customers_table_name}
+					JOIN
+						{$order_stats_table_name}
+					ON
+						{$customers_table_name}.customer_id = {$order_stats_table_name}.customer_id
 					WHERE
 						1=1
 						{$sql_query_params['where_time_clause']}
 						{$sql_query_params['where_clause']}
 					GROUP BY
-						customer_id
+						{$customers_table_name}.customer_id
+					HAVING
+						1=1
+						{$sql_query_params['having_clause']}
 					ORDER BY
 						{$sql_query_params['order_by_clause']}
 					{$sql_query_params['limit']}
@@ -416,9 +480,6 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			return false;
 		}
 
-		$order_count = $customer->get_order_count( 'edit' );
-		$total_spend = $customer->get_total_spent( 'edit' );
-		$last_order  = $customer->get_last_order();
 		$last_active = $customer->get_meta( 'wc_last_active', true, 'edit' );
 
 		// TODO: try to preserve customer_id for existing user_id?
@@ -433,10 +494,6 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 				'city'             => $customer->get_billing_city( 'edit' ),
 				'postcode'         => $customer->get_billing_postcode( 'edit' ),
 				'country'          => $customer->get_billing_country( 'edit' ),
-				'orders_count'     => $order_count,
-				'total_spend'      => $total_spend,
-				'avg_order_value'  => $order_count ? ( $total_spend / $order_count ) : 0,
-				'date_last_order'  => $last_order ? date( 'Y-m-d H:i:s', $last_order->get_date_created( 'edit' )->getTimestamp() ) : '',
 				'date_registered'  => date( 'Y-m-d H:i:s', $customer->get_date_created( 'edit' )->getTimestamp() ),
 				'date_last_active' => $last_active ? date( 'Y-m-d H:i:s', $last_active ) : '',
 			),
@@ -448,10 +505,6 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 				'%s',
 				'%s',
 				'%s',
-				'%s',
-				'%d',
-				'%f',
-				'%f',
 				'%s',
 				'%s',
 				'%s',
