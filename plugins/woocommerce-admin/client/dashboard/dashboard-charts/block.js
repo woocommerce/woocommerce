@@ -2,13 +2,15 @@
 /**
  * External dependencies
  */
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * WooCommerce dependencies
  */
 import { Card } from '@woocommerce/components';
+import { getAdminLink, history } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -17,6 +19,16 @@ import ReportChart from 'analytics/components/report-chart';
 import './block.scss';
 
 class ChartBlock extends Component {
+	handleChartClick = () => {
+		const { charts } = this.props;
+
+		if ( ! charts || ! charts.length ) {
+			return null;
+		}
+
+		history.push( 'analytics/' + charts[ 0 ].endpoint + '?chart=' + charts[ 0 ].key );
+	};
+
 	render() {
 		const { charts, endpoint, path, query } = this.props;
 
@@ -25,8 +37,24 @@ class ChartBlock extends Component {
 		}
 
 		return (
-			<Fragment>
+			<div
+				role="presentation"
+				className="woocommerce-dashboard__chart-block-wrapper"
+				onClick={ this.handleChartClick }
+			>
 				<Card className="woocommerce-dashboard__chart-block" title={ charts[ 0 ].label }>
+					<a
+						className="screen-reader-text"
+						href={ getAdminLink(
+							'admin.php?page=wc-admin#/analytics/' +
+								charts[ 0 ].endpoint +
+								'?chart=' +
+								charts[ 0 ].key
+						) }
+					>
+						{ /* translators: %s is the chart type */
+						sprintf( __( '%s Report', 'wc-admin' ), charts[ 0 ].label ) }
+					</a>
 					<ReportChart
 						charts={ charts }
 						endpoint={ endpoint }
@@ -36,7 +64,7 @@ class ChartBlock extends Component {
 						selectedChart={ charts[ 0 ] }
 					/>
 				</Card>
-			</Fragment>
+			</div>
 		);
 	}
 }
