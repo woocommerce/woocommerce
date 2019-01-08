@@ -20,15 +20,17 @@ function wc_webhook_process_delivery( $webhook, $arg ) {
 	// so as to avoid delays or failures in delivery from affecting the
 	// user who triggered it.
 	if ( apply_filters( 'woocommerce_webhook_deliver_async', true, $webhook, $arg ) ) {
-		// Deliver in background.
-		WC()->queue()->add(
-			'woocommerce_deliver_webhook_async',
-			array(
-				'webhook_id' => $webhook->get_id(),
-				'arg'        => $arg,
-			),
-			'woocommerce-webhooks'
+		$queue_args = array(
+			'webhook_id' => $webhook->get_id(),
+			'arg'        => $arg,
 		);
+
+		$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
+
+		// Make webhooks unique - only schedule one webhook every 10 minutes to maintain backward compatibility with WP Cron behaviour seen in WC < 3.5.0.
+		if ( is_null( $next_scheduled_date ) || $next_scheduled_date->getTimestamp() >= ( 600 + gmdate( 'U' ) ) ) {
+			WC()->queue()->add( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
+		}
 	} else {
 		// Deliver immediately.
 		$webhook->deliver( $arg );

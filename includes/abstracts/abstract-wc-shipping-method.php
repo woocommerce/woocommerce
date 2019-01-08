@@ -224,7 +224,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * Return calculated rates for a package.
 	 *
 	 * @since 2.6.0
-	 * @param object $package Package array.
+	 * @param array $package Package array.
 	 * @return array
 	 */
 	public function get_rates_for_package( $package ) {

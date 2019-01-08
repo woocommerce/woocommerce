@@ -765,21 +765,21 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
-	 * The exporter prepends a ' to fields that start with a - which causes
-	 * issues with negative numbers. This removes the ' if the input is still a valid
-	 * number after removal.
+	 * The exporter prepends a ' to escape fields that start with =, +, - or @.
+	 * Remove the prepended ' character preceding those characters.
 	 *
-	 * @since 3.3.0
-	 * @param string $value A numeric string that may or may not have ' prepended.
+	 * @since 3.5.2
+	 * @param  string $value A string that may or may not have been escaped with '.
 	 * @return string
 	 */
-	protected function unescape_negative_number( $value ) {
-		if ( 0 === strpos( $value, "'-" ) ) {
-			$unescaped = trim( $value, "'" );
-			if ( is_numeric( $unescaped ) ) {
-				return $unescaped;
-			}
+	protected function unescape_data( $value ) {
+		$active_content_triggers = array( "'=", "'+", "'-", "'@" );
+
+		if ( in_array( mb_substr( $value, 0, 2 ), $active_content_triggers, true ) ) {
+			$value = mb_substr( $value, 1 );
 		}
+
 		return $value;
 	}
+
 }

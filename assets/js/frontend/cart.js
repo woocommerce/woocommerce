@@ -71,7 +71,7 @@ jQuery( function( $ ) {
 
 		// No form, cannot do this.
 		if ( $( '.woocommerce-cart-form' ).length === 0 ) {
-			window.location.href = window.location.href;
+			window.location.reload();
 			return;
 		}
 
@@ -83,7 +83,7 @@ jQuery( function( $ ) {
 		if ( $new_form.length === 0 ) {
 			// If the checkout is also displayed on this page, trigger reload instead.
 			if ( $( '.woocommerce-checkout' ).length ) {
-				window.location.href = window.location.href;
+				window.location.reload();
 				return;
 			}
 
