@@ -17,7 +17,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$text_align = is_rtl() ? 'right' : 'left';
+$text_align  = is_rtl() ? 'right' : 'left';
+$margin_side = is_rtl() ? 'left' : 'right';
 
 foreach ( $items as $item_id => $item ) :
 	$product       = $item->get_product();
@@ -59,7 +60,7 @@ foreach ( $items as $item_id => $item ) :
 		wc_display_item_meta(
 			$item,
 			array(
-				'label_before' => '<strong class="wc-item-meta-label" style="float: left; margin-right: .25em; clear: both">',
+				'label_before' => '<strong class="wc-item-meta-label" style="float: ' . esc_attr( $text_align ) . '; margin-' . esc_attr( $margin_side ) . ': .25em; clear: both">',
 			)
 		);
 
