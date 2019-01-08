@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cb53f81a493f453b55e37363f7dc51a2",
+    "content-hash": "328576a4b89a433502bd3366ca4f7326",
     "packages": [
         {
             "name": "composer/installers",
@@ -247,7 +247,7 @@
                     "homepage": "https://github.com/kukulich"
                 },
                 {
-                    "name": "Tomáš Votruba",
+                    "name": "Tomas Votruba",
                     "email": "tomas.vot@gmail.com"
                 },
                 {
