@@ -9,11 +9,11 @@ import { Component, Fragment } from '@wordpress/element';
  * Internal dependencies
  */
 import './style.scss';
-import Header from 'header';
-import StorePerformance from './store-performance';
-import TopSellingProducts from './top-selling-products';
 import DashboardCharts from './dashboard-charts';
+import Header from 'header';
+import Leaderboards from './leaderboards';
 import { ReportFilters } from '@woocommerce/components';
+import StorePerformance from './store-performance';
 
 export default class Dashboard extends Component {
 	render() {
@@ -23,11 +23,7 @@ export default class Dashboard extends Component {
 				<Header sections={ [ __( 'Dashboard', 'wc-admin' ) ] } />
 				<ReportFilters query={ query } path={ path } />
 				<StorePerformance />
-				<div className="woocommerce-dashboard__columns">
-					<div>
-						<TopSellingProducts query={ query } />
-					</div>
-				</div>
+				<Leaderboards query={ query } />
 				<DashboardCharts query={ query } path={ path } />
 			</Fragment>
 		);

@@ -23,9 +23,18 @@ import './style.scss';
 
 export class Leaderboard extends Component {
 	render() {
-		const { getHeadersContent, getRowsContent, isRequesting, isError, items, title } = this.props;
+		const {
+			getHeadersContent,
+			getRowsContent,
+			isRequesting,
+			isError,
+			items,
+			tableQuery,
+			title,
+		} = this.props;
 		const data = get( items, [ 'data' ], [] );
 		const rows = getRowsContent( data );
+		const totalRows = tableQuery ? tableQuery.per_page : 5;
 
 		if ( isError ) {
 			return <ReportError className="woocommerce-leaderboard" isError />;
@@ -47,9 +56,9 @@ export class Leaderboard extends Component {
 				headers={ getHeadersContent() }
 				isLoading={ isRequesting }
 				rows={ rows }
-				rowsPerPage={ 5 }
+				rowsPerPage={ totalRows }
 				title={ title }
-				totalRows={ 5 }
+				totalRows={ totalRows }
 			/>
 		);
 	}
