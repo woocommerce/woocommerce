@@ -22,7 +22,7 @@
     "babel": "6.23.0",
     "babel-cli": "6.26.0",
     "babel-eslint": "8.2.6",
-    "babel-plugin-add-module-exports": "0.2.1",
+    "babel-plugin-add-module-exports": "0.3.3",
     "babel-preset-es2015": "6.24.1",
     "babel-preset-stage-2": "6.24.1",
     "chai": "4.2.0",
