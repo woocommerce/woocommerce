@@ -327,7 +327,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 					SELECT {$customers_table_name}.customer_id
 					FROM
 						{$customers_table_name}
-					JOIN
+					LEFT JOIN
 						{$order_stats_table_name}
 					ON
 						{$customers_table_name}.customer_id = {$order_stats_table_name}.customer_id
@@ -354,7 +354,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 						{$selections}
 					FROM
 						{$customers_table_name}
-					JOIN
+					LEFT JOIN
 						{$order_stats_table_name}
 					ON
 						{$customers_table_name}.customer_id = {$order_stats_table_name}.customer_id
