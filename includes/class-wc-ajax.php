@@ -615,7 +615,7 @@ class WC_AJAX {
 		$response = array();
 
 		try {
-			parse_str( $_POST['data'], $data );
+			parse_str( wp_unslash( $_POST['data'] ), $data );
 
 			$attributes   = WC_Meta_Box_Product_Data::prepare_attributes( $data );
 			$product_id   = absint( $_POST['post_id'] );
