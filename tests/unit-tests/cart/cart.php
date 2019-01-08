@@ -699,6 +699,87 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test a rounding issue on prices that are entered inclusive tax.
+	 * See #20997
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_inclusive_tax_rounding_issue_20997() {
+		// Store is set to enter product prices inclusive tax.
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_currency', 'EUR' );
+		update_option( 'woocommerce_price_decimal_sep', ',' );
+
+		// 22% tax.
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '22.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		// Create products and add them to cart.
+		$product1 = new WC_Product_Simple();
+		$product1->set_regular_price( '46,00' );
+		$product1->save();
+
+		$product2 = new WC_Product_Simple();
+		$product2->set_regular_price( '22,50' );
+		$product2->save();
+
+		$product3 = new WC_Product_Simple();
+		$product3->set_regular_price( '69,00' );
+		$product3->save();
+
+		$product4 = new WC_Product_Simple();
+		$product4->set_regular_price( '43,00' );
+		$product4->save();
+
+		$product5 = new WC_Product_Simple();
+		$product5->set_regular_price( '27,00' );
+		$product5->save();
+
+		$product6 = new WC_Product_Simple();
+		$product6->set_regular_price( '100.00' );
+		$product6->save();
+
+		WC()->cart->add_to_cart( $product1->get_id(), 1 );
+		WC()->cart->add_to_cart( $product2->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$expected_price = '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&euro;</span>68,50</span>';
+		$this->assertEquals( $expected_price, WC()->cart->get_total() );
+		$this->assertEquals( '12.36', wc_round_tax_total( WC()->cart->get_total_tax( 'edit' ) ) );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product3->get_id(), 1 );
+		WC()->cart->add_to_cart( $product4->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$expected_price = '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&euro;</span>112,00</span>';
+		$this->assertEquals( $expected_price, WC()->cart->get_total() );
+		$this->assertEquals( '20.19', wc_round_tax_total( WC()->cart->get_total_tax( 'edit' ) ) );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product3->get_id(), 1 );
+		WC()->cart->add_to_cart( $product4->get_id(), 1 );
+		WC()->cart->add_to_cart( $product5->get_id(), 1 );
+		WC()->cart->add_to_cart( $product6->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$expected_price = '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&euro;</span>239,00</span>';
+		$this->assertEquals( $expected_price, WC()->cart->get_total() );
+		$this->assertEquals( '43.09', wc_round_tax_total( WC()->cart->get_total_tax( 'edit' ) ) );
+	}
+
+	/**
 	 * Test a rounding issue on prices that are entered exclusive tax.
 	 * See: #17970.
 	 *
