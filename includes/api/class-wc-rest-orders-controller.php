@@ -217,12 +217,15 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		$args['post_status'] = array();
 		foreach ( $statuses as $status ) {
-			if ( 'any' === $status ) {
+			if ( in_array( $status, $this->get_order_statuses(), true ) ) {
+				$args['post_status'][] = 'wc-' . $status;
+			} elseif ( 'any' === $status ) {
 				// Set status to "any" and short-circuit out.
 				$args['post_status'] = 'any';
 				break;
+			} else {
+				$args['post_status'][] = $status;
 			}
-			$args['post_status'][] = 'wc-' . $status;
 		}
 
 		return $args;
@@ -255,7 +258,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'string',
-				'enum' => array_merge( array( 'any' ), $this->get_order_statuses() ),
+				'enum' => array_merge( array( 'any', 'trash' ), $this->get_order_statuses() ),
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);

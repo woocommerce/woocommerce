@@ -314,7 +314,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @return array
 	 */
 	protected function get_image( $variation ) {
-		if ( ! has_post_thumbnail( $variation->get_id() ) ) {
+		if ( ! $variation->get_image_id() ) {
 			return;
 		}
 
@@ -514,10 +514,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 						'type'       => 'object',
 						'properties' => array(
 							'id'   => array(
-								'description' => __( 'File MD5 hash.', 'woocommerce' ),
+								'description' => __( 'File ID.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
 							),
 							'name' => array(
 								'description' => __( 'File name.', 'woocommerce' ),
@@ -568,8 +567,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'context'     => array( 'view', 'edit' ),
 				),
 				'stock_status'          => array(
-					'description' => __( 'Controls the stock status of the product: "instock", "outofstock" or "onbackorder".', 'woocommerce' ),
+					'description' => __( 'Controls the stock status of the product.', 'woocommerce' ),
 					'type'        => 'string',
+					'default'     => 'instock',
 					'enum'        => array_keys( wc_get_product_stock_status_options() ),
 					'context'     => array( 'view', 'edit' ),
 				),

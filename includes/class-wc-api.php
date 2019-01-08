@@ -342,6 +342,10 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_System_Status_Tools_Controller',
 			'WC_REST_Shipping_Methods_Controller',
 			'WC_REST_Payment_Gateways_Controller',
+			'WC_REST_Data_Controller',
+			'WC_REST_Data_Continents_Controller',
+			'WC_REST_Data_Countries_Controller',
+			'WC_REST_Data_Currencies_Controller',
 		);
 
 		foreach ( $controllers as $controller ) {

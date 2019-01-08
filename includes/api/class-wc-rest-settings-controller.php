@@ -61,7 +61,7 @@ class WC_REST_Settings_Controller extends WC_REST_Settings_V2_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
-		$options_controller = new WC_REST_Dev_Setting_Options_Controller();
+		$options_controller = new WC_REST_Setting_Options_Controller();
 		$response           = $options_controller->update_item( $request );
 
 		return $response;

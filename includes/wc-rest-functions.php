@@ -273,13 +273,29 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 function wc_rest_check_user_permissions( $context = 'read', $object_id = 0 ) {
 	$contexts = array(
 		'read'   => 'list_users',
-		'create' => 'edit_users',
+		'create' => 'promote_users', // Check if current user can create users, shop managers are not allowed to create users.
 		'edit'   => 'edit_users',
 		'delete' => 'delete_users',
-		'batch'  => 'edit_users',
+		'batch'  => 'promote_users',
 	);
 
-	$permission = current_user_can( $contexts[ $context ], $object_id );
+	// Check to allow shop_managers to manage only customers.
+	if ( in_array( $context, array( 'edit', 'delete' ), true ) && wc_current_user_has_role( 'shop_manager' ) ) {
+		$permission                  = false;
+		$user_data                   = get_userdata( $object_id );
+		$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
+
+		if ( isset( $user_data->roles ) ) {
+			$can_manage_users = array_intersect( $user_data->roles, array_unique( $shop_manager_editable_roles ) );
+
+			// Check if Shop Manager can edit customer or with the is same shop manager.
+			if ( 0 < count( $can_manage_users ) || intval( $object_id ) === intval( get_current_user_id() ) ) {
+				$permission = current_user_can( $contexts[ $context ], $object_id );
+			}
+		}
+	} else {
+		$permission = current_user_can( $contexts[ $context ], $object_id );
+	}
 
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, 'user' );
 }

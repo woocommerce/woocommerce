@@ -34,7 +34,7 @@ if ( $order->has_status( 'pending' ) ) {
 
 } else {
 	/* translators: %s Order date */
-	echo sprintf( esc_html__( 'Here are the details of your order placed on %s:', 'woocommerce' ), esc_html( wc_format_datetime( $this->object->get_date_created() ) ) ) . "\n\n";
+	echo sprintf( esc_html__( 'Here are the details of your order placed on %s:', 'woocommerce' ), esc_html( wc_format_datetime( $order->get_date_created() ) ) ) . "\n\n";
 }
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 

@@ -473,7 +473,7 @@ class WC_API_Orders extends WC_API_Resource {
 				}
 
 				update_post_meta( $order->get_id(), '_payment_method', $data['payment_details']['method_id'] );
-				update_post_meta( $order->get_id(), '_payment_method_title', $data['payment_details']['method_title'] );
+				update_post_meta( $order->get_id(), '_payment_method_title', sanitize_text_field( $data['payment_details']['method_title'] ) );
 
 				// mark as paid if set
 				if ( isset( $data['payment_details']['paid'] ) && true === $data['payment_details']['paid'] ) {
@@ -622,7 +622,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 				// Method title.
 				if ( isset( $data['payment_details']['method_title'] ) ) {
-					update_post_meta( $order->get_id(), '_payment_method_title', $data['payment_details']['method_title'] );
+					update_post_meta( $order->get_id(), '_payment_method_title', sanitize_text_field( $data['payment_details']['method_title'] ) );
 				}
 
 				// Mark as paid if set.
@@ -1538,10 +1538,11 @@ class WC_API_Orders extends WC_API_Resource {
 	 * @param string $order_id order ID
 	 * @param int $id
 	 * @param string|null $fields fields to limit response to
+	 * @param array $filter
 	 *
 	 * @return array|WP_Error
 	 */
-	public function get_order_refund( $order_id, $id, $fields = null ) {
+	public function get_order_refund( $order_id, $id, $fields = null, $filter = array() ) {
 		try {
 			// Validate order ID
 			$order_id = $this->validate_request( $order_id, $this->post_type, 'read' );

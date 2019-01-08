@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: https://woocommerce.com/
  * Description: An eCommerce toolkit that helps you sell anything. Beautifully.
- * Version: 3.5.0-rc.1
+ * Version: 3.6.0-dev
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Text Domain: woocommerce
@@ -34,9 +34,9 @@ if ( ! class_exists( 'WooCommerce' ) ) {
  * @since  2.1
  * @return WooCommerce
  */
-function wc() {
+function WC() {
 	return WooCommerce::instance();
 }
 
 // Global for backwards compatibility.
-$GLOBALS['woocommerce'] = wc();
+$GLOBALS['woocommerce'] = WC();

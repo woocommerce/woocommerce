@@ -17,6 +17,10 @@ if ( ! class_exists( 'WC_Product_Importer', false ) ) {
 	include_once dirname( __FILE__ ) . '/abstract-wc-product-importer.php';
 }
 
+if ( ! class_exists( 'WC_Product_CSV_Importer_Controller', false ) ) {
+	include_once WC_ABSPATH . 'includes/admin/importers/class-wc-product-csv-importer-controller.php';
+}
+
 /**
  * WC_Product_CSV_Importer Class.
  */
@@ -70,7 +74,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$handle = fopen( $this->file, 'r' ); // @codingStandardsIgnoreLine.
 
 		if ( false !== $handle ) {
-			$this->raw_keys = version_compare( PHP_VERSION, '5.3', '>=' ) ? fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) : fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'] ); // @codingStandardsIgnoreLine
+			$this->raw_keys = version_compare( PHP_VERSION, '5.3', '>=' ) ? array_map( 'trim', fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'], $this->params['escape'] ) ) : array_map( 'trim', fgetcsv( $handle, 0, $this->params['delimiter'], $this->params['enclosure'] ) ); // @codingStandardsIgnoreLine
 
 			// Remove BOM signature from the first item.
 			if ( isset( $this->raw_keys[0] ) ) {
@@ -284,6 +288,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return array();
 		}
 
+		$value = $this->unescape_data( $value );
 		return array_map( 'wc_clean', $this->explode_values( $value ) );
 	}
 
@@ -318,7 +323,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		// Remove the ' prepended to fields that start with - if needed.
-		$value = $this->unescape_negative_number( $value );
+		$value = $this->unescape_data( $value );
 
 		return floatval( $value );
 	}
@@ -335,7 +340,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		// Remove the ' prepended to fields that start with - if needed.
-		$value = $this->unescape_negative_number( $value );
+		$value = $this->unescape_data( $value );
 
 		return wc_stock_amount( $value );
 	}
@@ -403,6 +408,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return array();
 		}
 
+		$value = $this->unescape_data( $value );
 		$names = $this->explode_values( $value );
 		$tags  = array();
 
@@ -549,7 +555,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	public function parse_int_field( $value ) {
 		// Remove the ' prepended to fields that start with - if needed.
-		$value = $this->unescape_negative_number( $value );
+		$value = $this->unescape_data( $value );
 
 		return intval( $value );
 	}

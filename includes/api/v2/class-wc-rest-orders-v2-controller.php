@@ -358,27 +358,24 @@ class WC_REST_Orders_V2_Controller extends WC_REST_Legacy_Orders_Controller {
 		$args = parent::prepare_objects_query( $request );
 
 		// Set post_status.
-		if ( 'any' !== $request['status'] ) {
+		if ( in_array( $request['status'], $this->get_order_statuses(), true ) ) {
 			$args['post_status'] = 'wc-' . $request['status'];
-		} else {
+		} elseif ( 'any' === $request['status'] ) {
 			$args['post_status'] = 'any';
+		} else {
+			$args['post_status'] = $request['status'];
 		}
 
 		if ( isset( $request['customer'] ) ) {
-			// On WC 3.5.0 the ID of the user that placed the order was moved from the post meta _customer_user to the post_author field in the wp_posts table.
-			if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) ) {
-				$args['author'] = $request['customer'];
-			} else {
-				if ( ! empty( $args['meta_query'] ) ) {
-					$args['meta_query'] = array(); // WPCS: slow query ok.
-				}
-
-				$args['meta_query'][] = array(
-					'key'   => '_customer_user',
-					'value' => $request['customer'],
-					'type'  => 'NUMERIC',
-				);
+			if ( ! empty( $args['meta_query'] ) ) {
+				$args['meta_query'] = array(); // WPCS: slow query ok.
 			}
+
+			$args['meta_query'][] = array(
+				'key'   => '_customer_user',
+				'value' => $request['customer'],
+				'type'  => 'NUMERIC',
+			);
 		}
 
 		// Search by product.
@@ -1106,6 +1103,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_Legacy_Orders_Controller {
 					'description' => __( 'Payment method title.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 				'transaction_id'       => array(
 					'description' => __( 'Unique transaction ID.', 'woocommerce' ),
@@ -1674,7 +1674,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_Legacy_Orders_Controller {
 			'default'           => 'any',
 			'description'       => __( 'Limit result set to orders assigned a specific status.', 'woocommerce' ),
 			'type'              => 'string',
-			'enum'              => array_merge( array( 'any' ), $this->get_order_statuses() ),
+			'enum'              => array_merge( array( 'any', 'trash' ), $this->get_order_statuses() ),
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

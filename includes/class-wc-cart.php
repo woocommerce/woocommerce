@@ -143,7 +143,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array of cart items
 	 */
 	public function get_cart_contents() {
-		return (array) $this->cart_contents;
+		return apply_filters( 'woocommerce_get_cart_contents', (array) $this->cart_contents );
 	}
 
 	/**
@@ -603,7 +603,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		if ( ! did_action( 'wp_loaded' ) ) {
 			wc_doing_it_wrong( __FUNCTION__, __( 'Get cart should not be called before the wp_loaded action.', 'woocommerce' ), '2.3' );
 		}
-		if ( ! did_action( 'woocommerce_cart_loaded_from_session' ) ) {
+		if ( ! did_action( 'woocommerce_load_cart_from_session' ) ) {
 			$this->session->get_cart_from_session();
 		}
 		return array_filter( $this->get_cart_contents() );
@@ -778,7 +778,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 
 			// Check stock based on all items in the cart and consider any held stock within pending orders.
-			$held_stock     = wc_get_held_stock_quantity( $product, $current_session_order_id );
+			$held_stock     = ( $hold_stock_minutes > 0 ) ? wc_get_held_stock_quantity( $product, $current_session_order_id ) : 0;
 			$required_stock = $product_qty_in_cart[ $product->get_stock_managed_by_id() ];
 
 			if ( $product->get_stock_quantity() < ( $held_stock + $required_stock ) ) {
@@ -1079,8 +1079,10 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				// Add item after merging with $cart_item_data - hook to allow plugins to modify cart item.
 				$this->cart_contents[ $cart_item_key ] = apply_filters(
-					'woocommerce_add_cart_item', array_merge(
-						$cart_item_data, array(
+					'woocommerce_add_cart_item',
+					array_merge(
+						$cart_item_data,
+						array(
 							'key'          => $cart_item_key,
 							'product_id'   => $product_id,
 							'variation_id' => $variation_id,
@@ -1089,7 +1091,8 @@ class WC_Cart extends WC_Legacy_Cart {
 							'data'         => $product_data,
 							'data_hash'    => wc_get_cart_item_data_hash( $product_data ),
 						)
-					), $cart_item_key
+					),
+					$cart_item_key
 				);
 			}
 
@@ -1226,7 +1229,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Uses the shipping class to calculate shipping then gets the totals when its finished.
 	 */
 	public function calculate_shipping() {
-		$this->shipping_methods = $this->needs_shipping() ? $this->get_chosen_shipping_methods( WC()->shipping->calculate_shipping( $this->get_shipping_packages() ) ) : array();
+		$this->shipping_methods = $this->needs_shipping() ? $this->get_chosen_shipping_methods( WC()->shipping()->calculate_shipping( $this->get_shipping_packages() ) ) : array();
 
 		$shipping_taxes = wp_list_pluck( $this->shipping_methods, 'taxes' );
 		$merged_taxes   = array();
@@ -1374,11 +1377,6 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 		}
 
-		// If we're on the cart page, the user has not calculated shipping, hide the area.
-		if ( is_cart() && ! $this->get_customer()->has_calculated_shipping() ) {
-			return false;
-		}
-
 		return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 	}
 
@@ -1432,8 +1430,10 @@ class WC_Cart extends WC_Legacy_Cart {
 				$check_emails  = array_unique(
 					array_filter(
 						array_map(
-							'strtolower', array_map(
-								'sanitize_email', array(
+							'strtolower',
+							array_map(
+								'sanitize_email',
+								array(
 									$billing_email,
 									$current_user->user_email,
 								)
@@ -1512,7 +1512,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			// Go through the allowed emails and return true if the email matches a wildcard.
 			foreach ( $restrictions as $restriction ) {
 				// Convert to PHP-regex syntax.
-				$regex = '/' . str_replace( '*', '(.+)?', $restriction ) . '/';
+				$regex = '/^' . str_replace( '*', '(.+)?', $restriction ) . '$/';
 				preg_match( $regex, $check_email, $match );
 				if ( ! empty( $match ) ) {
 					return true;
@@ -1609,7 +1609,7 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		// Choose free shipping.
 		if ( $the_coupon->get_free_shipping() ) {
-			$packages                = WC()->shipping->get_packages();
+			$packages                = WC()->shipping()->get_packages();
 			$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
 			foreach ( $packages as $i => $package ) {
