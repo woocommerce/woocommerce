@@ -547,6 +547,12 @@ class WC_Post_Types {
 					/* translators: %s: number of orders */
 					'label_count'               => _n_noop( 'Failed <span class="count">(%s)</span>', 'Failed <span class="count">(%s)</span>', 'woocommerce' ),
 				),
+				'wc-auto-draft'     => array(
+					'public'                    => false,
+					'exclude_from_search'       => false,
+					'show_in_admin_all_list'    => false,
+					'show_in_admin_status_list' => false,
+				),
 			)
 		);
 
