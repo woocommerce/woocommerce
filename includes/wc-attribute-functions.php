@@ -94,10 +94,11 @@ function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
 	$attribute_name = $wpdb->get_var(
 		$wpdb->prepare(
 			"
-		SELECT attribute_name
-		FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
-		WHERE attribute_id = %d
-	", $attribute_id
+			SELECT attribute_name
+			FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
+			WHERE attribute_id = %d
+			",
+			$attribute_id
 		)
 	);
 
@@ -201,7 +202,8 @@ function wc_get_attribute_taxonomy_names() {
  */
 function wc_get_attribute_types() {
 	return (array) apply_filters(
-		'product_attributes_type_selector', array(
+		'product_attributes_type_selector',
+		array(
 			'select' => __( 'Select', 'woocommerce' ),
 		)
 	);
@@ -382,10 +384,11 @@ function wc_get_attribute( $id ) {
 	$data = $wpdb->get_row(
 		$wpdb->prepare(
 			"
-		SELECT *
-		FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
-		WHERE attribute_id = %d
-	 ", $id
+			SELECT *
+			FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
+			WHERE attribute_id = %d
+			",
+			$id
 		)
 	);
 
@@ -543,7 +546,8 @@ function wc_create_attribute( $args ) {
 					"SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_product_attributes' AND meta_value LIKE %s",
 					'%' . $wpdb->esc_like( $old_taxonomy_name ) . '%'
 				),
-			ARRAY_A );
+				ARRAY_A
+			);
 			foreach ( $metadatas as $metadata ) {
 				$product_id        = $metadata['post_id'];
 				$unserialized_data = maybe_unserialize( $metadata['meta_value'] );
@@ -554,7 +558,7 @@ function wc_create_attribute( $args ) {
 				$unserialized_data[ $new_taxonomy_name ] = $unserialized_data[ $old_taxonomy_name ];
 				unset( $unserialized_data[ $old_taxonomy_name ] );
 				$unserialized_data[ $new_taxonomy_name ]['name'] = $new_taxonomy_name;
-				update_post_meta( $product_id, '_product_attributes', $unserialized_data );
+				update_post_meta( $product_id, '_product_attributes', wp_slash( $unserialized_data ) );
 			}
 
 			// Update variations which use this taxonomy.
@@ -600,7 +604,8 @@ function wc_update_attribute( $id, $args ) {
 				SELECT attribute_name
 				FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
 				WHERE attribute_id = %d
-			", $args['id']
+			",
+			$args['id']
 		)
 	);
 
@@ -620,10 +625,11 @@ function wc_delete_attribute( $id ) {
 	$name = $wpdb->get_var(
 		$wpdb->prepare(
 			"
-		SELECT attribute_name
-		FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
-		WHERE attribute_id = %d
-	", $id
+			SELECT attribute_name
+			FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
+			WHERE attribute_id = %d
+			",
+			$id
 		)
 	);
 

@@ -427,7 +427,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$attributes             = $product->get_attributes();
 			$updated_attribute_keys = array();
 			foreach ( $attributes as $key => $value ) {
-				update_post_meta( $product->get_id(), 'attribute_' . $key, $value );
+				update_post_meta( $product->get_id(), 'attribute_' . $key, wp_slash( $value ) );
 				$updated_attribute_keys[] = 'attribute_' . $key;
 			}
 

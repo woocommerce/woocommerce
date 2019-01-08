@@ -764,7 +764,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					);
 				}
 			}
-			update_post_meta( $product->get_id(), '_product_attributes', $meta_values );
+			// Note, we use wp_slash to add extra level of escaping. See https://codex.wordpress.org/Function_Reference/update_post_meta#Workaround.
+			update_post_meta( $product->get_id(), '_product_attributes', wp_slash( $meta_values ) );
 		}
 	}
 
