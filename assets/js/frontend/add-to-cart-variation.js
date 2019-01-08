@@ -352,11 +352,19 @@
 								}
 
 								if ( attr_val ) {
-									// Decode entities and add slashes.
+									// Decode entities.
 									attr_val = $( '<div/>' ).html( attr_val ).text();
 
-									// Attach.
-									new_attr_select.find( 'option[value="' + form.addSlashes( attr_val ) + '"]' ).addClass( 'attached ' + variation_active );
+									// Attach to matching options by value. This is done to compare
+									// TEXT values rather than any HTML entities.
+									new_attr_select.find( 'option' ).each( function( index, el ) {
+										var option_value = $( this ).val();
+
+										if ( attr_val === option_value ) {
+											$( this ).addClass( 'attached ' + variation_active );
+											return false; // break.
+										}
+									});
 								} else {
 									// Attach all apart from placeholder.
 									new_attr_select.find( 'option:gt(0)' ).addClass( 'attached ' + variation_active );
@@ -371,8 +379,21 @@
 			attached_options_count = new_attr_select.find( 'option.attached' ).length;
 
 			// Check if current selection is in attached options.
-			if ( selected_attr_val && ( attached_options_count === 0 || new_attr_select.find( 'option.attached.enabled[value="' + form.addSlashes( selected_attr_val ) + '"]' ).length === 0 ) ) {
-				selected_attr_val_valid = false;
+			if ( selected_attr_val ) {
+				if ( 0 === attached_options_count ) {
+					selected_attr_val_valid = false;
+				} else {
+					selected_attr_val_valid = false;
+
+					new_attr_select.find( 'option.attached.enabled' ).each( function( index, el ) {
+						var option_value = $( this ).val();
+
+						if ( selected_attr_val === option_value ) {
+							selected_attr_val_valid = true;
+							return false; // break.
+						}
+					});
+				}
 			}
 
 			// Detach the placeholder if:
