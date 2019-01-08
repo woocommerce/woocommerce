@@ -40,6 +40,8 @@ function updateCurrentUserData( resourceNames, data, fetch ) {
 		'revenue_report_columns',
 		'taxes_report_columns',
 		'variations_report_columns',
+		'dashboard_charts',
+		'dashboard_chart_type',
 	];
 
 	if ( resourceNames.includes( resourceName ) ) {

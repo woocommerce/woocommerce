@@ -21,19 +21,11 @@ const allCharts = ordersCharts
 	);
 
 // Need to remove duplicate charts, by key, from the configs
-const uniqCharts = allCharts.reduce( ( a, b ) => {
+export const uniqCharts = allCharts.reduce( ( a, b ) => {
 	if ( a.findIndex( d => d.key === b.key ) < 0 ) {
 		a.push( b );
 	}
 	return a;
 }, [] );
 
-// Default charts.
-// TODO: Implement user-based toggling/persistence.
-const defaultCharts = [ 'items_sold', 'gross_revenue' ];
-
-export const showCharts = uniqCharts.map( d => ( {
-	...d,
-	show: defaultCharts.indexOf( d.key ) >= 0,
-} ) );
 export const getChartFromKey = key => allCharts.filter( d => d.key === key );

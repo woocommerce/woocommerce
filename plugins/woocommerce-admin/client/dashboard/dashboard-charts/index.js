@@ -4,10 +4,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
-import Gridicon from 'gridicons';
-import { ToggleControl, IconButton, NavigableMenu } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
+import Gridicon from 'gridicons';
+import { isEqual, xor } from 'lodash';
 import PropTypes from 'prop-types';
+import { ToggleControl, IconButton, NavigableMenu } from '@wordpress/components';
+import { withDispatch } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
@@ -18,47 +21,73 @@ import { EllipsisMenu, MenuItem, SectionHeader } from '@woocommerce/components';
  * Internal dependencies
  */
 import ChartBlock from './block';
-import { getChartFromKey, showCharts } from './config';
+import { getChartFromKey, uniqCharts } from './config';
+import withSelect from 'wc-api/with-select';
 import './style.scss';
 
 class DashboardCharts extends Component {
-	constructor() {
+	constructor( props ) {
 		super( ...arguments );
 		this.state = {
-			chartType: 'line', // @TODO: Remove this and use from props containing persisted user preferences.
-			showCharts,
+			chartType: props.userPrefChartType || 'line',
+			hiddenChartKeys: props.userPrefCharts || [],
+			query: props.query,
 		};
 
 		this.toggle = this.toggle.bind( this );
 	}
 
+	componentDidUpdate( {
+		userPrefCharts: prevUserPrefCharts,
+		userPrefChartType: prevUserPrefChartType,
+	} ) {
+		const { userPrefCharts, userPrefChartType } = this.props;
+		if ( userPrefCharts && ! isEqual( userPrefCharts, prevUserPrefCharts ) ) {
+			/* eslint-disable react/no-did-update-set-state */
+			this.setState( {
+				hiddenChartKeys: userPrefCharts,
+			} );
+			/* eslint-enable react/no-did-update-set-state */
+		}
+		if ( userPrefChartType && userPrefChartType !== prevUserPrefChartType ) {
+			/* eslint-disable react/no-did-update-set-state */
+			this.setState( {
+				chartType: userPrefChartType,
+			} );
+			/* eslint-enable react/no-did-update-set-state */
+		}
+	}
+
 	toggle( key ) {
 		return () => {
-			this.setState( state => {
-				const foundIndex = state.showCharts.findIndex( x => x.key === key );
-				state.showCharts[ foundIndex ].show = ! state.showCharts[ foundIndex ].show;
-				return state;
-			} );
+			const hiddenChartKeys = xor( this.state.hiddenChartKeys, [ key ] );
+			this.setState( { hiddenChartKeys } );
+			const userDataFields = {
+				[ 'dashboard_charts' ]: hiddenChartKeys,
+			};
+			this.props.updateCurrentUserData( userDataFields );
 		};
 	}
 
 	handleTypeToggle( type ) {
 		return () => {
-			this.setState( {
-				chartType: type,
-			} );
+			this.setState( { chartType: type } );
+			const userDataFields = {
+				[ 'dashboard_chart_type' ]: type,
+			};
+			this.props.updateCurrentUserData( userDataFields );
 		};
 	}
 
 	renderMenu() {
 		return (
 			<EllipsisMenu label={ __( 'Choose which charts to display', 'wc-admin' ) }>
-				{ this.state.showCharts.map( chart => {
+				{ uniqCharts.map( chart => {
 					return (
 						<MenuItem onInvoke={ this.toggle( chart.key ) } key={ chart.key }>
 							<ToggleControl
 								label={ __( `${ chart.label }`, 'wc-admin' ) }
-								checked={ chart.show }
+								checked={ ! this.state.hiddenChartKeys.includes( chart.key ) }
 								onChange={ this.toggle( chart.key ) }
 							/>
 						</MenuItem>
@@ -70,7 +99,8 @@ class DashboardCharts extends Component {
 
 	render() {
 		const { path } = this.props;
-		const query = { ...this.props.query, type: this.state.chartType };
+		const { chartType, hiddenChartKeys } = this.state;
+		const query = { ...this.props.query, type: chartType };
 		return (
 			<Fragment>
 				<div className="woocommerce-dashboard__dashboard-charts">
@@ -105,8 +135,8 @@ class DashboardCharts extends Component {
 						</NavigableMenu>
 					</SectionHeader>
 					<div className="woocommerce-dashboard__columns">
-						{ this.state.showCharts.map( chart => {
-							return ! chart.show ? null : (
+						{ uniqCharts.map( chart => {
+							return hiddenChartKeys.includes( chart.key ) ? null : (
 								<div key={ chart.key }>
 									<ChartBlock
 										charts={ getChartFromKey( chart.key ) }
@@ -129,4 +159,21 @@ DashboardCharts.propTypes = {
 	query: PropTypes.object.isRequired,
 };
 
-export default DashboardCharts;
+export default compose(
+	withSelect( select => {
+		const { getCurrentUserData } = select( 'wc-api' );
+		const userData = getCurrentUserData();
+
+		return {
+			userPrefCharts: userData.dashboard_charts,
+			userPrefChartType: userData.dashboard_chart_type,
+		};
+	} ),
+	withDispatch( dispatch => {
+		const { updateCurrentUserData } = dispatch( 'wc-api' );
+
+		return {
+			updateCurrentUserData,
+		};
+	} )
+)( DashboardCharts );
