@@ -7,14 +7,14 @@
   "prefer-stable": true,
   "minimum-stability": "dev",
   "require": {
-    "composer/installers": "~1.2"
+    "composer/installers": "~1.6"
   },
   "require-dev": {
-    "apigen/apigen": "^4",
-    "nette/utils": "~2.3.0",
-    "phpunit/phpunit": "6.*",
+    "apigen/apigen": "4.1.2",
+    "nette/utils": "2.3.11",
+    "phpunit/phpunit": "6.5.13",
     "woocommerce/woocommerce-git-hooks": "*",
-    "woocommerce/woocommerce-sniffs": "^0.0.5"
+    "woocommerce/woocommerce-sniffs": "0.0.5"
   },
   "scripts": {
     "pre-update-cmd": [
