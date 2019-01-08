@@ -70,23 +70,25 @@ class D3Chart extends Component {
 	}
 
 	drawChart( node ) {
-		const { data, margin, type } = this.props;
-		const params = this.getParams();
-		const adjParams = Object.assign( {}, params, {
-			height: params.adjHeight,
-			width: params.adjWidth,
-			tooltip: this.tooltipRef.current,
-			valueType: params.valueType,
+		setTimeout( () => {
+			const { data, margin, type } = this.props;
+			const params = this.getParams();
+			const adjParams = Object.assign( {}, params, {
+				height: params.adjHeight,
+				width: params.adjWidth,
+				tooltip: this.tooltipRef.current,
+				valueType: params.valueType,
+			} );
+
+			const g = node
+				.attr( 'id', 'chart' )
+				.append( 'g' )
+				.attr( 'transform', `translate(${ margin.left },${ margin.top })` );
+
+			drawAxis( g, adjParams );
+			type === 'line' && drawLines( g, data, adjParams );
+			type === 'bar' && drawBars( g, data, adjParams );
 		} );
-
-		const g = node
-			.attr( 'id', 'chart' )
-			.append( 'g' )
-			.attr( 'transform', `translate(${ margin.left },${ margin.top })` );
-
-		drawAxis( g, adjParams );
-		type === 'line' && drawLines( g, data, adjParams );
-		type === 'bar' && drawBars( g, data, adjParams );
 	}
 
 	shouldBeCompact() {
