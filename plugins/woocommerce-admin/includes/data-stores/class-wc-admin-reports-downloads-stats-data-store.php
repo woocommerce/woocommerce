@@ -199,7 +199,12 @@ class WC_Admin_Reports_Downloads_Stats_Data_Store extends WC_Admin_Reports_Downl
 	 * @param string   $direction DESC/ASC.
 	 */
 	protected function sort_intervals( &$data, $sort_by, $direction ) {
-		$this->order_by = 'time_interval';
+		if ( 'date' === $sort_by ) {
+			$this->order_by = 'time_interval';
+		} else {
+			$this->order_by = $sort_by;
+		}
+
 		$this->order    = $direction;
 		usort( $data->intervals, array( $this, 'interval_cmp' ) );
 	}

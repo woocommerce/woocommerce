@@ -110,6 +110,121 @@ class WC_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 8, count( $reports['intervals'] ) );
 		$this->assertEquals( 0, $reports['intervals'][1]['subtotals']->download_count );
+
+		// Test sorting by download_count.
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'before'   => date( 'Y-m-d 23:59:59', $time ),
+				'after'    => date( 'Y-m-d H:00:00', $time - ( 7 * DAY_IN_SECONDS ) ),
+				'interval' => 'day',
+				'orderby'  => 'download_count',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+	}
+
+	/**
+	 * Test getting report ordering.
+	 */
+	public function test_get_report_orderby() {
+		global $wpdb;
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Populate all of the data.
+		$prod_download = new WC_Product_Download();
+		$prod_download->set_file( plugin_dir_url( __FILE__ ) . '/assets/images/help.png' );
+		$prod_download->set_id( 1 );
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_downloadable( 'yes' );
+		$product->set_downloads( array( $prod_download ) );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( 'completed' );
+		$order->set_total( 100 );
+		$order->save();
+
+		$download = new WC_Customer_Download();
+		$download->set_user_id( $this->user );
+		$download->set_order_id( $order->get_id() );
+		$download->set_product_id( $product->get_id() );
+		$download->set_download_id( $prod_download->get_id() );
+		$download->save();
+
+		$object = new WC_Customer_Download_Log();
+		$object->set_permission_id( $download->get_id() );
+		$object->set_user_id( $this->user );
+		$object->set_user_ip_address( '1.2.3.4' );
+		$object->save();
+
+		$object = new WC_Customer_Download_Log();
+		$object->set_permission_id( $download->get_id() );
+		$object->set_user_id( $this->user );
+		$object->set_user_ip_address( '1.2.3.4' );
+		$object->save();
+
+		$object = new WC_Customer_Download_Log();
+		$object->set_permission_id( $download->get_id() );
+		$object->set_user_id( $this->user );
+		$object->set_user_ip_address( '1.2.3.4' );
+		$object->save();
+
+		$three_days_from_now = current_time( 'timestamp', true ) - ( 3 * DAY_IN_SECONDS );
+
+		$object = new WC_Customer_Download_Log();
+		$object->set_permission_id( $download->get_id() );
+		$object->set_user_id( $this->user );
+		$object->set_user_ip_address( '1.2.3.4' );
+		$object->set_timestamp( $three_days_from_now );
+		$object->save();
+
+		$time           = time();
+		$seven_days_ago = $time - ( 7 * DAY_IN_SECONDS );
+
+		// Test sorting by download_count.
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'before'   => date( 'Y-m-d 23:59:59', $time ),
+				'after'    => date( 'Y-m-d H:00:00', $seven_days_ago ),
+				'interval' => 'day',
+				'orderby'  => 'download_count',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 3, $reports['intervals'][0]['subtotals']->download_count );
+		$this->assertEquals( date( 'Y-m-d', $time ), $reports['intervals'][0]['interval'] );
+
+		$this->assertEquals( 1, $reports['intervals'][1]['subtotals']->download_count );
+		$this->assertEquals( date( 'Y-m-d', $three_days_from_now ), $reports['intervals'][1]['interval'] );
+
+		// Test sorting by date.
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'before'   => date( 'Y-m-d 23:59:59', $time ),
+				'after'    => date( 'Y-m-d H:00:00', $seven_days_ago ),
+				'interval' => 'day',
+				'orderby'  => 'date',
+				'order'    => 'asc',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 0, $reports['intervals'][0]['subtotals']->download_count );
+		$this->assertEquals( date( 'Y-m-d', $seven_days_ago ), $reports['intervals'][0]['interval'] );
+
+		$this->assertEquals( 3, $reports['intervals'][7]['subtotals']->download_count );
+		$this->assertEquals( date( 'Y-m-d', $time ), $reports['intervals'][7]['interval'] );
 	}
 
 	/**
@@ -138,7 +253,7 @@ class WC_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case {
 
 		$totals = $properties['totals']['properties'];
 		$this->assertEquals( 1, count( $totals ) );
-		$this->assertArrayHasKey( 'downloads_count', $totals );
+		$this->assertArrayHasKey( 'download_count', $totals );
 
 		$intervals = $properties['intervals']['items']['properties'];
 		$this->assertEquals( 6, count( $intervals ) );
@@ -151,6 +266,6 @@ class WC_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case {
 
 		$subtotals = $properties['intervals']['items']['properties']['subtotals']['properties'];
 		$this->assertEquals( 1, count( $subtotals ) );
-		$this->assertArrayHasKey( 'downloads_count', $subtotals );
+		$this->assertArrayHasKey( 'download_count', $subtotals );
 	}
 }

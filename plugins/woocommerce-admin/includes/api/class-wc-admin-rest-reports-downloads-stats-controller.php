@@ -138,7 +138,7 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 	 */
 	public function get_item_schema() {
 		$totals = array(
-			'downloads_count' => array(
+			'download_count' => array(
 				'description' => __( 'Number of downloads.', 'wc-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
@@ -263,7 +263,7 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 			'default'           => 'date',
 			'enum'              => array(
 				'date',
-				'downloads_count',
+				'download_count',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
