@@ -11,7 +11,7 @@
   },
   "require-dev": {
     "apigen/apigen": "4.1.2",
-    "nette/utils": "2.3.11",
+    "nette/utils": "2.5.3",
     "phpunit/phpunit": "6.5.13",
     "woocommerce/woocommerce-git-hooks": "*",
     "woocommerce/woocommerce-sniffs": "0.0.5"
