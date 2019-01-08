@@ -56,15 +56,6 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	);
 
 	/**
-	 * Set up all the hooks for maintaining and populating table data.
-	 */
-	public static function init() {
-		add_action( 'woocommerce_new_order', array( __CLASS__, 'sync_order' ) );
-		add_action( 'woocommerce_update_order', array( __CLASS__, 'sync_order' ) );
-		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order' ) );
-	}
-
-	/**
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
 	 *
 	 * @param string $order_by Sorting criterion.
@@ -314,68 +305,29 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	}
 
 	/**
-	 * Add customer information to the lookup table when orders are created or modified.
+	 * Gets the guest (no user_id) customer ID or creates a new one for
+	 * the corresponding billing email in the provided WC_Order
 	 *
-	 * @param int $post_id Post ID.
+	 * @param WC_Order $order Order to get/create guest customer data with.
+	 * @return int|false The ID of the retrieved/created customer, or false on error.
 	 */
-	public static function sync_order( $post_id ) {
-		if ( 'shop_order' !== get_post_type( $post_id ) ) {
-			return;
-		}
-
-		$order = wc_get_order( $post_id );
-		if ( ! $order ) {
-			return;
-		}
-
-		$customer_id = $order->get_customer_id();
-		if ( 0 === $customer_id ) {
-			return;
-		}
-
-		self::update_registered_customer( $customer_id );
-	}
-
-	/**
-	 * Updates a guest (no user_id) customer data with new order data.
-	 *
-	 * @param WC_Order $order Order to update guest customer data with.
-	 * @return int|false The number of rows affected, or false on error.
-	 */
-	public function update_guest_customer_by_order( $order ) {
+	public function get_or_create_guest_customer_from_order( $order ) {
 		global $wpdb;
 
 		$email = $order->get_billing_email( 'edit' );
 
 		if ( empty( $email ) ) {
-			return true;
+			return false;
 		}
 
 		$existing_guest = $this->get_guest_by_email( $email );
 
 		if ( $existing_guest ) {
-			$order_timestamp  = date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() );
-			$new_orders_count = $existing_guest['orders_count'] + 1;
-			$new_total_spend  = $existing_guest['total_spend'] + (float) $order->get_total( 'edit' );
-
-			return $wpdb->update(
-				$wpdb->prefix . self::TABLE_NAME,
-				array(
-					'orders_count'     => $new_orders_count,
-					'total_spend'      => $new_total_spend,
-					'avg_order_value'  => $new_total_spend / $new_orders_count,
-					'date_last_order'  => $order_timestamp,
-					'date_last_active' => $order_timestamp,
-				),
-				array(
-					'customer_id' => $existing_guest['customer_id'],
-				),
-				array( '%d', '%f', '%f', '%s', '%s' ),
-				array( '%d' )
-			);
+			return $existing_guest['customer_id'];
 		}
 
-		return $this->insert_guest_customer(
+		$result = $wpdb->insert(
+			$wpdb->prefix . self::TABLE_NAME,
 			array(
 				'first_name'       => $order->get_billing_first_name( 'edit' ),
 				'last_name'        => $order->get_billing_last_name( 'edit' ),
@@ -383,38 +335,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 				'city'             => $order->get_billing_city( 'edit' ),
 				'postcode'         => $order->get_billing_postcode( 'edit' ),
 				'country'          => $order->get_billing_country( 'edit' ),
-				'orders_count'     => 1,
-				'total_spend'      => (float) $order->get_total( 'edit' ),
-				'avg_order_value'  => (float) $order->get_total( 'edit' ),
-				'date_last_order'  => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 				'date_last_active' => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
-			)
-		);
-	}
-
-	/**
-	 * Insert a guest (no user_id) customer into lookup table.
-	 *
-	 * @param array $customer_data Array of guest customer data to insert.
-	 * @return int|false The number of rows affected, or false on error.
-	 */
-	public static function insert_guest_customer( $customer_data ) {
-		global $wpdb;
-
-		return $wpdb->insert(
-			$wpdb->prefix . self::TABLE_NAME,
-			array(
-				'first_name'       => $customer_data['first_name'],
-				'last_name'        => $customer_data['last_name'],
-				'email'            => $customer_data['email'],
-				'city'             => $customer_data['city'],
-				'postcode'         => $customer_data['postcode'],
-				'country'          => $customer_data['country'],
-				'orders_count'     => $customer_data['orders_count'],
-				'total_spend'      => $customer_data['total_spend'],
-				'avg_order_value'  => $customer_data['avg_order_value'],
-				'date_last_order'  => $customer_data['date_last_order'],
-				'date_last_active' => $customer_data['date_last_active'],
 			),
 			array(
 				'%s',
@@ -423,13 +344,11 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 				'%s',
 				'%s',
 				'%s',
-				'%d',
-				'%f',
-				'%f',
-				'%s',
 				'%s',
 			)
 		);
+
+		return $result ? $wpdb->insert_id : false;
 	}
 
 	/**
@@ -452,6 +371,31 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 
 		if ( $guest_row ) {
 			return $this->cast_numbers( $guest_row );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Retrieve a registered customer row by user_id.
+	 *
+	 * @param string|int $user_id User ID.
+	 * @returns false|array Customer array if found, boolean false if not.
+	 */
+	public function get_customer_by_user_id( $user_id ) {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		$customer   = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT * FROM {$table_name} WHERE user_id = %d LIMIT 1",
+				$user_id
+			),
+			ARRAY_A
+		); // WPCS: unprepared SQL ok.
+
+		if ( $customer ) {
+			return $this->cast_numbers( $customer );
 		}
 
 		return false;

@@ -447,7 +447,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			return;
 		}
 
-		$data = array(
+		$data   = array(
 			'order_id'           => $order->get_id(),
 			'date_created'       => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
 			'num_items_sold'     => self::get_num_items_sold( $order ),
@@ -460,25 +460,46 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			'returning_customer' => self::is_returning_customer( $order ),
 			'status'             => self::normalize_order_status( $order->get_status() ),
 		);
+		$format = array(
+			'%d',
+			'%s',
+			'%d',
+			'%f',
+			'%f',
+			'%f',
+			'%f',
+			'%f',
+			'%f',
+			'%d',
+			'%s',
+		);
+
+		// Ensure we're associating this order with a Customer in the lookup table.
+		$order_user_id        = $order->get_customer_id();
+		$customers_data_store = new WC_Admin_Reports_Customers_Data_Store();
+
+		if ( 0 === $order_user_id ) {
+			$email = $order->get_billing_email( 'edit' );
+
+			if ( $email ) {
+				$customer_id = $customers_data_store->get_or_create_guest_customer_from_order( $order );
+
+				if ( $customer_id ) {
+					$data['customer_id'] = $customer_id;
+					$format[] = '%d';
+				}
+			}
+		} else {
+			$customer = $customers_data_store->get_customer_by_user_id( $order_user_id );
+
+			if ( $customer && $customer['customer_id'] ) {
+				$data['customer_id'] = $customer['customer_id'];
+				$format[] = '%d';
+			}
+		}
 
 		// Update or add the information to the DB.
-		return $wpdb->replace(
-			$table_name,
-			$data,
-			array(
-				'%d',
-				'%s',
-				'%d',
-				'%f',
-				'%f',
-				'%f',
-				'%f',
-				'%f',
-				'%f',
-				'%d',
-				'%s',
-			)
-		);
+		return $wpdb->replace( $table_name, $data, $format );
 	}
 
 	/**

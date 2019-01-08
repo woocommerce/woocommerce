@@ -29,8 +29,6 @@ class WC_Admin_Api_Init {
 
 		// Initialize Orders data store class's static vars.
 		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'orders_data_store_init' ), 20 );
-		// Initialize Customers Report data store class's static vars.
-		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'customers_report_data_store_init' ), 20 );
 	}
 
 	/**
@@ -265,9 +263,11 @@ class WC_Admin_Api_Init {
 	 * Regenerate data for reports.
 	 */
 	public static function regenerate_report_data() {
+		// Add registered customers to the lookup table before updating order stats
+		// so that the orders can be associated with the `customer_id` column.
+		self::customer_lookup_store_init();
 		WC_Admin_Reports_Orders_Data_Store::queue_order_stats_repopulate_database();
 		self::order_product_lookup_store_init();
-		self::customer_lookup_store_init();
 	}
 
 	/**
@@ -337,13 +337,6 @@ class WC_Admin_Api_Init {
 	}
 
 	/**
-	 * Init customers report data store.
-	 */
-	public static function customers_report_data_store_init() {
-		WC_Admin_Reports_Customers_Data_Store::init();
-	}
-
-	/**
 	 * Init customer lookup store.
 	 *
 	 * @param WC_Background_Updater|null $updater Updater instance.
@@ -382,48 +375,6 @@ class WC_Admin_Api_Init {
 			if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
 				// Update the transient for the next run to avoid processing the same orders again.
 				set_transient( 'wc_update_350_all_customers', $customer_ids, DAY_IN_SECONDS );
-				return true;
-			}
-		}
-
-		// Backfill customer lookup table with guests.
-		$guest_order_ids = get_transient( 'wc_update_350_all_guest_orders' );
-
-		if ( false === $guest_order_ids ) {
-			$guest_order_ids = wc_get_orders(
-				// TODO: restrict to certain order status?
-				array(
-					'fields'         => 'ids',
-					'customer_id'    => 0,
-					'order'          => 'asc',
-					'orderby'        => 'date',
-					'posts_per_page' => -1,
-				)
-			);
-
-			set_transient( 'wc_update_350_all_guest_orders', $guest_order_ids, DAY_IN_SECONDS );
-		}
-
-		$customers_report_data_store = new WC_Admin_Reports_Customers_Data_Store();
-
-		foreach ( $guest_order_ids as $idx => $order_id ) {
-			$order = wc_get_order( $order_id );
-
-			if ( ! $order ) {
-				unset( $guest_order_ids[ $idx ] );
-			} elseif ( ! $order->get_billing_email( 'edit' ) ) {
-				unset( $guest_order_ids[ $idx ] );
-			} else {
-				$result = $customers_report_data_store->update_guest_customer_by_order( $order );
-
-				if ( $result ) {
-					unset( $guest_order_ids[ $idx ] );
-				}
-			}
-
-			if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
-				// Update the transient for the next run to avoid processing the same orders again.
-				set_transient( 'wc_update_350_all_guest_orders', $guest_order_ids, DAY_IN_SECONDS );
 				return true;
 			}
 		}
