@@ -508,6 +508,7 @@ class WC_Admin_Api_Init {
 			net_total double DEFAULT 0 NOT NULL,
 			returning_customer boolean DEFAULT 0 NOT NULL,
 			status varchar(200) NOT NULL,
+			customer_id BIGINT UNSIGNED NOT NULL,
 			PRIMARY KEY (order_id),
 			KEY date_created (date_created)
 		  ) $collate;
