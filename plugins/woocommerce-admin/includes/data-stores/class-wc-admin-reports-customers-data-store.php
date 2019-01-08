@@ -67,6 +67,30 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	}
 
 	/**
+	 * Set up all the hooks for maintaining and populating table data.
+	 */
+	public static function init() {
+		add_action( 'woocommerce_new_customer', array( __CLASS__, 'update_registered_customer' ) );
+		add_action( 'woocommerce_update_customer', array( __CLASS__, 'update_registered_customer' ) );
+		add_action( 'edit_user_profile_update', array( __CLASS__, 'update_registered_customer' ) );
+		add_action( 'updated_user_meta', array( __CLASS__, 'update_registered_customer_via_last_active' ), 10, 3 );
+	}
+
+	/**
+	 * Trigger a customer update if their "last active" meta value was changed.
+	 * Function expects to be hooked into the `updated_user_meta` action.
+	 *
+	 * @param int    $meta_id ID of updated metadata entry.
+	 * @param int    $user_id ID of the user being updated.
+	 * @param string $meta_key Meta key being updated.
+	 */
+	public static function update_registered_customer_via_last_active( $meta_id, $user_id, $meta_key ) {
+		if ( 'wc_last_active' === $meta_key ) {
+			self::update_registered_customer( $user_id );
+		}
+	}
+
+	/**
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
 	 *
 	 * @param string $order_by Sorting criterion.
@@ -466,6 +490,26 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	}
 
 	/**
+	 * Retrieve a registered customer row id by user_id.
+	 *
+	 * @param string|int $user_id User ID.
+	 * @returns false|int Customer ID if found, boolean false if not.
+	 */
+	public static function get_customer_id_by_user_id( $user_id ) {
+		global $wpdb;
+
+		$table_name  = $wpdb->prefix . self::TABLE_NAME;
+		$customer_id = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT customer_id FROM {$table_name} WHERE user_id = %d LIMIT 1",
+				$user_id
+			)
+		); // WPCS: unprepared SQL ok.
+
+		return $customer_id ? (int) $customer_id : false;
+	}
+
+	/**
 	 * Update the database with customer data.
 	 *
 	 * @param int $user_id WP User ID to update customer data for.
@@ -481,35 +525,40 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		}
 
 		$last_active = $customer->get_meta( 'wc_last_active', true, 'edit' );
-
-		// TODO: try to preserve customer_id for existing user_id?
-		return $wpdb->replace(
-			$wpdb->prefix . self::TABLE_NAME,
-			array(
-				'user_id'          => $user_id,
-				'username'         => $customer->get_username( 'edit' ),
-				'first_name'       => $customer->get_first_name( 'edit' ),
-				'last_name'        => $customer->get_last_name( 'edit' ),
-				'email'            => $customer->get_email( 'edit' ),
-				'city'             => $customer->get_billing_city( 'edit' ),
-				'postcode'         => $customer->get_billing_postcode( 'edit' ),
-				'country'          => $customer->get_billing_country( 'edit' ),
-				'date_registered'  => date( 'Y-m-d H:i:s', $customer->get_date_created( 'edit' )->getTimestamp() ),
-				'date_last_active' => $last_active ? date( 'Y-m-d H:i:s', $last_active ) : '',
-			),
-			array(
-				'%d',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-			)
+		$data        = array(
+			'user_id'          => $user_id,
+			'username'         => $customer->get_username( 'edit' ),
+			'first_name'       => $customer->get_first_name( 'edit' ),
+			'last_name'        => $customer->get_last_name( 'edit' ),
+			'email'            => $customer->get_email( 'edit' ),
+			'city'             => $customer->get_billing_city( 'edit' ),
+			'postcode'         => $customer->get_billing_postcode( 'edit' ),
+			'country'          => $customer->get_billing_country( 'edit' ),
+			'date_registered'  => date( 'Y-m-d H:i:s', $customer->get_date_created( 'edit' )->getTimestamp() ),
+			'date_last_active' => $last_active ? date( 'Y-m-d H:i:s', $last_active ) : '',
 		);
+		$format      = array(
+			'%d',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+		);
+
+		$customer_id = self::get_customer_id_by_user_id( $user_id );
+
+		if ( $customer_id ) {
+			// Preserve customer_id for existing user_id.
+			$data['customer_id'] = $customer_id;
+			$format[] = '%d';
+		}
+
+		return $wpdb->replace( $wpdb->prefix . self::TABLE_NAME, $data, $format );
 	}
 
 	/**
