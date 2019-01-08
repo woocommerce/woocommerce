@@ -443,7 +443,7 @@ class WC_Template_Loader {
 			$args      = self::get_current_shop_view_args();
 			$shortcode = new WC_Shortcode_Products(
 				array_merge(
-					wc()->query->get_catalog_ordering_args(),
+					WC()->query->get_catalog_ordering_args(),
 					array(
 						'page'     => $args->page,
 						'columns'  => $args->columns,
@@ -457,12 +457,12 @@ class WC_Template_Loader {
 			'products' );
 
 			// Allow queries to run e.g. layered nav.
-			add_action( 'pre_get_posts', array( wc()->query, 'product_query' ) );
+			add_action( 'pre_get_posts', array( WC()->query, 'product_query' ) );
 
 			$content = $content . $shortcode->get_content();
 
 			// Remove actions and self to avoid nested calls.
-			remove_action( 'pre_get_posts', array( wc()->query, 'product_query' ) );
+			remove_action( 'pre_get_posts', array( WC()->query, 'product_query' ) );
 			WC()->query->remove_ordering_args();
 		}
 
