@@ -230,9 +230,11 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 	protected function prepare_objects_query( $request ) {
 		$args = parent::prepare_objects_query( $request );
 
-		$orderby      = $request->get_param( 'orderby' );
-		$order        = $request->get_param( 'order' );
-		$cat_operator = $request->get_param( 'cat_operator' );
+		$orderby       = $request->get_param( 'orderby' );
+		$order         = $request->get_param( 'order' );
+		$cat_operator  = $request->get_param( 'cat_operator' );
+		$attributes    = $request->get_param( 'attributes' );
+		$attr_operator = $request->get_param( 'attr_operator' );
 
 		$ordering_args   = WC()->query->get_catalog_ordering_args( $orderby, $order );
 		$args['orderby'] = $ordering_args['orderby'];
@@ -248,6 +250,30 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 					$args['tax_query'][ $i ]['include_children'] = 'AND' === $cat_operator ? false : true;
 				}
 			}
+		}
+
+		$tax_query = array();
+		if ( $attributes ) {
+			foreach ( $attributes as $attribute => $attribute_terms ) {
+				if ( in_array( $attribute, wc_get_attribute_taxonomy_names(), true ) ) {
+					$tax_query[] = array(
+						'taxonomy' => $attribute,
+						'field'    => 'term_id',
+						'terms'    => $attribute_terms,
+						'operator' => ! $attr_operator ? 'IN' : $attr_operator,
+					);
+				}
+			}
+		}
+
+		// Merge attribute `$tax_query`s into the request's WP_Query args.
+		if ( ! empty( $tax_query ) ) {
+			if ( ! empty( $args['tax_query'] ) ) {
+				$args['tax_query'] = array_merge( $tax_query, $args['tax_query'] ); // WPCS: slow query ok.
+			} else {
+				$args['tax_query'] = $tax_query; // WPCS: slow query ok.
+			}
+			$args['tax_query']['relation'] = 'AND' === $attr_operator ? 'AND' : 'OR';
 		}
 
 		return $args;
@@ -292,6 +318,31 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+		$params['attr_operator']   = array(
+			'description'       => __( 'Operator to compare product attribute terms.', 'woo-gutenberg-products-block' ),
+			'type'              => 'string',
+			'enum'              => array( 'IN', 'AND' ),
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$attr_properties = array();
+		foreach ( wc_get_attribute_taxonomy_names() as $name ) {
+			$attr_properties[ $name ] = array(
+				'type'  => 'array',
+				'items' => array( 'type' => 'string' ),
+			);
+		}
+		$params['attributes'] = array(
+			'description'       => __( 'Map of attributes to selected terms.', 'woo-gutenberg-products-block' ),
+			'type'              => 'object',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		if ( ! empty( $attr_properties ) ) {
+			$params['attributes']['properties']           = $attr_properties;
+			$params['attributes']['additionalProperties'] = false;
+		}
+
 		return $params;
 	}
 
