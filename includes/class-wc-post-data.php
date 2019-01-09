@@ -199,6 +199,14 @@ class WC_Post_Data {
 				global $wpdb;
 
 				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE meta_key = %s AND meta_value = %s;", $edited_term->slug, 'attribute_' . sanitize_title( $taxonomy ), self::$editing_term->slug ) );
+
+				$wpdb->query(
+					$wpdb->prepare(
+						"UPDATE {$wpdb->postmeta} SET meta_value = REPLACE( meta_value, %s, %s ) WHERE meta_key = '_default_attributes'",
+						serialize( self::$editing_term->taxonomy ) . serialize( self::$editing_term->slug ),
+						serialize( $edited_term->taxonomy ) . serialize( $edited_term->slug )
+					)
+				);
 			}
 		} else {
 			self::$editing_term = null;
