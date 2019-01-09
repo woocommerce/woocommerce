@@ -78,12 +78,15 @@ class WC_REST_Product_Categories_V1_Controller extends WC_REST_Terms_Controller 
 				'id'            => (int) $image_id,
 				'date_created'  => wc_rest_prepare_date_response( $attachment->post_date_gmt ),
 				'date_modified' => wc_rest_prepare_date_response( $attachment->post_modified_gmt ),
-				'src'           => wp_get_attachment_url( $image_id ),
+				'src'           => wc_get_term_thumbnail_url($item, $image_id, false, false),
 				'title'         => get_the_title( $attachment ),
 				'alt'           => get_post_meta( $image_id, '_wp_attachment_image_alt', true ),
 			);
 		}
-
+		else{
+			$data['image_src'] = wc_get_term_thumbnail_url($item, false, false, false);
+		}
+		
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
 		$data    = $this->filter_response_by_context( $data, $context );
