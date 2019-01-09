@@ -62,10 +62,13 @@ class WC_REST_Product_Categories_V2_Controller extends WC_REST_Product_Categorie
 				'date_created_gmt'  => wc_rest_prepare_date_response( $attachment->post_date_gmt ),
 				'date_modified'     => wc_rest_prepare_date_response( $attachment->post_modified ),
 				'date_modified_gmt' => wc_rest_prepare_date_response( $attachment->post_modified_gmt ),
-				'src'               => wp_get_attachment_url( $image_id ),
+				'src'               => wc_get_term_thumbnail_url( $item, $image_id, false, false ),
 				'title'             => get_the_title( $attachment ),
 				'alt'               => get_post_meta( $image_id, '_wp_attachment_image_alt', true ),
 			);
+		}
+		else{
+			$data['image_src'] = wc_get_term_thumbnail_url( $item, false, false, false );
 		}
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
