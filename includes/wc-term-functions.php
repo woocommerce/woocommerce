@@ -820,5 +820,5 @@ function wc_get_term_src_url( $term, $image_id = false, $size = false, $placehol
 		$image_url = wc_placeholder_img_src();
 	}
 	
-	return apply_filters( 'woocommerce_get_term_src_url', $image_url, $term_id );
+	return apply_filters( 'woocommerce_get_term_src_url', $image_url, $term_id, $size, $placeholder_image );
 }
