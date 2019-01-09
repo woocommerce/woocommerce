@@ -66,7 +66,7 @@ if ( wc_tax_enabled() ) {
 		</tbody>
 		<tbody id="order_shipping_line_items">
 			<?php
-			$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
+			$shipping_methods = WC()->shipping() ? WC()->shipping()->load_shipping_methods() : array();
 			foreach ( $line_items_shipping as $item_id => $item ) {
 				include 'html-order-shipping.php';
 			}

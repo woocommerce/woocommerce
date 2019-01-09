@@ -25,7 +25,8 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	public function create( &$zone ) {
 		global $wpdb;
 		$wpdb->insert(
-			$wpdb->prefix . 'woocommerce_shipping_zones', array(
+			$wpdb->prefix . 'woocommerce_shipping_zones',
+			array(
 				'zone_name'  => $zone->get_zone_name(),
 				'zone_order' => $zone->get_zone_order(),
 			)
@@ -48,10 +49,12 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 		global $wpdb;
 		if ( $zone->get_id() ) {
 			$wpdb->update(
-				$wpdb->prefix . 'woocommerce_shipping_zones', array(
+				$wpdb->prefix . 'woocommerce_shipping_zones',
+				array(
 					'zone_name'  => $zone->get_zone_name(),
 					'zone_order' => $zone->get_zone_order(),
-				), array( 'zone_id' => $zone->get_id() )
+				),
+				array( 'zone_id' => $zone->get_id() )
 			);
 		}
 		$zone->save_meta_data();
@@ -140,7 +143,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 			$raw_methods_sql = "SELECT method_id, method_order, instance_id, is_enabled FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE zone_id = %d";
 		}
 
-		return $wpdb->get_results( $wpdb->prepare( $raw_methods_sql, $zone_id ) ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		return $wpdb->get_results( $wpdb->prepare( $raw_methods_sql, $zone_id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -245,7 +248,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 		return $wpdb->get_var(
 			"SELECT zones.zone_id FROM {$wpdb->prefix}woocommerce_shipping_zones as zones
 			LEFT OUTER JOIN {$wpdb->prefix}woocommerce_shipping_zone_locations as locations ON zones.zone_id = locations.zone_id AND location_type != 'postcode'
-			WHERE " . implode( ' ', $criteria ) // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+			WHERE " . implode( ' ', $criteria ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			. ' ORDER BY zone_order ASC, zone_id ASC LIMIT 1'
 		);
 	}
@@ -317,7 +320,8 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 
 		foreach ( $zone->get_zone_locations( 'edit' ) as $location ) {
 			$wpdb->insert(
-				$wpdb->prefix . 'woocommerce_shipping_zone_locations', array(
+				$wpdb->prefix . 'woocommerce_shipping_zone_locations',
+				array(
 					'zone_id'       => $zone->get_id(),
 					'location_code' => $location->code,
 					'location_type' => $location->type,

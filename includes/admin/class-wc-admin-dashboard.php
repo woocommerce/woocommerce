@@ -39,9 +39,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 */
 		public function init() {
 			if ( current_user_can( 'publish_shop_orders' ) && post_type_supports( 'product', 'comments' ) ) {
-				wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce recent reviews', 'woocommerce' ), array( $this, 'recent_reviews' ) );
+				wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce Recent Reviews', 'woocommerce' ), array( $this, 'recent_reviews' ) );
 			}
-			wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce status', 'woocommerce' ), array( $this, 'status_widget' ) );
+			wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce Status', 'woocommerce' ), array( $this, 'status_widget' ) );
 
 			// Network Order Widget.
 			if ( is_multisite() ) {
@@ -53,7 +53,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * Register the network order dashboard widget.
 		 */
 		public function register_network_order_widget() {
-			wp_add_dashboard_widget( 'woocommerce_network_orders', __( 'WooCommerce network orders', 'woocommerce' ), array( $this, 'network_orders' ) );
+			wp_add_dashboard_widget( 'woocommerce_network_orders', __( 'WooCommerce Network Orders', 'woocommerce' ), array( $this, 'network_orders' ) );
 		}
 
 		/**
