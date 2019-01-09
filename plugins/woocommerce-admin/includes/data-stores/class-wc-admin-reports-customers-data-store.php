@@ -27,8 +27,6 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	protected $column_types = array(
 		'customer_id'      => 'intval',
 		'user_id'          => 'intval',
-		'date_registered'  => 'strval',
-		'date_last_active' => 'strval',
 		'orders_count'     => 'intval',
 		'total_spend'      => 'floatval',
 		'avg_order_value'  => 'floatval',
