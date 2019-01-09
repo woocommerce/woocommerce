@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 = 3.6.0 - 2019-xx-xx =
 
 * Enhancement - Only include order erasure bulk action if erasure is enabled in settings. #22354
+* Enhancement - Customer notes containing URLs now automatically converts to clickable links. #21927
 * Dev - Introduce `woocommerce_reviews_title` filter. #22216
 * Dev - Added `woocommerce_cheque_process_payment_order_status` filter allowing plugins to change the order status to the Cheque gateway. #21402
 * Dev - Add the current coupon object to the `woocommerce_get_shop_coupon_data` filter. #21442
