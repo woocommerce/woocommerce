@@ -812,7 +812,7 @@ function wc_get_term_thumbnail_url( $term, $image_id = false, $size = false, $pl
 	
 	// If image exists, get it
 	if ( $image_id ) {
-		$image_url = wp_get_attachment_url( $image_id );
+		$image_url = $size == 'thumb' ? wp_get_attachment_thumb_url($image_id) : wp_get_attachment_url( $image_id );
 	}
 	
 	// If placeholder image is needed
