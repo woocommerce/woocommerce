@@ -188,6 +188,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Check stock status of items when 'ordering again' from the account page. #22331
 * Fix - Restores an opportunity to print non-cart related notices that a few extensions are relying on. #22337
 * Fix - Correct order item meta alignment in order emails when using an RTL language. #22376
+* Fix - Fix bug where product status was erroneously going to draft status in some circumstances on new published variable products. #20667
 * Dev - REST API - Fixed support to order results by slugs. #22168
 
 = 3.5.3 - 2018-12-20 =
