@@ -68,7 +68,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	protected function read_file() {
 		if ( ! WC_Product_CSV_Importer_Controller::is_file_valid_csv( $this->file ) ) {
-			wp_die( __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
+			wp_die( esc_html__( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 		}
 
 		$handle = fopen( $this->file, 'r' ); // @codingStandardsIgnoreLine.
@@ -901,7 +901,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			do_action( 'woocommerce_product_import_before_import', $parsed_data );
 
 			$id         = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
-			$sku        = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
+			$sku        = isset( $parsed_data['sku'] ) ? $parsed_data['sku'] : '';
 			$id_exists  = false;
 			$sku_exists = false;
 
@@ -917,27 +917,39 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 
 			if ( $id_exists && ! $update_existing ) {
-				$data['skipped'][] = new WP_Error( 'woocommerce_product_importer_error', __( 'A product with this ID already exists.', 'woocommerce' ), array(
-					'id'  => $id,
-					'row' => $this->get_row_id( $parsed_data ),
-				) );
+				$data['skipped'][] = new WP_Error(
+					'woocommerce_product_importer_error',
+					__( 'A product with this ID already exists.', 'woocommerce' ),
+					array(
+						'id'  => $id,
+						'row' => $this->get_row_id( $parsed_data ),
+					)
+				);
 				continue;
 			}
 
 			if ( $sku_exists && ! $update_existing ) {
-				$data['skipped'][] = new WP_Error( 'woocommerce_product_importer_error', __( 'A product with this SKU already exists.', 'woocommerce' ), array(
-					'sku' => $sku,
-					'row' => $this->get_row_id( $parsed_data ),
-				) );
+				$data['skipped'][] = new WP_Error(
+					'woocommerce_product_importer_error',
+					__( 'A product with this SKU already exists.', 'woocommerce' ),
+					array(
+						'sku' => esc_attr( $sku ),
+						'row' => $this->get_row_id( $parsed_data ),
+					)
+				);
 				continue;
 			}
 
 			if ( $update_existing && ( $id || $sku ) && ! $id_exists && ! $sku_exists ) {
-				$data['skipped'][] = new WP_Error( 'woocommerce_product_importer_error', __( 'No matching product exists to update.', 'woocommerce' ), array(
-					'id'  => $id,
-					'sku' => $sku,
-					'row' => $this->get_row_id( $parsed_data ),
-				) );
+				$data['skipped'][] = new WP_Error(
+					'woocommerce_product_importer_error',
+					__( 'No matching product exists to update.', 'woocommerce' ),
+					array(
+						'id'  => $id,
+						'sku' => esc_attr( $sku ),
+						'row' => $this->get_row_id( $parsed_data ),
+					)
+				);
 				continue;
 			}
 
