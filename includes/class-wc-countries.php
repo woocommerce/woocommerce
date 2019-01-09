@@ -74,7 +74,7 @@ class WC_Countries {
 	 * Get continent code for a country code.
 	 *
 	 * @since 2.6.0
-	 * @param string $cc Continent code.
+	 * @param string $cc Country code.
 	 * @return string
 	 */
 	public function get_continent_code_for_country( $cc ) {
@@ -252,7 +252,7 @@ class WC_Countries {
 	}
 
 	/**
-	 * Get the allowed countries for the store.
+	 * Get countries that the store sells to.
 	 *
 	 * @return array
 	 */
@@ -289,7 +289,7 @@ class WC_Countries {
 	}
 
 	/**
-	 * Get the countries you ship to.
+	 * Get countries that the store ships to.
 	 *
 	 * @return array
 	 */
