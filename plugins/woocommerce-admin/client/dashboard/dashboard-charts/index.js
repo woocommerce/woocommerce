@@ -9,13 +9,14 @@ import { compose } from '@wordpress/compose';
 import Gridicon from 'gridicons';
 import { isEqual, xor } from 'lodash';
 import PropTypes from 'prop-types';
-import { ToggleControl, IconButton, NavigableMenu } from '@wordpress/components';
+import { ToggleControl, IconButton, NavigableMenu, SelectControl } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
  */
 import { EllipsisMenu, MenuItem, SectionHeader } from '@woocommerce/components';
+import { getAllowedIntervalsForQuery } from '@woocommerce/date';
 
 /**
  * Internal dependencies
@@ -31,7 +32,7 @@ class DashboardCharts extends Component {
 		this.state = {
 			chartType: props.userPrefChartType || 'line',
 			hiddenChartKeys: props.userPrefCharts || [],
-			query: props.query,
+			interval: props.userPrefIntervals || 'day',
 		};
 
 		this.toggle = this.toggle.bind( this );
@@ -40,8 +41,9 @@ class DashboardCharts extends Component {
 	componentDidUpdate( {
 		userPrefCharts: prevUserPrefCharts,
 		userPrefChartType: prevUserPrefChartType,
+		userPrefChartInterval: prevUserPrefChartInterval,
 	} ) {
-		const { userPrefCharts, userPrefChartType } = this.props;
+		const { userPrefCharts, userPrefChartInterval, userPrefChartType } = this.props;
 		if ( userPrefCharts && ! isEqual( userPrefCharts, prevUserPrefCharts ) ) {
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( {
@@ -53,6 +55,13 @@ class DashboardCharts extends Component {
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( {
 				chartType: userPrefChartType,
+			} );
+			/* eslint-enable react/no-did-update-set-state */
+		}
+		if ( userPrefChartInterval !== prevUserPrefChartInterval ) {
+			/* eslint-disable react/no-did-update-set-state */
+			this.setState( {
+				interval: userPrefChartInterval,
 			} );
 			/* eslint-enable react/no-did-update-set-state */
 		}
@@ -97,14 +106,56 @@ class DashboardCharts extends Component {
 		);
 	}
 
+	renderIntervalSelector() {
+		const allowedIntervals = getAllowedIntervalsForQuery( this.props.query );
+		if ( ! allowedIntervals || allowedIntervals.length < 1 ) {
+			return null;
+		}
+
+		const intervalLabels = {
+			hour: __( 'By hour', 'wc-admin' ),
+			day: __( 'By day', 'wc-admin' ),
+			week: __( 'By week', 'wc-admin' ),
+			month: __( 'By month', 'wc-admin' ),
+			quarter: __( 'By quarter', 'wc-admin' ),
+			year: __( 'By year', 'wc-admin' ),
+		};
+
+		return (
+			<SelectControl
+				className="woocommerce-chart__interval-select"
+				value={ this.state.interval }
+				options={ allowedIntervals.map( allowedInterval => ( {
+					value: allowedInterval,
+					label: intervalLabels[ allowedInterval ],
+				} ) ) }
+				onChange={ this.setInterval }
+			/>
+		);
+	}
+
+	setInterval = interval => {
+		this.setState( { interval }, () => {
+			const userDataFields = {
+				[ 'dashboard_chart_interval' ]: this.state.interval,
+			};
+			this.props.updateCurrentUserData( userDataFields );
+		} );
+	};
+
 	render() {
 		const { path } = this.props;
-		const { chartType, hiddenChartKeys } = this.state;
-		const query = { ...this.props.query, type: chartType };
+		const { chartType, hiddenChartKeys, interval } = this.state;
+		const query = { ...this.props.query, type: chartType, interval };
 		return (
 			<Fragment>
 				<div className="woocommerce-dashboard__dashboard-charts">
-					<SectionHeader title={ __( 'Charts', 'wc-admin' ) } menu={ this.renderMenu() }>
+					<SectionHeader
+						title={ __( 'Charts', 'wc-admin' ) }
+						menu={ this.renderMenu() }
+						className={ 'has-interval-select' }
+					>
+						{ this.renderIntervalSelector() }
 						<NavigableMenu
 							className="woocommerce-chart__types"
 							orientation="horizontal"
@@ -167,6 +218,7 @@ export default compose(
 		return {
 			userPrefCharts: userData.dashboard_charts,
 			userPrefChartType: userData.dashboard_chart_type,
+			userPrefChartInterval: userData.dashboard_chart_interval,
 		};
 	} ),
 	withDispatch( dispatch => {

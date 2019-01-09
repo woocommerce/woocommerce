@@ -21,6 +21,19 @@
 		height: 1px;
 		margin: 0 10px;
 	}
+
+	@include breakpoint( '<782px' ) {
+		&.has-interval-select {
+			position: relative;
+			padding-bottom: 30px;
+			.woocommerce-chart__interval-select {
+				position: absolute;
+				left: 0;
+				bottom: 0;
+				padding-left: 6px;
+			}
+		}
+	}
 }
 
 .woocommerce-section-header__actions,
@@ -31,6 +44,18 @@
 	display: flex;
 	flex-grow: 1;
 	justify-content: flex-end;
+	align-items: center;
+
+	.components-base-control {
+		padding-top: 0;
+		min-height: 34px;
+	}
+	.components-base-control__field {
+		margin-bottom: 0;
+		select {
+			background: transparent;
+		}
+	}
 }
 
 .woocommerce-ellipsis-menu__toggle {
@@ -48,7 +73,7 @@
 	// EllipsisMenu is 24px, so to match we add 6px padding around the
 	// heading text, which we know is 18px from line-height.
 	padding: 3px 0;
-	@include font-size( 15 );
+	@include font-size( 18 );
 	line-height: 2.2;
 	font-weight: 600;
 }
