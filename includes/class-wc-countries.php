@@ -93,6 +93,7 @@ class WC_Countries {
 	/**
 	 * Get continents that the store ships to.
 	 *
+	 * @since 3.6.0
 	 * @return array
 	 */
 	public function get_shipping_continents() {

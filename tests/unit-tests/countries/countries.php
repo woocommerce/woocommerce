@@ -18,6 +18,27 @@ class WC_Tests_Countries extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test get_shipping_continents.
+	 *
+	 * @since 3.6.0
+	 */
+	public function test_get_shipping_continents() {
+		$countries = new WC_Countries();
+		$all_continents = $countries->get_continents();
+
+		update_option( 'woocommerce_ship_to_countries', 'all' );
+		$this->assertSame( $all_continents, $countries->get_shipping_continents() );
+
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'CA', 'JP' ) );
+		$expected = array(
+			'AS' => $all_continents['AS'],
+			'NA' => $all_continents['NA'],
+		);
+		$this->assertSame( $expected, $countries->get_shipping_continents() );
+	}
+
+	/**
 	 * Test get_allowed_countries.
 	 *
 	 * @since 3.1
