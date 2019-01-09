@@ -206,12 +206,6 @@ class WC_Admin_Taxonomies {
 
 		$display_type = get_woocommerce_term_meta( $term->term_id, 'display_type', true );
 		$thumbnail_id = absint( get_woocommerce_term_meta( $term->term_id, 'thumbnail_id', true ) );
-
-		if ( $thumbnail_id ) {
-			$image = wp_get_attachment_thumb_url( $thumbnail_id );
-		} else {
-			$image = wc_placeholder_img_src();
-		}
 		?>
 		<tr class="form-field term-display-type-wrap">
 			<th scope="row" valign="top"><label><?php _e( 'Display type', 'woocommerce' ); ?></label></th>
@@ -227,7 +221,7 @@ class WC_Admin_Taxonomies {
 		<tr class="form-field term-thumbnail-wrap">
 			<th scope="row" valign="top"><label><?php _e( 'Thumbnail', 'woocommerce' ); ?></label></th>
 			<td>
-				<div id="product_cat_thumbnail" style="float: left; margin-right: 10px;"><img src="<?php echo esc_url( $image ); ?>" width="60px" height="60px" /></div>
+				<div id="product_cat_thumbnail" style="float: left; margin-right: 10px;"><img src="<?php echo esc_url( wc_get_term_thumbnail_url( $term, $thumbnail_id, 'thumb', true ) ); ?>" width="60px" height="60px" /></div>
 				<div style="line-height: 60px;">
 					<input type="hidden" id="product_cat_thumbnail_id" name="product_cat_thumbnail_id" value="<?php echo $thumbnail_id; ?>" />
 					<button type="button" class="upload_image_button button"><?php _e( 'Upload/Add image', 'woocommerce' ); ?></button>
