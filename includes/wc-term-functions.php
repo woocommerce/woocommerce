@@ -791,3 +791,34 @@ function wc_get_product_visibility_term_ids() {
 		)
 	);
 }
+
+/**
+ * Get a thumbnail image for term.
+ *
+ * The returned variable is filtered by woocommerce_get_term_thumbnail_url filter to
+ * allow 3rd party customisation.
+ *
+ * @param array|int $term Term object of the target term, or term ID.
+ * @return string Final image url.
+ */
+function wc_get_term_thumbnail_url( $term, $image_id = false, $size = false, $placeholder_image = false ) {
+	
+	$term_id = is_numeric($term) ? $term : $term->term_id;
+	$image_url = '';
+	
+	// Get term image id.
+	if ( ! $image_id )
+		$image_id = (int) get_woocommerce_term_meta( $term_id, 'thumbnail_id' );
+	
+	// If image exists, get it
+	if ( $image_id ) {
+		$image_url = wp_get_attachment_url( $image_id );
+	}
+	
+	// If placeholder image is needed
+	if ( empty( $image_url ) && $placeholder_image ) {
+		$image_url = wc_placeholder_img_src();
+	}
+	
+	return apply_filters( 'woocommerce_get_term_thumbnail_url', $image_url, $term_id );
+}
