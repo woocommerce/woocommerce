@@ -524,7 +524,11 @@ jQuery( function( $ ) {
 		 * After saved, continue with form submission
 		 */
 		save_on_submit_done: function() {
-			$( 'form#post' ).append('<input type="hidden" name="publish" value="1" />').submit();
+			if ( $( '#hidden_post_status' ).val() !== 'publish' ) {
+				$( 'form#post' ).append('<input type="hidden" name="save-post" value="1" />').submit();
+			} else {
+				$( 'form#post' ).append('<input type="hidden" name="publish" value="1" />').submit();
+			}
 		},
 
 		/**
