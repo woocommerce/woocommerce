@@ -1,6 +1,6 @@
 <?php
 /**
- * Class for time interval handling for reports
+ * Class for time interval and numeric range handling for reports.
  *
  * @package  WooCommerce Admin/Classes
  */
@@ -8,7 +8,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Date & time interval handling class for Reporting API.
+ * Date & time interval and numeric range handling class for Reporting API.
  */
 class WC_Admin_Reports_Interval {
 
@@ -474,4 +474,38 @@ class WC_Admin_Reports_Interval {
 		}
 	}
 
+	/**
+	 * Normalize "*_between" parameters to "*_min" and "*_max".
+	 *
+	 * @param array        $request Query params from REST API request.
+	 * @param string|array $param_names One or more param names to handle. Should not include "_between" suffix.
+	 * @return array Normalized query values.
+	 */
+	public static function normalize_between_params( $request, $param_names ) {
+		if ( ! is_array( $param_names ) ) {
+			$param_names = array( $param_names );
+		}
+
+		$normalized = array();
+
+		foreach ( $param_names as $param_name ) {
+			if ( empty( $request[ $param_name . '_between' ] ) ) {
+				continue;
+			}
+
+			$min_param = $param_name . '_min';
+			$max_param = $param_name . '_max';
+			$range     = explode( ',', $request[ $param_name . '_between' ] );
+
+			if ( isset( $range[0] ) && is_numeric( $range[0] ) ) {
+				$normalized[ $min_param ] = $range[0];
+			}
+
+			if ( isset( $range[1] ) && is_numeric( $range[1] ) ) {
+				$normalized[ $max_param ] = $range[1];
+			}
+		}
+
+		return $normalized;
+	}
 }

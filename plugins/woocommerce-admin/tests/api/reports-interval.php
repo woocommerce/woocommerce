@@ -796,4 +796,30 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Test function that normalizes *_between query parameters to *_min & *_max.
+	 */
+	public function test_normalize_between_params() {
+		$request  = array(
+			'a_between' => 'malformed', // won't be normalized.
+			'b_between' => '1,5',       // results in min=1, max=5.
+			'c_between' => ',6',        // results in max=6.
+			'd_between' => '7',         // results in min=7.
+			'e_between' => '8,',        // results in min=8.
+			'f_between' => '10,12',     // not in params, skipped.
+			'g_between' => '-1,a',       // results in min=-1.
+		);
+		$params   = array( 'a', 'b', 'c', 'd', 'e', 'g' );
+		$result   = WC_Admin_Reports_Interval::normalize_between_params( $request, $params );
+		$expected = array(
+			'b_min' => '1',
+			'b_max' => '5',
+			'c_max' => '6',
+			'd_min' => '7',
+			'e_min' => '8',
+			'g_min' => '-1',
+		);
+
+		$this->assertEquals( $result, $expected );
+	}
 }
