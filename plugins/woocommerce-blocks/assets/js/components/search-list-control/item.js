@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { IconChecked, IconUnchecked } from '../icons';
+import { IconCheckChecked, IconCheckUnchecked } from '../icons';
 
 function getHighlightedName( name, search ) {
 	if ( ! search ) {
@@ -53,7 +53,7 @@ const SearchListItem = ( {
 			{ ...props }
 		>
 			<span className="woocommerce-search-list__item-state">
-				{ isSelected ? <IconChecked /> : <IconUnchecked /> }
+				{ isSelected ? <IconCheckChecked /> : <IconCheckUnchecked /> }
 			</span>
 
 			<span className="woocommerce-search-list__item-label">
