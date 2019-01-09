@@ -389,8 +389,8 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		);
 		$params['orders_count_between']     = array(
 			'description'       => __( 'Limit response to objects with an order count between two given integers.', 'wc-admin' ),
-			'type'              => 'string',
-			'validate_callback' => 'rest_validate_request_arg',
+			'type'              => 'array',
+			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_arg' ),
 		);
 		$params['total_spend_min']         = array(
 			'description'       => __( 'Limit response to objects with a total order spend greater than or equal to given number.', 'wc-admin' ),
@@ -404,8 +404,8 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		);
 		$params['total_spend_between']     = array(
 			'description'       => __( 'Limit response to objects with a total order spend between two given numbers.', 'wc-admin' ),
-			'type'              => 'string',
-			'validate_callback' => 'rest_validate_request_arg',
+			'type'              => 'array',
+			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_arg' ),
 		);
 		$params['avg_order_value_min']     = array(
 			'description'       => __( 'Limit response to objects with an average order spend greater than or equal to given number.', 'wc-admin' ),
@@ -419,8 +419,8 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		);
 		$params['avg_order_value_between'] = array(
 			'description'       => __( 'Limit response to objects with an average order spend between two given numbers.', 'wc-admin' ),
-			'type'              => 'string',
-			'validate_callback' => 'rest_validate_request_arg',
+			'type'              => 'array',
+			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_arg' ),
 		);
 		$params['last_order_before']       = array(
 			'description'       => __( 'Limit response to objects with last order before (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),

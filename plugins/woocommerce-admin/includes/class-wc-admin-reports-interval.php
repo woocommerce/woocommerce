@@ -489,23 +489,57 @@ class WC_Admin_Reports_Interval {
 		$normalized = array();
 
 		foreach ( $param_names as $param_name ) {
-			if ( empty( $request[ $param_name . '_between' ] ) ) {
+			if ( ! is_array( $request[ $param_name . '_between' ] ) ) {
 				continue;
 			}
 
-			$min_param = $param_name . '_min';
-			$max_param = $param_name . '_max';
-			$range     = explode( ',', $request[ $param_name . '_between' ] );
+			$range = $request[ $param_name . '_between' ];
 
-			if ( isset( $range[0] ) && is_numeric( $range[0] ) ) {
-				$normalized[ $min_param ] = $range[0];
+			if ( 2 !== count( $range ) ) {
+				continue;
 			}
 
-			if ( isset( $range[1] ) && is_numeric( $range[1] ) ) {
-				$normalized[ $max_param ] = $range[1];
+			if ( $range[0] < $range[1] ) {
+				$normalized[ $param_name . '_min' ] = $range[0];
+				$normalized[ $param_name . '_max' ] = $range[1];
+			} else {
+				$normalized[ $param_name . '_min' ] = $range[1];
+				$normalized[ $param_name . '_max' ] = $range[0];
 			}
 		}
 
 		return $normalized;
+	}
+
+	/**
+	 * Validate a "*_between" range argument (an array with 2 numeric items).
+	 *
+	 * @param  mixed           $value Parameter value.
+	 * @param  WP_REST_Request $request REST Request.
+	 * @param  string          $param Parameter name.
+	 * @return WP_Error|boolean
+	 */
+	public static function rest_validate_between_arg( $value, $request, $param ) {
+		if ( ! wp_is_numeric_array( $value ) ) {
+			return new WP_Error(
+				'rest_invalid_param',
+				/* translators: 1: parameter name */
+				sprintf( __( '%1$s is not a numerically indexed array.', 'wc-admin' ), $param )
+			);
+		}
+
+		if (
+			2 !== count( $value ) ||
+			! is_numeric( $value[0] ) ||
+			! is_numeric( $value[1] )
+		) {
+			return new WP_Error(
+				'rest_invalid_param',
+				/* translators: %s: parameter name */
+				sprintf( __( '%s must contain 2 numbers.', 'wc-admin' ), $param )
+			);
+		}
+
+		return true;
 	}
 }
