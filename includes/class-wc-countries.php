@@ -91,6 +91,26 @@ class WC_Countries {
 	}
 
 	/**
+	 * Get continents that the store ships to.
+	 *
+	 * @return array
+	 */
+	public function get_shipping_continents() {
+		$continents             = $this->get_continents();
+		$shipping_countries     = $this->get_shipping_countries();
+		$shipping_country_codes = array_keys( $shipping_countries );
+		$shipping_continents    = array();
+
+		foreach ( $continents as $continent_code => $continent ) {
+			if ( count( array_intersect( $continent['countries'], $shipping_country_codes ) ) ) {
+				$shipping_continents[ $continent_code ] = $continent;
+			}
+		}
+
+		return $shipping_continents;
+	}
+
+	/**
 	 * Load the states.
 	 */
 	public function load_country_states() {

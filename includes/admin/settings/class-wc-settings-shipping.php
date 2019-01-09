@@ -229,10 +229,10 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			wp_die( esc_html__( 'Zone does not exist!', 'woocommerce' ) );
 		}
 
-		$allowed_countries = WC()->countries->get_allowed_countries();
-		$wc_shipping       = WC_Shipping::instance();
-		$shipping_methods  = $wc_shipping->get_shipping_methods();
-		$continents        = WC()->countries->get_continents();
+		$allowed_countries    = WC()->countries->get_allowed_countries();
+		$wc_shipping          = WC_Shipping::instance();
+		$shipping_methods     = $wc_shipping->get_shipping_methods();
+		$shipping_continents  = WC()->countries->get_shipping_continents();
 
 		// Prepare locations.
 		$locations = array();
