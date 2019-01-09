@@ -9,7 +9,7 @@ import { format as formatDate } from '@wordpress/date';
 /**
  * WooCommerce dependencies
  */
-import { getDateFormatsForInterval, getIntervalForQuery } from '@woocommerce/date';
+import { defaultTableDateFormat } from '@woocommerce/date';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import { Link } from '@woocommerce/components';
 
@@ -92,10 +92,6 @@ export default class CustomersReportTable extends Component {
 	}
 
 	getRowsContent( customers ) {
-		const { query } = this.props;
-		const currentInterval = getIntervalForQuery( query );
-		const formats = getDateFormatsForInterval( currentInterval );
-
 		return customers.map( customer => {
 			const {
 				avg_order_value,
@@ -129,7 +125,7 @@ export default class CustomersReportTable extends Component {
 					value: username,
 				},
 				{
-					display: formatDate( formats.tableFormat, date_sign_up ),
+					display: formatDate( defaultTableDateFormat, date_sign_up ),
 					value: date_sign_up,
 				},
 				{
@@ -149,7 +145,7 @@ export default class CustomersReportTable extends Component {
 					value: getCurrencyFormatDecimal( avg_order_value ),
 				},
 				{
-					display: formatDate( formats.tableFormat, date_last_active ),
+					display: formatDate( defaultTableDateFormat, date_last_active ),
 					value: date_last_active,
 				},
 				{

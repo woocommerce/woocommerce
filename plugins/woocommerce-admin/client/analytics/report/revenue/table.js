@@ -11,12 +11,7 @@ import { get } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import {
-	appendTimestamp,
-	getCurrentDates,
-	getDateFormatsForInterval,
-	getIntervalForQuery,
-} from '@woocommerce/date';
+import { appendTimestamp, defaultTableDateFormat, getCurrentDates } from '@woocommerce/date';
 import { Link } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 
@@ -100,10 +95,6 @@ class RevenueReportTable extends Component {
 	}
 
 	getRowsContent( data = [] ) {
-		const { query } = this.props;
-		const currentInterval = getIntervalForQuery( query );
-		const formats = getDateFormatsForInterval( currentInterval );
-
 		return data.map( row => {
 			const {
 				coupons,
@@ -127,7 +118,7 @@ class RevenueReportTable extends Component {
 			);
 			return [
 				{
-					display: formatDate( formats.tableFormat, row.date_start ),
+					display: formatDate( defaultTableDateFormat, row.date_start ),
 					value: row.date_start,
 				},
 				{

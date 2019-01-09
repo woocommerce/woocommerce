@@ -11,7 +11,7 @@ import moment from 'moment';
 /**
  * WooCommerce dependencies
  */
-import { getIntervalForQuery, getCurrentDates, getDateFormatsForInterval } from '@woocommerce/date';
+import { defaultTableDateFormat, getCurrentDates } from '@woocommerce/date';
 import { Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 
@@ -67,8 +67,6 @@ export default class CouponsReportTable extends Component {
 
 	getRowsContent( downloads ) {
 		const { query } = this.props;
-		const currentInterval = getIntervalForQuery( query );
-		const { tableFormat } = getDateFormatsForInterval( currentInterval );
 		const persistedQuery = getPersistedQuery( query );
 
 		return map( downloads, download => {
@@ -83,7 +81,7 @@ export default class CouponsReportTable extends Component {
 
 			return [
 				{
-					display: formatDate( tableFormat, date ),
+					display: formatDate( defaultTableDateFormat, date ),
 					value: date,
 				},
 				{
