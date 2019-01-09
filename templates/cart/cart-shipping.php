@@ -56,7 +56,7 @@ $calculator_text          = '';
 					?>
 				</p>
 			<?php endif; ?>
-		<?php
+			<?php
 		elseif ( ! $has_calculated_shipping || ! $formatted_destination ) :
 			esc_html_e( 'Enter your address to view shipping options.', 'woocommerce' );
 		elseif ( ! is_cart() ) :
