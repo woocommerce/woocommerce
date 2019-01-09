@@ -76,7 +76,8 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		if ( '' === $current_section ) {
 			$settings = apply_filters(
-				'woocommerce_shipping_settings', array(
+				'woocommerce_shipping_settings',
+				array(
 
 					array(
 						'title' => __( 'Shipping options', 'woocommerce' ),
@@ -247,7 +248,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		}
 
 		wp_localize_script(
-			'wc-shipping-zone-methods', 'shippingZoneMethodsLocalizeScript', array(
+			'wc-shipping-zone-methods',
+			'shippingZoneMethodsLocalizeScript',
+			array(
 				'methods'                 => $zone->get_shipping_methods( false, 'json' ),
 				'zone_name'               => $zone->get_zone_name(),
 				'zone_id'                 => $zone->get_id(),
@@ -277,7 +280,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		$method_count      = wc_get_shipping_method_count();
 
 		wp_localize_script(
-			'wc-shipping-zones', 'shippingZonesLocalizeScript', array(
+			'wc-shipping-zones',
+			'shippingZonesLocalizeScript',
+			array(
 				'zones'                   => WC_Shipping_Zones::get_zones( 'json' ),
 				'default_zone'            => array(
 					'zone_id'    => 0,
@@ -336,7 +341,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	protected function output_shipping_class_screen() {
 		$wc_shipping = WC_Shipping::instance();
 		wp_localize_script(
-			'wc-shipping-classes', 'shippingClassesLocalizeScript', array(
+			'wc-shipping-classes',
+			'shippingClassesLocalizeScript',
+			array(
 				'classes'                   => $wc_shipping->get_shipping_classes(),
 				'default_shipping_class'    => array(
 					'term_id'     => 0,
@@ -354,7 +361,8 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		// Extendable columns to show on the shipping classes screen.
 		$shipping_class_columns = apply_filters(
-			'woocommerce_shipping_classes_columns', array(
+			'woocommerce_shipping_classes_columns',
+			array(
 				'wc-shipping-class-name'        => __( 'Shipping class', 'woocommerce' ),
 				'wc-shipping-class-slug'        => __( 'Slug', 'woocommerce' ),
 				'wc-shipping-class-description' => __( 'Description', 'woocommerce' ),

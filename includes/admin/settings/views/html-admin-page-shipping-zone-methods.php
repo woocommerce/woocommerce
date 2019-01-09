@@ -49,7 +49,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 							foreach ( $countries as $country_code ) {
 								echo '<option value="country:' . esc_attr( $country_code ) . '"' . wc_selected( "country:$country_code", $locations ) . ' alt="' . esc_attr( $continent['name'] ) . '">' . esc_html( '&nbsp;&nbsp; ' . $allowed_countries[ $country_code ] ) . '</option>';
 
-								if ( $states = WC()->countries->get_states( $country_code ) ) {
+								$states = WC()->countries->get_states( $country_code );
+
+								if ( $states ) {
 									foreach ( $states as $state_code => $state_name ) {
 										echo '<option value="state:' . esc_attr( $country_code . ':' . $state_code ) . '"' . wc_selected( "state:$country_code:$state_code", $locations ) . ' alt="' . esc_attr( $continent['name'] . ' ' . $allowed_countries[ $country_code ] ) . '">' . esc_html( '&nbsp;&nbsp;&nbsp;&nbsp; ' . $state_name ) . '</option>';
 									}
@@ -138,8 +140,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<header class="wc-backbone-modal-header">
 					<h1>
 						<?php
-						/* translators: %s: shipping method title */
 						printf(
+							/* translators: %s: shipping method title */
 							esc_html__( '%s Settings', 'woocommerce' ),
 							'{{{ data.method.method_title }}}'
 						);
