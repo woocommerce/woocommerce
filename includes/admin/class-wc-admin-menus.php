@@ -100,7 +100,7 @@ class WC_Admin_Menus {
 		// Save settings if data has been posted.
 		if ( '' !== $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}_{$current_section}", ! empty( $_POST ) ) ) { // WPCS: input var okay, CSRF ok.
 			WC_Admin_Settings::save();
-		} elseif ( apply_filters( "woocommerce_save_settings_{$current_tab}", ! empty( $_POST ) ) ) { // WPCS: input var okay, CSRF ok.
+		} elseif ( '' === $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}", ! empty( $_POST ) ) ) { // WPCS: input var okay, CSRF ok.
 			WC_Admin_Settings::save();
 		}
 
@@ -215,10 +215,11 @@ class WC_Admin_Menus {
 	/**
 	 * Custom menu order.
 	 *
+	 * @param bool $enabled Whether custom menu ordering is already enabled.
 	 * @return bool
 	 */
-	public function custom_menu_order() {
-		return current_user_can( 'manage_woocommerce' );
+	public function custom_menu_order( $enabled ) {
+		return $enabled || current_user_can( 'manage_woocommerce' );
 	}
 
 	/**

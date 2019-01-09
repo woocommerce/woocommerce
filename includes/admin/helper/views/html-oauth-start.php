@@ -19,12 +19,12 @@ defined( 'ABSPATH' ) || exit();
 				<img src="<?php echo esc_url( WC()->plugin_url() . '/assets/images/woocommerce_logo.png' ); ?>" alt="WooCommerce" style="width:180px;">
 
 				<?php if ( ! empty( $_GET['wc-helper-status'] ) && 'helper-disconnected' === $_GET['wc-helper-status'] ) : ?>
-					<p><?php esc_html_e( '<strong>Sorry to see you go</strong>. Feel free to reconnect again using the button below.', 'woocommerce' ); ?></p>
+					<p><strong><?php esc_html_e( 'Sorry to see you go.', 'woocommerce' ) . '</strong>' . esc_html_e( 'Feel free to reconnect again using the button below.', 'woocommerce' ); ?></p>
 				<?php endif; ?>
 
 				<h2><?php esc_html_e( 'Manage your subscriptions, get important product notifications, and updates, all from the convenience of your WooCommerce dashboard', 'woocommerce' ); ?></h2>
 				<p><?php esc_html_e( 'Once connected, your WooCommerce.com purchases will be listed here.', 'woocommerce' ); ?></p>
-				<p><a class="button button-primary" href="<?php echo esc_url( $connect_url ); ?>"><?php esc_html_e( 'Connect', 'woocommerce' ); ?></a></p>
+				<p><a class="button button-primary button-helper-connect" href="<?php echo esc_url( $connect_url ); ?>"><?php esc_html_e( 'Connect', 'woocommerce' ); ?></a></p>
 			</div>
 		</div>
 </div>

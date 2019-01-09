@@ -181,7 +181,7 @@ class WC_Cache_Helper {
 				return;
 			}
 
-			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s ORDER BY option_id LIMIT %d;", '\_transient\_%' . $version, $limit ) ); // WPCS: cache ok, db call ok.
+			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s LIMIT %d;", '\_transient\_%' . $version, $limit ) ); // WPCS: cache ok, db call ok.
 
 			// If affected rows is equal to limit, there are more rows to delete. Delete in 30 secs.
 			if ( $affected === $limit ) {

@@ -429,9 +429,7 @@ abstract class WC_Data {
 			$array_key  = $array_keys ? current( $array_keys ) : false;
 		} else {
 			// Find matches by key.
-			$matches     = array();
-			$ids_to_keys = wp_list_pluck( $this->meta_data, 'key', 'id' );
-
+			$matches = array();
 			foreach ( $this->meta_data as $meta_data_array_key => $meta ) {
 				if ( $meta->key === $key ) {
 					$matches[] = $meta_data_array_key;
@@ -447,7 +445,7 @@ abstract class WC_Data {
 			}
 		}
 
-		if ( $array_key ) {
+		if ( false !== $array_key ) {
 			$meta        = $this->meta_data[ $array_key ];
 			$meta->key   = $key;
 			$meta->value = $value;

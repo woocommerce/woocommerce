@@ -486,7 +486,7 @@ class WC_AJAX {
 
 			if ( wc_is_order_status( 'wc-' . $status ) && $order ) {
 				// Initialize payment gateways in case order has hooked status transition actions.
-				wc()->payment_gateways();
+				WC()->payment_gateways();
 
 				$order->update_status( $status, '', true );
 				do_action( 'woocommerce_order_edit_status', $order->get_id(), $status );
@@ -612,6 +612,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$response = array();
+
 		try {
 			parse_str( $_POST['data'], $data );
 
@@ -624,13 +626,12 @@ class WC_AJAX {
 			$product->set_attributes( $attributes );
 			$product->save();
 
-			$response = array();
-
 			ob_start();
 			$attributes = $product->get_attributes( 'edit' );
 			$i          = -1;
 
-			foreach ( $attributes as $attribute ) {
+			foreach ( $data['attribute_names'] as $attribute_name ) {
+				$attribute = isset( $attributes[ sanitize_title( $attribute_name ) ] ) ? $attributes[ sanitize_title( $attribute_name ) ] : false;
 				if ( ! $attribute ) {
 					continue;
 				}
@@ -646,12 +647,12 @@ class WC_AJAX {
 			}
 
 			$response['html'] = ob_get_clean();
-
-			wp_send_json_success( $response );
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
-		wp_die();
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -846,6 +847,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$response = array();
+
 		try {
 			if ( ! isset( $_POST['order_id'] ) ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
@@ -896,14 +899,13 @@ class WC_AJAX {
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
-			wp_send_json_success(
-				array(
-					'html' => ob_get_clean(),
-				)
-			);
+			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -915,6 +917,8 @@ class WC_AJAX {
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			wp_die( -1 );
 		}
+
+		$response = array();
 
 		try {
 			$order_id           = absint( $_POST['order_id'] );
@@ -943,7 +947,7 @@ class WC_AJAX {
 			$fee = new WC_Order_Item_Fee();
 			$fee->set_amount( $amount );
 			$fee->set_total( $amount );
-			$fee->set_name( sprintf( __( '%s fee', 'woocommerce' ), $formatted_amount ) );
+			$fee->set_name( sprintf( __( '%s fee', 'woocommerce' ), wc_clean( $formatted_amount ) ) );
 
 			$order->add_item( $fee );
 			$order->calculate_taxes( $calculate_tax_args );
@@ -952,15 +956,13 @@ class WC_AJAX {
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
-
-			wp_send_json_success(
-				array(
-					'html' => ob_get_clean(),
-				)
-			);
+			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -973,11 +975,13 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$response = array();
+
 		try {
 			$order_id         = absint( $_POST['order_id'] );
 			$order            = wc_get_order( $order_id );
 			$order_taxes      = $order->get_taxes();
-			$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
+			$shipping_methods = WC()->shipping() ? WC()->shipping()->load_shipping_methods() : array();
 
 			// Add new shipping
 			$item = new WC_Order_Item_Shipping();
@@ -987,15 +991,13 @@ class WC_AJAX {
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-shipping.php';
-
-			wp_send_json_success(
-				array(
-					'html' => ob_get_clean(),
-				)
-			);
+			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -1007,6 +1009,8 @@ class WC_AJAX {
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			wp_die( -1 );
 		}
+
+		$response = array();
 
 		try {
 			$order_id = absint( $_POST['order_id'] );
@@ -1022,15 +1026,13 @@ class WC_AJAX {
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
-
-			wp_send_json_success(
-				array(
-					'html' => ob_get_clean(),
-				)
-			);
+			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -1043,6 +1045,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$response = array();
+
 		try {
 			$order_id = absint( $_POST['order_id'] );
 			$order    = wc_get_order( $order_id );
@@ -1054,15 +1058,13 @@ class WC_AJAX {
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
-
-			wp_send_json_success(
-				array(
-					'html' => ob_get_clean(),
-				)
-			);
+			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -1075,6 +1077,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$response = array();
+
 		try {
 			$order_id = absint( $_POST['order_id'] );
 			$order    = wc_get_order( $order_id );
@@ -1083,15 +1087,13 @@ class WC_AJAX {
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
-
-			wp_send_json_success(
-				array(
-					'html' => ob_get_clean(),
-				)
-			);
+			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -1103,6 +1105,8 @@ class WC_AJAX {
 		if ( ! current_user_can( 'edit_shop_orders' ) ) {
 			wp_die( -1 );
 		}
+
+		$response = array();
 
 		try {
 			$order_id           = absint( $_POST['order_id'] );
@@ -1139,15 +1143,13 @@ class WC_AJAX {
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
-
-			wp_send_json_success(
-				array(
-					'html' => ob_get_clean(),
-				)
-			);
+			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -1160,6 +1162,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$response = array();
+
 		try {
 			$order_id = absint( $_POST['order_id'] );
 			$rate_id  = absint( $_POST['rate_id'] );
@@ -1171,15 +1175,13 @@ class WC_AJAX {
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
-
-			wp_send_json_success(
-				array(
-					'html' => ob_get_clean(),
-				)
-			);
+			$response['html'] = ob_get_clean();
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -1428,9 +1430,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
-		$term    = wc_clean( wp_unslash( $_GET['term'] ) );
-		$exclude = array();
-		$limit   = '';
+		$term  = wc_clean( wp_unslash( $_GET['term'] ) );
+		$limit = 0;
 
 		if ( empty( $term ) ) {
 			wp_die();
@@ -1632,7 +1633,7 @@ class WC_AJAX {
 		$api_refund             = 'true' === $_POST['api_refund'];
 		$restock_refunded_items = 'true' === $_POST['restock_refunded_items'];
 		$refund                 = false;
-		$response_data          = array();
+		$response               = array();
 
 		try {
 			$order       = wc_get_order( $order_id );
@@ -1685,14 +1686,14 @@ class WC_AJAX {
 			}
 
 			if ( did_action( 'woocommerce_order_fully_refunded' ) ) {
-				$response_data['status'] = 'fully_refunded';
+				$response['status'] = 'fully_refunded';
 			}
-
-			wp_send_json_success( $response_data );
-
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -1742,6 +1743,8 @@ class WC_AJAX {
 			wp_die( -1 );
 		}
 
+		$response = array();
+
 		try {
 			if ( empty( $_POST['description'] ) ) {
 				throw new Exception( __( 'Description is missing.', 'woocommerce' ) );
@@ -1757,6 +1760,13 @@ class WC_AJAX {
 			$description = sanitize_text_field( wp_unslash( $_POST['description'] ) );
 			$permissions = ( in_array( $_POST['permissions'], array( 'read', 'write', 'read_write' ) ) ) ? sanitize_text_field( $_POST['permissions'] ) : 'read';
 			$user_id     = absint( $_POST['user'] );
+
+			// Check if current user can edit other users.
+			if ( $user_id && ! current_user_can( 'edit_user', $user_id ) ) {
+				if ( get_current_user_id() !== $user_id ) {
+					throw new Exception( __( 'You do not have permission to assign API Keys to the selected user.', 'woocommerce' ) );
+				}
+			}
 
 			if ( 0 < $key_id ) {
 				$data = array(
@@ -1777,9 +1787,10 @@ class WC_AJAX {
 					array( '%d' )
 				);
 
-				$data['consumer_key']    = '';
-				$data['consumer_secret'] = '';
-				$data['message']         = __( 'API Key updated successfully.', 'woocommerce' );
+				$response                    = $data;
+				$response['consumer_key']    = '';
+				$response['consumer_secret'] = '';
+				$response['message']         = __( 'API Key updated successfully.', 'woocommerce' );
 			} else {
 				$consumer_key    = 'ck_' . wc_rand_hash();
 				$consumer_secret = 'cs_' . wc_rand_hash();
@@ -1806,17 +1817,19 @@ class WC_AJAX {
 					)
 				);
 
-				$key_id                  = $wpdb->insert_id;
-				$data['consumer_key']    = $consumer_key;
-				$data['consumer_secret'] = $consumer_secret;
-				$data['message']         = __( 'API Key generated successfully. Make sure to copy your new keys now as the secret key will be hidden once you leave this page.', 'woocommerce' );
-				$data['revoke_url']      = '<a style="color: #a00; text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke key', 'woocommerce' ) . '</a>';
+				$key_id                      = $wpdb->insert_id;
+				$response                    = $data;
+				$response['consumer_key']    = $consumer_key;
+				$response['consumer_secret'] = $consumer_secret;
+				$response['message']         = __( 'API Key generated successfully. Make sure to copy your new keys now as the secret key will be hidden once you leave this page.', 'woocommerce' );
+				$response['revoke_url']      = '<a style="color: #a00; text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke key', 'woocommerce' ) . '</a>';
 			}
-
-			wp_send_json_success( $data );
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
 		}
+
+		// wp_send_json_success must be outside the try block not to break phpunit tests.
+		wp_send_json_success( $response );
 	}
 
 	/**
@@ -2352,7 +2365,7 @@ class WC_AJAX {
 			wp_die();
 		}
 
-		$changes = $_POST['changes'];
+		$changes = stripslashes_deep( $_POST['changes'] );
 		foreach ( $changes as $tax_rate_id => $data ) {
 			if ( isset( $data['deleted'] ) ) {
 				if ( isset( $data['newRow'] ) ) {
@@ -2393,7 +2406,7 @@ class WC_AJAX {
 				WC_Tax::_update_tax_rate_postcodes( $tax_rate_id, $postcode );
 			}
 			if ( isset( $data['city'] ) ) {
-				WC_Tax::_update_tax_rate_cities( $tax_rate_id, array_map( 'wc_clean', $data['city'] ) );
+				WC_Tax::_update_tax_rate_cities( $tax_rate_id, array_map( 'wc_clean', array_map( 'wp_unslash', $data['city'] ) ) );
 			}
 		}
 

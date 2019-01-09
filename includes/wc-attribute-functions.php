@@ -507,24 +507,24 @@ function wc_create_attribute( $args ) {
 			return new WP_Error( 'cannot_update_attribute', __( 'Could not update the attribute.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
-		// Set old_slug to check for database changes.
-		$args['old_slug'] = ! empty( $args['old_slug'] ) ? $args['old_slug'] : $args['slug'];
+		// Set old slug to check for database changes.
+		$old_slug = ! empty( $args['old_slug'] ) ? wc_sanitize_taxonomy_name( $args['old_slug'] ) : $slug;
 
 		/**
 		 * Attribute updated.
 		 *
-		 * @param int    $id        Added attribute ID.
-		 * @param array  $data      Attribute data.
-		 * @param string $old_slug  Attribute old name.
+		 * @param int    $id       Added attribute ID.
+		 * @param array  $data     Attribute data.
+		 * @param string $old_slug Attribute old name.
 		 */
-		do_action( 'woocommerce_attribute_updated', $id, $data, $args['old_slug'] );
+		do_action( 'woocommerce_attribute_updated', $id, $data, $old_slug );
 
-		if ( $args['old_slug'] !== $args['slug'] ) {
+		if ( $old_slug !== $slug ) {
 			// Update taxonomies in the wp term taxonomy table.
 			$wpdb->update(
 				$wpdb->term_taxonomy,
 				array( 'taxonomy' => wc_attribute_taxonomy_name( $data['attribute_name'] ) ),
-				array( 'taxonomy' => 'pa_' . $args['old_slug'] )
+				array( 'taxonomy' => 'pa_' . $old_slug )
 			);
 
 			// Update taxonomy ordering term meta.
@@ -532,26 +532,36 @@ function wc_create_attribute( $args ) {
 			$wpdb->update(
 				$table_name,
 				array( 'meta_key' => 'order_pa_' . sanitize_title( $data['attribute_name'] ) ), // WPCS: slow query ok.
-				array( 'meta_key' => 'order_pa_' . sanitize_title( $args['old_slug'] ) ) // WPCS: slow query ok.
+				array( 'meta_key' => 'order_pa_' . sanitize_title( $old_slug ) ) // WPCS: slow query ok.
 			);
 
 			// Update product attributes which use this taxonomy.
-			$old_attribute_name_length = strlen( $args['old_slug'] ) + 3;
-			$attribute_name_length     = strlen( $data['attribute_name'] ) + 3;
-
-			$wpdb->query(
+			$old_taxonomy_name = 'pa_' . $old_slug;
+			$new_taxonomy_name = 'pa_' . $data['attribute_name'];
+			$metadatas         = $wpdb->get_results(
 				$wpdb->prepare(
-					"UPDATE {$wpdb->postmeta} SET meta_value = REPLACE( meta_value, %s, %s ) WHERE meta_key = '_product_attributes'",
-					's:' . $old_attribute_name_length . ':"pa_' . $args['old_slug'] . '"',
-					's:' . $attribute_name_length . ':"pa_' . $data['attribute_name'] . '"'
-				)
-			);
+					"SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_product_attributes' AND meta_value LIKE %s",
+					'%' . $wpdb->esc_like( $old_taxonomy_name ) . '%'
+				),
+			ARRAY_A );
+			foreach ( $metadatas as $metadata ) {
+				$product_id        = $metadata['post_id'];
+				$unserialized_data = maybe_unserialize( $metadata['meta_value'] );
+				if ( ! $unserialized_data || ! is_array( $unserialized_data ) || ! isset( $unserialized_data[ $old_taxonomy_name ] ) ) {
+					continue;
+				}
+
+				$unserialized_data[ $new_taxonomy_name ] = $unserialized_data[ $old_taxonomy_name ];
+				unset( $unserialized_data[ $old_taxonomy_name ] );
+				$unserialized_data[ $new_taxonomy_name ]['name'] = $new_taxonomy_name;
+				update_post_meta( $product_id, '_product_attributes', $unserialized_data );
+			}
 
 			// Update variations which use this taxonomy.
 			$wpdb->update(
 				$wpdb->postmeta,
 				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $data['attribute_name'] ) ), // WPCS: slow query ok.
-				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $args['old_slug'] ) ) // WPCS: slow query ok.
+				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $old_slug ) ) // WPCS: slow query ok.
 			);
 		}
 	}
@@ -587,10 +597,10 @@ function wc_update_attribute( $id, $args ) {
 	$args['old_slug'] = $wpdb->get_var(
 		$wpdb->prepare(
 			"
-		SELECT attribute_name
-		FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
-		WHERE attribute_id = %d
-	", $args['id']
+				SELECT attribute_name
+				FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
+				WHERE attribute_id = %d
+			", $args['id']
 		)
 	);
 

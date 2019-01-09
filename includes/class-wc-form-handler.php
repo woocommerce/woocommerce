@@ -130,8 +130,6 @@ class WC_Form_Handler {
 								}
 								break;
 							case 'phone' :
-								$_POST[ $key ] = wc_format_phone_number( $_POST[ $key ] );
-
 								if ( ! WC_Validation::is_phone( $_POST[ $key ] ) ) {
 									wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
 								}
@@ -733,7 +731,7 @@ class WC_Form_Handler {
 
 		// If we added the product to the cart we can now optionally do a redirect.
 		if ( $was_added_to_cart && 0 === wc_notice_count( 'error' ) ) {
-			if ( $url = apply_filters( 'woocommerce_add_to_cart_redirect', $url ) ) {
+			if ( $url = apply_filters( 'woocommerce_add_to_cart_redirect', $url, $adding_to_cart ) ) {
 				wp_safe_redirect( $url );
 				exit;
 			} elseif ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {

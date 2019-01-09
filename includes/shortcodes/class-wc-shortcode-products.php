@@ -176,9 +176,14 @@ class WC_Shortcode_Products {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => false === wc_string_to_bool( $this->attributes['paginate'] ),
-			'orderby'             => $this->attributes['orderby'],
-			'order'               => strtoupper( $this->attributes['order'] ),
+			'orderby'             => empty( $_GET['orderby'] ) ? $this->attributes['orderby'] : wc_clean( wp_unslash( $_GET['orderby'] ) ),
 		);
+
+		$orderby_value         = explode( '-', $query_args['orderby'] );
+		$orderby               = esc_attr( $orderby_value[0] );
+		$order                 = ! empty( $orderby_value[1] ) ? $orderby_value[1] : strtoupper( $this->attributes['order'] );
+		$query_args['orderby'] = $orderby;
+		$query_args['order']   = $order;
 
 		if ( wc_string_to_bool( $this->attributes['paginate'] ) ) {
 			$this->attributes['page'] = absint( empty( $_GET['product-page'] ) ? 1 : $_GET['product-page'] ); // WPCS: input var ok, CSRF ok.
@@ -282,8 +287,15 @@ class WC_Shortcode_Products {
 			$field    = 'slug';
 
 			if ( $terms && is_numeric( $terms[0] ) ) {
-				$terms = array_map( 'absint', $terms );
 				$field = 'term_id';
+				$terms = array_map( 'absint', $terms );
+				// Check numeric slugs.
+				foreach ( $terms as $term ) {
+					$the_term = get_term_by( 'slug', $term, $taxonomy );
+					if ( false !== $the_term ) {
+						$terms[] = $the_term->term_id;
+					}
+				}
 			}
 
 			// If no terms were specified get all products that are in the attribute taxonomy.
@@ -297,6 +309,7 @@ class WC_Shortcode_Products {
 				$field = 'term_id';
 			}
 
+			// We always need to search based on the slug as well, this is to accommodate numeric slugs.
 			$query_args['tax_query'][] = array(
 				'taxonomy' => $taxonomy,
 				'terms'    => $terms,
@@ -318,8 +331,15 @@ class WC_Shortcode_Products {
 			$field      = 'slug';
 
 			if ( is_numeric( $categories[0] ) ) {
+				$field = 'term_id';
 				$categories = array_map( 'absint', $categories );
-				$field      = 'term_id';
+				// Check numeric slugs.
+				foreach ( $categories as $cat ) {
+					$the_cat = get_term_by( 'slug', $cat, 'product_cat' );
+					if ( false !== $the_cat ) {
+						$categories[] = $the_cat->term_id;
+					}
+				}
 			}
 
 			$query_args['tax_query'][] = array(

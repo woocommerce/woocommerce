@@ -19,7 +19,7 @@ class WC_Admin_Webhooks {
 	public function __construct() {
 		add_action( 'admin_init', array( $this, 'actions' ) );
 		add_action( 'woocommerce_settings_page_init', array( $this, 'screen_option' ) );
-		add_filter( 'woocommerce_save_settings_api_webhooks', array( $this, 'allow_save_settings' ) );
+		add_filter( 'woocommerce_save_settings_advanced_webhooks', array( $this, 'allow_save_settings' ) );
 	}
 
 	/**
@@ -30,7 +30,7 @@ class WC_Admin_Webhooks {
 	 * @return bool
 	 */
 	public function allow_save_settings( $allow ) {
-		if ( ! isset( $_GET['edit-webhook'] ) ) {// WPCS: input var okay, CSRF ok.
+		if ( ! isset( $_GET['edit-webhook'] ) ) { // WPCS: input var okay, CSRF ok.
 			return false;
 		}
 
@@ -119,7 +119,8 @@ class WC_Admin_Webhooks {
 		}
 
 		// API version.
-		$webhook->set_api_version( ! empty( $_POST['webhook_api_version'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_api_version'] ) ) : 'wp_api_v2' ); // WPCS: input var okay, CSRF ok.
+		$rest_api_versions = wc_get_webhook_rest_api_versions();
+		$webhook->set_api_version( ! empty( $_POST['webhook_api_version'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_api_version'] ) ) : end( $rest_api_versions ) ); // WPCS: input var okay, CSRF ok.
 
 		$webhook->save();
 
@@ -277,7 +278,7 @@ class WC_Admin_Webhooks {
 			$webhooks_table_list->prepare_items();
 
 			echo '<input type="hidden" name="page" value="wc-settings" />';
-			echo '<input type="hidden" name="tab" value="api" />';
+			echo '<input type="hidden" name="tab" value="advanced" />';
 			echo '<input type="hidden" name="section" value="webhooks" />';
 
 			$webhooks_table_list->views();

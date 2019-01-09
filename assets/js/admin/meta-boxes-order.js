@@ -641,6 +641,8 @@ jQuery( function ( $ ) {
 					items:    $( 'table.woocommerce_order_items :input[name], .wc-order-totals-items :input[name]' ).serialize(),
 					security: woocommerce_admin_meta_boxes.calc_totals_nonce
 				} );
+				
+				$( document.body ).trigger( 'order-totals-recalculate-before', data );
 
 				$.ajax({
 					url:  woocommerce_admin_meta_boxes.ajax_url,
@@ -651,6 +653,11 @@ jQuery( function ( $ ) {
 						$( '#woocommerce-order-items' ).find( '.inside' ).append( response );
 						wc_meta_boxes_order_items.reloaded_items();
 						wc_meta_boxes_order_items.unblock();
+
+						$( document.body ).trigger( 'order-totals-recalculate-success', response );
+					},
+					complete: function( response ) {
+						$( document.body ).trigger( 'order-totals-recalculate-complete', response );
 					}
 				});
 			}

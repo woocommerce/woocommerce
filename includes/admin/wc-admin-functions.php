@@ -208,7 +208,7 @@ function wc_save_order_items( $order_id, $items ) {
 			$item_data = array();
 
 			foreach ( $data_keys as $key => $default ) {
-				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
+				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_check_invalid_utf8( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
 			}
 
 			if ( '0' === $item_data['order_item_qty'] ) {
@@ -250,6 +250,9 @@ function wc_save_order_items( $order_id, $items ) {
 					}
 				}
 			}
+
+			// Allow other plugins to change item object before it is saved.
+			do_action( 'woocommerce_before_save_order_item', $item );
 
 			$item->save();
 		}

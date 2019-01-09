@@ -262,6 +262,10 @@ class WC_Order extends WC_Abstract_Order {
 				'manual' => (bool) $manual_update,
 			);
 
+			if ( $manual_update ) {
+				do_action( 'woocommerce_order_edit_status', $this->get_id(), $result['to'] );
+			}
+
 			$this->maybe_set_date_paid();
 			$this->maybe_set_date_completed();
 		}

@@ -296,13 +296,13 @@ class WC_API_Products extends WC_API_Resource {
 			$post_content = isset( $data['description'] ) ? wc_clean( $data['description'] ) : '';
 			if ( $post_content && isset( $data['enable_html_description'] ) && true === $data['enable_html_description'] ) {
 
-				$post_content = $data['description'];
+				$post_content = wp_filter_post_kses( $data['description'] );
 			}
 
 			// Enable short description html tags.
 			$post_excerpt = isset( $data['short_description'] ) ? wc_clean( $data['short_description'] ) : '';
 			if ( $post_excerpt && isset( $data['enable_html_short_description'] ) && true === $data['enable_html_short_description'] ) {
-				$post_excerpt = $data['short_description'];
+				$post_excerpt = wp_filter_post_kses( $data['short_description'] );
 			}
 
 			$classname = WC_Product_Factory::get_classname_from_product_type( $data['type'] );
@@ -407,14 +407,14 @@ class WC_API_Products extends WC_API_Resource {
 			// Product short description.
 			if ( isset( $data['short_description'] ) ) {
 				// Enable short description html tags.
-				$post_excerpt = ( isset( $data['enable_html_short_description'] ) && true === $data['enable_html_short_description'] ) ? $data['short_description'] : wc_clean( $data['short_description'] );
+				$post_excerpt = ( isset( $data['enable_html_short_description'] ) && true === $data['enable_html_short_description'] ) ? wp_filter_post_kses( $data['short_description'] ) : wc_clean( $data['short_description'] );
 				$product->set_short_description( $post_excerpt );
 			}
 
 			// Product description.
 			if ( isset( $data['description'] ) ) {
 				// Enable description html tags.
-				$post_content = ( isset( $data['enable_html_description'] ) && true === $data['enable_html_description'] ) ? $data['description'] : wc_clean( $data['description'] );
+				$post_content = ( isset( $data['enable_html_description'] ) && true === $data['enable_html_description'] ) ? wp_filter_post_kses( $data['description'] ) : wc_clean( $data['description'] );
 				$product->set_description( $post_content );
 			}
 
@@ -488,13 +488,18 @@ class WC_API_Products extends WC_API_Resource {
 			if ( $product->is_type( 'variable' ) ) {
 				foreach ( $product->get_children() as $child_id ) {
 					$child = wc_get_product( $child_id );
-					$child->delete( true );
+					if ( ! empty( $child ) ) {
+						$child->delete( true );
+					}
 				}
-			} elseif ( $product->is_type( 'grouped' ) ) {
+			} else {
+				// For other product types, if the product has children, remove the relationship.
 				foreach ( $product->get_children() as $child_id ) {
 					$child = wc_get_product( $child_id );
-					$child->set_parent_id( 0 );
-					$child->save();
+					if ( ! empty( $child ) ) {
+						$child->set_parent_id( 0 );
+						$child->save();
+					}
 				}
 			}
 
@@ -2031,7 +2036,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			$download = new WC_Product_Download();
-			$download->set_id( $file['id'] ? $file['id'] : wp_generate_uuid4() );
+			$download->set_id( ! empty( $file['id'] ) ? $file['id'] : wp_generate_uuid4() );
 			$download->set_name( $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['file'] ) );
 			$download->set_file( apply_filters( 'woocommerce_file_download_path', $file['file'], $product, $key ) );
 			$files[]  = $download;

@@ -227,7 +227,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$expected_attributes = array( 'pa_size' => array( 'small', 'large' ) );
 		$this->assertEquals( $expected_attributes, $product->get_variation_attributes() );
-		$product->delete();
 	}
 
 	/**
@@ -315,7 +314,6 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$product->set_name( 'Renamed Variable Product' );
 		$product->save();
 		$this->assertEquals( 'Renamed Variable Product', $product->get_name() );
-		$product->delete();
 	}
 
 	public function test_variation_save_attributes() {
@@ -497,12 +495,22 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$future_sale_product->set_price( $future_sale_product->get_regular_price() );
 		$future_sale_product->save();
 
+		$variable_draft_product = WC_Helper_Product::create_variation_product();
+		$variable_draft_product->set_status( 'draft' );
+		$variable_draft_product->save();
+		$children = $variable_draft_product->get_children();
+		$variable_draft_product_child = wc_get_product( $children[0] );
+		$variable_draft_product_child->set_sale_price( 8 );
+		$variable_draft_product_child->save();
+
 		$sale_products    = $product_store->get_on_sale_products();
 		$sale_product_ids = wp_list_pluck( $sale_products, 'id' );
 
 		$this->assertContains( $sale_product->get_id(), $sale_product_ids );
 		$this->assertNotContains( $not_sale_product->get_id(), $sale_product_ids );
 		$this->assertNotContains( $future_sale_product->get_id(), $sale_product_ids );
+		$this->assertNotContains( $variable_draft_product->get_id(), $sale_product_ids );
+		$this->assertNotContains( $variable_draft_product_child->get_id(), $sale_product_ids );
 	}
 
 	public function test_generate_product_title() {
@@ -674,11 +682,5 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertContains( $product2->get_id(), $results );
 		$this->assertNotContains( $product3->get_id(), $results );
 		$this->assertNotContains( $product4->get_id(), $results );
-
-		// Clean up.
-		$product->delete();
-		$product2->delete();
-		$product3->delete();
-		$product4->delete();
 	}
 }

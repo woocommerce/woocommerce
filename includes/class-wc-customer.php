@@ -294,7 +294,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $password Password.
 	 */
 	public function set_password( $password ) {
-		$this->password = wc_clean( $password );
+		$this->password = $password;
 	}
 
 	/**

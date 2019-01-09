@@ -37,6 +37,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_stock',
 		'_stock_status',
 		'_backorders',
+		'_low_stock_amount',
 		'_sold_individually',
 		'_weight',
 		'_length',
@@ -98,7 +99,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$id = wp_insert_post(
 			apply_filters(
-				'woocommerce_new_product_data', array(
+				'woocommerce_new_product_data',
+				array(
 					'post_type'      => 'product',
 					'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
 					'post_author'    => get_current_user_id(),
@@ -113,7 +115,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
 					'post_name'      => $product->get_slug( 'edit' ),
 				)
-			), true
+			),
+			true
 		);
 
 		if ( $id && ! is_wp_error( $id ) ) {
@@ -261,7 +264,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$post_type = $product->is_type( 'variation' ) ? 'product_variation' : 'product';
 
 		$args = wp_parse_args(
-			$args, array(
+			$args,
+			array(
 				'force_delete' => false,
 			)
 		);
@@ -333,6 +337,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'stock_quantity'     => get_post_meta( $id, '_stock', true ),
 				'stock_status'       => get_post_meta( $id, '_stock_status', true ),
 				'backorders'         => get_post_meta( $id, '_backorders', true ),
+				'low_stock_amount'   => get_post_meta( $id, '_low_stock_amount', true ),
 				'sold_individually'  => get_post_meta( $id, '_sold_individually', true ),
 				'weight'             => get_post_meta( $id, '_weight', true ),
 				'length'             => get_post_meta( $id, '_length', true ),
@@ -427,7 +432,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 						'is_visible'   => 0,
 						'is_variation' => 0,
 						'is_taxonomy'  => 0,
-					), (array) $meta_attribute_value
+					),
+					(array) $meta_attribute_value
 				);
 
 				// Check if is a taxonomy attribute.
@@ -499,6 +505,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'_tax_class'             => 'tax_class',
 			'_manage_stock'          => 'manage_stock',
 			'_backorders'            => 'backorders',
+			'_low_stock_amount'      => 'low_stock_amount',
 			'_sold_individually'     => 'sold_individually',
 			'_weight'                => 'weight',
 			'_length'                => 'length',
@@ -741,7 +748,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 						continue;
 
 					} elseif ( $attribute->is_taxonomy() ) {
-						wp_set_object_terms( $product->get_id(), wp_list_pluck( $attribute->get_terms(), 'term_id' ), $attribute->get_name() );
+						wp_set_object_terms( $product->get_id(), wp_list_pluck( (array) $attribute->get_terms(), 'term_id' ), $attribute->get_name() );
 					} else {
 						$value = wc_implode_text_attributes( $attribute->get_options() );
 					}
@@ -845,6 +852,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$exclude_term_ids            = array();
 		$outofstock_join             = '';
 		$outofstock_where            = '';
+		$non_published_where         = '';
 		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && $product_visibility_term_ids['outofstock'] ) {
@@ -856,8 +864,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$outofstock_where = ' AND exclude_join.object_id IS NULL';
 		}
 
+		// Fetch a list of non-published parent products and exlude them, quicker than joining in the main query below.
+		$non_published_products = $wpdb->get_col(
+			"SELECT post.ID as id FROM `$wpdb->posts` AS post
+			WHERE post.post_type = 'product'
+			AND post.post_parent = 0
+			AND post.post_status != 'publish'"
+		);
+		if ( 0 < count( $non_published_products ) ) {
+			$non_published_where = ' AND post.post_parent NOT IN ( ' . implode( ',', $non_published_products ) . ')';
+		}
+
 		return $wpdb->get_results(
-			// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 			$wpdb->prepare(
 				"SELECT post.ID as id, post.post_parent as parent_id FROM `$wpdb->posts` AS post
 				LEFT JOIN `$wpdb->postmeta` AS meta ON post.ID = meta.post_id
@@ -871,6 +890,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND CAST( meta.meta_value AS CHAR ) != ''
 					AND CAST( meta.meta_value AS DECIMAL( 10, %d ) ) = CAST( meta2.meta_value AS DECIMAL( 10, %d ) )
 					$outofstock_where
+					$non_published_where
 				GROUP BY post.ID",
 				$decimals,
 				$decimals
@@ -937,7 +957,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = %s
 					AND $wpdb->postmeta.post_id <> %d
 				LIMIT 1",
-				wp_slash( $sku ), $product_id
+				wp_slash( $sku ),
+				$product_id
 			)
 		);
 	}
@@ -1134,7 +1155,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$related_product_query = (array) apply_filters( 'woocommerce_product_related_posts_query', $this->get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id, $args );
 
-		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery, WordPress.WP.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
 		return $wpdb->get_col( implode( ' ', $related_product_query ) );
 	}
 
@@ -1217,7 +1238,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 				$wpdb->query(
 					$wpdb->prepare(
-						"UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock
+						"UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'",
+						$stock_quantity,
+						$product_id_with_stock
 					)
 				);
 				break;
@@ -1225,7 +1248,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 				$wpdb->query(
 					$wpdb->prepare(
-						"UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock
+						"UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'",
+						$stock_quantity,
+						$product_id_with_stock
 					)
 				);
 				break;
@@ -1233,7 +1258,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 				$wpdb->query(
 					$wpdb->prepare(
-						"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'", $stock_quantity, $product_id_with_stock
+						"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
+						$stock_quantity,
+						$product_id_with_stock
 					)
 				);
 				break;
@@ -1262,7 +1289,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 				$wpdb->query(
 					$wpdb->prepare(
-						"UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='total_sales'", $quantity, $product_id
+						"UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='total_sales'",
+						$quantity,
+						$product_id
 					)
 				);
 				break;
@@ -1270,7 +1299,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 				$wpdb->query(
 					$wpdb->prepare(
-						"UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='total_sales'", $quantity, $product_id
+						"UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='total_sales'",
+						$quantity,
+						$product_id
 					)
 				);
 				break;
@@ -1278,7 +1309,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 				$wpdb->query(
 					$wpdb->prepare(
-						"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='total_sales'", $quantity, $product_id
+						"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='total_sales'",
+						$quantity,
+						$product_id
 					)
 				);
 				break;
@@ -1625,11 +1658,26 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Handle SKU.
 		if ( $manual_queries['sku'] ) {
-			$wp_query_args['meta_query'][] = array(
-				'key'     => '_sku',
-				'value'   => $manual_queries['sku'],
-				'compare' => 'LIKE',
-			);
+			// Check for existing values if wildcard is used.
+			if ( '*' === $manual_queries['sku'] ) {
+				$wp_query_args['meta_query'][] = array(
+					array(
+						'key'     => '_sku',
+						'compare' => 'EXISTS',
+					),
+					array(
+						'key'     => '_sku',
+						'value'   => '',
+						'compare' => '!=',
+					),
+				);
+			} else {
+				$wp_query_args['meta_query'][] = array(
+					'key'     => '_sku',
+					'value'   => $manual_queries['sku'],
+					'compare' => 'LIKE',
+				);
+			}
 		}
 
 		// Handle featured.

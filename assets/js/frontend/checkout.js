@@ -131,7 +131,6 @@ jQuery( function( $ ) {
 			}
 		},
 		init_checkout: function() {
-			$( '#billing_country, #shipping_country, .country_to_state' ).change();
 			$( document.body ).trigger( 'update_checkout' );
 		},
 		maybe_input_changed: function( e ) {
@@ -375,7 +374,7 @@ jQuery( function( $ ) {
 							if ( ID ) {
 								if ( $.inArray( $( this ).attr( 'type' ), [ 'checkbox', 'radio' ] ) !== -1 ) {
 									$( this ).prop( 'checked', paymentDetails[ ID ] ).change();
-								} else if ( 0 === $( this ).val().length ) {
+								} else if ( null !== $( this ).val() && 0 === $( this ).val().length ) {
 									$( this ).val( paymentDetails[ ID ] ).change();
 								}
 							}

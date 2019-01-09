@@ -55,7 +55,7 @@ class WC_Geolite_Integration {
 		$iso_code = '';
 
 		try {
-			$reader = new MaxMind\Db\Reader( $this->database ); // phpcs:ignore PHPCompatibility.PHP.NewLanguageConstructs.t_ns_separatorFound
+			$reader = new MaxMind\Db\Reader( $this->database ); // phpcs:ignore PHPCompatibility.LanguageConstructs.NewLanguageConstructs.t_ns_separatorFound
 			$data   = $reader->get( $ip_address );
 
 			if ( isset( $data['country']['iso_code'] ) ) {

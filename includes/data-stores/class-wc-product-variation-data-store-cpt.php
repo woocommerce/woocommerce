@@ -113,7 +113,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$id = wp_insert_post(
 			apply_filters(
-				'woocommerce_new_product_variation_data', array(
+				'woocommerce_new_product_variation_data',
+				array(
 					'post_type'      => 'product_variation',
 					'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
 					'post_author'    => get_current_user_id(),
@@ -127,7 +128,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 					'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
 					'post_name'      => $product->get_slug( 'edit' ),
 				)
-			), true
+			),
+			true
 		);
 
 		if ( $id && ! is_wp_error( $id ) ) {
@@ -353,6 +355,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				'sku'                => get_post_meta( $product->get_parent_id(), '_sku', true ),
 				'manage_stock'       => get_post_meta( $product->get_parent_id(), '_manage_stock', true ),
 				'backorders'         => get_post_meta( $product->get_parent_id(), '_backorders', true ),
+				'low_stock_amount'   => get_post_meta( $product->get_parent_id(), '_low_stock_amount', true ),
 				'stock_quantity'     => wc_stock_amount( get_post_meta( $product->get_parent_id(), '_stock', true ) ),
 				'weight'             => get_post_meta( $product->get_parent_id(), '_weight', true ),
 				'length'             => get_post_meta( $product->get_parent_id(), '_length', true ),
@@ -431,7 +434,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			// Remove old taxonomies attributes so data is kept up to date - first get attribute key names.
 			$delete_attribute_keys = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT meta_key FROM {$wpdb->postmeta} WHERE meta_key LIKE %s AND meta_key NOT IN ( '" . implode( "','", array_map( 'esc_sql', $updated_attribute_keys ) ) . "' ) AND post_id = %d", // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.QuotedDynamicPlaceholderGeneration
+					// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.QuotedDynamicPlaceholderGeneration
+					"SELECT meta_key FROM {$wpdb->postmeta} WHERE meta_key LIKE %s AND meta_key NOT IN ( '" . implode( "','", array_map( 'esc_sql', $updated_attribute_keys ) ) . "' ) AND post_id = %d",
 					$wpdb->esc_like( 'attribute_' ) . '%',
 					$product->get_id()
 				)
