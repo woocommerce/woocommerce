@@ -221,7 +221,7 @@ class WC_Admin_Taxonomies {
 		<tr class="form-field term-thumbnail-wrap">
 			<th scope="row" valign="top"><label><?php _e( 'Thumbnail', 'woocommerce' ); ?></label></th>
 			<td>
-				<div id="product_cat_thumbnail" style="float: left; margin-right: 10px;"><img src="<?php echo esc_url( wc_get_term_thumbnail_url( $term, $thumbnail_id, 'thumb', true ) ); ?>" width="60px" height="60px" /></div>
+				<div id="product_cat_thumbnail" style="float: left; margin-right: 10px;"><img src="<?php echo esc_url( wc_get_term_src_url( $term, $thumbnail_id, 'thumb', true ) ); ?>" width="60px" height="60px" /></div>
 				<div style="line-height: 60px;">
 					<input type="hidden" id="product_cat_thumbnail_id" name="product_cat_thumbnail_id" value="<?php echo $thumbnail_id; ?>" />
 					<button type="button" class="upload_image_button button"><?php _e( 'Upload/Add image', 'woocommerce' ); ?></button>
