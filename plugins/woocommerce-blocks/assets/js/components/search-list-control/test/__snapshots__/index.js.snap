@@ -67,37 +67,16 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -126,37 +105,16 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -190,37 +148,16 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -254,37 +191,16 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -318,37 +234,16 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -377,37 +272,16 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -495,37 +369,16 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -554,37 +407,16 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -613,37 +445,16 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -672,37 +483,16 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -731,37 +521,16 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -790,37 +559,16 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -908,37 +656,16 @@ exports[`SearchListControl should render a search box and list of options with a
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -967,37 +694,16 @@ exports[`SearchListControl should render a search box and list of options with a
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -1026,37 +732,16 @@ exports[`SearchListControl should render a search box and list of options with a
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -1085,37 +770,16 @@ exports[`SearchListControl should render a search box and list of options with a
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -1144,37 +808,16 @@ exports[`SearchListControl should render a search box and list of options with a
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -1203,37 +846,16 @@ exports[`SearchListControl should render a search box and list of options with a
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -1404,37 +1026,16 @@ exports[`SearchListControl should render a search box and list of options, with 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -1463,37 +1064,16 @@ exports[`SearchListControl should render a search box and list of options, with 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -1522,37 +1102,16 @@ exports[`SearchListControl should render a search box and list of options, with 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -1581,37 +1140,16 @@ exports[`SearchListControl should render a search box and list of options, with 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -1640,37 +1178,16 @@ exports[`SearchListControl should render a search box and list of options, with 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -1699,37 +1216,16 @@ exports[`SearchListControl should render a search box and list of options, with 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -1961,37 +1457,16 @@ exports[`SearchListControl should render a search box with a search term, and on
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -2020,37 +1495,16 @@ exports[`SearchListControl should render a search box with a search term, and on
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -2139,37 +1593,16 @@ exports[`SearchListControl should render a search box with a search term, and on
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -2198,37 +1631,16 @@ exports[`SearchListControl should render a search box with a search term, and on
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -2369,37 +1781,16 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -2428,37 +1819,16 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 1H2.7778C1.791 1 1 1.8 1 2.7778v12.4444C1 16.2 1.7911 17 2.7778 17h12.4444C16.209 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2089 1 15.2222 1zm-8 12.4444L2.7778 9 4.031 7.7467l3.1911 3.1822 6.7467-6.7467 1.2533 1.2622-8 8z"
-                id="checked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="checked-mask"
-              >
-                <use
-                  xlinkHref="#checked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#1E8CBE"
-                mask="url(#checked-mask)"
-              />
-            </g>
+            <path
+              d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+              fill="#1E8CBE"
+            />
           </svg>
         </span>
         <span
@@ -2487,37 +1857,16 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -2546,37 +1895,16 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -2605,37 +1933,16 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -2664,37 +1971,16 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -2880,37 +2166,16 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -2939,37 +2204,16 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 1H2.7778C1.791 1 1 1.8 1 2.7778v12.4444C1 16.2 1.7911 17 2.7778 17h12.4444C16.209 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2089 1 15.2222 1zm-8 12.4444L2.7778 9 4.031 7.7467l3.1911 3.1822 6.7467-6.7467 1.2533 1.2622-8 8z"
-                id="checked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="checked-mask"
-              >
-                <use
-                  xlinkHref="#checked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#1E8CBE"
-                mask="url(#checked-mask)"
-              />
-            </g>
+            <path
+              d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+              fill="#1E8CBE"
+            />
           </svg>
         </span>
         <span
@@ -2998,37 +2242,16 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -3057,37 +2280,16 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 1H2.7778C1.791 1 1 1.8 1 2.7778v12.4444C1 16.2 1.7911 17 2.7778 17h12.4444C16.209 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2089 1 15.2222 1zm-8 12.4444L2.7778 9 4.031 7.7467l3.1911 3.1822 6.7467-6.7467 1.2533 1.2622-8 8z"
-                id="checked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="checked-mask"
-              >
-                <use
-                  xlinkHref="#checked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#1E8CBE"
-                mask="url(#checked-mask)"
-              />
-            </g>
+            <path
+              d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+              fill="#1E8CBE"
+            />
           </svg>
         </span>
         <span
@@ -3116,37 +2318,16 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
@@ -3175,37 +2356,16 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           <svg
             aria-hidden="true"
             focusable="false"
-            height="16"
+            height="24"
             role="img"
-            viewBox="0 0 16 16"
-            width="16"
+            viewBox="0 0 24 24"
+            width="24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <defs>
-              <path
-                d="M15.2222 2.7778v12.4444H2.7778V2.7778h12.4444zm0-1.7778H2.7778C1.8 1 1 1.8 1 2.7778v12.4444C1 16.2 1.8 17 2.7778 17h12.4444C16.2 17 17 16.2 17 15.2222V2.7778C17 1.8 16.2 1 15.2222 1z"
-                id="unchecked"
-              />
-            </defs>
-            <g
-              fill="none"
-              fillRule="evenodd"
-              transform="translate(-1 -1)"
-            >
-              <mask
-                fill="#fff"
-                id="unchecked-mask"
-              >
-                <use
-                  xlinkHref="#unchecked"
-                />
-              </mask>
-              <path
-                d="M0 0h18v18H0z"
-                fill="#6C7781"
-                mask="url(#unchecked-mask)"
-              />
-            </g>
+            <path
+              d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"
+              fill="#6C7781"
+            />
           </svg>
         </span>
         <span
