@@ -227,7 +227,8 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		global $wpdb;
 
 		$args = wp_parse_args(
-			$args, array(
+			$args,
+			array(
 				'limit'   => 10,
 				'offset'  => 0,
 				'order'   => 'DESC',
