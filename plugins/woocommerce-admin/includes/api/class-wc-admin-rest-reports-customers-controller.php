@@ -38,31 +38,33 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args                            = array();
-		$args['registered_before']       = $request['registered_before'];
-		$args['registered_after']        = $request['registered_after'];
-		$args['page']                    = $request['page'];
-		$args['per_page']                = $request['per_page'];
-		$args['order']                   = $request['order'];
-		$args['orderby']                 = $request['orderby'];
-		$args['match']                   = $request['match'];
-		$args['name']                    = $request['name'];
-		$args['username']                = $request['username'];
-		$args['email']                   = $request['email'];
-		$args['country']                 = $request['country'];
-		$args['last_active_before']      = $request['last_active_before'];
-		$args['last_active_after']       = $request['last_active_after'];
-		$args['orders_count_min']        = $request['orders_count_min'];
-		$args['orders_count_max']        = $request['orders_count_max'];
-		$args['orders_count_between']    = $request['orders_count_between'];
-		$args['total_spend_min']         = $request['total_spend_min'];
-		$args['total_spend_max']         = $request['total_spend_max'];
-		$args['total_spend_between']     = $request['total_spend_between'];
-		$args['avg_order_value_min']     = $request['avg_order_value_min'];
-		$args['avg_order_value_max']     = $request['avg_order_value_max'];
-		$args['avg_order_value_between'] = $request['avg_order_value_between'];
-		$args['last_order_before']       = $request['last_order_before'];
-		$args['last_order_after']        = $request['last_order_after'];
+		$args                        = array();
+		$args['registered_before']   = $request['registered_before'];
+		$args['registered_after']    = $request['registered_after'];
+		$args['page']                = $request['page'];
+		$args['per_page']            = $request['per_page'];
+		$args['order']               = $request['order'];
+		$args['orderby']             = $request['orderby'];
+		$args['match']               = $request['match'];
+		$args['name']                = $request['name'];
+		$args['username']            = $request['username'];
+		$args['email']               = $request['email'];
+		$args['country']             = $request['country'];
+		$args['last_active_before']  = $request['last_active_before'];
+		$args['last_active_after']   = $request['last_active_after'];
+		$args['orders_count_min']    = $request['orders_count_min'];
+		$args['orders_count_max']    = $request['orders_count_max'];
+		$args['total_spend_min']     = $request['total_spend_min'];
+		$args['total_spend_max']     = $request['total_spend_max'];
+		$args['avg_order_value_min'] = $request['avg_order_value_min'];
+		$args['avg_order_value_max'] = $request['avg_order_value_max'];
+		$args['last_order_before']   = $request['last_order_before'];
+		$args['last_order_after']    = $request['last_order_after'];
+
+		$between_params = array( 'orders_count', 'total_spend', 'avg_order_value' );
+		$normalized     = WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params );
+		$args           = array_merge( $args, $normalized );
+
 		return $args;
 	}
 
@@ -388,7 +390,7 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		$params['orders_count_between']     = array(
 			'description'       => __( 'Limit response to objects with an order count between two given integers.', 'wc-admin' ),
 			'type'              => 'array',
-			'validate_callback' => 'rest_validate_request_arg',
+			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_arg' ),
 		);
 		$params['total_spend_min']         = array(
 			'description'       => __( 'Limit response to objects with a total order spend greater than or equal to given number.', 'wc-admin' ),
@@ -403,7 +405,7 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		$params['total_spend_between']     = array(
 			'description'       => __( 'Limit response to objects with a total order spend between two given numbers.', 'wc-admin' ),
 			'type'              => 'array',
-			'validate_callback' => 'rest_validate_request_arg',
+			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_arg' ),
 		);
 		$params['avg_order_value_min']     = array(
 			'description'       => __( 'Limit response to objects with an average order spend greater than or equal to given number.', 'wc-admin' ),
@@ -418,7 +420,7 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		$params['avg_order_value_between'] = array(
 			'description'       => __( 'Limit response to objects with an average order spend between two given numbers.', 'wc-admin' ),
 			'type'              => 'array',
-			'validate_callback' => 'rest_validate_request_arg',
+			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_arg' ),
 		);
 		$params['last_order_before']       = array(
 			'description'       => __( 'Limit response to objects with last order before (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
