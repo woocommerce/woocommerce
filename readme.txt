@@ -171,6 +171,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Add support for custom classes on global/quantity-input.php. #21553
 * Dev - Pass product object to `woocommerce_add_to_cart_redirect` filter where appropriate. #22123
 * Dev - Add support for forgetting the cart contents and user session when switching between accounts using the User Switching plugin. #21991
+* Dev - Added a consistent form class to the Track Order Form. #21991
 * Fix - Fix W3C validation of single product page quantity input. #22333
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 
