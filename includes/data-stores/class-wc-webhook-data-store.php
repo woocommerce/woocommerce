@@ -146,7 +146,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			$wpdb->prefix . 'wc_webhooks',
 			$data,
 			array(
-				'webhook_id' => $webhook->get_id( 'edit' ),
+				'webhook_id' => $webhook->get_id(),
 			)
 		); // WPCS: DB call ok.
 
