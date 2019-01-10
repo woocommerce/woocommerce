@@ -43,7 +43,7 @@ export default class CustomersReportTable extends Component {
 			},
 			{
 				label: __( 'Sign Up', 'wc-admin' ),
-				key: 'date_sign_up',
+				key: 'date_registered',
 				defaultSort: true,
 				isSortable: true,
 			},
@@ -95,25 +95,30 @@ export default class CustomersReportTable extends Component {
 		return customers.map( customer => {
 			const {
 				avg_order_value,
-				billing,
 				date_last_active,
-				date_sign_up,
+				date_registered,
 				email,
-				first_name,
-				id,
-				last_name,
+				name,
+				user_id,
 				orders_count,
 				username,
 				total_spend,
+				postcode,
+				city,
+				country,
 			} = customer;
-			const { postcode, city, country } = billing || {};
-			const name = `${ first_name } ${ last_name }`;
 
-			const customerNameLink = (
-				<Link href={ 'user-edit.php?user_id=' + id } type="wp-admin">
+			const customerNameLink = user_id ? (
+				<Link href={ 'user-edit.php?user_id=' + user_id } type="wp-admin">
 					{ name }
 				</Link>
+			) : (
+				name
 			);
+
+			const dateRegistered = date_registered
+				? formatDate( defaultTableDateFormat, date_registered )
+				: '—';
 
 			return [
 				{
@@ -125,8 +130,8 @@ export default class CustomersReportTable extends Component {
 					value: username,
 				},
 				{
-					display: formatDate( defaultTableDateFormat, date_sign_up ),
-					value: date_sign_up,
+					display: dateRegistered,
+					value: date_registered,
 				},
 				{
 					display: <a href={ 'mailto:' + email }>{ email }</a>,
@@ -182,7 +187,7 @@ export default class CustomersReportTable extends Component {
 				labels={ { placeholder: __( 'Search by customer name', 'wc-admin' ) } }
 				searchBy="customers"
 				searchParam="name_includes"
-				title={ __( 'Registered Customers', 'wc-admin' ) }
+				title={ __( 'Customers', 'wc-admin' ) }
 				columnPrefsKey="customers_report_columns"
 			/>
 		);
