@@ -587,7 +587,7 @@ final class WC_Cart_Totals {
 	/**
 	 * Round merged taxes.
 	 *
-	 * @since 3.4.5
+	 * @since 3.5.4
 	 * @param array $taxes Taxes to round.
 	 * @return array
 	 */
