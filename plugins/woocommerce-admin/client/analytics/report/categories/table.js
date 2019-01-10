@@ -33,6 +33,7 @@ class CategoriesReportTable extends Component {
 				label: __( 'Category', 'wc-admin' ),
 				key: 'category',
 				required: true,
+				isSortable: true,
 				isLeftAligned: true,
 			},
 			{

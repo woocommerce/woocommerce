@@ -73,7 +73,6 @@ class WC_Admin_Reports_Downloads_Data_Store extends WC_Admin_Reports_Data_Store 
 
 		$sql_query_params = $this->get_time_period_sql_params( $query_args, $lookup_table );
 		$sql_query_params = array_merge( $sql_query_params, $this->get_limit_sql_params( $query_args ) );
-		$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_sql_params( $query_args ) );
 
 		$included_products = $this->get_included_products( $query_args );
 		$excluded_products = $this->get_excluded_products( $query_args );
@@ -163,6 +162,7 @@ class WC_Admin_Reports_Downloads_Data_Store extends WC_Admin_Reports_Data_Store 
 		}
 
 		$sql_query_params['from_clause'] .= " JOIN {$wpdb->prefix}woocommerce_downloadable_product_permissions as product_permissions ON {$lookup_table}.permission_id = product_permissions.permission_id";
+		$sql_query_params = $this->get_order_by( $query_args, $sql_query_params );
 
 		return $sql_query_params;
 	}
@@ -240,12 +240,18 @@ class WC_Admin_Reports_Downloads_Data_Store extends WC_Admin_Reports_Data_Store 
 	 * Fills ORDER BY clause of SQL request based on user supplied parameters.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
+	 * @param array $sql_query Current SQL query array.
 	 * @return array
 	 */
-	protected function get_order_by_sql_params( $query_args ) {
+	protected function get_order_by( $query_args, $sql_query ) {
+		global $wpdb;
 		$sql_query['order_by_clause'] = '';
 		if ( isset( $query_args['orderby'] ) ) {
 			$sql_query['order_by_clause'] = $this->normalize_order_by( $query_args['orderby'] );
+		}
+
+		if ( false !== strpos( $sql_query['order_by_clause'], '_products' ) ) {
+			$sql_query['from_clause'] .= " JOIN {$wpdb->prefix}posts AS _products ON product_permissions.product_id = _products.ID";
 		}
 
 		if ( isset( $query_args['order'] ) ) {
@@ -375,6 +381,10 @@ class WC_Admin_Reports_Downloads_Data_Store extends WC_Admin_Reports_Data_Store 
 
 		if ( 'date' === $order_by ) {
 			return $wpdb->prefix . 'wc_download_log.timestamp';
+		}
+
+		if ( 'product' === $order_by ) {
+			return '_products.post_title';
 		}
 
 		return $order_by;

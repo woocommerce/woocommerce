@@ -278,6 +278,7 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_REST_Reports_Control
 			'default'           => 'date',
 			'enum'              => array(
 				'date',
+				'product',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);

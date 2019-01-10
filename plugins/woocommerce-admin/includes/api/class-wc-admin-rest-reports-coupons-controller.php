@@ -262,6 +262,7 @@ class WC_Admin_REST_Reports_Coupons_Controller extends WC_REST_Reports_Controlle
 			'default'           => 'coupon_id',
 			'enum'              => array(
 				'coupon_id',
+				'code',
 				'amount',
 				'orders_count',
 			),

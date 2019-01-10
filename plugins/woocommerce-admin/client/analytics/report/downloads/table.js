@@ -42,7 +42,8 @@ export default class CouponsReportTable extends Component {
 			},
 			{
 				label: __( 'Product Title', 'wc-admin' ),
-				key: 'product_id',
+				key: 'product',
+				isSortable: true,
 				required: true,
 			},
 			{

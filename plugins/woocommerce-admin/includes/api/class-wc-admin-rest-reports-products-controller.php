@@ -291,6 +291,7 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 				'orders_count',
 				'items_sold',
 				'product_name',
+				'sku',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);

@@ -100,6 +100,10 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			$sql_query['from_clause'] .= " JOIN {$wpdb->prefix}posts AS _products ON {$order_product_lookup_table}.product_id = _products.ID";
 		}
 
+		if ( 'postmeta.meta_value' === $sql_query['order_by_clause'] ) {
+			$sql_query['from_clause'] .= " JOIN {$wpdb->prefix}postmeta AS postmeta ON {$order_product_lookup_table}.product_id = postmeta.post_id AND postmeta.meta_key = '_sku'";
+		}
+
 		if ( isset( $query_args['order'] ) ) {
 			$sql_query['order_by_clause'] .= ' ' . $query_args['order'];
 		} else {
@@ -150,7 +154,9 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		if ( 'product_name' === $order_by ) {
 			return '_products.post_title';
 		}
-
+		if ( 'sku' === $order_by ) {
+			return 'postmeta.meta_value';
+		}
 		return $order_by;
 	}
 

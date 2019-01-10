@@ -94,6 +94,52 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 		return $sql_query_params;
 	}
 
+
+	/**
+	 * Fills ORDER BY clause of SQL request based on user supplied parameters.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return array
+	 */
+	protected function get_order_by_sql_params( $query_args ) {
+		global $wpdb;
+		$lookup_table                 = $wpdb->prefix . self::TABLE_NAME;
+		$sql_query                    = array();
+		$sql_query['from_clause']     = '';
+		$sql_query['order_by_clause'] = '';
+		if ( isset( $query_args['orderby'] ) ) {
+			$sql_query['order_by_clause'] = $this->normalize_order_by( $query_args['orderby'] );
+		}
+
+		if ( false !== strpos( $sql_query['order_by_clause'], '_coupons' ) ) {
+			$sql_query['from_clause'] .= " JOIN {$wpdb->prefix}posts AS _coupons ON {$lookup_table}.coupon_id = _coupons.ID";
+		}
+
+		if ( isset( $query_args['order'] ) ) {
+			$sql_query['order_by_clause'] .= ' ' . $query_args['order'];
+		} else {
+			$sql_query['order_by_clause'] .= ' DESC';
+		}
+
+		return $sql_query;
+	}
+
+	/**
+	 * Maps ordering specified by the user to columns in the database/fields in the data.
+	 *
+	 * @param string $order_by Sorting criterion.
+	 * @return string
+	 */
+	protected function normalize_order_by( $order_by ) {
+		if ( 'date' === $order_by ) {
+			return 'time_interval';
+		}
+		if ( 'code' === $order_by ) {
+			return '_coupons.post_title';
+		}
+		return $order_by;
+	}
+
 	/**
 	 * Enriches the coupon data with extra attributes.
 	 *

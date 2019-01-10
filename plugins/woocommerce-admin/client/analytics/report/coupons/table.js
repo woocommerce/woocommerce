@@ -33,9 +33,10 @@ export default class CouponsReportTable extends Component {
 		return [
 			{
 				label: __( 'Coupon Code', 'wc-admin' ),
-				key: 'coupon_id',
+				key: 'code',
 				required: true,
 				isLeftAligned: true,
+				isSortable: true,
 			},
 			{
 				label: __( 'Orders', 'wc-admin' ),
