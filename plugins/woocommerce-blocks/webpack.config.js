@@ -30,7 +30,13 @@ const GutenbergBlocksConfig = {
 		// Legacy block
 		'products-block': './assets/js/legacy/products-block.jsx',
 		// New blocks
-		blocks: './assets/js/index.js',
+		'handpicked-products': './assets/js/blocks/handpicked-products/index.js',
+		'product-best-sellers': './assets/js/blocks/product-best-sellers/index.js',
+		'product-category': './assets/js/blocks/product-category/index.js',
+		'product-new': './assets/js/blocks/product-new/index.js',
+		'product-on-sale': './assets/js/blocks/product-on-sale/index.js',
+		'product-top-rated': './assets/js/blocks/product-top-rated/index.js',
+		'products-grid': './assets/css/products-grid.scss',
 	},
 	output: {
 		path: path.resolve( __dirname, './build/' ),
@@ -50,7 +56,7 @@ const GutenbergBlocksConfig = {
 				use: [
 					'style-loader',
 					MiniCssExtractPlugin.loader,
-					'css-loader',
+					{ loader: 'css-loader', options: { importLoaders: 1 } },
 					'postcss-loader',
 					{
 						loader: 'sass-loader',

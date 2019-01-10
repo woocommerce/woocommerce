@@ -4,11 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-import {
-	BlockAlignmentToolbar,
-	BlockControls,
-	InspectorControls,
-} from '@wordpress/editor';
+import { InspectorControls } from '@wordpress/editor';
 import { Component, Fragment } from '@wordpress/element';
 import { debounce } from 'lodash';
 import Gridicon from 'gridicons';
@@ -23,14 +19,14 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import getQuery from './utils/get-query';
-import ProductCategoryControl from './components/product-category-control';
-import ProductPreview from './components/product-preview';
+import getQuery from '../../utils/get-query';
+import ProductCategoryControl from '../../components/product-category-control';
+import ProductPreview from '../../components/product-preview';
 
 /**
- * Component to handle edit mode of "Top Rated Products".
+ * Component to handle edit mode of "Best Selling Products".
  */
-class ProductTopRatedBlock extends Component {
+class ProductBestSellersBlock extends Component {
 	constructor() {
 		super( ...arguments );
 		this.state = {
@@ -42,15 +38,16 @@ class ProductTopRatedBlock extends Component {
 	}
 
 	componentDidMount() {
-		if ( this.props.attributes.categories ) {
-			this.getProducts();
-		}
+		this.getProducts();
 	}
 
 	componentDidUpdate( prevProps ) {
-		const hasChange = [ 'rows', 'columns', 'categories' ].reduce( ( acc, key ) => {
-			return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
-		}, false );
+		const hasChange = [ 'categories', 'catOperator', 'columns', 'rows' ].reduce(
+			( acc, key ) => {
+				return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
+			},
+			false
+		);
 		if ( hasChange ) {
 			this.debouncedGetProducts();
 		}
@@ -73,7 +70,7 @@ class ProductTopRatedBlock extends Component {
 
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
-		const { columns, rows } = attributes;
+		const { categories, catOperator, columns, rows } = attributes;
 
 		return (
 			<InspectorControls key="inspector">
@@ -104,11 +101,15 @@ class ProductTopRatedBlock extends Component {
 					initialOpen={ false }
 				>
 					<ProductCategoryControl
-						selected={ attributes.categories }
+						selected={ categories }
 						onChange={ ( value = [] ) => {
 							const ids = value.map( ( { id } ) => id );
 							setAttributes( { categories: ids } );
 						} }
+						operator={ catOperator }
+						onOperatorChange={ ( value = 'any' ) =>
+							setAttributes( { catOperator: value } )
+						}
 					/>
 				</PanelBody>
 			</InspectorControls>
@@ -116,10 +117,12 @@ class ProductTopRatedBlock extends Component {
 	}
 
 	render() {
-		const { setAttributes } = this.props;
-		const { columns, align } = this.props.attributes;
+		const { columns } = this.props.attributes;
 		const { loaded, products } = this.state;
-		const classes = [ 'wc-block-products-grid', 'wc-block-top-rated-products' ];
+		const classes = [
+			'wc-block-products-grid',
+			'wc-block-best-selling-products',
+		];
 		if ( columns ) {
 			classes.push( `cols-${ columns }` );
 		}
@@ -133,13 +136,6 @@ class ProductTopRatedBlock extends Component {
 
 		return (
 			<Fragment>
-				<BlockControls>
-					<BlockAlignmentToolbar
-						controls={ [ 'wide', 'full' ] }
-						value={ align }
-						onChange={ ( nextAlign ) => setAttributes( { align: nextAlign } ) }
-					/>
-				</BlockControls>
 				{ this.getInspectorControls() }
 				<div className={ classes.join( ' ' ) }>
 					{ products.length ? (
@@ -148,8 +144,11 @@ class ProductTopRatedBlock extends Component {
 						) )
 					) : (
 						<Placeholder
-							icon={ <Gridicon icon="trophy" /> }
-							label={ __( 'Top Rated Products', 'woo-gutenberg-products-block' ) }
+							icon={ <Gridicon icon="stats-up-alt" /> }
+							label={ __(
+								'Best Selling Products',
+								'woo-gutenberg-products-block'
+							) }
 						>
 							{ ! loaded ? (
 								<Spinner />
@@ -164,7 +163,7 @@ class ProductTopRatedBlock extends Component {
 	}
 }
 
-ProductTopRatedBlock.propTypes = {
+ProductBestSellersBlock.propTypes = {
 	/**
 	 * The attributes for this block
 	 */
@@ -179,4 +178,4 @@ ProductTopRatedBlock.propTypes = {
 	setAttributes: PropTypes.func.isRequired,
 };
 
-export default ProductTopRatedBlock;
+export default ProductBestSellersBlock;

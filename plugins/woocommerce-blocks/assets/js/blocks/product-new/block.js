@@ -4,11 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-import {
-	BlockAlignmentToolbar,
-	BlockControls,
-	InspectorControls,
-} from '@wordpress/editor';
+import { InspectorControls } from '@wordpress/editor';
 import { Component, Fragment } from '@wordpress/element';
 import { debounce } from 'lodash';
 import {
@@ -22,10 +18,10 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import getQuery from './utils/get-query';
-import { IconNewReleases } from './components/icons';
-import ProductCategoryControl from './components/product-category-control';
-import ProductPreview from './components/product-preview';
+import getQuery from '../../utils/get-query';
+import { IconNewReleases } from '../../components/icons';
+import ProductCategoryControl from '../../components/product-category-control';
+import ProductPreview from '../../components/product-preview';
 
 /**
  * Component to handle edit mode of "Newest Products".
@@ -116,8 +112,7 @@ class ProductNewestBlock extends Component {
 	}
 
 	render() {
-		const { setAttributes } = this.props;
-		const { columns, align } = this.props.attributes;
+		const { columns } = this.props.attributes;
 		const { loaded, products } = this.state;
 		const classes = [ 'wc-block-products-grid', 'wc-block-newest-products' ];
 		if ( columns ) {
@@ -133,13 +128,6 @@ class ProductNewestBlock extends Component {
 
 		return (
 			<Fragment>
-				<BlockControls>
-					<BlockAlignmentToolbar
-						controls={ [ 'wide', 'full' ] }
-						value={ align }
-						onChange={ ( nextAlign ) => setAttributes( { align: nextAlign } ) }
-					/>
-				</BlockControls>
 				{ this.getInspectorControls() }
 				<div className={ classes.join( ' ' ) }>
 					{ products.length ? (

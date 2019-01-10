@@ -1,3 +1,6 @@
-module.exports = {
-	plugins: [ require( 'autoprefixer' )( { browsers: [ '>1%' ] } ) ],
-};
+module.exports = ( { env } ) => ( {
+	plugins: {
+		autoprefixer: { browsers: [ '>1%' ] },
+		cssnano: env === 'production',
+	},
+} );
