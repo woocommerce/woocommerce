@@ -8,7 +8,12 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { IconCheckChecked, IconCheckUnchecked } from '../icons';
+import {
+	IconCheckChecked,
+	IconCheckUnchecked,
+	IconRadioSelected,
+	IconRadioUnselected,
+} from '../icons';
 
 function getHighlightedName( name, search ) {
 	if ( ! search ) {
@@ -29,11 +34,19 @@ function getBreadcrumbsForDisplay( breadcrumbs ) {
 	return first( breadcrumbs ) + ' … ' + last( breadcrumbs );
 }
 
+const getInteractionIcon = ( isSingle = false, isSelected = false ) => {
+	if ( isSingle ) {
+		return isSelected ? <IconRadioSelected /> : <IconRadioUnselected />;
+	}
+	return isSelected ? <IconCheckChecked /> : <IconCheckUnchecked />;
+};
+
 const SearchListItem = ( {
 	className,
 	depth = 0,
 	item,
 	isSelected,
+	isSingle,
 	onSelect,
 	search = '',
 	showCount = false,
@@ -41,7 +54,9 @@ const SearchListItem = ( {
 } ) => {
 	const classes = [ className, 'woocommerce-search-list__item' ];
 	classes.push( `depth-${ depth }` );
-
+	if ( isSingle ) {
+		classes.push( 'is-radio-button' );
+	}
 	const hasBreadcrumbs = item.breadcrumbs && item.breadcrumbs.length;
 
 	return (
@@ -53,7 +68,7 @@ const SearchListItem = ( {
 			{ ...props }
 		>
 			<span className="woocommerce-search-list__item-state">
-				{ isSelected ? <IconCheckChecked /> : <IconCheckUnchecked /> }
+				{ getInteractionIcon( isSingle, isSelected ) }
 			</span>
 
 			<span className="woocommerce-search-list__item-label">
@@ -96,6 +111,10 @@ SearchListItem.propTypes = {
 	 * Whether this item is selected.
 	 */
 	isSelected: PropTypes.bool,
+	/**
+	 * Whether this should only display a single item (controls radio vs checkbox icon).
+	 */
+	isSingle: PropTypes.bool,
 	/**
 	 * Callback for selecting the item.
 	 */
