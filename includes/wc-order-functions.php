@@ -125,6 +125,16 @@ function wc_get_is_paid_statuses() {
 }
 
 /**
+ * Get list of statuses which are consider 'pending payment'.
+ *
+ * @since  3.5.4
+ * @return array
+ */
+function wc_get_is_pending_statuses() {
+	return apply_filters( 'woocommerce_order_is_pending_statuses', array( 'pending' ) );
+}
+
+/**
  * Get the nice name for an order status.
  *
  * @since  2.2

@@ -116,7 +116,7 @@ class WC_Shortcode_Checkout {
 				}
 
 				// Ensure order items are still stocked if paying for a failed order. Pending orders do not need this check because stock is held.
-				if ( ! $order->has_status( 'pending' ) ) {
+				if ( ! $order->has_status( wc_get_is_pending_statuses() ) ) {
 					$quantities = array();
 
 					foreach ( $order->get_items() as $item_key => $item ) {
