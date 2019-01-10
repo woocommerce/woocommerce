@@ -188,14 +188,13 @@ class DashboardCharts extends Component {
 					<div className="woocommerce-dashboard__columns">
 						{ uniqCharts.map( chart => {
 							return hiddenChartKeys.includes( chart.key ) ? null : (
-								<div key={ chart.key }>
-									<ChartBlock
-										charts={ getChartFromKey( chart.key ) }
-										endpoint={ chart.endpoint }
-										path={ path }
-										query={ query }
-									/>
-								</div>
+								<ChartBlock
+									charts={ getChartFromKey( chart.key ) }
+									endpoint={ chart.endpoint }
+									key={ chart.key }
+									path={ path }
+									query={ query }
+								/>
 							);
 						} ) }
 					</div>

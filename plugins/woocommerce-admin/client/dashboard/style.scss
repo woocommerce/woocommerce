@@ -2,11 +2,11 @@
 
 .woocommerce-dashboard__columns {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: calc(50% - #{$gap-large/2}) calc(50% - #{$gap-large/2});
 	grid-column-gap: $gap-large;
 
 	@include breakpoint( '<960px' ) {
-		grid-template-columns: 1fr;
+		grid-template-columns: 100%;
 	}
 }
 
