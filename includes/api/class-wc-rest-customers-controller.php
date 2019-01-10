@@ -39,7 +39,8 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V2_Controller {
 
 		// Format date values.
 		foreach ( $format_date as $key ) {
-			$datetime              = 'date_created' == $key ? get_date_from_gmt( $data[ $key ] ) : $data[ $key ];
+			// Date created is stored UTC, date modified is stored WP local time.
+			$datetime              = 'date_created' === $key ? get_date_from_gmt( gmdate( 'Y-m-d\TH:i:s', $data[ $key ]->getTimestamp() ) ) : $data[ $key ];
 			$data[ $key ]          = wc_rest_prepare_date_response( $datetime, false );
 			$data[ $key . '_gmt' ] = wc_rest_prepare_date_response( $datetime );
 		}
