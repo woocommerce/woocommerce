@@ -139,10 +139,10 @@ class ProductByCategoryBlock extends Component {
 					<ProductAttributeControl
 						selected={ attributes.attributes }
 						onChange={ ( value = [] ) => {
-							const selected = value.map( ( { id, attr_slug } ) => ( {
+							const selected = value.map( ( { id, attr_slug } ) => ( { // eslint-disable-line camelcase
 								id,
 								attr_slug,
-							} ) ); // eslint-disable-line camelcase
+							} ) );
 							setAttributes( { attributes: selected } );
 						} }
 					/>

@@ -50,21 +50,28 @@ export class SearchListControl extends Component {
 	}
 
 	onRemove( id ) {
-		const { selected, onChange } = this.props;
+		const { isSingle, onChange, selected } = this.props;
 		return () => {
+			if ( isSingle ) {
+				onChange( [] );
+			}
 			const i = findIndex( selected, { id } );
 			onChange( [ ...selected.slice( 0, i ), ...selected.slice( i + 1 ) ] );
 		};
 	}
 
 	onSelect( item ) {
-		const { selected, onChange } = this.props;
+		const { isSingle, onChange, selected } = this.props;
 		return () => {
 			if ( this.isSelected( item ) ) {
 				this.onRemove( item.id )();
 				return;
 			}
-			onChange( [ ...selected, item ] );
+			if ( isSingle ) {
+				onChange( [ item ] );
+			} else {
+				onChange( [ ...selected, item ] );
+			}
 		};
 	}
 
@@ -91,13 +98,11 @@ export class SearchListControl extends Component {
 	}
 
 	defaultRenderItem( args ) {
-		return (
-			<SearchListItem { ...args } />
-		);
+		return <SearchListItem { ...args } />;
 	}
 
 	renderList( list, depth = 0 ) {
-		const { search } = this.props;
+		const { isSingle, search } = this.props;
 		const renderItem = this.props.renderItem || this.defaultRenderItem;
 		if ( ! list ) {
 			return null;
@@ -108,6 +113,7 @@ export class SearchListControl extends Component {
 					item,
 					isSelected: this.isSelected( item ),
 					onSelect: this.onSelect,
+					isSingle,
 					search,
 					depth,
 				} ) }
@@ -157,44 +163,44 @@ export class SearchListControl extends Component {
 		);
 	}
 
-	render() {
-		const {
-			className = '',
-			isLoading,
-			search,
-			selected,
-			setState,
-		} = this.props;
+	renderSelectedSection() {
+		const { isLoading, isSingle, selected } = this.props;
 		const messages = { ...defaultMessages, ...this.props.messages };
+
+		if ( isLoading || isSingle || ! selected ) {
+			return null;
+		}
+
 		const selectedCount = selected.length;
+		return (
+			<div className="woocommerce-search-list__selected">
+				<div className="woocommerce-search-list__selected-header">
+					<strong>{ messages.selected( selectedCount ) }</strong>
+					{ selectedCount > 0 ? (
+						<Button
+							isLink
+							isDestructive
+							onClick={ this.onClear }
+							aria-label={ messages.clear }
+						>
+							{ __( 'Clear all', 'woo-gutenberg-products-block' ) }
+						</Button>
+					) : null }
+				</div>
+				{ selected.map( ( item, i ) => (
+					<Tag key={ i } label={ item.name } id={ item.id } remove={ this.onRemove } />
+				) ) }
+			</div>
+		);
+	}
+
+	render() {
+		const { className = '', search, setState } = this.props;
+		const messages = { ...defaultMessages, ...this.props.messages };
 
 		return (
 			<div className={ `woocommerce-search-list ${ className }` }>
-				{ ! isLoading && (
-					<div className="woocommerce-search-list__selected">
-						<div className="woocommerce-search-list__selected-header">
-							<strong>{ messages.selected( selectedCount ) }</strong>
-							{ selectedCount > 0 ? (
-								<Button
-									isLink
-									isDestructive
-									onClick={ this.onClear }
-									aria-label={ messages.clear }
-								>
-									{ __( 'Clear all', 'woo-gutenberg-products-block' ) }
-								</Button>
-							) : null }
-						</div>
-						{ selected.map( ( item, i ) => (
-							<Tag
-								key={ i }
-								label={ item.name }
-								id={ item.id }
-								remove={ this.onRemove }
-							/>
-						) ) }
-					</div>
-				) }
+				{ this.renderSelectedSection() }
 
 				<div className="woocommerce-search-list__search">
 					<TextControl
@@ -225,6 +231,10 @@ SearchListControl.propTypes = {
 	 * Whether the list of items is still loading.
 	 */
 	isLoading: PropTypes.bool,
+	/**
+	 * Restrict selections to one item.
+	 */
+	isSingle: PropTypes.bool,
 	/**
 	 * A complete list of item objects, each with id, name properties. This is displayed as a
 	 * clickable/keyboard-able list, and possibly filtered by the search term (searches name).
