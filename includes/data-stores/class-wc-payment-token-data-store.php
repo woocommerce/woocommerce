@@ -106,7 +106,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 			$wpdb->update(
 				$wpdb->prefix . 'woocommerce_payment_tokens',
 				$payment_token_data,
-				array( 'token_id' => $token->get_id( 'edit' ) )
+				array( 'token_id' => $token->get_id() )
 			);
 		}
 
