@@ -73,7 +73,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 					'post_parent'   => $order->get_parent_id( 'edit' ),
 					'post_excerpt'  => $this->get_post_excerpt( $order ),
 				)
-			), true
+			),
+			true
 		);
 
 		if ( $id && ! is_wp_error( $id ) ) {
@@ -102,10 +103,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$order->set_props(
 			array(
-				'parent_id'     => $post_object->post_parent,
-				'date_created'  => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
-				'date_modified' => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
-				'status'        => $post_object->post_status,
+				'parent_id'          => $post_object->post_parent,
+				'date_created'       => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
+				'date_modified'      => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
+				'status'             => $post_object->post_status,
+				'prices_include_tax' => 'yes' === get_option( 'woocommerce_prices_include_tax' ),
 			)
 		);
 
@@ -119,7 +121,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		 * stored. @todo When meta is flattened, handle this during migration.
 		 */
 		if ( version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) && $order->get_prices_include_tax( 'edit' ) ) {
-			$order->set_discount_total( (double) get_post_meta( $order->get_id(), '_cart_discount', true ) - (double) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
+			$order->set_discount_total( (float) get_post_meta( $order->get_id(), '_cart_discount', true ) - (float) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
 		}
 	}
 
