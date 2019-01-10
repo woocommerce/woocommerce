@@ -329,7 +329,13 @@ jQuery( function( $ ) {
 				.on( 'change', '#variable_product_options .woocommerce_variations :input', this.input_changed )
 				.on( 'change', '.variations-defaults select', this.defaults_changed );
 
-			$( 'form#post' ).on( 'submit', this.save_on_submit );
+			var postForm = $( 'form#post' );
+
+			postForm.on( 'submit', this.save_on_submit );
+
+			$( 'input:submit', postForm ).bind( 'click keypress', function() {
+				postForm.data( 'callerid', this.id );
+			});
 
 			$( '.wc-metaboxes-wrapper' ).on( 'click', 'a.do_variation_action', this.do_variation_action );
 		},
@@ -524,7 +530,14 @@ jQuery( function( $ ) {
 		 * After saved, continue with form submission
 		 */
 		save_on_submit_done: function() {
-			$( 'form#post' ).submit();
+			var postForm = $( 'form#post' ),
+				callerid = postForm.data( 'callerid' );
+
+			if ( 'publish' === callerid ) {
+				postForm.append('<input type="hidden" name="publish" value="1" />').submit();
+			} else {
+				postForm.append('<input type="hidden" name="save-post" value="1" />').submit();
+			}
 		},
 
 		/**

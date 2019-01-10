@@ -7,18 +7,14 @@
   "prefer-stable": true,
   "minimum-stability": "dev",
   "require": {
-    "composer/installers": "~1.2"
+    "composer/installers": "~1.6"
   },
   "require-dev": {
-    "squizlabs/php_codesniffer": "*",
-    "wp-coding-standards/wpcs": "^0.14",
-    "phpunit/phpunit": "6.*",
+    "apigen/apigen": "4.1.2",
+    "nette/utils": "2.5.3",
+    "phpunit/phpunit": "6.5.13",
     "woocommerce/woocommerce-git-hooks": "*",
-    "woocommerce/woocommerce-sniffs": "*",
-    "wimg/php-compatibility": "^8.0",
-    "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3",
-    "apigen/apigen": "^4",
-    "nette/utils": "~2.3.0"
+    "woocommerce/woocommerce-sniffs": "0.0.5"
   },
   "scripts": {
     "pre-update-cmd": [

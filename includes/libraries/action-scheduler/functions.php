@@ -14,7 +14,7 @@
  *
  * @return string The job ID
  */
-function wc_schedule_single_action( $timestamp, $hook, $args = array(), $group = '' ) {
+function as_schedule_single_action( $timestamp, $hook, $args = array(), $group = '' ) {
 	return ActionScheduler::factory()->single( $hook, $args, $timestamp, $group );
 }
 
@@ -29,7 +29,7 @@ function wc_schedule_single_action( $timestamp, $hook, $args = array(), $group =
  *
  * @return string The job ID
  */
-function wc_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '' ) {
+function as_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, $args = array(), $group = '' ) {
 	return ActionScheduler::factory()->recurring( $hook, $args, $timestamp, $interval_in_seconds, $group );
 }
 
@@ -54,18 +54,27 @@ function wc_schedule_recurring_action( $timestamp, $interval_in_seconds, $hook, 
  *
  * @return string The job ID
  */
-function wc_schedule_cron_action( $timestamp, $schedule, $hook, $args = array(), $group = '' ) {
+function as_schedule_cron_action( $timestamp, $schedule, $hook, $args = array(), $group = '' ) {
 	return ActionScheduler::factory()->cron( $hook, $args, $timestamp, $schedule, $group );
 }
 
 /**
- * Cancel the next occurrence of a job.
+ * Cancel the next occurrence of a scheduled action.
+ *
+ * While only the next instance of a recurring or cron action is unscheduled by this method, that will also prevent
+ * all future instances of that recurring or cron action from being run. Recurring and cron actions are scheduled in
+ * a sequence instead of all being scheduled at once. Each successive occurrence of a recurring action is scheduled
+ * only after the former action is run. If the next instance is never run, because it's unscheduled by this function,
+ * then the following instance will never be scheduled (or exist), which is effectively the same as being unscheduled
+ * by this method also.
  *
  * @param string $hook The hook that the job will trigger
  * @param array $args Args that would have been passed to the job
  * @param string $group
+ *
+ * @return string The scheduled action ID if a scheduled action was found, or empty string if no matching action found.
  */
-function wc_unschedule_action( $hook, $args = array(), $group = '' ) {
+function as_unschedule_action( $hook, $args = array(), $group = '' ) {
 	$params = array();
 	if ( is_array($args) ) {
 		$params['args'] = $args;
@@ -74,11 +83,25 @@ function wc_unschedule_action( $hook, $args = array(), $group = '' ) {
 		$params['group'] = $group;
 	}
 	$job_id = ActionScheduler::store()->find_action( $hook, $params );
-	if ( empty($job_id) ) {
-		return;
+
+	if ( ! empty( $job_id ) ) {
+		ActionScheduler::store()->cancel_action( $job_id );
 	}
 
-	ActionScheduler::store()->cancel_action( $job_id );
+	return $job_id;
+}
+
+/**
+ * Cancel all occurrences of a scheduled action.
+ *
+ * @param string $hook The hook that the job will trigger
+ * @param array $args Args that would have been passed to the job
+ * @param string $group
+ */
+function as_unschedule_all_actions( $hook, $args = array(), $group = '' ) {
+	do {
+		$unscheduled_action = as_unschedule_action( $hook, $args, $group );
+	} while ( ! empty( $unscheduled_action ) );
 }
 
 /**
@@ -88,7 +111,7 @@ function wc_unschedule_action( $hook, $args = array(), $group = '' ) {
  *
  * @return int|bool The timestamp for the next occurrence, or false if nothing was found
  */
-function wc_next_scheduled_action( $hook, $args = NULL, $group = '' ) {
+function as_next_scheduled_action( $hook, $args = NULL, $group = '' ) {
 	$params = array();
 	if ( is_array($args) ) {
 		$params['args'] = $args;
@@ -130,7 +153,7 @@ function wc_next_scheduled_action( $hook, $args = NULL, $group = '' ) {
  *
  * @return array
  */
-function wc_get_scheduled_actions( $args = array(), $return_format = OBJECT ) {
+function as_get_scheduled_actions( $args = array(), $return_format = OBJECT ) {
 	$store = ActionScheduler::store();
 	foreach ( array('date', 'modified') as $key ) {
 		if ( isset($args[$key]) ) {

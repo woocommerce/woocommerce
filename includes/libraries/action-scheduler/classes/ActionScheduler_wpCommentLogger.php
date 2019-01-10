@@ -18,15 +18,16 @@ class ActionScheduler_wpCommentLogger extends ActionScheduler_Logger {
 		if ( empty($date) ) {
 			$date = as_get_datetime_object();
 		} else {
-			$date = clone $date;
+			$date = as_get_datetime_object( clone $date );
 		}
 		$comment_id = $this->create_wp_comment( $action_id, $message, $date );
 		return $comment_id;
 	}
 
 	protected function create_wp_comment( $action_id, $message, DateTime $date ) {
+
 		$comment_date_gmt = $date->format('Y-m-d H:i:s');
-		$date->setTimezone( ActionScheduler_TimezoneHelper::get_local_timezone() );
+		ActionScheduler_TimezoneHelper::set_local_timezone( $date );
 		$comment_data = array(
 			'comment_post_ID' => $action_id,
 			'comment_date' => $date->format('Y-m-d H:i:s'),
@@ -51,7 +52,7 @@ class ActionScheduler_wpCommentLogger extends ActionScheduler_Logger {
 		}
 
 		$date = as_get_datetime_object( $comment->comment_date_gmt );
-		$date->setTimezone( ActionScheduler_TimezoneHelper::get_local_timezone() );
+		ActionScheduler_TimezoneHelper::set_local_timezone( $date );
 		return new ActionScheduler_LogEntry( $comment->comment_post_ID, $comment->comment_content, $date );
 	}
 
@@ -217,14 +218,9 @@ class ActionScheduler_wpCommentLogger extends ActionScheduler_Logger {
 	public function init() {
 		add_action( 'action_scheduler_before_process_queue', array( $this, 'disable_comment_counting' ), 10, 0 );
 		add_action( 'action_scheduler_after_process_queue', array( $this, 'enable_comment_counting' ), 10, 0 );
-		add_action( 'action_scheduler_stored_action', array( $this, 'log_stored_action' ), 10, 1 );
-		add_action( 'action_scheduler_canceled_action', array( $this, 'log_canceled_action' ), 10, 1 );
-		add_action( 'action_scheduler_before_execute', array( $this, 'log_started_action' ), 10, 1 );
-		add_action( 'action_scheduler_after_execute', array( $this, 'log_completed_action' ), 10, 1 );
-		add_action( 'action_scheduler_failed_execution', array( $this, 'log_failed_action' ), 10, 2 );
-		add_action( 'action_scheduler_failed_action', array( $this, 'log_timed_out_action' ), 10, 2 );
-		add_action( 'action_scheduler_unexpected_shutdown', array( $this, 'log_unexpected_shutdown' ), 10, 2 );
-		add_action( 'action_scheduler_reset_action', array( $this, 'log_reset_action' ), 10, 1 );
+
+		parent::init();
+
 		add_action( 'pre_get_comments', array( $this, 'filter_comment_queries' ), 10, 1 );
 		add_action( 'wp_count_comments', array( $this, 'filter_comment_count' ), 20, 2 ); // run after WC_Comments::wp_count_comments() to make sure we exclude order notes and action logs
 		add_action( 'comment_feed_where', array( $this, 'filter_comment_feed' ), 10, 2 );
@@ -239,40 +235,6 @@ class ActionScheduler_wpCommentLogger extends ActionScheduler_Logger {
 	}
 	public function enable_comment_counting() {
 		wp_defer_comment_counting(false);
-	}
-
-	public function log_stored_action( $action_id ) {
-		$this->log( $action_id, __('action created', 'action-scheduler') );
-	}
-
-	public function log_canceled_action( $action_id ) {
-		$this->log( $action_id, __('action canceled', 'action-scheduler') );
-	}
-
-	public function log_started_action( $action_id ) {
-		$this->log( $action_id, __('action started', 'action-scheduler') );
-	}
-
-	public function log_completed_action( $action_id ) {
-		$this->log( $action_id, __('action complete', 'action-scheduler') );
-	}
-
-	public function log_failed_action( $action_id, Exception $exception ) {
-		$this->log( $action_id, sprintf(__('action failed: %s', 'action-scheduler'), $exception->getMessage() ));
-	}
-
-	public function log_timed_out_action( $action_id, $timeout) {
-		$this->log( $action_id, sprintf( __('action timed out after %s seconds', 'action-scheduler'), $timeout ) );
-	}
-
-	public function log_unexpected_shutdown( $action_id, $error ) {
-		if ( !empty($error) ) {
-			$this->log( $action_id, sprintf(__('unexpected shutdown: PHP Fatal error %s in %s on line %s', 'action-scheduler'), $error['message'], $error['file'], $error['line'] ) );
-		}
-	}
-
-	public function log_reset_action( $action_id ) {
-		$this->log( $action_id, __('action reset', 'action_scheduler') );
 	}
 
 }

@@ -238,8 +238,12 @@ class WC_Checkout {
 				'placeholder' => esc_attr__( 'Password', 'woocommerce' ),
 			);
 		}
-
 		$this->fields = apply_filters( 'woocommerce_checkout_fields', $this->fields );
+
+		foreach ( $this->fields as $field_type => $fields ) {
+			// Sort each of the checkout field sections based on priority.
+			uasort( $this->fields[ $field_type ], 'wc_checkout_fields_uasort_comparison' );
+		}
 
 		return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
 	}
@@ -346,7 +350,7 @@ class WC_Checkout {
 			$order->set_total( WC()->cart->get_total( 'edit' ) );
 			$this->create_order_line_items( $order, WC()->cart );
 			$this->create_order_fee_lines( $order, WC()->cart );
-			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping->get_packages() );
+			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
 			$this->create_order_tax_lines( $order, WC()->cart );
 			$this->create_order_coupon_lines( $order, WC()->cart );
 
@@ -699,8 +703,6 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'phone', $format, true ) ) {
-					$data[ $key ] = wc_format_phone_number( $data[ $key ] );
-
 					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
@@ -772,7 +774,7 @@ class WC_Checkout {
 			} else {
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
-				foreach ( WC()->shipping->get_packages() as $i => $package ) {
+				foreach ( WC()->shipping()->get_packages() as $i => $package ) {
 					if ( ! isset( $chosen_shipping_methods[ $i ], $package['rates'][ $chosen_shipping_methods[ $i ] ] ) ) {
 						$errors->add( 'shipping', __( 'No shipping method has been selected. Please double check your address, or contact us if you need any help.', 'woocommerce' ) );
 					}

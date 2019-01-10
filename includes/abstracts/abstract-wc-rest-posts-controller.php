@@ -530,6 +530,8 @@ abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
 			$query_args['orderby'] = 'post__in';
 		} elseif ( 'id' === $query_args['orderby'] ) {
 			$query_args['orderby'] = 'ID'; // ID must be capitalized.
+		} elseif ( 'slug' === $query_args['orderby'] ) {
+			$query_args['orderby'] = 'name';
 		}
 
 		return $query_args;

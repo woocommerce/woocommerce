@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * @package WooCommerce/API
  * @extends WC_REST_Webhook_Deliveries_V1_Controller
  */
-class WC_REST_Webhook_Deliveries_Controller extends WC_REST_Webhook_Deliveries_V1_Controller {
+class WC_REST_Webhook_Deliveries_V2_Controller extends WC_REST_Webhook_Deliveries_V1_Controller {
 
 	/**
 	 * Endpoint namespace.

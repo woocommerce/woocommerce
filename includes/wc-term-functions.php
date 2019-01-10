@@ -51,9 +51,7 @@ function _wc_get_cached_product_terms( $product_id, $taxonomy, $args = array() )
 		return $terms;
 	}
 
-	// @codingStandardsIgnoreStart
 	$terms = wp_get_post_terms( $product_id, $taxonomy, $args );
-	// @codingStandardsIgnoreEnd
 
 	wp_cache_add( $cache_key, $terms, $cache_group );
 
@@ -482,6 +480,12 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 
 	foreach ( (array) $taxonomies as $taxonomy ) {
 		if ( taxonomy_is_product_attribute( $taxonomy ) || in_array( $taxonomy, apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ), true ) ) {
+
+			// Don't modify the orderby when we're ordering attributes by name.
+			if ( taxonomy_is_product_attribute( $taxonomy ) && 'name' === wc_attribute_orderby( $taxonomy ) ) {
+				return $clauses;
+			}
+
 			$found = true;
 			break;
 		}
@@ -537,7 +541,7 @@ add_filter( 'terms_clauses', 'wc_terms_clauses', 99, 3 );
  * Function for recounting product terms, ignoring hidden products.
  *
  * @param array  $terms                       List of terms.
- * @param string $taxonomy                    Taxonomy.
+ * @param object $taxonomy                    Taxonomy.
  * @param bool   $callback                    Callback.
  * @param bool   $terms_are_term_taxonomy_ids If terms are from term_taxonomy_id column.
  */

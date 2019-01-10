@@ -446,11 +446,11 @@ jQuery( function( $ ) {
 				opacity: 0.6
 			}
 		});
-
+		var original_data = $( '.product_attributes' ).find( 'input, select, textarea' );
 		var data = {
 			post_id     : woocommerce_admin_meta_boxes.post_id,
 			product_type: $( '#product-type' ).val(),
-			data        : $( '.product_attributes' ).find( 'input, select, textarea' ).serialize(),
+			data        : original_data.serialize(),
 			action      : 'woocommerce_save_attributes',
 			security    : woocommerce_admin_meta_boxes.save_attributes_nonce
 		};
@@ -463,6 +463,14 @@ jQuery( function( $ ) {
 				// Success.
 				$( '.product_attributes' ).html( response.data.html );
 				$( '.product_attributes' ).unblock();
+
+				// Make sure the dropdown is not disabled for empty value attributes.
+				var nr_elements = original_data.length / 6;
+				for ( var i = 0; i < nr_elements; i++ ) {
+					if ( typeof( original_data ) !== 'undefined' && original_data[ i * 6 + 2 ].value === '' ) {
+						$( 'select.attribute_taxonomy' ).find( 'option[value="' + original_data[ i * 6 ].value + '"]' ).removeAttr( 'disabled' );
+					}
+				}
 
 				// Reload variations panel.
 				var this_page = window.location.toString();

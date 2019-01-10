@@ -219,14 +219,10 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 	$result         = get_transient( $transient_name );
 
 	if ( false === $result ) {
-		$customer_data = array();
+		$customer_data = array( $user_id );
 
 		if ( $user_id ) {
 			$user = get_user_by( 'id', $user_id );
-
-			if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '<' ) ) {
-				$customer_data[] = $user_id;
-			}
 
 			if ( isset( $user->user_email ) ) {
 				$customer_data[] = $user->user_email;
@@ -244,31 +240,19 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 			return false;
 		}
 
-		if ( version_compare( get_option( 'woocommerce_db_version' ), '3.5.0', '>=' ) && $user_id ) {
-			// Since WC 3.5 wp_posts.post_author is used to store the ID of the customer who placed an order.
-			$query = "SELECT im.meta_value FROM {$wpdb->posts} AS p
-				INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
-				INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
-				WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
-				AND p.post_author = {$user_id}
-				AND pm.meta_key = '_billing_email'
-				AND im.meta_key IN ( '_product_id', '_variation_id' )
-				AND im.meta_value != 0
-				AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )";
-		} else {
-			$query = "SELECT im.meta_value FROM {$wpdb->posts} AS p
-				INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
-				INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
-				WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
-				AND pm.meta_key IN ( '_billing_email', '_customer_user' )
-				AND im.meta_key IN ( '_product_id', '_variation_id' )
-				AND im.meta_value != 0
-				AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )";
-		}
-
-		$result = $wpdb->get_col( $query ); // WPCS: unprepared SQL ok.
+		$result = $wpdb->get_col(
+			"
+			SELECT im.meta_value FROM {$wpdb->posts} AS p
+			INNER JOIN {$wpdb->postmeta} AS pm ON p.ID = pm.post_id
+			INNER JOIN {$wpdb->prefix}woocommerce_order_items AS i ON p.ID = i.order_id
+			INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS im ON i.order_item_id = im.order_item_id
+			WHERE p.post_status IN ( 'wc-" . implode( "','wc-", $statuses ) . "' )
+			AND pm.meta_key IN ( '_billing_email', '_customer_user' )
+			AND im.meta_key IN ( '_product_id', '_variation_id' )
+			AND im.meta_value != 0
+			AND pm.meta_value IN ( '" . implode( "','", $customer_data ) . "' )
+		"
+		); // WPCS: unprepared SQL ok.
 		$result = array_map( 'absint', $result );
 
 		set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
@@ -277,12 +261,42 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 }
 
 /**
+ * Checks if the current user has a role.
+ *
+ * @param string $role The role.
+ * @return bool
+ */
+function wc_current_user_has_role( $role ) {
+	return wc_user_has_role( wp_get_current_user(), $role );
+}
+
+/**
+ * Checks if a user has a role.
+ *
+ * @param int|\WP_User $user The user.
+ * @param string       $role The role.
+ * @return bool
+ */
+function wc_user_has_role( $user, $role ) {
+	if ( ! is_object( $user ) ) {
+		$user = get_userdata( $user );
+	}
+
+	if ( ! $user || ! $user->exists() ) {
+		return false;
+	}
+
+	return in_array( $role, $user->roles, true );
+}
+
+/**
  * Checks if a user has a certain capability.
  *
  * @param array $allcaps All capabilities.
  * @param array $caps    Capabilities.
  * @param array $args    Arguments.
- * @return bool
+ *
+ * @return array The filtered array of all capabilities.
  */
 function wc_customer_has_capability( $allcaps, $caps, $args ) {
 	if ( isset( $caps[0] ) ) {
@@ -349,9 +363,18 @@ add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
  * @return array
  */
 function wc_modify_editable_roles( $roles ) {
-	if ( ! current_user_can( 'administrator' ) ) {
-		unset( $roles['administrator'] );
+	if ( is_multisite() && is_super_admin() ) {
+		return $roles;
 	}
+	if ( ! wc_current_user_has_role( 'administrator' ) ) {
+		unset( $roles['administrator'] );
+
+		if ( wc_current_user_has_role( 'shop_manager' ) ) {
+			$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
+			return array_intersect_key( $roles, array_flip( $shop_manager_editable_roles ) );
+		}
+	}
+
 	return $roles;
 }
 add_filter( 'editable_roles', 'wc_modify_editable_roles' );
@@ -368,6 +391,9 @@ add_filter( 'editable_roles', 'wc_modify_editable_roles' );
  * @return array
  */
 function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
+	if ( is_multisite() && is_super_admin() ) {
+		return $caps;
+	}
 	switch ( $cap ) {
 		case 'edit_user':
 		case 'remove_user':
@@ -376,8 +402,17 @@ function wc_modify_map_meta_cap( $caps, $cap, $user_id, $args ) {
 			if ( ! isset( $args[0] ) || $args[0] === $user_id ) {
 				break;
 			} else {
-				if ( user_can( $args[0], 'administrator' ) && ! current_user_can( 'administrator' ) ) {
-					$caps[] = 'do_not_allow';
+				if ( ! wc_current_user_has_role( 'administrator' ) ) {
+					if ( wc_user_has_role( $args[0], 'administrator' ) ) {
+						$caps[] = 'do_not_allow';
+					} elseif ( wc_current_user_has_role( 'shop_manager' ) ) {
+						// Shop managers can only edit customer info.
+						$userdata = get_userdata( $args[0] );
+						$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
+						if ( property_exists( $userdata, 'roles' ) && ! empty( $userdata->roles ) && ! array_intersect( $userdata->roles, $shop_manager_editable_roles ) ) {
+							$caps[] = 'do_not_allow';
+						}
+					}
 				}
 			}
 			break;
@@ -511,7 +546,7 @@ function wc_get_customer_order_count( $user_id ) {
 }
 
 /**
- * Reset customer ID on orders when a user is deleted.
+ * Reset _customer_user on orders when a user is deleted.
  *
  * @param int $user_id User ID.
  */
@@ -524,22 +559,6 @@ function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 			'meta_value' => $user_id,
 		)
 	); // WPCS: slow query ok.
-
-	$post_types              = (array) apply_filters( 'woocommerce_reset_order_customer_id_post_types', array( 'shop_order' ) );
-	$post_types_placeholders = implode( ', ', array_fill( 0, count( $post_types ), '%s' ) );
-	$query_args              = array_merge( $post_types, array( $user_id ) );
-
-	// Since WC 3.5, the customer ID is stored both in the _customer_user postmeta and in the post_author field.
-	// In future versions of WC, the plan is to use only post_author and stop using _customer_user, but for now
-	// we have to update both places.
-	$wpdb->query(
-		// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-		$wpdb->prepare(
-			"UPDATE {$wpdb->posts} SET `post_author` = 0 WHERE post_type IN ({$post_types_placeholders}) AND post_author = %d",
-			$query_args
-		)
-		// phpcs:enable
-	);
 }
 
 add_action( 'deleted_user', 'wc_reset_order_customer_id_on_deleted_user' );

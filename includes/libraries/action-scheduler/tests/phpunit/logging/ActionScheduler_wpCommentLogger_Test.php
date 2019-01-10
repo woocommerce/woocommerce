@@ -12,11 +12,30 @@ class ActionScheduler_wpCommentLogger_Test extends ActionScheduler_UnitTestCase 
 	}
 
 	public function test_add_log_entry() {
-		$action_id = wc_schedule_single_action( time(), 'a hook' );
+		$action_id = as_schedule_single_action( time(), 'a hook' );
 		$logger = ActionScheduler::logger();
 		$message = 'Logging that something happened';
 		$log_id = $logger->log( $action_id, $message );
 		$entry = $logger->get_entry( $log_id );
+
+		$this->assertEquals( $action_id, $entry->get_action_id() );
+		$this->assertEquals( $message, $entry->get_message() );
+	}
+
+	public function test_add_log_datetime() {
+		$action_id = as_schedule_single_action( time(), 'a hook' );
+		$logger    = ActionScheduler::logger();
+		$message   = 'Logging that something happened';
+		$date      = new DateTime( 'now', new DateTimeZone( 'UTC' ) );
+		$log_id    = $logger->log( $action_id, $message, $date );
+		$entry     = $logger->get_entry( $log_id );
+
+		$this->assertEquals( $action_id, $entry->get_action_id() );
+		$this->assertEquals( $message, $entry->get_message() );
+
+		$date      = new ActionScheduler_DateTime( 'now', new DateTimeZone( 'UTC' ) );
+		$log_id    = $logger->log( $action_id, $message, $date );
+		$entry     = $logger->get_entry( $log_id );
 
 		$this->assertEquals( $action_id, $entry->get_action_id() );
 		$this->assertEquals( $message, $entry->get_message() );
@@ -42,7 +61,7 @@ class ActionScheduler_wpCommentLogger_Test extends ActionScheduler_UnitTestCase 
 	}
 
 	public function test_storage_comments() {
-		$action_id = wc_schedule_single_action( time(), 'a hook' );
+		$action_id = as_schedule_single_action( time(), 'a hook' );
 		$logger = ActionScheduler::logger();
 		$logs = $logger->get_logs( $action_id );
 		$expected = new ActionScheduler_LogEntry( $action_id, 'action created' );
@@ -62,7 +81,7 @@ class ActionScheduler_wpCommentLogger_Test extends ActionScheduler_UnitTestCase 
 	}
 
 	public function test_execution_comments() {
-		$action_id = wc_schedule_single_action( time(), 'a hook' );
+		$action_id = as_schedule_single_action( time(), 'a hook' );
 		$logger = ActionScheduler::logger();
 		$started = new ActionScheduler_LogEntry( $action_id, 'action started' );
 		$finished = new ActionScheduler_LogEntry( $action_id, 'action complete' );
@@ -78,7 +97,7 @@ class ActionScheduler_wpCommentLogger_Test extends ActionScheduler_UnitTestCase 
 	public function test_failed_execution_comments() {
 		$hook = md5(rand());
 		add_action( $hook, array( $this, '_a_hook_callback_that_throws_an_exception' ) );
-		$action_id = wc_schedule_single_action( time(), $hook );
+		$action_id = as_schedule_single_action( time(), $hook );
 		$logger = ActionScheduler::logger();
 		$started = new ActionScheduler_LogEntry( $action_id, 'action started' );
 		$finished = new ActionScheduler_LogEntry( $action_id, 'action complete' );
@@ -95,7 +114,7 @@ class ActionScheduler_wpCommentLogger_Test extends ActionScheduler_UnitTestCase 
 
 	public function test_fatal_error_comments() {
 		$hook = md5(rand());
-		$action_id = wc_schedule_single_action( time(), $hook );
+		$action_id = as_schedule_single_action( time(), $hook );
 		$logger = ActionScheduler::logger();
 		do_action( 'action_scheduler_unexpected_shutdown', $action_id, array(
 			'type' => E_ERROR,
@@ -115,8 +134,8 @@ class ActionScheduler_wpCommentLogger_Test extends ActionScheduler_UnitTestCase 
 	}
 
 	public function test_canceled_action_comments() {
-		$action_id = wc_schedule_single_action( time(), 'a hook' );
-		wc_unschedule_action( 'a hook' );
+		$action_id = as_schedule_single_action( time(), 'a hook' );
+		as_unschedule_action( 'a hook' );
 		$logger = ActionScheduler::logger();
 		$logs = $logger->get_logs( $action_id );
 		$expected = new ActionScheduler_LogEntry( $action_id, 'action canceled' );
@@ -143,7 +162,7 @@ class ActionScheduler_wpCommentLogger_Test extends ActionScheduler_UnitTestCase 
 		$this->assertEquals( $comment_id, $comments[0]->comment_ID );
 
 
-		$action_id = wc_schedule_single_action( time(), 'a hook' );
+		$action_id = as_schedule_single_action( time(), 'a hook' );
 		$logger = ActionScheduler::logger();
 		$message = 'Logging that something happened';
 		$log_id = $logger->log( $action_id, $message );

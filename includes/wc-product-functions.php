@@ -284,8 +284,7 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
 
 	if ( ! empty( $placeholder_image ) ) {
 		if ( is_numeric( $placeholder_image ) ) {
-			$dimensions = wc_get_image_size( $size );
-			$image      = wp_get_attachment_image_src( $placeholder_image, array( $dimensions['width'], $dimensions['height'] ) );
+			$image = wp_get_attachment_image_src( $placeholder_image, $size );
 
 			if ( ! empty( $image[0] ) ) {
 				$src = $image[0];
@@ -455,8 +454,12 @@ add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
  * @return array
  */
 function wc_get_attachment_image_attributes( $attr ) {
-	if ( strstr( $attr['src'][0], 'woocommerce_uploads/' ) ) {
-		$attr['src'][0] = wc_placeholder_img_src();
+	if ( isset( $attr['src'] ) && strstr( $attr['src'], 'woocommerce_uploads/' ) ) {
+		$attr['src'] = wc_placeholder_img_src();
+
+		if ( isset( $attr['srcset'] ) ) {
+			$attr['srcset'] = '';
+		}
 	}
 	return $attr;
 }
@@ -527,7 +530,8 @@ add_action( 'template_redirect', 'wc_track_product_view', 20 );
  */
 function wc_get_product_types() {
 	return (array) apply_filters(
-		'product_type_selector', array(
+		'product_type_selector',
+		array(
 			'simple'   => __( 'Simple product', 'woocommerce' ),
 			'grouped'  => __( 'Grouped product', 'woocommerce' ),
 			'external' => __( 'External/Affiliate product', 'woocommerce' ),
@@ -744,8 +748,7 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$props['thumb_src_h'] = $src[2];
 
 		// Image source.
-		$flexslider      = (bool) apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) );
-		$image_size      = apply_filters( 'woocommerce_gallery_image_size', $flexslider ? 'woocommerce_single' : $gallery_thumbnail_size );
+		$image_size      = apply_filters( 'woocommerce_gallery_image_size', 'woocommerce_single' );
 		$src             = wp_get_attachment_image_src( $attachment_id, $image_size );
 		$props['src']    = $src[0];
 		$props['src_w']  = $src[1];
@@ -764,7 +767,8 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
  */
 function wc_get_product_visibility_options() {
 	return apply_filters(
-		'woocommerce_product_visibility_options', array(
+		'woocommerce_product_visibility_options',
+		array(
 			'visible' => __( 'Shop and search results', 'woocommerce' ),
 			'catalog' => __( 'Shop only', 'woocommerce' ),
 			'search'  => __( 'Search results only', 'woocommerce' ),
@@ -910,7 +914,10 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 	}
 
 	$related_posts = apply_filters(
-		'woocommerce_related_products', $related_posts, $product_id, array(
+		'woocommerce_related_products',
+		$related_posts,
+		$product_id,
+		array(
 			'limit'        => $limit,
 			'excluded_ids' => $exclude_ids,
 		)
@@ -944,7 +951,8 @@ function wc_get_product_term_ids( $product_id, $taxonomy ) {
  */
 function wc_get_price_including_tax( $product, $args = array() ) {
 	$args = wp_parse_args(
-		$args, array(
+		$args,
+		array(
 			'qty'   => '',
 			'price' => '',
 		)
@@ -1006,7 +1014,8 @@ function wc_get_price_including_tax( $product, $args = array() ) {
  */
 function wc_get_price_excluding_tax( $product, $args = array() ) {
 	$args = wp_parse_args(
-		$args, array(
+		$args,
+		array(
 			'qty'   => '',
 			'price' => '',
 		)
@@ -1045,7 +1054,8 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
  */
 function wc_get_price_to_display( $product, $args = array() ) {
 	$args = wp_parse_args(
-		$args, array(
+		$args,
+		array(
 			'qty'   => 1,
 			'price' => $product->get_price(),
 		)
@@ -1056,13 +1066,15 @@ function wc_get_price_to_display( $product, $args = array() ) {
 
 	return 'incl' === get_option( 'woocommerce_tax_display_shop' ) ?
 		wc_get_price_including_tax(
-			$product, array(
+			$product,
+			array(
 				'qty'   => $qty,
 				'price' => $price,
 			)
 		) :
 		wc_get_price_excluding_tax(
-			$product, array(
+			$product,
+			array(
 				'qty'   => $qty,
 				'price' => $price,
 			)

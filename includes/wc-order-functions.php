@@ -73,7 +73,7 @@ function wc_get_orders( $args ) {
  *
  * @param  mixed $the_order Post object or post ID of the order.
  *
- * @return bool|WC_Order|WC_Refund
+ * @return bool|WC_Order|WC_Order_Refund
  */
 function wc_get_order( $the_order = false ) {
 	if ( ! did_action( 'woocommerce_after_register_post_type' ) ) {
@@ -886,7 +886,7 @@ add_action( 'woocommerce_cancel_unpaid_orders', 'wc_cancel_unpaid_orders' );
  * @param int $order_id Order ID.
  */
 function wc_sanitize_order_id( $order_id ) {
-	return filter_var( $order_id, FILTER_SANITIZE_NUMBER_INT );
+	return (int) filter_var( $order_id, FILTER_SANITIZE_NUMBER_INT );
 }
 add_filter( 'woocommerce_shortcode_order_tracking_order_id', 'wc_sanitize_order_id' );
 

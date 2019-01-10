@@ -329,6 +329,12 @@ class WC_Structured_Data {
 		$markup['itemListElement'] = array();
 
 		foreach ( $crumbs as $key => $crumb ) {
+			// Don't add the current page to the breadcrumb list on product pages,
+			// otherwise Google will not recognize both the BreadcrumbList and Product structured data.
+			if ( is_product() && count( $crumbs ) - 1 === $key ) {
+				continue;
+			}
+
 			$markup['itemListElement'][ $key ] = array(
 				'@type'    => 'ListItem',
 				'position' => $key + 1,
@@ -337,7 +343,7 @@ class WC_Structured_Data {
 				),
 			);
 
-			if ( ! empty( $crumb[1] ) && count( $crumbs ) !== $key + 1 ) {
+			if ( ! empty( $crumb[1] ) ) {
 				$markup['itemListElement'][ $key ]['item'] += array( '@id' => $crumb[1] );
 			}
 		}

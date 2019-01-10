@@ -61,6 +61,7 @@ final class WC_Cart_Session {
 	 * @since 3.2.0
 	 */
 	public function get_cart_from_session() {
+		do_action( 'woocommerce_load_cart_from_session' );
 		$this->cart->set_totals( WC()->session->get( 'cart_totals', null ) );
 		$this->cart->set_applied_coupons( WC()->session->get( 'applied_coupons', array() ) );
 		$this->cart->set_coupon_discount_totals( WC()->session->get( 'coupon_discount_totals', array() ) );
@@ -68,6 +69,7 @@ final class WC_Cart_Session {
 		$this->cart->set_removed_cart_contents( WC()->session->get( 'removed_cart_contents', array() ) );
 
 		$update_cart_session = false; // Flag to indicate the stored cart should be updated.
+		$order_again         = false; // Flag to indicate whether this is a re-order.
 		$cart                = WC()->session->get( 'cart', null );
 		$merge_saved_cart    = (bool) get_user_meta( get_current_user_id(), '_woocommerce_load_saved_cart_after_login', true );
 
@@ -83,7 +85,8 @@ final class WC_Cart_Session {
 
 		// Populate cart from order.
 		if ( isset( $_GET['order_again'], $_GET['_wpnonce'] ) && is_user_logged_in() && wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'woocommerce-order_again' ) ) { // WPCS: input var ok, sanitization ok.
-			$cart = $this->populate_cart_from_order( absint( $_GET['order_again'] ), $cart ); // WPCS: input var ok.
+			$cart        = $this->populate_cart_from_order( absint( $_GET['order_again'] ), $cart ); // WPCS: input var ok.
+			$order_again = true;
 		}
 
 		// Prime caches to reduce future queries.
@@ -117,7 +120,8 @@ final class WC_Cart_Session {
 				} else {
 					// Put session data into array. Run through filter so other plugins can load their own session data.
 					$session_data = array_merge(
-						$values, array(
+						$values,
+						array(
 							'data' => $product,
 						)
 					);
@@ -140,6 +144,12 @@ final class WC_Cart_Session {
 		if ( $update_cart_session || is_null( WC()->session->get( 'cart_totals', null ) ) ) {
 			WC()->session->set( 'cart', $this->get_cart_for_session() );
 			$this->cart->calculate_totals();
+		}
+
+		// If this is a re-order, redirect to the cart page to get rid of the `order_again` query string.
+		if ( $order_again ) {
+			wp_safe_redirect( wc_get_page_permalink( 'cart' ) );
+			exit;
 		}
 	}
 
@@ -209,7 +219,9 @@ final class WC_Cart_Session {
 	public function persistent_cart_update() {
 		if ( get_current_user_id() && apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			update_user_meta(
-				get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), array(
+				get_current_user_id(),
+				'_woocommerce_persistent_cart_' . get_current_blog_id(),
+				array(
 					'cart' => $this->get_cart_for_session(),
 				)
 			);
@@ -300,6 +312,11 @@ final class WC_Cart_Session {
 				continue;
 			}
 
+			// Prevent reordering items specifically out of stock.
+			if ( ! $product->is_in_stock() ) {
+				continue;
+			}
+
 			foreach ( $item->get_meta_data() as $meta ) {
 				if ( taxonomy_is_product_attribute( $meta->key ) ) {
 					$term                     = get_term_by( 'slug', $meta->value, $meta->key );
@@ -317,8 +334,10 @@ final class WC_Cart_Session {
 			$cart_id          = WC()->cart->generate_cart_id( $product_id, $variation_id, $variations, $cart_item_data );
 			$product_data     = wc_get_product( $variation_id ? $variation_id : $product_id );
 			$cart[ $cart_id ] = apply_filters(
-				'woocommerce_add_cart_item', array_merge(
-					$cart_item_data, array(
+				'woocommerce_add_order_again_cart_item',
+				array_merge(
+					$cart_item_data,
+					array(
 						'key'          => $cart_id,
 						'product_id'   => $product_id,
 						'variation_id' => $variation_id,
@@ -327,11 +346,12 @@ final class WC_Cart_Session {
 						'data'         => $product_data,
 						'data_hash'    => wc_get_cart_item_data_hash( $product_data ),
 					)
-				), $cart_id
+				),
+				$cart_id
 			);
 		}
 
-		do_action( 'woocommerce_ordered_again', $order->get_id() );
+		do_action( 'woocommerce_ordered_again', $order->get_id(), $order_items, $cart );
 
 		$num_items_in_cart           = count( $cart );
 		$num_items_in_original_order = count( $order_items );
@@ -344,10 +364,10 @@ final class WC_Cart_Session {
 					_n(
 						'%d item from your previous order is currently unavailable and could not be added to your cart.',
 						'%d items from your previous order are currently unavailable and could not be added to your cart.',
-						$num_items_added,
+						$num_items_in_original_order - $num_items_added,
 						'woocommerce'
 					),
-					$num_items_added
+					$num_items_in_original_order - $num_items_added
 				),
 				'error'
 			);

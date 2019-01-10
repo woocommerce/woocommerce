@@ -32,8 +32,6 @@ class WC_Helper {
 		add_action( 'current_screen', array( __CLASS__, 'current_screen' ) );
 		add_action( 'woocommerce_helper_output', array( __CLASS__, 'render_helper_output' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'admin_enqueue_scripts' ) );
-		add_filter( 'extra_plugin_headers', array( __CLASS__, 'extra_headers' ) );
-		add_filter( 'extra_theme_headers', array( __CLASS__, 'extra_headers' ) );
 
 		// Attempt to toggle subscription state upon plugin activation/deactivation
 		add_action( 'activated_plugin', array( __CLASS__, 'activated_plugin' ) );
@@ -1006,16 +1004,6 @@ class WC_Helper {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Additional theme style.css and plugin file headers.
-	 *
-	 * Format: Woo: product_id:file_id
-	 */
-	public static function extra_headers( $headers ) {
-		$headers[] = 'Woo';
-		return $headers;
 	}
 
 	/**

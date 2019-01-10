@@ -11,7 +11,7 @@ jQuery( function( $ ) {
 		// Params.
 		this.params = $.extend( {}, {
 			'is_registration_required': false,
-			'is_logged_in'            : false,
+			'is_logged_in'            : false
 		}, wc_tokenization_form_params );
 
 		// Bind functions to this.
@@ -109,7 +109,4 @@ jQuery( function( $ ) {
 			$( this ).wc_tokenization_form();
 		} );
 	} );
-
-	// Alias.
-	var wcTokenizationForm = TokenizationForm;
 } );
