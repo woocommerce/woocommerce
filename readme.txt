@@ -186,6 +186,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Correct quote handling in tax class names. #22270
 * Fix - Prevent style side-effects on notices on the Extensions pages. #22330
 * Fix - Check stock status of items when 'ordering again' from the account page. #22331
+* Fix - Improve rounding when rounding at subtotal level in cart. #21217
 * Dev - REST API - Fixed support to order results by slugs. #22168
 
 = 3.5.3 - 2018-12-20 =
