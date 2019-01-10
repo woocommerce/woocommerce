@@ -1,5 +1,4 @@
 // Import the woocommerce components stylesheet
-// @todo Move this to a separate file so we can build a cacheable single stylesheet for all blocks.
 @import "../../node_modules/@woocommerce/components/build-style/style.css";
 
 // Hack to hide preview overflow.
@@ -36,6 +35,7 @@
 		padding: 2em 1em;
 	}
 
+	// Styles for "resuable block" preview.
 	.editor-block-preview & {
 		min-width: 5em;
 
@@ -48,40 +48,6 @@
 		&.is-loading,
 		&.is-not-found {
 			min-width: auto;
-		}
-	}
-}
-
-.wc-block-products-category__selection,
-.wc-block-handpicked-products__selection {
-	width: 100%;
-}
-
-.components-panel {
-	.woocommerce-search-list {
-		padding: 0;
-	}
-
-	.woocommerce-search-list__selected {
-		margin: 0 0 $gap;
-		padding: 0;
-		border-top: none;
-		// 54px is the height of 1 row of tags in the sidebar.
-		min-height: 54px;
-	}
-
-	.woocommerce-search-list__search {
-		margin: 0 0 $gap;
-		padding: 0;
-		border-top: none;
-	}
-
-	.woocommerce-product-categories__operator.components-base-control {
-		margin-top: $gap;
-
-		.components-select-control__input {
-			margin-left: 0;
-			min-width: 100%;
 		}
 	}
 }

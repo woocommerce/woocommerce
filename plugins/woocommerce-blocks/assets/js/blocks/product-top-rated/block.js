@@ -4,11 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-import {
-	BlockAlignmentToolbar,
-	BlockControls,
-	InspectorControls,
-} from '@wordpress/editor';
+import { InspectorControls } from '@wordpress/editor';
 import { Component, Fragment } from '@wordpress/element';
 import { debounce } from 'lodash';
 import Gridicon from 'gridicons';
@@ -23,15 +19,14 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import getQuery from './utils/get-query';
-import ProductCategoryControl from './components/product-category-control';
-import ProductOrderbyControl from './components/product-orderby-control';
-import ProductPreview from './components/product-preview';
+import getQuery from '../../utils/get-query';
+import ProductCategoryControl from '../../components/product-category-control';
+import ProductPreview from '../../components/product-preview';
 
 /**
- * Component to handle edit mode of "On Sale Products".
+ * Component to handle edit mode of "Top Rated Products".
  */
-class ProductOnSaleBlock extends Component {
+class ProductTopRatedBlock extends Component {
 	constructor() {
 		super( ...arguments );
 		this.state = {
@@ -43,17 +38,13 @@ class ProductOnSaleBlock extends Component {
 	}
 
 	componentDidMount() {
-		this.getProducts();
+		if ( this.props.attributes.categories ) {
+			this.getProducts();
+		}
 	}
 
 	componentDidUpdate( prevProps ) {
-		const hasChange = [
-			'categories',
-			'catOperator',
-			'columns',
-			'orderby',
-			'rows',
-		].reduce( ( acc, key ) => {
+		const hasChange = [ 'rows', 'columns', 'categories' ].reduce( ( acc, key ) => {
 			return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
 		}, false );
 		if ( hasChange ) {
@@ -78,7 +69,7 @@ class ProductOnSaleBlock extends Component {
 
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
-		const { categories, catOperator, columns, rows, orderby } = attributes;
+		const { columns, rows } = attributes;
 
 		return (
 			<InspectorControls key="inspector">
@@ -102,15 +93,6 @@ class ProductOnSaleBlock extends Component {
 					/>
 				</PanelBody>
 				<PanelBody
-					title={ __( 'Order By', 'woo-gutenberg-products-block' ) }
-					initialOpen={ false }
-				>
-					<ProductOrderbyControl
-						setAttributes={ setAttributes }
-						value={ orderby }
-					/>
-				</PanelBody>
-				<PanelBody
 					title={ __(
 						'Filter by Product Category',
 						'woo-gutenberg-products-block'
@@ -118,15 +100,11 @@ class ProductOnSaleBlock extends Component {
 					initialOpen={ false }
 				>
 					<ProductCategoryControl
-						selected={ categories }
+						selected={ attributes.categories }
 						onChange={ ( value = [] ) => {
 							const ids = value.map( ( { id } ) => id );
 							setAttributes( { categories: ids } );
 						} }
-						operator={ catOperator }
-						onOperatorChange={ ( value = 'any' ) =>
-							setAttributes( { catOperator: value } )
-						}
 					/>
 				</PanelBody>
 			</InspectorControls>
@@ -134,10 +112,9 @@ class ProductOnSaleBlock extends Component {
 	}
 
 	render() {
-		const { setAttributes } = this.props;
-		const { columns, align } = this.props.attributes;
+		const { columns } = this.props.attributes;
 		const { loaded, products } = this.state;
-		const classes = [ 'wc-block-products-grid', 'wc-block-on-sale-products' ];
+		const classes = [ 'wc-block-products-grid', 'wc-block-top-rated-products' ];
 		if ( columns ) {
 			classes.push( `cols-${ columns }` );
 		}
@@ -151,13 +128,6 @@ class ProductOnSaleBlock extends Component {
 
 		return (
 			<Fragment>
-				<BlockControls>
-					<BlockAlignmentToolbar
-						controls={ [ 'wide', 'full' ] }
-						value={ align }
-						onChange={ ( nextAlign ) => setAttributes( { align: nextAlign } ) }
-					/>
-				</BlockControls>
 				{ this.getInspectorControls() }
 				<div className={ classes.join( ' ' ) }>
 					{ products.length ? (
@@ -166,8 +136,8 @@ class ProductOnSaleBlock extends Component {
 						) )
 					) : (
 						<Placeholder
-							icon={ <Gridicon icon="tag" /> }
-							label={ __( 'On Sale Products', 'woo-gutenberg-products-block' ) }
+							icon={ <Gridicon icon="trophy" /> }
+							label={ __( 'Top Rated Products', 'woo-gutenberg-products-block' ) }
 						>
 							{ ! loaded ? (
 								<Spinner />
@@ -182,7 +152,7 @@ class ProductOnSaleBlock extends Component {
 	}
 }
 
-ProductOnSaleBlock.propTypes = {
+ProductTopRatedBlock.propTypes = {
 	/**
 	 * The attributes for this block
 	 */
@@ -197,4 +167,4 @@ ProductOnSaleBlock.propTypes = {
 	setAttributes: PropTypes.func.isRequired,
 };
 
-export default ProductOnSaleBlock;
+export default ProductTopRatedBlock;

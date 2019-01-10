@@ -4,11 +4,7 @@
 import { __, _n } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-import {
-	BlockAlignmentToolbar,
-	BlockControls,
-	InspectorControls,
-} from '@wordpress/editor';
+import { BlockControls, InspectorControls } from '@wordpress/editor';
 import {
 	Button,
 	PanelBody,
@@ -25,11 +21,11 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import getQuery from './utils/get-query';
-import ProductAttributeControl from './components/product-attribute-control';
-import ProductCategoryControl from './components/product-category-control';
-import ProductOrderbyControl from './components/product-orderby-control';
-import ProductPreview from './components/product-preview';
+import getQuery from '../../utils/get-query';
+import ProductAttributeControl from '../../components/product-attribute-control';
+import ProductCategoryControl from '../../components/product-category-control';
+import ProductOrderbyControl from '../../components/product-orderby-control';
+import ProductPreview from '../../components/product-preview';
 
 /**
  * Component to handle edit mode of "Products by Category".
@@ -143,7 +139,10 @@ class ProductByCategoryBlock extends Component {
 					<ProductAttributeControl
 						selected={ attributes.attributes }
 						onChange={ ( value = [] ) => {
-							const selected = value.map( ( { id, attr_slug } ) => ( { id, attr_slug } ) ); // eslint-disable-line camelcase
+							const selected = value.map( ( { id, attr_slug } ) => ( {
+								id,
+								attr_slug,
+							} ) ); // eslint-disable-line camelcase
 							setAttributes( { attributes: selected } );
 						} }
 					/>
@@ -157,7 +156,10 @@ class ProductByCategoryBlock extends Component {
 		const onDone = () => {
 			setAttributes( { editMode: false } );
 			debouncedSpeak(
-				__( 'Showing Products by Category block preview.', 'woo-gutenberg-products-block' )
+				__(
+					'Showing Products by Category block preview.',
+					'woo-gutenberg-products-block'
+				)
 			);
 		};
 
@@ -193,7 +195,7 @@ class ProductByCategoryBlock extends Component {
 
 	render() {
 		const { setAttributes } = this.props;
-		const { align, categories, columns, editMode } = this.props.attributes;
+		const { categories, columns, editMode } = this.props.attributes;
 		const { loaded, products } = this.state;
 		const classes = [ 'wc-block-products-grid', 'wc-block-products-category' ];
 		if ( columns ) {
@@ -222,11 +224,6 @@ class ProductByCategoryBlock extends Component {
 		return (
 			<Fragment>
 				<BlockControls>
-					<BlockAlignmentToolbar
-						controls={ [ 'wide', 'full' ] }
-						value={ align }
-						onChange={ ( nextAlign ) => setAttributes( { align: nextAlign } ) }
-					/>
 					<Toolbar
 						controls={ [
 							{

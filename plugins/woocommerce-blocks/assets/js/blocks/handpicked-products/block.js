@@ -4,11 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-import {
-	BlockAlignmentToolbar,
-	BlockControls,
-	InspectorControls,
-} from '@wordpress/editor';
+import { BlockControls, InspectorControls } from '@wordpress/editor';
 import {
 	Button,
 	PanelBody,
@@ -25,11 +21,11 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import getQuery from './utils/get-query';
-import { IconWidgets } from './components/icons';
-import ProductsControl from './components/products-control';
-import ProductOrderbyControl from './components/product-orderby-control';
-import ProductPreview from './components/product-preview';
+import getQuery from '../../utils/get-query';
+import { IconWidgets } from '../../components/icons';
+import ProductsControl from '../../components/products-control';
+import ProductOrderbyControl from '../../components/product-orderby-control';
+import ProductPreview from '../../components/product-preview';
 
 /**
  * Component to handle edit mode of "Hand-picked Products".
@@ -50,12 +46,9 @@ class ProductsBlock extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const hasChange = [ 'products', 'columns', 'orderby' ].reduce(
-			( acc, key ) => {
-				return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
-			},
-			false
-		);
+		const hasChange = [ 'products', 'columns', 'orderby' ].reduce( ( acc, key ) => {
+			return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
+		}, false );
 		if ( hasChange ) {
 			this.debouncedGetProducts();
 		}
@@ -129,7 +122,10 @@ class ProductsBlock extends Component {
 		const onDone = () => {
 			setAttributes( { editMode: false } );
 			debouncedSpeak(
-				__( 'Showing Hand-picked Products block preview.', 'woo-gutenberg-products-block' )
+				__(
+					'Showing Hand-picked Products block preview.',
+					'woo-gutenberg-products-block'
+				)
 			);
 		};
 
@@ -161,7 +157,7 @@ class ProductsBlock extends Component {
 
 	render() {
 		const { setAttributes } = this.props;
-		const { align, columns, editMode } = this.props.attributes;
+		const { columns, editMode } = this.props.attributes;
 		const { loaded, products } = this.state;
 		const hasSelectedProducts = products && products.length;
 		const classes = [ 'wc-block-products-grid', 'wc-block-handpicked-products' ];
@@ -179,11 +175,6 @@ class ProductsBlock extends Component {
 		return (
 			<Fragment>
 				<BlockControls>
-					<BlockAlignmentToolbar
-						controls={ [ 'wide', 'full' ] }
-						value={ align }
-						onChange={ ( nextAlign ) => setAttributes( { align: nextAlign } ) }
-					/>
 					<Toolbar
 						controls={ [
 							{

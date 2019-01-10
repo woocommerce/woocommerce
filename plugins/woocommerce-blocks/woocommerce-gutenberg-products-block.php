@@ -26,8 +26,9 @@ function wgpb_initialize() {
 	$files_exist = file_exists( plugin_dir_path( __FILE__ ) . '/build/products-block.js' );
 
 	if ( $files_exist && function_exists( 'register_block_type' ) ) {
-		add_action( 'init', 'wgpb_register_products_block' );
-		add_action( 'enqueue_block_editor_assets', 'wgpb_extra_gutenberg_scripts' );
+		add_action( 'init', 'wgpb_register_blocks' );
+		add_action( 'init', 'wgpb_register_scripts' );
+		add_filter( 'block_categories', 'wgpb_add_block_category' );
 	}
 
 	if ( defined( 'WGPB_DEVELOPMENT_MODE' ) && WGPB_DEVELOPMENT_MODE && ! $files_exist ) {
@@ -71,28 +72,87 @@ function wgpb_add_block_category( $categories ) {
 		)
 	);
 }
-add_filter( 'block_categories', 'wgpb_add_block_category' );
 
 /**
  * Register the Products block and its scripts.
  */
-function wgpb_register_products_block() {
-	register_block_type( 'woocommerce/products' );
-	register_block_type( 'woocommerce/product-category' );
-	register_block_type( 'woocommerce/product-best-sellers' );
-	register_block_type( 'woocommerce/product-top-rated' );
+function wgpb_register_blocks() {
+	// Legacy block.
+	register_block_type(
+		'woocommerce/products',
+		array(
+			'editor_script' => 'woocommerce-products-block-editor',
+			'editor_style'  => 'woocommerce-products-block-editor',
+		)
+	);
+	// New blocks.
+	register_block_type(
+		'woocommerce/handpicked-products',
+		array(
+			'editor_script' => 'wc-handpicked-products',
+			'editor_style'  => 'wc-handpicked-products-editor',
+		)
+	);
+	register_block_type(
+		'woocommerce/product-best-sellers',
+		array(
+			'editor_script' => 'wc-product-best-sellers',
+			'editor_style'  => 'wc-product-best-sellers-editor',
+		)
+	);
+	register_block_type(
+		'woocommerce/product-category',
+		array(
+			'editor_script' => 'wc-product-category',
+			'editor_style'  => 'wc-product-category-editor',
+		)
+	);
+	register_block_type(
+		'woocommerce/product-new',
+		array(
+			'editor_script' => 'wc-product-new',
+			'editor_style'  => 'wc-product-new-editor',
+		)
+	);
+	register_block_type(
+		'woocommerce/product-on-sale',
+		array(
+			'editor_script' => 'wc-product-on-sale',
+			'editor_style'  => 'wc-product-on-sale-editor',
+		)
+	);
+	register_block_type(
+		'woocommerce/product-top-rated',
+		array(
+			'editor_script' => 'wc-product-top-rated',
+			'editor_style'  => 'wc-product-top-rated-editor',
+		)
+	);
 }
 
 /**
  * Register extra scripts needed.
  */
-function wgpb_extra_gutenberg_scripts() {
+function wgpb_register_scripts() {
 	if ( ! function_exists( 'wc_get_theme_support' ) ) {
 		return;
 	}
 
+	$block_dependencies = array(
+		'wp-api-fetch',
+		'wp-blocks',
+		'wp-components',
+		'wp-compose',
+		'wp-data',
+		'wp-element',
+		'wp-editor',
+		'wp-i18n',
+		'wp-url',
+		'lodash',
+	);
+
 	// @todo Remove this dependency (as it adds a separate react instance).
-	wp_enqueue_script(
+	wp_register_script(
 		'react-transition-group',
 		plugins_url( 'assets/js/vendor/react-transition-group.js', __FILE__ ),
 		array(),
@@ -101,21 +161,50 @@ function wgpb_extra_gutenberg_scripts() {
 	);
 
 	wp_register_script(
-		'woocommerce-blocks',
-		plugins_url( 'build/blocks.js', __FILE__ ),
-		array(
-			'wp-api-fetch',
-			'wp-blocks',
-			'wp-components',
-			'wp-compose',
-			'wp-data',
-			'wp-element',
-			'wp-editor',
-			'wp-i18n',
-			'wp-url',
-			'lodash',
-		),
-		defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? filemtime( plugin_dir_path( __FILE__ ) . '/build/blocks.js' ) : WGPB_VERSION,
+		'wc-handpicked-products',
+		plugins_url( 'build/handpicked-products.js', __FILE__ ),
+		$block_dependencies,
+		wgpb_get_file_version( '/build/handpicked-products.js' ),
+		true
+	);
+
+	wp_register_script(
+		'wc-product-best-sellers',
+		plugins_url( 'build/product-best-sellers.js', __FILE__ ),
+		$block_dependencies,
+		wgpb_get_file_version( '/build/product-best-sellers.js' ),
+		true
+	);
+
+	wp_register_script(
+		'wc-product-category',
+		plugins_url( 'build/product-category.js', __FILE__ ),
+		$block_dependencies,
+		wgpb_get_file_version( '/build/product-category.js' ),
+		true
+	);
+
+	wp_register_script(
+		'wc-product-new',
+		plugins_url( 'build/product-new.js', __FILE__ ),
+		$block_dependencies,
+		wgpb_get_file_version( '/build/product-new.js' ),
+		true
+	);
+
+	wp_register_script(
+		'wc-product-on-sale',
+		plugins_url( 'build/product-on-sale.js', __FILE__ ),
+		$block_dependencies,
+		wgpb_get_file_version( '/build/product-on-sale.js' ),
+		true
+	);
+
+	wp_register_script(
+		'wc-product-top-rated',
+		plugins_url( 'build/product-top-rated.js', __FILE__ ),
+		$block_dependencies,
+		wgpb_get_file_version( '/build/product-top-rated.js' ),
 		true
 	);
 
@@ -123,7 +212,7 @@ function wgpb_extra_gutenberg_scripts() {
 		'woocommerce-products-block-editor',
 		plugins_url( 'build/products-block.js', __FILE__ ),
 		array( 'wp-api-fetch', 'wp-element', 'wp-components', 'wp-blocks', 'wp-editor', 'wp-i18n', 'react-transition-group' ),
-		defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? filemtime( plugin_dir_path( __FILE__ ) . '/build/products-block.js' ) : WGPB_VERSION,
+		wgpb_get_file_version( '/build/products-block.js' ),
 		true
 	);
 
@@ -131,24 +220,76 @@ function wgpb_extra_gutenberg_scripts() {
 		wp_set_script_translations( 'woocommerce-blocks', 'woo-gutenberg-products-block' );
 	}
 
-	wp_enqueue_script( 'woocommerce-products-block-editor' );
-	wp_enqueue_script( 'woocommerce-blocks' );
+	wp_register_style(
+		'wc-products-grid',
+		plugins_url( 'build/products-grid.css', __FILE__ ),
+		array(),
+		wgpb_get_file_version( '/build/products-grid.css' )
+	);
 
-	wp_enqueue_style(
+	wp_register_style(
+		'wc-handpicked-products-editor',
+		plugins_url( 'build/handpicked-products.css', __FILE__ ),
+		array( 'wp-edit-blocks', 'wc-products-grid' ),
+		wgpb_get_file_version( '/build/handpicked-products.css' )
+	);
+
+	wp_register_style(
+		'wc-product-best-sellers-editor',
+		plugins_url( 'build/product-best-sellers.css', __FILE__ ),
+		array( 'wp-edit-blocks', 'wc-products-grid' ),
+		wgpb_get_file_version( '/build/product-best-sellers.css' )
+	);
+
+	wp_register_style(
+		'wc-product-category-editor',
+		plugins_url( 'build/product-category.css', __FILE__ ),
+		array( 'wp-edit-blocks', 'wc-products-grid' ),
+		wgpb_get_file_version( '/build/product-category.css' )
+	);
+
+	wp_register_style(
+		'wc-product-new-editor',
+		plugins_url( 'build/product-new.css', __FILE__ ),
+		array( 'wp-edit-blocks', 'wc-products-grid' ),
+		wgpb_get_file_version( '/build/product-new.css' )
+	);
+
+	wp_register_style(
+		'wc-product-on-sale-editor',
+		plugins_url( 'build/product-on-sale.css', __FILE__ ),
+		array( 'wp-edit-blocks', 'wc-products-grid' ),
+		wgpb_get_file_version( '/build/product-on-sale.css' )
+	);
+
+	wp_register_style(
+		'wc-product-top-rated-editor',
+		plugins_url( 'build/product-top-rated.css', __FILE__ ),
+		array( 'wp-edit-blocks', 'wc-products-grid' ),
+		wgpb_get_file_version( '/build/product-top-rated.css' )
+	);
+
+	wp_register_style(
 		'woocommerce-products-block-editor',
 		plugins_url( 'build/products-block.css', __FILE__ ),
 		array( 'wp-edit-blocks' ),
-		defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? filemtime( plugin_dir_path( __FILE__ ) . '/build/products-block.css' ) : WGPB_VERSION
-	);
-
-	wp_enqueue_style(
-		'woocommerce-blocks',
-		plugins_url( 'build/blocks.css', __FILE__ ),
-		array( 'wp-edit-blocks' ),
-		defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? filemtime( plugin_dir_path( __FILE__ ) . '/build/blocks.css' ) : WGPB_VERSION
+		wgpb_get_file_version( '/build/products-block.css' )
 	);
 
 	add_action( 'admin_print_footer_scripts', 'wgpb_print_script_settings', 1 );
+}
+
+/**
+ * Get the file modified time as a cache buster if we're in dev mode.
+ *
+ * @param string $file Local path to the file.
+ * @return string The cache buster value to use for the given file.
+ */
+function wgpb_get_file_version( $file ) {
+	if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
+		return filemtime( plugin_dir_path( __FILE__ ) . $file );
+	}
+	return WGPB_VERSION;
 }
 
 /**

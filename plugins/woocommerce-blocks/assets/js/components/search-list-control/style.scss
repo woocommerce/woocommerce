@@ -170,3 +170,23 @@
 		}
 	}
 }
+
+.components-panel {
+	.woocommerce-search-list {
+		padding: 0;
+	}
+
+	.woocommerce-search-list__selected {
+		margin: 0 0 $gap;
+		padding: 0;
+		border-top: none;
+		// 54px is the height of 1 row of tags in the sidebar.
+		min-height: 54px;
+	}
+
+	.woocommerce-search-list__search {
+		margin: 0 0 $gap;
+		padding: 0;
+		border-top: none;
+	}
+}
