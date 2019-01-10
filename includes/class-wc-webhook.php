@@ -441,7 +441,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		}
 
 		$logger->info(
-			wc_print_r( $message, true ), array(
+			wc_print_r( $message, true ),
+			array(
 				'source' => 'webhooks-delivery',
 			)
 		);
