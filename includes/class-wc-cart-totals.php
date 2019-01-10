@@ -580,7 +580,26 @@ final class WC_Cart_Totals {
 			}
 		}
 
+		$taxes = $this->round_merged_taxes( $taxes );
+
 		return $in_cents ? $taxes : wc_remove_number_precision_deep( $taxes );
+	}
+
+	/**
+	 * Round merged taxes.
+	 *
+	 * @since 3.5.4
+	 * @param array $taxes Taxes to round.
+	 * @return array
+	 */
+	protected function round_merged_taxes( $taxes ) {
+		if ( $this->round_at_subtotal() ) {
+			foreach ( $taxes as $rate_id => $tax ) {
+				$taxes[ $rate_id ] = wc_round_tax_total( $tax, 0 );
+			}
+		}
+
+		return $taxes;
 	}
 
 	/**
