@@ -1124,11 +1124,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					$item = $this->get_item( $item_id, false );
 
 					if ( $this->get_prices_include_tax() && wc_tax_enabled() ) {
-						$amount_tax    = array_sum( WC_Tax::calc_tax( $item_discount_amount, WC_Tax::get_rates( $item->get_tax_class() ), true ) );
-						$discount_tax += $amount_tax;
-						$amount        = $amount - $amount_tax;
+						$taxes = WC_Tax::calc_tax( $item_discount_amount, WC_Tax::get_rates( $item->get_tax_class() ), true );
+
+						if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+							$taxes = array_map( 'wc_round_tax_total', $taxes );
+						}
+
+						$discount_tax += array_sum( $taxes );
+						$amount        = $amount - array_sum( $taxes );
 					} else {
-						$discount_tax += array_sum( WC_Tax::calc_tax( $item_discount_amount, WC_Tax::get_rates( $item->get_tax_class() ) ) );
+						$taxes = WC_Tax::calc_tax( $item_discount_amount, WC_Tax::get_rates( $item->get_tax_class() ) );
+
+						if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+							$taxes = array_map( 'wc_round_tax_total', $taxes );
+						}
+
+						$discount_tax += array_sum( $taxes );
 					}
 				}
 
