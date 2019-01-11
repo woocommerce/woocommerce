@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/**a
+/**
  * WC Product Data Store: Stored in CPT.
  *
  * @version  3.0.0
@@ -910,12 +910,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function get_featured_product_ids() {
 		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 
+		// phpcs:disable
 		return get_posts(
 			array(
 				'post_type'      => array( 'product', 'product_variation' ),
 				'posts_per_page' => -1,
 				'post_status'    => 'publish',
-				// phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_tax_query
 				'tax_query'      => array(
 					'relation' => 'AND',
 					array(
@@ -933,6 +933,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'fields'         => 'id=>parent',
 			)
 		);
+		// phpcs:enable
 	}
 
 	/**
@@ -1054,62 +1055,68 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function find_matching_product_variation( $product, $match_attributes = array() ) {
 		global $wpdb;
 
-		$matched_variation  = 0;
-		$sorted_meta        = array();
+		$matched_variation_id = 0;
 
-		// Get any variations of the main product
-		$variation_ids = $wpdb->get_results("
-			SELECT ID
-			FROM {$wpdb->prefix}posts
-			WHERE {$wpdb->prefix}posts.post_parent  = " . $product->get_id() . "
-			AND {$wpdb->prefix}posts.post_status	= 'publish'
-			AND {$wpdb->prefix}posts.post_type	  = 'product_variation'
-		", ARRAY_A);
+		// Get any variations of the main product.
+		$variation_ids = wp_parse_id_list(
+			$wpdb->get_col(
+				$wpdb->prepare(
+					"
+					SELECT ID
+					FROM {$wpdb->prefix}posts
+					WHERE {$wpdb->prefix}posts.post_parent = %d
+					AND {$wpdb->prefix}posts.post_status = 'publish'
+					AND {$wpdb->prefix}posts.post_type = 'product_variation'
+					ORDER BY menu_order ASC, ID ASC
+					",
+					$product->get_id()
+				)
+			)
+		);
 
 		if ( $variation_ids ) {
-			foreach ( $variation_ids as $ids ) {
-				$variations_string .= $ids['ID'] . ',';
-			}
-
-			$variations_string = rtrim( $variations_string, ',' );
-
-			// Get the attributes of the variations
-			$attributes = $wpdb->get_results("
-				SELECT * FROM {$wpdb->prefix}postmeta
-				WHERE post_id
-				IN($variations_string)
-				AND meta_key LIKE 'attribute%'
-			",
-			ARRAY_A);
+			// Get the attributes of the variations.
+			$variation_ids_string = implode( ',', $variation_ids );
+			$query                = "SELECT * FROM {$wpdb->prefix}postmeta WHERE post_id IN($variation_ids_string) AND meta_key LIKE %s";
+			$attributes           = $wpdb->get_results(
+				$wpdb->prepare(
+					$query, // phpcs:ignore
+					$wpdb->esc_like( 'attribute_' ) . '%'
+				)
+			);
 
 			if ( $attributes ) {
-				// Sort them into a nice easy array for us to filter
+				$sorted_meta = array();
+
 				foreach ( $attributes as $m ) {
-					$sorted_meta[ $m['post_id'] ][ $m['meta_key'] ] = $m['meta_value'];
+					$sorted_meta[ $m->post_id ][ $m->meta_key ] = $m->meta_value; // phpcs:ignore
 				}
 
-				// Check each variation to find the one that matches the $match_attributes
-				// Note: Not all meta fields will be set which is why we check existance
-				foreach ( $sorted_meta as $post_id => $variation ) {
+				/**
+				 * Check each variation to find the one that matches the $match_attributes.
+				 *
+				 * Note: Not all meta fields will be set which is why we check existance.
+				 */
+				foreach ( $sorted_meta as $variation_id => $variation ) {
 					$match = true;
 
-					foreach ( $match_attributes as $k => $v ) {
-						if ( array_key_exists( $k, $variation ) ) {
-							if ( $variation[ $k ] != $v && ! empty( $variation[ $k ] ) ) {
+					foreach ( $match_attributes as $attribute_key => $attribute_value ) {
+						if ( array_key_exists( $attribute_key, $variation ) ) {
+							if ( $variation[ $attribute_key ] !== $attribute_value && ! empty( $variation[ $attribute_key ] ) ) {
 								$match = false;
 							}
 						}
 					}
 
-					// Bingo
-					if ( true == $match ) {
-						$matched_variation = $post_id;
+					if ( true === $match ) {
+						$matched_variation_id = $variation_id;
+						break;
 					}
 				}
 			}
 		}
 
-		return $matched_variation;
+		return $matched_variation_id;
 	}
 
 	/**
@@ -1590,8 +1597,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$wp_query_args['date_query'] = array();
 		}
 		if ( ! isset( $wp_query_args['meta_query'] ) ) {
-			// phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_query
-			$wp_query_args['meta_query'] = array();
+			$wp_query_args['meta_query'] = array(); // phpcs:ignore
 		}
 
 		// Handle product types.
