@@ -1079,9 +1079,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 				// If the prices include tax, discounts should be taken off the tax inclusive prices like in the cart.
 				if ( $this->get_prices_include_tax() && wc_tax_enabled() ) {
-					$amount_tax = WC_Tax::get_tax_total( WC_Tax::calc_tax( $amount, WC_Tax::get_rates( $item->get_tax_class() ), true ) );
-					$amount    -= $amount_tax;
-					$item->set_total( max( 0, $item->get_total() - $amount ) );
+					$taxes = WC_Tax::calc_tax( $amount, WC_Tax::get_rates( $item->get_tax_class() ), true );
+
+					if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+						$taxes = array_map( 'wc_round_tax_total', $taxes );
+					}
+
+					$amount = $amount - array_sum( $taxes );
+					$item->set_total( max( 0, round( $item->get_total() - $amount, wc_get_price_decimals() ) ) );
 				} else {
 					$item->set_total( max( 0, $item->get_total() - $amount ) );
 				}
