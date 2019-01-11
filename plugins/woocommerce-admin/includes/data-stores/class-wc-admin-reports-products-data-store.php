@@ -346,38 +346,35 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			// distribute simply based on number of line items.
 			$shipping_tax_amount = 0;
 			// TODO: if WC is currently not tax enabled, but it was before (or vice versa), would this work correctly?
-			if ( wc_tax_enabled() ) {
-				$order_taxes               = $order->get_taxes();
-				$line_items_shipping       = $order->get_items( 'shipping' );
-				$total_shipping_tax_amount = 0;
-				foreach ( $line_items_shipping as $item_id => $item ) {
-					$tax_data = $item->get_taxes();
-					if ( $tax_data ) {
-						foreach ( $order_taxes as $tax_item ) {
-							$tax_item_id    = $tax_item->get_rate_id();
-							$tax_item_total = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : '';
-							$refunded       = $order->get_tax_refunded_for_item( $item_id, $tax_item_id, 'shipping' );
-							if ( $refunded ) {
-								$total_shipping_tax_amount += $tax_item_total - $refunded;
-							} else {
-								$total_shipping_tax_amount += $tax_item_total;
-							}
+			$order_taxes               = $order->get_taxes();
+			$line_items_shipping       = $order->get_items( 'shipping' );
+			$total_shipping_tax_amount = 0;
+			foreach ( $line_items_shipping as $item_id => $item ) {
+				$tax_data = $item->get_taxes();
+				if ( $tax_data ) {
+					foreach ( $order_taxes as $tax_item ) {
+						$tax_item_id    = $tax_item->get_rate_id();
+						$tax_item_total = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : '';
+						$refunded       = $order->get_tax_refunded_for_item( $item_id, $tax_item_id, 'shipping' );
+						if ( $refunded ) {
+							$total_shipping_tax_amount += $tax_item_total - $refunded;
+						} else {
+							$total_shipping_tax_amount += $tax_item_total;
 						}
 					}
 				}
-				$shipping_tax_amount = $total_shipping_tax_amount / $order_items;
 			}
+			$shipping_tax_amount = $total_shipping_tax_amount / $order_items;
 
 			// Tax amount.
 			// TODO: check if this calculates tax correctly with refunds.
 			$tax_amount = 0;
-			if ( wc_tax_enabled() ) {
-				$order_taxes = $order->get_taxes();
-				$tax_data    = $order_item->get_taxes();
-				foreach ( $order_taxes as $tax_item ) {
-					$tax_item_id = $tax_item->get_rate_id();
-					$tax_amount += isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : 0;
-				}
+
+			$order_taxes = $order->get_taxes();
+			$tax_data    = $order_item->get_taxes();
+			foreach ( $order_taxes as $tax_item ) {
+				$tax_item_id = $tax_item->get_rate_id();
+				$tax_amount += isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : 0;
 			}
 
 			// TODO: should net revenue be affected by refunds, as refunds are tracked separately?
@@ -404,8 +401,6 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 						'product_qty'           => $order_item->get_quantity( 'edit' ) - $quantity_refunded,
 						'product_net_revenue'   => $net_revenue,
 						'date_created'          => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
-						// TODO: is it needed? can we even recover the info?
-						'price'                 => $order_item->get_subtotal( 'edit' ) / $order_item->get_quantity( 'edit' ),
 						'coupon_amount'         => $coupon_amount,
 						'tax_amount'            => $tax_amount,
 						'shipping_amount'       => $shipping_amount,

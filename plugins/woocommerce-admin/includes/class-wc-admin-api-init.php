@@ -414,7 +414,6 @@ class WC_Admin_Api_Init {
 			product_qty INT UNSIGNED NOT NULL,
 			product_net_revenue double DEFAULT 0 NOT NULL,
 			product_gross_revenue double DEFAULT 0 NOT NULL,
-			price double DEFAULT 0 NOT NULL,
 			coupon_amount double DEFAULT 0 NOT NULL,
 			tax_amount double DEFAULT 0 NOT NULL,
 			shipping_amount double DEFAULT 0 NOT NULL,
