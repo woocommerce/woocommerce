@@ -275,7 +275,7 @@ class Chart extends Component {
 				yFormat = '.0f';
 				break;
 			case 'currency':
-				yFormat = '$.3s';
+				yFormat = '$.3~s';
 				break;
 			case 'number':
 				yFormat = '.0f';

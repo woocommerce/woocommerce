@@ -10,6 +10,7 @@
   - `showHeaderControls`: whether the header controls must be visible. Defaults to true.
 - `getColor()` method in chart utils now requires `keys` and `colorScheme` to be passed as separate params.
 - Fix to avoid duplicated Y-axis ticks when the Y max value was 0.
+- Remove decimals from Y-axis when displaying currencies.
 
 # 1.3.0
 
