@@ -1055,7 +1055,41 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function find_matching_product_variation( $product, $match_attributes = array() ) {
 		global $wpdb;
 
-		$matched_variation_id = 0;
+		$meta_attribute_names = array();
+
+		// Get attributes to match in meta.
+		foreach ( $product->get_attributes() as $attribute ) {
+			if ( ! $attribute->get_variation() ) {
+				continue;
+			}
+
+			$attribute_field_name = 'attribute_' . sanitize_title( $attribute->get_name() );
+
+			if ( ! isset( $match_attributes[ $attribute_field_name ] ) ) {
+				return 0;
+			}
+
+			$meta_attribute_names[] = $attribute_field_name;
+		}
+
+		// Get the attributes of the variations.
+		$query = $wpdb->prepare(
+			"
+			SELECT post_id, meta_key, meta_value FROM {$wpdb->prefix}postmeta
+			WHERE post_id IN (
+				SELECT ID FROM {$wpdb->prefix}posts
+				WHERE {$wpdb->prefix}posts.post_parent = %d
+				AND {$wpdb->prefix}posts.post_status = 'publish'
+				AND {$wpdb->prefix}posts.post_type = 'product_variation'
+				ORDER BY menu_order ASC, ID ASC
+			)
+			",
+			$product->get_id()
+		);
+
+		$query .= ' AND meta_key IN ( "' . implode( '","', array_map( 'esc_sql', $meta_attribute_names ) ) . '" );';
+
+		$attributes = $wpdb->get_results( $query ); // phpcs:ignore
 
 		// Get any variations of the main product.
 		$variation_ids = wp_parse_id_list(
@@ -1074,45 +1108,37 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			)
 		);
 
-		if ( $variation_ids ) {
-			// Get the attributes of the variations.
-			$variation_ids_string = implode( ',', $variation_ids );
-			$query                = "SELECT * FROM {$wpdb->prefix}postmeta WHERE post_id IN($variation_ids_string) AND meta_key LIKE %s";
-			$attributes           = $wpdb->get_results(
-				$wpdb->prepare(
-					$query, // phpcs:ignore
-					$wpdb->esc_like( 'attribute_' ) . '%'
-				)
-			);
+		if ( ! $attributes ) {
+			return 0;
+		}
 
-			if ( $attributes ) {
-				$sorted_meta = array();
+		$sorted_meta = array();
 
-				foreach ( $attributes as $m ) {
-					$sorted_meta[ $m->post_id ][ $m->meta_key ] = $m->meta_value; // phpcs:ignore
-				}
+		foreach ( $attributes as $m ) {
+			$sorted_meta[ $m->post_id ][ $m->meta_key ] = $m->meta_value; // phpcs:ignore
+		}
 
-				/**
-				 * Check each variation to find the one that matches the $match_attributes.
-				 *
-				 * Note: Not all meta fields will be set which is why we check existance.
-				 */
-				foreach ( $sorted_meta as $variation_id => $variation ) {
-					$match = true;
+		/**
+		 * Check each variation to find the one that matches the $match_attributes.
+		 *
+		 * Note: Not all meta fields will be set which is why we check existance.
+		 */
+		$matched_variation_id = 0;
 
-					foreach ( $match_attributes as $attribute_key => $attribute_value ) {
-						if ( array_key_exists( $attribute_key, $variation ) ) {
-							if ( $variation[ $attribute_key ] !== $attribute_value && ! empty( $variation[ $attribute_key ] ) ) {
-								$match = false;
-							}
-						}
-					}
+		foreach ( $sorted_meta as $variation_id => $variation ) {
+			$match = true;
 
-					if ( true === $match ) {
-						$matched_variation_id = $variation_id;
-						break;
+			foreach ( $match_attributes as $attribute_key => $attribute_value ) {
+				if ( array_key_exists( $attribute_key, $variation ) ) {
+					if ( $variation[ $attribute_key ] !== $attribute_value && ! empty( $variation[ $attribute_key ] ) ) {
+						$match = false;
 					}
 				}
+			}
+
+			if ( true === $match ) {
+				$matched_variation_id = $variation_id;
+				break;
 			}
 		}
 
