@@ -1053,7 +1053,7 @@ class WC_AJAX {
 			$result   = $order->apply_coupon( wc_clean( $_POST['coupon'] ) );
 
 			if ( is_wp_error( $result ) ) {
-				throw new Exception( $result->get_error_message() );
+				throw new Exception( html_entity_decode( wp_strip_all_tags( $result->get_error_message() ) ) );
 			}
 
 			ob_start();
