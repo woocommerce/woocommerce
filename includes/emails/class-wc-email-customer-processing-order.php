@@ -57,7 +57,7 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( 'Payment received for your order', 'woocommerce' );
+			return __( 'Your {site_title} order has been received!', 'woocommerce' );
 		}
 
 		/**
@@ -67,7 +67,7 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
-			return __( 'Thank you for your payment', 'woocommerce' );
+			return __( 'Thank you for your order', 'woocommerce' );
 		}
 
 		/**
