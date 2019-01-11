@@ -159,6 +159,7 @@ final class WC_Cart_Totals {
 			'price_includes_tax' => false,
 			'subtotal'           => 0,
 			'subtotal_tax'       => 0,
+			'subtotal_taxes'     => array(),
 			'total'              => 0,
 			'total_tax'          => 0,
 			'taxes'              => array(),
@@ -693,6 +694,8 @@ final class WC_Cart_Totals {
 	 * @since 3.2.0
 	 */
 	protected function calculate_item_subtotals() {
+		$merged_subtotal_taxes = array(); // Taxes indexed by tax rate ID for storage later.
+
 		foreach ( $this->items as $item_key => $item ) {
 			if ( $item->price_includes_tax ) {
 				if ( $this->cart->get_customer()->get_is_vat_exempt() ) {
@@ -703,24 +706,31 @@ final class WC_Cart_Totals {
 			}
 
 			$item->subtotal = $item->price;
-			$subtotal_taxes = array();
 
 			if ( $this->calculate_tax && $item->product->is_taxable() ) {
-				$subtotal_taxes     = WC_Tax::calc_tax( $item->subtotal, $item->tax_rates, $item->price_includes_tax );
-				$item->subtotal_tax = array_sum( array_map( array( $this, 'round_line_tax' ), $subtotal_taxes ) );
+				$item->subtotal_taxes = WC_Tax::calc_tax( $item->subtotal, $item->tax_rates, $item->price_includes_tax );
+				$item->subtotal_tax   = array_sum( array_map( array( $this, 'round_line_tax' ), $item->subtotal_taxes ) );
 
 				if ( $item->price_includes_tax ) {
 					// Use unrounded taxes so we can re-calculate from the orders screen accurately later.
-					$item->subtotal = $item->subtotal - array_sum( $subtotal_taxes );
+					$item->subtotal = $item->subtotal - array_sum( $item->subtotal_taxes );
+				}
+
+				foreach ( $item->subtotal_taxes as $rate_id => $rate ) {
+					if ( ! isset( $merged_subtotal_taxes[ $rate_id ] ) ) {
+						$merged_subtotal_taxes[ $rate_id ] = 0;
+					}
+					$merged_subtotal_taxes[ $rate_id ] += $this->round_line_tax( $rate );
 				}
 			}
 
-			$this->cart->cart_contents[ $item_key ]['line_tax_data']     = array( 'subtotal' => wc_remove_number_precision_deep( $subtotal_taxes ) );
+			$this->cart->cart_contents[ $item_key ]['line_tax_data']     = array( 'subtotal' => wc_remove_number_precision_deep( $item->subtotal_taxes ) );
 			$this->cart->cart_contents[ $item_key ]['line_subtotal']     = wc_remove_number_precision( $item->subtotal );
 			$this->cart->cart_contents[ $item_key ]['line_subtotal_tax'] = wc_remove_number_precision( $item->subtotal_tax );
 		}
+
 		$this->set_total( 'items_subtotal', array_sum( array_map( 'round', array_values( wp_list_pluck( $this->items, 'subtotal' ) ) ) ) );
-		$this->set_total( 'items_subtotal_tax', array_sum( array_values( wp_list_pluck( $this->items, 'subtotal_tax' ) ) ) );
+		$this->set_total( 'items_subtotal_tax', array_sum( $this->round_merged_taxes( $merged_subtotal_taxes ) ) );
 
 		$this->cart->set_subtotal( $this->get_total( 'items_subtotal' ) );
 		$this->cart->set_subtotal_tax( $this->get_total( 'items_subtotal_tax' ) );
