@@ -1425,7 +1425,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			if ( $coupon->is_valid() ) {
 
 				// Get user and posted emails to compare.
-				$current_user = wp_get_current_user();
+				$current_user  = wp_get_current_user();
 				$billing_email = isset( $posted['billing_email'] ) ? $posted['billing_email'] : '';
 				$check_emails  = array_unique(
 					array_filter(

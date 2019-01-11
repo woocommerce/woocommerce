@@ -972,8 +972,8 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 
 	if ( $product->is_taxable() ) {
 		if ( ! wc_prices_include_tax() ) {
-			$tax_rates    = WC_Tax::get_rates( $product->get_tax_class() );
-			$taxes        = WC_Tax::calc_tax( $line_price, $tax_rates, false );
+			$tax_rates = WC_Tax::get_rates( $product->get_tax_class() );
+			$taxes     = WC_Tax::calc_tax( $line_price, $tax_rates, false );
 
 			if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
 				$taxes_total = array_sum( $taxes );
