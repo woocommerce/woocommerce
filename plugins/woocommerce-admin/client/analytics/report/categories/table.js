@@ -111,7 +111,7 @@ class CategoriesReportTable extends Component {
 				value: numberFormat( totals.items_sold ),
 			},
 			{
-				label: __( 'gross revenue', 'wc-admin' ),
+				label: __( 'net revenue', 'wc-admin' ),
 				value: formatCurrency( totals.net_revenue ),
 			},
 			{
