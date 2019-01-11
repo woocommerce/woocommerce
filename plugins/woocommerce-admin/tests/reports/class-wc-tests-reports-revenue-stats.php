@@ -63,6 +63,7 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 0,
 				'num_new_customers'       => 1,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => array(
 				array(
@@ -84,6 +85,7 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 						'avg_order_value'         => 80,
 						'num_returning_customers' => 0,
 						'num_new_customers'       => 1,
+						'segments'                => array(),
 					),
 				),
 			),
@@ -107,6 +109,7 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 				'shipping'       => 10,
 				'net_revenue'    => 80,
 				'products'       => '1',
+				'segments'       => array(),
 			),
 			'intervals' => array(
 				array(
@@ -124,6 +127,7 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 						'taxes'          => 7,
 						'shipping'       => 10,
 						'net_revenue'    => 80,
+						'segments'       => array(),
 					),
 				),
 			),
