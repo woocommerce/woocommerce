@@ -62,7 +62,7 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 				'avg_order_value'         => 80,
 				'num_returning_customers' => 0,
 				'num_new_customers'       => 1,
-				'products'                => '1',
+				'products'                => 1,
 			),
 			'intervals' => array(
 				array(
