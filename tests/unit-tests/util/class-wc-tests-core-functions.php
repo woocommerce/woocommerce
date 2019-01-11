@@ -885,11 +885,11 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		// First test a normal asort which does not work right for accented characters.
 		$sorted_values = $unsorted_values;
 		asort( $sorted_values );
-		$this->assertSame( array( 'Benin', 'Bélgica' ), $sorted_values );
+		$this->assertSame( array( 'Benin', 'Bélgica' ), array_values( $sorted_values ) );
 
 		$sorted_values = $unsorted_values;
 		// Now test the new wc_ascii_uasort_comparison function which sorts the strings correctly.
 		uasort( $sorted_values, 'wc_ascii_uasort_comparison' );
-		$this->assertSame( array( 'Bélgica', 'Benin' ), $sorted_values );
+		$this->assertSame( array( 'Bélgica', 'Benin' ), array_values( $sorted_values ) );
 	}
 }
