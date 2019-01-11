@@ -150,6 +150,13 @@ class WC_Tax {
 			$taxes[ $key ] += $tax_amount;
 		}
 
+		/**
+		 * Round all taxes to precision (4DP) before passing them back. Note, this is not the same rounding
+		 * as in the cart calculation class which, depending on settings, will round to 2DP when calculating
+		 * final totals. Also unlike that class, this rounds .5 up for all cases.
+		 */
+		$taxes = array_map( array( __CLASS__, 'round' ), $taxes );
+
 		return $taxes;
 	}
 
@@ -199,6 +206,13 @@ class WC_Tax {
 				$pre_compound_total = array_sum( $taxes );
 			}
 		}
+
+		/**
+		 * Round all taxes to precision (4DP) before passing them back. Note, this is not the same rounding
+		 * as in the cart calculation class which, depending on settings, will round to 2DP when calculating
+		 * final totals. Also unlike that class, this rounds .5 up for all cases.
+		 */
+		$taxes = array_map( array( __CLASS__, 'round' ), $taxes );
 
 		return $taxes;
 	}
@@ -710,13 +724,13 @@ class WC_Tax {
 	}
 
 	/**
-	 * Round tax lines and return the sum. Note this rounds to precision, not store currency decimals.
+	 * Sums a set of taxes to form a single total. Values are pre-rounded to precision from 3.6.0.
 	 *
-	 * @param   array $taxes Array of taxes to round.
-	 * @return  float
+	 * @param  array $taxes Array of taxes.
+	 * @return float
 	 */
 	public static function get_tax_total( $taxes ) {
-		return array_sum( array_map( array( __CLASS__, 'round' ), $taxes ) );
+		return array_sum( $taxes );
 	}
 
 	/**
