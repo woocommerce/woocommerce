@@ -166,6 +166,12 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
+			'num_items_sold'          => array(
+				'description' => __( 'Number of items sold', 'wc-admin' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
 			'coupons'                 => array(
 				'description' => __( 'Amount discounted by coupons', 'wc-admin' ),
 				'type'        => 'number',
@@ -225,6 +231,8 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 		// Products is not shown in intervals.
 		unset( $data_values['products'] );
 
+		$intervals = array_merge( $data_values, $segments );
+
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'report_orders_stats',
@@ -281,7 +289,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 								'type'        => 'object',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
-								'properties'  => $data_values,
+								'properties'  => $intervals,
 							),
 						),
 					),
