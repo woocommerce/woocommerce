@@ -19,7 +19,7 @@ import { Link } from '@woocommerce/components';
 import { numberFormat } from 'lib/number';
 import Leaderboard from 'analytics/components/leaderboard';
 
-export class TopSellingProducts extends Component {
+export class TopSellingCategories extends Component {
 	constructor( props ) {
 		super( props );
 
@@ -30,8 +30,8 @@ export class TopSellingProducts extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Product', 'wc-admin' ),
-				key: 'product',
+				label: __( 'Category', 'wc-admin' ),
+				key: 'category',
 				required: true,
 				isLeftAligned: true,
 				isSortable: false,
@@ -57,22 +57,21 @@ export class TopSellingProducts extends Component {
 		const { query } = this.props;
 		const persistedQuery = getPersistedQuery( query );
 		return map( data, row => {
-			const { product_id, items_sold, net_revenue, extended_info } = row;
+			const { category_id, items_sold, net_revenue, extended_info } = row;
 			const name = get( extended_info, [ 'name' ] );
-
-			const productUrl = getNewPath( persistedQuery, 'analytics/products', {
-				filter: 'single_product',
-				products: product_id,
+			// TODO Update this to use a single_category filter, once it exists.
+			const categoryUrl = getNewPath( persistedQuery, 'analytics/categories', {
+				filter: 'compare-categories',
+				categories: category_id,
 			} );
-			const productLink = (
-				<Link href={ productUrl } type="wc-admin">
+			const categoryLink = (
+				<Link href={ categoryUrl } type="wc-admin">
 					{ name }
 				</Link>
 			);
-
 			return [
 				{
-					display: productLink,
+					display: categoryLink,
 					value: name,
 				},
 				{
@@ -98,15 +97,15 @@ export class TopSellingProducts extends Component {
 
 		return (
 			<Leaderboard
-				endpoint="products"
+				endpoint="categories"
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				query={ query }
 				tableQuery={ tableQuery }
-				title={ __( 'Top Products - Items Sold', 'wc-admin' ) }
+				title={ __( 'Top Categories - Items Sold', 'wc-admin' ) }
 			/>
 		);
 	}
 }
 
-export default TopSellingProducts;
+export default TopSellingCategories;
