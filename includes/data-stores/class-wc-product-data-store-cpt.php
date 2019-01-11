@@ -1091,23 +1091,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$attributes = $wpdb->get_results( $query ); // phpcs:ignore
 
-		// Get any variations of the main product.
-		$variation_ids = wp_parse_id_list(
-			$wpdb->get_col(
-				$wpdb->prepare(
-					"
-					SELECT ID
-					FROM {$wpdb->prefix}posts
-					WHERE {$wpdb->prefix}posts.post_parent = %d
-					AND {$wpdb->prefix}posts.post_status = 'publish'
-					AND {$wpdb->prefix}posts.post_type = 'product_variation'
-					ORDER BY menu_order ASC, ID ASC
-					",
-					$product->get_id()
-				)
-			)
-		);
-
 		if ( ! $attributes ) {
 			return 0;
 		}
