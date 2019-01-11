@@ -4,7 +4,7 @@
  */
 import { Component, Fragment } from '@wordpress/element';
 import { SelectControl, TextControl } from '@wordpress/components';
-import { get, find, partial } from 'lodash';
+import { get, find, partial, isArray } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 import classnames from 'classnames';
 import { sprintf, __, _x } from '@wordpress/i18n';
@@ -32,7 +32,7 @@ class NumberFilter extends Component {
 	getScreenReaderText( filter, config ) {
 		const inputType = get( config, [ 'input', 'type' ], 'number' );
 		const rule = find( config.rules, { value: filter.rule } ) || {};
-		let [ rangeStart, rangeEnd ] = ( filter.value || '' ).split( ',' );
+		let [ rangeStart, rangeEnd ] = isArray( filter.value ) ? filter.value : [ filter.value ];
 
 		// Return nothing if we're missing input(s)
 		if (
@@ -114,7 +114,7 @@ class NumberFilter extends Component {
 			return this.getRangeInput();
 		}
 
-		const [ rangeStart, rangeEnd ] = ( filter.value || '' ).split( ',' );
+		const [ rangeStart, rangeEnd ] = isArray( filter.value ) ? filter.value : [ filter.value ];
 		if ( Boolean( rangeEnd ) ) {
 			// If there's a value for rangeEnd, we've just changed from "between"
 			// to "less than" or "more than" and need to transition the value
@@ -144,16 +144,14 @@ class NumberFilter extends Component {
 	getRangeInput() {
 		const { config, filter, onFilterChange } = this.props;
 		const inputType = get( config, [ 'input', 'type' ], 'number' );
-		const [ rangeStart, rangeEnd ] = ( filter.value || '' ).split( ',' );
+		const [ rangeStart, rangeEnd ] = isArray( filter.value ) ? filter.value : [ filter.value ];
 
 		const rangeStartOnChange = ( newRangeStart ) => {
-			const newValue = [ newRangeStart, rangeEnd ].join( ',' );
-			onFilterChange( filter.key, 'value', newValue );
+			onFilterChange( filter.key, 'value', [ newRangeStart, rangeEnd ] );
 		};
 
 		const rangeEndOnChange = ( newRangeEnd ) => {
-			const newValue = [ rangeStart, newRangeEnd ].join( ',' );
-			onFilterChange( filter.key, 'value', newValue );
+			onFilterChange( filter.key, 'value', [ rangeStart, newRangeEnd ] );
 		};
 
 		return interpolateComponents( {
@@ -161,7 +159,7 @@ class NumberFilter extends Component {
 			components: {
 				rangeStart: this.getFormControl( {
 					type: inputType,
-					value: rangeStart,
+					value: rangeStart || '',
 					label: sprintf(
 						/* eslint-disable-next-line max-len */
 						/* translators: Sentence fragment, "range start" refers to the first of two numeric values the field must be between. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
@@ -172,7 +170,7 @@ class NumberFilter extends Component {
 				} ),
 				rangeEnd: this.getFormControl( {
 					type: inputType,
-					value: rangeEnd,
+					value: rangeEnd || '',
 					label: sprintf(
 						/* eslint-disable-next-line max-len */
 						/* translators: Sentence fragment, "range end" refers to the second of two numeric values the field must be between. Screenshot for context: https://cloudup.com/cmv5CLyMPNQ */
