@@ -499,12 +499,12 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	 *
 	 * @param array $query_args Query args provided by the user.
 	 *
-	 * @return array|void
+	 * @return array
 	 */
 	protected function get_all_segments( $query_args ) {
 		global $wpdb;
-		if ( ! isset( $query_args['segmentby'] ) ) {
-			return;
+		if ( ! isset( $query_args['segmentby'] ) || '' === $query_args['segmentby'] ) {
+			return array();
 		}
 
 		if ( 'product' === $query_args['segmentby'] ) {
@@ -517,7 +517,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		} elseif ( 'variation' === $query_args['segmentby'] ) {
 			// TODO: assuming that this will only be used for one product, check assumption.
 			if ( ! isset( $query_args['product_includes'] ) || count( $query_args['product_includes'] ) !== 1 ) {
-				return;
+				return array();
 			}
 
 			$segments = wc_get_products(
@@ -900,13 +900,13 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	 * @param string $table_name Name of main SQL table for the data store (used as basis for JOINS).
 	 * @param array  $all_segments Array of all segment ids.
 	 *
-	 * @return array|void
+	 * @return array
 	 * @throws WC_REST_Exception In case of segmenting by variations, when no parent product is specified.
 	 */
 	protected function get_segments( $type, $query_args, $query_params, $table_name, $all_segments ) {
 		global $wpdb;
-		if ( ! isset( $query_args['segmentby'] ) ) {
-			return;
+		if ( ! isset( $query_args['segmentby'] ) || '' === $query_args['segmentby'] ) {
+			return array();
 		}
 
 		$product_segmenting_table = $wpdb->prefix . 'wc_order_product_lookup';
@@ -989,7 +989,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	protected function assign_segments_to_intervals( &$intervals, $intervals_segments ) {
 		$old_keys = array_keys( $intervals );
 		foreach ( $intervals as $interval ) {
-			$intervals[ $interval['time_interval'] ] = $interval;
+			$intervals[ $interval['time_interval'] ]             = $interval;
+			$intervals[ $interval['time_interval'] ]['segments'] = array();
 		}
 		foreach ( $old_keys as $key ) {
 			unset( $intervals[ $key ] );
