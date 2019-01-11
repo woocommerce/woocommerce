@@ -23,6 +23,11 @@ class WC_Admin_Api_Init {
 	const CUSTOMERS_BATCH_ACTION = 'wc-admin_process_customers_batch';
 
 	/**
+	 * Action hook for processing a batch of orders.
+	 */
+	const ORDERS_BATCH_ACTION = 'wc-admin_process_orders_batch';
+
+	/**
 	 * Boostrap REST API.
 	 */
 	public function __construct() {
@@ -47,6 +52,7 @@ class WC_Admin_Api_Init {
 		// Initialize scheduled action handlers.
 		add_action( self::QUEUE_BATCH_ACTION, array( __CLASS__, 'queue_batches' ), 10, 3 );
 		add_action( self::CUSTOMERS_BATCH_ACTION, array( __CLASS__, 'customer_lookup_process_batch' ) );
+		add_action( self::ORDERS_BATCH_ACTION, array( __CLASS__, 'orders_lookup_process_batch' ) );
 	}
 
 	/**
@@ -295,8 +301,8 @@ class WC_Admin_Api_Init {
 		// Add registered customers to the lookup table before updating order stats
 		// so that the orders can be associated with the `customer_id` column.
 		self::customer_lookup_batch_init();
-		WC_Admin_Reports_Orders_Stats_Data_Store::queue_order_stats_repopulate_database();
-		self::order_product_lookup_store_init();
+		// TODO: figure out how to delay this until customers lookup generation is done.
+		self::orders_lookup_batch_init();
 	}
 
 	/**
@@ -330,39 +336,47 @@ class WC_Admin_Api_Init {
 	}
 
 	/**
-	 * Init orders product lookup store.
-	 *
-	 * @param WC_Background_Updater|null $updater Updater instance.
-	 * @return bool
+	 * Init order/product lookup tables update (in batches).
 	 */
-	public static function order_product_lookup_store_init( $updater = null ) {
-		// TODO: this needs to be updated a bit, as it no longer runs as a part of WC_Install, there is no bg updater.
-		global $wpdb;
+	public static function orders_lookup_batch_init() {
+		$batch_size  = self::get_batch_size( self::ORDERS_BATCH_ACTION );
+		$order_query = new WC_Order_Query(
+			array(
+				'return'   => 'ids',
+				'limit'    => 1,
+				'paginate' => true,
+			)
+		);
+		$result      = $order_query->get_orders();
+		$num_batches = ceil( $result->total / $batch_size );
 
-		$orders = get_transient( 'wc_update_350_all_orders' );
-		if ( false === $orders ) {
-			$orders = wc_get_orders(
-				array(
-					'limit'  => -1,
-					'return' => 'ids',
-				)
-			);
-			set_transient( 'wc_update_350_all_orders', $orders, DAY_IN_SECONDS );
-		}
+		self::queue_batches( 1, $num_batches, self::ORDERS_BATCH_ACTION );
+	}
 
-		// Process orders until close to running out of memory timeouts on large sites then requeue.
-		foreach ( $orders as $order_id ) {
+	/**
+	 * Process a batch of orders to update (stats and products).
+	 *
+	 * @param int $batch_number Batch number to process (essentially a query page number).
+	 * @return void
+	 */
+	public static function orders_lookup_process_batch( $batch_number ) {
+		$batch_size  = self::get_batch_size( self::ORDERS_BATCH_ACTION );
+		$order_query = new WC_Order_Query(
+			array(
+				'return'  => 'ids',
+				'limit'   => $batch_size,
+				'page'    => $batch_number,
+				'orderby' => 'ID',
+				'order'   => 'ASC',
+			)
+		);
+		$order_ids = $order_query->get_orders();
+
+		foreach ( $order_ids as $order_id ) {
+			// TODO: schedule single order update if this fails?
+			WC_Admin_Reports_Orders_Stats_Data_Store::sync_order( $order_id );
 			WC_Admin_Reports_Products_Data_Store::sync_order_products( $order_id );
-			// Pop the order ID from the array for updating the transient later should we near memory exhaustion.
-			unset( $orders[ $order_id ] );
-			if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
-				// Update the transient for the next run to avoid processing the same orders again.
-				set_transient( 'wc_update_350_all_orders', $orders, DAY_IN_SECONDS );
-				return true;
-			}
 		}
-
-		return true;
 	}
 
 	/**
@@ -383,6 +397,7 @@ class WC_Admin_Api_Init {
 		$batch_sizes = array(
 			self::QUEUE_BATCH_ACTION     => 100,
 			self::CUSTOMERS_BATCH_ACTION => 25,
+			self::ORDERS_BATCH_ACTION    => 10,
 		);
 		$batch_size  = isset( $batch_sizes[ $action ] ) ? $batch_sizes[ $action ] : 25;
 
@@ -657,9 +672,7 @@ class WC_Admin_Api_Init {
 		self::create_db_tables();
 
 		// Initialize report tables.
-		// TODO: just call self::regenerate_report_data() here?
-		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'order_product_lookup_store_init' ), 20 );
-		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'customer_lookup_batch_init' ), 20 );
+		add_action( 'woocommerce_after_register_post_type', array( __CLASS__, 'regenerate_report_data' ), 20 );
 	}
 
 }
