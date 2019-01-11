@@ -18,6 +18,11 @@ class WC_Admin_Api_Init {
 	const QUEUE_BATCH_ACTION = 'wc-admin_queue_batches';
 
 	/**
+	 * Action hook for queuing an action after another is complete.
+	 */
+	const QUEUE_DEPEDENT_ACTION = 'wc-admin_queue_dependent_action';
+
+	/**
 	 * Action hook for processing a batch of customers.
 	 */
 	const CUSTOMERS_BATCH_ACTION = 'wc-admin_process_customers_batch';
@@ -26,6 +31,11 @@ class WC_Admin_Api_Init {
 	 * Action hook for processing a batch of orders.
 	 */
 	const ORDERS_BATCH_ACTION = 'wc-admin_process_orders_batch';
+
+	/**
+	 * Action hook for initializing the orders lookup batch creation.
+	 */
+	const ORDERS_LOOKUP_BATCH_INIT = 'wc-admin_orders_lookup_batch_init';
 
 	/**
 	 * Boostrap REST API.
@@ -51,8 +61,10 @@ class WC_Admin_Api_Init {
 
 		// Initialize scheduled action handlers.
 		add_action( self::QUEUE_BATCH_ACTION, array( __CLASS__, 'queue_batches' ), 10, 3 );
+		add_action( self::QUEUE_DEPEDENT_ACTION, array( __CLASS__, 'queue_dependent_action' ), 10, 2 );
 		add_action( self::CUSTOMERS_BATCH_ACTION, array( __CLASS__, 'customer_lookup_process_batch' ) );
 		add_action( self::ORDERS_BATCH_ACTION, array( __CLASS__, 'orders_lookup_process_batch' ) );
+		add_action( self::ORDERS_LOOKUP_BATCH_INIT, array( __CLASS__, 'orders_lookup_batch_init' ) );
 	}
 
 	/**
@@ -301,8 +313,8 @@ class WC_Admin_Api_Init {
 		// Add registered customers to the lookup table before updating order stats
 		// so that the orders can be associated with the `customer_id` column.
 		self::customer_lookup_batch_init();
-		// TODO: figure out how to delay this until customers lookup generation is done.
-		self::orders_lookup_batch_init();
+		// Queue orders lookup to occur after customers lookup generation is done.
+		self::queue_dependent_action( self::ORDERS_LOOKUP_BATCH_INIT, self::CUSTOMERS_BATCH_ACTION );
 	}
 
 	/**
@@ -445,6 +457,39 @@ class WC_Admin_Api_Init {
 			for ( $i = $range_start; $i <= $range_end; $i++ ) {
 				$queue->schedule_single( $schedule, $single_batch_action, array( $i ) );
 			}
+		}
+	}
+
+	/**
+	 * Queue an action to run after another.
+	 *
+	 * @param string $action Action to run after prerequisite.
+	 * @param string $prerequisite_action Prerequisite action.
+	 */
+	public static function queue_dependent_action( $action, $prerequisite_action ) {
+		$queue         = WC()->queue();
+		$blocking_jobs = $queue->search(
+			array(
+				'status'   => 'pending',
+				'orderby'  => 'date',
+				'order'    => 'DESC',
+				'per_page' => 1,
+				'claimed'  => false,
+				'search'   => $prerequisite_action, // search is used instead of hook to find queued batch creation.
+			)
+		);
+
+		if ( $blocking_jobs ) {
+			$blocking_job       = current( $blocking_jobs );
+			$after_blocking_job = $blocking_job->get_schedule()->next()->getTimestamp() + 5;
+
+			$queue->schedule_single(
+				$after_blocking_job,
+				self::QUEUE_DEPEDENT_ACTION,
+				array( $action, $prerequisite_action )
+			);
+		} else {
+			$queue->schedule_single( time() + 5, $action );
 		}
 	}
 
