@@ -1002,6 +1002,9 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			}
 			$intervals[ $time_interval ]['segments'] = $segment['segments'];
 		}
+
+		// To remove time interval keys (so that REST response is formatted correctly).
+		$intervals = array_values( $intervals );
 	}
 
 	/**
