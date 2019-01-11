@@ -122,7 +122,10 @@ export const showTooltip = ( params, d, position ) => {
 		row => `
 				<li class="key-row">
 					<div class="key-container">
-						<span class="key-color" style="background-color:${ getColor( row.key, params ) }"></span>
+						<span
+							class="key-color"
+							style="background-color:${ getColor( row.key, params.orderedKeys, params.colorScheme ) }">
+						</span>
 						<span class="key-key">${ getTooltipRowLabel( d, row, params ) }</span>
 					</div>
 					<span class="key-value">${ params.tooltipValueFormat( d[ row.key ].value ) }</span>

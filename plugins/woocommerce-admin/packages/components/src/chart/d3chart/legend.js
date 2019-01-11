@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { getFormatter } from './utils';
+import { getFormatter } from './utils/index';
 import { getColor } from './utils/color';
 
 /**
@@ -58,10 +58,6 @@ class D3Legend extends Component {
 			totalLabel,
 		} = this.props;
 		const { isScrollable } = this.state;
-		const colorParams = {
-			orderedKeys: data,
-			colorScheme,
-		};
 		const numberOfRowsVisible = data.filter( row => row.visible ).length;
 		const showTotalLabel = legendDirection === 'column' && data.length > 5 && totalLabel;
 
@@ -105,7 +101,7 @@ class D3Legend extends Component {
 											'woocommerce-legend__item-checkmark-checked': row.visible,
 										} ) }
 										id={ row.key }
-										style={ { color: getColor( row.key, colorParams ) } }
+										style={ { color: getColor( row.key, data, colorScheme ) } }
 									/>
 									<span className="woocommerce-legend__item-title" id={ row.key }>
 										{ row.key }

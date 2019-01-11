@@ -44,6 +44,7 @@ export default class D3Base extends Component {
 		return (
 			this.props.className !== nextProps.className ||
 			! isEqual( this.props.data, nextProps.data ) ||
+			! isEqual( this.props.orderedKeys, nextProps.orderedKeys ) ||
 			this.props.drawChart !== nextProps.drawChart ||
 			this.props.height !== nextProps.height ||
 			this.props.type !== nextProps.type ||
@@ -102,7 +103,7 @@ export default class D3Base extends Component {
 
 D3Base.propTypes = {
 	className: PropTypes.string,
-	data: PropTypes.any, // required to detect changes in data
-	drawChart: PropTypes.func.isRequired,
+	data: PropTypes.array,
+	orderedKeys: PropTypes.array, // required to detect changes in data
 	type: PropTypes.string,
 };

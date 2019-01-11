@@ -41,7 +41,7 @@ export const drawLines = ( node, data, params ) => {
 		.attr( 'stroke-width', lineStroke )
 		.attr( 'stroke-linejoin', 'round' )
 		.attr( 'stroke-linecap', 'round' )
-		.attr( 'stroke', d => getColor( d.key, params ) )
+		.attr( 'stroke', d => getColor( d.key, params.orderedKeys, params.colorScheme ) )
 		.style( 'opacity', d => {
 			const opacity = d.focus ? 1 : 0.1;
 			return d.visible ? opacity : 0;
@@ -57,7 +57,7 @@ export const drawLines = ( node, data, params ) => {
 			.enter()
 			.append( 'circle' )
 			.attr( 'r', dotRadius )
-			.attr( 'fill', d => getColor( d.key, params ) )
+			.attr( 'fill', d => getColor( d.key, params.orderedKeys, params.colorScheme ) )
 			.attr( 'stroke', '#fff' )
 			.attr( 'stroke-width', lineStroke + 1 )
 			.style( 'opacity', d => {
@@ -110,7 +110,7 @@ export const drawLines = ( node, data, params ) => {
 		.enter()
 		.append( 'circle' )
 		.attr( 'r', dotRadius + 2 )
-		.attr( 'fill', d => getColor( d.key, params ) )
+		.attr( 'fill', d => getColor( d.key, params.orderedKeys, params.colorScheme ) )
 		.attr( 'stroke', '#fff' )
 		.attr( 'stroke-width', lineStroke + 2 )
 		.attr( 'cx', d => params.xLineScale( new Date( d.date ) ) )

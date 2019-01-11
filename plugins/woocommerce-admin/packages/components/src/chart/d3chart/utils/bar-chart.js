@@ -66,7 +66,7 @@ export const drawBars = ( node, data, params ) => {
 		.attr( 'y', d => params.yScale( d.value ) )
 		.attr( 'width', params.xGroupScale.bandwidth() )
 		.attr( 'height', d => params.height - params.yScale( d.value ) )
-		.attr( 'fill', d => getColor( d.key, params ) )
+		.attr( 'fill', d => getColor( d.key, params.orderedKeys, params.colorScheme ) )
 		.attr( 'tabindex', '0' )
 		.attr( 'aria-label', d => {
 			const label = params.mode === 'time-comparison' && d.label ? d.label : d.key;
