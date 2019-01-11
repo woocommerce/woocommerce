@@ -1123,8 +1123,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		 *
 		 * Note: Not all meta fields will be set which is why we check existance.
 		 */
-		$matched_variation_id = 0;
-
 		foreach ( $sorted_meta as $variation_id => $variation ) {
 			$match = true;
 
@@ -1137,12 +1135,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 
 			if ( true === $match ) {
-				$matched_variation_id = $variation_id;
-				break;
+				return $variation_id;
 			}
 		}
 
-		return $matched_variation_id;
+		if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '2.4.0', '<' ) ) {
+			/**
+			 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+			 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same.
+			 */
+			return ( array_map( 'sanitize_title', $match_attributes ) === $match_attributes ) ? 0 : $this->find_matching_product_variation( $product, array_map( 'sanitize_title', $match_attributes ) );
+		}
 	}
 
 	/**
