@@ -104,7 +104,8 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 		 */
 		public function get_content_html() {
 			return wc_get_template_html(
-				$this->template_html, array(
+				$this->template_html,
+				array(
 					'order'         => $this->object,
 					'email_heading' => $this->get_heading(),
 					'sent_to_admin' => false,
@@ -121,7 +122,8 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 		 */
 		public function get_content_plain() {
 			return wc_get_template_html(
-				$this->template_plain, array(
+				$this->template_plain,
+				array(
 					'order'         => $this->object,
 					'email_heading' => $this->get_heading(),
 					'sent_to_admin' => false,
