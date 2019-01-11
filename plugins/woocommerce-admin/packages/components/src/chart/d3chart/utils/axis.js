@@ -172,6 +172,19 @@ export const compareStrings = ( s1, s2, splitChar = new RegExp( [ ' |,' ], 'g' )
 	return diff;
 };
 
+export const getYGrids = ( yMax ) => {
+	const yGrids = [];
+
+	for ( let i = 0; i < 4; i++ ) {
+		const value = yMax > 1 ? Math.round( i / 3 * yMax ) : i / 3 * yMax;
+		if ( yGrids[ yGrids.length - 1 ] !== value ) {
+			yGrids.push( value );
+		}
+	}
+
+	return yGrids;
+};
+
 export const drawAxis = ( node, params ) => {
 	const xScale = params.type === 'line' ? params.xLineScale : params.xScale;
 	const removeDuplicateDates = ( d, i, ticks, formatter ) => {
@@ -183,17 +196,7 @@ export const drawAxis = ( node, params ) => {
 			: compareStrings( formatter( prevMonth ), formatter( monthDate ) ).join( ' ' );
 	};
 
-	const yGrids = [];
-	for ( let i = 0; i < 4; i++ ) {
-		if ( params.yMax > 1 ) {
-			const roundedValue = Math.round( i / 3 * params.yMax );
-			if ( yGrids[ yGrids.length - 1 ] !== roundedValue ) {
-				yGrids.push( roundedValue );
-			}
-		} else {
-			yGrids.push( i / 3 * params.yMax );
-		}
-	}
+	const yGrids = getYGrids( params.yMax );
 
 	const ticks = params.xTicks.map( d => ( params.type === 'line' ? new Date( d ) : d ) );
 

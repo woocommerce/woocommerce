@@ -6,7 +6,7 @@
 /**
 * Internal dependencies
 */
-import { compareStrings, getXTicks } from '../axis';
+import { compareStrings, getXTicks, getYGrids } from '../axis';
 
 describe( 'getXTicks', () => {
 	describe( 'interval=day', () => {
@@ -236,5 +236,23 @@ describe( 'compareStrings', () => {
 		expect( compareStrings( 'Jul 2017', 'Aug 2018' ).join( ' ' ) ).toEqual( 'Aug 2018' );
 		expect( compareStrings( 'Jul 2017', 'Jul 2018' ).join( ' ' ) ).toEqual( '2018' );
 		expect( compareStrings( 'Jul, 2018', 'Aug, 2018' ).join( ' ' ) ).toEqual( 'Aug' );
+	} );
+} );
+
+describe( 'getYGrids', () => {
+	it( 'returns a single 0 when yMax is 0', () => {
+		expect( getYGrids( 0 ) ).toEqual( [ 0 ] );
+	} );
+
+	it( 'returns decimal values when yMax is <= 1', () => {
+		expect( getYGrids( 1 ) ).toEqual( [ 0, 0.3333333333333333, 0.6666666666666666, 1 ] );
+	} );
+
+	it( 'doesn\'t return decimal values when yMax is >1', () => {
+		expect( getYGrids( 2 ) ).toEqual( [ 0, 1, 2 ] );
+	} );
+
+	it( 'returns up to four values when yMax is a big number', () => {
+		expect( getYGrids( 10000 ) ).toEqual( [ 0, 3333, 6667, 10000 ] );
 	} );
 } );

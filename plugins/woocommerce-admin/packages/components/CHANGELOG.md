@@ -9,6 +9,7 @@
   - `legendPosition`: can be `top`, `side` or `bottom`. If not specified, it's calculated based on `mode` and viewport width.
   - `showHeaderControls`: whether the header controls must be visible. Defaults to true.
 - `getColor()` method in chart utils now requires `keys` and `colorScheme` to be passed as separate params.
+- Fix to avoid duplicated Y-axis ticks when the Y max value was 0.
 
 # 1.3.0
 
