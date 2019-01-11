@@ -445,9 +445,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_REST_Reports_Cont
 				'product',
 				'category',
 				'variation',
-				'tax',
 				'coupon',
-				'billing_country', // just to test out if it's possible.
 				'customer_type', // new vs returning.
 			),
 			'validate_callback' => 'rest_validate_request_arg',
