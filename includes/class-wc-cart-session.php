@@ -351,7 +351,7 @@ final class WC_Cart_Session {
 			);
 		}
 
-		do_action( 'woocommerce_ordered_again', $order->get_id(), $order_items, $cart );
+		do_action_ref_array( 'woocommerce_ordered_again', array( $order->get_id(), $order_items, &$cart ) );
 
 		$num_items_in_cart           = count( $cart );
 		$num_items_in_original_order = count( $order_items );
