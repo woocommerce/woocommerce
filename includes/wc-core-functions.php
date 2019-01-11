@@ -1554,6 +1554,19 @@ function wc_uasort_comparison( $a, $b ) {
 }
 
 /**
+ * Sort values based on ascii, usefull for special chars in strings.
+ *
+ * @param string $a First value.
+ * @param string $b Second value.
+ * @return int
+ */
+function wc_ascii_uasort_comparison( $a, $b ) {
+	$aconv = iconv( 'UTF-8', 'ASCII//TRANSLIT', $a );
+	$bconv = iconv( 'UTF-8', 'ASCII//TRANSLIT', $b );
+	return strcmp( $aconv, $bconv );
+}
+
+/**
  * Get rounding mode for internal tax calculations.
  *
  * @since 3.2.4
