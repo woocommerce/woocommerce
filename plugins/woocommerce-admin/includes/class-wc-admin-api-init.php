@@ -33,6 +33,9 @@ class WC_Admin_Api_Init {
 		// Note: we need to hook into 'wp' before `wc_current_user_is_active`.
 		// See: https://github.com/woocommerce/woocommerce/blob/942615101ba00c939c107c3a4820c3d466864872/includes/wc-user-functions.php#L749.
 		add_action( 'wp', array( 'WC_Admin_Api_Init', 'customers_report_data_store_init' ), 9 );
+
+		// Handle batched queuing.
+		add_action( 'wc-admin_queue_batches', array( __CLASS__, 'queue_batches' ), 10, 3 );
 	}
 
 	/**
@@ -356,6 +359,53 @@ class WC_Admin_Api_Init {
 	 */
 	public static function customers_report_data_store_init() {
 		WC_Admin_Reports_Customers_Data_Store::init();
+	}
+
+	/**
+	 * Returns the batch size for regenerating reports.
+	 *
+	 * @return int Batch size.
+	 */
+	public static function get_batch_size() {
+		return apply_filters( 'wc_admin_report_regenerate_batch_size', 25 );
+	}
+
+	/**
+	 * Queue a large number of batch jobs, respecting the batch size limit.
+	 * Reduces a range of batches down to "single batch" jobs.
+	 *
+	 * @param int    $range_start Starting batch number.
+	 * @param int    $range_end Ending batch number.
+	 * @param string $single_batch_action Action to schedule for a single batch.
+	 * @return void
+	 */
+	public static function queue_batches( $range_start, $range_end, $single_batch_action ) {
+		$batch_size = self::get_batch_size();
+		$range_size = 1 + ( $range_end - $range_start );
+		$queue      = WC()->queue();
+		$schedule   = time() + 5;
+
+		if ( $range_size > $batch_size ) {
+			// If the current batch range is larger than a single batch,
+			// split the range into $batch_size chunks.
+			$chunk_size = ceil( $range_size / $batch_size );
+
+			for ( $i = 0; $i < $batch_size; $i++ ) {
+				$batch_start = $range_start + ( $i * $chunk_size );
+				$batch_end   = min( $range_end, $range_start + ( $chunk_size * ( $i + 1 ) ) - 1 );
+
+				$queue->schedule_single(
+					$schedule,
+					'wc-admin_queue_batches',
+					array( $batch_start, $batch_end, $single_batch_action )
+				);
+			}
+		} else {
+			// Otherwise, queue the single batches.
+			for ( $i = $range_start; $i <= $range_end; $i++ ) {
+				$queue->schedule_single( $schedule, $single_batch_action, array( $i ) );
+			}
+		}
 	}
 
 	/**
