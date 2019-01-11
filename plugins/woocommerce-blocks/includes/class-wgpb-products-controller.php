@@ -291,12 +291,14 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 		$raw_data = parent::get_product_data( $product, $context );
 		$data     = array();
 
-		$data['id']         = $raw_data['id'];
-		$data['name']       = $raw_data['name'];
-		$data['sku']        = $raw_data['sku'];
-		$data['price']      = $raw_data['price'];
-		$data['price_html'] = $raw_data['price_html'];
-		$data['images']     = $raw_data['images'];
+		$data['id']                = $raw_data['id'];
+		$data['name']              = $raw_data['name'];
+		$data['sku']               = $raw_data['sku'];
+		$data['description']       = $raw_data['description'];
+		$data['short_description'] = $raw_data['short_description'];
+		$data['price']             = $raw_data['price'];
+		$data['price_html']        = $raw_data['price_html'];
+		$data['images']            = $raw_data['images'];
 
 		return $data;
 	}
@@ -360,12 +362,14 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 			'properties' => array(),
 		);
 
-		$schema['properties']['id']         = $raw_schema['properties']['id'];
-		$schema['properties']['name']       = $raw_schema['properties']['name'];
-		$schema['properties']['sku']        = $raw_schema['properties']['sku'];
-		$schema['properties']['price']      = $raw_schema['properties']['price'];
-		$schema['properties']['price_html'] = $raw_schema['properties']['price_html'];
-		$schema['properties']['images']     = array(
+		$schema['properties']['id']                = $raw_schema['properties']['id'];
+		$schema['properties']['name']              = $raw_schema['properties']['name'];
+		$schema['properties']['sku']               = $raw_schema['properties']['sku'];
+		$schema['properties']['description']       = $raw_schema['properties']['description'];
+		$schema['properties']['short_description'] = $raw_schema['properties']['short_description'];
+		$schema['properties']['price']             = $raw_schema['properties']['price'];
+		$schema['properties']['price_html']        = $raw_schema['properties']['price_html'];
+		$schema['properties']['images']            = array(
 			'description' => $raw_schema['properties']['images']['description'],
 			'type'        => 'object',
 			'context'     => array( 'view', 'edit' ),
