@@ -13,6 +13,16 @@ defined( 'ABSPATH' ) || exit;
 class WC_Admin_Api_Init {
 
 	/**
+	 * Action hook for reducing a range of batches down to single actions.
+	 */
+	const QUEUE_BATCH_ACTION = 'wc-admin_queue_batches';
+
+	/**
+	 * Action hook for processing a batch of customers.
+	 */
+	const CUSTOMERS_BATCH_ACTION = 'wc-admin_process_customers_batch';
+
+	/**
 	 * Boostrap REST API.
 	 */
 	public function __construct() {
@@ -34,9 +44,9 @@ class WC_Admin_Api_Init {
 		// See: https://github.com/woocommerce/woocommerce/blob/942615101ba00c939c107c3a4820c3d466864872/includes/wc-user-functions.php#L749.
 		add_action( 'wp', array( 'WC_Admin_Api_Init', 'customers_report_data_store_init' ), 9 );
 
-		// Handle batched queuing.
-		add_action( 'wc-admin_queue_batches', array( __CLASS__, 'queue_batches' ), 10, 3 );
-		add_action( 'wc-admin_process_customers_batch', array( __CLASS__, 'customer_lookup_process_batch' ) );
+		// Initialize scheduled action handlers.
+		add_action( self::QUEUE_BATCH_ACTION, array( __CLASS__, 'queue_batches' ), 10, 3 );
+		add_action( self::CUSTOMERS_BATCH_ACTION, array( __CLASS__, 'customer_lookup_process_batch' ) );
 	}
 
 	/**
@@ -364,11 +374,25 @@ class WC_Admin_Api_Init {
 
 	/**
 	 * Returns the batch size for regenerating reports.
+	 * Note: can differ per batch action.
 	 *
+	 * @param string $action Single batch action name.
 	 * @return int Batch size.
 	 */
-	public static function get_batch_size() {
-		return apply_filters( 'wc_admin_report_regenerate_batch_size', 25 );
+	public static function get_batch_size( $action ) {
+		$batch_sizes = array(
+			self::QUEUE_BATCH_ACTION     => 100,
+			self::CUSTOMERS_BATCH_ACTION => 25,
+		);
+		$batch_size  = isset( $batch_sizes[ $action ] ) ? $batch_sizes[ $action ] : 25;
+
+		/**
+		 * Filter the batch size for regenerating a report table.
+		 *
+		 * @param int    $batch_size Batch size.
+		 * @param string $action Batch action name.
+		 */
+		return apply_filters( 'wc_admin_report_regenerate_batch_size', $batch_size, $action );
 	}
 
 	/**
@@ -381,14 +405,14 @@ class WC_Admin_Api_Init {
 	 * @return void
 	 */
 	public static function queue_batches( $range_start, $range_end, $single_batch_action ) {
-		$batch_size = self::get_batch_size();
+		$batch_size = self::get_batch_size( self::QUEUE_BATCH_ACTION );
 		$range_size = 1 + ( $range_end - $range_start );
 		$queue      = WC()->queue();
 		$schedule   = time() + 5;
 
 		if ( $range_size > $batch_size ) {
 			// If the current batch range is larger than a single batch,
-			// split the range into $batch_size chunks.
+			// split the range into $queue_batch_size chunks.
 			$chunk_size = ceil( $range_size / $batch_size );
 
 			for ( $i = 0; $i < $batch_size; $i++ ) {
@@ -397,7 +421,7 @@ class WC_Admin_Api_Init {
 
 				$queue->schedule_single(
 					$schedule,
-					'wc-admin_queue_batches',
+					self::QUEUE_BATCH_ACTION,
 					array( $batch_start, $batch_end, $single_batch_action )
 				);
 			}
@@ -413,7 +437,7 @@ class WC_Admin_Api_Init {
 	 * Init customer lookup table update (in batches).
 	 */
 	public static function customer_lookup_batch_init() {
-		$batch_size     = self::get_batch_size();
+		$batch_size     = self::get_batch_size( self::CUSTOMERS_BATCH_ACTION );
 		$customer_query = new WP_User_Query(
 			array(
 				'fields'  => 'ID',
@@ -421,12 +445,10 @@ class WC_Admin_Api_Init {
 				'number'  => 1,
 			)
 		);
-		$queue           = WC()->queue();
-		$schedule        = time() + 5;
 		$total_customers = $customer_query->get_total();
 		$num_batches     = ceil( $total_customers / $batch_size );
 
-		self::queue_batches( 1, $num_batches, 'wc-admin_process_customers_batch' );
+		self::queue_batches( 1, $num_batches, self::CUSTOMERS_BATCH_ACTION );
 	}
 
 	/**
@@ -436,7 +458,7 @@ class WC_Admin_Api_Init {
 	 * @return void
 	 */
 	public static function customer_lookup_process_batch( $batch_number ) {
-		$batch_size     = self::get_batch_size();
+		$batch_size     = self::get_batch_size( self::CUSTOMERS_BATCH_ACTION );
 		$customer_query = new WP_User_Query(
 			array(
 				'fields'  => 'ID',
