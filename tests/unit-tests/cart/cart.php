@@ -13,6 +13,93 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test for subtotals and multiple tax rounding.
+	 * Ticket:
+	 *  https://github.com/woocommerce/woocommerce/issues/21871
+	 */
+	public function test_cart_subtotal_issue_21871() {
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+
+		// Create dummy product - price will be 10.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 79 );
+		$product->save();
+
+		// Add taxes.
+		$tax_rate_025 = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '0.2500',
+				'tax_rate_name'     => 'TAX025',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$tax_rate_06 = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '6.0000',
+				'tax_rate_name'     => 'TAX06',
+				'tax_rate_priority' => '2',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$tax_rate_015 = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '1.5000',
+				'tax_rate_name'     => 'TAX015',
+				'tax_rate_priority' => '3',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$tax_rate_01 = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '1.000',
+				'tax_rate_name'     => 'TAX01',
+				'tax_rate_priority' => '4',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Add product to cart x1, calc and test
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		$this->assertEquals( '85.92', number_format( WC()->cart->total, 2, '.', '' ) );
+		$this->assertEquals( '85.92', number_format( WC()->cart->subtotal, 2, '.', '' ) );
+		$this->assertEquals( '85.92', wc_get_price_including_tax( $product ) );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		WC_Tax::_delete_tax_rate( $tax_rate_025 );
+		WC_Tax::_delete_tax_rate( $tax_rate_06 );
+		WC_Tax::_delete_tax_rate( $tax_rate_015 );
+		WC_Tax::_delete_tax_rate( $tax_rate_01 );
+	}
+
+	/**
 	 * Test tax rounding.
 	 * Ticket:
 	 *  https://github.com/woocommerce/woocommerce/issues/21021
@@ -98,7 +185,6 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 
 		WC_Tax::_delete_tax_rate( $tax_rate_23 );
 		WC_Tax::_delete_tax_rate( $tax_rate_5 );
-
 	}
 
 	/**
