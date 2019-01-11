@@ -4,6 +4,7 @@
  */
 import { Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
+import { Spinner } from '@wordpress/components';
 
 /**
  * `ChartPlaceholder` displays a large loading indiciator for use in place of a `Chart` while data is loading.
@@ -13,7 +14,9 @@ class ChartPlaceholder extends Component {
 		const { height } = this.props;
 
 		return (
-			<div aria-hidden="true" className="woocommerce-chart-placeholder" style={ { height } } />
+			<div aria-hidden="true" className="woocommerce-chart-placeholder" style={ { height } }>
+				<Spinner />
+			</div>
 		);
 	}
 }

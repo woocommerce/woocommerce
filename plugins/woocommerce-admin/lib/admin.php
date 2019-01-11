@@ -399,6 +399,11 @@ function wc_admin_get_user_data_fields() {
 		'revenue_report_columns',
 		'taxes_report_columns',
 		'variations_report_columns',
+		'dashboard_charts',
+		'dashboard_chart_type',
+		'dashboard_chart_interval',
+		'dashboard_leaderboards',
+		'dashboard_leaderboard_rows',
 	);
 
 	return apply_filters( 'wc_admin_get_user_data_fields', $user_data_fields );

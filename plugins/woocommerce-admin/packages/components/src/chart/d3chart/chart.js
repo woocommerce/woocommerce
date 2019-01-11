@@ -8,31 +8,31 @@ import { Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { timeFormat as d3TimeFormat, utcParse as d3UTCParse } from 'd3-time-format';
-import { select as d3Select } from 'd3-selection';
 
 /**
  * Internal dependencies
  */
 import D3Base from './d3base';
 import {
-	drawAxis,
-	drawBars,
-	drawLines,
 	getDateSpaces,
 	getOrderedKeys,
 	getLine,
 	getLineData,
-	getXTicks,
 	getUniqueKeys,
 	getUniqueDates,
+	getFormatter,
+} from './utils';
+import {
 	getXScale,
 	getXGroupScale,
 	getXLineScale,
 	getYMax,
 	getYScale,
 	getYTickOffset,
-	getFormatter,
-} from './utils';
+} from './utils/scales';
+import { drawAxis, getXTicks } from './utils/axis';
+import { drawBars } from './utils/bar-chart';
+import { drawLines } from './utils/line-chart';
 
 /**
  * A simple D3 line and bar chart component for timeseries data in React.
@@ -70,23 +70,48 @@ class D3Chart extends Component {
 	}
 
 	drawChart( node ) {
-		const { data, margin, type } = this.props;
-		const params = this.getParams();
-		const adjParams = Object.assign( {}, params, {
-			height: params.adjHeight,
-			width: params.adjWidth,
-			tooltip: d3Select( this.tooltipRef.current ),
-			valueType: params.valueType,
+		setTimeout( () => {
+			const { data, margin, type } = this.props;
+			const params = this.getParams();
+			const adjParams = Object.assign( {}, params, {
+				height: params.adjHeight,
+				width: params.adjWidth,
+				tooltip: this.tooltipRef.current,
+				valueType: params.valueType,
+			} );
+
+			const g = node
+				.attr( 'id', 'chart' )
+				.append( 'g' )
+				.attr( 'transform', `translate(${ margin.left },${ margin.top })` );
+
+			drawAxis( g, adjParams );
+			type === 'line' && drawLines( g, data, adjParams );
+			type === 'bar' && drawBars( g, data, adjParams );
 		} );
+	}
 
-		const g = node
-			.attr( 'id', 'chart' )
-			.append( 'g' )
-			.attr( 'transform', `translate(${ margin.left },${ margin.top })` );
+	shouldBeCompact() {
+		const {	data, margin, type, width } = this.props;
+		if ( type !== 'bar' ) {
+			return false;
+		}
+		const widthWithoutMargins = width - margin.left - margin.right;
+		const columnsPerDate = data && data.length ? Object.keys( data[ 0 ] ).length - 1 : 0;
+		const minimumWideWidth = data.length * ( columnsPerDate + 1 );
 
-		drawAxis( g, adjParams );
-		type === 'line' && drawLines( g, data, adjParams );
-		type === 'bar' && drawBars( g, data, adjParams );
+		return widthWithoutMargins < minimumWideWidth;
+	}
+
+	getWidth() {
+		const {	data, margin, type, width } = this.props;
+		if ( type !== 'bar' ) {
+			return width;
+		}
+		const columnsPerDate = data && data.length ? Object.keys( data[ 0 ] ).length - 1 : 0;
+		const minimumWidth = this.shouldBeCompact() ? data.length * columnsPerDate : data.length * ( columnsPerDate + 1 );
+
+		return Math.max( width, minimumWidth + margin.left + margin.right );
 	}
 
 	getParams() {
@@ -104,14 +129,14 @@ class D3Chart extends Component {
 			tooltipValueFormat,
 			tooltipTitle,
 			type,
-			width,
 			xFormat,
 			x2Format,
 			yFormat,
 			valueType,
 		} = this.props;
 		const adjHeight = height - margin.top - margin.bottom;
-		const adjWidth = width - margin.left - margin.right;
+		const adjWidth = this.getWidth() - margin.left - margin.right;
+		const compact = this.shouldBeCompact();
 		const uniqueKeys = getUniqueKeys( data );
 		const newOrderedKeys = orderedKeys || getOrderedKeys( data, uniqueKeys );
 		const lineData = getLineData( data, newOrderedKeys );
@@ -120,7 +145,7 @@ class D3Chart extends Component {
 		const parseDate = d3UTCParse( dateParser );
 		const uniqueDates = getUniqueDates( lineData, parseDate );
 		const xLineScale = getXLineScale( uniqueDates, adjWidth );
-		const xScale = getXScale( uniqueDates, adjWidth );
+		const xScale = getXScale( uniqueDates, adjWidth, compact );
 		const xTicks = getXTicks( uniqueDates, adjWidth, mode, interval );
 		return {
 			adjHeight,
@@ -143,7 +168,7 @@ class D3Chart extends Component {
 			uniqueKeys,
 			xFormat: getFormatter( xFormat, d3TimeFormat ),
 			x2Format: getFormatter( x2Format, d3TimeFormat ),
-			xGroupScale: getXGroupScale( orderedKeys, xScale ),
+			xGroupScale: getXGroupScale( orderedKeys, xScale, compact ),
 			xLineScale,
 			xTicks,
 			xScale,
@@ -156,21 +181,24 @@ class D3Chart extends Component {
 	}
 
 	render() {
-		if ( isEmpty( this.props.data ) ) {
+		const { className, data, height } = this.props;
+		if ( isEmpty( data ) ) {
 			return null; // TODO: improve messaging
 		}
+		const computedWidth = this.getWidth();
 		return (
 			<div
-				className={ classNames( 'd3-chart__container', this.props.className ) }
-				style={ { height: this.props.height } }
+				className={ classNames( 'd3-chart__container', className ) }
+				style={ { height } }
 			>
 				<D3Base
 					className={ classNames( this.props.className ) }
 					data={ this.state.allData }
 					drawChart={ this.drawChart }
-					height={ this.props.height }
+					height={ height }
+					tooltipRef={ this.tooltipRef }
 					type={ this.state.type }
-					width={ this.props.width }
+					width={ computedWidth }
 				/>
 				<div className="d3-chart__tooltip" ref={ this.tooltipRef } />
 			</div>

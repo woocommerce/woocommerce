@@ -38,26 +38,33 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args                            = array();
-		$args['before']                  = $request['before'];
-		$args['after']                   = $request['after'];
-		$args['page']                    = $request['page'];
-		$args['per_page']                = $request['per_page'];
-		$args['name']                    = $request['name'];
-		$args['username']                = $request['username'];
-		$args['email']                   = $request['email'];
-		$args['country']                 = $request['country'];
-		$args['last_active_before']      = $request['last_active_before'];
-		$args['last_active_after']       = $request['last_active_after'];
-		$args['order_count_min']         = $request['order_count_min'];
-		$args['order_count_max']         = $request['order_count_max'];
-		$args['order_count_between']     = $request['order_count_between'];
-		$args['total_spend_min']         = $request['total_spend_min'];
-		$args['total_spend_max']         = $request['total_spend_max'];
-		$args['total_spend_between']     = $request['total_spend_between'];
-		$args['avg_order_value_min']     = $request['avg_order_value_min'];
-		$args['avg_order_value_max']     = $request['avg_order_value_max'];
-		$args['avg_order_value_between'] = $request['avg_order_value_between'];
+		$args                        = array();
+		$args['registered_before']   = $request['registered_before'];
+		$args['registered_after']    = $request['registered_after'];
+		$args['page']                = $request['page'];
+		$args['per_page']            = $request['per_page'];
+		$args['order']               = $request['order'];
+		$args['orderby']             = $request['orderby'];
+		$args['match']               = $request['match'];
+		$args['name']                = $request['name'];
+		$args['username']            = $request['username'];
+		$args['email']               = $request['email'];
+		$args['country']             = $request['country'];
+		$args['last_active_before']  = $request['last_active_before'];
+		$args['last_active_after']   = $request['last_active_after'];
+		$args['orders_count_min']    = $request['orders_count_min'];
+		$args['orders_count_max']    = $request['orders_count_max'];
+		$args['total_spend_min']     = $request['total_spend_min'];
+		$args['total_spend_max']     = $request['total_spend_max'];
+		$args['avg_order_value_min'] = $request['avg_order_value_min'];
+		$args['avg_order_value_max'] = $request['avg_order_value_max'];
+		$args['last_order_before']   = $request['last_order_before'];
+		$args['last_order_after']    = $request['last_order_after'];
+
+		$between_params = array( 'orders_count', 'total_spend', 'avg_order_value' );
+		$normalized     = WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params );
+		$args           = array_merge( $args, $normalized );
+
 		return $args;
 	}
 
@@ -69,19 +76,20 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 	 */
 	public function get_items( $request ) {
 		$query_args      = $this->prepare_reports_query( $request );
-		$customers_query = new WC_Reports_Orders_Stats_Query( $query_args ); // @todo change to correct class.
+		$customers_query = new WC_Admin_Reports_Customers_Query( $query_args );
 		$report_data     = $customers_query->get_data();
-		$out_data        = array(
-			'totals'    => get_object_vars( $report_data->totals ),
-			'customers' => array(),
-		);
-		foreach ( $report_data->customers as $customer_data ) {
-			$item_data               = $this->prepare_item_for_response( (object) $customer_data, $request );
-			$out_data['customers'][] = $item_data;
+
+		$data = array();
+
+		foreach ( $report_data->data as $customer_data ) {
+			$item   = $this->prepare_item_for_response( $customer_data, $request );
+			$data[] = $this->prepare_response_for_collection( $item );
 		}
-		$response = rest_ensure_response( $out_data );
+
+		$response = rest_ensure_response( $data );
 		$response->header( 'X-WP-Total', (int) $report_data->total );
 		$response->header( 'X-WP-TotalPages', (int) $report_data->pages );
+
 		$page      = $report_data->page_no;
 		$max_pages = $report_data->pages;
 		$base      = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
@@ -98,21 +106,26 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 			$next_link = add_query_arg( 'page', $next_page, $base );
 			$response->link_header( 'next', $next_link );
 		}
+
 		return $response;
 	}
 
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param stdClass        $report  Report data.
+	 * @param array           $report  Report data.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$data    = get_object_vars( $report );
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
+		$context                      = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data                         = $this->add_additional_fields_to_object( $report, $request );
+		$data['date_registered_gmt']  = wc_rest_prepare_date_response( $data['date_registered'] );
+		$data['date_registered']      = wc_rest_prepare_date_response( $data['date_registered'], false );
+		$data['date_last_active_gmt'] = wc_rest_prepare_date_response( $data['date_last_active'] );
+		$data['date_last_active']     = wc_rest_prepare_date_response( $data['date_last_active'], false );
+		$data                         = $this->filter_response_by_context( $data, $context );
+
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 		$response->add_links( $this->prepare_links( $report ) );
@@ -131,16 +144,19 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Reports_Query $object Object data.
+	 * @param array $object Object data.
 	 * @return array
 	 */
 	protected function prepare_links( $object ) {
-		$links = array(
+		if ( empty( $object['user_id'] ) ) {
+			return array();
+		}
+
+		return array(
 			'customer' => array(
-				'href' => rest_url( sprintf( '/%s/customers/%d', $this->namespace, $object->customer_id ) ),
+				'href' => rest_url( sprintf( '/%s/customers/%d', $this->namespace, $object['user_id'] ) ),
 			),
 		);
-		return $links;
 	}
 
 	/**
@@ -154,15 +170,57 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 			'title'      => 'report_customers',
 			'type'       => 'object',
 			'properties' => array(
-				'id'                   => array(
-					'description' => __( 'ID.', 'wc-admin' ),
+				'customer_id'          => array(
+					'description' => __( 'Customer ID.', 'wc-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'customer_id'          => array(
-					'description' => __( 'Customer ID.', 'wc-admin' ),
+				'user_id'              => array(
+					'description' => __( 'User ID.', 'wc-admin' ),
 					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'name'                 => array(
+					'description' => __( 'Name.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'username'             => array(
+					'description' => __( 'Username.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'country'              => array(
+					'description' => __( 'Country.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'city'                 => array(
+					'description' => __( 'City.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'postcode'             => array(
+					'description' => __( 'Postal code.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_registered'      => array(
+					'description' => __( 'Date registered.', 'wc-admin' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_registered_gmt'  => array(
+					'description' => __( 'Date registered GMT.', 'wc-admin' ),
+					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
@@ -209,14 +267,14 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 	public function get_collection_params() {
 		$params                            = array();
 		$params['context']                 = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['before']                  = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'wc-admin' ),
+		$params['registered_before']       = array(
+			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after']                   = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'wc-admin' ),
+		$params['registered_after']        = array(
+			'description'       => __( 'Limit response to objects registered after (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -238,7 +296,42 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['name']                    = array(
+		$params['order']               = array(
+			'description'       => __( 'Order sort attribute ascending or descending.', 'wc-admin' ),
+			'type'              => 'string',
+			'default'           => 'desc',
+			'enum'              => array( 'asc', 'desc' ),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['orderby']             = array(
+			'description'       => __( 'Sort collection by object attribute.', 'wc-admin' ),
+			'type'              => 'string',
+			'default'           => 'date_registered',
+			'enum'              => array(
+				'username',
+				'name',
+				'country',
+				'city',
+				'postcode',
+				'date_registered',
+				'date_last_active',
+				'orders_count',
+				'total_spend',
+				'avg_order_value',
+			),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['match']               = array(
+			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'wc-admin' ),
+			'type'              => 'string',
+			'default'           => 'all',
+			'enum'              => array(
+				'all',
+				'any',
+			),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['name']                = array(
 			'description'       => __( 'Limit response to objects with a specfic customer name.', 'wc-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -270,22 +363,34 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order_count_min']         = array(
+		$params['registered_before']  = array(
+			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['registered_after']   = array(
+			'description'       => __( 'Limit response to objects registered after (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['orders_count_min']    = array(
 			'description'       => __( 'Limit response to objects with an order count greater than or equal to given integer.', 'wc-admin' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order_count_max']         = array(
+		$params['orders_count_max']    = array(
 			'description'       => __( 'Limit response to objects with an order count less than or equal to given integer.', 'wc-admin' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order_count_between']     = array(
+		$params['orders_count_between']     = array(
 			'description'       => __( 'Limit response to objects with an order count between two given integers.', 'wc-admin' ),
 			'type'              => 'array',
-			'validate_callback' => 'rest_validate_request_arg',
+			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_arg' ),
 		);
 		$params['total_spend_min']         = array(
 			'description'       => __( 'Limit response to objects with a total order spend greater than or equal to given number.', 'wc-admin' ),
@@ -300,7 +405,7 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		$params['total_spend_between']     = array(
 			'description'       => __( 'Limit response to objects with a total order spend between two given numbers.', 'wc-admin' ),
 			'type'              => 'array',
-			'validate_callback' => 'rest_validate_request_arg',
+			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_arg' ),
 		);
 		$params['avg_order_value_min']     = array(
 			'description'       => __( 'Limit response to objects with an average order spend greater than or equal to given number.', 'wc-admin' ),
@@ -315,6 +420,18 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		$params['avg_order_value_between'] = array(
 			'description'       => __( 'Limit response to objects with an average order spend between two given numbers.', 'wc-admin' ),
 			'type'              => 'array',
+			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_arg' ),
+		);
+		$params['last_order_before']       = array(
+			'description'       => __( 'Limit response to objects with last order before (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['last_order_after']        = array(
+			'description'       => __( 'Limit response to objects with last order after (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		return $params;

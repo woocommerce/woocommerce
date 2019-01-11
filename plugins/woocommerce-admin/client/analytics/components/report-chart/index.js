@@ -68,7 +68,18 @@ export class ReportChart extends Component {
 	}
 
 	render() {
-		const { query, itemsLabel, mode, path, primaryData, secondaryData, selectedChart } = this.props;
+		const {
+			interactiveLegend,
+			itemsLabel,
+			legendPosition,
+			mode,
+			path,
+			primaryData,
+			query,
+			secondaryData,
+			selectedChart,
+			showHeaderControls,
+		} = this.props;
 
 		if ( primaryData.isError || secondaryData.isError ) {
 			return <ReportError isError />;
@@ -106,23 +117,26 @@ export class ReportChart extends Component {
 
 		return (
 			<Chart
+				allowedIntervals={ allowedIntervals }
+				data={ chartData }
+				dateParser={ '%Y-%m-%dT%H:%M:%S' }
+				interactiveLegend={ interactiveLegend }
+				interval={ currentInterval }
+				isRequesting={ primaryData.isRequesting || secondaryData.isRequesting }
+				itemsLabel={ itemsLabel }
+				legendPosition={ legendPosition }
+				mode={ mode || this.getChartMode() }
 				path={ path }
 				query={ query }
-				data={ chartData }
+				showHeaderControls={ showHeaderControls }
 				title={ selectedChart.label }
-				interval={ currentInterval }
-				type={ getChartTypeForQuery( query ) }
-				allowedIntervals={ allowedIntervals }
-				itemsLabel={ itemsLabel }
-				mode={ mode || this.getChartMode() }
 				tooltipLabelFormat={ formats.tooltipLabelFormat }
-				tooltipValueFormat={ getTooltipValueFormat( selectedChart.type ) }
 				tooltipTitle={ selectedChart.label }
+				tooltipValueFormat={ getTooltipValueFormat( selectedChart.type ) }
+				type={ getChartTypeForQuery( query ) }
+				valueType={ selectedChart.type }
 				xFormat={ formats.xFormat }
 				x2Format={ formats.x2Format }
-				dateParser={ '%Y-%m-%dT%H:%M:%S' }
-				valueType={ selectedChart.type }
-				isRequesting={ primaryData.isRequesting || secondaryData.isRequesting }
 			/>
 		);
 	}

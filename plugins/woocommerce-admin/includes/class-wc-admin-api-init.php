@@ -29,6 +29,10 @@ class WC_Admin_Api_Init {
 
 		// Initialize Orders data store class's static vars.
 		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'orders_data_store_init' ), 20 );
+		// Initialize Customers Report data store sync hooks.
+		// Note: we need to hook into 'wp' before `wc_current_user_is_active`.
+		// See: https://github.com/woocommerce/woocommerce/blob/942615101ba00c939c107c3a4820c3d466864872/includes/wc-user-functions.php#L749.
+		add_action( 'wp', array( 'WC_Admin_Api_Init', 'customers_report_data_store_init' ), 9 );
 	}
 
 	/**
@@ -54,6 +58,8 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-coupons-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-coupons-stats-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-downloads-query.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-downloads-stats-query.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-customers-query.php';
 
 		// Data stores.
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-data-store.php';
@@ -67,6 +73,8 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-coupons-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-coupons-stats-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-downloads-data-store.php';
+		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-downloads-stats-data-store.php';
+		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-customers-data-store.php';
 
 		// Data triggers.
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-notes-data-store.php';
@@ -100,35 +108,43 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-products-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-variations-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-products-stats-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-performance-indicators-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-revenue-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-stock-controller.php';
-		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-controller.php';
 
-		$controllers = array(
-			'WC_Admin_REST_Admin_Notes_Controller',
-			'WC_Admin_REST_Customers_Controller',
-			'WC_Admin_REST_Data_Controller',
-			'WC_Admin_REST_Data_Download_Ips_Controller',
-			'WC_Admin_REST_Orders_Controller',
-			'WC_Admin_REST_Products_Controller',
-			'WC_Admin_REST_Product_Reviews_Controller',
-			'WC_Admin_REST_Reports_Controller',
-			'WC_Admin_REST_System_Status_Tools_Controller',
-			'WC_Admin_REST_Reports_Products_Controller',
-			'WC_Admin_REST_Reports_Variations_Controller',
-			'WC_Admin_REST_Reports_Products_Stats_Controller',
-			'WC_Admin_REST_Reports_Revenue_Stats_Controller',
-			'WC_Admin_REST_Reports_Orders_Stats_Controller',
-			'WC_Admin_REST_Reports_Categories_Controller',
-			'WC_Admin_REST_Reports_Taxes_Controller',
-			'WC_Admin_REST_Reports_Taxes_Stats_Controller',
-			'WC_Admin_REST_Reports_Coupons_Controller',
-			'WC_Admin_REST_Reports_Coupons_Stats_Controller',
-			'WC_Admin_REST_Reports_Stock_Controller',
-			'WC_Admin_REST_Reports_Downloads_Controller',
+		$controllers = apply_filters(
+			'woocommerce_admin_rest_controllers',
+			array(
+				'WC_Admin_REST_Admin_Notes_Controller',
+				'WC_Admin_REST_Customers_Controller',
+				'WC_Admin_REST_Data_Controller',
+				'WC_Admin_REST_Data_Download_Ips_Controller',
+				'WC_Admin_REST_Orders_Controller',
+				'WC_Admin_REST_Products_Controller',
+				'WC_Admin_REST_Product_Reviews_Controller',
+				'WC_Admin_REST_Reports_Controller',
+				'WC_Admin_REST_System_Status_Tools_Controller',
+				'WC_Admin_REST_Reports_Products_Controller',
+				'WC_Admin_REST_Reports_Variations_Controller',
+				'WC_Admin_REST_Reports_Products_Stats_Controller',
+				'WC_Admin_REST_Reports_Revenue_Stats_Controller',
+				'WC_Admin_REST_Reports_Orders_Stats_Controller',
+				'WC_Admin_REST_Reports_Categories_Controller',
+				'WC_Admin_REST_Reports_Taxes_Controller',
+				'WC_Admin_REST_Reports_Taxes_Stats_Controller',
+				'WC_Admin_REST_Reports_Coupons_Controller',
+				'WC_Admin_REST_Reports_Coupons_Stats_Controller',
+				'WC_Admin_REST_Reports_Stock_Controller',
+				'WC_Admin_REST_Reports_Downloads_Controller',
+				'WC_Admin_REST_Reports_Downloads_Stats_Controller',
+				'WC_Admin_REST_Reports_Customers_Controller',
+			)
 		);
+
+		// The performance indicators controller must be registered last, after other /stats endpoints have been registered.
+		$controllers[] = 'WC_Admin_REST_Reports_Performance_Indicators_Controller';
 
 		foreach ( $controllers as $controller ) {
 			$this->$controller = new $controller();
@@ -258,6 +274,9 @@ class WC_Admin_Api_Init {
 	 * Regenerate data for reports.
 	 */
 	public static function regenerate_report_data() {
+		// Add registered customers to the lookup table before updating order stats
+		// so that the orders can be associated with the `customer_id` column.
+		self::customer_lookup_store_init();
 		WC_Admin_Reports_Orders_Data_Store::queue_order_stats_repopulate_database();
 		self::order_product_lookup_store_init();
 	}
@@ -329,6 +348,59 @@ class WC_Admin_Api_Init {
 	}
 
 	/**
+	 * Init customers report data store.
+	 */
+	public static function customers_report_data_store_init() {
+		WC_Admin_Reports_Customers_Data_Store::init();
+	}
+
+	/**
+	 * Init customer lookup store.
+	 *
+	 * @param WC_Background_Updater|null $updater Updater instance.
+	 * @return bool
+	 */
+	public static function customer_lookup_store_init( $updater = null ) {
+		// TODO: this needs to be updated a bit, as it no longer runs as a part of WC_Install, there is no bg updater.
+		global $wpdb;
+
+		// Backfill customer lookup table with registered customers.
+		$customer_ids = get_transient( 'wc_update_350_all_customers' );
+
+		if ( false === $customer_ids ) {
+			$customer_query = new WP_User_Query(
+				array(
+					'fields' => 'ID',
+					'role'   => 'customer',
+					'number' => -1,
+				)
+			);
+
+			$customer_ids = $customer_query->get_results();
+
+			set_transient( 'wc_update_350_all_customers', $customer_ids, DAY_IN_SECONDS );
+		}
+
+		// Process customers until close to running out of memory timeouts on large sites then requeue.
+		foreach ( $customer_ids as $customer_id ) {
+			$result = WC_Admin_Reports_Customers_Data_Store::update_registered_customer( $customer_id );
+
+			if ( $result ) {
+				// Pop the customer ID from the array for updating the transient later should we near memory exhaustion.
+				unset( $customer_ids[ $customer_id ] );
+			}
+
+			if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
+				// Update the transient for the next run to avoid processing the same orders again.
+				set_transient( 'wc_update_350_all_customers', $customer_ids, DAY_IN_SECONDS );
+				return true;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Adds data stores.
 	 *
 	 * @param array $data_stores List of data stores.
@@ -338,18 +410,20 @@ class WC_Admin_Api_Init {
 		return array_merge(
 			$data_stores,
 			array(
-				'report-revenue-stats'  => 'WC_Admin_Reports_Orders_Data_Store',
-				'report-orders-stats'   => 'WC_Admin_Reports_Orders_Data_Store',
-				'report-products'       => 'WC_Admin_Reports_Products_Data_Store',
-				'report-variations'     => 'WC_Admin_Reports_Variations_Data_Store',
-				'report-products-stats' => 'WC_Admin_Reports_Products_Stats_Data_Store',
-				'report-categories'     => 'WC_Admin_Reports_Categories_Data_Store',
-				'report-taxes'          => 'WC_Admin_Reports_Taxes_Data_Store',
-				'report-taxes-stats'    => 'WC_Admin_Reports_Taxes_Stats_Data_Store',
-				'report-coupons'        => 'WC_Admin_Reports_Coupons_Data_Store',
-				'report-coupons-stats'  => 'WC_Admin_Reports_Coupons_Stats_Data_Store',
-				'report-downloads'      => 'WC_Admin_Reports_Downloads_Data_Store',
-				'admin-note'            => 'WC_Admin_Notes_Data_Store',
+				'report-revenue-stats'   => 'WC_Admin_Reports_Orders_Data_Store',
+				'report-orders-stats'    => 'WC_Admin_Reports_Orders_Data_Store',
+				'report-products'        => 'WC_Admin_Reports_Products_Data_Store',
+				'report-variations'      => 'WC_Admin_Reports_Variations_Data_Store',
+				'report-products-stats'  => 'WC_Admin_Reports_Products_Stats_Data_Store',
+				'report-categories'      => 'WC_Admin_Reports_Categories_Data_Store',
+				'report-taxes'           => 'WC_Admin_Reports_Taxes_Data_Store',
+				'report-taxes-stats'     => 'WC_Admin_Reports_Taxes_Stats_Data_Store',
+				'report-coupons'         => 'WC_Admin_Reports_Coupons_Data_Store',
+				'report-coupons-stats'   => 'WC_Admin_Reports_Coupons_Stats_Data_Store',
+				'report-downloads'       => 'WC_Admin_Reports_Downloads_Data_Store',
+				'report-downloads-stats' => 'WC_Admin_Reports_Downloads_Stats_Data_Store',
+				'admin-note'             => 'WC_Admin_Notes_Data_Store',
+				'report-customers'       => 'WC_Admin_Reports_Customers_Data_Store',
 			)
 		);
 	}
@@ -373,6 +447,7 @@ class WC_Admin_Api_Init {
 				"{$wpdb->prefix}wc_order_coupon_lookup",
 				"{$wpdb->prefix}woocommerce_admin_notes",
 				"{$wpdb->prefix}woocommerce_admin_note_actions",
+				"{$wpdb->prefix}wc_customer_lookup",
 			)
 		);
 	}
@@ -401,6 +476,8 @@ class WC_Admin_Api_Init {
 			shipping_total double DEFAULT 0 NOT NULL,
 			net_total double DEFAULT 0 NOT NULL,
 			returning_customer boolean DEFAULT 0 NOT NULL,
+			status varchar(200) NOT NULL,
+			customer_id BIGINT UNSIGNED NOT NULL,
 			PRIMARY KEY (order_id),
 			KEY date_created (date_created)
 		  ) $collate;
@@ -469,6 +546,22 @@ class WC_Admin_Api_Init {
 				PRIMARY KEY (action_id),
 				KEY note_id (note_id)
 				) $collate;
+			CREATE TABLE {$wpdb->prefix}wc_customer_lookup (
+				customer_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+				user_id BIGINT UNSIGNED DEFAULT NULL,
+				username varchar(60) DEFAULT '' NOT NULL,
+				first_name varchar(255) NOT NULL,
+				last_name varchar(255) NOT NULL,
+				email varchar(100) NOT NULL,
+				date_last_active timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
+				date_registered timestamp NULL default null,
+				country char(2) DEFAULT '' NOT NULL,
+				postcode varchar(20) DEFAULT '' NOT NULL,
+				city varchar(100) DEFAULT '' NOT NULL,
+				PRIMARY KEY (customer_id),
+				UNIQUE KEY user_id (user_id),
+				KEY email (email)
+				) $collate;
 			";
 
 		return $tables;
@@ -492,17 +585,7 @@ class WC_Admin_Api_Init {
 
 		// Initialize report tables.
 		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'order_product_lookup_store_init' ), 20 );
-	}
-
-	/**
-	 * Enables the WP REST API for product categories
-	 *
-	 * @param array $args Default arguments for product_cat taxonomy.
-	 * @return array
-	 */
-	public static function show_product_categories_in_rest( $args ) {
-		$args['show_in_rest'] = true;
-		return $args;
+		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'customer_lookup_store_init' ), 20 );
 	}
 
 }

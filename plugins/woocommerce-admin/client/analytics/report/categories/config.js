@@ -18,7 +18,7 @@ export const charts = [
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Gross Revenue', 'wc-admin' ),
+		label: __( 'Net Revenue', 'wc-admin' ),
 		type: 'currency',
 	},
 	{

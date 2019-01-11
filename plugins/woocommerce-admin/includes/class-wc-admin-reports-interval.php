@@ -1,6 +1,6 @@
 <?php
 /**
- * Class for time interval handling for reports
+ * Class for time interval and numeric range handling for reports.
  *
  * @package  WooCommerce Admin/Classes
  */
@@ -8,7 +8,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Date & time interval handling class for Reporting API.
+ * Date & time interval and numeric range handling class for Reporting API.
  */
 class WC_Admin_Reports_Interval {
 
@@ -475,4 +475,72 @@ class WC_Admin_Reports_Interval {
 		}
 	}
 
+	/**
+	 * Normalize "*_between" parameters to "*_min" and "*_max".
+	 *
+	 * @param array        $request Query params from REST API request.
+	 * @param string|array $param_names One or more param names to handle. Should not include "_between" suffix.
+	 * @return array Normalized query values.
+	 */
+	public static function normalize_between_params( $request, $param_names ) {
+		if ( ! is_array( $param_names ) ) {
+			$param_names = array( $param_names );
+		}
+
+		$normalized = array();
+
+		foreach ( $param_names as $param_name ) {
+			if ( ! is_array( $request[ $param_name . '_between' ] ) ) {
+				continue;
+			}
+
+			$range = $request[ $param_name . '_between' ];
+
+			if ( 2 !== count( $range ) ) {
+				continue;
+			}
+
+			if ( $range[0] < $range[1] ) {
+				$normalized[ $param_name . '_min' ] = $range[0];
+				$normalized[ $param_name . '_max' ] = $range[1];
+			} else {
+				$normalized[ $param_name . '_min' ] = $range[1];
+				$normalized[ $param_name . '_max' ] = $range[0];
+			}
+		}
+
+		return $normalized;
+	}
+
+	/**
+	 * Validate a "*_between" range argument (an array with 2 numeric items).
+	 *
+	 * @param  mixed           $value Parameter value.
+	 * @param  WP_REST_Request $request REST Request.
+	 * @param  string          $param Parameter name.
+	 * @return WP_Error|boolean
+	 */
+	public static function rest_validate_between_arg( $value, $request, $param ) {
+		if ( ! wp_is_numeric_array( $value ) ) {
+			return new WP_Error(
+				'rest_invalid_param',
+				/* translators: 1: parameter name */
+				sprintf( __( '%1$s is not a numerically indexed array.', 'wc-admin' ), $param )
+			);
+		}
+
+		if (
+			2 !== count( $value ) ||
+			! is_numeric( $value[0] ) ||
+			! is_numeric( $value[1] )
+		) {
+			return new WP_Error(
+				'rest_invalid_param',
+				/* translators: %s: parameter name */
+				sprintf( __( '%s must contain 2 numbers.', 'wc-admin' ), $param )
+			);
+		}
+
+		return true;
+	}
 }

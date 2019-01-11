@@ -181,6 +181,71 @@ class WC_Admin_Reports_Data_Store {
 	}
 
 	/**
+	 * Returns expected number of items on the page in case of date ordering.
+	 *
+	 * @param int $expected_interval_count Expected number of intervals in total.
+	 * @param int $items_per_page          Number of items per page.
+	 * @param int $page_no                 Page number.
+	 *
+	 * @return float|int
+	 */
+	protected function expected_intervals_on_page( $expected_interval_count, $items_per_page, $page_no ) {
+		$total_pages = (int) ceil( $expected_interval_count / $items_per_page );
+		if ( $page_no < $total_pages ) {
+			return $items_per_page;
+		} elseif ( $page_no === $total_pages ) {
+			return $expected_interval_count - ( $page_no - 1 ) * $items_per_page;
+		} else {
+			return 0;
+		}
+	}
+
+	/**
+	 * Returns true if there are any intervals that need to be filled in the response.
+	 *
+	 * @param int    $expected_interval_count Expected number of intervals in total.
+	 * @param int    $db_records              Total number of records for given period in the database.
+	 * @param int    $items_per_page          Number of items per page.
+	 * @param int    $page_no                 Page number.
+	 * @param string $order                   asc or desc.
+	 * @param string $order_by                Column by which the result will be sorted.
+	 * @param int    $intervals_count         Number of records for given (possibly shortened) time interval.
+	 *
+	 * @return bool
+	 */
+	protected function intervals_missing( $expected_interval_count, $db_records, $items_per_page, $page_no, $order, $order_by, $intervals_count ) {
+		if ( $expected_interval_count > $db_records ) {
+			if ( 'date' === $order_by ) {
+				$expected_intervals_on_page = $this->expected_intervals_on_page( $expected_interval_count, $items_per_page, $page_no );
+				if ( $intervals_count < $expected_intervals_on_page ) {
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				if ( 'desc' === $order ) {
+					if ( $page_no > floor( $db_records / $items_per_page ) ) {
+						return true;
+					} else {
+						return false;
+					}
+				} elseif ( 'asc' === $order ) {
+					if ( $page_no <= ceil( ( $expected_interval_count - $db_records ) / $items_per_page ) ) {
+						return true;
+					} else {
+						return false;
+					}
+				} else {
+					// Invalid ordering.
+					return false;
+				}
+			}
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * Updates the LIMIT query part for Intervals query of the report.
 	 *
 	 * If there are less records in the database than time intervals, then we need to remap offset in SQL query
@@ -346,7 +411,7 @@ class WC_Admin_Reports_Data_Store {
 	 * @param string $status Order status.
 	 * @return string
 	 */
-	protected function normalize_order_status( $status ) {
+	protected static function normalize_order_status( $status ) {
 		$status = trim( $status );
 		return 'wc-' . $status;
 	}
@@ -709,14 +774,14 @@ class WC_Admin_Reports_Data_Store {
 		if ( isset( $query_args['status_is'] ) && is_array( $query_args['status_is'] ) && count( $query_args['status_is'] ) > 0 ) {
 			$allowed_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is'] );
 			if ( $allowed_statuses ) {
-				$subqueries[] = "{$wpdb->prefix}posts.post_status IN ( '" . implode( "','", $allowed_statuses ) . "' )";
+				$subqueries[] = "{$wpdb->prefix}wc_order_stats.status IN ( '" . implode( "','", $allowed_statuses ) . "' )";
 			}
 		}
 
 		if ( isset( $query_args['status_is_not'] ) && is_array( $query_args['status_is_not'] ) && count( $query_args['status_is_not'] ) > 0 ) {
 			$forbidden_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is_not'] );
 			if ( $forbidden_statuses ) {
-				$subqueries[] = "{$wpdb->prefix}posts.post_status NOT IN ( '" . implode( "','", $forbidden_statuses ) . "' )";
+				$subqueries[] = "{$wpdb->prefix}wc_order_stats.status NOT IN ( '" . implode( "','", $forbidden_statuses ) . "' )";
 			}
 		}
 

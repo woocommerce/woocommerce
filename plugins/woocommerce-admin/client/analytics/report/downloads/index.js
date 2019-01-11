@@ -29,7 +29,6 @@ export default class DownloadsReport extends Component {
 					query={ query }
 					path={ path }
 					filters={ filters }
-					showDatePicker={ false }
 					advancedFilters={ advancedFilters }
 				/>
 				<ReportSummary

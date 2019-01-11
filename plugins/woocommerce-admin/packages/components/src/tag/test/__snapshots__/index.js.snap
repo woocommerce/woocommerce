@@ -77,7 +77,7 @@ exports[`Tag <Tag label="foo" remove={ noop } /> should render a tag with a clos
     type="button"
   >
     <svg
-      aria-hidden={true}
+      aria-hidden="true"
       className="dashicon dashicons-dismiss"
       focusable="false"
       height={20}

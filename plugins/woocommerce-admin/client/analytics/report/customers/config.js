@@ -18,7 +18,7 @@ export const filters = [
 		param: 'filter',
 		showFilters: () => true,
 		filters: [
-			{ label: __( 'All Registered Customers', 'wc-admin' ), value: 'all' },
+			{ label: __( 'All Customers', 'wc-admin' ), value: 'all' },
 			{ label: __( 'Advanced Filters', 'wc-admin' ), value: 'advanced' },
 		],
 	},

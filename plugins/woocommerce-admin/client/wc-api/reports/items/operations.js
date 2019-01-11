@@ -14,10 +14,6 @@ import { stringifyQuery } from '@woocommerce/navigation';
  */
 import { getResourceIdentifier, getResourcePrefix } from '../../utils';
 import { NAMESPACE } from '../../constants';
-import { SWAGGERNAMESPACE } from 'store/constants';
-
-// TODO: Remove once swagger endpoints are phased out.
-const swaggerEndpoints = [ 'customers', 'downloads' ];
 
 const typeEndpointMap = {
 	'report-items-query-orders': 'orders',
@@ -42,16 +38,10 @@ function read( resourceNames, fetch = apiFetch ) {
 		const prefix = getResourcePrefix( resourceName );
 		const endpoint = typeEndpointMap[ prefix ];
 		const query = getResourceIdentifier( resourceName );
-
 		const fetchArgs = {
 			parse: false,
+			path: NAMESPACE + '/reports/' + endpoint + stringifyQuery( query ),
 		};
-
-		if ( swaggerEndpoints.indexOf( endpoint ) >= 0 ) {
-			fetchArgs.url = SWAGGERNAMESPACE + 'reports/' + endpoint + stringifyQuery( query );
-		} else {
-			fetchArgs.path = NAMESPACE + '/reports/' + endpoint + stringifyQuery( query );
-		}
 
 		try {
 			const response = await fetch( fetchArgs );

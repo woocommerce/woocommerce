@@ -9,7 +9,8 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { getColor, getFormatter } from './utils';
+import { getFormatter } from './utils';
+import { getColor } from './utils/color';
 
 /**
  * A legend specifically designed for the WooCommerce admin charts.

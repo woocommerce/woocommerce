@@ -56,18 +56,24 @@ export const periods = [
 /**
  * Adds timestamp to a string date.
  *
- * @param {string} date - Date as a string.
- * @param {string} timeOfDay - Either `start` or `end` of the day.
+ * @param {moment.Moment} date - Date as a moment object.
+ * @param {string} timeOfDay - Either `start`, `now` or `end` of the day.
  * @return {string} - String date with timestamp attached.
  */
 export const appendTimestamp = ( date, timeOfDay ) => {
+	date = date.format( isoDateFormat );
 	if ( timeOfDay === 'start' ) {
 		return date + 'T00:00:00+00:00';
+	}
+	if ( timeOfDay === 'now' ) {
+		// Set seconds to 00 to avoid consecutives calls happening before the previous
+		// one finished.
+		return date + 'T' + moment().format( 'HH:mm:00' ) + '+00:00';
 	}
 	if ( timeOfDay === 'end' ) {
 		return date + 'T23:59:59+00:00';
 	}
-	throw new Error( 'appendTimestamp requires second parameter to be either `start` or `end`' );
+	throw new Error( 'appendTimestamp requires second parameter to be either `start`, `now` or `end`' );
 };
 
 /**
@@ -172,14 +178,14 @@ export function getLastPeriod( period, compare ) {
  */
 export function getCurrentPeriod( period, compare ) {
 	const primaryStart = moment().startOf( period );
-	const primaryEnd = moment().add( 1, 'hour' );
-	const hoursSoFar = primaryEnd.diff( primaryStart, 'hours' );
+	const primaryEnd = moment();
+	const daysSoFar = primaryEnd.diff( primaryStart, 'days' );
 	let secondaryStart;
 	let secondaryEnd;
 
 	if ( 'previous_period' === compare ) {
 		secondaryStart = primaryStart.clone().subtract( 1, period );
-		secondaryEnd = primaryEnd.clone().subtract( 1, period ).add( 1, 'hour' );
+		secondaryEnd = primaryEnd.clone().subtract( 1, period );
 	} else {
 		secondaryStart =
 			'week' === period
@@ -189,7 +195,7 @@ export function getCurrentPeriod( period, compare ) {
 						.week( primaryStart.week() )
 						.startOf( 'week' )
 				: primaryStart.clone().subtract( 1, 'years' );
-		secondaryEnd = secondaryStart.clone().add( hoursSoFar + 1, 'hours' );
+		secondaryEnd = secondaryStart.clone().add( daysSoFar, 'days' );
 	}
 	return {
 		primaryStart,
@@ -256,9 +262,9 @@ function getDateValue( period, compare, after, before ) {
  * Add default date-related parameters to a query object
  *
  * @param {string} [period] - period value, ie `last_week`
- * @param {string} [compare] - compare valuer, ie previous_year
- * @param {string} [after] - date in iso date format, ie 2018-07-03
- * @param {string} [before] - date in iso date format, ie 2018-07-03
+ * @param {string} [compare] - compare value, ie `previous_year`
+ * @param {string} [after] - date in iso date format, ie `2018-07-03`
+ * @param {string} [before] - date in iso date format, ie `2018-07-03`
  * @return {DateParams} - date parameters derived from query parameters with added defaults
  */
 export const getDateParamsFromQuery = ( { period, compare, after, before } ) => {
@@ -275,13 +281,12 @@ export const getDateParamsFromQuery = ( { period, compare, after, before } ) => 
  *
  * @param {Object} query - date parameters derived from query parameters
  * @property {string} [period] - period value, ie `last_week`
- * @property {string} [compare] - compare valuer, ie previous_year
- * @property {string} [after] - date in iso date format, ie 2018-07-03
- * @property {string} [before] - date in iso date format, ie 2018-07-03
- * @param {String} dateFormat - format of the dates to return
+ * @property {string} [compare] - compare value, ie `previous_year`
+ * @property {string} [after] - date in iso date format, ie `2018-07-03`
+ * @property {string} [before] - date in iso date format, ie `2018-07-03`
  * @return {{primary: DateValue, secondary: DateValue}} - Primary and secondary DateValue objects
  */
-export const getCurrentDates = ( query, dateFormat = isoDateFormat ) => {
+export const getCurrentDates = query => {
 	const { period, compare, after, before } = getDateParamsFromQuery( query );
 	const { primaryStart, primaryEnd, secondaryStart, secondaryEnd } = getDateValue(
 		period,
@@ -294,14 +299,14 @@ export const getCurrentDates = ( query, dateFormat = isoDateFormat ) => {
 		primary: {
 			label: find( presetValues, item => item.value === period ).label,
 			range: getRangeLabel( primaryStart, primaryEnd ),
-			after: primaryStart.format( dateFormat ),
-			before: primaryEnd.format( dateFormat ),
+			after: primaryStart,
+			before: primaryEnd,
 		},
 		secondary: {
 			label: find( periods, item => item.value === compare ).label,
 			range: getRangeLabel( secondaryStart, secondaryEnd ),
-			after: secondaryStart.format( dateFormat ),
-			before: secondaryEnd.format( dateFormat ),
+			after: secondaryStart,
+			before: secondaryEnd,
 		},
 	};
 };
@@ -323,11 +328,11 @@ export const getDateDifferenceInDays = ( date, date2 ) => {
  * Get the previous date for either the previous period of year.
  *
  * @param {String} date - Base date
- * @param {String} date1 - primary start
- * @param {String} date2 - secondary start
+ * @param {String|Moment.moment} date1 - primary start
+ * @param {String|Moment.moment} date2 - secondary start
  * @param {String} compare - `previous_period`  or `previous_year`
  * @param {String} interval - interval
- * @return {String}  - Calculated date
+ * @return {Moment.moment}  - Calculated date
  */
 export const getPreviousDate = ( date, date1, date2, compare, interval ) => {
 	const dateMoment = moment( date );
@@ -371,7 +376,7 @@ export function getAllowedIntervalsForQuery( query ) {
 		switch ( query.period ) {
 			case 'today':
 			case 'yesterday':
-				allowed = [ 'hour' ];
+				allowed = [ 'hour', 'day' ];
 				break;
 			case 'week':
 			case 'last_week':
@@ -390,7 +395,7 @@ export function getAllowedIntervalsForQuery( query ) {
 				allowed = [ 'day', 'week', 'month', 'quarter' ];
 				break;
 			default:
-				allowed = [ 'day' ];
+				allowed = [ 'hour', 'day' ];
 				break;
 		}
 	}
@@ -429,6 +434,7 @@ export function getChartTypeForQuery( { type } ) {
 
 export const dayTicksThreshold = 63;
 export const weekTicksThreshold = 9;
+export const defaultTableDateFormat = 'm/d/Y';
 
 /**
  * Returns date formats for the current interval.
@@ -442,7 +448,7 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
 	let tooltipLabelFormat = '%B %d, %Y';
 	let xFormat = '%Y-%m-%d';
 	let x2Format = '%b %Y';
-	let tableFormat = 'm/d/Y';
+	let tableFormat = defaultTableDateFormat;
 
 	switch ( interval ) {
 		case 'hour':
@@ -490,15 +496,14 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
 }
 
 /**
- * Gutenberg's moment instance is loaded with i18n values. If the locale isn't english
- * we can use that data and enhance it with additional translations
+ * Gutenberg's moment instance is loaded with i18n values, which are
+ * PHP date formats, ie 'LLL: "F j, Y g:i a"'. Override those with translations
+ * of moment style js formats.
  */
 export function loadLocaleData() {
-	const { date, l10n } = wcSettings;
-	const { userLocale, weekdaysShort } = l10n;
-
-	// Keep the default Momentjs English settings for any English
-	if ( ! userLocale.match( /en_/ ) ) {
+	const { userLocale, weekdaysShort } = wcSettings.l10n;
+	// Don't update if the wp locale hasn't been set yet, like in unit tests, for instance.
+	if ( 'en' !== moment.locale() ) {
 		moment.updateLocale( userLocale, {
 			longDateFormat: {
 				L: __( 'MM/DD/YYYY', 'wc-admin' ),
@@ -506,17 +511,6 @@ export function loadLocaleData() {
 				LLL: __( 'D MMMM YYYY LT', 'wc-admin' ),
 				LLLL: __( 'dddd, D MMMM YYYY LT', 'wc-admin' ),
 				LT: __( 'HH:mm', 'wc-admin' ),
-			},
-			calendar: {
-				lastDay: __( '[Yesterday at] LT', 'wc-admin' ),
-				lastWeek: __( '[Last] dddd [at] LT', 'wc-admin' ),
-				nextDay: __( '[Tomorrow at] LT', 'wc-admin' ),
-				nextWeek: __( 'dddd [at] LT', 'wc-admin' ),
-				sameDay: __( '[Today at] LT', 'wc-admin' ),
-				sameElse: __( 'L', 'wc-admin' ),
-			},
-			week: {
-				dow: Number( date.dow ),
 			},
 			weekdaysMin: weekdaysShort,
 		} );

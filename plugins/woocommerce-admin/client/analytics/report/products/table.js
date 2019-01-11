@@ -36,14 +36,16 @@ class ProductsReportTable extends Component {
 		return [
 			{
 				label: __( 'Product Title', 'wc-admin' ),
-				key: 'name',
+				key: 'product_name',
 				required: true,
 				isLeftAligned: true,
+				isSortable: true,
 			},
 			{
 				label: __( 'SKU', 'wc-admin' ),
 				key: 'sku',
 				hiddenByDefault: true,
+				isSortable: true,
 			},
 			{
 				label: __( 'Items Sold', 'wc-admin' ),
@@ -118,9 +120,11 @@ class ProductsReportTable extends Component {
 				products: product_id,
 			} );
 			const categories = this.props.categories;
-			const productCategories = category_ids
-				.map( category_id => categories[ category_id ] )
-				.filter( Boolean );
+
+			const productCategories =
+				( category_ids &&
+					category_ids.map( category_id => categories[ category_id ] ).filter( Boolean ) ) ||
+				[];
 
 			return [
 				{

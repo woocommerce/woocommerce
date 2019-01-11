@@ -144,25 +144,29 @@ export const getColor = ( key, params ) => {
  * Describes getXScale
  * @param {array} uniqueDates - from `getUniqueDates`
  * @param {number} width - calculated width of the charting space
+ * @param {boolean} compact - whether the chart must be compact (without padding
+ between days)
  * @returns {function} a D3 scale of the dates
  */
-export const getXScale = ( uniqueDates, width ) =>
+export const getXScale = ( uniqueDates, width, compact = false ) =>
 	d3ScaleBand()
 		.domain( uniqueDates )
 		.rangeRound( [ 0, width ] )
-		.paddingInner( 0.1 );
+		.paddingInner( compact ? 0 : 0.1 );
 
 /**
  * Describes getXGroupScale
  * @param {array} orderedKeys - from `getOrderedKeys`
  * @param {function} xScale - from `getXScale`
+ * @param {boolean} compact - whether the chart must be compact (without padding
+ between days)
  * @returns {function} a D3 scale for each category within the xScale range
  */
-export const getXGroupScale = ( orderedKeys, xScale ) =>
+export const getXGroupScale = ( orderedKeys, xScale, compact = false ) =>
 	d3ScaleBand()
 		.domain( orderedKeys.filter( d => d.visible ).map( d => d.key ) )
 		.rangeRound( [ 0, xScale.bandwidth() ] )
-		.padding( 0.07 );
+		.padding( compact ? 0 : 0.07 );
 
 /**
  * Describes getXLineScale
@@ -568,27 +572,30 @@ const calculateTooltipXPosition = (
 	elementWidthRatio,
 	tooltipPosition
 ) => {
-	const xPosition =
-		elementCoords.left + elementCoords.width * elementWidthRatio + tooltipMargin - chartCoords.left;
+	const d3BaseCoords = d3Select( '.d3-base' ).node().getBoundingClientRect();
+	const leftMargin = Math.max( d3BaseCoords.left, chartCoords.left );
 
 	if ( tooltipPosition === 'below' ) {
 		return Math.max(
 			tooltipMargin,
 			Math.min(
-				xPosition - tooltipSize.width / 2,
-				chartCoords.width - tooltipSize.width - tooltipMargin
+				elementCoords.left + elementCoords.width * 0.5 - tooltipSize.width / 2 - leftMargin,
+				d3BaseCoords.width - tooltipSize.width - tooltipMargin
 			)
 		);
 	}
 
-	if ( xPosition + tooltipSize.width + tooltipMargin > chartCoords.width ) {
+	const xPosition =
+		elementCoords.left + elementCoords.width * elementWidthRatio + tooltipMargin - leftMargin;
+
+	if ( xPosition + tooltipSize.width + tooltipMargin > d3BaseCoords.width ) {
 		return Math.max(
 			tooltipMargin,
 			elementCoords.left +
 				elementCoords.width * ( 1 - elementWidthRatio ) -
 				tooltipSize.width -
 				tooltipMargin -
-				chartCoords.left
+				leftMargin
 		);
 	}
 

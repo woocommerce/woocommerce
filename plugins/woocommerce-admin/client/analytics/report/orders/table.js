@@ -11,12 +11,7 @@ import { map } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import {
-	appendTimestamp,
-	getCurrentDates,
-	getIntervalForQuery,
-	getDateFormatsForInterval,
-} from '@woocommerce/date';
+import { appendTimestamp, defaultTableDateFormat, getCurrentDates } from '@woocommerce/date';
 import { Link, OrderStatus, ViewMoreList } from '@woocommerce/components';
 import { formatCurrency } from '@woocommerce/currency';
 
@@ -102,9 +97,6 @@ class OrdersReportTable extends Component {
 	}
 
 	getRowsContent( tableData ) {
-		const { query } = this.props;
-		const currentInterval = getIntervalForQuery( query );
-		const { tableFormat } = getDateFormatsForInterval( currentInterval );
 		return map( tableData, row => {
 			const {
 				date,
@@ -134,7 +126,7 @@ class OrdersReportTable extends Component {
 
 			return [
 				{
-					display: formatDate( tableFormat, date ),
+					display: formatDate( defaultTableDateFormat, date ),
 					value: date,
 				},
 				{

@@ -5,6 +5,7 @@
 import { Button } from '@wordpress/components';
 import Gridicon from 'gridicons';
 import { shallow } from 'enzyme';
+import moment from 'moment';
 
 /**
  * Internal dependencies
@@ -54,8 +55,7 @@ describe( 'ActivityCard', () => {
 
 	test( 'should render a timestamp on a card', () => {
 		// We're generating this via moment to ensure it's always "3 days ago".
-		const threeDaysAgo = wp.date
-			.moment()
+		const threeDaysAgo = moment()
 			.subtract( 3, 'days' )
 			.format();
 		const card = shallow(

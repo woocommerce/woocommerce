@@ -70,13 +70,15 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
 
 		$sql_query_params = $this->get_time_period_sql_params( $query_args, $order_product_lookup_table );
-		// Limit is left out here so that the grouping in code by PHP can be applied correctly.
-		$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_sql_params( $query_args ) );
 
 		// join wp_order_product_lookup_table with relationships and taxonomies
 		// @TODO: How to handle custom product tables?
 		$sql_query_params['from_clause'] .= " LEFT JOIN {$wpdb->prefix}term_relationships ON {$order_product_lookup_table}.product_id = {$wpdb->prefix}term_relationships.object_id";
 		$sql_query_params['from_clause'] .= " LEFT JOIN {$wpdb->prefix}term_taxonomy ON {$wpdb->prefix}term_relationships.term_taxonomy_id = {$wpdb->prefix}term_taxonomy.term_taxonomy_id";
+
+		// Limit is left out here so that the grouping in code by PHP can be applied correctly.
+		// This also needs to be put after the term_taxonomy JOIN so that we can match the correct term name.
+		$sql_query_params = $this->get_order_by_params( $query_args, $sql_query_params );
 
 		$included_categories = $this->get_included_categories( $query_args );
 		if ( $included_categories ) {
@@ -101,6 +103,52 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 	}
 
 	/**
+	 * Fills ORDER BY clause of SQL request based on user supplied parameters.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @param array $sql_query Current SQL query array.
+	 * @return array
+	 */
+	protected function get_order_by_params( $query_args, $sql_query ) {
+		global $wpdb;
+		$lookup_table = $wpdb->prefix . self::TABLE_NAME;
+
+		$sql_query['order_by_clause'] = '';
+		if ( isset( $query_args['orderby'] ) ) {
+			$sql_query['order_by_clause'] = $this->normalize_order_by( $query_args['orderby'] );
+		}
+
+		if ( false !== strpos( $sql_query['order_by_clause'], '_terms' ) ) {
+			$sql_query['from_clause'] .= " JOIN {$wpdb->prefix}terms AS _terms ON {$wpdb->prefix}term_taxonomy.term_id = _terms.term_id";
+		}
+
+		if ( isset( $query_args['order'] ) ) {
+			$sql_query['order_by_clause'] .= ' ' . $query_args['order'];
+		} else {
+			$sql_query['order_by_clause'] .= ' DESC';
+		}
+
+		return $sql_query;
+	}
+
+	/**
+	 * Maps ordering specified by the user to columns in the database/fields in the data.
+	 *
+	 * @param string $order_by Sorting criterion.
+	 * @return string
+	 */
+	protected function normalize_order_by( $order_by ) {
+		if ( 'date' === $order_by ) {
+			return 'time_interval';
+		}
+		if ( 'category' === $order_by ) {
+			return '_terms.name';
+		}
+		return $order_by;
+	}
+
+
+	/**
 	 * Returns comma separated ids of included categories, based on query arguments from the user.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
@@ -113,39 +161,6 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 			$included_categories_str = implode( ',', $query_args['categories'] );
 		}
 		return $included_categories_str;
-	}
-
-	/**
-	 * Compares values in 2 arrays based on criterion specified when called via sort_records.
-	 *
-	 * @param array $a Array 1 to compare.
-	 * @param array $b Array 2 to compare.
-	 * @return integer|WP_Error
-	 */
-	private function sort_callback( $a, $b ) {
-		if ( '' === $this->order_by || '' === $this->order ) {
-			return new WP_Error( 'woocommerce_reports_categories_sort_failed', __( 'Sorry, fetching categories data failed.', 'wc-admin' ) );
-		}
-		if ( $a[ $this->order_by ] === $b[ $this->order_by ] ) {
-			return 0;
-		} elseif ( $a[ $this->order_by ] > $b[ $this->order_by ] ) {
-			return strtolower( $this->order ) === 'desc' ? -1 : 1;
-		} elseif ( $a[ $this->order_by ] < $b[ $this->order_by ] ) {
-			return strtolower( $this->order ) === 'desc' ? 1 : -1;
-		}
-	}
-
-	/**
-	 * Sorts the data based on given sorting criterion and order.
-	 *
-	 * @param array  $data      Data to sort.
-	 * @param string $sort_by   Sorting criterion, any of the column_types keys.
-	 * @param string $direction Sorting direction: asc/desc.
-	 */
-	protected function sort_records( &$data, $sort_by, $direction ) {
-		$this->order_by = $this->normalize_order_by( $sort_by );
-		$this->order    = $direction;
-		usort( $data, array( $this, 'sort_callback' ) );
 	}
 
 	/**
@@ -223,7 +238,7 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 
 			$categories_data = $wpdb->get_results(
 				"SELECT
-						term_id as category_id,
+						{$wpdb->prefix}term_taxonomy.term_id as category_id,
 						{$selections}
 					FROM
 						{$table_name}
@@ -234,6 +249,8 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 						{$sql_query_params['where_clause']}
 					GROUP BY
 						category_id
+					ORDER BY
+						{$sql_query_params['order_by_clause']}
 					",
 				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
@@ -248,11 +265,8 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 				return $data;
 			}
 
-			$this->sort_records( $categories_data, $query_args['orderby'], $query_args['order'] );
 			$categories_data = $this->page_records( $categories_data, $query_args['page'], $query_args['per_page'] );
-
 			$this->include_extended_info( $categories_data, $query_args );
-
 			$categories_data = array_map( array( $this, 'cast_numbers' ), $categories_data );
 			$data            = (object) array(
 				'data'    => $categories_data,

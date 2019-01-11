@@ -16,7 +16,7 @@ import { getAdminLink } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { numberFormat } from 'lib/number';
-import Leaderboard from 'dashboard/leaderboard';
+import Leaderboard from 'analytics/components/leaderboard';
 
 export class TopSellingProducts extends Component {
 	constructor( props ) {
@@ -88,10 +88,11 @@ export class TopSellingProducts extends Component {
 	}
 
 	render() {
+		const { query, totalRows } = this.props;
 		const tableQuery = {
 			orderby: 'items_sold',
 			order: 'desc',
-			per_page: 5, //TODO replace with user configured leaderboard per page value.
+			per_page: totalRows,
 			extended_info: true,
 		};
 
@@ -100,7 +101,7 @@ export class TopSellingProducts extends Component {
 				endpoint="products"
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
-				query={ this.props.query }
+				query={ query }
 				tableQuery={ tableQuery }
 				title={ __( 'Top Selling Products', 'wc-admin' ) }
 			/>

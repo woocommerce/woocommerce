@@ -156,8 +156,8 @@ class WC_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 
 		$subtotals = $properties['intervals']['items']['properties']['subtotals']['properties'];
 		$this->assertEquals( 3, count( $subtotals ) );
-		$this->assertArrayHasKey( 'net_revenue', $totals );
-		$this->assertArrayHasKey( 'items_sold', $totals );
-		$this->assertArrayHasKey( 'orders_count', $totals );
+		$this->assertArrayHasKey( 'net_revenue', $subtotals );
+		$this->assertArrayHasKey( 'items_sold', $subtotals );
+		$this->assertArrayHasKey( 'orders_count', $subtotals );
 	}
 }

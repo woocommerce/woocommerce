@@ -4,6 +4,7 @@
  * External dependencies
  */
 import { find, forEach, isNull } from 'lodash';
+import moment from 'moment';
 
 /**
  * WooCommerce dependencies
@@ -18,19 +19,21 @@ import { formatCurrency } from '@woocommerce/currency';
 import { MAX_PER_PAGE, QUERY_DEFAULTS } from 'store/constants';
 import * as categoriesConfig from 'analytics/report/categories/config';
 import * as couponsConfig from 'analytics/report/coupons/config';
+import * as customersConfig from 'analytics/report/customers/config';
+import * as downloadsConfig from 'analytics/report/downloads/config';
 import * as ordersConfig from 'analytics/report/orders/config';
 import * as productsConfig from 'analytics/report/products/config';
 import * as taxesConfig from 'analytics/report/taxes/config';
-import * as customersConfig from 'analytics/report/customers/config';
 import * as reportsUtils from './utils';
 
 const reportConfigs = {
 	categories: categoriesConfig,
 	coupons: couponsConfig,
+	customers: customersConfig,
+	downloads: downloadsConfig,
 	orders: ordersConfig,
 	products: productsConfig,
 	taxes: taxesConfig,
-	customers: customersConfig,
 };
 
 export function getFilterQuery( endpoint, query ) {
@@ -119,15 +122,18 @@ export function isReportDataEmpty( report ) {
  * @returns {Object} data request query parameters.
  */
 function getRequestQuery( endpoint, dataType, query ) {
-	const datesFromQuery = getCurrentDates( query, 'YYYY-MM-DDTHH:00:00' );
+	const datesFromQuery = getCurrentDates( query );
 	const interval = getIntervalForQuery( query );
 	const filterQuery = getFilterQuery( endpoint, query );
+	const end = datesFromQuery[ dataType ].before;
+	const endingTimeOfDay = end.isSame( moment(), 'day' ) ? 'now' : 'end';
+
 	return {
 		order: 'asc',
 		interval,
 		per_page: MAX_PER_PAGE,
-		after: datesFromQuery[ dataType ].after,
-		before: datesFromQuery[ dataType ].before,
+		after: appendTimestamp( datesFromQuery[ dataType ].after, 'start' ),
+		before: appendTimestamp( end, endingTimeOfDay ),
 		...filterQuery,
 	};
 }

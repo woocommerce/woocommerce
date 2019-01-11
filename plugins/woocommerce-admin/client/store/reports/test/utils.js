@@ -327,7 +327,7 @@ describe( 'getSummaryNumbers()', () => {
 		} );
 
 		setGetReportStats( ( endpoint, _query ) => {
-			if ( '2018-10-10T00:00:00' === _query.after ) {
+			if ( '2018-10-10T00:00:00+00:00' === _query.after ) {
 				return {
 					data: {
 						totals: totals.primary,

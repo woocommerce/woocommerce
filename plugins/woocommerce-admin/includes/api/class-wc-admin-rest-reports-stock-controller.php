@@ -58,8 +58,9 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 			$args['orderby'] = 'post__in';
 		} elseif ( 'id' === $args['orderby'] ) {
 			$args['orderby'] = 'ID'; // ID must be capitalized.
-		} elseif ( 'slug' === $args['orderby'] ) {
-			$args['orderby'] = 'name';
+		} elseif ( 'sku' === $args['orderby'] ) {
+			$args['meta_key'] = '_sku'; // WPCS: slow query ok.
+			$args['orderby']  = 'meta_value';
 		}
 
 		$args['post_type'] = array( 'product', 'product_variation' );
@@ -359,7 +360,7 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 				'id',
 				'include',
 				'title',
-				'slug',
+				'sku',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);

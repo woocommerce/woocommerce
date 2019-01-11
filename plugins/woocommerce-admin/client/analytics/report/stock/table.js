@@ -30,13 +30,15 @@ export default class StockReportTable extends Component {
 		return [
 			{
 				label: __( 'Product / Variation', 'wc-admin' ),
-				key: 'product_variation',
+				key: 'title',
 				required: true,
 				isLeftAligned: true,
+				isSortable: true,
 			},
 			{
 				label: __( 'SKU', 'wc-admin' ),
 				key: 'sku',
+				isSortable: true,
 			},
 			{
 				label: __( 'Status', 'wc-admin' ),

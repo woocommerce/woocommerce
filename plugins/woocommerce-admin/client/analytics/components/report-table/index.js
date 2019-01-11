@@ -6,7 +6,7 @@ import { applyFilters } from '@wordpress/hooks';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
-import { get, orderBy } from 'lodash';
+import { get } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -84,15 +84,13 @@ class ReportTable extends Component {
 		}
 
 		const isRequesting = tableData.isRequesting || primaryData.isRequesting;
-		const orderedItems = orderBy( items.data, query.orderby, query.order );
 		const totals = get( primaryData, [ 'data', 'totals' ], null );
 		const totalResults = items.totalResults || 0;
 		const { headers, ids, rows, summary } = applyFilters( TABLE_FILTER, {
 			endpoint: endpoint,
 			headers: getHeadersContent(),
-			orderedItems: orderedItems,
-			ids: itemIdField ? orderedItems.map( item => item[ itemIdField ] ) : null,
-			rows: getRowsContent( orderedItems ),
+			ids: itemIdField ? items.data.map( item => item[ itemIdField ] ) : null,
+			rows: getRowsContent( items.data ),
 			totals: totals,
 			summary: getSummary ? getSummary( totals, totalResults ) : null,
 		} );

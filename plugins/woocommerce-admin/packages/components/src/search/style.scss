@@ -10,18 +10,16 @@
 		fill: $core-grey-light-900;
 	}
 
-	.woocommerce-tag {
-		margin: 8px 6px 0 0;
+	&:not(.has-inline-tags) {
+		.woocommerce-tag {
+			margin: 8px 6px 0 0;
+		}
 	}
 
 	&.has-inline-tags {
 		.woocommerce-search__icon {
 			top: 50%;
 			transform: translateY(-50%);
-		}
-
-		.woocommerce-tag {
-			margin: initial;
 		}
 	}
 

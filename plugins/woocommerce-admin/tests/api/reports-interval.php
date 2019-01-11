@@ -796,4 +796,45 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Test function that normalizes *_between query parameters to *_min & *_max.
+	 */
+	public function test_normalize_between_params() {
+		$request  = array(
+			'a_between' => 'malformed',     // won't be normalized (not an array).
+			'b_between' => array( 1, 5 ),   // results in min=1, max=5.
+			'c_between' => array( 4, 2 ),   // results in min=2, max=4.
+			'd_between' => array( 7 ),      // won't be normalized (only 1 item).
+			'f_between' => array( 10, 12 ), // not in params, skipped.
+		);
+		$params   = array( 'a', 'b', 'c', 'd' );
+		$result   = WC_Admin_Reports_Interval::normalize_between_params( $request, $params );
+		$expected = array(
+			'b_min' => 1,
+			'b_max' => 5,
+			'c_min' => 2,
+			'c_max' => 4,
+		);
+
+		$this->assertEquals( $result, $expected );
+	}
+
+	/**
+	 * Test function that validates *_between query parameters.
+	 */
+	public function test_rest_validate_between_arg() {
+		$this->assertIsWPError(
+			WC_Admin_Reports_Interval::rest_validate_between_arg( 'not array', null, 'param' ),
+			'param is not a numerically indexed array.'
+		);
+
+		$this->assertIsWPError(
+			WC_Admin_Reports_Interval::rest_validate_between_arg( array( 1 ), null, 'param' ),
+			'param must contain 2 numbers.'
+		);
+
+		$this->assertTrue(
+			WC_Admin_Reports_Interval::rest_validate_between_arg( array( 1, 2 ), null, 'param' )
+		);
+	}
 }

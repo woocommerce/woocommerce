@@ -33,6 +33,7 @@ class CategoriesReportTable extends Component {
 				label: __( 'Category', 'wc-admin' ),
 				key: 'category',
 				required: true,
+				isSortable: true,
 				isLeftAligned: true,
 			},
 			{
@@ -110,7 +111,7 @@ class CategoriesReportTable extends Component {
 				value: numberFormat( totals.items_sold ),
 			},
 			{
-				label: __( 'gross revenue', 'wc-admin' ),
+				label: __( 'net revenue', 'wc-admin' ),
 				value: formatCurrency( totals.net_revenue ),
 			},
 			{

@@ -107,8 +107,10 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_REST_Reports_Control
 		$product_id                  = intval( $data['product_id'] );
 		$_product                    = wc_get_product( $product_id );
 		$file_path                   = $_product->get_file_download_path( $data['download_id'] );
+
 		$filename                    = basename( $file_path );
 		$response->data['file_name'] = apply_filters( 'woocommerce_file_download_filename', $filename, $product_id );
+		$response->data['file_path'] = $file_path;
 
 		/**
 		 * Filter a report returned from the API.
@@ -190,6 +192,12 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_REST_Reports_Control
 					'context'     => array( 'view', 'edit' ),
 					'description' => __( 'File name.', 'wc-admin' ),
 				),
+				'file_path' => array(
+					'type'        => 'string',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'File URL.', 'wc-admin' ),
+				),
 				'product_id' => array(
 					'type'        => 'integer',
 					'readonly'    => true,
@@ -270,6 +278,7 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_REST_Reports_Control
 			'default'           => 'date',
 			'enum'              => array(
 				'date',
+				'product',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
@@ -292,7 +301,6 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_REST_Reports_Control
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
-
 		);
 		$params['product_excludes'] = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified product(s) assigned.', 'wc-admin' ),

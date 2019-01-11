@@ -12,7 +12,7 @@ import { NAMESPACE } from 'store/constants';
 
 export const charts = [
 	{
-		key: 'downloads_count',
+		key: 'download_count',
 		label: __( 'Downloads', 'wc-admin' ),
 		type: 'number',
 	},
@@ -70,7 +70,7 @@ export const advancedFilters = {
 				} ) ),
 			},
 		},
-		username: {
+		user: {
 			labels: {
 				add: __( 'Username', 'wc-admin' ),
 				placeholder: __( 'Search customer username', 'wc-admin' ),
@@ -132,7 +132,7 @@ export const advancedFilters = {
 				} ) ),
 			},
 		},
-		downloadIp: {
+		ip_address: {
 			labels: {
 				add: __( 'IP Address', 'wc-admin' ),
 				placeholder: __( 'Search IP address', 'wc-admin' ),
