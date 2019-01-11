@@ -697,6 +697,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				        $segmenting_groupby AS $segmenting_dimension_name,
 				        MAX( num_items_sold ) AS num_items_sold, 
 				        MAX( net_total ) as net_total, 
+				        MAX( refund_total ) as refund_total,
 				        MAX( returning_customer ) AS returning_customer
 				    FROM
 				        $table_name 
