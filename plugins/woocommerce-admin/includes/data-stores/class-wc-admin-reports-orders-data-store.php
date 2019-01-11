@@ -627,7 +627,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	 * Calculate segments for segmenting property bound to order (e.g. coupon or customer type).
 	 *
 	 * @param string $type Type of segments to return--'totals' or 'intervals'.
-	 * @param array  $segmenting_select SELECT part of segmenting SQL query.
+	 * @param string $segmenting_select SELECT part of segmenting SQL query.
 	 * @param string $segmenting_from FROM part of segmenting SQL query.
 	 * @param string $segmenting_where WHERE part of segmenting SQL query.
 	 * @param string $segmenting_groupby GROUP BY part of segmenting SQL query.
