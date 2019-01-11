@@ -36,6 +36,7 @@ class WC_Admin_Api_Init {
 
 		// Handle batched queuing.
 		add_action( 'wc-admin_queue_batches', array( __CLASS__, 'queue_batches' ), 10, 3 );
+		add_action( 'wc-admin_process_customers_batch', array( __CLASS__, 'customer_lookup_process_batch' ) );
 	}
 
 	/**
@@ -283,7 +284,7 @@ class WC_Admin_Api_Init {
 	public static function regenerate_report_data() {
 		// Add registered customers to the lookup table before updating order stats
 		// so that the orders can be associated with the `customer_id` column.
-		self::customer_lookup_store_init();
+		self::customer_lookup_batch_init();
 		WC_Admin_Reports_Orders_Stats_Data_Store::queue_order_stats_repopulate_database();
 		self::order_product_lookup_store_init();
 	}
@@ -409,49 +410,50 @@ class WC_Admin_Api_Init {
 	}
 
 	/**
-	 * Init customer lookup store.
-	 *
-	 * @param WC_Background_Updater|null $updater Updater instance.
-	 * @return bool
+	 * Init customer lookup table update (in batches).
 	 */
-	public static function customer_lookup_store_init( $updater = null ) {
-		// TODO: this needs to be updated a bit, as it no longer runs as a part of WC_Install, there is no bg updater.
-		global $wpdb;
+	public static function customer_lookup_batch_init() {
+		$batch_size     = self::get_batch_size();
+		$customer_query = new WP_User_Query(
+			array(
+				'fields'  => 'ID',
+				'role'    => 'customer',
+				'number'  => 1,
+			)
+		);
+		$queue           = WC()->queue();
+		$schedule        = time() + 5;
+		$total_customers = $customer_query->get_total();
+		$num_batches     = ceil( $total_customers / $batch_size );
 
-		// Backfill customer lookup table with registered customers.
-		$customer_ids = get_transient( 'wc_update_350_all_customers' );
+		self::queue_batches( 1, $num_batches, 'wc-admin_process_customers_batch' );
+	}
 
-		if ( false === $customer_ids ) {
-			$customer_query = new WP_User_Query(
-				array(
-					'fields' => 'ID',
-					'role'   => 'customer',
-					'number' => -1,
-				)
-			);
+	/**
+	 * Process a batch of customers to update.
+	 *
+	 * @param int $batch_number Batch number to process (essentially a query page number).
+	 * @return void
+	 */
+	public static function customer_lookup_process_batch( $batch_number ) {
+		$batch_size     = self::get_batch_size();
+		$customer_query = new WP_User_Query(
+			array(
+				'fields'  => 'ID',
+				'role'    => 'customer',
+				'orderby' => 'ID',
+				'order'   => 'ASC',
+				'number'  => $batch_size,
+				'paged'   => $batch_number,
+			)
+		);
 
-			$customer_ids = $customer_query->get_results();
+		$customer_ids = $customer_query->get_results();
 
-			set_transient( 'wc_update_350_all_customers', $customer_ids, DAY_IN_SECONDS );
-		}
-
-		// Process customers until close to running out of memory timeouts on large sites then requeue.
 		foreach ( $customer_ids as $customer_id ) {
-			$result = WC_Admin_Reports_Customers_Data_Store::update_registered_customer( $customer_id );
-
-			if ( $result ) {
-				// Pop the customer ID from the array for updating the transient later should we near memory exhaustion.
-				unset( $customer_ids[ $customer_id ] );
-			}
-
-			if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
-				// Update the transient for the next run to avoid processing the same orders again.
-				set_transient( 'wc_update_350_all_customers', $customer_ids, DAY_IN_SECONDS );
-				return true;
-			}
+			// TODO: schedule single customer update if this fails?
+			WC_Admin_Reports_Customers_Data_Store::update_registered_customer( $customer_id );
 		}
-
-		return true;
 	}
 
 	/**
@@ -633,8 +635,9 @@ class WC_Admin_Api_Init {
 		self::create_db_tables();
 
 		// Initialize report tables.
+		// TODO: just call self::regenerate_report_data() here?
 		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'order_product_lookup_store_init' ), 20 );
-		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'customer_lookup_store_init' ), 20 );
+		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'customer_lookup_batch_init' ), 20 );
 	}
 
 }
