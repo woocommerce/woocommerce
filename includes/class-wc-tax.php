@@ -147,7 +147,7 @@ class WC_Tax {
 		$regular_tax_rate = 1 + ( array_sum( $regular_rates ) / 100 );
 
 		foreach ( $regular_rates as $key => $regular_rate ) {
-			$the_rate       = ( $regular_rate / 100 ) / $regular_tax_rate;
+			$the_rate       = apply_filters( 'woocommerce_rate_inc_tax_amount', ( $regular_rate / 100 ) / $regular_tax_rate, $regular_rate, $regular_tax_rate );
 			$net_price      = $price - ( $the_rate * $non_compound_price );
 			$tax_amount     = apply_filters( 'woocommerce_price_inc_tax_amount', $price - $net_price, $key, $rates[ $key ], $price );
 			$taxes[ $key ] += $tax_amount;
