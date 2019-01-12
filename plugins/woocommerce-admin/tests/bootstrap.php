@@ -114,3 +114,4 @@ wc_test_includes();
 // Include wc-admin helpers.
 require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-helper-reports.php';
 require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-helper-admin-notes.php';
+require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-test-action-queue.php';
