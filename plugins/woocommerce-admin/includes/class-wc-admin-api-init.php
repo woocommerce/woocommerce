@@ -38,6 +38,13 @@ class WC_Admin_Api_Init {
 	const ORDERS_LOOKUP_BATCH_INIT = 'wc-admin_orders_lookup_batch_init';
 
 	/**
+	 * Queue instance.
+	 *
+	 * @var WC_Queue_Interface
+	 */
+	protected static $queue = null;
+
+	/**
 	 * Boostrap REST API.
 	 */
 	public function __construct() {
@@ -65,6 +72,28 @@ class WC_Admin_Api_Init {
 		add_action( self::CUSTOMERS_BATCH_ACTION, array( __CLASS__, 'customer_lookup_process_batch' ) );
 		add_action( self::ORDERS_BATCH_ACTION, array( __CLASS__, 'orders_lookup_process_batch' ) );
 		add_action( self::ORDERS_LOOKUP_BATCH_INIT, array( __CLASS__, 'orders_lookup_batch_init' ) );
+	}
+
+	/**
+	 * Get queue instance.
+	 *
+	 * @return WC_Queue_Interface
+	 */
+	public static function queue() {
+		if ( is_null( self::$queue ) ) {
+			self::$queue = WC()->queue();
+		}
+
+		return self::$queue;
+	}
+
+	/**
+	 * Set queue instance.
+	 *
+	 * @param WC_Queue_Interface $queue Queue instance.
+	 */
+	public static function set_queue( $queue ) {
+		self::$queue = $queue;
 	}
 
 	/**
@@ -434,7 +463,6 @@ class WC_Admin_Api_Init {
 	public static function queue_batches( $range_start, $range_end, $single_batch_action ) {
 		$batch_size = self::get_batch_size( self::QUEUE_BATCH_ACTION );
 		$range_size = 1 + ( $range_end - $range_start );
-		$queue      = WC()->queue();
 		$schedule   = time() + 5;
 
 		if ( $range_size > $batch_size ) {
@@ -446,7 +474,7 @@ class WC_Admin_Api_Init {
 				$batch_start = $range_start + ( $i * $chunk_size );
 				$batch_end   = min( $range_end, $range_start + ( $chunk_size * ( $i + 1 ) ) - 1 );
 
-				$queue->schedule_single(
+				self::queue()->schedule_single(
 					$schedule,
 					self::QUEUE_BATCH_ACTION,
 					array( $batch_start, $batch_end, $single_batch_action )
@@ -455,7 +483,7 @@ class WC_Admin_Api_Init {
 		} else {
 			// Otherwise, queue the single batches.
 			for ( $i = $range_start; $i <= $range_end; $i++ ) {
-				$queue->schedule_single( $schedule, $single_batch_action, array( $i ) );
+				self::queue()->schedule_single( $schedule, $single_batch_action, array( $i ) );
 			}
 		}
 	}
@@ -467,8 +495,7 @@ class WC_Admin_Api_Init {
 	 * @param string $prerequisite_action Prerequisite action.
 	 */
 	public static function queue_dependent_action( $action, $prerequisite_action ) {
-		$queue         = WC()->queue();
-		$blocking_jobs = $queue->search(
+		$blocking_jobs = self::queue()->search(
 			array(
 				'status'   => 'pending',
 				'orderby'  => 'date',
@@ -483,13 +510,13 @@ class WC_Admin_Api_Init {
 			$blocking_job       = current( $blocking_jobs );
 			$after_blocking_job = $blocking_job->get_schedule()->next()->getTimestamp() + 5;
 
-			$queue->schedule_single(
+			self::queue()->schedule_single(
 				$after_blocking_job,
 				self::QUEUE_DEPEDENT_ACTION,
 				array( $action, $prerequisite_action )
 			);
 		} else {
-			$queue->schedule_single( time() + 5, $action );
+			self::queue()->schedule_single( time() + 5, $action );
 		}
 	}
 
