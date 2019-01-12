@@ -55,9 +55,9 @@ class WC_Admin_Api_Init {
 		// Initialize Orders data store class's static vars.
 		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'orders_data_store_init' ), 20 );
 		// Initialize Customers Report data store sync hooks.
-		// Note: we need to hook into 'wp' before `wc_current_user_is_active`.
+		// Note: we need to hook in before `wc_current_user_is_active`.
 		// See: https://github.com/woocommerce/woocommerce/blob/942615101ba00c939c107c3a4820c3d466864872/includes/wc-user-functions.php#L749.
-		add_action( 'wp', array( 'WC_Admin_Api_Init', 'customers_report_data_store_init' ), 9 );
+		add_action( 'wp_loaded', array( 'WC_Admin_Api_Init', 'customers_report_data_store_init' ) );
 
 		// Initialize scheduled action handlers.
 		add_action( self::QUEUE_BATCH_ACTION, array( __CLASS__, 'queue_batches' ), 10, 3 );
