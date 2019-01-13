@@ -77,6 +77,8 @@ function wgpb_add_block_category( $categories ) {
  * Register the Products block and its scripts.
  */
 function wgpb_register_blocks() {
+	include_once dirname( __FILE__ ) . '/includes/blocks/class-wc-block-featured-product.php';
+
 	// Legacy block.
 	register_block_type(
 		'woocommerce/products',
@@ -131,8 +133,9 @@ function wgpb_register_blocks() {
 	register_block_type(
 		'woocommerce/featured-product',
 		array(
-			'editor_script' => 'wc-featured-product',
-			'editor_style'  => 'wc-featured-product-editor',
+			'render_callback' => array( 'WC_Block_Featured_Product', 'render' ),
+			'editor_script'   => 'wc-featured-product',
+			'style'           => 'wc-featured-product-editor',
 		)
 	);
 }

@@ -39,6 +39,7 @@
     "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "10.0.1",
     "babel-loader": "8.0.5",
+    "classnames": "^2.2.6",
     "clean-webpack-plugin": "1.0.0",
     "core-js": "2.6.2",
     "cross-env": "5.2.0",
