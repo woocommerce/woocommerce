@@ -7,6 +7,7 @@ import { registerBlockType } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
+import './style.scss';
 import Block from './block';
 import { IconStar } from '../../components/icons';
 
@@ -27,6 +28,22 @@ registerBlockType( 'woocommerce/featured-product', {
 	},
 	attributes: {
 		/**
+		 * Alignment of content inside block.
+		 */
+		contentAlign: {
+			type: 'string',
+			default: 'center',
+		},
+
+		/**
+		 * Percentage opacity of overlay.
+		 */
+		dimRatio: {
+			type: 'number',
+			default: 50,
+		},
+
+		/**
 		 * Toggle for edit mode in the block preview.
 		 */
 		editMode: {
@@ -35,10 +52,48 @@ registerBlockType( 'woocommerce/featured-product', {
 		},
 
 		/**
-		 * The product ID to display
+		 * The overlay color, from the color list.
+		 */
+		overlayColor: {
+			type: 'string',
+		},
+
+		/**
+		 * The overlay color, if a custom color value.
+		 */
+		customOverlayColor: {
+			type: 'string',
+		},
+
+		/**
+		 * Text for the product link.
+		 */
+		linkText: {
+			type: 'string',
+			default: __( 'Shop now', 'woo-gutenberg-products-block' ),
+		},
+
+		/**
+		 * The product ID to display.
 		 */
 		productId: {
 			type: 'number',
+		},
+
+		/**
+		 * Show the product description.
+		 */
+		showDesc: {
+			type: 'boolean',
+			default: true,
+		},
+
+		/**
+		 * Show the product price.
+		 */
+		showPrice: {
+			type: 'boolean',
+			default: true,
 		},
 	},
 
