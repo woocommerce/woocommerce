@@ -175,6 +175,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Add $orderby and $order params to filter `woocommerce_get_catalog_ordering_args`. #22257
 * Dev - Add new pre query filter to WC_Product_Data_Store_CPT::search_products(). #22165
 * Dev - Added additional parameters to the `woocommerce_variation_option_name` filter. #21153
+* Dev - Added new filter `woocommerce_get_min_max_price_meta_query`. #22255
 * Fix - Fix W3C validation of single product page quantity input. #22333
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 
