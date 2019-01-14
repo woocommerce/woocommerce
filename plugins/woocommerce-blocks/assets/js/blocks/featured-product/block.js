@@ -245,8 +245,7 @@ class FeaturedProduct extends Component {
 									<div
 										className="wc-block-featured-product__description"
 										dangerouslySetInnerHTML={ {
-											__html:
-												'<p>Black cotton top with matching striped skirt. </p>\n',
+											__html: product.short_description,
 										} }
 									/>
 								) }
