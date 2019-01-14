@@ -59,7 +59,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 
 		$this->data_store = WC_Data_Store::load( 'webhook' );
 
-		// If we have an ID, load the user from the DB.
+		// If we have an ID, load the webhook from the DB.
 		if ( $this->get_id() ) {
 			try {
 				$this->data_store->read( $this );
@@ -441,7 +441,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		}
 
 		$logger->info(
-			wc_print_r( $message, true ), array(
+			wc_print_r( $message, true ),
+			array(
 				'source' => 'webhooks-delivery',
 			)
 		);

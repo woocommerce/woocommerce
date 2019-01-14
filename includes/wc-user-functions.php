@@ -295,7 +295,8 @@ function wc_user_has_role( $user, $role ) {
  * @param array $allcaps All capabilities.
  * @param array $caps    Capabilities.
  * @param array $args    Arguments.
- * @return bool
+ *
+ * @return array The filtered array of all capabilities.
  */
 function wc_customer_has_capability( $allcaps, $caps, $args ) {
 	if ( isset( $caps[0] ) ) {

@@ -134,6 +134,14 @@ function wc_delete_product_transients( $post_id = 0 ) {
 					'products'
 				);
 			}
+
+			$attributes = $product->get_attributes();
+
+			if ( $attributes ) {
+				foreach ( $attributes as $attribute_key => $attribute ) {
+					$transients_to_clear[] = 'wc_layered_nav_counts_' . $attribute_key;
+				}
+			}
 		}
 	}
 
@@ -284,7 +292,7 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
 
 	if ( ! empty( $placeholder_image ) ) {
 		if ( is_numeric( $placeholder_image ) ) {
-			$image      = wp_get_attachment_image_src( $placeholder_image, $size );
+			$image = wp_get_attachment_image_src( $placeholder_image, $size );
 
 			if ( ! empty( $image[0] ) ) {
 				$src = $image[0];
@@ -530,7 +538,8 @@ add_action( 'template_redirect', 'wc_track_product_view', 20 );
  */
 function wc_get_product_types() {
 	return (array) apply_filters(
-		'product_type_selector', array(
+		'product_type_selector',
+		array(
 			'simple'   => __( 'Simple product', 'woocommerce' ),
 			'grouped'  => __( 'Grouped product', 'woocommerce' ),
 			'external' => __( 'External/Affiliate product', 'woocommerce' ),
@@ -766,7 +775,8 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
  */
 function wc_get_product_visibility_options() {
 	return apply_filters(
-		'woocommerce_product_visibility_options', array(
+		'woocommerce_product_visibility_options',
+		array(
 			'visible' => __( 'Shop and search results', 'woocommerce' ),
 			'catalog' => __( 'Shop only', 'woocommerce' ),
 			'search'  => __( 'Search results only', 'woocommerce' ),
@@ -808,12 +818,12 @@ function wc_get_min_max_price_meta_query( $args ) {
 		$max = $class_max;
 	}
 
-	return array(
+	return apply_filters( 'woocommerce_get_min_max_price_meta_query', array(
 		'key'     => '_price',
 		'value'   => array( $min, $max ),
 		'compare' => 'BETWEEN',
 		'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
-	);
+	), $args );
 }
 
 /**
@@ -912,7 +922,10 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 	}
 
 	$related_posts = apply_filters(
-		'woocommerce_related_products', $related_posts, $product_id, array(
+		'woocommerce_related_products',
+		$related_posts,
+		$product_id,
+		array(
 			'limit'        => $limit,
 			'excluded_ids' => $exclude_ids,
 		)
@@ -946,7 +959,8 @@ function wc_get_product_term_ids( $product_id, $taxonomy ) {
  */
 function wc_get_price_including_tax( $product, $args = array() ) {
 	$args = wp_parse_args(
-		$args, array(
+		$args,
+		array(
 			'qty'   => '',
 			'price' => '',
 		)
@@ -1008,7 +1022,8 @@ function wc_get_price_including_tax( $product, $args = array() ) {
  */
 function wc_get_price_excluding_tax( $product, $args = array() ) {
 	$args = wp_parse_args(
-		$args, array(
+		$args,
+		array(
 			'qty'   => '',
 			'price' => '',
 		)
@@ -1047,7 +1062,8 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
  */
 function wc_get_price_to_display( $product, $args = array() ) {
 	$args = wp_parse_args(
-		$args, array(
+		$args,
+		array(
 			'qty'   => 1,
 			'price' => $product->get_price(),
 		)
@@ -1058,13 +1074,15 @@ function wc_get_price_to_display( $product, $args = array() ) {
 
 	return 'incl' === get_option( 'woocommerce_tax_display_shop' ) ?
 		wc_get_price_including_tax(
-			$product, array(
+			$product,
+			array(
 				'qty'   => $qty,
 				'price' => $price,
 			)
 		) :
 		wc_get_price_excluding_tax(
-			$product, array(
+			$product,
+			array(
 				'qty'   => $qty,
 				'price' => $price,
 			)

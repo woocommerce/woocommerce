@@ -231,9 +231,15 @@ class WC_Session_Handler extends WC_Session {
 	 * Destroy all session data.
 	 */
 	public function destroy_session() {
-		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, apply_filters( 'wc_session_use_secure_cookie', false ) );
-
 		$this->delete_session( $this->_customer_id );
+		$this->forget_session();
+	}
+
+	/**
+	 * Forget all session data without destroying it.
+	 */
+	public function forget_session() {
+		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, apply_filters( 'wc_session_use_secure_cookie', false ) );
 
 		wc_empty_cart();
 

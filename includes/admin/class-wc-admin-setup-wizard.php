@@ -1080,10 +1080,11 @@ class WC_Admin_Setup_Wizard {
 
 		if ( $setup_shipstation ) {
 			$this->install_plugin(
-				'woocommerce-shipstation',
+				'woocommerce-shipstation-integration',
 				array(
 					'name'      => __( 'ShipStation', 'woocommerce' ),
-					'repo-slug' => 'woocommerce-shipstation',
+					'repo-slug' => 'woocommerce-shipstation-integration',
+					'file'      => 'woocommerce-shipstation.php',
 				)
 			);
 		}

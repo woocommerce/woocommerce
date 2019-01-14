@@ -433,7 +433,7 @@ class WC_API_Orders extends WC_API_Resource {
 				}
 
 				update_post_meta( $order->get_id(), '_payment_method', $data['payment_details']['method_id'] );
-				update_post_meta( $order->get_id(), '_payment_method_title', $data['payment_details']['method_title'] );
+				update_post_meta( $order->get_id(), '_payment_method_title', sanitize_text_field( $data['payment_details']['method_title'] ) );
 
 				// mark as paid if set
 				if ( isset( $data['payment_details']['paid'] ) && true === $data['payment_details']['paid'] ) {
@@ -585,7 +585,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 				// Method title.
 				if ( isset( $data['payment_details']['method_title'] ) ) {
-					update_post_meta( $order->get_id(), '_payment_method_title', $data['payment_details']['method_title'] );
+					update_post_meta( $order->get_id(), '_payment_method_title', sanitize_text_field( $data['payment_details']['method_title'] ) );
 				}
 
 				// Mark as paid if set.

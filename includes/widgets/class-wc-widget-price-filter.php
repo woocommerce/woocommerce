@@ -66,7 +66,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			return;
 		}
 
-		if ( ! wc()->query->get_main_query()->post_count ) {
+		if ( ! WC()->query->get_main_query()->post_count ) {
 			return;
 		}
 
@@ -119,7 +119,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 	protected function get_filtered_price() {
 		global $wpdb;
 
-		$args       = wc()->query->get_main_query()->query_vars;
+		$args       = WC()->query->get_main_query()->query_vars;
 		$tax_query  = isset( $args['tax_query'] ) ? $args['tax_query'] : array();
 		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
 

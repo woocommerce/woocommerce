@@ -1103,6 +1103,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_Legacy_Orders_Controller {
 					'description' => __( 'Payment method title.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 				'transaction_id'       => array(
 					'description' => __( 'Unique transaction ID.', 'woocommerce' ),
