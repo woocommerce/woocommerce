@@ -30,6 +30,8 @@ class WC_Block_Featured_Product {
 		'contentAlign' => 'center',
 		'dimRatio'     => 50,
 		'linkText'     => false,
+		'mediaId'      => 0,
+		'mediaSrc'     => '',
 		'showDesc'     => true,
 		'showPrice'    => true,
 	);
@@ -98,8 +100,16 @@ class WC_Block_Featured_Product {
 	 * @return string
 	 */
 	public static function get_styles( $attributes, $product ) {
-		$image = self::get_image( $product, ( 'none' !== $attributes['align'] ) ? 'large' : 'full' );
-		$style = sprintf( 'background-image:url(%s);', esc_url( $image ) );
+		$image_size = ( 'none' !== $attributes['align'] ) ? 'full' : 'large';
+		if ( $attributes['mediaId'] ) {
+			$image = wp_get_attachment_image_url( $attributes['mediaId'], $image_size );
+		} else {
+			$image = self::get_image( $product, $image_size );
+		}
+
+		if ( ! empty( $image ) ) {
+			$style = sprintf( 'background-image:url(%s);', esc_url( $image ) );
+		}
 
 		if ( isset( $attributes['customOverlayColor'] ) ) {
 			$style .= sprintf( 'background-color:%s;', esc_attr( $attributes['customOverlayColor'] ) );
