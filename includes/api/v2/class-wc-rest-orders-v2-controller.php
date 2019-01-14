@@ -529,7 +529,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_Legacy_Orders_Controller {
 
 				// Make sure customer is part of blog.
 				if ( is_multisite() && ! is_user_member_of_blog( $request['customer_id'] ) ) {
-					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id_network', __( 'Customer ID does not belong to this site.', 'woocommerce' ), 400 );
+					add_user_to_blog( get_current_blog_id(), $request['customer_id'], 'customer' );
 				}
 			}
 
