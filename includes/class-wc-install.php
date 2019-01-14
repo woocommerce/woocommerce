@@ -1137,7 +1137,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		}
 
 		$upload_dir = wp_upload_dir();
-		$source     = WC()->plugin_path() . '/assets/images/placeholder.png';
+		$source     = WC()->plugin_path() . '/assets/images/placeholder-attachment.png';
 		$filename   = $upload_dir['basedir'] . '/woocommerce-placeholder.png';
 
 		if ( ! file_exists( $filename ) ) {
