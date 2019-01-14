@@ -18,6 +18,6 @@ You can use [`card/example.md`](https://raw.githubusercontent.com/woocommerce/wc
 
 ## 4. Add your example to `client/devdocs/examples.json`
 
-Keep these alphabetized. Optional properties here are `render` and `filePath`. `render` defaults to `My{ComponentName}`, and `filePath` defaults to `/docs/component/{component-name-as-slug}`.
+Keep these alphabetized. Optional properties here are `render`, `filePath`, and `docPath`. `render` defaults to `My{ComponentName}`, and `filePath` defaults to `/docs/component/packages/{component-name-as-slug}`. `docPath` designates the origin of the component and efaults to `packages` for components from `/packages/components`.
 
 Now you can visit `/wp-admin/admin.php?page=wc-admin#/devdocs` to see your component in action.
