@@ -78,7 +78,7 @@
     "eslint-loader": "2.1.1",
     "eslint-plugin-jest": "22.1.2",
     "eslint-plugin-jsx-a11y": "6.1.2",
-    "eslint-plugin-react": "7.12.1",
+    "eslint-plugin-react": "7.12.3",
     "eslint-plugin-wpcalypso": "4.0.2",
     "extract-text-webpack-plugin": "4.0.0-beta.0",
     "grunt": "1.0.3",
