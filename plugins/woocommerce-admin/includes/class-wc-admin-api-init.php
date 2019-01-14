@@ -389,6 +389,11 @@ class WC_Admin_Api_Init {
 			)
 		);
 		$result      = $order_query->get_orders();
+
+		if ( 0 === $result->total ) {
+			return;
+		}
+
 		$num_batches = ceil( $result->total / $batch_size );
 
 		self::queue_batches( 1, $num_batches, self::ORDERS_BATCH_ACTION );
@@ -533,6 +538,11 @@ class WC_Admin_Api_Init {
 			)
 		);
 		$total_customers = $customer_query->get_total();
+
+		if ( 0 === $total_customers ) {
+			return;
+		}
+
 		$num_batches     = ceil( $total_customers / $batch_size );
 
 		self::queue_batches( 1, $num_batches, self::CUSTOMERS_BATCH_ACTION );
