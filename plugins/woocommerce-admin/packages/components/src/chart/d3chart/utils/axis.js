@@ -5,6 +5,7 @@
  */
 import { axisBottom as d3AxisBottom, axisLeft as d3AxisLeft } from 'd3-axis';
 import { smallBreak, wideBreak } from './breakpoints';
+import moment from 'moment';
 
 const dayTicksThreshold = 63;
 const weekTicksThreshold = 9;
@@ -107,8 +108,8 @@ const calculateXTicksIncrementFactor = ( uniqueDates, maxTicks ) => {
  * @returns {boolean} whether the first and last date are different hours from the same date.
  */
 const areDatesInTheSameDay = dates => {
-	const firstDate = new Date( dates [ 0 ] );
-	const lastDate = new Date( dates [ dates.length - 1 ] );
+	const firstDate = moment( dates [ 0 ] ).toDate();
+	const lastDate = moment( dates [ dates.length - 1 ] ).toDate();
 	return (
 		firstDate.getDate() === lastDate.getDate() &&
 		firstDate.getMonth() === lastDate.getMonth() &&
@@ -123,7 +124,7 @@ const areDatesInTheSameDay = dates => {
 */
 const getFirstDatePerMonth = dates => {
 	return dates.filter(
-	( date, i ) => i === 0 || new Date( date ).getMonth() !== new Date( dates[ i - 1 ] ).getMonth()
+	( date, i ) => i === 0 || moment( date ).toDate().getMonth() !== moment( dates[ i - 1 ] ).toDate().getMonth()
 	);
 };
 
@@ -188,9 +189,9 @@ export const getYGrids = ( yMax ) => {
 export const drawAxis = ( node, params ) => {
 	const xScale = params.type === 'line' ? params.xLineScale : params.xScale;
 	const removeDuplicateDates = ( d, i, ticks, formatter ) => {
-		const monthDate = d instanceof Date ? d : new Date( d );
+		const monthDate = moment( d ).toDate();
 		let prevMonth = i !== 0 ? ticks[ i - 1 ] : ticks[ i ];
-		prevMonth = prevMonth instanceof Date ? prevMonth : new Date( prevMonth );
+		prevMonth = prevMonth instanceof Date ? prevMonth : moment( prevMonth ).toDate();
 		return i === 0
 			? formatter( monthDate )
 			: compareStrings( formatter( prevMonth ), formatter( monthDate ) ).join( ' ' );
@@ -198,7 +199,7 @@ export const drawAxis = ( node, params ) => {
 
 	const yGrids = getYGrids( params.yMax );
 
-	const ticks = params.xTicks.map( d => ( params.type === 'line' ? new Date( d ) : d ) );
+	const ticks = params.xTicks.map( d => ( params.type === 'line' ? moment( d ).toDate() : d ) );
 
 	node
 		.append( 'g' )

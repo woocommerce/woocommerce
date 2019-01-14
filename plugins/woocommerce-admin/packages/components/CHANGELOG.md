@@ -11,6 +11,7 @@
 - `getColor()` method in chart utils now requires `keys` and `colorScheme` to be passed as separate params.
 - Fix to avoid duplicated Y-axis ticks when the Y max value was 0.
 - Remove decimals from Y-axis when displaying currencies.
+- Fix date formatting on charts in Safari.
 
 # 1.3.0
 

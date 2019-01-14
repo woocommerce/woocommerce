@@ -4,6 +4,7 @@
  * External dependencies
  */
 import { select as d3Select } from 'd3-selection';
+import moment from 'moment';
 
 /**
  * Internal dependencies
@@ -108,11 +109,7 @@ export const calculateTooltipPosition = ( element, chart, tooltipPosition, eleme
 
 const getTooltipRowLabel = ( d, row, params ) => {
 	if ( d[ row.key ].labelDate ) {
-		return params.tooltipLabelFormat(
-			d[ row.key ].labelDate instanceof Date
-				? d[ row.key ].labelDate
-				: new Date( d[ row.key ].labelDate )
-		);
+		return params.tooltipLabelFormat( moment( d[ row.key ].labelDate ).toDate() );
 	}
 	return row.key;
 };
@@ -135,7 +132,7 @@ export const showTooltip = ( params, d, position ) => {
 
 	const tooltipTitle = params.tooltipTitle
 		? params.tooltipTitle
-		: params.tooltipLabelFormat( d.date instanceof Date ? d.date : new Date( d.date ) );
+		: params.tooltipLabelFormat( moment( d.date ).toDate() );
 
 	d3Select( params.tooltip )
 		.style( 'left', position.x + 'px' )

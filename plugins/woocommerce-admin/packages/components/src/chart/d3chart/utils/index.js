@@ -6,6 +6,7 @@
 import { find, get } from 'lodash';
 import { format as d3Format } from 'd3-format';
 import { line as d3Line } from 'd3-shape';
+import moment from 'moment';
 
 /**
  * Allows an overriding formatter or defaults to d3Format or d3TimeFormat
@@ -93,7 +94,7 @@ export const getUniqueDates = ( lineData, parseDate ) => {
  */
 export const getLine = ( xLineScale, yScale ) =>
 	d3Line()
-		.x( d => xLineScale( new Date( d.date ) ) )
+		.x( d => xLineScale( moment( d.date ).toDate() ) )
 		.y( d => yScale( d.value ) );
 
 /**
@@ -107,15 +108,15 @@ export const getLine = ( xLineScale, yScale ) =>
 export const getDateSpaces = ( data, uniqueDates, width, xLineScale ) =>
 	uniqueDates.map( ( d, i ) => {
 		const datapoints = find( data, { date: d } );
-		const xNow = xLineScale( new Date( d ) );
+		const xNow = xLineScale( moment( d ).toDate() );
 		const xPrev =
 			i >= 1
-				? xLineScale( new Date( uniqueDates[ i - 1 ] ) )
-				: xLineScale( new Date( uniqueDates[ 0 ] ) );
+				? xLineScale( moment( uniqueDates[ i - 1 ] ).toDate() )
+				: xLineScale( moment( uniqueDates[ 0 ] ).toDate() );
 		const xNext =
 			i < uniqueDates.length - 1
-				? xLineScale( new Date( uniqueDates[ i + 1 ] ) )
-				: xLineScale( new Date( uniqueDates[ uniqueDates.length - 1 ] ) );
+				? xLineScale( moment( uniqueDates[ i + 1 ] ).toDate() )
+				: xLineScale( moment( uniqueDates[ uniqueDates.length - 1 ] ).toDate() );
 		let xWidth = i === 0 ? xNext - xNow : xNow - xPrev;
 		const xStart = i === 0 ? 0 : xNow - xWidth / 2;
 		xWidth = i === 0 || i === uniqueDates.length - 1 ? xWidth / 2 : xWidth;
