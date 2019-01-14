@@ -684,7 +684,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			var main_chart;
 
 			jQuery(function(){
-				var order_data = jQuery.parseJSON( '<?php echo esc_js( $chart_data ); ?>' );
+				var order_data = jQuery.parseJSON( '<?php echo $chart_data;  // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>' );
 				var drawGraph = function( highlight ) {
 					var series = [
 						{
@@ -731,7 +731,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							points: { show: true, radius: 5, lineWidth: 2, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 2, fill: false },
 							shadowSize: 0,
-							<?php echo esc_js( $this->get_currency_tooltip() ); ?>
+							<?php echo $this->get_currency_tooltip();  // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
 						},
 						{
 							label: "<?php echo esc_js( __( 'Shipping amount', 'woocommerce' ) ); ?>",
@@ -741,7 +741,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							points: { show: true, radius: 5, lineWidth: 2, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 2, fill: false },
 							shadowSize: 0,
-							prepend_tooltip: "<?php echo get_woocommerce_currency_symbol();// phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>"
+							prepend_tooltip: "<?php echo get_woocommerce_currency_symbol(); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>"
 						},
 						{
 							label: "<?php echo esc_js( __( 'Gross sales amount', 'woocommerce' ) ); ?>",
@@ -751,7 +751,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							points: { show: true, radius: 5, lineWidth: 2, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 2, fill: false },
 							shadowSize: 0,
-							<?php echo $this->get_currency_tooltip();// phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+							<?php echo $this->get_currency_tooltip(); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
 						},
 						{
 							label: "<?php echo esc_js( __( 'Net sales amount', 'woocommerce' ) ); ?>",
