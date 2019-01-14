@@ -51,6 +51,22 @@ registerBlockType( 'woocommerce/featured-product', {
 		},
 
 		/**
+		 * ID for a custom image, overriding the product's featured image.
+		 */
+		mediaId: {
+			type: 'number',
+			default: 0,
+		},
+
+		/**
+		 * URL for a custom image, overriding the product's featured image.
+		 */
+		mediaSrc: {
+			type: 'string',
+			default: '',
+		},
+
+		/**
 		 * The overlay color, from the color list.
 		 */
 		overlayColor: {
