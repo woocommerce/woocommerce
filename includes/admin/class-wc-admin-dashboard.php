@@ -329,7 +329,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				'wc-network-orders', 'woocommerce_network_orders', array(
 					'nonce'          => wp_create_nonce( 'wp_rest' ),
 					'sites'          => array_values( $blog_ids ),
-					'order_endpoint' => get_rest_url( null, 'wc/v2/orders/network' ),
+					'order_endpoint' => get_rest_url( null, 'wc/v3/orders/network' ),
 				)
 			);
 			?>
