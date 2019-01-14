@@ -31,7 +31,9 @@ class WC_REST_Network_Orders_V2_Controller extends WC_REST_Orders_V2_Controller 
 	public function register_routes() {
 		if ( is_multisite() ) {
 			register_rest_route(
-				$this->namespace, '/' . $this->rest_base . '/network', array(
+				$this->namespace,
+				'/' . $this->rest_base . '/network',
+				array(
 					array(
 						'methods'             => WP_REST_Server::READABLE,
 						'callback'            => array( $this, 'network_orders' ),
@@ -46,8 +48,6 @@ class WC_REST_Network_Orders_V2_Controller extends WC_REST_Orders_V2_Controller 
 
 	/**
 	 * Retrieves the item's schema for display / public consumption purposes.
-	 *
-	 * @access public
 	 *
 	 * @return array Public item schema data.
 	 */
