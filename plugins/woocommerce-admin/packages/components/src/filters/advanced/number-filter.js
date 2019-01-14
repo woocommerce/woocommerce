@@ -203,7 +203,7 @@ class NumberFilter extends Component {
 				),
 				filter: (
 					<div
-						className={ classnames( 'woocommerce-filters-advanced__input-numeric-range', {
+						className={ classnames( 'woocommerce-filters-advanced__input-range', {
 							'is-between': 'between' === rule,
 						} ) }
 					>
