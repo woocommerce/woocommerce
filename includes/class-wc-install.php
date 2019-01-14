@@ -1127,12 +1127,13 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	private static function create_placeholder_image() {
 		$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
 
-		if ( ! is_numeric( $placeholder_image ) ) {
-			return;
-		}
-
-		if ( ! empty( $placeholder_image ) && is_numeric( $placeholder_image ) && wp_attachment_is_image( $placeholder_image ) ) {
-			return;
+		// Validate current setting if set. If set, return.
+		if ( ! empty( $placeholder_image ) ) {
+			if ( ! is_numeric( $placeholder_image ) ) {
+				return;
+			} elseif ( $placeholder_image && wp_attachment_is_image( $placeholder_image ) ) {
+				return;
+			}
 		}
 
 		$upload_dir = wp_upload_dir();
