@@ -36,7 +36,7 @@
 
 .woocommerce-search-list__list {
 	padding: 0;
-	max-height: 18.5em;
+	max-height: 17em;
 	overflow-x: hidden;
 	overflow-y: auto;
 	border-top: 1px solid $core-grey-light-500;
@@ -85,7 +85,7 @@
 		display: flex;
 		align-items: center;
 		margin-bottom: 0;
-		padding: $gap;
+		padding: $gap-small $gap;
 		background: $white;
 		// !important to keep the border around on hover
 		border-bottom: 1px solid $core-grey-light-500 !important;
@@ -102,6 +102,8 @@
 		.woocommerce-search-list__item-state {
 			flex: 0 0 16px;
 			margin-right: $gap-smaller;
+			// Set an explicit height to ensure vertical alignment
+			height: 24px;
 		}
 
 		.woocommerce-search-list__item-label {
