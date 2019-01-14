@@ -905,6 +905,9 @@ registerBlockType( 'woocommerce/products', {
 	icon: 'screenoptions',
 	category: 'woocommerce',
 	description: __( 'Display a grid of products from a variety of sources.' ),
+	supports: {
+		inserter: false,
+	},
 
 	attributes: {
 
