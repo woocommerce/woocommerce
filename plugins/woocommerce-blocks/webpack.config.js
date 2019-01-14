@@ -45,6 +45,17 @@ const GutenbergBlocksConfig = {
 		libraryTarget: 'this',
 	},
 	externals,
+	optimization: {
+		splitChunks: {
+			cacheGroups: {
+				commons: {
+					test: /[\\/]node_modules[\\/]/,
+					name: 'vendors',
+					chunks: 'all',
+				},
+			},
+		},
+	},
 	module: {
 		rules: [
 			{
