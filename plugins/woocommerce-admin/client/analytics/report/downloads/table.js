@@ -4,7 +4,6 @@
  */
 import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import { format as formatDate } from '@wordpress/date';
 import { map } from 'lodash';
 import moment from 'moment';
 
@@ -12,7 +11,7 @@ import moment from 'moment';
  * WooCommerce dependencies
  */
 import { defaultTableDateFormat, getCurrentDates } from '@woocommerce/date';
-import { Link } from '@woocommerce/components';
+import { Date, Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 
 /**
@@ -82,7 +81,7 @@ export default class CouponsReportTable extends Component {
 
 			return [
 				{
-					display: formatDate( defaultTableDateFormat, date ),
+					display: <Date date={ date } visibleFormat={ defaultTableDateFormat } />,
 					value: date,
 				},
 				{

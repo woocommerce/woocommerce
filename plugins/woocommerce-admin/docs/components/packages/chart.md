@@ -6,6 +6,13 @@ A chart container using d3, to display timeseries data with an interactive legen
 Props
 -----
 
+### `allowedIntervals`
+
+- Type: Array
+- Default: null
+
+Allowed intervals to show in a dropdown.
+
 ### `data`
 
 - Type: Array
@@ -27,6 +34,14 @@ Format to parse dates into d3 time format
 
 Label describing the legend items.
 
+### `mode`
+
+- Type: One of: 'item-comparison', 'time-comparison'
+- Default: `'time-comparison'`
+
+`item-comparison` (default) or `time-comparison`, this is used to generate correct
+ARIA properties.
+
 ### `path`
 
 - Type: String
@@ -40,6 +55,56 @@ Current path
 - Default: null
 
 The query string represented in object form
+
+### `interactiveLegend`
+
+- Type: Boolean
+- Default: `true`
+
+Whether the legend items can be activated/deactivated.
+
+### `interval`
+
+- Type: One of: 'hour', 'day', 'week', 'month', 'quarter', 'year'
+- Default: `'day'`
+
+Interval specification (hourly, daily, weekly etc).
+
+### `intervalData`
+
+- Type: Object
+- Default: null
+
+Information about the currently selected interval, and set of allowed intervals for the chart. See `getIntervalsForQuery`.
+
+### `isRequesting`
+
+- Type: Boolean
+- Default: `false`
+
+Render a chart placeholder to signify an in-flight data request.
+
+### `legendPosition`
+
+- Type: One of: 'bottom', 'side', 'top'
+- Default: null
+
+Position the legend must be displayed in. If it's not defined, it's calculated
+depending on the viewport width and the mode.
+
+### `showHeaderControls`
+
+- Type: Boolean
+- Default: `true`
+
+Wether header UI controls must be displayed.
+
+### `title`
+
+- Type: String
+- Default: null
+
+A title describing this chart.
 
 ### `tooltipLabelFormat`
 
@@ -62,6 +127,20 @@ A number formatting string or function to format the value displayed in the tool
 
 A string to use as a title for the tooltip. Takes preference over `tooltipLabelFormat`.
 
+### `type`
+
+- Type: One of: 'bar', 'line'
+- Default: `'line'`
+
+Chart type of either `line` or `bar`.
+
+### `valueType`
+
+- Type: String
+- Default: null
+
+What type of data is to be displayed? Number, Average, String?
+
 ### `xFormat`
 
 - Type: String
@@ -82,63 +161,6 @@ A datetime formatting string, passed to d3TimeFormat.
 - Default: `'$.3s'`
 
 A number formatting string, passed to d3Format.
-
-### `mode`
-
-- Type: One of: 'block', 'item-comparison', 'time-comparison'
-- Default: `'time-comparison'`
-
-`item-comparison` (default) or `time-comparison`, this is used to generate correct
-ARIA properties.
-
-### `title`
-
-- Type: String
-- Default: null
-
-A title describing this chart.
-
-### `type`
-
-- Type: One of: 'bar', 'line'
-- Default: `'line'`
-
-Chart type of either `line` or `bar`.
-
-### `intervalData`
-
-- Type: Object
-- Default: null
-
-Information about the currently selected interval, and set of allowed intervals for the chart. See `getIntervalsForQuery`.
-
-### `interval`
-
-- Type: One of: 'hour', 'day', 'week', 'month', 'quarter', 'year'
-- Default: `'day'`
-
-Interval specification (hourly, daily, weekly etc).
-
-### `allowedIntervals`
-
-- Type: Array
-- Default: null
-
-Allowed intervals to show in a dropdown.
-
-### `valueType`
-
-- Type: String
-- Default: null
-
-What type of data is to be displayed? Number, Average, String?
-
-### `isRequesting`
-
-- Type: Boolean
-- Default: `false`
-
-Render a chart placeholder to signify an in-flight data request.
 
 `ChartPlaceholder` (component)
 ==============================
