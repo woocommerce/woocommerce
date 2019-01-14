@@ -22,6 +22,9 @@
     "phpcs": [
       "phpcs -s -p"
     ],
+    "phpcs-pre-commit": [
+      "phpcs -s -p -n"
+    ],
     "phpcbf": [
       "phpcbf -p"
     ]

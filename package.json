@@ -74,7 +74,7 @@
     "linters": {
       "*.php": [
         "php -d display_errors=1 -l",
-        "composer run-script phpcs"
+        "composer run-script phpcs-pre-commit"
       ],
       "*.scss": [
         "stylelint --syntax=scss --fix",
