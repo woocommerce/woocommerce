@@ -96,14 +96,17 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 		$reports  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-
 		$this->assertEquals( 2, count( $reports ) );
 
 		$this->assertEquals( 'orders/orders_count', $reports[0]['stat'] );
+		$this->assertEquals( 'Amount of orders', $reports[0]['label'] );
 		$this->assertEquals( 1, $reports[0]['value'] );
+		$this->assertEquals( 'http://example.org/wp-admin/admin.php?page=wc-admin#/orders?chart=orders_count', $response->data[0]['_links']['report'][0]['href'] );
 
 		$this->assertEquals( 'downloads/download_count', $reports[1]['stat'] );
+		$this->assertEquals( 'Number of downloads.', $reports[1]['label'] );
 		$this->assertEquals( 2, $reports[1]['value'] );
+		$this->assertEquals( 'http://example.org/wp-admin/admin.php?page=wc-admin#/downloads?chart=download_count', $response->data[1]['_links']['report'][0]['href'] );
 	}
 
 	/**
@@ -148,8 +151,9 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 2, count( $properties ) );
+		$this->assertEquals( 3, count( $properties ) );
 		$this->assertArrayHasKey( 'stat', $properties );
+		$this->assertArrayHasKey( 'label', $properties );
 		$this->assertArrayHasKey( 'value', $properties );
 	}
 }

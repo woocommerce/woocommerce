@@ -64,6 +64,7 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 		return true;
 	}
 
+
 	/**
 	 * Get all reports.
 	 *
@@ -135,7 +136,36 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 			),
 		);
 
+		/**
+		 * Filter the list of allowed reports, so that data can be loaded from third party extensions in addition to WooCommerce core.
+		 * Array items should be in format of array( 'slug' => 'downloads/stats', 'description' =>  '',
+		 * 'url' => '', and 'path' => '/wc-ext/v1/...'.
+		 *
+		 * @param array $endpoints The list of allowed reports..
+		 */
+		$reports = apply_filters( 'woocommerce_admin_reports', $reports );
+
 		foreach ( $reports as $report ) {
+			if ( empty( $report['slug'] ) ) {
+				continue;
+			}
+
+			if ( empty( $report['path'] ) ) {
+				$report['path'] = '/' . $this->namespace . '/reports/' . $report['slug'];
+			}
+
+			// Allows a different admin page to be loaded here,
+			// or allows an empty url if no report exists for a set of performance indicators.
+			if ( ! isset( $report['url'] ) ) {
+				if ( '/stats' === substr( $report['slug'], -6 ) ) {
+					$url_slug = substr( $report['slug'], 0, -6 );
+				} else {
+					$url_slug = $report['slug'];
+				}
+
+				$report['url'] = admin_url( 'admin.php?page=wc-admin#/' . $url_slug );
+			}
+
 			$item   = $this->prepare_item_for_response( (object) $report, $request );
 			$data[] = $this->prepare_response_for_collection( $item );
 		}
@@ -154,6 +184,7 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 		$data = array(
 			'slug'        => $report->slug,
 			'description' => $report->description,
+			'path'        => $report->path,
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -165,7 +196,10 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 		$response->add_links(
 			array(
 				'self'       => array(
-					'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $report->slug ) ),
+					'href' => rest_url( $report->path ),
+				),
+				'report'       => array(
+					'href' => $report->url,
 				),
 				'collection' => array(
 					'href' => rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ),
@@ -204,6 +238,12 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 				),
 				'description' => array(
 					'description' => __( 'A human-readable description of the resource.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'path'        => array(
+					'description' => __( 'API path.', 'wc-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
