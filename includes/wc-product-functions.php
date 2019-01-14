@@ -271,11 +271,10 @@ function wc_product_post_type_link( $permalink, $post ) {
 }
 add_filter( 'post_type_link', 'wc_product_post_type_link', 10, 2 );
 
-
 /**
- * Get the placeholder image URL for products etc.
+ * Get the placeholder image URL either from media, or use the fallback image.
  *
- * @param string $size Image size.
+ * @param string $size Thumbnail size to use.
  * @return string
  */
 function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
@@ -298,15 +297,76 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
 }
 
 /**
+ * Get the placeholder attachment image src, falling back to the default if unset.
+ *
+ * @since 3.6.0
+ * @param string $size Thumbnail size to use.
+ * @return bool|array Returns an array (url, width, height, is_intermediate), or false, if no image is available.
+ */
+function wc_get_placeholder_image_src( $size ) {
+	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
+
+	if ( ! empty( $placeholder_image ) && is_numeric( $placeholder_image ) ) {
+		return wp_get_attachment_image_src( $placeholder_image, $size );
+	}
+
+	// Fallback to non-attachment placeholder.
+	return array( wc_placeholder_img_src( $size ), $dimensions['width'], $dimensions['height'] );
+}
+
+/**
+ * Get the placeholder attachment srcset property for responsiveness.
+ *
+ * @since 3.6.0
+ * @param string $size Thumbnail size to use.
+ * @return bool|string Image srcset for the img tag, or false if unavailable.
+ */
+function wc_get_placeholder_image_srcset( $size ) {
+	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
+
+	if ( ! empty( $placeholder_image ) && is_numeric( $placeholder_image ) && function_exists( 'wp_get_attachment_image_srcset' ) ) {
+		return wp_get_attachment_image_srcset( $placeholder_image, $size );
+	}
+
+	return false;
+}
+
+/**
+ * Get the placeholder attachment sizes property for responsiveness.
+ *
+ * @since 3.6.0
+ * @param string $size Thumbnail size to use.
+ * @return bool|string Image sizes for the img tag, or false if unavailable.
+ */
+function wc_get_placeholder_image_sizes( $size ) {
+	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
+
+	if ( ! empty( $placeholder_image ) && is_numeric( $placeholder_image ) && function_exists( 'wp_get_attachment_image_sizes' ) ) {
+		return wp_get_attachment_image_sizes( $placeholder_image, $size );
+	}
+
+	return false;
+}
+
+/**
  * Get the placeholder image.
  *
  * @param string $size Image size.
  * @return string
  */
 function wc_placeholder_img( $size = 'woocommerce_thumbnail' ) {
-	$dimensions = wc_get_image_size( $size );
+	$dimensions   = wc_get_image_size( $size );
+	$image        = wc_get_placeholder_image_src( $size );
+	$image_srcset = wc_get_placeholder_image_srcset( $size );
+	$image_sizes  = wc_get_placeholder_image_sizes( $size );
 
-	return apply_filters( 'woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src( $size ) . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />', $size, $dimensions );
+	if ( $image_srcset && $image_sizes ) {
+		$placeholder_image_html = '<img src="' . esc_attr( $image[0] ) . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $image[1] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $image[2] ) . '" srcset="' . esc_attr( $image_srcset ) . '" sizes="' . esc_attr( $image_sizes ) . '" />';
+	} else {
+		$placeholder_image_html = '<img src="' . esc_attr( $image[0] ) . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $image[1] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $image[2] ) . '" />';
+	}
+
+	return apply_filters( 'woocommerce_placeholder_img', $placeholder_image_html, $size, $dimensions );
 }
 
 /**
