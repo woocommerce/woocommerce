@@ -22,7 +22,6 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import getQuery from '../../utils/get-query';
-import ProductAttributeControl from '../../components/product-attribute-control';
 import ProductCategoryControl from '../../components/product-category-control';
 import ProductOrderbyControl from '../../components/product-orderby-control';
 import ProductPreview from '../../components/product-preview';
@@ -130,21 +129,6 @@ class ProductByCategoryBlock extends Component {
 					<ProductOrderbyControl
 						setAttributes={ setAttributes }
 						value={ orderby }
-					/>
-				</PanelBody>
-				<PanelBody
-					title={ __( 'Filter by Attribute', 'woo-gutenberg-products-block' ) }
-					initialOpen={ false }
-				>
-					<ProductAttributeControl
-						selected={ attributes.attributes }
-						onChange={ ( value = [] ) => {
-							const selected = value.map( ( { id, attr_slug } ) => ( { // eslint-disable-line camelcase
-								id,
-								attr_slug,
-							} ) );
-							setAttributes( { attributes: selected } );
-						} }
 					/>
 				</PanelBody>
 			</InspectorControls>
