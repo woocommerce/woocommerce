@@ -336,6 +336,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			$order_item_id     = $order_item->get_id();
 			$quantity_refunded = isset( $refunds[ $order_item_id ] ) ? $refunds[ $order_item_id ]['quantity'] : 0;
 			$amount_refunded   = isset( $refunds[ $order_item_id ] ) ? $refunds[ $order_item_id ]['subtotal'] : 0;
+			$product_qty       = $order_item->get_quantity( 'edit' ) - $quantity_refunded;
 
 			// Shipping amount based on woocommerce code in includes/admin/meta-boxes/views/html-order-item(s).php
 			// distributed simply based on number of line items.
@@ -346,7 +347,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			} else {
 				$total_shipping_amount = $order->get_shipping_total();
 			}
-			$shipping_amount = $total_shipping_amount / $order_items;
+			$shipping_amount = $total_shipping_amount / $order_items * $product_qty;
 
 			// Shipping amount tax based on woocommerce code in includes/admin/meta-boxes/views/html-order-item(s).php
 			// distribute simply based on number of line items.
@@ -370,7 +371,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 					}
 				}
 			}
-			$shipping_tax_amount = $total_shipping_tax_amount / $order_items;
+			$shipping_tax_amount = $total_shipping_tax_amount / $order_items * $product_qty;
 
 			// Tax amount.
 			// TODO: check if this calculates tax correctly with refunds.
@@ -404,7 +405,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 						'product_id'            => $order_item->get_product_id( 'edit' ),
 						'variation_id'          => $order_item->get_variation_id( 'edit' ),
 						'customer_id'           => ( 0 < $order->get_customer_id( 'edit' ) ) ? $order->get_customer_id( 'edit' ) : null,
-						'product_qty'           => $order_item->get_quantity( 'edit' ) - $quantity_refunded,
+						'product_qty'           => $product_qty,
 						'product_net_revenue'   => $net_revenue,
 						'date_created'          => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 						'coupon_amount'         => $coupon_amount,
