@@ -346,7 +346,7 @@ class WC_Admin_Menus {
 		}
 
 		// Show only when the user is a member of this site, or they're a super admin.
-		if ( ! is_user_member_of_blog() && ! is_super_admin() ) {
+		if ( ! is_super_admin() ) {
 			return;
 		}
 
