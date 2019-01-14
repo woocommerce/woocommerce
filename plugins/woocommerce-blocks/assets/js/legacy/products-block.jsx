@@ -5,7 +5,7 @@ const { InspectorControls, BlockControls } = wp.editor;
 const { Toolbar, Button, Dashicon, RangeControl, Tooltip, SelectControl } = wp.components;
 const { apiFetch } = wp;
 
-import '../../css/products-block.scss';
+import './products-block.scss';
 
 import { ProductsSpecificSelect } from './views/specific-select.jsx';
 import { ProductsCategorySelect } from './views/category-select.jsx';

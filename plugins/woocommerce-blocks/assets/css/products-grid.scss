@@ -1,5 +1,5 @@
 // Import the woocommerce components stylesheet
-@import "../../node_modules/@woocommerce/components/build-style/style.css";
+@import "~@woocommerce/components/build-style/style.css";
 
 // Hack to hide preview overflow.
 .editor-block-preview__content {
