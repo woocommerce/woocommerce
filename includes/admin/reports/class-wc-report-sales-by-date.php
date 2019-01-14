@@ -194,6 +194,11 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 						'function' => 'SUM',
 						'name'     => 'total_shipping_tax',
 					),
+					'_prices_include_tax' => array(
+						'type'     => 'meta',
+						'function' => '',
+						'name'     => 'prices_include_tax',
+					),
 					'post_date'           => array(
 						'type'     => 'post_data',
 						'function' => '',
@@ -208,6 +213,12 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				'order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ),
 			)
 		);
+
+		foreach ( $this->report_data->orders as $key => $order ) {
+			if ( 'yes' === $order->prices_include_tax ) {
+				$this->report_data->orders[ $key ]->total_sales -= $order->total_tax;
+			}
+		}
 
 		/**
 		 * If an order is 100% refunded we should look at the parent's totals, but the refunds dates.
@@ -236,6 +247,11 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 						'function' => '',
 						'name'     => 'total_shipping_tax',
 					),
+					'_prices_include_tax' => array(
+						'type'     => 'parent_meta',
+						'function' => '',
+						'name'     => 'prices_include_tax',
+					),
 					'post_date'           => array(
 						'type'     => 'post_data',
 						'function' => '',
@@ -249,6 +265,12 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				'parent_order_status' => array( 'refunded' ),
 			)
 		);
+
+		foreach ( $this->report_data->full_refunds as $key => $order ) {
+			if ( 'yes' === $order->prices_include_tax ) {
+				$this->report_data->full_refunds[ $key ]->total_refund -= $order->total_tax;
+			}
+		}
 
 		/**
 		 * Partial refunds. This includes line items, shipping and taxes. Not grouped by date.
@@ -409,7 +431,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$this->report_data->total_shipping     = wc_format_decimal( array_sum( wp_list_pluck( $this->report_data->orders, 'total_shipping' ) ) - $this->report_data->total_shipping_refunded, 2 );
 		$this->report_data->total_shipping_tax = wc_format_decimal( array_sum( wp_list_pluck( $this->report_data->orders, 'total_shipping_tax' ) ) - $this->report_data->total_shipping_tax_refunded, 2 );
 
-		// Total the refunds and sales amounts. Sales subract refunds. Note - total_sales also includes shipping costs.
+		// Total the refunds and sales amounts. Sales subtract refunds. Note - total_sales also includes shipping costs.
 		$this->report_data->total_sales = wc_format_decimal( array_sum( wp_list_pluck( $this->report_data->orders, 'total_sales' ) ) - $this->report_data->total_refunds, 2 );
 		$this->report_data->net_sales   = wc_format_decimal( $this->report_data->total_sales - $this->report_data->total_shipping - max( 0, $this->report_data->total_tax ) - max( 0, $this->report_data->total_shipping_tax ), 2 );
 
@@ -731,7 +753,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 							points: { show: true, radius: 5, lineWidth: 2, fillColor: '#fff', fill: true },
 							lines: { show: true, lineWidth: 2, fill: false },
 							shadowSize: 0,
-							<?php echo $this->get_currency_tooltip();  // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+							<?php echo $this->get_currency_tooltip(); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
 						},
 						{
 							label: "<?php echo esc_js( __( 'Shipping amount', 'woocommerce' ) ); ?>",
