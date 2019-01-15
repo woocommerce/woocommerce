@@ -7,14 +7,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! class_exists( 'WC_Admin_Order_Stats_Background_Process', false ) ) {
-	include_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-order-stats-background-process.php';
-}
-
 /**
  * WC_Admin_Reports_Orders_Data_Store.
- *
- * @version  3.5.0
  */
 class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store implements WC_Admin_Reports_Data_Store_Interface {
 
@@ -26,175 +20,103 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	const TABLE_NAME = 'wc_order_stats';
 
 	/**
-	 * Cron event name.
-	 */
-	const CRON_EVENT = 'wc_order_stats_update';
-
-	/**
-	 * Type for each column to cast values correctly later.
+	 * Mapping columns to data type to return correct response types.
 	 *
 	 * @var array
 	 */
 	protected $column_types = array(
-		'orders_count'            => 'intval',
-		'num_items_sold'          => 'intval',
-		'gross_revenue'           => 'floatval',
-		'coupons'                 => 'floatval',
-		'refunds'                 => 'floatval',
-		'taxes'                   => 'floatval',
-		'shipping'                => 'floatval',
-		'net_revenue'             => 'floatval',
-		'avg_items_per_order'     => 'floatval',
-		'avg_order_value'         => 'floatval',
-		'num_returning_customers' => 'intval',
-		'num_new_customers'       => 'intval',
-		'products'                => 'intval',
+		'order_id'       => 'intval',
+		'date_created'   => 'strval',
+		'status'         => 'strval',
+		'customer_id'    => 'intval',
+		'net_total'      => 'floatval',
+		'num_items_sold' => 'intval',
+		'customer_type'  => 'strval',
 	);
 
 	/**
-	 * SQL definition for each column.
+	 * SQL columns to select in the db query and their mapping to SQL code.
 	 *
 	 * @var array
 	 */
 	protected $report_columns = array(
-		'orders_count'            => 'COUNT(*) as orders_count',
-		'num_items_sold'          => 'SUM(num_items_sold) as num_items_sold',
-		'gross_revenue'           => 'SUM(gross_total) AS gross_revenue',
-		'coupons'                 => 'SUM(coupon_total) AS coupons',
-		'refunds'                 => 'SUM(refund_total) AS refunds',
-		'taxes'                   => 'SUM(tax_total) AS taxes',
-		'shipping'                => 'SUM(shipping_total) AS shipping',
-		'net_revenue'             => '( SUM(net_total) - SUM(refund_total) ) AS net_revenue',
-		'avg_items_per_order'     => 'AVG(num_items_sold) AS avg_items_per_order',
-		'avg_order_value'         => '( SUM(net_total) - SUM(refund_total) ) / COUNT(*) AS avg_order_value',
-		'num_returning_customers' => 'SUM(returning_customer = 1) AS num_returning_customers',
-		'num_new_customers'       => 'SUM(returning_customer = 0) AS num_new_customers',
+		'order_id'       => 'order_id',
+		'date_created'   => 'date_created',
+		'status'         => 'status',
+		'customer_id'    => 'customer_id',
+		'net_total'      => 'net_total',
+		'num_items_sold' => 'num_items_sold',
+		'customer_type'  => '(CASE WHEN returning_customer <> 0 THEN "returning" ELSE "new" END) as customer_type',
 	);
 
 	/**
-	 * Background process to populate order stats.
-	 *
-	 * @var WC_Admin_Order_Stats_Background_Process
-	 */
-	protected static $background_process;
-
-	/**
-	 * Constructor.
+	 * Constructor
 	 */
 	public function __construct() {
-		if ( ! self::$background_process ) {
-			self::$background_process = new WC_Admin_Order_Stats_Background_Process();
-		}
-	}
-
-	/**
-	 * Set up all the hooks for maintaining and populating table data.
-	 */
-	public static function init() {
-		add_action( 'save_post', array( __CLASS__, 'sync_order' ) );
-		// TODO: this is required as order update skips save_post.
-		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order' ) );
-		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order' ) );
-		add_action( 'woocommerce_refund_deleted', array( __CLASS__, 'sync_on_refund_delete' ), 10, 2 );
-
-		if ( ! self::$background_process ) {
-			self::$background_process = new WC_Admin_Order_Stats_Background_Process();
-		}
-	}
-
-	/**
-	 * Updates the totals and intervals database queries with parameters used for Orders report: categories, coupons and order status.
-	 *
-	 * @param array $query_args      Query arguments supplied by the user.
-	 * @param array $totals_query    Array of options for totals db query.
-	 * @param array $intervals_query Array of options for intervals db query.
-	 */
-	protected function orders_stats_sql_filter( $query_args, &$totals_query, &$intervals_query ) {
-		// TODO: performance of all of this?
 		global $wpdb;
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		// Avoid ambigious columns in SQL query.
+		$this->report_columns['order_id']     = $table_name . '.' . $this->report_columns['order_id'];
+		$this->report_columns['date_created'] = $table_name . '.' . $this->report_columns['date_created'];
+		$this->report_columns['customer_id']  = $table_name . '.' . $this->report_columns['customer_id'];
+	}
 
-		$from_clause        = '';
-		$orders_stats_table = $wpdb->prefix . self::TABLE_NAME;
-		$operator           = $this->get_match_operator( $query_args );
+	/**
+	 * Updates the database query with parameters used for orders report: coupons and products filters.
+	 *
+	 * @param array $query_args Query arguments supplied by the user.
+	 * @return array            Array of parameters used for SQL query.
+	 */
+	protected function get_sql_query_params( $query_args ) {
+		global $wpdb;
+		$order_stats_lookup_table = $wpdb->prefix . self::TABLE_NAME;
 
-		$where_filters = array();
+		$sql_query_params = $this->get_time_period_sql_params( $query_args, $order_stats_lookup_table );
+		$sql_query_params = array_merge( $sql_query_params, $this->get_limit_sql_params( $query_args ) );
+		$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_sql_params( $query_args ) );
 
-		// TODO: maybe move the sql inside the get_included/excluded functions?
-		// Products filters.
-		$included_products = $this->get_included_products( $query_args );
-		$excluded_products = $this->get_excluded_products( $query_args );
-		if ( $included_products ) {
-			$where_filters[] = " {$orders_stats_table}.order_id IN (
-			SELECT
-				DISTINCT {$wpdb->prefix}wc_order_product_lookup.order_id
-			FROM
-				{$wpdb->prefix}wc_order_product_lookup
-			WHERE
-				{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$included_products})
-			)";
+		$status_subquery = $this->get_status_subquery( $query_args );
+		if ( $status_subquery ) {
+			$sql_query_params['where_clause'] .= " AND {$status_subquery}";
 		}
 
-		if ( $excluded_products ) {
-			$where_filters[] = " {$orders_stats_table}.order_id NOT IN (
-			SELECT
-				DISTINCT {$wpdb->prefix}wc_order_product_lookup.order_id
-			FROM
-				{$wpdb->prefix}wc_order_product_lookup
-			WHERE
-				{$wpdb->prefix}wc_order_product_lookup.product_id IN ({$excluded_products})
-			)";
+		if ( $query_args['customer_type'] ) {
+			$returning_customer                = 'returning' === $query_args['customer_type'] ? 1 : 0;
+			$sql_query_params['where_clause'] .= " AND returning_customer = ${returning_customer}";
 		}
 
-		// Coupons filters.
-		$included_coupons = $this->get_included_coupons( $query_args );
-		$excluded_coupons = $this->get_excluded_coupons( $query_args );
+		$included_coupons          = $this->get_included_coupons( $query_args );
+		$excluded_coupons          = $this->get_excluded_coupons( $query_args );
+		$order_coupon_lookup_table = $wpdb->prefix . 'wc_order_coupon_lookup';
+		if ( $included_coupons || $excluded_coupons ) {
+			$sql_query_params['from_clause'] .= " JOIN {$order_coupon_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_coupon_lookup_table}.order_id";
+		}
 		if ( $included_coupons ) {
-			$where_filters[] = " {$orders_stats_table}.order_id IN (
-				SELECT
-					DISTINCT {$wpdb->prefix}wc_order_coupon_lookup.order_id
-				FROM
-					{$wpdb->prefix}wc_order_coupon_lookup
-				WHERE
-					{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$included_coupons})
-				)";
+			$sql_query_params['where_clause'] .= " AND {$order_coupon_lookup_table}.coupon_id IN ({$included_coupons})";
 		}
-
 		if ( $excluded_coupons ) {
-			$where_filters[] = " {$orders_stats_table}.order_id NOT IN (
-				SELECT
-					DISTINCT {$wpdb->prefix}wc_order_coupon_lookup.order_id
-				FROM
-					{$wpdb->prefix}wc_order_coupon_lookup
-				WHERE
-					{$wpdb->prefix}wc_order_coupon_lookup.coupon_id IN ({$excluded_coupons})
-				)";
+			$sql_query_params['where_clause'] .= " AND {$order_coupon_lookup_table}.coupon_id NOT IN ({$excluded_coupons})";
 		}
 
-		$order_status_filter = $this->get_status_subquery( $query_args, $operator );
-		if ( $order_status_filter ) {
-			$where_filters[] = $order_status_filter;
+		$included_products          = $this->get_included_products( $query_args );
+		$excluded_products          = $this->get_excluded_products( $query_args );
+		$order_product_lookup_table = $wpdb->prefix . 'wc_order_product_lookup';
+		if ( $included_products || $excluded_products ) {
+			$sql_query_params['from_clause'] .= " JOIN {$order_product_lookup_table} ON {$order_stats_lookup_table}.order_id = {$order_product_lookup_table}.order_id";
+		}
+		if ( $included_products ) {
+			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";
+		}
+		if ( $excluded_products ) {
+			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id NOT IN ({$excluded_products})";
 		}
 
-		$customer_filter = $this->get_customer_subquery( $query_args );
-		if ( $customer_filter ) {
-			$where_filters[] = $customer_filter;
-		}
-
-		$where_subclause = implode( " $operator ", $where_filters );
-
-		// To avoid requesting the subqueries twice, the result is applied to all queries passed to the method.
-		if ( $where_subclause ) {
-			$totals_query['where_clause']    .= " AND ( $where_subclause )";
-			$totals_query['from_clause']     .= $from_clause;
-			$intervals_query['where_clause'] .= " AND ( $where_subclause )";
-			$intervals_query['from_clause']  .= $from_clause;
-		}
+		return $sql_query_params;
 	}
 
 	/**
 	 * Returns the report data based on parameters supplied by the user.
 	 *
-	 * @since 3.5.0
 	 * @param array $query_args  Query parameters.
 	 * @return stdClass|WP_Error Data.
 	 */
@@ -205,26 +127,22 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		$now        = time();
 		$week_back  = $now - WEEK_IN_SECONDS;
 
-		// These defaults are only applied when not using REST API, as the API has its own defaults that overwrite these for most values (except before, after, etc).
+		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
 			'per_page'         => get_option( 'posts_per_page' ),
 			'page'             => 1,
 			'order'            => 'DESC',
-			'orderby'          => 'date',
+			'orderby'          => 'date_created',
 			'before'           => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
 			'after'            => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
-			'interval'         => 'week',
 			'fields'           => '*',
-
-			'match'            => 'all',
-			'status_is'        => array(),
-			'status_is_not'    => array(),
 			'product_includes' => array(),
 			'product_excludes' => array(),
 			'coupon_includes'  => array(),
 			'coupon_excludes'  => array(),
-			'customer'         => '',
-			'categories'       => array(),
+			'customer_type'    => null,
+			'status_is'        => parent::get_report_order_statuses(),
+			'extended_info'    => false,
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 
@@ -233,109 +151,66 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 
 		if ( false === $data ) {
 			$data = (object) array(
-				'totals'    => (object) array(),
-				'intervals' => (object) array(),
-				'total'     => 0,
-				'pages'     => 0,
-				'page_no'   => 0,
+				'data'    => array(),
+				'total'   => 0,
+				'pages'   => 0,
+				'page_no' => 0,
 			);
 
-			$selections      = $this->selected_columns( $query_args );
-			$totals_query    = $this->get_time_period_sql_params( $query_args, $table_name );
-			$intervals_query = $this->get_intervals_sql_params( $query_args, $table_name );
+			$selections       = $this->selected_columns( $query_args );
+			$sql_query_params = $this->get_sql_query_params( $query_args );
 
-			// Additional filtering for Orders report.
-			$this->orders_stats_sql_filter( $query_args, $totals_query, $intervals_query );
-
-			$totals = $wpdb->get_results(
-				"SELECT
-						{$selections}
-					FROM
-						{$table_name}
-						{$totals_query['from_clause']}
-					WHERE
-						1=1
-						{$totals_query['where_time_clause']}
-						{$totals_query['where_clause']}",
-				ARRAY_A
+			$db_records_count = (int) $wpdb->get_var(
+				"SELECT COUNT(*) FROM (
+							SELECT
+								{$table_name}.order_id
+							FROM
+								{$table_name}
+								{$sql_query_params['from_clause']}
+							WHERE
+								1=1
+								{$sql_query_params['where_time_clause']}
+								{$sql_query_params['where_clause']}
+					  		) AS tt"
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
-			if ( null === $totals ) {
-				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
-			}
 
-			$unique_products       = $this->get_unique_product_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
-			$totals[0]['products'] = $unique_products;
-
-			$totals = (object) $this->cast_numbers( $totals[0] );
-
-			$db_intervals = $wpdb->get_col(
-				"SELECT
-							{$intervals_query['select_clause']} AS time_interval
-						FROM
-							{$table_name}
-							{$intervals_query['from_clause']}
-						WHERE
-							1=1
-							{$intervals_query['where_time_clause']}
-							{$intervals_query['where_clause']}
-						GROUP BY
-							time_interval"
-			); // WPCS: cache ok, DB call ok, , unprepared SQL ok.
-
-			$db_interval_count       = count( $db_intervals );
-			$expected_interval_count = WC_Admin_Reports_Interval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
-			$total_pages             = (int) ceil( $expected_interval_count / $intervals_query['per_page'] );
-
+			$total_pages = (int) ceil( $db_records_count / $sql_query_params['per_page'] );
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 				return $data;
 			}
 
-			$this->update_intervals_sql_params( $intervals_query, $query_args, $db_interval_count, $expected_interval_count );
-
-			if ( '' !== $selections ) {
-				$selections = ', ' . $selections;
-			}
-
-			$intervals = $wpdb->get_results(
+			$orders_data = $wpdb->get_results(
 				"SELECT
-							MAX(date_created) AS datetime_anchor,
-							{$intervals_query['select_clause']} AS time_interval
-							{$selections}
-						FROM
-							{$table_name}
-							{$intervals_query['from_clause']}
-						WHERE
-							1=1
-							{$intervals_query['where_time_clause']}
-							{$intervals_query['where_clause']}
-						GROUP BY
-							time_interval
-						ORDER BY
-							{$intervals_query['order_by_clause']}
-						{$intervals_query['limit']}",
+						{$selections}
+					FROM
+						{$table_name}
+						{$sql_query_params['from_clause']}
+					WHERE
+						1=1
+						{$sql_query_params['where_time_clause']}
+						{$sql_query_params['where_clause']}
+					ORDER BY
+						{$sql_query_params['order_by_clause']}
+					{$sql_query_params['limit']}
+					",
 				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
-			if ( null === $intervals ) {
-				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
+			if ( null === $orders_data ) {
+				return $data;
 			}
 
-			$data = (object) array(
-				'totals'    => $totals,
-				'intervals' => $intervals,
-				'total'     => $expected_interval_count,
-				'pages'     => $total_pages,
-				'page_no'   => (int) $query_args['page'],
+			if ( $query_args['extended_info'] ) {
+				$this->include_extended_info( $orders_data, $query_args );
+			}
+
+			$orders_data = array_map( array( $this, 'cast_numbers' ), $orders_data );
+			$data        = (object) array(
+				'data'    => $orders_data,
+				'total'   => $db_records_count,
+				'pages'   => $total_pages,
+				'page_no' => (int) $query_args['page'],
 			);
-
-			if ( WC_Admin_Reports_Interval::intervals_missing( $expected_interval_count, $db_interval_count, $intervals_query['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
-				$this->fill_in_missing_intervals( $db_intervals, $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
-				$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
-				$this->remove_extra_records( $data, $query_args['page'], $intervals_query['per_page'], $db_interval_count, $expected_interval_count, $query_args['orderby'] );
-			} else {
-				$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data->intervals );
-			}
-			$this->create_interval_subtotals( $data->intervals );
 
 			wp_cache_set( $cache_key, $data, $this->cache_group );
 		}
@@ -344,210 +219,150 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	}
 
 	/**
-	 * Get unique products based on user time query
+	 * Normalizes order_by clause to match to SQL query.
 	 *
-	 * @param string $from_clause       From clause with date query.
-	 * @param string $where_time_clause Where clause with date query.
-	 * @param string $where_clause      Where clause with date query.
-	 * @return integer Unique product count.
+	 * @param string $order_by Order by option requeste by user.
+	 * @return string
 	 */
-	public function get_unique_product_count( $from_clause, $where_time_clause, $where_clause ) {
-		global $wpdb;
+	protected function normalize_order_by( $order_by ) {
+		if ( 'date' === $order_by ) {
+			return 'date_created';
+		}
 
-		$table_name = $wpdb->prefix . self::TABLE_NAME;
-
-		return $wpdb->get_var(
-			"SELECT
-					COUNT( DISTINCT {$wpdb->prefix}wc_order_product_lookup.product_id )
-				FROM
-				    {$wpdb->prefix}wc_order_product_lookup JOIN {$table_name} ON {$wpdb->prefix}wc_order_product_lookup.order_id = {$table_name}.order_id
-					{$from_clause}
-				WHERE
-					1=1
-					{$where_time_clause}
-					{$where_clause}"
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		return $order_by;
 	}
 
 	/**
-	 * Queue a background process that will repopulate the entire orders stats database.
+	 * Returns order status subquery to be used in WHERE SQL query, based on query arguments from the user.
 	 *
-	 * @todo Make this work on large DBs.
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $operator   AND or OR, based on match query argument.
+	 * @return string
 	 */
-	public static function queue_order_stats_repopulate_database() {
-
-		// This needs to be updated to work in batches instead of getting all orders, as
-		// that will not work well on DBs with more than a few hundred orders.
-		$order_ids = wc_get_orders(
-			array(
-				'limit'  => -1,
-				'status' => parent::get_report_order_statuses(),
-				'type'   => 'shop_order',
-				'return' => 'ids',
-			)
-		);
-
-		foreach ( $order_ids as $id ) {
-			self::$background_process->push_to_queue( $id );
+	protected function get_status_subquery( $query_args, $operator = 'AND' ) {
+		$subqueries = array();
+		if ( isset( $query_args['status_is'] ) && is_array( $query_args['status_is'] ) && count( $query_args['status_is'] ) > 0 ) {
+			$allowed_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is'] );
+			if ( $allowed_statuses ) {
+				$subqueries[] = "status IN ( '" . implode( "','", $allowed_statuses ) . "' )";
+			}
 		}
 
-		self::$background_process->save();
-		self::$background_process->dispatch();
+		if ( isset( $query_args['status_is_not'] ) && is_array( $query_args['status_is_not'] ) && count( $query_args['status_is_not'] ) > 0 ) {
+			$forbidden_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is_not'] );
+			if ( $forbidden_statuses ) {
+				$subqueries[] = "status NOT IN ( '" . implode( "','", $forbidden_statuses ) . "' )";
+			}
+		}
+
+		return implode( " $operator ", $subqueries );
 	}
 
 	/**
-	 * Add order information to the lookup table when orders are created or modified.
+	 * Enriches the order data.
 	 *
-	 * @param int $post_id Post ID.
+	 * @param array $orders_data Orders data.
+	 * @param array $query_args  Query parameters.
 	 */
-	public static function sync_order( $post_id ) {
-		if ( 'shop_order' !== get_post_type( $post_id ) ) {
-			return;
-		}
+	protected function include_extended_info( &$orders_data, $query_args ) {
+		$mapped_orders      = $this->map_array_by_key( $orders_data, 'order_id' );
+		$products           = $this->get_products_by_order_ids( array_keys( $mapped_orders ) );
+		$mapped_products    = $this->map_array_by_key( $products, 'product_id' );
+		$product_categories = $this->get_product_categories_by_product_ids( array_keys( $mapped_products ) );
 
-		$order = wc_get_order( $post_id );
-		if ( ! $order ) {
-			return;
-		}
+		$mapped_data = array();
+		foreach ( $products as $product ) {
+			if ( ! isset( $mapped_data[ $product['order_id'] ] ) ) {
+				$mapped_data[ $product['order_id'] ]['products']   = array();
+				$mapped_data[ $product['order_id'] ]['categories'] = array();
+			}
 
-		self::update( $order );
-	}
-
-	/**
-	 * Syncs order information when a refund is deleted.
-	 *
-	 * @param int $refund_id Refund ID.
-	 * @param int $order_id Order ID.
-	 */
-	public static function sync_on_refund_delete( $refund_id, $order_id ) {
-		self::sync_order( $order_id );
-	}
-
-	/**
-	 * Update the database with stats data.
-	 *
-	 * @param WC_Order $order Order to update row for.
-	 * @return int|bool|null Number or rows modified or false on failure.
-	 */
-	public static function update( $order ) {
-		global $wpdb;
-		$table_name = $wpdb->prefix . self::TABLE_NAME;
-
-		if ( ! $order->get_id() || ! $order->get_date_created() ) {
-			return false;
-		}
-
-		if ( ! in_array( $order->get_status(), parent::get_report_order_statuses(), true ) ) {
-			$wpdb->delete(
-				$table_name,
-				array(
-					'order_id' => $order->get_id(),
+			$mapped_data[ $product['order_id'] ]['products'][] = array(
+				'id'   => $product['product_id'],
+				'name' => $product['product_name'],
+			);
+			$mapped_data[ $product['order_id'] ]['categories'] = array_unique(
+				array_merge(
+					$mapped_data[ $product['order_id'] ]['categories'],
+					$product_categories[ $product['product_id'] ]
 				)
 			);
-			return;
 		}
 
-		$data   = array(
-			'order_id'           => $order->get_id(),
-			'date_created'       => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
-			'num_items_sold'     => self::get_num_items_sold( $order ),
-			'gross_total'        => $order->get_total(),
-			'coupon_total'       => $order->get_total_discount(),
-			'refund_total'       => $order->get_total_refunded(),
-			'tax_total'          => $order->get_total_tax(),
-			'shipping_total'     => $order->get_shipping_total(),
-			'net_total'          => (float) $order->get_total() - (float) $order->get_total_tax() - (float) $order->get_shipping_total(),
-			'returning_customer' => self::is_returning_customer( $order ),
-			'status'             => self::normalize_order_status( $order->get_status() ),
-		);
-		$format = array(
-			'%d',
-			'%s',
-			'%d',
-			'%f',
-			'%f',
-			'%f',
-			'%f',
-			'%f',
-			'%f',
-			'%d',
-			'%s',
-		);
-
-		// Ensure we're associating this order with a Customer in the lookup table.
-		$order_user_id        = $order->get_customer_id();
-		$customers_data_store = new WC_Admin_Reports_Customers_Data_Store();
-
-		if ( 0 === $order_user_id ) {
-			$email = $order->get_billing_email( 'edit' );
-
-			if ( $email ) {
-				$customer_id = $customers_data_store->get_or_create_guest_customer_from_order( $order );
-
-				if ( $customer_id ) {
-					$data['customer_id'] = $customer_id;
-					$format[] = '%d';
-				}
-			}
-		} else {
-			$customer = $customers_data_store->get_customer_by_user_id( $order_user_id );
-
-			if ( $customer && $customer['customer_id'] ) {
-				$data['customer_id'] = $customer['customer_id'];
-				$format[] = '%d';
-			}
+		foreach ( $orders_data as $key => $order_data ) {
+			$orders_data[ $key ]['extended_info'] = $mapped_data[ $order_data['order_id'] ];
 		}
-
-		// Update or add the information to the DB.
-		return $wpdb->replace( $table_name, $data, $format );
 	}
 
 	/**
-	 * Calculation methods.
-	 */
-
-	/**
-	 * Get number of items sold among all orders.
+	 * Returns the same array index by a given key
 	 *
-	 * @param array $order WC_Order object.
-	 * @return int
+	 * @param array  $array Array to be looped over.
+	 * @param string $key Key of values used for new array.
+	 * @return array
 	 */
-	protected static function get_num_items_sold( $order ) {
-		$num_items = 0;
-
-		$line_items = $order->get_items( 'line_item' );
-		foreach ( $line_items as $line_item ) {
-			$num_items += $line_item->get_quantity();
+	protected function map_array_by_key( $array, $key ) {
+		$mapped = array();
+		foreach ( $array as $item ) {
+			$mapped[ $item[ $key ] ] = $item;
 		}
-
-		return $num_items;
+		return $mapped;
 	}
 
 	/**
-	 * Check to see if an order's customer has made previous orders or not
+	 * Get product Ids, names, and categories from order IDs.
 	 *
-	 * @param array $order WC_Order object.
-	 * @return bool
+	 * @param array $order_ids Array of order IDs.
+	 * @return array
 	 */
-	protected static function is_returning_customer( $order ) {
-		$customer_id = $order->get_user_id();
+	protected function get_products_by_order_ids( $order_ids ) {
+		global $wpdb;
+		$order_product_lookup_table = $wpdb->prefix . 'wc_order_product_lookup';
+		$included_order_ids         = implode( ',', $order_ids );
 
-		if ( 0 === $customer_id ) {
-			return false;
+		$products = $wpdb->get_results(
+			"SELECT order_id, ID as product_id, post_title as product_name
+				FROM {$wpdb->prefix}posts
+				JOIN {$order_product_lookup_table} ON {$order_product_lookup_table}.product_id = {$wpdb->prefix}posts.ID
+				WHERE 
+					order_id IN ({$included_order_ids})
+				",
+			ARRAY_A
+		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+
+		return $products;
+	}
+
+	/**
+	 * Get product categories by array of product IDs
+	 *
+	 * @param array $product_ids Product IDs.
+	 * @return array
+	 */
+	protected function get_product_categories_by_product_ids( $product_ids ) {
+		global $wpdb;
+		$order_product_lookup_table = $wpdb->prefix . 'wc_order_product_lookup';
+		$included_product_ids       = implode( ',', $product_ids );
+
+		$product_categories = $wpdb->get_results(
+			"SELECT term_id AS category_id, object_id AS product_id
+				FROM {$wpdb->prefix}term_relationships
+				JOIN {$wpdb->prefix}term_taxonomy ON {$wpdb->prefix}term_relationships.term_taxonomy_id = {$wpdb->prefix}term_taxonomy.term_taxonomy_id
+				WHERE
+					object_id IN (${included_product_ids})
+					AND taxonomy = 'product_cat'
+				",
+			ARRAY_A
+		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+
+		$mapped_product_categories = array();
+		foreach ( $product_categories as $category ) {
+			$mapped_product_categories[ $category['product_id'] ][] = $category['category_id'];
 		}
 
-		$customer_orders = get_posts(
-			array(
-				'meta_key'    => '_customer_user', // WPCS: slow query ok.
-				'meta_value'  => $customer_id, // WPCS: slow query ok.
-				'post_type'   => 'shop_order',
-				'post_status' => array( 'wc-on-hold', 'wc-processing', 'wc-completed' ),
-				'numberposts' => 2,
-			)
-		);
-
-		return count( $customer_orders ) > 1;
+		return $mapped_product_categories;
 	}
+
 
 	/**
 	 * Returns string to be used as cache key for the data.
@@ -558,4 +373,5 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	protected function get_cache_key( $params ) {
 		return 'woocommerce_' . self::TABLE_NAME . '_' . md5( wp_json_encode( $params ) );
 	}
+
 }

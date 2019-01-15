@@ -224,4 +224,19 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
 		);
 	}
+
+	/**
+	 * Get order statuses without prefixes.
+	 *
+	 * @return array
+	 */
+	public function get_order_statuses() {
+		$order_statuses = array();
+
+		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
+			$order_statuses[] = str_replace( 'wc-', '', $status );
+		}
+
+		return $order_statuses;
+	}
 }
