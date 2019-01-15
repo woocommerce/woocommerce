@@ -67,6 +67,8 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
+		$expected_customer_id = WC_Admin_Reports_Customers_Data_Store::get_customer_id_by_user_id( 1 );
+
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$reports  = $response->get_data();
 
@@ -77,7 +79,7 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( $order->get_id(), $order_report['order_id'] );
 		$this->assertEquals( date( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ), $order_report['date_created'] );
-		$this->assertEquals( 0, $order_report['customer_id'] ); // @TODO: This should be 1, but customer_id is returning 0 in lookup table.
+		$this->assertEquals( $expected_customer_id, $order_report['customer_id'] );
 		$this->assertEquals( 4, $order_report['num_items_sold'] );
 		$this->assertEquals( 90.0, $order_report['net_total'] ); // 25 x 4 - 10 (shipping)
 		$this->assertEquals( 'new', $order_report['customer_type'] );
