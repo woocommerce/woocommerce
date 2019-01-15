@@ -208,7 +208,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			'refunds'        => "SUM($products_table.refund_amount) AS refunds",
 			'taxes'          => "SUM($products_table.tax_amount) AS taxes",
 			'shipping'       => "SUM($products_table.shipping_amount) AS shipping",
-			'net_revenue'    => "SUM($products_table.product_net_revenue) - SUM($products_table.refund_amount) AS net_revenue",
+			// TODO: product_net_revenue should already have refunds subtracted, so it should not be here. Pls check.
+			'net_revenue'    => "SUM($products_table.product_net_revenue) AS net_revenue",
 		);
 
 		return $this->prepare_selections( $query_args, $columns_mapping );
