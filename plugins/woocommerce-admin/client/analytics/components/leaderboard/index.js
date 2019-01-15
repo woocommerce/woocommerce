@@ -57,6 +57,7 @@ export class Leaderboard extends Component {
 				isLoading={ isRequesting }
 				rows={ rows }
 				rowsPerPage={ totalRows }
+				showMenu={ false }
 				title={ title }
 				totalRows={ totalRows }
 			/>
