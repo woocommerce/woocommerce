@@ -28,7 +28,7 @@ class Leaderboards extends Component {
 		super( ...arguments );
 		this.state = {
 			hiddenLeaderboardKeys: props.userPrefLeaderboards || [],
-			rowsPerTable: props.userPrefLeaderboardRows || 5,
+			rowsPerTable: parseInt( props.userPrefLeaderboardRows ) || 5,
 		};
 
 		this.toggle = this.toggle.bind( this );

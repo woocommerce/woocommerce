@@ -167,6 +167,11 @@ function wc_admin_print_script_settings() {
 		$preload_function
 	);
 
+	$current_user_data = array();
+	foreach ( wc_admin_get_user_data_fields() as $user_field ) {
+		$current_user_data[ $user_field ] = get_user_meta( get_current_user_id(), 'wc_admin_' . $user_field, true );
+	}
+
 	/**
 	 * TODO: On merge, once plugin images are added to core WooCommerce, `wcAdminAssetUrl` can be retired, and
 	 * `wcAssetUrl` can be used in its place throughout the codebase.
@@ -189,6 +194,7 @@ function wc_admin_print_script_settings() {
 			'userLocale'    => get_user_locale(),
 			'weekdaysShort' => array_values( $wp_locale->weekday_abbrev ),
 		),
+		'currentUserData'  => $current_user_data,
 	);
 
 	foreach ( $preload_data_endpoints as $key => $endpoint ) {
