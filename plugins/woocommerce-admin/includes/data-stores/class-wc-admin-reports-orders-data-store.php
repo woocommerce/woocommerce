@@ -584,7 +584,9 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		}
 
 		// Using array_values to remove custom keys, so that it gets later converted to JSON as an array.
-		return array_values( $segments );
+		$segments_no_keys = array_values( $segments );
+		$this->sort_array( $segments_no_keys, 'segment_id', 'asc' );
+		return $segments_no_keys;
 	}
 
 	/**
