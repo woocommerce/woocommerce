@@ -4,15 +4,36 @@ Tags: gutenberg, woocommerce, woo commerce, products
 Requires at least: 4.9
 Tested up to: 5.0
 Requires PHP: 5.2
-Stable tag: 1.2.0
+Stable tag: 1.3.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 == Description ==
 
-WooCommerce Blocks are the easiest, most flexible way to display your products on posts and pages! Using the original "Products Block", your displayed products can be filtered by category, sale status, or a variety of other fields. You can even make a custom list of hand-picked products to display.
+WooCommerce Blocks are the easiest, most flexible way to display your products on posts and pages! New for version 1.3.0: We've added six new blocks! 
 
-New for 1.2.0: We've added a stand-alone Product Category block to simplify the experience and improve the category search and selection UI. Be on the lookout for additional stand-alone blocks in future releases. 
+**NEW: Featured Product Block**
+Select and display a single product in a new, high impact fashion. Control text alignment, hide or show the price and description, add a color overlay, change the button call to action, and override the product photo. 
+
+**NEW: Hand-Picked products Block**
+Display a grid of hand picked products. Products can be ordred in various ways.
+
+**NEW: Best Selling Products Block**
+Display a grid of your best selling products, filterable by category.
+
+**NEW: Top Rated Products Block**
+Display a grid of your top rated products, filterable by category.
+
+**NEW: Newest Products Block**
+Display a grid of your newest products, filterable by category.
+
+**NEW: On Sale Products Block**
+Display a grid of on sale products, filterable by category.
+
+**Products by Category Block**
+Display a grid of products from your selected category, or categories. Products can be ordered in various ways.
+
+We've also improved the category selection filter. If you select two or more categories, you can now chose to show products that include ANY or ALL selected categories. 
 
 == Getting Started ==
 
@@ -57,12 +78,30 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Screenshots ==
 
-1. The initial Products block.
-2. Selecting hand-picked products for the Products block.
-3. The completed Products block when inserted into a post.
-4. New: Stand-alone Product Category block
+1. The Featured Product Block
+2. Selecting a product for the Featured Product Block
+3. Selecting Products for the Hand-Picked Products Block
+4. Selecting categories in the Products By Category block
+5. WooCommerce Product Blocks in the block inserter menu
 
 == Changelog ==
+
+== 1.3.0 - 2019-01-15 =
+
+- Feature: Added new blocks: "Featured Product", "Hand-picked Products", "Best Selling Products", "Newest Products", "On Sale Products", "Top Rated Products"
+- Enhancement: Create new "WooCommerce" block category, all blocks are found there now
+- Enhancement: Added a control to "Products by Category" block to control whether products need to match any selected categories or all selected categories
+- Fix: A "Products by Category" block with no category selected will no longer show all products
+- Legacy block: Remove legacy "Products" block from being shown in the block inserter (still loading the block for an existing uses)
+- Legacy block: Fix an issue with imageless products in the legacy "Products" block.
+- Components: Add new Control components `ProductControl`, `ProductsControl`, `ProductOrderbyControl`
+- Components: Update `SearchListControl` to allow selecting a single item
+- API: Add `cat_operator` support to products endpoint
+- API: Add product `description` & `short_description` to each product
+- API: Add attribute group names to each attribute
+- Build: Update packages
+- Build: Add cssnano to minify CSS
+- Build: Split out node_modules code into separate vendors files
 
 == 1.2.0 - 2018-12-04 =
 * Feature - Stand-alone product category block with improved category selection interface.
