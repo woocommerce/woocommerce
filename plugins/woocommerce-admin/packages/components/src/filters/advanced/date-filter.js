@@ -42,6 +42,7 @@ class DateFilter extends Component {
 
 		this.onSingleDateChange = this.onSingleDateChange.bind( this );
 		this.onRangeDateChange = this.onRangeDateChange.bind( this );
+		this.onRuleChange = this.onRuleChange.bind( this );
 	}
 
 	getBetweenString() {
@@ -170,21 +171,23 @@ class DateFilter extends Component {
 		);
 	}
 
-	// onRuleChange( value ) {
-	// 	const { onFilterChange, filter } = this.props;
-	// 	if ( 'between' === filter.rule && 'between' !== value ) {
-	// 		this.setState( {
-	// 			after: null,
-	// 			afterText: '',
-	// 			afterError: null,
-	// 		} );
-	// 	}
-	// 	onFilterChange( filter.key, 'rule', value );
-	// }
+	onRuleChange( value ) {
+		const { onFilterChange, filter, replaceFilter } = this.props;
+		const { before } = this.state;
+		if ( 'between' === filter.rule && 'between' !== value ) {
+			replaceFilter( {
+				key: filter.key,
+				rule: value,
+				value: before ? before.format( isoDateFormat ) : undefined,
+			} );
+		} else {
+			onFilterChange( filter.key, 'rule', value );
+		}
+	}
 
 	render() {
-		const { config, filter, onFilterChange, isEnglish } = this.props;
-		const { key, rule } = filter;
+		const { config, filter, isEnglish } = this.props;
+		const { rule } = filter;
 		const { labels, rules } = config;
 		const screenReaderText = this.getScreenReaderText( filter, config );
 		const children = interpolateComponents( {
@@ -195,7 +198,7 @@ class DateFilter extends Component {
 						className="woocommerce-filters-advanced__rule"
 						options={ rules }
 						value={ rule }
-						onChange={ partial( onFilterChange, key, 'rule' ) }
+						onChange={ this.onRuleChange }
 						aria-label={ labels.rule }
 					/>
 				),
