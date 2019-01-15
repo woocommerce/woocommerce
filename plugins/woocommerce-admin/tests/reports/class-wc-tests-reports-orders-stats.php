@@ -3156,7 +3156,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$order_2->calculate_totals();
 		$order_2->save();
 
-		$data_store = new WC_Admin_Reports_Orders_Data_Store();
+		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 
 		// Tests for before & after set to current hour.
 		$now = new DateTime();
