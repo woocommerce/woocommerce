@@ -968,9 +968,13 @@ class WC_Discounts {
 			 */
 			$message = apply_filters( 'woocommerce_coupon_error', is_numeric( $e->getMessage() ) ? $coupon->get_coupon_error( $e->getMessage() ) : $e->getMessage(), $e->getCode(), $coupon );
 
-			return new WP_Error( 'invalid_coupon', $message, array(
-				'status' => 400,
-			) );
+			return new WP_Error(
+				'invalid_coupon',
+				$message,
+				array(
+					'status' => 400,
+				)
+			);
 		}
 		return true;
 	}
