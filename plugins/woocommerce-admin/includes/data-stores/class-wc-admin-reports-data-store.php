@@ -94,9 +94,20 @@ class WC_Admin_Reports_Data_Store {
 	 * @param string   $direction DESC/ASC.
 	 */
 	protected function sort_intervals( &$data, $sort_by, $direction ) {
+		$this->sort_array( $data->intervals, $sort_by, $direction );
+	}
+
+	/**
+	 * Sorts array of arrays based on subarray key $sort_by.
+	 *
+	 * @param array  $arr       Array to sort.
+	 * @param string $sort_by   Ordering property.
+	 * @param string $direction DESC/ASC.
+	 */
+	protected function sort_array( &$arr, $sort_by, $direction ) {
 		$this->order_by = $this->normalize_order_by( $sort_by );
 		$this->order    = $direction;
-		usort( $data->intervals, array( $this, 'interval_cmp' ) );
+		usort( $arr, array( $this, 'interval_cmp' ) );
 	}
 
 	/**
