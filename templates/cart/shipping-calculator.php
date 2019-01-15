@@ -53,7 +53,7 @@ do_action( 'woocommerce_before_shipping_calculator' ); ?>
 					?>
 					<span>
 						<select name="calc_shipping_state" class="state_select" id="calc_shipping_state" placeholder="<?php esc_attr_e( 'State / County', 'woocommerce' ); ?>">
-							<option value=""><?php esc_html_e( 'Select a state&hellip;', 'woocommerce' ); ?></option>
+							<option value=""><?php esc_html_e( 'Select an option&hellip;', 'woocommerce' ); ?></option>
 							<?php
 							foreach ( $states as $ckey => $cvalue ) {
 								echo '<option value="' . esc_attr( $ckey ) . '" ' . selected( $current_r, $ckey, false ) . '>' . esc_html( $cvalue ) . '</option>';
