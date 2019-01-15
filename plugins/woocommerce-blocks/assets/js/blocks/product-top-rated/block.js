@@ -44,7 +44,7 @@ class ProductTopRatedBlock extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const hasChange = [ 'rows', 'columns', 'categories' ].reduce( ( acc, key ) => {
+		const hasChange = [ 'rows', 'columns', 'categories', 'catOperator' ].reduce( ( acc, key ) => {
 			return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
 		}, false );
 		if ( hasChange ) {
@@ -69,7 +69,7 @@ class ProductTopRatedBlock extends Component {
 
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
-		const { columns, rows } = attributes;
+		const { categories, catOperator, columns, rows } = attributes;
 
 		return (
 			<InspectorControls key="inspector">
@@ -100,11 +100,15 @@ class ProductTopRatedBlock extends Component {
 					initialOpen={ false }
 				>
 					<ProductCategoryControl
-						selected={ attributes.categories }
+						selected={ categories }
 						onChange={ ( value = [] ) => {
 							const ids = value.map( ( { id } ) => id );
 							setAttributes( { categories: ids } );
 						} }
+						operator={ catOperator }
+						onOperatorChange={ ( value = 'any' ) =>
+							setAttributes( { catOperator: value } )
+						}
 					/>
 				</PanelBody>
 			</InspectorControls>
