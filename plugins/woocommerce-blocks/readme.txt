@@ -76,6 +76,8 @@ Bugs should be reported in the [WooCommerce Gutenberg Products Block GitHub repo
 
 Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/woocommerce-gutenberg-products-block/) :)
 
+Release and roadmap notes available on the [WooCommerce Developers Blog](https://woocommerce.wordpress.com/2019/01/15/woocommerce-blocks-1-3-0-release-notes/)
+
 == Screenshots ==
 
 1. The Featured Product Block
