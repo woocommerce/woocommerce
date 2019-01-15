@@ -422,6 +422,8 @@ class WC_Admin_Api_Init {
 			// TODO: schedule single order update if this fails?
 			WC_Admin_Reports_Orders_Stats_Data_Store::sync_order( $order_id );
 			WC_Admin_Reports_Products_Data_Store::sync_order_products( $order_id );
+			WC_Admin_Reports_Coupons_Data_Store::sync_order_coupons( $order_id );
+			WC_Admin_Reports_Taxes_Data_Store::sync_order_taxes( $order_id );
 		}
 	}
 
