@@ -566,7 +566,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				}
 			}
 		} else {
-			foreach ( $this->report_columns as $field ) {
+			foreach ( $this->report_columns as $field => $sql_clause ) {
 				$segment_subtotals[ $field ] = 0;
 			}
 		}
