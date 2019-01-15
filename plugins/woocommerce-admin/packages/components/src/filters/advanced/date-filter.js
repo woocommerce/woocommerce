@@ -27,7 +27,7 @@ class DateFilter extends Component {
 	constructor( { filter } ) {
 		super( ...arguments );
 
-		const [ isoAfter, isoBefore ] = Array.isArray( filter.value ) ? filter.value : [ filter.value ];
+		const [ isoAfter, isoBefore ] = Array.isArray( filter.value ) ? filter.value : [ null, filter.value ];
 		const after = isoAfter ? toMoment( isoDateFormat, isoAfter ) : null;
 		const before = isoBefore ? toMoment( isoDateFormat, isoBefore ) : null;
 
