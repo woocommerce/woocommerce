@@ -342,19 +342,24 @@ function wgpb_print_script_settings() {
 	$code = get_woocommerce_currency();
 
 	// Settings and variables can be passed here for access in the app.
+	// Will need `wcAdminAssetUrl` if the ImageAsset component is used.
+	// Will need `dataEndpoints.countries` if Search component is used with 'country' type.
+	// Will need `orderStatuses` if the OrderStatus component is used.
+	// Deliberately excluding: `embedBreadcrumbs`, `trackingEnabled`.
 	$settings = array(
-		'adminUrl'   => admin_url(),
-		'wcAssetUrl' => plugins_url( 'assets/', WC_PLUGIN_FILE ),
-		'siteLocale' => esc_attr( get_bloginfo( 'language' ) ),
-		'currency'   => array(
+		'adminUrl'      => admin_url(),
+		'wcAssetUrl'    => plugins_url( 'assets/', WC_PLUGIN_FILE ),
+		'siteLocale'    => esc_attr( get_bloginfo( 'language' ) ),
+		'currency'      => array(
 			'code'      => $code,
 			'precision' => wc_get_price_decimals(),
 			'symbol'    => get_woocommerce_currency_symbol( $code ),
+			'position'  => get_option( 'woocommerce_currency_pos' ),
 		),
-		'date'       => array(
-			'dow' => get_option( 'start_of_week', 0 ),
-		),
-		'l10n'       => array(
+		'stockStatuses' => wc_get_product_stock_status_options(),
+		'siteTitle'     => get_bloginfo( 'name' ),
+		'dataEndpoints' => array(),
+		'l10n'          => array(
 			'userLocale'    => get_user_locale(),
 			'weekdaysShort' => array_values( $wp_locale->weekday_abbrev ),
 		),
@@ -371,7 +376,8 @@ function wgpb_print_script_settings() {
 	);
 	?>
 	<script type="text/javascript">
-		var wcSettings = <?php echo wp_json_encode( $settings ); ?>;
+		<?php // Use the wcSettings from wc-admin if already present. ?>
+		var wcSettings = wcSettings || <?php echo wp_json_encode( $settings ); ?>;
 		var wc_product_block_data = <?php echo wp_json_encode( $block_settings ); ?>;
 	</script>
 	<?php
