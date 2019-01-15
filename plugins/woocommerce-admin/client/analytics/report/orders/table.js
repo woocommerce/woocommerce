@@ -4,7 +4,6 @@
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { format as formatDate } from '@wordpress/date';
 import { compose } from '@wordpress/compose';
 import { map } from 'lodash';
 
@@ -12,7 +11,7 @@ import { map } from 'lodash';
  * WooCommerce dependencies
  */
 import { appendTimestamp, defaultTableDateFormat, getCurrentDates } from '@woocommerce/date';
-import { Link, OrderStatus, ViewMoreList } from '@woocommerce/components';
+import { Date, Link, OrderStatus, ViewMoreList } from '@woocommerce/components';
 import { formatCurrency } from '@woocommerce/currency';
 
 /**
@@ -126,7 +125,7 @@ class OrdersReportTable extends Component {
 
 			return [
 				{
-					display: formatDate( defaultTableDateFormat, date ),
+					display: <Date date={ date } visibleFormat={ defaultTableDateFormat } />,
 					value: date,
 				},
 				{

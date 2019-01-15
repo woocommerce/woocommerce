@@ -4,13 +4,12 @@
  */
 import { __, _n } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import { format as formatDate } from '@wordpress/date';
 import { map } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
-import { Link } from '@woocommerce/components';
+import { Date, Link } from '@woocommerce/components';
 import { defaultTableDateFormat } from '@woocommerce/date';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 
@@ -102,13 +101,15 @@ export default class CouponsReportTable extends Component {
 					value: getCurrencyFormatDecimal( amount ),
 				},
 				{
-					display: formatDate( defaultTableDateFormat, date_created ),
+					display: <Date date={ date_created } visibleFormat={ defaultTableDateFormat } />,
 					value: date_created,
 				},
 				{
-					display: date_expires
-						? formatDate( defaultTableDateFormat, date_expires )
-						: __( 'N/A', 'wc-admin' ),
+					display: date_expires ? (
+						<Date date={ date_expires } visibleFormat={ defaultTableDateFormat } />
+					) : (
+						__( 'N/A', 'wc-admin' )
+					),
 					value: date_expires,
 				},
 				{

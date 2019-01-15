@@ -77,22 +77,26 @@
 		max-width: min-content;
 		min-width: 80px;
 		width: 100%;
+		font-size: 11px;
 		height: 60px;
-		border-bottom: 3px solid $white;
-
 		@include breakpoint( '>960px' ) {
+			font-size: 13px;
 			height: 80px;
 		}
 
 		&.is-active {
 			color: $core-grey-dark-700;
-			border-bottom: 3px solid $woocommerce;
 			box-shadow: none;
-		}
 
-		font-size: 11px;
-		@include breakpoint( '>960px' ) {
-			font-size: 13px;
+			&::before {
+				background-color: $woocommerce;
+				bottom: 0;
+				content: '';
+				height: 3px;
+				left: 0;
+				position: absolute;
+				right: 0;
+			}
 		}
 
 		&.has-unread::after,
@@ -125,9 +129,7 @@
 		}
 
 		&:hover,
-		&.components-button:not(:disabled):not([aria-disabled='true']):hover,
-		&:focus,
-		&.components-button:not(:disabled):not([aria-disabled='true']):focus {
+		&.components-button:not(:disabled):not([aria-disabled='true']):hover {
 			background-color: $core-grey-light-200;
 			box-shadow: none;
 
@@ -137,15 +139,9 @@
 			}
 		}
 
-		&:focus:not(.is-active),
-		&.components-button:not(.is-active):not(:disabled):not([aria-disabled='true']):focus,
-		&:hover:not(.is-active),
-		&.components-button:not(.is-active):not(:disabled):not([aria-disabled='true']):hover {
-			border-bottom: 3px solid $core-grey-light-200;
-			&.has-unread::after,
-			&.woocommerce-layout__activity-panel-tab-wordpress-notices::after {
-				border-color: $core-grey-light-200;
-			}
+		&:focus,
+		&.components-button:not(:disabled):not([aria-disabled='true']):focus {
+			box-shadow: inset -1px -1px 0 $core-grey-dark-300, inset 1px 1px 0 $core-grey-dark-300;
 		}
 	}
 }
@@ -205,7 +201,7 @@
 	top: 92px;
 	z-index: 1000;
 	overflow-x: hidden;
-	overflow-y: scroll;
+	overflow-y: auto;
 
 	// Extra padding is needed at the bottom of the wrapper because of our positioning, height, and overflow rules. Otherwise, some content can get cut off.
 	padding-bottom: $gap-small * 6;

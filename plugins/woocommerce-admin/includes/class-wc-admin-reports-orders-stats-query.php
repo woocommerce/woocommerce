@@ -1,6 +1,6 @@
 <?php
 /**
- * Class for parameter-based Orders Reports querying
+ * Class for parameter-based Order Stats Reports querying
  *
  * Example usage:
  * $args = array(

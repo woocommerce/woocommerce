@@ -48,6 +48,7 @@ class WC_Admin_Api_Init {
 
 		// Query classes for reports.
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-revenue-query.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-orders-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-orders-stats-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-products-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-variations-query.php';
@@ -64,6 +65,7 @@ class WC_Admin_Api_Init {
 		// Data stores.
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-orders-data-store.php';
+		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-orders-stats-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-products-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-variations-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-products-stats-data-store.php';
@@ -92,7 +94,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-customers-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-data-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-data-download-ips-controller.php';
-		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-orders-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-orders-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-products-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-reviews-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-controller.php';
@@ -104,6 +106,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-files-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-stats-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-orders-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-orders-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-products-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-variations-controller.php';
@@ -121,7 +124,7 @@ class WC_Admin_Api_Init {
 				'WC_Admin_REST_Customers_Controller',
 				'WC_Admin_REST_Data_Controller',
 				'WC_Admin_REST_Data_Download_Ips_Controller',
-				'WC_Admin_REST_Orders_Controller',
+				'WC_Admin_REST_Orders_Stats_Controller',
 				'WC_Admin_REST_Products_Controller',
 				'WC_Admin_REST_Product_Reviews_Controller',
 				'WC_Admin_REST_Reports_Controller',
@@ -130,6 +133,7 @@ class WC_Admin_Api_Init {
 				'WC_Admin_REST_Reports_Variations_Controller',
 				'WC_Admin_REST_Reports_Products_Stats_Controller',
 				'WC_Admin_REST_Reports_Revenue_Stats_Controller',
+				'WC_Admin_REST_Reports_Orders_Controller',
 				'WC_Admin_REST_Reports_Orders_Stats_Controller',
 				'WC_Admin_REST_Reports_Categories_Controller',
 				'WC_Admin_REST_Reports_Taxes_Controller',
@@ -203,9 +207,9 @@ class WC_Admin_Api_Init {
 			&& isset( $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][5] )
 			&& isset( $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][4] )
 			&& isset( $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][3] )
-			&& $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
-			&& $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][4]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
-			&& $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][5]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Stats_Controller
+			&& $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][4]['callback'][0] instanceof WC_Admin_REST_Orders_Stats_Controller
+			&& $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][5]['callback'][0] instanceof WC_Admin_REST_Orders_Stats_Controller
 		) {
 			$endpoints['/wc/v3/orders/(?P<id>[\d]+)'][0] = $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][3];
 			$endpoints['/wc/v3/orders/(?P<id>[\d]+)'][1] = $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][4];
@@ -216,8 +220,8 @@ class WC_Admin_Api_Init {
 		if ( isset( $endpoints['/wc/v3/orders'] )
 			&& isset( $endpoints['/wc/v3/orders'][3] )
 			&& isset( $endpoints['/wc/v3/orders'][2] )
-			&& $endpoints['/wc/v3/orders'][2]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
-			&& $endpoints['/wc/v3/orders'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v3/orders'][2]['callback'][0] instanceof WC_Admin_REST_Orders_Stats_Controller
+			&& $endpoints['/wc/v3/orders'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Stats_Controller
 		) {
 			$endpoints['/wc/v3/orders'][0] = $endpoints['/wc/v3/orders'][2];
 			$endpoints['/wc/v3/orders'][1] = $endpoints['/wc/v3/orders'][3];
@@ -277,7 +281,7 @@ class WC_Admin_Api_Init {
 		// Add registered customers to the lookup table before updating order stats
 		// so that the orders can be associated with the `customer_id` column.
 		self::customer_lookup_store_init();
-		WC_Admin_Reports_Orders_Data_Store::queue_order_stats_repopulate_database();
+		WC_Admin_Reports_Orders_Stats_Data_Store::queue_order_stats_repopulate_database();
 		self::order_product_lookup_store_init();
 	}
 
@@ -305,7 +309,7 @@ class WC_Admin_Api_Init {
 	 * Init orders data store.
 	 */
 	public static function orders_data_store_init() {
-		WC_Admin_Reports_Orders_Data_Store::init();
+		WC_Admin_Reports_Orders_Stats_Data_Store::init();
 		WC_Admin_Reports_Products_Data_Store::init();
 		WC_Admin_Reports_Taxes_Data_Store::init();
 		WC_Admin_Reports_Coupons_Data_Store::init();
@@ -410,17 +414,18 @@ class WC_Admin_Api_Init {
 		return array_merge(
 			$data_stores,
 			array(
-				'report-revenue-stats'   => 'WC_Admin_Reports_Orders_Data_Store',
-				'report-orders-stats'    => 'WC_Admin_Reports_Orders_Data_Store',
-				'report-products'        => 'WC_Admin_Reports_Products_Data_Store',
-				'report-variations'      => 'WC_Admin_Reports_Variations_Data_Store',
-				'report-products-stats'  => 'WC_Admin_Reports_Products_Stats_Data_Store',
-				'report-categories'      => 'WC_Admin_Reports_Categories_Data_Store',
-				'report-taxes'           => 'WC_Admin_Reports_Taxes_Data_Store',
-				'report-taxes-stats'     => 'WC_Admin_Reports_Taxes_Stats_Data_Store',
-				'report-coupons'         => 'WC_Admin_Reports_Coupons_Data_Store',
-				'report-coupons-stats'   => 'WC_Admin_Reports_Coupons_Stats_Data_Store',
-				'report-downloads'       => 'WC_Admin_Reports_Downloads_Data_Store',
+				'report-revenue-stats'  => 'WC_Admin_Reports_Orders_Stats_Data_Store',
+				'report-orders'         => 'WC_Admin_Reports_Orders_Data_Store',
+				'report-orders-stats'   => 'WC_Admin_Reports_Orders_Stats_Data_Store',
+				'report-products'       => 'WC_Admin_Reports_Products_Data_Store',
+				'report-variations'     => 'WC_Admin_Reports_Variations_Data_Store',
+				'report-products-stats' => 'WC_Admin_Reports_Products_Stats_Data_Store',
+				'report-categories'     => 'WC_Admin_Reports_Categories_Data_Store',
+				'report-taxes'          => 'WC_Admin_Reports_Taxes_Data_Store',
+				'report-taxes-stats'    => 'WC_Admin_Reports_Taxes_Stats_Data_Store',
+				'report-coupons'        => 'WC_Admin_Reports_Coupons_Data_Store',
+				'report-coupons-stats'  => 'WC_Admin_Reports_Coupons_Stats_Data_Store',
+				'report-downloads'      => 'WC_Admin_Reports_Downloads_Data_Store',
 				'report-downloads-stats' => 'WC_Admin_Reports_Downloads_Stats_Data_Store',
 				'admin-note'             => 'WC_Admin_Notes_Data_Store',
 				'report-customers'       => 'WC_Admin_Reports_Customers_Data_Store',

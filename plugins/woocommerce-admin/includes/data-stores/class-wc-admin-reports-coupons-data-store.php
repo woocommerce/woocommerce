@@ -1,6 +1,6 @@
 <?php
 /**
- * WC_Admin_Reports_Copons_Data_Store class file.
+ * WC_Admin_Reports_Coupons_Data_Store class file.
  *
  * @package WooCommerce Admin/Classes
  */

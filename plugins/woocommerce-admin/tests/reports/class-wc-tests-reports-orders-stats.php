@@ -6,9 +6,9 @@
  */
 
 /**
- * Class WC_Tests_Reports_Orders
+ * Class WC_Tests_Reports_Orders_Stats
  */
-class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
+class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 	/**
 	 * Test the calculations and querying works correctly for the base case of 1 order.
@@ -41,7 +41,7 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 			)
 		);
 
-		$data_store = new WC_Admin_Reports_Orders_Data_Store();
+		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
@@ -325,7 +325,7 @@ class WC_Tests_Reports_Orders extends WC_Unit_Test_Case {
 			}
 		}
 
-		$data_store = new WC_Admin_Reports_Orders_Data_Store();
+		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 
 		// Tests for before & after set to current hour.
 		$current_hour = new DateTime();

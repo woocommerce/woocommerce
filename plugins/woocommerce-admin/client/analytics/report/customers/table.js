@@ -4,14 +4,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
-import { format as formatDate } from '@wordpress/date';
 
 /**
  * WooCommerce dependencies
  */
 import { defaultTableDateFormat } from '@woocommerce/date';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
-import { Link } from '@woocommerce/components';
+import { Date, Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -116,9 +115,11 @@ export default class CustomersReportTable extends Component {
 				name
 			);
 
-			const dateRegistered = date_registered
-				? formatDate( defaultTableDateFormat, date_registered )
-				: '—';
+			const dateRegistered = date_registered ? (
+				<Date date={ date_registered } visibleFormat={ defaultTableDateFormat } />
+			) : (
+				'—'
+			);
 
 			return [
 				{
@@ -150,7 +151,7 @@ export default class CustomersReportTable extends Component {
 					value: getCurrencyFormatDecimal( avg_order_value ),
 				},
 				{
-					display: formatDate( defaultTableDateFormat, date_last_active ),
+					display: <Date date={ date_last_active } visibleFormat={ defaultTableDateFormat } />,
 					value: date_last_active,
 				},
 				{

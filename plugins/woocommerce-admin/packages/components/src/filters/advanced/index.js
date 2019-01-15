@@ -28,6 +28,7 @@ import Link from '../../link';
 import SelectFilter from './select-filter';
 import SearchFilter from './search-filter';
 import NumberFilter from './number-filter';
+import DateFilter from './date-filter';
 
 const matches = [
 	{ value: 'all', label: __( 'All', 'wc-admin' ) },
@@ -205,6 +206,15 @@ class AdvancedFilters extends Component {
 									<NumberFilter
 										filter={ filter }
 										config={ { ...config.filters[ key ], ...{ input: { type: 'currency', component: 'Currency' } } } }
+										onFilterChange={ this.onFilterChange }
+										isEnglish={ isEnglish }
+										query={ query }
+									/>
+								) }
+								{ 'Date' === input.component && (
+									<DateFilter
+										filter={ filter }
+										config={ config.filters[ key ] }
 										onFilterChange={ this.onFilterChange }
 										isEnglish={ isEnglish }
 										query={ query }

@@ -395,7 +395,7 @@ export function getAllowedIntervalsForQuery( query ) {
 				allowed = [ 'day', 'week', 'month', 'quarter' ];
 				break;
 			default:
-				allowed = [ 'hour', 'day' ];
+				allowed = [ 'day' ];
 				break;
 		}
 	}

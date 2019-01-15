@@ -251,6 +251,36 @@ export const advancedFilters = {
 				component: 'Currency',
 			},
 		},
+		registered: {
+			labels: {
+				add: __( 'Registered', 'wc-admin' ),
+				remove: __( 'Remove registered filter', 'wc-admin' ),
+				rule: __( 'Select a registered filter match', 'wc-admin' ),
+				/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
+				title: __( 'Registered {{rule /}} {{filter /}}', 'wc-admin' ),
+				filter: __( 'Select registered date', 'wc-admin' ),
+			},
+			rules: [
+				{
+					value: 'before',
+					/* translators: Sentence fragment, logical, "Before" refers to customers registered before a given date. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'Before', 'date', 'wc-admin' ),
+				},
+				{
+					value: 'after',
+					/* translators: Sentence fragment, logical, "after" refers to customers registered after a given date. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'After', 'date', 'wc-admin' ),
+				},
+				{
+					value: 'between',
+					/* translators: Sentence fragment, logical, "Between" refers to average order value of a customer, between two given amounts. Screenshot for context: https://cloudup.com/cCsm3GeXJbE */
+					label: _x( 'Between', 'date', 'wc-admin' ),
+				},
+			],
+			input: {
+				component: 'Date',
+			},
+		},
 	},
 };
 /*eslint-enable max-len*/

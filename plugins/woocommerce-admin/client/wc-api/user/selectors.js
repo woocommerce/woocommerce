@@ -8,7 +8,8 @@ import { DEFAULT_REQUIREMENT } from '../constants';
 const getCurrentUserData = ( getResource, requireResource ) => (
 	requirement = DEFAULT_REQUIREMENT
 ) => {
-	return requireResource( requirement, 'current-user-data' ).data || {};
+	const initalState = wcSettings.currentUserData;
+	return requireResource( requirement, 'current-user-data' ).data || initalState;
 };
 
 export default {

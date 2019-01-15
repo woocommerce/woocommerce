@@ -13,6 +13,7 @@
     * [Card](components/packages/card.md)
     * [Chart](components/packages/chart.md)
     * [Count](components/packages/count.md)
+    * [Date](components/packages/date.md)
     * [DropdownButton](components/packages/dropdown-button.md)
     * [EllipsisMenu](components/packages/ellipsis-menu.md)
     * [EmptyContent](components/packages/empty-content.md)

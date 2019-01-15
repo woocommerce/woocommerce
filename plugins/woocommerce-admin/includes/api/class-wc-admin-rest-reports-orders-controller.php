@@ -1,8 +1,8 @@
 <?php
 /**
- * REST API Reports categories controller
+ * REST API Reports orders controller
  *
- * Handles requests to the /reports/categories endpoint.
+ * Handles requests to the /reports/orders endpoint.
  *
  * @package WooCommerce Admin/API
  */
@@ -10,26 +10,26 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * REST API Reports categories controller class.
+ * REST API Reports orders controller class.
  *
  * @package WooCommerce/API
  * @extends WC_Admin_REST_Reports_Controller
  */
-class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_Controller {
+class WC_Admin_REST_Reports_Orders_Controller extends WC_Admin_REST_Reports_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v3';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'reports/categories';
+	protected $rest_base = 'reports/orders';
 
 	/**
 	 * Maps query arguments from the REST request.
@@ -38,19 +38,21 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args                  = array();
-		$args['before']        = $request['before'];
-		$args['after']         = $request['after'];
-		$args['interval']      = $request['interval'];
-		$args['page']          = $request['page'];
-		$args['per_page']      = $request['per_page'];
-		$args['orderby']       = $request['orderby'];
-		$args['order']         = $request['order'];
-		$args['extended_info'] = $request['extended_info'];
-		$args['categories']    = (array) $request['categories'];
-		$args['status_is']     = (array) $request['status_is'];
-		$args['status_is_not'] = (array) $request['status_is_not'];
-
+		$args                     = array();
+		$args['before']           = $request['before'];
+		$args['after']            = $request['after'];
+		$args['page']             = $request['page'];
+		$args['per_page']         = $request['per_page'];
+		$args['orderby']          = $request['orderby'];
+		$args['order']            = $request['order'];
+		$args['product_includes'] = (array) $request['product_includes'];
+		$args['product_excludes'] = (array) $request['product_excludes'];
+		$args['coupon_includes']  = (array) $request['coupon_includes'];
+		$args['coupon_excludes']  = (array) $request['coupon_excludes'];
+		$args['status_is']        = (array) $request['status_is'];
+		$args['status_is_not']    = (array) $request['status_is_not'];
+		$args['customer_type']    = $request['customer_type'];
+		$args['extended_info']    = $request['extended_info'];
 		return $args;
 	}
 
@@ -61,26 +63,18 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$query_args       = $this->prepare_reports_query( $request );
-		$categories_query = new WC_Admin_Reports_Categories_Query( $query_args );
-		$report_data      = $categories_query->get_data();
+		$query_args   = $this->prepare_reports_query( $request );
+		$orders_query = new WC_Admin_Reports_Orders_Query( $query_args );
+		$report_data  = $orders_query->get_data();
 
-		if ( is_wp_error( $report_data ) ) {
-			return $report_data;
+		$data = array();
+
+		foreach ( $report_data->data as $orders_data ) {
+			$item   = $this->prepare_item_for_response( $orders_data, $request );
+			$data[] = $this->prepare_response_for_collection( $item );
 		}
 
-		if ( ! isset( $report_data->data ) || ! isset( $report_data->page_no ) || ! isset( $report_data->pages ) ) {
-			return new WP_Error( 'woocommerce_rest_reports_categories_invalid_response', __( 'Invalid response from data store.', 'wc-admin' ), array( 'status' => 500 ) );
-		}
-
-		$out_data = array();
-
-		foreach ( $report_data->data as $datum ) {
-			$item       = $this->prepare_item_for_response( $datum, $request );
-			$out_data[] = $this->prepare_response_for_collection( $item );
-		}
-
-		$response = rest_ensure_response( $out_data );
+		$response = rest_ensure_response( $data );
 		$response->header( 'X-WP-Total', (int) $report_data->total );
 		$response->header( 'X-WP-TotalPages', (int) $report_data->pages );
 
@@ -131,19 +125,19 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 		 * @param object           $report   The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_report_categories', $response, $report, $request );
+		return apply_filters( 'woocommerce_rest_prepare_report_orders', $response, $report, $request );
 	}
 
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Admin_Reports_Query $object Object data.
+	 * @param WC_Reports_Query $object Object data.
 	 * @return array
 	 */
 	protected function prepare_links( $object ) {
 		$links = array(
-			'category' => array(
-				'href' => rest_url( sprintf( '/%s/products/categories/%d', $this->namespace, $object['category_id'] ) ),
+			'order' => array(
+				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $object['order_id'] ) ),
 			),
 		);
 
@@ -158,45 +152,63 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 	public function get_item_schema() {
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'report_categories',
+			'title'      => 'report_orders',
 			'type'       => 'object',
 			'properties' => array(
-				'category_id'    => array(
-					'description' => __( 'Category ID.', 'wc-admin' ),
+				'order_id'           => array(
+					'description' => __( 'Order ID.', 'wc-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'items_sold'     => array(
-					'description' => __( 'Amount of items sold.', 'wc-admin' ),
+				'date_created'       => array(
+					'description' => __( 'Date the order was created.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'status'             => array(
+					'description' => __( 'Order status.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'customer_id'        => array(
+					'description' => __( 'Customer ID.', 'wc-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'net_revenue'  => array(
-					'description' => __( 'Gross revenue.', 'wc-admin' ),
-					'type'        => 'number',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'orders_count'   => array(
-					'description' => __( 'Amount of orders.', 'wc-admin' ),
+				'num_items_sold'     => array(
+					'description' => __( 'Number of items sold.', 'wc-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'products_count' => array(
-					'description' => __( 'Amount of products.', 'wc-admin' ),
-					'type'        => 'integer',
+				'net_total'          => array(
+					'description' => __( 'Net total revenue.', 'wc-admin' ),
+					'type'        => 'float',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'extended_info' => array(
-					'name'       => array(
-						'type'        => 'string',
+				'customer_type' => array(
+					'description' => __( 'Returning or new customer.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'extended_info'      => array(
+					'products'   => array(
+						'type'        => 'array',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Category name.', 'wc-admin' ),
+						'description' => __( 'List of product IDs and names.', 'wc-admin' ),
+					),
+					'categories' => array(
+						'type'        => 'array',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Category IDs.', 'wc-admin' ),
 					),
 				),
 			),
@@ -211,9 +223,9 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                  = array();
-		$params['context']       = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']          = array(
+		$params                     = array();
+		$params['context']          = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['page']             = array(
 			'description'       => __( 'Current page of the collection.', 'wc-admin' ),
 			'type'              => 'integer',
 			'default'           => 1,
@@ -221,7 +233,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 			'validate_callback' => 'rest_validate_request_arg',
 			'minimum'           => 1,
 		);
-		$params['per_page']      = array(
+		$params['per_page']         = array(
 			'description'       => __( 'Maximum number of items to be returned in result set.', 'wc-admin' ),
 			'type'              => 'integer',
 			'default'           => 10,
@@ -230,54 +242,77 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after']         = array(
+		$params['after']            = array(
 			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before']        = array(
+		$params['before']           = array(
 			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order']         = array(
+		$params['order']            = array(
 			'description'       => __( 'Order sort attribute ascending or descending.', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby']       = array(
+		$params['orderby']          = array(
 			'description'       => __( 'Sort collection by object attribute.', 'wc-admin' ),
 			'type'              => 'string',
-			'default'           => 'category_id',
+			'default'           => 'date',
 			'enum'              => array(
-				'category_id',
-				'items_sold',
-				'net_revenue',
-				'orders_count',
-				'products_count',
-				'category',
+				'date',
+				'num_items_sold',
+				'net_total',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['interval']      = array(
-			'description'       => __( 'Time interval to use for buckets in the returned data.', 'wc-admin' ),
-			'type'              => 'string',
-			'default'           => 'week',
-			'enum'              => array(
-				'hour',
-				'day',
-				'week',
-				'month',
-				'quarter',
-				'year',
+		$params['product_includes'] = array(
+			'description'       => __( 'Limit result set to items that have the specified product(s) assigned.', 'wc-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
 			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['status_is']     = array(
+		$params['product_excludes'] = array(
+			'description'       => __( 'Limit result set to items that don\'t have the specified product(s) assigned.', 'wc-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'validate_callback' => 'rest_validate_request_arg',
+			'sanitize_callback' => 'wp_parse_id_list',
+		);
+		$params['coupon_includes']  = array(
+			'description'       => __( 'Limit result set to items that have the specified coupon(s) assigned.', 'wc-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['coupon_excludes']  = array(
+			'description'       => __( 'Limit result set to items that don\'t have the specified coupon(s) assigned.', 'wc-admin' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'validate_callback' => 'rest_validate_request_arg',
+			'sanitize_callback' => 'wp_parse_id_list',
+		);
+		$params['status_is']        = array(
 			'description'       => __( 'Limit result set to items that have the specified order status.', 'wc-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
@@ -287,7 +322,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 				'type' => 'string',
 			),
 		);
-		$params['status_is_not'] = array(
+		$params['status_is_not']    = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified order status.', 'wc-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
@@ -297,17 +332,19 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 				'type' => 'string',
 			),
 		);
-		$params['categories']    = array(
-			'description'       => __( 'Limit result set to all items that have the specified term assigned in the categories taxonomy.', 'wc-admin' ),
-			'type'              => 'array',
-			'sanitize_callback' => 'wp_parse_id_list',
-			'validate_callback' => 'rest_validate_request_arg',
-			'items'             => array(
-				'type' => 'integer',
+		$params['customer_type']    = array(
+			'description'       => __( 'Limit result set to returning or new customers.', 'wc-admin' ),
+			'type'              => 'string',
+			'default'           => '',
+			'enum'              => array(
+				'',
+				'returning',
+				'new',
 			),
+			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['extended_info'] = array(
-			'description'       => __( 'Add additional piece of info about each category to the report.', 'wc-admin' ),
+		$params['extended_info']    = array(
+			'description'       => __( 'Add additional piece of info about each coupon to the report.', 'wc-admin' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
@@ -316,5 +353,4 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 
 		return $params;
 	}
-
 }

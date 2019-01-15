@@ -5,7 +5,7 @@
  */
 import { findIndex } from 'lodash';
 
-export const getColor = ( key, params ) => {
+export const getColor = ( key, orderedKeys, colorScheme ) => {
 	const smallColorScales = [
 		[],
 		[ 0.5 ],
@@ -14,12 +14,12 @@ export const getColor = ( key, params ) => {
 		[ 0.12, 0.375, 0.625, 0.88 ],
 	];
 	let keyValue = 0;
-	const len = params.orderedKeys.length;
-	const idx = findIndex( params.orderedKeys, d => d.key === key );
+	const len = orderedKeys.length;
+	const idx = findIndex( orderedKeys, d => d.key === key );
 	if ( len < 5 ) {
 		keyValue = smallColorScales[ len ][ idx ];
 	} else {
-		keyValue = idx / ( params.orderedKeys.length - 1 );
+		keyValue = idx / ( orderedKeys.length - 1 );
 	}
-	return params.colorScheme( keyValue );
+	return colorScheme( keyValue );
 };

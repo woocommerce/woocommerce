@@ -4,6 +4,7 @@
   { "component": "Card" },
   { "component": "Chart" },
   { "component": "Count" },
+  { "component": "Date" },
   { "component": "DropdownButton" },
   { "component": "EllipsisMenu" },
   { "component": "EmptyContent" },

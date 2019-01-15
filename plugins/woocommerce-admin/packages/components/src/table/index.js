@@ -237,6 +237,7 @@ class TableCard extends Component {
 			rowsPerPage,
 			searchBy,
 			searchParam,
+			showMenu,
 			summary,
 			title,
 			totalRows,
@@ -301,7 +302,7 @@ class TableCard extends Component {
 					),
 				] }
 				menu={
-					<EllipsisMenu label={ __( 'Choose which values to display', 'wc-admin' ) }>
+					showMenu && <EllipsisMenu label={ __( 'Choose which values to display', 'wc-admin' ) }>
 						<MenuTitle>{ __( 'Columns:', 'wc-admin' ) }</MenuTitle>
 						{ allHeaders.map( ( { key, label, required } ) => {
 							if ( required ) {
@@ -442,6 +443,10 @@ TableCard.propTypes = {
 	 */
 	searchParam: PropTypes.string,
 	/**
+	 * Boolean to determine whether or not ellipsis menu is shown.
+	 */
+	showMenu: PropTypes.bool,
+	/**
 	 * An array of objects with `label` & `value` properties, which display in a line under the table.
 	 * Optional, can be left off to show no summary.
 	 */
@@ -470,6 +475,7 @@ TableCard.defaultProps = {
 	query: {},
 	rowHeader: 0,
 	rows: [],
+	showMenu: true,
 };
 
 export default TableCard;

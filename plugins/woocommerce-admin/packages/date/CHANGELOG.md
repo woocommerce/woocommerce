@@ -1,3 +1,7 @@
+# 1.0.5 Not Released
+
+- Fixed bug in getAllowedIntervalsForQuery() to not return `hour` for default intervals
+
 # 1.0.4
 
 - Remove deprecated @wordpress/date::getSettings() usage.

@@ -52,7 +52,7 @@ export default class extends Component {
 			<div className={ className }>
 				<Header sections={ breadcrumbs } />
 				{ exampleList.map( example => {
-					const { componentName, filePath, render } = getExampleData( example );
+					const { componentName, filePath, render, docPath } = getExampleData( example );
 					const cardClasses = classnames(
 						'woocommerce-devdocs__card',
 						`woocommerce-devdocs__card--${ filePath }`
@@ -78,7 +78,11 @@ export default class extends Component {
 							/>
 
 							{ component && (
-								<ComponentDocs componentName={ componentName } filePath={ filePath } />
+								<ComponentDocs
+									componentName={ componentName }
+									filePath={ filePath }
+									docPath={ docPath }
+								/>
 							) }
 						</Card>
 					);

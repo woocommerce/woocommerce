@@ -9,6 +9,7 @@ import {
 	scaleLinear as d3ScaleLinear,
 	scaleTime as d3ScaleTime,
 } from 'd3-scale';
+import moment from 'moment';
 
 /**
  * Describes and rounds the maximum y value to the nearest thousand, ten-thousand, million etc. In case it is a decimal number, ceils it.
@@ -57,7 +58,10 @@ export const getXGroupScale = ( orderedKeys, xScale, compact = false ) =>
  */
 export const getXLineScale = ( uniqueDates, width ) =>
 	d3ScaleTime()
-		.domain( [ new Date( uniqueDates[ 0 ] ), new Date( uniqueDates[ uniqueDates.length - 1 ] ) ] )
+		.domain( [
+			moment( uniqueDates[ 0 ], 'YYYY-MM-DD HH:mm' ).toDate(),
+			moment( uniqueDates[ uniqueDates.length - 1 ], 'YYYY-MM-DD HH:mm' ).toDate(),
+		] )
 		.rangeRound( [ 0, width ] );
 
 /**

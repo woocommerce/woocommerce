@@ -5,6 +5,7 @@
  */
 import { get } from 'lodash';
 import { event as d3Event, select as d3Select } from 'd3-selection';
+import moment from 'moment';
 
 /**
  * Internal dependencies
@@ -34,7 +35,7 @@ export const drawBars = ( node, data, params ) => {
 			'aria-label',
 			d =>
 				params.mode === 'item-comparison'
-					? params.tooltipLabelFormat( d.date instanceof Date ? d.date : new Date( d.date ) )
+					? params.tooltipLabelFormat( d.date instanceof Date ? d.date : moment( d.date ).toDate() )
 					: null
 		);
 
@@ -66,7 +67,7 @@ export const drawBars = ( node, data, params ) => {
 		.attr( 'y', d => params.yScale( d.value ) )
 		.attr( 'width', params.xGroupScale.bandwidth() )
 		.attr( 'height', d => params.height - params.yScale( d.value ) )
-		.attr( 'fill', d => getColor( d.key, params ) )
+		.attr( 'fill', d => getColor( d.key, params.orderedKeys, params.colorScheme ) )
 		.attr( 'tabindex', '0' )
 		.attr( 'aria-label', d => {
 			const label = params.mode === 'time-comparison' && d.label ? d.label : d.key;

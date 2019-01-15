@@ -5,6 +5,7 @@
  */
 import { event as d3Event, select as d3Select } from 'd3-selection';
 import { smallBreak, wideBreak } from './breakpoints';
+import moment from 'moment';
 
 /**
  * Internal dependencies
@@ -41,7 +42,7 @@ export const drawLines = ( node, data, params ) => {
 		.attr( 'stroke-width', lineStroke )
 		.attr( 'stroke-linejoin', 'round' )
 		.attr( 'stroke-linecap', 'round' )
-		.attr( 'stroke', d => getColor( d.key, params ) )
+		.attr( 'stroke', d => getColor( d.key, params.orderedKeys, params.colorScheme ) )
 		.style( 'opacity', d => {
 			const opacity = d.focus ? 1 : 0.1;
 			return d.visible ? opacity : 0;
@@ -57,20 +58,20 @@ export const drawLines = ( node, data, params ) => {
 			.enter()
 			.append( 'circle' )
 			.attr( 'r', dotRadius )
-			.attr( 'fill', d => getColor( d.key, params ) )
+			.attr( 'fill', d => getColor( d.key, params.orderedKeys, params.colorScheme ) )
 			.attr( 'stroke', '#fff' )
 			.attr( 'stroke-width', lineStroke + 1 )
 			.style( 'opacity', d => {
 				const opacity = d.focus ? 1 : 0.1;
 				return d.visible ? opacity : 0;
 			} )
-			.attr( 'cx', d => params.xLineScale( new Date( d.date ) ) )
+			.attr( 'cx', d => params.xLineScale( moment( d.date ).toDate() ) )
 			.attr( 'cy', d => params.yScale( d.value ) )
 			.attr( 'tabindex', '0' )
 			.attr( 'aria-label', d => {
 				const label = d.label
 					? d.label
-					: params.tooltipLabelFormat( d.date instanceof Date ? d.date : new Date( d.date ) );
+					: params.tooltipLabelFormat( d.date instanceof Date ? d.date : moment( d.date ).toDate() );
 				return `${ label } ${ params.tooltipValueFormat( d.value ) }`;
 			} )
 			.on( 'focus', ( d, i, nodes ) => {
@@ -99,9 +100,9 @@ export const drawLines = ( node, data, params ) => {
 
 	focusGrid
 		.append( 'line' )
-		.attr( 'x1', d => params.xLineScale( new Date( d.date ) ) )
+		.attr( 'x1', d => params.xLineScale( moment( d.date ).toDate() ) )
 		.attr( 'y1', 0 )
-		.attr( 'x2', d => params.xLineScale( new Date( d.date ) ) )
+		.attr( 'x2', d => params.xLineScale( moment( d.date ).toDate() ) )
 		.attr( 'y2', params.height );
 
 	focusGrid
@@ -110,10 +111,10 @@ export const drawLines = ( node, data, params ) => {
 		.enter()
 		.append( 'circle' )
 		.attr( 'r', dotRadius + 2 )
-		.attr( 'fill', d => getColor( d.key, params ) )
+		.attr( 'fill', d => getColor( d.key, params.orderedKeys, params.colorScheme ) )
 		.attr( 'stroke', '#fff' )
 		.attr( 'stroke-width', lineStroke + 2 )
-		.attr( 'cx', d => params.xLineScale( new Date( d.date ) ) )
+		.attr( 'cx', d => params.xLineScale( moment( d.date ).toDate() ) )
 		.attr( 'cy', d => params.yScale( d.value ) );
 
 	focus
