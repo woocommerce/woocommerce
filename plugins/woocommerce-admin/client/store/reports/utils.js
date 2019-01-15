@@ -46,9 +46,27 @@ export function getFilterQuery( endpoint, query ) {
 	return {};
 }
 
-// export function timeStampFilterDates() {
-//
-// }
+export function timeStampFilterDates( config, activeFilter ) {
+	if ( 'Date' === config.filters[ activeFilter.key ].input.component ) {
+		const { rule, value } = activeFilter;
+		const timeOfDayMap = {
+			after: 'start',
+			before: 'end',
+		};
+		let appendedValue;
+		if ( Array.isArray( value ) ) {
+			const [ after, before ] = value;
+			appendedValue = [
+				appendTimestamp( moment( after ), timeOfDayMap.after ),
+				appendTimestamp( moment( before ), timeOfDayMap.before ),
+			];
+		} else {
+			appendedValue = appendTimestamp( moment( value ), timeOfDayMap[ rule ] );
+		}
+		return Object.assign( {}, activeFilter, { value: appendedValue } );
+	}
+	return activeFilter;
+}
 
 export function getQueryFromConfig( config, advancedFilters, query ) {
 	const queryValue = query[ config.param ];
@@ -64,7 +82,7 @@ export function getQueryFromConfig( config, advancedFilters, query ) {
 			return {};
 		}
 
-		return activeFilters.reduce(
+		return activeFilters.map( filter => timeStampFilterDates( advancedFilters, filter ) ).reduce(
 			( result, activeFilter ) => {
 				const { key, rule, value } = activeFilter;
 				result[ getUrlKey( key, rule ) ] = value;
