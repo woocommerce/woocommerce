@@ -202,7 +202,11 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 				$size_data['crop'] = false;
 			}
 
-			list( $orig_w, $orig_h ) = getimagesize( $fullsizepath );
+			$image_sizes = getimagesize( $fullsizepath );
+			if ( false === $image_sizes ) {
+				continue;
+			}
+			list( $orig_w, $orig_h ) = $image_sizes;
 
 			$dimensions = image_resize_dimensions( $orig_w, $orig_h, $size_data['width'], $size_data['height'], $size_data['crop'] );
 
@@ -222,6 +226,7 @@ class WC_Regenerate_Images_Request extends WC_Background_Process {
 				unset( $sizes[ $size ] );
 			}
 		}
+
 		return $sizes;
 	}
 
