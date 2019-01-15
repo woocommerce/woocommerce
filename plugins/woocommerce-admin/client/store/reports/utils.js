@@ -46,6 +46,10 @@ export function getFilterQuery( endpoint, query ) {
 	return {};
 }
 
+// export function timeStampFilterDates() {
+//
+// }
+
 export function getQueryFromConfig( config, advancedFilters, query ) {
 	const queryValue = query[ config.param ];
 
