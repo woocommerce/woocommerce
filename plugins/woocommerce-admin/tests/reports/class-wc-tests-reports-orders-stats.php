@@ -15,7 +15,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	 *
 	 * @since 3.5.0
 	 */
-	public function _test_populate_and_query() {
+	public function test_populate_and_query() {
 		WC_Helper_Reports::reset_stats_dbs();
 
 		// Populate all of the data.
@@ -145,7 +145,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	/**
 	 * Test the calculations and querying works correctly for the case of multiple orders.
 	 */
-	public function _test_populate_and_query_multiple_intervals() {
+	public function test_populate_and_query_multiple_intervals() {
 		global $wpdb;
 
 		// 2 different products.
