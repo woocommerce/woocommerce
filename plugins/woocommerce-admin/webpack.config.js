@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-const ExtractTextPlugin = require( 'extract-text-webpack-plugin' );
+const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const { get } = require( 'lodash' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
@@ -96,32 +96,30 @@ const webpackConfig = {
 			{ test: /\.md$/, use: 'raw-loader' },
 			{
 				test: /\.s?css$/,
-				use: ExtractTextPlugin.extract( {
-					fallback: 'style-loader',
-					use: [
-						'css-loader',
-						{
-							// postcss loader so we can use autoprefixer and theme Gutenberg components
-							loader: 'postcss-loader',
-							options: {
-								config: {
-									path: 'postcss.config.js',
-								},
+				use: [
+					MiniCssExtractPlugin.loader,
+					'css-loader',
+					{
+						// postcss loader so we can use autoprefixer and theme Gutenberg components
+						loader: 'postcss-loader',
+						options: {
+							config: {
+								path: 'postcss.config.js',
 							},
 						},
-						{
-							loader: 'sass-loader',
-							query: {
-								includePaths: [ 'client/stylesheets/abstracts' ],
-								data:
-									'@import "_colors"; ' +
-									'@import "_variables"; ' +
-									'@import "_breakpoints"; ' +
-									'@import "_mixins"; ',
-							},
+					},
+					{
+						loader: 'sass-loader',
+						query: {
+							includePaths: [ 'client/stylesheets/abstracts' ],
+							data:
+								'@import "_colors"; ' +
+								'@import "_variables"; ' +
+								'@import "_breakpoints"; ' +
+								'@import "_mixins"; ',
 						},
-					],
-				} ),
+					},
+				],
 			},
 		],
 	},
@@ -146,7 +144,7 @@ const webpackConfig = {
 				return outputPath;
 			},
 		} ),
-		new ExtractTextPlugin( {
+		new MiniCssExtractPlugin( {
 			filename: './dist/[name]/style.css',
 		} ),
 		new CopyWebpackPlugin(
