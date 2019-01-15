@@ -665,7 +665,7 @@ class WC_Discounts {
 	protected function validate_coupon_minimum_amount( $coupon ) {
 		$subtotal = wc_remove_number_precision( $this->get_object_subtotal() );
 
-		if ( $this->object->get_prices_include_tax() ) {
+		if ( is_a( $this->object, 'WC_Order' ) && $this->object->get_prices_include_tax() ) {
 			$subtotal += round( $this->object->get_total_tax(), wc_get_price_decimals() );
 		}
 
@@ -688,7 +688,7 @@ class WC_Discounts {
 	protected function validate_coupon_maximum_amount( $coupon ) {
 		$subtotal = wc_remove_number_precision( $this->get_object_subtotal() );
 
-		if ( $this->object->get_prices_include_tax() ) {
+		if ( is_a( $this->object, 'WC_Order' ) && $this->object->get_prices_include_tax() ) {
 			$subtotal += round( $this->object->get_total_tax(), wc_get_price_decimals() );
 		}
 
