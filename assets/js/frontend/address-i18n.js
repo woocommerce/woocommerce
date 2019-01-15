@@ -65,7 +65,8 @@ jQuery( function( $ ) {
 
 				// Placeholders.
 				if ( typeof fieldLocale.placeholder !== 'undefined' ) {
-					field.find( 'input' ).attr( 'placeholder', fieldLocale.placeholder );
+					field.find( ':input' ).attr( 'placeholder', fieldLocale.placeholder );
+					field.find( ':input' ).attr( 'data-placeholder', fieldLocale.placeholder );
 					field.find( '.select2-selection__placeholder' ).text( fieldLocale.placeholder );
 				}
 
@@ -75,7 +76,8 @@ jQuery( function( $ ) {
 					typeof fieldLocale.label !== 'undefined' &&
 					! field.find( 'label' ).length
 				) {
-					field.find( 'input' ).attr( 'placeholder', fieldLocale.label );
+					field.find( ':input' ).attr( 'placeholder', fieldLocale.label );
+					field.find( ':input' ).attr( 'data-placeholder', fieldLocale.label );
 					field.find( '.select2-selection__placeholder' ).text( fieldLocale.label );
 				}
 
@@ -94,7 +96,7 @@ jQuery( function( $ ) {
 				// Hidden fields.
 				if ( 'state' !== key ) {
 					if ( typeof fieldLocale.hidden !== 'undefined' && true === fieldLocale.hidden ) {
-						field.hide().find( 'input' ).val( '' );
+						field.hide().find( ':input' ).val( '' );
 					} else {
 						field.show();
 					}
