@@ -468,9 +468,9 @@ class WC_Admin_Api_Init {
 	 * @return void
 	 */
 	public static function queue_batches( $range_start, $range_end, $single_batch_action ) {
-		$batch_size = self::get_batch_size( self::QUEUE_BATCH_ACTION );
-		$range_size = 1 + ( $range_end - $range_start );
-		$schedule   = time() + 5;
+		$batch_size       = self::get_batch_size( self::QUEUE_BATCH_ACTION );
+		$range_size       = 1 + ( $range_end - $range_start );
+		$action_timestamp = time() + 5;
 
 		if ( $range_size > $batch_size ) {
 			// If the current batch range is larger than a single batch,
@@ -482,7 +482,7 @@ class WC_Admin_Api_Init {
 				$batch_end   = min( $range_end, $range_start + ( $chunk_size * ( $i + 1 ) ) - 1 );
 
 				self::queue()->schedule_single(
-					$schedule,
+					$action_timestamp,
 					self::QUEUE_BATCH_ACTION,
 					array( $batch_start, $batch_end, $single_batch_action )
 				);
@@ -490,7 +490,7 @@ class WC_Admin_Api_Init {
 		} else {
 			// Otherwise, queue the single batches.
 			for ( $i = $range_start; $i <= $range_end; $i++ ) {
-				self::queue()->schedule_single( $schedule, $single_batch_action, array( $i ) );
+				self::queue()->schedule_single( $action_timestamp, $single_batch_action, array( $i ) );
 			}
 		}
 	}
