@@ -627,6 +627,17 @@ class WC_Admin_Post_Types {
 		$product->set_backorders( $backorders );
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+			$change_stock = absint( $_REQUEST['change_stock'] );
+			switch ( $change_stock ) {
+				case 2:
+					$stock_amount = wc_stock_amount( $product->get_stock_quantity() + $stock_amount );
+					break;
+				case 3:
+					$stock_amount = wc_stock_amount( $product->get_stock_quantity() - $stock_amount );
+					break;
+				default:
+					break;
+			}
 			$product->set_stock_quantity( $stock_amount );
 		}
 
