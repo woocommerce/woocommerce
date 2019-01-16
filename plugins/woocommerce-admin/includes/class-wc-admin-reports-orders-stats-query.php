@@ -9,7 +9,7 @@
  *          'interval'     => 'week',
  *          'categories'   => array(15, 18),
  *          'coupons'      => array(138),
- *          'order_status' => array('completed'),
+ *          'status_in'    => array('completed'),
  *         );
  * $report = new WC_Admin_Reports_Orders_Stats_Query( $args );
  * $mydata = $report->get_data();

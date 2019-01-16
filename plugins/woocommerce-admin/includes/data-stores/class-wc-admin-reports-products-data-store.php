@@ -73,6 +73,16 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 	);
 
 	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		// Avoid ambigious column order_id in SQL query.
+		$this->report_columns['orders_count'] = str_replace( 'order_id', $table_name . '.order_id', $this->report_columns['orders_count'] );
+	}
+
+	/**
 	 * Set up all the hooks for maintaining and populating table data.
 	 */
 	public static function init() {
@@ -134,7 +144,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 
 		$order_status_filter = $this->get_status_subquery( $query_args );
 		if ( $order_status_filter ) {
-			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}posts ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}posts.ID";
+			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 			$sql_query_params['where_clause'] .= " AND ( {$order_status_filter} )";
 		}
 
@@ -148,8 +158,11 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 	 * @return string
 	 */
 	protected function normalize_order_by( $order_by ) {
+		global $wpdb;
+		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
+
 		if ( 'date' === $order_by ) {
-			return 'date_created';
+			return $order_product_lookup_table . '.date_created';
 		}
 		if ( 'product_name' === $order_by ) {
 			return '_products.post_title';
@@ -214,9 +227,6 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			'categories'       => array(),
 			'product_includes' => array(),
 			'extended_info'    => false,
-			// This is not a parameter for products reports per se, but we want to only take into account selected order types.
-			'order_status'     => parent::get_report_order_statuses(),
-
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 
@@ -318,15 +328,6 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 
 		// This hook gets called on refunds as well, so return early to avoid errors.
 		if ( ! $order || 'shop_order_refund' === $order->get_type() ) {
-			return;
-		}
-
-		if ( ! in_array( $order->get_status(), parent::get_report_order_statuses(), true ) ) {
-			$wpdb->delete(
-				$wpdb->prefix . self::TABLE_NAME,
-				array( 'order_id' => $order->get_id() ),
-				array( '%d' )
-			);
 			return;
 		}
 

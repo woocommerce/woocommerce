@@ -107,7 +107,7 @@ class WC_Admin_Reports_Downloads_Stats_Data_Store extends WC_Admin_Reports_Downl
 				return array();
 			}
 
-			$this->update_intervals_sql_params( $intervals_query, $query_args, $db_records_count, $expected_interval_count );
+			$this->update_intervals_sql_params( $intervals_query, $query_args, $db_records_count, $expected_interval_count, $table_name );
 			$intervals_query['where_time_clause'] = str_replace( 'date_created', 'timestamp', $intervals_query['where_time_clause'] );
 
 			$totals = $wpdb->get_results(

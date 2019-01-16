@@ -251,12 +251,13 @@ class WC_Admin_Reports_Data_Store {
 	 * If there are less records in the database than time intervals, then we need to remap offset in SQL query
 	 * to fetch correct records.
 	 *
-	 * @param array $intervals_query Array with clauses for the Intervals SQL query.
-	 * @param array $query_args Query arguements.
-	 * @param int   $db_interval_count Database interval count.
-	 * @param int   $expected_interval_count Expected interval count on the output.
+	 * @param array  $intervals_query Array with clauses for the Intervals SQL query.
+	 * @param array  $query_args Query arguements.
+	 * @param int    $db_interval_count Database interval count.
+	 * @param int    $expected_interval_count Expected interval count on the output.
+	 * @param string $table_name Name of the db table relevant for the date constraint.
 	 */
-	protected function update_intervals_sql_params( &$intervals_query, &$query_args, $db_interval_count, $expected_interval_count ) {
+	protected function update_intervals_sql_params( &$intervals_query, &$query_args, $db_interval_count, $expected_interval_count, $table_name ) {
 		if ( $db_interval_count === $expected_interval_count ) {
 			return;
 		}
@@ -328,8 +329,8 @@ class WC_Admin_Reports_Data_Store {
 			$query_args['adj_after']               = $new_start_date->format( WC_Admin_Reports_Interval::$iso_datetime_format );
 			$query_args['adj_before']              = $new_end_date->format( WC_Admin_Reports_Interval::$iso_datetime_format );
 			$intervals_query['where_time_clause']  = '';
-			$intervals_query['where_time_clause'] .= " AND date_created <= '{$query_args['adj_before']}'";
-			$intervals_query['where_time_clause'] .= " AND date_created >= '{$query_args['adj_after']}'";
+			$intervals_query['where_time_clause'] .= " AND {$table_name}.date_created <= '{$query_args['adj_before']}'";
+			$intervals_query['where_time_clause'] .= " AND {$table_name}.date_created >= '{$query_args['adj_after']}'";
 			$intervals_query['limit']              = 'LIMIT 0,' . $intervals_query['per_page'];
 		} else {
 			if ( 'asc' === $query_args['order'] ) {
@@ -396,12 +397,12 @@ class WC_Admin_Reports_Data_Store {
 	}
 
 	/**
-	 * Get the order statuses used when calculating reports.
+	 * Get the excluded order statuses used when calculating reports.
 	 *
 	 * @return array
 	 */
-	protected static function get_report_order_statuses() {
-		return apply_filters( 'woocommerce_reports_order_statuses', array( 'completed', 'processing', 'on-hold' ) );
+	protected static function get_excluded_report_order_statuses() {
+		return apply_filters( 'woocommerce_reports_excluded_order_statuses', array( 'refunded', 'pending', 'failed', 'cancelled' ) );
 	}
 
 	/**
@@ -585,7 +586,7 @@ class WC_Admin_Reports_Data_Store {
 
 		if ( isset( $query_args['interval'] ) && '' !== $query_args['interval'] ) {
 			$interval                         = $query_args['interval'];
-			$intervals_query['select_clause'] = WC_Admin_Reports_Interval::db_datetime_format( $interval );
+			$intervals_query['select_clause'] = WC_Admin_Reports_Interval::db_datetime_format( $interval, $table_name );
 		}
 
 		$intervals_query = array_merge( $intervals_query, $this->get_limit_sql_params( $query_args ) );
@@ -769,7 +770,8 @@ class WC_Admin_Reports_Data_Store {
 	protected function get_status_subquery( $query_args, $operator = 'AND' ) {
 		global $wpdb;
 
-		$subqueries = array();
+		$subqueries        = array();
+		$excluded_statuses = array();
 		if ( isset( $query_args['status_is'] ) && is_array( $query_args['status_is'] ) && count( $query_args['status_is'] ) > 0 ) {
 			$allowed_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is'] );
 			if ( $allowed_statuses ) {
@@ -778,10 +780,17 @@ class WC_Admin_Reports_Data_Store {
 		}
 
 		if ( isset( $query_args['status_is_not'] ) && is_array( $query_args['status_is_not'] ) && count( $query_args['status_is_not'] ) > 0 ) {
-			$forbidden_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is_not'] );
-			if ( $forbidden_statuses ) {
-				$subqueries[] = "{$wpdb->prefix}wc_order_stats.status NOT IN ( '" . implode( "','", $forbidden_statuses ) . "' )";
-			}
+			$excluded_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is_not'] );
+		}
+
+		if ( ( ! isset( $query_args['status_is'] ) || empty( $query_args['status_is'] ) )
+			&& ( ! isset( $query_args['status_is_not'] ) || empty( $query_args['status_is_not'] ) )
+		) {
+			$excluded_statuses = array_map( array( $this, 'normalize_order_status' ), $this->get_excluded_report_order_statuses() );
+		}
+
+		if ( $excluded_statuses ) {
+			$subqueries[] = "{$wpdb->prefix}wc_order_stats.status NOT IN ( '" . implode( "','", $excluded_statuses ) . "' )";
 		}
 
 		return implode( " $operator ", $subqueries );

@@ -52,8 +52,8 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 		$args['status_is_not']    = (array) $request['status_is_not'];
 		$args['product_includes'] = (array) $request['product_includes'];
 		$args['product_excludes'] = (array) $request['product_excludes'];
-		$args['coupon_includes']    = (array) $request['coupon_includes'];
-		$args['coupon_excludes']    = (array) $request['coupon_excludes'];
+		$args['coupon_includes']  = (array) $request['coupon_includes'];
+		$args['coupon_excludes']  = (array) $request['coupon_excludes'];
 		$args['customer']         = $request['customer'];
 		$args['categories']       = (array) $request['categories'];
 
@@ -319,6 +319,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
+			'default'           => null,
 			'items'             => array(
 				'enum' => $this->get_order_statuses(),
 				'type' => 'string',

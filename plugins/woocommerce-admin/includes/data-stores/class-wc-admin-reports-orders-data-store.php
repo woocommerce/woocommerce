@@ -141,7 +141,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			'coupon_includes'  => array(),
 			'coupon_excludes'  => array(),
 			'customer_type'    => null,
-			'status_is'        => parent::get_report_order_statuses(),
+			'status_is'        => array(),
 			'extended_info'    => false,
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
@@ -228,34 +228,6 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		if ( 'date' === $order_by ) {
 			return 'date_created';
 		}
-
-		return $order_by;
-	}
-
-	/**
-	 * Returns order status subquery to be used in WHERE SQL query, based on query arguments from the user.
-	 *
-	 * @param array  $query_args Parameters supplied by the user.
-	 * @param string $operator   AND or OR, based on match query argument.
-	 * @return string
-	 */
-	protected function get_status_subquery( $query_args, $operator = 'AND' ) {
-		$subqueries = array();
-		if ( isset( $query_args['status_is'] ) && is_array( $query_args['status_is'] ) && count( $query_args['status_is'] ) > 0 ) {
-			$allowed_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is'] );
-			if ( $allowed_statuses ) {
-				$subqueries[] = "status IN ( '" . implode( "','", $allowed_statuses ) . "' )";
-			}
-		}
-
-		if ( isset( $query_args['status_is_not'] ) && is_array( $query_args['status_is_not'] ) && count( $query_args['status_is_not'] ) > 0 ) {
-			$forbidden_statuses = array_map( array( $this, 'normalize_order_status' ), $query_args['status_is_not'] );
-			if ( $forbidden_statuses ) {
-				$subqueries[] = "status NOT IN ( '" . implode( "','", $forbidden_statuses ) . "' )";
-			}
-		}
-
-		return implode( " $operator ", $subqueries );
 	}
 
 	/**

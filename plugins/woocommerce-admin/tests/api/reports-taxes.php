@@ -82,7 +82,7 @@ class WC_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$wpdb->insert(
 			$wpdb->prefix . 'wc_order_tax_lookup',
 			array(
-				'order_id'     => 1,
+				'order_id'     => $order->get_id(),
 				'tax_rate_id'  => 1,
 				'date_created' => date( 'Y-m-d H:i:s' ),
 				'shipping_tax' => 2,
