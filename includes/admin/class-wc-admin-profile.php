@@ -154,7 +154,7 @@ if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 		 * @param WP_User $user
 		 */
 		public function add_customer_meta_fields( $user ) {
-			if ( ! apply_filters( 'woocommerce_current_user_can_edit_customer_meta_fields', current_user_can( 'manage_woocommerce' ), $user ) ) {
+			if ( ! apply_filters( 'woocommerce_current_user_can_edit_customer_meta_fields', current_user_can( 'manage_woocommerce' ), $user->ID ) ) {
 				return;
 			}
 
@@ -202,7 +202,7 @@ if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 		 * @param int $user_id User ID of the user being saved
 		 */
 		public function save_customer_meta_fields( $user_id ) {
-			if ( ! apply_filters( 'woocommerce_current_user_can_edit_customer_meta_fields', current_user_can( 'manage_woocommerce' ), get_userdata( $user ) ) ) {
+			if ( ! apply_filters( 'woocommerce_current_user_can_edit_customer_meta_fields', current_user_can( 'manage_woocommerce' ), $user_id ) ) {
 				return;
 			}
 
