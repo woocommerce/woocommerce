@@ -109,6 +109,13 @@ export function getQueryFromActiveFilters( activeFilters, query, config ) {
 		return data;
 	}, {} );
 	const nextData = activeFilters.reduce( ( data, filter ) => {
+		if (
+			'between' === filter.rule &&
+			( ! Array.isArray( filter.value ) || filter.value.some( value => ! value ) )
+		) {
+			return data;
+		}
+
 		if ( filter.value ) {
 			data[ getUrlKey( filter.key, filter.rule ) ] = filter.value;
 		}
