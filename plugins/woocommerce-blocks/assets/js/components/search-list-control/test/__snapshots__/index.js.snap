@@ -1713,7 +1713,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
         type="button"
       >
         <svg
-          aria-hidden={true}
+          aria-hidden="true"
           className="dashicon dashicons-dismiss"
           focusable="false"
           height={20}
@@ -2053,7 +2053,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         type="button"
       >
         <svg
-          aria-hidden={true}
+          aria-hidden="true"
           className="dashicon dashicons-dismiss"
           focusable="false"
           height={20}
@@ -2098,7 +2098,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
         type="button"
       >
         <svg
-          aria-hidden={true}
+          aria-hidden="true"
           className="dashicon dashicons-dismiss"
           focusable="false"
           height={20}
