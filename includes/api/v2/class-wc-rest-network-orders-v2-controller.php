@@ -31,7 +31,9 @@ class WC_REST_Network_Orders_V2_Controller extends WC_REST_Orders_V2_Controller 
 	public function register_routes() {
 		if ( is_multisite() ) {
 			register_rest_route(
-				$this->namespace, '/' . $this->rest_base . '/network', array(
+				$this->namespace,
+				'/' . $this->rest_base . '/network',
+				array(
 					array(
 						'methods'             => WP_REST_Server::READABLE,
 						'callback'            => array( $this, 'network_orders' ),
@@ -46,8 +48,6 @@ class WC_REST_Network_Orders_V2_Controller extends WC_REST_Orders_V2_Controller 
 
 	/**
 	 * Retrieves the item's schema for display / public consumption purposes.
-	 *
-	 * @access public
 	 *
 	 * @return array Public item schema data.
 	 */
@@ -118,9 +118,21 @@ class WC_REST_Network_Orders_V2_Controller extends WC_REST_Orders_V2_Controller 
 	public function network_orders( $request ) {
 		$blog_id = $request->get_param( 'blog_id' );
 		$blog_id = ! empty( $blog_id ) ? $blog_id : get_current_blog_id();
+		$active_plugins = get_blog_option( $blog_id, 'active_plugins', array() );
+		$wc_active = false;
+		foreach ( $active_plugins as $plugin ) {
+			if ( substr_compare( $plugin, '/woocommerce.php', strlen( $plugin ) - strlen( '/woocommerce.php' ), strlen( '/woocommerce.php' ) ) === 0 ) {
+				$wc_active = true;
+			}
+		}
+
+		// If WooCommerce not active for site, return an empty response.
+		if ( ! $wc_active ) {
+			$response = rest_ensure_response( array() );
+			return $response;
+		}
 
 		switch_to_blog( $blog_id );
-
 		add_filter( 'woocommerce_rest_orders_prepare_object_query', array( $this, 'network_orders_filter_args' ) );
 		$items = $this->get_items( $request );
 		remove_filter( 'woocommerce_rest_orders_prepare_object_query', array( $this, 'network_orders_filter_args' ) );
