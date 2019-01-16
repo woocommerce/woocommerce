@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import { find, forEach, isNull } from 'lodash';
+import { find, forEach, isNull, get } from 'lodash';
 import moment from 'moment';
 
 /**
@@ -46,8 +46,17 @@ export function getFilterQuery( endpoint, query ) {
 	return {};
 }
 
+/**
+ * Add timestamp to advanced filter parameters involving date. The api
+ * expects a timestamp for these values similar to `before` and `after`.
+ *
+ * @param {object} config - advancedFilters config object.
+ * @param {object} activeFilter - an active filter.
+ * @returns {object} - an active filter with timestamp added to date values.
+ */
 export function timeStampFilterDates( config, activeFilter ) {
-	if ( 'Date' === config.filters[ activeFilter.key ].input.component ) {
+	const advancedFilterConfig = config.filters[ activeFilter.key ];
+	if ( 'Date' === get( advancedFilterConfig, [ 'input', 'component' ] ) ) {
 		const { rule, value } = activeFilter;
 		const timeOfDayMap = {
 			after: 'start',
