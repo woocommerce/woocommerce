@@ -139,6 +139,13 @@ The string to use as a query parameter when searching row items.
 
 Url query parameter search function operates on
 
+### `showMenu`
+
+- Type: Boolean
+- Default: `true`
+
+Boolean to determine whether or not ellipsis menu is shown.
+
 ### `summary`
 
 - Type: Array
