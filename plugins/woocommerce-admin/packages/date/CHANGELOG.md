@@ -1,4 +1,4 @@
-# 1.0.5 Not Released
+# 1.0.5
 
 - Fixed bug in getAllowedIntervalsForQuery() to not return `hour` for default intervals
 
