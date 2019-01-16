@@ -442,7 +442,7 @@ function get_woocommerce_currencies() {
 					'UYU' => __( 'Uruguayan peso', 'woocommerce' ),
 					'UZS' => __( 'Uzbekistani som', 'woocommerce' ),
 					'VEF' => __( 'Venezuelan bol&iacute;var', 'woocommerce' ),
-					'VES' => __( 'Bolívar soberano', 'woocommerce' ),
+					'VES' => __( 'Bol&iacute;var soberano', 'woocommerce' ),
 					'VND' => __( 'Vietnamese &#x111;&#x1ed3;ng', 'woocommerce' ),
 					'VUV' => __( 'Vanuatu vatu', 'woocommerce' ),
 					'WST' => __( 'Samoan t&#x101;l&#x101;', 'woocommerce' ),
