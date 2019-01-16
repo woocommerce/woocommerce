@@ -111,8 +111,8 @@
 	VariationForm.prototype.onResetDisplayedVariation = function( event ) {
 		var form = event.data.variationForm;
 		form.$product.find( '.product_meta' ).find( '.sku' ).wc_reset_content();
-		form.$product.find( '.product_weight' ).wc_reset_content();
-		form.$product.find( '.product_dimensions' ).wc_reset_content();
+		form.$product.find( '.product_weight, .woocommerce-product-attributes-item--weight .woocommerce-product-attributes-item__value' ).wc_reset_content();
+		form.$product.find( '.product_dimensions, .woocommerce-product-attributes-item--dimensions .woocommerce-product-attributes-item__value' ).wc_reset_content();
 		form.$form.trigger( 'reset_image' );
 		form.$singleVariation.slideUp( 200 ).trigger( 'hide_variation' );
 	};
@@ -194,8 +194,8 @@
 	VariationForm.prototype.onFoundVariation = function( event, variation ) {
 		var form           = event.data.variationForm,
 			$sku           = form.$product.find( '.product_meta' ).find( '.sku' ),
-			$weight        = form.$product.find( '.product_weight' ),
-			$dimensions    = form.$product.find( '.product_dimensions' ),
+			$weight        = form.$product.find( '.product_weight, .woocommerce-product-attributes-item--weight .woocommerce-product-attributes-item__value' ),
+			$dimensions    = form.$product.find( '.product_dimensions, .woocommerce-product-attributes-item--dimensions .woocommerce-product-attributes-item__value' ),
 			$qty           = form.$singleVariationWrap.find( '.quantity' ),
 			purchasable    = true,
 			variation_id   = '',
