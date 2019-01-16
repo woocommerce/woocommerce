@@ -62,17 +62,21 @@ export function timeStampFilterDates( config, activeFilter ) {
 			after: 'start',
 			before: 'end',
 		};
-		let appendedValue;
+		// If the value is an array, it signifies "between" values which must have a timestamp
+		// appended to each value.
 		if ( Array.isArray( value ) ) {
 			const [ after, before ] = value;
-			appendedValue = [
-				appendTimestamp( moment( after ), timeOfDayMap.after ),
-				appendTimestamp( moment( before ), timeOfDayMap.before ),
-			];
-		} else {
-			appendedValue = appendTimestamp( moment( value ), timeOfDayMap[ rule ] );
+			return Object.assign( {}, activeFilter, {
+				value: [
+					appendTimestamp( moment( after ), timeOfDayMap.after ),
+					appendTimestamp( moment( before ), timeOfDayMap.before ),
+				],
+			} );
 		}
-		return Object.assign( {}, activeFilter, { value: appendedValue } );
+
+		return Object.assign( {}, activeFilter, {
+			value: appendTimestamp( moment( value ), timeOfDayMap[ rule ] ),
+		} );
 	}
 	return activeFilter;
 }

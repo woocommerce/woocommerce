@@ -11,6 +11,7 @@ import {
 	getSummaryNumbers,
 	getFilterQuery,
 	getReportTableData,
+	timeStampFilterDates,
 } from '../utils';
 import * as ordersConfig from 'analytics/report/orders/config';
 
@@ -525,5 +526,73 @@ describe( 'getReportTableData()', () => {
 			query
 		);
 		expect( select( 'wc-api' ).getReportItemsError ).toHaveBeenLastCalledWith( 'coupons', query );
+	} );
+} );
+
+describe( 'timeStampFilterDates', () => {
+	const advancedFilters = {
+		filters: {
+			city: {
+				input: { component: 'Search' },
+			},
+			my_date: {
+				input: { component: 'Date' },
+			},
+		},
+	};
+
+	it( 'should not change activeFilters not using the Date component', () => {
+		const activeFilter = {
+			key: 'name',
+			rule: 'is',
+			value: 'New York',
+		};
+		const timeStampedActiveFilter = timeStampFilterDates( advancedFilters, activeFilter );
+
+		expect( timeStampedActiveFilter ).toMatchObject( activeFilter );
+	} );
+
+	it( 'should append timestamps to activeFilters using the Date component', () => {
+		const activeFilter = {
+			key: 'my_date',
+			rule: 'before',
+			value: '2018-04-04',
+		};
+		const timeStampedActiveFilter = timeStampFilterDates( advancedFilters, activeFilter );
+
+		expect( timeStampedActiveFilter.value ).toHaveLength( 25 );
+	} );
+
+	it( 'should append start of day for "after" rule', () => {
+		const activeFilter = {
+			key: 'my_date',
+			rule: 'after',
+			value: '2018-04-04',
+		};
+		const timeStampedActiveFilter = timeStampFilterDates( advancedFilters, activeFilter );
+		expect( timeStampedActiveFilter.value ).toContain( 'T00:00:00+00:00' );
+	} );
+
+	it( 'should append end of day for "before" rule', () => {
+		const activeFilter = {
+			key: 'my_date',
+			rule: 'before',
+			value: '2018-04-04',
+		};
+		const timeStampedActiveFilter = timeStampFilterDates( advancedFilters, activeFilter );
+		expect( timeStampedActiveFilter.value ).toContain( 'T23:59:59+00:00' );
+	} );
+
+	it( 'should handle "between" values', () => {
+		const activeFilter = {
+			key: 'my_date',
+			rule: 'before',
+			value: [ '2018-04-04', '2018-04-10' ],
+		};
+		const timeStampedActiveFilter = timeStampFilterDates( advancedFilters, activeFilter );
+		expect( Array.isArray( timeStampedActiveFilter.value ) ).toBe( true );
+		expect( timeStampedActiveFilter.value ).toHaveLength( 2 );
+		expect( timeStampedActiveFilter.value[ 0 ] ).toContain( 'T00:00:00+00:00' );
+		expect( timeStampedActiveFilter.value[ 1 ] ).toContain( 'T23:59:59+00:00' );
 	} );
 } );
