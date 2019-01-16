@@ -154,7 +154,7 @@ if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 		 * @param WP_User $user
 		 */
 		public function add_customer_meta_fields( $user ) {
-			if ( ! current_user_can( 'manage_woocommerce' ) && ! apply_filters( 'woocommerce_current_user_can_edit_customer_meta_fields', false, $user ) ) {
+			if ( ! apply_filters( 'woocommerce_current_user_can_edit_customer_meta_fields', current_user_can( 'manage_woocommerce' ), $user ) ) {
 				return;
 			}
 
