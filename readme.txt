@@ -183,6 +183,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Added `woocommerce_geolocation_ajax_get_location_hash` filter. #22350
 * Dev - Added `woocommerce_variation_prices_array` filter. #21003
 * Dev - Added `wc_emptied_cart` javascript event when cart is emptied. #22469
+* Dev - Add a filter, woocommerce_current_user_can_edit_customer_meta_fields, to bypass manage_woocommerce when editing customer meta fields. #22277
 * Fix - Fix W3C validation of single product page quantity input. #22333
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 * Localization - Added US Minor Outlying Islands as states to avoid confusion with US. #22468
