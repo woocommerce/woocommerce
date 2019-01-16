@@ -52,7 +52,8 @@ class WC_Frontend_Scripts {
 	 */
 	public static function get_styles() {
 		return apply_filters(
-			'woocommerce_enqueue_styles', array(
+			'woocommerce_enqueue_styles',
+			array(
 				'woocommerce-layout'      => array(
 					'src'     => self::get_asset_url( 'assets/css/woocommerce-layout.css' ),
 					'deps'    => '',
@@ -221,7 +222,7 @@ class WC_Frontend_Scripts {
 			),
 			'wc-address-i18n'            => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/address-i18n' . $suffix . '.js' ),
-				'deps'    => array( 'jquery' ),
+				'deps'    => array( 'jquery', 'wc-country-select' ),
 				'version' => WC_VERSION,
 			),
 			'wc-add-payment-method'      => array(
@@ -414,7 +415,7 @@ class WC_Frontend_Scripts {
 		}
 
 		// Placeholder style.
-		wp_register_style( 'woocommerce-inline', false );
+		wp_register_style( 'woocommerce-inline', false ); // phpcs:ignore
 		wp_enqueue_style( 'woocommerce-inline' );
 
 		if ( true === wc_string_to_bool( get_option( 'woocommerce_checkout_highlight_required_fields', 'yes' ) ) ) {
@@ -473,7 +474,8 @@ class WC_Frontend_Scripts {
 					'i18n_required_rating_text' => esc_attr__( 'Please select a rating', 'woocommerce' ),
 					'review_rating_required'    => get_option( 'woocommerce_review_rating_required' ),
 					'flexslider'                => apply_filters(
-						'woocommerce_single_product_carousel_options', array(
+						'woocommerce_single_product_carousel_options',
+						array(
 							'rtl'            => is_rtl(),
 							'animation'      => 'slide',
 							'smoothHeight'   => true,
@@ -489,7 +491,8 @@ class WC_Frontend_Scripts {
 					'zoom_options'              => apply_filters( 'woocommerce_single_product_zoom_options', array() ),
 					'photoswipe_enabled'        => apply_filters( 'woocommerce_single_product_photoswipe_enabled', get_theme_support( 'wc-product-gallery-lightbox' ) ),
 					'photoswipe_options'        => apply_filters(
-						'woocommerce_single_product_photoswipe_options', array(
+						'woocommerce_single_product_photoswipe_options',
+						array(
 							'shareEl'               => false,
 							'closeOnScroll'         => false,
 							'history'               => false,
