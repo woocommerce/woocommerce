@@ -172,10 +172,10 @@ class DateFilter extends Component {
 	}
 
 	onRuleChange( value ) {
-		const { onFilterChange, filter, replaceFilter } = this.props;
+		const { onFilterChange, filter, updateFilter } = this.props;
 		const { before } = this.state;
 		if ( 'between' === filter.rule && 'between' !== value ) {
-			replaceFilter( {
+			updateFilter( {
 				key: filter.key,
 				rule: value,
 				value: before ? before.format( isoDateFormat ) : undefined,

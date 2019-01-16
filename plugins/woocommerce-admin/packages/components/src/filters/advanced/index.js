@@ -55,7 +55,7 @@ class AdvancedFilters extends Component {
 		this.removeFilter = this.removeFilter.bind( this );
 		this.clearFilters = this.clearFilters.bind( this );
 		this.getUpdateHref = this.getUpdateHref.bind( this );
-		this.replaceFilter = this.replaceFilter.bind( this );
+		this.updateFilter = this.updateFilter.bind( this );
 	}
 
 	componentDidUpdate( prevProps ) {
@@ -86,7 +86,7 @@ class AdvancedFilters extends Component {
 		this.setState( { activeFilters } );
 	}
 
-	replaceFilter( filter ) {
+	updateFilter( filter ) {
 		const activeFilters = this.state.activeFilters.map( activeFilter => {
 			if ( filter.key === activeFilter.key ) {
 				return filter;
@@ -230,7 +230,7 @@ class AdvancedFilters extends Component {
 										onFilterChange={ this.onFilterChange }
 										isEnglish={ isEnglish }
 										query={ query }
-										replaceFilter={ this.replaceFilter }
+										updateFilter={ this.updateFilter }
 									/>
 								) }
 								<IconButton
