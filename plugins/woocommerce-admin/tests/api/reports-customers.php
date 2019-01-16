@@ -122,10 +122,6 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 			$test_customers[] = WC_Helper_Customer::create_customer( "customer{$i}", 'password', "customer{$i}@example.com" );
 		}
 
-		// Initialize the report lookup table.
-		delete_transient( 'wc_update_350_all_customers' );
-		WC_Admin_Api_Init::customer_lookup_store_init();
-
 		// Create a test product for use in an order.
 		$product = new WC_Product_Simple();
 		$product->set_name( 'Test Product' );

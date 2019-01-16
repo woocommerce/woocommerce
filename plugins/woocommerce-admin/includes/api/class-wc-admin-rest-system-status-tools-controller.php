@@ -55,7 +55,7 @@ class WC_Admin_REST_System_Status_Tools_Controller extends WC_REST_System_Status
 
 		switch ( $tool ) {
 			case 'rebuild_stats':
-				WC_Admin_Reports_Orders_Stats_Data_Store::queue_order_stats_repopulate_database();
+				WC_Admin_Api_Init::regenerate_report_data();
 				$message = __( 'Rebuilding reports data in the background . . .', 'wc-admin' );
 				break;
 			default:

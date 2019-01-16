@@ -7,10 +7,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! class_exists( 'WC_Admin_Order_Stats_Background_Process', false ) ) {
-	include_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-order-stats-background-process.php';
-}
-
 /**
  * WC_Admin_Reports_Orders_Stats_Data_Store.
  *
@@ -72,22 +68,6 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	);
 
 	/**
-	 * Background process to populate order stats.
-	 *
-	 * @var WC_Admin_Order_Stats_Background_Process
-	 */
-	protected static $background_process;
-
-	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		if ( ! self::$background_process ) {
-			self::$background_process = new WC_Admin_Order_Stats_Background_Process();
-		}
-	}
-
-	/**
 	 * Set up all the hooks for maintaining and populating table data.
 	 */
 	public static function init() {
@@ -96,10 +76,6 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order' ) );
 		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order' ) );
 		add_action( 'woocommerce_refund_deleted', array( __CLASS__, 'sync_on_refund_delete' ), 10, 2 );
-
-		if ( ! self::$background_process ) {
-			self::$background_process = new WC_Admin_Order_Stats_Background_Process();
-		}
 	}
 
 	/**
@@ -371,31 +347,6 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 					{$where_time_clause}
 					{$where_clause}"
 		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
-	}
-
-	/**
-	 * Queue a background process that will repopulate the entire orders stats database.
-	 *
-	 * @todo Make this work on large DBs.
-	 */
-	public static function queue_order_stats_repopulate_database() {
-
-		// This needs to be updated to work in batches instead of getting all orders, as
-		// that will not work well on DBs with more than a few hundred orders.
-		$order_ids = wc_get_orders(
-			array(
-				'limit'  => -1,
-				'type'   => 'shop_order',
-				'return' => 'ids',
-			)
-		);
-
-		foreach ( $order_ids as $id ) {
-			self::$background_process->push_to_queue( $id );
-		}
-
-		self::$background_process->save();
-		self::$background_process->dispatch();
 	}
 
 	/**
