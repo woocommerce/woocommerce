@@ -160,6 +160,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 = 3.5.4 - 2019-01-xx =
 * Tweak - Allow limited html in woocommerce_rating_filter_count filter. #21904
+* Tweak - Remove 'on-hold' orders from admin tax reports for more logical reporting. #22419
 * Fix - Unescape CSV formulas in product attributes in CSV importer/exporter. #21938
 * Fix - Remove use of non-existing `WC_REST_Dev_Setting_Options_Controller` class. #22121
 * Fix - Fix edge case where `get_plugins` would not have the custom WooCommerce plugin headers if `get_plugins` was called early. #21669
@@ -190,7 +191,13 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Restores an opportunity to print non-cart related notices that a few extensions are relying on. #22337
 * Fix - Correct order item meta alignment in order emails when using an RTL language. #22376
 * Fix - Fix bug where product status was erroneously going to draft status in some circumstances on new published variable products. #20667
+* Fix - Use slug sanitization on product export category slugs for better foreign character support. #22320
+* Fix - Correct item subtotal rounding when multiple taxes are applied so it matches the cart. #22416
+* Fix - Prevent fatal errors when retrieving network orders for sites that do not have WooCommerce activated. #22439
+* Fix - Numerous bug fixes around checkout field locales on first load. #22444
+* Fix - Correct position of admin notices on my-account pages. #22445
 * Dev - REST API - Fixed support to order results by slugs. #22168
+* Dev - REST API - Removed extra inherited filters from product endpoint in variations endpoint. #22452
 
 = 3.5.3 - 2018-12-20 =
 * Fix - Fix orders list in the admin after a change introduced in WordPress 5.0.2. #22273
