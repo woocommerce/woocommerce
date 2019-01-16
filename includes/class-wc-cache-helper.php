@@ -63,7 +63,7 @@ class WC_Cache_Helper {
 		$location['state']    = $customer->get_billing_state();
 		$location['postcode'] = $customer->get_billing_postcode();
 		$location['city']     = $customer->get_billing_city();
-		return apply_filters("woocommerce_geolocation_ajax_get_location_hash",substr( md5( implode( '', $location ) ), 0, 12 ),$location);
+		return apply_filters( 'woocommerce_geolocation_ajax_get_location_hash', substr( md5( implode( '', $location ) ), 0, 12 ), $location, $customer );
 	}
 
 	/**
