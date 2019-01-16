@@ -535,7 +535,6 @@ class WC_Admin_Api_Init {
 		$customer_query = new WP_User_Query(
 			array(
 				'fields'  => 'ID',
-				'role'    => 'customer',
 				'number'  => 1,
 			)
 		);
@@ -561,7 +560,6 @@ class WC_Admin_Api_Init {
 		$customer_query = new WP_User_Query(
 			array(
 				'fields'  => 'ID',
-				'role'    => 'customer',
 				'orderby' => 'ID',
 				'order'   => 'ASC',
 				'number'  => $batch_size,
