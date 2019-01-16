@@ -115,9 +115,11 @@ export default class CustomersReportTable extends Component {
 				name
 			);
 
-			const dateRegistered = date_registered
-				? <Date date={ date_registered } visibleFormat={ defaultTableDateFormat } />
-				: '—';
+			const dateRegistered = date_registered ? (
+				<Date date={ date_registered } visibleFormat={ defaultTableDateFormat } />
+			) : (
+				'—'
+			);
 
 			return [
 				{
@@ -174,11 +176,6 @@ export default class CustomersReportTable extends Component {
 		return (
 			<ReportTable
 				endpoint="customers"
-				extendItemsMethodNames={ {
-					load: 'getCustomers',
-					getError: 'getCustomersError',
-					isRequesting: 'isGetCustomersRequesting',
-				} }
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				itemIdField="id"
