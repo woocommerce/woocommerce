@@ -162,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 * Enhancement - Only include order erasure bulk action if erasure is enabled in settings. #22354
 * Enhancement - Customer notes containing URLs now automatically converts to clickable links. #21927
+* Tweak - Generalize shipping estimate text on cart page. #22467
 * Dev - Introduce `woocommerce_reviews_title` filter. #22216
 * Dev - Added `woocommerce_cheque_process_payment_order_status` filter allowing plugins to change the order status to the Cheque gateway. #21402
 * Dev - Add the current coupon object to the `woocommerce_get_shop_coupon_data` filter. #21442
@@ -176,8 +177,10 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Add new pre query filter to WC_Product_Data_Store_CPT::search_products(). #22165
 * Dev - Added additional parameters to the `woocommerce_variation_option_name` filter. #21153
 * Dev - Added new filter `woocommerce_get_min_max_price_meta_query`. #22255
+* Dev - Added a filter to WC_REST_CRUD_Controller::get_collection_params method to allow developers to change params in the same way as WP_Rest_Posts_controller::get_collection_params. #21562
 * Fix - Fix W3C validation of single product page quantity input. #22333
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
+* Localization - Added US Minor Outlying Islands as states to avoid confusion with US. #22468
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
