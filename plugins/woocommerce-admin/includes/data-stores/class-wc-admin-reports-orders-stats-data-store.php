@@ -171,17 +171,21 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 				)";
 		}
 
-		$order_status_filter = $this->get_status_subquery( $query_args, $operator );
-		if ( $order_status_filter ) {
-			$where_filters[] = $order_status_filter;
-		}
-
 		$customer_filter = $this->get_customer_subquery( $query_args );
 		if ( $customer_filter ) {
 			$where_filters[] = $customer_filter;
 		}
 
 		$where_subclause = implode( " $operator ", $where_filters );
+
+		// Append status filter after to avoid matching ANY on default statuses.
+		$order_status_filter = $this->get_status_subquery( $query_args, $operator );
+		if ( $order_status_filter ) {
+			if ( empty( $query_args['status_is'] ) && empty( $query_args['status_is_not'] ) ) {
+				$operator = 'AND';
+			}
+			$where_subclause = implode( " $operator ", array_filter( array( $where_subclause, $order_status_filter ) ) );
+		}
 
 		// To avoid requesting the subqueries twice, the result is applied to all queries passed to the method.
 		if ( $where_subclause ) {
@@ -1209,7 +1213,6 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		$order_ids = wc_get_orders(
 			array(
 				'limit'  => -1,
-				'status' => parent::get_report_order_statuses(),
 				'type'   => 'shop_order',
 				'return' => 'ids',
 			)
@@ -1263,16 +1266,6 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 
 		if ( ! $order->get_id() || ! $order->get_date_created() ) {
 			return false;
-		}
-
-		if ( ! in_array( $order->get_status(), parent::get_report_order_statuses(), true ) ) {
-			$wpdb->delete(
-				$table_name,
-				array(
-					'order_id' => $order->get_id(),
-				)
-			);
-			return;
 		}
 
 		$data   = array(

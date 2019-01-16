@@ -42,6 +42,16 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 	);
 
 	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		// Avoid ambigious column order_id in SQL query.
+		$this->report_columns['orders_count'] = str_replace( 'order_id', $table_name . '.order_id', $this->report_columns['orders_count'] );
+	}
+
+	/**
 	 * Set up all the hooks for maintaining and populating table data.
 	 */
 	public static function init() {
@@ -84,10 +94,9 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 			$sql_query_params['where_clause'] .= " AND {$order_coupon_lookup_table}.coupon_id IN ({$included_coupons})";
 		}
 
-		// TODO: questionable, I think we need order status filters, even though it's not specified.
 		$order_status_filter = $this->get_status_subquery( $query_args );
 		if ( $order_status_filter ) {
-			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}posts ON {$order_coupon_lookup_table}.order_id = {$wpdb->prefix}posts.ID";
+			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_coupon_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 			$sql_query_params['where_clause'] .= " AND ( {$order_status_filter} )";
 		}
 
@@ -214,9 +223,6 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 			'fields'        => '*',
 			'coupons'       => array(),
 			'extended_info' => false,
-			// This is not a parameter for coupons reports per se, but we want to only take into account selected order types.
-			'order_status'  => parent::get_report_order_statuses(),
-
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 
@@ -316,15 +322,6 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
-			return;
-		}
-
-		if ( ! in_array( $order->get_status(), parent::get_report_order_statuses(), true ) ) {
-			$wpdb->delete(
-				$wpdb->prefix . self::TABLE_NAME,
-				array( 'order_id' => $order->get_id() ),
-				array( '%d' )
-			);
 			return;
 		}
 

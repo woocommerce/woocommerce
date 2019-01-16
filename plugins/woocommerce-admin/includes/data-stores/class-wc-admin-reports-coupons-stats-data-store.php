@@ -40,6 +40,16 @@ class WC_Admin_Reports_Coupons_Stats_Data_Store extends WC_Admin_Reports_Coupons
 	);
 
 	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		// Avoid ambigious column order_id in SQL query.
+		$this->report_columns['orders_count'] = str_replace( 'order_id', $table_name . '.order_id', $this->report_columns['orders_count'] );
+	}
+
+	/**
 	 * Updates the database query with parameters used for Products Stats report: categories and order status.
 	 *
 	 * @param array $query_args       Query arguments supplied by the user.
@@ -61,7 +71,7 @@ class WC_Admin_Reports_Coupons_Stats_Data_Store extends WC_Admin_Reports_Coupons
 
 		$order_status_filter = $this->get_status_subquery( $query_args );
 		if ( $order_status_filter ) {
-			$coupons_from_clause  .= " JOIN {$wpdb->prefix}posts ON {$order_coupon_lookup_table}.order_id = {$wpdb->prefix}posts.ID";
+			$coupons_from_clause  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_coupon_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 			$coupons_where_clause .= " AND ( {$order_status_filter} )";
 		}
 
@@ -99,8 +109,6 @@ class WC_Admin_Reports_Coupons_Stats_Data_Store extends WC_Admin_Reports_Coupons
 			'fields'       => '*',
 			'interval'     => 'week',
 			'coupons'      => array(),
-			// This is not a parameter for products reports per se, but we should probably restricts order statuses here, too.
-			'order_status' => parent::get_report_order_statuses(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 
@@ -168,7 +176,7 @@ class WC_Admin_Reports_Coupons_Stats_Data_Store extends WC_Admin_Reports_Coupons
 
 			$intervals = $wpdb->get_results(
 				"SELECT
-							MAX(date_created) AS datetime_anchor,
+							MAX({$table_name}.date_created) AS datetime_anchor,
 							{$intervals_query['select_clause']} AS time_interval
 							{$selections}
 						FROM

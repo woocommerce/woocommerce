@@ -60,6 +60,16 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 	);
 
 	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		// Avoid ambigious column order_id in SQL query.
+		$this->report_columns['orders_count'] = str_replace( 'order_id', $table_name . '.order_id', $this->report_columns['orders_count'] );
+	}
+
+	/**
 	 * Return the database query with parameters used for Categories report: time span and order status.
 	 *
 	 * @param array $query_args Query arguments supplied by the user.
@@ -93,7 +103,7 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 
 		$order_status_filter = $this->get_status_subquery( $query_args );
 		if ( $order_status_filter ) {
-			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}posts ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}posts.ID";
+			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 			$sql_query_params['where_clause'] .= " AND ( {$order_status_filter} )";
 		}
 
@@ -216,9 +226,6 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 			'fields'        => '*',
 			'categories'    => array(),
 			'extended_info' => false,
-			// This is not a parameter for products reports per se, but maybe we should restricts order statuses here, too?
-			'order_status'  => parent::get_report_order_statuses(),
-
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 

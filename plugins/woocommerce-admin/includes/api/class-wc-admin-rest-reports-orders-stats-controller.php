@@ -385,6 +385,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
+			'default'           => null,
 			'items'             => array(
 				'enum' => $this->get_order_statuses(),
 				'type' => 'string',

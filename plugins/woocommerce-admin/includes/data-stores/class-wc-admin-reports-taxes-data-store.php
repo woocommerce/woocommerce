@@ -61,8 +61,9 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 	public function __construct() {
 		global $wpdb;
 		$table_name                          = $wpdb->prefix . self::TABLE_NAME;
-		// Avoid ambigious column tax_rate_id in SQL query.
-		$this->report_columns['tax_rate_id'] = $table_name . '.' . $this->report_columns['tax_rate_id'];
+		// Avoid ambigious columns in SQL query.
+		$this->report_columns['tax_rate_id']  = $table_name . '.' . $this->report_columns['tax_rate_id'];
+		$this->report_columns['orders_count'] = str_replace( 'order_id', $table_name . '.order_id', $this->report_columns['orders_count'] );
 	}
 
 	/**
@@ -92,6 +93,12 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 		if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
 			$allowed_taxes                     = implode( ',', $query_args['taxes'] );
 			$sql_query_params['where_clause'] .= " AND {$order_tax_lookup_table}.tax_rate_id IN ({$allowed_taxes})";
+		}
+
+		$order_status_filter = $this->get_status_subquery( $query_args );
+		if ( $order_status_filter ) {
+			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_tax_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
+			$sql_query_params['where_clause'] .= " AND ( {$order_status_filter} )";
 		}
 
 		$sql_query_params['from_clause'] .= " JOIN {$wpdb->prefix}woocommerce_tax_rates ON {$order_tax_lookup_table}.tax_rate_id = {$wpdb->prefix}woocommerce_tax_rates.tax_rate_id";
@@ -254,15 +261,6 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 		global $wpdb;
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
-			return;
-		}
-
-		if ( ! in_array( $order->get_status(), parent::get_report_order_statuses(), true ) ) {
-			$wpdb->delete(
-				$wpdb->prefix . self::TABLE_NAME,
-				array( 'order_id' => $order->get_id() ),
-				array( '%d' )
-			);
 			return;
 		}
 

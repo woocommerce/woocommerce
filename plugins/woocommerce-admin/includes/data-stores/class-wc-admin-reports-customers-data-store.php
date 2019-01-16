@@ -203,11 +203,13 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 */
 	protected function get_sql_query_params( $query_args ) {
 		global $wpdb;
-		$customer_lookup_table = $wpdb->prefix . self::TABLE_NAME;
+		$customer_lookup_table  = $wpdb->prefix . self::TABLE_NAME;
+		$order_stats_table_name = $wpdb->prefix . 'wc_order_stats';
 
-		$sql_query_params = $this->get_time_period_sql_params( $query_args, $customer_lookup_table );
-		$sql_query_params = array_merge( $sql_query_params, $this->get_limit_sql_params( $query_args ) );
-		$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_sql_params( $query_args ) );
+		$sql_query_params                = $this->get_time_period_sql_params( $query_args, $customer_lookup_table );
+		$sql_query_params                = array_merge( $sql_query_params, $this->get_limit_sql_params( $query_args ) );
+		$sql_query_params                = array_merge( $sql_query_params, $this->get_order_by_sql_params( $query_args ) );
+		$sql_query_params['from_clause'] = " LEFT JOIN {$order_stats_table_name} ON {$customer_lookup_table}.customer_id = {$order_stats_table_name}.customer_id";
 
 		$match_operator = $this->get_match_operator( $query_args );
 		$where_clauses  = array();
@@ -276,6 +278,11 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			$sql_query_params['where_clause'] = $preceding_match . implode( " {$match_operator} ", $where_clauses );
 		}
 
+		$order_status_filter = $this->get_status_subquery( $query_args );
+		if ( $order_status_filter ) {
+			$sql_query_params['from_clause'] .= " AND ( {$order_status_filter} )";
+		}
+
 		if ( $having_clauses ) {
 			$preceding_match = empty( $sql_query_params['having_clause'] ) ? ' AND ' : " {$match_operator} ";
 			$sql_query_params['having_clause'] .= $preceding_match . implode( " {$match_operator} ", $having_clauses );
@@ -293,7 +300,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	public function get_data( $query_args ) {
 		global $wpdb;
 
-		$customers_table_name = $wpdb->prefix . self::TABLE_NAME;
+		$customers_table_name   = $wpdb->prefix . self::TABLE_NAME;
 		$order_stats_table_name = $wpdb->prefix . 'wc_order_stats';
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
@@ -325,10 +332,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 					SELECT {$customers_table_name}.customer_id
 					FROM
 						{$customers_table_name}
-					LEFT JOIN
-						{$order_stats_table_name}
-					ON
-						{$customers_table_name}.customer_id = {$order_stats_table_name}.customer_id
+						{$sql_query_params['from_clause']}
 					WHERE
 						1=1
 						{$sql_query_params['where_time_clause']}
@@ -352,10 +356,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 						{$selections}
 					FROM
 						{$customers_table_name}
-					LEFT JOIN
-						{$order_stats_table_name}
-					ON
-						{$customers_table_name}.customer_id = {$order_stats_table_name}.customer_id
+						{$sql_query_params['from_clause']}
 					WHERE
 						1=1
 						{$sql_query_params['where_time_clause']}
