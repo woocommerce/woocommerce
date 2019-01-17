@@ -96,34 +96,34 @@ class WC_Tests_Report_Sales_By_Date extends WC_Unit_Test_Case {
 			$data->coupons[0]->order_item_name,
 			'There should be a single coupon applied.'
 		);
-		$this->assertEquals( $data->coupons[0]->discount_amount, $data->total_coupons );
+		$this->assertEquals( $data->coupons[0]->discount_amount, $data->total_coupons, 'Total discount amount.' );
 
 		$this->assertCount( 1, $data->refund_lines, 'There was one refund granted.' );
 		$this->assertEquals( 7, $data->partial_refunds[0]->total_refund, 'Total refunds.' );
-		$this->assertEquals( $data->partial_refunds[0]->total_refund, $data->total_refunds );
+		$this->assertEquals( $data->partial_refunds[0]->total_refund, $data->total_refunds, 'Day refunds, total refunds.' );
 
 		$this->assertEquals(
 			$order1->get_shipping_total() + $order2->get_shipping_total() + $order3->get_shipping_total(),
 			$data->orders[0]->total_shipping,
 			'Orders, total shipping.'
 		);
-		$this->assertEquals( $data->orders[0]->total_shipping, $data->total_shipping );
+		$this->assertEquals( $data->orders[0]->total_shipping, $data->total_shipping, 'Day shipping, total shipping.' );
 
 		$this->assertEquals(
 			$order1->get_shipping_tax() + $order2->get_shipping_tax() + $order3->get_shipping_tax(),
 			$data->orders[0]->total_shipping_tax,
 			'Orders, total shipping tax.'
 		);
-		$this->assertEquals( $data->orders[0]->total_shipping_tax, $data->total_shipping_tax );
+		$this->assertEquals( $data->orders[0]->total_shipping_tax, $data->total_shipping_tax, 'Day shipping tax, total shipping tax.' );
 
-		$this->assertEquals( $data->orders[0]->total_tax, $data->total_tax );
+		$this->assertEquals( $data->orders[0]->total_tax, $data->total_tax, 'Day tax, total tax.' );
 
 		$this->assertEquals(
 			$order1->get_total() + $order2->get_total() + $order3->get_total(),
 			$data->orders[0]->total_sales,
-			'Total sales.'
+			'Orders, total sales.'
 		);
-		$this->assertEquals( $data->orders[0]->total_sales - $data->total_refunds, $data->total_sales, 'Total sales.' );
+		$this->assertEquals( $data->orders[0]->total_sales - $data->total_refunds, $data->total_sales, 'Day sales, total sales.' );
 		$this->assertEquals( $data->total_sales, $data->average_total_sales, 'Average total sales.' );
 
 		$this->assertEquals(
