@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 = 3.5.4 - 2019-01-xx =
 * Tweak - Allow limited html in woocommerce_rating_filter_count filter. #21904
 * Tweak - Remove 'on-hold' orders from admin tax reports for more logical reporting. #22419
+* Tweak - Remove payment phrases from processing emails. #22418
 * Fix - Unescape CSV formulas in product attributes in CSV importer/exporter. #21938
 * Fix - Remove use of non-existing `WC_REST_Dev_Setting_Options_Controller` class. #22121
 * Fix - Fix edge case where `get_plugins` would not have the custom WooCommerce plugin headers if `get_plugins` was called early. #21669
@@ -197,10 +198,29 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Numerous bug fixes around checkout field locales on first load. #22444
 * Fix - Correct position of admin notices on my-account pages. #22445
 * Fix - Fixed padding of addresses in email template. #22466
-* Fix - Fix position of error notices on account pages. #22445
 * Fix - Prevevent payment method descriptions sliding up/down if selected after ajax updates. #22459
-* Fix - Restores an opportunity to print non-cart related notices that a few extensions are relying on. #22337
 * Fix - Fixed formatted address in uppercase for languages that use accents. #22096
+* Fix - Fix product updating on import for SKUs with special characters. #22071
+* Fix - Ensure cache_delete on coupon deletion. #22053
+* Fix - Make product edit form aware publish was pressed. #20667
+* Fix - Unescape imported CSV formulas in product attributes. #21938
+* Fix - Warning when deprecated user meta starts with uppercase. #21943
+* Fix - Filter out buttons from the onRowClick event on the Orders list view page. #21966
+* Fix - Update "Filter Products by Attribute" widget when product stock quantity changes via "Quick Edit" or WC API. #22029
+* Fix - Ensure product parent exists before getting its image. #22074
+* Fix - Fixed support for multiple query parameters translated to meta queries via REST API requests. #22108
+* Fix - Strip hash from URL when reload refunds in the dashboard. #22116
+* Fix - Prevent notice when using non existing value for tabs in WooCommerce > Reports > Stock. #22183
+* Fix - Filter by attributes dropdown placeholder text wrapped in quotes. #22185
+* Fix - Fix escaped html on checkout when javascript is disabled. #22214
+* Fix - Allow empty schema again when registering a custom field for the API. #22204
+* Fix - Fix import & export of newline characters in product description fields. #22298
+* Fix - Allow quotes in tax class names. #22270
+* Fix - Sale price applies to end of closing sale date. #22189
+* Fix - Product export by unicode product categories. #22320
+* Fix - Check stock status of items when 'ordering again' from the account page. #22331
+* Fix - Issue where images offloaded to external servers caused errors and broken images when changing aspect ratios. #22461
+* Dev - REST API - 0 value attribute permalink calculation, property population in REST api. #22026
 * Dev - REST API - Fixed support to order results by slugs. #22168
 * Dev - REST API - Removed extra inherited filters from product endpoint in variations endpoint. #22452
 
