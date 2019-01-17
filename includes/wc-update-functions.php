@@ -1894,3 +1894,28 @@ function wc_update_352_drop_download_log_fk() {
 		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY fk_wc_download_log_permission_id" ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 	}
 }
+
+/**
+ * Remove edit_user capabilities from shop managers and use "translated" capabilities instead.
+ * See wc_shop_manager_has_capability function.
+ */
+function wc_update_354_modify_shop_manager_caps() {
+	global $wp_roles;
+
+	if ( ! class_exists( 'WP_Roles' ) ) {
+		return;
+	}
+
+	if ( ! isset( $wp_roles ) ) {
+		$wp_roles = new WP_Roles(); // @codingStandardsIgnoreLine
+	}
+
+	$wp_roles->remove_cap( 'shop_manager', 'edit_users' );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_354_db_version() {
+	WC_Install::update_db_version( '3.5.4' );
+}

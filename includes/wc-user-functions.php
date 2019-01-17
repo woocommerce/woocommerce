@@ -356,6 +356,31 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
 
 /**
+ * Safe way of allowing shop managers restricted capabilities that will remove
+ * access to the capabilities if WooCommerce is deactivated.
+ *
+ * @since 3.5.4
+ * @param bool[]   $allcaps Array of key/value pairs where keys represent a capability name and boolean values
+ *                          represent whether the user has that capability.
+ * @param string[] $caps    Required primitive capabilities for the requested capability.
+ * @param array    $args Arguments that accompany the requested capability check.
+ * @param WP_User  $user    The user object.
+ * @return bool[]
+ */
+function wc_shop_manager_has_capability( $allcaps, $caps, $args, $user ) {
+
+	if ( wc_user_has_role( $user, 'shop_manager' ) ) {
+		/**
+		 * @see wc_modify_map_meta_cap, which limits editing to customers.
+		 */
+		$allcaps['edit_users'] = true;
+	}
+
+	return $allcaps;
+}
+add_filter( 'user_has_cap', 'wc_shop_manager_has_capability', 10, 4 );
+
+/**
  * Modify the list of editable roles to prevent non-admin adding admin users.
  *
  * @param  array $roles Roles.

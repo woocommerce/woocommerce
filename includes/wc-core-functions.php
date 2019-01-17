@@ -43,7 +43,7 @@ add_filter( 'woocommerce_attribute_label', 'wp_kses_post', 100 );
 /**
  * Short Description (excerpt).
  */
-if ( version_compare( $wp_version, '5.0', '>=' ) ) {
+if ( function_exists( 'do_blocks' ) ) {
 	add_filter( 'woocommerce_short_description', 'do_blocks', 9 );
 }
 add_filter( 'woocommerce_short_description', 'wptexturize' );

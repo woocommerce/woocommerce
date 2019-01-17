@@ -92,8 +92,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * Process the webhook for delivery by verifying that it should be delivered.
 	 * and scheduling the delivery (in the background by default, or immediately).
 	 *
-	 * @since 2.2.0
-	 * @param mixed $arg The first argument provided from the associated hooks.
+	 * @since  2.2.0
+	 * @param  mixed $arg The first argument provided from the associated hooks.
+	 * @return mixed $arg Returns the argument in case the webhook was hooked into a filter.
 	 */
 	public function process( $arg ) {
 
@@ -109,6 +110,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		 * @hooked wc_webhook_process_delivery - 10
 		 */
 		do_action( 'woocommerce_webhook_process_delivery', $this, $arg );
+
+		return $arg;
 	}
 
 	/**
