@@ -162,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Allow limited html in woocommerce_rating_filter_count filter. #21904
 * Tweak - Remove 'on-hold' orders from admin tax reports for more logical reporting. #22419
 * Tweak - Remove payment phrases from processing emails. #22418
+* Tweak - Removed display of cost for local pickup when free. #22446
 * Fix - Unescape CSV formulas in product attributes in CSV importer/exporter. #21938
 * Fix - Remove use of non-existing `WC_REST_Dev_Setting_Options_Controller` class. #22121
 * Fix - Fix edge case where `get_plugins` would not have the custom WooCommerce plugin headers if `get_plugins` was called early. #21669
