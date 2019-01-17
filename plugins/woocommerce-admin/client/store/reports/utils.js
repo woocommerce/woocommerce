@@ -56,29 +56,30 @@ export function getFilterQuery( endpoint, query ) {
  */
 export function timeStampFilterDates( config, activeFilter ) {
 	const advancedFilterConfig = config.filters[ activeFilter.key ];
-	if ( 'Date' === get( advancedFilterConfig, [ 'input', 'component' ] ) ) {
-		const { rule, value } = activeFilter;
-		const timeOfDayMap = {
-			after: 'start',
-			before: 'end',
-		};
-		// If the value is an array, it signifies "between" values which must have a timestamp
-		// appended to each value.
-		if ( Array.isArray( value ) ) {
-			const [ after, before ] = value;
-			return Object.assign( {}, activeFilter, {
-				value: [
-					appendTimestamp( moment( after ), timeOfDayMap.after ),
-					appendTimestamp( moment( before ), timeOfDayMap.before ),
-				],
-			} );
-		}
+	if ( 'Date' !== get( advancedFilterConfig, [ 'input', 'component' ] ) ) {
+		return activeFilter;
+	}
 
+	const { rule, value } = activeFilter;
+	const timeOfDayMap = {
+		after: 'start',
+		before: 'end',
+	};
+	// If the value is an array, it signifies "between" values which must have a timestamp
+	// appended to each value.
+	if ( Array.isArray( value ) ) {
+		const [ after, before ] = value;
 		return Object.assign( {}, activeFilter, {
-			value: appendTimestamp( moment( value ), timeOfDayMap[ rule ] ),
+			value: [
+				appendTimestamp( moment( after ), timeOfDayMap.after ),
+				appendTimestamp( moment( before ), timeOfDayMap.before ),
+			],
 		} );
 	}
-	return activeFilter;
+
+	return Object.assign( {}, activeFilter, {
+		value: appendTimestamp( moment( value ), timeOfDayMap[ rule ] ),
+	} );
 }
 
 export function getQueryFromConfig( config, advancedFilters, query ) {
