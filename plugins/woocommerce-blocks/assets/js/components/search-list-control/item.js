@@ -61,7 +61,7 @@ const SearchListItem = ( {
 
 	return (
 		<MenuItem
-			role="menuitemcheckbox"
+			role={ isSingle ? 'menuitemradio' : 'menuitemcheckbox' }
 			className={ classes.join( ' ' ) }
 			onClick={ onSelect( item ) }
 			isSelected={ isSelected }
