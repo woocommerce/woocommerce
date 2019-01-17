@@ -555,12 +555,12 @@ describe( 'timeStampFilterDates', () => {
 	it( 'should append timestamps to activeFilters using the Date component', () => {
 		const activeFilter = {
 			key: 'my_date',
-			rule: 'before',
+			rule: 'after',
 			value: '2018-04-04',
 		};
 		const timeStampedActiveFilter = timeStampFilterDates( advancedFilters, activeFilter );
 
-		expect( timeStampedActiveFilter.value ).toHaveLength( 25 );
+		expect( timeStampedActiveFilter.value ).toBe( '2018-04-04T00:00:00+00:00' );
 	} );
 
 	it( 'should append start of day for "after" rule', () => {
@@ -570,7 +570,7 @@ describe( 'timeStampFilterDates', () => {
 			value: '2018-04-04',
 		};
 		const timeStampedActiveFilter = timeStampFilterDates( advancedFilters, activeFilter );
-		expect( timeStampedActiveFilter.value ).toContain( 'T00:00:00+00:00' );
+		expect( timeStampedActiveFilter.value ).toBe( '2018-04-04T00:00:00+00:00' );
 	} );
 
 	it( 'should append end of day for "before" rule', () => {
@@ -580,7 +580,7 @@ describe( 'timeStampFilterDates', () => {
 			value: '2018-04-04',
 		};
 		const timeStampedActiveFilter = timeStampFilterDates( advancedFilters, activeFilter );
-		expect( timeStampedActiveFilter.value ).toContain( 'T23:59:59+00:00' );
+		expect( timeStampedActiveFilter.value ).toBe( '2018-04-04T23:59:59+00:00' );
 	} );
 
 	it( 'should handle "between" values', () => {
