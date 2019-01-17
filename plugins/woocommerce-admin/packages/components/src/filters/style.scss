@@ -13,6 +13,10 @@
 	@include breakpoint( '<1280px' ) {
 		flex-direction: column;
 	}
+
+	@include breakpoint( '<782px' ) {
+		margin-bottom: $gap;
+	}
 }
 
 .woocommerce-filters-filter {

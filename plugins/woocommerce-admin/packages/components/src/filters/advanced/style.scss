@@ -20,6 +20,11 @@
 	.components-base-control__field {
 		margin-bottom: 0;
 	}
+
+	@include breakpoint( '<782px' ) {
+		margin: $gap 0;
+		border: 1px solid $core-grey-light-700;
+	}
 }
 
 .woocommerce-filters-advanced__title-select {
@@ -85,10 +90,13 @@
 		padding: 0 $gap-smallest;
 
 		@include breakpoint( '<782px' ) {
-			display: block;
-			margin: 0;
 			width: 100%;
 			padding: $gap-smallest 0;
+		}
+
+		@include breakpoint( '<400px' ) {
+			display: block;
+			margin: 0;
 		}
 	}
 
@@ -187,9 +195,5 @@
 
 	.separator {
 		padding: 0 8px;
-
-		@include breakpoint( '<782px' ) {
-			padding: 0;
-		}
 	}
 }

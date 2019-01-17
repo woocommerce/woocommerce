@@ -11,6 +11,10 @@
 	@include breakpoint( '>960px' ) {
 		margin-top: 100px;
 	}
+
+	@include breakpoint( '<782px' ) {
+		margin-top: 60px;
+	}
 }
 
 .woocommerce-layout .woocommerce-layout__main {
