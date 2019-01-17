@@ -21,6 +21,10 @@ describe( 'numberFormat', () => {
 		expect( numberFormat( '10000.123456' ) ).toBe( '10,000.123456' );
 	} );
 
+	it( 'maintains all decimals if invalid precision specified', () => {
+		expect( numberFormat( '10000.123456', 'not a number' ) ).toBe( '10,000.123456' );
+	} );
+
 	it( 'uses store currency settings, not locale', () => {
 		global.wcSettings.siteLocale = 'en-US';
 		global.wcSettings.currency.decimal_separator = ',';
