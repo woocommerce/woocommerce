@@ -37,37 +37,41 @@ class WC_Tests_Report_Sales_By_Date extends WC_Unit_Test_Case {
 
 		$product = WC_Helper_Product::create_simple_product();
 		$coupon  = WC_Helper_Coupon::create_coupon();
-		$tax     = WC_Tax::_insert_tax_rate( array(
-			'tax_rate_country'  => '',
-			'tax_rate_state'    => '',
-			'tax_rate'          => '10.0000',
-			'tax_rate_name'     => 'VAT',
-			'tax_rate_priority' => '1',
-			'tax_rate_compound' => '0',
-			'tax_rate_shipping' => '1',
-			'tax_rate_order'    => '1',
-			'tax_rate_class'    => '',
-		) );
+		$tax     = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
 
 		// A standard order.
-		$order1  = WC_Helper_Order::create_order( 0, $product->get_id() );
+		$order1 = WC_Helper_Order::create_order( 0, $product->get_id() );
 		$order1->set_status( 'completed' );
 		$order1->save();
 
 		// An order using a coupon.
-		$order2  = WC_Helper_Order::create_order();
+		$order2 = WC_Helper_Order::create_order();
 		$order2->apply_coupon( $coupon );
 		$order2->set_status( 'completed' );
 		$order2->save();
 
 		// An order that was refunded, save for shipping.
-		$order3  = WC_Helper_Order::create_order();
+		$order3 = WC_Helper_Order::create_order();
 		$order3->set_status( 'completed' );
 		$order3->save();
-		wc_create_refund( array(
-			'amount'   => 7,
-			'order_id' => $order3->get_id(),
-		) );
+		wc_create_refund(
+			array(
+				'amount'   => 7,
+				'order_id' => $order3->get_id(),
+			)
+		);
 
 		// Parameters borrowed from WC_Admin_Dashboard::get_sales_report_data().
 		$report                 = new WC_Report_Sales_By_Date();
