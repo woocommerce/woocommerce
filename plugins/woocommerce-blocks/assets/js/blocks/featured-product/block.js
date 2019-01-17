@@ -134,12 +134,12 @@ class FeaturedProduct extends Component {
 				</PanelBody>
 				<PanelBody title={ __( 'Content', 'woo-gutenberg-products-block' ) }>
 					<ToggleControl
-						label="Show description"
+						label={ __( 'Show description', 'woo-gutenberg-products-block' ) }
 						checked={ attributes.showDesc }
 						onChange={ () => setAttributes( { showDesc: ! attributes.showDesc } ) }
 					/>
 					<ToggleControl
-						label="Show price"
+						label={ __( 'Show price', 'woo-gutenberg-products-block' ) }
 						checked={ attributes.showPrice }
 						onChange={ () => setAttributes( { showPrice: ! attributes.showPrice } ) }
 					/>
