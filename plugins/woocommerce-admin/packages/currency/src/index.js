@@ -18,7 +18,7 @@ import { numberFormat } from 'lib/number';
  * @returns {?String} A formatted string.
  */
 export function formatCurrency( number, currencySymbol ) {
-	// default to wcSettings if currency symbol is not passed in
+	// default to wcSettings (and then to $) if currency symbol is not passed in
 	if ( ! currencySymbol ) {
 		currencySymbol = get( wcSettings, [ 'currency', 'symbol' ], '$' );
 	}
