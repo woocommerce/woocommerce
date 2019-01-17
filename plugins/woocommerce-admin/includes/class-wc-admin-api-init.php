@@ -72,6 +72,9 @@ class WC_Admin_Api_Init {
 		add_action( self::CUSTOMERS_BATCH_ACTION, array( __CLASS__, 'customer_lookup_process_batch' ) );
 		add_action( self::ORDERS_BATCH_ACTION, array( __CLASS__, 'orders_lookup_process_batch' ) );
 		add_action( self::ORDERS_LOOKUP_BATCH_INIT, array( __CLASS__, 'orders_lookup_batch_init' ) );
+
+		// Add currency symbol to orders endpoint response.
+		add_filter( 'woocommerce_rest_prepare_shop_order_object', array( __CLASS__, 'add_currency_symbol_to_order_response' ) );
 	}
 
 	/**
@@ -757,6 +760,22 @@ class WC_Admin_Api_Init {
 		add_action( 'woocommerce_after_register_post_type', array( __CLASS__, 'regenerate_report_data' ), 20 );
 	}
 
+	/**
+	 * Add the currency symbol (in addition to currency code) to each Order
+	 * object in REST API responses. For use in formatCurrency().
+	 *
+	 * @param {WP_REST_Response} $response REST response object.
+	 * @returns {WP_REST_Response}
+	 */
+	public static function add_currency_symbol_to_order_response( $response ) {
+		$response_data   = $response->get_data();
+		$currency_code   = $response_data['currency'];
+		$currency_symbol = get_woocommerce_currency_symbol( $currency_code );
+		$response_data['currency_symbol'] = html_entity_decode( $currency_symbol );
+		$response->set_data( $response_data );
+
+		return $response;
+	}
 }
 
 new WC_Admin_Api_Init();
