@@ -196,6 +196,11 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Prevent fatal errors when retrieving network orders for sites that do not have WooCommerce activated. #22439
 * Fix - Numerous bug fixes around checkout field locales on first load. #22444
 * Fix - Correct position of admin notices on my-account pages. #22445
+* Fix - Fixed padding of addresses in email template. #22466
+* Fix - Fix position of error notices on account pages. #22445
+* Fix - Prevevent payment method descriptions sliding up/down if selected after ajax updates. #22459
+* Fix - Restores an opportunity to print non-cart related notices that a few extensions are relying on. #22337
+* Fix - Fixed formatted address in uppercase for languages that use accents. #22096
 * Dev - REST API - Fixed support to order results by slugs. #22168
 * Dev - REST API - Removed extra inherited filters from product endpoint in variations endpoint. #22452
 
