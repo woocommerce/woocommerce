@@ -46,6 +46,10 @@ class WC_Admin_Api_Init {
 		// Common date time code.
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-interval.php';
 
+		// Segmentation.
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-segmenting.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-orders-stats-segmenting.php';
+
 		// Query classes for reports.
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-revenue-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-orders-query.php';
