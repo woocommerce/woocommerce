@@ -218,7 +218,8 @@ function wc_cart_totals_shipping_html() {
 		}
 
 		wc_get_template(
-			'cart/cart-shipping.php', array(
+			'cart/cart-shipping.php',
+			array(
 				'package'                  => $package,
 				'available_methods'        => $package['rates'],
 				'show_package_details'     => count( $packages ) > 1,
@@ -341,9 +342,11 @@ function wc_cart_totals_fee_html( $fee ) {
  * @return string
  */
 function wc_cart_totals_shipping_method_label( $method ) {
-	$label = $method->get_label();
+	$label     = $method->get_label();
+	$has_cost  = 0 < $method->cost;
+	$hide_cost = ! $has_cost && in_array( $method->get_method_id(), array( 'free_shipping', 'local_pickup' ), true );
 
-	if ( $method->cost >= 0 && $method->get_method_id() !== 'free_shipping' ) {
+	if ( $has_cost && ! $hide_cost ) {
 		if ( WC()->cart->display_prices_including_tax() ) {
 			$label .= ': ' . wc_price( $method->cost + $method->get_shipping_tax() );
 			if ( $method->get_shipping_tax() > 0 && ! wc_prices_include_tax() ) {
