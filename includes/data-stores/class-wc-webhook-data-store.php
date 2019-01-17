@@ -152,6 +152,10 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 
 		$webhook->apply_changes();
 
+		if ( isset( $changes['status'] ) ) {
+			// We need to delete all transients, because we can't be sure of the old status.
+			$this->delete_transients( 'all' );
+		}
 		wp_cache_delete( $webhook->get_id(), 'webhooks' );
 		WC_Cache_Helper::incr_cache_prefix( 'webhooks' );
 
