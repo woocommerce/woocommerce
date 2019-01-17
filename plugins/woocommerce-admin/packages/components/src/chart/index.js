@@ -272,13 +272,13 @@ class Chart extends Component {
 
 		switch ( valueType ) {
 			case 'average':
-				yFormat = '.0f';
+				yFormat = ',.0f';
 				break;
 			case 'currency':
 				yFormat = '$.3~s';
 				break;
 			case 'number':
-				yFormat = '.0f';
+				yFormat = ',.0f';
 				break;
 		}
 		return (
