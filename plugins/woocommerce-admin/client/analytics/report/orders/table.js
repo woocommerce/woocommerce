@@ -105,7 +105,7 @@ class OrdersReportTable extends Component {
 				line_items,
 				items_sold,
 				coupon_lines,
-				currency,
+				currency_symbol,
 				net_revenue,
 			} = row;
 
@@ -167,7 +167,7 @@ class OrdersReportTable extends Component {
 					value: coupons.map( item => item.code ).join( ' ' ),
 				},
 				{
-					display: formatCurrency( net_revenue, currency ),
+					display: formatCurrency( net_revenue, currency_symbol ),
 					value: net_revenue,
 				},
 			];

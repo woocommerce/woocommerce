@@ -3,28 +3,35 @@
  * External dependencies
  */
 import { get, isNaN } from 'lodash';
+import { sprintf } from '@wordpress/i18n';
 
 /**
- * Formats money with a given currency code. Uses site's current locale for symbol formatting
- *
- * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NumberFormat
- * @param   {Number|String}  number    number to format
- * @param   {String}         currency  currency code e.g. 'USD'
- * @returns {?String}                  A formatted string.
+ * Internal dependencies
  */
-export function formatCurrency( number, currency ) {
-	const locale = wcSettings.siteLocale || 'en-US'; // Default so we don't break.
-	// default to wcSettings if currency is not passed in
-	if ( ! currency ) {
-		currency = get( wcSettings, 'currency.code', 'USD' );
+import { numberFormat } from 'lib/number';
+
+/**
+ * Formats money with a given currency code. Uses site's currency settings for formatting.
+ *
+ * @param   {Number|String} number number to format
+ * @param   {String}        currencySymbol currency code e.g. '$'
+ * @returns {?String} A formatted string.
+ */
+export function formatCurrency( number, currencySymbol ) {
+	// default to wcSettings if currency symbol is not passed in
+	if ( ! currencySymbol ) {
+		currencySymbol = get( wcSettings, [ 'currency', 'symbol' ], '$' );
 	}
-	if ( 'number' !== typeof number ) {
-		number = parseFloat( number );
+
+	const precision = get( wcSettings, [ 'currency', 'precision' ], 2 );
+	const formattedNumber = numberFormat( number, precision );
+	const priceFormat = get( wcSettings, [ 'currency', 'price_format' ], '%1$s%2$s' );
+
+	if ( '' === formattedNumber ) {
+		return formattedNumber;
 	}
-	if ( isNaN( number ) ) {
-		return '';
-	}
-	return new Intl.NumberFormat( locale, { style: 'currency', currency } ).format( number );
+
+	return sprintf( priceFormat, currencySymbol, formattedNumber );
 }
 
 /**
