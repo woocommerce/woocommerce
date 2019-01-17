@@ -6,7 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import classnames from 'classnames';
 import Gridicon from 'gridicons';
-import { isNil } from 'lodash';
+import { isNil, noop } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -30,6 +30,7 @@ const SummaryNumber = ( {
 	reverseTrend,
 	selected,
 	value,
+	onLinkClickCallback,
 } ) => {
 	const liClasses = classnames( 'woocommerce-summary__item-container', {
 		'is-dropdown-button': onToggle,
@@ -59,13 +60,15 @@ const SummaryNumber = ( {
 	};
 
 	if ( onToggle || href ) {
-		Container = onToggle ? Button : Link;
-		if ( ! onToggle ) {
-			containerProps.href = href;
-			containerProps.role = 'menuitem';
-		} else {
+		const isButton = !! onToggle;
+		Container = isButton ? Button : Link;
+		if ( isButton ) {
 			containerProps.onClick = onToggle;
 			containerProps[ 'aria-expanded' ] = isOpen;
+		} else {
+			containerProps.href = href;
+			containerProps.role = 'menuitem';
+			containerProps.onClick = onLinkClickCallback;
 		}
 	} else {
 		Container = 'div';
@@ -150,6 +153,10 @@ SummaryNumber.propTypes = {
 	 * A string or number value to display - a string is allowed so we can accept currency formatting.
 	 */
 	value: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ),
+	/**
+	 * A function to be called after a SummaryNumber, rendered as a link, is clicked.
+	 */
+	onLinkClickCallback: PropTypes.func,
 };
 
 SummaryNumber.defaultProps = {
@@ -158,6 +165,7 @@ SummaryNumber.defaultProps = {
 	prevLabel: __( 'Previous Period:', 'wc-admin' ),
 	reverseTrend: false,
 	selected: false,
+	onLinkClickCallback: noop,
 };
 
 export default SummaryNumber;

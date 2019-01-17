@@ -3,12 +3,15 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
 import { Children, cloneElement } from '@wordpress/element';
-import { Dropdown, NavigableMenu } from '@wordpress/components';
+import { Dropdown } from '@wordpress/components';
 import PropTypes from 'prop-types';
-import { uniqueId } from 'lodash';
 import { withViewportMatch } from '@wordpress/viewport';
+
+/**
+ * Internal dependencies
+ */
+import Menu from './menu';
 
 /**
  * A container element for a list of SummaryNumbers. This component handles detecting & switching to
@@ -17,45 +20,27 @@ import { withViewportMatch } from '@wordpress/viewport';
  * @return { object } -
  */
 const SummaryList = ( { children, isDropdownBreakpoint, label } ) => {
-	if ( ! label ) {
-		label = __( 'Performance Indicators', 'wc-admin' );
-	}
-
+	const items = children( {} );
 	// We default to "one" because we can't have empty children.
-	const itemCount = Children.count( children ) || 1;
-	const hasItemsClass = itemCount < 10 ? `has-${ itemCount }-items` : 'has-10-items';
-	const classes = classnames( 'woocommerce-summary', {
-		[ hasItemsClass ]: ! isDropdownBreakpoint,
-	} );
-
-	const instanceId = uniqueId( 'woocommerce-summary-helptext-' );
-	const menu = (
-		<NavigableMenu
-			aria-label={ label }
-			aria-describedby={ instanceId }
-			orientation={ isDropdownBreakpoint ? 'vertical' : 'horizontal' }
-			stopNavigationEvents
-		>
-			<p id={ instanceId } className="screen-reader-text">
-				{ __(
-					'List of data points available for filtering. Use arrow keys to cycle through ' +
-						'the list. Click a data point for a detailed report.',
-					'wc-admin'
-				) }
-			</p>
-			<ul className={ classes }>{ children }</ul>
-		</NavigableMenu>
+	const itemCount = Children.count( items ) || 1;
+	const orientation = isDropdownBreakpoint ? 'vertical' : 'horizontal';
+	const summaryMenu = (
+		<Menu
+			label={ label }
+			orientation={ orientation }
+			itemCount={ itemCount }
+			items={ items }
+		/>
 	);
 
 	// On large screens, or if there are not multiple SummaryNumbers, we'll display the plain list.
 	if ( ! isDropdownBreakpoint || itemCount < 2 ) {
-		return menu;
+		return summaryMenu;
 	}
 
-	const items = Children.toArray( children );
 	const selected = items.find( item => !! item.props.selected );
 	if ( ! selected ) {
-		return menu;
+		return summaryMenu;
 	}
 
 	return (
@@ -64,20 +49,31 @@ const SummaryList = ( { children, isDropdownBreakpoint, label } ) => {
 			position="bottom"
 			headerTitle={ label }
 			renderToggle={ ( { isOpen, onToggle } ) => cloneElement( selected, { onToggle, isOpen } ) }
-			renderContent={ () => menu }
+			renderContent={ renderContentArgs => (
+				<Menu
+					label={ label }
+					orientation={ orientation }
+					itemCount={ itemCount }
+					items={ children( renderContentArgs ) }
+				/>
+			) }
 		/>
 	);
 };
 
 SummaryList.propTypes = {
 	/**
-	 * A list of `<SummaryNumber />`s
+	 * A function returning a list of `<SummaryNumber />`s
 	 */
-	children: PropTypes.node.isRequired,
+	children: PropTypes.func.isRequired,
 	/**
-	 * An optional label of this group, read to screen reader users. Defaults to "Performance Indicators".
+	 * An optional label of this group, read to screen reader users.
 	 */
 	label: PropTypes.string,
+};
+
+SummaryList.defaultProps = {
+	label: __( 'Performance Indicators', 'wc-admin' ),
 };
 
 export default withViewportMatch( {

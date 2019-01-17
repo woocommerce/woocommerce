@@ -112,37 +112,39 @@ class StorePerformance extends Component {
 				: __( 'Previous Year:', 'wc-admin' );
 		return (
 			<SummaryList>
-				{ userIndicators.map( ( indicator, i ) => {
-					const primaryItem = find( primaryData.data, data => data.stat === indicator.stat );
-					const secondaryItem = find( secondaryData.data, data => data.stat === indicator.stat );
+				{ () =>
+					userIndicators.map( ( indicator, i ) => {
+						const primaryItem = find( primaryData.data, data => data.stat === indicator.stat );
+						const secondaryItem = find( secondaryData.data, data => data.stat === indicator.stat );
 
-					if ( ! primaryItem || ! secondaryItem ) {
-						return null;
-					}
+						if ( ! primaryItem || ! secondaryItem ) {
+							return null;
+						}
 
-					const href =
-						( primaryItem._links &&
-							primaryItem._links.report[ 0 ] &&
-							primaryItem._links.report[ 0 ].href ) ||
-						'';
-					const reportUrl =
-						( href && getNewPath( persistedQuery, href, { chart: primaryItem.chart } ) ) || '';
-					const delta = calculateDelta( primaryItem.value, secondaryItem.value );
-					const primaryValue = formatValue( primaryItem.format, primaryItem.value );
-					const secondaryValue = formatValue( secondaryItem.format, secondaryItem.value );
+						const href =
+							( primaryItem._links &&
+								primaryItem._links.report[ 0 ] &&
+								primaryItem._links.report[ 0 ].href ) ||
+							'';
+						const reportUrl =
+							( href && getNewPath( persistedQuery, href, { chart: primaryItem.chart } ) ) || '';
+						const delta = calculateDelta( primaryItem.value, secondaryItem.value );
+						const primaryValue = formatValue( primaryItem.format, primaryItem.value );
+						const secondaryValue = formatValue( secondaryItem.format, secondaryItem.value );
 
-					return (
-						<SummaryNumber
-							key={ i }
-							href={ reportUrl }
-							label={ indicator.label }
-							value={ primaryValue }
-							prevLabel={ prevLabel }
-							prevValue={ secondaryValue }
-							delta={ delta }
-						/>
-					);
-				} ) }
+						return (
+							<SummaryNumber
+								key={ i }
+								href={ reportUrl }
+								label={ indicator.label }
+								value={ primaryValue }
+								prevLabel={ prevLabel }
+								prevValue={ secondaryValue }
+								delta={ delta }
+							/>
+						);
+					} )
+				}
 			</SummaryList>
 		);
 	}
