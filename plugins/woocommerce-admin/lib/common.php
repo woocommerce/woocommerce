@@ -269,10 +269,13 @@ function wc_admin_currency_settings() {
 	return apply_filters(
 		'wc_currency_settings',
 		array(
-			'code'      => $code,
-			'precision' => wc_get_price_decimals(),
-			'symbol'    => get_woocommerce_currency_symbol( $code ),
-			'position'  => get_option( 'woocommerce_currency_pos' ),
+			'code'               => $code,
+			'precision'          => wc_get_price_decimals(),
+			'symbol'             => get_woocommerce_currency_symbol( $code ),
+			'position'           => get_option( 'woocommerce_currency_pos' ),
+			'decimal_separator'  => wc_get_price_decimal_separator(),
+			'thousand_separator' => wc_get_price_thousand_separator(),
+			'price_format'       => get_woocommerce_price_format(),
 		)
 	);
 }
