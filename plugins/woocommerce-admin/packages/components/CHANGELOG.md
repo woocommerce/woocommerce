@@ -15,6 +15,7 @@
 - Fix to avoid duplicated Y-axis ticks when the Y max value was 0.
 - Remove decimals from Y-axis when displaying currencies.
 - Fix date formatting on charts in Safari.
+- Make `href`/linking optional in SummaryNumber.
 
 # 1.3.0
 

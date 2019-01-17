@@ -153,7 +153,8 @@ function wc_admin_print_script_settings() {
 	}
 
 	$preload_data_endpoints = array(
-		'countries' => '/wc/v4/data/countries',
+		'countries'              => '/wc/v4/data/countries',
+		'performanceIndicators'  => '/wc/v4/reports/performance-indicators/allowed',
 	);
 
 	if ( function_exists( 'gutenberg_preload_api_request' ) ) {
@@ -169,8 +170,10 @@ function wc_admin_print_script_settings() {
 
 	$current_user_data = array();
 	foreach ( wc_admin_get_user_data_fields() as $user_field ) {
-		$current_user_data[ $user_field ] = get_user_meta( get_current_user_id(), 'wc_admin_' . $user_field, true );
+		$current_user_data[ $user_field ] = json_decode( get_user_meta( get_current_user_id(), 'wc_admin_' . $user_field, true ) );
 	}
+
+	$current_user_data = wc_admin_get_user_defaults( $current_user_data );
 
 	/**
 	 * TODO: On merge, once plugin images are added to core WooCommerce, `wcAdminAssetUrl` can be retired, and
@@ -179,22 +182,22 @@ function wc_admin_print_script_settings() {
 
 	// Settings and variables can be passed here for access in the app.
 	$settings = array(
-		'adminUrl'         => admin_url(),
-		'wcAssetUrl'       => plugins_url( 'assets/', WC_PLUGIN_FILE ),
-		'wcAdminAssetUrl'  => plugins_url( 'images/', wc_admin_dir_path( 'wc-admin.php' ) ), // Temporary for plugin. See above.
-		'embedBreadcrumbs' => wc_admin_get_embed_breadcrumbs(),
-		'siteLocale'       => esc_attr( get_bloginfo( 'language' ) ),
-		'currency'         => wc_admin_currency_settings(),
-		'orderStatuses'    => format_order_statuses( wc_get_order_statuses() ),
-		'stockStatuses'    => wc_get_product_stock_status_options(),
-		'siteTitle'        => get_bloginfo( 'name' ),
-		'trackingEnabled'  => $tracking_enabled,
-		'dataEndpoints'    => array(),
-		'l10n'             => array(
+		'adminUrl'              => admin_url(),
+		'wcAssetUrl'            => plugins_url( 'assets/', WC_PLUGIN_FILE ),
+		'wcAdminAssetUrl'       => plugins_url( 'images/', wc_admin_dir_path( 'wc-admin.php' ) ), // Temporary for plugin. See above.
+		'embedBreadcrumbs'      => wc_admin_get_embed_breadcrumbs(),
+		'siteLocale'            => esc_attr( get_bloginfo( 'language' ) ),
+		'currency'              => wc_admin_currency_settings(),
+		'orderStatuses'         => format_order_statuses( wc_get_order_statuses() ),
+		'stockStatuses'         => wc_get_product_stock_status_options(),
+		'siteTitle'             => get_bloginfo( 'name' ),
+		'trackingEnabled'       => $tracking_enabled,
+		'dataEndpoints'         => array(),
+		'l10n'                  => array(
 			'userLocale'    => get_user_locale(),
 			'weekdaysShort' => array_values( $wp_locale->weekday_abbrev ),
 		),
-		'currentUserData'  => $current_user_data,
+		'currentUserData'       => $current_user_data,
 	);
 
 	foreach ( $preload_data_endpoints as $key => $endpoint ) {
@@ -210,6 +213,27 @@ function wc_admin_print_script_settings() {
 	<?php
 }
 add_action( 'admin_print_footer_scripts', 'wc_admin_print_script_settings', 1 );
+
+/**
+ * Sets default values for user preferences.
+ *
+ * @param array $user_data Array of user data.
+ * @return array Filtered array of user data.
+ */
+function wc_admin_get_user_defaults( $user_data ) {
+	// If no settings for performance indicators are stored, these are the defaults to disable.
+	if ( ! is_array( $user_data['dashboard_performance_indicators'] ) ) {
+		$user_data['dashboard_performance_indicators'] = array(
+			'coupons/orders_count',
+			'taxes/total_tax',
+			'taxes/order_tax',
+			'taxes/shipping_tax',
+			'downloads/download_count',
+		);
+	}
+
+	return $user_data;
+}
 
 /**
  * Load plugin text domain for translations.

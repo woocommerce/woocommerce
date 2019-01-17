@@ -146,18 +146,22 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
-			),
-			'avg_order_value'     => array(
-				'description' => __( 'Average order value.', 'wc-admin' ),
-				'type'        => 'number',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
+				'format'      => 'currency',
 			),
 			'orders_count'        => array(
 				'description' => __( 'Amount of orders', 'wc-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
+				'indicator'   => true,
+			),
+			'avg_order_value'     => array(
+				'description' => __( 'Average order value.', 'wc-admin' ),
+				'type'        => 'number',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+				'indicator'   => true,
+				'format'      => 'currency',
 			),
 			'avg_items_per_order' => array(
 				'description' => __( 'Average items per order', 'wc-admin' ),

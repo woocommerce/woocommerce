@@ -22,7 +22,7 @@ export default class Dashboard extends Component {
 			<Fragment>
 				<Header sections={ [ __( 'Dashboard', 'wc-admin' ) ] } />
 				<ReportFilters query={ query } path={ path } />
-				<StorePerformance />
+				<StorePerformance query={ query } />
 				<Leaderboards query={ query } />
 				<DashboardCharts query={ query } path={ path } />
 			</Fragment>

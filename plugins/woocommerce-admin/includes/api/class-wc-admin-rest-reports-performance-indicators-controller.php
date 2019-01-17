@@ -60,6 +60,39 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 	protected $urls = array();
 
 	/**
+	 * Register the routes for reports.
+	 */
+	public function register_routes() {
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/allowed',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_allowed_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+				'schema' => array( $this, 'get_public_allowed_item_schema' ),
+			)
+		);
+	}
+
+	/**
 	 * Maps query arguments from the REST request.
 	 *
 	 * @param array $request Request array.
@@ -79,8 +112,6 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 	 * @return WP_Error|True
 	 */
 	private function get_indicator_data() {
-		global $wp_rest_server;
-
 		// Data already retrieved.
 		if ( ! empty( $this->endpoints ) && ! empty( $this->labels ) && ! empty( $this->allowed_stats ) ) {
 			return true;
@@ -90,7 +121,6 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 		$response      = rest_do_request( $request );
 		$endpoints     = $response->get_data();
 		$allowed_stats = array();
-
 		if ( 200 !== $response->get_status() ) {
 			return new WP_Error( 'woocommerce_reports_performance_indicators_result_failed', __( 'Sorry, fetching performance indicators failed.', 'wc-admin' ) );
 		}
@@ -108,10 +138,15 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 				}
 
 				foreach ( $data['schema']['properties']['totals']['properties'] as $property_key => $schema_info ) {
+					if ( empty( $schema_info['indicator'] ) || ! $schema_info['indicator'] ) {
+						continue;
+					}
+
 					$stat            = $prefix . '/' . $property_key;
 					$allowed_stats[] = $stat;
 
-					$this->labels[ $stat ] = $schema_info['description'];
+					$this->labels[ $stat ]  = trim( preg_replace( '/\W+/', ' ', $schema_info['description'] ) );
+					$this->formats[ $stat ] = isset( $schema_info['format'] ) ? $schema_info['format'] : 'number';
 				}
 
 				$this->endpoints[ $prefix ]  = $endpoint['path'];
@@ -121,6 +156,95 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 
 		$this->allowed_stats = $allowed_stats;
 		return true;
+	}
+
+	/**
+	 * Returns a list of allowed performance indicators.
+	 *
+	 * @param  WP_REST_Request $request Request data.
+	 * @return array|WP_Error
+	 */
+	public function get_allowed_items( $request ) {
+		$indicator_data = $this->get_indicator_data();
+		if ( is_wp_error( $indicator_data ) ) {
+			return $indicator_data;
+		}
+
+		$data = array();
+		foreach ( $this->allowed_stats as $stat ) {
+			$pieces   = $this->get_stats_parts( $stat );
+			$report   = $pieces[0];
+			$chart    = $pieces[1];
+			$data[] = (object) array(
+				'stat'   => $stat,
+				'chart'  => $chart,
+				'label'  => $this->labels[ $stat ],
+			);
+		}
+
+		usort( $data, array( $this, 'sort' ) );
+
+		$objects = array();
+		foreach ( $data as $item ) {
+			$prepared  = $this->prepare_item_for_response( $item, $request );
+			$objects[] = $this->prepare_response_for_collection( $prepared );
+		}
+
+		$response = rest_ensure_response( $objects );
+		$response->header( 'X-WP-Total', count( $data ) );
+		$response->header( 'X-WP-TotalPages', 1 );
+
+		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
+
+		return $response;
+	}
+
+	/**
+	 * Sorts the list of stats. Sorted by custom arrangement.
+	 *
+	 * @see https://github.com/woocommerce/wc-admin/issues/1282
+	 * @param object $a First item.
+	 * @param object $b Second item.
+	 * @return order
+	 */
+	public function sort( $a, $b ) {
+		/**
+		 * Custom ordering for store performance indicators.
+		 *
+		 * @see https://github.com/woocommerce/wc-admin/issues/1282
+		 * @param array $indicators A list of ordered indicators.
+		 */
+		$stat_order = apply_filters(
+			'woocommerce_rest_report_sort_performance_indicators',
+			array(
+				'revenue/gross_revenue',
+				'revenue/net_revenue',
+				'orders/orders_count',
+				'orders/avg_order_value',
+				'products/items_sold',
+				'revenue/refunds',
+				'coupons/orders_count',
+				'coupons/amount',
+				'taxes/total_tax',
+				'taxes/order_tax',
+				'taxes/shipping_tax',
+				'revenue/shipping',
+				'downloads/download_count',
+			)
+		);
+
+		$a = array_search( $a->stat, $stat_order );
+		$b = array_search( $b->stat, $stat_order );
+
+		if ( false === $a && false === $b ) {
+			return 0;
+		} elseif ( false === $a ) {
+			return 1;
+		} elseif ( false === $b ) {
+			return -1;
+		} else {
+			return $a - $b;
+		}
 	}
 
 	/**
@@ -146,7 +270,7 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 
 			$pieces   = $this->get_stats_parts( $stat );
 			$report   = $pieces[0];
-			$field    = $pieces[1];
+			$chart    = $pieces[1];
 
 			if ( ! in_array( $stat, $this->allowed_stats ) ) {
 				continue;
@@ -160,12 +284,15 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 			$response = rest_do_request( $request );
 
 			$data     = $response->get_data();
+			$format   = $this->formats[ $stat ];
 			$label    = $this->labels[ $stat ];
 
-			if ( 200 !== $response->get_status() || ! isset( $data['totals'][ $field ] ) ) {
+			if ( 200 !== $response->get_status() || ! isset( $data['totals'][ $chart ] ) ) {
 				$stats[] = (object) array(
 					'stat'   => $stat,
+					'chart'  => $chart,
 					'label'  => $label,
+					'format' => $format,
 					'value'  => null,
 				);
 				continue;
@@ -173,10 +300,14 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 
 			$stats[] = (object) array(
 				'stat'   => $stat,
+				'chart'  => $chart,
 				'label'  => $label,
-				'value'  => $data['totals'][ $field ],
+				'format' => $format,
+				'value'  => $data['totals'][ $chart ],
 			);
 		}
+
+		usort( $stats, array( $this, 'sort' ) );
 
 		$objects = array();
 		foreach ( $stats as $stat ) {
@@ -239,7 +370,7 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 				'href' => rest_url( $this->endpoints[ $endpoint ] ),
 			),
 			'report' => array(
-				'href' => ! empty( $url ) ? $url . '?chart=' . $stat : '',
+				'href' => ! empty( $url ) ? $url : '',
 			),
 		);
 
@@ -287,11 +418,24 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 					'readonly'    => true,
 					'enum'        => $allowed_stats,
 				),
+				'chart'           => array(
+					'description' => __( 'The specific chart this stat referrers to.', 'wc-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'label'           => array(
 					'description' => __( 'Human readable label for the stat.', 'wc-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
+				),
+				'format'      => array(
+					'description' => __( 'Format of the stat.', 'wc-admin' ),
+					'type'        => 'number',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+					'enum'        => array( 'number', 'currency' ),
 				),
 				'value'      => array(
 					'description' => __( 'Value of the stat. Returns null if the stat does not exist or cannot be loaded.', 'wc-admin' ),
@@ -303,6 +447,18 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 		);
 
 		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Get schema for the list of allowed performance indicators.
+	 *
+	 * @return array $schema
+	 */
+	public function get_public_allowed_item_schema() {
+		$schema = $this->get_public_item_schema();
+		unset( $schema['properties']['value'] );
+		unset( $schema['properties']['format'] );
+		return $sceham;
 	}
 
 	/**

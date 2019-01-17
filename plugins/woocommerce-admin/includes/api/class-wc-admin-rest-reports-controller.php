@@ -163,7 +163,7 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 					$url_slug = $report['slug'];
 				}
 
-				$report['url'] = admin_url( 'admin.php?page=wc-admin#/' . $url_slug );
+				$report['url'] = '/analytics/' . $url_slug;
 			}
 
 			$item   = $this->prepare_item_for_response( (object) $report, $request );
