@@ -240,7 +240,8 @@ class WC_Comments {
 					FROM {$wpdb->comments}
 					WHERE comment_type NOT IN ('order_note', 'webhook_delivery')
 					GROUP BY comment_approved
-				", ARRAY_A
+					",
+					ARRAY_A
 				);
 
 				$approved = array(
@@ -327,7 +328,8 @@ class WC_Comments {
 				AND comment_post_ID = %d
 				AND comment_approved = '1'
 				AND meta_value > 0
-			", $product->get_id()
+					",
+					$product->get_id()
 				)
 			);
 			$average = number_format( $ratings / $count, 2, '.', '' );
@@ -360,7 +362,8 @@ class WC_Comments {
 			WHERE comment_parent = 0
 			AND comment_post_ID = %d
 			AND comment_approved = '1'
-		", $product->get_id()
+				",
+				$product->get_id()
 			)
 		);
 
@@ -393,7 +396,8 @@ class WC_Comments {
 			AND comment_approved = '1'
 			AND meta_value > 0
 			GROUP BY meta_value
-		", $product->get_id()
+				",
+				$product->get_id()
 			)
 		);
 
