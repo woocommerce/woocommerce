@@ -16,7 +16,7 @@
 }
 
 .woocommerce-filters-filter {
-	width: 33.3%;
+	width: 25%;
 	padding: 0 $gap-small;
 	min-height: 82px;
 	display: flex;
@@ -29,6 +29,10 @@
 
 	&:last-child {
 		padding-right: 0;
+	}
+
+	@include breakpoint( '<1440px' ) {
+		width: 33.3%;
 	}
 
 	@include breakpoint( '<1280px' ) {
