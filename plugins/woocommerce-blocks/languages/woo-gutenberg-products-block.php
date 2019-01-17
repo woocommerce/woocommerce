@@ -7,6 +7,12 @@ $generated_i18n_strings = array(
 	// Reference: assets/js/blocks/featured-product/block.js:135
 	__( 'Content', 'woo-gutenberg-products-block' ),
 
+	// Reference: assets/js/blocks/featured-product/block.js:137
+	__( 'Show description', 'woo-gutenberg-products-block' ),
+
+	// Reference: assets/js/blocks/featured-product/block.js:142
+	__( 'Show price', 'woo-gutenberg-products-block' ),
+
 	// Reference: assets/js/blocks/featured-product/block.js:148
 	__( 'Overlay', 'woo-gutenberg-products-block' ),
 
