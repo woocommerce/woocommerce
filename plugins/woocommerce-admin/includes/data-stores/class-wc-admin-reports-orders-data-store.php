@@ -335,7 +335,6 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		return $mapped_product_categories;
 	}
 
-
 	/**
 	 * Returns string to be used as cache key for the data.
 	 *

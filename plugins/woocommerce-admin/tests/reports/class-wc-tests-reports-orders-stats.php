@@ -371,7 +371,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
@@ -393,7 +393,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -458,7 +458,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
@@ -480,7 +480,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -531,7 +531,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
@@ -553,7 +553,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -664,7 +664,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
@@ -686,7 +686,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -737,7 +737,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 3,
 			),
@@ -759,7 +759,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -806,8 +806,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count,
-				'num_new_customers'       => 0,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => 2,
 				'products'                => 2,
 				// product 3 and product 4 (that is sometimes included in the orders with product 3).
 			),
@@ -829,8 +829,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count,
-						'num_new_customers'       => 0,
+						'num_returning_customers' => 0,
+						'num_new_customers'       => 2,
 					),
 				),
 			),
@@ -878,8 +878,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count,
-				'num_new_customers'       => 0, // 'new' customer orders product 1 (their first order)
+				'num_returning_customers' => 0,
+				'num_new_customers'       => 2,
 				'products'                => 3,
 			),
 			'intervals' => array(
@@ -900,8 +900,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count,
-						'num_new_customers'       => 0,
+						'num_returning_customers' => 0,
+						'num_new_customers'       => 2,
 					),
 				),
 			),
@@ -948,8 +948,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count,
-				'num_new_customers'       => 0, // 'new' customer orders product 1 (their first order)
+				'num_returning_customers' => 0,
+				'num_new_customers'       => 2,
 				'products'                => 2,
 			),
 			'intervals' => array(
@@ -970,8 +970,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count,
-						'num_new_customers'       => 0,
+						'num_returning_customers' => 0,
+						'num_new_customers'       => 2,
 					),
 				),
 			),
@@ -1021,8 +1021,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count,
-				'num_new_customers'       => 0, // 'new' customer orders product 1 (their first order)
+				'num_returning_customers' => 0,
+				'num_new_customers'       => 2,
 				'products'                => 2,
 			),
 			'intervals' => array(
@@ -1043,8 +1043,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count,
-						'num_new_customers'       => 0,
+						'num_returning_customers' => 0,
+						'num_new_customers'       => 2,
 					),
 				),
 			),
@@ -1096,8 +1096,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count,
-				'num_new_customers'       => 0, // new customers' orders created without coupon.
+				'num_returning_customers' => 0,
+				'num_new_customers'       => 2,
 				'products'                => 4,
 			),
 			'intervals' => array(
@@ -1118,8 +1118,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count,
-						'num_new_customers'       => 0,
+						'num_returning_customers' => 0,
+						'num_new_customers'       => 2,
 					),
 				),
 			),
@@ -1168,8 +1168,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count,
-				'num_new_customers'       => 0,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => 2,
 				'products'                => 4,
 			),
 			'intervals' => array(
@@ -1190,8 +1190,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count,
-						'num_new_customers'       => 0,
+						'num_returning_customers' => 0,
+						'num_new_customers'       => 2,
 					),
 				),
 			),
@@ -1240,7 +1240,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
@@ -1262,7 +1262,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -1314,7 +1314,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
@@ -1336,7 +1336,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -1391,70 +1391,9 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count,
-				'num_new_customers'       => 0,
-				'products'                => 4,
-			),
-			'intervals' => array(
-				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
-					'subtotals'      => array(
-						'orders_count'            => $orders_count,
-						'num_items_sold'          => $num_items_sold,
-						'gross_revenue'           => $gross_revenue,
-						'coupons'                 => $coupons,
-						'refunds'                 => 0,
-						'taxes'                   => 0,
-						'shipping'                => $shipping,
-						'net_revenue'             => $net_revenue,
-						'avg_items_per_order'     => $num_items_sold / $orders_count,
-						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count,
-						'num_new_customers'       => 0,
-					),
-				),
-			),
-			'total'     => 1,
-			'pages'     => 1,
-			'page_no'   => 1,
-		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Product includes, negative filter for 2 product: ' . $wpdb->last_query );
-
-		// * Customer filters
-		// ** Customer new
-		$query_args = array(
-			'after'    => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'interval' => 'hour',
-			'customer' => 'new',
-		);
-
-		$orders_count   = 2;
-		$num_items_sold = $orders_count * $qty_per_product;
-		$coupons        = 0;
-		$shipping       = $orders_count * 10;
-		$net_revenue    = $product_1_price * $qty_per_product * ( $orders_count ) - $coupons;
-		$gross_revenue  = $net_revenue + $shipping;
-
-		$expected_stats = array(
-			'totals'    => array(
-				'orders_count'            => $orders_count,
-				'num_items_sold'          => $num_items_sold,
-				'gross_revenue'           => $gross_revenue,
-				'coupons'                 => $coupons,
-				'refunds'                 => 0,
-				'taxes'                   => 0,
-				'shipping'                => $shipping,
-				'net_revenue'             => $net_revenue,
-				'avg_items_per_order'     => $num_items_sold / $orders_count,
-				'avg_order_value'         => $net_revenue / $orders_count,
 				'num_returning_customers' => 0,
-				'num_new_customers'       => 2,
-				'products'                => 1,
+				'num_new_customers'       => $new_customers,
+				'products'                => 4,
 			),
 			'intervals' => array(
 				array(
@@ -1475,7 +1414,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
 						'num_returning_customers' => 0,
-						'num_new_customers'       => 2,
+						'num_new_customers'       => $new_customers,
 					),
 				),
 			),
@@ -1485,33 +1424,28 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Product includes, negative filter for 2 product: ' . $wpdb->last_query );
 
-		// ** Customer returning
+		// * Customer filters
+		// ** Customer new
 		$query_args = array(
 			'after'    => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'before'   => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval' => 'hour',
-			'customer' => 'returning',
+			'customer' => 'new',
 		);
 
-		$order_permutations     = 72;
-		$order_w_coupon_1_perms = 24;
-		$order_w_coupon_2_perms = 24;
-
-		$orders_count = count( $this_['hour'] ) * $order_permutations - $new_customers;
-		// New customers for single product orders.
-		$num_items_sold = ( $orders_count / 2 - 1 ) * $qty_per_product
-						+ ( $orders_count / 2 + 1 ) * $qty_per_product * 2;
-		// New customers have orders with no coupon.
-		$coupons       = count( $this_['hour'] ) * ( $order_w_coupon_1_perms * $coupon_1_amount + $order_w_coupon_2_perms * $coupon_2_amount );
-		$shipping      = $orders_count * 10;
-		$net_revenue   = $product_1_price * $qty_per_product * ( ( ( $orders_count + $new_customers ) / 6 ) - $new_customers )
-						+ $product_2_price * $qty_per_product * ( ( $orders_count + $new_customers ) / 6 )
-						+ $product_3_price * $qty_per_product * ( ( $orders_count + $new_customers ) / 6 )
-						+ ( $product_1_price + $product_4_price ) * $qty_per_product * ( ( $orders_count + $new_customers ) / 6 )
-						+ ( $product_2_price + $product_4_price ) * $qty_per_product * ( ( $orders_count + $new_customers ) / 6 )
-						+ ( $product_3_price + $product_4_price ) * $qty_per_product * ( ( $orders_count + $new_customers ) / 6 )
+		$orders_count   = 144;
+		$num_items_sold = $orders_count / 2 * $qty_per_product
+						+ $orders_count / 2 * $qty_per_product * 2;
+		$coupons        = $orders_count;
+		$shipping       = $orders_count * 10;
+		$net_revenue    = $product_1_price * $qty_per_product * ( $orders_count / 6 )
+						+ $product_2_price * $qty_per_product * ( $orders_count / 6 )
+						+ $product_3_price * $qty_per_product * ( $orders_count / 6 )
+						+ ( $product_1_price + $product_4_price ) * $qty_per_product * ( $orders_count / 6 )
+						+ ( $product_2_price + $product_4_price ) * $qty_per_product * ( $orders_count / 6 )
+						+ ( $product_3_price + $product_4_price ) * $qty_per_product * ( $orders_count / 6 )
 						- $coupons;
-		$gross_revenue = $net_revenue + $shipping;
+		$gross_revenue  = $net_revenue + $shipping;
 
 		$expected_stats = array(
 			'totals'    => array(
@@ -1523,10 +1457,10 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'taxes'                   => 0,
 				'shipping'                => $shipping,
 				'net_revenue'             => $net_revenue,
-				'avg_items_per_order'     => round( $num_items_sold / $orders_count, 4 ), // TODO: this is fragile.
+				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count,
-				'num_new_customers'       => 0,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
 			'intervals' => array(
@@ -1545,10 +1479,10 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'taxes'                   => 0,
 						'shipping'                => $shipping,
 						'net_revenue'             => $net_revenue,
-						'avg_items_per_order'     => round( $num_items_sold / $orders_count, 4 ),
+						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count,
-						'num_new_customers'       => 0,
+						'num_returning_customers' => 0,
+						'num_new_customers'       => $new_customers,
 					),
 				),
 			),
@@ -1557,6 +1491,77 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Product includes, negative filter for 2 product: ' . $wpdb->last_query );
+
+		// ** Customer returning
+		$returning_order = WC_Helper_Order::create_order( $customer_1->get_id(), $product );
+		$returning_order->set_status( 'completed' );
+		$returning_order->set_shipping_total( 10 );
+		$returning_order->set_total( 110 ); // $25x4 products + $10 shipping.
+		$returning_order->save();
+
+		$query_args = array(
+			'after'    => date( 'Y-m-d H:i:s', $orders[0]->get_date_created()->getOffsetTimestamp() + 1 ), // Date after initial order to get a returning customer.
+			'before'   => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'interval' => 'hour',
+			'customer' => 'returning',
+		);
+
+		$order_permutations     = 72;
+		$order_w_coupon_1_perms = 24;
+		$order_w_coupon_2_perms = 24;
+
+		$orders_count   = 1;
+		$num_items_sold = 4;
+		$coupons        = 0;
+		$shipping       = $orders_count * 10;
+		$net_revenue    = 100;
+		$gross_revenue  = $net_revenue + $shipping;
+
+		$expected_stats = array(
+			'totals'    => array(
+				'orders_count'            => $orders_count,
+				'num_items_sold'          => $num_items_sold,
+				'gross_revenue'           => $gross_revenue,
+				'coupons'                 => $coupons,
+				'refunds'                 => 0,
+				'taxes'                   => 0,
+				'shipping'                => $shipping,
+				'net_revenue'             => $net_revenue,
+				'avg_items_per_order'     => $num_items_sold,
+				'avg_order_value'         => $net_revenue / $orders_count,
+				'num_returning_customers' => 1,
+				'num_new_customers'       => 0,
+				'products'                => 1,
+			),
+			'intervals' => array(
+				array(
+					'interval'       => $current_hour->format( 'Y-m-d H' ),
+					'date_start'     => date( 'Y-m-d H:i:s', $orders[0]->get_date_created()->getOffsetTimestamp() + 1 ),
+					'date_start_gmt' => date( 'Y-m-d H:i:s', $orders[0]->get_date_created()->getOffsetTimestamp() + 1 ),
+					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'subtotals'      => array(
+						'orders_count'            => $orders_count,
+						'num_items_sold'          => $num_items_sold,
+						'gross_revenue'           => $gross_revenue,
+						'coupons'                 => $coupons,
+						'refunds'                 => 0,
+						'taxes'                   => 0,
+						'shipping'                => $shipping,
+						'net_revenue'             => $net_revenue,
+						'avg_items_per_order'     => $num_items_sold,
+						'avg_order_value'         => $net_revenue / $orders_count,
+						'num_returning_customers' => 1,
+						'num_new_customers'       => 0,
+					),
+				),
+			),
+			'total'     => 1,
+			'pages'     => 1,
+			'page_no'   => 1,
+		);
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Orders from returning customers: ' . $wpdb->last_query );
+		wp_delete_post( $returning_order->get_id(), true );
 
 		// Combinations: match all
 		// status_is + product_includes.
@@ -1598,7 +1603,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 2,
 			),
@@ -1620,7 +1625,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -1674,8 +1679,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count,
-				'num_new_customers'       => 0,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
 			'intervals' => array(
@@ -1696,8 +1701,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count,
-						'num_new_customers'       => 0,
+						'num_returning_customers' => 0,
+						'num_new_customers'       => $new_customers,
 					),
 				),
 			),
@@ -1746,8 +1751,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count,
-				'num_new_customers'       => 0,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => $new_customers,
 				'products'                => 2,
 			),
 			'intervals' => array(
@@ -1768,8 +1773,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count,
-						'num_new_customers'       => 0,
+						'num_returning_customers' => 0,
+						'num_new_customers'       => $new_customers,
 					),
 				),
 			),
@@ -1821,8 +1826,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count,
-				'num_new_customers'       => 0,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => $new_customers,
 				'products'                => 2,
 			),
 			'intervals' => array(
@@ -1843,8 +1848,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count,
-						'num_new_customers'       => 0,
+						'num_returning_customers' => 0,
+						'num_new_customers'       => $new_customers,
 					),
 				),
 			),
@@ -1900,8 +1905,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count,
-				'num_new_customers'       => 0,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => $new_customers,
 				'products'                => 2,
 			),
 			'intervals' => array(
@@ -1922,8 +1927,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count,
-						'num_new_customers'       => 0,
+						'num_returning_customers' => 0,
+						'num_new_customers'       => $new_customers,
 					),
 				),
 			),
@@ -1979,7 +1984,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				// Prod_1, status_1, no coupon orders included here, so 2 new cust orders.
 				'products'                => 2,
@@ -2002,7 +2007,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -2062,8 +2067,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count,
-				'num_new_customers'       => 0,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => $new_customers,
 				'products'                => 2,
 			),
 			'intervals' => array(
@@ -2084,8 +2089,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count,
-						'num_new_customers'       => 0,
+						'num_returning_customers' => 0,
+						'num_new_customers'       => $new_customers,
 					),
 				),
 			),
@@ -2148,8 +2153,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count,
-				'num_new_customers'       => 0,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => $new_customers,
 				'products'                => 2,
 			),
 			'intervals' => array(
@@ -2170,8 +2175,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count,
-						'num_new_customers'       => 0,
+						'num_returning_customers' => 0,
+						'num_new_customers'       => $new_customers,
 					),
 				),
 			),
@@ -2226,7 +2231,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
@@ -2248,7 +2253,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -2303,7 +2308,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
@@ -2325,7 +2330,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -2380,7 +2385,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
@@ -2402,7 +2407,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -2457,7 +2462,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
@@ -2479,7 +2484,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -2534,7 +2539,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
@@ -2556,7 +2561,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -2614,7 +2619,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
@@ -2636,7 +2641,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -2697,7 +2702,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
@@ -2719,7 +2724,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -2780,7 +2785,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
@@ -2802,7 +2807,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -2866,7 +2871,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
@@ -2888,7 +2893,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),
@@ -2955,7 +2960,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => $num_items_sold / $orders_count,
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 4,
 			),
@@ -2977,7 +2982,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $net_revenue,
 						'avg_items_per_order'     => $num_items_sold / $orders_count,
 						'avg_order_value'         => $net_revenue / $orders_count,
-						'num_returning_customers' => $orders_count - $new_customers,
+						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
 					),
 				),

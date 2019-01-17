@@ -63,8 +63,9 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		'net_revenue'             => '( SUM(net_total) - SUM(refund_total) ) AS net_revenue',
 		'avg_items_per_order'     => 'AVG(num_items_sold) AS avg_items_per_order',
 		'avg_order_value'         => '( SUM(net_total) - SUM(refund_total) ) / COUNT(*) AS avg_order_value',
-		'num_returning_customers' => 'SUM(returning_customer = 1) AS num_returning_customers',
-		'num_new_customers'       => 'SUM(returning_customer = 0) AS num_new_customers',
+		// Count returning customers as ( total_customers - new_customers ) to get an accurate number and count customers in with both new and old statuses as new.
+		'num_returning_customers' => '( COUNT( DISTINCT( customer_id ) ) -  COUNT( DISTINCT( CASE WHEN returning_customer = 0 THEN customer_id END ) ) ) AS num_returning_customers',
+		'num_new_customers'       => 'COUNT( DISTINCT( CASE WHEN returning_customer = 0 THEN customer_id END ) ) AS num_new_customers',
 	);
 
 	/**
@@ -76,6 +77,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order' ) );
 		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order' ) );
 		add_action( 'woocommerce_refund_deleted', array( __CLASS__, 'sync_on_refund_delete' ), 10, 2 );
+		add_action( 'delete_post', array( __CLASS__, 'delete_order' ) );
 	}
 
 	/**
@@ -447,6 +449,28 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	}
 
 	/**
+	 * Deletes the order stats when an order is deleted.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public static function delete_order( $post_id ) {
+		global $wpdb;
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
+
+		if ( 'shop_order' !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM ${table_name} WHERE order_id = %d",
+				$post_id
+			)
+		);
+	}
+
+
+	/**
 	 * Calculation methods.
 	 */
 
@@ -474,23 +498,23 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * @return bool
 	 */
 	protected static function is_returning_customer( $order ) {
-		$customer_id = $order->get_user_id();
+		global $wpdb;
+		$customer_id        = WC_Admin_Reports_Customers_Data_Store::get_customer_id_by_user_id( $order->get_user_id() );
+		$orders_stats_table = $wpdb->prefix . self::TABLE_NAME;
 
-		if ( 0 === $customer_id ) {
+		if ( ! $customer_id ) {
 			return false;
 		}
 
-		$customer_orders = get_posts(
-			array(
-				'meta_key'    => '_customer_user', // WPCS: slow query ok.
-				'meta_value'  => $customer_id, // WPCS: slow query ok.
-				'post_type'   => 'shop_order',
-				'post_status' => array( 'wc-on-hold', 'wc-processing', 'wc-completed' ),
-				'numberposts' => 2,
+		$customer_orders = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM ${orders_stats_table} WHERE customer_id = %d AND date_created < %s",
+				$customer_id,
+				date( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() )
 			)
 		);
 
-		return count( $customer_orders ) > 1;
+		return $customer_orders >= 1;
 	}
 
 	/**
