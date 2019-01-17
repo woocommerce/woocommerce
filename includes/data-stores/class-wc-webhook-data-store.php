@@ -206,7 +206,6 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	 * @return int[]
 	 */
 	public function get_webhooks_ids( $status = '', $limit = null ) {
-		global $wpdb;
 
 		if ( ! empty( $status ) ) {
 			$this->validate_status( $status );
