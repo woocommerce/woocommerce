@@ -485,7 +485,9 @@ final class WC_Cart_Totals {
 			return array();
 		}
 		$tax_class = $item->product->get_tax_class();
-		return isset( $this->item_tax_rates[ $tax_class ] ) ? $this->item_tax_rates[ $tax_class ] : $this->item_tax_rates[ $tax_class ] = WC_Tax::get_rates( $item->product->get_tax_class(), $this->cart->get_customer() );
+		$taxrates = isset( $this->item_tax_rates[ $tax_class ] ) ? $this->item_tax_rates[ $tax_class ] : $this->item_tax_rates[ $tax_class ] = WC_Tax::get_rates( $item->product->get_tax_class(), $this->cart->get_customer() );
+		$taxrates = apply_filters( 'woocommerce_item_tax_rates', $taxrates, $item, $this->cart );
+		return $taxrates;		
 	}
 
 	/**
