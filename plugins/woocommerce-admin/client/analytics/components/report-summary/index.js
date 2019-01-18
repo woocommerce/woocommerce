@@ -19,7 +19,7 @@ import { SummaryList, SummaryListPlaceholder, SummaryNumber } from '@woocommerce
  */
 import { getSummaryNumbers } from 'store/reports/utils';
 import ReportError from 'analytics/components/report-error';
-import { calculateDelta, formatValue } from './utils';
+import { calculateDelta, formatValue } from 'lib/number';
 import withSelect from 'wc-api/with-select';
 
 /**

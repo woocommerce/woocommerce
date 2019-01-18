@@ -26,6 +26,7 @@ const typeEndpointMap = {
 	'report-items-query-downloads': 'downloads',
 	'report-items-query-customers': 'customers',
 	'report-items-query-stock': 'stock',
+	'report-items-query-performance-indicators': 'performance-indicators',
 };
 
 function read( resourceNames, fetch = apiFetch ) {

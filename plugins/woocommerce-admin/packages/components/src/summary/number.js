@@ -52,17 +52,23 @@ const SummaryNumber = ( {
 		screenReaderLabel = sprintf( __( 'No change from %s', 'wc-admin' ), prevLabel );
 	}
 
-	const Container = onToggle ? Button : Link;
+	let Container;
 	const containerProps = {
 		className: classes,
 		'aria-current': selected ? 'page' : null,
 	};
-	if ( ! onToggle ) {
-		containerProps.href = href;
-		containerProps.role = 'menuitem';
+
+	if ( onToggle || href ) {
+		Container = onToggle ? Button : Link;
+		if ( ! onToggle ) {
+			containerProps.href = href;
+			containerProps.role = 'menuitem';
+		} else {
+			containerProps.onClick = onToggle;
+			containerProps[ 'aria-expanded' ] = isOpen;
+		}
 	} else {
-		containerProps.onClick = onToggle;
-		containerProps[ 'aria-expanded' ] = isOpen;
+		Container = 'div';
 	}
 
 	return (
@@ -109,7 +115,7 @@ SummaryNumber.propTypes = {
 	/**
 	 * An internal link to the report focused on this number.
 	 */
-	href: PropTypes.string.isRequired,
+	href: PropTypes.string,
 	/**
 	 * Boolean describing whether the menu list is open. Only applies in mobile view,
 	 * and only applies to the toggle-able item (first in the list).
@@ -147,7 +153,7 @@ SummaryNumber.propTypes = {
 };
 
 SummaryNumber.defaultProps = {
-	href: '/analytics',
+	href: '',
 	isOpen: false,
 	prevLabel: __( 'Previous Period:', 'wc-admin' ),
 	reverseTrend: false,

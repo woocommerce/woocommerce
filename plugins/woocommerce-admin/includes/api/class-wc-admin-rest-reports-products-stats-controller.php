@@ -152,12 +152,14 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
+				'indicator'   => true,
 			),
 			'net_revenue' => array(
 				'description' => __( 'Net revenue.', 'wc-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
+				'format'      => 'currency',
 			),
 			'orders_count'  => array(
 				'description' => __( 'Number of orders.', 'wc-admin' ),
