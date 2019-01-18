@@ -30,6 +30,7 @@
 		background-color: $white;
 		display: flex;
 		align-items: center;
+		position: relative;
 
 		&.is-active {
 			border-color: $input-active-border;
