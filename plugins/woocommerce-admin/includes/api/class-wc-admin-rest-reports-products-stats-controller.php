@@ -385,8 +385,6 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 				'product',
 				'category',
 				'variation',
-				'coupon',
-				'customer_type', // new vs returning.
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
