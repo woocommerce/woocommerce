@@ -44,6 +44,7 @@ export const filters = [
 					labels: {
 						title: __( 'Compare Coupon Codes', 'wc-admin' ),
 						update: __( 'Compare', 'wc-admin' ),
+						helpText: __( 'Select at least two coupon codes to compare', 'wc-admin' ),
 					},
 				},
 			},
