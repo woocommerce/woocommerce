@@ -38,14 +38,15 @@ class WC_Admin_REST_Reports_Revenue_Stats_Controller extends WC_REST_Reports_Con
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args             = array();
-		$args['before']   = $request['before'];
-		$args['after']    = $request['after'];
-		$args['interval'] = $request['interval'];
-		$args['page']     = $request['page'];
-		$args['per_page'] = $request['per_page'];
-		$args['orderby']  = $request['orderby'];
-		$args['order']    = $request['order'];
+		$args              = array();
+		$args['before']    = $request['before'];
+		$args['after']     = $request['after'];
+		$args['interval']  = $request['interval'];
+		$args['page']      = $request['page'];
+		$args['per_page']  = $request['per_page'];
+		$args['orderby']   = $request['orderby'];
+		$args['order']     = $request['order'];
+		$args['segmentby'] = $request['segmentby'];
 
 		return $args;
 	}
@@ -130,7 +131,7 @@ class WC_Admin_REST_Reports_Revenue_Stats_Controller extends WC_REST_Reports_Con
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$totals = array(
+		$data_values = array(
 			'gross_revenue'  => array(
 				'description' => __( 'Gross revenue.', 'wc-admin' ),
 				'type'        => 'number',
@@ -187,8 +188,40 @@ class WC_Admin_REST_Reports_Revenue_Stats_Controller extends WC_REST_Reports_Con
 			),
 		);
 
-		$intervals = $totals;
-		unset( $intervals['products'] );
+		$segments = array(
+			'segments' => array(
+				'description' => __( 'Reports data grouped by segment condition.', 'wc-admin' ),
+				'type'        => 'array',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+				'items'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'segment_id' => array(
+							'description' => __( 'Segment identificator.', 'wc-admin' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'enum'        => array( 'day', 'week', 'month', 'year' ),
+						),
+						'subtotals'  => array(
+							'description' => __( 'Interval subtotals.', 'wc-admin' ),
+							'type'        => 'object',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'properties'  => $data_values,
+						),
+					),
+				),
+			),
+		);
+
+		$totals = array_merge( $data_values, $segments );
+
+		// Products is not shown in intervals.
+		unset( $data_values['products'] );
+
+		$intervals = array_merge( $data_values, $segments );
 
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
@@ -329,6 +362,18 @@ class WC_Admin_REST_Reports_Revenue_Stats_Controller extends WC_REST_Reports_Con
 				'month',
 				'quarter',
 				'year',
+			),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['segmentby']  = array(
+			'description'       => __( 'Segment the response by additional constraint.', 'wc-admin' ),
+			'type'              => 'string',
+			'enum'              => array(
+				'product',
+				'category',
+				'variation',
+				'coupon',
+				'customer_type', // new vs returning.
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
