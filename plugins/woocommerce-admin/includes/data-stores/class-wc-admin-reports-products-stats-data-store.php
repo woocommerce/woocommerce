@@ -159,6 +159,9 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 				ARRAY_A
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
+			$segmenter             = new WC_Admin_Reports_Products_Stats_Segmenting( $query_args, $this->report_columns );
+			$totals[0]['segments'] = $segmenter->get_totals_segments( $totals_query, $table_name );
+
 			if ( null === $totals ) {
 				return new WP_Error( 'woocommerce_reports_products_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
 			}
@@ -208,6 +211,7 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 			} else {
 				$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data->intervals );
 			}
+			$segmenter->add_intervals_segments( $data, $intervals_query, $table_name );
 			$this->create_interval_subtotals( $data->intervals );
 
 			wp_cache_set( $cache_key, $data, $this->cache_group );

@@ -146,7 +146,7 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$totals = array(
+		$data_values = array(
 			'items_sold'    => array(
 				'description' => __( 'Number of items sold.', 'wc-admin' ),
 				'type'        => 'integer',
@@ -166,6 +166,36 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 				'readonly'    => true,
 			),
 		);
+
+		$segments = array(
+			'segments' => array(
+				'description' => __( 'Reports data grouped by segment condition.', 'wc-admin' ),
+				'type'        => 'array',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+				'items'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'segment_id' => array(
+							'description' => __( 'Segment identificator.', 'wc-admin' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'enum'        => array( 'day', 'week', 'month', 'year' ),
+						),
+						'subtotals'  => array(
+							'description' => __( 'Interval subtotals.', 'wc-admin' ),
+							'type'        => 'object',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'properties'  => $data_values,
+						),
+					),
+				),
+			),
+		);
+
+		$totals = array_merge( $data_values, $segments );
 
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
@@ -347,6 +377,18 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 			'items'             => array(
 				'type' => 'integer',
 			),
+		);
+		$params['segmentby']  = array(
+			'description'       => __( 'Segment the response by additional constraint.', 'wc-admin' ),
+			'type'              => 'string',
+			'enum'              => array(
+				'product',
+				'category',
+				'variation',
+				'coupon',
+				'customer_type', // new vs returning.
+			),
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;

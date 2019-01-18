@@ -49,6 +49,7 @@ class WC_Admin_Api_Init {
 		// Segmentation.
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-segmenting.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-orders-stats-segmenting.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-products-stats-segmenting.php';
 
 		// Query classes for reports.
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-revenue-query.php';
