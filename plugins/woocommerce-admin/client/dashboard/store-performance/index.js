@@ -7,10 +7,14 @@ import { ToggleControl } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
-import { getCurrentDates, appendTimestamp, getDateParamsFromQuery } from '@woocommerce/date';
-import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import moment from 'moment';
 import { find } from 'lodash';
+
+/**
+ * WooCommerce dependencies
+ */
+import { getCurrentDates, appendTimestamp, getDateParamsFromQuery } from '@woocommerce/date';
+import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
