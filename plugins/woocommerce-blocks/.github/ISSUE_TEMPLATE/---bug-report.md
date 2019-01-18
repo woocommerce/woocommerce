@@ -21,6 +21,15 @@ A clear and concise description of what you expected to happen.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
+**WordPress (please complete the following information):**
+
+* Core version: [e.g. 5.0.3]
+* Gutenberg version (if installed): [e.g. 4.8.0]
+* WooCommerce version: [e.g. 3.5.3]
+* WooCommerce Blocks version: [e.g. 1.3.1]
+* Site language:
+* Any other plugins installed:
+
 **Desktop (please complete the following information):**
 
 * OS: [e.g. iOS]
