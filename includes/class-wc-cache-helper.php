@@ -13,15 +13,61 @@ defined( 'ABSPATH' ) || exit;
 class WC_Cache_Helper {
 
 	/**
+	 * Transients to delete on shutdown.
+	 *
+	 * @var array Array of transient keys.
+	 */
+	private static $delete_transients = array();
+
+	/**
 	 * Hook in methods.
 	 */
 	public static function init() {
+		add_action( 'shutdown', array( __CLASS__, 'delete_transients_on_shutdown' ), 10 );
 		add_action( 'template_redirect', array( __CLASS__, 'geolocation_ajax_redirect' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
-		add_action( 'delete_version_transients', array( __CLASS__, 'delete_version_transients' ) );
+		add_action( 'delete_version_transients', array( __CLASS__, 'delete_version_transients' ), 10, 2 );
 		add_action( 'wp', array( __CLASS__, 'prevent_caching' ) );
 		add_action( 'clean_term_cache', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
 		add_action( 'edit_terms', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
+	}
+
+	/**
+	 * Add a transient to delete on shutdown.
+	 *
+	 * @since 3.6.0
+	 * @param string|array $keys Transient key or keys.
+	 */
+	public static function queue_delete_transient( $keys ) {
+		self::$delete_transients = array_unique( array_merge( is_array( $keys ) ? $keys : array( $keys ), self::$delete_transients ) );
+	}
+
+	/**
+	 * Transients that don't need to be cleaned right away can be deleted on shutdown to avoid repetition.
+	 *
+	 * @since 3.6.0
+	 */
+	public static function delete_transients_on_shutdown() {
+		if ( self::$delete_transients ) {
+			foreach ( self::$delete_transients as $key ) {
+				delete_transient( $key );
+			}
+			self::$delete_transients = array();
+		}
+	}
+
+	/**
+	 * Used to clear layered nav counts based on passed attribute names.
+	 *
+	 * @since 3.6.0
+	 * @param array $attribute_keys Attribute keys.
+	 */
+	public static function invalidate_attribute_count( $attribute_keys ) {
+		if ( $attribute_keys ) {
+			foreach ( $attribute_keys as $attribute_key ) {
+				self::queue_delete_transient( 'wc_layered_nav_counts_' . $attribute_key );
+			}
+		}
 	}
 
 	/**
