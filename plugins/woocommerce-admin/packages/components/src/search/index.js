@@ -156,6 +156,7 @@ class Search extends Component {
 			'aria-label': this.props[ 'aria-label' ],
 		};
 		const shouldRenderTags = this.shouldRenderTags();
+		const inputType = autocompleter.inputType ? autocompleter.inputType : 'text';
 
 		return (
 			<div className={ classnames( 'woocommerce-search', className, {
@@ -188,7 +189,7 @@ class Search extends Component {
 									{ this.renderTags() }
 									<input
 										ref={ this.input }
-										type="text"
+										type={ inputType }
 										size={
 											( ( value.length === 0 && placeholder && placeholder.length ) ||
 												value.length ) + 1

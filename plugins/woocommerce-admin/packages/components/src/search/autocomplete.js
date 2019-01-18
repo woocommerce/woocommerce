@@ -146,6 +146,9 @@ export class Autocomplete extends Component {
 		const promise = ( this.activePromise = Promise.resolve(
 			typeof options === 'function' ? options( query ) : options
 		).then( optionsData => {
+			if ( ! optionsData ) {
+				return;
+			}
 			const { selected } = this.props;
 			if ( promise !== this.activePromise ) {
 				// Another promise has become active since this one was asked to resolve, so do nothing,

@@ -24,6 +24,7 @@ import { computeSuggestionMatch } from './utils';
 export default {
 	name: 'orders',
 	className: 'woocommerce-search__order-result',
+	inputType: 'number',
 	options( search ) {
 		let payload = '';
 		if ( search ) {

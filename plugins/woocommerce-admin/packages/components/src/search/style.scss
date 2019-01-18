@@ -52,6 +52,12 @@
 		min-width: 70px;
 		font-size: inherit;
 		vertical-align: middle;
+
+		&[type="number"]::-webkit-outer-spin-button,
+		&[type="number"]::-webkit-inner-spin-button {
+			-webkit-appearance: none;
+			margin: 0;
+		}
 	}
 
 	.woocommerce-search__input {
