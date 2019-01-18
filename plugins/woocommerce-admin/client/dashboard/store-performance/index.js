@@ -171,13 +171,7 @@ export default compose(
 		// Set default values for user preferences if none is set.
 		// These columns are HIDDEN by default.
 		if ( ! userPrefs ) {
-			userPrefs = [
-				'coupons/orders_count',
-				'taxes/total_tax',
-				'taxes/order_tax',
-				'taxes/shipping_tax',
-				'downloads/download_count',
-			];
+			userPrefs = [ 'taxes/order_tax', 'taxes/shipping_tax', 'downloads/download_count' ];
 		}
 
 		const datesFromQuery = getCurrentDates( query );
