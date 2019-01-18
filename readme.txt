@@ -221,6 +221,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Product export by unicode product categories. #22320
 * Fix - Check stock status of items when 'ordering again' from the account page. #22331
 * Fix - Issue where images offloaded to external servers caused errors and broken images when changing aspect ratios. #22461
+* Fix - Remove block comments from shop page description. #22334
 * Dev - REST API - 0 value attribute permalink calculation, property population in REST api. #22026
 * Dev - REST API - Fixed support to order results by slugs. #22168
 * Dev - REST API - Removed extra inherited filters from product endpoint in variations endpoint. #22452
