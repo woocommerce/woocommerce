@@ -3,7 +3,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
+import { Component, Fragment } from '@wordpress/element';
+import { Tooltip } from '@wordpress/components';
 
 /**
  * WooCommerce dependencies
@@ -90,6 +91,12 @@ export default class CustomersReportTable extends Component {
 		];
 	}
 
+	getCountryName( code ) {
+		const countries = ( wcSettings.dataEndpoints && wcSettings.dataEndpoints.countries ) || [];
+		const country = countries.find( c => c.code === code );
+		return country ? country.name : null;
+	}
+
 	getRowsContent( customers ) {
 		return customers.map( customer => {
 			const {
@@ -106,6 +113,7 @@ export default class CustomersReportTable extends Component {
 				city,
 				country,
 			} = customer;
+			const countryName = this.getCountryName( country );
 
 			const customerNameLink = user_id ? (
 				<Link href={ 'user-edit.php?user_id=' + user_id } type="wp-admin">
@@ -119,6 +127,15 @@ export default class CustomersReportTable extends Component {
 				<Date date={ date_registered } visibleFormat={ defaultTableDateFormat } />
 			) : (
 				'—'
+			);
+
+			const countryDisplay = (
+				<Fragment>
+					<Tooltip text={ countryName }>
+						<span aria-hidden="true">{ country }</span>
+					</Tooltip>
+					<span className="screen-reader-text">{ countryName }</span>
+				</Fragment>
 			);
 
 			return [
@@ -155,7 +172,7 @@ export default class CustomersReportTable extends Component {
 					value: date_last_active,
 				},
 				{
-					display: country,
+					display: countryDisplay,
 					value: country,
 				},
 				{
