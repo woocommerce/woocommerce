@@ -243,6 +243,26 @@ return array(
 			),
 		),
 	),
+	'DK' => array(
+		'currency_code'  => 'DKK',
+		'currency_pos'   => 'left_space',
+		'thousand_sep'   => '.',
+		'decimal_sep'    => ',',
+		'num_decimals'   => 2,
+		'weight_unit'    => 'kg',
+		'dimension_unit' => 'cm',
+		'tax_rates'      => array(
+			'' => array(
+				array(
+					'country'  => '*',
+					'state'    => '',
+					'rate'     => '25.0000',
+					'name'     => 'Moms',
+					'shipping' => true,
+				),
+			),
+		),
+	),
 	'ES' => array(
 		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right',
