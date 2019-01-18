@@ -125,6 +125,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-downloads-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-downloads-stats-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-customers-query.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-customers-stats-query.php';
 
 		// Data stores.
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-data-store.php';
@@ -141,6 +142,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-downloads-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-downloads-stats-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-customers-data-store.php';
+		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-customers-stats-data-store.php';
 
 		// Data triggers.
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-notes-data-store.php';
@@ -169,6 +171,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-coupons-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-coupons-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-customers-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-customers-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-files-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-stats-controller.php';
@@ -212,6 +215,7 @@ class WC_Admin_Api_Init {
 				'WC_Admin_REST_Reports_Downloads_Controller',
 				'WC_Admin_REST_Reports_Downloads_Stats_Controller',
 				'WC_Admin_REST_Reports_Customers_Controller',
+				'WC_Admin_REST_Reports_Customers_Stats_Controller',
 			)
 		);
 
@@ -618,6 +622,7 @@ class WC_Admin_Api_Init {
 				'report-downloads-stats' => 'WC_Admin_Reports_Downloads_Stats_Data_Store',
 				'admin-note'             => 'WC_Admin_Notes_Data_Store',
 				'report-customers'       => 'WC_Admin_Reports_Customers_Data_Store',
+				'report-customers-stats' => 'WC_Admin_Reports_Customers_Stats_Data_Store',
 			)
 		);
 	}
