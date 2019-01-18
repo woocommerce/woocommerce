@@ -92,12 +92,12 @@ function wc_product_dimensions_enabled() {
 }
 
 /**
- * Clear all transients cache for product data.
+ * Clear transient cache for product data.
  *
- * @param int $post_id (default: 0).
+ * @param int $post_id (default: 0) The product ID.
  */
 function wc_delete_product_transients( $post_id = 0 ) {
-	// Core transients.
+	// Transient data to clear with a fixed name which may be stale after product updates.
 	$transients_to_clear = array(
 		'wc_products_onsale',
 		'wc_featured_products',
@@ -105,48 +105,21 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		'wc_low_stock_count',
 	);
 
-	// Transient names that include an ID.
-	$post_transient_names = array(
-		'wc_product_children_',
-		'wc_var_prices_',
-		'wc_related_',
-		'wc_child_has_weight_',
-		'wc_child_has_dimensions_',
-	);
+	WC_Cache_Helper::queue_delete_transient( $transients_to_clear );
 
 	if ( $post_id > 0 ) {
+		// Transient names that include an ID - since they are dynamic they cannot be cleaned in bulk without the ID.
+		$post_transient_names = array(
+			'wc_product_children_',
+			'wc_var_prices_',
+			'wc_related_',
+			'wc_child_has_weight_',
+			'wc_child_has_dimensions_',
+		);
+
 		foreach ( $post_transient_names as $transient ) {
-			$transients_to_clear[] = $transient . $post_id;
+			delete_transient( $transient . $post_id );
 		}
-
-		// Does this product have a parent?
-		$product = wc_get_product( $post_id );
-
-		if ( $product ) {
-			if ( $product->get_parent_id() > 0 ) {
-				wc_delete_product_transients( $product->get_parent_id() );
-			}
-
-			if ( 'variable' === $product->get_type() ) {
-				wp_cache_delete(
-					WC_Cache_Helper::get_cache_prefix( 'products' ) . 'product_variation_attributes_' . $product->get_id(),
-					'products'
-				);
-			}
-
-			$attributes = $product->get_attributes();
-
-			if ( $attributes ) {
-				foreach ( $attributes as $attribute_key => $attribute ) {
-					$transients_to_clear[] = 'wc_layered_nav_counts_' . $attribute_key;
-				}
-			}
-		}
-	}
-
-	// Delete transients.
-	foreach ( $transients_to_clear as $transient ) {
-		delete_transient( $transient );
 	}
 
 	// Increments the transient version to invalidate cache.
@@ -817,12 +790,16 @@ function wc_get_min_max_price_meta_query( $args ) {
 		$max = $class_max;
 	}
 
-	return apply_filters( 'woocommerce_get_min_max_price_meta_query', array(
-		'key'     => '_price',
-		'value'   => array( $min, $max ),
-		'compare' => 'BETWEEN',
-		'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
-	), $args );
+	return apply_filters(
+		'woocommerce_get_min_max_price_meta_query',
+		array(
+			'key'     => '_price',
+			'value'   => array( $min, $max ),
+			'compare' => 'BETWEEN',
+			'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
+		),
+		$args
+	);
 }
 
 /**
