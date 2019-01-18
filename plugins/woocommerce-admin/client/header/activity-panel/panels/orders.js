@@ -133,11 +133,11 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 											</span>
 											{ refundValue ? (
 												<span>
-													<s>{ formatCurrency( total, order.currency ) }</s>{' '}
-													{ formatCurrency( remainingTotal, order.currency ) }
+													<s>{ formatCurrency( total, order.currency_symbol ) }</s>{' '}
+													{ formatCurrency( remainingTotal, order.currency_symbol ) }
 												</span>
 											) : (
-												<span>{ formatCurrency( total, order.currency ) }</span>
+												<span>{ formatCurrency( total, order.currency_symbol ) }</span>
 											) }
 										</div>
 									}

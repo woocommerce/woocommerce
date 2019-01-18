@@ -10,32 +10,22 @@ describe( 'formatCurrency', () => {
 		expect( formatCurrency( 30 ) ).toBe( '$30.00' );
 	} );
 
-	it( 'should round a number to 2 decimal places in USD', () => {
-		expect( formatCurrency( 9.49258, 'USD' ) ).toBe( '$9.49' );
-		expect( formatCurrency( 30, 'USD' ) ).toBe( '$30.00' );
-		expect( formatCurrency( 3.0002, 'USD' ) ).toBe( '$3.00' );
-	} );
+	it( 'should uses store currency settings, not locale-based', () => {
+		global.wcSettings.currency.code = 'JPY';
+		global.wcSettings.currency.precision = 3;
+		global.wcSettings.currency.decimal_separator = ',';
+		global.wcSettings.currency.thousand_separator = '.';
+		global.wcSettings.currency.price_format = '%2$s%1$s';
 
-	it( 'should round a number to 2 decimal places in GBP', () => {
-		expect( formatCurrency( 8.9272, 'GBP' ) ).toBe( '£8.93' );
-		expect( formatCurrency( 11, 'GBP' ) ).toBe( '£11.00' );
-		expect( formatCurrency( 7.0002, 'GBP' ) ).toBe( '£7.00' );
-	} );
-
-	it( 'should round a number to 0 decimal places in JPY', () => {
-		expect( formatCurrency( 1239.88, 'JPY' ) ).toBe( '¥1,240' );
-		expect( formatCurrency( 1500, 'JPY' ) ).toBe( '¥1,500' );
-		expect( formatCurrency( 33715.02, 'JPY' ) ).toBe( '¥33,715' );
-	} );
-
-	it( 'should correctly convert and round a string', () => {
-		expect( formatCurrency( '19.80', 'USD' ) ).toBe( '$19.80' );
+		expect( formatCurrency( 9.49258, '¥' ) ).toBe( '9,493¥' );
+		expect( formatCurrency( 3000, '¥' ) ).toBe( '3.000,000¥' );
+		expect( formatCurrency( 3.0002, '¥' ) ).toBe( '3,000¥' );
 	} );
 
 	it( "should return empty string when given an input that isn't a number", () => {
-		expect( formatCurrency( 'abc', 'USD' ) ).toBe( '' );
-		expect( formatCurrency( false, 'USD' ) ).toBe( '' );
-		expect( formatCurrency( null, 'USD' ) ).toBe( '' );
+		expect( formatCurrency( 'abc' ) ).toBe( '' );
+		expect( formatCurrency( false ) ).toBe( '' );
+		expect( formatCurrency( null ) ).toBe( '' );
 	} );
 } );
 

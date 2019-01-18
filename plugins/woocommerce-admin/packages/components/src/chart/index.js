@@ -5,7 +5,6 @@
 import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Component, createRef, Fragment } from '@wordpress/element';
-import { decodeEntities } from '@wordpress/html-entities';
 import { formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
 import { get, isEqual, partial } from 'lodash';
 import Gridicon from 'gridicons';
@@ -26,11 +25,28 @@ import ChartPlaceholder from './placeholder';
 import { H, Section } from '../section';
 import { D3Chart, D3Legend } from './d3chart';
 
+function getD3CurrencyFormat( symbol, position ) {
+	switch ( position ) {
+		case 'left_space':
+			return [ symbol + ' ', '' ];
+		case 'right':
+			return [ '', symbol ];
+		case 'right_space':
+			return [ '', ' ' + symbol ];
+		case 'left':
+		default:
+			return [ symbol, '' ];
+	}
+}
+
+const currencySymbol = get( wcSettings, [ 'currency', 'symbol' ], '' );
+const symbolPosition = get( wcSettings, [ 'currency', 'position' ], 'left' );
+
 d3FormatDefaultLocale( {
-	decimal: '.',
-	thousands: ',',
+	decimal: get( wcSettings, [ 'currency', 'decimal_separator' ], '.' ),
+	thousands: get( wcSettings, [ 'currency', 'thousand_separator' ], ',' ),
 	grouping: [ 3 ],
-	currency: [ decodeEntities( get( wcSettings, 'currency.symbol', '' ) ), '' ],
+	currency: getD3CurrencyFormat( currencySymbol, symbolPosition ),
 } );
 
 function getOrderedKeys( props, previousOrderedKeys = [] ) {
