@@ -173,8 +173,6 @@ function wc_admin_print_script_settings() {
 		$current_user_data[ $user_field ] = json_decode( get_user_meta( get_current_user_id(), 'wc_admin_' . $user_field, true ) );
 	}
 
-	$current_user_data = wc_admin_get_user_defaults( $current_user_data );
-
 	/**
 	 * TODO: On merge, once plugin images are added to core WooCommerce, `wcAdminAssetUrl` can be retired, and
 	 * `wcAssetUrl` can be used in its place throughout the codebase.
@@ -213,27 +211,6 @@ function wc_admin_print_script_settings() {
 	<?php
 }
 add_action( 'admin_print_footer_scripts', 'wc_admin_print_script_settings', 1 );
-
-/**
- * Sets default values for user preferences.
- *
- * @param array $user_data Array of user data.
- * @return array Filtered array of user data.
- */
-function wc_admin_get_user_defaults( $user_data ) {
-	// If no settings for performance indicators are stored, these are the defaults to disable.
-	if ( ! is_array( $user_data['dashboard_performance_indicators'] ) ) {
-		$user_data['dashboard_performance_indicators'] = array(
-			'coupons/orders_count',
-			'taxes/total_tax',
-			'taxes/order_tax',
-			'taxes/shipping_tax',
-			'downloads/download_count',
-		);
-	}
-
-	return $user_data;
-}
 
 /**
  * Load plugin text domain for translations.

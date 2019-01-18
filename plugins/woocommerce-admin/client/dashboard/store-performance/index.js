@@ -166,7 +166,19 @@ export default compose(
 			isReportItemsRequesting,
 		} = select( 'wc-api' );
 		const userData = getCurrentUserData();
-		const userPrefs = userData.dashboard_performance_indicators;
+		let userPrefs = userData.dashboard_performance_indicators;
+
+		// Set default values for user preferences if none is set.
+		// These columns are HIDDEN by default.
+		if ( ! userPrefs ) {
+			userPrefs = [
+				'coupons/orders_count',
+				'taxes/total_tax',
+				'taxes/order_tax',
+				'taxes/shipping_tax',
+				'downloads/download_count',
+			];
+		}
 
 		const datesFromQuery = getCurrentDates( query );
 		const endPrimary = datesFromQuery.primary.before;
