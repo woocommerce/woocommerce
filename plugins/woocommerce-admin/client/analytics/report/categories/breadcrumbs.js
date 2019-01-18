@@ -54,7 +54,10 @@ export default class CategoryBreadcrumbs extends Component {
 			<div className="woocommerce-table__breadcrumbs">
 				{ this.getCategoryAncestors( category, categories ) }
 				<Link
-					href={ 'term.php?taxonomy=product_cat&post_type=product&tag_ID=' + category.id }
+					href={
+						'admin.php?page=wc-admin#/analytics/categories?filter=single_category&categories=' +
+						category.id
+					}
 					type="wp-admin"
 				>
 					{ category.name }
