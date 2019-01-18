@@ -37,7 +37,9 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -49,7 +51,9 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\w-]+)',
+			array(
 				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
@@ -199,7 +203,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					__( 'Note:', 'woocommerce' ),
 					__( 'This tool will update your WooCommerce database to the latest version. Please ensure you make sufficient backups before proceeding.', 'woocommerce' )
 				),
-			)
+			),
 		);
 
 		// Jetpack does the image resizing heavy lifting so you don't have to.
@@ -226,7 +230,8 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 						'name'        => $tool['name'],
 						'action'      => $tool['button'],
 						'description' => $tool['desc'],
-					), $request
+					),
+					$request
 				)
 			);
 		}
@@ -254,7 +259,8 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					'name'        => $tool['name'],
 					'action'      => $tool['button'],
 					'description' => $tool['desc'],
-				), $request
+				),
+				$request
 			)
 		);
 	}
@@ -418,6 +424,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 			case 'clear_transients':
 				wc_delete_product_transients();
 				wc_delete_shop_order_transients();
+				delete_transient( 'wc_count_comments' );
 
 				$attribute_taxonomies = wc_get_attribute_taxonomies();
 
@@ -494,14 +501,16 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 
 			case 'recount_terms':
 				$product_cats = get_terms(
-					'product_cat', array(
+					'product_cat',
+					array(
 						'hide_empty' => false,
 						'fields'     => 'id=>parent',
 					)
 				);
 				_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), true, false );
 				$product_tags = get_terms(
-					'product_tag', array(
+					'product_tag',
+					array(
 						'hide_empty' => false,
 						'fields'     => 'id=>parent',
 					)
