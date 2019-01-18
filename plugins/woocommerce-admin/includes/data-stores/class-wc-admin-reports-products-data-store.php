@@ -418,21 +418,20 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 						'refund_amount'         => $amount_refunded,
 					),
 					array(
-						'%d',
-						'%d',
-						'%d',
-						'%d',
-						'%d',
-						'%d',
-						'%f',
-						'%s',
-						'%f',
-						'%f',
-						'%f',
-						'%f',
-						'%f',
-						'%f',
-						'%f',
+						'%d', // order_item_id.
+						'%d', // order_id.
+						'%d', // product_id.
+						'%d', // variation_id.
+						'%d', // customer_id.
+						'%d', // product_qty.
+						'%f', // product_net_revenue.
+						'%s', // date_created.
+						'%f', // coupon_amount.
+						'%f', // tax_amount.
+						'%f', // shipping_amount.
+						'%f', // shipping_tax_amount.
+						'%f', // product_gross_revenue.
+						'%f', // refund_amount.
 					)
 				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 			}
