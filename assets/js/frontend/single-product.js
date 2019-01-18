@@ -307,6 +307,12 @@ jQuery( function( $ ) {
 	 * Initialize all galleries on page.
 	 */
 	$( '.woocommerce-product-gallery' ).each( function() {
-		$( this ).wc_product_gallery();
+		
+		$( this ).trigger( 'wc-product-gallery-before-init', [ this, wc_single_product_params ] );
+		
+		$( this ).wc_product_gallery( wc_single_product_params );
+		
+		$( this ).trigger( 'wc-product-gallery-after-init', [ this, wc_single_product_params ] );
+		
 	} );
 } );
