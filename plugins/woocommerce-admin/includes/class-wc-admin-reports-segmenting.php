@@ -478,4 +478,30 @@ class WC_Admin_Reports_Segmenting {
 		// To remove time interval keys (so that REST response is formatted correctly).
 		$intervals = array_values( $intervals );
 	}
+
+	/**
+	 * Returns an array of segments for totals part of REST response.
+	 *
+	 * @param array  $query_params Totals SQL query parameters.
+	 * @param string $table_name Name of the SQL table that is the main order stats table.
+	 *
+	 * @return array
+	 */
+	public function get_totals_segments( $query_params, $table_name ) {
+		$segments = $this->get_segments( 'totals', $query_params, $table_name );
+		return $this->fill_in_missing_segments( $segments );
+	}
+
+	/**
+	 * Adds an array of segments to data->intervals object.
+	 *
+	 * @param stdClass $data Data object representing the REST response.
+	 * @param array    $intervals_query Intervals SQL query parameters.
+	 * @param string   $table_name Name of the SQL table that is the main order stats table.
+	 */
+	public function add_intervals_segments( &$data, $intervals_query, $table_name ) {
+		$intervals_segments = $this->get_segments( 'intervals', $intervals_query, $table_name );
+		$this->assign_segments_to_intervals( $data->intervals, $intervals_segments );
+		$this->fill_in_missing_interval_segments( $data );
+	}
 }
