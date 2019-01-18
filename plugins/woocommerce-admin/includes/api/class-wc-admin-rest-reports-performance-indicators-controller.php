@@ -22,7 +22,7 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v3';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.
@@ -53,7 +53,7 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 	public function get_allowed_stats() {
 		global $wp_rest_server;
 
-		$request       = new WP_REST_Request( 'GET', '/wc/v3/reports' );
+		$request       = new WP_REST_Request( 'GET', '/wc/v4/reports' );
 		$response      = rest_do_request( $request );
 		$endpoints     = $response->get_data();
 		$allowed_stats = array();
@@ -63,7 +63,7 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 
 		foreach ( $endpoints as $endpoint ) {
 			if ( '/stats' === substr( $endpoint['slug'], -6 ) ) {
-				$request  = new WP_REST_Request( 'OPTIONS', '/wc/v3/reports/' . $endpoint['slug'] );
+				$request  = new WP_REST_Request( 'OPTIONS', '/wc/v4/reports/' . $endpoint['slug'] );
 				$response = rest_do_request( $request );
 				$data     = $response->get_data();
 				$prefix   = substr( $endpoint['slug'], 0, -6 );
@@ -126,7 +126,7 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 			if ( ! empty( $stats_endpoints [ $endpoint ] ) ) {
 				$request_url = $stats_endpoints [ $endpoint ];
 			} else {
-				$request_url = '/wc/v3/reports/' . $endpoint . '/stats';
+				$request_url = '/wc/v4/reports/' . $endpoint . '/stats';
 			}
 
 			$request = new WP_REST_Request( 'GET', $request_url );

@@ -155,10 +155,11 @@ class WC_Admin_Api_Init {
 	 */
 	public function rest_api_init() {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-admin-notes-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-coupons-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-customers-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-data-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-data-download-ips-controller.php';
-		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-orders-stats-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-orders-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-products-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-reviews-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-controller.php';
@@ -185,10 +186,11 @@ class WC_Admin_Api_Init {
 			'woocommerce_admin_rest_controllers',
 			array(
 				'WC_Admin_REST_Admin_Notes_Controller',
+				'WC_Admin_REST_Coupons_Controller',
 				'WC_Admin_REST_Customers_Controller',
 				'WC_Admin_REST_Data_Controller',
 				'WC_Admin_REST_Data_Download_Ips_Controller',
-				'WC_Admin_REST_Orders_Stats_Controller',
+				'WC_Admin_REST_Orders_Controller',
 				'WC_Admin_REST_Products_Controller',
 				'WC_Admin_REST_Product_Reviews_Controller',
 				'WC_Admin_REST_Reports_Controller',
@@ -227,112 +229,123 @@ class WC_Admin_Api_Init {
 	 * @return array
 	 */
 	public static function filter_rest_endpoints( $endpoints ) {
-		// Override GET /wc/v3/system_status/tools.
-		if ( isset( $endpoints['/wc/v3/system_status/tools'] )
-			&& isset( $endpoints['/wc/v3/system_status/tools'][1] )
-			&& isset( $endpoints['/wc/v3/system_status/tools'][0] )
-			&& $endpoints['/wc/v3/system_status/tools'][1]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
+		// Override GET /wc/v4/system_status/tools.
+		if ( isset( $endpoints['/wc/v4/system_status/tools'] )
+			&& isset( $endpoints['/wc/v4/system_status/tools'][1] )
+			&& isset( $endpoints['/wc/v4/system_status/tools'][0] )
+			&& $endpoints['/wc/v4/system_status/tools'][1]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
 		) {
-			$endpoints['/wc/v3/system_status/tools'][0] = $endpoints['/wc/v3/system_status/tools'][1];
+			$endpoints['/wc/v4/system_status/tools'][0] = $endpoints['/wc/v4/system_status/tools'][1];
 		}
-		// // Override GET & PUT for /wc/v3/system_status/tools.
-		if ( isset( $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'] )
-			&& isset( $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][3] )
-			&& isset( $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][2] )
-			&& $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][2]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
-			&& $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][3]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
+		// // Override GET & PUT for /wc/v4/system_status/tools.
+		if ( isset( $endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'] )
+			&& isset( $endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'][3] )
+			&& isset( $endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'][2] )
+			&& $endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'][2]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
+			&& $endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'][3]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
 		) {
-			$endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][0] = $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][2];
-			$endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][1] = $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][3];
-		}
-
-		// Override GET /wc/v3/reports.
-		if ( isset( $endpoints['/wc/v3/reports'] )
-			&& isset( $endpoints['/wc/v3/reports'][1] )
-			&& isset( $endpoints['/wc/v3/reports'][0] )
-			&& $endpoints['/wc/v3/reports'][1]['callback'][0] instanceof WC_Admin_REST_Reports_Controller
-		) {
-			$endpoints['/wc/v3/reports'][0] = $endpoints['/wc/v3/reports'][1];
+			$endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'][0] = $endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'][2];
+			$endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'][1] = $endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'][3];
 		}
 
-		// Override /wc/v3/customers.
-		if ( isset( $endpoints['/wc/v3/customers'] )
-			&& isset( $endpoints['/wc/v3/customers'][3] )
-			&& isset( $endpoints['/wc/v3/customers'][2] )
-			&& $endpoints['/wc/v3/customers'][2]['callback'][0] instanceof WC_Admin_REST_Customers_Controller
-			&& $endpoints['/wc/v3/customers'][3]['callback'][0] instanceof WC_Admin_REST_Customers_Controller
+		// Override GET /wc/v4/reports.
+		if ( isset( $endpoints['/wc/v4/reports'] )
+			&& isset( $endpoints['/wc/v4/reports'][1] )
+			&& isset( $endpoints['/wc/v4/reports'][0] )
+			&& $endpoints['/wc/v4/reports'][1]['callback'][0] instanceof WC_Admin_REST_Reports_Controller
 		) {
-			$endpoints['/wc/v3/customers'][0] = $endpoints['/wc/v3/customers'][2];
-			$endpoints['/wc/v3/customers'][1] = $endpoints['/wc/v3/customers'][3];
+			$endpoints['/wc/v4/reports'][0] = $endpoints['/wc/v4/reports'][1];
 		}
 
-		// Override /wc/v3/orders/$id.
-		if ( isset( $endpoints['/wc/v3/orders/(?P<id>[\d]+)'] )
-			&& isset( $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][5] )
-			&& isset( $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][4] )
-			&& isset( $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][3] )
-			&& $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Stats_Controller
-			&& $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][4]['callback'][0] instanceof WC_Admin_REST_Orders_Stats_Controller
-			&& $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][5]['callback'][0] instanceof WC_Admin_REST_Orders_Stats_Controller
+		// Override /wc/v4/coupons.
+		if ( isset( $endpoints['/wc/v4/coupons'] )
+			&& isset( $endpoints['/wc/v4/coupons'][3] )
+			&& isset( $endpoints['/wc/v4/coupons'][2] )
+			&& $endpoints['/wc/v4/coupons'][2]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v4/coupons'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
 		) {
-			$endpoints['/wc/v3/orders/(?P<id>[\d]+)'][0] = $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][3];
-			$endpoints['/wc/v3/orders/(?P<id>[\d]+)'][1] = $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][4];
-			$endpoints['/wc/v3/orders/(?P<id>[\d]+)'][2] = $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][5];
+			$endpoints['/wc/v4/coupons'][0] = $endpoints['/wc/v4/coupons'][2];
+			$endpoints['/wc/v4/coupons'][1] = $endpoints['/wc/v4/coupons'][3];
 		}
 
-		// Override /wc/v3orders.
-		if ( isset( $endpoints['/wc/v3/orders'] )
-			&& isset( $endpoints['/wc/v3/orders'][3] )
-			&& isset( $endpoints['/wc/v3/orders'][2] )
-			&& $endpoints['/wc/v3/orders'][2]['callback'][0] instanceof WC_Admin_REST_Orders_Stats_Controller
-			&& $endpoints['/wc/v3/orders'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Stats_Controller
+		// Override /wc/v4/customers.
+		if ( isset( $endpoints['/wc/v4/customers'] )
+			&& isset( $endpoints['/wc/v4/customers'][3] )
+			&& isset( $endpoints['/wc/v4/customers'][2] )
+			&& $endpoints['/wc/v4/customers'][2]['callback'][0] instanceof WC_Admin_REST_Customers_Controller
+			&& $endpoints['/wc/v4/customers'][3]['callback'][0] instanceof WC_Admin_REST_Customers_Controller
 		) {
-			$endpoints['/wc/v3/orders'][0] = $endpoints['/wc/v3/orders'][2];
-			$endpoints['/wc/v3/orders'][1] = $endpoints['/wc/v3/orders'][3];
+			$endpoints['/wc/v4/customers'][0] = $endpoints['/wc/v4/customers'][2];
+			$endpoints['/wc/v4/customers'][1] = $endpoints['/wc/v4/customers'][3];
 		}
 
-		// Override /wc/v3/data.
-		if ( isset( $endpoints['/wc/v3/data'] )
-			&& isset( $endpoints['/wc/v3/data'][1] )
-			&& $endpoints['/wc/v3/data'][1]['callback'][0] instanceof WC_Admin_REST_Data_Controller
+		// Override /wc/v4/orders/$id.
+		if ( isset( $endpoints['/wc/v4/orders/(?P<id>[\d]+)'] )
+			&& isset( $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][5] )
+			&& isset( $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][4] )
+			&& isset( $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][3] )
+			&& $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][4]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][5]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
 		) {
-			$endpoints['/wc/v3/data'][0] = $endpoints['/wc/v3/data'][1];
+			$endpoints['/wc/v4/orders/(?P<id>[\d]+)'][0] = $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][3];
+			$endpoints['/wc/v4/orders/(?P<id>[\d]+)'][1] = $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][4];
+			$endpoints['/wc/v4/orders/(?P<id>[\d]+)'][2] = $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][5];
 		}
 
-		// Override /wc/v3/products.
-		if ( isset( $endpoints['/wc/v3/products'] )
-			&& isset( $endpoints['/wc/v3/products'][3] )
-			&& isset( $endpoints['/wc/v3/products'][2] )
-			&& $endpoints['/wc/v3/products'][2]['callback'][0] instanceof WC_Admin_REST_Products_Controller
-			&& $endpoints['/wc/v3/products'][3]['callback'][0] instanceof WC_Admin_REST_Products_Controller
+		// Override /wc/v4/orders.
+		if ( isset( $endpoints['/wc/v4/orders'] )
+			&& isset( $endpoints['/wc/v4/orders'][3] )
+			&& isset( $endpoints['/wc/v4/orders'][2] )
+			&& $endpoints['/wc/v4/orders'][2]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v4/orders'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
 		) {
-			$endpoints['/wc/v3/products'][0] = $endpoints['/wc/v3/products'][2];
-			$endpoints['/wc/v3/products'][1] = $endpoints['/wc/v3/products'][3];
+			$endpoints['/wc/v4/orders'][0] = $endpoints['/wc/v4/orders'][2];
+			$endpoints['/wc/v4/orders'][1] = $endpoints['/wc/v4/orders'][3];
 		}
 
-		// Override /wc/v3/products/$id.
-		if ( isset( $endpoints['/wc/v3/products/(?P<id>[\d]+)'] )
-			&& isset( $endpoints['/wc/v3/products/(?P<id>[\d]+)'][5] )
-			&& isset( $endpoints['/wc/v3/products/(?P<id>[\d]+)'][4] )
-			&& isset( $endpoints['/wc/v3/products/(?P<id>[\d]+)'][3] )
-			&& $endpoints['/wc/v3/products/(?P<id>[\d]+)'][3]['callback'][0] instanceof WC_Admin_REST_Products_Controller
-			&& $endpoints['/wc/v3/products/(?P<id>[\d]+)'][4]['callback'][0] instanceof WC_Admin_REST_Products_Controller
-			&& $endpoints['/wc/v3/products/(?P<id>[\d]+)'][5]['callback'][0] instanceof WC_Admin_REST_Products_Controller
+		// Override /wc/v4/data.
+		if ( isset( $endpoints['/wc/v4/data'] )
+			&& isset( $endpoints['/wc/v4/data'][1] )
+			&& $endpoints['/wc/v4/data'][1]['callback'][0] instanceof WC_Admin_REST_Data_Controller
 		) {
-			$endpoints['/wc/v3/products/(?P<id>[\d]+)'][0] = $endpoints['/wc/v3/products/(?P<id>[\d]+)'][3];
-			$endpoints['/wc/v3/products/(?P<id>[\d]+)'][1] = $endpoints['/wc/v3/products/(?P<id>[\d]+)'][4];
-			$endpoints['/wc/v3/products/(?P<id>[\d]+)'][2] = $endpoints['/wc/v3/products/(?P<id>[\d]+)'][5];
+			$endpoints['/wc/v4/data'][0] = $endpoints['/wc/v4/data'][1];
 		}
 
-		// Override /wc/v3/products/reviews.
-		if ( isset( $endpoints['/wc/v3/products/reviews'] )
-			&& isset( $endpoints['/wc/v3/products/reviews'][3] )
-			&& isset( $endpoints['/wc/v3/products/reviews'][2] )
-			&& $endpoints['/wc/v3/products/reviews'][2]['callback'][0] instanceof WC_Admin_REST_Product_Reviews_Controller
-			&& $endpoints['/wc/v3/products/reviews'][3]['callback'][0] instanceof WC_Admin_REST_Product_Reviews_Controller
+		// Override /wc/v4/products.
+		if ( isset( $endpoints['/wc/v4/products'] )
+			&& isset( $endpoints['/wc/v4/products'][3] )
+			&& isset( $endpoints['/wc/v4/products'][2] )
+			&& $endpoints['/wc/v4/products'][2]['callback'][0] instanceof WC_Admin_REST_Products_Controller
+			&& $endpoints['/wc/v4/products'][3]['callback'][0] instanceof WC_Admin_REST_Products_Controller
 		) {
-			$endpoints['/wc/v3/products/reviews'][0] = $endpoints['/wc/v3/products/reviews'][2];
-			$endpoints['/wc/v3/products/reviews'][1] = $endpoints['/wc/v3/products/reviews'][3];
+			$endpoints['/wc/v4/products'][0] = $endpoints['/wc/v4/products'][2];
+			$endpoints['/wc/v4/products'][1] = $endpoints['/wc/v4/products'][3];
+		}
+
+		// Override /wc/v4/products/$id.
+		if ( isset( $endpoints['/wc/v4/products/(?P<id>[\d]+)'] )
+			&& isset( $endpoints['/wc/v4/products/(?P<id>[\d]+)'][5] )
+			&& isset( $endpoints['/wc/v4/products/(?P<id>[\d]+)'][4] )
+			&& isset( $endpoints['/wc/v4/products/(?P<id>[\d]+)'][3] )
+			&& $endpoints['/wc/v4/products/(?P<id>[\d]+)'][3]['callback'][0] instanceof WC_Admin_REST_Products_Controller
+			&& $endpoints['/wc/v4/products/(?P<id>[\d]+)'][4]['callback'][0] instanceof WC_Admin_REST_Products_Controller
+			&& $endpoints['/wc/v4/products/(?P<id>[\d]+)'][5]['callback'][0] instanceof WC_Admin_REST_Products_Controller
+		) {
+			$endpoints['/wc/v4/products/(?P<id>[\d]+)'][0] = $endpoints['/wc/v4/products/(?P<id>[\d]+)'][3];
+			$endpoints['/wc/v4/products/(?P<id>[\d]+)'][1] = $endpoints['/wc/v4/products/(?P<id>[\d]+)'][4];
+			$endpoints['/wc/v4/products/(?P<id>[\d]+)'][2] = $endpoints['/wc/v4/products/(?P<id>[\d]+)'][5];
+		}
+
+		// Override /wc/v4/products/reviews.
+		if ( isset( $endpoints['/wc/v4/products/reviews'] )
+			&& isset( $endpoints['/wc/v4/products/reviews'][3] )
+			&& isset( $endpoints['/wc/v4/products/reviews'][2] )
+			&& $endpoints['/wc/v4/products/reviews'][2]['callback'][0] instanceof WC_Admin_REST_Product_Reviews_Controller
+			&& $endpoints['/wc/v4/products/reviews'][3]['callback'][0] instanceof WC_Admin_REST_Product_Reviews_Controller
+		) {
+			$endpoints['/wc/v4/products/reviews'][0] = $endpoints['/wc/v4/products/reviews'][2];
+			$endpoints['/wc/v4/products/reviews'][1] = $endpoints['/wc/v4/products/reviews'][3];
 		}
 
 		return $endpoints;

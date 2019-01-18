@@ -11,6 +11,7 @@ import { dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import { NAMESPACE } from 'store/constants';
 import resolvers from '../resolvers';
 
 const { getOrders } = resolvers;
@@ -29,10 +30,10 @@ describe( 'getOrders', () => {
 
 	beforeAll( () => {
 		apiFetch.mockImplementation( options => {
-			if ( options.path === '/wc/v3/orders' ) {
+			if ( options.path === NAMESPACE + 'orders' ) {
 				return Promise.resolve( ORDERS_1 );
 			}
-			if ( options.path === '/wc/v3/orders?orderby=id' ) {
+			if ( options.path === NAMESPACE + 'orders?orderby=id' ) {
 				return Promise.resolve( ORDERS_2 );
 			}
 		} );

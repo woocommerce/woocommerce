@@ -32,7 +32,7 @@ export default {
 			};
 			payload = stringifyQuery( query );
 		}
-		return apiFetch( { path: `/wc/v3/coupons${ payload }` } );
+		return apiFetch( { path: `/wc/v4/coupons${ payload }` } );
 	},
 	isDebounced: true,
 	getOptionKeywords( coupon ) {

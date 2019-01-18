@@ -21,7 +21,7 @@ class WC_Admin_REST_Data_Download_Ips_Controller extends WC_REST_Data_Controller
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v3';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.

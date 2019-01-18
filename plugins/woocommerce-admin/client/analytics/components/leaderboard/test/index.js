@@ -17,6 +17,7 @@ import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency'
  * Internal dependencies
  */
 import LeaderboardWithSelect, { Leaderboard } from '../';
+import { NAMESPACE } from 'store/constants';
 import { numberFormat } from 'lib/number';
 import mockData from '../__mocks__/top-selling-products-mock-data';
 
@@ -102,7 +103,7 @@ describe( 'Leaderboard', () => {
 		);
 		const leaderboard = leaderboardWrapper.root.findByType( Leaderboard );
 
-		const endpoint = '/wc/v3/reports/products';
+		const endpoint = NAMESPACE + 'reports/products';
 		const query = { orderby: 'items_sold', per_page: 5, extended_info: 1 };
 
 		expect( getReportStatsMock.mock.calls[ 0 ][ 1 ] ).toBe( endpoint );

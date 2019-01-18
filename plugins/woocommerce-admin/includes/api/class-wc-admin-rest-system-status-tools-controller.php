@@ -22,7 +22,7 @@ class WC_Admin_REST_System_Status_Tools_Controller extends WC_REST_System_Status
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v3';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * A list of available tools for use in the system status section.

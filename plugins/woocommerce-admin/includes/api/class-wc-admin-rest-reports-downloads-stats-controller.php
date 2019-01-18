@@ -22,7 +22,7 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v3';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.

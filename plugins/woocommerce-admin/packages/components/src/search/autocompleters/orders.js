@@ -38,7 +38,7 @@ export default {
 				per_page: 10,
 			};
 			payload = stringifyQuery( query );
-			return apiFetch( { path: `/wc/v3/orders${ payload }` } );
+			return apiFetch( { path: `/wc/v4/orders${ payload }` } );
 		}
 	},
 	isDebounced: true,

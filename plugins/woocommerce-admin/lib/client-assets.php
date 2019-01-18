@@ -153,7 +153,7 @@ function wc_admin_print_script_settings() {
 	}
 
 	$preload_data_endpoints = array(
-		'countries' => '/wc/v3/data/countries',
+		'countries' => '/wc/v4/data/countries',
 	);
 
 	if ( function_exists( 'gutenberg_preload_api_request' ) ) {

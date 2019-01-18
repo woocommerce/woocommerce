@@ -5,6 +5,10 @@
  * @package WooCommerce\Tests\API
  * @since 3.5.0
  */
+
+/**
+ * Class WC_Tests_API_Reports_Stock
+ */
 class WC_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 
 	/**
@@ -12,7 +16,7 @@ class WC_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v3/reports/stock';
+	protected $endpoint = '/wc/v4/reports/stock';
 
 	/**
 	 * Setup test reports stock data.

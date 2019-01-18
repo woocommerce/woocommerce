@@ -18,6 +18,13 @@ defined( 'ABSPATH' ) || exit;
 class WC_Admin_REST_Products_Controller extends WC_REST_Products_Controller {
 
 	/**
+	 * Endpoint namespace.
+	 *
+	 * @var string
+	 */
+	protected $namespace = 'wc/v4';
+
+	/**
 	 * Adds properties that can be embed via ?_embed=1.
 	 *
 	 * @return array

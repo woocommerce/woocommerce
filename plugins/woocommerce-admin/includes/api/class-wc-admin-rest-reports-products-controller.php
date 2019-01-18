@@ -22,7 +22,7 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v3';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.

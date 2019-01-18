@@ -18,6 +18,13 @@ defined( 'ABSPATH' ) || exit;
 class WC_Admin_REST_Data_Controller extends WC_REST_Data_Controller {
 
 	/**
+	 * Endpoint namespace.
+	 *
+	 * @var string
+	 */
+	protected $namespace = 'wc/v4';
+
+	/**
 	 * Return the list of data resources.
 	 *
 	 * @param  WP_REST_Request $request Request data.

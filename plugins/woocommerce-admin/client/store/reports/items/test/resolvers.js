@@ -31,7 +31,7 @@ describe( 'getReportItems', () => {
 
 	beforeAll( () => {
 		apiFetch.mockImplementation( options => {
-			if ( options.path === `/wc/v3/reports/${ endpoint }` ) {
+			if ( options.path === `/wc/v4/reports/${ endpoint }` ) {
 				return Promise.resolve( {
 					headers: {
 						get: () => ITEMS_1_COUNT,
@@ -39,7 +39,7 @@ describe( 'getReportItems', () => {
 					json: () => Promise.resolve( ITEMS_1 ),
 				} );
 			}
-			if ( options.path === `/wc/v3/reports/${ endpoint }?orderby=id` ) {
+			if ( options.path === `/wc/v4/reports/${ endpoint }?orderby=id` ) {
 				return Promise.resolve( {
 					headers: {
 						get: () => ITEMS_2_COUNT,

@@ -4,7 +4,7 @@
  */
 import { SECOND, MINUTE } from '@fresh-data/framework';
 
-export const NAMESPACE = '/wc/v3';
+export const NAMESPACE = '/wc/v4';
 
 export const DEFAULT_REQUIREMENT = {
 	timeout: 5 * SECOND,
