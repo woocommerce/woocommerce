@@ -614,4 +614,14 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
 		return $mocked_response;
 	}
+
+	/**
+	 * Test WC_Product_CSV_Importer_Controller::is_file_valid_csv.
+	 */
+	public function test_is_file_valid_csv() {
+		$this->assertTrue( WC_Product_CSV_Importer_Controller::is_file_valid_csv( 'C:/wamp64/www/test.local/wp-content/uploads/2018/10/products_all_gg-1.csv' ) );
+		$this->assertTrue( WC_Product_CSV_Importer_Controller::is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
+		$this->assertFalse( WC_Product_CSV_Importer_Controller::is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/img.jpg' ) );
+		$this->assertFalse( WC_Product_CSV_Importer_Controller::is_file_valid_csv( 'file:///srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
+	}
 }

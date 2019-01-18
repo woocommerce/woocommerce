@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<h2>
 				<?php echo esc_html( $viewed_log ); ?>
 				<?php if ( ! empty( $viewed_log ) ) : ?>
-					<a class="page-title-action" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'handle' => $viewed_log ), admin_url( 'admin.php?page=wc-status&tab=logs' ) ), 'remove_log' ) ); ?>" class="button"><?php esc_html_e( 'Delete log', 'woocommerce' ); ?></a>
+					<a class="page-title-action" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'handle' => sanitize_title( $viewed_log ) ), admin_url( 'admin.php?page=wc-status&tab=logs' ) ), 'remove_log' ) ); ?>" class="button"><?php esc_html_e( 'Delete log', 'woocommerce' ); ?></a>
 				<?php endif; ?>
 			</h2>
 		</div>

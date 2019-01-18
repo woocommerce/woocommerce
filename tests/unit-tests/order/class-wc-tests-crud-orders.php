@@ -92,7 +92,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	public function test_get_prices_include_tax() {
 		$object = new WC_Order();
-		$set_to = 'USD';
 		$object->set_prices_include_tax( 1 );
 		$this->assertTrue( $object->get_prices_include_tax() );
 	}
@@ -942,6 +941,28 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertContains( 'Update status event failed', $note->content );
 
 		remove_filter( 'woocommerce_payment_complete_order_status', array( $this, 'throwAnException' ) );
+	}
+
+	/**
+	 * Test: status_transition
+	 */
+	public function test_status_transition_handles_transition_errors() {
+		$object = new WC_Order();
+		$object->save();
+
+		add_filter( 'woocommerce_order_status_on-hold', array( $this, 'throwAnException' ) );
+		$object->update_status( 'on-hold' );
+		remove_filter( 'woocommerce_order_status_on-hold', array( $this, 'throwAnException' ) );
+
+		$note = current(
+			wc_get_order_notes(
+				array(
+					'order_id' => $object->get_id(),
+				)
+			)
+		);
+
+		$this->assertContains( __( 'Error during status transition.', 'woocommerce' ), $note->content );
 	}
 
 	/**

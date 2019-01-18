@@ -237,7 +237,7 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	public static function get_local_database_path( $deprecated = '2' ) {
-		$upload_dir = wp_upload_dir();
+		$upload_dir = wp_get_upload_dir();
 
 		return apply_filters( 'woocommerce_geolocation_local_database_path', $upload_dir['basedir'] . '/GeoLite2-Country.mmdb', $deprecated );
 	}
@@ -265,7 +265,7 @@ class WC_Geolocation {
 				$dest_path = trailingslashit( $upload_dir['basedir'] ) . $database;
 
 				// Extract files with PharData. Tool built into PHP since 5.3.
-				$file      = new PharData( $tmp_database_path ); // phpcs:ignore PHPCompatibility.PHP.NewClasses.phardataFound
+				$file      = new PharData( $tmp_database_path ); // phpcs:ignore PHPCompatibility.Classes.NewClasses.phardataFound
 				$file_path = trailingslashit( $file->current()->getFileName() ) . $database;
 
 				// Extract under uploads directory.

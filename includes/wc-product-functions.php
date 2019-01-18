@@ -134,6 +134,14 @@ function wc_delete_product_transients( $post_id = 0 ) {
 					'products'
 				);
 			}
+
+			$attributes = $product->get_attributes();
+
+			if ( $attributes ) {
+				foreach ( $attributes as $attribute_key => $attribute ) {
+					$transients_to_clear[] = 'wc_layered_nav_counts_' . $attribute_key;
+				}
+			}
 		}
 	}
 
@@ -284,8 +292,7 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
 
 	if ( ! empty( $placeholder_image ) ) {
 		if ( is_numeric( $placeholder_image ) ) {
-			$dimensions = wc_get_image_size( $size );
-			$image      = wp_get_attachment_image_src( $placeholder_image, array( $dimensions['width'], $dimensions['height'] ) );
+			$image = wp_get_attachment_image_src( $placeholder_image, $size );
 
 			if ( ! empty( $image[0] ) ) {
 				$src = $image[0];
@@ -455,8 +462,12 @@ add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
  * @return array
  */
 function wc_get_attachment_image_attributes( $attr ) {
-	if ( strstr( $attr['src'][0], 'woocommerce_uploads/' ) ) {
-		$attr['src'][0] = wc_placeholder_img_src();
+	if ( isset( $attr['src'] ) && strstr( $attr['src'], 'woocommerce_uploads/' ) ) {
+		$attr['src'] = wc_placeholder_img_src();
+
+		if ( isset( $attr['srcset'] ) ) {
+			$attr['srcset'] = '';
+		}
 	}
 	return $attr;
 }
@@ -527,7 +538,8 @@ add_action( 'template_redirect', 'wc_track_product_view', 20 );
  */
 function wc_get_product_types() {
 	return (array) apply_filters(
-		'product_type_selector', array(
+		'product_type_selector',
+		array(
 			'simple'   => __( 'Simple product', 'woocommerce' ),
 			'grouped'  => __( 'Grouped product', 'woocommerce' ),
 			'external' => __( 'External/Affiliate product', 'woocommerce' ),
@@ -744,8 +756,7 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$props['thumb_src_h'] = $src[2];
 
 		// Image source.
-		$flexslider      = (bool) apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) );
-		$image_size      = apply_filters( 'woocommerce_gallery_image_size', $flexslider ? 'woocommerce_single' : $gallery_thumbnail_size );
+		$image_size      = apply_filters( 'woocommerce_gallery_image_size', 'woocommerce_single' );
 		$src             = wp_get_attachment_image_src( $attachment_id, $image_size );
 		$props['src']    = $src[0];
 		$props['src_w']  = $src[1];
@@ -764,7 +775,8 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
  */
 function wc_get_product_visibility_options() {
 	return apply_filters(
-		'woocommerce_product_visibility_options', array(
+		'woocommerce_product_visibility_options',
+		array(
 			'visible' => __( 'Shop and search results', 'woocommerce' ),
 			'catalog' => __( 'Shop only', 'woocommerce' ),
 			'search'  => __( 'Search results only', 'woocommerce' ),
@@ -806,12 +818,12 @@ function wc_get_min_max_price_meta_query( $args ) {
 		$max = $class_max;
 	}
 
-	return array(
+	return apply_filters( 'woocommerce_get_min_max_price_meta_query', array(
 		'key'     => '_price',
 		'value'   => array( $min, $max ),
 		'compare' => 'BETWEEN',
 		'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
-	);
+	), $args );
 }
 
 /**
@@ -910,7 +922,10 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 	}
 
 	$related_posts = apply_filters(
-		'woocommerce_related_products', $related_posts, $product_id, array(
+		'woocommerce_related_products',
+		$related_posts,
+		$product_id,
+		array(
 			'limit'        => $limit,
 			'excluded_ids' => $exclude_ids,
 		)
@@ -944,7 +959,8 @@ function wc_get_product_term_ids( $product_id, $taxonomy ) {
  */
 function wc_get_price_including_tax( $product, $args = array() ) {
 	$args = wp_parse_args(
-		$args, array(
+		$args,
+		array(
 			'qty'   => '',
 			'price' => '',
 		)
@@ -964,10 +980,16 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 
 	if ( $product->is_taxable() ) {
 		if ( ! wc_prices_include_tax() ) {
-			$tax_rates    = WC_Tax::get_rates( $product->get_tax_class() );
-			$taxes        = WC_Tax::calc_tax( $line_price, $tax_rates, false );
-			$tax_amount   = WC_Tax::get_tax_total( $taxes );
-			$return_price = round( $line_price + $tax_amount, wc_get_price_decimals() );
+			$tax_rates = WC_Tax::get_rates( $product->get_tax_class() );
+			$taxes     = WC_Tax::calc_tax( $line_price, $tax_rates, false );
+
+			if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+				$taxes_total = array_sum( $taxes );
+			} else {
+				$taxes_total = array_sum( array_map( 'wc_round_tax_total', $taxes ) );
+			}
+
+			$return_price = round( $line_price + $taxes_total, wc_get_price_decimals() );
 		} else {
 			$tax_rates      = WC_Tax::get_rates( $product->get_tax_class() );
 			$base_tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
@@ -978,8 +1000,14 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 			 */
 			if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) { // @codingStandardsIgnoreLine.
 				$remove_taxes = apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ? WC_Tax::calc_tax( $line_price, $base_tax_rates, true ) : WC_Tax::calc_tax( $line_price, $tax_rates, true );
-				$remove_tax   = array_sum( $remove_taxes );
-				$return_price = round( $line_price - $remove_tax, wc_get_price_decimals() );
+
+				if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+					$remove_taxes_total = array_sum( $remove_taxes );
+				} else {
+					$remove_taxes_total = array_sum( array_map( 'wc_round_tax_total', $remove_taxes ) );
+				}
+
+				$return_price = round( $line_price - $remove_taxes_total, wc_get_price_decimals() );
 
 				/**
 			 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing with out of base locations.
@@ -989,7 +1017,16 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 			} elseif ( $tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 				$base_taxes   = WC_Tax::calc_tax( $line_price, $base_tax_rates, true );
 				$modded_taxes = WC_Tax::calc_tax( $line_price - array_sum( $base_taxes ), $tax_rates, false );
-				$return_price = round( $line_price - array_sum( $base_taxes ) + wc_round_tax_total( array_sum( $modded_taxes ), wc_get_price_decimals() ), wc_get_price_decimals() );
+
+				if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+					$base_taxes_total   = array_sum( $base_taxes );
+					$modded_taxes_total = array_sum( $modded_taxes );
+				} else {
+					$base_taxes_total   = array_sum( array_map( 'wc_round_tax_total', $base_taxes ) );
+					$modded_taxes_total = array_sum( array_map( 'wc_round_tax_total', $modded_taxes ) );
+				}
+
+				$return_price = round( $line_price - $base_taxes_total + $modded_taxes_total, wc_get_price_decimals() );
 			}
 		}
 	}
@@ -1006,7 +1043,8 @@ function wc_get_price_including_tax( $product, $args = array() ) {
  */
 function wc_get_price_excluding_tax( $product, $args = array() ) {
 	$args = wp_parse_args(
-		$args, array(
+		$args,
+		array(
 			'qty'   => '',
 			'price' => '',
 		)
@@ -1027,7 +1065,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 		$tax_rates      = WC_Tax::get_rates( $product->get_tax_class() );
 		$base_tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
 		$remove_taxes   = apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ? WC_Tax::calc_tax( $line_price, $base_tax_rates, true ) : WC_Tax::calc_tax( $line_price, $tax_rates, true );
-		$return_price   = $line_price - array_sum( $remove_taxes );
+		$return_price   = $line_price - array_sum( $remove_taxes ); // Unrounded since we're dealing with tax inclusive prices. Matches logic in cart-totals class. @see adjust_non_base_location_price.
 	} else {
 		$return_price = $line_price;
 	}
@@ -1045,7 +1083,8 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
  */
 function wc_get_price_to_display( $product, $args = array() ) {
 	$args = wp_parse_args(
-		$args, array(
+		$args,
+		array(
 			'qty'   => 1,
 			'price' => $product->get_price(),
 		)
@@ -1056,13 +1095,15 @@ function wc_get_price_to_display( $product, $args = array() ) {
 
 	return 'incl' === get_option( 'woocommerce_tax_display_shop' ) ?
 		wc_get_price_including_tax(
-			$product, array(
+			$product,
+			array(
 				'qty'   => $qty,
 				'price' => $price,
 			)
 		) :
 		wc_get_price_excluding_tax(
-			$product, array(
+			$product,
+			array(
 				'qty'   => $qty,
 				'price' => $price,
 			)

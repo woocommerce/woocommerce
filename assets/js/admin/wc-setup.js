@@ -163,18 +163,14 @@ jQuery( function( $ ) {
 			$( this ).closest( '.wc-wizard-service-settings' )
 				.find( 'input.payment-email-input' )
 				.attr( 'type', 'email' )
+				.prop( 'disabled', false )
 				.prop( 'required', true );
-			$( this ).closest( '.wc-wizard-service-settings' )
-				.find( '.wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_email' )
-				.show();
 		} else {
 			$( this ).closest( '.wc-wizard-service-settings' )
 				.find( 'input.payment-email-input' )
 				.attr( 'type', null )
+				.prop( 'disabled', true )
 				.prop( 'required', false );
-			$( this ).closest( '.wc-wizard-service-settings' )
-				.find( '.wc-wizard-service-setting-stripe_email, .wc-wizard-service-setting-ppec_paypal_email' )
-				.hide();
 		}
 	} ).find( 'input#stripe_create_account, input#ppec_paypal_reroute_requests' ).change();
 
@@ -239,4 +235,14 @@ jQuery( function( $ ) {
 
 	updatePluginInfo();
 	$( '.wc-setup-content' ).on( 'change', '[data-plugins]', updatePluginInfo );
+
+	$( document.body ).on( 'init_tooltips', function() {
+		$( '.help_tip' ).tipTip( {
+			'attribute': 'data-tip',
+			'fadeIn': 50,
+			'fadeOut': 50,
+			'delay': 200,
+			'defaultPosition': 'top'
+		} );
+	} ).trigger( 'init_tooltips' );
 } );

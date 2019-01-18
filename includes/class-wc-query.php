@@ -459,6 +459,9 @@ class WC_Query {
 		);
 
 		switch ( $orderby ) {
+			case 'id':
+				$args['orderby'] = 'ID';
+				break;
 			case 'menu_order':
 				$args['orderby'] = 'menu_order title';
 				break;
@@ -499,7 +502,7 @@ class WC_Query {
 				break;
 		}
 
-		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args );
+		return apply_filters( 'woocommerce_get_catalog_ordering_args', $args, $orderby, $order );
 	}
 
 	/**

@@ -14,16 +14,16 @@ defined( 'ABSPATH' ) || exit;
  * REST API Customers controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_Customers_V1_Controller
+ * @extends WC_REST_Customers_V2_Controller
  */
-class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
+class WC_REST_Customers_Controller extends WC_REST_Customers_V2_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v2';
+	protected $namespace = 'wc/v3';
 
 	/**
 	 * Get formatted item data.
@@ -57,56 +57,9 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 			'billing'            => $data['billing'],
 			'shipping'           => $data['shipping'],
 			'is_paying_customer' => $data['is_paying_customer'],
-			'orders_count'       => $object->get_order_count(),
-			'total_spent'        => $object->get_total_spent(),
 			'avatar_url'         => $object->get_avatar_url(),
 			'meta_data'          => $data['meta_data'],
 		);
-	}
-
-	/**
-	 * Prepare a single customer output for response.
-	 *
-	 * @param  WP_User         $user_data User object.
-	 * @param  WP_REST_Request $request   Request object.
-	 * @return WP_REST_Response $response  Response data.
-	 */
-	public function prepare_item_for_response( $user_data, $request ) {
-		$customer = new WC_Customer( $user_data->ID );
-		$data     = $this->get_formatted_item_data( $customer );
-		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data     = $this->add_additional_fields_to_object( $data, $request );
-		$data     = $this->filter_response_by_context( $data, $context );
-		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $user_data ) );
-
-		/**
-		 * Filter customer data returned from the REST API.
-		 *
-		 * @param WP_REST_Response $response   The response object.
-		 * @param WP_User          $user_data  User object used to create response.
-		 * @param WP_REST_Request  $request    Request object.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_customer', $response, $user_data, $request );
-	}
-
-	/**
-	 * Update customer meta fields.
-	 *
-	 * @param WC_Customer     $customer Customer data.
-	 * @param WP_REST_Request $request  Request data.
-	 */
-	protected function update_customer_meta_fields( $customer, $request ) {
-		parent::update_customer_meta_fields( $customer, $request );
-
-		// Meta data.
-		if ( isset( $request['meta_data'] ) ) {
-			if ( is_array( $request['meta_data'] ) ) {
-				foreach ( $request['meta_data'] as $meta ) {
-					$customer->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-				}
-			}
-		}
 	}
 
 	/**
@@ -309,18 +262,6 @@ class WC_REST_Customers_Controller extends WC_REST_Customers_V1_Controller {
 				'is_paying_customer' => array(
 					'description' => __( 'Is the customer a paying customer?', 'woocommerce' ),
 					'type'        => 'bool',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'orders_count'       => array(
-					'description' => __( 'Quantity of orders made by the customer.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'total_spent'        => array(
-					'description' => __( 'Total amount spent.', 'woocommerce' ),
-					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),

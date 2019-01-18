@@ -215,7 +215,8 @@
 		}
 
 		if ( variation.dimensions ) {
-			$dimensions.wc_set_content( variation.dimensions_html );
+			// Decode HTML entities.
+			$dimensions.wc_set_content( $.parseHTML( variation.dimensions_html )[0].data );
 		} else {
 			$dimensions.wc_reset_content();
 		}

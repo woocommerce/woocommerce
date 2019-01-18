@@ -14,81 +14,28 @@ defined( 'ABSPATH' ) || exit;
  * REST API Order Notes controller class.
  *
  * @package WooCommerce/API
- * @extends WC_REST_ControllerWC_REST_Order_Notes_V1_Controller
+ * @extends WC_REST_Order_Notes_V2_Controller
  */
-class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V1_Controller {
+class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V2_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v2';
-
-	/**
-	 * Get order notes from an order.
-	 *
-	 * @param WP_REST_Request $request Request data.
-	 *
-	 * @return array|WP_Error
-	 */
-	public function get_items( $request ) {
-		$order = wc_get_order( (int) $request['order_id'] );
-
-		if ( ! $order || $this->post_type !== $order->get_type() ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		$args = array(
-			'post_id' => $order->get_id(),
-			'approve' => 'approve',
-			'type'    => 'order_note',
-		);
-
-		// Allow filter by order note type.
-		if ( 'customer' === $request['type'] ) {
-			$args['meta_query'] = array( // WPCS: slow query ok.
-				array(
-					'key'     => 'is_customer_note',
-					'value'   => 1,
-					'compare' => '=',
-				),
-			);
-		} elseif ( 'internal' === $request['type'] ) {
-			$args['meta_query'] = array( // WPCS: slow query ok.
-				array(
-					'key'     => 'is_customer_note',
-					'compare' => 'NOT EXISTS',
-				),
-			);
-		}
-
-		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
-
-		$notes = get_comments( $args );
-
-		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
-
-		$data = array();
-		foreach ( $notes as $note ) {
-			$order_note = $this->prepare_item_for_response( $note, $request );
-			$order_note = $this->prepare_response_for_collection( $order_note );
-			$data[]     = $order_note;
-		}
-
-		return rest_ensure_response( $data );
-	}
+	protected $namespace = 'wc/v3';
 
 	/**
 	 * Prepare a single order note output for response.
 	 *
-	 * @param WP_Comment      $note Order note object.
+	 * @param WP_Comment      $note    Order note object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $note, $request ) {
 		$data = array(
 			'id'               => (int) $note->comment_ID,
+			'author'           => __( 'WooCommerce', 'woocommerce' ) === $note->comment_author ? 'system' : $note->comment_author,
 			'date_created'     => wc_rest_prepare_date_response( $note->comment_date ),
 			'date_created_gmt' => wc_rest_prepare_date_response( $note->comment_date_gmt ),
 			'note'             => $note->comment_content,
@@ -115,6 +62,52 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V1_Controller {
 	}
 
 	/**
+	 * Create a single order note.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function create_item( $request ) {
+		if ( ! empty( $request['id'] ) ) {
+			/* translators: %s: post type */
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+		}
+
+		$order = wc_get_order( (int) $request['order_id'] );
+
+		if ( ! $order || $this->post_type !== $order->get_type() ) {
+			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		// Create the note.
+		$note_id = $order->add_order_note( $request['note'], $request['customer_note'], $request['added_by_user'] );
+
+		if ( ! $note_id ) {
+			return new WP_Error( 'woocommerce_api_cannot_create_order_note', __( 'Cannot create order note, please try again.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		$note = get_comment( $note_id );
+		$this->update_additional_fields_for_object( $note, $request );
+
+		/**
+		 * Fires after a order note is created or updated via the REST API.
+		 *
+		 * @param WP_Comment      $note      New order note object.
+		 * @param WP_REST_Request $request   Request object.
+		 * @param boolean         $creating  True when creating item, false when updating.
+		 */
+		do_action( 'woocommerce_rest_insert_order_note', $note, $request, true );
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $note, $request );
+		$response = rest_ensure_response( $response );
+		$response->set_status( 201 );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, str_replace( '(?P<order_id>[\d]+)', $order->get_id(), $this->rest_base ), $note_id ) ) );
+
+		return $response;
+	}
+
+	/**
 	 * Get the Order Notes schema, conforming to JSON Schema.
 	 *
 	 * @return array
@@ -128,6 +121,12 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V1_Controller {
 				'id'               => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'author'           => array(
+					'description' => __( 'Order note author.', 'woocommerce' ),
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
@@ -154,29 +153,15 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V1_Controller {
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
 				),
+				'added_by_user'    => array(
+					'description' => __( 'If true, this note will be attributed to the current user. If false, the note will be attributed to the system.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'default'     => false,
+					'context'     => array( 'edit' ),
+				),
 			),
 		);
 
 		return $this->add_additional_fields_schema( $schema );
-	}
-
-	/**
-	 * Get the query params for collections.
-	 *
-	 * @return array
-	 */
-	public function get_collection_params() {
-		$params            = array();
-		$params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['type']    = array(
-			'default'           => 'any',
-			'description'       => __( 'Limit result to customers or internal notes.', 'woocommerce' ),
-			'type'              => 'string',
-			'enum'              => array( 'any', 'customer', 'internal' ),
-			'sanitize_callback' => 'sanitize_key',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-
-		return $params;
 	}
 }

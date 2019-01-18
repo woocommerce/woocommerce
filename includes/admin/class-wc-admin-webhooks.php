@@ -119,7 +119,8 @@ class WC_Admin_Webhooks {
 		}
 
 		// API version.
-		$webhook->set_api_version( ! empty( $_POST['webhook_api_version'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_api_version'] ) ) : 'wp_api_v2' ); // WPCS: input var okay, CSRF ok.
+		$rest_api_versions = wc_get_webhook_rest_api_versions();
+		$webhook->set_api_version( ! empty( $_POST['webhook_api_version'] ) ? sanitize_text_field( wp_unslash( $_POST['webhook_api_version'] ) ) : end( $rest_api_versions ) ); // WPCS: input var okay, CSRF ok.
 
 		$webhook->save();
 

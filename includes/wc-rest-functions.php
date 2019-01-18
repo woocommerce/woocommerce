@@ -273,13 +273,29 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 function wc_rest_check_user_permissions( $context = 'read', $object_id = 0 ) {
 	$contexts = array(
 		'read'   => 'list_users',
-		'create' => 'edit_users',
+		'create' => 'promote_users', // Check if current user can create users, shop managers are not allowed to create users.
 		'edit'   => 'edit_users',
 		'delete' => 'delete_users',
-		'batch'  => 'edit_users',
+		'batch'  => 'promote_users',
 	);
 
-	$permission = current_user_can( $contexts[ $context ], $object_id );
+	// Check to allow shop_managers to manage only customers.
+	if ( in_array( $context, array( 'edit', 'delete' ), true ) && wc_current_user_has_role( 'shop_manager' ) ) {
+		$permission                  = false;
+		$user_data                   = get_userdata( $object_id );
+		$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
+
+		if ( isset( $user_data->roles ) ) {
+			$can_manage_users = array_intersect( $user_data->roles, array_unique( $shop_manager_editable_roles ) );
+
+			// Check if Shop Manager can edit customer or with the is same shop manager.
+			if ( 0 < count( $can_manage_users ) || intval( $object_id ) === intval( get_current_user_id() ) ) {
+				$permission = current_user_can( $contexts[ $context ], $object_id );
+			}
+		}
+	} else {
+		$permission = current_user_can( $contexts[ $context ], $object_id );
+	}
 
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, 'user' );
 }
@@ -331,4 +347,29 @@ function wc_rest_check_manager_permissions( $object, $context = 'read' ) {
 	$permission = current_user_can( $objects[ $object ] );
 
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, 0, $object );
+}
+
+/**
+ * Check product reviews permissions on REST API.
+ *
+ * @since 3.5.0
+ * @param string $context   Request context.
+ * @param string $object_id Object ID.
+ * @return bool
+ */
+function wc_rest_check_product_reviews_permissions( $context = 'read', $object_id = 0 ) {
+	$permission = false;
+	$contexts   = array(
+		'read'   => 'moderate_comments',
+		'create' => 'moderate_comments',
+		'edit'   => 'moderate_comments',
+		'delete' => 'moderate_comments',
+		'batch'  => 'moderate_comments',
+	);
+
+	if ( isset( $contexts[ $context ] ) ) {
+		$permission = current_user_can( $contexts[ $context ] );
+	}
+
+	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, 'product_review' );
 }

@@ -878,7 +878,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_dimensions() {
-		$this->assertEquals( '10 x 10 x 10 cm', wc_format_dimensions( array( 10, 10, 10 ) ) );
+		$this->assertEquals( '10 &times; 10 &times; 10 cm', wc_format_dimensions( array( 10, 10, 10 ) ) );
 	}
 
 	/**
@@ -985,5 +985,16 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 				'w' => 1,
 			),
 		), wc_array_merge_recursive_numeric( $a, $b, $c ) );
+	}
+
+	/**
+	 * Test the wc_sanitize_endpoint_slug function
+	 *
+	 * @return void
+	 */
+	public function test_wc_sanitize_endpoint_slug() {
+		$this->assertEquals( 'a-valid-slug', wc_sanitize_endpoint_slug( 'a-valid-slug' ) );
+		$this->assertEquals( 'an-invalid-slug', wc_sanitize_endpoint_slug( 'An invalid slug' ) );
+		$this->assertEquals( 'case-slug', wc_sanitize_endpoint_slug( 'case-SLUG' ) );
 	}
 }

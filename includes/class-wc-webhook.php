@@ -59,7 +59,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 
 		$this->data_store = WC_Data_Store::load( 'webhook' );
 
-		// If we have an ID, load the user from the DB.
+		// If we have an ID, load the webhook from the DB.
 		if ( $this->get_id() ) {
 			try {
 				$this->data_store->read( $this );
@@ -164,6 +164,10 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			} elseif ( 'updated' === $this->get_event() && $resource_created ) {
 				$should_deliver = false;
 			}
+		}
+
+		if ( ! wc_is_webhook_valid_topic( $this->get_topic() ) ) {
+			$should_deliver = false;
 		}
 
 		/*
@@ -280,7 +284,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return array
 	 */
 	private function get_wp_api_payload( $resource, $resource_id, $event ) {
-		$version_suffix = 'wp_api_v1' === $this->get_api_version() ? '_V1' : '';
+		$rest_api_versions = wc_get_webhook_rest_api_versions();
+		$version_suffix    = end( $rest_api_versions ) !== $this->get_api_version() ? strtoupper( str_replace( 'wp_api', '', $this->get_api_version() ) ) : '';
 
 		switch ( $resource ) {
 			case 'coupon':
@@ -340,7 +345,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				'id' => $resource_id,
 			);
 		} else {
-			if ( in_array( $this->get_api_version(), array( 'wp_api_v1', 'wp_api_v2' ), true ) ) {
+			if ( in_array( $this->get_api_version(), wc_get_webhook_rest_api_versions(), true ) ) {
 				$payload = $this->get_wp_api_payload( $resource, $resource_id, $event );
 			} else {
 				$payload = $this->get_legacy_api_payload( $resource, $resource_id, $event );
@@ -436,13 +441,15 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		}
 
 		$logger->info(
-			wc_print_r( $message, true ), array(
+			wc_print_r( $message, true ),
+			array(
 				'source' => 'webhooks-delivery',
 			)
 		);
 
 		// Track failures.
-		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 300 ) {
+		// Check for a success, which is a 2xx, 301 or 302 Response Code.
+		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 303 ) {
 			$this->set_failure_count( 0 );
 			$this->save();
 		} else {

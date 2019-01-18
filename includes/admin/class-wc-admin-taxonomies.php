@@ -19,9 +19,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Taxonomies {
 
 	/**
+	 * Default category ID.
+	 *
+	 * @var int
+	 */
+	private $default_cat_id = 0;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
+		// Default category ID.
+		$this->default_cat_id = get_option( 'default_product_cat', 0 );
+
 		// Category/term ordering
 		add_action( 'create_term', array( $this, 'create_term' ), 5, 3 );
 		add_action( 'delete_term', array( $this, 'delete_term' ), 5 );
@@ -54,6 +64,9 @@ class WC_Admin_Taxonomies {
 
 		// Maintain hierarchy of terms
 		add_filter( 'wp_terms_checklist_args', array( $this, 'disable_checked_ontop' ) );
+
+		// Admin footer scripts for this product categories admin screen
+		add_action( 'admin_footer', array( $this, 'scripts_at_product_cat_screen_footer' ) );
 	}
 
 	/**
@@ -435,6 +448,26 @@ class WC_Admin_Taxonomies {
 			$args['checked_ontop'] = false;
 		}
 		return $args;
+	}
+
+	/**
+	 * Admin footer scripts for the product categories admin screen
+	 *
+	 * @return void
+	 */
+	public function scripts_at_product_cat_screen_footer() {
+		if ( ! isset( $_GET['taxonomy'] ) || 'product_cat' !== $_GET['taxonomy'] ) {
+			return;
+		}
+		// Ensure the tooltip is displayed when the image column is disabled on product categories
+		wc_enqueue_js("
+			(function( $ ) {
+				'use strict';
+				var product_cat = $( 'tr#tag-" . absint( $this->default_cat_id ) . "' );
+				product_cat.find( 'th' ).empty();
+				product_cat.find( 'td.thumb span' ).detach( 'span' ).appendTo( product_cat.find( 'th' ) );
+			})( jQuery );
+		");
 	}
 }
 

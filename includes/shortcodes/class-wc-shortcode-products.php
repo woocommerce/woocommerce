@@ -287,8 +287,15 @@ class WC_Shortcode_Products {
 			$field    = 'slug';
 
 			if ( $terms && is_numeric( $terms[0] ) ) {
-				$terms = array_map( 'absint', $terms );
 				$field = 'term_id';
+				$terms = array_map( 'absint', $terms );
+				// Check numeric slugs.
+				foreach ( $terms as $term ) {
+					$the_term = get_term_by( 'slug', $term, $taxonomy );
+					if ( false !== $the_term ) {
+						$terms[] = $the_term->term_id;
+					}
+				}
 			}
 
 			// If no terms were specified get all products that are in the attribute taxonomy.
@@ -302,6 +309,7 @@ class WC_Shortcode_Products {
 				$field = 'term_id';
 			}
 
+			// We always need to search based on the slug as well, this is to accommodate numeric slugs.
 			$query_args['tax_query'][] = array(
 				'taxonomy' => $taxonomy,
 				'terms'    => $terms,
@@ -323,8 +331,15 @@ class WC_Shortcode_Products {
 			$field      = 'slug';
 
 			if ( is_numeric( $categories[0] ) ) {
+				$field = 'term_id';
 				$categories = array_map( 'absint', $categories );
-				$field      = 'term_id';
+				// Check numeric slugs.
+				foreach ( $categories as $cat ) {
+					$the_cat = get_term_by( 'slug', $cat, 'product_cat' );
+					if ( false !== $the_cat ) {
+						$categories[] = $the_cat->term_id;
+					}
+				}
 			}
 
 			$query_args['tax_query'][] = array(

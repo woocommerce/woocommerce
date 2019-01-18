@@ -51,7 +51,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 
 		if ( ! defined( 'WC_INSTALLING' ) ) {
 			// Load shipping methods so we can show any global options they may have.
-			$shipping_methods = WC()->shipping->load_shipping_methods();
+			$shipping_methods = WC()->shipping()->load_shipping_methods();
 
 			foreach ( $shipping_methods as $method ) {
 				if ( ! $method->has_settings() ) {
@@ -146,7 +146,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		global $current_section, $hide_save_button;
 
 		// Load shipping methods so we can show any global options they may have.
-		$shipping_methods = WC()->shipping->load_shipping_methods();
+		$shipping_methods = WC()->shipping()->load_shipping_methods();
 
 		if ( '' === $current_section ) {
 			$this->output_zones_screen();
@@ -174,8 +174,11 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		switch ( $current_section ) {
 			case 'options':
 				WC_Admin_Settings::save_fields( $this->get_settings() );
+				do_action( 'woocommerce_update_options_' . $this->id . '_options' );
 				break;
 			case 'classes':
+				do_action( 'woocommerce_update_options_' . $this->id . '_classes' );
+				break;
 			case '':
 				break;
 			default:
@@ -187,10 +190,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 					}
 				}
 				break;
-		}
-
-		if ( $current_section ) {
-			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
 		}
 
 		// Increments the transient version to invalidate cache.
