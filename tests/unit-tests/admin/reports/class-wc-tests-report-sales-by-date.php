@@ -123,7 +123,11 @@ class WC_Tests_Report_Sales_By_Date extends WC_Unit_Test_Case {
 			$data->orders[0]->total_sales,
 			'Orders, total sales.'
 		);
-		$this->assertEquals( $data->orders[0]->total_sales - $data->total_refunds, $data->total_sales, 'Day sales, total sales.' );
+		$this->assertEquals(
+			$data->orders[0]->total_sales - $data->total_refunds,
+			$data->total_sales,
+			'Day sales, total sales.'
+		);
 		$this->assertEquals( $data->total_sales, $data->average_total_sales, 'Average total sales.' );
 
 		$this->assertEquals(
