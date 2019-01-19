@@ -445,7 +445,7 @@ export const defaultTableDateFormat = 'm/d/Y';
  * @return {String} Current interval.
  */
 export function getDateFormatsForInterval( interval, ticks = 0 ) {
-	let tooltipLabelFormat = '%B %d, %Y';
+	let tooltipLabelFormat = '%B %-d, %Y';
 	let xFormat = '%Y-%m-%d';
 	let x2Format = '%b %Y';
 	let tableFormat = defaultTableDateFormat;
@@ -454,12 +454,12 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
 		case 'hour':
 			tooltipLabelFormat = '%_I%p';
 			xFormat = '%_I%p';
-			x2Format = '%b %d, %Y';
+			x2Format = '%b %-d, %Y';
 			tableFormat = 'h A';
 			break;
 		case 'day':
 			if ( ticks < dayTicksThreshold ) {
-				xFormat = '%d';
+				xFormat = '%-d';
 			} else {
 				xFormat = '%b';
 				x2Format = '%Y';
@@ -467,13 +467,13 @@ export function getDateFormatsForInterval( interval, ticks = 0 ) {
 			break;
 		case 'week':
 			if ( ticks < weekTicksThreshold ) {
-				xFormat = '%d';
+				xFormat = '%-d';
 				x2Format = '%b %Y';
 			} else {
 				xFormat = '%b';
 				x2Format = '%Y';
 			}
-			tooltipLabelFormat = __( 'Week of %B %d, %Y', 'wc-admin' );
+			tooltipLabelFormat = __( 'Week of %B %-d, %Y', 'wc-admin' );
 			break;
 		case 'quarter':
 		case 'month':
