@@ -500,6 +500,7 @@ function wc_create_refund( $args = array() ) {
 		$refund->set_amount( $args['amount'] );
 		$refund->set_parent_id( absint( $args['order_id'] ) );
 		$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
+		$refund->set_prices_include_tax( $order->get_prices_include_tax() );
 
 		if ( ! is_null( $args['reason'] ) ) {
 			$refund->set_reason( $args['reason'] );
