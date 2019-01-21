@@ -31,7 +31,7 @@
     "chromedriver": "2.45.0",
     "config": "3.0.1",
     "cross-env": "5.2.0",
-    "eslint": "5.12.1",
+    "eslint": "5.12.0",
     "eslint-config-wpcalypso": "4.0.1",
     "eslint-plugin-wpcalypso": "4.0.2",
     "grunt": "1.0.3",
@@ -55,7 +55,7 @@
     "lint-staged": "8.1.0",
     "mocha": "5.2.0",
     "prettier": "github:automattic/calypso-prettier#c56b4251",
-    "stylelint": "9.10.0",
+    "stylelint": "9.10.1",
     "stylelint-config-wordpress": "13.1.0",
     "wc-e2e-page-objects": "0.10.0"
   },
