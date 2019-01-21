@@ -92,8 +92,9 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$min_price = isset( $_GET['min_price'] ) ? wc_clean( wp_unslash( $_GET['min_price'] ) ) : apply_filters( 'woocommerce_price_filter_widget_min_amount', $min ); // WPCS: input var ok, CSRF ok.
 		$max_price = isset( $_GET['max_price'] ) ? wc_clean( wp_unslash( $_GET['max_price'] ) ) : apply_filters( 'woocommerce_price_filter_widget_max_amount', $max ); // WPCS: input var ok, CSRF ok.
 
-		echo '<form method="get" action="' . esc_url( $form_action ) . '">
-			<div class="price_slider_wrapper">
+		echo '<form method="get" action="' . esc_url( $form_action ) . '">';
+		do_action( 'woocommerce_price_filter_widget_before_input' );
+		echo '<div class="price_slider_wrapper">
 				<div class="price_slider" style="display:none;"></div>
 				<div class="price_slider_amount">
 					<input type="text" id="min_price" name="min_price" value="' . esc_attr( $min_price ) . '" data-min="' . esc_attr( apply_filters( 'woocommerce_price_filter_widget_min_amount', $min ) ) . '" placeholder="' . esc_attr__( 'Min price', 'woocommerce' ) . '" />
@@ -105,8 +106,9 @@ class WC_Widget_Price_Filter extends WC_Widget {
 					' . wc_query_string_form_fields( null, array( 'min_price', 'max_price' ), '', true ) . '
 					<div class="clear"></div>
 				</div>
-			</div>
-		</form>'; // WPCS: XSS ok.
+			</div>';
+		do_action( 'woocommerce_price_filter_widget_after_input' );
+		echo '</form>'; // WPCS: XSS ok.
 
 		$this->widget_end( $args );
 	}
