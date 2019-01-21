@@ -801,7 +801,7 @@ function wc_get_product_visibility_term_ids() {
  * @param array|int $term Term object of the target term, or term ID.
  * @return string Final image url.
  */
-function wc_get_term_src_url( $term, $image_id = false, $size = false, $placeholder_image = false ) {
+function wc_get_term_image_url( $term, $image_id = false, $size = false, $placeholder_image = false ) {
 	
 	$term_id = is_numeric($term) ? $term : $term->term_id;
 	$image_url = '';
@@ -820,5 +820,5 @@ function wc_get_term_src_url( $term, $image_id = false, $size = false, $placehol
 		$image_url = wc_placeholder_img_src();
 	}
 	
-	return apply_filters( 'woocommerce_get_term_src_url', $image_url, $term_id, $size, $placeholder_image );
+	return apply_filters( 'woocommerce_get_term_image_url', $image_url, $term_id, $size, $placeholder_image );
 }
