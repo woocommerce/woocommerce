@@ -54,8 +54,8 @@
 		font-size: inherit;
 		vertical-align: middle;
 
-		&[type="number"]::-webkit-outer-spin-button,
-		&[type="number"]::-webkit-inner-spin-button {
+		&[type='number']::-webkit-outer-spin-button,
+		&[type='number']::-webkit-inner-spin-button {
 			-webkit-appearance: none;
 			margin: 0;
 		}
