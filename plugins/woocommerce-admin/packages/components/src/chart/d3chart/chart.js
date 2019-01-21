@@ -60,8 +60,11 @@ class D3Chart extends Component {
 			.append( 'g' )
 			.attr( 'transform', `translate(${ margin.left },${ margin.top })` );
 
-		drawAxis( g, adjParams );
-		type === 'line' && drawLines( g, data, adjParams );
+		const xOffset = type === 'line' && adjParams.uniqueDates.length <= 1
+			? adjParams.width / 2
+			: 0;
+		drawAxis( g, adjParams, xOffset );
+		type === 'line' && drawLines( g, data, adjParams, xOffset );
 		type === 'bar' && drawBars( g, data, adjParams );
 	}
 
@@ -140,6 +143,7 @@ class D3Chart extends Component {
 			type,
 			uniqueDates,
 			uniqueKeys,
+			valueType,
 			xFormat: getFormatter( xFormat, d3TimeFormat ),
 			x2Format: getFormatter( x2Format, d3TimeFormat ),
 			xGroupScale: getXGroupScale( orderedKeys, xScale, compact ),
@@ -150,7 +154,6 @@ class D3Chart extends Component {
 			yScale,
 			yTickOffset: getYTickOffset( adjHeight, yMax ),
 			yFormat: getFormatter( yFormat ),
-			valueType,
 		};
 	}
 
