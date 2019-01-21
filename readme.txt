@@ -158,6 +158,75 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
+= 3.5.4 - 2019-01-xx =
+* Tweak - Allow limited html in woocommerce_rating_filter_count filter. #21904
+* Tweak - Remove 'on-hold' orders from admin tax reports for more logical reporting. #22419
+* Tweak - Remove payment phrases from processing emails. #22418
+* Tweak - Removed display of cost for local pickup when free. #22446
+* Fix - Unescape CSV formulas in product attributes in CSV importer/exporter. #21938
+* Fix - Remove use of non-existing `WC_REST_Dev_Setting_Options_Controller` class. #22121
+* Fix - Fix edge case where `get_plugins` would not have the custom WooCommerce plugin headers if `get_plugins` was called early. #21669
+* Fix - Prevent PHP warning when deprecated user meta starts with uppercase. #21943
+* Fix - Fixed support for multiple query parameters translated to meta queries via REST API requests. #22108
+* Fix - Prevent PHP errors when trying to access non-existant report tabs. #22183
+* Fix - Filter by attributes dropdown placeholder text should not be wrapped in quotes. #22185
+* Fix - Apply sale price until end of closing sale date. #22189
+* Fix - Allow empty schema again when registering a custom field for the API. #22204
+* Fix - Don't display escaped html on checkout when javascript is disabled. #22214
+* Fix - Fixed formatted address in uppercase for languages that use accents. #22096
+* Fix - Reload the cart page when the cart is empty when there is a hash in the URL. #22114
+* Fix - Do not schedule duplicate webhooks within 10 minutes of each other to maintain previous behavior. #22088
+* Fix - Return correct next scheduled date for items in queue by fixing date instantiation in WC_Action_Queue::get_next(). #22104
+* Fix - Allow products to use default low stock threshold. #22084
+* Fix - Fix 0 value attribute permalink calculation, property population in REST api. #22026
+* Fix - Ensure cache delete on coupon trash or delete. #22053
+* Fix - Ensure product parent exists before getting its image. #22074
+* Fix - Correctly use wildcard character on email restrictions on coupons. #22167
+* Fix - Avoids Warnings in Action Scheduler Library for PHP 5.2. #22160
+* Fix - Don't include product in BreadcrumbList structured data so Google will recognize stand-alone Product structured data. #22344
+* Fix - Fix Product widget showing hidden products when hide out of stock was enabled. #22230
+* Fix - Run webhook status updates through new wc_is_webhook_valid_status functions when doing API requests. #22205
+* Fix - Correct quote handling in tax class names. #22270
+* Fix - Prevent style side-effects on notices on the Extensions pages. #22330
+* Fix - Check stock status of items when 'ordering again' from the account page. #22331
+* Fix - Improve rounding when rounding at subtotal level in cart. #21217
+* Fix - Restores an opportunity to print non-cart related notices that a few extensions are relying on. #22337
+* Fix - Correct order item meta alignment in order emails when using an RTL language. #22376
+* Fix - Fix bug where product status was erroneously going to draft status in some circumstances on new published variable products. #20667
+* Fix - Load customer data for logged in users regardless of being member of sub-site to avoid errors. #22448
+* Fix - Use slug sanitization on product export category slugs for better foreign character support. #22320
+* Fix - Correct item subtotal rounding when multiple taxes are applied so it matches the cart. #22416
+* Fix - Prevent fatal errors when retrieving network orders for sites that do not have WooCommerce activated. #22439
+* Fix - Numerous bug fixes around checkout field locales on first load. #22444
+* Fix - Correct position of admin notices on my-account pages. #22445
+* Fix - Fixed padding of addresses in email template. #22466
+* Fix - Prevevent payment method descriptions sliding up/down if selected after ajax updates. #22459
+* Fix - Fixed formatted address in uppercase for languages that use accents. #22096
+* Fix - Fix product updating on import for SKUs with special characters. #22071
+* Fix - Ensure cache_delete on coupon deletion. #22053
+* Fix - Make product edit form aware publish was pressed. #20667
+* Fix - Unescape imported CSV formulas in product attributes. #21938
+* Fix - Warning when deprecated user meta starts with uppercase. #21943
+* Fix - Filter out buttons from the onRowClick event on the Orders list view page. #21966
+* Fix - Update "Filter Products by Attribute" widget when product stock quantity changes via "Quick Edit" or WC API. #22029
+* Fix - Ensure product parent exists before getting its image. #22074
+* Fix - Fixed support for multiple query parameters translated to meta queries via REST API requests. #22108
+* Fix - Strip hash from URL when reload refunds in the dashboard. #22116
+* Fix - Prevent notice when using non existing value for tabs in WooCommerce > Reports > Stock. #22183
+* Fix - Filter by attributes dropdown placeholder text wrapped in quotes. #22185
+* Fix - Fix escaped html on checkout when javascript is disabled. #22214
+* Fix - Allow empty schema again when registering a custom field for the API. #22204
+* Fix - Fix import & export of newline characters in product description fields. #22298
+* Fix - Allow quotes in tax class names. #22270
+* Fix - Sale price applies to end of closing sale date. #22189
+* Fix - Product export by unicode product categories. #22320
+* Fix - Check stock status of items when 'ordering again' from the account page. #22331
+* Fix - Issue where images offloaded to external servers caused errors and broken images when changing aspect ratios. #22461
+* Fix - Remove block comments from shop page description. #22334
+* Dev - REST API - 0 value attribute permalink calculation, property population in REST api. #22026
+* Dev - REST API - Fixed support to order results by slugs. #22168
+* Dev - REST API - Removed extra inherited filters from product endpoint in variations endpoint. #22452
+
 = 3.5.3 - 2018-12-20 =
 * Fix - Fix orders list in the admin after a change introduced in WordPress 5.0.2. #22273
 
