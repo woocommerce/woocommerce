@@ -43,6 +43,9 @@ add_filter( 'woocommerce_attribute_label', 'wp_kses_post', 100 );
 /**
  * Short Description (excerpt).
  */
+if ( function_exists( 'do_blocks' ) ) {
+	add_filter( 'woocommerce_short_description', 'do_blocks', 9 );
+}
 add_filter( 'woocommerce_short_description', 'wptexturize' );
 add_filter( 'woocommerce_short_description', 'convert_smilies' );
 add_filter( 'woocommerce_short_description', 'convert_chars' );
@@ -194,14 +197,14 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 
 	$located = wc_locate_template( $template_name, $template_path, $default_path );
 
+	// Allow 3rd party plugin filter template file from their plugin.
+	$located = apply_filters( 'wc_get_template', $located, $template_name, $args, $template_path, $default_path );
+
 	if ( ! file_exists( $located ) ) {
 		/* translators: %s template */
 		wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $located . '</code>' ), '2.1' );
 		return;
 	}
-
-	// Allow 3rd party plugin filter template file from their plugin.
-	$located = apply_filters( 'wc_get_template', $located, $template_name, $args, $template_path, $default_path );
 
 	do_action( 'woocommerce_before_template_part', $template_name, $template_path, $located, $args );
 
@@ -442,6 +445,7 @@ function get_woocommerce_currencies() {
 					'UYU' => __( 'Uruguayan peso', 'woocommerce' ),
 					'UZS' => __( 'Uzbekistani som', 'woocommerce' ),
 					'VEF' => __( 'Venezuelan bol&iacute;var', 'woocommerce' ),
+					'VES' => __( 'Bol&iacute;var soberano', 'woocommerce' ),
 					'VND' => __( 'Vietnamese &#x111;&#x1ed3;ng', 'woocommerce' ),
 					'VUV' => __( 'Vanuatu vatu', 'woocommerce' ),
 					'WST' => __( 'Samoan t&#x101;l&#x101;', 'woocommerce' ),
@@ -628,6 +632,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			'UYU' => '&#36;',
 			'UZS' => 'UZS',
 			'VEF' => 'Bs F',
+			'VES' => 'Bs.S',
 			'VND' => '&#8363;',
 			'VUV' => 'Vt',
 			'WST' => 'T',

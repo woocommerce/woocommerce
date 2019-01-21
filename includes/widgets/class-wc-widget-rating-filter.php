@@ -91,7 +91,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			return;
 		}
 
-		if ( ! wc()->query->get_main_query()->post_count ) {
+		if ( ! WC()->query->get_main_query()->post_count ) {
 			return;
 		}
 

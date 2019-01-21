@@ -606,6 +606,11 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$mocked_response = false;
 
 		if ( false !== strpos( $url, 'http://demo.woothemes.com' ) ) {
+
+			if ( ! empty( $request['filename'] ) ) {
+				copy( WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png', $request['filename'] );
+			}
+
 			$mocked_response = array(
 				'body'     => 'Mocked response',
 				'response' => array( 'code' => 200 ),

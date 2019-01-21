@@ -535,7 +535,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Create order key.
 		if ( ! $order->get_order_key() ) {
-			$props['order_key'] = 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) );
+			$props['order_key'] = wc_generate_order_key();
 		}
 
 		// Update customer.

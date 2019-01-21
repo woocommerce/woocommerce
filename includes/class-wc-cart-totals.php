@@ -484,8 +484,11 @@ final class WC_Cart_Totals {
 		if ( ! wc_tax_enabled() ) {
 			return array();
 		}
-		$tax_class = $item->product->get_tax_class();
-		return isset( $this->item_tax_rates[ $tax_class ] ) ? $this->item_tax_rates[ $tax_class ] : $this->item_tax_rates[ $tax_class ] = WC_Tax::get_rates( $item->product->get_tax_class(), $this->cart->get_customer() );
+		$tax_class      = $item->product->get_tax_class();
+		$item_tax_rates = isset( $this->item_tax_rates[ $tax_class ] ) ? $this->item_tax_rates[ $tax_class ] : $this->item_tax_rates[ $tax_class ] = WC_Tax::get_rates( $item->product->get_tax_class(), $this->cart->get_customer() );
+
+		// Allow plugins to filter item tax rates.
+		return apply_filters( 'woocommerce_cart_totals_get_item_tax_rates', $item_tax_rates, $item, $this->cart );
 	}
 
 	/**
@@ -579,8 +582,26 @@ final class WC_Cart_Totals {
 				$taxes[ $rate_id ] += $this->round_line_tax( $rate );
 			}
 		}
+		$taxes = $this->round_merged_taxes( $taxes );
 
 		return $in_cents ? $taxes : wc_remove_number_precision_deep( $taxes );
+	}
+
+	/**
+	 * Round merged taxes.
+	 *
+	 * @since 3.5.4
+	 * @param array $taxes Taxes to round.
+	 * @return array
+	 */
+	protected function round_merged_taxes( $taxes ) {
+		if ( $this->round_at_subtotal() ) {
+			foreach ( $taxes as $rate_id => $tax ) {
+				$taxes[ $rate_id ] = wc_round_tax_total( $tax, 0 );
+			}
+		}
+
+		return $taxes;
 	}
 
 	/**
