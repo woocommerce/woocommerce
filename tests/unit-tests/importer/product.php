@@ -87,7 +87,9 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
 	/**
 	 * Test import.
+	 *
 	 * @since 3.1.0
+	 * @requires PHP 5.4
 	 */
 	public function test_import() {
 		$args = array(

@@ -77,6 +77,8 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_rest_upload_image_from_url() should return error when invalid image is passed.
+	 *
+	 * @requires PHP 5.4
 	 */
 	public function test_wc_rest_upload_image_from_url_should_return_error_when_invalid_image_is_passed() {
 		// empty file.
@@ -97,6 +99,8 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_rest_upload_image_from_url() should download image and return an array containing
 	 * information about it.
+	 *
+	 * @requires PHP 5.4
 	 */
 	public function test_wc_rest_upload_image_from_url_should_download_image_and_return_array() {
 		$expected_result = array(
