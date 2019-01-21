@@ -458,7 +458,7 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 		$schema = $this->get_public_item_schema();
 		unset( $schema['properties']['value'] );
 		unset( $schema['properties']['format'] );
-		return $sceham;
+		return $schema;
 	}
 
 	/**
