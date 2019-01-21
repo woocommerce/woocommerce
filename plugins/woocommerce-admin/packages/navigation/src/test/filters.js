@@ -126,6 +126,20 @@ describe( 'getQueryFromActiveFilters', () => {
 		expect( nextQuery.with_select_is ).toBeUndefined();
 		expect( nextQuery.with_search_includes ).toBeUndefined();
 	} );
+
+	it( 'should only reflect complete filters with multiple values', () => {
+		const activeFilters = [
+			{ key: 'valid_date', rule: 'between', value: [ '2018-04-04', '2018-04-10' ] },
+			{ key: 'invalid_date_1', rule: 'between', value: [ '2018-04-04', undefined ] },
+			{ key: 'invalid_date_2', rule: 'between', value: '2018-04-04' },
+		];
+		const query = {};
+		const nextQuery = getQueryFromActiveFilters( activeFilters, query, config );
+
+		expect( nextQuery.valid_date_between ).toBeDefined();
+		expect( nextQuery.invalid_date_1_between ).toBeUndefined();
+		expect( nextQuery.invalid_date_2_between ).toBeUndefined();
+	} );
 } );
 
 describe( 'getDefaultOptionValue', () => {
