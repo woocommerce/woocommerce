@@ -185,6 +185,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Added `wc_emptied_cart` javascript event when cart is emptied. #22469
 * Dev - Switched `woocommerce_ordered_again` hook to ref_array. #22425
 * Dev - `woocommerce_checkout_before_order_review_heading` action added in checkout form template. #22481
+* Dev - Added `woocommerce_variation_header` hook in variations list. #21341
 * Dev - Add a filter, woocommerce_current_user_can_edit_customer_meta_fields, to bypass manage_woocommerce when editing customer meta fields. #22277
 * Dev - Adds filter on the return value of function 'get_item_tax_rates'. This gives developers the possibility to prevent the mandatory caching of tax rates. #22488
 * Dev - Add filters for mail callback in WC_Email::send method. #22394
