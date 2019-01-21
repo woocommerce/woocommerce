@@ -67,8 +67,7 @@ class WC_REST_Product_Categories_V2_Controller extends WC_REST_Product_Categorie
 				'title'             => get_the_title( $attachment ),
 				'alt'               => get_post_meta( $image_id, '_wp_attachment_image_alt', true ),
 			);
-		}
-		else{
+		} else {
 			$data['image_src'] = wc_get_term_image_url( $item, false, false, false );
 		}
 
