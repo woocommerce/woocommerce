@@ -61,7 +61,7 @@
     "react-test-renderer": "16.7.0",
     "sass-loader": "7.1.0",
     "style-loader": "0.23.1",
-    "stylelint": "9.10.0",
+    "stylelint": "9.10.1",
     "stylelint-config-wordpress": "13.1.0",
     "webpack": "4.28.4",
     "webpack-cli": "3.2.1"
