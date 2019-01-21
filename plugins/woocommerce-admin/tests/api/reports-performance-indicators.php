@@ -161,4 +161,21 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 		$this->assertArrayHasKey( 'format', $properties );
 		$this->assertArrayHasKey( 'value', $properties );
 	}
+
+	/**
+	 * Test schema for /allowed indicators endpoint.
+	 */
+	public function test_indicators_schema_allowed() {
+		wp_set_current_user( $this->user );
+
+		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint . '/allowed' );
+		$response   = $this->server->dispatch( $request );
+		$data       = $response->get_data();
+		$properties = $data['schema']['properties'];
+
+		$this->assertEquals( 3, count( $properties ) );
+		$this->assertArrayHasKey( 'stat', $properties );
+		$this->assertArrayHasKey( 'chart', $properties );
+		$this->assertArrayHasKey( 'label', $properties );
+	}
 }
