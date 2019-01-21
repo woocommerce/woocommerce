@@ -149,11 +149,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			throw new Exception( __( 'Invalid customer.', 'woocommerce' ) );
 		}
 
-		// Only users on this site should be read.
-		if ( is_multisite() && ! is_user_member_of_blog( $customer->get_id() ) ) {
-			throw new Exception( __( 'Invalid customer.', 'woocommerce' ) );
-		}
-
 		$customer_id = $customer->get_id();
 
 		// Load meta but exclude deprecated props.
