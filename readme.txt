@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, claudiulodro,
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.7
 Tested up to: 5.0
-Stable tag: 3.5.3
+Stable tag: 3.5.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
-= 3.5.4 - 2019-01-xx =
+= 3.5.4 - 2019-01-21 =
 * Tweak - Allow limited html in woocommerce_rating_filter_count filter. #21904
 * Tweak - Remove 'on-hold' orders from admin tax reports for more logical reporting. #22419
 * Tweak - Remove payment phrases from processing emails. #22418
