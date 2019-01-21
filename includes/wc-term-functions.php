@@ -806,9 +806,10 @@ function wc_get_term_image_url( $term, $image_id = false, $size = false, $placeh
 	$term_id = is_numeric($term) ? $term : $term->term_id;
 	$image_url = '';
 	
-	// Get term image id.
-	if ( ! $image_id )
+	// Get term image id, if ID was not explicitly passed
+	if ( ! $image_id ) {
 		$image_id = (int) get_woocommerce_term_meta( $term_id, 'thumbnail_id' );
+	}
 	
 	// If image exists, get it
 	if ( $image_id ) {
