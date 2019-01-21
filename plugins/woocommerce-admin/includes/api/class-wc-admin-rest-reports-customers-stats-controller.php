@@ -75,7 +75,8 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 		$report_data     = $customers_query->get_data();
 		$out_data        = array(
 			'totals'    => $report_data,
-			'intervals' => array(), // TODO: is this needed?
+			// TODO: is this needed? the single element array tricks the isReportDataEmpty() selector.
+			'intervals' => array( (object) array() ),
 		);
 
 		return rest_ensure_response( $out_data );
