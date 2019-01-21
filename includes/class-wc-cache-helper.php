@@ -182,41 +182,12 @@ class WC_Cache_Helper {
 		$transient_value = get_transient( $transient_name );
 
 		if ( false === $transient_value || true === $refresh ) {
-			self::delete_version_transients( $transient_value );
-
 			$transient_value = (string) time();
 
 			set_transient( $transient_name, $transient_value );
 		}
 
 		return $transient_value;
-	}
-
-	/**
-	 * When the transient version increases, this is used to remove all past transients to avoid filling the DB.
-	 *
-	 * Note; this only works on transients appended with the transient version, and when object caching is not being used.
-	 *
-	 * @since  2.3.10
-	 * @param string $version Version of the transient to remove.
-	 */
-	public static function delete_version_transients( $version = '' ) {
-		if ( ! wp_using_ext_object_cache() && ! empty( $version ) ) {
-			global $wpdb;
-
-			$limit = apply_filters( 'woocommerce_delete_version_transients_limit', 1000 );
-
-			if ( ! $limit ) {
-				return;
-			}
-
-			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s LIMIT %d;", '\_transient\_%' . $version, $limit ) ); // WPCS: cache ok, db call ok.
-
-			// If affected rows is equal to limit, there are more rows to delete. Delete in 30 secs.
-			if ( $affected === $limit ) {
-				wp_schedule_single_event( time() + 30, 'delete_version_transients', array( $version ) );
-			}
-		}
 	}
 
 	/**
@@ -280,6 +251,34 @@ class WC_Cache_Helper {
 
 			foreach ( $clear_ids as $id ) {
 				wp_cache_delete( 'product-category-hierarchy-' . $id, 'product_cat' );
+			}
+		}
+	}
+
+	/**
+	 * When the transient version increases, this is used to remove all past transients to avoid filling the DB.
+	 *
+	 * Note; this only works on transients appended with the transient version, and when object caching is not being used.
+	 *
+	 * @deprecated 3.6.0 Adjusted transient usage to include versions within the transient values, making this cleanup obsolete.
+	 * @since  2.3.10
+	 * @param string $version Version of the transient to remove.
+	 */
+	public static function delete_version_transients( $version = '' ) {
+		if ( ! wp_using_ext_object_cache() && ! empty( $version ) ) {
+			global $wpdb;
+
+			$limit = apply_filters( 'woocommerce_delete_version_transients_limit', 1000 );
+
+			if ( ! $limit ) {
+				return;
+			}
+
+			$affected = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s LIMIT %d;", '\_transient\_%' . $version, $limit ) ); // WPCS: cache ok, db call ok.
+
+			// If affected rows is equal to limit, there are more rows to delete. Delete in 30 secs.
+			if ( $affected === $limit ) {
+				wp_schedule_single_event( time() + 30, 'delete_version_transients', array( $version ) );
 			}
 		}
 	}
