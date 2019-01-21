@@ -250,6 +250,10 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			)
 		);
 
+		foreach ( $this->report_data->full_refunds as $key => $order ) {
+			$this->report_data->full_refunds[ $key ]->net_refund = $order->total_refund - ( $order->total_shipping + $order->total_tax + $order->total_shipping_tax );
+		}
+
 		/**
 		 * Partial refunds. This includes line items, shipping and taxes. Not grouped by date.
 		 */
@@ -315,6 +319,10 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 				'parent_order_status' => array( 'completed', 'processing', 'on-hold' ),
 			)
 		);
+
+		foreach ( $this->report_data->partial_refunds as $key => $order ) {
+			$this->report_data->partial_refunds[ $key ]->net_refund = $order->total_refund - ( $order->total_shipping + $order->total_tax + $order->total_shipping_tax );
+		}
 
 		/**
 		 * Refund lines - all partial refunds on all order types so we can plot full AND partial refunds on the chart.
@@ -390,9 +398,9 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 		$this->report_data->total_shipping_tax_refunded = 0;
 		$this->report_data->total_refunds               = 0;
 
-		$refunded_orders = array_merge( $this->report_data->partial_refunds, $this->report_data->full_refunds );
+		$this->report_data->refunded_orders = array_merge( $this->report_data->partial_refunds, $this->report_data->full_refunds );
 
-		foreach ( $refunded_orders as $key => $value ) {
+		foreach ( $this->report_data->refunded_orders as $key => $value ) {
 			$this->report_data->total_tax_refunded          += floatval( $value->total_tax < 0 ? $value->total_tax * -1 : $value->total_tax );
 			$this->report_data->total_refunds               += floatval( $value->total_refund );
 			$this->report_data->total_shipping_tax_refunded += floatval( $value->total_shipping_tax < 0 ? $value->total_shipping_tax * -1 : $value->total_shipping_tax );
@@ -640,6 +648,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			'coupon_amounts'       => $this->prepare_chart_data( $this->report_data->coupons, 'post_date', 'discount_amount', $this->chart_interval, $this->start_date, $this->chart_groupby ),
 			'shipping_amounts'     => $this->prepare_chart_data( $this->report_data->orders, 'post_date', 'total_shipping', $this->chart_interval, $this->start_date, $this->chart_groupby ),
 			'refund_amounts'       => $this->prepare_chart_data( $this->report_data->refund_lines, 'post_date', 'total_refund', $this->chart_interval, $this->start_date, $this->chart_groupby ),
+			'net_refund_amounts'   => $this->prepare_chart_data( $this->report_data->refunded_orders, 'post_date', 'net_refund', $this->chart_interval, $this->start_date, $this->chart_groupby ),
 			'shipping_tax_amounts' => $this->prepare_chart_data( $this->report_data->orders, 'post_date', 'total_shipping_tax', $this->chart_interval, $this->start_date, $this->chart_groupby ),
 			'tax_amounts'          => $this->prepare_chart_data( $this->report_data->orders, 'post_date', 'total_tax', $this->chart_interval, $this->start_date, $this->chart_groupby ),
 			'net_order_amounts'    => array(),
@@ -653,7 +662,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			$data['net_order_amounts'][ $order_amount_key ] = $order_amount_value;
 			// Subtract the sum of the values from net order amounts.
 			$data['net_order_amounts'][ $order_amount_key ][1] -=
-				$data['refund_amounts'][ $order_amount_key ][1] +
+				$data['net_refund_amounts'][ $order_amount_key ][1] +
 				$data['shipping_amounts'][ $order_amount_key ][1] +
 				$data['shipping_tax_amounts'][ $order_amount_key ][1] +
 				$data['tax_amounts'][ $order_amount_key ][1];
