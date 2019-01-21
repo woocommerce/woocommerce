@@ -1004,6 +1004,12 @@ class WC_Countries {
 							'required' => false,
 						),
 					),
+					'LV' => array(
+						'state' => array(
+							'label'    => __( 'Municipality', 'woocommerce' ),
+							'required' => false,
+						),
+					),
 					'LB' => array(
 						'state' => array(
 							'required' => false,
