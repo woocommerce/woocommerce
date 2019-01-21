@@ -9,6 +9,11 @@ import PropTypes from 'prop-types';
 import { withViewportMatch } from '@wordpress/viewport';
 
 /**
+ * Internal dependencies
+ */
+import { getHasItemsClass } from './utils';
+
+/**
  * `SummaryListPlaceholder` behaves like `SummaryList` but displays placeholder summary items instead of data.
  * This can be used while loading data.
  */
@@ -17,7 +22,7 @@ class SummaryListPlaceholder extends Component {
 		const { isDropdownBreakpoint } = this.props;
 		const numberOfItems = isDropdownBreakpoint ? 1 : this.props.numberOfItems;
 
-		const hasItemsClass = numberOfItems < 10 ? `has-${ numberOfItems }-items` : 'has-10-items';
+		const hasItemsClass = getHasItemsClass( numberOfItems );
 		const classes = classnames( 'woocommerce-summary', {
 			[ hasItemsClass ]: ! isDropdownBreakpoint,
 			'is-placeholder': true,
