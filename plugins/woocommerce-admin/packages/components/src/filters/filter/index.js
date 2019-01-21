@@ -134,7 +134,9 @@ class FilterPicker extends Component {
 	renderButton( filter, onClose ) {
 		if ( filter.component ) {
 			const { type, labels } = filter.settings;
-			const { selectedTag } = this.state;
+			const persistedFilter = this.getFilter();
+			const selectedTag = persistedFilter.value === filter.value ? this.state.selectedTag : null;
+
 			return (
 				<Search
 					className="woocommerce-filters-filter__search"

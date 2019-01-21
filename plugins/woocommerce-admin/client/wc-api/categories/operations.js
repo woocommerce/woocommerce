@@ -14,13 +14,14 @@ import { stringifyQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { isResourcePrefix, getResourceIdentifier, getResourceName } from '../utils';
+import { NAMESPACE } from '../constants';
 
 function read( resourceNames, fetch = apiFetch ) {
 	const filteredNames = resourceNames.filter( name => isResourcePrefix( name, 'category-query' ) );
 
 	return filteredNames.map( async resourceName => {
 		const query = getResourceIdentifier( resourceName );
-		const url = `/wc/v3/products/categories${ stringifyQuery( query ) }`;
+		const url = NAMESPACE + `/products/categories${ stringifyQuery( query ) }`;
 
 		try {
 			const categories = await fetch( {

@@ -162,6 +162,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-data-download-ips-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-orders-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-products-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-categories-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-reviews-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-system-status-tools-controller.php';
@@ -194,6 +195,7 @@ class WC_Admin_Api_Init {
 				'WC_Admin_REST_Data_Download_Ips_Controller',
 				'WC_Admin_REST_Orders_Controller',
 				'WC_Admin_REST_Products_Controller',
+				'WC_Admin_REST_Product_Categories_Controller',
 				'WC_Admin_REST_Product_Reviews_Controller',
 				'WC_Admin_REST_Reports_Controller',
 				'WC_Admin_REST_System_Status_Tools_Controller',
@@ -337,6 +339,17 @@ class WC_Admin_Api_Init {
 			$endpoints['/wc/v4/products/(?P<id>[\d]+)'][0] = $endpoints['/wc/v4/products/(?P<id>[\d]+)'][3];
 			$endpoints['/wc/v4/products/(?P<id>[\d]+)'][1] = $endpoints['/wc/v4/products/(?P<id>[\d]+)'][4];
 			$endpoints['/wc/v4/products/(?P<id>[\d]+)'][2] = $endpoints['/wc/v4/products/(?P<id>[\d]+)'][5];
+		}
+
+		// Override /wc/v4/products/categories.
+		if ( isset( $endpoints['/wc/v4/products/categories'] )
+			&& isset( $endpoints['/wc/v4/products/categories'][3] )
+			&& isset( $endpoints['/wc/v4/products/categories'][2] )
+			&& $endpoints['/wc/v4/products/categories'][2]['callback'][0] instanceof WC_Admin_REST_Product_categories_Controller
+			&& $endpoints['/wc/v4/products/categories'][3]['callback'][0] instanceof WC_Admin_REST_Product_categories_Controller
+		) {
+			$endpoints['/wc/v4/products/categories'][0] = $endpoints['/wc/v4/products/categories'][2];
+			$endpoints['/wc/v4/products/categories'][1] = $endpoints['/wc/v4/products/categories'][3];
 		}
 
 		// Override /wc/v4/products/reviews.

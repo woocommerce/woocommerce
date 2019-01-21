@@ -11,6 +11,8 @@ import { map } from 'lodash';
  * WooCommerce dependencies
  */
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
+import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -68,8 +70,9 @@ class CategoriesReportTable extends Component {
 	getRowsContent( categoryStats ) {
 		return map( categoryStats, categoryStat => {
 			const { category_id, items_sold, net_revenue, products_count, orders_count } = categoryStat;
-			const categories = this.props.categories;
+			const { categories, query } = this.props;
 			const category = categories[ category_id ];
+			const persistedQuery = getPersistedQuery( query );
 
 			return [
 				{
@@ -85,7 +88,17 @@ class CategoriesReportTable extends Component {
 					value: getCurrencyFormatDecimal( net_revenue ),
 				},
 				{
-					display: numberFormat( products_count ),
+					display: category && (
+						<Link
+							href={ getNewPath( persistedQuery, 'categories', {
+								filter: 'single_category',
+								categories: category.id,
+							} ) }
+							type="wc-admin"
+						>
+							{ numberFormat( products_count ) }
+						</Link>
+					),
 					value: products_count,
 				},
 				{
