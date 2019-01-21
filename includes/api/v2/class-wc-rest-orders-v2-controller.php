@@ -58,7 +58,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_Legacy_Orders_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -76,7 +78,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_Legacy_Orders_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+			array(
 				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
@@ -114,7 +118,9 @@ class WC_REST_Orders_V2_Controller extends WC_REST_Legacy_Orders_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/batch', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/batch',
+			array(
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
@@ -382,12 +388,11 @@ class WC_REST_Orders_V2_Controller extends WC_REST_Legacy_Orders_Controller {
 		if ( ! empty( $request['product'] ) ) {
 			$order_ids = $wpdb->get_col(
 				$wpdb->prepare(
-					"
-				SELECT order_id
-				FROM {$wpdb->prefix}woocommerce_order_items
-				WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_key = '_product_id' AND meta_value = %d )
-				AND order_item_type = 'line_item'
-			 ", $request['product']
+					"SELECT order_id
+					FROM {$wpdb->prefix}woocommerce_order_items
+					WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_key = '_product_id' AND meta_value = %d )
+					AND order_item_type = 'line_item'",
+					$request['product']
 				)
 			);
 
