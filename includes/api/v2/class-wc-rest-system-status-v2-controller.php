@@ -572,6 +572,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		if ( function_exists( 'curl_version' ) ) {
 			$curl_version = curl_version();
 			$curl_version = $curl_version['version'] . ', ' . $curl_version['ssl_version'];
+		} elseif ( extension_loaded( 'curl' ) ) {
+			$curl_version = __( 'cURL installed but unable to retrieve version.', 'woocommerce' );
 		}
 
 		// WP memory limit.
