@@ -200,7 +200,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Numerous bug fixes around checkout field locales on first load. #22444
 * Fix - Correct position of admin notices on my-account pages. #22445
 * Fix - Fixed padding of addresses in email template. #22466
-* Fix - Prevevent payment method descriptions sliding up/down if selected after ajax updates. #22459
+* Fix - Prevent payment method descriptions sliding up/down if selected after ajax updates. #22459
 * Fix - Fixed formatted address in uppercase for languages that use accents. #22096
 * Fix - Fix product updating on import for SKUs with special characters. #22071
 * Fix - Ensure cache_delete on coupon deletion. #22053
