@@ -35,7 +35,9 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), WC_VERSION, true );
 		wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch', 'accounting' ), WC_VERSION, true );
 		wp_localize_script(
-			'wc-price-slider', 'woocommerce_price_slider_params', array(
+			'wc-price-slider',
+			'woocommerce_price_slider_params',
+			array(
 				'currency_format_num_decimals' => 0,
 				'currency_format_symbol'       => get_woocommerce_currency_symbol(),
 				'currency_format_decimal_sep'  => esc_attr( wc_get_price_decimal_separator() ),
@@ -92,7 +94,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$min_price = isset( $_GET['min_price'] ) ? wc_clean( wp_unslash( $_GET['min_price'] ) ) : apply_filters( 'woocommerce_price_filter_widget_min_amount', $min ); // WPCS: input var ok, CSRF ok.
 		$max_price = isset( $_GET['max_price'] ) ? wc_clean( wp_unslash( $_GET['max_price'] ) ) : apply_filters( 'woocommerce_price_filter_widget_max_amount', $max ); // WPCS: input var ok, CSRF ok.
 
-		echo '<form method="get" action="' . esc_url( $form_action ) . '">';
+		echo '<form method="get" action="' . esc_url( $form_action ) . '">'; // WPCS: XSS ok.
 		do_action( 'woocommerce_price_filter_widget_before_input' );
 		echo '<div class="price_slider_wrapper">
 				<div class="price_slider" style="display:none;"></div>
@@ -106,7 +108,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 					' . wc_query_string_form_fields( null, array( 'min_price', 'max_price' ), '', true ) . '
 					<div class="clear"></div>
 				</div>
-			</div>';
+			</div>'; // WPCS: XSS ok.
 		do_action( 'woocommerce_price_filter_widget_after_input' );
 		echo '</form>'; // WPCS: XSS ok.
 
