@@ -42,15 +42,15 @@ class WC_Form_Handler {
 	public static function redirect_reset_password_link() {
 		if ( is_account_page() && isset( $_GET['key'] ) && ( isset( $_GET['id'] ) || isset( $_GET['login'] ) ) ) {
 
-			// If available, get $user_login from query string parameter for fallback purposes.
+			// If available, get $user_id from query string parameter for fallback purposes.
 			if ( isset( $_GET['login'] ) ) {
-				$user_login = $_GET['login'];
+				$user = get_user_by( 'login', sanitize_user( wp_unslash( $_GET['login'] ) ) );
+				$user_id = $user ? $user->ID : 0;
 			} else {
-				$user = get_user_by( 'id', absint( $_GET['id'] ) );
-				$user_login = $user ? $user->user_login : '';
+				$user_id = absint( $_GET['id'] );
 			}
 
-			$value = sprintf( '%s:%s', wp_unslash( $user_login ), wp_unslash( $_GET['key'] ) );
+			$value = sprintf( '%d:%s', $user_id, wp_unslash( $_GET['key'] ) );
 			WC_Shortcode_My_Account::set_reset_password_cookie( $value );
 			wp_safe_redirect( add_query_arg( 'show-reset-form', 'true', wc_lostpassword_url() ) );
 			exit;
@@ -357,7 +357,7 @@ class WC_Form_Handler {
 			$order_id   = absint( $wp->query_vars['order-pay'] );
 			$order      = wc_get_order( $order_id );
 
-			if ( $order_id === $order->get_id() && $order_key === $order->get_order_key() && $order->needs_payment() ) {
+			if ( $order_id === $order->get_id() && hash_equals( $order->get_order_key(), $order_key ) && $order->needs_payment() ) {
 
 				do_action( 'woocommerce_before_pay_action', $order );
 
@@ -671,7 +671,7 @@ class WC_Form_Handler {
 
 			if ( $order->has_status( 'cancelled' ) ) {
 				// Already cancelled - take no action
-			} elseif ( $user_can_cancel && $order_can_cancel && $order->get_id() === $order_id && $order->get_order_key() === $order_key ) {
+			} elseif ( $user_can_cancel && $order_can_cancel && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
 
 				// Cancel the order + restore stock
 				WC()->session->set( 'order_awaiting_payment', false );

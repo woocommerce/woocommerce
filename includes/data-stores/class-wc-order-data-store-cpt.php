@@ -81,7 +81,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param WC_Order $order Order object.
 	 */
 	public function create( &$order ) {
-		$order->set_order_key( 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) ) );
+		$order->set_order_key( wc_generate_order_key() );
 		parent::create( $order );
 		do_action( 'woocommerce_new_order', $order->get_id() );
 	}
