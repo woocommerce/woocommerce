@@ -40,7 +40,12 @@ $base_lighter_40 = wc_hex_lighter( $base, 40 );
 $text_lighter_20 = wc_hex_lighter( $text, 20 );
 
 // !important; is a gmail hack to prevent styles being stripped if it doesn't like something.
+// body{padding: 0;} ensures proper scale/positioning of the email in the iOS native email app.
 ?>
+body {
+	padding: 0;
+}
+
 #wrapper {
 	background-color: <?php echo esc_attr( $bg ); ?>;
 	margin: 0;
