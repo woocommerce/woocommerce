@@ -18,6 +18,7 @@ import { formatCurrency } from '@woocommerce/currency';
  */
 import { numberFormat } from 'lib/number';
 import ReportTable from 'analytics/components/report-table';
+import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import './style.scss';
 
 export default class OrdersReportTable extends Component {
@@ -91,6 +92,8 @@ export default class OrdersReportTable extends Component {
 	}
 
 	getRowsContent( tableData ) {
+		const { query } = this.props;
+		const persistedQuery = getPersistedQuery( query );
 		return map( tableData, row => {
 			const {
 				currency,
@@ -108,15 +111,19 @@ export default class OrdersReportTable extends Component {
 				.sort( ( itemA, itemB ) => itemB.quantity - itemA.quantity )
 				.map( item => ( {
 					label: item.name,
-					href:
-						'admin.php?page=wc-admin#/analytics/products?filter=single_product&products=' + item.id,
 					quantity: item.quantity,
+					href: getNewPath( persistedQuery, 'products', {
+						filter: 'single_product',
+						products: item.id,
+					} ),
 				} ) );
 
 			const formattedCoupons = coupons.map( coupon => ( {
 				label: coupon.code,
-				// @TODO It should link to the coupons report
-				href: 'edit.php?s=' + coupon.code + '&post_type=shop_coupon',
+				href: getNewPath( persistedQuery, 'coupons', {
+					filter: 'single_coupon',
+					coupons: coupon.id,
+				} ),
 			} ) );
 
 			return [
@@ -217,7 +224,7 @@ export default class OrdersReportTable extends Component {
 
 	renderLinks( items = [] ) {
 		return items.map( ( item, i ) => (
-			<Link href={ item.href } key={ i } type="wp-admin">
+			<Link href={ item.href } key={ i } type="wc-admin">
 				{ item.label }
 			</Link>
 		) );
