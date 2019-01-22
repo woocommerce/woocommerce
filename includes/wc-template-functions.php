@@ -1324,7 +1324,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 			unset( $catalog_orderby_options['menu_order'] );
 		}
 
-		if ( 'no' === get_option( 'woocommerce_enable_review_rating' ) ) {
+		if ( ! wc_review_ratings_enabled() ) {
 			unset( $catalog_orderby_options['rating'] );
 		}
 
