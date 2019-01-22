@@ -164,7 +164,7 @@ final class WC_Cart_Session {
 
 		// If this is a re-order, redirect to the cart page to get rid of the `order_again` query string.
 		if ( $order_again ) {
-			wp_redirect( wc_get_page_permalink( 'cart' ) );
+			wp_safe_redirect( wc_get_page_permalink( 'cart' ) );
 			exit;
 		}
 	}
@@ -235,7 +235,9 @@ final class WC_Cart_Session {
 	public function persistent_cart_update() {
 		if ( get_current_user_id() && apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			update_user_meta(
-				get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), array(
+				get_current_user_id(),
+				'_woocommerce_persistent_cart_' . get_current_blog_id(),
+				array(
 					'cart' => $this->get_cart_for_session(),
 				)
 			);
@@ -292,7 +294,7 @@ final class WC_Cart_Session {
 	 *
 	 * @since  3.5.0
 	 *
-	 * @param int $order_id Order ID to try to load.
+	 * @param int   $order_id Order ID to try to load.
 	 * @param array $cart Current cart array.
 	 *
 	 * @return array
@@ -345,17 +347,20 @@ final class WC_Cart_Session {
 			$cart_id          = WC()->cart->generate_cart_id( $product_id, $variation_id, $variations, $cart_item_data );
 			$product_data     = wc_get_product( $variation_id ? $variation_id : $product_id );
 			$cart[ $cart_id ] = apply_filters(
-				'woocommerce_add_order_again_cart_item', array_merge(
-				$cart_item_data, array(
-					'key'          => $cart_id,
-					'product_id'   => $product_id,
-					'variation_id' => $variation_id,
-					'variation'    => $variations,
-					'quantity'     => $quantity,
-					'data'         => $product_data,
-					'data_hash'    => wc_get_cart_item_data_hash( $product_data ),
-				)
-			), $cart_id
+				'woocommerce_add_order_again_cart_item',
+				array_merge(
+					$cart_item_data,
+					array(
+						'key'          => $cart_id,
+						'product_id'   => $product_id,
+						'variation_id' => $variation_id,
+						'variation'    => $variations,
+						'quantity'     => $quantity,
+						'data'         => $product_data,
+						'data_hash'    => wc_get_cart_item_data_hash( $product_data ),
+					)
+				),
+				$cart_id
 			);
 		}
 
@@ -368,7 +373,7 @@ final class WC_Cart_Session {
 		if ( $num_items_in_original_order > $num_items_added ) {
 			wc_add_notice(
 				sprintf(
-				/* translators: %d item count */
+					/* translators: %d item count */
 					_n(
 						'%d item from your previous order is currently unavailable and could not be added to your cart.',
 						'%d items from your previous order are currently unavailable and could not be added to your cart.',
