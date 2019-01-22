@@ -466,6 +466,9 @@ jQuery( function( $ ) {
 				$( '.product_attributes' ).html( response.data.html );
 				$( '.product_attributes' ).unblock();
 
+				// Hide the 'Used for variations' checkbox if not viewing a variable product
+				show_and_hide_panels();
+
 				// Make sure the dropdown is not disabled for empty value attributes.
 				var nr_elements = original_data.length / 6;
 				for ( var i = 0; i < nr_elements; i++ ) {
