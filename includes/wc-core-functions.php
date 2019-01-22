@@ -1561,8 +1561,10 @@ function wc_uasort_comparison( $a, $b ) {
  * @return int
  */
 function wc_ascii_uasort_comparison( $a, $b ) {
-	$aconv = iconv( 'UTF-8', 'ASCII//TRANSLIT', $a );
-	$bconv = iconv( 'UTF-8', 'ASCII//TRANSLIT', $b );
+	if ( function_exists( 'iconv' ) ) {
+		$a = iconv( 'UTF-8', 'ASCII//TRANSLIT', $a );
+		$b = iconv( 'UTF-8', 'ASCII//TRANSLIT', $b );
+	}
 	return strcmp( $aconv, $bconv );
 }
 
