@@ -25,6 +25,10 @@
 		margin: $gap 0;
 		border: 1px solid $core-grey-light-700;
 	}
+
+	@include breakpoint( '<400px' ) {
+		margin: $gap-smaller 0;
+	}
 }
 
 .woocommerce-filters-advanced__title-select {
@@ -57,10 +61,22 @@
 		width: 40px;
 		height: 38px;
 		align-self: center;
+
+		@include breakpoint( '<400px' ) {
+			position: absolute;
+			top: 0;
+			right: $gap-smallest;
+		}
 	}
 
 	.components-form-token-field {
 		border-radius: 4px;
+	}
+
+	@include breakpoint( '<400px' ) {
+		display: block;
+		position: relative;
+		padding: $gap-smaller $gap-smaller 0 0;
 	}
 }
 
@@ -95,8 +111,8 @@
 		}
 
 		@include breakpoint( '<400px' ) {
-			display: block;
-			margin: 0;
+			//display: block;
+			//margin: 0;
 		}
 	}
 
