@@ -422,7 +422,7 @@ function wc_post_content_has_shortcode( $tag = '' ) {
 /**
  * Check if reviews are enabled.
  *
- * @since 3.5.4
+ * @since 3.6.0
  * @return bool
  */
 function wc_reviews_enabled() {
@@ -432,7 +432,7 @@ function wc_reviews_enabled() {
 /**
  * Check if reviews ratings are enabled.
  *
- * @since 3.5.4
+ * @since 3.6.0
  * @return bool
  */
 function wc_review_ratings_enabled() {
@@ -442,7 +442,7 @@ function wc_review_ratings_enabled() {
 /**
  * Check if review ratings are required.
  *
- * @since 3.5.4
+ * @since 3.6.0
  * @return bool
  */
 function wc_review_ratings_required() {
