@@ -54,7 +54,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		);
 		$response     = $this->server->dispatch( $request );
 		$customers    = $response->get_data();
-		$date_created = get_date_from_gmt( $customer_1->get_date_created() );
+		$date_created = get_date_from_gmt( date( 'Y-m-d H:i:s', strtotime( $customer_1->get_date_created() ) ) );
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $customers ) );
@@ -113,6 +113,77 @@ class Customers extends WC_REST_Unit_Test_Case {
 			),
 			$customers
 		);
+
+		update_option( 'timezone_tring', 'America/New York' );
+		$customer_3 = WC_Helper_Customer::create_customer( 'timezonetest', 'timezonetest', 'timezonetest@woo.local' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/customers' );
+		$request->set_query_params(
+			array(
+				'orderby' => 'id',
+			)
+		);
+		$response     = $this->server->dispatch( $request );
+		$customers    = $response->get_data();
+		$date_created = get_date_from_gmt( date( 'Y-m-d H:i:s', strtotime( $customer_3->get_date_created() ) ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assertContains(
+			array(
+				'id'                 => $customer_3->get_id(),
+				'date_created'       => wc_rest_prepare_date_response( $date_created, false ),
+				'date_created_gmt'   => wc_rest_prepare_date_response( $date_created ),
+				'date_modified'      => wc_rest_prepare_date_response( $customer_3->get_date_modified(), false ),
+				'date_modified_gmt'  => wc_rest_prepare_date_response( $customer_3->get_date_modified() ),
+				'email'              => 'timezonetest@woo.local',
+				'first_name'         => 'Justin',
+				'last_name'          => '',
+				'role'               => 'customer',
+				'username'           => 'timezonetest',
+				'billing'            => array(
+					'first_name' => '',
+					'last_name'  => '',
+					'company'    => '',
+					'address_1'  => '123 South Street',
+					'address_2'  => 'Apt 1',
+					'city'       => 'Philadelphia',
+					'state'      => 'PA',
+					'postcode'   => '19123',
+					'country'    => 'US',
+					'email'      => '',
+					'phone'      => '',
+				),
+				'shipping'           => array(
+					'first_name' => '',
+					'last_name'  => '',
+					'company'    => '',
+					'address_1'  => '123 South Street',
+					'address_2'  => 'Apt 1',
+					'city'       => 'Philadelphia',
+					'state'      => 'PA',
+					'postcode'   => '19123',
+					'country'    => 'US',
+				),
+				'is_paying_customer' => false,
+				'avatar_url'         => $customer_3->get_avatar_url(),
+				'meta_data'          => array(),
+				'_links'             => array(
+					'self'       => array(
+						array(
+							'href' => rest_url( '/wc/v3/customers/' . $customer_3->get_id() . '' ),
+						),
+					),
+					'collection' => array(
+						array(
+							'href' => rest_url( '/wc/v3/customers' ),
+						),
+					),
+				),
+			),
+			$customers
+		);
+
 	}
 
 	/**
