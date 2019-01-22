@@ -27,7 +27,7 @@
 	}
 
 	@include breakpoint( '<400px' ) {
-		margin: $gap-smaller 0;
+		margin: $gap-small 0;
 	}
 }
 
@@ -210,6 +210,6 @@
 	}
 
 	.separator {
-		padding: 0 8px;
+		text-align: center;
 	}
 }
