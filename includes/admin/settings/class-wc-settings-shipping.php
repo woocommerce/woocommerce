@@ -230,7 +230,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			wp_die( esc_html__( 'Zone does not exist!', 'woocommerce' ) );
 		}
 
-		$allowed_countries    = WC()->countries->get_allowed_countries();
+		$allowed_countries    = WC()->countries->get_shipping_countries();
 		$shipping_continents  = WC()->countries->get_shipping_continents();
 
 		// Prepare locations.
