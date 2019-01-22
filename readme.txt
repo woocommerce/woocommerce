@@ -162,6 +162,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 * Enhancement - Only include order erasure bulk action if erasure is enabled in settings. #22354
 * Enhancement - Customer notes containing URLs now automatically converts to clickable links. #21927
+* Enhancement - Add increase and decrease stock options to bulk edit form. #22475
 * Tweak - Generalize shipping estimate text on cart page. #22467
 * Tweak - Include auto draft orders in order list filters. #22380
 * Tweak - Only include the network orders widget on the main site dashboard. #22318
