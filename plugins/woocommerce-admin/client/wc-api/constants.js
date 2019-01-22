@@ -2,12 +2,12 @@
 /**
  * External dependencies
  */
-import { SECOND, MINUTE } from '@fresh-data/framework';
+import { MINUTE } from '@fresh-data/framework';
 
 export const NAMESPACE = '/wc/v4';
 
 export const DEFAULT_REQUIREMENT = {
-	timeout: 5 * SECOND,
+	timeout: 1 * MINUTE,
 	freshness: 5 * MINUTE,
 };
 
