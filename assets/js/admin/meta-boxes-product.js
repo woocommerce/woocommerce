@@ -1,7 +1,8 @@
 /*global woocommerce_admin_meta_boxes */
 jQuery( function( $ ) {
 
-	// Scroll to first checked category - https://github.com/scribu/wp-category-checklist-tree/blob/d1c3c1f449e1144542efa17dde84a9f52ade1739/category-checklist-tree.php
+	// Scroll to first checked category
+	// https://github.com/scribu/wp-category-checklist-tree/blob/d1c3c1f449e1144542efa17dde84a9f52ade1739/category-checklist-tree.php
 	$( function() {
 		$( '[id$="-all"] > ul.categorychecklist' ).each( function() {
 			var $list = $( this );
@@ -422,7 +423,8 @@ jQuery( function( $ ) {
 					window.alert( response.error );
 				} else if ( response.slug ) {
 					// Success.
-					$wrapper.find( 'select.attribute_values' ).append( '<option value="' + response.term_id + '" selected="selected">' + response.name + '</option>' );
+					$wrapper.find( 'select.attribute_values' )
+						.append( '<option value="' + response.term_id + '" selected="selected">' + response.name + '</option>' );
 					$wrapper.find( 'select.attribute_values' ).change();
 				}
 
@@ -468,7 +470,8 @@ jQuery( function( $ ) {
 				var nr_elements = original_data.length / 6;
 				for ( var i = 0; i < nr_elements; i++ ) {
 					if ( typeof( original_data ) !== 'undefined' && original_data[ i * 6 + 2 ].value === '' ) {
-						$( 'select.attribute_taxonomy' ).find( 'option[value="' + original_data[ i * 6 ].value + '"]' ).removeAttr( 'disabled' );
+						$( 'select.attribute_taxonomy' )
+							.find( 'option[value="' + original_data[ i * 6 ].value + '"]' ).removeAttr( 'disabled' );
 					}
 				}
 
@@ -607,7 +610,11 @@ jQuery( function( $ ) {
 					attachment_ids   = attachment_ids ? attachment_ids + ',' + attachment.id : attachment.id;
 					var attachment_image = attachment.sizes && attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
 
-					$product_images.append( '<li class="image" data-attachment_id="' + attachment.id + '"><img src="' + attachment_image + '" /><ul class="actions"><li><a href="#" class="delete" title="' + $el.data('delete') + '">' + $el.data('text') + '</a></li></ul></li>' );
+					$product_images.append(
+						'<li class="image" data-attachment_id="' + attachment.id + '"><img src="' + attachment_image +
+						'" /><ul class="actions"><li><a href="#" class="delete" title="' + $el.data('delete') + '">' +
+						$el.data('text') + '</a></li></ul></li>'
+					);
 				}
 			});
 
