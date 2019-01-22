@@ -190,6 +190,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Adds filter on the return value of function 'get_item_tax_rates'. This gives developers the possibility to prevent the mandatory caching of tax rates. #22488
 * Dev - Add filters for mail callback in WC_Email::send method. #22394
 * Dev - Add an instance method to WC_Admin_Taxonomies. #21884
+* Dev - Added `woocommerce_order_is_pending_statuses` filter and `wc_get_is_pending_statuses` function. #22409
 * Dev - Filter save_payment_method_checkbox to allow "Save to account" checkbox to be removed from the checkout form. #21859
 * Dev - Added triggers to the gallery script to allow 3rd parties to run scripts before and after initialization. #22501
 * Fix - Fix W3C validation of single product page quantity input. #22333
