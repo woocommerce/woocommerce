@@ -99,46 +99,54 @@ final class WC_Cart_Session {
 		$cart_contents = array();
 
 		foreach ( $cart as $key => $values ) {
-			$product = wc_get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
-
 			if ( ! is_customize_preview() && 'customize-preview' === $key ) {
 				continue;
 			}
 
-			if ( ! empty( $product ) && $product->exists() && $values['quantity'] > 0 ) {
+			$product = wc_get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
 
-				if ( apply_filter( 'woocommerce_pre_remove_cart_item_from_session', false, $key, $values ) ) {
-					$update_cart_session = true;
-					do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
+			if ( empty( $product ) || ! $product->exists() || 0 >= $values['quantity'] ) {
+				continue;
+			}
 
-				} else {
-					if ( ! $product->is_purchasable() ) {
-						$update_cart_session = true;
-						/* translators: %s: product name */
-						wc_add_notice( sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_name() ), 'error' );
-						do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
+			/**
+			 * Allow 3rd parties to validate this item before it's added to cart and add their own notices.
+			 *
+			 * @since 3.6.0
+			 *
+			 * @param bool $remove_cart_item_from_session If true, the item will not be added to the cart. Default: false.
+			 * @param string $key Cart item key.
+			 * @param array $values Cart item values e.g. quantity and product_id.
+			 */
+			if ( apply_filters( 'woocommerce_pre_remove_cart_item_from_session', false, $key, $values ) ) {
+				$update_cart_session = true;
+				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
-					} elseif ( ! empty( $values['data_hash'] ) && ! hash_equals( $values['data_hash'], wc_get_cart_item_data_hash( $product ) ) ) { // phpcs:ignore PHPCompatibility.PHP.NewFunctions.hash_equalsFound
-						$update_cart_session = true;
-						/* translators: %1$s: product name. %2$s product permalink */
-						wc_add_notice( sprintf( __( '%1$s has been removed from your cart because it has since been modified. You can add it back to your cart <a href="%2$s">here</a>.', 'woocommerce' ), $product->get_name(), $product->get_permalink() ), 'notice' );
-						do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
+			} elseif ( ! $product->is_purchasable() ) {
+				$update_cart_session = true;
+				/* translators: %s: product name */
+				wc_add_notice( sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_name() ), 'error' );
+				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
-					} else {
-						// Put session data into array. Run through filter so other plugins can load their own session data.
-						$session_data = array_merge(
-							$values,
-							array(
-								'data' => $product,
-							)
-						);
+			} elseif ( ! empty( $values['data_hash'] ) && ! hash_equals( $values['data_hash'], wc_get_cart_item_data_hash( $product ) ) ) { // phpcs:ignore PHPCompatibility.PHP.NewFunctions.hash_equalsFound
+				$update_cart_session = true;
+				/* translators: %1$s: product name. %2$s product permalink */
+				wc_add_notice( sprintf( __( '%1$s has been removed from your cart because it has since been modified. You can add it back to your cart <a href="%2$s">here</a>.', 'woocommerce' ), $product->get_name(), $product->get_permalink() ), 'notice' );
+				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
-						$cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $session_data, $values, $key );
+			} else {
+				// Put session data into array. Run through filter so other plugins can load their own session data.
+				$session_data = array_merge(
+					$values,
+					array(
+						'data' => $product,
+					)
+				);
 
-						// Add to cart right away so the product is visible in woocommerce_get_cart_item_from_session hook.
-						$this->cart->set_cart_contents( $cart_contents );
-					}
-				}
+				$cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $session_data, $values, $key );
+
+				// Add to cart right away so the product is visible in woocommerce_get_cart_item_from_session hook.
+				$this->cart->set_cart_contents( $cart_contents );
 			}
 		}
 
