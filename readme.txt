@@ -193,6 +193,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Added `woocommerce_order_is_pending_statuses` filter and `wc_get_is_pending_statuses` function. #22409
 * Dev - Filter save_payment_method_checkbox to allow "Save to account" checkbox to be removed from the checkout form. #21859
 * Dev - Added triggers to the gallery script to allow 3rd parties to run scripts before and after initialization. #22501
+* Dev - Added `woocommerce_add_to_cart_qty_html` filter. #21069
 * Fix - Hide ratings on the shop page when reviews are disabled. #22476
 * Fix - Fix W3C validation of single product page quantity input. #22333
 * Fix - Give product variations a unique guid after creation. #22324
