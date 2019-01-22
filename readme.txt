@@ -196,6 +196,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Filter save_payment_method_checkbox to allow "Save to account" checkbox to be removed from the checkout form. #21859
 * Dev - Added triggers to the gallery script to allow 3rd parties to run scripts before and after initialization. #22501
 * Dev - Added `woocommerce_add_to_cart_qty_html` filter. #21069
+* Dev - Prevent extract from polluting hook arguments in wc_get_template(). #21722
 * Dev - Add `woocommerce_pre_remove_cart_item_from_session` hook to allow removal of cart items when the cart is loaded from the session. #22290
 * Fix - Hide ratings on the shop page when reviews are disabled. #22476
 * Fix - Fix W3C validation of single product page quantity input. #22333
