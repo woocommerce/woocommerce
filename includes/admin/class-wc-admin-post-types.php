@@ -633,15 +633,15 @@ class WC_Admin_Post_Types {
 			$change_stock = absint( $_REQUEST['change_stock'] );
 			switch ( $change_stock ) {
 				case 2:
-					$stock_amount = wc_stock_amount( $product->get_stock_quantity() + $stock_amount );
+					wc_update_product_stock( $product, $stock_amount, 'increase' );
 					break;
 				case 3:
-					$stock_amount = wc_stock_amount( $product->get_stock_quantity() - $stock_amount );
+					wc_update_product_stock( $product, $stock_amount, 'decrease' );
 					break;
 				default:
+					wc_update_product_stock( $product, $stock_amount, 'set' );
 					break;
 			}
-			$product->set_stock_quantity( $stock_amount );
 		}
 
 		// Apply product type constraints to stock status.
