@@ -1565,7 +1565,7 @@ function wc_ascii_uasort_comparison( $a, $b ) {
 		$a = iconv( 'UTF-8', 'ASCII//TRANSLIT', $a );
 		$b = iconv( 'UTF-8', 'ASCII//TRANSLIT', $b );
 	}
-	return strcmp( $aconv, $bconv );
+	return strcmp( $a, $b );
 }
 
 /**
