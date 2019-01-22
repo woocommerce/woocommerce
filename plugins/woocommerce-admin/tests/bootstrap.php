@@ -94,7 +94,9 @@ function wc_test_includes() {
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
-	require dirname( dirname( dirname( __FILE__ ) ) ) . '/gutenberg/gutenberg.php';
+	if ( version_compare( $GLOBALS['wp_version'], '4.9.9', '<=' ) ) { // < 5.0 fails for "5.0-alpha-12345-src
+		require dirname( dirname( dirname( __FILE__ ) ) ) . '/gutenberg/gutenberg.php';
+	}
 
 	define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 	define( 'WC_USE_TRANSACTIONS', false );

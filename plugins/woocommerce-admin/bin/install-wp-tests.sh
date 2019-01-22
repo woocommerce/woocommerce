@@ -168,8 +168,12 @@ install_deps() {
 	php wp-cli.phar core config --dbname=$DB_NAME --dbuser=$DB_USER --dbpass=$DB_PASS --dbhost=$DB_HOST --dbprefix=wptests_
 	php wp-cli.phar core install --url="$WP_SITE_URL" --title="Example" --admin_user=admin --admin_password=password --admin_email=info@example.com --path=$WP_CORE_DIR --skip-email
 
-	# Install Gutenberg
-	php wp-cli.phar plugin install gutenberg --activate
+	# Install Gutenberg if WP < 5
+	if [[ $WP_VERSION =~ ^([0-9]+)[0-9\.]+\-? ]]; then
+		if [ "5" -gt "${BASH_REMATCH[1]}" ]; then
+			php wp-cli.phar plugin install gutenberg --activate
+		fi
+	fi
 
 	# Install WooCommerce
 	cd "wp-content/plugins/"
