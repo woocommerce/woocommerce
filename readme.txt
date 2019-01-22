@@ -189,6 +189,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Add a filter, woocommerce_current_user_can_edit_customer_meta_fields, to bypass manage_woocommerce when editing customer meta fields. #22277
 * Dev - Adds filter on the return value of function 'get_item_tax_rates'. This gives developers the possibility to prevent the mandatory caching of tax rates. #22488
 * Dev - Add filters for mail callback in WC_Email::send method. #22394
+* Dev - Added triggers to the gallery script to allow 3rd parties to run scripts before and after initialization. #22501
 * Fix - Fix W3C validation of single product page quantity input. #22333
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 * Localization - Added US Minor Outlying Islands as states to avoid confusion with US. #22468
