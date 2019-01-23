@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Generalize shipping estimate text on cart page. #22467
 * Tweak - Include auto draft orders in order list filters. #22380
 * Tweak - Only include the network orders widget on the main site dashboard. #22318
+* Tweak - Only show available shipping continents when selecting shipping zone region. #22131
 * Dev - Introduce `woocommerce_reviews_title` filter. #22216
 * Dev - Added `woocommerce_cheque_process_payment_order_status` filter allowing plugins to change the order status to the Cheque gateway. #21402
 * Dev - Add the current coupon object to the `woocommerce_get_shop_coupon_data` filter. #21442
