@@ -89,7 +89,8 @@ function wc_get_coupon_code_by_id( $id ) {
  * @return int
  */
 function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {
-	if ( empty ( $code ) ) {
+
+	if ( empty( $code ) ) {
 		return 0;
 	}
 
