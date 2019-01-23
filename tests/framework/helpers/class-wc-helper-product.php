@@ -25,11 +25,12 @@ class WC_Helper_Product {
 	 * @since 2.3
 	 * @return WC_Product_Simple
 	 */
-	public static function create_simple_product() {
+	public static function create_simple_product( $save = true ) {
 		$product = new WC_Product_Simple();
 		$product->set_props( array(
 			'name'          => 'Dummy Product',
 			'regular_price' => 10,
+			'price'         => 10,
 			'sku'           => 'DUMMY SKU',
 			'manage_stock'  => false,
 			'tax_status'    => 'taxable',
@@ -38,9 +39,13 @@ class WC_Helper_Product {
 			'stock_status'  => 'instock',
 			'weight'        => '1.1',
 		) );
-		$product->save();
 
-		return wc_get_product( $product->get_id() );
+		if ( $save ) {
+			$product->save();
+			return wc_get_product( $product->get_id() );
+		} else {
+			return $product;
+		}
 	}
 
 	/**
@@ -137,6 +142,8 @@ class WC_Helper_Product {
 	 *
 	 * @since 2.3
 	 *
+	 * @param string        $attribute_name Name of attribute to create.
+	 * @param array(string) $terms          Terms to create for the attribute.
 	 * @return array
 	 */
 	public static function create_attribute( $attribute_name = 'size', $terms = array( 'small' ) ) {
@@ -174,7 +181,8 @@ class WC_Helper_Product {
 		global $wc_product_attributes;
 		$wc_product_attributes = array();
 		foreach ( wc_get_attribute_taxonomies() as $tax ) {
-			if ( $name = wc_attribute_taxonomy_name( $tax->attribute_name ) ) {
+			$name = wc_attribute_taxonomy_name( $tax->attribute_name );
+			if ( $name ) {
 				$wc_product_attributes[ $name ] = $tax;
 			}
 		}
@@ -205,7 +213,9 @@ class WC_Helper_Product {
 
 		$attribute_id = absint( $attribute_id );
 
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = $attribute_id" );
+		$wpdb->query(
+			$wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = %d", $attribute_id )
+		);
 	}
 
 	/**

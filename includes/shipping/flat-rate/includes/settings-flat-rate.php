@@ -38,7 +38,7 @@ $settings = array(
 	),
 );
 
-$shipping_classes = WC()->shipping->get_shipping_classes();
+$shipping_classes = WC()->shipping()->get_shipping_classes();
 
 if ( ! empty( $shipping_classes ) ) {
 	$settings['class_costs'] = array(

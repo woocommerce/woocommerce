@@ -137,7 +137,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	public function delete_and_reassign( $reassign = null ) {
 		if ( $this->data_store ) {
 			$this->data_store->delete(
-				$this, array(
+				$this,
+				array(
 					'force_delete' => true,
 					'reassign'     => $reassign,
 				)
@@ -294,7 +295,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $password Password.
 	 */
 	public function set_password( $password ) {
-		$this->password = wc_clean( $password );
+		$this->password = $password;
 	}
 
 	/**

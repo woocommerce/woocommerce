@@ -1,7 +1,8 @@
 /*global woocommerce_admin_meta_boxes */
 jQuery( function( $ ) {
 
-	// Scroll to first checked category - https://github.com/scribu/wp-category-checklist-tree/blob/d1c3c1f449e1144542efa17dde84a9f52ade1739/category-checklist-tree.php
+	// Scroll to first checked category
+	// https://github.com/scribu/wp-category-checklist-tree/blob/d1c3c1f449e1144542efa17dde84a9f52ade1739/category-checklist-tree.php
 	$( function() {
 		$( '[id$="-all"] > ul.categorychecklist' ).each( function() {
 			var $list = $( this );
@@ -422,7 +423,8 @@ jQuery( function( $ ) {
 					window.alert( response.error );
 				} else if ( response.slug ) {
 					// Success.
-					$wrapper.find( 'select.attribute_values' ).append( '<option value="' + response.term_id + '" selected="selected">' + response.name + '</option>' );
+					$wrapper.find( 'select.attribute_values' )
+						.append( '<option value="' + response.term_id + '" selected="selected">' + response.name + '</option>' );
 					$wrapper.find( 'select.attribute_values' ).change();
 				}
 
@@ -446,11 +448,11 @@ jQuery( function( $ ) {
 				opacity: 0.6
 			}
 		});
-
+		var original_data = $( '.product_attributes' ).find( 'input, select, textarea' );
 		var data = {
 			post_id     : woocommerce_admin_meta_boxes.post_id,
 			product_type: $( '#product-type' ).val(),
-			data        : $( '.product_attributes' ).find( 'input, select, textarea' ).serialize(),
+			data        : original_data.serialize(),
 			action      : 'woocommerce_save_attributes',
 			security    : woocommerce_admin_meta_boxes.save_attributes_nonce
 		};
@@ -463,6 +465,18 @@ jQuery( function( $ ) {
 				// Success.
 				$( '.product_attributes' ).html( response.data.html );
 				$( '.product_attributes' ).unblock();
+
+				// Hide the 'Used for variations' checkbox if not viewing a variable product
+				show_and_hide_panels();
+
+				// Make sure the dropdown is not disabled for empty value attributes.
+				var nr_elements = original_data.length / 6;
+				for ( var i = 0; i < nr_elements; i++ ) {
+					if ( typeof( original_data ) !== 'undefined' && original_data[ i * 6 + 2 ].value === '' ) {
+						$( 'select.attribute_taxonomy' )
+							.find( 'option[value="' + original_data[ i * 6 ].value + '"]' ).removeAttr( 'disabled' );
+					}
+				}
 
 				// Reload variations panel.
 				var this_page = window.location.toString();
@@ -599,7 +613,11 @@ jQuery( function( $ ) {
 					attachment_ids   = attachment_ids ? attachment_ids + ',' + attachment.id : attachment.id;
 					var attachment_image = attachment.sizes && attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
 
-					$product_images.append( '<li class="image" data-attachment_id="' + attachment.id + '"><img src="' + attachment_image + '" /><ul class="actions"><li><a href="#" class="delete" title="' + $el.data('delete') + '">' + $el.data('text') + '</a></li></ul></li>' );
+					$product_images.append(
+						'<li class="image" data-attachment_id="' + attachment.id + '"><img src="' + attachment_image +
+						'" /><ul class="actions"><li><a href="#" class="delete" title="' + $el.data('delete') + '">' +
+						$el.data('text') + '</a></li></ul></li>'
+					);
 				}
 			});
 

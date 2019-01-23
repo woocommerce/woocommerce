@@ -302,7 +302,7 @@ class WC_Product_Variable extends WC_Product {
 
 			$available_variations[] = $this->get_available_variation( $variation );
 		}
-		$available_variations = array_filter( $available_variations );
+		$available_variations = array_values( array_filter( $available_variations ) );
 
 		return $available_variations;
 	}
@@ -406,6 +406,7 @@ class WC_Product_Variable extends WC_Product {
 		if ( ! $this->get_manage_stock() ) {
 			$this->set_stock_quantity( '' );
 			$this->set_backorders( 'no' );
+			$this->set_low_stock_amount( '' );
 			$this->data_store->sync_stock_status( $this );
 
 			// If we are stock managing, backorders are allowed, and we don't have stock, force on backorder status.
@@ -503,7 +504,7 @@ class WC_Product_Variable extends WC_Product {
 
 		if ( false === $has_weight ) {
 			$has_weight = $this->data_store->child_has_weight( $this );
-			set_transient( $transient_name, $has_weight, DAY_IN_SECONDS * 30 );
+			set_transient( $transient_name, (int) $has_weight, DAY_IN_SECONDS * 30 );
 		}
 
 		return (bool) $has_weight;
@@ -520,7 +521,7 @@ class WC_Product_Variable extends WC_Product {
 
 		if ( false === $has_dimension ) {
 			$has_dimension = $this->data_store->child_has_dimensions( $this );
-			set_transient( $transient_name, $has_dimension, DAY_IN_SECONDS * 30 );
+			set_transient( $transient_name, (int) $has_dimension, DAY_IN_SECONDS * 30 );
 		}
 
 		return (bool) $has_dimension;

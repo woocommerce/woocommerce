@@ -171,7 +171,7 @@ abstract class WC_CSV_Exporter {
 	 */
 	public function send_headers() {
 		if ( function_exists( 'gc_enable' ) ) {
-			gc_enable(); // phpcs:ignore PHPCompatibility.PHP.NewFunctions.gc_enableFound
+			gc_enable(); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.gc_enableFound
 		}
 		if ( function_exists( 'apache_setenv' ) ) {
 			@apache_setenv( 'no-gzip', 1 ); // @codingStandardsIgnoreLine
@@ -264,7 +264,7 @@ abstract class WC_CSV_Exporter {
 	 * Export rows in CSV format.
 	 *
 	 * @since 3.1.0
-	 * @return array
+	 * @return string
 	 */
 	protected function export_rows() {
 		$data   = $this->get_data_to_export();
@@ -354,7 +354,7 @@ abstract class WC_CSV_Exporter {
 		$active_content_triggers = array( '=', '+', '-', '@' );
 
 		if ( in_array( mb_substr( $data, 0, 1 ), $active_content_triggers, true ) ) {
-			$data = "'" . $data . "'";
+			$data = "'" . $data;
 		}
 
 		return $data;
@@ -379,7 +379,6 @@ abstract class WC_CSV_Exporter {
 		}
 
 		$use_mb = function_exists( 'mb_convert_encoding' );
-		$data   = (string) urldecode( $data );
 
 		if ( $use_mb ) {
 			$encoding = mb_detect_encoding( $data, 'UTF-8, ISO-8859-1', true );
@@ -395,7 +394,7 @@ abstract class WC_CSV_Exporter {
 	 * @since 3.1.0
 	 * @param  array  $term_ids Term IDs to format.
 	 * @param  string $taxonomy Taxonomy name.
-	 * @return array
+	 * @return string
 	 */
 	public function format_term_ids( $term_ids, $taxonomy ) {
 		$term_ids = wp_parse_id_list( $term_ids );

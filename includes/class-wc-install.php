@@ -114,8 +114,15 @@ class WC_Install {
 			'wc_update_344_db_version',
 		),
 		'3.5.0' => array(
-			'wc_update_350_order_customer_id',
+			'wc_update_350_reviews_comment_type',
 			'wc_update_350_db_version',
+		),
+		'3.5.2' => array(
+			'wc_update_352_drop_download_log_fk',
+		),
+		'3.5.4' => array(
+			'wc_update_354_modify_shop_manager_caps',
+			'wc_update_354_db_version',
 		),
 	);
 
@@ -247,7 +254,7 @@ class WC_Install {
 	/**
 	 * Is this a brand new WC install?
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return boolean
 	 */
 	private static function is_new_install() {
@@ -257,7 +264,7 @@ class WC_Install {
 	/**
 	 * Is a DB update needed?
 	 *
-	 * @since 3.2.0
+	 * @since  3.2.0
 	 * @return boolean
 	 */
 	private static function needs_db_update() {
@@ -354,7 +361,8 @@ class WC_Install {
 	/**
 	 * Add more cron schedules.
 	 *
-	 * @param  array $schedules List of WP scheduled cron jobs.
+	 * @param array $schedules List of WP scheduled cron jobs.
+	 *
 	 * @return array
 	 */
 	public static function cron_schedules( $schedules ) {
@@ -404,7 +412,8 @@ class WC_Install {
 		include_once dirname( __FILE__ ) . '/admin/wc-admin-functions.php';
 
 		$pages = apply_filters(
-			'woocommerce_create_pages', array(
+			'woocommerce_create_pages',
+			array(
 				'shop'      => array(
 					'name'    => _x( 'shop', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'Shop', 'Page title', 'woocommerce' ),
@@ -413,17 +422,17 @@ class WC_Install {
 				'cart'      => array(
 					'name'    => _x( 'cart', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'Cart', 'Page title', 'woocommerce' ),
-					'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']',
+					'content' => '<!-- wp:shortcode -->[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']<!-- /wp:shortcode -->',
 				),
 				'checkout'  => array(
 					'name'    => _x( 'checkout', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'Checkout', 'Page title', 'woocommerce' ),
-					'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
+					'content' => '<!-- wp:shortcode -->[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']<!-- /wp:shortcode -->',
 				),
 				'myaccount' => array(
 					'name'    => _x( 'my-account', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'My account', 'Page title', 'woocommerce' ),
-					'content' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
+					'content' => '<!-- wp:shortcode -->[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']<!-- /wp:shortcode -->',
 				),
 			)
 		);
@@ -552,6 +561,22 @@ class WC_Install {
 			}
 		}
 
+		/**
+		 * Change wp_woocommerce_sessions schema to use a bigint auto increment field instead of char(32) field as
+		 * the primary key as it is not a good practice to use a char(32) field as the primary key of a table and as
+		 * there were reports of issues with this table (see https://github.com/woocommerce/woocommerce/issues/20912).
+		 *
+		 * This query needs to run before dbDelta() as this WP function is not able to handle primary key changes
+		 * (see https://github.com/woocommerce/woocommerce/issues/21534 and https://core.trac.wordpress.org/ticket/40357).
+		 */
+		if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}woocommerce_sessions'" ) ) {
+			if ( ! $wpdb->get_var( "SHOW KEYS FROM {$wpdb->prefix}woocommerce_sessions WHERE Key_name = 'PRIMARY' AND Column_name = 'session_id'" ) ) {
+				$wpdb->query(
+					"ALTER TABLE `{$wpdb->prefix}woocommerce_sessions` DROP PRIMARY KEY, DROP KEY `session_id`, ADD PRIMARY KEY(`session_id`), ADD UNIQUE KEY(`session_key`)"
+				);
+			}
+		}
+
 		dbDelta( self::get_schema() );
 
 		$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
@@ -577,21 +602,21 @@ class WC_Install {
 
 		// Add constraint to download logs if the columns matches.
 		if ( ! empty( $download_permissions_column_type ) && ! empty( $download_log_column_type ) && $download_permissions_column_type === $download_log_column_type ) {
-			$fk_result = $wpdb->get_row( "
-				SELECT COUNT(*) AS fk_count
+			$fk_result = $wpdb->get_row(
+				"SELECT COUNT(*) AS fk_count
 				FROM information_schema.TABLE_CONSTRAINTS
 				WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
-				AND CONSTRAINT_NAME = 'fk_wc_download_log_permission_id'
+				AND CONSTRAINT_NAME = 'fk_{$wpdb->prefix}wc_download_log_permission_id'
 				AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-				AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'
-			" );
+				AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'"
+			); // WPCS: unprepared SQL ok.
 			if ( 0 === (int) $fk_result->fk_count ) {
-				$wpdb->query( "
-					ALTER TABLE `{$wpdb->prefix}wc_download_log`
-					ADD CONSTRAINT `fk_wc_download_log_permission_id`
+				$wpdb->query(
+					"ALTER TABLE `{$wpdb->prefix}wc_download_log`
+					ADD CONSTRAINT `fk_{$wpdb->prefix}wc_download_log_permission_id`
 					FOREIGN KEY (`permission_id`)
-					REFERENCES `{$wpdb->prefix}woocommerce_downloadable_product_permissions` (`permission_id`) ON DELETE CASCADE;
-				" );
+					REFERENCES `{$wpdb->prefix}woocommerce_downloadable_product_permissions` (`permission_id`) ON DELETE CASCADE;"
+				); // WPCS: unprepared SQL ok.
 			}
 		}
 	}
@@ -627,8 +652,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_key char(32) NOT NULL,
   session_value longtext NOT NULL,
   session_expiry BIGINT UNSIGNED NOT NULL,
-  PRIMARY KEY  (session_key),
-  UNIQUE KEY session_id (session_id)
+  PRIMARY KEY  (session_id),
+  UNIQUE KEY session_key (session_key)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
   key_id BIGINT UNSIGNED NOT NULL auto_increment,
@@ -872,14 +897,15 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		$tables = self::get_tables();
 
 		foreach ( $tables as $table ) {
-			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		}
 	}
 
 	/**
 	 * Uninstall tables when MU blog is deleted.
 	 *
-	 * @param  array $tables List of tables that will be deleted by WP.
+	 * @param array $tables List of tables that will be deleted by WP.
+	 *
 	 * @return string[]
 	 */
 	public static function wpmu_drop_tables( $tables ) {
@@ -933,7 +959,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				'read'                   => true,
 				'read_private_pages'     => true,
 				'read_private_posts'     => true,
-				'edit_users'             => true,
 				'edit_posts'             => true,
 				'edit_pages'             => true,
 				'edit_published_posts'   => true,
@@ -1149,8 +1174,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	/**
 	 * Show action links on the plugin screen.
 	 *
-	 * @param   mixed $links Plugin Action links.
-	 * @return  array
+	 * @param mixed $links Plugin Action links.
+	 *
+	 * @return array
 	 */
 	public static function plugin_action_links( $links ) {
 		$action_links = array(
@@ -1163,9 +1189,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	/**
 	 * Show row meta on the plugin screen.
 	 *
-	 * @param   mixed $links Plugin Row Meta.
-	 * @param   mixed $file  Plugin Base file.
-	 * @return  array
+	 * @param mixed $links Plugin Row Meta.
+	 * @param mixed $file  Plugin Base file.
+	 *
+	 * @return array
 	 */
 	public static function plugin_row_meta( $links, $file ) {
 		if ( WC_PLUGIN_BASENAME === $file ) {
@@ -1200,12 +1227,14 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 *
 	 * @param string $plugin_to_install_id Plugin ID.
 	 * @param array  $plugin_to_install Plugin information.
+	 *
 	 * @throws Exception If unable to proceed with plugin installation.
-	 * @since 2.6.0
+	 * @since  2.6.0
 	 */
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
 		// Explicitly clear the event.
-		wp_clear_scheduled_hook( 'woocommerce_plugin_background_installer', func_get_args() );
+		$args = func_get_args();
+		wp_clear_scheduled_hook( 'woocommerce_plugin_background_installer', $args );
 
 		if ( ! empty( $plugin_to_install['repo-slug'] ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -1217,7 +1246,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 			$skin              = new Automatic_Upgrader_Skin();
 			$upgrader          = new WP_Upgrader( $skin );
-			$installed_plugins = array_reduce( array_keys( get_plugins() ), array( __CLASS__, 'associate_plugin_file' ), array() );
+			$installed_plugins = array_reduce( array_keys( get_plugins() ), array( __CLASS__, 'associate_plugin_file' ) );
+			if ( empty( $installed_plugins ) ) {
+				$installed_plugins = array();
+			}
 			$plugin_slug       = $plugin_to_install['repo-slug'];
 			$plugin_file       = isset( $plugin_to_install['file'] ) ? $plugin_to_install['file'] : $plugin_slug . '.php';
 			$installed         = false;
@@ -1316,6 +1348,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			// Activate this thing.
 			if ( $activate ) {
 				try {
+					add_action( 'add_option_mailchimp_woocommerce_plugin_do_activation_redirect', array( __CLASS__, 'remove_mailchimps_redirect' ), 10, 2 );
 					$result = activate_plugin( $installed ? $installed_plugins[ $plugin_file ] : $plugin_slug . '/' . $plugin_file );
 
 					if ( is_wp_error( $result ) ) {
@@ -1337,15 +1370,31 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	}
 
 	/**
+	 * Removes redirect added during MailChimp plugin's activation.
+	 *
+	 * @param string $option Option name.
+	 * @param string $value  Option value.
+	 */
+	public static function remove_mailchimps_redirect( $option, $value ) {
+		// Remove this action to prevent infinite looping.
+		remove_action( 'add_option_mailchimp_woocommerce_plugin_do_activation_redirect', array( __CLASS__, 'remove_mailchimps_redirect' ) );
+
+		// Update redirect back to false.
+		update_option( 'mailchimp_woocommerce_plugin_do_activation_redirect', false );
+	}
+
+	/**
 	 * Install a theme from .org in the background via a cron job (used by installer - opt in).
 	 *
 	 * @param string $theme_slug Theme slug.
+	 *
 	 * @throws Exception If unable to proceed with theme installation.
-	 * @since 3.1.0
+	 * @since  3.1.0
 	 */
 	public static function theme_background_installer( $theme_slug ) {
 		// Explicitly clear the event.
-		wp_clear_scheduled_hook( 'woocommerce_theme_background_installer', func_get_args() );
+		$args = func_get_args();
+		wp_clear_scheduled_hook( 'woocommerce_theme_background_installer', $args );
 
 		if ( ! empty( $theme_slug ) ) {
 			// Suppress feedback.
@@ -1364,7 +1413,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					$skin     = new Automatic_Upgrader_Skin();
 					$upgrader = new Theme_Upgrader( $skin );
 					$api      = themes_api(
-						'theme_information', array(
+						'theme_information',
+						array(
 							'slug'   => $theme_slug,
 							'fields' => array( 'sections' => false ),
 						)

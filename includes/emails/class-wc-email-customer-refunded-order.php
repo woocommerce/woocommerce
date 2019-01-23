@@ -17,7 +17,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 	 * Order refunded emails are sent to the customer when the order is marked refunded.
 	 *
 	 * @class    WC_Email_Customer_Refunded_Order
-	 * @version  2.4.0
+	 * @version  3.5.0
 	 * @package  WooCommerce/Classes/Emails
 	 * @extends  WC_Email
 	 */
@@ -70,9 +70,9 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 		 */
 		public function get_default_subject( $partial = false ) {
 			if ( $partial ) {
-				return __( 'Your {site_title} order from {order_date} has been partially refunded', 'woocommerce' );
+				return __( 'Your {site_title} order #{order_number} has been partially refunded', 'woocommerce' );
 			} else {
-				return __( 'Your {site_title} order from {order_date} has been refunded', 'woocommerce' );
+				return __( 'Your {site_title} order #{order_number} has been refunded', 'woocommerce' );
 			}
 		}
 
@@ -85,16 +85,15 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 		 */
 		public function get_default_heading( $partial = false ) {
 			if ( $partial ) {
-				return __( 'Your order has been partially refunded', 'woocommerce' );
+				return __( 'Partial Refund: Order {order_number}', 'woocommerce' );
 			} else {
-				return __( 'Order {order_number} details', 'woocommerce' );
+				return __( 'Order Refunded: {order_number}', 'woocommerce' );
 			}
 		}
 
 		/**
 		 * Get email subject.
 		 *
-		 * @access public
 		 * @return string
 		 */
 		public function get_subject() {
@@ -109,7 +108,6 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 		/**
 		 * Get email heading.
 		 *
-		 * @access public
 		 * @return string
 		 */
 		public function get_heading() {
@@ -184,7 +182,6 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 		/**
 		 * Get content html.
 		 *
-		 * @access public
 		 * @return string
 		 */
 		public function get_content_html() {

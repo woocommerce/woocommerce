@@ -46,6 +46,7 @@ class WC_Product_Query extends WC_Object_Query {
 				'stock_quantity'    => '',
 				'stock_status'      => '',
 				'backorders'        => '',
+				'low_stock_amount'  => '',
 				'sold_individually' => '',
 				'weight'            => '',
 				'length'            => '',

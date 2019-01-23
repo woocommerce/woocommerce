@@ -84,7 +84,6 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * (default value: 0)
 	 *
 	 * @var int
-	 * @access protected
 	 */
 	protected $start_time = 0;
 
@@ -234,7 +233,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 
 			if ( 'external' === $object->get_type() ) {
-				unset( $data['manage_stock'], $data['stock_status'], $data['backorders'] );
+				unset( $data['manage_stock'], $data['stock_status'], $data['backorders'], $data['low_stock_amount'] );
 			}
 
 			if ( 'importing' === $object->get_status() ) {
@@ -432,6 +431,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		// Stop if parent does not exists.
 		if ( ! $parent ) {
 			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Variation cannot be imported: Missing parent ID or parent does not exist yet.', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		// Stop if parent is a product variation.
+		if ( $parent->is_type( 'variation' ) ) {
+			return new WP_Error( 'woocommerce_product_importer_parent_set_as_variation', __( 'Variation cannot be imported: Parent product cannot be a product variation', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
 		if ( isset( $data['raw_attributes'] ) ) {
@@ -761,21 +765,21 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
-	 * The exporter prepends a ' to fields that start with a - which causes
-	 * issues with negative numbers. This removes the ' if the input is still a valid
-	 * number after removal.
+	 * The exporter prepends a ' to escape fields that start with =, +, - or @.
+	 * Remove the prepended ' character preceding those characters.
 	 *
-	 * @since 3.3.0
-	 * @param string $value A numeric string that may or may not have ' prepended.
+	 * @since 3.5.2
+	 * @param  string $value A string that may or may not have been escaped with '.
 	 * @return string
 	 */
-	protected function unescape_negative_number( $value ) {
-		if ( 0 === strpos( $value, "'-" ) ) {
-			$unescaped = trim( $value, "'" );
-			if ( is_numeric( $unescaped ) ) {
-				return $unescaped;
-			}
+	protected function unescape_data( $value ) {
+		$active_content_triggers = array( "'=", "'+", "'-", "'@" );
+
+		if ( in_array( mb_substr( $value, 0, 2 ), $active_content_triggers, true ) ) {
+			$value = mb_substr( $value, 1 );
 		}
+
 		return $value;
 	}
+
 }

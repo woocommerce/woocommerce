@@ -39,6 +39,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		add_filter( 'query_vars', array( $this, 'add_custom_query_var' ) );
 		add_filter( 'views_edit-product', array( $this, 'product_views' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );
+		add_filter( 'posts_clauses', array( $this, 'add_variation_parents_for_shipping_class' ), 10, 2 );
 	}
 
 	/**
@@ -145,7 +146,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	}
 
 	/**
-	 * Render columm: name.
+	 * Render column: name.
 	 */
 	protected function render_name_column() {
 		global $post;
@@ -160,7 +161,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		echo '</strong>';
 
 		if ( $this->object->get_parent_id() > 0 ) {
-			echo '&nbsp;&nbsp;&larr; <a href="' . esc_url( get_edit_post_link( $this->object->get_parent_id() ) ) . '">' . get_the_title( $this->object->get_parent_id() ) . '</a>';
+			echo '&nbsp;&nbsp;&larr; <a href="' . esc_url( get_edit_post_link( $this->object->get_parent_id() ) ) . '">' . get_the_title( $this->object->get_parent_id() ) . '</a>'; // @codingStandardsIgnoreLine.
 		}
 
 		get_inline_data( $post );
@@ -168,7 +169,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		/* Custom inline data for woocommerce. */
 		echo '
 			<div class="hidden" id="woocommerce_inline_' . absint( $this->object->get_id() ) . '">
-				<div class="menu_order">' . absint( $this->object->get_menu_order() ) . '</div>
+				<div class="menu_order">' . esc_html( $this->object->get_menu_order() ) . '</div>
 				<div class="sku">' . esc_html( $this->object->get_sku() ) . '</div>
 				<div class="regular_price">' . esc_html( $this->object->get_regular_price() ) . '</div>
 				<div class="sale_price">' . esc_html( $this->object->get_sale_price() ) . '</div>
@@ -187,6 +188,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				<div class="tax_status">' . esc_html( $this->object->get_tax_status() ) . '</div>
 				<div class="tax_class">' . esc_html( $this->object->get_tax_class() ) . '</div>
 				<div class="backorders">' . esc_html( $this->object->get_backorders() ) . '</div>
+				<div class="low_stock_amount">' . esc_html( $this->object->get_low_stock_amount() ) . '</div>
 			</div>
 		';
 	}
@@ -287,11 +289,14 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Render any custom filters and search inputs for the list table.
 	 */
 	protected function render_filters() {
-		$filters = apply_filters( 'woocommerce_products_admin_list_table_filters', array(
-			'product_category' => array( $this, 'render_products_category_filter' ),
-			'product_type'     => array( $this, 'render_products_type_filter' ),
-			'stock_status'     => array( $this, 'render_products_stock_status_filter' ),
-		) );
+		$filters = apply_filters(
+			'woocommerce_products_admin_list_table_filters',
+			array(
+				'product_category' => array( $this, 'render_products_category_filter' ),
+				'product_type'     => array( $this, 'render_products_type_filter' ),
+				'stock_status'     => array( $this, 'render_products_stock_status_filter' ),
+			)
+		);
 
 		ob_start();
 		foreach ( $filters as $filter_callback ) {
@@ -387,18 +392,24 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	protected function query_filters( $query_vars ) {
 		if ( isset( $query_vars['orderby'] ) ) {
 			if ( 'price' === $query_vars['orderby'] ) {
-				$query_vars = array_merge( $query_vars, array(
-					// phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-					'meta_key' => '_price',
-					'orderby'  => 'meta_value_num',
-				) );
+				$query_vars = array_merge(
+					$query_vars,
+					array(
+						// phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
+						'meta_key' => '_price',
+						'orderby'  => 'meta_value_num',
+					)
+				);
 			}
 			if ( 'sku' === $query_vars['orderby'] ) {
-				$query_vars = array_merge( $query_vars, array(
-					// phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-					'meta_key' => '_sku',
-					'orderby'  => 'meta_value',
-				) );
+				$query_vars = array_merge(
+					$query_vars,
+					array(
+						// phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
+						'meta_key' => '_sku',
+						'orderby'  => 'meta_value',
+					)
+				);
 			}
 		}
 
@@ -496,4 +507,26 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		return wc_clean( wp_unslash( $_GET['s'] ) ); // WPCS: input var ok, sanitization ok.
 	}
+
+	/**
+	 * Modifies post query so that it includes parent products whose variations have particular shipping class assigned.
+	 *
+	 * @param array    $pieces   Array of SELECT statement pieces (from, where, etc).
+	 * @param WP_Query $wp_query WP_Query instance.
+	 * @return array             Array of products, including parents of variations.
+	 */
+	public function add_variation_parents_for_shipping_class( $pieces, $wp_query ) {
+		global $wpdb;
+		if ( isset( $_GET['product_shipping_class'] ) && '0' !== $_GET['product_shipping_class'] ) { // WPCS: input var ok.
+			$replaced_where   = str_replace( ".post_type = 'product'", ".post_type = 'product_variation'", $pieces['where'] );
+			$pieces['where'] .= " OR {$wpdb->posts}.ID in (
+				SELECT {$wpdb->posts}.post_parent FROM
+				{$wpdb->posts} LEFT JOIN {$wpdb->term_relationships} ON ({$wpdb->posts}.ID = {$wpdb->term_relationships}.object_id)
+				WHERE 1=1 $replaced_where
+			)";
+			return $pieces;
+		}
+		return $pieces;
+	}
+
 }

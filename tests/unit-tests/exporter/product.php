@@ -24,16 +24,16 @@ class WC_Tests_Product_CSV_Exporter extends WC_Unit_Test_Case {
 		$exporter = new WC_Product_CSV_Exporter();
 
 		$data = "=cmd|' /C calc'!A0";
-		$this->assertEquals( "'=cmd|' /C calc'!A0'", $exporter->escape_data( $data ) );
+		$this->assertEquals( "'=cmd|' /C calc'!A0", $exporter->escape_data( $data ) );
 
 		$data = "+cmd|' /C calc'!A0";
-		$this->assertEquals( "'+cmd|' /C calc'!A0'", $exporter->escape_data( $data ) );
+		$this->assertEquals( "'+cmd|' /C calc'!A0", $exporter->escape_data( $data ) );
 
 		$data = "-cmd|' /C calc'!A0";
-		$this->assertEquals( "'-cmd|' /C calc'!A0'", $exporter->escape_data( $data ) );
+		$this->assertEquals( "'-cmd|' /C calc'!A0", $exporter->escape_data( $data ) );
 
 		$data = "@cmd|' /C calc'!A0";
-		$this->assertEquals( "'@cmd|' /C calc'!A0'", $exporter->escape_data( $data ) );
+		$this->assertEquals( "'@cmd|' /C calc'!A0", $exporter->escape_data( $data ) );
 	}
 
 	/**
@@ -119,6 +119,7 @@ class WC_Tests_Product_CSV_Exporter extends WC_Unit_Test_Case {
 		WC_Helper_Product::create_grouped_product();
 		WC_Helper_Product::create_variation_product();
 
+		$exporter->set_product_category_to_export( array() );
 		$exporter->prepare_data_to_export();
 	}
 

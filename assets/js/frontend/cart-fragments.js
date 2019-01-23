@@ -38,6 +38,7 @@ jQuery( function( $ ) {
 	var $fragment_refresh = {
 		url: wc_cart_fragments_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_refreshed_fragments' ),
 		type: 'POST',
+		timeout: wc_cart_fragments_params.request_timeout,
 		success: function( data ) {
 			if ( data && data.fragments ) {
 
@@ -56,6 +57,9 @@ jQuery( function( $ ) {
 
 				$( document.body ).trigger( 'wc_fragments_refreshed' );
 			}
+		},
+		error: function() {
+			$( document.body ).trigger( 'wc_fragments_ajax_error' );
 		}
 	};
 

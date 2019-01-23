@@ -238,8 +238,12 @@ class WC_Checkout {
 				'placeholder' => esc_attr__( 'Password', 'woocommerce' ),
 			);
 		}
-
 		$this->fields = apply_filters( 'woocommerce_checkout_fields', $this->fields );
+
+		foreach ( $this->fields as $field_type => $fields ) {
+			// Sort each of the checkout field sections based on priority.
+			uasort( $this->fields[ $field_type ], 'wc_checkout_fields_uasort_comparison' );
+		}
 
 		return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
 	}
@@ -309,21 +313,31 @@ class WC_Checkout {
 				$order = new WC_Order();
 			}
 
+			$fields_prefix = array(
+				'shipping'  => true,
+				'billing'   => true,
+			);
+			$shipping_fields = array(
+				'shipping_method'   => true,
+				'shipping_total'    => true,
+				'shipping_tax'      => true,
+			);
 			foreach ( $data as $key => $value ) {
 				if ( is_callable( array( $order, "set_{$key}" ) ) ) {
 					$order->{"set_{$key}"}( $value );
-
 					// Store custom fields prefixed with wither shipping_ or billing_. This is for backwards compatibility with 2.6.x.
-					// TODO: Fix conditional to only include shipping/billing address fields in a smarter way without str(i)pos.
-				} elseif ( ( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) )
-					&& ! in_array( $key, array( 'shipping_method', 'shipping_total', 'shipping_tax' ), true ) ) {
-					$order->update_meta_data( '_' . $key, $value );
+				} elseif ( isset( $fields_prefix[ current( explode( '_', $key ) ) ] ) ) {
+					if ( ! isset( $shipping_fields[ $key ] ) ) {
+						$order->update_meta_data( '_' . $key, $value );
+					}
 				}
 			}
 
 			$order->set_created_via( 'checkout' );
 			$order->set_cart_hash( $cart_hash );
 			$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() ) );
+			$order_vat_exempt = WC()->cart->get_customer()->get_is_vat_exempt() ? 'yes' : 'no';
+			$order->add_meta_data( 'is_vat_exempt', $order_vat_exempt );
 			$order->set_currency( get_woocommerce_currency() );
 			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
@@ -338,7 +352,7 @@ class WC_Checkout {
 			$order->set_total( WC()->cart->get_total( 'edit' ) );
 			$this->create_order_line_items( $order, WC()->cart );
 			$this->create_order_fee_lines( $order, WC()->cart );
-			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping->get_packages() );
+			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
 			$this->create_order_tax_lines( $order, WC()->cart );
 			$this->create_order_coupon_lines( $order, WC()->cart );
 
@@ -615,6 +629,9 @@ class WC_Checkout {
 					case 'textarea':
 						$value = isset( $_POST[ $key ] ) ? wc_sanitize_textarea( wp_unslash( $_POST[ $key ] ) ) : ''; // WPCS: input var ok, CSRF ok.
 						break;
+					case 'password':
+						$value = isset( $_POST[ $key ] ) ? wp_unslash( $_POST[ $key ] ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
+						break;
 					default:
 						$value = isset( $_POST[ $key ] ) ? wc_clean( wp_unslash( $_POST[ $key ] ) ) : ''; // WPCS: input var ok, CSRF ok.
 						break;
@@ -688,8 +705,6 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'phone', $format, true ) ) {
-					$data[ $key ] = wc_format_phone_number( $data[ $key ] );
-
 					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
@@ -697,9 +712,10 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'email', $format, true ) && '' !== $data[ $key ] ) {
+					$email_is_valid = is_email( $data[ $key ] );
 					$data[ $key ] = sanitize_email( $data[ $key ] );
 
-					if ( $validate_fieldset && ! is_email( $data[ $key ] ) ) {
+					if ( $validate_fieldset && ! $email_is_valid ) {
 						/* translators: %s: email address */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
 						continue;
@@ -760,7 +776,7 @@ class WC_Checkout {
 			} else {
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
-				foreach ( WC()->shipping->get_packages() as $i => $package ) {
+				foreach ( WC()->shipping()->get_packages() as $i => $package ) {
 					if ( ! isset( $chosen_shipping_methods[ $i ], $package['rates'][ $chosen_shipping_methods[ $i ] ] ) ) {
 						$errors->add( 'shipping', __( 'No shipping method has been selected. Please double check your address, or contact us if you need any help.', 'woocommerce' ) );
 					}

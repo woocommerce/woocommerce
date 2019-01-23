@@ -767,6 +767,7 @@ body {
 
 // Shipping list of services
 .wc-wizard-services.shipping {
+	margin: 0;
 
 	.wc-wizard-service-name {
 		font-weight: normal;
@@ -852,13 +853,15 @@ body {
 		line-height: 1.5em;
 		font-size: 13px;
 		margin-bottom: 0.25em;
+		text-align: center;
 	}
 
 	.wc-setup-shipping-unit {
 		margin-bottom: 1.75em;
 
 		.select2 {
-			min-width: 100%; // widen dropdowns
+			min-width: 125px; // widen dropdowns
+			top: -5px; // vertically align dropdown value with surrounding text
 		}
 	}
 }
@@ -960,8 +963,12 @@ h3.jetpack-reasons {
 		display: block;
 	}
 	
-	.plugin-install-info-list-item:not(:last-child)::after {
+	.plugin-install-info-list-item::after {
 		content: ', ';
+	}
+
+	.plugin-install-info-list-item:last-of-type::after {
+		content: '. ';
 	}
 
 	a {
@@ -1053,6 +1060,10 @@ h3.jetpack-reasons {
 		color: #444;
 		background-color: #fff;
 		display: inline-block;
+
+		&[disabled] {
+			color: #aaa;
+		}
 	}
 }
 
@@ -1245,13 +1256,13 @@ p.jetpack-terms {
 	border: 1px solid #ebebeb;
 	border-radius: 4px;
 	padding: 2.5em;
+}
 
-	li {
-		list-style: none;
+.wc-setup-content .recommended-item {
+	list-style: none;
 
-		&:last-child label {
-			margin-bottom: 0; // Avoid extra space at the end of the list.
-		}
+	&:last-child label {
+		margin-bottom: 0; // Avoid extra space at the end of the list.
 	}
 
 	label {
@@ -1292,6 +1303,17 @@ p.jetpack-terms {
 			height: 2em;
 			padding: ( 3.5em - 2em ) / 2;
 		}
+
+		&.recommended-item-icon-woocommerce_services {
+			background-color: #f0f0f0;
+			max-height: 1.5em;
+			padding: 1.3em .7em;
+		}
+
+		&.recommended-item-icon-shipstation {
+			background-color: #f0f0f0;
+			padding: .3em;
+		}
 	}
 
 	.recommended-item-description-container {
@@ -1307,4 +1329,29 @@ p.jetpack-terms {
 			line-height: 1.5em;
 		}
 	}
+}
+
+.wc-wizard-service-info {
+	padding: 1em 2em;
+	background-color: #fafafa;
+}
+
+.help_tip {
+	text-decoration: underline dotted;
+}
+
+.wc-setup {
+	 #tiptip_content {
+		 background: #5f6973;
+	 }
+
+	 #tiptip_holder.tip_top #tiptip_arrow_inner {
+		 border-top-color: #5f6973;
+	 }
+}
+
+.wc-setup-shipping-recommended {
+	border-bottom: 1px solid #eee;
+	margin-top: 0;
+	padding: 30px 0;
 }

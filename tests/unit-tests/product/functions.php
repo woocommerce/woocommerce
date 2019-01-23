@@ -49,7 +49,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$draft->set_status( 'draft' );
 		$draft->save();
 
-		$this->assertEquals( 9, count( wc_get_products( array( 'return' => 'ids' ) ) ) );
+		$this->assertCount( 9, wc_get_products( array( 'return' => 'ids' ) ) );
 
 		// Test status.
 		$products = wc_get_products(
@@ -67,7 +67,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'type'   => 'variation',
 			)
 		);
-		$this->assertEquals( 2, count( $products ) );
+		$this->assertCount( 2, $products );
 
 		// Test parent.
 		$products = wc_get_products(
@@ -77,7 +77,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'parent' => $variation->get_id(),
 			)
 		);
-		$this->assertEquals( 2, count( $products ) );
+		$this->assertCount( 2, $products );
 
 		// Test parent_exclude.
 		$products = wc_get_products(
@@ -87,7 +87,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'parent_exclude' => array( $variation->get_id() ),
 			)
 		);
-		$this->assertEquals( 0, count( $products ) );
+		$this->assertCount( 0, $products );
 
 		// Test skus.
 		$products = wc_get_products(
@@ -96,7 +96,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'sku'    => 'GET TEST SKU',
 			)
 		);
-		$this->assertEquals( 2, count( $products ) );
+		$this->assertCount( 2, $products );
 		$this->assertContains( $product->get_id(), $products );
 		$this->assertContains( $external->get_id(), $products );
 
@@ -107,7 +107,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'category' => array( $term_cat_1->slug ),
 			)
 		);
-		$this->assertEquals( 3, count( $products ) );
+		$this->assertCount( 3, $products );
 
 		// Test tags.
 		$products = wc_get_products(
@@ -116,7 +116,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'tag'    => array( $term_tag_1->slug ),
 			)
 		);
-		$this->assertEquals( 2, count( $products ) );
+		$this->assertCount( 2, $products );
 
 		$products = wc_get_products(
 			array(
@@ -124,7 +124,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'tag'    => array( $term_tag_2->slug ),
 			)
 		);
-		$this->assertEquals( 1, count( $products ) );
+		$this->assertCount( 1, $products );
 
 		$products = wc_get_products(
 			array(
@@ -132,7 +132,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'tag'    => array( $term_tag_1->slug, $term_tag_2->slug ),
 			)
 		);
-		$this->assertEquals( 3, count( $products ) );
+		$this->assertCount( 3, $products );
 
 		// Test limit.
 		$products = wc_get_products(
@@ -141,7 +141,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'limit'  => 5,
 			)
 		);
-		$this->assertEquals( 5, count( $products ) );
+		$this->assertCount( 5, $products );
 
 		// Test offset.
 		$products        = wc_get_products(
@@ -157,8 +157,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'offset' => 2,
 			)
 		);
-		$this->assertEquals( 2, count( $products ) );
-		$this->assertEquals( 2, count( $products_offset ) );
+		$this->assertCount( 2, $products );
+		$this->assertCount( 2, $products_offset );
 		$this->assertNotEquals( $products, $products_offset );
 
 		// Test page.
@@ -175,8 +175,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'page'   => 2,
 			)
 		);
-		$this->assertEquals( 2, count( $products_page_1 ) );
-		$this->assertEquals( 2, count( $products_page_2 ) );
+		$this->assertCount( 2, $products_page_1 );
+		$this->assertCount( 2, $products_page_2 );
 		$this->assertNotEquals( $products_page_1, $products_page_2 );
 
 		// Test exclude.
@@ -897,8 +897,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-     * @expectedException WC_Data_Exception
-     */
+	 * @expectedException WC_Data_Exception
+	 */
 	public function test_wc_product_has_unique_sku() {
 		$product_1 = WC_Helper_Product::create_simple_product();
 
@@ -986,5 +986,46 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertFalse( wc_is_attribute_in_product_name( 'L', 'Product' ) );
 		$this->assertFalse( wc_is_attribute_in_product_name( 'L', 'Product L Thing' ) );
 		$this->assertFalse( wc_is_attribute_in_product_name( 'Blue', 'Product &ndash; Large, Blueish' ) );
+	}
+
+	public function test_wc_get_attachment_image_attributes() {
+		$image_attr = array(
+			'src'    => 'https://wc.local/wp-content/uploads/2018/02/single-1-250x250.jpg',
+			'class'  => 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail',
+			'alt'    => '',
+			'srcset' => 'https://wc.local/wp-content/uploads/2018/02/single-1-250x250.jpg 250w, https://wc.local/wp-content/uploads/2018/02/single-1-350x350.jpg 350w, https://wc.local/wp-content/uploads/2018/02/single-1-150x150.jpg 150w, https://wc.local/wp-content/uploads/2018/02/single-1-300x300.jpg 300w, https://wc.local/wp-content/uploads/2018/02/single-1-768x768.jpg 768w, https://wc.local/wp-content/uploads/2018/02/single-1-100x100.jpg 100w, https://wc.local/wp-content/uploads/2018/02/single-1.jpg 800w',
+			'sizes'  => '(max-width: 250px) 100vw, 250px',
+		);
+		// Test regular image attr
+		$this->assertEquals( $image_attr, wc_get_attachment_image_attributes( $image_attr ) );
+
+		$image_attr = array(
+			'src'    => '',
+			'class'  => 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail',
+			'alt'    => '',
+			'srcset' => '',
+			'sizes'  => '(max-width: 250px) 100vw, 250px',
+		);
+		// Test blank src image attr, this is used in lazy loading.
+		$this->assertEquals( $image_attr, wc_get_attachment_image_attributes( $image_attr ) );
+
+		$image_attr = array(
+			'src'    => 'https://wc.local/wp-content/woocommerce_uploads/my-image.jpg',
+			'class'  => 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail',
+			'alt'    => '',
+			'srcset' => 'https://wc.local/wp-content/woocommerce_uploads/my-image-250x250.jpg 250w, https://wc.local/wp-content/woocommerce_uploads/my-image-350x350 350w',
+			'sizes'  => '(max-width: 250px) 100vw, 250px',
+		);
+		$expected_attr = array(
+			'src'    => WC()->plugin_url() . '/assets/images/placeholder.png',
+			'class'  => 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail',
+			'alt'    => '',
+			'srcset' => '',
+			'sizes'  => '(max-width: 250px) 100vw, 250px',
+		);
+		// Test image hosted in woocommerce_uploads which is not allowed, think shops selling photos.
+		$this->assertEquals( $expected_attr, wc_get_attachment_image_attributes( $image_attr ) );
+
+		unset( $image_attr, $expected_attr );
 	}
 }
