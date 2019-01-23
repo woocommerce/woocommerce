@@ -228,13 +228,14 @@ function wc_product_post_type_link( $permalink, $post ) {
 	$terms = get_the_terms( $post->ID, 'product_cat' );
 
 	if ( ! empty( $terms ) ) {
-		if ( function_exists( 'wp_list_sort' ) ) {
-			$terms = wp_list_sort( $terms, 'term_id', 'ASC' );
-		} else {
-			usort( $terms, '_usort_terms_by_ID' );
-		}
+		$terms           = wp_list_sort(
+			$terms,
+			array(
+				'parent'  => 'DESC',
+				'term_id' => 'ASC',
+			)
+		);
 		$category_object = apply_filters( 'wc_product_post_type_link_product_cat', $terms[0], $terms, $post );
-		$category_object = get_term( $category_object, 'product_cat' );
 		$product_cat     = $category_object->slug;
 
 		if ( $category_object->parent ) {
@@ -818,12 +819,16 @@ function wc_get_min_max_price_meta_query( $args ) {
 		$max = $class_max;
 	}
 
-	return apply_filters( 'woocommerce_get_min_max_price_meta_query', array(
-		'key'     => '_price',
-		'value'   => array( $min, $max ),
-		'compare' => 'BETWEEN',
-		'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
-	), $args );
+	return apply_filters(
+		'woocommerce_get_min_max_price_meta_query',
+		array(
+			'key'     => '_price',
+			'value'   => array( $min, $max ),
+			'compare' => 'BETWEEN',
+			'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
+		),
+		$args
+	);
 }
 
 /**
