@@ -108,5 +108,5 @@ function wc_get_coupon_id_by_code( $code, $exclude = 0, $allow_empty = false ) {
 
 	$ids = array_diff( array_filter( array_map( 'absint', (array) $ids ) ), array( $exclude ) );
 
-	return apply_filters( 'woocommerce_get_coupon_id_from_code', absint( current( $ids ) ), $code, $exclude );
+	return apply_filters( 'woocommerce_get_coupon_id_from_code', absint( current( $ids ) ), $code, $exclude, $allow_empty );
 }
