@@ -1209,7 +1209,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 	 *
 	 * @param WC_Product $product    Product instance.
 	 * @param array      $downloads  Downloads data.
-	 * @param int        $deprecated Deprecated since 3.0
+	 * @param int        $deprecated Deprecated since 3.0.
 	 *
 	 * @return WC_Product
 	 */
