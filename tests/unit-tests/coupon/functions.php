@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Class Functions.
  * @package WooCommerce\Tests\Coupon
