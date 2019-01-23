@@ -106,7 +106,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 					<div class="price_label" style="display:none;">
 						' . esc_html__( 'Price:', 'woocommerce' ) . ' <span class="from"></span> &mdash; <span class="to"></span>
 					</div>
-					' . wc_query_string_form_fields( null, array( 'min_price', 'max_price' ), '', true ) . '
+					' . wc_query_string_form_fields( null, array( 'min_price', 'max_price', 'paged' ), '', true ) . '
 					<div class="clear"></div>
 				</div>
 			</div>
