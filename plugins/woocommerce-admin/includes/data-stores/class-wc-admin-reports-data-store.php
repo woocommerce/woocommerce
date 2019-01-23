@@ -171,12 +171,17 @@ class WC_Admin_Reports_Data_Store {
 	 * @param int      $db_interval_count Database interval count.
 	 * @param int      $expected_interval_count Expected interval count on the output.
 	 * @param string   $order_by Order by field.
+	 * @param string   $order ASC or DESC.
 	 */
-	protected function remove_extra_records( &$data, $page_no, $items_per_page, $db_interval_count, $expected_interval_count, $order_by ) {
+	protected function remove_extra_records( &$data, $page_no, $items_per_page, $db_interval_count, $expected_interval_count, $order_by, $order ) {
 		if ( 'date' === strtolower( $order_by ) ) {
 			$offset = 0;
 		} else {
-			$offset = ( $page_no - 1 ) * $items_per_page - $db_interval_count;
+			if ( 'asc' === strtolower( $order ) ) {
+				$offset = ( $page_no - 1 ) * $items_per_page;
+			} else {
+				$offset = ( $page_no - 1 ) * $items_per_page - $db_interval_count;
+			}
 			$offset = $offset < 0 ? 0 : $offset;
 		}
 		$count = $expected_interval_count - ( $page_no - 1 ) * $items_per_page;
