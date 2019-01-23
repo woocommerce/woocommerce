@@ -95,7 +95,13 @@ function wc_test_includes() {
  */
 function _manually_load_plugin() {
 	if ( version_compare( $GLOBALS['wp_version'], '4.9.9', '<=' ) ) { // < 5.0 fails for "5.0-alpha-12345-src
-		require dirname( dirname( dirname( __FILE__ ) ) ) . '/gutenberg/gutenberg.php';
+		$_tests_wp_core_dir = getenv( 'WP_CORE_DIR' );
+
+		if ( ! $_tests_wp_core_dir ) {
+			$_tests_wp_core_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress';
+		}
+
+		require $_tests_wp_core_dir . '/wp-content/plugins/gutenberg/gutenberg.php';
 	}
 
 	define( 'WC_TAX_ROUNDING_MODE', 'auto' );
