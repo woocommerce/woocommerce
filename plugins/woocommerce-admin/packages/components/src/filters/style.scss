@@ -4,6 +4,11 @@
 	.components-base-control__field {
 		margin-bottom: 0;
 	}
+
+	@include breakpoint( '<400px' ) {
+		margin-left: -8px;
+		margin-right: -8px;
+	}
 }
 
 .woocommerce-filters__basic-filters {
@@ -12,6 +17,10 @@
 
 	@include breakpoint( '<1280px' ) {
 		flex-direction: column;
+	}
+
+	@include breakpoint( '<782px' ) {
+		margin-bottom: $gap;
 	}
 }
 
