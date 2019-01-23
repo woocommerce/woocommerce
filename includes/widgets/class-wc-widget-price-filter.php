@@ -68,23 +68,27 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			return;
 		}
 
-		$min_price = isset( $_GET['min_price'] ) ? wc_clean( wp_unslash( $_GET['min_price'] ) ) : null; // WPCS: input var ok, CSRF ok.
-		$max_price = isset( $_GET['max_price'] ) ? wc_clean( wp_unslash( $_GET['max_price'] ) ) : null; // WPCS: input var ok, CSRF ok.
+		// Current active min and max price is retrieved from the query string.
+		$current_min_price = isset( $_GET['min_price'] ) ? wc_clean( wp_unslash( $_GET['min_price'] ) ) : null; // WPCS: input var ok, CSRF ok.
+		$current_max_price = isset( $_GET['max_price'] ) ? wc_clean( wp_unslash( $_GET['max_price'] ) ) : null; // WPCS: input var ok, CSRF ok.
 
 		// If there are not posts and we're not filtering, hide the widget.
-		if ( ! WC()->query->get_main_query()->post_count && null === $min_price && null === $max_price ) {
+		if ( ! WC()->query->get_main_query()->post_count && null === $current_min_price && null === $current_max_price ) {
 			return;
 		}
 
 		wp_enqueue_script( 'wc-price-slider' );
 
-		// Find min and max price in current result set, rounding to the nearest 10.
-		$prices = $this->get_filtered_price();
-		$min    = floor( $prices->min_price / 10 ) * 10;
-		$max    = ceil( $prices->max_price / 10 ) * 10;
+		// Find min and max price in current result set.
+		$prices            = $this->get_filtered_price();
+		$min_price         = apply_filters( 'woocommerce_price_filter_widget_min_amount', floor( $prices->min_price / 10 ) * 10 );
+		$max_price         = apply_filters( 'woocommerce_price_filter_widget_max_amount', ceil( $prices->max_price / 10 ) * 10 );
+		$current_min_price = is_null( $current_min_price ) ? $min_price : floor( $current_min_price / 10 ) * 10;
+		$current_max_price = is_null( $current_max_price ) ? $max_price : ceil( $current_max_price / 10 ) * 10;
+		$step              = apply_filters( 'woocommerce_price_filter_widget_step', 10 );
 
 		// If both min and max are equal, we don't need a slider.
-		if ( $min === $max ) {
+		if ( $min_price === $max_price ) {
 			return;
 		}
 
@@ -96,15 +100,12 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( trailingslashit( $wp->request ) ) );
 		}
 
-		$min_price = null !== $min_price ? $min_price : apply_filters( 'woocommerce_price_filter_widget_min_amount', $min );
-		$max_price = null !== $max_price ? $max_price : apply_filters( 'woocommerce_price_filter_widget_max_amount', $max );
-
 		echo '<form method="get" action="' . esc_url( $form_action ) . '">
 			<div class="price_slider_wrapper">
 				<div class="price_slider" style="display:none;"></div>
-				<div class="price_slider_amount">
-					<input type="text" id="min_price" name="min_price" value="' . esc_attr( $min_price ) . '" data-min="' . esc_attr( apply_filters( 'woocommerce_price_filter_widget_min_amount', $min ) ) . '" placeholder="' . esc_attr__( 'Min price', 'woocommerce' ) . '" />
-					<input type="text" id="max_price" name="max_price" value="' . esc_attr( $max_price ) . '" data-max="' . esc_attr( apply_filters( 'woocommerce_price_filter_widget_max_amount', $max ) ) . '" placeholder="' . esc_attr__( 'Max price', 'woocommerce' ) . '" />
+				<div class="price_slider_amount" data-step="' . esc_attr( $step ) . '">
+					<input type="text" id="min_price" name="min_price" value="' . esc_attr( $current_min_price ) . '" data-min="' . esc_attr( $min_price ) . '" placeholder="' . esc_attr__( 'Min price', 'woocommerce' ) . '" />
+					<input type="text" id="max_price" name="max_price" value="' . esc_attr( $current_max_price ) . '" data-max="' . esc_attr( $max_price ) . '" placeholder="' . esc_attr__( 'Max price', 'woocommerce' ) . '" />
 					<button type="submit" class="button">' . esc_html__( 'Filter', 'woocommerce' ) . '</button>
 					<div class="price_label" style="display:none;">
 						' . esc_html__( 'Price:', 'woocommerce' ) . ' <span class="from"></span> &mdash; <span class="to"></span>
