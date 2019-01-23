@@ -170,11 +170,29 @@ class WC_Admin_Reports_Interval {
 
 		switch ( $interval ) {
 			case 'hour':
-				$diff_timestamp = (int) $end_datetime->format( 'U' ) - (int) $start_datetime->format( 'U' );
-				return (int) floor( ( (int) $diff_timestamp ) / HOUR_IN_SECONDS ) + 1;
+				$end_timestamp   = (int) $end_datetime->format( 'U' );
+				$start_timestamp = (int) $start_datetime->format( 'U' );
+				$addendum        = 0;
+				$end_min_sec     = $end_timestamp % HOUR_IN_SECONDS;
+				$start_min_sec   = $start_timestamp % HOUR_IN_SECONDS;
+				if ( $end_min_sec < $start_min_sec ) {
+					$addendum = 1;
+				}
+				$diff_timestamp = $end_timestamp - $start_timestamp;
+
+				return (int) floor( ( (int) $diff_timestamp ) / HOUR_IN_SECONDS ) + 1 + $addendum;
 			case 'day':
-				$diff_timestamp = (int) $end_datetime->format( 'U' ) - (int) $start_datetime->format( 'U' );
-				return (int) floor( ( (int) $diff_timestamp ) / DAY_IN_SECONDS ) + 1;
+				$end_timestamp      = (int) $end_datetime->format( 'U' );
+				$start_timestamp    = (int) $start_datetime->format( 'U' );
+				$addendum           = 0;
+				$end_hour_min_sec   = $end_timestamp % DAY_IN_SECONDS;
+				$start_hour_min_sec = $start_timestamp % DAY_IN_SECONDS;
+				if ( $end_hour_min_sec < $start_hour_min_sec ) {
+					$addendum = 1;
+				}
+				$diff_timestamp = $end_timestamp - $start_timestamp;
+
+				return (int) floor( ( (int) $diff_timestamp ) / DAY_IN_SECONDS ) + 1 + $addendum;
 			case 'week':
 				// TODO: optimize? approximately day count / 7, but year end is tricky, a week can have fewer days.
 				$week_count = 0;
