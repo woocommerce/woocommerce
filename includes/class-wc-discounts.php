@@ -519,8 +519,9 @@ class WC_Discounts {
 			$apply_quantity = max( 0, apply_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
 
 			// Run coupon calculations.
-			$discount = wc_add_number_precision( $coupon->get_discount_amount( $price_to_discount / $item->quantity, $item->object, true ) ) * $apply_quantity;
-			$discount = wc_round_discount( min( $discounted_price, $discount ), 0 );
+			$discount      = wc_add_number_precision( $coupon->get_discount_amount( $price_to_discount / $item->quantity, $item->object, true ) ) * $apply_quantity;
+			$discount      = wc_round_discount( min( $discounted_price, $discount ), 0 );
+			$applied_count = $applied_count + $apply_quantity;
 
 			// Store code and discount amount per item.
 			$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
