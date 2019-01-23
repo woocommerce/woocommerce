@@ -117,7 +117,7 @@ function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
  * @return int
  */
 function wc_attribute_taxonomy_id_by_name( $name ) {
-	$name       = wc_attribute_taxonomy_name_raw( $name );
+	$name       = wc_attribute_taxonomy_slug( $name );
 	$taxonomies = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_id', 'attribute_name' );
 
 	return isset( $taxonomies[ $name ] ) ? (int) $taxonomies[ $name ] : 0;
@@ -132,7 +132,7 @@ function wc_attribute_taxonomy_id_by_name( $name ) {
  */
 function wc_attribute_label( $name, $product = '' ) {
 	if ( taxonomy_is_product_attribute( $name ) ) {
-		$name       = wc_attribute_taxonomy_name_raw( $name );
+		$name       = wc_attribute_taxonomy_slug( $name );
 		$all_labels = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_label', 'attribute_name' );
 		$label      = isset( $all_labels[ $name ] ) ? $all_labels[ $name ] : $name;
 	} elseif ( $product ) {
@@ -167,7 +167,7 @@ function wc_attribute_label( $name, $product = '' ) {
 function wc_attribute_orderby( $name ) {
 	global $wc_product_attributes, $wpdb;
 
-	$name = wc_attribute_taxonomy_name_raw( $name );
+	$name = wc_attribute_taxonomy_slug( $name );
 
 	if ( isset( $wc_product_attributes[ 'pa_' . $name ] ) ) {
 		$orderby = $wc_product_attributes[ 'pa_' . $name ]->attribute_orderby;
@@ -672,12 +672,12 @@ function wc_delete_attribute( $id ) {
 /**
  * Get an unprefixed product attribute name.
  *
- * @since 3.5.3
+ * @since 3.6.0
  *
  * @param  string $attribute_name Attribute name.
  * @return string
  */
-function wc_attribute_taxonomy_name_raw( $attribute_name ) {
+function wc_attribute_taxonomy_slug( $attribute_name ) {
 	$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
 	return 0 === strpos( $attribute_name, 'pa_' ) ? substr( $attribute_name, 3 ) : $attribute_name;
 }

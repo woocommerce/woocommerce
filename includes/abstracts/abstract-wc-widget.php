@@ -337,7 +337,7 @@ abstract class WC_Widget extends WP_Widget {
 		// All current filters.
 		if ( $_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes() ) { // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found, WordPress.CodeAnalysis.AssignmentInCondition.Found
 			foreach ( $_chosen_attributes as $name => $data ) {
-				$filter_name = wc_attribute_taxonomy_name_raw( $name );
+				$filter_name = wc_attribute_taxonomy_slug( $name );
 				if ( ! empty( $data['terms'] ) ) {
 					$link = add_query_arg( 'filter_' . $filter_name, implode( ',', $data['terms'] ), $link );
 				}

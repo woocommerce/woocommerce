@@ -460,7 +460,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 		$attributes = $product->get_attributes();
 
 		if ( ! isset( $attributes[ $slug ] ) ) {
-			return wc_attribute_taxonomy_name_raw( $slug );
+			return wc_attribute_taxonomy_slug( $slug );
 		}
 
 		$attribute = $attributes[ $slug ];

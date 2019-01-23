@@ -159,7 +159,7 @@ class WC_Admin_Importers {
 					foreach ( $post['terms'] as $term ) {
 						if ( strstr( $term['domain'], 'pa_' ) ) {
 							if ( ! taxonomy_exists( $term['domain'] ) ) {
-								$attribute_name = wc_attribute_taxonomy_name_raw( $term['domain'] );
+								$attribute_name = wc_attribute_taxonomy_slug( $term['domain'] );
 
 								// Create the taxonomy.
 								if ( ! in_array( $attribute_name, wc_get_attribute_taxonomies(), true ) ) {

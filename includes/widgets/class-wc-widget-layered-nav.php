@@ -223,7 +223,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		if ( $taxonomy !== $this->get_current_taxonomy() ) {
 			$term_counts          = $this->get_filtered_term_product_counts( wp_list_pluck( $terms, 'term_id' ), $taxonomy, $query_type );
 			$_chosen_attributes   = WC_Query::get_layered_nav_chosen_attributes();
-			$taxonomy_filter_name = wc_attribute_taxonomy_name_raw( $taxonomy );
+			$taxonomy_filter_name = wc_attribute_taxonomy_slug( $taxonomy );
 			$taxonomy_label       = wc_attribute_label( $taxonomy );
 
 			/* translators: %s: taxonomy name */
@@ -423,7 +423,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				continue;
 			}
 
-			$filter_name    = 'filter_' . wc_attribute_taxonomy_name_raw( $taxonomy );
+			$filter_name    = 'filter_' . wc_attribute_taxonomy_slug( $taxonomy );
 			$current_filter = isset( $_GET[ $filter_name ] ) ? explode( ',', wc_clean( wp_unslash( $_GET[ $filter_name ] ) ) ) : array(); // WPCS: input var ok, CSRF ok.
 			$current_filter = array_map( 'sanitize_title', $current_filter );
 
@@ -452,7 +452,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 				// Add Query type Arg to URL.
 				if ( 'or' === $query_type && ! ( 1 === count( $current_filter ) && $option_is_set ) ) {
-					$link = add_query_arg( 'query_type_' . wc_attribute_taxonomy_name_raw( $taxonomy ), 'or', $link );
+					$link = add_query_arg( 'query_type_' . wc_attribute_taxonomy_slug( $taxonomy ), 'or', $link );
 				}
 				$link = str_replace( '%2C', ',', $link );
 			}
