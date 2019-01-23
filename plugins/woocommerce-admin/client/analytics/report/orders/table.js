@@ -2,30 +2,26 @@
 /**
  * External dependencies
  */
-import { __, _n, sprintf } from '@wordpress/i18n';
+import { __, _n, _x, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { compose } from '@wordpress/compose';
 import { map } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
-import { appendTimestamp, defaultTableDateFormat, getCurrentDates } from '@woocommerce/date';
 import { Date, Link, OrderStatus, ViewMoreList } from '@woocommerce/components';
+import { defaultTableDateFormat } from '@woocommerce/date';
 import { formatCurrency } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
-import { QUERY_DEFAULTS } from 'store/constants';
-import { getFilterQuery } from 'store/reports/utils';
 import { numberFormat } from 'lib/number';
-import withSelect from 'wc-api/with-select';
 import ReportTable from 'analytics/components/report-table';
-import { formatTableOrders } from './utils';
+import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import './style.scss';
 
-class OrdersReportTable extends Component {
+export default class OrdersReportTable extends Component {
 	constructor() {
 		super();
 
@@ -96,45 +92,52 @@ class OrdersReportTable extends Component {
 	}
 
 	getRowsContent( tableData ) {
+		const { query } = this.props;
+		const persistedQuery = getPersistedQuery( query );
 		return map( tableData, row => {
 			const {
-				date,
-				id,
-				status,
-				customer_id,
-				line_items,
-				items_sold,
-				coupon_lines,
 				currency,
-				net_revenue,
+				customer_type,
+				date_created,
+				extended_info,
+				net_total,
+				num_items_sold,
+				order_id,
+				status,
 			} = row;
+			const { coupons, products } = extended_info;
 
-			const products = line_items
+			const formattedProducts = products
 				.sort( ( itemA, itemB ) => itemB.quantity - itemA.quantity )
 				.map( item => ( {
 					label: item.name,
-					href: 'post.php?post=' + item.product_id + '&action=edit',
 					quantity: item.quantity,
+					href: getNewPath( persistedQuery, 'products', {
+						filter: 'single_product',
+						products: item.id,
+					} ),
 				} ) );
 
-			const coupons = coupon_lines.map( coupon => ( {
+			const formattedCoupons = coupons.map( coupon => ( {
 				label: coupon.code,
-				// @TODO It should link to the coupons report
-				href: 'edit.php?s=' + coupon.code + '&post_type=shop_coupon',
+				href: getNewPath( persistedQuery, 'coupons', {
+					filter: 'single_coupon',
+					coupons: coupon.id,
+				} ),
 			} ) );
 
 			return [
 				{
-					display: <Date date={ date } visibleFormat={ defaultTableDateFormat } />,
-					value: date,
+					display: <Date date={ date_created } visibleFormat={ defaultTableDateFormat } />,
+					value: date_created,
 				},
 				{
 					display: (
-						<Link href={ 'post.php?post=' + id + '&action=edit' } type="wp-admin">
-							{ id }
+						<Link href={ 'post.php?post=' + order_id + '&action=edit' } type="wp-admin">
+							{ order_id }
 						</Link>
 					),
-					value: id,
+					value: order_id,
 				},
 				{
 					display: (
@@ -143,32 +146,36 @@ class OrdersReportTable extends Component {
 					value: status,
 				},
 				{
-					// @TODO This should display customer type (new/returning) once it's
-					// implemented in the API.
-					display: customer_id,
-					value: customer_id,
+					display:
+						customer_type === 'new'
+							? _x( 'New', 'customer type', 'wc-admin' )
+							: _x( 'Returning', 'customer type', 'wc-admin' ),
+					value: customer_type,
 				},
 				{
 					display: this.renderList(
-						products.length ? [ products[ 0 ] ] : [],
-						products.map( product => ( {
+						formattedProducts.length ? [ formattedProducts[ 0 ] ] : [],
+						formattedProducts.map( product => ( {
 							label: sprintf( __( '%s× %s', 'wc-admin' ), product.quantity, product.label ),
 							href: product.href,
 						} ) )
 					),
-					value: products.map( product => product.label ).join( ' ' ),
+					value: formattedProducts.map( product => product.label ).join( ' ' ),
 				},
 				{
-					display: numberFormat( items_sold ),
-					value: items_sold,
+					display: numberFormat( num_items_sold ),
+					value: num_items_sold,
 				},
 				{
-					display: this.renderList( coupons.length ? [ coupons[ 0 ] ] : [], coupons ),
-					value: coupons.map( item => item.code ).join( ' ' ),
+					display: this.renderList(
+						formattedCoupons.length ? [ formattedCoupons[ 0 ] ] : [],
+						formattedCoupons
+					),
+					value: formattedCoupons.map( item => item.code ).join( ' ' ),
 				},
 				{
-					display: formatCurrency( net_revenue, currency ),
-					value: net_revenue,
+					display: formatCurrency( net_total, currency ),
+					value: net_total,
 				},
 			];
 		} );
@@ -217,7 +224,7 @@ class OrdersReportTable extends Component {
 
 	renderLinks( items = [] ) {
 		return items.map( ( item, i ) => (
-			<Link href={ item.href } key={ i } type="wp-admin">
+			<Link href={ item.href } key={ i } type="wc-admin">
 				{ item.label }
 			</Link>
 		) );
@@ -233,7 +240,7 @@ class OrdersReportTable extends Component {
 	}
 
 	render() {
-		const { query, tableData } = this.props;
+		const { query } = this.props;
 
 		return (
 			<ReportTable
@@ -242,49 +249,12 @@ class OrdersReportTable extends Component {
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
 				query={ query }
-				tableData={ tableData }
+				tableQuery={ {
+					extended_info: true,
+				} }
 				title={ __( 'Orders', 'wc-admin' ) }
 				columnPrefsKey="orders_report_columns"
 			/>
 		);
 	}
 }
-
-export default compose(
-	withSelect( ( select, props ) => {
-		const { query } = props;
-		const datesFromQuery = getCurrentDates( query );
-		const filterQuery = getFilterQuery( 'orders', query );
-
-		const { getOrders, getOrdersTotalCount, getOrdersError, isGetOrdersRequesting } = select(
-			'wc-api'
-		);
-
-		const tableQuery = {
-			orderby: query.orderby || 'date',
-			order: query.order || 'asc',
-			page: query.page || 1,
-			per_page: query.per_page || QUERY_DEFAULTS.pageSize,
-			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
-			before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
-			status: [ 'processing', 'on-hold', 'completed' ],
-			...filterQuery,
-		};
-		const orders = getOrders( tableQuery );
-		const ordersTotalCount = getOrdersTotalCount( tableQuery );
-		const isError = Boolean( getOrdersError( tableQuery ) );
-		const isRequesting = isGetOrdersRequesting( tableQuery );
-
-		return {
-			tableData: {
-				items: {
-					data: formatTableOrders( orders ),
-					totalResults: ordersTotalCount,
-				},
-				isError,
-				isRequesting,
-				query: tableQuery,
-			},
-		};
-	} )
-)( OrdersReportTable );

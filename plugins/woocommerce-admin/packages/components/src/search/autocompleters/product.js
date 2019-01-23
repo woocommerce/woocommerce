@@ -34,7 +34,7 @@ export default {
 			};
 			payload = stringifyQuery( query );
 		}
-		return apiFetch( { path: `/wc/v3/products${ payload }` } );
+		return apiFetch( { path: `/wc/v4/products${ payload }` } );
 	},
 	isDebounced: true,
 	getOptionKeywords( product ) {

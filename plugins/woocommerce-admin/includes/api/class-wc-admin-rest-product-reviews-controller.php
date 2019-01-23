@@ -16,6 +16,12 @@ defined( 'ABSPATH' ) || exit;
  * @extends WC_REST_Product_Reviews_Controller
  */
 class WC_Admin_REST_Product_Reviews_Controller extends WC_REST_Product_Reviews_Controller {
+	/**
+	 * Endpoint namespace.
+	 *
+	 * @var string
+	 */
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Prepare links for the request.

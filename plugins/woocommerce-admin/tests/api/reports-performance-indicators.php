@@ -15,7 +15,7 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v3/reports/performance-indicators';
+	protected $endpoint = '/wc/v4/reports/performance-indicators';
 
 	/**
 	 * Setup tests.
@@ -37,6 +37,7 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 		$routes = $this->server->get_routes();
 
 		$this->assertArrayHasKey( $this->endpoint, $routes );
+		$this->assertArrayHasKey( $this->endpoint . '/allowed', $routes );
 	}
 
 	/**
@@ -96,14 +97,19 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 		$reports  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-
 		$this->assertEquals( 2, count( $reports ) );
 
 		$this->assertEquals( 'orders/orders_count', $reports[0]['stat'] );
+		$this->assertEquals( 'Amount of orders', $reports[0]['label'] );
 		$this->assertEquals( 1, $reports[0]['value'] );
+		$this->assertEquals( 'orders_count', $reports[0]['chart'] );
+		$this->assertEquals( '/analytics/orders', $response->data[0]['_links']['report'][0]['href'] );
 
 		$this->assertEquals( 'downloads/download_count', $reports[1]['stat'] );
+		$this->assertEquals( 'Number of downloads', $reports[1]['label'] );
 		$this->assertEquals( 2, $reports[1]['value'] );
+		$this->assertEquals( 'download_count', $reports[1]['chart'] );
+		$this->assertEquals( '/analytics/downloads', $response->data[1]['_links']['report'][0]['href'] );
 	}
 
 	/**
@@ -148,8 +154,28 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 2, count( $properties ) );
+		$this->assertEquals( 5, count( $properties ) );
 		$this->assertArrayHasKey( 'stat', $properties );
+		$this->assertArrayHasKey( 'chart', $properties );
+		$this->assertArrayHasKey( 'label', $properties );
+		$this->assertArrayHasKey( 'format', $properties );
 		$this->assertArrayHasKey( 'value', $properties );
+	}
+
+	/**
+	 * Test schema for /allowed indicators endpoint.
+	 */
+	public function test_indicators_schema_allowed() {
+		wp_set_current_user( $this->user );
+
+		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint . '/allowed' );
+		$response   = $this->server->dispatch( $request );
+		$data       = $response->get_data();
+		$properties = $data['schema']['properties'];
+
+		$this->assertEquals( 3, count( $properties ) );
+		$this->assertArrayHasKey( 'stat', $properties );
+		$this->assertArrayHasKey( 'chart', $properties );
+		$this->assertArrayHasKey( 'label', $properties );
 	}
 }

@@ -10,6 +10,7 @@ import { Spinner } from '@wordpress/components';
  * WooCommerce dependencies
  */
 import { Link } from '@woocommerce/components';
+import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 
 export default class CategoryBreadcrumbs extends Component {
 	getCategoryAncestorIds( category, categories ) {
@@ -48,14 +49,18 @@ export default class CategoryBreadcrumbs extends Component {
 	}
 
 	render() {
-		const { categories, category } = this.props;
+		const { categories, category, query } = this.props;
+		const persistedQuery = getPersistedQuery( query );
 
 		return category ? (
 			<div className="woocommerce-table__breadcrumbs">
 				{ this.getCategoryAncestors( category, categories ) }
 				<Link
-					href={ 'term.php?taxonomy=product_cat&post_type=product&tag_ID=' + category.id }
-					type="wp-admin"
+					href={ getNewPath( persistedQuery, 'categories', {
+						filter: 'single_category',
+						categories: category.id,
+					} ) }
+					type="wc-admin"
 				>
 					{ category.name }
 				</Link>

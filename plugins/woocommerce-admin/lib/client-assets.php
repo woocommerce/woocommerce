@@ -153,7 +153,8 @@ function wc_admin_print_script_settings() {
 	}
 
 	$preload_data_endpoints = array(
-		'countries' => '/wc/v3/data/countries',
+		'countries'              => '/wc/v4/data/countries',
+		'performanceIndicators'  => '/wc/v4/reports/performance-indicators/allowed',
 	);
 
 	if ( function_exists( 'gutenberg_preload_api_request' ) ) {
@@ -169,7 +170,7 @@ function wc_admin_print_script_settings() {
 
 	$current_user_data = array();
 	foreach ( wc_admin_get_user_data_fields() as $user_field ) {
-		$current_user_data[ $user_field ] = get_user_meta( get_current_user_id(), 'wc_admin_' . $user_field, true );
+		$current_user_data[ $user_field ] = json_decode( get_user_meta( get_current_user_id(), 'wc_admin_' . $user_field, true ) );
 	}
 
 	/**
@@ -179,22 +180,22 @@ function wc_admin_print_script_settings() {
 
 	// Settings and variables can be passed here for access in the app.
 	$settings = array(
-		'adminUrl'         => admin_url(),
-		'wcAssetUrl'       => plugins_url( 'assets/', WC_PLUGIN_FILE ),
-		'wcAdminAssetUrl'  => plugins_url( 'images/', wc_admin_dir_path( 'wc-admin.php' ) ), // Temporary for plugin. See above.
-		'embedBreadcrumbs' => wc_admin_get_embed_breadcrumbs(),
-		'siteLocale'       => esc_attr( get_bloginfo( 'language' ) ),
-		'currency'         => wc_admin_currency_settings(),
-		'orderStatuses'    => format_order_statuses( wc_get_order_statuses() ),
-		'stockStatuses'    => wc_get_product_stock_status_options(),
-		'siteTitle'        => get_bloginfo( 'name' ),
-		'trackingEnabled'  => $tracking_enabled,
-		'dataEndpoints'    => array(),
-		'l10n'             => array(
+		'adminUrl'              => admin_url(),
+		'wcAssetUrl'            => plugins_url( 'assets/', WC_PLUGIN_FILE ),
+		'wcAdminAssetUrl'       => plugins_url( 'images/', wc_admin_dir_path( 'wc-admin.php' ) ), // Temporary for plugin. See above.
+		'embedBreadcrumbs'      => wc_admin_get_embed_breadcrumbs(),
+		'siteLocale'            => esc_attr( get_bloginfo( 'language' ) ),
+		'currency'              => wc_admin_currency_settings(),
+		'orderStatuses'         => format_order_statuses( wc_get_order_statuses() ),
+		'stockStatuses'         => wc_get_product_stock_status_options(),
+		'siteTitle'             => get_bloginfo( 'name' ),
+		'trackingEnabled'       => $tracking_enabled,
+		'dataEndpoints'         => array(),
+		'l10n'                  => array(
 			'userLocale'    => get_user_locale(),
 			'weekdaysShort' => array_values( $wp_locale->weekday_abbrev ),
 		),
-		'currentUserData'  => $current_user_data,
+		'currentUserData'       => $current_user_data,
 	);
 
 	foreach ( $preload_data_endpoints as $key => $endpoint ) {

@@ -15,7 +15,7 @@ class WC_Tests_API_Reports_Coupons extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v3/reports/coupons';
+	protected $endpoint = '/wc/v4/reports/coupons';
 
 	/**
 	 * Setup test reports products data.

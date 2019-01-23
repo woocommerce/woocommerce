@@ -2,7 +2,7 @@
  * @format
  */
 
-export const NAMESPACE = '/wc/v3/';
+export const NAMESPACE = '/wc/v4/';
 export const SWAGGERNAMESPACE = 'https://virtserver.swaggerhub.com/peterfabian/wc-v3-api/1.0.0/';
 export const ERROR = 'ERROR';
 

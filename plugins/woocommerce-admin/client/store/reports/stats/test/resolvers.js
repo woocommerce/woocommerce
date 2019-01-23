@@ -55,7 +55,7 @@ describe( 'getReportStats', () => {
 
 	beforeAll( () => {
 		apiFetch.mockImplementation( options => {
-			if ( options.path === '/wc/v3/reports/revenue/stats' ) {
+			if ( options.path === '/wc/v4/reports/revenue/stats' ) {
 				return Promise.resolve( {
 					headers: {
 						get: header => REPORT_1_TOTALS[ header ],
@@ -63,7 +63,7 @@ describe( 'getReportStats', () => {
 					json: () => Promise.resolve( REPORT_1 ),
 				} );
 			}
-			if ( options.path === '/wc/v3/reports/products/stats?interval=week' ) {
+			if ( options.path === '/wc/v4/reports/products/stats?interval=week' ) {
 				return Promise.resolve( {
 					headers: {
 						get: header => REPORT_2_TOTALS[ header ],

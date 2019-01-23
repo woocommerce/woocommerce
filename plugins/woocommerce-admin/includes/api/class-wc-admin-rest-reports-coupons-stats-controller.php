@@ -22,7 +22,7 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v3';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.
@@ -139,6 +139,8 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
+				'indicator'   => true,
+				'format'      => 'currency',
 			),
 			'coupons_count' => array(
 				'description' => __( 'Amount of coupons.', 'wc-admin' ),
@@ -147,10 +149,11 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 				'readonly'    => true,
 			),
 			'orders_count'  => array(
-				'description' => __( 'Amount of orders.', 'wc-admin' ),
+				'description' => __( 'Amount of discounted orders.', 'wc-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
+				'indicator'   => true,
 			),
 		);
 

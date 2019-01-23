@@ -5,6 +5,10 @@
  * @package WooCommerce\Tests\API
  * @since 3.5.0
  */
+
+/**
+ * Class WC_Tests_API_Reports_Revenue_Stats
+ */
 class WC_Tests_API_Reports_Revenue_Stats extends WC_REST_Unit_Test_Case {
 
 	/**
@@ -12,8 +16,13 @@ class WC_Tests_API_Reports_Revenue_Stats extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v3/reports/revenue/stats';
+	protected $endpoint = '/wc/v4/reports/revenue/stats';
 
+	/**
+	 * Orders
+	 *
+	 * @var array
+	 */
 	protected $orders = array();
 
 	/**
@@ -56,7 +65,7 @@ class WC_Tests_API_Reports_Revenue_Stats extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $data ) ); // @todo update results after implement report interface.
-		//$this->assertEquals( array(), $reports ); // @todo update results after implement report interface.
+		// $this->assertEquals( array(), $reports ); // @todo update results after implement report interface.
 	}
 
 	/**

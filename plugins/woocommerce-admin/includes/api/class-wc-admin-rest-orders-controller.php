@@ -15,7 +15,14 @@ defined( 'ABSPATH' ) || exit;
  * @package WooCommerce Admin/API
  * @extends WC_REST_Orders_Controller
  */
-class WC_Admin_REST_Orders_Stats_Controller extends WC_REST_Orders_Controller {
+class WC_Admin_REST_Orders_Controller extends WC_REST_Orders_Controller {
+	/**
+	 * Endpoint namespace.
+	 *
+	 * @var string
+	 */
+	protected $namespace = 'wc/v4';
+
 	/**
 	 * Get the query params for collections.
 	 *

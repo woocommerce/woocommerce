@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import { find, forEach, isNull } from 'lodash';
+import { find, forEach, isNull, get } from 'lodash';
 import moment from 'moment';
 
 /**
@@ -46,6 +46,42 @@ export function getFilterQuery( endpoint, query ) {
 	return {};
 }
 
+/**
+ * Add timestamp to advanced filter parameters involving date. The api
+ * expects a timestamp for these values similar to `before` and `after`.
+ *
+ * @param {object} config - advancedFilters config object.
+ * @param {object} activeFilter - an active filter.
+ * @returns {object} - an active filter with timestamp added to date values.
+ */
+export function timeStampFilterDates( config, activeFilter ) {
+	const advancedFilterConfig = config.filters[ activeFilter.key ];
+	if ( 'Date' !== get( advancedFilterConfig, [ 'input', 'component' ] ) ) {
+		return activeFilter;
+	}
+
+	const { rule, value } = activeFilter;
+	const timeOfDayMap = {
+		after: 'start',
+		before: 'end',
+	};
+	// If the value is an array, it signifies "between" values which must have a timestamp
+	// appended to each value.
+	if ( Array.isArray( value ) ) {
+		const [ after, before ] = value;
+		return Object.assign( {}, activeFilter, {
+			value: [
+				appendTimestamp( moment( after ), timeOfDayMap.after ),
+				appendTimestamp( moment( before ), timeOfDayMap.before ),
+			],
+		} );
+	}
+
+	return Object.assign( {}, activeFilter, {
+		value: appendTimestamp( moment( value ), timeOfDayMap[ rule ] ),
+	} );
+}
+
 export function getQueryFromConfig( config, advancedFilters, query ) {
 	const queryValue = query[ config.param ];
 
@@ -60,7 +96,7 @@ export function getQueryFromConfig( config, advancedFilters, query ) {
 			return {};
 		}
 
-		return activeFilters.reduce(
+		return activeFilters.map( filter => timeStampFilterDates( advancedFilters, filter ) ).reduce(
 			( result, activeFilter ) => {
 				const { key, rule, value } = activeFilter;
 				result[ getUrlKey( key, rule ) ] = value;
@@ -284,7 +320,7 @@ export function getReportTableQuery( endpoint, urlQuery, query ) {
 
 	return {
 		orderby: urlQuery.orderby || 'date',
-		order: urlQuery.order || 'asc',
+		order: urlQuery.order || 'desc',
 		after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
 		before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
 		page: urlQuery.page || 1,

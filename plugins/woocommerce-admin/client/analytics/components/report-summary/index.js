@@ -19,7 +19,7 @@ import { SummaryList, SummaryListPlaceholder, SummaryNumber } from '@woocommerce
  */
 import { getSummaryNumbers } from 'store/reports/utils';
 import ReportError from 'analytics/components/report-error';
-import { calculateDelta, formatValue } from './utils';
+import { calculateDelta, formatValue } from 'lib/number';
 import withSelect from 'wc-api/with-select';
 
 /**
@@ -42,33 +42,35 @@ export class ReportSummary extends Component {
 		const secondaryTotals = totals.secondary || {};
 		const { compare } = getDateParamsFromQuery( query );
 
-		const summaryNumbers = charts.map( chart => {
-			const { key, label, type } = chart;
-			const delta = calculateDelta( primaryTotals[ key ], secondaryTotals[ key ] );
-			const href = getNewPath( { chart: key } );
-			const prevValue = formatValue( type, secondaryTotals[ key ] );
-			const isSelected = selectedChart.key === key;
-			const value = formatValue( type, primaryTotals[ key ] );
+		const renderSummaryNumbers = ( { onToggle } ) =>
+			charts.map( chart => {
+				const { key, label, type } = chart;
+				const delta = calculateDelta( primaryTotals[ key ], secondaryTotals[ key ] );
+				const href = getNewPath( { chart: key } );
+				const prevValue = formatValue( type, secondaryTotals[ key ] );
+				const isSelected = selectedChart.key === key;
+				const value = formatValue( type, primaryTotals[ key ] );
 
-			return (
-				<SummaryNumber
-					key={ key }
-					delta={ delta }
-					href={ href }
-					label={ label }
-					prevLabel={
-						'previous_period' === compare
-							? __( 'Previous Period:', 'wc-admin' )
-							: __( 'Previous Year:', 'wc-admin' )
-					}
-					prevValue={ prevValue }
-					selected={ isSelected }
-					value={ value }
-				/>
-			);
-		} );
+				return (
+					<SummaryNumber
+						key={ key }
+						delta={ delta }
+						href={ href }
+						label={ label }
+						prevLabel={
+							'previous_period' === compare
+								? __( 'Previous Period:', 'wc-admin' )
+								: __( 'Previous Year:', 'wc-admin' )
+						}
+						prevValue={ prevValue }
+						selected={ isSelected }
+						value={ value }
+						onLinkClickCallback={ onToggle }
+					/>
+				);
+			} );
 
-		return <SummaryList>{ summaryNumbers }</SummaryList>;
+		return <SummaryList>{ renderSummaryNumbers }</SummaryList>;
 	}
 }
 
@@ -80,7 +82,7 @@ ReportSummary.propTypes = {
 	/**
 	 * The endpoint to use in API calls to populate the Summary Numbers.
 	 * For example, if `taxes` is provided, data will be fetched from the report
-	 * `taxes` endpoint (ie: `/wc/v3/reports/taxes/stats`). If the provided endpoint
+	 * `taxes` endpoint (ie: `/wc/v4/reports/taxes/stats`). If the provided endpoint
 	 * doesn't exist, an error will be shown to the user with `ReportError`.
 	 */
 	endpoint: PropTypes.string.isRequired,

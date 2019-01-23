@@ -1,4 +1,8 @@
-# 1.4.0 ( unreleased )
+# 1.4.1 (unreleased)
+- Chart component: format numbers and prices using store currency settings.
+- Make `href`/linking optional in SummaryNumber.
+
+# 1.4.0
 - Add download log ip address autocompleter to search component
 - Add order number autocompleter to search component
 - Add order number, username, and IP address filters to the downloads report.

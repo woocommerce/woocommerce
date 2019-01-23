@@ -32,7 +32,7 @@ export default {
 			};
 			payload = stringifyQuery( query );
 		}
-		return apiFetch( { path: `/wc/v3/taxes${ payload }` } );
+		return apiFetch( { path: `/wc/v4/taxes${ payload }` } );
 	},
 	isDebounced: true,
 	getOptionKeywords( tax ) {

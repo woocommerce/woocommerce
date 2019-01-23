@@ -15,7 +15,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v3/orders';
+	protected $endpoint = '/wc/v4/orders';
 
 	/**
 	 * Setup test data. Called before every test.

@@ -27,7 +27,7 @@ class DateFilter extends Component {
 	constructor( { filter } ) {
 		super( ...arguments );
 
-		const [ isoAfter, isoBefore ] = ( filter.value || '' ).split( ',' );
+		const [ isoAfter, isoBefore ] = Array.isArray( filter.value ) ? filter.value : [ null, filter.value ];
 		const after = isoAfter ? toMoment( isoDateFormat, isoAfter ) : null;
 		const before = isoBefore ? toMoment( isoDateFormat, isoBefore ) : null;
 
@@ -42,6 +42,7 @@ class DateFilter extends Component {
 
 		this.onSingleDateChange = this.onSingleDateChange.bind( this );
 		this.onRangeDateChange = this.onRangeDateChange.bind( this );
+		this.onRuleChange = this.onRuleChange.bind( this );
 	}
 
 	getBetweenString() {
@@ -58,7 +59,7 @@ class DateFilter extends Component {
 		const { before, after } = this.state;
 
 		// Return nothing if we're missing input(s)
-		if ( ! before || 'between' === rule.value && ! after ) {
+		if ( ! before || ( 'between' === rule.value && ! after ) ) {
 			return '';
 		}
 
@@ -75,13 +76,15 @@ class DateFilter extends Component {
 			} );
 		}
 
-		return textContent( interpolateComponents( {
-			mixedString: config.labels.title,
-			components: {
-				filter: <Fragment>{ filterStr }</Fragment>,
-				rule: <Fragment>{ rule.label }</Fragment>,
-			},
-		} ) );
+		return textContent(
+			interpolateComponents( {
+				mixedString: config.labels.title,
+				components: {
+					filter: <Fragment>{ filterStr }</Fragment>,
+					rule: <Fragment>{ rule.label }</Fragment>,
+				},
+			} )
+		);
 	}
 
 	onSingleDateChange( { date, text, error } ) {
@@ -118,7 +121,7 @@ class DateFilter extends Component {
 			}
 
 			if ( nextAfter && nextBefore ) {
-				onFilterChange( filter.key, 'value', [ nextAfter, nextBefore ].join( ',' ) );
+				onFilterChange( filter.key, 'value', [ nextAfter, nextBefore ] );
 			}
 		}
 	}
@@ -168,9 +171,23 @@ class DateFilter extends Component {
 		);
 	}
 
+	onRuleChange( value ) {
+		const { onFilterChange, filter, updateFilter } = this.props;
+		const { before } = this.state;
+		if ( 'between' === filter.rule && 'between' !== value ) {
+			updateFilter( {
+				key: filter.key,
+				rule: value,
+				value: before ? before.format( isoDateFormat ) : undefined,
+			} );
+		} else {
+			onFilterChange( filter.key, 'rule', value );
+		}
+	}
+
 	render() {
-		const { config, filter, onFilterChange, isEnglish } = this.props;
-		const { key, rule } = filter;
+		const { config, filter, isEnglish } = this.props;
+		const { rule } = filter;
 		const { labels, rules } = config;
 		const screenReaderText = this.getScreenReaderText( filter, config );
 		const children = interpolateComponents( {
@@ -181,7 +198,7 @@ class DateFilter extends Component {
 						className="woocommerce-filters-advanced__rule"
 						options={ rules }
 						value={ rule }
-						onChange={ partial( onFilterChange, key, 'rule' ) }
+						onChange={ this.onRuleChange }
 						aria-label={ labels.rule }
 					/>
 				),
@@ -199,9 +216,7 @@ class DateFilter extends Component {
 		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (
 			<fieldset tabIndex="0">
-				<legend className="screen-reader-text">
-					{ labels.add || '' }
-				</legend>
+				<legend className="screen-reader-text">{ labels.add || '' }</legend>
 				<div
 					className={ classnames( 'woocommerce-filters-advanced__fieldset', {
 						'is-english': isEnglish,
@@ -209,11 +224,7 @@ class DateFilter extends Component {
 				>
 					{ children }
 				</div>
-				{ screenReaderText && (
-					<span className="screen-reader-text">
-						{ screenReaderText }
-					</span>
-				) }
+				{ screenReaderText && <span className="screen-reader-text">{ screenReaderText }</span> }
 			</fieldset>
 		);
 		/*eslint-enable jsx-a11y/no-noninteractive-tabindex*/

@@ -3,13 +3,12 @@
  * External dependencies
  */
 import { utcParse as d3UTCParse } from 'd3-time-format';
+import { scaleBand, scaleLinear, scaleTime } from 'd3-scale';
 
 /**
  * Internal dependencies
  */
 import dummyOrders from './fixtures/dummy-orders';
-import orderedDates from './fixtures/dummy-ordered-dates';
-import orderedKeys from './fixtures/dummy-ordered-keys';
 import {
 	getOrderedKeys,
 	getLineData,
@@ -18,61 +17,104 @@ import {
 } from '../index';
 import { getXGroupScale, getXScale, getXLineScale, getYMax, getYScale, getYTickOffset } from '../scales';
 
-const parseDate = d3UTCParse( '%Y-%m-%dT%H:%M:%S' );
+jest.mock( 'd3-scale', () => ( {
+	...require.requireActual( 'd3-scale' ),
+	scaleBand: jest.fn().mockReturnValue( {
+		bandwidth: jest.fn().mockReturnThis(),
+		domain: jest.fn().mockReturnThis(),
+		padding: jest.fn().mockReturnThis(),
+		paddingInner: jest.fn().mockReturnThis(),
+		range: jest.fn().mockReturnThis(),
+		rangeRound: jest.fn().mockReturnThis(),
+	} ),
+	scaleLinear: jest.fn().mockReturnValue( {
+		domain: jest.fn().mockReturnThis(),
+		rangeRound: jest.fn().mockReturnThis(),
+	} ),
+	scaleTime: jest.fn().mockReturnValue( {
+		domain: jest.fn().mockReturnThis(),
+		rangeRound: jest.fn().mockReturnThis(),
+	} ),
+} ) );
+
 const testUniqueKeys = getUniqueKeys( dummyOrders );
 const testOrderedKeys = getOrderedKeys( dummyOrders, testUniqueKeys );
 const testLineData = getLineData( dummyOrders, testOrderedKeys );
-const testUniqueDates = getUniqueDates( testLineData, parseDate );
-const testXScale = getXScale( testUniqueDates, 100 );
-const testXLineScale = getXLineScale( testUniqueDates, 100 );
-const testYMax = getYMax( testLineData );
-const testYScale = getYScale( 100, testYMax );
 
-describe( 'getXScale', () => {
-	it( 'properly scale inputs to the provided domain and range', () => {
-		expect( testXScale( orderedDates[ 0 ] ) ).toEqual( 3 );
-		expect( testXScale( orderedDates[ 2 ] ) ).toEqual( 35 );
-		expect( testXScale( orderedDates[ orderedDates.length - 1 ] ) ).toEqual( 83 );
+describe( 'X scales', () => {
+	const parseDate = d3UTCParse( '%Y-%m-%dT%H:%M:%S' );
+	const testUniqueDates = getUniqueDates( testLineData, parseDate );
+
+	describe( 'getXScale', () => {
+		it( 'creates band scale with correct parameters', () => {
+			getXScale( testUniqueDates, 100 );
+
+			expect( scaleBand().domain ).toHaveBeenLastCalledWith( testUniqueDates );
+			expect( scaleBand().range ).toHaveBeenLastCalledWith( [ 0, 100 ] );
+			expect( scaleBand().paddingInner ).toHaveBeenLastCalledWith( 0.1 );
+		} );
+
+		it( 'creates band scale with correct paddingInner parameter when it\'s in compact mode', () => {
+			getXScale( testUniqueDates, 100, true );
+
+			expect( scaleBand().paddingInner ).toHaveBeenLastCalledWith( 0 );
+		} );
 	} );
-	it( 'properly scale inputs and test the bandwidth', () => {
-		expect( testXScale.bandwidth() ).toEqual( 14 );
+
+	describe( 'getXGroupScale', () => {
+		const testXScale = getXScale( testUniqueDates, 100 );
+
+		it( 'creates band scale with correct parameters', () => {
+			getXGroupScale( testOrderedKeys, testXScale );
+			const filteredOrderedKeys = [ 'Cap', 'T-Shirt', 'Sunglasses', 'Polo', 'Hoodie' ];
+
+			expect( scaleBand().domain ).toHaveBeenLastCalledWith( filteredOrderedKeys );
+			expect( scaleBand().range ).toHaveBeenLastCalledWith( [ 0, 100 ] );
+			expect( scaleBand().padding ).toHaveBeenLastCalledWith( 0.07 );
+		} );
+
+		it( 'creates band scale with correct padding parameter when it\'s in compact mode', () => {
+			getXGroupScale( testOrderedKeys, testXScale, true );
+
+			expect( scaleBand().padding ).toHaveBeenLastCalledWith( 0 );
+		} );
+	} );
+
+	describe( 'getXLineScale', () => {
+		it( 'creates time scale with correct parameters', () => {
+			getXLineScale( testUniqueDates, 100 );
+
+			expect( scaleTime().domain ).toHaveBeenLastCalledWith( [
+				new Date( '2018-05-30T00:00:00' ),
+				new Date( '2018-06-04T00:00:00' ),
+			] );
+			expect( scaleTime().rangeRound ).toHaveBeenLastCalledWith( [ 0, 100 ] );
+		} );
 	} );
 } );
 
-describe( 'getXGroupScale', () => {
-	it( 'properly scale inputs based on the getXScale', () => {
-		const testXGroupScale = getXGroupScale( testOrderedKeys, testXScale );
-		expect( testXGroupScale( orderedKeys[ 0 ].key ) ).toEqual( 2 );
-		expect( testXGroupScale( orderedKeys[ 2 ].key ) ).toEqual( 6 );
-		expect( testXGroupScale( orderedKeys[ orderedKeys.length - 1 ].key ) ).toEqual( 10 );
+describe( 'Y scales', () => {
+	describe( 'getYMax', () => {
+		it( 'calculate the correct maximum y value', () => {
+			expect( getYMax( testLineData ) ).toEqual( 15000000 );
+		} );
 	} );
-} );
 
-describe( 'getXLineScale', () => {
-	it( 'properly scale inputs for the line', () => {
-		expect( testXLineScale( new Date( orderedDates[ 0 ] ) ) ).toEqual( 0 );
-		expect( testXLineScale( new Date( orderedDates[ 2 ] ) ) ).toEqual( 40 );
-		expect( testXLineScale( new Date( orderedDates[ orderedDates.length - 1 ] ) ) ).toEqual( 100 );
+	describe( 'getYScale', () => {
+		it( 'creates linear scale with correct parameters', () => {
+			getYScale( 100, 15000000 );
+
+			expect( scaleLinear().domain ).toHaveBeenLastCalledWith( [ 0, 15000000 ] );
+			expect( scaleLinear().rangeRound ).toHaveBeenLastCalledWith( [ 100, 0 ] );
+		} );
 	} );
-} );
 
-describe( 'getYMax', () => {
-	it( 'calculate the correct maximum y value', () => {
-		expect( testYMax ).toEqual( 15000000 );
-	} );
-} );
+	describe( 'getYTickOffset', () => {
+		it( 'creates linear scale with correct parameters', () => {
+			getYTickOffset( 100, 15000000 );
 
-describe( 'getYScale', () => {
-	it( 'properly scale the y values given the height and maximum y value', () => {
-		expect( testYScale( 0 ) ).toEqual( 100 );
-		expect( testYScale( testYMax ) ).toEqual( 0 );
-	} );
-} );
-
-describe( 'getYTickOffset', () => {
-	it( 'properly scale the y values for the y-axis ticks given the height and maximum y value', () => {
-		const testYTickOffset1 = getYTickOffset( 100, testYMax );
-		expect( testYTickOffset1( 0 ) ).toEqual( 112 );
-		expect( testYTickOffset1( testYMax ) ).toEqual( 12 );
+			expect( scaleLinear().domain ).toHaveBeenLastCalledWith( [ 0, 15000000 ] );
+			expect( scaleLinear().rangeRound ).toHaveBeenLastCalledWith( [ 112, 12 ] );
+		} );
 	} );
 } );

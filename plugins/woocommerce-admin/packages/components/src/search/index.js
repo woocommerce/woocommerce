@@ -156,12 +156,13 @@ class Search extends Component {
 			'aria-label': this.props[ 'aria-label' ],
 		};
 		const shouldRenderTags = this.shouldRenderTags();
+		const inputType = autocompleter.inputType ? autocompleter.inputType : 'text';
+		const searchIcon = <Gridicon className="woocommerce-search__icon" icon="search" size={ 18 } />;
 
 		return (
 			<div className={ classnames( 'woocommerce-search', className, {
 				'has-inline-tags': inlineTags,
 			} ) }>
-				<Gridicon className="woocommerce-search__icon" icon="search" size={ 18 } />
 				<Autocomplete
 					completer={ autocompleter }
 					onSelect={ this.selectResult }
@@ -184,11 +185,12 @@ class Search extends Component {
 									this.input.current.focus();
 								} }
 							>
+								{ searchIcon }
 								<div className="woocommerce-search__token-list">
 									{ this.renderTags() }
 									<input
 										ref={ this.input }
-										type="text"
+										type={ inputType }
 										size={
 											( ( value.length === 0 && placeholder && placeholder.length ) ||
 												value.length ) + 1
@@ -212,16 +214,19 @@ class Search extends Component {
 								</div>
 							</div>
 						) : (
-							<input
-								type="search"
-								value={ value }
-								placeholder={ placeholder }
-								className="woocommerce-search__input"
-								onChange={ this.updateSearch( onChange ) }
-								aria-owns={ listBoxId }
-								aria-activedescendant={ activeId }
-								{ ...aria }
-							/>
+							<Fragment>
+								{ searchIcon }
+								<input
+									type="search"
+									value={ value }
+									placeholder={ placeholder }
+									className="woocommerce-search__input"
+									onChange={ this.updateSearch( onChange ) }
+									aria-owns={ listBoxId }
+									aria-activedescendant={ activeId }
+									{ ...aria }
+								/>
+							</Fragment>
 						)
 					}
 				</Autocomplete>

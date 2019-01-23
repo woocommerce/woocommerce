@@ -61,6 +61,31 @@ const filterConfig = {
 			],
 		},
 		{
+			label: __( 'Single Product Category', 'wc-admin' ),
+			value: 'select_category',
+			chartMode: 'item-comparison',
+			subFilters: [
+				{
+					component: 'Search',
+					value: 'single_category',
+					chartMode: 'item-comparison',
+					path: [ 'select_category' ],
+					settings: {
+						type: 'categories',
+						param: 'categories',
+						getLabels: getRequestByIdString( NAMESPACE + 'products/categories', category => ( {
+							id: category.id,
+							label: category.name,
+						} ) ),
+						labels: {
+							placeholder: __( 'Type to search for a product category', 'wc-admin' ),
+							button: __( 'Single Product Category', 'wc-admin' ),
+						},
+					},
+				},
+			],
+		},
+		{
 			label: __( 'Product Comparison', 'wc-admin' ),
 			value: 'compare-products',
 			chartMode: 'item-comparison',

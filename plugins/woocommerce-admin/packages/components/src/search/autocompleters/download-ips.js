@@ -30,7 +30,7 @@ export default {
 				match,
 			};
 			payload = stringifyQuery( query );
-			return apiFetch( { path: `/wc/v3/data/download-ips${ payload }` } );
+			return apiFetch( { path: `/wc/v4/data/download-ips${ payload }` } );
 		}
 	},
 	isDebounced: true,

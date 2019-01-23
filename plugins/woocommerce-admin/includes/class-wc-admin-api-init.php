@@ -13,6 +13,38 @@ defined( 'ABSPATH' ) || exit;
 class WC_Admin_Api_Init {
 
 	/**
+	 * Action hook for reducing a range of batches down to single actions.
+	 */
+	const QUEUE_BATCH_ACTION = 'wc-admin_queue_batches';
+
+	/**
+	 * Action hook for queuing an action after another is complete.
+	 */
+	const QUEUE_DEPEDENT_ACTION = 'wc-admin_queue_dependent_action';
+
+	/**
+	 * Action hook for processing a batch of customers.
+	 */
+	const CUSTOMERS_BATCH_ACTION = 'wc-admin_process_customers_batch';
+
+	/**
+	 * Action hook for processing a batch of orders.
+	 */
+	const ORDERS_BATCH_ACTION = 'wc-admin_process_orders_batch';
+
+	/**
+	 * Action hook for initializing the orders lookup batch creation.
+	 */
+	const ORDERS_LOOKUP_BATCH_INIT = 'wc-admin_orders_lookup_batch_init';
+
+	/**
+	 * Queue instance.
+	 *
+	 * @var WC_Queue_Interface
+	 */
+	protected static $queue = null;
+
+	/**
 	 * Boostrap REST API.
 	 */
 	public function __construct() {
@@ -30,9 +62,41 @@ class WC_Admin_Api_Init {
 		// Initialize Orders data store class's static vars.
 		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'orders_data_store_init' ), 20 );
 		// Initialize Customers Report data store sync hooks.
-		// Note: we need to hook into 'wp' before `wc_current_user_is_active`.
+		// Note: we need to hook in before `wc_current_user_is_active`.
 		// See: https://github.com/woocommerce/woocommerce/blob/942615101ba00c939c107c3a4820c3d466864872/includes/wc-user-functions.php#L749.
-		add_action( 'wp', array( 'WC_Admin_Api_Init', 'customers_report_data_store_init' ), 9 );
+		add_action( 'wp_loaded', array( 'WC_Admin_Api_Init', 'customers_report_data_store_init' ) );
+
+		// Initialize scheduled action handlers.
+		add_action( self::QUEUE_BATCH_ACTION, array( __CLASS__, 'queue_batches' ), 10, 3 );
+		add_action( self::QUEUE_DEPEDENT_ACTION, array( __CLASS__, 'queue_dependent_action' ), 10, 2 );
+		add_action( self::CUSTOMERS_BATCH_ACTION, array( __CLASS__, 'customer_lookup_process_batch' ) );
+		add_action( self::ORDERS_BATCH_ACTION, array( __CLASS__, 'orders_lookup_process_batch' ) );
+		add_action( self::ORDERS_LOOKUP_BATCH_INIT, array( __CLASS__, 'orders_lookup_batch_init' ) );
+
+		// Add currency symbol to orders endpoint response.
+		add_filter( 'woocommerce_rest_prepare_shop_order_object', array( __CLASS__, 'add_currency_symbol_to_order_response' ) );
+	}
+
+	/**
+	 * Get queue instance.
+	 *
+	 * @return WC_Queue_Interface
+	 */
+	public static function queue() {
+		if ( is_null( self::$queue ) ) {
+			self::$queue = WC()->queue();
+		}
+
+		return self::$queue;
+	}
+
+	/**
+	 * Set queue instance.
+	 *
+	 * @param WC_Queue_Interface $queue Queue instance.
+	 */
+	public static function set_queue( $queue ) {
+		self::$queue = $queue;
 	}
 
 	/**
@@ -97,11 +161,14 @@ class WC_Admin_Api_Init {
 	 */
 	public function rest_api_init() {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-admin-notes-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-coupons-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-customers-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-data-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-data-countries-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-data-download-ips-controller.php';
-		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-orders-stats-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-orders-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-products-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-categories-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-reviews-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-system-status-tools-controller.php';
@@ -127,11 +194,14 @@ class WC_Admin_Api_Init {
 			'woocommerce_admin_rest_controllers',
 			array(
 				'WC_Admin_REST_Admin_Notes_Controller',
+				'WC_Admin_REST_Coupons_Controller',
 				'WC_Admin_REST_Customers_Controller',
 				'WC_Admin_REST_Data_Controller',
+				'WC_Admin_REST_Data_Countries_Controller',
 				'WC_Admin_REST_Data_Download_Ips_Controller',
-				'WC_Admin_REST_Orders_Stats_Controller',
+				'WC_Admin_REST_Orders_Controller',
 				'WC_Admin_REST_Products_Controller',
+				'WC_Admin_REST_Product_Categories_Controller',
 				'WC_Admin_REST_Product_Reviews_Controller',
 				'WC_Admin_REST_Reports_Controller',
 				'WC_Admin_REST_System_Status_Tools_Controller',
@@ -169,112 +239,134 @@ class WC_Admin_Api_Init {
 	 * @return array
 	 */
 	public static function filter_rest_endpoints( $endpoints ) {
-		// Override GET /wc/v3/system_status/tools.
-		if ( isset( $endpoints['/wc/v3/system_status/tools'] )
-			&& isset( $endpoints['/wc/v3/system_status/tools'][1] )
-			&& isset( $endpoints['/wc/v3/system_status/tools'][0] )
-			&& $endpoints['/wc/v3/system_status/tools'][1]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
+		// Override GET /wc/v4/system_status/tools.
+		if ( isset( $endpoints['/wc/v4/system_status/tools'] )
+			&& isset( $endpoints['/wc/v4/system_status/tools'][1] )
+			&& isset( $endpoints['/wc/v4/system_status/tools'][0] )
+			&& $endpoints['/wc/v4/system_status/tools'][1]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
 		) {
-			$endpoints['/wc/v3/system_status/tools'][0] = $endpoints['/wc/v3/system_status/tools'][1];
+			$endpoints['/wc/v4/system_status/tools'][0] = $endpoints['/wc/v4/system_status/tools'][1];
 		}
-		// // Override GET & PUT for /wc/v3/system_status/tools.
-		if ( isset( $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'] )
-			&& isset( $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][3] )
-			&& isset( $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][2] )
-			&& $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][2]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
-			&& $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][3]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
+		// // Override GET & PUT for /wc/v4/system_status/tools.
+		if ( isset( $endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'] )
+			&& isset( $endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'][3] )
+			&& isset( $endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'][2] )
+			&& $endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'][2]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
+			&& $endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'][3]['callback'][0] instanceof WC_Admin_REST_System_Status_Tools_Controller
 		) {
-			$endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][0] = $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][2];
-			$endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][1] = $endpoints['/wc/v3/system_status/tools/(?P<id>[\w-]+)'][3];
-		}
-
-		// Override GET /wc/v3/reports.
-		if ( isset( $endpoints['/wc/v3/reports'] )
-			&& isset( $endpoints['/wc/v3/reports'][1] )
-			&& isset( $endpoints['/wc/v3/reports'][0] )
-			&& $endpoints['/wc/v3/reports'][1]['callback'][0] instanceof WC_Admin_REST_Reports_Controller
-		) {
-			$endpoints['/wc/v3/reports'][0] = $endpoints['/wc/v3/reports'][1];
+			$endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'][0] = $endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'][2];
+			$endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'][1] = $endpoints['/wc/v4/system_status/tools/(?P<id>[\w-]+)'][3];
 		}
 
-		// Override /wc/v3/customers.
-		if ( isset( $endpoints['/wc/v3/customers'] )
-			&& isset( $endpoints['/wc/v3/customers'][3] )
-			&& isset( $endpoints['/wc/v3/customers'][2] )
-			&& $endpoints['/wc/v3/customers'][2]['callback'][0] instanceof WC_Admin_REST_Customers_Controller
-			&& $endpoints['/wc/v3/customers'][3]['callback'][0] instanceof WC_Admin_REST_Customers_Controller
+		// Override GET /wc/v4/reports.
+		if ( isset( $endpoints['/wc/v4/reports'] )
+			&& isset( $endpoints['/wc/v4/reports'][1] )
+			&& isset( $endpoints['/wc/v4/reports'][0] )
+			&& $endpoints['/wc/v4/reports'][1]['callback'][0] instanceof WC_Admin_REST_Reports_Controller
 		) {
-			$endpoints['/wc/v3/customers'][0] = $endpoints['/wc/v3/customers'][2];
-			$endpoints['/wc/v3/customers'][1] = $endpoints['/wc/v3/customers'][3];
+			$endpoints['/wc/v4/reports'][0] = $endpoints['/wc/v4/reports'][1];
 		}
 
-		// Override /wc/v3/orders/$id.
-		if ( isset( $endpoints['/wc/v3/orders/(?P<id>[\d]+)'] )
-			&& isset( $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][5] )
-			&& isset( $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][4] )
-			&& isset( $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][3] )
-			&& $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Stats_Controller
-			&& $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][4]['callback'][0] instanceof WC_Admin_REST_Orders_Stats_Controller
-			&& $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][5]['callback'][0] instanceof WC_Admin_REST_Orders_Stats_Controller
+		// Override /wc/v4/coupons.
+		if ( isset( $endpoints['/wc/v4/coupons'] )
+			&& isset( $endpoints['/wc/v4/coupons'][3] )
+			&& isset( $endpoints['/wc/v4/coupons'][2] )
+			&& $endpoints['/wc/v4/coupons'][2]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v4/coupons'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
 		) {
-			$endpoints['/wc/v3/orders/(?P<id>[\d]+)'][0] = $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][3];
-			$endpoints['/wc/v3/orders/(?P<id>[\d]+)'][1] = $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][4];
-			$endpoints['/wc/v3/orders/(?P<id>[\d]+)'][2] = $endpoints['/wc/v3/orders/(?P<id>[\d]+)'][5];
+			$endpoints['/wc/v4/coupons'][0] = $endpoints['/wc/v4/coupons'][2];
+			$endpoints['/wc/v4/coupons'][1] = $endpoints['/wc/v4/coupons'][3];
 		}
 
-		// Override /wc/v3orders.
-		if ( isset( $endpoints['/wc/v3/orders'] )
-			&& isset( $endpoints['/wc/v3/orders'][3] )
-			&& isset( $endpoints['/wc/v3/orders'][2] )
-			&& $endpoints['/wc/v3/orders'][2]['callback'][0] instanceof WC_Admin_REST_Orders_Stats_Controller
-			&& $endpoints['/wc/v3/orders'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Stats_Controller
+		// Override /wc/v4/customers.
+		if ( isset( $endpoints['/wc/v4/customers'] )
+			&& isset( $endpoints['/wc/v4/customers'][3] )
+			&& isset( $endpoints['/wc/v4/customers'][2] )
+			&& $endpoints['/wc/v4/customers'][2]['callback'][0] instanceof WC_Admin_REST_Customers_Controller
+			&& $endpoints['/wc/v4/customers'][3]['callback'][0] instanceof WC_Admin_REST_Customers_Controller
 		) {
-			$endpoints['/wc/v3/orders'][0] = $endpoints['/wc/v3/orders'][2];
-			$endpoints['/wc/v3/orders'][1] = $endpoints['/wc/v3/orders'][3];
+			$endpoints['/wc/v4/customers'][0] = $endpoints['/wc/v4/customers'][2];
+			$endpoints['/wc/v4/customers'][1] = $endpoints['/wc/v4/customers'][3];
 		}
 
-		// Override /wc/v3/data.
-		if ( isset( $endpoints['/wc/v3/data'] )
-			&& isset( $endpoints['/wc/v3/data'][1] )
-			&& $endpoints['/wc/v3/data'][1]['callback'][0] instanceof WC_Admin_REST_Data_Controller
+		// Override /wc/v4/orders/$id.
+		if ( isset( $endpoints['/wc/v4/orders/(?P<id>[\d]+)'] )
+			&& isset( $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][5] )
+			&& isset( $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][4] )
+			&& isset( $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][3] )
+			&& $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][4]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][5]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
 		) {
-			$endpoints['/wc/v3/data'][0] = $endpoints['/wc/v3/data'][1];
+			$endpoints['/wc/v4/orders/(?P<id>[\d]+)'][0] = $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][3];
+			$endpoints['/wc/v4/orders/(?P<id>[\d]+)'][1] = $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][4];
+			$endpoints['/wc/v4/orders/(?P<id>[\d]+)'][2] = $endpoints['/wc/v4/orders/(?P<id>[\d]+)'][5];
 		}
 
-		// Override /wc/v3/products.
-		if ( isset( $endpoints['/wc/v3/products'] )
-			&& isset( $endpoints['/wc/v3/products'][3] )
-			&& isset( $endpoints['/wc/v3/products'][2] )
-			&& $endpoints['/wc/v3/products'][2]['callback'][0] instanceof WC_Admin_REST_Products_Controller
-			&& $endpoints['/wc/v3/products'][3]['callback'][0] instanceof WC_Admin_REST_Products_Controller
+		// Override /wc/v4/orders.
+		if ( isset( $endpoints['/wc/v4/orders'] )
+			&& isset( $endpoints['/wc/v4/orders'][3] )
+			&& isset( $endpoints['/wc/v4/orders'][2] )
+			&& $endpoints['/wc/v4/orders'][2]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v4/orders'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
 		) {
-			$endpoints['/wc/v3/products'][0] = $endpoints['/wc/v3/products'][2];
-			$endpoints['/wc/v3/products'][1] = $endpoints['/wc/v3/products'][3];
+			$endpoints['/wc/v4/orders'][0] = $endpoints['/wc/v4/orders'][2];
+			$endpoints['/wc/v4/orders'][1] = $endpoints['/wc/v4/orders'][3];
 		}
 
-		// Override /wc/v3/products/$id.
-		if ( isset( $endpoints['/wc/v3/products/(?P<id>[\d]+)'] )
-			&& isset( $endpoints['/wc/v3/products/(?P<id>[\d]+)'][5] )
-			&& isset( $endpoints['/wc/v3/products/(?P<id>[\d]+)'][4] )
-			&& isset( $endpoints['/wc/v3/products/(?P<id>[\d]+)'][3] )
-			&& $endpoints['/wc/v3/products/(?P<id>[\d]+)'][3]['callback'][0] instanceof WC_Admin_REST_Products_Controller
-			&& $endpoints['/wc/v3/products/(?P<id>[\d]+)'][4]['callback'][0] instanceof WC_Admin_REST_Products_Controller
-			&& $endpoints['/wc/v3/products/(?P<id>[\d]+)'][5]['callback'][0] instanceof WC_Admin_REST_Products_Controller
+		// Override /wc/v4/data.
+		if ( isset( $endpoints['/wc/v4/data'] )
+			&& isset( $endpoints['/wc/v4/data'][1] )
+			&& $endpoints['/wc/v4/data'][1]['callback'][0] instanceof WC_Admin_REST_Data_Controller
 		) {
-			$endpoints['/wc/v3/products/(?P<id>[\d]+)'][0] = $endpoints['/wc/v3/products/(?P<id>[\d]+)'][3];
-			$endpoints['/wc/v3/products/(?P<id>[\d]+)'][1] = $endpoints['/wc/v3/products/(?P<id>[\d]+)'][4];
-			$endpoints['/wc/v3/products/(?P<id>[\d]+)'][2] = $endpoints['/wc/v3/products/(?P<id>[\d]+)'][5];
+			$endpoints['/wc/v4/data'][0] = $endpoints['/wc/v4/data'][1];
 		}
 
-		// Override /wc/v3/products/reviews.
-		if ( isset( $endpoints['/wc/v3/products/reviews'] )
-			&& isset( $endpoints['/wc/v3/products/reviews'][3] )
-			&& isset( $endpoints['/wc/v3/products/reviews'][2] )
-			&& $endpoints['/wc/v3/products/reviews'][2]['callback'][0] instanceof WC_Admin_REST_Product_Reviews_Controller
-			&& $endpoints['/wc/v3/products/reviews'][3]['callback'][0] instanceof WC_Admin_REST_Product_Reviews_Controller
+		// Override /wc/v4/products.
+		if ( isset( $endpoints['/wc/v4/products'] )
+			&& isset( $endpoints['/wc/v4/products'][3] )
+			&& isset( $endpoints['/wc/v4/products'][2] )
+			&& $endpoints['/wc/v4/products'][2]['callback'][0] instanceof WC_Admin_REST_Products_Controller
+			&& $endpoints['/wc/v4/products'][3]['callback'][0] instanceof WC_Admin_REST_Products_Controller
 		) {
-			$endpoints['/wc/v3/products/reviews'][0] = $endpoints['/wc/v3/products/reviews'][2];
-			$endpoints['/wc/v3/products/reviews'][1] = $endpoints['/wc/v3/products/reviews'][3];
+			$endpoints['/wc/v4/products'][0] = $endpoints['/wc/v4/products'][2];
+			$endpoints['/wc/v4/products'][1] = $endpoints['/wc/v4/products'][3];
+		}
+
+		// Override /wc/v4/products/$id.
+		if ( isset( $endpoints['/wc/v4/products/(?P<id>[\d]+)'] )
+			&& isset( $endpoints['/wc/v4/products/(?P<id>[\d]+)'][5] )
+			&& isset( $endpoints['/wc/v4/products/(?P<id>[\d]+)'][4] )
+			&& isset( $endpoints['/wc/v4/products/(?P<id>[\d]+)'][3] )
+			&& $endpoints['/wc/v4/products/(?P<id>[\d]+)'][3]['callback'][0] instanceof WC_Admin_REST_Products_Controller
+			&& $endpoints['/wc/v4/products/(?P<id>[\d]+)'][4]['callback'][0] instanceof WC_Admin_REST_Products_Controller
+			&& $endpoints['/wc/v4/products/(?P<id>[\d]+)'][5]['callback'][0] instanceof WC_Admin_REST_Products_Controller
+		) {
+			$endpoints['/wc/v4/products/(?P<id>[\d]+)'][0] = $endpoints['/wc/v4/products/(?P<id>[\d]+)'][3];
+			$endpoints['/wc/v4/products/(?P<id>[\d]+)'][1] = $endpoints['/wc/v4/products/(?P<id>[\d]+)'][4];
+			$endpoints['/wc/v4/products/(?P<id>[\d]+)'][2] = $endpoints['/wc/v4/products/(?P<id>[\d]+)'][5];
+		}
+
+		// Override /wc/v4/products/categories.
+		if ( isset( $endpoints['/wc/v4/products/categories'] )
+			&& isset( $endpoints['/wc/v4/products/categories'][3] )
+			&& isset( $endpoints['/wc/v4/products/categories'][2] )
+			&& $endpoints['/wc/v4/products/categories'][2]['callback'][0] instanceof WC_Admin_REST_Product_categories_Controller
+			&& $endpoints['/wc/v4/products/categories'][3]['callback'][0] instanceof WC_Admin_REST_Product_categories_Controller
+		) {
+			$endpoints['/wc/v4/products/categories'][0] = $endpoints['/wc/v4/products/categories'][2];
+			$endpoints['/wc/v4/products/categories'][1] = $endpoints['/wc/v4/products/categories'][3];
+		}
+
+		// Override /wc/v4/products/reviews.
+		if ( isset( $endpoints['/wc/v4/products/reviews'] )
+			&& isset( $endpoints['/wc/v4/products/reviews'][3] )
+			&& isset( $endpoints['/wc/v4/products/reviews'][2] )
+			&& $endpoints['/wc/v4/products/reviews'][2]['callback'][0] instanceof WC_Admin_REST_Product_Reviews_Controller
+			&& $endpoints['/wc/v4/products/reviews'][3]['callback'][0] instanceof WC_Admin_REST_Product_Reviews_Controller
+		) {
+			$endpoints['/wc/v4/products/reviews'][0] = $endpoints['/wc/v4/products/reviews'][2];
+			$endpoints['/wc/v4/products/reviews'][1] = $endpoints['/wc/v4/products/reviews'][3];
 		}
 
 		return $endpoints;
@@ -286,9 +378,9 @@ class WC_Admin_Api_Init {
 	public static function regenerate_report_data() {
 		// Add registered customers to the lookup table before updating order stats
 		// so that the orders can be associated with the `customer_id` column.
-		self::customer_lookup_store_init();
-		WC_Admin_Reports_Orders_Stats_Data_Store::queue_order_stats_repopulate_database();
-		self::order_product_lookup_store_init();
+		self::customer_lookup_batch_init();
+		// Queue orders lookup to occur after customers lookup generation is done.
+		self::queue_dependent_action( self::ORDERS_LOOKUP_BATCH_INIT, self::CUSTOMERS_BATCH_ACTION );
 	}
 
 	/**
@@ -322,39 +414,54 @@ class WC_Admin_Api_Init {
 	}
 
 	/**
-	 * Init orders product lookup store.
-	 *
-	 * @param WC_Background_Updater|null $updater Updater instance.
-	 * @return bool
+	 * Init order/product lookup tables update (in batches).
 	 */
-	public static function order_product_lookup_store_init( $updater = null ) {
-		// TODO: this needs to be updated a bit, as it no longer runs as a part of WC_Install, there is no bg updater.
-		global $wpdb;
+	public static function orders_lookup_batch_init() {
+		$batch_size  = self::get_batch_size( self::ORDERS_BATCH_ACTION );
+		$order_query = new WC_Order_Query(
+			array(
+				'return'   => 'ids',
+				'limit'    => 1,
+				'paginate' => true,
+			)
+		);
+		$result      = $order_query->get_orders();
 
-		$orders = get_transient( 'wc_update_350_all_orders' );
-		if ( false === $orders ) {
-			$orders = wc_get_orders(
-				array(
-					'limit'  => -1,
-					'return' => 'ids',
-				)
-			);
-			set_transient( 'wc_update_350_all_orders', $orders, DAY_IN_SECONDS );
+		if ( 0 === $result->total ) {
+			return;
 		}
 
-		// Process orders until close to running out of memory timeouts on large sites then requeue.
-		foreach ( $orders as $order_id ) {
+		$num_batches = ceil( $result->total / $batch_size );
+
+		self::queue_batches( 1, $num_batches, self::ORDERS_BATCH_ACTION );
+	}
+
+	/**
+	 * Process a batch of orders to update (stats and products).
+	 *
+	 * @param int $batch_number Batch number to process (essentially a query page number).
+	 * @return void
+	 */
+	public static function orders_lookup_process_batch( $batch_number ) {
+		$batch_size  = self::get_batch_size( self::ORDERS_BATCH_ACTION );
+		$order_query = new WC_Order_Query(
+			array(
+				'return'  => 'ids',
+				'limit'   => $batch_size,
+				'page'    => $batch_number,
+				'orderby' => 'ID',
+				'order'   => 'ASC',
+			)
+		);
+		$order_ids = $order_query->get_orders();
+
+		foreach ( $order_ids as $order_id ) {
+			// TODO: schedule single order update if this fails?
+			WC_Admin_Reports_Orders_Stats_Data_Store::sync_order( $order_id );
 			WC_Admin_Reports_Products_Data_Store::sync_order_products( $order_id );
-			// Pop the order ID from the array for updating the transient later should we near memory exhaustion.
-			unset( $orders[ $order_id ] );
-			if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
-				// Update the transient for the next run to avoid processing the same orders again.
-				set_transient( 'wc_update_350_all_orders', $orders, DAY_IN_SECONDS );
-				return true;
-			}
+			WC_Admin_Reports_Coupons_Data_Store::sync_order_coupons( $order_id );
+			WC_Admin_Reports_Taxes_Data_Store::sync_order_taxes( $order_id );
 		}
-
-		return true;
 	}
 
 	/**
@@ -365,49 +472,144 @@ class WC_Admin_Api_Init {
 	}
 
 	/**
-	 * Init customer lookup store.
+	 * Returns the batch size for regenerating reports.
+	 * Note: can differ per batch action.
 	 *
-	 * @param WC_Background_Updater|null $updater Updater instance.
-	 * @return bool
+	 * @param string $action Single batch action name.
+	 * @return int Batch size.
 	 */
-	public static function customer_lookup_store_init( $updater = null ) {
-		// TODO: this needs to be updated a bit, as it no longer runs as a part of WC_Install, there is no bg updater.
-		global $wpdb;
+	public static function get_batch_size( $action ) {
+		$batch_sizes = array(
+			self::QUEUE_BATCH_ACTION     => 100,
+			self::CUSTOMERS_BATCH_ACTION => 25,
+			self::ORDERS_BATCH_ACTION    => 10,
+		);
+		$batch_size  = isset( $batch_sizes[ $action ] ) ? $batch_sizes[ $action ] : 25;
 
-		// Backfill customer lookup table with registered customers.
-		$customer_ids = get_transient( 'wc_update_350_all_customers' );
+		/**
+		 * Filter the batch size for regenerating a report table.
+		 *
+		 * @param int    $batch_size Batch size.
+		 * @param string $action Batch action name.
+		 */
+		return apply_filters( 'wc_admin_report_regenerate_batch_size', $batch_size, $action );
+	}
 
-		if ( false === $customer_ids ) {
-			$customer_query = new WP_User_Query(
-				array(
-					'fields' => 'ID',
-					'role'   => 'customer',
-					'number' => -1,
-				)
+	/**
+	 * Queue a large number of batch jobs, respecting the batch size limit.
+	 * Reduces a range of batches down to "single batch" jobs.
+	 *
+	 * @param int    $range_start Starting batch number.
+	 * @param int    $range_end Ending batch number.
+	 * @param string $single_batch_action Action to schedule for a single batch.
+	 * @return void
+	 */
+	public static function queue_batches( $range_start, $range_end, $single_batch_action ) {
+		$batch_size       = self::get_batch_size( self::QUEUE_BATCH_ACTION );
+		$range_size       = 1 + ( $range_end - $range_start );
+		$action_timestamp = time() + 5;
+
+		if ( $range_size > $batch_size ) {
+			// If the current batch range is larger than a single batch,
+			// split the range into $queue_batch_size chunks.
+			$chunk_size = ceil( $range_size / $batch_size );
+
+			for ( $i = 0; $i < $batch_size; $i++ ) {
+				$batch_start = $range_start + ( $i * $chunk_size );
+				$batch_end   = min( $range_end, $range_start + ( $chunk_size * ( $i + 1 ) ) - 1 );
+
+				self::queue()->schedule_single(
+					$action_timestamp,
+					self::QUEUE_BATCH_ACTION,
+					array( $batch_start, $batch_end, $single_batch_action )
+				);
+			}
+		} else {
+			// Otherwise, queue the single batches.
+			for ( $i = $range_start; $i <= $range_end; $i++ ) {
+				self::queue()->schedule_single( $action_timestamp, $single_batch_action, array( $i ) );
+			}
+		}
+	}
+
+	/**
+	 * Queue an action to run after another.
+	 *
+	 * @param string $action Action to run after prerequisite.
+	 * @param string $prerequisite_action Prerequisite action.
+	 */
+	public static function queue_dependent_action( $action, $prerequisite_action ) {
+		$blocking_jobs = self::queue()->search(
+			array(
+				'status'   => 'pending',
+				'orderby'  => 'date',
+				'order'    => 'DESC',
+				'per_page' => 1,
+				'claimed'  => false,
+				'search'   => $prerequisite_action, // search is used instead of hook to find queued batch creation.
+			)
+		);
+
+		if ( $blocking_jobs ) {
+			$blocking_job       = current( $blocking_jobs );
+			$after_blocking_job = $blocking_job->get_schedule()->next()->getTimestamp() + 5;
+
+			self::queue()->schedule_single(
+				$after_blocking_job,
+				self::QUEUE_DEPEDENT_ACTION,
+				array( $action, $prerequisite_action )
 			);
+		} else {
+			self::queue()->schedule_single( time() + 5, $action );
+		}
+	}
 
-			$customer_ids = $customer_query->get_results();
+	/**
+	 * Init customer lookup table update (in batches).
+	 */
+	public static function customer_lookup_batch_init() {
+		$batch_size     = self::get_batch_size( self::CUSTOMERS_BATCH_ACTION );
+		$customer_query = new WP_User_Query(
+			array(
+				'fields'  => 'ID',
+				'number'  => 1,
+			)
+		);
+		$total_customers = $customer_query->get_total();
 
-			set_transient( 'wc_update_350_all_customers', $customer_ids, DAY_IN_SECONDS );
+		if ( 0 === $total_customers ) {
+			return;
 		}
 
-		// Process customers until close to running out of memory timeouts on large sites then requeue.
+		$num_batches     = ceil( $total_customers / $batch_size );
+
+		self::queue_batches( 1, $num_batches, self::CUSTOMERS_BATCH_ACTION );
+	}
+
+	/**
+	 * Process a batch of customers to update.
+	 *
+	 * @param int $batch_number Batch number to process (essentially a query page number).
+	 * @return void
+	 */
+	public static function customer_lookup_process_batch( $batch_number ) {
+		$batch_size     = self::get_batch_size( self::CUSTOMERS_BATCH_ACTION );
+		$customer_query = new WP_User_Query(
+			array(
+				'fields'  => 'ID',
+				'orderby' => 'ID',
+				'order'   => 'ASC',
+				'number'  => $batch_size,
+				'paged'   => $batch_number,
+			)
+		);
+
+		$customer_ids = $customer_query->get_results();
+
 		foreach ( $customer_ids as $customer_id ) {
-			$result = WC_Admin_Reports_Customers_Data_Store::update_registered_customer( $customer_id );
-
-			if ( $result ) {
-				// Pop the customer ID from the array for updating the transient later should we near memory exhaustion.
-				unset( $customer_ids[ $customer_id ] );
-			}
-
-			if ( $updater instanceof WC_Background_Updater && $updater->is_memory_exceeded() ) {
-				// Update the transient for the next run to avoid processing the same orders again.
-				set_transient( 'wc_update_350_all_customers', $customer_ids, DAY_IN_SECONDS );
-				return true;
-			}
+			// TODO: schedule single customer update if this fails?
+			WC_Admin_Reports_Customers_Data_Store::update_registered_customer( $customer_id );
 		}
-
-		return true;
 	}
 
 	/**
@@ -595,10 +797,25 @@ class WC_Admin_Api_Init {
 		self::create_db_tables();
 
 		// Initialize report tables.
-		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'order_product_lookup_store_init' ), 20 );
-		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'customer_lookup_store_init' ), 20 );
+		add_action( 'woocommerce_after_register_post_type', array( __CLASS__, 'regenerate_report_data' ), 20 );
 	}
 
+	/**
+	 * Add the currency symbol (in addition to currency code) to each Order
+	 * object in REST API responses. For use in formatCurrency().
+	 *
+	 * @param {WP_REST_Response} $response REST response object.
+	 * @returns {WP_REST_Response}
+	 */
+	public static function add_currency_symbol_to_order_response( $response ) {
+		$response_data   = $response->get_data();
+		$currency_code   = $response_data['currency'];
+		$currency_symbol = get_woocommerce_currency_symbol( $currency_code );
+		$response_data['currency_symbol'] = html_entity_decode( $currency_symbol );
+		$response->set_data( $response_data );
+
+		return $response;
+	}
 }
 
 new WC_Admin_Api_Init();

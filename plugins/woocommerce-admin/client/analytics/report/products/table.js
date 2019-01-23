@@ -172,6 +172,7 @@ class ProductsReportTable extends Component {
 											category={ category }
 											categories={ categories }
 											key={ category.id }
+											query={ query }
 										/>
 									) ) }
 								/>

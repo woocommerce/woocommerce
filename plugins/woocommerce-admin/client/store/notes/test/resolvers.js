@@ -11,6 +11,7 @@ import { dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+import { NAMESPACE } from 'store/constants';
 import resolvers from '../resolvers';
 
 const { getNotes } = resolvers;
@@ -29,10 +30,10 @@ describe( 'getNotes', () => {
 
 	beforeAll( () => {
 		apiFetch.mockImplementation( options => {
-			if ( options.path === '/wc/v3/admin/notes' ) {
+			if ( options.path === NAMESPACE + 'admin/notes' ) {
 				return Promise.resolve( NOTES_1 );
 			}
-			if ( options.path === '/wc/v3/admin/notes?page=2' ) {
+			if ( options.path === NAMESPACE + 'admin/notes?page=2' ) {
 				return Promise.resolve( NOTES_2 );
 			}
 		} );

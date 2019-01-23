@@ -42,7 +42,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	protected $report_columns = array(
 		'order_id'       => 'order_id',
 		'date_created'   => 'date_created',
-		'status'         => 'status',
+		'status'         => 'REPLACE(status, "wc-", "") as status',
 		'customer_id'    => 'customer_id',
 		'net_total'      => 'net_total',
 		'num_items_sold' => 'num_items_sold',
@@ -240,6 +240,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		$mapped_orders      = $this->map_array_by_key( $orders_data, 'order_id' );
 		$products           = $this->get_products_by_order_ids( array_keys( $mapped_orders ) );
 		$mapped_products    = $this->map_array_by_key( $products, 'product_id' );
+		$coupons            = $this->get_coupons_by_order_ids( array_keys( $mapped_orders ) );
 		$product_categories = $this->get_product_categories_by_product_ids( array_keys( $mapped_products ) );
 
 		$mapped_data = array();
@@ -250,8 +251,9 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			}
 
 			$mapped_data[ $product['order_id'] ]['products'][] = array(
-				'id'   => $product['product_id'],
-				'name' => $product['product_name'],
+				'id'       => $product['product_id'],
+				'name'     => $product['product_name'],
+				'quantity' => $product['product_quantity'],
 			);
 			$mapped_data[ $product['order_id'] ]['categories'] = array_unique(
 				array_merge(
@@ -261,8 +263,24 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			);
 		}
 
+		foreach ( $coupons as $coupon ) {
+			if ( ! isset( $mapped_data[ $coupon['order_id'] ] ) ) {
+				$mapped_data[ $product['order_id'] ]['coupons'] = array();
+			}
+
+			$mapped_data[ $coupon['order_id'] ]['coupons'][] = array(
+				'id'   => $coupon['coupon_id'],
+				'code' => wc_format_coupon_code( $coupon['coupon_code'] ),
+			);
+		}
+
 		foreach ( $orders_data as $key => $order_data ) {
-			$orders_data[ $key ]['extended_info'] = $mapped_data[ $order_data['order_id'] ];
+			$defaults                             = array(
+				'products'   => array(),
+				'categories' => array(),
+				'coupons'    => array(),
+			);
+			$orders_data[ $key ]['extended_info'] = isset( $mapped_data[ $order_data['order_id'] ] ) ? array_merge( $defaults, $mapped_data[ $order_data['order_id'] ] ) : $defaults;
 		}
 	}
 
@@ -282,7 +300,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	}
 
 	/**
-	 * Get product Ids, names, and categories from order IDs.
+	 * Get product IDs, names, and quantity from order IDs.
 	 *
 	 * @param array $order_ids Array of order IDs.
 	 * @return array
@@ -293,7 +311,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		$included_order_ids         = implode( ',', $order_ids );
 
 		$products = $wpdb->get_results(
-			"SELECT order_id, ID as product_id, post_title as product_name
+			"SELECT order_id, ID as product_id, post_title as product_name, product_qty as product_quantity
 				FROM {$wpdb->prefix}posts
 				JOIN {$order_product_lookup_table} ON {$order_product_lookup_table}.product_id = {$wpdb->prefix}posts.ID
 				WHERE 
@@ -303,6 +321,30 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 		return $products;
+	}
+
+	/**
+	 * Get coupon information from order IDs.
+	 *
+	 * @param array $order_ids Array of order IDs.
+	 * @return array
+	 */
+	protected function get_coupons_by_order_ids( $order_ids ) {
+		global $wpdb;
+		$order_coupon_lookup_table = $wpdb->prefix . 'wc_order_coupon_lookup';
+		$included_order_ids        = implode( ',', $order_ids );
+
+		$coupons = $wpdb->get_results(
+			"SELECT order_id, coupon_id, post_title as coupon_code
+				FROM {$wpdb->prefix}posts
+				JOIN {$order_coupon_lookup_table} ON {$order_coupon_lookup_table}.coupon_id = {$wpdb->prefix}posts.ID
+				WHERE 
+					order_id IN ({$included_order_ids})
+				",
+			ARRAY_A
+		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+
+		return $coupons;
 	}
 
 	/**
@@ -334,7 +376,6 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 
 		return $mapped_product_categories;
 	}
-
 
 	/**
 	 * Returns string to be used as cache key for the data.

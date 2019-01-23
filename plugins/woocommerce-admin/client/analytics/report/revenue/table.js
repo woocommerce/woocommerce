@@ -222,7 +222,7 @@ export default compose(
 		const tableQuery = {
 			interval: 'day',
 			orderby: query.orderby || 'date',
-			order: query.order || 'asc',
+			order: query.order || 'desc',
 			page: query.page || 1,
 			per_page: query.per_page || QUERY_DEFAULTS.pageSize,
 			after: appendTimestamp( datesFromQuery.primary.after, 'start' ),

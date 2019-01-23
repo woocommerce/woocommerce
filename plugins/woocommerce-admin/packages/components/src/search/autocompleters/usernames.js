@@ -29,7 +29,7 @@ export default {
 			};
 			payload = stringifyQuery( query );
 		}
-		return apiFetch( { path: `/wc/v3/customers${ payload }` } );
+		return apiFetch( { path: `/wc/v4/customers${ payload }` } );
 	},
 	isDebounced: true,
 	getOptionKeywords( customer ) {

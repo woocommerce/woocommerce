@@ -11,7 +11,7 @@ Props
 ### `date`
 
 - **Required**
-- Type: String
+- Type: One of type: string, object
 - Default: null
 
 Date to use in the component.

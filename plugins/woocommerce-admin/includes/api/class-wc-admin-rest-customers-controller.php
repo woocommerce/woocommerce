@@ -20,6 +20,13 @@ class WC_Admin_REST_Customers_Controller extends WC_REST_Customers_Controller {
 	// TODO Add support for guests here. See https://wp.me/p7bje6-1dM.
 
 	/**
+	 * Endpoint namespace.
+	 *
+	 * @var string
+	 */
+	protected $namespace = 'wc/v4';
+
+	/**
 	 * Searches emails by partial search instead of a strict match.
 	 * See "search parameters" under https://codex.wordpress.org/Class_Reference/WP_User_Query.
 	 *

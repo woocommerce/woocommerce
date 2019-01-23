@@ -13,13 +13,13 @@ import { NAMESPACE } from 'store/constants';
 
 export const charts = [
 	{
-		key: 'order_tax',
-		label: __( 'Order Tax', 'wc-admin' ),
+		key: 'total_tax',
+		label: __( 'Total Tax', 'wc-admin' ),
 		type: 'currency',
 	},
 	{
-		key: 'total_tax',
-		label: __( 'Total Tax', 'wc-admin' ),
+		key: 'order_tax',
+		label: __( 'Order Tax', 'wc-admin' ),
 		type: 'currency',
 	},
 	{

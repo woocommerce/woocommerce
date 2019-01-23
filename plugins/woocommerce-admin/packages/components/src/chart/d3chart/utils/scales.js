@@ -12,17 +12,6 @@ import {
 import moment from 'moment';
 
 /**
- * Describes and rounds the maximum y value to the nearest thousand, ten-thousand, million etc. In case it is a decimal number, ceils it.
- * @param {array} lineData - from `getLineData`
- * @returns {number} the maximum value in the timeseries multiplied by 4/3
- */
-export const getYMax = lineData => {
-	const yMax = 4 / 3 * d3Max( lineData, d => d3Max( d.values.map( date => date.value ) ) );
-	const pow3Y = Math.pow( 10, ( ( Math.log( yMax ) * Math.LOG10E + 1 ) | 0 ) - 2 ) * 3;
-	return Math.ceil( Math.ceil( yMax / pow3Y ) * pow3Y );
-};
-
-/**
  * Describes getXScale
  * @param {array} uniqueDates - from `getUniqueDates`
  * @param {number} width - calculated width of the charting space
@@ -33,7 +22,7 @@ export const getYMax = lineData => {
 export const getXScale = ( uniqueDates, width, compact = false ) =>
 	d3ScaleBand()
 		.domain( uniqueDates )
-		.rangeRound( [ 0, width ] )
+		.range( [ 0, width ] )
 		.paddingInner( compact ? 0 : 0.1 );
 
 /**
@@ -63,6 +52,17 @@ export const getXLineScale = ( uniqueDates, width ) =>
 			moment( uniqueDates[ uniqueDates.length - 1 ], 'YYYY-MM-DD HH:mm' ).toDate(),
 		] )
 		.rangeRound( [ 0, width ] );
+
+/**
+ * Describes and rounds the maximum y value to the nearest thousand, ten-thousand, million etc. In case it is a decimal number, ceils it.
+ * @param {array} lineData - from `getLineData`
+ * @returns {number} the maximum value in the timeseries multiplied by 4/3
+ */
+export const getYMax = lineData => {
+	const yMax = 4 / 3 * d3Max( lineData, d => d3Max( d.values.map( date => date.value ) ) );
+	const pow3Y = Math.pow( 10, ( ( Math.log( yMax ) * Math.LOG10E + 1 ) | 0 ) - 2 ) * 3;
+	return Math.ceil( Math.ceil( yMax / pow3Y ) * pow3Y );
+};
 
 /**
  * Describes getYScale

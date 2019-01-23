@@ -18,7 +18,7 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v3/reports/customers';
+	protected $endpoint = '/wc/v4/reports/customers';
 
 	/**
 	 * Setup test reports products data.
@@ -121,10 +121,6 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		for ( $i = 1; $i <= 10; $i++ ) {
 			$test_customers[] = WC_Helper_Customer::create_customer( "customer{$i}", 'password', "customer{$i}@example.com" );
 		}
-
-		// Initialize the report lookup table.
-		delete_transient( 'wc_update_350_all_customers' );
-		WC_Admin_Api_Init::customer_lookup_store_init();
 
 		// Create a test product for use in an order.
 		$product = new WC_Product_Simple();

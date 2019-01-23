@@ -6,7 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import classnames from 'classnames';
 import Gridicon from 'gridicons';
-import { isNil } from 'lodash';
+import { isNil, noop } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -30,6 +30,7 @@ const SummaryNumber = ( {
 	reverseTrend,
 	selected,
 	value,
+	onLinkClickCallback,
 } ) => {
 	const liClasses = classnames( 'woocommerce-summary__item-container', {
 		'is-dropdown-button': onToggle,
@@ -52,17 +53,25 @@ const SummaryNumber = ( {
 		screenReaderLabel = sprintf( __( 'No change from %s', 'wc-admin' ), prevLabel );
 	}
 
-	const Container = onToggle ? Button : Link;
+	let Container;
 	const containerProps = {
 		className: classes,
 		'aria-current': selected ? 'page' : null,
 	};
-	if ( ! onToggle ) {
-		containerProps.href = href;
-		containerProps.role = 'menuitem';
+
+	if ( onToggle || href ) {
+		const isButton = !! onToggle;
+		Container = isButton ? Button : Link;
+		if ( isButton ) {
+			containerProps.onClick = onToggle;
+			containerProps[ 'aria-expanded' ] = isOpen;
+		} else {
+			containerProps.href = href;
+			containerProps.role = 'menuitem';
+			containerProps.onClick = onLinkClickCallback;
+		}
 	} else {
-		containerProps.onClick = onToggle;
-		containerProps[ 'aria-expanded' ] = isOpen;
+		Container = 'div';
 	}
 
 	return (
@@ -109,7 +118,7 @@ SummaryNumber.propTypes = {
 	/**
 	 * An internal link to the report focused on this number.
 	 */
-	href: PropTypes.string.isRequired,
+	href: PropTypes.string,
 	/**
 	 * Boolean describing whether the menu list is open. Only applies in mobile view,
 	 * and only applies to the toggle-able item (first in the list).
@@ -144,14 +153,19 @@ SummaryNumber.propTypes = {
 	 * A string or number value to display - a string is allowed so we can accept currency formatting.
 	 */
 	value: PropTypes.oneOfType( [ PropTypes.number, PropTypes.string ] ),
+	/**
+	 * A function to be called after a SummaryNumber, rendered as a link, is clicked.
+	 */
+	onLinkClickCallback: PropTypes.func,
 };
 
 SummaryNumber.defaultProps = {
-	href: '/analytics',
+	href: '',
 	isOpen: false,
 	prevLabel: __( 'Previous Period:', 'wc-admin' ),
 	reverseTrend: false,
 	selected: false,
+	onLinkClickCallback: noop,
 };
 
 export default SummaryNumber;

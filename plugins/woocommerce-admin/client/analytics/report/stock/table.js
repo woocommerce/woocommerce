@@ -43,12 +43,13 @@ export default class StockReportTable extends Component {
 			{
 				label: __( 'Status', 'wc-admin' ),
 				key: 'stock_status',
+				isSortable: true,
+				defaultSort: true,
 			},
 			{
 				label: __( 'Stock', 'wc-admin' ),
 				key: 'stock_quantity',
 				isSortable: true,
-				defaultSort: true,
 			},
 		];
 	}
@@ -136,8 +137,8 @@ export default class StockReportTable extends Component {
 				// getSummary={ this.getSummary }
 				query={ query }
 				tableQuery={ {
-					orderby: query.orderby || 'stock_quantity',
-					order: query.order || 'desc',
+					orderby: query.orderby || 'stock_status',
+					order: query.order || 'asc',
 					type: query.type || 'all',
 				} }
 				title={ __( 'Stock', 'wc-admin' ) }

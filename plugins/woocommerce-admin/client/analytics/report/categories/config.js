@@ -37,6 +37,31 @@ export const filters = [
 		filters: [
 			{ label: __( 'All Categories', 'wc-admin' ), value: 'all' },
 			{
+				label: __( 'Single Category', 'wc-admin' ),
+				value: 'select_category',
+				chartMode: 'item-comparison',
+				subFilters: [
+					{
+						component: 'Search',
+						value: 'single_category',
+						chartMode: 'item-comparison',
+						path: [ 'select_category' ],
+						settings: {
+							type: 'categories',
+							param: 'categories',
+							getLabels: getRequestByIdString( NAMESPACE + 'products/categories', category => ( {
+								id: category.id,
+								label: category.name,
+							} ) ),
+							labels: {
+								placeholder: __( 'Type to search for a category', 'wc-admin' ),
+								button: __( 'Single Category', 'wc-admin' ),
+							},
+						},
+					},
+				],
+			},
+			{
 				label: __( 'Comparison', 'wc-admin' ),
 				value: 'compare-categories',
 				chartMode: 'item-comparison',

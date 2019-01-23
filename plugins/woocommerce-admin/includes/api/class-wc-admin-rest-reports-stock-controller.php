@@ -22,7 +22,7 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v3';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.
@@ -51,6 +51,23 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 
 		if ( 'date' === $args['orderby'] ) {
 			$args['orderby'] = 'date ID';
+		} elseif ( 'stock_status' === $args['orderby'] ) {
+			$args['meta_query'] = array( // WPCS: slow query ok.
+				'relation'      => 'AND',
+				'_stock_status' => array(
+					'key'     => '_stock_status',
+					'compare' => 'EXISTS',
+				),
+				'_stock' => array(
+					'key'     => '_stock',
+					'compare' => 'EXISTS',
+					'type'    => 'NUMERIC',
+				),
+			);
+			$args['orderby']    = array(
+				'_stock_status' => $args['order'],
+				'_stock'        => 'desc' === $args['order'] ? 'asc' : 'desc',
+			);
 		} elseif ( 'stock_quantity' === $args['orderby'] ) {
 			$args['meta_key'] = '_stock'; // WPCS: slow query ok.
 			$args['orderby']  = 'meta_value_num';
@@ -353,8 +370,9 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 		$params['orderby']        = array(
 			'description'       => __( 'Sort collection by object attribute.', 'wc-admin' ),
 			'type'              => 'string',
-			'default'           => 'stock_quantity',
+			'default'           => 'stock_status',
 			'enum'              => array(
+				'stock_status',
 				'stock_quantity',
 				'date',
 				'id',

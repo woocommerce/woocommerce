@@ -24,7 +24,7 @@ export default {
 		return wcSettings.dataEndpoints.countries || [];
 	},
 	getOptionKeywords( country ) {
-		return [ decodeEntities( country.name ) ];
+		return [ country.code, decodeEntities( country.name ) ];
 	},
 	getOptionLabel( country, query ) {
 		const name = decodeEntities( country.name );
