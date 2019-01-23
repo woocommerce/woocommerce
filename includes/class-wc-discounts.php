@@ -664,6 +664,7 @@ class WC_Discounts {
 	 */
 	protected function validate_coupon_minimum_amount( $coupon ) {
 		$subtotal = wc_remove_number_precision( $this->get_object_subtotal() );
+
 		if ( $coupon->get_minimum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_minimum_amount', $coupon->get_minimum_amount() > $subtotal, $coupon, $subtotal ) ) {
 			/* translators: %s: coupon minimum amount */
 			throw new Exception( sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), wc_price( $coupon->get_minimum_amount() ) ), 108 );
@@ -682,6 +683,7 @@ class WC_Discounts {
 	 */
 	protected function validate_coupon_maximum_amount( $coupon ) {
 		$subtotal = wc_remove_number_precision( $this->get_object_subtotal() );
+
 		if ( $coupon->get_maximum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_maximum_amount', $coupon->get_maximum_amount() < $subtotal, $coupon ) ) {
 			/* translators: %s: coupon maximum amount */
 			throw new Exception( sprintf( __( 'The maximum spend for this coupon is %s.', 'woocommerce' ), wc_price( $coupon->get_maximum_amount() ) ), 112 );
@@ -906,7 +908,8 @@ class WC_Discounts {
 		if ( is_a( $this->object, 'WC_Cart' ) ) {
 			return wc_add_number_precision( $this->object->get_displayed_subtotal() );
 		} elseif ( is_a( $this->object, 'WC_Order' ) ) {
-			return wc_add_number_precision( $this->object->get_subtotal() );
+			$subtotal = wc_add_number_precision( $this->object->get_subtotal() );
+			return $this->object->get_prices_include_tax() ? $subtotal + round( $this->object->get_total_tax(), wc_get_price_decimals() ) : $subtotal;
 		} else {
 			return array_sum( wp_list_pluck( $this->items, 'price' ) );
 		}
@@ -963,9 +966,13 @@ class WC_Discounts {
 			 */
 			$message = apply_filters( 'woocommerce_coupon_error', is_numeric( $e->getMessage() ) ? $coupon->get_coupon_error( $e->getMessage() ) : $e->getMessage(), $e->getCode(), $coupon );
 
-			return new WP_Error( 'invalid_coupon', $message, array(
-				'status' => 400,
-			) );
+			return new WP_Error(
+				'invalid_coupon',
+				$message,
+				array(
+					'status' => 400,
+				)
+			);
 		}
 		return true;
 	}
