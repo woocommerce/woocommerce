@@ -3005,4 +3005,658 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 	}
 
+	/**
+	 * Test zero filling when ordering by date in descending order.
+	 */
+	public function test_zero_fill_order_date_desc() {
+		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product_price = 11;
+		$product       = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( $product_price );
+		$product->save();
+
+		$customer = WC_Helper_Customer::create_customer( 'cust_1', 'pwd_1', 'user_1@mail.com' );
+
+		$order_1_time = time();
+		$order_2_time = $order_1_time;
+
+		$order_during_this_['hour']  = array( 1, 2 );
+		$order_during_this_['day']   = array( 1, 2 );
+		$order_during_this_['week']  = array( 1, 2 );
+		$order_during_this_['month'] = array( 1, 2 );
+		$order_during_this_['year']  = array( 1, 2 );
+
+		$order_1_datetime = new DateTime();
+		$order_1_datetime = $order_1_datetime->setTimestamp( $order_1_time );
+
+		// Previous year.
+		$order_7_datetime  = new DateTime();
+		$order_7_datetime  = $order_7_datetime->setTimestamp( $order_1_time - YEAR_IN_SECONDS );
+		$order_7_time      = $order_7_datetime->format( 'U' );
+		$order[7]['year']  = (int) $order_7_datetime->format( 'Y' );
+		$order[7]['month'] = (int) $order_7_datetime->format( 'm' );
+		$order[7]['week']  = (int) $order_7_datetime->format( 'W' );
+		$order[7]['day']   = (int) $order_7_datetime->format( 'd' );
+
+		// Previous month.
+		$order_6_datetime  = new DateTime();
+		$order_6_datetime  = $order_6_datetime->setTimestamp( $order_1_time - MONTH_IN_SECONDS );
+		$order_6_time      = $order_6_datetime->format( 'U' );
+		$order[6]['year']  = (int) $order_6_datetime->format( 'Y' );
+		$order[6]['month'] = (int) $order_6_datetime->format( 'm' );
+		$order[6]['week']  = (int) $order_6_datetime->format( 'W' );
+		$order[6]['day']   = (int) $order_6_datetime->format( 'd' );
+
+		// Previous week.
+		$order_5_datetime  = new DateTime();
+		$order_5_datetime  = $order_5_datetime->setTimestamp( $order_1_time - WEEK_IN_SECONDS );
+		$order_5_time      = $order_5_datetime->format( 'U' );
+		$order[5]['year']  = (int) $order_5_datetime->format( 'Y' );
+		$order[5]['month'] = (int) $order_5_datetime->format( 'm' );
+		$order[5]['week']  = (int) $order_5_datetime->format( 'W' );
+		$order[5]['day']   = (int) $order_5_datetime->format( 'd' );
+
+		// Previous day.
+		$order_4_datetime  = new DateTime();
+		$order_4_datetime  = $order_4_datetime->setTimestamp( $order_1_time - DAY_IN_SECONDS );
+		$order_4_time      = $order_4_datetime->format( 'U' );
+		$order[4]['year']  = (int) $order_4_datetime->format( 'Y' );
+		$order[4]['month'] = (int) $order_4_datetime->format( 'm' );
+		$order[4]['week']  = (int) $order_4_datetime->format( 'W' );
+		$order[4]['day']   = (int) $order_4_datetime->format( 'd' );
+
+		// same day, -1 hour.
+		$order_3_datetime  = new DateTime();
+		$order_3_datetime  = $order_3_datetime->setTimestamp( $order_1_time - HOUR_IN_SECONDS );
+		$order_3_time      = $order_3_datetime->format( 'U' );
+		$order[3]['year']  = (int) $order_3_datetime->format( 'Y' );
+		$order[3]['month'] = (int) $order_3_datetime->format( 'm' );
+		$order[3]['week']  = (int) $order_3_datetime->format( 'W' );
+		$order[3]['day']   = (int) $order_3_datetime->format( 'd' );
+
+		// Current order.
+		$order[1]['year']  = (int) $order_1_datetime->format( 'Y' );
+		$order[1]['month'] = (int) $order_1_datetime->format( 'm' );
+		$order[1]['week']  = (int) $order_1_datetime->format( 'W' );
+		$order[1]['day']   = (int) $order_1_datetime->format( 'd' );
+		$order[1]['hour']  = (int) $order_1_datetime->format( 'H' );
+
+		foreach ( array( 3, 4, 5, 6, 7 ) as $order_no ) {
+			if ( $order[ $order_no ]['day'] === $order[1]['day'] && $order[ $order_no ]['month'] === $order[1]['month'] && $order[ $order_no ]['year'] === $order[1]['year'] ) {
+				$order_during_this_['day'][] = $order_no;
+			}
+			if ( $order[ $order_no ]['week'] === $order[1]['week'] && $order[ $order_no ]['year'] === $order[1]['year'] ) {
+				$order_during_this_['week'][] = $order_no;
+			}
+			if ( $order[ $order_no ]['month'] === $order[1]['month'] && $order[ $order_no ]['year'] === $order[1]['year'] ) {
+				$order_during_this_['month'][] = $order_no;
+			}
+			if ( $order[ $order_no ]['year'] === $order[1]['year'] ) {
+				$order_during_this_['year'][] = $order_no;
+			}
+		}
+
+		$order_status    = 'completed';
+		$qty_per_product = 4; // Hardcoded in WC_Helper_Order::create_order.
+
+		$orders = array();
+		foreach (
+			array(
+				$order_1_time,
+				$order_2_time,
+				$order_3_time,
+				$order_4_time,
+				$order_5_time,
+				$order_6_time,
+				$order_7_time,
+			) as $order_time
+		) {
+			// Order with 1 product.
+			$order = WC_Helper_Order::create_order( $customer->get_id(), $product );
+			$order->set_date_created( $order_time );
+			$order->set_status( $order_status );
+
+			$order->calculate_totals();
+			$order->save();
+
+			$orders[] = $order;
+		}
+
+		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+
+		// Tests for before & after set to current hour.
+		$current_hour_start = new DateTime();
+		$current_hour_start->setTimestamp( $order_1_time );
+		$current_hour_minutes = (int) $current_hour_start->format( 'i' );
+		$current_hour_start->setTimestamp( $order_1_time - $current_hour_minutes * MINUTE_IN_SECONDS );
+
+		$current_hour_end = new DateTime();
+		$current_hour_end->setTimestamp( $order_1_time );
+		$seconds_into_hour = (int) $current_hour_end->format( 'U' ) % HOUR_IN_SECONDS;
+		$current_hour_end->setTimestamp( $order_1_time + ( HOUR_IN_SECONDS - $seconds_into_hour ) - 1 );
+
+		// Test for current hour--only 1 hour visible.
+		$query_args = array(
+			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'interval' => 'hour',
+			'orderby'  => 'date',
+			'order'    => 'desc',
+		);
+
+		$orders_count   = count( $order_during_this_['hour'] );
+		$num_items_sold = $orders_count * $qty_per_product;
+		$coupons        = 0;
+		$shipping       = $orders_count * 10;
+		$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
+		$gross_revenue  = $net_revenue + $shipping;
+		$new_customers  = 1;
+
+		$expected_stats = array(
+			'totals'    => array(
+				'orders_count'            => $orders_count,
+				'num_items_sold'          => $num_items_sold,
+				'gross_revenue'           => $gross_revenue,
+				'coupons'                 => $coupons,
+				'refunds'                 => 0,
+				'taxes'                   => 0,
+				'shipping'                => $shipping,
+				'net_revenue'             => $net_revenue,
+				'avg_items_per_order'     => $num_items_sold / $orders_count,
+				'avg_order_value'         => $net_revenue / $orders_count,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => $new_customers,
+				'products'                => 1,
+			),
+			'intervals' => array(
+				array(
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'subtotals'      => array(
+						'orders_count'            => $orders_count,
+						'num_items_sold'          => $num_items_sold,
+						'gross_revenue'           => $gross_revenue,
+						'coupons'                 => $coupons,
+						'refunds'                 => 0,
+						'taxes'                   => 0,
+						'shipping'                => $shipping,
+						'net_revenue'             => $net_revenue,
+						'avg_items_per_order'     => $num_items_sold / $orders_count,
+						'avg_order_value'         => $net_revenue / $orders_count,
+						'num_returning_customers' => 0,
+						'num_new_customers'       => $new_customers,
+					),
+				),
+			),
+			'total'     => 1,
+			'pages'     => 1,
+			'page_no'   => 1,
+		);
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+
+		/*
+		 * Test for [-5 hours, now] -- partial 1 page.
+		 * | --------------------|------|-----|-----|
+		 * minus 5 hours         |      |   order1  now
+		 *                       |      |   order2
+		 *                       |  now-1 hour
+		 *                     order 3
+		 */
+		$hour_offset   = 5;
+		$minus_5_hours = new DateTime();
+		$now_timestamp = (int) $current_hour_end->format( 'U' );
+		$minus_5_hours->setTimestamp( $now_timestamp - $hour_offset * HOUR_IN_SECONDS );
+
+		$query_args = array(
+			'after'    => $minus_5_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'interval' => 'hour',
+			'orderby'  => 'date',
+			'order'    => 'desc',
+		);
+
+		// Expected Intervals section construction.
+		$expected_intervals = [];
+		// Even in case this runs exactly at the hour turn second, there should still be 6 intervals:
+		// e.g. 20:30:51 -(minus 5 hours)- 15:30:51 means intervals 15:30:51--15:59:59, 16:00-16:59, 17, 18, 19, 20:00-20:30, i.e. 6 intervals
+		// also if this run exactly at 20:00 -(minus 5 hours)- 15:00, then intervals should be 15:00-15:59, 16, 17, 18, 19, 20:00-20:00.
+		$interval_count = $hour_offset + 1;
+		for ( $i = 0; $i < $interval_count; $i ++ ) {
+			if ( 0 === $i ) {
+				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
+				$date_end = $current_hour_end;
+			} elseif ( $hour_offset === $i ) {
+				$date_start = $minus_5_hours;
+				$date_end   = new DateTime( $minus_5_hours->format( 'Y-m-d H:59:59' ) );
+			} else {
+				$hour_anchor = new DateTime();
+				$hour_anchor->setTimestamp( $now_timestamp - $i * HOUR_IN_SECONDS );
+				$date_start = new DateTime( $hour_anchor->format( 'Y-m-d H:00:00' ) );
+				$date_end   = new DateTime( $hour_anchor->format( 'Y-m-d H:59:59' ) );
+			}
+
+			if ( 0 === $i ) {
+				$orders_count   = count( $order_during_this_['hour'] );
+				$num_items_sold = $orders_count * $qty_per_product;
+				$coupons        = 0;
+				$shipping       = $orders_count * 10;
+				$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
+				$gross_revenue  = $net_revenue + $shipping;
+				$new_customers  = 1;
+			} elseif ( 1 === $i ) {
+				$orders_count   = 1;
+				$num_items_sold = $orders_count * $qty_per_product;
+				$coupons        = 0;
+				$shipping       = $orders_count * 10;
+				$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
+				$gross_revenue  = $net_revenue + $shipping;
+				$new_customers  = 1;
+			} else {
+				$orders_count   = 0;
+				$num_items_sold = $orders_count * $qty_per_product;
+				$coupons        = 0;
+				$shipping       = $orders_count * 10;
+				$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
+				$gross_revenue  = $net_revenue + $shipping;
+				$new_customers  = 0;
+			}
+
+			$expected_interval = array(
+				'interval'       => $date_start->format( 'Y-m-d H' ),
+				'date_start'     => $date_start->format( 'Y-m-d H:i:s' ),
+				'date_start_gmt' => $date_start->format( 'Y-m-d H:i:s' ),
+				'date_end'       => $date_end->format( 'Y-m-d H:i:s' ),
+				'date_end_gmt'   => $date_end->format( 'Y-m-d H:i:s' ),
+				'subtotals'      => array(
+					'orders_count'            => $orders_count,
+					'num_items_sold'          => $num_items_sold,
+					'gross_revenue'           => $gross_revenue,
+					'coupons'                 => $coupons,
+					'refunds'                 => 0,
+					'taxes'                   => 0,
+					'shipping'                => $shipping,
+					'net_revenue'             => $net_revenue,
+					'avg_items_per_order'     => 0 === $orders_count ? 0 : $num_items_sold / $orders_count,
+					'avg_order_value'         => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
+					'num_returning_customers' => 0,
+					'num_new_customers'       => $new_customers,
+				),
+			);
+
+			$expected_intervals[] = $expected_interval;
+		}
+
+		// Totals section.
+		$orders_count   = count( $order_during_this_['hour'] ) + 1; // order 3 is 1 hour before order 1 & 2, so include it.
+		$num_items_sold = $orders_count * $qty_per_product;
+		$coupons        = 0;
+		$shipping       = $orders_count * 10;
+		$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
+		$gross_revenue  = $net_revenue + $shipping;
+		$new_customers  = 1;
+
+		$expected_stats = array(
+			'totals'    => array(
+				'orders_count'            => $orders_count,
+				'num_items_sold'          => $num_items_sold,
+				'gross_revenue'           => $gross_revenue,
+				'coupons'                 => $coupons,
+				'refunds'                 => 0,
+				'taxes'                   => 0,
+				'shipping'                => $shipping,
+				'net_revenue'             => $net_revenue,
+				'avg_items_per_order'     => $num_items_sold / $orders_count,
+				'avg_order_value'         => $net_revenue / $orders_count,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => $new_customers,
+				'products'                => 1,
+			),
+			'intervals' => $expected_intervals,
+			'total'     => $interval_count,
+			'pages'     => 1,
+			'page_no'   => 1,
+		);
+		$actual = json_decode( json_encode( $data_store->get_data( $query_args ) ), true );
+		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+
+		/*
+		 * Test for [-9 hours, now] -- full 1 page.
+		 * | --------------------|------|-----|-----|
+		 * minus 9 hours         |      |   order1  now
+		 *                       |      |   order2
+		 *                       |  now-1 hour
+		 *                     order 3
+		 */
+		$hour_offset   = 9;
+		$minus_9_hours = new DateTime();
+		$now_timestamp = (int) $current_hour_end->format( 'U' );
+		$minus_9_hours->setTimestamp( $now_timestamp - $hour_offset * HOUR_IN_SECONDS );
+
+		$query_args = array(
+			'after'    => $minus_9_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'interval' => 'hour',
+			'orderby'  => 'date',
+			'order'    => 'desc',
+		);
+
+		// Expected Intervals section construction.
+		$expected_intervals = [];
+		$interval_count     = $hour_offset + 1;
+		for ( $i = 0; $i < $interval_count; $i ++ ) {
+			if ( 0 === $i ) {
+				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
+				$date_end = $current_hour_end;
+			} elseif ( $hour_offset === $i ) {
+				$date_start = $minus_9_hours;
+				$date_end   = new DateTime( $minus_9_hours->format( 'Y-m-d H:59:59' ) );
+			} else {
+				$hour_anchor = new DateTime();
+				$hour_anchor->setTimestamp( $now_timestamp - $i * HOUR_IN_SECONDS );
+				$date_start = new DateTime( $hour_anchor->format( 'Y-m-d H:00:00' ) );
+				$date_end   = new DateTime( $hour_anchor->format( 'Y-m-d H:59:59' ) );
+			}
+
+			if ( 0 === $i ) {
+				$orders_count   = count( $order_during_this_['hour'] );
+				$num_items_sold = $orders_count * $qty_per_product;
+				$coupons        = 0;
+				$shipping       = $orders_count * 10;
+				$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
+				$gross_revenue  = $net_revenue + $shipping;
+				$new_customers  = 1;
+			} elseif ( 1 === $i ) {
+				$orders_count   = 1;
+				$num_items_sold = $orders_count * $qty_per_product;
+				$coupons        = 0;
+				$shipping       = $orders_count * 10;
+				$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
+				$gross_revenue  = $net_revenue + $shipping;
+				$new_customers  = 1;
+			} else {
+				$orders_count   = 0;
+				$num_items_sold = $orders_count * $qty_per_product;
+				$coupons        = 0;
+				$shipping       = $orders_count * 10;
+				$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
+				$gross_revenue  = $net_revenue + $shipping;
+				$new_customers  = 0;
+			}
+
+			$expected_interval = array(
+				'interval'       => $date_start->format( 'Y-m-d H' ),
+				'date_start'     => $date_start->format( 'Y-m-d H:i:s' ),
+				'date_start_gmt' => $date_start->format( 'Y-m-d H:i:s' ),
+				'date_end'       => $date_end->format( 'Y-m-d H:i:s' ),
+				'date_end_gmt'   => $date_end->format( 'Y-m-d H:i:s' ),
+				'subtotals'      => array(
+					'orders_count'            => $orders_count,
+					'num_items_sold'          => $num_items_sold,
+					'gross_revenue'           => $gross_revenue,
+					'coupons'                 => $coupons,
+					'refunds'                 => 0,
+					'taxes'                   => 0,
+					'shipping'                => $shipping,
+					'net_revenue'             => $net_revenue,
+					'avg_items_per_order'     => 0 === $orders_count ? 0 : $num_items_sold / $orders_count,
+					'avg_order_value'         => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
+					'num_returning_customers' => 0,
+					'num_new_customers'       => $new_customers,
+				),
+			);
+
+			$expected_intervals[] = $expected_interval;
+		}
+
+		// Totals section.
+		$orders_count   = count( $order_during_this_['hour'] ) + 1; // order 3 is 1 hour before order 1 & 2, so include it.
+		$num_items_sold = $orders_count * $qty_per_product;
+		$coupons        = 0;
+		$shipping       = $orders_count * 10;
+		$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
+		$gross_revenue  = $net_revenue + $shipping;
+		$new_customers  = 1;
+
+		$expected_stats = array(
+			'totals'    => array(
+				'orders_count'            => $orders_count,
+				'num_items_sold'          => $num_items_sold,
+				'gross_revenue'           => $gross_revenue,
+				'coupons'                 => $coupons,
+				'refunds'                 => 0,
+				'taxes'                   => 0,
+				'shipping'                => $shipping,
+				'net_revenue'             => $net_revenue,
+				'avg_items_per_order'     => $num_items_sold / $orders_count,
+				'avg_order_value'         => $net_revenue / $orders_count,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => $new_customers,
+				'products'                => 1,
+			),
+			'intervals' => $expected_intervals,
+			'total'     => $interval_count,
+			'pages'     => 1,
+			'page_no'   => 1,
+		);
+
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+
+		/*
+		 * Test for [-10 hours, now] -- 1 page full, 1 interval on 2nd page.
+		 *                 page 1
+		 * | --------------------|------|-----|-----|
+		 * minus 9 hours         |      |   order1  now
+		 *                       |      |   order2
+		 *                       |  now-1 hour
+		 *                     order 3
+		 *
+		 *                 page 2
+		 * |---|
+		 * minus 10 hours
+		 *     minus 9 hours
+		 */
+		$hour_offset   = 10;
+		$minus_10_hours = new DateTime();
+		$now_timestamp = (int) $current_hour_end->format( 'U' );
+		$minus_10_hours->setTimestamp( $now_timestamp - $hour_offset * HOUR_IN_SECONDS );
+
+		// Page 1.
+		$query_args = array(
+			'after'    => $minus_10_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'interval' => 'hour',
+			'orderby'  => 'date',
+			'order'    => 'desc',
+			'page'     => 1,
+		);
+
+		// Expected Intervals section construction.
+		$expected_intervals = [];
+		$interval_count     = 10;
+		for ( $i = 0; $i < $interval_count; $i ++ ) {
+			if ( 0 === $i ) {
+				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
+				$date_end = $current_hour_end;
+			} else {
+				$hour_anchor = new DateTime();
+				$hour_anchor->setTimestamp( $now_timestamp - $i * HOUR_IN_SECONDS );
+				$date_start = new DateTime( $hour_anchor->format( 'Y-m-d H:00:00' ) );
+				$date_end   = new DateTime( $hour_anchor->format( 'Y-m-d H:59:59' ) );
+			}
+
+			if ( 0 === $i ) {
+				$orders_count   = count( $order_during_this_['hour'] );
+				$num_items_sold = $orders_count * $qty_per_product;
+				$coupons        = 0;
+				$shipping       = $orders_count * 10;
+				$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
+				$gross_revenue  = $net_revenue + $shipping;
+				$new_customers  = 1;
+			} elseif ( 1 === $i ) {
+				$orders_count   = 1;
+				$num_items_sold = $orders_count * $qty_per_product;
+				$coupons        = 0;
+				$shipping       = $orders_count * 10;
+				$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
+				$gross_revenue  = $net_revenue + $shipping;
+				$new_customers  = 1;
+			} else {
+				$orders_count   = 0;
+				$num_items_sold = $orders_count * $qty_per_product;
+				$coupons        = 0;
+				$shipping       = $orders_count * 10;
+				$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
+				$gross_revenue  = $net_revenue + $shipping;
+				$new_customers  = 0;
+			}
+
+			$expected_interval = array(
+				'interval'       => $date_start->format( 'Y-m-d H' ),
+				'date_start'     => $date_start->format( 'Y-m-d H:i:s' ),
+				'date_start_gmt' => $date_start->format( 'Y-m-d H:i:s' ),
+				'date_end'       => $date_end->format( 'Y-m-d H:i:s' ),
+				'date_end_gmt'   => $date_end->format( 'Y-m-d H:i:s' ),
+				'subtotals'      => array(
+					'orders_count'            => $orders_count,
+					'num_items_sold'          => $num_items_sold,
+					'gross_revenue'           => $gross_revenue,
+					'coupons'                 => $coupons,
+					'refunds'                 => 0,
+					'taxes'                   => 0,
+					'shipping'                => $shipping,
+					'net_revenue'             => $net_revenue,
+					'avg_items_per_order'     => 0 === $orders_count ? 0 : $num_items_sold / $orders_count,
+					'avg_order_value'         => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
+					'num_returning_customers' => 0,
+					'num_new_customers'       => $new_customers,
+				),
+			);
+
+			$expected_intervals[] = $expected_interval;
+		}
+
+		// Totals section.
+		$orders_count   = count( $order_during_this_['hour'] ) + 1; // order 3 is 1 hour before order 1 & 2, so include it.
+		$num_items_sold = $orders_count * $qty_per_product;
+		$coupons        = 0;
+		$shipping       = $orders_count * 10;
+		$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
+		$gross_revenue  = $net_revenue + $shipping;
+		$new_customers  = 1;
+
+		$expected_stats = array(
+			'totals'    => array(
+				'orders_count'            => $orders_count,
+				'num_items_sold'          => $num_items_sold,
+				'gross_revenue'           => $gross_revenue,
+				'coupons'                 => $coupons,
+				'refunds'                 => 0,
+				'taxes'                   => 0,
+				'shipping'                => $shipping,
+				'net_revenue'             => $net_revenue,
+				'avg_items_per_order'     => $num_items_sold / $orders_count,
+				'avg_order_value'         => $net_revenue / $orders_count,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => $new_customers,
+				'products'                => 1,
+			),
+			'intervals' => $expected_intervals,
+			'total'     => 11,
+			'pages'     => 2,
+			'page_no'   => 1,
+		);
+
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+
+		// Page 2.
+		$query_args = array(
+			'after'    => $minus_10_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'interval' => 'hour',
+			'orderby'  => 'date',
+			'order'    => 'desc',
+			'page'     => 2,
+		);
+
+		// Expected Intervals section construction.
+		$expected_intervals = [];
+		$interval_count     = 1;
+
+		// Interval subresponse.
+		$date_start = $minus_10_hours;
+		$date_end   = new DateTime( $minus_10_hours->format( 'Y-m-d H:59:59' ) );
+
+		$orders_count   = 0;
+		$num_items_sold = $orders_count * $qty_per_product;
+		$coupons        = 0;
+		$shipping       = $orders_count * 10;
+		$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
+		$gross_revenue  = $net_revenue + $shipping;
+		$new_customers  = 0;
+
+		$expected_interval = array(
+			'interval'       => $date_start->format( 'Y-m-d H' ),
+			'date_start'     => $date_start->format( 'Y-m-d H:i:s' ),
+			'date_start_gmt' => $date_start->format( 'Y-m-d H:i:s' ),
+			'date_end'       => $date_end->format( 'Y-m-d H:i:s' ),
+			'date_end_gmt'   => $date_end->format( 'Y-m-d H:i:s' ),
+			'subtotals'      => array(
+				'orders_count'            => $orders_count,
+				'num_items_sold'          => $num_items_sold,
+				'gross_revenue'           => $gross_revenue,
+				'coupons'                 => $coupons,
+				'refunds'                 => 0,
+				'taxes'                   => 0,
+				'shipping'                => $shipping,
+				'net_revenue'             => $net_revenue,
+				'avg_items_per_order'     => 0 === $orders_count ? 0 : $num_items_sold / $orders_count,
+				'avg_order_value'         => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => $new_customers,
+			),
+		);
+
+		$expected_intervals[] = $expected_interval;
+
+		// Totals section.
+		$orders_count   = count( $order_during_this_['hour'] ) + 1; // order 3 is 1 hour before order 1 & 2, so include it.
+		$num_items_sold = $orders_count * $qty_per_product;
+		$coupons        = 0;
+		$shipping       = $orders_count * 10;
+		$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
+		$gross_revenue  = $net_revenue + $shipping;
+		$new_customers  = 1;
+
+		$expected_stats = array(
+			'totals'    => array(
+				'orders_count'            => $orders_count,
+				'num_items_sold'          => $num_items_sold,
+				'gross_revenue'           => $gross_revenue,
+				'coupons'                 => $coupons,
+				'refunds'                 => 0,
+				'taxes'                   => 0,
+				'shipping'                => $shipping,
+				'net_revenue'             => $net_revenue,
+				'avg_items_per_order'     => $num_items_sold / $orders_count,
+				'avg_order_value'         => $net_revenue / $orders_count,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => $new_customers,
+				'products'                => 1,
+			),
+			'intervals' => $expected_intervals,
+			'total'     => 11,
+			'pages'     => 2,
+			'page_no'   => 2,
+		);
+
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+
+		// Now the same should be done for days, weeks, months and years. But I'm too low on mana to do that.
+	}
 }
