@@ -12,9 +12,7 @@
  * @package WooCommerce
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 // Define WC_PLUGIN_FILE.
 if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
@@ -27,14 +25,12 @@ if ( ! class_exists( 'WooCommerce' ) ) {
 }
 
 /**
- * Main instance of WooCommerce.
- *
- * Returns the main instance of WC to prevent the need to use globals.
+ * Returns the main instance of WC.
  *
  * @since  2.1
  * @return WooCommerce
  */
-function WC() {
+function WC() { // phpcs:ignore
 	return WooCommerce::instance();
 }
 
