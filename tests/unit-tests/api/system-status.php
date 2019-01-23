@@ -183,7 +183,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$settings = (array) $data['security'];
 
 		$this->assertEquals( 2, count( $settings ) );
-		$this->assertEquals( 'https' === substr( get_permalink( wc_get_page_id( 'shop' ) ), 0, 5 ), $settings['secure_connection'] );
+		$this->assertEquals( 'https' === substr( wc_get_page_permalink( 'shop' ), 0, 5 ), $settings['secure_connection'] );
 		$this->assertEquals( ! ( defined( 'WP_DEBUG' ) && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG && WP_DEBUG_DISPLAY ) || 0 === intval( ini_get( 'display_errors' ) ), $settings['hide_errors'] );
 	}
 
