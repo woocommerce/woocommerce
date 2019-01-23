@@ -116,14 +116,14 @@ class WC_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 
 		$subtotals = $properties['intervals']['items']['properties']['subtotals']['properties'];
 		$this->assertEquals( 9, count( $subtotals ) );
-		$this->assertArrayHasKey( 'net_revenue', $totals );
-		$this->assertArrayHasKey( 'avg_order_value', $totals );
-		$this->assertArrayHasKey( 'orders_count', $totals );
-		$this->assertArrayHasKey( 'avg_items_per_order', $totals );
-		$this->assertArrayHasKey( 'num_items_sold', $totals );
-		$this->assertArrayHasKey( 'coupons', $totals );
-		$this->assertArrayHasKey( 'num_returning_customers', $totals );
-		$this->assertArrayHasKey( 'num_new_customers', $totals );
-		$this->assertArrayHasKey( 'segments', $totals );
+		$this->assertArrayHasKey( 'net_revenue', $subtotals );
+		$this->assertArrayHasKey( 'avg_order_value', $subtotals );
+		$this->assertArrayHasKey( 'orders_count', $subtotals );
+		$this->assertArrayHasKey( 'avg_items_per_order', $subtotals );
+		$this->assertArrayHasKey( 'num_items_sold', $subtotals );
+		$this->assertArrayHasKey( 'coupons', $subtotals );
+		$this->assertArrayHasKey( 'num_returning_customers', $subtotals );
+		$this->assertArrayHasKey( 'num_new_customers', $subtotals );
+		$this->assertArrayHasKey( 'segments', $subtotals );
 	}
 }
