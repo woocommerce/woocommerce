@@ -128,8 +128,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 				'query_type'          => 'get_results',
 				'filter_range'        => true,
 				'order_types'         => wc_get_order_types( 'sales-reports' ),
-				'order_status'        => array( 'completed', 'processing', 'on-hold', 'refunded' ),
-				'parent_order_status' => array( 'completed', 'processing', 'on-hold', 'refunded' ), // Partial refunds inside refunded orders should be ignored.
+				'order_status'        => array( 'completed', 'processing', 'refunded' ),
 			)
 		);
 
@@ -141,7 +140,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 				'query_type'          => 'get_results',
 				'filter_range'        => true,
 				'order_types'         => array( 'shop_order_refund' ),
-				'parent_order_status' => array( 'completed', 'processing', 'on-hold' ), // Partial refunds inside refunded orders should be ignored.
+				'parent_order_status' => array( 'completed', 'processing' ), // Partial refunds inside refunded orders should be ignored.
 			)
 		);
 
