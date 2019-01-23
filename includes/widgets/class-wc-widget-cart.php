@@ -37,7 +37,7 @@ class WC_Widget_Cart extends WC_Widget {
 		);
 
 		if ( is_customize_preview() ) {
-			$this->enqueue_ajax_script();
+			wp_enqueue_script( 'wc-cart-fragments' );
 		}
 
 		parent::__construct();
@@ -58,6 +58,10 @@ class WC_Widget_Cart extends WC_Widget {
 
 		$hide_if_empty = empty( $instance['hide_if_empty'] ) ? 0 : 1;
 
+		if ( empty( $instance['title'] ) ) {
+			$instance['title'] = __( 'Cart', 'woocommerce' );
+		}
+
 		$this->widget_start( $args, $instance );
 
 		if ( $hide_if_empty ) {
@@ -72,43 +76,5 @@ class WC_Widget_Cart extends WC_Widget {
 		}
 
 		$this->widget_end( $args );
-	}
-
-	/**
-	 * This method provides the JS script which will execute on addition of a new widget.
-	 *
-	 * @todo 1. In this function there is redundency of code, which needs to be fixed.
-	 *       2. Also sort out a better way to fix the later raw JS code block. May be do it a more WordPress way.
-	 *
-	 * @return void
-	 */
-	private function enqueue_ajax_script() {
-		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-
-		wp_register_script( 'wc-cart-fragments', WC()->plugin_url() . '/assets/js/frontend/cart-fragments' . $suffix . '.js', array( 'jquery', 'js-cookie' ), WC_VERSION, true );
-
-		wp_localize_script( 'wc-cart-fragments', 'wc_cart_fragments_params',
-			array(
-				'ajax_url'      => WC()->ajax_url(),
-				'wc_ajax_url'   => WC_AJAX::get_endpoint( '%%endpoint%%' ),
-				'cart_hash_key' => apply_filters( 'woocommerce_cart_hash_key', 'wc_cart_hash_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) . get_template() ) ),
-				'fragment_name' => apply_filters( 'woocommerce_cart_fragment_name', 'wc_fragments_' . md5( get_current_blog_id() . '_' . get_site_url( get_current_blog_id(), '/' ) . get_template() ) ),
-			)
-		);
-
-		wp_enqueue_script( 'wc-cart-fragments' );
-
-		?>
-		<script type="text/javascript">
-			(function( $ ) {
-				$(function() {
-					'use strict';
-					$(document).on('widget-added', function() {
-						refresh_cart_fragment();
-					});
-				});
-			})(jQuery);
-		</script>
-		<?php
 	}
 }
