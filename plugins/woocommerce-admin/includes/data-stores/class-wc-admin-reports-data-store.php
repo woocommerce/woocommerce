@@ -76,7 +76,15 @@ class WC_Admin_Reports_Data_Store {
 			// TODO: should return WP_Error here perhaps?
 		}
 		if ( $a[ $this->order_by ] === $b[ $this->order_by ] ) {
-			return 0;
+			// As relative order is undefined in case of equality in usort, second-level sorting by date needs to be enforced
+			// so that paging is stable.
+			if ( $a['time_interval'] === $b['time_interval'] ) {
+				return 0; // This should never happen.
+			} elseif ( $a['time_interval'] > $b['time_interval'] ) {
+				return 1;
+			} elseif ( $a['time_interval'] < $b['time_interval'] ) {
+				return -1;
+			}
 		} elseif ( $a[ $this->order_by ] > $b[ $this->order_by ] ) {
 			return strtolower( $this->order ) === 'desc' ? -1 : 1;
 		} elseif ( $a[ $this->order_by ] < $b[ $this->order_by ] ) {
