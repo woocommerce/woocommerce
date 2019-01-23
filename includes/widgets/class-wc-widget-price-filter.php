@@ -70,17 +70,20 @@ class WC_Widget_Price_Filter extends WC_Widget {
 
 		$min_price = isset( $_GET['min_price'] ) ? wc_clean( wp_unslash( $_GET['min_price'] ) ) : null; // WPCS: input var ok, CSRF ok.
 		$max_price = isset( $_GET['max_price'] ) ? wc_clean( wp_unslash( $_GET['max_price'] ) ) : null; // WPCS: input var ok, CSRF ok.
-		if ( ! wc()->query->get_main_query()->post_count && null === $min_price && null === $max_price ) {
+
+		// If there are not posts and we're not filtering, hide the widget.
+		if ( ! WC()->query->get_main_query()->post_count && null === $min_price && null === $max_price ) {
 			return;
 		}
 
 		wp_enqueue_script( 'wc-price-slider' );
 
-		// Find min and max price in current result set.
+		// Find min and max price in current result set, rounding to the nearest 10.
 		$prices = $this->get_filtered_price();
-		$min    = floor( $prices->min_price );
-		$max    = ceil( $prices->max_price );
+		$min    = floor( $prices->min_price / 10 ) * 10;
+		$max    = ceil( $prices->max_price / 10 ) * 10;
 
+		// If both min and max are equal, we don't need a slider.
 		if ( $min === $max ) {
 			return;
 		}

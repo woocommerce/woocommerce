@@ -41,6 +41,7 @@ jQuery( function( $ ) {
 			animate: true,
 			min: min_price,
 			max: max_price,
+			step: 10,
 			values: [ current_min_price, current_max_price ],
 			create: function() {
 
