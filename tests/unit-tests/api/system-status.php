@@ -81,7 +81,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$data        = $response->get_data();
 		$environment = (array) $data['environment'];
 
-		// Make sure all expected data is present
+		// Make sure all expected data is present.
 		$this->assertEquals( 32, count( $environment ) );
 
 		// Test some responses to make sure they match up.
@@ -468,7 +468,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 	 *
 	 * This function is called by WP_HTTP_TestCase::http_request_listner().
 	 *
-	 * @param array $request Request arguments.
+	 * @param array  $request Request arguments.
 	 * @param string $url URL of the request.
 	 *
 	 * @return array|false mocked response or false to let WP perform a regular request.
