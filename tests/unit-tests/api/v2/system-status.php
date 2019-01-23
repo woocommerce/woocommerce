@@ -78,7 +78,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$data        = $response->get_data();
 		$environment = (array) $data['environment'];
 
-		// Make sure all expected data is present
+		// Make sure all expected data is present.
 		$this->assertEquals( 32, count( $environment ) );
 
 		// Test some responses to make sure they match up.
