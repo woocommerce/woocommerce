@@ -793,43 +793,14 @@ function wc_get_product_visibility_options() {
  * @return array
  */
 function wc_get_min_max_price_meta_query( $args ) {
-	$min = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
-	$max = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : 9999999999;
-	$src = isset( $args['min_max_source'] ) ? wc_clean( $args['min_max_source'] ) : '';
-
-	/**
-	 * Adjust if the store taxes are not displayed how they are stored.
-	 * Kicks in when prices excluding tax are displayed including tax.
-	 */
-	if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
-		$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
-		$class_min   = $min;
-		$class_max   = $max;
-
-		foreach ( $tax_classes as $tax_class ) {
-			$tax_rates = WC_Tax::get_rates( $tax_class );
-
-			if ( $tax_rates ) {
-				// Price filter widget values already contain taxes, we need to subtract taxes and not add.
-				if ( 'price_filter_widget' === $src ) {
-					$class_min = $min - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
-					$class_max = $max - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $max, $tax_rates ) );
-				} else {
-					$class_min = $min + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
-					$class_max = $max + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $max, $tax_rates ) );
-				}
-			}
-		}
-
-		$min = $class_min;
-		$max = $class_max;
-	}
+	$current_min_price = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
+	$current_max_price = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : 9999999999;
 
 	return apply_filters(
 		'woocommerce_get_min_max_price_meta_query',
 		array(
 			'key'     => '_price',
-			'value'   => array( $min, $max ),
+			'value'   => array( $current_min_price, $current_max_price ),
 			'compare' => 'BETWEEN',
 			'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
 		),
