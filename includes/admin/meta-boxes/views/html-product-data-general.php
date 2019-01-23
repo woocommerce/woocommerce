@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				'id'          => '_product_url',
 				'value'       => is_callable( array( $product_object, 'get_product_url' ) ) ? $product_object->get_product_url( 'edit' ) : '',
 				'label'       => __( 'Product URL', 'woocommerce' ),
-				'placeholder' => 'http://',
+				'placeholder' => 'https://',
 				'description' => __( 'Enter the external URL to the product.', 'woocommerce' ),
 			)
 		);

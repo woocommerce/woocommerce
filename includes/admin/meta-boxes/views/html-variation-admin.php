@@ -35,11 +35,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</option>
 				<?php if ( $attribute->is_taxonomy() ) : ?>
 					<?php foreach ( $attribute->get_terms() as $option ) : ?>
-						<option <?php selected( $selected_value, $option->slug ); ?> value="<?php echo esc_attr( $option->slug ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option->name ) ); ?></option>
+						<option <?php selected( $selected_value, $option->slug ); ?> value="<?php echo esc_attr( $option->slug ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option->name, $option, $attribute->get_name(), $product_object ) ); ?></option>
 					<?php endforeach; ?>
 				<?php else : ?>
 					<?php foreach ( $attribute->get_options() as $option ) : ?>
-						<option <?php selected( $selected_value, $option ); ?> value="<?php echo esc_attr( $option ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option ) ); ?></option>
+						<option <?php selected( $selected_value, $option ); ?> value="<?php echo esc_attr( $option ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option, null, $attribute->get_name(), $product_object ) ); ?></option>
 					<?php endforeach; ?>
 				<?php endif; ?>
 			</select>
@@ -48,6 +48,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 		?>
 		<input type="hidden" name="variable_post_id[<?php echo esc_attr( $loop ); ?>]" value="<?php echo esc_attr( $variation_id ); ?>" />
 		<input type="hidden" class="variation_menu_order" name="variation_menu_order[<?php echo esc_attr( $loop ); ?>]" value="<?php echo esc_attr( $variation_object->get_menu_order( 'edit' ) ); ?>" />
+
+		<?php
+		/**
+		 * woocommerce_variation_header action.
+		 *
+		 * @since 3.6.0
+		 *
+		 * @param WP_Post $variation .
+		 */
+		do_action( 'woocommerce_variation_header', $variation );
+		?>
 	</h3>
 	<div class="woocommerce_variable_attributes wc-metabox-content" style="display: none;">
 		<div class="data">

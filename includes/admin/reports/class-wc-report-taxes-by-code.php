@@ -119,6 +119,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 			),
 		);
 
+		// We exclude on-hold orders as they are still pending payment.
 		$tax_rows_orders = $this->get_order_report_data(
 			array(
 				'data'                => $query_data,
@@ -132,40 +133,44 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 			)
 		);
 
-		$tax_rows_partial_refunds = $this->get_order_report_data( array(
-			'data'                => $query_data,
-			'where'               => $query_where,
-			'order_by'            => 'posts.post_date ASC',
-			'query_type'          => 'get_results',
-			'filter_range'        => true,
-			'order_types'         => array( 'shop_order_refund' ),
-			'parent_order_status' => array( 'completed', 'processing', 'on-hold' ), // Partial refunds inside refunded orders should be ignored.
-		) );
+		$tax_rows_partial_refunds = $this->get_order_report_data(
+			array(
+				'data'                => $query_data,
+				'where'               => $query_where,
+				'order_by'            => 'posts.post_date ASC',
+				'query_type'          => 'get_results',
+				'filter_range'        => true,
+				'order_types'         => array( 'shop_order_refund' ),
+				'parent_order_status' => array( 'completed', 'processing', 'on-hold' ), // Partial refunds inside refunded orders should be ignored.
+			)
+		);
 
-		$tax_rows_full_refunds = $this->get_order_report_data( array(
-			'data'                => array(
-				'ID'          => array(
-					'type'     => 'post_data',
-					'distinct' => true,
-					'function' => '',
-					'name'     => 'ID',
+		$tax_rows_full_refunds = $this->get_order_report_data(
+			array(
+				'data'                => array(
+					'ID'          => array(
+						'type'     => 'post_data',
+						'distinct' => true,
+						'function' => '',
+						'name'     => 'ID',
+					),
+					'post_parent' => array(
+						'type'     => 'post_data',
+						'function' => '',
+						'name'     => 'post_parent',
+					),
+					'post_date'   => array(
+						'type'     => 'post_data',
+						'function' => '',
+						'name'     => 'post_date',
+					),
 				),
-				'post_parent' => array(
-					'type'     => 'post_data',
-					'function' => '',
-					'name'     => 'post_parent',
-				),
-				'post_date'   => array(
-					'type'     => 'post_data',
-					'function' => '',
-					'name'     => 'post_date',
-				),
-			),
-			'query_type'          => 'get_results',
-			'filter_range'        => true,
-			'order_types'         => array( 'shop_order_refund' ),
-			'parent_order_status' => array( 'refunded' ),
-		) );
+				'query_type'          => 'get_results',
+				'filter_range'        => true,
+				'order_types'         => array( 'shop_order_refund' ),
+				'parent_order_status' => array( 'refunded' ),
+			)
+		);
 
 		// Merge.
 		$tax_rows = array();
@@ -223,12 +228,12 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 						$rate = $wpdb->get_var( $wpdb->prepare( "SELECT tax_rate FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_id = %d;", $rate_id ) );
 						?>
 						<tr>
-							<th scope="row"><?php echo apply_filters( 'woocommerce_reports_taxes_tax_rate', $tax_row->tax_rate, $rate_id, $tax_row ); ?></th>
-							<td><?php echo apply_filters( 'woocommerce_reports_taxes_rate', $rate, $rate_id, $tax_row ); ?>%</td>
-							<td class="total_row"><?php echo $tax_row->total_orders; ?></td>
-							<td class="total_row"><?php echo wc_price( $tax_row->tax_amount ); ?></td>
-							<td class="total_row"><?php echo wc_price( $tax_row->shipping_tax_amount ); ?></td>
-							<td class="total_row"><?php echo wc_price( $tax_row->tax_amount + $tax_row->shipping_tax_amount ); ?></td>
+							<th scope="row"><?php echo wp_kses_post( apply_filters( 'woocommerce_reports_taxes_tax_rate', $tax_row->tax_rate, $rate_id, $tax_row ) ); ?></th>
+							<td><?php echo wp_kses_post( apply_filters( 'woocommerce_reports_taxes_rate', $rate, $rate_id, $tax_row ) ); ?>%</td>
+							<td class="total_row"><?php echo esc_html( $tax_row->total_orders ); ?></td>
+							<td class="total_row"><?php echo wc_price( $tax_row->tax_amount ); // phpcs:ignore ?></td>
+							<td class="total_row"><?php echo wc_price( $tax_row->shipping_tax_amount ); // phpcs:ignore ?></td>
+							<td class="total_row"><?php echo wc_price( $tax_row->tax_amount + $tax_row->shipping_tax_amount ); // phpcs:ignore ?></td>
 						</tr>
 						<?php
 					}
@@ -236,10 +241,10 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 				</tbody>
 				<tfoot>
 					<tr>
-						<th scope="row" colspan="3"><?php _e( 'Total', 'woocommerce' ); ?></th>
-						<th class="total_row"><?php echo wc_price( wc_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) ) ); ?></th>
-						<th class="total_row"><?php echo wc_price( wc_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) ) ) ); ?></th>
-						<th class="total_row"><strong><?php echo wc_price( wc_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) + array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) ) ) ); ?></strong></th>
+						<th scope="row" colspan="3"><?php esc_html_e( 'Total', 'woocommerce' ); ?></th>
+						<th class="total_row"><?php echo wc_price( wc_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) ) ); // phpcs:ignore ?></th>
+						<th class="total_row"><?php echo wc_price( wc_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) ) ) ); // phpcs:ignore ?></th>
+						<th class="total_row"><strong><?php echo wc_price( wc_round_tax_total( array_sum( wp_list_pluck( (array) $tax_rows, 'tax_amount' ) ) + array_sum( wp_list_pluck( (array) $tax_rows, 'shipping_tax_amount' ) ) ) ); // phpcs:ignore ?></strong></th>
 					</tr>
 				</tfoot>
 			<?php else : ?>

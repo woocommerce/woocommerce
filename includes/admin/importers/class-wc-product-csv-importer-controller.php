@@ -96,7 +96,7 @@ class WC_Product_CSV_Importer_Controller {
 		}
 
 		$valid_filetypes = self::get_valid_csv_filetypes();
-		$filetype = wp_check_filetype( $file, $valid_filetypes );
+		$filetype        = wp_check_filetype( $file, $valid_filetypes );
 		if ( in_array( $filetype['type'], $valid_filetypes, true ) ) {
 			return true;
 		}
@@ -111,7 +111,8 @@ class WC_Product_CSV_Importer_Controller {
 	 */
 	protected static function get_valid_csv_filetypes() {
 		return apply_filters(
-			'woocommerce_csv_product_import_valid_filetypes', array(
+			'woocommerce_csv_product_import_valid_filetypes',
+			array(
 				'csv' => 'text/csv',
 				'txt' => 'text/plain',
 			)
@@ -147,7 +148,7 @@ class WC_Product_CSV_Importer_Controller {
 
 		$this->steps = apply_filters( 'woocommerce_product_csv_importer_steps', $default_steps );
 
-		// phpcs:disable WordPress.CSRF.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
 		$this->step            = isset( $_REQUEST['step'] ) ? sanitize_key( $_REQUEST['step'] ) : current( array_keys( $this->steps ) );
 		$this->file            = isset( $_REQUEST['file'] ) ? wc_clean( wp_unslash( $_REQUEST['file'] ) ) : '';
 		$this->update_existing = isset( $_REQUEST['update_existing'] ) ? (bool) $_REQUEST['update_existing'] : false;
@@ -258,7 +259,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * Dispatch current step and show correct view.
 	 */
 	public function dispatch() {
-		// phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+		// phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 		if ( ! empty( $_POST['save_step'] ) && ! empty( $this->steps[ $this->step ]['handler'] ) ) {
 			call_user_func( $this->steps[ $this->step ]['handler'], $this );
 		}
@@ -306,7 +307,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * @return string|WP_Error
 	 */
 	public function handle_upload() {
-		// phpcs:disable WordPress.CSRF.NonceVerification.NoNonceVerification -- Nonce already verified in WC_Product_CSV_Importer_Controller::upload_form_handler()
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification -- Nonce already verified in WC_Product_CSV_Importer_Controller::upload_form_handler()
 		$file_url = isset( $_POST['file_url'] ) ? wc_clean( wp_unslash( $_POST['file_url'] ) ) : '';
 
 		if ( empty( $file_url ) ) {
@@ -410,7 +411,7 @@ class WC_Product_CSV_Importer_Controller {
 			return;
 		}
 
-		// phpcs:disable WordPress.CSRF.NonceVerification.NoNonceVerification -- Nonce already verified in WC_Admin_Importers::do_ajax_product_import()
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification -- Nonce already verified in WC_Admin_Importers::do_ajax_product_import()
 		if ( ! empty( $_POST['map_from'] ) && ! empty( $_POST['map_to'] ) ) {
 			$mapping_from = wc_clean( wp_unslash( $_POST['map_from'] ) );
 			$mapping_to   = wc_clean( wp_unslash( $_POST['map_to'] ) );
@@ -424,7 +425,9 @@ class WC_Product_CSV_Importer_Controller {
 		// phpcs:enable
 
 		wp_localize_script(
-			'wc-product-import', 'wc_product_import_params', array(
+			'wc-product-import',
+			'wc_product_import_params',
+			array(
 				'import_nonce'    => wp_create_nonce( 'wc-product-import' ),
 				'mapping'         => array(
 					'from' => $mapping_from,
@@ -444,7 +447,7 @@ class WC_Product_CSV_Importer_Controller {
 	 * Done step.
 	 */
 	protected function done() {
-		// phpcs:disable WordPress.CSRF.NonceVerification.NoNonceVerification
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
 		$imported = isset( $_GET['products-imported'] ) ? absint( $_GET['products-imported'] ) : 0;
 		$updated  = isset( $_GET['products-updated'] ) ? absint( $_GET['products-updated'] ) : 0;
 		$failed   = isset( $_GET['products-failed'] ) ? absint( $_GET['products-failed'] ) : 0;
@@ -491,7 +494,8 @@ class WC_Product_CSV_Importer_Controller {
 		 */
 		$default_columns = $this->normalize_columns_names(
 			apply_filters(
-				'woocommerce_csv_product_import_mapping_default_columns', array(
+				'woocommerce_csv_product_import_mapping_default_columns',
+				array(
 					__( 'ID', 'woocommerce' )             => 'id',
 					__( 'Type', 'woocommerce' )           => 'type',
 					__( 'SKU', 'woocommerce' )            => 'sku',

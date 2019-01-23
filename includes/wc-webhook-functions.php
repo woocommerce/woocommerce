@@ -20,11 +20,17 @@ function wc_webhook_process_delivery( $webhook, $arg ) {
 	// so as to avoid delays or failures in delivery from affecting the
 	// user who triggered it.
 	if ( apply_filters( 'woocommerce_webhook_deliver_async', true, $webhook, $arg ) ) {
-		// Deliver in background.
-		WC()->queue()->add( 'woocommerce_deliver_webhook_async', array(
+		$queue_args = array(
 			'webhook_id' => $webhook->get_id(),
 			'arg'        => $arg,
-		), 'woocommerce-webhooks' );
+		);
+
+		$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
+
+		// Make webhooks unique - only schedule one webhook every 10 minutes to maintain backward compatibility with WP Cron behaviour seen in WC < 3.5.0.
+		if ( is_null( $next_scheduled_date ) || $next_scheduled_date->getTimestamp() >= ( 600 + gmdate( 'U' ) ) ) {
+			WC()->queue()->add( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
+		}
 	} else {
 		// Deliver immediately.
 		$webhook->deliver( $arg );
@@ -90,17 +96,31 @@ function wc_is_webhook_valid_topic( $topic ) {
 }
 
 /**
+ * Check if given status is a valid webhook status.
+ *
+ * @since 3.5.3
+ * @param string $status Status to check.
+ * @return bool
+ */
+function wc_is_webhook_valid_status( $status ) {
+	return in_array( $status, array_keys( wc_get_webhook_statuses() ), true );
+}
+
+/**
  * Get Webhook statuses.
  *
  * @since  2.3.0
  * @return array
  */
 function wc_get_webhook_statuses() {
-	return apply_filters( 'woocommerce_webhook_statuses', array(
-		'active'   => __( 'Active', 'woocommerce' ),
-		'paused'   => __( 'Paused', 'woocommerce' ),
-		'disabled' => __( 'Disabled', 'woocommerce' ),
-	) );
+	return apply_filters(
+		'woocommerce_webhook_statuses',
+		array(
+			'active'   => __( 'Active', 'woocommerce' ),
+			'paused'   => __( 'Paused', 'woocommerce' ),
+			'disabled' => __( 'Disabled', 'woocommerce' ),
+		)
+	);
 }
 
 /**

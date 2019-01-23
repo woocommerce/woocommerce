@@ -34,9 +34,9 @@ if ( ! class_exists( 'WooCommerce' ) ) {
  * @since  2.1
  * @return WooCommerce
  */
-function wc() {
+function WC() {
 	return WooCommerce::instance();
 }
 
 // Global for backwards compatibility.
-$GLOBALS['woocommerce'] = wc();
+$GLOBALS['woocommerce'] = WC();

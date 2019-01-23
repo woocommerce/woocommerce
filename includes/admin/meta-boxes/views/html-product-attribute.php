@@ -59,7 +59,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<?php
 							}
 
-							do_action( 'woocommerce_product_option_terms', $attribute_taxonomy, $i );
+							do_action( 'woocommerce_product_option_terms', $attribute_taxonomy, $i, $attribute );
 						} else {
 							/* translators: %s: WC_DELIMITER */
 							?>

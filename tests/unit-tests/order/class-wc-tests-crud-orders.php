@@ -92,7 +92,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	public function test_get_prices_include_tax() {
 		$object = new WC_Order();
-		$set_to = 'USD';
 		$object->set_prices_include_tax( 1 );
 		$this->assertTrue( $object->get_prices_include_tax() );
 	}
