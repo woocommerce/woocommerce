@@ -274,13 +274,14 @@ class WC_Admin_Reports_Segmenting {
 	/**
 	 * Fetches all segment ids from db and stores it for later use.
 	 *
-	 * @return array
+	 * @return void
 	 */
 	protected function set_all_segments() {
 		global $wpdb;
 
 		if ( ! isset( $this->query_args['segmentby'] ) || '' === $this->query_args['segmentby'] ) {
 			$this->all_segment_ids = array();
+			return;
 		}
 
 		if ( 'product' === $this->query_args['segmentby'] ) {
@@ -293,7 +294,8 @@ class WC_Admin_Reports_Segmenting {
 		} elseif ( 'variation' === $this->query_args['segmentby'] ) {
 			// TODO: assuming that this will only be used for one product, check assumption.
 			if ( ! isset( $this->query_args['product_includes'] ) || count( $this->query_args['product_includes'] ) !== 1 ) {
-				return array();
+				$this->all_segment_ids = array();
+				return;
 			}
 
 			$segments = wc_get_products(
