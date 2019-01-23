@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<td class="forminp">
 					<select multiple="multiple" data-attribute="zone_locations" id="zone_locations" name="zone_locations" data-placeholder="<?php esc_html_e( 'Select regions within this zone', 'woocommerce' ); ?>" class="wc-shipping-zone-region-select chosen_select">
 						<?php
-						foreach ( $continents as $continent_code => $continent ) {
+						foreach ( $shipping_continents as $continent_code => $continent ) {
 							echo '<option value="continent:' . esc_attr( $continent_code ) . '"' . wc_selected( "continent:$continent_code", $locations ) . ' alt="">' . esc_html( $continent['name'] ) . '</option>';
 
 							$countries = array_intersect( array_keys( $allowed_countries ), $continent['countries'] );
@@ -49,7 +49,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 							foreach ( $countries as $country_code ) {
 								echo '<option value="country:' . esc_attr( $country_code ) . '"' . wc_selected( "country:$country_code", $locations ) . ' alt="' . esc_attr( $continent['name'] ) . '">' . esc_html( '&nbsp;&nbsp; ' . $allowed_countries[ $country_code ] ) . '</option>';
 
-								if ( $states = WC()->countries->get_states( $country_code ) ) {
+								$states = WC()->countries->get_states( $country_code );
+
+								if ( $states ) {
 									foreach ( $states as $state_code => $state_name ) {
 										echo '<option value="state:' . esc_attr( $country_code . ':' . $state_code ) . '"' . wc_selected( "state:$country_code:$state_code", $locations ) . ' alt="' . esc_attr( $continent['name'] . ' ' . $allowed_countries[ $country_code ] ) . '">' . esc_html( '&nbsp;&nbsp;&nbsp;&nbsp; ' . $state_name ) . '</option>';
 									}
@@ -138,8 +140,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<header class="wc-backbone-modal-header">
 					<h1>
 						<?php
-						/* translators: %s: shipping method title */
 						printf(
+							/* translators: %s: shipping method title */
 							esc_html__( '%s Settings', 'woocommerce' ),
 							'{{{ data.method.method_title }}}'
 						);
