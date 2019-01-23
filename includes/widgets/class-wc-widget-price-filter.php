@@ -68,16 +68,15 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			return;
 		}
 
-		// Current active min and max price is retrieved from the query string.
-		$current_min_price = isset( $_GET['min_price'] ) ? wc_clean( wp_unslash( $_GET['min_price'] ) ) : null; // WPCS: input var ok, CSRF ok.
-		$current_max_price = isset( $_GET['max_price'] ) ? wc_clean( wp_unslash( $_GET['max_price'] ) ) : null; // WPCS: input var ok, CSRF ok.
-
 		// If there are not posts and we're not filtering, hide the widget.
-		if ( ! WC()->query->get_main_query()->post_count && null === $current_min_price && null === $current_max_price ) {
+		if ( ! WC()->query->get_main_query()->post_count && ! isset( $_GET['min_price'] ) && ! isset( $_GET['max_price'] ) ) { // WPCS: input var ok, CSRF ok.
 			return;
 		}
 
 		wp_enqueue_script( 'wc-price-slider' );
+
+		// Round values to nearest 10 by default.
+		$step = max( apply_filters( 'woocommerce_price_filter_widget_step', 10 ), 1 );
 
 		// Find min and max price in current result set.
 		$prices    = $this->get_filtered_price();
@@ -88,31 +87,25 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 
 		if ( wc_tax_enabled() && ! wc_prices_include_tax() && 'incl' === $tax_display_mode ) {
-			$class_min   = $min_price;
-			$class_max   = $max_price;
-			$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
-			foreach ( $tax_classes as $tax_class ) {
-				$tax_rates = WC_Tax::get_rates( $tax_class );
-				if ( $tax_rates ) {
-					$class_min = $min_price + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min_price, $tax_rates ) );
-					$class_max = $max_price + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $max_price, $tax_rates ) );
-				}
+			$tax_class = apply_filters( 'woocommerce_price_filter_widget_tax_class', '' ); // Uses standard tax class.
+			$tax_rates = WC_Tax::get_rates( $tax_class );
+
+			if ( $tax_rates ) {
+				$min_price += WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min_price, $tax_rates ) );
+				$max_price += WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $max_price, $tax_rates ) );
 			}
-			$min_price = $class_min;
-			$max_price = $class_max;
 		}
 
-		$min_price = apply_filters( 'woocommerce_price_filter_widget_min_amount', floor( $min_price / 10 ) * 10 );
-		$max_price = apply_filters( 'woocommerce_price_filter_widget_max_amount', ceil( $max_price / 10 ) * 10 );
+		$min_price = apply_filters( 'woocommerce_price_filter_widget_min_amount', floor( $min_price / $step ) * $step );
+		$max_price = apply_filters( 'woocommerce_price_filter_widget_max_amount', ceil( $max_price / $step ) * $step );
 
 		// If both min and max are equal, we don't need a slider.
 		if ( $min_price === $max_price ) {
 			return;
 		}
 
-		$current_min_price = is_null( $current_min_price ) ? $min_price : floor( $current_min_price / 10 ) * 10;
-		$current_max_price = is_null( $current_max_price ) ? $max_price : ceil( $current_max_price / 10 ) * 10;
-		$step              = apply_filters( 'woocommerce_price_filter_widget_step', 10 );
+		$current_min_price = isset( $_GET['min_price'] ) ? floor( floatval( wp_unslash( $_GET['min_price'] ) ) / $step ) * $step : $min_price; // WPCS: input var ok, CSRF ok.
+		$current_max_price = isset( $_GET['max_price'] ) ? ceil( floatval( wp_unslash( $_GET['max_price'] ) ) / $step ) * $step : $max_price; // WPCS: input var ok, CSRF ok.
 
 		$this->widget_start( $args, $instance );
 
