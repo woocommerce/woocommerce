@@ -119,7 +119,11 @@ class WC_Install {
 		),
 		'3.5.2' => array(
 			'wc_update_352_drop_download_log_fk',
-		)
+		),
+		'3.5.4' => array(
+			'wc_update_354_modify_shop_manager_caps',
+			'wc_update_354_db_version',
+		),
 	);
 
 	/**
@@ -408,7 +412,8 @@ class WC_Install {
 		include_once dirname( __FILE__ ) . '/admin/wc-admin-functions.php';
 
 		$pages = apply_filters(
-			'woocommerce_create_pages', array(
+			'woocommerce_create_pages',
+			array(
 				'shop'      => array(
 					'name'    => _x( 'shop', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'Shop', 'Page title', 'woocommerce' ),
@@ -597,21 +602,21 @@ class WC_Install {
 
 		// Add constraint to download logs if the columns matches.
 		if ( ! empty( $download_permissions_column_type ) && ! empty( $download_log_column_type ) && $download_permissions_column_type === $download_log_column_type ) {
-			$fk_result = $wpdb->get_row( "
-				SELECT COUNT(*) AS fk_count
+			$fk_result = $wpdb->get_row(
+				"SELECT COUNT(*) AS fk_count
 				FROM information_schema.TABLE_CONSTRAINTS
 				WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
 				AND CONSTRAINT_NAME = 'fk_{$wpdb->prefix}wc_download_log_permission_id'
 				AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-				AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'
-			" ); // WPCS: unprepared SQL ok.
+				AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'"
+			); // WPCS: unprepared SQL ok.
 			if ( 0 === (int) $fk_result->fk_count ) {
-				$wpdb->query( "
-					ALTER TABLE `{$wpdb->prefix}wc_download_log`
+				$wpdb->query(
+					"ALTER TABLE `{$wpdb->prefix}wc_download_log`
 					ADD CONSTRAINT `fk_{$wpdb->prefix}wc_download_log_permission_id`
 					FOREIGN KEY (`permission_id`)
-					REFERENCES `{$wpdb->prefix}woocommerce_downloadable_product_permissions` (`permission_id`) ON DELETE CASCADE;
-				" ); // WPCS: unprepared SQL ok.
+					REFERENCES `{$wpdb->prefix}woocommerce_downloadable_product_permissions` (`permission_id`) ON DELETE CASCADE;"
+				); // WPCS: unprepared SQL ok.
 			}
 		}
 	}
@@ -892,7 +897,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		$tables = self::get_tables();
 
 		foreach ( $tables as $table ) {
-			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+			$wpdb->query( "DROP TABLE IF EXISTS {$table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		}
 	}
 
@@ -954,7 +959,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				'read'                   => true,
 				'read_private_pages'     => true,
 				'read_private_posts'     => true,
-				'edit_users'             => true,
 				'edit_posts'             => true,
 				'edit_pages'             => true,
 				'edit_published_posts'   => true,
@@ -1229,7 +1233,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 */
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
 		// Explicitly clear the event.
-		wp_clear_scheduled_hook( 'woocommerce_plugin_background_installer', func_get_args() );
+		$args = func_get_args();
+		wp_clear_scheduled_hook( 'woocommerce_plugin_background_installer', $args );
 
 		if ( ! empty( $plugin_to_install['repo-slug'] ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -1241,7 +1246,10 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 			$skin              = new Automatic_Upgrader_Skin();
 			$upgrader          = new WP_Upgrader( $skin );
-			$installed_plugins = array_reduce( array_keys( get_plugins() ), array( __CLASS__, 'associate_plugin_file' ), array() );
+			$installed_plugins = array_reduce( array_keys( get_plugins() ), array( __CLASS__, 'associate_plugin_file' ) );
+			if ( empty( $installed_plugins ) ) {
+				$installed_plugins = array();
+			}
 			$plugin_slug       = $plugin_to_install['repo-slug'];
 			$plugin_file       = isset( $plugin_to_install['file'] ) ? $plugin_to_install['file'] : $plugin_slug . '.php';
 			$installed         = false;
@@ -1385,7 +1393,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	 */
 	public static function theme_background_installer( $theme_slug ) {
 		// Explicitly clear the event.
-		wp_clear_scheduled_hook( 'woocommerce_theme_background_installer', func_get_args() );
+		$args = func_get_args();
+		wp_clear_scheduled_hook( 'woocommerce_theme_background_installer', $args );
 
 		if ( ! empty( $theme_slug ) ) {
 			// Suppress feedback.
@@ -1404,7 +1413,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 					$skin     = new Automatic_Upgrader_Skin();
 					$upgrader = new Theme_Upgrader( $skin );
 					$api      = themes_api(
-						'theme_information', array(
+						'theme_information',
+						array(
 							'slug'   => $theme_slug,
 							'fields' => array( 'sections' => false ),
 						)

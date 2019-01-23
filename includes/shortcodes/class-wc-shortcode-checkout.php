@@ -86,10 +86,10 @@ class WC_Shortcode_Checkout {
 			try {
 				$order_key          = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // WPCS: input var ok, CSRF ok.
 				$order              = wc_get_order( $order_id );
- 				$hold_stock_minutes = (int) get_option( 'woocommerce_hold_stock_minutes', 0 );
+				$hold_stock_minutes = (int) get_option( 'woocommerce_hold_stock_minutes', 0 );
 
 				// Order or payment link is invalid.
-				if ( ! $order || $order->get_id() !== $order_id || $order->get_order_key() !== $order_key ) {
+				if ( ! $order || $order->get_id() !== $order_id || ! hash_equals( $order->get_order_key(), $order_key ) ) {
 					throw new Exception( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ) );
 				}
 
@@ -116,7 +116,7 @@ class WC_Shortcode_Checkout {
 				}
 
 				// Ensure order items are still stocked if paying for a failed order. Pending orders do not need this check because stock is held.
-				if ( ! $order->has_status( 'pending' ) ) {
+				if ( ! $order->has_status( wc_get_is_pending_statuses() ) ) {
 					$quantities = array();
 
 					foreach ( $order->get_items() as $item_key => $item ) {
@@ -177,7 +177,8 @@ class WC_Shortcode_Checkout {
 				}
 
 				wc_get_template(
-					'checkout/form-pay.php', array(
+					'checkout/form-pay.php',
+					array(
 						'order'              => $order,
 						'available_gateways' => $available_gateways,
 						'order_button_text'  => apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) ),
@@ -193,7 +194,7 @@ class WC_Shortcode_Checkout {
 			$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // WPCS: input var ok, CSRF ok.
 			$order     = wc_get_order( $order_id );
 
-			if ( $order && $order->get_id() === $order_id && $order->get_order_key() === $order_key ) {
+			if ( $order && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
 
 				if ( $order->needs_payment() ) {
 
@@ -227,7 +228,7 @@ class WC_Shortcode_Checkout {
 
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
-			if ( ! $order || $order->get_order_key() !== $order_key ) {
+			if ( ! $order || ! hash_equals( $order->get_order_key(), $order_key ) ) {
 				$order = false;
 			}
 		}
@@ -251,6 +252,9 @@ class WC_Shortcode_Checkout {
 	 * Show the checkout.
 	 */
 	private static function checkout() {
+		// Show non-cart errors.
+		do_action( 'woocommerce_before_checkout_form_cart_notices' );
+
 		// Check cart has contents.
 		if ( WC()->cart->is_empty() && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_redirect_empty_cart', true ) ) {
 			return;

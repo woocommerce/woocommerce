@@ -37,37 +37,41 @@ class WC_Tests_Report_Sales_By_Date extends WC_Unit_Test_Case {
 
 		$product = WC_Helper_Product::create_simple_product();
 		$coupon  = WC_Helper_Coupon::create_coupon();
-		$tax     = WC_Tax::_insert_tax_rate( array(
-			'tax_rate_country'  => '',
-			'tax_rate_state'    => '',
-			'tax_rate'          => '10.0000',
-			'tax_rate_name'     => 'VAT',
-			'tax_rate_priority' => '1',
-			'tax_rate_compound' => '0',
-			'tax_rate_shipping' => '1',
-			'tax_rate_order'    => '1',
-			'tax_rate_class'    => '',
-		) );
+		$tax     = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
 
 		// A standard order.
-		$order1  = WC_Helper_Order::create_order( 0, $product->get_id() );
+		$order1 = WC_Helper_Order::create_order( 0, $product->get_id() );
 		$order1->set_status( 'completed' );
 		$order1->save();
 
 		// An order using a coupon.
-		$order2  = WC_Helper_Order::create_order();
+		$order2 = WC_Helper_Order::create_order();
 		$order2->apply_coupon( $coupon );
 		$order2->set_status( 'completed' );
 		$order2->save();
 
 		// An order that was refunded, save for shipping.
-		$order3  = WC_Helper_Order::create_order();
+		$order3 = WC_Helper_Order::create_order();
 		$order3->set_status( 'completed' );
 		$order3->save();
-		wc_create_refund( array(
-			'amount'   => 7,
-			'order_id' => $order3->get_id(),
-		) );
+		wc_create_refund(
+			array(
+				'amount'   => 7,
+				'order_id' => $order3->get_id(),
+			)
+		);
 
 		// Parameters borrowed from WC_Admin_Dashboard::get_sales_report_data().
 		$report                 = new WC_Report_Sales_By_Date();
@@ -92,34 +96,38 @@ class WC_Tests_Report_Sales_By_Date extends WC_Unit_Test_Case {
 			$data->coupons[0]->order_item_name,
 			'There should be a single coupon applied.'
 		);
-		$this->assertEquals( $data->coupons[0]->discount_amount, $data->total_coupons );
+		$this->assertEquals( $data->coupons[0]->discount_amount, $data->total_coupons, 'Total discount amount.' );
 
 		$this->assertCount( 1, $data->refund_lines, 'There was one refund granted.' );
 		$this->assertEquals( 7, $data->partial_refunds[0]->total_refund, 'Total refunds.' );
-		$this->assertEquals( $data->partial_refunds[0]->total_refund, $data->total_refunds );
+		$this->assertEquals( $data->partial_refunds[0]->total_refund, $data->total_refunds, 'Day refunds, total refunds.' );
 
 		$this->assertEquals(
 			$order1->get_shipping_total() + $order2->get_shipping_total() + $order3->get_shipping_total(),
 			$data->orders[0]->total_shipping,
 			'Orders, total shipping.'
 		);
-		$this->assertEquals( $data->orders[0]->total_shipping, $data->total_shipping );
+		$this->assertEquals( $data->orders[0]->total_shipping, $data->total_shipping, 'Day shipping, total shipping.' );
 
 		$this->assertEquals(
 			$order1->get_shipping_tax() + $order2->get_shipping_tax() + $order3->get_shipping_tax(),
 			$data->orders[0]->total_shipping_tax,
 			'Orders, total shipping tax.'
 		);
-		$this->assertEquals( $data->orders[0]->total_shipping_tax, $data->total_shipping_tax );
+		$this->assertEquals( $data->orders[0]->total_shipping_tax, $data->total_shipping_tax, 'Day shipping tax, total shipping tax.' );
 
-		$this->assertEquals( $data->orders[0]->total_tax, $data->total_tax );
+		$this->assertEquals( $data->orders[0]->total_tax, $data->total_tax, 'Day tax, total tax.' );
 
 		$this->assertEquals(
 			$order1->get_total() + $order2->get_total() + $order3->get_total(),
 			$data->orders[0]->total_sales,
-			'Total sales.'
+			'Orders, total sales.'
 		);
-		$this->assertEquals( $data->orders[0]->total_sales - $data->total_refunds, $data->total_sales, 'Total sales.' );
+		$this->assertEquals(
+			$data->orders[0]->total_sales - $data->total_refunds,
+			$data->total_sales,
+			'Day sales, total sales.'
+		);
 		$this->assertEquals( $data->total_sales, $data->average_total_sales, 'Average total sales.' );
 
 		$this->assertEquals(

@@ -59,8 +59,8 @@ abstract class WC_Widget extends WP_Widget {
 	 */
 	public function __construct() {
 		$widget_ops = array(
-			'classname'   => $this->widget_cssclass,
-			'description' => $this->widget_description,
+			'classname'                   => $this->widget_cssclass,
+			'description'                 => $this->widget_description,
 			'customize_selective_refresh' => true,
 		);
 
@@ -347,7 +347,7 @@ abstract class WC_Widget extends WP_Widget {
 			}
 		}
 
-		return $link;
+		return apply_filters( 'woocommerce_widget_get_current_page_url', $link, $this );
 	}
 
 	/**

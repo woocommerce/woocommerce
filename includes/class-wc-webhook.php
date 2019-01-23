@@ -59,7 +59,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 
 		$this->data_store = WC_Data_Store::load( 'webhook' );
 
-		// If we have an ID, load the user from the DB.
+		// If we have an ID, load the webhook from the DB.
 		if ( $this->get_id() ) {
 			try {
 				$this->data_store->read( $this );
@@ -92,8 +92,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * Process the webhook for delivery by verifying that it should be delivered.
 	 * and scheduling the delivery (in the background by default, or immediately).
 	 *
-	 * @since 2.2.0
-	 * @param mixed $arg The first argument provided from the associated hooks.
+	 * @since  2.2.0
+	 * @param  mixed $arg The first argument provided from the associated hooks.
+	 * @return mixed $arg Returns the argument in case the webhook was hooked into a filter.
 	 */
 	public function process( $arg ) {
 
@@ -109,6 +110,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		 * @hooked wc_webhook_process_delivery - 10
 		 */
 		do_action( 'woocommerce_webhook_process_delivery', $this, $arg );
+
+		return $arg;
 	}
 
 	/**
@@ -441,7 +444,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		}
 
 		$logger->info(
-			wc_print_r( $message, true ), array(
+			wc_print_r( $message, true ),
+			array(
 				'source' => 'webhooks-delivery',
 			)
 		);
@@ -865,6 +869,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			'order.updated'    => array(
 				'woocommerce_process_shop_order_meta',
 				'woocommerce_update_order',
+				'woocommerce_order_refunded',
 			),
 			'order.deleted'    => array(
 				'wp_trash_post',

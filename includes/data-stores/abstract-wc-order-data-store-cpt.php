@@ -69,7 +69,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 					'ping_status'   => 'closed',
 					'post_author'   => 1,
 					'post_title'    => $this->get_post_title(),
-					'post_password' => uniqid( 'order_' ),
+					'post_password' => wc_generate_order_key(),
 					'post_parent'   => $order->get_parent_id( 'edit' ),
 					'post_excerpt'  => $this->get_post_excerpt( $order ),
 				)

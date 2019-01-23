@@ -2226,70 +2226,13 @@ class WC_API_Products extends WC_API_Resource {
 	 * @since 2.5.0
 	 * @param string $image_url
 	 * @param string $upload_for
-	 * @return array|WP_Error
+	 * @return array
 	 */
 	protected function upload_image_from_url( $image_url, $upload_for = 'product_image' ) {
-		$file_name = basename( current( explode( '?', $image_url ) ) );
-		$parsed_url = @parse_url( $image_url );
-
-		// Check parsed URL.
-		if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_' . $upload_for, sprintf( __( 'Invalid URL %s.', 'woocommerce' ), $image_url ), 400 );
+		$upload = wc_rest_upload_image_from_url( $image_url );
+		if ( is_wp_error( $upload ) ) {
+			throw new WC_API_Exception( 'woocommerce_api_' . $upload_for . '_upload_error', $upload->get_error_message(), 400 );
 		}
-
-		// Ensure url is valid.
-		$image_url = str_replace( ' ', '%20', $image_url );
-
-		// Get the file.
-		$response = wp_safe_remote_get( $image_url, array(
-			'timeout' => 10,
-		) );
-
-		if ( is_wp_error( $response ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_' . $upload_for, sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ) . ' ' . sprintf( __( 'Error: %s.', 'woocommerce' ), $response->get_error_message() ), 400 );
-		} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_' . $upload_for, sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ), 400 );
-		}
-
-		// Ensure we have a file name and type.
-		$wp_filetype = wp_check_filetype( $file_name, wc_rest_allowed_image_mime_types() );
-
-		if ( ! $wp_filetype['type'] ) {
-			$headers = wp_remote_retrieve_headers( $response );
-			if ( isset( $headers['content-disposition'] ) && strstr( $headers['content-disposition'], 'filename=' ) ) {
-				$disposition = end( explode( 'filename=', $headers['content-disposition'] ) );
-				$disposition = sanitize_file_name( $disposition );
-				$file_name   = $disposition;
-			} elseif ( isset( $headers['content-type'] ) && strstr( $headers['content-type'], 'image/' ) ) {
-				$file_name = 'image.' . str_replace( 'image/', '', $headers['content-type'] );
-			}
-			unset( $headers );
-
-			// Recheck filetype
-			$wp_filetype = wp_check_filetype( $file_name, wc_rest_allowed_image_mime_types() );
-
-			if ( ! $wp_filetype['type'] ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_' . $upload_for, __( 'Invalid image type.', 'woocommerce' ), 400 );
-			}
-		}
-
-		// Upload the file.
-		$upload = wp_upload_bits( $file_name, '', wp_remote_retrieve_body( $response ) );
-
-		if ( $upload['error'] ) {
-			throw new WC_API_Exception( 'woocommerce_api_' . $upload_for . '_upload_error', $upload['error'], 400 );
-		}
-
-		// Get filesize.
-		$filesize = filesize( $upload['file'] );
-
-		if ( 0 == $filesize ) {
-			@unlink( $upload['file'] );
-			unset( $upload );
-			throw new WC_API_Exception( 'woocommerce_api_' . $upload_for . '_upload_file_error', __( 'Zero size file downloaded.', 'woocommerce' ), 400 );
-		}
-
-		unset( $response );
 
 		do_action( 'woocommerce_api_uploaded_image_from_url', $upload, $image_url, $upload_for );
 

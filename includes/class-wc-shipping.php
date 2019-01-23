@@ -95,10 +95,10 @@ class WC_Shipping {
 	public function __get( $name ) {
 		// Grab from cart for backwards compatibility with versions prior to 3.2.
 		if ( 'shipping_total' === $name ) {
-			return wc()->cart->get_shipping_total();
+			return WC()->cart->get_shipping_total();
 		}
 		if ( 'shipping_taxes' === $name ) {
-			return wc()->cart->get_shipping_taxes();
+			return WC()->cart->get_shipping_taxes();
 		}
 	}
 
@@ -151,7 +151,7 @@ class WC_Shipping {
 	 * If a $package is passed some methods may add themselves conditionally and zones will be used.
 	 *
 	 * @param array $package Package information.
-	 * @return array
+	 * @return WC_Shipping_Method[]
 	 */
 	public function load_shipping_methods( $package = array() ) {
 		if ( ! empty( $package ) ) {
@@ -209,7 +209,7 @@ class WC_Shipping {
 	/**
 	 * Returns all registered shipping methods for usage.
 	 *
-	 * @return array
+	 * @return WC_Shipping_Method[]
 	 */
 	public function get_shipping_methods() {
 		if ( is_null( $this->shipping_methods ) ) {

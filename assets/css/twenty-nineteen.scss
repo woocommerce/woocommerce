@@ -549,13 +549,16 @@ table.variations {
 			margin-top: 0 !important;
 		}
 
+		h1,
 		h2 {
-			margin: 0 0 1rem;
-			font-size: 1em;
-
 			&:before {
 				content: none;
 			}
+		}
+
+		h2:first-of-type {
+			font-size: 1em;
+			margin: 0 0 1rem;
 		}
 	}
 
