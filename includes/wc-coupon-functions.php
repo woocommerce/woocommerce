@@ -77,7 +77,7 @@ function wc_coupons_enabled() {
  */
 function wc_get_coupon_code_by_id( $id ) {
 	$data_store = WC_Data_Store::load( 'coupon' );
-	return (string) $data_store->get_code_by_id( $id );
+	return empty( $id ) ? '' : (string) $data_store->get_code_by_id( $id );
 }
 
 /**
@@ -86,13 +86,20 @@ function wc_get_coupon_code_by_id( $id ) {
  * @since 3.0.0
  * @param string $code    Coupon code.
  * @param int    $exclude Used to exclude an ID from the check if you're checking existence.
+ * @param bool   $allow_empty Allow queries to fetch empty coupon code.
  * @return int
  */
-function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {
+function wc_get_coupon_id_by_code( $code, $exclude = 0, $allow_empty = false ) {
+
 	$data_store = WC_Data_Store::load( 'coupon' );
 	$ids        = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
 
-	if ( false === $ids ) {
+	if ( false === $ids && ! empty( $code ) ) {
+		$ids = $data_store->get_ids_by_code( $code );
+		if ( $ids ) {
+			wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, $ids, 'coupons' );
+		}
+	} elseif ( empty( $code ) && $allow_empty ) {
 		$ids = $data_store->get_ids_by_code( $code );
 		if ( $ids ) {
 			wp_cache_set( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, $ids, 'coupons' );

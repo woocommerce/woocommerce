@@ -78,4 +78,27 @@ class WC_Tests_Functions extends WC_Unit_Test_Case {
 
 		$this->assertEmpty( wc_get_coupon_id_by_code( 0 ) );
 	}
+
+	/**
+	 * Test wc_get_coupon_id_by_code().
+	 *
+	 * @since 3.0.0
+	 */
+	public function test_wc_get_coupon_id_by_code_empty() {
+		// Create coupon empty name.
+		$code   = '';
+		$coupon = WC_Helper_Coupon::create_coupon( $code );
+
+		$this->assertEquals( $coupon->get_id(), wc_get_coupon_id_by_code( $coupon->get_code(), 0, true ) );
+
+		$code   = '';
+		$coupon = WC_Helper_Coupon::create_coupon( $code );
+
+		$this->assertEmpty( wc_get_coupon_id_by_code( $coupon->get_code() ) );
+
+		// Delete coupon.
+		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
+
+		$this->assertEmpty( wc_get_coupon_id_by_code( 0 ) );
+	}
 }
