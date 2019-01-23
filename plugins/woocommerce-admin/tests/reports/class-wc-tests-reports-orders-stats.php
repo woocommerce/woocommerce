@@ -3286,7 +3286,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'net_revenue'             => $net_revenue,
 				'avg_items_per_order'     => round( $num_items_sold / $orders_count, 4 ),
 				'avg_order_value'         => $net_revenue / $orders_count,
-				'num_returning_customers' => $orders_count - $new_customers,
+				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 2,
 				'segments'                => array(
@@ -3361,7 +3361,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'net_revenue'             => $i3_tot_net_revenue,
 						'avg_items_per_order'     => $i3_tot_num_items_sold / $i3_tot_orders_count,
 						'avg_order_value'         => $i3_tot_net_revenue / $i3_tot_orders_count,
-						'num_returning_customers' => $i3_tot_orders_count - $i3_tot_new_customers,
+						'num_returning_customers' => 1,
 						'num_new_customers'       => $i3_tot_new_customers,
 						'segments'                => array(
 							array(
@@ -3571,8 +3571,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Segmenting by product' );
+		$actual = json_decode( json_encode( $data_store->get_data( $query_args ) ), true );
+		$this->assertEquals( $expected_stats, $actual, 'Segmenting by product, expected: ' . print_r( $expected_stats, true ) . '; actual: ' . print_r( $actual, true ) );
 	}
 
 }
