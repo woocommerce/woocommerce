@@ -147,24 +147,9 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 
 		$tax_rows_full_refunds = $this->get_order_report_data(
 			array(
-				'data'                => array(
-					'ID'          => array(
-						'type'     => 'post_data',
-						'distinct' => true,
-						'function' => '',
-						'name'     => 'ID',
-					),
-					'post_parent' => array(
-						'type'     => 'post_data',
-						'function' => '',
-						'name'     => 'post_parent',
-					),
-					'post_date'   => array(
-						'type'     => 'post_data',
-						'function' => '',
-						'name'     => 'post_date',
-					),
-				),
+				'data'                => $query_data,
+				'where'               => $query_where,
+				'order_by'            => 'posts.post_date ASC',
 				'query_type'          => 'get_results',
 				'filter_range'        => true,
 				'order_types'         => array( 'shop_order_refund' ),
@@ -182,11 +167,7 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 				'shipping_tax_amount' => 0,
 				'total_orders'        => 0,
 			);
-
-			if ( 'shop_order_refund' !== get_post_type( $tax_row->post_id ) ) {
-				$tax_rows[ $key ]->total_orders += 1;
-			}
-
+			$tax_rows[ $key ]->total_orders        += 1;
 			$tax_rows[ $key ]->tax_rate             = $tax_row->tax_rate;
 			$tax_rows[ $key ]->tax_amount          += wc_round_tax_total( $tax_row->tax_amount );
 			$tax_rows[ $key ]->shipping_tax_amount += wc_round_tax_total( $tax_row->shipping_tax_amount );
@@ -197,17 +178,11 @@ class WC_Report_Taxes_By_Code extends WC_Admin_Report {
 			$tax_rows[ $key ] = isset( $tax_rows[ $key ] ) ? $tax_rows[ $key ] : (object) array(
 				'tax_amount'          => 0,
 				'shipping_tax_amount' => 0,
-				'total_sales'         => 0,
-				'total_shipping'      => 0,
 				'total_orders'        => 0,
 			);
-			$parent_order     = wc_get_order( $tax_row->post_parent );
-			if ( $parent_order ) {
-				$tax_rows[ $key ]->tax_amount          += $parent_order->get_cart_tax() * -1;
-				$tax_rows[ $key ]->shipping_tax_amount += $parent_order->get_shipping_tax() * -1;
-				$tax_rows[ $key ]->total_sales         += $parent_order->get_total() * -1;
-				$tax_rows[ $key ]->total_shipping      += $parent_order->get_shipping_total() * -1;
-			}
+			$tax_rows[ $key ]->tax_rate             = $tax_row->tax_rate;
+			$tax_rows[ $key ]->tax_amount          += wc_round_tax_total( $tax_row->tax_amount );
+			$tax_rows[ $key ]->shipping_tax_amount += wc_round_tax_total( $tax_row->shipping_tax_amount );
 		}
 		?>
 		<table class="widefat">
