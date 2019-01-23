@@ -37,7 +37,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base,
+			$this->namespace,
+			'/' . $this->rest_base,
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
@@ -571,6 +572,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		if ( function_exists( 'curl_version' ) ) {
 			$curl_version = curl_version();
 			$curl_version = $curl_version['version'] . ', ' . $curl_version['ssl_version'];
+		} elseif ( extension_loaded( 'curl' ) ) {
+			$curl_version = __( 'cURL installed but unable to retrieve version.', 'woocommerce' );
 		}
 
 		// WP memory limit.
@@ -835,7 +838,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 									'changelog' => $body->sections['changelog'],
 								);
 								set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
-								break;
 							}
 						}
 					}

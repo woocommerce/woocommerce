@@ -43,6 +43,9 @@ add_filter( 'woocommerce_attribute_label', 'wp_kses_post', 100 );
 /**
  * Short Description (excerpt).
  */
+if ( function_exists( 'do_blocks' ) ) {
+	add_filter( 'woocommerce_short_description', 'do_blocks', 9 );
+}
 add_filter( 'woocommerce_short_description', 'wptexturize' );
 add_filter( 'woocommerce_short_description', 'convert_smilies' );
 add_filter( 'woocommerce_short_description', 'convert_chars' );
@@ -188,11 +191,10 @@ function wc_get_template_part( $slug, $name = '' ) {
  * @param string $default_path  Default path. (default: '').
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
-	if ( ! empty( $args ) && is_array( $args ) ) {
-		extract( $args ); // @codingStandardsIgnoreLine
-	}
-
 	$located = wc_locate_template( $template_name, $template_path, $default_path );
+
+	// Allow 3rd party plugin filter template file from their plugin.
+	$located = apply_filters( 'wc_get_template', $located, $template_name, $args, $template_path, $default_path );
 
 	if ( ! file_exists( $located ) ) {
 		/* translators: %s template */
@@ -200,16 +202,23 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 		return;
 	}
 
-	// Allow 3rd party plugin filter template file from their plugin.
-	$located = apply_filters( 'wc_get_template', $located, $template_name, $args, $template_path, $default_path );
+	$action_args = array(
+		'template_name' => $template_name,
+		'template_path' => $template_path,
+		'located'       => $located,
+		'args'          => $args,
+	);
 
-	do_action( 'woocommerce_before_template_part', $template_name, $template_path, $located, $args );
+	if ( ! empty( $args ) && is_array( $args ) ) {
+		extract( $args ); // @codingStandardsIgnoreLine
+	}
+
+	do_action( 'woocommerce_before_template_part', $action_args['template_name'], $action_args['template_path'], $action_args['located'], $action_args['args'] );
 
 	include $located;
 
-	do_action( 'woocommerce_after_template_part', $template_name, $template_path, $located, $args );
+	do_action( 'woocommerce_after_template_part', $action_args['template_name'], $action_args['template_path'], $action_args['located'], $action_args['args'] );
 }
-
 
 /**
  * Like wc_get_template, but returns the HTML instead of outputting.
@@ -442,6 +451,7 @@ function get_woocommerce_currencies() {
 					'UYU' => __( 'Uruguayan peso', 'woocommerce' ),
 					'UZS' => __( 'Uzbekistani som', 'woocommerce' ),
 					'VEF' => __( 'Venezuelan bol&iacute;var', 'woocommerce' ),
+					'VES' => __( 'Bol&iacute;var soberano', 'woocommerce' ),
 					'VND' => __( 'Vietnamese &#x111;&#x1ed3;ng', 'woocommerce' ),
 					'VUV' => __( 'Vanuatu vatu', 'woocommerce' ),
 					'WST' => __( 'Samoan t&#x101;l&#x101;', 'woocommerce' ),
@@ -628,6 +638,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			'UYU' => '&#36;',
 			'UZS' => 'UZS',
 			'VEF' => 'Bs F',
+			'VES' => 'Bs.S',
 			'VND' => '&#8363;',
 			'VUV' => 'Vt',
 			'WST' => 'T',
@@ -1285,7 +1296,7 @@ function wc_get_checkout_url() {
  * @param string|object $shipping_method class name (string) or a class object.
  */
 function woocommerce_register_shipping_method( $shipping_method ) {
-	WC()->shipping->register_shipping_method( $shipping_method );
+	WC()->shipping()->register_shipping_method( $shipping_method );
 }
 
 if ( ! function_exists( 'wc_get_shipping_zone' ) ) {
@@ -1456,7 +1467,7 @@ function wc_get_shipping_method_count( $include_legacy = false ) {
 
 		if ( $include_legacy ) {
 			// Count activated methods that don't support shipping zones.
-			$methods = WC()->shipping->get_shipping_methods();
+			$methods = WC()->shipping()->get_shipping_methods();
 
 			foreach ( $methods as $method ) {
 				if ( isset( $method->enabled ) && 'yes' === $method->enabled && ! $method->supports( 'shipping-zones' ) ) {
@@ -1551,6 +1562,21 @@ function wc_uasort_comparison( $a, $b ) {
 		return 0;
 	}
 	return ( $a < $b ) ? -1 : 1;
+}
+
+/**
+ * Sort values based on ascii, usefull for special chars in strings.
+ *
+ * @param string $a First value.
+ * @param string $b Second value.
+ * @return int
+ */
+function wc_ascii_uasort_comparison( $a, $b ) {
+	if ( function_exists( 'iconv' ) ) {
+		$a = iconv( 'UTF-8', 'ASCII//TRANSLIT', $a );
+		$b = iconv( 'UTF-8', 'ASCII//TRANSLIT', $b );
+	}
+	return strcmp( $a, $b );
 }
 
 /**

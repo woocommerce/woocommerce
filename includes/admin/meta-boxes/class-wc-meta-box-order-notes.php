@@ -44,7 +44,7 @@ class WC_Meta_Box_Order_Notes {
 				?>
 				<li rel="<?php echo absint( $note->id ); ?>" class="<?php echo esc_attr( implode( ' ', $note_classes ) ); ?>">
 					<div class="note_content">
-						<?php echo wpautop( wptexturize( wp_kses_post( $note->content ) ) ); ?>
+						<?php echo wpautop( wptexturize( wp_kses_post( make_clickable( $note->content ) ) ) ); ?>
 					</div>
 					<p class="meta">
 						<abbr class="exact-date" title="<?php echo $note->date_created->date( 'y-m-d h:i:s' ); ?>"><?php printf( __( 'added on %1$s at %2$s', 'woocommerce' ), $note->date_created->date_i18n( wc_date_format() ), $note->date_created->date_i18n( wc_time_format() ) ); ?></abbr>

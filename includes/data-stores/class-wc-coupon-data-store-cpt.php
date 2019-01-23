@@ -76,7 +76,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 					'post_date'     => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getOffsetTimestamp() ),
 					'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $coupon->get_date_created()->getTimestamp() ),
 				)
-			), true
+			),
+			true
 		);
 
 		if ( $coupon_id ) {
@@ -191,7 +192,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	 */
 	public function delete( &$coupon, $args = array() ) {
 		$args = wp_parse_args(
-			$args, array(
+			$args,
+			array(
 				'force_delete' => false,
 			)
 		);
@@ -343,7 +345,8 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		add_post_meta( $id, 'usage_count', $coupon->get_usage_count( 'edit' ), true );
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE $wpdb->postmeta SET meta_value = meta_value {$operator} 1 WHERE meta_key = 'usage_count' AND post_id = %d;", // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				"UPDATE $wpdb->postmeta SET meta_value = meta_value {$operator} 1 WHERE meta_key = 'usage_count' AND post_id = %d;",
 				$id
 			)
 		);

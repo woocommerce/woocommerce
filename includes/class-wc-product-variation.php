@@ -167,7 +167,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 			$data = $this->get_variation_attributes();
 		}
 
-		$data = array_filter( $data );
+		$data = array_filter( $data, 'wc_array_filter_default_attributes' );
 
 		if ( empty( $data ) ) {
 			return $url;

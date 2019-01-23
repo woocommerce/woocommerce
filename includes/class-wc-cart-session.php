@@ -30,6 +30,7 @@ final class WC_Cart_Session {
 	 *
 	 * @since 3.2.0
 	 * @throws Exception If missing WC_Cart object.
+	 *
 	 * @param WC_Cart $cart Cart object to calculate totals for.
 	 */
 	public function __construct( &$cart ) {
@@ -70,7 +71,6 @@ final class WC_Cart_Session {
 
 		$update_cart_session = false; // Flag to indicate the stored cart should be updated.
 		$order_again         = false; // Flag to indicate whether this is a re-order.
-
 		$cart                = WC()->session->get( 'cart', null );
 		$merge_saved_cart    = (bool) get_user_meta( get_current_user_id(), '_woocommerce_load_saved_cart_after_login', true );
 
@@ -98,39 +98,54 @@ final class WC_Cart_Session {
 		$cart_contents = array();
 
 		foreach ( $cart as $key => $values ) {
-			$product = wc_get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
-
 			if ( ! is_customize_preview() && 'customize-preview' === $key ) {
 				continue;
 			}
 
-			if ( ! empty( $product ) && $product->exists() && $values['quantity'] > 0 ) {
+			$product = wc_get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
 
-				if ( ! $product->is_purchasable() ) {
-					$update_cart_session = true;
-					/* translators: %s: product name */
-					wc_add_notice( sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_name() ), 'error' );
-					do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
+			if ( empty( $product ) || ! $product->exists() || 0 >= $values['quantity'] ) {
+				continue;
+			}
 
-				} elseif ( ! empty( $values['data_hash'] ) && ! hash_equals( $values['data_hash'], wc_get_cart_item_data_hash( $product ) ) ) { // phpcs:ignore PHPCompatibility.PHP.NewFunctions.hash_equalsFound
-					$update_cart_session = true;
-					/* translators: %1$s: product name. %2$s product permalink */
-					wc_add_notice( sprintf( __( '%1$s has been removed from your cart because it has since been modified. You can add it back to your cart <a href="%2$s">here</a>.', 'woocommerce' ), $product->get_name(), $product->get_permalink() ), 'notice' );
-					do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
+			/**
+			 * Allow 3rd parties to validate this item before it's added to cart and add their own notices.
+			 *
+			 * @since 3.6.0
+			 *
+			 * @param bool $remove_cart_item_from_session If true, the item will not be added to the cart. Default: false.
+			 * @param string $key Cart item key.
+			 * @param array $values Cart item values e.g. quantity and product_id.
+			 */
+			if ( apply_filters( 'woocommerce_pre_remove_cart_item_from_session', false, $key, $values ) ) {
+				$update_cart_session = true;
+				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
-				} else {
-					// Put session data into array. Run through filter so other plugins can load their own session data.
-					$session_data = array_merge(
-						$values, array(
-							'data' => $product,
-						)
-					);
+			} elseif ( ! $product->is_purchasable() ) {
+				$update_cart_session = true;
+				/* translators: %s: product name */
+				wc_add_notice( sprintf( __( '%s has been removed from your cart because it can no longer be purchased. Please contact us if you need assistance.', 'woocommerce' ), $product->get_name() ), 'error' );
+				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
-					$cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $session_data, $values, $key );
+			} elseif ( ! empty( $values['data_hash'] ) && ! hash_equals( $values['data_hash'], wc_get_cart_item_data_hash( $product ) ) ) { // phpcs:ignore PHPCompatibility.PHP.NewFunctions.hash_equalsFound
+				$update_cart_session = true;
+				/* translators: %1$s: product name. %2$s product permalink */
+				wc_add_notice( sprintf( __( '%1$s has been removed from your cart because it has since been modified. You can add it back to your cart <a href="%2$s">here</a>.', 'woocommerce' ), $product->get_name(), $product->get_permalink() ), 'notice' );
+				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
-					// Add to cart right away so the product is visible in woocommerce_get_cart_item_from_session hook.
-					$this->cart->set_cart_contents( $cart_contents );
-				}
+			} else {
+				// Put session data into array. Run through filter so other plugins can load their own session data.
+				$session_data = array_merge(
+					$values,
+					array(
+						'data' => $product,
+					)
+				);
+
+				$cart_contents[ $key ] = apply_filters( 'woocommerce_get_cart_item_from_session', $session_data, $values, $key );
+
+				// Add to cart right away so the product is visible in woocommerce_get_cart_item_from_session hook.
+				$this->cart->set_cart_contents( $cart_contents );
 			}
 		}
 
@@ -148,7 +163,7 @@ final class WC_Cart_Session {
 
 		// If this is a re-order, redirect to the cart page to get rid of the `order_again` query string.
 		if ( $order_again ) {
-			wp_redirect( wc_get_page_permalink( 'cart' ) );
+			wp_safe_redirect( wc_get_page_permalink( 'cart' ) );
 			exit;
 		}
 	}
@@ -219,7 +234,9 @@ final class WC_Cart_Session {
 	public function persistent_cart_update() {
 		if ( get_current_user_id() && apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			update_user_meta(
-				get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), array(
+				get_current_user_id(),
+				'_woocommerce_persistent_cart_' . get_current_blog_id(),
+				array(
 					'cart' => $this->get_cart_for_session(),
 				)
 			);
@@ -275,8 +292,10 @@ final class WC_Cart_Session {
 	 * Get a cart from an order, if user has permission.
 	 *
 	 * @since  3.5.0
+	 *
 	 * @param int   $order_id Order ID to try to load.
 	 * @param array $cart Current cart array.
+	 *
 	 * @return array
 	 */
 	private function populate_cart_from_order( $order_id, $cart ) {
@@ -310,6 +329,11 @@ final class WC_Cart_Session {
 				continue;
 			}
 
+			// Prevent reordering items specifically out of stock.
+			if ( ! $product->is_in_stock() ) {
+				continue;
+			}
+
 			foreach ( $item->get_meta_data() as $meta ) {
 				if ( taxonomy_is_product_attribute( $meta->key ) ) {
 					$term                     = get_term_by( 'slug', $meta->value, $meta->key );
@@ -327,8 +351,10 @@ final class WC_Cart_Session {
 			$cart_id          = WC()->cart->generate_cart_id( $product_id, $variation_id, $variations, $cart_item_data );
 			$product_data     = wc_get_product( $variation_id ? $variation_id : $product_id );
 			$cart[ $cart_id ] = apply_filters(
-				'woocommerce_add_order_again_cart_item', array_merge(
-					$cart_item_data, array(
+				'woocommerce_add_order_again_cart_item',
+				array_merge(
+					$cart_item_data,
+					array(
 						'key'          => $cart_id,
 						'product_id'   => $product_id,
 						'variation_id' => $variation_id,
@@ -337,11 +363,12 @@ final class WC_Cart_Session {
 						'data'         => $product_data,
 						'data_hash'    => wc_get_cart_item_data_hash( $product_data ),
 					)
-				), $cart_id
+				),
+				$cart_id
 			);
 		}
 
-		do_action( 'woocommerce_ordered_again', $order->get_id(), $order_items, $cart );
+		do_action_ref_array( 'woocommerce_ordered_again', array( $order->get_id(), $order_items, &$cart ) );
 
 		$num_items_in_cart           = count( $cart );
 		$num_items_in_original_order = count( $order_items );
@@ -354,10 +381,10 @@ final class WC_Cart_Session {
 					_n(
 						'%d item from your previous order is currently unavailable and could not be added to your cart.',
 						'%d items from your previous order are currently unavailable and could not be added to your cart.',
-						$num_items_added,
+						$num_items_in_original_order - $num_items_added,
 						'woocommerce'
 					),
-					$num_items_added
+					$num_items_in_original_order - $num_items_added
 				),
 				'error'
 			);

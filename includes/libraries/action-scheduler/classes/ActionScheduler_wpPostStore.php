@@ -685,7 +685,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 		$status = $this->get_post_column( $action_id, 'post_status' );
 
 		if ( $status === null ) {
-			throw new \InvalidArgumentException( __( 'Invalid action ID. No status found.', 'action-scheduler' ) );
+			throw new InvalidArgumentException( __( 'Invalid action ID. No status found.', 'action-scheduler' ) );
 		}
 
 		return $this->get_action_status_by_post_status( $status );
