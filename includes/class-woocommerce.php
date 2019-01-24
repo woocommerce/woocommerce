@@ -228,31 +228,26 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Returns true if the request is a REST API request.
+	 * Returns true if the request is a non-legacy REST API request.
+	 *
+	 * Legacy REST requests should run extra code for backwards compatibility.
 	 *
 	 * @return bool
 	 */
-	private static function is_rest_api_request() {
+	private static function is_nonlegacy_rest_api_request() {
+		// TODO: replace this function once core WP function is available: https://core.trac.wordpress.org/ticket/42061.
 		$request_uri = $_SERVER['REQUEST_URI']; // @codingStandardsIgnoreLine
 		if ( empty( $request_uri ) ) {
 			return false;
 		}
 
-		// Legacy API.
-		if ( 0 === strpos( $request_uri, '/wc-api/' ) ) {
-			return true;
-		}
-
-		// New REST API.
+		// Non-legacy REST API prefix.
 		$rest_prefix = trailingslashit( rest_get_url_prefix() );
 
-		// Check if this is WC endpoint.
-		$woocommerce = ( false !== strpos( $request_uri, $rest_prefix . 'wc/' ) );
+		// Check if this is a WC endpoint.
+		$is_woocommerce_endpoint = ( false !== strpos( $request_uri, $rest_prefix . 'wc/' ) );
 
-		// Allow third party plugins use our authentication methods.
-		$third_party = ( false !== strpos( $request_uri, $rest_prefix . 'wc-' ) );
-
-		return apply_filters( 'woocommerce_rest_is_request_to_rest_api', $woocommerce || $third_party );
+		return apply_filters( 'woocommerce_is_request_to_nonlegacy_rest_api', $is_woocommerce_endpoint );
 	}
 
 	/**
@@ -270,7 +265,7 @@ final class WooCommerce {
 			case 'cron':
 				return defined( 'DOING_CRON' );
 			case 'frontend':
-				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! self::is_rest_api_request();
+				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! self::is_nonlegacy_rest_api_request();
 		}
 	}
 
