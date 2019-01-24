@@ -13,6 +13,8 @@ php:
   - 5.6
   - 7.0
   - 7.1
+  - 7.2
+  - 7.3
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
@@ -26,23 +28,38 @@ matrix:
     dist: precise
   - php: 5.2
     dist: precise
-  - php: 7.2
-    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1 RUN_E2E=1
+  - name: "Coding standard check"
+    php: 7.2
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
+  - name: "e2e tests"
+    php: 7.2
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
+  - name: "Unit tests code coverage"
+    php: 7.1
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
+  - name: "WooCommerce unit tests using WordPress nightly"
+    php: 7.3
+    env: WP_VERSION=nightly WP_MULTISITE=0
+  allow_failures:
   - php: 7.1
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
-  allow_failures:
-  - env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
 
 before_script:
-  - phpenv config-rm xdebug.ini
-  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - |
+    # Remove Xdebug for a huge performance increase:
+    if [ -f ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini ]; then
+      phpenv config-rm xdebug.ini
+    else
+      echo "xdebug.ini does not exist"
+    fi
+  - export PATH="$HOME/.config/composer/vendor/bin:$PATH"
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - bash tests/bin/travis.sh before
 
 script:
   - bash tests/bin/phpunit.sh
   - bash tests/bin/phpcs.sh
-  - bash tests/bin/run-e2e-CI.sh
+  - travis_retry bash tests/bin/run-e2e-CI.sh
 
 after_script:
   - bash tests/bin/travis.sh after

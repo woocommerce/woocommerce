@@ -65,9 +65,6 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 		WC()->query->init_query_vars();
 		$updated_vars = WC()->query->get_query_vars();
 		$this->assertEquals( 'order-pay-new', $updated_vars['order-pay'] );
-
-		// Clean up.
-		update_option( 'woocommerce_checkout_pay_endpoint', 'order-pay' );
 	}
 
 	/**

@@ -1,4 +1,8 @@
 <?php
+/**
+ * Unit tests for Webhook functions.
+ * @package WooCommerce\Tests\Webhook
+ */
 
 /**
  * Class Functions.
@@ -35,6 +39,7 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 			array( false, wc_is_webhook_valid_topic( 'wc.product.updated' ) ),
 			array( false, wc_is_webhook_valid_topic( 'missingdot' ) ),
 			array( false, wc_is_webhook_valid_topic( 'with space' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.woocommerce_login_credentials' ) ),
 		);
 	}
 
@@ -43,8 +48,37 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @dataProvider data_provider_test_wc_is_webhook_valid_topic
 	 * @since 3.2.0
+	 * @param bool  $assert Expected value.
+	 * @param array $values Values to test.
 	 */
 	public function test_wc_is_webhook_valid_topic( $assert, $values ) {
+		$this->assertEquals( $assert, $values );
+	}
+
+	/**
+	 * Data provider for test_wc_is_webhook_valid_status.
+	 *
+	 * @since 3.5.3
+	 */
+	public function data_provider_test_wc_is_webhook_valid_status() {
+		return array(
+			array( true, wc_is_webhook_valid_status( 'active' ) ),
+			array( true, wc_is_webhook_valid_status( 'paused' ) ),
+			array( true, wc_is_webhook_valid_status( 'disabled' ) ),
+			array( false, wc_is_webhook_valid_status( 'pending' ) ),
+		);
+	}
+
+	/**
+	 * Test wc_is_webhook_valid_status
+	 *
+	 * @dataProvider data_provider_test_wc_is_webhook_valid_status
+	 * @since 3.5.3
+	 * @param bool  $assert Expected outcome.
+	 * @param array $values Values to test.
+	 * @return void
+	 */
+	public function test_wc_is_webhook_valid_status( $assert, $values ) {
 		$this->assertEquals( $assert, $values );
 	}
 
@@ -69,16 +103,18 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_wc_load_webhooks() {
-		$webhook = new WC_Webhook;
-		$webhook->set_props( array(
-			'status'           => 'active',
-			'name'             => 'Testing webhook',
-			'user_id'          => 0,
-			'delivery_url'     => 'https://requestb.in/17jajv31',
-			'secret'           => 'secret',
-			'topic'            => 'action.woocommerce_some_action',
-			'api_version'      => 2,
-		) );
+		$webhook = new WC_Webhook();
+		$webhook->set_props(
+			array(
+				'status'       => 'active',
+				'name'         => 'Testing webhook',
+				'user_id'      => 0,
+				'delivery_url' => 'https://requestb.in/17jajv31',
+				'secret'       => 'secret',
+				'topic'        => 'action.woocommerce_some_action',
+				'api_version'  => 2,
+			)
+		);
 		$webhook->save();
 
 		$this->assertTrue( wc_load_webhooks() );

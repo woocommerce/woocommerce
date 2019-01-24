@@ -22,6 +22,7 @@ class WC_Admin {
 	 * Constructor.
 	 */
 	public function __construct() {
+		add_action( 'plugins_loaded', array( $this, 'preload_helper' ), 9 );
 		add_action( 'init', array( $this, 'includes' ) );
 		add_action( 'current_screen', array( $this, 'conditional_includes' ) );
 		add_action( 'admin_init', array( $this, 'buffer' ), 1 );
@@ -84,6 +85,13 @@ class WC_Admin {
 		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-plugin-info.php';
 		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-compat.php';
 		include_once dirname( __FILE__ ) . '/helper/class-wc-helper.php';
+	}
+
+	/**
+	 * Preloads some functionality of the Helper to be loaded on the `plugins_loaded` hook
+	 */
+	public function preload_helper() {
+		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-file-headers.php';
 	}
 
 	/**
@@ -160,7 +168,7 @@ class WC_Admin {
 	public function prevent_admin_access() {
 		$prevent_access = false;
 
-		if ( 'yes' === get_option( 'woocommerce_lock_down_admin', 'yes' ) && ! is_ajax() && basename( $_SERVER['SCRIPT_FILENAME'] ) !== 'admin-post.php' ) {
+		if ( apply_filters( 'woocommerce_disable_admin_bar', true ) && ! is_ajax() && basename( $_SERVER["SCRIPT_FILENAME"] ) !== 'admin-post.php' ) {
 			$has_cap     = false;
 			$access_caps = array( 'edit_posts', 'manage_woocommerce', 'view_admin_dashboard' );
 

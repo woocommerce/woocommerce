@@ -48,6 +48,9 @@ class WC_Comments {
 
 		// Review of verified purchase.
 		add_action( 'comment_post', array( __CLASS__, 'add_comment_purchase_verification' ) );
+
+		// Set comment type.
+		add_action( 'preprocess_comment', array( __CLASS__, 'update_comment_type' ), 1 );
 	}
 
 	/**
@@ -143,7 +146,7 @@ class WC_Comments {
 	 */
 	public static function check_comment_rating( $comment_data ) {
 		// If posting a comment (not trackback etc) and not logged in.
-		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $_POST['rating'], $comment_data['comment_type'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) && empty( $_POST['rating'] ) && '' === $comment_data['comment_type'] && 'yes' === get_option( 'woocommerce_enable_review_rating' ) && 'yes' === get_option( 'woocommerce_review_rating_required' ) ) { // WPCS: input var ok, CSRF ok.
+		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $_POST['rating'], $comment_data['comment_type'] ) && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) && empty( $_POST['rating'] ) && '' === $comment_data['comment_type'] && wc_review_ratings_enabled() && wc_review_ratings_required() ) { // WPCS: input var ok, CSRF ok.
 			wp_die( esc_html__( 'Please rate the product.', 'woocommerce' ) );
 			exit;
 		}
@@ -237,7 +240,8 @@ class WC_Comments {
 					FROM {$wpdb->comments}
 					WHERE comment_type NOT IN ('order_note', 'webhook_delivery')
 					GROUP BY comment_approved
-				", ARRAY_A
+					",
+					ARRAY_A
 				);
 
 				$approved = array(
@@ -324,7 +328,8 @@ class WC_Comments {
 				AND comment_post_ID = %d
 				AND comment_approved = '1'
 				AND meta_value > 0
-			", $product->get_id()
+					",
+					$product->get_id()
 				)
 			);
 			$average = number_format( $ratings / $count, 2, '.', '' );
@@ -357,7 +362,8 @@ class WC_Comments {
 			WHERE comment_parent = 0
 			AND comment_post_ID = %d
 			AND comment_approved = '1'
-		", $product->get_id()
+				",
+				$product->get_id()
 			)
 		);
 
@@ -390,7 +396,8 @@ class WC_Comments {
 			AND comment_approved = '1'
 			AND meta_value > 0
 			GROUP BY meta_value
-		", $product->get_id()
+				",
+				$product->get_id()
 			)
 		);
 
@@ -404,6 +411,21 @@ class WC_Comments {
 		$data_store->update_rating_counts( $product );
 
 		return $counts;
+	}
+
+	/**
+	 * Update comment type of product reviews.
+	 *
+	 * @since 3.5.0
+	 * @param array $comment_data Comment data.
+	 * @return array
+	 */
+	public static function update_comment_type( $comment_data ) {
+		if ( ! is_admin() && isset( $_POST['comment_post_ID'], $comment_data['comment_type'] ) && '' === $comment_data['comment_type'] && 'product' === get_post_type( absint( $_POST['comment_post_ID'] ) ) ) { // WPCS: input var ok, CSRF ok.
+			$comment_data['comment_type'] = 'review';
+		}
+
+		return $comment_data;
 	}
 }
 

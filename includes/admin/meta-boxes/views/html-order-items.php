@@ -66,7 +66,7 @@ if ( wc_tax_enabled() ) {
 		</tbody>
 		<tbody id="order_shipping_line_items">
 			<?php
-			$shipping_methods = WC()->shipping() ? WC()->shipping->load_shipping_methods() : array();
+			$shipping_methods = WC()->shipping() ? WC()->shipping()->load_shipping_methods() : array();
 			foreach ( $line_items_shipping as $item_id => $item ) {
 				include 'html-order-shipping.php';
 			}
@@ -253,7 +253,7 @@ if ( wc_tax_enabled() ) {
 		<?php if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) : ?>
 			<tr>
 				<td class="label"><label for="restock_refunded_items"><?php esc_html_e( 'Restock refunded items', 'woocommerce' ); ?>:</label></td>
-				<td class="total"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items" checked="checked" /></td>
+				<td class="total"><input type="checkbox" id="restock_refunded_items" name="restock_refunded_items" <?php checked( apply_filters( 'woocommerce_restock_refunded_items', true ) ); ?> /></td>
 			</tr>
 		<?php endif; ?>
 		<tr>

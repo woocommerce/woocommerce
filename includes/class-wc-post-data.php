@@ -199,6 +199,14 @@ class WC_Post_Data {
 				global $wpdb;
 
 				$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE meta_key = %s AND meta_value = %s;", $edited_term->slug, 'attribute_' . sanitize_title( $taxonomy ), self::$editing_term->slug ) );
+
+				$wpdb->query(
+					$wpdb->prepare(
+						"UPDATE {$wpdb->postmeta} SET meta_value = REPLACE( meta_value, %s, %s ) WHERE meta_key = '_default_attributes'",
+						serialize( self::$editing_term->taxonomy ) . serialize( self::$editing_term->slug ),
+						serialize( $edited_term->taxonomy ) . serialize( $edited_term->slug )
+					)
+				);
 			}
 		} else {
 			self::$editing_term = null;
@@ -245,7 +253,7 @@ class WC_Post_Data {
 			wp_cache_delete( 'product-' . $object_id, 'products' );
 		}
 
-		if ( ! empty( $meta_value ) && is_float( $meta_value ) && in_array( get_post_type( $object_id ), array_merge( wc_get_order_types(), array( 'shop_coupon', 'product', 'product_variation' ) ), true ) ) {
+		if ( ! empty( $meta_value ) && is_float( $meta_value ) && ! registered_meta_key_exists( 'post', $meta_key ) && in_array( get_post_type( $object_id ), array_merge( wc_get_order_types(), array( 'shop_coupon', 'product', 'product_variation' ) ), true ) ) {
 
 			// Convert float to string.
 			$meta_value = wc_float_to_string( $meta_value );

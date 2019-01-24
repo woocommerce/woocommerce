@@ -87,7 +87,9 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
 	/**
 	 * Test import.
+	 *
 	 * @since 3.1.0
+	 * @requires PHP 5.4
 	 */
 	public function test_import() {
 		$args = array(
@@ -606,6 +608,11 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$mocked_response = false;
 
 		if ( false !== strpos( $url, 'http://demo.woothemes.com' ) ) {
+
+			if ( ! empty( $request['filename'] ) ) {
+				copy( WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png', $request['filename'] );
+			}
+
 			$mocked_response = array(
 				'body'     => 'Mocked response',
 				'response' => array( 'code' => 200 ),
@@ -613,5 +620,15 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		}
 
 		return $mocked_response;
+	}
+
+	/**
+	 * Test WC_Product_CSV_Importer_Controller::is_file_valid_csv.
+	 */
+	public function test_is_file_valid_csv() {
+		$this->assertTrue( WC_Product_CSV_Importer_Controller::is_file_valid_csv( 'C:/wamp64/www/test.local/wp-content/uploads/2018/10/products_all_gg-1.csv' ) );
+		$this->assertTrue( WC_Product_CSV_Importer_Controller::is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
+		$this->assertFalse( WC_Product_CSV_Importer_Controller::is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/img.jpg' ) );
+		$this->assertFalse( WC_Product_CSV_Importer_Controller::is_file_valid_csv( 'file:///srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
 	}
 }

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Class Functions.
  * @package WooCommerce\Tests\Coupon
@@ -76,6 +75,9 @@ class WC_Tests_Functions extends WC_Unit_Test_Case {
 		// Delete coupon.
 		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 
+		$this->assertEquals( 0, wc_get_coupon_id_by_code( '' ) );
+
 		$this->assertEmpty( wc_get_coupon_id_by_code( 0 ) );
 	}
+
 }

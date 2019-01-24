@@ -143,10 +143,8 @@ test.describe( 'Checkout Page', function() {
 		checkoutPage.placeOrder();
 		Helper.waitTillUIBlockNotPresent( driver );
 
-		const orderReceivedPage = new CheckoutOrderReceivedPage( driver, { visit: false } );
-
 		assert.eventually.ok(
-			orderReceivedPage.hasText( 'Order received' )
+			checkoutPage.hasText( 'Order received' )
 		);
 	} );
 

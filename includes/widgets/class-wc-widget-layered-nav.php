@@ -223,7 +223,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		if ( $taxonomy !== $this->get_current_taxonomy() ) {
 			$term_counts          = $this->get_filtered_term_product_counts( wp_list_pluck( $terms, 'term_id' ), $taxonomy, $query_type );
 			$_chosen_attributes   = WC_Query::get_layered_nav_chosen_attributes();
-			$taxonomy_filter_name = str_replace( 'pa_', '', $taxonomy );
+			$taxonomy_filter_name = wc_attribute_taxonomy_slug( $taxonomy );
 			$taxonomy_label       = wc_attribute_label( $taxonomy );
 
 			/* translators: %s: taxonomy name */
@@ -293,7 +293,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				if ( jQuery().selectWoo ) {
 					var wc_layered_nav_select = function() {
 						jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).selectWoo( {
-							placeholder: '" . esc_js( $any_label ) . "',
+							placeholder: " . wp_json_encode( (string) wp_specialchars_decode( $any_label ) ) . ",
 							minimumResultsForSearch: 5,
 							width: '100%',
 							allowClear: " . ( $multiple ? 'false' : 'true' ) . ",
@@ -373,7 +373,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		// Maybe store a transient of the count values.
 		$cache = apply_filters( 'woocommerce_layered_nav_count_maybe_cache', true );
 		if ( true === $cache ) {
-			$cached_counts = (array) get_transient( 'wc_layered_nav_counts_' . $taxonomy );
+			$cached_counts = (array) get_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ) );
 		} else {
 			$cached_counts = array();
 		}
@@ -383,7 +383,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			$counts                       = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 			$cached_counts[ $query_hash ] = $counts;
 			if ( true === $cache ) {
-				set_transient( 'wc_layered_nav_counts_' . $taxonomy, $cached_counts, DAY_IN_SECONDS );
+				set_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ), $cached_counts, DAY_IN_SECONDS );
 			}
 		}
 
@@ -423,7 +423,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				continue;
 			}
 
-			$filter_name    = 'filter_' . str_replace( 'pa_', '', $taxonomy );
+			$filter_name    = 'filter_' . wc_attribute_taxonomy_slug( $taxonomy );
 			$current_filter = isset( $_GET[ $filter_name ] ) ? explode( ',', wc_clean( wp_unslash( $_GET[ $filter_name ] ) ) ) : array(); // WPCS: input var ok, CSRF ok.
 			$current_filter = array_map( 'sanitize_title', $current_filter );
 
@@ -452,7 +452,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 
 				// Add Query type Arg to URL.
 				if ( 'or' === $query_type && ! ( 1 === count( $current_filter ) && $option_is_set ) ) {
-					$link = add_query_arg( 'query_type_' . sanitize_title( str_replace( 'pa_', '', $taxonomy ) ), 'or', $link );
+					$link = add_query_arg( 'query_type_' . wc_attribute_taxonomy_slug( $taxonomy ), 'or', $link );
 				}
 				$link = str_replace( '%2C', ',', $link );
 			}

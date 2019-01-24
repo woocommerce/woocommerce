@@ -93,7 +93,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 		$transaction = wc_clean( wp_unslash( $_REQUEST['tx'] ) ); // WPCS: input var ok, CSRF ok, sanitization ok.
 		$order       = $this->get_paypal_order( $order_id );
 
-		if ( ! $order || ! $order->has_status( 'pending' ) ) {
+		if ( ! $order || ! $order->needs_payment() ) {
 			return false;
 		}
 
@@ -106,7 +106,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 			update_post_meta( $order->get_id(), '_transaction_id', $transaction );
 
 			if ( 'completed' === $status ) {
-				if ( $order->get_total() !== $amount ) {
+				if ( number_format( $order->get_total(), 2, '.', '' ) !== number_format( $amount, 2, '.', '' ) ) {
 					WC_Gateway_Paypal::log( 'Payment error: Amounts do not match (amt ' . $amount . ')', 'error' );
 					/* translators: 1: Payment amount */
 					$this->payment_on_hold( $order, sprintf( __( 'Validation error: PayPal amounts do not match (amt %s).', 'woocommerce' ), $amount ) );

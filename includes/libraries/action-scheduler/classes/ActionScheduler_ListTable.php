@@ -242,7 +242,7 @@ class ActionScheduler_ListTable extends ActionScheduler_Abstract_ListTable {
 
 		$row_html = '<ul>';
 		foreach ( $row['args'] as $key => $value ) {
-			$row_html .= sprintf( '<li><code>%s => %s</code></li>', esc_html( $key ), esc_html( $value ) );
+			$row_html .= sprintf( '<li><code>%s => %s</code></li>', esc_html( var_export( $key, true ) ), esc_html( var_export( $value, true ) ) );
 		}
 		$row_html .= '</ul>';
 

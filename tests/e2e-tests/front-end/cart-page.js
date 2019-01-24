@@ -51,7 +51,6 @@ test.describe( 'Cart page', function() {
 	test.it( 'should updates qty when updated via qty input', () => {
 		const cartPage = new CartPage( driver, { url: manager.getPageUrl( '/cart' ) } );
 		cartPage.getItem( 'Album', { qty: 2 } ).setQty( 4 );
-		cartPage.update();
 		cartPage.getItem( 'Polo', { qty: 1 } ).setQty( 3 );
 		cartPage.update();
 

@@ -275,7 +275,7 @@ abstract class ActionScheduler_Abstract_ListTable extends WP_List_Table {
 		$valid_sortable_columns = array_values( $this->sort_by );
 
 		if ( ! empty( $_GET['orderby'] ) && in_array( $_GET['orderby'], $valid_sortable_columns ) ) {
-			$orderby = wc_clean( $_GET['orderby'] );
+			$orderby = sanitize_text_field( $_GET['orderby'] );
 		} else {
 			$orderby = $valid_sortable_columns[0];
 		}
