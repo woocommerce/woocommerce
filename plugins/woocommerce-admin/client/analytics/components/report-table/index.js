@@ -193,6 +193,7 @@ export default compose(
 		const selectProps = {
 			primaryData,
 			tableData: extendedTableData,
+			query: { ...tableQuery, ...query },
 		};
 
 		if ( columnPrefsKey ) {
