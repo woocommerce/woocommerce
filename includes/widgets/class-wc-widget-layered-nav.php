@@ -102,16 +102,6 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 	}
 
 	/**
-	 * Get this widgets title.
-	 *
-	 * @param array $instance Array of instance options.
-	 * @return string
-	 */
-	protected function get_instance_title( $instance ) {
-		return isset( $instance['title'] ) ? $instance['title'] : __( 'Filter by', 'woocommerce' );
-	}
-
-	/**
 	 * Get this widgets taxonomy.
 	 *
 	 * @param array $instance Array of instance options.

@@ -129,7 +129,15 @@ abstract class WC_Widget extends WP_Widget {
 	 * @return string
 	 */
 	protected function get_instance_title( $instance ) {
-		return isset( $instance['title'] ) ? $instance['title'] : '';
+		if ( isset( $instance['title'] ) ) {
+			return $instance['title'];
+		}
+
+		if ( isset( $this->settings, $this->settings['title'], $this->settings['title']['std'] ) ) {
+			return $this->settings['title']['std'];
+		}
+
+		return '';
 	}
 
 	/**
