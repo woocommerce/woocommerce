@@ -7,8 +7,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { getRequestByIdString } from 'lib/async-requests';
-import { NAMESPACE } from 'store/constants';
+import { getCategoryLabels } from 'lib/async-requests';
 
 export const charts = [
 	{
@@ -49,10 +48,7 @@ export const filters = [
 						settings: {
 							type: 'categories',
 							param: 'categories',
-							getLabels: getRequestByIdString( NAMESPACE + 'products/categories', category => ( {
-								id: category.id,
-								label: category.name,
-							} ) ),
+							getLabels: getCategoryLabels,
 							labels: {
 								placeholder: __( 'Type to search for a category', 'wc-admin' ),
 								button: __( 'Single Category', 'wc-admin' ),
@@ -68,10 +64,7 @@ export const filters = [
 				settings: {
 					type: 'categories',
 					param: 'categories',
-					getLabels: getRequestByIdString( NAMESPACE + 'products/categories', cat => ( {
-						id: cat.id,
-						label: cat.name,
-					} ) ),
+					getLabels: getCategoryLabels,
 					labels: {
 						helpText: __( 'Select at least two categories to compare', 'wc-admin' ),
 						placeholder: __( 'Search for categories to compare', 'wc-admin' ),

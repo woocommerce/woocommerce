@@ -193,7 +193,10 @@ export class Autocomplete extends Component {
 			}
 		}
 		// create a regular expression to filter the options
-		const search = new RegExp( escapeRegExp( query ), 'i' );
+		const expression = 'undefined' !== typeof completer.getSearchExpression
+			? completer.getSearchExpression( escapeRegExp( query ) )
+			: escapeRegExp( query );
+		const search = new RegExp( expression, 'i' );
 		// filter the options we already have
 		const filteredOptions = filterOptions( search, this.state.options, selected );
 		// update the state

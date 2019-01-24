@@ -23,6 +23,9 @@ export default {
 	options() {
 		return wcSettings.dataEndpoints.countries || [];
 	},
+	getSearchExpression( query ) {
+		return '^' + query;
+	},
 	getOptionKeywords( country ) {
 		return [ country.code, decodeEntities( country.name ) ];
 	},
