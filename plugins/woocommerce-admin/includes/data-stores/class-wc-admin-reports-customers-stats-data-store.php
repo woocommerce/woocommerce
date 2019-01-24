@@ -80,7 +80,12 @@ class WC_Admin_Reports_Customers_Stats_Data_Store extends WC_Admin_Reports_Custo
 				"SELECT {$selections} FROM
 				(
 					SELECT
-						COUNT( order_id ) as orders_count, 
+						(
+							CASE WHEN COUNT( order_id ) = 0
+								THEN NULL
+								ELSE COUNT( order_id )
+							END
+						) as orders_count,
       					SUM( gross_total ) as total_spend, 
 						( SUM( gross_total ) / COUNT( order_id ) ) as avg_order_value
 					FROM
