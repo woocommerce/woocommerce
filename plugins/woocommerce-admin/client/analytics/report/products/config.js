@@ -7,8 +7,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { getRequestByIdString } from 'lib/async-requests';
-import { NAMESPACE } from 'store/constants';
+import { getProductLabels, getCategoryLabels, getVariationLabels } from 'lib/async-requests';
 
 export const charts = [
 	{
@@ -48,10 +47,7 @@ const filterConfig = {
 					settings: {
 						type: 'products',
 						param: 'products',
-						getLabels: getRequestByIdString( NAMESPACE + 'products', product => ( {
-							id: product.id,
-							label: product.name,
-						} ) ),
+						getLabels: getProductLabels,
 						labels: {
 							placeholder: __( 'Type to search for a product', 'wc-admin' ),
 							button: __( 'Single Product', 'wc-admin' ),
@@ -73,10 +69,7 @@ const filterConfig = {
 					settings: {
 						type: 'categories',
 						param: 'categories',
-						getLabels: getRequestByIdString( NAMESPACE + 'products/categories', category => ( {
-							id: category.id,
-							label: category.name,
-						} ) ),
+						getLabels: getCategoryLabels,
 						labels: {
 							placeholder: __( 'Type to search for a product category', 'wc-admin' ),
 							button: __( 'Single Product Category', 'wc-admin' ),
@@ -92,10 +85,7 @@ const filterConfig = {
 			settings: {
 				type: 'products',
 				param: 'products',
-				getLabels: getRequestByIdString( NAMESPACE + 'products', product => ( {
-					id: product.id,
-					label: product.name,
-				} ) ),
+				getLabels: getProductLabels,
 				labels: {
 					helpText: __( 'Select at least two products to compare', 'wc-admin' ),
 					placeholder: __( 'Search for products to compare', 'wc-admin' ),
@@ -111,10 +101,7 @@ const filterConfig = {
 			settings: {
 				type: 'categories',
 				param: 'categories',
-				getLabels: getRequestByIdString( NAMESPACE + 'products/categories', category => ( {
-					id: category.id,
-					label: category.name,
-				} ) ),
+				getLabels: getCategoryLabels,
 				labels: {
 					helpText: __( 'Select at least two product categories to compare', 'wc-admin' ),
 					placeholder: __( 'Search for product categories to compare', 'wc-admin' ),
@@ -151,19 +138,7 @@ const variationsConfig = {
 			settings: {
 				type: 'variations',
 				param: 'variations',
-				getLabels: getRequestByIdString(
-					query => NAMESPACE + `products/${ query.products }/variations`,
-					variation => {
-						return {
-							id: variation.id,
-							label: variation.attributes.reduce(
-								( desc, attribute, index, arr ) =>
-									desc + `${ attribute.option }${ arr.length === index + 1 ? '' : ', ' }`,
-								''
-							),
-						};
-					}
-				),
+				getLabels: getVariationLabels,
 				labels: {
 					helpText: __( 'Select at least two variations to compare', 'wc-admin' ),
 					placeholder: __( 'Search for variations to compare', 'wc-admin' ),

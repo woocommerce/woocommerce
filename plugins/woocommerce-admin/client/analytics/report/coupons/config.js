@@ -7,8 +7,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { getRequestByIdString } from 'lib/async-requests';
-import { NAMESPACE } from 'store/constants';
+import { getCouponLabels } from 'lib/async-requests';
 
 export const charts = [
 	{
@@ -44,10 +43,7 @@ export const filters = [
 						settings: {
 							type: 'coupons',
 							param: 'coupons',
-							getLabels: getRequestByIdString( NAMESPACE + 'coupons', coupon => ( {
-								id: coupon.id,
-								label: coupon.code,
-							} ) ),
+							getLabels: getCouponLabels,
 							labels: {
 								placeholder: __( 'Type to search for a coupon', 'wc-admin' ),
 								button: __( 'Single Coupon', 'wc-admin' ),
@@ -62,10 +58,7 @@ export const filters = [
 				settings: {
 					type: 'coupons',
 					param: 'coupons',
-					getLabels: getRequestByIdString( NAMESPACE + 'coupons', coupon => ( {
-						id: coupon.id,
-						label: coupon.code,
-					} ) ),
+					getLabels: getCouponLabels,
 					labels: {
 						title: __( 'Compare Coupon Codes', 'wc-admin' ),
 						update: __( 'Compare', 'wc-admin' ),
