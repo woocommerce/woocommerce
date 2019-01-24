@@ -42,9 +42,14 @@ export default class CustomersReportTable extends Component {
 				hiddenByDefault: true,
 			},
 			{
+				label: __( 'Last Active', 'wc-admin' ),
+				key: 'date_last_active',
+				defaultSort: true,
+				isSortable: true,
+			},
+			{
 				label: __( 'Sign Up', 'wc-admin' ),
 				key: 'date_registered',
-				defaultSort: true,
 				isSortable: true,
 			},
 			{
@@ -58,7 +63,7 @@ export default class CustomersReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Lifetime Spend', 'wc-admin' ),
+				label: __( 'Total Spend', 'wc-admin' ),
 				key: 'total_spend',
 				isSortable: true,
 				isNumeric: true,
@@ -68,11 +73,6 @@ export default class CustomersReportTable extends Component {
 				screenReaderLabel: __( 'Average Order Value', 'wc-admin' ),
 				key: 'avg_order_value',
 				isNumeric: true,
-			},
-			{
-				label: __( 'Last Active', 'wc-admin' ),
-				key: 'date_last_active',
-				isSortable: true,
 			},
 			{
 				label: __( 'Country', 'wc-admin' ),
@@ -148,6 +148,10 @@ export default class CustomersReportTable extends Component {
 					value: username,
 				},
 				{
+					display: <Date date={ date_last_active } visibleFormat={ defaultTableDateFormat } />,
+					value: date_last_active,
+				},
+				{
 					display: dateRegistered,
 					value: date_registered,
 				},
@@ -166,10 +170,6 @@ export default class CustomersReportTable extends Component {
 				{
 					display: formatCurrency( avg_order_value ),
 					value: getCurrencyFormatDecimal( avg_order_value ),
-				},
-				{
-					display: <Date date={ date_last_active } visibleFormat={ defaultTableDateFormat } />,
-					value: date_last_active,
 				},
 				{
 					display: countryDisplay,
