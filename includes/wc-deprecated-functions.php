@@ -1012,3 +1012,15 @@ function wc_get_core_supported_themes() {
 	wc_deprecated_function( 'wc_get_core_supported_themes()', '3.3' );
 	return array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
 }
+
+/**
+ * When a term is split, ensure meta data maintained.
+ *
+ * @param  int    $old_term_id      Old term ID.
+ * @param  int    $new_term_id      New term ID.
+ * @param  string $term_taxonomy_id Term taxonomy ID.
+ * @param  string $taxonomy         Taxonomy.
+ */
+function wc_taxonomy_metadata_update_content_for_split_terms( $old_term_id, $new_term_id, $term_taxonomy_id, $taxonomy ) {
+	wc_deprecated_function( 'wc_taxonomy_metadata_update_content_for_split_terms', '3.6' );
+}

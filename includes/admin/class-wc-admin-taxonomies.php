@@ -49,7 +49,6 @@ class WC_Admin_Taxonomies {
 
 		// Category/term ordering.
 		add_action( 'create_term', array( $this, 'create_term' ), 5, 3 );
-		add_action( 'delete_term', array( $this, 'delete_term' ), 5 );
 
 		// Add form.
 		add_action( 'product_cat_add_form_fields', array( $this, 'add_category_fields' ) );
@@ -107,13 +106,7 @@ class WC_Admin_Taxonomies {
 	 * @param mixed $term_id Term ID.
 	 */
 	public function delete_term( $term_id ) {
-		global $wpdb;
-
-		$term_id = absint( $term_id );
-
-		if ( $term_id && get_option( 'db_version' ) < 34370 ) {
-			$wpdb->delete( $wpdb->woocommerce_termmeta, array( 'woocommerce_term_id' => $term_id ), array( '%d' ) );
-		}
+		wc_deprecated_function( 'delete_term', '3.6' );
 	}
 
 	/**

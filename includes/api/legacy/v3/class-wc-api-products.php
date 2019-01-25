@@ -861,11 +861,6 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_category', __( 'Could not delete the category', 'woocommerce' ), 401 );
 			}
 
-			// When a term is deleted, delete its meta.
-			if ( get_option( 'db_version' ) < 34370 ) {
-				$wpdb->delete( $wpdb->woocommerce_termmeta, array( 'woocommerce_term_id' => $id ), array( '%d' ) );
-			}
-
 			do_action( 'woocommerce_api_delete_product_category', $id, $this );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_category' ) );

@@ -698,10 +698,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			)
 		);
 
-		if ( get_option( 'db_version' ) < 34370 ) {
-			$core_tables[] = 'woocommerce_termmeta';
-		}
-
 		/**
 		 * Adding the prefix to the tables array, for backwards compatibility.
 		 *
