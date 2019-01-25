@@ -11,6 +11,100 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
+ * Change get terms defaults for attributes to order by the sorting setting, or default to menu_order for sortable taxonomies.
+ *
+ * @since 3.6.0 Sorting options are now set as the default automatically, so you no longer have to request to orderby menu_order.
+ *
+ * @param array $defaults   An array of default get_terms() arguments.
+ * @param array $taxonomies An array of taxonomies.
+ * @return array
+ */
+function wc_change_get_terms_defaults( $defaults, $taxonomies ) {
+	if ( is_array( $taxonomies ) && 1 < count( $taxonomies ) ) {
+		return $defaults;
+	}
+	$taxonomy = is_array( $taxonomies ) ? $taxonomies[0] : $taxonomies;
+	$orderby  = 'name';
+
+	if ( taxonomy_is_product_attribute( $taxonomy ) ) {
+		$orderby = wc_attribute_orderby( $taxonomy );
+	} elseif ( in_array( $taxonomy, apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ), true ) ) {
+		$orderby = 'menu_order';
+	}
+
+	switch ( $orderby ) {
+		case 'menu_order':
+			$defaults['orderby']               = 'meta_value_num';
+			$defaults['meta_key']              = 'order'; // phpcs:ignore
+			$defaults['force_menu_order_sort'] = true;
+			break;
+		case 'name_num':
+			$defaults['orderby']            = 'name';
+			$defaults['force_numeric_name'] = true;
+			break;
+		case 'parent':
+			$defaults['orderby'] = 'parent';
+			break;
+	}
+
+	return $defaults;
+}
+add_filter( 'get_terms_defaults', 'wc_change_get_terms_defaults', 10, 2 );
+
+/**
+ * Adds support to get_terms for menu_order argument.
+ *
+ * @since 3.6.0
+ * @param WP_Term_Query $terms_query Instance of WP_Term_Query.
+ */
+function wc_change_pre_get_terms( $terms_query ) {
+	$args = &$terms_query->query_vars;
+
+	if ( ! empty( $args['menu_order'] ) ) {
+		$args['order']                 = 'DESC' === strtoupper( $args['menu_order'] ) ? 'DESC' : 'ASC';
+		$args['orderby']               = 'meta_value_num';
+		$args['meta_key']              = 'order'; // phpcs:ignore
+		$args['force_menu_order_sort'] = true;
+		$terms_query->meta_query->parse_query_vars( $args );
+	}
+
+}
+add_action( 'pre_get_terms', 'wc_change_pre_get_terms', 10, 1 );
+
+/**
+ * Adjust term query to handle custom sorting parameters.
+ *
+ * @deprecated 3.6.0 No longer used as WP supports meta based sorting.
+ *
+ * @param array $clauses    Clauses.
+ * @param array $taxonomies Taxonomies.
+ * @param array $args       Arguments.
+ * @return array
+ */
+function wc_terms_clauses( $clauses, $taxonomies, $args ) {
+	global $wpdb;
+
+	// No need to filter when counting.
+	if ( strpos( 'COUNT(*)', $clauses['fields'] ) !== false ) {
+		return $clauses;
+	}
+
+	// Force numeric sort if using name_num custom sorting param.
+	if ( ! empty( $args['force_numeric_name'] ) ) {
+		$clauses['orderby'] = str_replace( 'ORDER BY t.name', 'ORDER BY t.name+0', $clauses['orderby'] );
+	}
+
+	// For sorting, force left join in case order meta is missing.
+	if ( ! empty( $args['force_menu_order_sort'] ) ) {
+		$clauses['join']  = str_replace( "INNER JOIN {$wpdb->termmeta}", "LEFT JOIN {$wpdb->termmeta}", $clauses['join'] );
+		$clauses['where'] = str_replace( "{$wpdb->termmeta}.meta_key = 'order'", "{$wpdb->termmeta}.meta_key = 'order' OR {$wpdb->termmeta}.meta_key IS NULL", $clauses['where'] );
+	}
+
+	return $clauses;
+}
+add_filter( 'terms_clauses', 'wc_terms_clauses', 99, 3 );
+
+/**
  * Helper to get cached object terms and filter by field using wp_list_pluck().
  * Works as a cached alternative for wp_get_post_terms() and wp_get_object_terms().
  *
@@ -59,10 +153,7 @@ function _wc_get_cached_product_terms( $product_id, $taxonomy, $args = array() )
 }
 
 /**
- * Wrapper for wp_get_post_terms which supports ordering by parent.
- *
- * NOTE: At this point in time, ordering by menu_order for example isn't possible with this function. wp_get_post_terms has no.
- *   filters which we can utilise to modify it's query. https://core.trac.wordpress.org/ticket/19094.
+ * Wrapper used to get terms for a product.
  *
  * @param  int    $product_id Product ID.
  * @param  string $taxonomy   Taxonomy slug.
@@ -74,65 +165,7 @@ function wc_get_product_terms( $product_id, $taxonomy, $args = array() ) {
 		return array();
 	}
 
-	if ( empty( $args['orderby'] ) && taxonomy_is_product_attribute( $taxonomy ) ) {
-		$args['orderby'] = wc_attribute_orderby( $taxonomy );
-	}
-
-	// Support ordering by parent.
-	if ( ! empty( $args['orderby'] ) && in_array( $args['orderby'], array( 'name_num', 'parent' ), true ) ) {
-		$fields  = isset( $args['fields'] ) ? $args['fields'] : 'all';
-		$orderby = $args['orderby'];
-
-		// Unset for wp_get_post_terms.
-		unset( $args['orderby'] );
-		unset( $args['fields'] );
-
-		$terms = _wc_get_cached_product_terms( $product_id, $taxonomy, $args );
-
-		switch ( $orderby ) {
-			case 'name_num':
-				usort( $terms, '_wc_get_product_terms_name_num_usort_callback' );
-				break;
-			case 'parent':
-				usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
-				break;
-		}
-
-		switch ( $fields ) {
-			case 'names':
-				$terms = wp_list_pluck( $terms, 'name' );
-				break;
-			case 'ids':
-				$terms = wp_list_pluck( $terms, 'term_id' );
-				break;
-			case 'slugs':
-				$terms = wp_list_pluck( $terms, 'slug' );
-				break;
-		}
-	} elseif ( ! empty( $args['orderby'] ) && 'menu_order' === $args['orderby'] ) {
-		// wp_get_post_terms doesn't let us use custom sort order.
-		$args['include'] = wc_get_object_terms( $product_id, $taxonomy, 'term_id' );
-
-		if ( empty( $args['include'] ) ) {
-			$terms = array();
-		} else {
-			// This isn't needed for get_terms.
-			unset( $args['orderby'] );
-
-			// Set args for get_terms.
-			$args['menu_order'] = isset( $args['order'] ) ? $args['order'] : 'ASC';
-			$args['hide_empty'] = isset( $args['hide_empty'] ) ? $args['hide_empty'] : 0;
-			$args['fields']     = isset( $args['fields'] ) ? $args['fields'] : 'names';
-
-			// Ensure slugs is valid for get_terms - slugs isn't supported.
-			$args['fields'] = ( 'slugs' === $args['fields'] ) ? 'id=>slug' : $args['fields'];
-			$terms          = get_terms( $taxonomy, $args );
-		}
-	} else {
-		$terms = _wc_get_cached_product_terms( $product_id, $taxonomy, $args );
-	}
-
-	return apply_filters( 'woocommerce_get_product_terms', $terms, $product_id, $taxonomy, $args );
+	return apply_filters( 'woocommerce_get_product_terms', _wc_get_cached_product_terms( $product_id, $taxonomy, $args ), $product_id, $taxonomy, $args );
 }
 
 /**
@@ -176,7 +209,8 @@ function wc_product_dropdown_categories( $args = array() ) {
 	global $wp_query;
 
 	$args = wp_parse_args(
-		$args, array(
+		$args,
+		array(
 			'pad_counts'         => 1,
 			'show_count'         => 1,
 			'hierarchical'       => 1,
@@ -184,7 +218,6 @@ function wc_product_dropdown_categories( $args = array() ) {
 			'show_uncategorized' => 1,
 			'orderby'            => 'name',
 			'selected'           => isset( $wp_query->query_vars['product_cat'] ) ? $wp_query->query_vars['product_cat'] : '',
-			'menu_order'         => false,
 			'show_option_none'   => __( 'Select a category', 'woocommerce' ),
 			'option_none_value'  => '',
 			'value_field'        => 'slug',
@@ -195,8 +228,8 @@ function wc_product_dropdown_categories( $args = array() ) {
 	);
 
 	if ( 'order' === $args['orderby'] ) {
-		$args['menu_order'] = 'asc';
-		$args['orderby']    = 'name';
+		$args['orderby']  = 'meta_value_num';
+		$args['meta_key'] = 'order'; // phpcs:ignore
 	}
 
 	wp_dropdown_categories( $args );
@@ -353,7 +386,7 @@ function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
  */
 function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = null ) {
 	if ( ! $terms ) {
-		$terms = get_terms( $taxonomy, 'menu_order=ASC&hide_empty=0&parent=0' );
+		$terms = get_terms( $taxonomy, 'hide_empty=0&parent=0&menu_order=ASC' );
 	}
 	if ( empty( $terms ) ) {
 		return $index;
@@ -386,7 +419,7 @@ function wc_reorder_terms( $the_term, $next_id, $taxonomy, $index = 0, $terms = 
 		do_action( 'woocommerce_after_set_term_order', $term, $index, $taxonomy );
 
 		// If that term has children we walk through them.
-		$children = get_terms( $taxonomy, "parent={$term_id}&menu_order=ASC&hide_empty=0" );
+		$children = get_terms( $taxonomy, "parent={$term_id}&hide_empty=0&menu_order=ASC" );
 		if ( ! empty( $children ) ) {
 			$index = wc_reorder_terms( $the_term, $next_id, $taxonomy, $index, $children );
 		}
@@ -414,20 +447,13 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 	$term_id = (int) $term_id;
 	$index   = (int) $index;
 
-	// Meta name.
-	if ( taxonomy_is_product_attribute( $taxonomy ) ) {
-		$meta_name = 'order_' . esc_attr( $taxonomy );
-	} else {
-		$meta_name = 'order';
-	}
-
-	update_woocommerce_term_meta( $term_id, $meta_name, $index );
+	update_woocommerce_term_meta( $term_id, 'order', $index );
 
 	if ( ! $recursive ) {
 		return $index;
 	}
 
-	$children = get_terms( $taxonomy, "parent=$term_id&menu_order=ASC&hide_empty=0" );
+	$children = get_terms( $taxonomy, "parent=$term_id&hide_empty=0&menu_order=ASC" );
 
 	foreach ( $children as $term ) {
 		$index++;
@@ -438,104 +464,6 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 
 	return $index;
 }
-
-/**
- * Add term ordering to get_terms.
- *
- * It enables the support a 'menu_order' parameter to get_terms for the product_cat taxonomy.
- * By default it is 'ASC'. It accepts 'DESC' too.
- *
- * To disable it, set it ot false (or 0).
- *
- * @param array $clauses    Clauses.
- * @param array $taxonomies Taxonomies.
- * @param array $args       Arguments.
- * @return array
- */
-function wc_terms_clauses( $clauses, $taxonomies, $args ) {
-	global $wpdb;
-
-	// No sorting when menu_order is false.
-	if ( isset( $args['menu_order'] ) && ( false === $args['menu_order'] || 'false' === $args['menu_order'] ) ) {
-		return $clauses;
-	}
-
-	// No sorting when orderby is non default.
-	if ( isset( $args['orderby'] ) && 'name' !== $args['orderby'] ) {
-		return $clauses;
-	}
-
-	// No sorting in admin when sorting by a column.
-	if ( is_admin() && isset( $_GET['orderby'] ) ) { // WPCS: input var ok, CSRF ok.
-		return $clauses;
-	}
-
-	// No need to filter counts.
-	if ( strpos( 'COUNT(*)', $clauses['fields'] ) !== false ) {
-		return $clauses;
-	}
-
-	// WordPress should give us the taxonomies asked when calling the get_terms function. Only apply to categories and pa_ attributes.
-	$found = false;
-
-	foreach ( (array) $taxonomies as $taxonomy ) {
-		if ( taxonomy_is_product_attribute( $taxonomy ) || in_array( $taxonomy, apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) ), true ) ) {
-
-			// Don't modify the orderby when we're ordering attributes by name.
-			if ( taxonomy_is_product_attribute( $taxonomy ) && 'name' === wc_attribute_orderby( $taxonomy ) ) {
-				return $clauses;
-			}
-
-			$found = true;
-			break;
-		}
-	}
-
-	if ( ! $found ) {
-		return $clauses;
-	}
-
-	// Meta name.
-	if ( ! empty( $taxonomies[0] ) && taxonomy_is_product_attribute( $taxonomies[0] ) ) {
-		$meta_name = 'order_' . esc_attr( $taxonomies[0] );
-	} else {
-		$meta_name = 'order';
-	}
-
-	// Query fields.
-	$clauses['fields'] = $clauses['fields'] . ', tm.meta_value';
-
-	// Query join.
-	if ( get_option( 'db_version' ) < 34370 ) {
-		$clauses['join'] .= " LEFT JOIN {$wpdb->woocommerce_termmeta} AS tm ON (t.term_id = tm.woocommerce_term_id AND tm.meta_key = '" . esc_sql( $meta_name ) . "') ";
-	} else {
-		$clauses['join'] .= " LEFT JOIN {$wpdb->termmeta} AS tm ON (t.term_id = tm.term_id AND tm.meta_key = '" . esc_sql( $meta_name ) . "') ";
-	}
-
-	// Default to ASC.
-	if ( ! isset( $args['menu_order'] ) || ! in_array( strtoupper( $args['menu_order'] ), array( 'ASC', 'DESC' ), true ) ) {
-		$args['menu_order'] = 'ASC';
-	}
-
-	$order = 'ORDER BY tm.meta_value+0 ' . $args['menu_order'];
-
-	if ( $clauses['orderby'] ) {
-		$clauses['orderby'] = str_replace( 'ORDER BY', $order . ',', $clauses['orderby'] );
-	} else {
-		$clauses['orderby'] = $order;
-	}
-
-	// Grouping.
-	if ( strstr( $clauses['fields'], 'tr.object_id' ) ) {
-		$clauses['orderby'] = ' GROUP BY t.term_id, tr.object_id ' . $clauses['orderby'];
-	} else {
-		$clauses['orderby'] = ' GROUP BY t.term_id ' . $clauses['orderby'];
-	}
-
-	return $clauses;
-}
-
-add_filter( 'terms_clauses', 'wc_terms_clauses', 99, 3 );
 
 /**
  * Function for recounting product terms, ignoring hidden products.
@@ -766,7 +694,8 @@ function wc_get_product_visibility_term_ids() {
 		return array();
 	}
 	return array_map(
-		'absint', wp_parse_args(
+		'absint',
+		wp_parse_args(
 			wp_list_pluck(
 				get_terms(
 					array(
