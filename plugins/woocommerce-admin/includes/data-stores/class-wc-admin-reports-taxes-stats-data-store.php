@@ -209,7 +209,7 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
-				return new WP_Error( 'woocommerce_reports_taxes_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
+				return new WP_Error( 'woocommerce_reports_taxes_stats_result_failed', __( 'Sorry, fetching tax data failed.', 'wc-admin' ) );
 			}
 
 			$totals = (object) $this->cast_numbers( $totals[0] );
