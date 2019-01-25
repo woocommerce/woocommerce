@@ -21,6 +21,7 @@ import { EllipsisMenu, MenuItem, MenuTitle, SectionHeader } from '@woocommerce/c
 import withSelect from 'wc-api/with-select';
 import TopSellingCategories from './top-selling-categories';
 import TopSellingProducts from './top-selling-products';
+import TopCoupons from './top-coupons';
 import './style.scss';
 
 class Leaderboards extends Component {
@@ -134,9 +135,11 @@ class Leaderboards extends Component {
 						{ ! hiddenLeaderboardKeys.includes( 'top-products' ) && (
 							<TopSellingProducts query={ query } totalRows={ rowsPerTable } />
 						) }
-
 						{ ! hiddenLeaderboardKeys.includes( 'top-categories' ) && (
 							<TopSellingCategories query={ query } totalRows={ rowsPerTable } />
+						) }
+						{ ! hiddenLeaderboardKeys.includes( 'top-coupons' ) && (
+							<TopCoupons query={ query } totalRows={ rowsPerTable } />
 						) }
 					</div>
 				</div>
