@@ -910,7 +910,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 				<?php do_action( 'woocommerce_no_products_found' ); ?>
 
-			<?php
+				<?php
 			endif;
 
 		}
@@ -1066,7 +1066,7 @@ if ( ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
 	 * Show the product title in the product loop. By default this is an H2.
 	 */
 	function woocommerce_template_loop_product_title() {
-		echo '<h2 class="woocommerce-loop-product__title">' . get_the_title() . '</h2>';
+		echo '<h2 class="woocommerce-loop-product__title">' . get_the_title() . '</h2>'; // phpcs:ignore
 	}
 }
 if ( ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
@@ -2403,7 +2403,6 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 					'woocommerce_product_subcategories_args',
 					array(
 						'parent'       => $parent_id,
-						'menu_order'   => 'ASC',
 						'hide_empty'   => 0,
 						'hierarchical' => 1,
 						'taxonomy'     => 'product_cat',
