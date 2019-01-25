@@ -1024,3 +1024,66 @@ function wc_get_core_supported_themes() {
 function wc_taxonomy_metadata_update_content_for_split_terms( $old_term_id, $new_term_id, $term_taxonomy_id, $taxonomy ) {
 	wc_deprecated_function( 'wc_taxonomy_metadata_update_content_for_split_terms', '3.6' );
 }
+
+/**
+ * WooCommerce Term Meta API.
+ *
+ * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
+ * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
+ *
+ * @param int    $term_id    Term ID.
+ * @param string $meta_key   Meta key.
+ * @param mixed  $meta_value Meta value.
+ * @param string $prev_value Previous value. (default: '').
+ * @return bool
+ */
+function update_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $prev_value = '' ) {
+	return function_exists( 'update_term_meta' ) ? update_term_meta( $term_id, $meta_key, $meta_value, $prev_value ) : update_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $prev_value );
+}
+
+/**
+ * WooCommerce Term Meta API.
+ *
+ * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
+ * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
+ *
+ * @param int    $term_id    Term ID.
+ * @param string $meta_key   Meta key.
+ * @param mixed  $meta_value Meta value.
+ * @param bool   $unique     Make meta key unique. (default: false).
+ * @return bool
+ */
+function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = false ) {
+	return function_exists( 'add_term_meta' ) ? add_term_meta( $term_id, $meta_key, $meta_value, $unique ) : add_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $unique );
+}
+
+/**
+ * WooCommerce Term Meta API
+ *
+ * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
+ * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
+ *
+ * @param int    $term_id    Term ID.
+ * @param string $meta_key   Meta key.
+ * @param string $meta_value Meta value (default: '').
+ * @param bool   $deprecated Deprecated param (default: false).
+ * @return bool
+ */
+function delete_woocommerce_term_meta( $term_id, $meta_key, $meta_value = '', $deprecated = false ) {
+	return function_exists( 'delete_term_meta' ) ? delete_term_meta( $term_id, $meta_key, $meta_value ) : delete_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value );
+}
+
+/**
+ * WooCommerce Term Meta API
+ *
+ * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
+ * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
+ *
+ * @param int    $term_id Term ID.
+ * @param string $key     Meta key.
+ * @param bool   $single  Whether to return a single value. (default: true).
+ * @return mixed
+ */
+function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
+	return function_exists( 'get_term_meta' ) ? get_term_meta( $term_id, $key, $single ) : get_metadata( 'woocommerce_term', $term_id, $key, $single );
+}

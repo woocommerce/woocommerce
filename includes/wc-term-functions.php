@@ -260,39 +260,6 @@ function wc_walk_category_dropdown_tree() {
 }
 
 /**
- * When a term is split, ensure meta data maintained.
- *
- * @param  int    $old_term_id      Old term ID.
- * @param  int    $new_term_id      New term ID.
- * @param  string $term_taxonomy_id Term taxonomy ID.
- * @param  string $taxonomy         Taxonomy.
- */
-function wc_taxonomy_metadata_update_content_for_split_terms( $old_term_id, $new_term_id, $term_taxonomy_id, $taxonomy ) {
-	global $wpdb;
-
-	if ( get_option( 'db_version' ) < 34370 ) {
-		if ( 'product_cat' === $taxonomy || taxonomy_is_product_attribute( $taxonomy ) ) {
-			$old_meta_data = $wpdb->get_results( $wpdb->prepare( "SELECT meta_key, meta_value FROM {$wpdb->prefix}woocommerce_termmeta WHERE woocommerce_term_id = %d;", $old_term_id ) );
-
-			// Copy across to split term.
-			if ( $old_meta_data ) {
-				foreach ( $old_meta_data as $meta_data ) {
-					$wpdb->insert(
-						"{$wpdb->prefix}woocommerce_termmeta",
-						array(
-							'woocommerce_term_id' => $new_term_id,
-							'meta_key'            => $meta_data->meta_key, // WPCS: slow query ok.
-							'meta_value'          => $meta_data->meta_value, // WPCS: slow query ok.
-						)
-					);
-				}
-			}
-		}
-	}
-}
-add_action( 'split_shared_term', 'wc_taxonomy_metadata_update_content_for_split_terms', 10, 4 );
-
-/**
  * Migrate data from WC term meta to WP term meta.
  *
  * When the database is updated to support term meta, migrate WC term meta data across.
@@ -310,69 +277,6 @@ function wc_taxonomy_metadata_migrate_data( $wp_db_version, $wp_current_db_versi
 	}
 }
 add_action( 'wp_upgrade', 'wc_taxonomy_metadata_migrate_data', 10, 2 );
-
-/**
- * WooCommerce Term Meta API.
- *
- * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
- * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
- *
- * @param int    $term_id    Term ID.
- * @param string $meta_key   Meta key.
- * @param mixed  $meta_value Meta value.
- * @param string $prev_value Previous value. (default: '').
- * @return bool
- */
-function update_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $prev_value = '' ) {
-	return function_exists( 'update_term_meta' ) ? update_term_meta( $term_id, $meta_key, $meta_value, $prev_value ) : update_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $prev_value );
-}
-
-/**
- * WooCommerce Term Meta API.
- *
- * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
- * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
- *
- * @param int    $term_id    Term ID.
- * @param string $meta_key   Meta key.
- * @param mixed  $meta_value Meta value.
- * @param bool   $unique     Make meta key unique. (default: false).
- * @return bool
- */
-function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = false ) {
-	return function_exists( 'add_term_meta' ) ? add_term_meta( $term_id, $meta_key, $meta_value, $unique ) : add_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $unique );
-}
-
-/**
- * WooCommerce Term Meta API
- *
- * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
- * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
- *
- * @param int    $term_id    Term ID.
- * @param string $meta_key   Meta key.
- * @param string $meta_value Meta value (default: '').
- * @param bool   $deprecated Deprecated param (default: false).
- * @return bool
- */
-function delete_woocommerce_term_meta( $term_id, $meta_key, $meta_value = '', $deprecated = false ) {
-	return function_exists( 'delete_term_meta' ) ? delete_term_meta( $term_id, $meta_key, $meta_value ) : delete_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value );
-}
-
-/**
- * WooCommerce Term Meta API
- *
- * WC tables for storing term meta are @deprecated from WordPress 4.4 since 4.4 has its own table.
- * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
- *
- * @param int    $term_id Term ID.
- * @param string $key     Meta key.
- * @param bool   $single  Whether to return a single value. (default: true).
- * @return mixed
- */
-function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
-	return function_exists( 'get_term_meta' ) ? get_term_meta( $term_id, $key, $single ) : get_metadata( 'woocommerce_term', $term_id, $key, $single );
-}
 
 /**
  * Move a term before the a given element of its hierarchy level.
@@ -447,7 +351,7 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 	$term_id = (int) $term_id;
 	$index   = (int) $index;
 
-	update_woocommerce_term_meta( $term_id, 'order', $index );
+	update_term_meta( $term_id, 'order', $index );
 
 	if ( ! $recursive ) {
 		return $index;
@@ -560,7 +464,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		$count = $wpdb->get_var( implode( ' ', $term_query ) ); // WPCS: unprepared SQL ok.
 
 		// Update the count.
-		update_woocommerce_term_meta( $term_id, 'product_count_' . $taxonomy->name, absint( $count ) );
+		update_term_meta( $term_id, 'product_count_' . $taxonomy->name, absint( $count ) );
 	}
 
 	delete_transient( 'wc_term_counts' );
@@ -625,7 +529,7 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 
 	foreach ( $terms as &$term ) {
 		if ( is_object( $term ) ) {
-			$term_counts[ $term->term_id ] = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : get_woocommerce_term_meta( $term->term_id, 'product_count_' . $taxonomies[0], true );
+			$term_counts[ $term->term_id ] = isset( $term_counts[ $term->term_id ] ) ? $term_counts[ $term->term_id ] : get_term_meta( $term->term_id, 'product_count_' . $taxonomies[0], true );
 
 			if ( '' !== $term_counts[ $term->term_id ] ) {
 				$term->count = absint( $term_counts[ $term->term_id ] );
@@ -652,11 +556,11 @@ add_filter( 'get_terms', 'wc_change_term_counts', 10, 2 );
  * @return array
  */
 function wc_get_term_product_ids( $term_id, $taxonomy ) {
-	$product_ids = get_woocommerce_term_meta( $term_id, 'product_ids', true );
+	$product_ids = get_term_meta( $term_id, 'product_ids', true );
 
 	if ( false === $product_ids || ! is_array( $product_ids ) ) {
 		$product_ids = get_objects_in_term( $term_id, $taxonomy );
-		update_woocommerce_term_meta( $term_id, 'product_ids', $product_ids );
+		update_term_meta( $term_id, 'product_ids', $product_ids );
 	}
 
 	return $product_ids;
@@ -674,10 +578,10 @@ function wc_get_term_product_ids( $term_id, $taxonomy ) {
  */
 function wc_clear_term_product_ids( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
 	foreach ( $old_tt_ids as $term_id ) {
-		delete_woocommerce_term_meta( $term_id, 'product_ids' );
+		delete_term_meta( $term_id, 'product_ids' );
 	}
 	foreach ( $tt_ids as $term_id ) {
-		delete_woocommerce_term_meta( $term_id, 'product_ids' );
+		delete_term_meta( $term_id, 'product_ids' );
 	}
 }
 add_action( 'set_object_terms', 'wc_clear_term_product_ids', 10, 6 );

@@ -666,11 +666,11 @@ class WC_API_Products extends WC_API_Resource {
 			$term_id = intval( $term->term_id );
 
 			// Get category display type
-			$display_type = get_woocommerce_term_meta( $term_id, 'display_type' );
+			$display_type = get_term_meta( $term_id, 'display_type' );
 
 			// Get category image
 			$image = '';
-			if ( $image_id = get_woocommerce_term_meta( $term_id, 'thumbnail_id' ) ) {
+			if ( $image_id = get_term_meta( $term_id, 'thumbnail_id' ) ) {
 				$image = wp_get_attachment_url( $image_id );
 			}
 
@@ -750,11 +750,11 @@ class WC_API_Products extends WC_API_Resource {
 
 			$id = $insert['term_id'];
 
-			update_woocommerce_term_meta( $id, 'display_type', 'default' === $data['display'] ? '' : sanitize_text_field( $data['display'] ) );
+			update_term_meta( $id, 'display_type', 'default' === $data['display'] ? '' : sanitize_text_field( $data['display'] ) );
 
 			// Check if image_id is a valid image attachment before updating the term meta.
 			if ( $image_id && wp_attachment_is_image( $image_id ) ) {
-				update_woocommerce_term_meta( $id, 'thumbnail_id', $image_id );
+				update_term_meta( $id, 'thumbnail_id', $image_id );
 			}
 
 			do_action( 'woocommerce_api_create_product_category', $id, $data );
@@ -823,11 +823,11 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			if ( ! empty( $data['display'] ) ) {
-				update_woocommerce_term_meta( $id, 'display_type', 'default' === $data['display'] ? '' : sanitize_text_field( $data['display'] ) );
+				update_term_meta( $id, 'display_type', 'default' === $data['display'] ? '' : sanitize_text_field( $data['display'] ) );
 			}
 
 			if ( isset( $image_id ) ) {
-				update_woocommerce_term_meta( $id, 'thumbnail_id', $image_id );
+				update_term_meta( $id, 'thumbnail_id', $image_id );
 			}
 
 			do_action( 'woocommerce_api_edit_product_category', $id, $data );

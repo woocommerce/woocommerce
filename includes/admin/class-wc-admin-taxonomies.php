@@ -97,7 +97,7 @@ class WC_Admin_Taxonomies {
 
 		$meta_name = taxonomy_is_product_attribute( $taxonomy ) ? 'order_' . esc_attr( $taxonomy ) : 'order';
 
-		update_woocommerce_term_meta( $term_id, $meta_name, 0 );
+		update_term_meta( $term_id, $meta_name, 0 );
 	}
 
 	/**
@@ -212,8 +212,8 @@ class WC_Admin_Taxonomies {
 	 */
 	public function edit_category_fields( $term ) {
 
-		$display_type = get_woocommerce_term_meta( $term->term_id, 'display_type', true );
-		$thumbnail_id = absint( get_woocommerce_term_meta( $term->term_id, 'thumbnail_id', true ) );
+		$display_type = get_term_meta( $term->term_id, 'display_type', true );
+		$thumbnail_id = absint( get_term_meta( $term->term_id, 'thumbnail_id', true ) );
 
 		if ( $thumbnail_id ) {
 			$image = wp_get_attachment_thumb_url( $thumbnail_id );
@@ -307,10 +307,10 @@ class WC_Admin_Taxonomies {
 	 */
 	public function save_category_fields( $term_id, $tt_id = '', $taxonomy = '' ) {
 		if ( isset( $_POST['display_type'] ) && 'product_cat' === $taxonomy ) { // WPCS: CSRF ok, input var ok.
-			update_woocommerce_term_meta( $term_id, 'display_type', esc_attr( $_POST['display_type'] ) ); // WPCS: CSRF ok, sanitization ok, input var ok.
+			update_term_meta( $term_id, 'display_type', esc_attr( $_POST['display_type'] ) ); // WPCS: CSRF ok, sanitization ok, input var ok.
 		}
 		if ( isset( $_POST['product_cat_thumbnail_id'] ) && 'product_cat' === $taxonomy ) { // WPCS: CSRF ok, input var ok.
-			update_woocommerce_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) ); // WPCS: CSRF ok, input var ok.
+			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) ); // WPCS: CSRF ok, input var ok.
 		}
 	}
 
@@ -433,7 +433,7 @@ class WC_Admin_Taxonomies {
 				$columns .= wc_help_tip( __( 'This is the default category and it cannot be deleted. It will be automatically assigned to products with no category.', 'woocommerce' ) );
 			}
 
-			$thumbnail_id = get_woocommerce_term_meta( $id, 'thumbnail_id', true );
+			$thumbnail_id = get_term_meta( $id, 'thumbnail_id', true );
 
 			if ( $thumbnail_id ) {
 				$image = wp_get_attachment_thumb_url( $thumbnail_id );
