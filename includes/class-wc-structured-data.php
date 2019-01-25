@@ -210,7 +210,7 @@ class WC_Structured_Data {
 		}
 
 		$markup['image']       = wp_get_attachment_url( $product->get_image_id() );
-		$markup['description'] = wpautop( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) );
+		$markup['description'] = wp_filter_nohtml_kses( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) );
 		$markup['sku']         = $product->get_sku();
 
 		if ( '' !== $product->get_price() ) {
