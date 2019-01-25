@@ -1,6 +1,7 @@
 # 1.4.1 (unreleased)
 - Chart component: format numbers and prices using store currency settings.
 - Make `href`/linking optional in SummaryNumber.
+- Fix SummaryNumber example code.
 
 # 1.4.0
 - Add download log ip address autocompleter to search component
