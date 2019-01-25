@@ -823,7 +823,6 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
   KEY timestamp (timestamp)
 ) $collate;
 		";
-		}
 
 		return $tables;
 	}
