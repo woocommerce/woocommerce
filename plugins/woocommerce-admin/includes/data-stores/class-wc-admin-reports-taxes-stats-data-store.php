@@ -184,6 +184,8 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 				return new WP_Error( 'woocommerce_reports_taxes_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
 			}
 
+			$this->update_intervals_sql_params( $intervals_query, $query_args, $db_interval_count, $expected_interval_count, $table_name );
+
 			if ( '' !== $selections ) {
 				$selections = ', ' . $selections;
 			}
@@ -214,16 +216,22 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 
 			$totals = (object) $this->cast_numbers( $totals[0] );
 
-			$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $intervals );
-			$this->create_interval_subtotals( $intervals );
-
-			$data     = (object) array(
+			$data = (object) array(
 				'totals'    => $totals,
 				'intervals' => $intervals,
 				'total'     => $expected_interval_count,
 				'pages'     => $total_pages,
 				'page_no'   => (int) $query_args['page'],
 			);
+
+			if ( WC_Admin_Reports_Interval::intervals_missing( $expected_interval_count, $db_interval_count, $intervals_query['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
+				$this->fill_in_missing_intervals( $db_intervals, $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
+				$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
+				$this->remove_extra_records( $data, $query_args['page'], $intervals_query['per_page'], $db_interval_count, $expected_interval_count, $query_args['orderby'] );
+			} else {
+				$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data->intervals );
+			}
+			$this->create_interval_subtotals( $data->intervals );
 
 			wp_cache_set( $cache_key, $data, $this->cache_group );
 		}
