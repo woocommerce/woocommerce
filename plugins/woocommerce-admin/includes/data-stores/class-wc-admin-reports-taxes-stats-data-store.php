@@ -132,6 +132,14 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 		$data      = wp_cache_get( $cache_key, $this->cache_group );
 
 		if ( false === $data ) {
+			$data = (object) array(
+				'totals'    => (object) array(),
+				'intervals' => (object) array(),
+				'total'     => 0,
+				'pages'     => 0,
+				'page_no'   => 0,
+			);
+
 			$selections      = $this->selected_columns( $query_args );
 			$totals_query    = array();
 			$intervals_query = array();
@@ -155,7 +163,7 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 
 			$total_pages = (int) ceil( $db_records_count / $intervals_query['per_page'] );
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-				return array();
+				return $data;
 			}
 
 			$totals = $wpdb->get_results(
