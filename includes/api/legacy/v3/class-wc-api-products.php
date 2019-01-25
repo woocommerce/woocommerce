@@ -2760,25 +2760,7 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'A product attribute with the provided ID could not be found', 'woocommerce' ), 404 );
 			}
 
-			$args    = array( 'hide_empty' => false );
-			$orderby = wc_attribute_orderby( $taxonomy );
-
-			switch ( $orderby ) {
-				case 'name' :
-					$args['orderby']    = 'name';
-					$args['menu_order'] = false;
-				break;
-				case 'id' :
-					$args['orderby']    = 'id';
-					$args['order']      = 'ASC';
-					$args['menu_order'] = false;
-				break;
-				case 'menu_order' :
-					$args['menu_order'] = 'ASC';
-				break;
-			}
-
-			$terms = get_terms( $taxonomy, $args );
+			$terms = get_terms( $taxonomy, array( 'hide_empty' => false ) );
 			$attribute_terms = array();
 
 			foreach ( $terms as $term ) {
