@@ -181,7 +181,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 							'format'      => 'uri',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'name'             => array(
+						'name'              => array(
 							'description' => __( 'Image name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
@@ -254,10 +254,12 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 
 				// Set the image title.
 				if ( ! empty( $request['image']['name'] ) ) {
-					wp_update_post( array(
-						'ID'         => $image_id,
-						'post_title' => wc_clean( $request['image']['name'] ),
-					) );
+					wp_update_post(
+						array(
+							'ID'         => $image_id,
+							'post_title' => wc_clean( $request['image']['name'] ),
+						)
+					);
 				}
 			} else {
 				delete_woocommerce_term_meta( $id, 'thumbnail_id' );
