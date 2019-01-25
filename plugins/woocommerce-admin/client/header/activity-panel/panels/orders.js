@@ -85,7 +85,7 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 						orderLink: <Link href={ 'post.php?action=edit&post=' + order.id } type="wp-admin" />,
 						// @TODO: Hook up customer name link
 						customerLink: <Link href={ '#' } type="wp-admin" />,
-						destinationFlag: <Flag order={ order } round={ false } height={ 9 } width={ 12 } />,
+						destinationFlag: <Flag order={ order } round={ false } />,
 					},
 				} ) }
 			</Fragment>
