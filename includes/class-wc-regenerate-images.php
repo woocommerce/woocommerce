@@ -346,7 +346,7 @@ class WC_Regenerate_Images {
 		}
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
-		
+
 		// Fix for images with no metadata.
 		if ( ! is_array( $metadata ) ) {
 			$metadata = array();
