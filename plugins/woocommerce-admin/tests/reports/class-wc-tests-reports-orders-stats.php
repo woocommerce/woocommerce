@@ -3008,7 +3008,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	/**
 	 * Test zero filling when ordering by date in descending order.
 	 */
-	public function test_zero_fill_order_date_desc() {
+	public function test_zero_fill_order_date() {
 		global $wpdb;
 		WC_Helper_Reports::reset_stats_dbs();
 
@@ -3139,6 +3139,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$current_hour_end->setTimestamp( $order_1_time + ( HOUR_IN_SECONDS - $seconds_into_hour ) - 1 );
 
 		// Test for current hour--only 1 hour visible.
+		// DESC.
 		$query_args = array(
 			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
@@ -3200,14 +3201,26 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
+		// ASC -- only 1 interval, so should be the same.
+		$query_args = array(
+			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'interval' => 'hour',
+			'orderby'  => 'date',
+			'order'    => 'asc',
+		);
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+
 		/*
 		 * Test for [-5 hours, now] -- partial 1 page.
+		 * bottom            ...                  top
 		 * | --------------------|------|-----|-----|
 		 * minus 5 hours         |      |   order1  now
 		 *                       |      |   order2
 		 *                       |  now-1 hour
 		 *                     order 3
 		 */
+		// DESC.
 		$hour_offset   = 5;
 		$minus_5_hours = new DateTime();
 		$now_timestamp = (int) $current_hour_end->format( 'U' );
@@ -3325,8 +3338,23 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$actual = json_decode( json_encode( $data_store->get_data( $query_args ) ), true );
 		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
+		// ASC -- reverse the intervals array, but numbers stay the same.
+		$query_args = array(
+			'after'    => $minus_5_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'interval' => 'hour',
+			'orderby'  => 'date',
+			'order'    => 'asc',
+		);
+		$expected_stats['intervals'] = array_reverse( $expected_stats['intervals'] );
+
+		$actual = json_decode( json_encode( $data_store->get_data( $query_args ) ), true );
+		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+
 		/*
 		 * Test for [-9 hours, now] -- full 1 page.
+		 * DESC:
+		 * bottom         ...                     top
 		 * | --------------------|------|-----|-----|
 		 * minus 9 hours         |      |   order1  now
 		 *                       |      |   order2
@@ -3447,8 +3475,24 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
+		// ASC -- same values, just reverse order of intervals.
+		$query_args = array(
+			'after'    => $minus_9_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'interval' => 'hour',
+			'orderby'  => 'date',
+			'order'    => 'asc',
+		);
+
+		$expected_stats['intervals'] = array_reverse( $expected_stats['intervals'] );
+
+		$actual = json_decode( json_encode( $data_store->get_data( $query_args ) ), true );
+		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+
 		/*
 		 * Test for [-10 hours, now] -- 1 page full, 1 interval on 2nd page.
+		 * DESC:
+		 * bottom           ...                    top
 		 *                 page 1
 		 * | --------------------|------|-----|-----|
 		 * minus 9 hours         |      |   order1  now
@@ -3461,10 +3505,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		 * minus 10 hours
 		 *     minus 9 hours
 		 */
-		$hour_offset   = 10;
+		$hour_offset    = 10;
 		$minus_10_hours = new DateTime();
-		$now_timestamp = (int) $current_hour_end->format( 'U' );
+		$now_timestamp  = (int) $current_hour_end->format( 'U' );
 		$minus_10_hours->setTimestamp( $now_timestamp - $hour_offset * HOUR_IN_SECONDS );
+		$per_page = 10;
 
 		// Page 1.
 		$query_args = array(
@@ -3474,15 +3519,19 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'orderby'  => 'date',
 			'order'    => 'desc',
 			'page'     => 1,
+			'per_page' => $per_page,
 		);
 
 		// Expected Intervals section construction.
 		$expected_intervals = [];
-		$interval_count     = 10;
+		$interval_count     = 11;
 		for ( $i = 0; $i < $interval_count; $i ++ ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end = $current_hour_end;
+			} elseif ( $hour_offset === $i ) {
+				$date_start = $minus_10_hours;
+				$date_end   = new DateTime( $minus_10_hours->format( 'Y-m-d H:59:59' ) );
 			} else {
 				$hour_anchor = new DateTime();
 				$hour_anchor->setTimestamp( $now_timestamp - $i * HOUR_IN_SECONDS );
@@ -3566,7 +3615,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_new_customers'       => $new_customers,
 				'products'                => 1,
 			),
-			'intervals' => $expected_intervals,
+			'intervals' => array_slice( $expected_intervals, 0, $per_page ),
 			'total'     => 11,
 			'pages'     => 2,
 			'page_no'   => 1,
@@ -3584,29 +3633,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page'     => 2,
 		);
 
-		// Expected Intervals section construction.
-		$expected_intervals = [];
-		$interval_count     = 1;
-
-		// Interval subresponse.
-		$date_start = $minus_10_hours;
-		$date_end   = new DateTime( $minus_10_hours->format( 'Y-m-d H:59:59' ) );
-
-		$orders_count   = 0;
-		$num_items_sold = $orders_count * $qty_per_product;
-		$coupons        = 0;
-		$shipping       = $orders_count * 10;
-		$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
-		$gross_revenue  = $net_revenue + $shipping;
-		$new_customers  = 0;
-
-		$expected_interval = array(
-			'interval'       => $date_start->format( 'Y-m-d H' ),
-			'date_start'     => $date_start->format( 'Y-m-d H:i:s' ),
-			'date_start_gmt' => $date_start->format( 'Y-m-d H:i:s' ),
-			'date_end'       => $date_end->format( 'Y-m-d H:i:s' ),
-			'date_end_gmt'   => $date_end->format( 'Y-m-d H:i:s' ),
-			'subtotals'      => array(
+		$expected_stats = array(
+			'totals'    => array(
 				'orders_count'            => $orders_count,
 				'num_items_sold'          => $num_items_sold,
 				'gross_revenue'           => $gross_revenue,
@@ -3615,23 +3643,48 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'taxes'                   => 0,
 				'shipping'                => $shipping,
 				'net_revenue'             => $net_revenue,
-				'avg_items_per_order'     => 0 === $orders_count ? 0 : $num_items_sold / $orders_count,
-				'avg_order_value'         => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
+				'avg_items_per_order'     => $num_items_sold / $orders_count,
+				'avg_order_value'         => $net_revenue / $orders_count,
 				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
+				'products'                => 1,
 			),
+			'intervals' => array_slice( $expected_intervals, $per_page ),
+			'total'     => 11,
+			'pages'     => 2,
+			'page_no'   => 2,
 		);
 
-		$expected_intervals[] = $expected_interval;
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
-		// Totals section.
-		$orders_count   = count( $order_during_this_['hour'] ) + 1; // order 3 is 1 hour before order 1 & 2, so include it.
-		$num_items_sold = $orders_count * $qty_per_product;
-		$coupons        = 0;
-		$shipping       = $orders_count * 10;
-		$net_revenue    = $product_price * $qty_per_product * $orders_count - $coupons;
-		$gross_revenue  = $net_revenue + $shipping;
-		$new_customers  = 1;
+		/*
+		 * Test for [-10 hours, now] -- 1 page full, 1 interval on 2nd page.
+		 * ASC:
+		 * bottom           ...                    top
+		 *                 page 1
+		 * | -----------|-----|-----------|-----------|
+		 * minus 1 hour |     |           |        minus 10 hours
+		 *           order 3  |           |
+		 *                    |          minus 9 hours
+		 *                   minus 2 hours
+		 *
+		 *                 page 2
+		 * |-----------|
+		 * now hours
+		 *            minus 1 hour
+		 */
+		$expected_intervals = array_reverse( $expected_intervals );
+
+		// Page 1.
+		$query_args = array(
+			'after'    => $minus_10_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'interval' => 'hour',
+			'orderby'  => 'date',
+			'order'    => 'asc',
+			'page'     => 1,
+			'per_page' => $per_page,
+		);
 
 		$expected_stats = array(
 			'totals'    => array(
@@ -3649,7 +3702,42 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_new_customers'       => $new_customers,
 				'products'                => 1,
 			),
-			'intervals' => $expected_intervals,
+			'intervals' => array_slice( $expected_intervals, 0, $per_page ),
+			'total'     => 11,
+			'pages'     => 2,
+			'page_no'   => 1,
+		);
+
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+
+		// Page 2.
+		$query_args = array(
+			'after'    => $minus_10_hours->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'interval' => 'hour',
+			'orderby'  => 'date',
+			'order'    => 'asc',
+			'page'     => 2,
+			'per_page' => $per_page,
+		);
+
+		$expected_stats = array(
+			'totals'    => array(
+				'orders_count'            => $orders_count,
+				'num_items_sold'          => $num_items_sold,
+				'gross_revenue'           => $gross_revenue,
+				'coupons'                 => $coupons,
+				'refunds'                 => 0,
+				'taxes'                   => 0,
+				'shipping'                => $shipping,
+				'net_revenue'             => $net_revenue,
+				'avg_items_per_order'     => $num_items_sold / $orders_count,
+				'avg_order_value'         => $net_revenue / $orders_count,
+				'num_returning_customers' => 0,
+				'num_new_customers'       => $new_customers,
+				'products'                => 1,
+			),
+			'intervals' => array_slice( $expected_intervals, $per_page ),
 			'total'     => 11,
 			'pages'     => 2,
 			'page_no'   => 2,
