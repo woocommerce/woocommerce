@@ -148,7 +148,9 @@ export default class CustomersReportTable extends Component {
 					value: username,
 				},
 				{
-					display: <Date date={ date_last_active } visibleFormat={ defaultTableDateFormat } />,
+					display: date_last_active && (
+						<Date date={ date_last_active } visibleFormat={ defaultTableDateFormat } />
+					),
 					value: date_last_active,
 				},
 				{
