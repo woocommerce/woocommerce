@@ -952,10 +952,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$this->set_coupon_discount_amounts( $discounts );
-		$this->set_item_discount_amounts( $discounts );
+		$this->save();
 
 		// Recalculate totals and taxes.
-		$this->calculate_totals( true );
+		$this->recalculate_coupons();
 
 		// Record usage so counts and validation is correct.
 		$used_by = $this->get_user_id();
