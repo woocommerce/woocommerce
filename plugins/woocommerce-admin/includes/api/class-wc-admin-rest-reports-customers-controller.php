@@ -62,10 +62,10 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		$args['last_order_after']    = $request['last_order_after'];
 
 		$between_params_numeric    = array( 'orders_count', 'total_spend', 'avg_order_value' );
-		$normalized_numeric_params = WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params_numeric, false );
+		$normalized_params_numeric = WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params_numeric, false );
 		$between_params_date       = array( 'last_active', 'registered' );
-		$normalized_date_params    = WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params_date, true );
-		$args                      = array_merge( $args, $normalized_numeric_params, $normalized_date_params );
+		$normalized_params_date    = WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params_date, true );
+		$args                      = array_merge( $args, $normalized_params_numeric, $normalized_params_date );
 
 		return $args;
 	}
