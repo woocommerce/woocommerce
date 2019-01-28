@@ -52,8 +52,6 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		$args['country']             = $request['country'];
 		$args['last_active_before']  = $request['last_active_before'];
 		$args['last_active_after']   = $request['last_active_after'];
-		$args['last_active_min']     = $request['last_active_min'];
-		$args['last_active_max']     = $request['last_active_max'];
 		$args['orders_count_min']    = $request['orders_count_min'];
 		$args['orders_count_max']    = $request['orders_count_max'];
 		$args['total_spend_min']     = $request['total_spend_min'];
@@ -64,10 +62,10 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		$args['last_order_after']    = $request['last_order_after'];
 
 		$numeric_between_params = array( 'orders_count', 'total_spend', 'avg_order_value' );
-		$date_between_params = array( 'last_active' );
-		$normalized     = WC_Admin_Reports_Interval::normalize_numeric_between_params( $request, $numeric_between_params );
-		$normalized_dates     = WC_Admin_Reports_Interval::normalize_date_between_params( $request, $date_between_params );
-		$args           = array_merge( $args, $normalized, $normalized_dates );
+		$date_between_params    = array( 'last_active' );
+		$normalized             = WC_Admin_Reports_Interval::normalize_between_params( $request, $numeric_between_params, false );
+		$normalized_dates       = WC_Admin_Reports_Interval::normalize_between_params( $request, $date_between_params, true );
+		$args                   = array_merge( $args, $normalized, $normalized_dates );
 
 		return $args;
 	}

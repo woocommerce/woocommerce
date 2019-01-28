@@ -813,7 +813,7 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	/**
 	 * Test function that normalizes *_between query parameters to *_min & *_max.
 	 */
-	public function test_normalize_numeric_between_params() {
+	public function test_normalize_between_params() {
 		$request  = array(
 			'a_between' => 'malformed',     // won't be normalized (not an array).
 			'b_between' => array( 1, 5 ),   // results in min=1, max=5.
@@ -822,7 +822,7 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			'f_between' => array( 10, 12 ), // not in params, skipped.
 		);
 		$params   = array( 'a', 'b', 'c', 'd' );
-		$result   = WC_Admin_Reports_Interval::normalize_numeric_between_params( $request, $params );
+		$result   = WC_Admin_Reports_Interval::normalize_between_params( $request, $params );
 		$expected = array(
 			'b_min' => 1,
 			'b_max' => 5,
