@@ -494,7 +494,8 @@ class WC_Admin_Reports_Interval {
 	}
 
 	/**
-	 * Normalize "*_between" parameters to "*_min" and "*_max".
+	 * Normalize "*_between" parameters to "*_min" and "*_max" for numeric values
+	 * and "*_after" and "*_before" for date values.
 	 *
 	 * @param array        $request Query params from REST API request.
 	 * @param string|array $param_names One or more param names to handle. Should not include "_between" suffix.
