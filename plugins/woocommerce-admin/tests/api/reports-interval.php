@@ -822,7 +822,7 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			'f_between' => array( 10, 12 ), // not in params, skipped.
 		);
 		$params   = array( 'a', 'b', 'c', 'd' );
-		$result   = WC_Admin_Reports_Interval::normalize_between_params( $request, $params );
+		$result   = WC_Admin_Reports_Interval::normalize_between_params( $request, $params, false );
 		$expected = array(
 			'b_min' => 1,
 			'b_max' => 5,

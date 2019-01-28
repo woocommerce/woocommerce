@@ -56,9 +56,11 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 		$args['last_order_before']   = $request['last_order_before'];
 		$args['last_order_after']    = $request['last_order_after'];
 
-		$between_params = array( 'orders_count', 'total_spend', 'avg_order_value' );
-		$normalized     = WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params );
-		$args           = array_merge( $args, $normalized );
+		$numeric_between_params = array( 'orders_count', 'total_spend', 'avg_order_value' );
+		$date_between_params    = array( 'last_active' );
+		$normalized             = WC_Admin_Reports_Interval::normalize_between_params( $request, $numeric_between_params, false );
+		$normalized_dates       = WC_Admin_Reports_Interval::normalize_between_params( $request, $date_between_params, true );
+		$args                   = array_merge( $args, $normalized, $normalized_dates );
 
 		return $args;
 	}
@@ -275,6 +277,11 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['last_active_between']     = array(
+			'description'       => __( 'Limit response to objects last active between two given ISO8601 compliant datetime.', 'wc-admin' ),
+			'type'              => 'array',
+			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_date_arg' ),
 		);
 		$params['registered_before']       = array(
 			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
