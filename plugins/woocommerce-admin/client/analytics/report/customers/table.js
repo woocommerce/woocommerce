@@ -25,6 +25,7 @@ export default class CustomersReportTable extends Component {
 
 		this.getHeadersContent = this.getHeadersContent.bind( this );
 		this.getRowsContent = this.getRowsContent.bind( this );
+		this.getSummary = this.getSummary.bind( this );
 	}
 
 	getHeadersContent() {
@@ -189,6 +190,30 @@ export default class CustomersReportTable extends Component {
 		} );
 	}
 
+	getSummary( totals ) {
+		if ( ! totals ) {
+			return [];
+		}
+		return [
+			{
+				label: __( 'customers', 'wc-admin' ),
+				value: numberFormat( totals.customers_count ),
+			},
+			{
+				label: __( 'average orders', 'wc-admin' ),
+				value: numberFormat( totals.avg_orders_count ),
+			},
+			{
+				label: __( 'average lifetime spend', 'wc-admin' ),
+				value: formatCurrency( totals.avg_total_spend ),
+			},
+			{
+				label: __( 'average order value', 'wc-admin' ),
+				value: formatCurrency( totals.avg_avg_order_value ),
+			},
+		];
+	}
+
 	render() {
 		const { query } = this.props;
 
@@ -197,6 +222,7 @@ export default class CustomersReportTable extends Component {
 				endpoint="customers"
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
+				getSummary={ this.getSummary }
 				itemIdField="id"
 				query={ query }
 				labels={ { placeholder: __( 'Search by customer name', 'wc-admin' ) } }
