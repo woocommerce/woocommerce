@@ -55,12 +55,12 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 	</thead>
 	<tbody>
 		<tr>
-			<td data-export-label="Site URL"><?php esc_html_e( 'WordPress Address (URL)', 'woocommerce' ); ?>:</td>
+			<td data-export-label="WordPress Address (URL)"><?php esc_html_e( 'WordPress Address (URL)', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The root URL of your site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo esc_html( $environment['site_url'] ); ?></td>
 		</tr>
 		<tr>
-			<td data-export-label="Home URL"><?php esc_html_e( 'Site Address (URL)', 'woocommerce' ); ?>:</td>
+			<td data-export-label="Site Address (URL)"><?php esc_html_e( 'Site Address (URL)', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The homepage URL of your site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo esc_html( $environment['home_url'] ); ?></td>
 		</tr>
