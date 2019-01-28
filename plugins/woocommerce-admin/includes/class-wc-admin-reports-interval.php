@@ -500,7 +500,7 @@ class WC_Admin_Reports_Interval {
 	 * @param string|array $param_names One or more param names to handle. Should not include "_between" suffix.
 	 * @return array Normalized query values.
 	 */
-	public static function normalize_between_params( $request, $param_names ) {
+	public static function normalize_numeric_between_params( $request, $param_names ) {
 		if ( ! is_array( $param_names ) ) {
 			$param_names = array( $param_names );
 		}
@@ -524,6 +524,43 @@ class WC_Admin_Reports_Interval {
 			} else {
 				$normalized[ $param_name . '_min' ] = $range[1];
 				$normalized[ $param_name . '_max' ] = $range[0];
+			}
+		}
+
+		return $normalized;
+	}
+
+	/**
+	 * Normalize "*_between" parameters to "*_after" and "*_before".
+	 *
+	 * @param array        $request Query params from REST API request.
+	 * @param string|array $param_names One or more param names to handle. Should not include "_between" suffix.
+	 * @return array Normalized query values.
+	 */
+	public static function normalize_date_between_params( $request, $param_names ) {
+		if ( ! is_array( $param_names ) ) {
+			$param_names = array( $param_names );
+		}
+
+		$normalized = array();
+
+		foreach ( $param_names as $param_name ) {
+			if ( ! is_array( $request[ $param_name . '_between' ] ) ) {
+				continue;
+			}
+
+			$range = $request[ $param_name . '_between' ];
+
+			if ( 2 !== count( $range ) ) {
+				continue;
+			}
+
+			if ( $range[0] < $range[1] ) {
+				$normalized[ $param_name . '_after' ] = $range[0];
+				$normalized[ $param_name . '_before' ] = $range[1];
+			} else {
+				$normalized[ $param_name . '_after' ] = $range[1];
+				$normalized[ $param_name . '_before' ] = $range[0];
 			}
 		}
 
