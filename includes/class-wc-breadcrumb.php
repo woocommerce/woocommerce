@@ -28,7 +28,7 @@ class WC_Breadcrumb {
 	 */
 	public function add_crumb( $name, $link = '' ) {
 		$this->crumbs[] = array(
-			strip_tags( $name ),
+			wp_strip_all_tags( $name ),
 			$link,
 		);
 	}
@@ -148,8 +148,11 @@ class WC_Breadcrumb {
 			$this->prepend_shop_page();
 
 			$terms = wc_get_product_terms(
-				$post->ID, 'product_cat', apply_filters(
-					'woocommerce_breadcrumb_product_terms_args', array(
+				$post->ID,
+				'product_cat',
+				apply_filters(
+					'woocommerce_breadcrumb_product_terms_args',
+					array(
 						'orderby' => 'parent',
 						'order'   => 'DESC',
 					)
