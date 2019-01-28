@@ -1295,7 +1295,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function key_is_valid( $key ) {
-		return $key === $this->get_order_key();
+		return hash_equals( $this->get_order_key(), $key );
 	}
 
 	/**

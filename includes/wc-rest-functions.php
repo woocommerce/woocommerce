@@ -65,7 +65,6 @@ function wc_rest_allowed_image_mime_types() {
  * @return array|WP_Error Attachment data or error message.
  */
 function wc_rest_upload_image_from_url( $image_url ) {
-	$file_name  = basename( current( explode( '?', $image_url ) ) );
 	$parsed_url = wp_parse_url( $image_url );
 
 	// Check parsed URL.
@@ -77,68 +76,47 @@ function wc_rest_upload_image_from_url( $image_url ) {
 	// Ensure url is valid.
 	$image_url = esc_url_raw( $image_url );
 
-	// Get the file.
-	$response = wp_safe_remote_get(
-		$image_url, array(
-			'timeout' => 10,
-		)
-	);
+	// download_url function is part of wp-admin.
+	if ( ! function_exists( 'download_url' ) ) {
+		include_once ABSPATH . 'wp-admin/includes/file.php';
+	}
 
-	if ( is_wp_error( $response ) ) {
+	$file_array         = array();
+	$file_array['name'] = basename( current( explode( '?', $image_url ) ) );
+
+	// Download file to temp location.
+	$file_array['tmp_name'] = download_url( $image_url );
+
+	// If error storing temporarily, return the error.
+	if ( is_wp_error( $file_array['tmp_name'] ) ) {
 		return new WP_Error( 'woocommerce_rest_invalid_remote_image_url',
 			/* translators: %s: image URL */
 			sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ) . ' '
 			/* translators: %s: error message */
-			. sprintf( __( 'Error: %s.', 'woocommerce' ), $response->get_error_message() ), array( 'status' => 400 )
+			. sprintf( __( 'Error: %s', 'woocommerce' ), $file_array['tmp_name']->get_error_message() ), array( 'status' => 400 )
 		);
-	} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-		/* translators: %s: image URL */
-		return new WP_Error( 'woocommerce_rest_invalid_remote_image_url', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ), array( 'status' => 400 ) );
 	}
 
-	// Ensure we have a file name and type.
-	$wp_filetype = wp_check_filetype( $file_name, wc_rest_allowed_image_mime_types() );
+	// Do the validation and storage stuff.
+	$file = wp_handle_sideload(
+		$file_array,
+		array(
+			'test_form' => false,
+			'mimes'     => wc_rest_allowed_image_mime_types(),
+		),
+		current_time( 'Y/m' )
+	);
 
-	if ( ! $wp_filetype['type'] ) {
-		$headers = wp_remote_retrieve_headers( $response );
-		if ( isset( $headers['content-disposition'] ) && strstr( $headers['content-disposition'], 'filename=' ) ) {
-			$content     = explode( 'filename=', $headers['content-disposition'] );
-			$disposition = end( $content );
-			$disposition = sanitize_file_name( $disposition );
-			$file_name   = $disposition;
-		} elseif ( isset( $headers['content-type'] ) && strstr( $headers['content-type'], 'image/' ) ) {
-			$file_name = 'image.' . str_replace( 'image/', '', $headers['content-type'] );
-		}
-		unset( $headers );
+	if ( isset( $file['error'] ) ) {
+		@unlink( $file_array['tmp_name'] ); // @codingStandardsIgnoreLine.
 
-		// Recheck filetype.
-		$wp_filetype = wp_check_filetype( $file_name, wc_rest_allowed_image_mime_types() );
-
-		if ( ! $wp_filetype['type'] ) {
-			return new WP_Error( 'woocommerce_rest_invalid_image_type', __( 'Invalid image type.', 'woocommerce' ), array( 'status' => 400 ) );
-		}
+		/* translators: %s: error message */
+		return new WP_Error( 'woocommerce_rest_invalid_image', sprintf( __( 'Invalid image: %s', 'woocommerce' ), $file['error'] ), array( 'status' => 400 ) );
 	}
 
-	// Upload the file.
-	$upload = wp_upload_bits( $file_name, '', wp_remote_retrieve_body( $response ) );
+	do_action( 'woocommerce_rest_api_uploaded_image_from_url', $file, $image_url );
 
-	if ( $upload['error'] ) {
-		return new WP_Error( 'woocommerce_rest_image_upload_error', $upload['error'], array( 'status' => 400 ) );
-	}
-
-	// Get filesize.
-	$filesize = filesize( $upload['file'] );
-
-	if ( ! $filesize ) {
-		@unlink( $upload['file'] ); // @codingStandardsIgnoreLine
-		unset( $upload );
-
-		return new WP_Error( 'woocommerce_rest_image_upload_file_error', __( 'Zero size file downloaded.', 'woocommerce' ), array( 'status' => 400 ) );
-	}
-
-	do_action( 'woocommerce_rest_api_uploaded_image_from_url', $upload, $image_url );
-
-	return $upload;
+	return $file;
 }
 
 /**

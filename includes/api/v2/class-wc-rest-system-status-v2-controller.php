@@ -37,7 +37,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base,
+			$this->namespace,
+			'/' . $this->rest_base,
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
@@ -571,6 +572,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		if ( function_exists( 'curl_version' ) ) {
 			$curl_version = curl_version();
 			$curl_version = $curl_version['version'] . ', ' . $curl_version['ssl_version'];
+		} elseif ( extension_loaded( 'curl' ) ) {
+			$curl_version = __( 'cURL installed but unable to retrieve version.', 'woocommerce' );
 		}
 
 		// WP memory limit.
@@ -721,10 +724,11 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'index' => 0,
 		);
 
-		$site_tables = $wpdb->tables( 'all', true );
+		$site_tables_prefix = $wpdb->get_blog_prefix( get_current_blog_id() );
+		$global_tables = $wpdb->tables( 'global', true );
 		foreach ( $database_table_sizes as $table ) {
 			// Only include tables matching the prefix of the current site, this is to prevent displaying all tables on a MS install not relating to the current.
-			if ( is_multisite() && ! in_array( $table->name, $site_tables, true ) ) {
+			if ( is_multisite() && 0 !== strpos( $table->name, $site_tables_prefix ) && ! in_array( $table->name, $global_tables, true ) ) {
 				continue;
 			}
 			$table_type = in_array( $table->name, $core_tables ) ? 'woocommerce' : 'other';
@@ -834,7 +838,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 									'changelog' => $body->sections['changelog'],
 								);
 								set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
-								break;
 							}
 						}
 					}
@@ -986,7 +989,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_security_info() {
-		$check_page = 0 < wc_get_page_id( 'shop' ) ? get_permalink( wc_get_page_id( 'shop' ) ) : get_home_url();
+		$check_page = wc_get_page_permalink( 'shop' );
 		return array(
 			'secure_connection' => 'https' === substr( $check_page, 0, 5 ),
 			'hide_errors'       => ! ( defined( 'WP_DEBUG' ) && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG && WP_DEBUG_DISPLAY ) || 0 === intval( ini_get( 'display_errors' ) ),
