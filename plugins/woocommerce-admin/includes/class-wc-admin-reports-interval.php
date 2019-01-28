@@ -583,14 +583,15 @@ class WC_Admin_Reports_Interval {
 			);
 		}
 
-		// check for dates here.
 		if (
-			2 !== count( $value )
+			2 !== count( $value ) ||
+			! rest_parse_date( $value[0] ) ||
+			! rest_parse_date( $value[1] )
 		) {
 			return new WP_Error(
 				'rest_invalid_param',
 				/* translators: %s: parameter name */
-				sprintf( __( '%s must contain 2 dates.', 'wc-admin' ), $param )
+				sprintf( __( '%s must contain 2 valid dates.', 'wc-admin' ), $param )
 			);
 		}
 
