@@ -836,19 +836,19 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	/**
 	 * Test function that validates *_between query parameters.
 	 */
-	public function test_rest_validate_between_arg() {
+	public function test_rest_validate_between_numeric_arg() {
 		$this->assertIsWPError(
-			WC_Admin_Reports_Interval::rest_validate_between_arg( 'not array', null, 'param' ),
+			WC_Admin_Reports_Interval::rest_validate_between_numeric_arg( 'not array', null, 'param' ),
 			'param is not a numerically indexed array.'
 		);
 
 		$this->assertIsWPError(
-			WC_Admin_Reports_Interval::rest_validate_between_arg( array( 1 ), null, 'param' ),
+			WC_Admin_Reports_Interval::rest_validate_between_numeric_arg( array( 1 ), null, 'param' ),
 			'param must contain 2 numbers.'
 		);
 
 		$this->assertTrue(
-			WC_Admin_Reports_Interval::rest_validate_between_arg( array( 1, 2 ), null, 'param' )
+			WC_Admin_Reports_Interval::rest_validate_between_numeric_arg( array( 1, 2 ), null, 'param' )
 		);
 	}
 }

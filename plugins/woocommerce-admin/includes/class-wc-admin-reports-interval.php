@@ -538,7 +538,7 @@ class WC_Admin_Reports_Interval {
 	 * @param  string          $param Parameter name.
 	 * @return WP_Error|boolean
 	 */
-	public static function rest_validate_between_arg( $value, $request, $param ) {
+	public static function rest_validate_between_numeric_arg( $value, $request, $param ) {
 		if ( ! wp_is_numeric_array( $value ) ) {
 			return new WP_Error(
 				'rest_invalid_param',
@@ -556,6 +556,37 @@ class WC_Admin_Reports_Interval {
 				'rest_invalid_param',
 				/* translators: %s: parameter name */
 				sprintf( __( '%s must contain 2 numbers.', 'wc-admin' ), $param )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validate a "*_between" range argument (an array with 2 date items).
+	 *
+	 * @param  mixed           $value Parameter value.
+	 * @param  WP_REST_Request $request REST Request.
+	 * @param  string          $param Parameter name.
+	 * @return WP_Error|boolean
+	 */
+	public static function rest_validate_between_date_arg( $value, $request, $param ) {
+		if ( ! wp_is_numeric_array( $value ) ) {
+			return new WP_Error(
+				'rest_invalid_param',
+				/* translators: 1: parameter name */
+				sprintf( __( '%1$s is not a numerically indexed array.', 'wc-admin' ), $param )
+			);
+		}
+
+		// check for dates here.
+		if (
+			2 !== count( $value )
+		) {
+			return new WP_Error(
+				'rest_invalid_param',
+				/* translators: %s: parameter name */
+				sprintf( __( '%s must contain 2 dates.', 'wc-admin' ), $param )
 			);
 		}
 
