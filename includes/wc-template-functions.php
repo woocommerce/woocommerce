@@ -2211,7 +2211,7 @@ if ( ! function_exists( 'woocommerce_get_loop_display_mode' ) ) {
 	 */
 	function woocommerce_get_loop_display_mode() {
 		// Only return products when filtering things.
-		if ( 1 < wc_get_loop_prop( 'current_page' ) || wc_get_loop_prop( 'is_search' ) || wc_get_loop_prop( 'is_filtered' ) ) {
+		if ( wc_get_loop_prop( 'is_search' ) || wc_get_loop_prop( 'is_filtered' ) ) {
 			return 'products';
 		}
 
