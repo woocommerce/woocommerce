@@ -426,13 +426,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_body_params(
 			array(
-				'line_items'   => array(
-					array(
-						'id'         => $order_item->get_id(),
-						'product_id' => $order_item->get_product_id(),
-						'subtotal'   => '35.00',
-					),
-				),
 				'coupon_lines' => array(
 					array(
 						'code' => 'fake-coupon',
