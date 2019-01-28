@@ -276,7 +276,13 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					'regular_price' => array(),
 					'sale_price'    => array(),
 				);
-				$variation_ids  = $product->get_visible_children();
+
+				$variation_ids = $product->get_visible_children();
+
+				if ( is_callable( '_prime_post_caches' ) ) {
+					_prime_post_caches( $variation_ids );
+				}
+
 				foreach ( $variation_ids as $variation_id ) {
 					$variation = wc_get_product( $variation_id );
 
@@ -344,18 +350,19 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 							}
 						}
 
-						$prices_array['price'][ $variation_id ] 		= wc_format_decimal( $price, wc_get_price_decimals() );
+						$prices_array['price'][ $variation_id ]         = wc_format_decimal( $price, wc_get_price_decimals() );
 						$prices_array['regular_price'][ $variation_id ] = wc_format_decimal( $regular_price, wc_get_price_decimals() );
 						$prices_array['sale_price'][ $variation_id ]    = wc_format_decimal( $sale_price . '.00', wc_get_price_decimals() );
+
 						$prices_array = apply_filters( 'woocommerce_variation_prices_array', $prices_array, $variation, $for_display );
 					}
-				}		
+				}
 
 				// Add all pricing data to the transient array.
-				foreach( $prices_array as $key => $values ) {
+				foreach ( $prices_array as $key => $values ) {
 					$transient_cached_prices_array[ $price_hash ][ $key ] = $values;
 				}
-				
+
 				set_transient( $transient_name, wp_json_encode( $transient_cached_prices_array ), DAY_IN_SECONDS * 30 );
 			}
 
