@@ -3005,4 +3005,104 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 	}
 
+	/**
+	 * Test if lookup tables are cleaned after delete an order.
+	 *
+	 * @covers WC_Admin_Reports_Orders_Stats_Data_Store::delete_order
+	 * @covers WC_Admin_Reports_Products_Data_Store::sync_on_order_delete
+	 * @covers WC_Admin_Reports_Coupons_Data_Store::sync_on_order_delete
+	 * @covers WC_Admin_Reports_Taxes_Data_Store::sync_on_order_delete
+	 */
+	public function test_order_deletion() {
+		global $wpdb;
+
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Tables to check.
+		$tables = array(
+			'wc_order_coupon_lookup',
+			'wc_order_product_lookup',
+			'wc_order_stats',
+			'wc_order_tax_lookup',
+		);
+
+		// Enable taxes.
+		$default_calc_taxes       = get_option( 'woocommerce_calc_taxes', 'no' );
+		$default_customer_address = get_option( 'woocommerce_default_customer_address', 'geolocation' );
+		$default_tax_based_on     = get_option( 'woocommerce_tax_based_on', 'shipping' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_customer_address', 'base' );
+		update_option( 'woocommerce_tax_based_on', 'base' );
+
+		// Create tax.
+		$tax_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Create product.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		// Create coupon.
+		$coupon = new WC_Coupon();
+		$coupon->set_code( '20fixed' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 20 );
+		$coupon->save();
+
+		// Create order.
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->set_status( 'completed' );
+		$order->set_shipping_total( 10 );
+		$order->apply_coupon( $coupon );
+		$order->save();
+
+		// Check if lookup tables are populated.
+		foreach ( $tables as $table ) {
+			$results = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM {$wpdb->prefix}{$table} WHERE order_id = %d", // phpcs:ignore
+					$order->get_id()
+				)
+			);
+
+			$this->assertTrue( is_array( $results ) && (bool) count( $results ) );
+		}
+
+		// Delete order and clean all other objects too.
+		$order->delete( true );
+		$product->delete( true );
+		$coupon->delete( true );
+		WC_Tax::_delete_tax_rate( $tax_id );
+
+		// Check if results are empty now.
+		foreach ( $tables as $table ) {
+			$results = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT * FROM {$wpdb->prefix}{$table} WHERE order_id = %d",  // phpcs:ignore
+					$order->get_id()
+				)
+			);
+
+			$this->assertEmpty( $results );
+		}
+
+		// Reset taxes settings.
+		update_option( 'woocommerce_calc_taxes', $default_customer_address );
+		update_option( 'woocommerce_default_customer_address', $default_calc_taxes );
+		update_option( 'woocommerce_tax_based_on', $default_tax_based_on );
+	}
 }
