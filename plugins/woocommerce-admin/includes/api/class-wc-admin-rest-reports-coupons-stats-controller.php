@@ -343,7 +343,7 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 			'enum'              => array(
 				'product',
 				'variation',
-				'category', // will we support this?
+				'category',
 				'coupon',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
