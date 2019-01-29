@@ -38,6 +38,7 @@ const wcAdminPackages = [
 	'currency',
 	'date',
 	'navigation',
+	'number',
 ];
 
 const entryPoints = {};

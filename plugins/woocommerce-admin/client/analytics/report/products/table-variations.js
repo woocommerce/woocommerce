@@ -12,12 +12,12 @@ import { map, get } from 'lodash';
 import { Link } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
+import { numberFormat } from '@woocommerce/number';
 
 /**
  * Internal dependencies
  */
 import ReportTable from 'analytics/components/report-table';
-import { numberFormat } from 'lib/number';
 import { isLowStock } from './utils';
 
 export default class VariationsReportTable extends Component {

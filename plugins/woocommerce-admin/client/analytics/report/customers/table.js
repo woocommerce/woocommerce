@@ -12,12 +12,12 @@ import { Tooltip } from '@wordpress/components';
 import { defaultTableDateFormat } from '@woocommerce/date';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import { Date, Link } from '@woocommerce/components';
+import { numberFormat } from '@woocommerce/number';
 
 /**
  * Internal dependencies
  */
 import ReportTable from 'analytics/components/report-table';
-import { numberFormat } from 'lib/number';
 
 export default class CustomersReportTable extends Component {
 	constructor() {

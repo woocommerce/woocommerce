@@ -13,12 +13,12 @@ import moment from 'moment';
 import { defaultTableDateFormat, getCurrentDates } from '@woocommerce/date';
 import { Date, Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
+import { numberFormat } from '@woocommerce/number';
 
 /**
  * Internal dependencies
  */
 import ReportTable from 'analytics/components/report-table';
-import { numberFormat } from 'lib/number';
 
 export default class CouponsReportTable extends Component {
 	constructor() {

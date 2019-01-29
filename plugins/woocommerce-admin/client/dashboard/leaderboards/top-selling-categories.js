@@ -12,11 +12,11 @@ import { get, map } from 'lodash';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
+import { numberFormat } from '@woocommerce/number';
 
 /**
  * Internal dependencies
  */
-import { numberFormat } from 'lib/number';
 import Leaderboard from 'analytics/components/leaderboard';
 
 export class TopSellingCategories extends Component {

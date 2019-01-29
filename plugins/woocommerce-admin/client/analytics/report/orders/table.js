@@ -12,11 +12,11 @@ import { map } from 'lodash';
 import { Date, Link, OrderStatus, ViewMoreList } from '@woocommerce/components';
 import { defaultTableDateFormat } from '@woocommerce/date';
 import { formatCurrency } from '@woocommerce/currency';
+import { numberFormat } from '@woocommerce/number';
 
 /**
  * Internal dependencies
  */
-import { numberFormat } from 'lib/number';
 import ReportTable from 'analytics/components/report-table';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import './style.scss';

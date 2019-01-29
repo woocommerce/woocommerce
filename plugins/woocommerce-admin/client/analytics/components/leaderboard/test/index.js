@@ -12,13 +12,13 @@ import { createRegistry, RegistryProvider } from '@wordpress/data';
  * WooCommerce dependencies
  */
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+import { numberFormat } from '@woocommerce/number';
 
 /**
  * Internal dependencies
  */
 import LeaderboardWithSelect, { Leaderboard } from '../';
 import { NAMESPACE } from 'store/constants';
-import { numberFormat } from 'lib/number';
 import mockData from '../__mocks__/top-selling-products-mock-data';
 
 // Mock <Table> to avoid tests failing due to it using DOM properties that
