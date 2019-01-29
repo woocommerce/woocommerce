@@ -163,7 +163,7 @@ export const advancedFilters = {
 				} ) ),
 			},
 		},
-		order_count: {
+		orders_count: {
 			labels: {
 				add: __( 'No. of Orders', 'wc-admin' ),
 				remove: __( 'Remove order  filter', 'wc-admin' ),
