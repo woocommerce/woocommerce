@@ -494,13 +494,15 @@ class WC_Admin_Reports_Interval {
 	}
 
 	/**
-	 * Normalize "*_between" parameters to "*_min" and "*_max".
+	 * Normalize "*_between" parameters to "*_min" and "*_max" for numeric values
+	 * and "*_after" and "*_before" for date values.
 	 *
 	 * @param array        $request Query params from REST API request.
 	 * @param string|array $param_names One or more param names to handle. Should not include "_between" suffix.
+	 * @param bool         $is_date Boolean if the param is date is related.
 	 * @return array Normalized query values.
 	 */
-	public static function normalize_between_params( $request, $param_names ) {
+	public static function normalize_between_params( $request, $param_names, $is_date ) {
 		if ( ! is_array( $param_names ) ) {
 			$param_names = array( $param_names );
 		}
@@ -518,12 +520,15 @@ class WC_Admin_Reports_Interval {
 				continue;
 			}
 
+			$min = $is_date ? '_after' : '_min';
+			$max = $is_date ? '_before' : '_max';
+
 			if ( $range[0] < $range[1] ) {
-				$normalized[ $param_name . '_min' ] = $range[0];
-				$normalized[ $param_name . '_max' ] = $range[1];
+				$normalized[ $param_name . $min ] = $range[0];
+				$normalized[ $param_name . $max ] = $range[1];
 			} else {
-				$normalized[ $param_name . '_min' ] = $range[1];
-				$normalized[ $param_name . '_max' ] = $range[0];
+				$normalized[ $param_name . $min ] = $range[1];
+				$normalized[ $param_name . $max ] = $range[0];
 			}
 		}
 
@@ -538,7 +543,7 @@ class WC_Admin_Reports_Interval {
 	 * @param  string          $param Parameter name.
 	 * @return WP_Error|boolean
 	 */
-	public static function rest_validate_between_arg( $value, $request, $param ) {
+	public static function rest_validate_between_numeric_arg( $value, $request, $param ) {
 		if ( ! wp_is_numeric_array( $value ) ) {
 			return new WP_Error(
 				'rest_invalid_param',
@@ -556,6 +561,38 @@ class WC_Admin_Reports_Interval {
 				'rest_invalid_param',
 				/* translators: %s: parameter name */
 				sprintf( __( '%s must contain 2 numbers.', 'wc-admin' ), $param )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validate a "*_between" range argument (an array with 2 date items).
+	 *
+	 * @param  mixed           $value Parameter value.
+	 * @param  WP_REST_Request $request REST Request.
+	 * @param  string          $param Parameter name.
+	 * @return WP_Error|boolean
+	 */
+	public static function rest_validate_between_date_arg( $value, $request, $param ) {
+		if ( ! wp_is_numeric_array( $value ) ) {
+			return new WP_Error(
+				'rest_invalid_param',
+				/* translators: 1: parameter name */
+				sprintf( __( '%1$s is not a numerically indexed array.', 'wc-admin' ), $param )
+			);
+		}
+
+		if (
+			2 !== count( $value ) ||
+			! rest_parse_date( $value[0] ) ||
+			! rest_parse_date( $value[1] )
+		) {
+			return new WP_Error(
+				'rest_invalid_param',
+				/* translators: %s: parameter name */
+				sprintf( __( '%s must contain 2 valid dates.', 'wc-admin' ), $param )
 			);
 		}
 
