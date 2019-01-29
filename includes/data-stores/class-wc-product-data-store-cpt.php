@@ -111,6 +111,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					'comment_status' => $product->get_reviews_allowed() ? 'open' : 'closed',
 					'ping_status'    => 'closed',
 					'menu_order'     => $product->get_menu_order(),
+					'post_password'  => $product->get_post_password( 'edit' ),
 					'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
 					'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
 					'post_name'      => $product->get_slug( 'edit' ),
@@ -163,6 +164,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'short_description' => $post_object->post_excerpt,
 				'parent_id'         => $post_object->post_parent,
 				'menu_order'        => $post_object->menu_order,
+				'post_password'     => $post_object->post_password,
 				'reviews_allowed'   => 'open' === $post_object->comment_status,
 			)
 		);
@@ -194,6 +196,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'comment_status' => $product->get_reviews_allowed( 'edit' ) ? 'open' : 'closed',
 				'post_status'    => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
 				'menu_order'     => $product->get_menu_order( 'edit' ),
+				'post_password'  => $product->get_post_password( 'edit' ),
 				'post_name'      => $product->get_slug( 'edit' ),
 				'post_type'      => 'product',
 			);
