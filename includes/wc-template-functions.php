@@ -557,72 +557,42 @@ function wc_get_product_class( $class = '', $product_id = null ) {
 	if ( is_a( $product_id, 'WC_Product' ) ) {
 		$product    = $product_id;
 		$product_id = $product_id->get_id();
-		$post       = get_post( $product_id );
 	} else {
-		$post    = get_post( $product_id );
 		$product = wc_get_product( $post->ID );
 	}
 
-	$classes = array();
-
-	if ( $class ) {
-		if ( ! is_array( $class ) ) {
-			$class = preg_split( '#\s+#', $class );
-		}
-		$classes = array_map( 'esc_attr', $class );
+	if ( ! is_array( $class ) ) {
+		$classes = preg_split( '#\s+#', $class );
 	} else {
-		// Ensure that we always coerce class to being an array.
-		$class = array();
+		$classes = $class;
 	}
 
-	if ( ! $post || ! $product ) {
-		return $classes;
+	if ( ! $product ) {
+		return array_map( 'esc_attr', $classes );
 	}
 
-	$classes[] = 'post-' . $post->ID;
-	if ( ! is_admin() ) {
-		$classes[] = $post->post_type;
-	}
-	$classes[] = 'type-' . $post->post_type;
-	$classes[] = 'status-' . $post->post_status;
+	$classes = array_merge(
+		$classes,
+		array(
+			'product',
+			'type-product',
+			'hentry',
+			'post-' . $product->get_id(),
+			'status-' . $product->get_status(),
+		),
+		wc_get_product_taxonomy_class( $product->get_category_ids(), 'product_cat' ),
+		wc_get_product_taxonomy_class( $product->get_tag_ids(), 'product_tag' )
+	);
 
-	// Post format.
-	if ( post_type_supports( $post->post_type, 'post-formats' ) ) {
-		$post_format = get_post_format( $post->ID );
-
-		if ( $post_format && ! is_wp_error( $post_format ) ) {
-			$classes[] = 'format-' . sanitize_html_class( $post_format );
-		} else {
-			$classes[] = 'format-standard';
-		}
-	}
-
-	// Post requires password.
-	$post_password_required = post_password_required( $post->ID );
-	if ( $post_password_required ) {
-		$classes[] = 'post-password-required';
-	} elseif ( ! empty( $post->post_password ) ) {
-		$classes[] = 'post-password-protected';
-	}
-
-	// Post thumbnails.
-	if ( current_theme_supports( 'post-thumbnails' ) && $product->get_image_id() && ! is_attachment( $post ) && ! $post_password_required ) {
+	if ( $product->get_image_id() ) {
 		$classes[] = 'has-post-thumbnail';
 	}
 
-	// Sticky for Sticky Posts.
-	if ( is_sticky( $post->ID ) ) {
-		if ( is_home() && ! is_paged() ) {
-			$classes[] = 'sticky';
-		} elseif ( is_admin() ) {
-			$classes[] = 'status-sticky';
-		}
+	if ( $product->get_post_password() ) {
+		$classes[] = post_password_required( $product->get_id() ) ? 'post-password-required' : 'post-password-protected';
 	}
 
-	// Hentry for hAtom compliance.
-	$classes[] = 'hentry';
-
-	// Include attributes and any extra taxonomy.
+	// Include attributes and any extra taxonomies.
 	if ( apply_filters( 'woocommerce_get_product_class_include_taxonomies', false ) ) {
 		$taxonomies = get_taxonomies( array( 'public' => true ) );
 		foreach ( (array) $taxonomies as $taxonomy ) {
@@ -631,13 +601,8 @@ function wc_get_product_class( $class = '', $product_id = null ) {
 			}
 		}
 	}
-	// Categories.
-	$classes = array_merge( $classes, wc_get_product_taxonomy_class( $product->get_category_ids(), 'product_cat' ) );
 
-	// Tags.
-	$classes = array_merge( $classes, wc_get_product_taxonomy_class( $product->get_tag_ids(), 'product_tag' ) );
-
-	return array_filter( array_unique( apply_filters( 'post_class', $classes, $class, $post->ID ) ) );
+	return array_filter( array_map( 'esc_attr', array_unique( apply_filters( 'post_class', $classes, $class, $product->get_id() ) ) ) );
 }
 
 /**
@@ -910,7 +875,7 @@ if ( ! function_exists( 'woocommerce_content' ) ) {
 
 				<?php do_action( 'woocommerce_no_products_found' ); ?>
 
-			<?php
+				<?php
 			endif;
 
 		}
@@ -1066,7 +1031,7 @@ if ( ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
 	 * Show the product title in the product loop. By default this is an H2.
 	 */
 	function woocommerce_template_loop_product_title() {
-		echo '<h2 class="woocommerce-loop-product__title">' . get_the_title() . '</h2>';
+		echo '<h2 class="woocommerce-loop-product__title">' . get_the_title() . '</h2>'; // phpcs:ignore
 	}
 }
 if ( ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
