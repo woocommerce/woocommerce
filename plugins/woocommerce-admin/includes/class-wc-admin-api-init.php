@@ -463,7 +463,7 @@ class WC_Admin_Api_Init {
 		$order_ids = $order_query->get_orders();
 
 		foreach ( $order_ids as $order_id ) {
-			// TODO: schedule single order update if this fails?
+			// @todo: schedule single order update if this fails?
 			WC_Admin_Reports_Orders_Stats_Data_Store::sync_order( $order_id );
 			WC_Admin_Reports_Products_Data_Store::sync_order_products( $order_id );
 			WC_Admin_Reports_Coupons_Data_Store::sync_order_coupons( $order_id );
@@ -614,7 +614,7 @@ class WC_Admin_Api_Init {
 		$customer_ids = $customer_query->get_results();
 
 		foreach ( $customer_ids as $customer_id ) {
-			// TODO: schedule single customer update if this fails?
+			// @todo: schedule single customer update if this fails?
 			WC_Admin_Reports_Customers_Data_Store::update_registered_customer( $customer_id );
 		}
 	}
@@ -661,7 +661,7 @@ class WC_Admin_Api_Init {
 		return array_merge(
 			$wc_tables,
 			array(
-				// TODO: will this work on multisite?
+				// @todo: will this work on multisite?
 				"{$wpdb->prefix}wc_order_stats",
 				"{$wpdb->prefix}wc_order_product_lookup",
 				"{$wpdb->prefix}wc_order_tax_lookup",

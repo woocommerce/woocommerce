@@ -353,7 +353,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			// Shipping amount tax based on woocommerce code in includes/admin/meta-boxes/views/html-order-item(s).php
 			// distribute simply based on number of line items.
 			$shipping_tax_amount = 0;
-			// TODO: if WC is currently not tax enabled, but it was before (or vice versa), would this work correctly?
+			// @todo: if WC is currently not tax enabled, but it was before (or vice versa), would this work correctly?
 			$order_taxes               = $order->get_taxes();
 			$line_items_shipping       = $order->get_items( 'shipping' );
 			$total_shipping_tax_amount = 0;
@@ -375,7 +375,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			$shipping_tax_amount = $total_shipping_tax_amount / $order_items * $product_qty;
 
 			// Tax amount.
-			// TODO: check if this calculates tax correctly with refunds.
+			// @todo: check if this calculates tax correctly with refunds.
 			$tax_amount = 0;
 
 			$order_taxes = $order->get_taxes();
@@ -385,7 +385,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 				$tax_amount += isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : 0;
 			}
 
-			// TODO: should net revenue be affected by refunds, as refunds are tracked separately?
+			// @todo: should net revenue be affected by refunds, as refunds are tracked separately?
 			$net_revenue = $order_item->get_subtotal( 'edit' ) - $amount_refunded;
 
 			// Coupon calculation based on woocommerce code in includes/admin/meta-boxes/views/html-order-item.php.
@@ -413,7 +413,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 						'tax_amount'            => $tax_amount,
 						'shipping_amount'       => $shipping_amount,
 						'shipping_tax_amount'   => $shipping_tax_amount,
-						// TODO: can this be incorrect if modified by filters?
+						// @todo: can this be incorrect if modified by filters?
 						'product_gross_revenue' => $net_revenue + $tax_amount + $shipping_amount + $shipping_tax_amount,
 						'refund_amount'         => $amount_refunded,
 					),

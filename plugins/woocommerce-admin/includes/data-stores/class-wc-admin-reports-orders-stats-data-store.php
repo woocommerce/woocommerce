@@ -74,7 +74,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 */
 	public static function init() {
 		add_action( 'save_post', array( __CLASS__, 'sync_order' ) );
-		// TODO: this is required as order update skips save_post.
+		// @todo: this is required as order update skips save_post.
 		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order' ) );
 		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order' ) );
 		add_action( 'woocommerce_refund_deleted', array( __CLASS__, 'sync_on_refund_delete' ), 10, 2 );
@@ -89,7 +89,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * @param array $intervals_query Array of options for intervals db query.
 	 */
 	protected function orders_stats_sql_filter( $query_args, &$totals_query, &$intervals_query ) {
-		// TODO: performance of all of this?
+		// @todo: performance of all of this?
 		global $wpdb;
 
 		$from_clause        = '';
@@ -98,7 +98,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 
 		$where_filters = array();
 
-		// TODO: maybe move the sql inside the get_included/excluded functions?
+		// @todo: maybe move the sql inside the get_included/excluded functions?
 		// Products filters.
 		$included_products = $this->get_included_products( $query_args );
 		$excluded_products = $this->get_excluded_products( $query_args );

@@ -194,7 +194,7 @@ class WC_Admin_Reports_Interval {
 
 				return (int) floor( ( (int) $diff_timestamp ) / DAY_IN_SECONDS ) + 1 + $addendum;
 			case 'week':
-				// TODO: optimize? approximately day count / 7, but year end is tricky, a week can have fewer days.
+				// @todo: optimize? approximately day count / 7, but year end is tricky, a week can have fewer days.
 				$week_count = 0;
 				do {
 					$start_datetime = self::next_week_start( $start_datetime );

@@ -292,7 +292,7 @@ class WC_Admin_Reports_Segmenting {
 				)
 			);
 		} elseif ( 'variation' === $this->query_args['segmentby'] ) {
-			// TODO: assuming that this will only be used for one product, check assumption.
+			// @todo: assuming that this will only be used for one product, check assumption.
 			if ( ! isset( $this->query_args['product_includes'] ) || count( $this->query_args['product_includes'] ) !== 1 ) {
 				$this->all_segment_ids = array();
 				return;
@@ -314,7 +314,7 @@ class WC_Admin_Reports_Segmenting {
 			);
 			$segments   = wp_list_pluck( $categories, 'cat_ID' );
 		} elseif ( 'coupon' === $this->query_args['segmentby'] ) {
-			// TODO: switch to a non-direct-SQL way to get all coupons?
+			// @todo: switch to a non-direct-SQL way to get all coupons?
 			$coupon_ids = $wpdb->get_results( "SELECT ID FROM {$wpdb->prefix}posts WHERE post_type='shop_coupon' AND post_status='publish'", ARRAY_A ); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 			$segments   = wp_list_pluck( $coupon_ids, 'ID' );
 		} elseif ( 'customer_type' === $this->query_args['segmentby'] ) {

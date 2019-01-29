@@ -75,7 +75,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 		$report_data     = $customers_query->get_data();
 		$out_data        = array(
 			'totals'    => $report_data,
-			// TODO: is this needed? the single element array tricks the isReportDataEmpty() selector.
+			// @todo: is this needed? the single element array tricks the isReportDataEmpty() selector.
 			'intervals' => array( (object) array() ),
 		);
 
@@ -117,7 +117,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 	 * @return array
 	 */
 	public function get_item_schema() {
-		// TODO: should any of these be 'indicator's?
+		// @todo: should any of these be 'indicator's?
 		$totals = array(
 			'customers_count'    => array(
 				'description' => __( 'Number of customers.', 'wc-admin' ),
@@ -159,7 +159,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 					'readonly'    => true,
 					'properties'  => $totals,
 				),
-				'intervals' => array( // TODO: remove this?
+				'intervals' => array( // @todo: remove this?
 					'description' => __( 'Reports data grouped by intervals.', 'wc-admin' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
