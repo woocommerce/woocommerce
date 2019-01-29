@@ -147,6 +147,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	 */
 	public function test_populate_and_query_multiple_intervals() {
 		global $wpdb;
+		WC_Helper_Reports::reset_stats_dbs();
 
 		// 2 different products.
 		$product_1_price = 25;
@@ -189,6 +190,10 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$customer_2 = WC_Helper_Customer::create_customer( 'cust_2', 'pwd_2', 'user_2@mail.com' );
 
 		$order_1_time = time();
+		// One more order needs to fit into the same hour, but also be one second later than this one, so in case it's very end of the hour, shift order 1 one second towards past.
+		if ( 59 === $order_1_time % MINUTE_IN_SECONDS ) {
+			$order_1_time--;
+		}
 		$order_2_time = $order_1_time;
 
 		$this_['hour']  = array( 1, 2 );
@@ -328,20 +333,23 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 
 		// Tests for before & after set to current hour.
-		$current_hour = new DateTime();
-		$current_hour->setTimestamp( $order_1_time );
-		$current_hour_minutes = (int) $current_hour->format( 'i' );
-		$current_hour->setTimestamp( $order_1_time - $current_hour_minutes * MINUTE_IN_SECONDS );
+		$current_hour_start = new DateTime();
+		$current_hour_start->setTimestamp( $order_1_time );
+		$current_hour_minutes = (int) $current_hour_start->format( 'i' );
+		$current_hour_start->setTimestamp( $order_1_time - $current_hour_minutes * MINUTE_IN_SECONDS );
 
-		$now = new DateTime();
+		$current_hour_end = new DateTime();
+		$current_hour_end->setTimestamp( $order_1_time );
+		$order_1_seconds = (int) $current_hour_end->format( 'U' ) % HOUR_IN_SECONDS;
+		$current_hour_end->setTimestamp( $order_1_time + ( HOUR_IN_SECONDS - $order_1_seconds ) - 1 );
 
 		// All orders, no filters.
 		// 72 orders in one batch (3 products * 3 coupon options * 2 order statuses * 2 customers * 2 orders), 4 items of each product per order
 		// 24 orders without coupons, 48 with coupons: 24 with $1 coupon and 24 with $2 coupon.
 		// shipping is $10 per order.
 		$query_args = array(
-			'after'    => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval' => 'hour',
 		);
 
@@ -382,11 +390,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -408,13 +416,13 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// * Order status filter
 		// ** Status is, positive filter for 2 statuses, i.e. all orders.
 		$query_args = array(
-			'after'     => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'    => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'     => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'    => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'  => 'hour',
 			'status_is' => array(
 				$order_status_1,
@@ -422,12 +430,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Status is, positive filter for 2 statuses' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// ** Status is, positive filter for 1 status -> half orders.
 		$query_args = array(
-			'after'     => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'    => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'     => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'    => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'  => 'hour',
 			'status_is' => array(
 				$order_status_1,
@@ -471,11 +479,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -497,12 +505,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Status is, positive filter for 1 status' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// ** Status is not, negative filter for 1 status -> half orders.
 		$query_args = array(
-			'after'         => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'        => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'         => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'        => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'      => 'hour',
 			'status_is_not' => array(
 				$order_status_2,
@@ -546,11 +554,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -572,12 +580,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Status is not, negative filter for 1 status ' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// ** Status is not, negative filter for 2 statuses -> no orders.
 		$query_args = array(
-			'after'         => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'        => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'         => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'        => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'      => 'hour',
 			'status_is_not' => array(
 				$order_status_1,
@@ -604,11 +612,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => 0,
 						'num_items_sold'          => 0,
@@ -630,12 +638,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Status is not, negative filter for 2 statuses' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// ** Status is + Status is not, positive filter for 2 statuses, negative for 1 -> half of orders.
 		$query_args = array(
-			'after'         => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'        => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'         => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'        => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'      => 'hour',
 			'status_is'     => array(
 				$order_status_1,
@@ -683,11 +691,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -709,13 +717,13 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Status is + Status is not, positive filter for 2 statuses, negative for 1' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// * Product filter
 		// ** Product includes, positive filter for 2 products, i.e. 2 orders out of 3.
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'product_includes' => array(
 				$product_1->get_id(),
@@ -758,11 +766,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -784,12 +792,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Product includes, positive filter for 2 products: ' . $wpdb->last_query );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// ** Product includes, positive filter for 1 product, 1/3 of orders
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'product_includes' => array(
 				$product_3->get_id(),
@@ -830,11 +838,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -856,12 +864,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Product includes, positive filter for 1 product: ' . $wpdb->last_query );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// ** Product excludes, negative filter for 1 product, 2/3 of orders.
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'product_excludes' => array(
 				$product_1->get_id(),
@@ -903,11 +911,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -929,12 +937,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Product includes, negative filter for 1 product: ' . $wpdb->last_query );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// ** Product excludes, negative filter for 2 products, 1/3 of orders
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'product_excludes' => array(
 				$product_1->get_id(),
@@ -975,11 +983,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -1001,12 +1009,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Product includes, negative filter for 2 product: ' . $wpdb->last_query );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// ** Product includes + product excludes, positive filter for 2 products, negative for 1 -> 1/3 of orders, only orders with product 2 and product 2 + product 4
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'product_includes' => array(
 				$product_1->get_id(),
@@ -1050,11 +1058,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -1076,13 +1084,13 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Product includes, negative filter for 2 product: ' . $wpdb->last_query );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// * Coupon filters
 		// ** Coupon includes, positive filter for 2 coupons, i.e. 2/3 of orders.
 		$query_args = array(
-			'after'           => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'          => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'           => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'          => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'        => 'hour',
 			'coupon_includes' => array(
 				$coupon_1->get_id(),
@@ -1127,11 +1135,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -1153,12 +1161,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Product includes, negative filter for 2 product: ' . $wpdb->last_query );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// ** Coupon includes, positive filter for 1 coupon, 1/3 of orders
 		$query_args = array(
-			'after'           => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'          => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'           => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'          => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'        => 'hour',
 			'coupon_includes' => array(
 				$coupon_1->get_id(),
@@ -1201,11 +1209,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -1227,12 +1235,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Product includes, negative filter for 2 product: ' . $wpdb->last_query );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// ** Coupon excludes, negative filter for 1 coupon, 2/3 of orders
 		$query_args = array(
-			'after'           => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'          => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'           => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'          => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'        => 'hour',
 			'coupon_excludes' => array(
 				$coupon_1->get_id(),
@@ -1275,11 +1283,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -1301,12 +1309,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Product includes, negative filter for 2 product: ' . $wpdb->last_query );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// ** Coupon excludes, negative filter for 2 coupons, 1/3 of orders
 		$query_args = array(
-			'after'           => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'          => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'           => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'          => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'        => 'hour',
 			'coupon_excludes' => array(
 				$coupon_1->get_id(),
@@ -1351,11 +1359,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -1377,12 +1385,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Product includes, negative filter for 2 product: ' . $wpdb->last_query );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// ** Coupon includes + coupon excludes, positive filter for 2 coupon, negative for 1, 1/3 orders
 		$query_args = array(
-			'after'           => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'          => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'           => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'          => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'        => 'hour',
 			'coupon_includes' => array(
 				$coupon_1->get_id(),
@@ -1430,11 +1438,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -1456,13 +1464,13 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Product includes, negative filter for 2 product: ' . $wpdb->last_query );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// * Customer filters
 		// ** Customer new
 		$query_args = array(
-			'after'    => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'   => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'customer' => 'new',
 		);
@@ -1500,11 +1508,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -1526,18 +1534,19 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Product includes, negative filter for 2 product: ' . $wpdb->last_query );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// ** Customer returning
 		$returning_order = WC_Helper_Order::create_order( $customer_1->get_id(), $product );
 		$returning_order->set_status( 'completed' );
 		$returning_order->set_shipping_total( 10 );
 		$returning_order->set_total( 110 ); // $25x4 products + $10 shipping.
+		$returning_order->set_date_created( $order_1_time + 1 ); // This is guaranteed to belong to the same hour by the adjustment to $order_1_time.
 		$returning_order->save();
 
 		$query_args = array(
-			'after'    => date( 'Y-m-d H:i:s', $orders[0]->get_date_created()->getOffsetTimestamp() + 1 ), // Date after initial order to get a returning customer.
-			'before'   => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ), // I don't think this makes sense.... date( 'Y-m-d H:i:s', $orders[0]->get_date_created()->getOffsetTimestamp() + 1 ), // Date after initial order to get a returning customer.
+			'before'   => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval' => 'hour',
 			'customer' => 'returning',
 		);
@@ -1572,11 +1581,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => date( 'Y-m-d H:i:s', $orders[0]->get_date_created()->getOffsetTimestamp() + 1 ),
-					'date_start_gmt' => date( 'Y-m-d H:i:s', $orders[0]->get_date_created()->getOffsetTimestamp() + 1 ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+					'date_start_gmt' => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -1598,14 +1607,15 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Orders from returning customers: ' . $wpdb->last_query );
+
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query};" );
 		wp_delete_post( $returning_order->get_id(), true );
 
 		// Combinations: match all
 		// status_is + product_includes.
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'status_is'        => array(
 				$order_status_1,
@@ -1648,11 +1658,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -1674,12 +1684,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// status_is + coupon_includes.
 		$query_args = array(
-			'after'           => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'          => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'           => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'          => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'        => 'hour',
 			'status_is'       => array(
 				$order_status_1,
@@ -1726,11 +1736,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -1752,12 +1762,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// product_includes + coupon_includes.
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'product_includes' => array(
 				$product_1->get_id(),
@@ -1800,11 +1810,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -1826,12 +1836,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// status_is + product_includes + coupon_includes.
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'status_is'        => array(
 				$order_status_1,
@@ -1877,11 +1887,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -1903,12 +1913,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// status_is + status_is_not + product_includes.
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'status_is'        => array(
 				$order_status_1,
@@ -1958,11 +1968,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -1984,12 +1994,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// status_is + status_is_not + product_includes + product_excludes.
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'status_is'        => array(
 				$order_status_1,
@@ -2040,11 +2050,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -2066,12 +2076,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// status_is + status_is_not + product_includes + product_excludes + coupon_includes.
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'status_is'        => array(
 				$order_status_1,
@@ -2124,11 +2134,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -2150,12 +2160,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// status_is + status_is_not + product_includes + product_excludes + coupon_includes + coupon_excludes.
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'status_is'        => array(
 				$order_status_1,
@@ -2212,11 +2222,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -2238,13 +2248,13 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// Combinations: match any
 		// status_is + status_is_not, all orders.
 		$query_args = array(
-			'after'         => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'        => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'         => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'        => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'      => 'hour',
 			'match'         => 'any',
 			'status_is'     => array(
@@ -2292,11 +2302,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -2318,12 +2328,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// status_is OR product_includes.
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'match'            => 'any',
 			'status_is'        => array(
@@ -2371,11 +2381,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -2397,12 +2407,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// status_is OR coupon_includes.
 		$query_args = array(
-			'after'           => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'          => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'           => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'          => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'        => 'hour',
 			'match'           => 'any',
 			'status_is'       => array(
@@ -2450,11 +2460,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -2476,12 +2486,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// status_is OR coupon_excludes.
 		$query_args = array(
-			'after'           => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'          => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'           => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'          => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'        => 'hour',
 			'match'           => 'any',
 			'status_is'       => array(
@@ -2529,11 +2539,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -2555,12 +2565,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// product_includes OR coupon_includes.
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'match'            => 'any',
 			'product_includes' => array(
@@ -2608,11 +2618,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -2634,12 +2644,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// status_is OR product_includes OR coupon_includes.
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'match'            => 'any',
 			'status_is'        => array(
@@ -2690,11 +2700,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -2716,12 +2726,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// status_is OR status_is_not OR product_includes.
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'match'            => 'any',
 			'status_is'        => array(
@@ -2775,11 +2785,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -2801,12 +2811,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// status_is OR status_is_not OR product_includes OR product_excludes.
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'match'            => 'any',
 			'status_is'        => array(
@@ -2860,11 +2870,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -2886,12 +2896,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// status_is OR status_is_not OR product_includes OR product_excludes OR coupon_includes.
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'match'            => 'any',
 			'status_is'        => array(
@@ -2948,11 +2958,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -2974,12 +2984,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 		// status_is OR status_is_not OR product_includes OR product_excludes OR coupon_includes OR coupon_excludes.
 		$query_args = array(
-			'after'            => $current_hour->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
-			'before'           => $now->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'after'            => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
+			'before'           => $current_hour_end->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'interval'         => 'hour',
 			'match'            => 'any',
 			'status_is'        => array(
@@ -3039,11 +3049,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 			'intervals' => array(
 				array(
-					'interval'       => $current_hour->format( 'Y-m-d H' ),
-					'date_start'     => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_start_gmt' => $current_hour->format( 'Y-m-d H:i:s' ),
-					'date_end'       => $now->format( 'Y-m-d H:i:s' ),
-					'date_end_gmt'   => $now->format( 'Y-m-d H:i:s' ),
+					'interval'       => $current_hour_start->format( 'Y-m-d H' ),
+					'date_start'     => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_start_gmt' => $current_hour_start->format( 'Y-m-d H:i:s' ),
+					'date_end'       => $current_hour_end->format( 'Y-m-d H:i:s' ),
+					'date_end_gmt'   => $current_hour_end->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => array(
 						'orders_count'            => $orders_count,
 						'num_items_sold'          => $num_items_sold,
@@ -3065,7 +3075,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'No filters' );
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
 
 	}
 

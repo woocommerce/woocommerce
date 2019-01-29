@@ -419,14 +419,28 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 					'year'    => 1,
 				),
 			),
-			// 23:59:59 h:m:s interval -> 24 hours, 1 for the rest
+			// 8.0186111 hours interval length -> 10 hours, 2 days, 1 for the rest
+			array(
+				'start'      => '2019-01-16T16:59:00Z',
+				'end'        => '2019-01-17T01:00:07Z',
+				'week_start' => 1,
+				'intervals'  => array(
+					'hour'    => 10,
+					'day'     => 2,
+					'week'    => 1,
+					'month'   => 1,
+					'quarter' => 1,
+					'year'    => 1,
+				),
+			),
+			// 23:59:59 h:m:s interval -> 24 hours, 2 days, 1 for the rest
 			array(
 				'start'      => '2017-12-24T11:00:00Z',
 				'end'        => '2017-12-25T10:59:59Z',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 24,
-					'day'     => 1,
+					'day'     => 2,
 					'week'    => 2,
 					'month'   => 1,
 					'quarter' => 1,
@@ -475,42 +489,42 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 					'year'    => 1,
 				),
 			),
-			// 1 month + 14 hour interval spanning 2 months in 1 quarter -> 735 hours, 31 days, 6 iso weeks, 2 months
+			// 1 month + 14 hour interval spanning 2 months in 1 quarter -> 735 hours, 32 days, 6 iso weeks, 2 months
 			array(
 				'start'      => '2017-11-24T11:00:00Z',
 				'end'        => '2017-12-25T01:00:00Z',
 				'week_start' => 1,
 				'intervals'  => array(
-					'hour'    => 30 * 24 + 14 + 1, // 30 full days + 14 full hours + 1 second from next hour
-					'day'     => 31,
+					'hour'    => 30 * 24 + 13 + 2, // 30 full days + 13 full hours on Nov 24 + 2 hours on Dec 25
+					'day'     => 32,
 					'week'    => 6,
 					'month'   => 2,
 					'quarter' => 1,
 					'year'    => 1,
 				),
 			),
-			// 1 month interval spanning 2 months and 2 quarters, 1 year -> 720 hours, 30 days, 6 iso weeks, 2 months, 2 q, 1 y
+			// 1 month interval spanning 2 months and 2 quarters, 1 year -> 720 hours, 31 days, 6 iso weeks, 2 months, 2 q, 1 y
 			array(
 				'start'      => '2017-09-24T11:00:00Z',
 				'end'        => '2017-10-24T10:59:59Z',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 30 * 24,
-					'day'     => 30, // Sept has 30 days.
+					'day'     => 31, // Sept has 30 days, but need to include interval for half of Sept 24 and interval for half of Oct 24.
 					'week'    => 6,
 					'month'   => 2,
 					'quarter' => 2,
 					'year'    => 1,
 				),
 			),
-			// 1 month interval spanning 2 months and 2 quarters, 2 years -> 744 hours, 30 days, 5 iso weeks, 2 months, 2 quarters, 2 years
+			// 1 month interval spanning 2 months and 2 quarters, 2 years -> 744 hours, 32 days, 6 iso weeks, 2 months, 2 quarters, 2 years
 			array(
 				'start'      => '2017-12-24T11:00:00Z',
 				'end'        => '2018-01-24T10:59:59Z',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 31 * 24,
-					'day'     => 31, // Dec has 31 days.
+					'day'     => 32, // Dec has 31 days, plus 1 interval for half day at the end.
 					'week'    => 6,
 					'month'   => 2,
 					'quarter' => 2,
@@ -587,7 +601,7 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		foreach ( $test_settings as $setting ) {
 			update_option( 'start_of_week', $setting['week_start'] );
 			foreach ( $setting['intervals'] as $interval => $exp_value ) {
-				$this->assertEquals( $exp_value, WC_Admin_Reports_Interval::intervals_between( $setting['start'], $setting['end'], $interval ), "FDoW: {$setting['week_start']}; Start: {$setting['start']}; End: {$setting['end']}; Interval: {$interval}" );
+				$this->assertEquals( $exp_value, WC_Admin_Reports_Interval::intervals_between( $setting['start'], $setting['end'], $interval ), "First Day of Week: {$setting['week_start']}; Start: {$setting['start']}; End: {$setting['end']}; Interval: {$interval}" );
 			}
 		}
 	}

@@ -20,7 +20,7 @@ export default class CustomersReport extends Component {
 	render() {
 		const { query, path } = this.props;
 		const tableQuery = {
-			orderby: 'date_registered',
+			orderby: 'date_last_active',
 			order: 'desc',
 			...query,
 		};

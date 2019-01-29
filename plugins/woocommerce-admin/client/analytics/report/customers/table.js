@@ -25,6 +25,7 @@ export default class CustomersReportTable extends Component {
 
 		this.getHeadersContent = this.getHeadersContent.bind( this );
 		this.getRowsContent = this.getRowsContent.bind( this );
+		this.getSummary = this.getSummary.bind( this );
 	}
 
 	getHeadersContent() {
@@ -42,9 +43,14 @@ export default class CustomersReportTable extends Component {
 				hiddenByDefault: true,
 			},
 			{
+				label: __( 'Last Active', 'wc-admin' ),
+				key: 'date_last_active',
+				defaultSort: true,
+				isSortable: true,
+			},
+			{
 				label: __( 'Sign Up', 'wc-admin' ),
 				key: 'date_registered',
-				defaultSort: true,
 				isSortable: true,
 			},
 			{
@@ -58,7 +64,7 @@ export default class CustomersReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Lifetime Spend', 'wc-admin' ),
+				label: __( 'Total Spend', 'wc-admin' ),
 				key: 'total_spend',
 				isSortable: true,
 				isNumeric: true,
@@ -68,11 +74,6 @@ export default class CustomersReportTable extends Component {
 				screenReaderLabel: __( 'Average Order Value', 'wc-admin' ),
 				key: 'avg_order_value',
 				isNumeric: true,
-			},
-			{
-				label: __( 'Last Active', 'wc-admin' ),
-				key: 'date_last_active',
-				isSortable: true,
 			},
 			{
 				label: __( 'Country', 'wc-admin' ),
@@ -148,6 +149,12 @@ export default class CustomersReportTable extends Component {
 					value: username,
 				},
 				{
+					display: date_last_active && (
+						<Date date={ date_last_active } visibleFormat={ defaultTableDateFormat } />
+					),
+					value: date_last_active,
+				},
+				{
 					display: dateRegistered,
 					value: date_registered,
 				},
@@ -168,10 +175,6 @@ export default class CustomersReportTable extends Component {
 					value: getCurrencyFormatDecimal( avg_order_value ),
 				},
 				{
-					display: <Date date={ date_last_active } visibleFormat={ defaultTableDateFormat } />,
-					value: date_last_active,
-				},
-				{
 					display: countryDisplay,
 					value: country,
 				},
@@ -187,6 +190,30 @@ export default class CustomersReportTable extends Component {
 		} );
 	}
 
+	getSummary( totals ) {
+		if ( ! totals ) {
+			return [];
+		}
+		return [
+			{
+				label: __( 'customers', 'wc-admin' ),
+				value: numberFormat( totals.customers_count ),
+			},
+			{
+				label: __( 'average orders', 'wc-admin' ),
+				value: numberFormat( totals.avg_orders_count ),
+			},
+			{
+				label: __( 'average lifetime spend', 'wc-admin' ),
+				value: formatCurrency( totals.avg_total_spend ),
+			},
+			{
+				label: __( 'average order value', 'wc-admin' ),
+				value: formatCurrency( totals.avg_avg_order_value ),
+			},
+		];
+	}
+
 	render() {
 		const { query } = this.props;
 
@@ -195,6 +222,7 @@ export default class CustomersReportTable extends Component {
 				endpoint="customers"
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
+				getSummary={ this.getSummary }
 				itemIdField="id"
 				query={ query }
 				labels={ { placeholder: __( 'Search by customer name', 'wc-admin' ) } }

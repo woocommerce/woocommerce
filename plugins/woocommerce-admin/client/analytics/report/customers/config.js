@@ -8,7 +8,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 /**
  * Internal dependencies
  */
-import { getRequestByIdString } from 'lib/async-requests';
+import { getCustomerLabels, getRequestByIdString } from 'lib/async-requests';
 import { NAMESPACE } from 'store/constants';
 
 export const filters = [
@@ -129,10 +129,7 @@ export const advancedFilters = {
 			input: {
 				component: 'Search',
 				type: 'usernames',
-				getLabels: getRequestByIdString( NAMESPACE + 'customers', customer => ( {
-					id: customer.id,
-					label: customer.username,
-				} ) ),
+				getLabels: getCustomerLabels,
 			},
 		},
 		email: {

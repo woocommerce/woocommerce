@@ -23,6 +23,9 @@ export default {
 	options() {
 		return wcSettings.dataEndpoints.countries || [];
 	},
+	getSearchExpression( query ) {
+		return '^' + query;
+	},
 	getOptionKeywords( country ) {
 		return [ country.code, decodeEntities( country.name ) ];
 	},
@@ -34,8 +37,8 @@ export default {
 				key="thumbnail"
 				className="woocommerce-search__result-thumbnail"
 				code={ country.code }
-				width={ 18 }
-				height={ 18 }
+				size={ 18 }
+				hideFromScreenReader
 			/>,
 			<span key="name" className="woocommerce-search__result-name" aria-label={ name }>
 				{ match.suggestionBeforeMatch }

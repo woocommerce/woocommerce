@@ -7,8 +7,7 @@ import { __, _x } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { getRequestByIdString } from 'lib/async-requests';
-import { NAMESPACE } from 'store/constants';
+import { getCouponLabels, getProductLabels } from 'lib/async-requests';
 
 const { orderStatuses } = wcSettings;
 
@@ -110,10 +109,7 @@ export const advancedFilters = {
 			input: {
 				component: 'Search',
 				type: 'products',
-				getLabels: getRequestByIdString( NAMESPACE + 'products', product => ( {
-					id: product.id,
-					label: product.name,
-				} ) ),
+				getLabels: getProductLabels,
 			},
 		},
 		coupon: {
@@ -141,10 +137,7 @@ export const advancedFilters = {
 			input: {
 				component: 'Search',
 				type: 'coupons',
-				getLabels: getRequestByIdString( NAMESPACE + 'coupons', coupon => ( {
-					id: coupon.id,
-					label: coupon.code,
-				} ) ),
+				getLabels: getCouponLabels,
 			},
 		},
 		customer: {

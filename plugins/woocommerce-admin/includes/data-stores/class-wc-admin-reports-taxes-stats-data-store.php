@@ -132,30 +132,39 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 		$data      = wp_cache_get( $cache_key, $this->cache_group );
 
 		if ( false === $data ) {
+			$data = (object) array(
+				'totals'    => (object) array(),
+				'intervals' => (object) array(),
+				'total'     => 0,
+				'pages'     => 0,
+				'page_no'   => 0,
+			);
+
 			$selections      = $this->selected_columns( $query_args );
 			$totals_query    = array();
 			$intervals_query = array();
 			$this->update_sql_query_params( $query_args, $totals_query, $intervals_query );
 
-			$db_records_count = (int) $wpdb->get_var(
-				"SELECT COUNT(*) FROM (
-							SELECT
-								{$intervals_query['select_clause']} AS time_interval
-							FROM
-								{$table_name}
-								{$intervals_query['from_clause']}
-							WHERE
-								1=1
-								{$intervals_query['where_time_clause']}
-								{$intervals_query['where_clause']}
-							GROUP BY
-								time_interval
-					  		) AS t"
+			$db_intervals = $wpdb->get_col(
+				"SELECT
+							{$intervals_query['select_clause']} AS time_interval
+						FROM
+							{$table_name}
+							{$intervals_query['from_clause']}
+						WHERE
+							1=1
+							{$intervals_query['where_time_clause']}
+							{$intervals_query['where_clause']}
+						GROUP BY
+							time_interval"
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
-			$total_pages = (int) ceil( $db_records_count / $intervals_query['per_page'] );
+			$db_interval_count       = count( $db_intervals );
+			$expected_interval_count = WC_Admin_Reports_Interval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
+			$total_pages             = (int) ceil( $expected_interval_count / $intervals_query['per_page'] );
+
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-				return array();
+				return $data;
 			}
 
 			$totals = $wpdb->get_results(
@@ -174,6 +183,8 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 			if ( null === $totals ) {
 				return new WP_Error( 'woocommerce_reports_taxes_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
 			}
+
+			$this->update_intervals_sql_params( $intervals_query, $query_args, $db_interval_count, $expected_interval_count, $table_name );
 
 			if ( '' !== $selections ) {
 				$selections = ', ' . $selections;
@@ -200,21 +211,27 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
-				return new WP_Error( 'woocommerce_reports_taxes_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
+				return new WP_Error( 'woocommerce_reports_taxes_stats_result_failed', __( 'Sorry, fetching tax data failed.', 'wc-admin' ) );
 			}
 
 			$totals = (object) $this->cast_numbers( $totals[0] );
 
-			$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $intervals );
-			$this->create_interval_subtotals( $intervals );
-
-			$data     = (object) array(
+			$data = (object) array(
 				'totals'    => $totals,
 				'intervals' => $intervals,
-				'total'     => $db_records_count,
+				'total'     => $expected_interval_count,
 				'pages'     => $total_pages,
 				'page_no'   => (int) $query_args['page'],
 			);
+
+			if ( WC_Admin_Reports_Interval::intervals_missing( $expected_interval_count, $db_interval_count, $intervals_query['per_page'], $query_args['page'], $query_args['order'], $query_args['orderby'], count( $intervals ) ) ) {
+				$this->fill_in_missing_intervals( $db_intervals, $query_args['adj_after'], $query_args['adj_before'], $query_args['interval'], $data );
+				$this->sort_intervals( $data, $query_args['orderby'], $query_args['order'] );
+				$this->remove_extra_records( $data, $query_args['page'], $intervals_query['per_page'], $db_interval_count, $expected_interval_count, $query_args['orderby'] );
+			} else {
+				$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data->intervals );
+			}
+			$this->create_interval_subtotals( $data->intervals );
 
 			wp_cache_set( $cache_key, $data, $this->cache_group );
 		}

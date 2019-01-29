@@ -295,12 +295,14 @@ class WC_Admin_Reports_Data_Store {
 				$new_end_date = clone $new_start_date;
 				for ( $i = 0; $i < $intervals_query['per_page']; $i++ ) {
 					if ( $new_end_date > $latest_end_date ) {
-						$new_end_date  = $latest_end_date;
-						$end_iteration = 0;
 						break;
 					}
 					$new_end_date = WC_Admin_Reports_Interval::iterate( $new_end_date, $query_args['interval'] );
 					$end_iteration ++;
+				}
+				if ( $new_end_date > $latest_end_date ) {
+					$new_end_date  = $latest_end_date;
+					$end_iteration = 0;
 				}
 				if ( $end_iteration ) {
 					$new_end_date_timestamp = (int) $new_end_date->format( 'U' ) - 1;
@@ -324,12 +326,14 @@ class WC_Admin_Reports_Data_Store {
 				$new_start_date = clone $new_end_date;
 				for ( $i = 0; $i < $intervals_query['per_page']; $i++ ) {
 					if ( $new_start_date < $earliest_start_date ) {
-						$new_start_date  = $earliest_start_date;
-						$start_iteration = 0;
 						break;
 					}
 					$new_start_date = WC_Admin_Reports_Interval::iterate( $new_start_date, $query_args['interval'], true );
 					$start_iteration ++;
+				}
+				if ( $new_start_date < $earliest_start_date ) {
+					$new_start_date  = $earliest_start_date;
+					$start_iteration = 0;
 				}
 				if ( $start_iteration ) {
 					// TODO: is this correct? should it only be added if iterate runs? other two iterate instances, too?

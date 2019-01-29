@@ -3,40 +3,36 @@
 /**
  * External dependencies
  */
-import ReactFlag from 'react-world-flags';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+import emojiFlags from 'emoji-flags';
+import { get } from 'lodash';
 
 /**
- * Use the `Flag` component to display a country's flag.
+ * Use the `Flag` component to display a country's flag using the operating system's emojis.
  *
- * @return { object } -
+ * @return { object } - React component.
  */
-const Flag = ( { code, order, round, height, width, className } ) => {
-	const classes = classnames( 'woocommerce-flag', className, {
-		'is-round': round,
-	} );
+const Flag = ( { code, order, className, size, hideFromScreenReader } ) => {
+	const classes = classnames( 'woocommerce-flag', className );
 
 	let _code = code || 'unknown';
-	if ( order && order.shipping ) {
+	if ( order && order.shipping && order.shipping.country ) {
 		_code = order.shipping.country;
 	} else if ( order && order.billing && order.billing.country ) {
 		_code = order.billing.country;
 	}
 
-	const _height = round ? height * 2 : height;
-	const _width = round ? width * 2 : width;
-	const inlineStyles = round ? { height, width } : {};
+	const inlineStyles = {
+		fontSize: size,
+	};
+
+	const emoji = get( emojiFlags.countryCode( _code ), 'emoji' );
 
 	return (
-		<div className={ classes } style={ inlineStyles }>
-			<ReactFlag
-				code={ _code }
-				fallback={ <div className="woocommerce-flag__fallback" style={ inlineStyles } /> }
-				height={ _height }
-				width={ _width }
-				alt=""
-			/>
+		<div className={ classes } style={ inlineStyles } aria-hidden={ hideFromScreenReader }>
+			{ emoji && <span>{ emoji }</span> }
+			{ ! emoji && <span className="woocommerce-flag__fallback">Invalid country flag</span> }
 		</div>
 	);
 };
@@ -51,27 +47,13 @@ Flag.propTypes = {
 	 */
 	order: PropTypes.object,
 	/**
-	 * True to display a rounded flag.
-	 */
-	round: PropTypes.bool,
-	/**
-	 * Flag image height.
-	 */
-	height: PropTypes.number,
-	/**
-	 * Flag image width.
-	 */
-	width: PropTypes.number,
-	/**
 	 * Additional CSS classes.
 	 */
 	className: PropTypes.string,
-};
-
-Flag.defaultProps = {
-	height: 24,
-	width: 24,
-	round: true,
+	/**
+	 * Supply a font size to be applied to the emoji flag.
+	 */
+	size: PropTypes.number,
 };
 
 export default Flag;

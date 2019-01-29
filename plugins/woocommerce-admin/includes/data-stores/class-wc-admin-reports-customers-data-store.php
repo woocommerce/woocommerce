@@ -534,7 +534,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			'postcode'         => $customer->get_billing_postcode( 'edit' ),
 			'country'          => $customer->get_billing_country( 'edit' ),
 			'date_registered'  => date( 'Y-m-d H:i:s', $customer->get_date_created( 'edit' )->getTimestamp() ),
-			'date_last_active' => $last_active ? date( 'Y-m-d H:i:s', $last_active ) : '',
+			'date_last_active' => $last_active ? date( 'Y-m-d H:i:s', $last_active ) : null,
 		);
 		$format      = array(
 			'%d',
