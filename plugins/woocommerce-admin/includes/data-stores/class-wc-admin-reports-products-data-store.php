@@ -331,48 +331,14 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			return;
 		}
 
-		$refunds = self::get_order_refund_items( $order );
-
 		foreach ( $order->get_items() as $order_item ) {
-			$order_item_id     = $order_item->get_id();
-			$quantity_refunded = isset( $refunds[ $order_item_id ] ) ? $refunds[ $order_item_id ]['quantity'] : 0;
-			$amount_refunded   = isset( $refunds[ $order_item_id ] ) ? $refunds[ $order_item_id ]['subtotal'] : 0;
-			$product_qty       = $order_item->get_quantity( 'edit' ) - $quantity_refunded;
-
-			// Shipping amount based on woocommerce code in includes/admin/meta-boxes/views/html-order-item(s).php
-			// distributed simply based on number of line items.
-			$order_items = $order->get_item_count();
-			$refunded    = $order->get_total_shipping_refunded();
-			if ( $refunded > 0 ) {
-				$total_shipping_amount = $order->get_shipping_total() - $refunded;
-			} else {
-				$total_shipping_amount = $order->get_shipping_total();
-			}
-			$shipping_amount = $total_shipping_amount / $order_items * $product_qty;
-
-			// Shipping amount tax based on woocommerce code in includes/admin/meta-boxes/views/html-order-item(s).php
-			// distribute simply based on number of line items.
-			$shipping_tax_amount = 0;
-			// @todo: if WC is currently not tax enabled, but it was before (or vice versa), would this work correctly?
-			$order_taxes               = $order->get_taxes();
-			$line_items_shipping       = $order->get_items( 'shipping' );
-			$total_shipping_tax_amount = 0;
-			foreach ( $line_items_shipping as $item_id => $item ) {
-				$tax_data = $item->get_taxes();
-				if ( $tax_data ) {
-					foreach ( $order_taxes as $tax_item ) {
-						$tax_item_id    = $tax_item->get_rate_id();
-						$tax_item_total = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : '';
-						$refunded       = $order->get_tax_refunded_for_item( $item_id, $tax_item_id, 'shipping' );
-						if ( $refunded ) {
-							$total_shipping_tax_amount += $tax_item_total - $refunded;
-						} else {
-							$total_shipping_tax_amount += $tax_item_total;
-						}
-					}
-				}
-			}
-			$shipping_tax_amount = $total_shipping_tax_amount / $order_items * $product_qty;
+			$order_item_id       = $order_item->get_id();
+			$quantity_refunded   = $order->get_item_quantity_refunded( $order_item );
+			$amount_refunded     = $order->get_item_amount_refunded( $order_item );
+			$product_qty         = $order->get_item_quantity_minus_refunded( $order_item );
+			$shipping_amount     = $order->get_item_shipping_amount( $order_item );
+			$shipping_tax_amount = $order->get_item_shipping_tax_amount( $order_item );
+			$coupon_amount       = $order->get_item_coupon_amount( $order_item );
 
 			// Tax amount.
 			// @todo: check if this calculates tax correctly with refunds.
@@ -387,9 +353,6 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 
 			// @todo: should net revenue be affected by refunds, as refunds are tracked separately?
 			$net_revenue = $order_item->get_subtotal( 'edit' ) - $amount_refunded;
-
-			// Coupon calculation based on woocommerce code in includes/admin/meta-boxes/views/html-order-item.php.
-			$coupon_amount = $order_item->get_subtotal( 'edit' ) - $order_item->get_total( 'edit' );
 
 			if ( $quantity_refunded >= $order_item->get_quantity( 'edit' ) ) {
 				$wpdb->delete(
@@ -436,29 +399,6 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 			}
 		}
-	}
-
-	/**
-	 * Get order refund items quantity and subtotal
-	 *
-	 * @param object $order WC Order object.
-	 * @return array
-	 */
-	public static function get_order_refund_items( $order ) {
-		$refunds             = $order->get_refunds();
-		$refunded_line_items = array();
-		foreach ( $refunds as $refund ) {
-			foreach ( $refund->get_items() as $refunded_item ) {
-				$line_item_id = wc_get_order_item_meta( $refunded_item->get_id(), '_refunded_item_id', true );
-				if ( ! isset( $refunded_line_items[ $line_item_id ] ) ) {
-					$refunded_line_items[ $line_item_id ]['quantity'] = 0;
-					$refunded_line_items[ $line_item_id ]['subtotal'] = 0;
-				}
-				$refunded_line_items[ $line_item_id ]['quantity'] += absint( $refunded_item['quantity'] );
-				$refunded_line_items[ $line_item_id ]['subtotal'] += abs( $refunded_item['subtotal'] );
-			}
-		}
-		return $refunded_line_items;
 	}
 
 }

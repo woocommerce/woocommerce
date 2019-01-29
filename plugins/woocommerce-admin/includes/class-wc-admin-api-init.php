@@ -113,6 +113,9 @@ class WC_Admin_Api_Init {
 		// Exceptions.
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-parameter-exception.php';
 
+		// WC Class extensions.
+		require_once dirname( __FILE__ ) . '/class-wc-admin-order.php';
+
 		// Segmentation.
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-segmenting.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-orders-stats-segmenting.php';
@@ -414,6 +417,9 @@ class WC_Admin_Api_Init {
 	 * Init orders data store.
 	 */
 	public static function orders_data_store_init() {
+		// Activate WC_Order extension.
+		WC_Admin_Order::add_filters();
+		// Initialize data stores.
 		WC_Admin_Reports_Orders_Stats_Data_Store::init();
 		WC_Admin_Reports_Products_Data_Store::init();
 		WC_Admin_Reports_Taxes_Data_Store::init();
