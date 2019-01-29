@@ -360,18 +360,19 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * Add order information to the lookup table when orders are created or modified.
 	 *
 	 * @param int $post_id Post ID.
+	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
 	 */
 	public static function sync_order( $post_id ) {
 		if ( 'shop_order' !== get_post_type( $post_id ) ) {
-			return;
+			return -1;
 		}
 
 		$order = wc_get_order( $post_id );
 		if ( ! $order ) {
-			return;
+			return -1;
 		}
 
-		self::update( $order );
+		return self::update( $order );
 	}
 
 	/**
@@ -388,14 +389,14 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * Update the database with stats data.
 	 *
 	 * @param WC_Order $order Order to update row for.
-	 * @return int|bool|null Number or rows modified or false on failure.
+	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
 	 */
 	public static function update( $order ) {
 		global $wpdb;
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
 
 		if ( ! $order->get_id() || ! $order->get_date_created() ) {
-			return false;
+			return -1;
 		}
 
 		$data   = array(
@@ -450,7 +451,9 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		}
 
 		// Update or add the information to the DB.
-		return $wpdb->replace( $table_name, $data, $format );
+		$result = $wpdb->replace( $table_name, $data, $format );
+
+		return ( 1 === $result );
 	}
 
 	/**

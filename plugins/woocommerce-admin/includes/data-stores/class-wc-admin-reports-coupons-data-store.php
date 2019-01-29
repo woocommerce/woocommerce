@@ -315,19 +315,21 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 	 *
 	 * @since 3.5.0
 	 * @param int $order_id Order ID.
-	 * @return void
+	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
 	 */
 	public static function sync_order_coupons( $order_id ) {
 		global $wpdb;
 
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
-			return;
+			return -1;
 		}
 
 		$coupon_items = $order->get_items( 'coupon' );
+		$num_updated  = 0;
+
 		foreach ( $coupon_items as $coupon_item ) {
-			$wpdb->replace(
+			$result = $wpdb->replace(
 				$wpdb->prefix . self::TABLE_NAME,
 				array(
 					'order_id'        => $order_id,
@@ -342,7 +344,11 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 					'%s',
 				)
 			);
+
+			$num_updated += intval( $result );
 		}
+
+		return ( count( $coupon_items ) === $num_updated );
 	}
 
 }

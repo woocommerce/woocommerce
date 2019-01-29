@@ -319,7 +319,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 	 *
 	 * @since 3.5.0
 	 * @param int $order_id Order ID.
-	 * @return void
+	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
 	 */
 	public static function sync_order_products( $order_id ) {
 		global $wpdb;
@@ -328,10 +328,13 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 
 		// This hook gets called on refunds as well, so return early to avoid errors.
 		if ( ! $order || 'shop_order_refund' === $order->get_type() ) {
-			return;
+			return -1;
 		}
 
-		foreach ( $order->get_items() as $order_item ) {
+		$order_items = $order->get_items();
+		$num_updated = 0;
+
+		foreach ( $order_items as $order_item ) {
 			$order_item_id       = $order_item->get_id();
 			$quantity_refunded   = $order->get_item_quantity_refunded( $order_item );
 			$amount_refunded     = $order->get_item_amount_refunded( $order_item );
@@ -355,13 +358,13 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			$net_revenue = $order_item->get_subtotal( 'edit' ) - $amount_refunded;
 
 			if ( $quantity_refunded >= $order_item->get_quantity( 'edit' ) ) {
-				$wpdb->delete(
+				$result = $wpdb->delete(
 					$wpdb->prefix . self::TABLE_NAME,
 					array( 'order_item_id' => $order_item_id ),
 					array( '%d' )
 				); // WPCS: cache ok, DB call ok.
 			} else {
-				$wpdb->replace(
+				$result = $wpdb->replace(
 					$wpdb->prefix . self::TABLE_NAME,
 					array(
 						'order_item_id'         => $order_item_id,
@@ -398,7 +401,11 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 					)
 				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 			}
+
+			$num_updated += intval( $result );
 		}
+
+		return ( count( $order_items ) === $num_updated );
 	}
 
 }
