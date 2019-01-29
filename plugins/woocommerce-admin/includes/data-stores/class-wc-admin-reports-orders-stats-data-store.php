@@ -455,18 +455,26 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 */
 	public static function delete_order( $post_id ) {
 		global $wpdb;
+		$order_id   = (int) $post_id;
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
 
-		if ( 'shop_order' !== get_post_type( $post_id ) ) {
+		if ( 'shop_order' !== get_post_type( $order_id ) ) {
 			return;
 		}
 
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM ${table_name} WHERE order_id = %d",
-				$post_id
+				$order_id
 			)
 		);
+
+		/**
+		 * Fires when orders stats are deleted.
+		 *
+		 * @param int $order_id Order ID.
+		 */
+		do_action( 'woocommerce_reports_orders_stats_data_deleted', (int) $order_id );
 	}
 
 
