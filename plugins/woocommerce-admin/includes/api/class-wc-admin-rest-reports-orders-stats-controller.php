@@ -70,7 +70,11 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 	public function get_items( $request ) {
 		$query_args   = $this->prepare_reports_query( $request );
 		$orders_query = new WC_Admin_Reports_Orders_Stats_Query( $query_args );
-		$report_data  = $orders_query->get_data();
+		try {
+			$report_data = $orders_query->get_data();
+		} catch ( WC_Admin_Reports_Parameter_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 
 		$out_data = array(
 			'totals'    => get_object_vars( $report_data->totals ),

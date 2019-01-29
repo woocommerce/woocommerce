@@ -74,8 +74,12 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 			}
 		}
 
-		$query       = new WC_Admin_Reports_Products_Stats_Query( $query_args );
-		$report_data = $query->get_data();
+		$query = new WC_Admin_Reports_Products_Stats_Query( $query_args );
+		try {
+			$report_data = $query->get_data();
+		} catch ( WC_Admin_Reports_Parameter_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 
 		$out_data = array(
 			'totals'    => get_object_vars( $report_data->totals ),

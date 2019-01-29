@@ -335,7 +335,7 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 	 * @param string $table_name Name of main SQL table for the data store (used as basis for JOINS).
 	 *
 	 * @return array
-	 * @throws WC_REST_Exception In case of segmenting by variations, when no parent product is specified.
+	 * @throws WC_Admin_Reports_Parameter_Exception In case of segmenting by variations, when no parent product is specified.
 	 */
 	protected function get_segments( $type, $query_params, $table_name ) {
 		global $wpdb;
@@ -363,7 +363,7 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 			$segments = $this->get_product_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $segmenting_dimension_name, $table_name, $query_params, $unique_orders_table );
 		} elseif ( 'variation' === $this->query_args['segmentby'] ) {
 			if ( ! isset( $this->query_args['product_includes'] ) || count( $this->query_args['product_includes'] ) !== 1 ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_segmenting_variation', __( 'product_includes parameter need to specify exactly one product when segmenting by variation.', 'wc-admin' ), 400 );
+				throw new WC_Admin_Reports_Parameter_Exception( 'wc_admin_reports_invalid_segmenting_variation', __( 'product_includes parameter need to specify exactly one product when segmenting by variation.', 'wc-admin' ) );
 			}
 
 			$segmenting_selections     = array(

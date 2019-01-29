@@ -62,7 +62,11 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 	public function get_items( $request ) {
 		$query_args    = $this->prepare_reports_query( $request );
 		$coupons_query = new WC_Admin_Reports_Coupons_Stats_Query( $query_args );
-		$report_data   = $coupons_query->get_data();
+		try {
+			$report_data = $coupons_query->get_data();
+		} catch ( WC_Admin_Reports_Parameter_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 
 		$out_data = array(
 			'totals'    => get_object_vars( $report_data->totals ),
