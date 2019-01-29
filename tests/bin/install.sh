@@ -92,7 +92,7 @@ install_test_suite() {
 		sed $ioption "s/youremptytestdbnamehere/$DB_NAME/" "$WP_TESTS_DIR"/wp-tests-config.php
 		sed $ioption "s/yourusernamehere/$DB_USER/" "$WP_TESTS_DIR"/wp-tests-config.php
 		# escape the regex delim if not already escaped (i.e. if preceded by an even number of backslashes)
-		E_DB_PASS=$(echo $DB_PASS | sed -E -e 's%((^|[^\\])(\\\\)*)/%\1\\/%')
+		E_DB_PASS=$(echo $DB_PASS | sed -E -e 's%([/&\\])%\\\1%g')
 		sed $ioption "s/yourpasswordhere/${E_DB_PASS}/" "$WP_TESTS_DIR"/wp-tests-config.php
 		sed $ioption "s|localhost|${DB_HOST}|" "$WP_TESTS_DIR"/wp-tests-config.php
 	fi
