@@ -58,6 +58,7 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 		add_action( 'save_post', array( __CLASS__, 'sync_order_coupons' ) );
 		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order_coupons' ) );
 		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order_coupons' ) );
+		add_action( 'woocommerce_reports_orders_stats_data_deleted', array( __CLASS__, 'sync_on_order_delete' ), 10 );
 	}
 
 	/**
@@ -343,6 +344,24 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 				)
 			);
 		}
+	}
+
+	/**
+	 * Clean coupons data when an order is deleted.
+	 *
+	 * @param int $order_id Order ID.
+	 */
+	public static function sync_on_order_delete( $order_id ) {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM ${table_name} WHERE order_id = %d",
+				$order_id
+			)
+		);
 	}
 
 }
