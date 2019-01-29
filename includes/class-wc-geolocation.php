@@ -148,7 +148,7 @@ class WC_Geolocation {
 
 	/**
 	 * Get user IP Address using an external service.
-	 * This is used mainly as a fallback for users on localhost where
+	 * This can be used as a fallback for users on localhost where
 	 * get_ip_address() will be a local IP and non-geolocatable.
 	 *
 	 * @return string
@@ -215,11 +215,6 @@ class WC_Geolocation {
 					$country_code = self::geolocate_via_api( $ip_address );
 				} else {
 					$country_code = '';
-				}
-
-				if ( ! $country_code && $fallback ) {
-					// May be a local environment - find external IP.
-					return self::geolocate_ip( self::get_external_ip_address(), false, $api_fallback );
 				}
 			}
 		}
