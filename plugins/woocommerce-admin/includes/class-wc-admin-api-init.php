@@ -68,7 +68,7 @@ class WC_Admin_Api_Init {
 
 		// Initialize scheduled action handlers.
 		add_action( self::QUEUE_BATCH_ACTION, array( __CLASS__, 'queue_batches' ), 10, 3 );
-		add_action( self::QUEUE_DEPEDENT_ACTION, array( __CLASS__, 'queue_dependent_action' ), 10, 2 );
+		add_action( self::QUEUE_DEPEDENT_ACTION, array( __CLASS__, 'queue_dependent_action' ), 10, 3 );
 		add_action( self::CUSTOMERS_BATCH_ACTION, array( __CLASS__, 'customer_lookup_process_batch' ) );
 		add_action( self::ORDERS_BATCH_ACTION, array( __CLASS__, 'orders_lookup_process_batch' ) );
 		add_action( self::ORDERS_LOOKUP_BATCH_INIT, array( __CLASS__, 'orders_lookup_batch_init' ) );
@@ -433,7 +433,7 @@ class WC_Admin_Api_Init {
 		// so that the orders can be associated with the `customer_id` column.
 		self::customer_lookup_batch_init();
 		// Queue orders lookup to occur after customers lookup generation is done.
-		self::queue_dependent_action( self::ORDERS_LOOKUP_BATCH_INIT, self::CUSTOMERS_BATCH_ACTION );
+		self::queue_dependent_action( self::ORDERS_LOOKUP_BATCH_INIT, array(), self::CUSTOMERS_BATCH_ACTION );
 	}
 
 	/**
@@ -592,9 +592,10 @@ class WC_Admin_Api_Init {
 	 * Queue an action to run after another.
 	 *
 	 * @param string $action Action to run after prerequisite.
+	 * @param array  $action_args Action arguments.
 	 * @param string $prerequisite_action Prerequisite action.
 	 */
-	public static function queue_dependent_action( $action, $prerequisite_action ) {
+	public static function queue_dependent_action( $action, $action_args, $prerequisite_action ) {
 		$blocking_jobs = self::queue()->search(
 			array(
 				'status'   => 'pending',
@@ -613,10 +614,10 @@ class WC_Admin_Api_Init {
 			self::queue()->schedule_single(
 				$after_blocking_job,
 				self::QUEUE_DEPEDENT_ACTION,
-				array( $action, $prerequisite_action )
+				array( $action, $action_args, $prerequisite_action )
 			);
 		} else {
-			self::queue()->schedule_single( time() + 5, $action );
+			self::queue()->schedule_single( time() + 5, $action, $action_args );
 		}
 	}
 
