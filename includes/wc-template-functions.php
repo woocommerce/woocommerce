@@ -494,10 +494,8 @@ function wc_product_post_class( $classes, $class = '', $post_id = 0 ) {
 		if ( $product->get_type() ) {
 			$classes[] = 'product-type-' . $product->get_type();
 		}
-		if ( $product->is_type( 'variable' ) ) {
-			if ( ! $product->get_default_attributes() ) {
-				$classes[] = 'has-default-attributes';
-			}
+		if ( $product->is_type( 'variable' ) && $product->get_default_attributes() ) {
+			$classes[] = 'has-default-attributes';
 		}
 	}
 
@@ -546,7 +544,11 @@ function wc_get_product_taxonomy_class( $term_ids, $taxonomy ) {
 /**
  * Retrieves the classes for the post div as an array.
  *
- * This method is clone from WordPress's get_post_class(), allowing removing taxonomies.
+ * This method was modified from WordPress's get_post_class() to allow the removal of taxonomies
+ * (for performance reasons).
+ *
+ * Previously wc_product_post_class was hooked into post_class. That still happens, but this function
+ * negates the need for it and thus unhooks it when running the post_class hook. @since 3.6.0
  *
  * @since 3.4.0
  * @param string|array           $class      One or more classes to add to the class list.
@@ -576,9 +578,10 @@ function wc_get_product_class( $class = '', $product_id = null ) {
 		array(
 			'product',
 			'type-product',
-			'hentry',
 			'post-' . $product->get_id(),
 			'status-' . $product->get_status(),
+			wc_get_loop_class(),
+			$product->get_stock_status(),
 		),
 		wc_get_product_taxonomy_class( $product->get_category_ids(), 'product_cat' ),
 		wc_get_product_taxonomy_class( $product->get_tag_ids(), 'product_tag' )
@@ -587,12 +590,41 @@ function wc_get_product_class( $class = '', $product_id = null ) {
 	if ( $product->get_image_id() ) {
 		$classes[] = 'has-post-thumbnail';
 	}
-
 	if ( $product->get_post_password() ) {
 		$classes[] = post_password_required( $product->get_id() ) ? 'post-password-required' : 'post-password-protected';
 	}
+	if ( $product->is_on_sale() ) {
+		$classes[] = 'sale';
+	}
+	if ( $product->is_featured() ) {
+		$classes[] = 'featured';
+	}
+	if ( $product->is_downloadable() ) {
+		$classes[] = 'downloadable';
+	}
+	if ( $product->is_virtual() ) {
+		$classes[] = 'virtual';
+	}
+	if ( $product->is_sold_individually() ) {
+		$classes[] = 'sold-individually';
+	}
+	if ( $product->is_taxable() ) {
+		$classes[] = 'taxable';
+	}
+	if ( $product->is_shipping_taxable() ) {
+		$classes[] = 'shipping-taxable';
+	}
+	if ( $product->is_purchasable() ) {
+		$classes[] = 'purchasable';
+	}
+	if ( $product->get_type() ) {
+		$classes[] = 'product-type-' . $product->get_type();
+	}
+	if ( $product->is_type( 'variable' ) && $product->get_default_attributes() ) {
+		$classes[] = 'has-default-attributes';
+	}
 
-	// Include attributes and any extra taxonomies.
+	// Include attributes and any extra taxonomies only if enabled via the hook - this is a performance issue.
 	if ( apply_filters( 'woocommerce_get_product_class_include_taxonomies', false ) ) {
 		$taxonomies = get_taxonomies( array( 'public' => true ) );
 		foreach ( (array) $taxonomies as $taxonomy ) {
@@ -602,7 +634,20 @@ function wc_get_product_class( $class = '', $product_id = null ) {
 		}
 	}
 
-	return array_filter( array_map( 'esc_attr', array_unique( apply_filters( 'post_class', $classes, $class, $product->get_id() ) ) ) );
+	// If using `wc_get_product_class` instead of `get_post_class`, we don't need to hook `wc_product_post_class` function.
+	$filtered = has_filter( 'post_class', 'wc_product_post_class' );
+
+	if ( $filtered ) {
+		remove_filter( 'post_class', 'wc_product_post_class', 20, 3 );
+	}
+
+	$classes = apply_filters( 'post_class', $classes, $class, $product->get_id() );
+
+	if ( $filtered ) {
+		add_filter( 'post_class', 'wc_product_post_class', 20, 3 );
+	}
+
+	return array_filter( array_map( 'esc_attr', array_unique( $classes ) ) );
 }
 
 /**
