@@ -297,9 +297,12 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 	 */
 	protected function get_order_related_intervals_segments( $segmenting_select, $segmenting_from, $segmenting_where, $segmenting_groupby, $table_name, $intervals_query ) {
 		global $wpdb;
+		$segmenting_limit = '';
 		$limit_parts      = explode( ',', $intervals_query['limit'] );
-		$orig_rowcount    = intval( $limit_parts[1] );
-		$segmenting_limit = $limit_parts[0] . ',' . $orig_rowcount * count( $this->get_all_segments() );
+		if ( 2 === count( $limit_parts ) ) {
+			$orig_rowcount    = intval( $limit_parts[1] );
+			$segmenting_limit = $limit_parts[0] . ',' . $orig_rowcount * count( $this->get_all_segments() );
+		}
 
 		$intervals_segments = $wpdb->get_results(
 			"SELECT
