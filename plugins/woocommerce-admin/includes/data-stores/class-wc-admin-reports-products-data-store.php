@@ -83,15 +83,6 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 	}
 
 	/**
-	 * Set up all the hooks for maintaining and populating table data.
-	 */
-	public static function init() {
-		add_action( 'save_post', array( __CLASS__, 'sync_order_products' ) );
-		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order_products' ) );
-		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order_products' ) );
-	}
-
-	/**
 	 * Fills ORDER BY clause of SQL request based on user supplied parameters.
 	 *
 	 * @param array $query_args Parameters supplied by the user.

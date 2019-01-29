@@ -73,10 +73,6 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * Set up all the hooks for maintaining and populating table data.
 	 */
 	public static function init() {
-		add_action( 'save_post', array( __CLASS__, 'sync_order' ) );
-		// @todo: this is required as order update skips save_post.
-		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order' ) );
-		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order' ) );
 		add_action( 'woocommerce_refund_deleted', array( __CLASS__, 'sync_on_refund_delete' ), 10, 2 );
 		add_action( 'delete_post', array( __CLASS__, 'delete_order' ) );
 	}
