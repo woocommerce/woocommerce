@@ -10,6 +10,7 @@
   "license": "GPL-3.0+",
   "main": "Gruntfile.js",
   "scripts": {
+    "postinstall": "composer install",
     "build": "cross-env BABEL_ENV=default NODE_ENV=production webpack && npm run i18n:php",
     "start": "cross-env BABEL_ENV=default webpack --watch",
     "i18n:php": "pot-to-php ./languages/woo-gutenberg-products-block.pot ./languages/woo-gutenberg-products-block.php woo-gutenberg-products-block",
