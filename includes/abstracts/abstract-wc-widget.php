@@ -354,6 +354,8 @@ abstract class WC_Widget extends WP_Widget {
 			}
 		}
 
+		wp_cache_set( $cache_key, $link, 'woocommerce' );
+
 		return apply_filters( 'woocommerce_widget_get_current_page_url', $link, $this );
 	}
 
