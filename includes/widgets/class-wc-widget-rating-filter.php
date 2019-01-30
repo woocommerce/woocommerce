@@ -99,6 +99,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 
 		$found         = false;
 		$rating_filter = isset( $_GET['rating_filter'] ) ? array_filter( array_map( 'absint', explode( ',', wp_unslash( $_GET['rating_filter'] ) ) ) ) : array(); // WPCS: input var ok, CSRF ok, sanitization ok.
+		$base_link     = $this->get_current_page_url();
 
 		$this->widget_start( $args, $instance );
 
@@ -110,7 +111,7 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 				continue;
 			}
 			$found = true;
-			$link  = $this->get_current_page_url();
+			$link  = $base_link;
 
 			if ( in_array( $rating, $rating_filter, true ) ) {
 				$link_ratings = implode( ',', array_diff( $rating_filter, array( $rating ) ) );

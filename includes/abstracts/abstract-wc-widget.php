@@ -289,13 +289,6 @@ abstract class WC_Widget extends WP_Widget {
 	 * @since  3.3.0
 	 */
 	protected function get_current_page_url() {
-		$cache_key   = 'widget_current_page_url';
-		$cache_value = wp_cache_get( $cache_key, 'woocommerce' );
-
-		if ( $cache_value ) {
-			return apply_filters( 'woocommerce_widget_get_current_page_url', $cache_value, $this );
-		}
-
 		if ( defined( 'SHOP_IS_ON_FRONT' ) ) {
 			$link = home_url();
 		} elseif ( is_shop() ) {
@@ -353,8 +346,6 @@ abstract class WC_Widget extends WP_Widget {
 				}
 			}
 		}
-
-		wp_cache_set( $cache_key, $link, 'woocommerce' );
 
 		return apply_filters( 'woocommerce_widget_get_current_page_url', $link, $this );
 	}
