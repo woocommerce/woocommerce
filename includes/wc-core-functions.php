@@ -203,12 +203,15 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 	$located = wc_locate_template( $template_name, $template_path, $default_path );
 
 	// Allow 3rd party plugin filter template file from their plugin.
-	$located = apply_filters( 'wc_get_template', $located, $template_name, $args, $template_path, $default_path );
+	$filter_located = apply_filters( 'wc_get_template', $located, $template_name, $args, $template_path, $default_path );
 
-	if ( ! file_exists( $located ) ) {
-		/* translators: %s template */
-		wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $located . '</code>' ), '2.1' );
-		return;
+	if ( $filter_located !== $located ) {
+		if ( ! file_exists( $filter_located ) ) {
+			/* translators: %s template */
+			wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $located . '</code>' ), '2.1' );
+			return;
+		}
+		$located = $filter_located;
 	}
 
 	$action_args = array(
