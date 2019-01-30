@@ -68,15 +68,16 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args             = array();
-		$args['before']   = $request['before'];
-		$args['after']    = $request['after'];
-		$args['interval'] = $request['interval'];
-		$args['page']     = $request['page'];
-		$args['per_page'] = $request['per_page'];
-		$args['orderby']  = $request['orderby'];
-		$args['order']    = $request['order'];
-		$args['taxes']    = (array) $request['taxes'];
+		$args              = array();
+		$args['before']    = $request['before'];
+		$args['after']     = $request['after'];
+		$args['interval']  = $request['interval'];
+		$args['page']      = $request['page'];
+		$args['per_page']  = $request['per_page'];
+		$args['orderby']   = $request['orderby'];
+		$args['order']     = $request['order'];
+		$args['taxes']     = (array) $request['taxes'];
+		$args['segmentby'] = $request['segmentby'];
 
 		return $args;
 	}
@@ -161,7 +162,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$totals = array(
+		$data_values = array(
 			'total_tax'    => array(
 				'description' => __( 'Total tax.', 'wc-admin' ),
 				'type'        => 'number',
@@ -192,13 +193,43 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'tax_codes' => array(
+			'tax_codes'    => array(
 				'description' => __( 'Amount of tax codes.', 'wc-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 		);
+
+		$segments = array(
+			'segments' => array(
+				'description' => __( 'Reports data grouped by segment condition.', 'wc-admin' ),
+				'type'        => 'array',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+				'items'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'segment_id' => array(
+							'description' => __( 'Segment identificator.', 'wc-admin' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'enum'        => array( 'day', 'week', 'month', 'year' ),
+						),
+						'subtotals'  => array(
+							'description' => __( 'Interval subtotals.', 'wc-admin' ),
+							'type'        => 'object',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'properties'  => $data_values,
+						),
+					),
+				),
+			),
+		);
+
+		$totals = array_merge( $data_values, $segments );
 
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
@@ -273,9 +304,9 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params             = array();
-		$params['context']  = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']     = array(
+		$params              = array();
+		$params['context']   = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['page']      = array(
 			'description'       => __( 'Current page of the collection.', 'wc-admin' ),
 			'type'              => 'integer',
 			'default'           => 1,
@@ -283,7 +314,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 			'validate_callback' => 'rest_validate_request_arg',
 			'minimum'           => 1,
 		);
-		$params['per_page'] = array(
+		$params['per_page']  = array(
 			'description'       => __( 'Maximum number of items to be returned in result set.', 'wc-admin' ),
 			'type'              => 'integer',
 			'default'           => 10,
@@ -292,26 +323,26 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after']    = array(
+		$params['after']     = array(
 			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before']   = array(
+		$params['before']    = array(
 			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order']    = array(
+		$params['order']     = array(
 			'description'       => __( 'Order sort attribute ascending or descending.', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby']  = array(
+		$params['orderby']   = array(
 			'description'       => __( 'Sort collection by object attribute.', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'date',
@@ -324,7 +355,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['interval'] = array(
+		$params['interval']  = array(
 			'description'       => __( 'Time interval to use for buckets in the returned data.', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'week',
@@ -338,7 +369,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['taxes']    = array(
+		$params['taxes']     = array(
 			'description'       => __( 'Limit result set to all items that have the specified term assigned in the taxes taxonomy.', 'wc-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -346,6 +377,14 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 			'items'             => array(
 				'type' => 'integer',
 			),
+		);
+		$params['segmentby'] = array(
+			'description'       => __( 'Segment the response by additional constraint.', 'wc-admin' ),
+			'type'              => 'string',
+			'enum'              => array(
+				'tax_code',
+			),
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;
