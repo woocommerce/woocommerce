@@ -289,11 +289,11 @@ abstract class WC_Widget extends WP_Widget {
 	 * @since  3.3.0
 	 */
 	protected function get_current_page_url() {
-		$cache_key    = 'woocommerce_widget_get_current_page_url';
-		$cached_value = (string) wp_cache_get( $cache_key, 'woocommerce' );
+		$cache_key   = 'widget_current_page_url';
+		$cache_value = wp_cache_get( $cache_key, 'woocommerce' );
 
-		if ( $cached_value ) {
-			return apply_filters( 'woocommerce_widget_get_current_page_url', $cached_value, $this );
+		if ( $cache_value ) {
+			return apply_filters( 'woocommerce_widget_get_current_page_url', $cache_value, $this );
 		}
 
 		if ( defined( 'SHOP_IS_ON_FRONT' ) ) {
