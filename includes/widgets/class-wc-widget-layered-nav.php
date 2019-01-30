@@ -458,8 +458,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			}
 
 			if ( $count > 0 || $option_is_set ) {
-				$link      = esc_url( apply_filters( 'woocommerce_layered_nav_link', $link, $term, $taxonomy ) );
-				$term_html = '<a rel="nofollow" href="' . $link . '">' . esc_html( $term->name ) . '</a>';
+				$link      = apply_filters( 'woocommerce_layered_nav_link', $link, $term, $taxonomy );
+				$term_html = '<a rel="nofollow" href="' . esc_url( $link ) . '">' . esc_html( $term->name ) . '</a>';
 			} else {
 				$link      = false;
 				$term_html = '<span>' . esc_html( $term->name ) . '</span>';
@@ -468,7 +468,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			$term_html .= ' ' . apply_filters( 'woocommerce_layered_nav_count', '<span class="count">(' . absint( $count ) . ')</span>', $count, $term );
 
 			echo '<li class="woocommerce-widget-layered-nav-list__item wc-layered-nav-term ' . ( $option_is_set ? 'woocommerce-widget-layered-nav-list__item--chosen chosen' : '' ) . '">';
-			echo wp_kses_post( apply_filters( 'woocommerce_layered_nav_term_html', $term_html, $term, $link, $count ) );
+			echo apply_filters( 'woocommerce_layered_nav_term_html', $term_html, $term, $link, $count ); // WPCS: XSS ok.
 			echo '</li>';
 		}
 
