@@ -305,6 +305,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'_sku'                   => 'sku',
 			'_regular_price'         => 'regular_price',
 			'_sale_price'            => 'sale_price',
+			'_price'                 => 'price',
 			'_sale_price_dates_from' => 'date_on_sale_from',
 			'_sale_price_dates_to'   => 'date_on_sale_to',
 			'total_sales'            => 'total_sales',
