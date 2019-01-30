@@ -382,7 +382,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 			'description'       => __( 'Segment the response by additional constraint.', 'wc-admin' ),
 			'type'              => 'string',
 			'enum'              => array(
-				'tax_code',
+				'tax_rate_id',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);

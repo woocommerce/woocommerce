@@ -121,6 +121,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-orders-stats-segmenting.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-products-stats-segmenting.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-coupons-stats-segmenting.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-taxes-stats-segmenting.php';
 
 		// Query classes for reports.
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-revenue-query.php';
