@@ -299,65 +299,70 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 3.0.0
 	 */
 	protected function read_product_data( &$product ) {
-		$id             = $product->get_id();
-		$review_count   = get_post_meta( $id, '_wc_review_count', true );
-		$rating_counts  = get_post_meta( $id, '_wc_rating_count', true );
-		$average_rating = get_post_meta( $id, '_wc_average_rating', true );
-
-		if ( '' === $review_count ) {
-			WC_Comments::get_review_count_for_product( $product );
-		} else {
-			$product->set_review_count( $review_count );
-		}
-
-		if ( '' === $rating_counts ) {
-			WC_Comments::get_rating_counts_for_product( $product );
-		} else {
-			$product->set_rating_counts( $rating_counts );
-		}
-
-		if ( '' === $average_rating ) {
-			WC_Comments::get_average_rating_for_product( $product );
-		} else {
-			$product->set_average_rating( $average_rating );
-		}
-
-		$product->set_props(
-			array(
-				'sku'                => get_post_meta( $id, '_sku', true ),
-				'regular_price'      => get_post_meta( $id, '_regular_price', true ),
-				'sale_price'         => get_post_meta( $id, '_sale_price', true ),
-				'price'              => get_post_meta( $id, '_price', true ),
-				'date_on_sale_from'  => get_post_meta( $id, '_sale_price_dates_from', true ),
-				'date_on_sale_to'    => get_post_meta( $id, '_sale_price_dates_to', true ),
-				'total_sales'        => get_post_meta( $id, 'total_sales', true ),
-				'tax_status'         => get_post_meta( $id, '_tax_status', true ),
-				'tax_class'          => get_post_meta( $id, '_tax_class', true ),
-				'manage_stock'       => get_post_meta( $id, '_manage_stock', true ),
-				'stock_quantity'     => get_post_meta( $id, '_stock', true ),
-				'stock_status'       => get_post_meta( $id, '_stock_status', true ),
-				'backorders'         => get_post_meta( $id, '_backorders', true ),
-				'low_stock_amount'   => get_post_meta( $id, '_low_stock_amount', true ),
-				'sold_individually'  => get_post_meta( $id, '_sold_individually', true ),
-				'weight'             => get_post_meta( $id, '_weight', true ),
-				'length'             => get_post_meta( $id, '_length', true ),
-				'width'              => get_post_meta( $id, '_width', true ),
-				'height'             => get_post_meta( $id, '_height', true ),
-				'upsell_ids'         => get_post_meta( $id, '_upsell_ids', true ),
-				'cross_sell_ids'     => get_post_meta( $id, '_crosssell_ids', true ),
-				'purchase_note'      => get_post_meta( $id, '_purchase_note', true ),
-				'default_attributes' => get_post_meta( $id, '_default_attributes', true ),
-				'category_ids'       => $this->get_term_ids( $product, 'product_cat' ),
-				'tag_ids'            => $this->get_term_ids( $product, 'product_tag' ),
-				'shipping_class_id'  => current( $this->get_term_ids( $product, 'product_shipping_class' ) ),
-				'virtual'            => get_post_meta( $id, '_virtual', true ),
-				'downloadable'       => get_post_meta( $id, '_downloadable', true ),
-				'gallery_image_ids'  => array_filter( explode( ',', get_post_meta( $id, '_product_image_gallery', true ) ) ),
-				'download_limit'     => get_post_meta( $id, '_download_limit', true ),
-				'download_expiry'    => get_post_meta( $id, '_download_expiry', true ),
-				'image_id'           => get_post_thumbnail_id( $id ),
-			)
+		$id                = $product->get_id();
+		$post_meta_values  = get_post_meta( $id );
+		$meta_key_to_props = array(
+			'_sku'                   => 'sku',
+			'_regular_price'         => 'regular_price',
+			'_sale_price'            => 'sale_price',
+			'_sale_price_dates_from' => 'date_on_sale_from',
+			'_sale_price_dates_to'   => 'date_on_sale_to',
+			'total_sales'            => 'total_sales',
+			'_tax_status'            => 'tax_status',
+			'_tax_class'             => 'tax_class',
+			'_manage_stock'          => 'manage_stock',
+			'_backorders'            => 'backorders',
+			'_low_stock_amount'      => 'low_stock_amount',
+			'_sold_individually'     => 'sold_individually',
+			'_weight'                => 'weight',
+			'_length'                => 'length',
+			'_width'                 => 'width',
+			'_height'                => 'height',
+			'_upsell_ids'            => 'upsell_ids',
+			'_crosssell_ids'         => 'cross_sell_ids',
+			'_purchase_note'         => 'purchase_note',
+			'_default_attributes'    => 'default_attributes',
+			'_virtual'               => 'virtual',
+			'_downloadable'          => 'downloadable',
+			'_download_limit'        => 'download_limit',
+			'_download_expiry'       => 'download_expiry',
+			'_thumbnail_id'          => 'image_id',
+			'_stock'                 => 'stock_quantity',
+			'_stock_status'          => 'stock_status',
+			'_wc_average_rating'     => 'average_rating',
+			'_wc_rating_count'       => 'rating_counts',
+			'_wc_review_count'       => 'review_count',
+			'_product_image_gallery' => 'gallery_image_ids',
 		);
+
+		$set_props = array();
+
+		foreach ( $meta_key_to_props as $meta_key => $prop ) {
+			$meta_value         = isset( $post_meta_values[ $meta_key ][0] ) ? $post_meta_values[ $meta_key ][0] : '';
+			$set_props[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
+		}
+
+		$set_props['category_ids']      = $this->get_term_ids( $product, 'product_cat' );
+		$set_props['tag_ids']           = $this->get_term_ids( $product, 'product_tag' );
+		$set_props['shipping_class_id'] = current( $this->get_term_ids( $product, 'product_shipping_class' ) );
+		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ) );
+
+		if ( '' === $set_props['review_count'] ) {
+			unset( $set_props['review_count'] );
+			WC_Comments::get_review_count_for_product( $product );
+		}
+
+		if ( '' === $set_props['rating_counts'] ) {
+			unset( $set_props['rating_counts'] );
+			WC_Comments::get_rating_counts_for_product( $product );
+		}
+
+		if ( '' === $set_props['average_rating'] ) {
+			unset( $set_props['average_rating'] );
+			WC_Comments::get_average_rating_for_product( $product );
+		}
+
+		$product->set_props( $set_props );
 
 		// Handle sale dates on the fly in case of missed cron schedule.
 		if ( $product->is_type( 'simple' ) && $product->is_on_sale( 'edit' ) && $product->get_sale_price( 'edit' ) !== $product->get_price( 'edit' ) ) {
