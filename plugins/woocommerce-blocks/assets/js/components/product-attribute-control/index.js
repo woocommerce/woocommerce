@@ -4,9 +4,10 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-import { Component } from '@wordpress/element';
+import { Component, Fragment } from '@wordpress/element';
 import { find } from 'lodash';
 import PropTypes from 'prop-types';
+import { SelectControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -89,7 +90,7 @@ class ProductAttributeControl extends Component {
 
 	render() {
 		const { list, loading } = this.state;
-		const { selected, onChange } = this.props;
+		const { onChange, onOperatorChange, operator = 'any', selected } = this.props;
 
 		const messages = {
 			clear: __( 'Clear all product attributes', 'woo-gutenberg-products-block' ),
@@ -119,16 +120,39 @@ class ProductAttributeControl extends Component {
 		};
 
 		return (
-			<SearchListControl
-				className="woocommerce-product-attributes"
-				list={ list }
-				isLoading={ loading }
-				selected={ selected.map( ( { id } ) => find( list, { id } ) ).filter( Boolean ) }
-				onChange={ onChange }
-				renderItem={ this.renderItem }
-				messages={ messages }
-				isHierarchical
-			/>
+			<Fragment>
+				<SearchListControl
+					className="woocommerce-product-attributes"
+					list={ list }
+					isLoading={ loading }
+					selected={ selected.map( ( { id } ) => find( list, { id } ) ).filter( Boolean ) }
+					onChange={ onChange }
+					renderItem={ this.renderItem }
+					messages={ messages }
+					isHierarchical
+				/>
+				{ ( !! onOperatorChange ) && (
+					<div className={ selected.length < 2 ? 'screen-reader-text' : '' }>
+						<SelectControl
+							className="woocommerce-product-attributes__operator"
+							label={ __( 'Display products matching', 'woo-gutenberg-products-block' ) }
+							help={ __( 'Pick at least two attributes to use this setting.', 'woo-gutenberg-products-block' ) }
+							value={ operator }
+							onChange={ onOperatorChange }
+							options={ [
+								{
+									label: __( 'Any selected attributes', 'woo-gutenberg-products-block' ),
+									value: 'any',
+								},
+								{
+									label: __( 'All selected attributes', 'woo-gutenberg-products-block' ),
+									value: 'all',
+								},
+							] }
+						/>
+					</div>
+				) }
+			</Fragment>
 		);
 	}
 }
@@ -138,6 +162,14 @@ ProductAttributeControl.propTypes = {
 	 * Callback to update the selected product attributes.
 	 */
 	onChange: PropTypes.func.isRequired,
+	/**
+	 * Callback to update the category operator. If not passed in, setting is not used.
+	 */
+	onOperatorChange: PropTypes.func,
+	/**
+	 * Setting for whether products should match all or any selected categories.
+	 */
+	operator: PropTypes.oneOf( [ 'all', 'any' ] ),
 	/**
 	 * The list of currently selected attribute slug/ID pairs.
 	 */

@@ -1,5 +1,14 @@
-export default function getQuery( attributes, name ) {
-	const { categories, catOperator, columns, orderby, products, rows } = attributes;
+export default function getQuery( blockAttributes, name ) {
+	const {
+		attributes,
+		attrOperator,
+		categories,
+		catOperator,
+		columns,
+		orderby,
+		products,
+		rows,
+	} = blockAttributes;
 
 	const query = {
 		status: 'publish',
@@ -28,6 +37,22 @@ export default function getQuery( attributes, name ) {
 			query.order = 'asc';
 		} else {
 			query.orderby = orderby;
+		}
+	}
+
+	if ( attributes ) {
+		query.attributes = attributes.reduce( ( accumulator, { attr_slug, id } ) => { // eslint-disable-line camelcase
+			if ( accumulator[ attr_slug ] ) {
+				accumulator[ attr_slug ].push( id );
+			} else {
+				accumulator[ attr_slug ] = [ id ];
+			}
+			return accumulator;
+		}, {} );
+
+		if ( attrOperator ) {
+			query.attr_operator = 'all' === attrOperator ? 'AND' : 'IN';
+			query.tax_relation = 'all' === attrOperator ? 'AND' : 'OR';
 		}
 	}
 

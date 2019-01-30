@@ -1,3 +1,20 @@
+.woocommerce-product-attributes__operator {
+	.components-base-control__help {
+		@include visually-hidden;
+	}
+}
+
+.components-panel {
+	.woocommerce-product-attributes__operator.components-base-control {
+		margin-top: $gap;
+
+		.components-select-control__input {
+			margin-left: 0;
+			min-width: 100%;
+		}
+	}
+}
+
 .woocommerce-search-list__item.woocommerce-product-attributes__item {
 	&.is-searching,
 	&.is-skip-level {
