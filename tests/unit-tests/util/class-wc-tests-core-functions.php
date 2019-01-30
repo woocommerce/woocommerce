@@ -141,7 +141,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'NZD' => 'New Zealand dollar',
 			'OMR' => 'Omani rial',
 			'PAB' => 'Panamanian balboa',
-			'PEN' => 'Peruvian nuevo sol',
+			'PEN' => 'Sol',
 			'PGK' => 'Papua New Guinean kina',
 			'PHP' => 'Philippine peso',
 			'PKR' => 'Pakistani rupee',
