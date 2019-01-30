@@ -151,7 +151,7 @@ class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
 			WC_Admin_Api_Init::queue()->search(
 				array(
 					'hook' => WC_Admin_Api_Init::QUEUE_DEPEDENT_ACTION,
-					'args' => array( 'dependent_action', 'blocking_job' ),
+					'args' => array( 'dependent_action', array(), 'blocking_job' ),
 				)
 			)
 		);
@@ -172,7 +172,7 @@ class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
 			WC_Admin_Api_Init::queue()->search(
 				array(
 					'hook' => WC_Admin_Api_Init::QUEUE_DEPEDENT_ACTION,
-					'args' => array( 'another_dependent_action', 'nonexistant_blocking_job' ),
+					'args' => array( 'another_dependent_action', array(), 'nonexistant_blocking_job' ),
 				)
 			)
 		);

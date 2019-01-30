@@ -91,6 +91,8 @@ class WC_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 			)
 		);
 
+		WC_Helper_Queue::run_all_pending();
+
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$reports  = $response->get_data();
 

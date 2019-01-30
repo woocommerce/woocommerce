@@ -87,6 +87,8 @@ class WC_Tests_API_Reports_Coupons_Stats extends WC_REST_Unit_Test_Case {
 		$order_2c->set_date_created( $time );
 		$order_2c->save();
 
+		WC_Helper_Queue::run_all_pending();
+
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(

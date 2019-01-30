@@ -37,6 +37,8 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
 		$order->save();
 
+		WC_Helper_Queue::run_all_pending();
+
 		// /reports/revenue/stats is mapped to Orders_Data_Store.
 		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 

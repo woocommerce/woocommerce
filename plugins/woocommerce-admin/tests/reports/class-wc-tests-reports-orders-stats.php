@@ -41,6 +41,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			)
 		);
 
+		WC_Helper_Queue::run_all_pending();
+
 		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -482,6 +484,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				}
 			}
 		}
+
+		WC_Helper_Queue::run_all_pending();
 
 		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 
@@ -1696,6 +1700,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$returning_order->set_total( 110 ); // $25x4 products + $10 shipping.
 		$returning_order->set_date_created( $order_1_time + 1 ); // This is guaranteed to belong to the same hour by the adjustment to $order_1_time.
 		$returning_order->save();
+
+		WC_Helper_Queue::run_all_pending();
 
 		$query_args = array(
 			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ), // I don't think this makes sense.... date( 'Y-m-d H:i:s', $orders[0]->get_date_created()->getOffsetTimestamp() + 1 ), // Date after initial order to get a returning customer.
