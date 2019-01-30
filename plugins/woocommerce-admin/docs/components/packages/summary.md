@@ -12,17 +12,17 @@ Props
 ### `children`
 
 - **Required**
-- Type: ReactNode
+- Type: Function
 - Default: null
 
-A list of `<SummaryNumber />`s
+A function returning a list of `<SummaryNumber />`s
 
 ### `label`
 
 - Type: String
-- Default: null
+- Default: `__( 'Performance Indicators', 'wc-admin' )`
 
-An optional label of this group, read to screen reader users. Defaults to "Performance Indicators".
+An optional label of this group, read to screen reader users.
 
 `SummaryNumber` (component)
 ===========================
@@ -46,7 +46,7 @@ If omitted, no change value will display.
 ### `href`
 
 - Type: String
-- Default: `'/analytics'`
+- Default: `''`
 
 An internal link to the report focused on this number.
 
@@ -108,6 +108,13 @@ A boolean used to show a highlight style on this number.
 - Default: null
 
 A string or number value to display - a string is allowed so we can accept currency formatting.
+
+### `onLinkClickCallback`
+
+- Type: Function
+- Default: `noop`
+
+A function to be called after a SummaryNumber, rendered as a link, is clicked.
 
 `SummaryListPlaceholder` (component)
 ====================================

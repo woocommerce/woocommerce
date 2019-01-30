@@ -1,9 +1,9 @@
 `Flag` (component)
 ==================
 
-Use the `Flag` component to display a country's flag.
+Use the `Flag` component to display a country's flag using the operating system's emojis.
 
-
+ React component.
 
 Props
 -----
@@ -22,31 +22,17 @@ Two letter, three letter or three digit country code.
 
 An order can be passed instead of `code` and the code will automatically be pulled from the billing or shipping data.
 
-### `round`
-
-- Type: Boolean
-- Default: `true`
-
-True to display a rounded flag.
-
-### `height`
-
-- Type: Number
-- Default: `24`
-
-Flag image height.
-
-### `width`
-
-- Type: Number
-- Default: `24`
-
-Flag image width.
-
 ### `className`
 
 - Type: String
 - Default: null
 
 Additional CSS classes.
+
+### `size`
+
+- Type: Number
+- Default: null
+
+Supply a font size to be applied to the emoji flag.
 
