@@ -9,6 +9,7 @@ Feature plugin for the Gutenberg Products block.
 3. On Gutenberg posts you should now have a Products block available.
 
 ## Getting started with the development version:
+
 1. Make sure you have:
   - the latest version of the Gutenberg plugin and WooCommerce 3.3.1+ installed and active
   - ***OR*** WordPress 5.0 (beta) and WooCommerce 3.5.1+
