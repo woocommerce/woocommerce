@@ -30,12 +30,4 @@ export default {
 		type: 'string',
 		default: 'any',
 	},
-
-	/**
-	 * Product attributes, used to display only products with the given attributes.
-	 */
-	attributes: {
-		type: 'array',
-		default: [],
-	},
 };

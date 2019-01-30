@@ -131,6 +131,13 @@ function wgpb_register_blocks() {
 		)
 	);
 	register_block_type(
+		'woocommerce/products-by-attribute',
+		array(
+			'editor_script' => 'wc-products-attribute',
+			'editor_style'  => 'wc-products-attribute-editor',
+		)
+	);
+	register_block_type(
 		'woocommerce/featured-product',
 		array(
 			'render_callback' => array( 'WC_Block_Featured_Product', 'render' ),
@@ -324,6 +331,25 @@ function wgpb_register_scripts() {
 
 	if ( function_exists( 'wp_set_script_translations' ) ) {
 		wp_set_script_translations( 'wc-featured-product', 'woo-gutenberg-products-block', plugin_dir_path( __FILE__ ) . 'languages' );
+	}
+
+	wp_register_script(
+		'wc-products-attribute',
+		plugins_url( 'build/products-attribute.js', __FILE__ ),
+		$block_dependencies,
+		wgpb_get_file_version( '/build/products-attribute.js' ),
+		true
+	);
+
+	wp_register_style(
+		'wc-products-attribute-editor',
+		plugins_url( 'build/products-attribute.css', __FILE__ ),
+		array( 'wc-vendors', 'wp-edit-blocks', 'wc-products-grid' ),
+		wgpb_get_file_version( '/build/products-attribute.css' )
+	);
+
+	if ( function_exists( 'wp_set_script_translations' ) ) {
+		wp_set_script_translations( 'wc-products-attribute', 'woo-gutenberg-products-block', plugin_dir_path( __FILE__ ) . 'languages' );
 	}
 
 	wp_register_script(
