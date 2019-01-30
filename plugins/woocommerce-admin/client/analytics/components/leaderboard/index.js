@@ -17,7 +17,7 @@ import { Card, EmptyTable, TableCard } from '@woocommerce/components';
  * Internal dependencies
  */
 import ReportError from 'analytics/components/report-error';
-import { getReportTableData } from 'store/reports/utils';
+import { getReportTableData } from 'wc-api/reports/utils';
 import withSelect from 'wc-api/with-select';
 import './style.scss';
 

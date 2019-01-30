@@ -16,7 +16,7 @@ import { formatCurrency } from '@woocommerce/currency';
 /**
  * Internal dependencies
  */
-import { MAX_PER_PAGE, QUERY_DEFAULTS } from 'store/constants';
+import { MAX_PER_PAGE, QUERY_DEFAULTS } from 'wc-api/constants';
 import * as categoriesConfig from 'analytics/report/categories/config';
 import * as couponsConfig from 'analytics/report/coupons/config';
 import * as customersConfig from 'analytics/report/customers/config';

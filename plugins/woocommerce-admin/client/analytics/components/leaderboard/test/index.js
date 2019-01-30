@@ -18,7 +18,7 @@ import { numberFormat } from '@woocommerce/number';
  * Internal dependencies
  */
 import LeaderboardWithSelect, { Leaderboard } from '../';
-import { NAMESPACE } from 'store/constants';
+import { NAMESPACE } from 'wc-api/constants';
 import mockData from '../__mocks__/top-selling-products-mock-data';
 
 // Mock <Table> to avoid tests failing due to it using DOM properties that

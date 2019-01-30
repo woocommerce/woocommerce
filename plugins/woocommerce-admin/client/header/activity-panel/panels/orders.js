@@ -33,7 +33,7 @@ import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
 import ActivityHeader from '../activity-header';
 import ActivityOutboundLink from '../activity-outbound-link';
 import { getOrderRefundTotal } from 'lib/order-values';
-import { QUERY_DEFAULTS } from 'store/constants';
+import { QUERY_DEFAULTS } from 'wc-api/constants';
 import withSelect from 'wc-api/with-select';
 
 function OrdersPanel( { orders, isRequesting, isError } ) {

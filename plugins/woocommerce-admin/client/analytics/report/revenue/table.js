@@ -19,7 +19,7 @@ import { numberFormat } from '@woocommerce/number';
 /**
  * Internal dependencies
  */
-import { QUERY_DEFAULTS } from 'store/constants';
+import { QUERY_DEFAULTS } from 'wc-api/constants';
 import ReportTable from 'analytics/components/report-table';
 import withSelect from 'wc-api/with-select';
 
