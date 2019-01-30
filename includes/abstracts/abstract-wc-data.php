@@ -640,16 +640,16 @@ abstract class WC_Data {
 
 		foreach ( $props as $prop => $value ) {
 			try {
-				if ( 'meta_data' === $prop ) {
+				/**
+				 * Checks if the prop being set is allowed, and the value is not null.
+				 */
+				if ( is_null( $value ) || in_array( $prop, array( 'prop', 'date_prop', 'meta_data' ), true ) ) {
 					continue;
 				}
 				$setter = "set_$prop";
-				if ( ! is_null( $value ) && is_callable( array( $this, $setter ) ) ) {
-					$reflection = new ReflectionMethod( $this, $setter );
 
-					if ( $reflection->isPublic() ) {
-						$this->{$setter}( $value );
-					}
+				if ( is_callable( array( $this, $setter ) ) ) {
+					$this->{$setter}( $value );
 				}
 			} catch ( WC_Data_Exception $e ) {
 				if ( ! $errors ) {
