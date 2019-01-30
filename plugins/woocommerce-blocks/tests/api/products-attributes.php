@@ -163,6 +163,7 @@ class WC_Tests_API_Products_By_Attributes_Controller extends WC_REST_Unit_Test_C
 			)
 		);
 		$request->set_param( 'attr_operator', 'IN' );
+		$request->set_param( 'tax_relation', 'OR' );
 
 		$response          = $this->server->dispatch( $request );
 		$response_products = $response->get_data();
@@ -186,6 +187,7 @@ class WC_Tests_API_Products_By_Attributes_Controller extends WC_REST_Unit_Test_C
 			)
 		);
 		$request->set_param( 'attr_operator', 'AND' );
+		$request->set_param( 'tax_relation', 'AND' );
 
 		$response          = $this->server->dispatch( $request );
 		$response_products = $response->get_data();

@@ -235,6 +235,7 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 		$cat_operator  = $request->get_param( 'cat_operator' );
 		$attributes    = $request->get_param( 'attributes' );
 		$attr_operator = $request->get_param( 'attr_operator' );
+		$tax_relation  = $request->get_param( 'tax_relation' );
 
 		$ordering_args   = WC()->query->get_catalog_ordering_args( $orderby, $order );
 		$args['orderby'] = $ordering_args['orderby'];
@@ -273,7 +274,9 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 			} else {
 				$args['tax_query'] = $tax_query; // WPCS: slow query ok.
 			}
-			$args['tax_query']['relation'] = 'AND' === $attr_operator ? 'AND' : 'OR';
+			if ( ! empty( $tax_relation ) && count( $tax_query ) > 1 ) {
+				$args['tax_query']['relation'] = 'AND' === $tax_relation ? 'AND' : 'OR';
+			}
 		}
 
 		return $args;
@@ -306,7 +309,8 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 	/**
 	 * Update the collection params.
 	 *
-	 * Adds new options for 'orderby', and new parameter 'cat_operator'.
+	 * Adds new options for 'orderby', and new parameters 'cat_operator', 'attributes',
+	 * 'attr_operator', and 'tax_relation'.
 	 *
 	 * @return array
 	 */
@@ -324,6 +328,13 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 			'description'       => __( 'Operator to compare product attribute terms.', 'woo-gutenberg-products-block' ),
 			'type'              => 'string',
 			'enum'              => array( 'IN', 'AND' ),
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['tax_relation']    = array(
+			'description'       => __( 'The logical relationship between each inner taxonomy array when there is more than one.', 'woo-gutenberg-products-block' ),
+			'type'              => 'string',
+			'enum'              => array( 'AND', 'OR' ),
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
