@@ -398,6 +398,8 @@ function wc_reset_product_grid_settings() {
 	if ( ! empty( $product_grid['default_columns'] ) ) {
 		update_option( 'woocommerce_catalog_columns', absint( $product_grid['default_columns'] ) );
 	}
+
+	wp_cache_flush(); // Flush any caches which could impact settings or templates.
 }
 add_action( 'after_switch_theme', 'wc_reset_product_grid_settings' );
 
