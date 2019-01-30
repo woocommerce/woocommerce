@@ -405,6 +405,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$term_counts        = $this->get_filtered_term_product_counts( wp_list_pluck( $terms, 'term_id' ), $taxonomy, $query_type );
 		$_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes();
 		$found              = false;
+		$base_link          = $this->get_current_page_url();
 
 		foreach ( $terms as $term ) {
 			$current_values = isset( $_chosen_attributes[ $taxonomy ]['terms'] ) ? $_chosen_attributes[ $taxonomy ]['terms'] : array();
@@ -431,7 +432,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				$current_filter[] = $term->slug;
 			}
 
-			$link = remove_query_arg( $filter_name, $this->get_current_page_url() );
+			$link = remove_query_arg( $filter_name, $base_link );
 
 			// Add current filters to URL.
 			foreach ( $current_filter as $key => $value ) {
