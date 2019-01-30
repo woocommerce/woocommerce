@@ -721,13 +721,13 @@ class WC_Tax {
 	 * @return array Array of class slugs ("reduced-rate", "zero-rate", etc).
 	 */
 	public static function get_tax_class_slugs() {
-		$cache_key = 'tax_class_slugs';
-		$slugs     = wp_cache_get( $cache_key, 'woocommerce' );
+		$cache_key = WC_Cache_Helper::get_cache_prefix( 'taxes' ) . '-slugs';
+		$slugs     = wp_cache_get( $cache_key, 'taxes' );
 
 		if ( ! $slugs ) {
 			$slugs = array_filter( array_map( 'sanitize_title', self::get_tax_classes() ) );
 
-			wp_cache_set( $cache_key, $slugs, 'woocommerce' );
+			wp_cache_set( $cache_key, $slugs, 'taxes' );
 		}
 
 		return $slugs;
