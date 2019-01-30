@@ -1503,15 +1503,27 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @return bool|string
 	 */
 	public function get_product_type( $product_id ) {
-		$post_type = get_post_type( $product_id );
-		if ( 'product_variation' === $post_type ) {
-			return 'variation';
-		} elseif ( 'product' === $post_type ) {
-			$terms = get_the_terms( $product_id, 'product_type' );
-			return ! empty( $terms ) ? sanitize_title( current( $terms )->name ) : 'simple';
-		} else {
-			return false;
+		$cache_key    = WC_Cache_Helper::get_cache_prefix( 'product_' . $product->get_id() ) . '_type_' . $product_id;
+		$product_type = wp_cache_get( $cache_key, 'products' );
+
+		if ( $product_type ) {
+			return $product_type;
 		}
+
+		$post_type = get_post_type( $product_id );
+
+		if ( 'product_variation' === $post_type ) {
+			$product_type = 'variation';
+		} elseif ( 'product' === $post_type ) {
+			$terms        = get_the_terms( $product_id, 'product_type' );
+			$product_type = ! empty( $terms ) ? sanitize_title( current( $terms )->name ) : 'simple';
+		} else {
+			$product_type = false;
+		}
+
+		wp_cache_set( $cache_key, $product_type, 'products' );
+
+		return $product_type;
 	}
 
 	/**
