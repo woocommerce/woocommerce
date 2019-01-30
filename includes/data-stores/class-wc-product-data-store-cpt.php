@@ -1503,7 +1503,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @return bool|string
 	 */
 	public function get_product_type( $product_id ) {
-		$cache_key    = WC_Cache_Helper::get_cache_prefix( 'product_' . $product->get_id() ) . '_type_' . $product_id;
+		$cache_key    = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . '_type_' . $product_id;
 		$product_type = wp_cache_get( $cache_key, 'products' );
 
 		if ( $product_type ) {
