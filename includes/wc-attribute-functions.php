@@ -678,6 +678,16 @@ function wc_delete_attribute( $id ) {
  * @return string
  */
 function wc_attribute_taxonomy_slug( $attribute_name ) {
+	$cache_key   = 'slug-' . $attribute_name;
+	$cache_value = wp_cache_get( $cache_key, 'woocommerce-attributes' );
+
+	if ( $cache_value ) {
+		return $cache_value;
+	}
+
 	$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
-	return 0 === strpos( $attribute_name, 'pa_' ) ? substr( $attribute_name, 3 ) : $attribute_name;
+	$attribute_slug = 0 === strpos( $attribute_name, 'pa_' ) ? substr( $attribute_name, 3 ) : $attribute_name;
+	wp_cache_set( $cache_key, $attribute_slug, 'woocommerce-attributes' );
+
+	return $attribute_slug;
 }
