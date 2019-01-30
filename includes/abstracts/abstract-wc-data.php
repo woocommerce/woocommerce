@@ -630,7 +630,7 @@ abstract class WC_Data {
 	 * @return bool|WP_Error
 	 */
 	public function set_props( $props, $context = 'set' ) {
-		$errors = new WP_Error();
+		$errors = false;
 
 		foreach ( $props as $prop => $value ) {
 			try {
@@ -646,11 +646,14 @@ abstract class WC_Data {
 					}
 				}
 			} catch ( WC_Data_Exception $e ) {
+				if ( ! $errors ) {
+					$errors = new WP_Error();
+				}
 				$errors->add( $e->getErrorCode(), $e->getMessage() );
 			}
 		}
 
-		return count( $errors->get_error_codes() ) ? $errors : true;
+		return $errors && count( $errors->get_error_codes() ) ? $errors : true;
 	}
 
 	/**
