@@ -10,7 +10,6 @@
   "license": "GPL-3.0+",
   "main": "Gruntfile.js",
   "scripts": {
-    "postinstall": "composer install",
     "build": "cross-env BABEL_ENV=default NODE_ENV=production webpack && npm run i18n:php",
     "start": "cross-env BABEL_ENV=default webpack --watch",
     "i18n:php": "pot-to-php ./languages/woo-gutenberg-products-block.pot ./languages/woo-gutenberg-products-block.php woo-gutenberg-products-block",
@@ -48,7 +47,7 @@
     "cssnano": "4.1.8",
     "eslint": "5.12.1",
     "eslint-config-wordpress": "2.0.0",
-    "eslint-plugin-jest": "22.1.3",
+    "eslint-plugin-jest": "22.2.1",
     "eslint-plugin-jsx-a11y": "6.2.0",
     "eslint-plugin-react": "7.12.4",
     "eslint-plugin-wordpress": "git://github.com/WordPress-Coding-Standards/eslint-plugin-wordpress.git#1774343f6226052a46b081e01db3fca8793cc9f1",
