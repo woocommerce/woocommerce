@@ -159,19 +159,28 @@ function wc_update_order( $args ) {
 function wc_get_template_part( $slug, $name = '' ) {
 	$template = '';
 
-	// Look in yourtheme/slug-name.php and yourtheme/woocommerce/slug-name.php.
-	if ( $name && ! WC_TEMPLATE_DEBUG_MODE ) {
-		$template = locate_template( array( "{$slug}-{$name}.php", WC()->template_path() . "{$slug}-{$name}.php" ) );
+	if ( $name ) {
+		$template = WC_TEMPLATE_DEBUG_MODE ? '' : locate_template(
+			array(
+				"{$slug}-{$name}.php",
+				WC()->template_path() . "{$slug}-{$name}.php",
+			)
+		);
+
+		if ( ! $template ) {
+			$fallback = WC()->plugin_path() . "/templates/{$slug}-{$name}.php";
+			$template = file_exists( $fallback ) ? $fallback : '';
+		}
 	}
 
-	// Get default slug-name.php.
-	if ( ! $template && $name && file_exists( WC()->plugin_path() . "/templates/{$slug}-{$name}.php" ) ) {
-		$template = WC()->plugin_path() . "/templates/{$slug}-{$name}.php";
-	}
-
-	// If template file doesn't exist, look in yourtheme/slug.php and yourtheme/woocommerce/slug.php.
-	if ( ! $template && ! WC_TEMPLATE_DEBUG_MODE ) {
-		$template = locate_template( array( "{$slug}.php", WC()->template_path() . "{$slug}.php" ) );
+	if ( ! $template ) {
+		// If template file doesn't exist, look in yourtheme/slug.php and yourtheme/woocommerce/slug.php.
+		$template = WC_TEMPLATE_DEBUG_MODE ? '' : locate_template(
+			array(
+				"{$slug}.php",
+				WC()->template_path() . "{$slug}.php",
+			)
+		);
 	}
 
 	// Allow 3rd party plugins to filter template file from their plugin.
