@@ -90,7 +90,7 @@ class ProductAttributeControl extends Component {
 
 	render() {
 		const { list, loading } = this.state;
-		const { onChange, onOperatorChange, operator = 'any', selected } = this.props;
+		const { onChange, onOperatorChange, operator, selected } = this.props;
 
 		const messages = {
 			clear: __( 'Clear all product attributes', 'woo-gutenberg-products-block' ),
@@ -174,6 +174,10 @@ ProductAttributeControl.propTypes = {
 	 * The list of currently selected attribute slug/ID pairs.
 	 */
 	selected: PropTypes.array.isRequired,
+};
+
+ProductAttributeControl.defaultProps = {
+	operator: 'any',
 };
 
 export default ProductAttributeControl;
