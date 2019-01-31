@@ -123,6 +123,24 @@ abstract class WC_Widget extends WP_Widget {
 	}
 
 	/**
+	 * Get this widgets title.
+	 *
+	 * @param array $instance Array of instance options.
+	 * @return string
+	 */
+	protected function get_instance_title( $instance ) {
+		if ( isset( $instance['title'] ) ) {
+			return $instance['title'];
+		}
+
+		if ( isset( $this->settings, $this->settings['title'], $this->settings['title']['std'] ) ) {
+			return $this->settings['title']['std'];
+		}
+
+		return '';
+	}
+
+	/**
 	 * Output the html at the start of a widget.
 	 *
 	 * @param array $args Arguments.
@@ -131,7 +149,9 @@ abstract class WC_Widget extends WP_Widget {
 	public function widget_start( $args, $instance ) {
 		echo $args['before_widget']; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 
-		if ( $title = apply_filters( 'widget_title', empty( $instance['title'] ) ? '' : $instance['title'], $instance, $this->id_base ) ) { // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found, WordPress.CodeAnalysis.AssignmentInCondition.Found
+		$title = apply_filters( 'widget_title', $this->get_instance_title( $instance ), $instance, $this->id_base );
+
+		if ( $title ) {
 			echo $args['before_title'] . $title . $args['after_title']; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 		}
 	}
@@ -225,7 +245,7 @@ abstract class WC_Widget extends WP_Widget {
 				case 'text':
 					?>
 					<p>
-						<label for="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>"><?php echo $setting['label']; /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></label>
+						<label for="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>"><?php echo wp_kses_post( $setting['label'] ); ?></label><?php // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
 						<input class="widefat <?php echo esc_attr( $class ); ?>" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $key ) ); ?>" type="text" value="<?php echo esc_attr( $value ); ?>" />
 					</p>
 					<?php
