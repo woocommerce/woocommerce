@@ -209,6 +209,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Update Emogrifier library to 2.1. #22342
 * Dev - Moved core state codes to a single file. #22339
 * Dev - Adds filter for product categories displayed by `product_categories` shortcode. #22571
+* Dev - Moves cart hash calculation to WC_Cart class. #21050
 * Fix - Hide ratings on the shop page when reviews are disabled. #22476
 * Fix - Fix W3C validation of single product page quantity input. #22333
 * Fix - Give product variations a unique guid after creation. #22324
