@@ -335,18 +335,19 @@ class WC_AJAX {
 		WC()->customer->save();
 		WC()->cart->calculate_totals();
 
-		// Get order review fragment
+		// Get order review fragment.
 		ob_start();
 		woocommerce_order_review();
 		$woocommerce_order_review = ob_get_clean();
 
-		// Get checkout payment fragment
+		// Get checkout payment fragment.
 		ob_start();
 		woocommerce_checkout_payment();
 		$woocommerce_checkout_payment = ob_get_clean();
 
-		// Get messages if reload checkout is not true
-		if ( ! isset( WC()->session->reload_checkout ) ) {
+		// Get messages if reload checkout is not true.
+		$reload_checkout = isset( WC()->session->reload_checkout ) ? true : false;
+		if ( ! $reload_checkout ) {
 			$messages = wc_print_notices( true );
 		} else {
 			$messages = '';
@@ -358,9 +359,10 @@ class WC_AJAX {
 			array(
 				'result'    => empty( $messages ) ? 'success' : 'failure',
 				'messages'  => $messages,
-				'reload'    => isset( WC()->session->reload_checkout ) ? 'true' : 'false',
+				'reload'    => $reload_checkout ? 'true' : 'false',
 				'fragments' => apply_filters(
-					'woocommerce_update_order_review_fragments', array(
+					'woocommerce_update_order_review_fragments',
+					array(
 						'.woocommerce-checkout-review-order-table' => $woocommerce_order_review,
 						'.woocommerce-checkout-payment' => $woocommerce_checkout_payment,
 					)
