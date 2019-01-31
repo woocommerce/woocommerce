@@ -14,12 +14,6 @@
 				"source": "@wordpress/element",
 				"isDefault": false
 			}
-		],
-		[
-			"@wordpress/babel-plugin-makepot",
-			{
-				"output": "languages/woo-gutenberg-products-block.pot"
-			}
 		]
 	]
 }
