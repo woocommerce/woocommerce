@@ -181,7 +181,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 							'format'      => 'uri',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'name'             => array(
+						'name'              => array(
 							'description' => __( 'Image name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
@@ -208,5 +208,64 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 		);
 
 		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Update term meta fields.
+	 *
+	 * @param WP_Term         $term    Term object.
+	 * @param WP_REST_Request $request Request instance.
+	 * @return bool|WP_Error
+	 *
+	 * @since 3.5.5
+	 */
+	protected function update_term_meta_fields( $term, $request ) {
+		$id = (int) $term->term_id;
+
+		if ( isset( $request['display'] ) ) {
+			update_woocommerce_term_meta( $id, 'display_type', 'default' === $request['display'] ? '' : $request['display'] );
+		}
+
+		if ( isset( $request['menu_order'] ) ) {
+			update_woocommerce_term_meta( $id, 'order', $request['menu_order'] );
+		}
+
+		if ( isset( $request['image'] ) ) {
+			if ( empty( $request['image']['id'] ) && ! empty( $request['image']['src'] ) ) {
+				$upload = wc_rest_upload_image_from_url( esc_url_raw( $request['image']['src'] ) );
+
+				if ( is_wp_error( $upload ) ) {
+					return $upload;
+				}
+
+				$image_id = wc_rest_set_uploaded_image_as_attachment( $upload );
+			} else {
+				$image_id = isset( $request['image']['id'] ) ? absint( $request['image']['id'] ) : 0;
+			}
+
+			// Check if image_id is a valid image attachment before updating the term meta.
+			if ( $image_id && wp_attachment_is_image( $image_id ) ) {
+				update_woocommerce_term_meta( $id, 'thumbnail_id', $image_id );
+
+				// Set the image alt.
+				if ( ! empty( $request['image']['alt'] ) ) {
+					update_post_meta( $image_id, '_wp_attachment_image_alt', wc_clean( $request['image']['alt'] ) );
+				}
+
+				// Set the image title.
+				if ( ! empty( $request['image']['name'] ) ) {
+					wp_update_post(
+						array(
+							'ID'         => $image_id,
+							'post_title' => wc_clean( $request['image']['name'] ),
+						)
+					);
+				}
+			} else {
+				delete_woocommerce_term_meta( $id, 'thumbnail_id' );
+			}
+		}
+
+		return true;
 	}
 }
