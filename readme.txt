@@ -163,6 +163,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Only include order erasure bulk action if erasure is enabled in settings. #22354
 * Enhancement - Customer notes containing URLs now automatically converts to clickable links. #21927
 * Enhancement - Add increase and decrease stock options to bulk edit form. #22475
+* Enhancement - Allow states in zones to be searched by country name. #22339
 * Tweak - Generalize shipping estimate text on cart page. #22467
 * Tweak - Include auto draft orders in order list filters. #22380
 * Tweak - Only include the network orders widget on the main site dashboard. #22318
@@ -206,6 +207,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Remove unused legacy 'woocommerce_lock_down_admin' option and use filter only instead. #17796
 * Dev - Allow custom settings sections in the Shipping tab. #21719
 * Dev - Update Emogrifier library to 2.1. #22342
+* Dev - Moved core state codes to a single file. #22339
 * Fix - Hide ratings on the shop page when reviews are disabled. #22476
 * Fix - Fix W3C validation of single product page quantity input. #22333
 * Fix - Give product variations a unique guid after creation. #22324
@@ -217,6 +219,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Allow pa_ in product attribute slugs. #22112
 * Fix - Fix customer creation dates in API. #22269
 * Fix - Get widget instance setting defaults so it shows in customiser before save. #22345
+* Fix - PR state codes. #22339
+* Fix - Allow selecting states from the Country / State drop-down for your store address when you have the option enabled to sell to specific countries. #22339
 * Performance - Prime caches when reading variations. #22587
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 * Localization - Added US Minor Outlying Islands as states to avoid confusion with US. #22468
