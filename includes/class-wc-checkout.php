@@ -293,7 +293,7 @@ class WC_Checkout {
 
 		try {
 			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
-			$cart_hash          = md5( wp_json_encode( wc_clean( WC()->cart->get_cart_for_session() ) ) . WC()->cart->total );
+			$cart_hash          = WC()->cart->get_cart_hash();
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 			$order              = $order_id ? wc_get_order( $order_id ) : null;
 
