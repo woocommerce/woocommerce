@@ -32,6 +32,7 @@ class WC_Tests_Reports_Variations extends WC_Unit_Test_Case {
 		$variation->set_parent_id( $product->get_id() );
 		$variation->set_regular_price( 10 );
 		$variation->set_attributes( array( 'pa_color' => 'green' ) );
+		$variation->set_sku( 'test-sku' );
 		$variation->save();
 
 		$order = WC_Helper_Order::create_order( 1, $variation );
@@ -142,6 +143,7 @@ class WC_Tests_Reports_Variations extends WC_Unit_Test_Case {
 								'option' => 'green',
 							),
 						),
+						'sku'              => $variation->get_sku(),
 					),
 				),
 			),
