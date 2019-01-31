@@ -1,4 +1,4 @@
-# 1.4.2 (unreleased)
+# 1.4.2
 - Add emoji-flags dependency
 
 # 1.4.1
