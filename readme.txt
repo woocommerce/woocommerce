@@ -170,6 +170,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Only show available shipping continents when selecting shipping zone region. #22131
 * Tweak - Use Shortcode block on default WooCommerce pages. #21817
 * Tweak - Show full category hierarchy in product URLs when term IDs are not sequential. #22526
+* Template - Moved the order of rememberme checkboxes for accessibility so they tab in order. #21454
 * Dev - Introduce `woocommerce_reviews_title` filter. #22216
 * Dev - Added `woocommerce_cheque_process_payment_order_status` filter allowing plugins to change the order status to the Cheque gateway. #21402
 * Dev - Add the current coupon object to the `woocommerce_get_shop_coupon_data` filter. #21442
