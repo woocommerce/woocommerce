@@ -75,7 +75,7 @@ class ProductCategoryControl extends Component {
 
 	render() {
 		const { list, loading } = this.state;
-		const { onChange, onOperatorChange, operator = 'any', selected } = this.props;
+		const { onChange, onOperatorChange, operator, selected } = this.props;
 
 		const messages = {
 			clear: __( 'Clear all product categories', 'woo-gutenberg-products-block' ),
@@ -159,6 +159,10 @@ ProductCategoryControl.propTypes = {
 	 * The list of currently selected category IDs.
 	 */
 	selected: PropTypes.array.isRequired,
+};
+
+ProductCategoryControl.defaultProps = {
+	operator: 'any',
 };
 
 export default ProductCategoryControl;
