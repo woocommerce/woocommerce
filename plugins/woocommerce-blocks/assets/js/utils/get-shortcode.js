@@ -1,5 +1,12 @@
 export default function getShortcode( { attributes }, name ) {
-	const { categories, catOperator, columns, orderby, products, rows } = attributes;
+	const {
+		categories,
+		catOperator,
+		orderby,
+		products,
+	} = attributes;
+	const columns = attributes.columns || wc_product_block_data.default_columns;
+	const rows = attributes.rows || wc_product_block_data.default_rows;
 
 	const shortcodeAtts = new Map();
 	shortcodeAtts.set( 'limit', rows * columns );
