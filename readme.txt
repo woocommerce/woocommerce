@@ -216,6 +216,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Option "Used for variations" should show only for variable products when saving attributes. #22524
 * Fix - Allow pa_ in product attribute slugs. #22112
 * Fix - Fix customer creation dates in API. #22269
+* Fix - Get widget instance setting defaults so it shows in customiser before save. #22345
 * Performance - Prime caches when reading variations. #22587
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 * Localization - Added US Minor Outlying Islands as states to avoid confusion with US. #22468
