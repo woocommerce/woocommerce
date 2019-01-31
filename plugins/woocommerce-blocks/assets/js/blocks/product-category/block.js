@@ -9,7 +9,6 @@ import {
 	Button,
 	PanelBody,
 	Placeholder,
-	RangeControl,
 	Spinner,
 	Toolbar,
 	withSpokenMessages,
@@ -22,6 +21,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import getQuery from '../../utils/get-query';
+import GridLayoutControl from '../../components/grid-layout-control';
 import ProductCategoryControl from '../../components/product-category-control';
 import ProductOrderbyControl from '../../components/product-orderby-control';
 import ProductPreview from '../../components/product-preview';
@@ -107,19 +107,10 @@ class ProductByCategoryBlock extends Component {
 					title={ __( 'Layout', 'woo-gutenberg-products-block' ) }
 					initialOpen
 				>
-					<RangeControl
-						label={ __( 'Columns', 'woo-gutenberg-products-block' ) }
-						value={ columns }
-						onChange={ ( value ) => setAttributes( { columns: value } ) }
-						min={ wc_product_block_data.min_columns }
-						max={ wc_product_block_data.max_columns }
-					/>
-					<RangeControl
-						label={ __( 'Rows', 'woo-gutenberg-products-block' ) }
-						value={ rows }
-						onChange={ ( value ) => setAttributes( { rows: value } ) }
-						min={ wc_product_block_data.min_rows }
-						max={ wc_product_block_data.max_rows }
+					<GridLayoutControl
+						columns={ columns }
+						rows={ rows }
+						setAttributes={ setAttributes }
 					/>
 				</PanelBody>
 				<PanelBody

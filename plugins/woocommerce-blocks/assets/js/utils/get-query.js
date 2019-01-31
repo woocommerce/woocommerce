@@ -4,11 +4,11 @@ export default function getQuery( blockAttributes, name ) {
 		attrOperator,
 		categories,
 		catOperator,
-		columns,
 		orderby,
 		products,
-		rows,
 	} = blockAttributes;
+	const columns = blockAttributes.columns || wc_product_block_data.default_columns;
+	const rows = blockAttributes.rows || wc_product_block_data.default_rows;
 
 	const query = {
 		status: 'publish',
