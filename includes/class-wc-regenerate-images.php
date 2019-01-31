@@ -347,6 +347,11 @@ class WC_Regenerate_Images {
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
+		// Fix for images with no metadata.
+		if ( ! is_array( $metadata ) ) {
+			$metadata = array();
+		}
+
 		// We only want to regen a specific image size.
 		add_filter( 'intermediate_image_sizes', array( __CLASS__, 'adjust_intermediate_image_sizes' ) );
 
