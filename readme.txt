@@ -220,6 +220,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Localization - Made municipality address field optional for Latvia. #22487
 * Localization - Added new Venezuelan currency Bs S. #22435
 * Localization - Added Danish locale. #22495
+* Localization - Update Peruvian currency. #22602
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
