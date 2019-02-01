@@ -45,6 +45,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		'num_returning_customers' => 'intval',
 		'num_new_customers'       => 'intval',
 		'products'                => 'intval',
+		'segment_id'              => 'intval',
 	);
 
 	/**
@@ -73,7 +74,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 */
 	public static function init() {
 		add_action( 'save_post', array( __CLASS__, 'sync_order' ) );
-		// TODO: this is required as order update skips save_post.
+		// @todo: this is required as order update skips save_post.
 		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order' ) );
 		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order' ) );
 		add_action( 'woocommerce_refund_deleted', array( __CLASS__, 'sync_on_refund_delete' ), 10, 2 );
@@ -88,7 +89,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * @param array $intervals_query Array of options for intervals db query.
 	 */
 	protected function orders_stats_sql_filter( $query_args, &$totals_query, &$intervals_query ) {
-		// TODO: performance of all of this?
+		// @todo: performance of all of this?
 		global $wpdb;
 
 		$from_clause        = '';
@@ -97,7 +98,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 
 		$where_filters = array();
 
-		// TODO: maybe move the sql inside the get_included/excluded functions?
+		// @todo: maybe move the sql inside the get_included/excluded functions?
 		// Products filters.
 		$included_products = $this->get_included_products( $query_args );
 		$excluded_products = $this->get_excluded_products( $query_args );
@@ -176,7 +177,6 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	/**
 	 * Returns the report data based on parameters supplied by the user.
 	 *
-	 * @since 3.5.0
 	 * @param array $query_args  Query parameters.
 	 * @return stdClass|WP_Error Data.
 	 */
@@ -197,6 +197,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 			'after'            => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
 			'interval'         => 'week',
 			'fields'           => '*',
+			'segmentby'        => '',
 
 			'match'            => 'all',
 			'status_is'        => array(),
@@ -248,7 +249,10 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 			$unique_products       = $this->get_unique_product_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
 			$totals[0]['products'] = $unique_products;
 
-			$totals = (object) $this->cast_numbers( $totals[0] );
+			$segmenting            = new WC_Admin_Reports_Orders_Stats_Segmenting( $query_args, $this->report_columns );
+			$totals[0]['segments'] = $segmenting->get_totals_segments( $totals_query, $table_name );
+
+			$totals                = (object) $this->cast_numbers( $totals[0] );
 
 			$db_intervals = $wpdb->get_col(
 				"SELECT
@@ -317,6 +321,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 			} else {
 				$this->update_interval_boundary_dates( $query_args['after'], $query_args['before'], $query_args['interval'], $data->intervals );
 			}
+			$segmenting->add_intervals_segments( $data, $intervals_query, $table_name );
 			$this->create_interval_subtotals( $data->intervals );
 
 			wp_cache_set( $cache_key, $data, $this->cache_group );

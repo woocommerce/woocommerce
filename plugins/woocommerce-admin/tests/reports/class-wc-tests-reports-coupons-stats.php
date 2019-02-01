@@ -72,9 +72,10 @@ class WC_Tests_Reports_Coupons_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 			'totals'    => (object) array(
-				'amount'        => 2 * $coupon_1_amount + $coupon_2_amount,
+				'amount'        => floatval( 2 * $coupon_1_amount + $coupon_2_amount ),
 				'coupons_count' => 2,
 				'orders_count'  => 2,
+				'segments'      => array(),
 			),
 			'intervals' => array(
 				array(
@@ -84,9 +85,10 @@ class WC_Tests_Reports_Coupons_Stats extends WC_Unit_Test_Case {
 					'date_end'       => $end_datetime->format( 'Y-m-d H:i:s' ),
 					'date_end_gmt'   => $end_datetime->format( 'Y-m-d H:i:s' ),
 					'subtotals'      => (object) array(
-						'amount'        => 2 * $coupon_1_amount + $coupon_2_amount,
+						'amount'        => floatval( 2 * $coupon_1_amount + $coupon_2_amount ),
 						'coupons_count' => 2,
 						'orders_count'  => 2,
+						'segments'      => array(),
 					),
 				),
 			),

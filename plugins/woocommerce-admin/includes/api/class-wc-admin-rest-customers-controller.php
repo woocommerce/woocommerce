@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Admin_REST_Customers_Controller extends WC_REST_Customers_Controller {
 
-	// TODO Add support for guests here. See https://wp.me/p7bje6-1dM.
+	// @todo Add support for guests here. See https://wp.me/p7bje6-1dM.
 
 	/**
 	 * Endpoint namespace.

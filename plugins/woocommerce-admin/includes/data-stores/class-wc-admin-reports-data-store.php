@@ -49,7 +49,7 @@ class WC_Admin_Reports_Data_Store {
 	 */
 	protected $report_columns = array();
 
-	// TODO: this does not really belong here, maybe factor out the comparison as separate class?
+	// @todo: this does not really belong here, maybe factor out the comparison as separate class?
 	/**
 	 * Order by property, used in the cmp function.
 	 *
@@ -73,7 +73,7 @@ class WC_Admin_Reports_Data_Store {
 	private function interval_cmp( $a, $b ) {
 		if ( '' === $this->order_by || '' === $this->order ) {
 			return 0;
-			// TODO: should return WP_Error here perhaps?
+			// @todo: should return WP_Error here perhaps?
 		}
 		if ( $a[ $this->order_by ] === $b[ $this->order_by ] ) {
 			return 0;
@@ -94,9 +94,20 @@ class WC_Admin_Reports_Data_Store {
 	 * @param string   $direction DESC/ASC.
 	 */
 	protected function sort_intervals( &$data, $sort_by, $direction ) {
+		$this->sort_array( $data->intervals, $sort_by, $direction );
+	}
+
+	/**
+	 * Sorts array of arrays based on subarray key $sort_by.
+	 *
+	 * @param array  $arr       Array to sort.
+	 * @param string $sort_by   Ordering property.
+	 * @param string $direction DESC/ASC.
+	 */
+	protected function sort_array( &$arr, $sort_by, $direction ) {
 		$this->order_by = $this->normalize_order_by( $sort_by );
 		$this->order    = $direction;
-		usort( $data->intervals, array( $this, 'interval_cmp' ) );
+		usort( $arr, array( $this, 'interval_cmp' ) );
 	}
 
 	/**
@@ -110,7 +121,7 @@ class WC_Admin_Reports_Data_Store {
 	 * @return stdClass
 	 */
 	protected function fill_in_missing_intervals( $db_intervals, $datetime_start, $datetime_end, $time_interval, &$data ) {
-		// TODO: this is ugly and messy.
+		// @todo: this is ugly and messy.
 		// At this point, we don't know when we can stop iterating, as the ordering can be based on any value.
 		$end_datetime = new DateTime( $datetime_end );
 		$time_ids     = array_flip( wp_list_pluck( $data->intervals, 'time_interval' ) );
@@ -121,7 +132,7 @@ class WC_Admin_Reports_Data_Store {
 		foreach ( $totals_arr as $key => $val ) {
 			$totals_arr[ $key ] = 0;
 		}
-		// TODO: should 'products' be in intervals?
+		// @todo: should 'products' be in intervals?
 		unset( $totals_arr['products'] );
 		while ( $datetime <= $end_datetime ) {
 			$next_start = WC_Admin_Reports_Interval::iterate( $datetime, $time_interval );
@@ -325,7 +336,7 @@ class WC_Admin_Reports_Data_Store {
 					$start_iteration = 0;
 				}
 				if ( $start_iteration ) {
-					// TODO: is this correct? should it only be added if iterate runs? other two iterate instances, too?
+					// @todo: is this correct? should it only be added if iterate runs? other two iterate instances, too?
 					$new_start_date_timestamp = (int) $new_start_date->format( 'U' ) + 1;
 					$new_start_date->setTimestamp( $new_start_date_timestamp );
 				}
@@ -451,7 +462,7 @@ class WC_Admin_Reports_Data_Store {
 			$datetime = new DateTime( $interval['datetime_anchor'] );
 
 			$prev_start = WC_Admin_Reports_Interval::iterate( $datetime, $time_interval, true );
-			// TODO: not sure if the +1/-1 here are correct, especially as they are applied before the ?: below.
+			// @todo: not sure if the +1/-1 here are correct, especially as they are applied before the ?: below.
 			$prev_start_timestamp = (int) $prev_start->format( 'U' ) + 1;
 			$prev_start->setTimestamp( $prev_start_timestamp );
 			if ( $datetime_start ) {
