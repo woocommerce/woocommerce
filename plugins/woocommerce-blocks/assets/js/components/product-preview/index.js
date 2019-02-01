@@ -13,9 +13,13 @@ import './style.scss';
  * Display a preview for a given product.
  */
 const ProductPreview = ( { product } ) => {
+	const { placeholderImgSrc } = wc_product_block_data; /* eslint-disable-line camelcase */
+
 	let image = null;
 	if ( product.images.length ) {
 		image = <img src={ product.images[ 0 ].src } alt="" />;
+	} else {
+		image = <img src={ placeholderImgSrc } alt="" />;
 	}
 
 	return (

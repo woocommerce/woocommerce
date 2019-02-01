@@ -2,7 +2,9 @@
 global.wp = {};
 
 // Set up our settings global.
-global.wc_product_block_data = {};
+global.wc_product_block_data = {
+	placeholderImgSrc: 'placeholder.png',
+};
 
 // wcSettings is required by @woocommerce/* packages
 global.wcSettings = {
