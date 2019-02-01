@@ -42,7 +42,13 @@ function wc_template_redirect() {
 		exit;
 	}
 
-	} elseif ( is_search() && is_post_type_archive( 'product' ) && apply_filters( 'woocommerce_redirect_single_search_result', true ) && 1 === absint( $wp_query->found_posts ) ) {
+	// Trigger 404 if trying to access an endpoint on wrong page.
+	if ( is_wc_endpoint_url() && ! is_account_page() && ! is_checkout() ) {
+		$wp_query->set_404();
+		status_header( 404 );
+		include( get_query_template( '404' ) );
+		exit;
+	}
 
 	// Redirect to the product page if we have a single product.
 	if ( is_search() && is_post_type_archive( 'product' ) && apply_filters( 'woocommerce_redirect_single_search_result', true ) && 1 === absint( $wp_query->found_posts ) ) {
