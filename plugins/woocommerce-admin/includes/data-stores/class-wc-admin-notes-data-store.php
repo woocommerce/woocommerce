@@ -44,6 +44,11 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 		$this->save_actions( $note );
 		$note->apply_changes();
 
+		/**
+		 * Fires when an admin note is created.
+		 *
+		 * @param int $note_id Note ID.
+		 */
 		do_action( 'woocommerce_new_note', $note_id );
 	}
 
@@ -73,6 +78,12 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 			$this->read_actions( $note );
 			$note->read_meta_data();
 			$note->set_object_read( true );
+
+			/**
+			 * Fires when an admin note is loaded.
+			 *
+			 * @param int $note_id Note ID.
+			 */
 			do_action( 'woocommerce_admin_note_loaded', $note );
 		} elseif ( $note_row ) {
 			$note->set_name( $note_row->name );
@@ -89,6 +100,12 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 			$this->read_actions( $note );
 			$note->read_meta_data();
 			$note->set_object_read( true );
+
+			/**
+			 * Fires when an admin note is loaded.
+			 *
+			 * @param int $note_id Note ID.
+			 */
 			do_action( 'woocommerce_admin_note_loaded', $note );
 		} else {
 			throw new Exception( __( 'Invalid data store for admin note.', 'wc-admin' ) );
@@ -138,6 +155,12 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 		$note->save_meta_data();
 		$this->save_actions( $note );
 		$note->apply_changes();
+
+		/**
+		 * Fires when an admin note is updated.
+		 *
+		 * @param int $note_id Note ID.
+		 */
 		do_action( 'woocommerce_update_note', $note->get_id() );
 	}
 
