@@ -155,7 +155,13 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 			$wpdb->delete( $wpdb->prefix . 'woocommerce_admin_note_actions', array( 'note_id' => $note_id ) );
 			$note->set_id( null );
 		}
-		do_action( 'woocommerce_trash_note', $note_id );
+
+		/**
+		 * Fires when an admin note is updated.
+		 *
+		 * @param int $note_id Note ID.
+		 */
+		do_action( 'woocommerce_delete_note', $note_id );
 	}
 
 	/**
