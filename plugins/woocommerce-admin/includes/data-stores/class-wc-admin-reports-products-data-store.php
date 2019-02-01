@@ -89,7 +89,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		add_action( 'save_post', array( __CLASS__, 'sync_order_products' ) );
 		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order_products' ) );
 		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order_products' ) );
-		add_action( 'woocommerce_reports_orders_stats_data_deleted', array( __CLASS__, 'sync_on_order_delete' ), 5 );
+		add_action( 'woocommerce_delete_reports_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 5 );
 	}
 
 	/**
