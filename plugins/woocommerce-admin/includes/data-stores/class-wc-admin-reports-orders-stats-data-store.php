@@ -445,7 +445,10 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		}
 
 		// Update or add the information to the DB.
-		return $wpdb->replace( $table_name, $data, $format );
+		$results = $wpdb->replace( $table_name, $data, $format );
+
+		do_action( 'woocommerce_update_reports_order_stats', $order->get_id() );
+		return $results;
 	}
 
 	/**

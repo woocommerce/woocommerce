@@ -343,6 +343,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 					array( 'order_item_id' => $order_item_id ),
 					array( '%d' )
 				);
+				do_action( 'woocommerce_delete_reports_product', $order_item_id, $order->get_id() );
 			} else {
 				$wpdb->replace(
 					$wpdb->prefix . self::TABLE_NAME,
@@ -367,6 +368,8 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 						'%s',
 					)
 				);
+
+				do_action( 'woocommerce_update_reports_product', $order_item_id, $order->get_id() );
 			}
 		}
 	}
