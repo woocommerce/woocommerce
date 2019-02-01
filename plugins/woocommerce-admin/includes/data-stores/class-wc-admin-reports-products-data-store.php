@@ -386,28 +386,4 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			}
 		}
 	}
-
-	/**
-	 * Get order refund items quantity and subtotal
-	 *
-	 * @param object $order WC Order object.
-	 * @return array
-	 */
-	public static function get_order_refund_items( $order ) {
-		$refunds             = $order->get_refunds();
-		$refunded_line_items = array();
-		foreach ( $refunds as $refund ) {
-			foreach ( $refund->get_items() as $refunded_item ) {
-				$line_item_id = wc_get_order_item_meta( $refunded_item->get_id(), '_refunded_item_id', true );
-				if ( ! isset( $refunded_line_items[ $line_item_id ] ) ) {
-					$refunded_line_items[ $line_item_id ]['quantity'] = 0;
-					$refunded_line_items[ $line_item_id ]['subtotal'] = 0;
-				}
-				$refunded_line_items[ $line_item_id ]['quantity'] += absint( $refunded_item['quantity'] );
-				$refunded_line_items[ $line_item_id ]['subtotal'] += abs( $refunded_item['subtotal'] );
-			}
-		}
-		return $refunded_line_items;
-	}
-
 }
