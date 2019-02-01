@@ -720,7 +720,9 @@ class WC_Admin_Api_Init {
 			status varchar(200) NOT NULL,
 			customer_id BIGINT UNSIGNED NOT NULL,
 			PRIMARY KEY (order_id),
-			KEY date_created (date_created)
+			KEY date_created (date_created),
+			KEY customer_id (customer_id),
+			KEY status (status)
 		  ) $collate;
 		  CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 			order_item_id BIGINT UNSIGNED NOT NULL,
