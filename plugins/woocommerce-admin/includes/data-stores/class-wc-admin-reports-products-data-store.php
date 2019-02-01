@@ -331,18 +331,35 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			return;
 		}
 
-		$refunds = self::get_order_refund_items( $order );
-
 		foreach ( $order->get_items() as $order_item ) {
-			$order_item_id     = $order_item->get_id();
-			$quantity_refunded = isset( $refunds[ $order_item_id ] ) ? $refunds[ $order_item_id ]['quantity'] : 0;
-			$amount_refunded   = isset( $refunds[ $order_item_id ] ) ? $refunds[ $order_item_id ]['subtotal'] : 0;
+			$order_item_id       = $order_item->get_id();
+			$quantity_refunded   = $order->get_item_quantity_refunded( $order_item );
+			$amount_refunded     = $order->get_item_amount_refunded( $order_item );
+			$product_qty         = $order->get_item_quantity_minus_refunded( $order_item );
+			$shipping_amount     = $order->get_item_shipping_amount( $order_item );
+			$shipping_tax_amount = $order->get_item_shipping_tax_amount( $order_item );
+			$coupon_amount       = $order->get_item_coupon_amount( $order_item );
+
+			// Tax amount.
+			// @todo: check if this calculates tax correctly with refunds.
+			$tax_amount = 0;
+
+			$order_taxes = $order->get_taxes();
+			$tax_data    = $order_item->get_taxes();
+			foreach ( $order_taxes as $tax_item ) {
+				$tax_item_id = $tax_item->get_rate_id();
+				$tax_amount += isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : 0;
+			}
+
+			// @todo: should net revenue be affected by refunds, as refunds are tracked separately?
+			$net_revenue = $order_item->get_subtotal( 'edit' ) - $amount_refunded;
+
 			if ( $quantity_refunded >= $order_item->get_quantity( 'edit' ) ) {
 				$wpdb->delete(
 					$wpdb->prefix . self::TABLE_NAME,
 					array( 'order_item_id' => $order_item_id ),
 					array( '%d' )
-				);
+				); // WPCS: cache ok, DB call ok.
 
 				/**
 				 * Fires when product's reports are deleted.
@@ -355,26 +372,39 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 				$wpdb->replace(
 					$wpdb->prefix . self::TABLE_NAME,
 					array(
-						'order_item_id'       => $order_item_id,
-						'order_id'            => $order->get_id(),
-						'product_id'          => $order_item->get_product_id( 'edit' ),
-						'variation_id'        => $order_item->get_variation_id( 'edit' ),
-						'customer_id'         => ( 0 < $order->get_customer_id( 'edit' ) ) ? $order->get_customer_id( 'edit' ) : null,
-						'product_qty'         => $order_item->get_quantity( 'edit' ) - $quantity_refunded,
-						'product_net_revenue' => $order_item->get_subtotal( 'edit' ) - $amount_refunded,
-						'date_created'        => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+						'order_item_id'         => $order_item_id,
+						'order_id'              => $order->get_id(),
+						'product_id'            => $order_item->get_product_id( 'edit' ),
+						'variation_id'          => $order_item->get_variation_id( 'edit' ),
+						'customer_id'           => ( 0 < $order->get_customer_id( 'edit' ) ) ? $order->get_customer_id( 'edit' ) : null,
+						'product_qty'           => $product_qty,
+						'product_net_revenue'   => $net_revenue,
+						'date_created'          => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+						'coupon_amount'         => $coupon_amount,
+						'tax_amount'            => $tax_amount,
+						'shipping_amount'       => $shipping_amount,
+						'shipping_tax_amount'   => $shipping_tax_amount,
+						// @todo: can this be incorrect if modified by filters?
+						'product_gross_revenue' => $net_revenue + $tax_amount + $shipping_amount + $shipping_tax_amount,
+						'refund_amount'         => $amount_refunded,
 					),
 					array(
-						'%d',
-						'%d',
-						'%d',
-						'%d',
-						'%d',
-						'%d',
-						'%f',
-						'%s',
+						'%d', // order_item_id.
+						'%d', // order_id.
+						'%d', // product_id.
+						'%d', // variation_id.
+						'%d', // customer_id.
+						'%d', // product_qty.
+						'%f', // product_net_revenue.
+						'%s', // date_created.
+						'%f', // coupon_amount.
+						'%f', // tax_amount.
+						'%f', // shipping_amount.
+						'%f', // shipping_tax_amount.
+						'%f', // product_gross_revenue.
+						'%f', // refund_amount.
 					)
-				);
+				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 				/**
 				 * Fires when product's reports are updated.
