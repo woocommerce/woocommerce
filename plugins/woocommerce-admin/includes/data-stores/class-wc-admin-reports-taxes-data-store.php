@@ -304,5 +304,13 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 				$order_id
 			)
 		);
+
+		/**
+		 * Fires when tax's reports are removed from database.
+		 *
+		 * @param int $tax_rate_id Tax Rate ID.
+		 * @param int $order_id    Order ID.
+		 */
+		do_action( 'woocommerce_delete_reports_tax', 0, $order_id );
 	}
 }

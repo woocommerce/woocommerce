@@ -362,6 +362,14 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 				$order_id
 			)
 		);
+
+		/**
+		 * Fires when coupon's reports are removed from database.
+		 *
+		 * @param int $coupon_id Coupon ID.
+		 * @param int $order_id  Order ID.
+		 */
+		do_action( 'woocommerce_delete_reports_coupon', 0, $order_id );
 	}
 
 }
