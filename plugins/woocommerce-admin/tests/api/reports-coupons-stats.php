@@ -101,9 +101,10 @@ class WC_Tests_API_Reports_Coupons_Stats extends WC_REST_Unit_Test_Case {
 
 		$expected_reports = array(
 			'totals'    => array(
-				'amount'        => 4,
+				'amount'        => 4.0,
 				'coupons_count' => 2,
 				'orders_count'  => 2,
+				'segments'      => array(),
 			),
 			'intervals' => array(
 				array(
@@ -113,9 +114,10 @@ class WC_Tests_API_Reports_Coupons_Stats extends WC_REST_Unit_Test_Case {
 					'date_end'       => date( 'Y-m-d 23:59:59', $time ),
 					'date_end_gmt'   => date( 'Y-m-d 23:59:59', $time ),
 					'subtotals'      => (object) array(
-						'amount'        => 4,
+						'amount'        => 4.0,
 						'coupons_count' => 2,
 						'orders_count'  => 2,
+						'segments'      => array(),
 					),
 				),
 			),
@@ -150,10 +152,11 @@ class WC_Tests_API_Reports_Coupons_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'intervals', $properties );
 
 		$totals = $properties['totals']['properties'];
-		$this->assertEquals( 3, count( $totals ) );
+		$this->assertEquals( 4, count( $totals ) );
 		$this->assertArrayHasKey( 'amount', $totals );
 		$this->assertArrayHasKey( 'coupons_count', $totals );
 		$this->assertArrayHasKey( 'orders_count', $totals );
+		$this->assertArrayHasKey( 'segments', $totals );
 
 		$intervals = $properties['intervals']['items']['properties'];
 		$this->assertEquals( 6, count( $intervals ) );
@@ -165,9 +168,11 @@ class WC_Tests_API_Reports_Coupons_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'subtotals', $intervals );
 
 		$subtotals = $properties['intervals']['items']['properties']['subtotals']['properties'];
-		$this->assertEquals( 3, count( $subtotals ) );
-		$this->assertArrayHasKey( 'amount', $totals );
-		$this->assertArrayHasKey( 'coupons_count', $totals );
-		$this->assertArrayHasKey( 'orders_count', $totals );
+		$this->assertEquals( 4, count( $subtotals ) );
+		$this->assertArrayHasKey( 'amount', $subtotals );
+		$this->assertArrayHasKey( 'coupons_count', $subtotals );
+		$this->assertArrayHasKey( 'orders_count', $subtotals );
+		$this->assertArrayHasKey( 'segments', $subtotals );
+
 	}
 }

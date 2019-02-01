@@ -822,7 +822,7 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			'f_between' => array( 10, 12 ), // not in params, skipped.
 		);
 		$params   = array( 'a', 'b', 'c', 'd' );
-		$result   = WC_Admin_Reports_Interval::normalize_between_params( $request, $params );
+		$result   = WC_Admin_Reports_Interval::normalize_between_params( $request, $params, false );
 		$expected = array(
 			'b_min' => 1,
 			'b_max' => 5,
@@ -834,21 +834,68 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test function that validates *_between query parameters.
+	 * Test function that normalizes *_between query parameters for dates to *_after & *_before.
 	 */
-	public function test_rest_validate_between_arg() {
+	public function test_normalize_between_date_params() {
+		$request  = array(
+			'a_between' => 'malformed',     // won't be normalized (not an array).
+			'b_between' => array( 1, 5 ),   // results in after=1, before=5.
+			'c_between' => array( 4, 2 ),   // results in after=2, before=4.
+			'd_between' => array( 7 ),      // won't be normalized (only 1 item).
+			'f_between' => array( 10, 12 ), // not in params, skipped.
+		);
+		$params   = array( 'a', 'b', 'c', 'd' );
+		$result   = WC_Admin_Reports_Interval::normalize_between_params( $request, $params, true );
+		$expected = array(
+			'b_after' => 1,
+			'b_before' => 5,
+			'c_after' => 2,
+			'c_before' => 4,
+		);
+
+		$this->assertEquals( $result, $expected );
+	}
+
+	/**
+	 * Test function that validates *_between query parameters for numeric values.
+	 */
+	public function test_rest_validate_between_numeric_arg() {
 		$this->assertIsWPError(
-			WC_Admin_Reports_Interval::rest_validate_between_arg( 'not array', null, 'param' ),
+			WC_Admin_Reports_Interval::rest_validate_between_numeric_arg( 'not array', null, 'param' ),
 			'param is not a numerically indexed array.'
 		);
 
 		$this->assertIsWPError(
-			WC_Admin_Reports_Interval::rest_validate_between_arg( array( 1 ), null, 'param' ),
+			WC_Admin_Reports_Interval::rest_validate_between_numeric_arg( array( 1 ), null, 'param' ),
 			'param must contain 2 numbers.'
 		);
 
 		$this->assertTrue(
-			WC_Admin_Reports_Interval::rest_validate_between_arg( array( 1, 2 ), null, 'param' )
+			WC_Admin_Reports_Interval::rest_validate_between_numeric_arg( array( 1, 2 ), null, 'param' )
+		);
+	}
+
+	/**
+	 * Test function that validates *_between query parameters for date values.
+	 */
+	public function rest_validate_between_date_arg() {
+		$this->assertIsWPError(
+			WC_Admin_Reports_Interval::rest_validate_between_date_arg( 'not array', null, 'param' ),
+			'param is not a numerically indexed array.'
+		);
+
+		$this->assertIsWPError(
+			WC_Admin_Reports_Interval::rest_validate_between_date_arg( array( '2019-01-01T00:00:00' ), null, 'param' ),
+			'param must contain 2 valid dates.'
+		);
+
+		$this->assertIsWPError(
+			WC_Admin_Reports_Interval::rest_validate_between_date_arg( array( 'not a valid date' ), null, 'param' ),
+			'param must contain 2 valid dates.'
+		);
+
+		$this->assertTrue(
+			WC_Admin_Reports_Interval::rest_validate_between_date_arg( array( '2019-01-01T00:00:00', '2019-01-15T00:00:00' ), null, 'param' )
 		);
 	}
 }

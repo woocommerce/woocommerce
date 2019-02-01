@@ -4,6 +4,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Component, createRef, Fragment } from '@wordpress/element';
+import { Button, Icon } from '@wordpress/components';
 import { withInstanceId } from '@wordpress/compose';
 import { findIndex, noop } from 'lodash';
 import Gridicon from 'gridicons';
@@ -44,6 +45,7 @@ class Search extends Component {
 		this.input = createRef();
 
 		this.selectResult = this.selectResult.bind( this );
+		this.removeAll = this.removeAll.bind( this );
 		this.removeResult = this.removeResult.bind( this );
 		this.updateSearch = this.updateSearch.bind( this );
 		this.onFocus = this.onFocus.bind( this );
@@ -58,6 +60,11 @@ class Search extends Component {
 			this.setState( { value: '' } );
 			onChange( [ ...selected, value ] );
 		}
+	}
+
+	removeAll() {
+		const { onChange } = this.props;
+		onChange( [] );
 	}
 
 	removeResult( id ) {
@@ -149,7 +156,16 @@ class Search extends Component {
 
 	render() {
 		const autocompleter = this.getAutocompleter();
-		const { placeholder, inlineTags, selected, instanceId, className, staticResults } = this.props;
+		const {
+			allowFreeTextSearch,
+			className,
+			inlineTags,
+			instanceId,
+			placeholder,
+			selected,
+			showClearButton,
+			staticResults,
+		} = this.props;
 		const { value = '', isActive } = this.state;
 		const aria = {
 			'aria-labelledby': this.props[ 'aria-labelledby' ],
@@ -164,6 +180,7 @@ class Search extends Component {
 				'has-inline-tags': inlineTags,
 			} ) }>
 				<Autocomplete
+					allowFreeText={ allowFreeTextSearch }
 					completer={ autocompleter }
 					onSelect={ this.selectResult }
 					selected={ selected.map( s => s.id ) }
@@ -209,7 +226,7 @@ class Search extends Component {
 										{ ...aria }
 									/>
 									<span id={ `search-inline-input-${ instanceId }` } className="screen-reader-text">
-										{ __( 'Move backward for selected items' ) }
+										{ __( 'Move backward for selected items', 'wc-admin' ) }
 									</span>
 								</div>
 							</div>
@@ -231,6 +248,16 @@ class Search extends Component {
 					}
 				</Autocomplete>
 				{ ! inlineTags && this.renderTags() }
+				{ showClearButton && shouldRenderTags ? (
+					<Button
+						className="woocommerce-search__clear"
+						isLink
+						onClick={ this.removeAll }
+					>
+						<Icon icon="dismiss" />
+						<span className="screen-reader-text">{ __( 'Clear all', 'wc-admin' ) }</span>
+					</Button>
+				) : null }
 			</div>
 		);
 		/* eslint-enable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
@@ -238,6 +265,10 @@ class Search extends Component {
 }
 
 Search.propTypes = {
+	/**
+	 * Render additional options in the autocompleter to allow free text entering depending on the type.
+	 */
+	allowFreeTextSearch: PropTypes.bool,
 	/**
 	 * Class name applied to parent div.
 	 */
@@ -285,15 +316,21 @@ Search.propTypes = {
 	 */
 	inlineTags: PropTypes.bool,
 	/**
+	 * Render a 'Clear' button next to the input box to remove its contents.
+	 */
+	showClearButton: PropTypes.bool,
+	/**
 	 * Render results list positioned statically instead of absolutely.
 	 */
 	staticResults: PropTypes.bool,
 };
 
 Search.defaultProps = {
+	allowFreeTextSearch: false,
 	onChange: noop,
 	selected: [],
 	inlineTags: false,
+	showClearButton: false,
 	staticResults: false,
 };
 

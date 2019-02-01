@@ -132,6 +132,16 @@ export class Autocomplete extends Component {
 	loadOptions( completer, query ) {
 		const { options } = completer;
 
+		if ( ! query ) {
+			this.setState( {
+				options: [],
+				filteredOptions: [],
+				selectedIndex: 0,
+			} );
+
+			return;
+		}
+
 		/*
 		 * We support both synchronous and asynchronous retrieval of completer options
 		 * but internally treat all as async so we maintain a single, consistent code path.
@@ -171,9 +181,7 @@ export class Autocomplete extends Component {
 				filteredOptions,
 				selectedIndex,
 			} );
-			if ( query ) {
-				this.announce( filteredOptions );
-			}
+			this.announce( filteredOptions );
 		} ) );
 	}
 
@@ -183,7 +191,7 @@ export class Autocomplete extends Component {
 		const container = event.target;
 
 		// look for the trigger prefix and search query just before the cursor location
-		const query = container.value;
+		const query = container.value.trim();
 		// asynchronously load the options for the open completer
 		if ( completer && query !== wasQuery ) {
 			if ( completer.isDebounced ) {
@@ -196,7 +204,8 @@ export class Autocomplete extends Component {
 		const expression = 'undefined' !== typeof completer.getSearchExpression
 			? completer.getSearchExpression( escapeRegExp( query ) )
 			: escapeRegExp( query );
-		const search = new RegExp( expression, 'i' );
+		// if there is no expression, match empty string
+		const search = expression ? new RegExp( expression, 'i' ) : /^$/;
 		// filter the options we already have
 		const filteredOptions = filterOptions( search, this.state.options, selected );
 		// update the state
@@ -207,26 +216,36 @@ export class Autocomplete extends Component {
 		}
 	}
 
+	getOptions() {
+		const { allowFreeText, completer } = this.props;
+		const { getFreeTextOptions } = completer;
+		const { filteredOptions, query } = this.state;
+
+		const additionalOptions = allowFreeText && getFreeTextOptions ? getFreeTextOptions( query ) : [];
+		return additionalOptions.concat( filteredOptions );
+	}
+
 	handleKeyDown( event ) {
-		const { selectedIndex, filteredOptions } = this.state;
-		if ( filteredOptions.length === 0 ) {
+		const options = this.getOptions();
+		const { selectedIndex } = this.state;
+		if ( options.length === 0 ) {
 			return;
 		}
 		let nextSelectedIndex;
 		switch ( event.keyCode ) {
 			case UP:
-				nextSelectedIndex = ( selectedIndex === 0 ? filteredOptions.length : selectedIndex ) - 1;
+				nextSelectedIndex = ( selectedIndex === 0 ? options.length : selectedIndex ) - 1;
 				this.setState( { selectedIndex: nextSelectedIndex } );
 				break;
 
 			case TAB:
 			case DOWN:
-				nextSelectedIndex = ( selectedIndex + 1 ) % filteredOptions.length;
+				nextSelectedIndex = ( selectedIndex + 1 ) % options.length;
 				this.setState( { selectedIndex: nextSelectedIndex } );
 				break;
 
 			case ENTER:
-				this.select( filteredOptions[ selectedIndex ] );
+				this.select( options[ selectedIndex ] );
 				break;
 
 			case LEFT:
@@ -255,9 +274,13 @@ export class Autocomplete extends Component {
 		this.node[ handler ]( 'keydown', this.handleKeyDown, true );
 	}
 
+	isExpanded( props, state ) {
+		return state.filteredOptions.length > 0 || ( props.completer.getFreeTextOptions && state.query );
+	}
+
 	componentDidUpdate( prevProps, prevState ) {
-		const isExpanded = this.state.filteredOptions.length > 0;
-		const wasExpanded = prevState.filteredOptions.length > 0;
+		const isExpanded = this.isExpanded( this.props, this.state );
+		const wasExpanded = this.isExpanded( prevProps, prevState );
 		if ( isExpanded && ! wasExpanded ) {
 			this.toggleKeyEvents( true );
 		} else if ( ! isExpanded && wasExpanded ) {
@@ -272,9 +295,10 @@ export class Autocomplete extends Component {
 
 	render() {
 		const { children, instanceId, completer: { className = '' }, staticResults } = this.props;
-		const { selectedIndex, filteredOptions, query } = this.state;
-		const { key: selectedKey = '' } = filteredOptions[ selectedIndex ] || {};
-		const isExpanded = filteredOptions.length > 0 && !! query;
+		const { selectedIndex } = this.state;
+		const isExpanded = this.isExpanded( this.props, this.state );
+		const options = isExpanded ? this.getOptions() : [];
+		const { key: selectedKey = '' } = options[ selectedIndex ] || {};
 		const listBoxId = isExpanded ? `woocommerce-search__autocomplete-${ instanceId }` : null;
 		const activeId = isExpanded
 			? `woocommerce-search__autocomplete-${ instanceId }-${ selectedKey }`
@@ -282,12 +306,13 @@ export class Autocomplete extends Component {
 		const resultsClasses = classnames( 'woocommerce-search__autocomplete-results', {
 			'is-static-results': staticResults,
 		} );
+
 		return (
 			<div ref={ this.bindNode } className="woocommerce-search__autocomplete">
 				{ children( { isExpanded, listBoxId, activeId, onChange: this.search } ) }
 				{ isExpanded && (
 					<div id={ listBoxId } role="listbox" className={ resultsClasses }>
-						{ filteredOptions.map( ( option, index ) => (
+						{ options.map( ( option, index ) => (
 								<Button
 									key={ option.key }
 									id={ `woocommerce-search__autocomplete-${ instanceId }-${ option.key }` }

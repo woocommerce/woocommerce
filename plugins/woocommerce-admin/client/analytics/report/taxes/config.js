@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { getRequestByIdString } from 'lib/async-requests';
 import { getTaxCode } from './utils';
-import { NAMESPACE } from 'store/constants';
+import { NAMESPACE } from 'wc-api/constants';
 
 export const charts = [
 	{

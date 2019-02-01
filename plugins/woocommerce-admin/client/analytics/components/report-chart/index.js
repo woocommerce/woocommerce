@@ -25,7 +25,7 @@ import { Chart } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { getReportChartData, getTooltipValueFormat } from 'store/reports/utils';
+import { getReportChartData, getTooltipValueFormat } from 'wc-api/reports/utils';
 import ReportError from 'analytics/components/report-error';
 import withSelect from 'wc-api/with-select';
 

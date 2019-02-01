@@ -19,7 +19,7 @@ import { onQueryChange } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import ReportError from 'analytics/components/report-error';
-import { getReportChartData, getReportTableData } from 'store/reports/utils';
+import { getReportChartData, getReportTableData } from 'wc-api/reports/utils';
 import withSelect from 'wc-api/with-select';
 import { extendTableData } from './utils';
 

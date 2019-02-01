@@ -25,17 +25,18 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 	 * @var array
 	 */
 	protected $column_types = array(
-		'date_start'    => 'strval',
-		'date_end'      => 'strval',
-		'product_id'    => 'intval',
-		'variation_id'  => 'intval',
-		'items_sold'    => 'intval',
-		'net_revenue'   => 'floatval',
-		'orders_count'  => 'intval',
-		'name'          => 'strval',
-		'price'         => 'floatval',
-		'image'         => 'strval',
-		'permalink'     => 'strval',
+		'date_start'   => 'strval',
+		'date_end'     => 'strval',
+		'product_id'   => 'intval',
+		'variation_id' => 'intval',
+		'items_sold'   => 'intval',
+		'net_revenue'  => 'floatval',
+		'orders_count' => 'intval',
+		'name'         => 'strval',
+		'price'        => 'floatval',
+		'image'        => 'strval',
+		'permalink'    => 'strval',
+		'sku'          => 'strval',
 	);
 
 	/**
@@ -64,6 +65,7 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 		'stock_status',
 		'stock_quantity',
 		'low_stock_amount',
+		'sku',
 	);
 
 	/**

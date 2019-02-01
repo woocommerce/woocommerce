@@ -157,6 +157,14 @@ function wc_admin_register_pages() {
 		)
 	);
 
+	wc_admin_register_page(
+		array(
+			'title'  => __( 'Settings', 'wc-admin' ),
+			'parent' => '/analytics/revenue',
+			'path'   => '/analytics/settings',
+		)
+	);
+
 	if ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
 		wc_admin_register_page(
 			array(
@@ -447,3 +455,39 @@ function wc_admin_update_user_data_values( $values, $user, $field_id ) {
 
 	return $updates;
 }
+
+/**
+ * Register the admin settings for use in the WC REST API
+ *
+ * @param array $groups Array of setting groups.
+ * @return array
+ */
+function wc_admin_add_settings_group( $groups ) {
+	$groups[] = array(
+		'id'          => 'wc_admin',
+		'label'       => __( 'WooCommerce Admin', 'wc-admin' ),
+		'description' => __( 'Settings for WooCommerce admin reporting.', 'wc-admin' ),
+	);
+	return $groups;
+}
+add_filter( 'woocommerce_settings_groups', 'wc_admin_add_settings_group' );
+
+/**
+ * Add WC Admin specific settings
+ *
+ * @param array $settings Array of settings in wc admin group.
+ * @return array
+ */
+function wc_admin_add_settings( $settings ) {
+	$settings[] = array(
+		'id'          => 'woocommerce_excluded_report_order_statuses',
+		'option_key'  => 'woocommerce_excluded_report_order_statuses',
+		'label'       => __( 'Excluded report order statuses', 'wc-admin' ),
+		'description' => __( 'Statuses that should not be included when calculating report totals.', 'wc-admin' ),
+		'default'     => '',
+		'type'        => 'multiselect',
+		'options'     => format_order_statuses( wc_get_order_statuses() ),
+	);
+	return $settings;
+};
+add_filter( 'woocommerce_settings-wc_admin', 'wc_admin_add_settings' );

@@ -18,7 +18,7 @@ export default class CategoryBreadcrumbs extends Component {
 		let parent = category.parent;
 		while ( parent ) {
 			ancestors.unshift( parent );
-			parent = categories[ parent ].parent;
+			parent = categories.get( parent ).parent;
 		}
 		return ancestors;
 	}
@@ -30,20 +30,20 @@ export default class CategoryBreadcrumbs extends Component {
 			return;
 		}
 		if ( ancestorIds.length === 1 ) {
-			return categories[ first( ancestorIds ) ].name + ' › ';
+			return categories.get( first( ancestorIds ) ).name + ' › ';
 		}
 		if ( ancestorIds.length === 2 ) {
 			return (
-				categories[ first( ancestorIds ) ].name +
+				categories.get( first( ancestorIds ) ).name +
 				' › ' +
-				categories[ last( ancestorIds ) ].name +
+				categories.get( last( ancestorIds ) ).name +
 				' › '
 			);
 		}
 		return (
-			categories[ first( ancestorIds ) ].name +
+			categories.get( first( ancestorIds ) ).name +
 			' … ' +
-			categories[ last( ancestorIds ) ].name +
+			categories.get( last( ancestorIds ) ).name +
 			' › '
 		);
 	}

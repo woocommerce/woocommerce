@@ -37,6 +37,12 @@ export default class VariationsReportTable extends Component {
 				isLeftAligned: true,
 			},
 			{
+				label: __( 'SKU', 'wc-admin' ),
+				key: 'sku',
+				hiddenByDefault: true,
+				isSortable: true,
+			},
+			{
 				label: __( 'Items Sold', 'wc-admin' ),
 				key: 'items_sold',
 				required: true,
@@ -77,7 +83,7 @@ export default class VariationsReportTable extends Component {
 
 		return map( data, row => {
 			const { items_sold, net_revenue, orders_count, extended_info, product_id } = row;
-			const { stock_status, stock_quantity, low_stock_amount } = extended_info;
+			const { stock_status, stock_quantity, low_stock_amount, sku } = extended_info;
 			const name = get( row, [ 'extended_info', 'name' ], '' ).replace( ' - ', ' / ' );
 			const ordersLink = getNewPath( persistedQuery, 'orders', {
 				filter: 'advanced',
@@ -93,6 +99,10 @@ export default class VariationsReportTable extends Component {
 						</Link>
 					),
 					value: name,
+				},
+				{
+					display: sku,
+					value: sku,
 				},
 				{
 					display: items_sold,
@@ -172,6 +182,7 @@ export default class VariationsReportTable extends Component {
 				labels={ labels }
 				query={ query }
 				getSummary={ this.getSummary }
+				searchBy="variations"
 				tableQuery={ {
 					orderby: query.orderby || 'items_sold',
 					order: query.order || 'desc',

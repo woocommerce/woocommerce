@@ -19,7 +19,7 @@ import { formatCurrency } from '@woocommerce/currency';
 /**
  * Internal dependencies
  */
-import { getSummaryNumbers } from 'store/reports/utils';
+import { getSummaryNumbers } from 'wc-api/reports/utils';
 import ReportError from 'analytics/components/report-error';
 import withSelect from 'wc-api/with-select';
 

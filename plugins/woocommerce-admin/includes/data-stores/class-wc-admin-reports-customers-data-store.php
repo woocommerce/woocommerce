@@ -25,11 +25,11 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 * @var array
 	 */
 	protected $column_types = array(
-		'customer_id'      => 'intval',
-		'user_id'          => 'intval',
-		'orders_count'     => 'intval',
-		'total_spend'      => 'floatval',
-		'avg_order_value'  => 'floatval',
+		'customer_id'     => 'intval',
+		'user_id'         => 'intval',
+		'orders_count'    => 'intval',
+		'total_spend'     => 'floatval',
+		'avg_order_value' => 'floatval',
 	);
 
 	/**
@@ -41,7 +41,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		'customer_id'      => 'customer_id',
 		'user_id'          => 'user_id',
 		'username'         => 'username',
-		'name'             => "CONCAT_WS( ' ', first_name, last_name ) as name", // TODO: what does this mean for RTL?
+		'name'             => "CONCAT_WS( ' ', first_name, last_name ) as name", // @todo: what does this mean for RTL?
 		'email'            => 'email',
 		'country'          => 'country',
 		'city'             => 'city',
@@ -60,7 +60,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		global $wpdb;
 
 		// Initialize some report columns that need disambiguation.
-		$this->report_columns['customer_id'] = $wpdb->prefix . self::TABLE_NAME . '.customer_id';
+		$this->report_columns['customer_id']     = $wpdb->prefix . self::TABLE_NAME . '.customer_id';
 		$this->report_columns['date_last_order'] = "MAX( {$wpdb->prefix}wc_order_stats.date_created ) as date_last_order";
 	}
 
@@ -274,7 +274,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		}
 
 		if ( $where_clauses ) {
-			$preceding_match = empty( $sql_query_params['where_time_clause'] ) ? ' AND ' : " {$match_operator} ";
+			$preceding_match                  = empty( $sql_query_params['where_time_clause'] ) ? ' AND ' : " {$match_operator} ";
 			$sql_query_params['where_clause'] = $preceding_match . implode( " {$match_operator} ", $where_clauses );
 		}
 
@@ -284,7 +284,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		}
 
 		if ( $having_clauses ) {
-			$preceding_match = empty( $sql_query_params['having_clause'] ) ? ' AND ' : " {$match_operator} ";
+			$preceding_match                    = empty( $sql_query_params['having_clause'] ) ? ' AND ' : " {$match_operator} ";
 			$sql_query_params['having_clause'] .= $preceding_match . implode( " {$match_operator} ", $having_clauses );
 		}
 
@@ -304,7 +304,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		$order_stats_table_name = $wpdb->prefix . 'wc_order_stats';
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
-		$defaults = array(
+		$defaults   = array(
 			'per_page' => get_option( 'posts_per_page' ),
 			'page'     => 1,
 			'order'    => 'DESC',
@@ -442,7 +442,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 * Retrieve a guest (no user_id) customer row by email.
 	 *
 	 * @param string $email Email address.
-	 * @returns false|array Customer array if found, boolean false if not.
+	 * @return false|array Customer array if found, boolean false if not.
 	 */
 	public function get_guest_by_email( $email ) {
 		global $wpdb;
@@ -467,7 +467,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 * Retrieve a registered customer row by user_id.
 	 *
 	 * @param string|int $user_id User ID.
-	 * @returns false|array Customer array if found, boolean false if not.
+	 * @return false|array Customer array if found, boolean false if not.
 	 */
 	public function get_customer_by_user_id( $user_id ) {
 		global $wpdb;
@@ -492,7 +492,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 * Retrieve a registered customer row id by user_id.
 	 *
 	 * @param string|int $user_id User ID.
-	 * @returns false|int Customer ID if found, boolean false if not.
+	 * @return false|int Customer ID if found, boolean false if not.
 	 */
 	public static function get_customer_id_by_user_id( $user_id ) {
 		global $wpdb;
@@ -554,7 +554,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		if ( $customer_id ) {
 			// Preserve customer_id for existing user_id.
 			$data['customer_id'] = $customer_id;
-			$format[] = '%d';
+			$format[]            = '%d';
 		}
 
 		return $wpdb->replace( $wpdb->prefix . self::TABLE_NAME, $data, $format );

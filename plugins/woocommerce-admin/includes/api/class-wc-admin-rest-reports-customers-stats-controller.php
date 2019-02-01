@@ -56,9 +56,11 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 		$args['last_order_before']   = $request['last_order_before'];
 		$args['last_order_after']    = $request['last_order_after'];
 
-		$between_params = array( 'orders_count', 'total_spend', 'avg_order_value' );
-		$normalized     = WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params );
-		$args           = array_merge( $args, $normalized );
+		$between_params_numeric    = array( 'orders_count', 'total_spend', 'avg_order_value' );
+		$normalized_params_numeric = WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params_numeric, false );
+		$between_params_date       = array( 'last_active', 'registered' );
+		$normalized_params_date    = WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params_date, true );
+		$args                      = array_merge( $args, $normalized_params_numeric, $normalized_params_date );
 
 		return $args;
 	}
@@ -75,7 +77,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 		$report_data     = $customers_query->get_data();
 		$out_data        = array(
 			'totals'    => $report_data,
-			// TODO: is this needed? the single element array tricks the isReportDataEmpty() selector.
+			// @todo: is this needed? the single element array tricks the isReportDataEmpty() selector.
 			'intervals' => array( (object) array() ),
 		);
 
@@ -117,9 +119,9 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 	 * @return array
 	 */
 	public function get_item_schema() {
-		// TODO: should any of these be 'indicator's?
+		// @todo: should any of these be 'indicator's?
 		$totals = array(
-			'customers_count'    => array(
+			'customers_count'     => array(
 				'description' => __( 'Number of customers.', 'wc-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
@@ -131,7 +133,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'avg_total_spend' => array(
+			'avg_total_spend'     => array(
 				'description' => __( 'Average total spend per customer.', 'wc-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
@@ -159,7 +161,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 					'readonly'    => true,
 					'properties'  => $totals,
 				),
-				'intervals' => array( // TODO: remove this?
+				'intervals' => array( // @todo: remove this?
 					'description' => __( 'Reports data grouped by intervals.', 'wc-admin' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
@@ -234,7 +236,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['match']               = array(
+		$params['match']                   = array(
 			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'wc-admin' ),
 			'type'              => 'string',
 			'default'           => 'all',
@@ -244,7 +246,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['name']                = array(
+		$params['name']                    = array(
 			'description'       => __( 'Limit response to objects with a specfic customer name.', 'wc-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -276,34 +278,44 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['registered_before']  = array(
+		$params['last_active_between']     = array(
+			'description'       => __( 'Limit response to objects last active between two given ISO8601 compliant datetime.', 'wc-admin' ),
+			'type'              => 'array',
+			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_date_arg' ),
+		);
+		$params['registered_before']       = array(
 			'description'       => __( 'Limit response to objects registered before (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['registered_after']   = array(
+		$params['registered_after']        = array(
 			'description'       => __( 'Limit response to objects registered after (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orders_count_min']    = array(
+		$params['registered_between']      = array(
+			'description'       => __( 'Limit response to objects last active between two given ISO8601 compliant datetime.', 'wc-admin' ),
+			'type'              => 'array',
+			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_date_arg' ),
+		);
+		$params['orders_count_min']        = array(
 			'description'       => __( 'Limit response to objects with an order count greater than or equal to given integer.', 'wc-admin' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orders_count_max']    = array(
+		$params['orders_count_max']        = array(
 			'description'       => __( 'Limit response to objects with an order count less than or equal to given integer.', 'wc-admin' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orders_count_between']     = array(
+		$params['orders_count_between']    = array(
 			'description'       => __( 'Limit response to objects with an order count between two given integers.', 'wc-admin' ),
 			'type'              => 'array',
-			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_arg' ),
+			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_numeric_arg' ),
 		);
 		$params['total_spend_min']         = array(
 			'description'       => __( 'Limit response to objects with a total order spend greater than or equal to given number.', 'wc-admin' ),
@@ -318,7 +330,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 		$params['total_spend_between']     = array(
 			'description'       => __( 'Limit response to objects with a total order spend between two given numbers.', 'wc-admin' ),
 			'type'              => 'array',
-			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_arg' ),
+			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_numeric_arg' ),
 		);
 		$params['avg_order_value_min']     = array(
 			'description'       => __( 'Limit response to objects with an average order spend greater than or equal to given number.', 'wc-admin' ),
@@ -333,7 +345,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 		$params['avg_order_value_between'] = array(
 			'description'       => __( 'Limit response to objects with an average order spend between two given numbers.', 'wc-admin' ),
 			'type'              => 'array',
-			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_arg' ),
+			'validate_callback' => array( 'WC_Admin_Reports_Interval', 'rest_validate_between_numeric_arg' ),
 		);
 		$params['last_order_before']       = array(
 			'description'       => __( 'Limit response to objects with last order before (or at) a given ISO8601 compliant datetime.', 'wc-admin' ),

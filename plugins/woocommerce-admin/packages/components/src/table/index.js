@@ -48,7 +48,7 @@ class TableCard extends Component {
 		const { compareBy, query } = props;
 
 		const showCols = props.headers.map( ( { key, hiddenByDefault } ) => ! hiddenByDefault && key ).filter( Boolean );
-		const selectedRows = getIdsFromQuery( query[ compareBy ] );
+		const selectedRows = query.filter ? getIdsFromQuery( query[ compareBy ] ) : [];
 
 		this.state = { showCols, selectedRows };
 		this.onColumnToggle = this.onColumnToggle.bind( this );
@@ -61,14 +61,17 @@ class TableCard extends Component {
 
 	componentDidUpdate( { query: prevQuery, headers: prevHeaders } ) {
 		const { compareBy, headers, query } = this.props;
-		const prevIds = getIdsFromQuery( prevQuery[ compareBy ] );
-		const currentIds = getIdsFromQuery( query[ compareBy ] );
-		if ( ! isEqual( prevIds.sort(), currentIds.sort() ) ) {
-			/* eslint-disable react/no-did-update-set-state */
-			this.setState( {
-				selectedRows: currentIds,
-			} );
-			/* eslint-enable react/no-did-update-set-state */
+
+		if ( query.filter || prevQuery.filter ) {
+			const prevIds = prevQuery.filter ? getIdsFromQuery( prevQuery[ compareBy ] ) : [];
+			const currentIds = query.filter ? getIdsFromQuery( query[ compareBy ] ) : [];
+			if ( ! isEqual( prevIds.sort(), currentIds.sort() ) ) {
+				/* eslint-disable react/no-did-update-set-state */
+				this.setState( {
+					selectedRows: currentIds,
+				} );
+				/* eslint-enable react/no-did-update-set-state */
+			}
 		}
 		if ( ! isEqual( headers, prevHeaders ) ) {
 			/* eslint-disable react/no-did-update-set-state */
@@ -148,19 +151,17 @@ class TableCard extends Component {
 	}
 
 	onSearch( values ) {
-		const { compareBy, compareParam, onQueryChange, searchBy, searchParam } = this.props;
-		const ids = values.map( v => v.id );
-		if ( compareBy ) {
-			const { selectedRows } = this.state;
-			onQueryChange( 'compare' )(
-				compareBy,
-				compareParam,
-				[ ...selectedRows, ...ids ].join( ',' )
-			);
-		} else if ( searchBy ) {
+		const { compareParam } = this.props;
+		const labels = values.map( v => v.label );
+		if ( labels.length ) {
 			updateQueryString( {
-				filter: 'advanced',
-				[ searchParam ]: ids.join( ',' ),
+				filter: undefined,
+				[ compareParam ]: undefined,
+				search: uniq( labels ).join( ',' ),
+			} );
+		} else {
+			updateQueryString( {
+				search: undefined,
 			} );
 		}
 	}
@@ -236,13 +237,14 @@ class TableCard extends Component {
 			rowHeader,
 			rowsPerPage,
 			searchBy,
-			searchParam,
 			showMenu,
 			summary,
 			title,
 			totalRows,
 		} = this.props;
 		const { selectedRows, showCols } = this.state;
+		const searchedValues = query.search ? query.search.split( ',' ) : [];
+		const searchedLabels = searchedValues.map( v => ( { id: v, label: v } ) );
 		const allHeaders = this.props.headers;
 		let headers = this.getVisibleHeaders();
 		let rows = this.getVisibleRows();
@@ -277,13 +279,16 @@ class TableCard extends Component {
 							{ labels.compareButton || __( 'Compare', 'wc-admin' ) }
 						</CompareButton>
 					),
-					( compareBy || searchBy ) && (
+					searchBy && (
 						<Search
+							allowFreeTextSearch={ true }
+							inlineTags
 							key="search"
-							placeholder={ labels.placeholder || __( 'Search by item name', 'wc-admin' ) }
-							type={ compareBy || searchBy }
 							onChange={ this.onSearch }
-							selected={ searchParam && getIdsFromQuery( query[ searchParam ] ).map( id => ( { id } ) ) }
+							placeholder={ labels.placeholder || __( 'Search by item name', 'wc-admin' ) }
+							selected={ searchedLabels }
+							showClearButton={ true }
+							type={ searchBy }
 						/>
 					),
 					( downloadable || onClickDownload ) && (
@@ -438,10 +443,6 @@ TableCard.propTypes = {
 	 * The string to use as a query parameter when searching row items.
 	 */
 	searchBy: PropTypes.string,
-	/**
-	 * Url query parameter search function operates on
-	 */
-	searchParam: PropTypes.string,
 	/**
 	 * Boolean to determine whether or not ellipsis menu is shown.
 	 */

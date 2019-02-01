@@ -13,7 +13,7 @@ import { getIdsFromQuery, stringifyQuery } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { NAMESPACE } from 'store/constants';
+import { NAMESPACE } from 'wc-api/constants';
 
 /**
  * Get a function that accepts ids as they are found in url parameter and

@@ -2,7 +2,9 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import interpolateComponents from 'interpolate-components';
 
 /**
  * WooCommerce dependencies
@@ -29,7 +31,7 @@ export default {
 		let payload = '';
 		if ( name ) {
 			const query = {
-				name,
+				search: name,
 				per_page: 10,
 			};
 			payload = stringifyQuery( query );
@@ -39,6 +41,25 @@ export default {
 	isDebounced: true,
 	getOptionKeywords( customer ) {
 		return [ getName( customer ) ];
+	},
+	getFreeTextOptions( query ) {
+		const label = (
+			<span key="name" className="woocommerce-search__result-name">
+				{ interpolateComponents( {
+					mixedString: __( 'All customers with names that include {{query /}}', 'wc-admin' ),
+					components: {
+						query: <strong className="components-form-token-field__suggestion-match">{ query }</strong>,
+					},
+				} ) }
+			</span>
+		);
+		const nameOption = {
+			key: 'name',
+			label: label,
+			value: { id: query, first_name: query },
+		};
+
+		return [ nameOption ];
 	},
 	getOptionLabel( customer, query ) {
 		const match = computeSuggestionMatch( getName( customer ), query ) || {};

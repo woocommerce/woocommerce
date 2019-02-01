@@ -2,7 +2,9 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import interpolateComponents from 'interpolate-components';
 
 /**
  * WooCommerce dependencies
@@ -39,6 +41,25 @@ export default {
 	isDebounced: true,
 	getOptionKeywords( product ) {
 		return [ product.name ];
+	},
+	getFreeTextOptions( query ) {
+		const label = (
+			<span key="name" className="woocommerce-search__result-name">
+				{ interpolateComponents( {
+					mixedString: __( 'All products with titles that include {{query /}}', 'wc-admin' ),
+					components: {
+						query: <strong className="components-form-token-field__suggestion-match">{ query }</strong>,
+					},
+				} ) }
+			</span>
+		);
+		const titleOption = {
+			key: 'title',
+			label: label,
+			value: { id: query, name: query },
+		};
+
+		return [ titleOption ];
 	},
 	getOptionLabel( product, query ) {
 		const match = computeSuggestionMatch( product.name, query ) || {};
