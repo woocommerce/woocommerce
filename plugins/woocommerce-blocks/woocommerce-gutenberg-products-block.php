@@ -395,6 +395,8 @@ function wgpb_print_script_settings() {
 	global $wp_locale;
 	$code = get_woocommerce_currency();
 
+	// NOTE: wcSettings is not used directly, it's only for @woocommerce/components
+	//
 	// Settings and variables can be passed here for access in the app.
 	// Will need `wcAdminAssetUrl` if the ImageAsset component is used.
 	// Will need `dataEndpoints.countries` if Search component is used with 'country' type.
@@ -421,12 +423,13 @@ function wgpb_print_script_settings() {
 
 	// Global settings used in each block.
 	$block_settings = array(
-		'min_columns'     => wc_get_theme_support( 'product_grid::min_columns', 1 ),
-		'max_columns'     => wc_get_theme_support( 'product_grid::max_columns', 6 ),
-		'default_columns' => wc_get_default_products_per_row(),
-		'min_rows'        => wc_get_theme_support( 'product_grid::min_rows', 1 ),
-		'max_rows'        => wc_get_theme_support( 'product_grid::max_rows', 6 ),
-		'default_rows'    => wc_get_default_product_rows_per_page(),
+		'min_columns'       => wc_get_theme_support( 'product_grid::min_columns', 1 ),
+		'max_columns'       => wc_get_theme_support( 'product_grid::max_columns', 6 ),
+		'default_columns'   => wc_get_default_products_per_row(),
+		'min_rows'          => wc_get_theme_support( 'product_grid::min_rows', 1 ),
+		'max_rows'          => wc_get_theme_support( 'product_grid::max_rows', 6 ),
+		'default_rows'      => wc_get_default_product_rows_per_page(),
+		'placeholderImgSrc' => wc_placeholder_img_src(),
 	);
 	?>
 	<script type="text/javascript">
