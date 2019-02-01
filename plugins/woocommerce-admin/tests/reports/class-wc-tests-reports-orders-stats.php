@@ -36,8 +36,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		$refund = wc_create_refund(
 			array(
-				'amount'         => 12,
-				'order_id'       => $order->get_id(),
+				'amount'   => 12,
+				'order_id' => $order->get_id(),
 			)
 		);
 
@@ -3180,7 +3180,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_tax_based_on', $default_tax_based_on );
 	}
 
-  /**
+	/**
 	 * Test segmenting by product id and by variation id.
 	 */
 	public function test_segmenting_by_product_and_variation() {
@@ -3682,7 +3682,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$actual = json_decode( json_encode( $data_store->get_data( $query_args ) ), true );
+		$actual         = json_decode( json_encode( $data_store->get_data( $query_args ) ), true );
 		$this->assertEquals( $expected_stats, $actual, 'Segmenting by product, expected: ' . print_r( $expected_stats, true ) . '; actual: ' . print_r( $actual, true ) );
 	}
 }
