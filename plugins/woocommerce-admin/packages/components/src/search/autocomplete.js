@@ -132,6 +132,16 @@ export class Autocomplete extends Component {
 	loadOptions( completer, query ) {
 		const { options } = completer;
 
+		if ( ! query ) {
+			this.setState( {
+				options: [],
+				filteredOptions: [],
+				selectedIndex: 0,
+			} );
+
+			return;
+		}
+
 		/*
 		 * We support both synchronous and asynchronous retrieval of completer options
 		 * but internally treat all as async so we maintain a single, consistent code path.
@@ -171,9 +181,7 @@ export class Autocomplete extends Component {
 				filteredOptions,
 				selectedIndex,
 			} );
-			if ( query ) {
-				this.announce( filteredOptions );
-			}
+			this.announce( filteredOptions );
 		} ) );
 	}
 
@@ -183,7 +191,7 @@ export class Autocomplete extends Component {
 		const container = event.target;
 
 		// look for the trigger prefix and search query just before the cursor location
-		const query = container.value;
+		const query = container.value.trim();
 		// asynchronously load the options for the open completer
 		if ( completer && query !== wasQuery ) {
 			if ( completer.isDebounced ) {
