@@ -149,7 +149,7 @@ class Search extends Component {
 
 	render() {
 		const autocompleter = this.getAutocompleter();
-		const { placeholder, inlineTags, selected, instanceId, className, staticResults } = this.props;
+		const { allowFreeTextSearch, placeholder, inlineTags, selected, instanceId, className, staticResults } = this.props;
 		const { value = '', isActive } = this.state;
 		const aria = {
 			'aria-labelledby': this.props[ 'aria-labelledby' ],
@@ -164,6 +164,7 @@ class Search extends Component {
 				'has-inline-tags': inlineTags,
 			} ) }>
 				<Autocomplete
+					allowFreeText={ allowFreeTextSearch }
 					completer={ autocompleter }
 					onSelect={ this.selectResult }
 					selected={ selected.map( s => s.id ) }
@@ -209,7 +210,7 @@ class Search extends Component {
 										{ ...aria }
 									/>
 									<span id={ `search-inline-input-${ instanceId }` } className="screen-reader-text">
-										{ __( 'Move backward for selected items' ) }
+										{ __( 'Move backward for selected items', 'wc-admin' ) }
 									</span>
 								</div>
 							</div>
@@ -238,6 +239,10 @@ class Search extends Component {
 }
 
 Search.propTypes = {
+	/**
+	 * Render additional options in the autocompleter to allow free text entering depending on the type.
+	 */
+	allowFreeTextSearch: PropTypes.bool,
 	/**
 	 * Class name applied to parent div.
 	 */
@@ -291,6 +296,7 @@ Search.propTypes = {
 };
 
 Search.defaultProps = {
+	allowFreeTextSearch: false,
 	onChange: noop,
 	selected: [],
 	inlineTags: false,

@@ -37,6 +37,12 @@ const reportConfigs = {
 };
 
 export function getFilterQuery( endpoint, query ) {
+	if ( query.search ) {
+		return {
+			[ endpoint ]: query[ endpoint ],
+		};
+	}
+
 	if ( reportConfigs[ endpoint ] ) {
 		const { filters = [], advancedFilters = {} } = reportConfigs[ endpoint ];
 		return filters
@@ -335,7 +341,7 @@ export function getReportTableQuery( endpoint, urlQuery, query ) {
  *
  * @param  {String} endpoint  Report API Endpoint
  * @param  {Object} urlQuery  Query parameters in the url
- * @param  {object} select    Instance of @wordpress/select
+ * @param  {Object} select    Instance of @wordpress/select
  * @param  {Object} query     Query parameters specific for that endpoint
  * @return {Object} Object    Table data response
  */

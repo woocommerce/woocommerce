@@ -27,12 +27,12 @@ export function computeSuggestionMatch( suggestion, query ) {
 
 export function getTaxCode( tax ) {
 	return [ tax.country, tax.state, tax.name || __( 'TAX', 'wc-admin' ), tax.priority ]
+		.filter( Boolean )
 		.map( item =>
 			item
 				.toString()
 				.toUpperCase()
 				.trim()
 		)
-		.filter( Boolean )
 		.join( '-' );
 }

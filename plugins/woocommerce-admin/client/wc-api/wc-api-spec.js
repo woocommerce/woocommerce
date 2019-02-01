@@ -3,7 +3,7 @@
 /**
  * Internal dependencies
  */
-import categories from './categories';
+import items from './items';
 import notes from './notes';
 import orders from './orders';
 import reportItems from './reports/items';
@@ -19,7 +19,7 @@ function createWcApiSpec() {
 			...user.mutations,
 		},
 		selectors: {
-			...categories.selectors,
+			...items.selectors,
 			...notes.selectors,
 			...orders.selectors,
 			...reportItems.selectors,
@@ -31,7 +31,7 @@ function createWcApiSpec() {
 		operations: {
 			read( resourceNames ) {
 				return [
-					...categories.operations.read( resourceNames ),
+					...items.operations.read( resourceNames ),
 					...notes.operations.read( resourceNames ),
 					...orders.operations.read( resourceNames ),
 					...reportItems.operations.read( resourceNames ),

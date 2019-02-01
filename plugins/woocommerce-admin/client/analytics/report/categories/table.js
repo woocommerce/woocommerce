@@ -153,6 +153,7 @@ class CategoriesReportTable extends Component {
 				getSummary={ this.getSummary }
 				itemIdField="category_id"
 				query={ query }
+				searchBy="categories"
 				labels={ labels }
 				tableQuery={ {
 					orderby: query.orderby || 'items_sold',
@@ -168,14 +169,14 @@ class CategoriesReportTable extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getCategories, getCategoriesError, isGetCategoriesRequesting } = select( 'wc-api' );
+		const { getItems, getItemsError, isGetItemsRequesting } = select( 'wc-api' );
 		const tableQuery = {
 			per_page: -1,
 		};
 
-		const categories = getCategories( tableQuery );
-		const isError = Boolean( getCategoriesError( tableQuery ) );
-		const isRequesting = isGetCategoriesRequesting( tableQuery );
+		const categories = getItems( 'categories', tableQuery );
+		const isError = Boolean( getItemsError( 'categories', tableQuery ) );
+		const isRequesting = isGetItemsRequesting( 'categories', tableQuery );
 
 		return { categories, isError, isRequesting };
 	} )
