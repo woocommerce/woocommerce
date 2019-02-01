@@ -16,15 +16,16 @@ export function searchItemsByString( select, endpoint, search ) {
 	const { getItems } = select( 'wc-api' );
 	const searchWords = search.split( ',' );
 
-	const items = searchWords.reduce( ( acc, searchWord ) => {
-		return {
-			...acc,
-			...getItems( endpoint, {
-				search: searchWord,
-				per_page: 10,
-			} ),
-		};
-	}, [] );
+	const items = {};
+	searchWords.forEach( searchWord => {
+		const newItems = getItems( endpoint, {
+			search: searchWord,
+			per_page: 10,
+		} );
+		newItems.forEach( ( item, id ) => {
+			items[ id ] = item;
+		} );
+	} );
 
 	return items;
 }

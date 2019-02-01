@@ -92,6 +92,51 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 		);
 	};
 
+	const cards = [];
+	orders.forEach( ( order, id ) => {
+		// We want the billing address, but shipping can be used as a fallback.
+		const address = { ...order.shipping, ...order.billing };
+		const productsCount = order.line_items.reduce( ( total, line ) => total + line.quantity, 0 );
+
+		const total = order.total;
+		const refundValue = getOrderRefundTotal( order );
+		const remainingTotal = getCurrencyFormatDecimal( order.total ) + refundValue;
+
+		cards.push(
+			<ActivityCard
+				key={ id }
+				className="woocommerce-order-activity-card"
+				title={ orderCardTitle( order, address ) }
+				date={ order.date_created }
+				subtitle={
+					<div>
+						<span>
+							{ sprintf(
+								_n( '%d product', '%d products', productsCount, 'wc-admin' ),
+								productsCount
+							) }
+						</span>
+						{ refundValue ? (
+							<span>
+								<s>{ formatCurrency( total, order.currency_symbol ) }</s>{' '}
+								{ formatCurrency( remainingTotal, order.currency_symbol ) }
+							</span>
+						) : (
+							<span>{ formatCurrency( total, order.currency_symbol ) }</span>
+						) }
+					</div>
+				}
+				actions={
+					<Button isDefault href={ getAdminLink( 'post.php?action=edit&post=' + order.id ) }>
+						{ __( 'Begin fulfillment' ) }
+					</Button>
+				}
+			>
+				<OrderStatus order={ order } />
+			</ActivityCard>
+		);
+	} );
+
 	return (
 		<Fragment>
 			<ActivityHeader title={ __( 'Orders', 'wc-admin' ) } menu={ menu } />
@@ -105,55 +150,7 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 					/>
 				) : (
 					<Fragment>
-						{ orders.map( ( order, i ) => {
-							// We want the billing address, but shipping can be used as a fallback.
-							const address = { ...order.shipping, ...order.billing };
-							const productsCount = order.line_items.reduce(
-								( total, line ) => total + line.quantity,
-								0
-							);
-
-							const total = order.total;
-							const refundValue = getOrderRefundTotal( order );
-							const remainingTotal = getCurrencyFormatDecimal( order.total ) + refundValue;
-
-							return (
-								<ActivityCard
-									key={ i }
-									className="woocommerce-order-activity-card"
-									title={ orderCardTitle( order, address ) }
-									date={ order.date_created }
-									subtitle={
-										<div>
-											<span>
-												{ sprintf(
-													_n( '%d product', '%d products', productsCount, 'wc-admin' ),
-													productsCount
-												) }
-											</span>
-											{ refundValue ? (
-												<span>
-													<s>{ formatCurrency( total, order.currency_symbol ) }</s>{' '}
-													{ formatCurrency( remainingTotal, order.currency_symbol ) }
-												</span>
-											) : (
-												<span>{ formatCurrency( total, order.currency_symbol ) }</span>
-											) }
-										</div>
-									}
-									actions={
-										<Button
-											isDefault
-											href={ getAdminLink( 'post.php?action=edit&post=' + order.id ) }
-										>
-											{ __( 'Begin fulfillment' ) }
-										</Button>
-									}
-								>
-									<OrderStatus order={ order } />
-								</ActivityCard>
-							);
-						} ) }
+						{ cards }
 						<ActivityOutboundLink href={ 'edit.php?post_type=shop_order' }>
 							{ __( 'Manage all orders' ) }
 						</ActivityOutboundLink>
@@ -165,29 +162,29 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 }
 
 OrdersPanel.propTypes = {
-	orders: PropTypes.array.isRequired,
+	orders: PropTypes.instanceOf( Map ).isRequired,
 	isError: PropTypes.bool,
 	isRequesting: PropTypes.bool,
 };
 
 OrdersPanel.defaultProps = {
-	orders: [],
+	orders: new Map(),
 	isError: false,
 	isRequesting: false,
 };
 
 export default compose(
 	withSelect( select => {
-		const { getOrders, getOrdersError, isGetOrdersRequesting } = select( 'wc-api' );
+		const { getItems, getItemsError, isGetItemsRequesting } = select( 'wc-api' );
 		const ordersQuery = {
 			page: 1,
 			per_page: QUERY_DEFAULTS.pageSize,
 			status: 'processing',
 		};
 
-		const orders = getOrders( ordersQuery );
-		const isError = Boolean( getOrdersError( ordersQuery ) );
-		const isRequesting = isGetOrdersRequesting( ordersQuery );
+		const orders = getItems( 'orders', ordersQuery );
+		const isError = Boolean( getItemsError( 'orders', ordersQuery ) );
+		const isRequesting = isGetItemsRequesting( 'orders', ordersQuery );
 
 		return { orders, isError, isRequesting };
 	} )

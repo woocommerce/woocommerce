@@ -18,13 +18,10 @@ const getItems = ( getResource, requireResource ) => (
 ) => {
 	const resourceName = getResourceName( `items-query-${ type }`, query );
 	const ids = requireResource( requirement, resourceName ).data || [];
-	const items = ids.reduce(
-		( acc, id ) => ( {
-			...acc,
-			[ id ]: getResource( getResourceName( `items-query-${ type }-item`, id ) ).data || {},
-		} ),
-		{}
-	);
+	const items = new Map();
+	ids.forEach( id => {
+		items.set( id, getResource( getResourceName( `items-query-${ type }-item`, id ) ).data );
+	} );
 	return items;
 };
 
