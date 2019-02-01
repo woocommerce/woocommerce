@@ -4,6 +4,7 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Component, createRef, Fragment } from '@wordpress/element';
+import { Button, Icon } from '@wordpress/components';
 import { withInstanceId } from '@wordpress/compose';
 import { findIndex, noop } from 'lodash';
 import Gridicon from 'gridicons';
@@ -44,6 +45,7 @@ class Search extends Component {
 		this.input = createRef();
 
 		this.selectResult = this.selectResult.bind( this );
+		this.removeAll = this.removeAll.bind( this );
 		this.removeResult = this.removeResult.bind( this );
 		this.updateSearch = this.updateSearch.bind( this );
 		this.onFocus = this.onFocus.bind( this );
@@ -58,6 +60,11 @@ class Search extends Component {
 			this.setState( { value: '' } );
 			onChange( [ ...selected, value ] );
 		}
+	}
+
+	removeAll() {
+		const { onChange } = this.props;
+		onChange( [] );
 	}
 
 	removeResult( id ) {
@@ -149,7 +156,16 @@ class Search extends Component {
 
 	render() {
 		const autocompleter = this.getAutocompleter();
-		const { allowFreeTextSearch, placeholder, inlineTags, selected, instanceId, className, staticResults } = this.props;
+		const {
+			allowFreeTextSearch,
+			className,
+			inlineTags,
+			instanceId,
+			placeholder,
+			selected,
+			showClearButton,
+			staticResults,
+		} = this.props;
 		const { value = '', isActive } = this.state;
 		const aria = {
 			'aria-labelledby': this.props[ 'aria-labelledby' ],
@@ -232,6 +248,16 @@ class Search extends Component {
 					}
 				</Autocomplete>
 				{ ! inlineTags && this.renderTags() }
+				{ showClearButton && shouldRenderTags ? (
+					<Button
+						className="woocommerce-search__clear"
+						isLink
+						onClick={ this.removeAll }
+					>
+						<Icon icon="dismiss" />
+						<span className="screen-reader-text">{ __( 'Clear all', 'wc-admin' ) }</span>
+					</Button>
+				) : null }
 			</div>
 		);
 		/* eslint-enable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */
@@ -290,6 +316,10 @@ Search.propTypes = {
 	 */
 	inlineTags: PropTypes.bool,
 	/**
+	 * Render a 'Clear' button next to the input box to remove its contents.
+	 */
+	showClearButton: PropTypes.bool,
+	/**
 	 * Render results list positioned statically instead of absolutely.
 	 */
 	staticResults: PropTypes.bool,
@@ -300,6 +330,7 @@ Search.defaultProps = {
 	onChange: noop,
 	selected: [],
 	inlineTags: false,
+	showClearButton: false,
 	staticResults: false,
 };
 

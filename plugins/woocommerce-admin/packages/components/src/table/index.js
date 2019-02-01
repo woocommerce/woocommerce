@@ -287,6 +287,7 @@ class TableCard extends Component {
 							onChange={ this.onSearch }
 							placeholder={ labels.placeholder || __( 'Search by item name', 'wc-admin' ) }
 							selected={ searchedLabels }
+							showClearButton={ true }
 							type={ searchBy }
 						/>
 					),
