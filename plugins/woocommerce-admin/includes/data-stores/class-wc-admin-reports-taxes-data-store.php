@@ -285,6 +285,12 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 				)
 			);
 
+			/**
+			 * Fires when tax's reports are updated.
+			 *
+			 * @param int $tax_rate_id Tax Rate ID.
+			 * @param int $order_id    Order ID.
+			 */
 			do_action( 'woocommerce_update_reports_tax', $tax_item->get_rate_id(), $order->get_id() );
 		}
 	}

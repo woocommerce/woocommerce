@@ -436,6 +436,11 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		);
 		$customer_id = $wpdb->insert_id;
 
+		/**
+		 * Fires when customser's reports are created.
+		 *
+		 * @param int $customer_id Customer ID.
+		 */
 		do_action( 'woocommerce_new_reports_customer', $customer_id );
 
 		return $result ? $customer_id : false;
@@ -562,6 +567,11 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 
 		$results = $wpdb->replace( $wpdb->prefix . self::TABLE_NAME, $data, $format );
 
+		/**
+		 * Fires when customser's reports are updated.
+		 *
+		 * @param int $customer_id Customer ID.
+		 */
 		do_action( 'woocommerce_update_reports_customer', $customer_id );
 		return $results;
 	}
