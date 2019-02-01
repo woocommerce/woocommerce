@@ -1,4 +1,9 @@
 <?php
+/**
+ * Admin notes helper for wc-admin unit tests.
+ *
+ * @package WooCommerce\Tests\Framework\Helpers
+ */
 
 /**
  * Class WC_Helper_Admin_Notes.
@@ -12,8 +17,8 @@ class WC_Helper_Admin_Notes {
 	 */
 	public static function reset_notes_dbs() {
 		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_admin_notes" ); // @codingStandardsIgnoreLine.
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_admin_note_actions" ); // @codingStandardsIgnoreLine.
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_admin_notes" ); // @codingStandardsIgnoreLine.
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_admin_note_actions" ); // @codingStandardsIgnoreLine.
 	}
 
 	/**
