@@ -14,9 +14,16 @@
     $ tests/bin/install.sh <db-name> <db-user> <db-password> [db-host]
     ```
 
-Sample usage:
+The `<db-password>` will be set as given. Previously, you would have needed to escape certain characters (forward & backward slashes, and ampersand), but install.sh now escapes them when it needs to internally. You may still need to quote strings with backslashes to prevent them from being processed by the shell or other programs.
+
+Sample usages:
 
     $ tests/bin/install.sh woocommerce_tests root root
+
+    #  The actual password only has a single backslash, but it's escaped
+	#  to prevent the shell and PHP from treating it as a backspace character
+    $ tests/bin/install.sh woocommerce_tests root 'a\\b/&'
+    #  Previously, the password would have had to be passed as 'a\\\\b\/\&'
 
 **Important**: The `<db-name>` database will be created if it doesn't exist and all data will be removed during testing.
 
