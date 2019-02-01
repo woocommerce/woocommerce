@@ -224,6 +224,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Get widget instance setting defaults so it shows in customiser before save. #22345
 * Fix - PR state codes. #22339
 * Fix - Allow selecting states from the Country / State drop-down for your store address when you have the option enabled to sell to specific countries. #22339
+* Fix - Restrict the price filter widget to filtering the main product query. #22621
 * Performance - Prime caches when reading variations. #22587
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 * Localization - Added US Minor Outlying Islands as states to avoid confusion with US. #22468
