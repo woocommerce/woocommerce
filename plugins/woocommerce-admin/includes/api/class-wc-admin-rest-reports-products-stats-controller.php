@@ -184,10 +184,9 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 					'properties' => array(
 						'segment_id' => array(
 							'description' => __( 'Segment identificator.', 'wc-admin' ),
-							'type'        => 'string',
+							'type'        => 'integer',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
-							'enum'        => array( 'day', 'week', 'month', 'year' ),
 						),
 						'subtotals'  => array(
 							'description' => __( 'Interval subtotals.', 'wc-admin' ),
