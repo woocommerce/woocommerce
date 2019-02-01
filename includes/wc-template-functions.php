@@ -3292,7 +3292,7 @@ function wc_get_stock_html( $product ) {
  * @return string
  */
 function wc_get_rating_html( $rating, $count = 0 ) {
-	$html = 0 < $rating ? '<div class="star-rating" aria-hidden="true">' . wc_get_star_rating_html( $rating, $count ) . '</div>' : '';
+	$html = 0 < $rating ? '<div class="star-rating" role="img" aria-label="Rated ' . $rating . ' out of 5">' . wc_get_star_rating_html( $rating, $count ) . '</div>' : '';
 	return apply_filters( 'woocommerce_product_get_rating_html', $html, $rating, $count );
 }
 
