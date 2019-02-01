@@ -327,6 +327,11 @@ abstract class WC_Widget extends WP_Widget {
 		// Post Type Arg.
 		if ( isset( $_GET['post_type'] ) ) {
 			$link = add_query_arg( 'post_type', wc_clean( wp_unslash( $_GET['post_type'] ) ), $link );
+
+			// Prevent post type and page id when pretty permalinks are disabled.
+			if ( is_shop() ) {
+				$link = remove_query_arg( 'page_id', $link );
+			}
 		}
 
 		// Min Rating Arg.
