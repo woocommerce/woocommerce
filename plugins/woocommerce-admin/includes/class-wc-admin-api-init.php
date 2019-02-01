@@ -110,6 +110,19 @@ class WC_Admin_Api_Init {
 		// Common date time code.
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-interval.php';
 
+		// Exceptions.
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-parameter-exception.php';
+
+		// WC Class extensions.
+		require_once dirname( __FILE__ ) . '/class-wc-admin-order.php';
+
+		// Segmentation.
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-segmenting.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-orders-stats-segmenting.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-products-stats-segmenting.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-coupons-stats-segmenting.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-taxes-stats-segmenting.php';
+
 		// Query classes for reports.
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-revenue-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-orders-query.php';
@@ -434,6 +447,9 @@ class WC_Admin_Api_Init {
 	 * Init orders data store.
 	 */
 	public static function orders_data_store_init() {
+		// Activate WC_Order extension.
+		WC_Admin_Order::add_filters();
+		// Initialize data stores.
 		WC_Admin_Reports_Orders_Stats_Data_Store::init();
 		WC_Admin_Reports_Products_Data_Store::init();
 		WC_Admin_Reports_Taxes_Data_Store::init();
@@ -483,7 +499,7 @@ class WC_Admin_Api_Init {
 		$order_ids = $order_query->get_orders();
 
 		foreach ( $order_ids as $order_id ) {
-			// TODO: schedule single order update if this fails?
+			// @todo: schedule single order update if this fails?
 			WC_Admin_Reports_Orders_Stats_Data_Store::sync_order( $order_id );
 			WC_Admin_Reports_Products_Data_Store::sync_order_products( $order_id );
 			WC_Admin_Reports_Coupons_Data_Store::sync_order_coupons( $order_id );
@@ -634,7 +650,7 @@ class WC_Admin_Api_Init {
 		$customer_ids = $customer_query->get_results();
 
 		foreach ( $customer_ids as $customer_id ) {
-			// TODO: schedule single customer update if this fails?
+			// @todo: schedule single customer update if this fails?
 			WC_Admin_Reports_Customers_Data_Store::update_registered_customer( $customer_id );
 		}
 	}
@@ -681,7 +697,7 @@ class WC_Admin_Api_Init {
 		return array_merge(
 			$wc_tables,
 			array(
-				// TODO: will this work on multisite?
+				// @todo: will this work on multisite?
 				"{$wpdb->prefix}wc_order_stats",
 				"{$wpdb->prefix}wc_order_product_lookup",
 				"{$wpdb->prefix}wc_order_tax_lookup",
@@ -733,6 +749,12 @@ class WC_Admin_Api_Init {
 			date_created timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			product_qty INT UNSIGNED NOT NULL,
 			product_net_revenue double DEFAULT 0 NOT NULL,
+			product_gross_revenue double DEFAULT 0 NOT NULL,
+			coupon_amount double DEFAULT 0 NOT NULL,
+			tax_amount double DEFAULT 0 NOT NULL,
+			shipping_amount double DEFAULT 0 NOT NULL,
+			shipping_tax_amount double DEFAULT 0 NOT NULL,
+			refund_amount double DEFAULT 0 NOT NULL,
 			PRIMARY KEY  (order_item_id),
 			KEY order_id (order_id),
 			KEY product_id (product_id),
