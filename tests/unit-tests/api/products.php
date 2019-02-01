@@ -235,7 +235,11 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertEquals( array( 'small' ), $data['attributes'][0]['options'] );
-		$this->assertEquals( array( 'red', 'yellow' ), $data['attributes'][1]['options'] );
+
+		foreach ( array( 'red', 'yellow' ) as $term_name ) {
+			$this->assertContains( $term_name, $data['attributes'][1]['options'] );
+		}
+
 		$product->delete( true );
 
 		// test external product
@@ -573,7 +577,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$response_product = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 1, $response_product['categories'] );
+		$this->assertCount( 1, $response_product['categories'], print_r( $response_product, true ) );
 		$this->assertEquals( 'uncategorized', $response_product['categories'][0]['slug'] );
 
 	}
