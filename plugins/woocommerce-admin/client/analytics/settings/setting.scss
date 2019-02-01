@@ -1,0 +1,49 @@
+/** @format */
+
+.woocommerce-setting {
+	display: flex;
+	margin-bottom: $gap-large;
+	@include breakpoint( '<1280px' ) {
+		flex-direction: column;
+	}
+}
+
+.woocommerce-setting__label {
+	@include font-size(16);
+	margin-bottom: $gap;
+	padding-right: $gap;
+	font-weight: bold;
+	@include breakpoint( '>1280px' ) {
+		width: 15%;
+	}
+}
+
+.woocommerce-setting__options {
+	display: flex;
+	flex-direction: column;
+	@include breakpoint( '>1280px' ) {
+		width: 35%;
+	}
+
+	label {
+		width: 100%;
+		display: block;
+		margin-bottom: $gap-small;
+		color: $core-grey-dark-500;
+	}
+
+	input[type='checkbox'] {
+		margin-right: $gap-small;
+	}
+}
+
+.woocommerce-setting__options-group-label {
+	display: block;
+	font-weight: bold;
+	margin-bottom: $gap-small;
+}
+
+.woocommerce-setting__help {
+	font-style: italic;
+	color: $core-grey-dark-300;
+}

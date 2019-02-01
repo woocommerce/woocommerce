@@ -12,12 +12,13 @@ import { map } from 'lodash';
 import { Date, Link } from '@woocommerce/components';
 import { defaultTableDateFormat } from '@woocommerce/date';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
+import { numberFormat } from '@woocommerce/number';
 
 /**
  * Internal dependencies
  */
 import ReportTable from 'analytics/components/report-table';
-import { numberFormat } from 'lib/number';
 
 export default class CouponsReportTable extends Component {
 	constructor() {
@@ -67,22 +68,29 @@ export default class CouponsReportTable extends Component {
 	}
 
 	getRowsContent( coupons ) {
+		const { query } = this.props;
+		const persistedQuery = getPersistedQuery( query );
+
 		return map( coupons, coupon => {
 			const { amount, coupon_id, extended_info, orders_count } = coupon;
 			const { code, date_created, date_expires, discount_type } = extended_info;
 
-			// @TODO must link to the coupon detail report
+			const couponUrl = getNewPath( persistedQuery, '/analytics/coupons', {
+				filter: 'single_coupon',
+				coupons: coupon_id,
+			} );
 			const couponLink = (
-				<Link href="" type="wc-admin">
+				<Link href={ couponUrl } type="wc-admin">
 					{ code }
 				</Link>
 			);
 
+			const ordersUrl = getNewPath( persistedQuery, '/analytics/orders', {
+				filter: 'advanced',
+				coupon_includes: coupon_id,
+			} );
 			const ordersLink = (
-				<Link
-					href={ '/analytics/orders?filter=advanced&code_includes=' + coupon_id }
-					type="wc-admin"
-				>
+				<Link href={ ordersUrl } type="wc-admin">
 					{ numberFormat( orders_count ) }
 				</Link>
 			);
@@ -161,9 +169,10 @@ export default class CouponsReportTable extends Component {
 				getSummary={ this.getSummary }
 				itemIdField="coupon_id"
 				query={ query }
+				searchBy="coupons"
 				tableQuery={ {
-					orderby: query.orderby || 'coupon_id',
-					order: query.order || 'asc',
+					orderby: query.orderby || 'orders_count',
+					order: query.order || 'desc',
 					extended_info: true,
 				} }
 				title={ __( 'Coupons', 'wc-admin' ) }

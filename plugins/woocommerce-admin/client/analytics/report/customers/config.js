@@ -9,7 +9,7 @@ import { decodeEntities } from '@wordpress/html-entities';
  * Internal dependencies
  */
 import { getCustomerLabels, getRequestByIdString } from 'lib/async-requests';
-import { NAMESPACE } from 'store/constants';
+import { NAMESPACE } from 'wc-api/constants';
 
 export const filters = [
 	{
@@ -163,7 +163,7 @@ export const advancedFilters = {
 				} ) ),
 			},
 		},
-		order_count: {
+		orders_count: {
 			labels: {
 				add: __( 'No. of Orders', 'wc-admin' ),
 				remove: __( 'Remove order  filter', 'wc-admin' ),

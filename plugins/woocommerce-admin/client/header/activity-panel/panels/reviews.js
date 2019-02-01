@@ -28,7 +28,7 @@ import {
  */
 import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
 import ActivityHeader from '../activity-header';
-import { QUERY_DEFAULTS } from 'store/constants';
+import { QUERY_DEFAULTS } from 'wc-api/constants';
 import sanitizeHTML from 'lib/sanitize-html';
 import withSelect from 'wc-api/with-select';
 

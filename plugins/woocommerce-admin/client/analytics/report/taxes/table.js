@@ -12,12 +12,12 @@ import { map } from 'lodash';
 import { Link } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import { getTaxCode } from './utils';
+import { numberFormat } from '@woocommerce/number';
 
 /**
  * Internal dependencies
  */
 import ReportTable from 'analytics/components/report-table';
-import { numberFormat } from 'lib/number';
 
 export default class TaxesReportTable extends Component {
 	constructor() {
@@ -150,6 +150,7 @@ export default class TaxesReportTable extends Component {
 				getSummary={ this.getSummary }
 				itemIdField="tax_rate_id"
 				query={ query }
+				searchBy="taxes"
 				tableQuery={ {
 					orderby: query.orderby || 'tax_rate_id',
 				} }

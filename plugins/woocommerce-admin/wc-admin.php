@@ -7,7 +7,7 @@
  * Author URI: https://woocommerce.com/
  * Text Domain: wc-admin
  * Domain Path: /languages
- * Version: 0.5.0
+ * Version: 0.6.0
  *
  * @package WC_Admin
  */
@@ -192,3 +192,9 @@ function wc_admin_woocommerce_updated() {
 	WC_Admin_Notes_Settings_Notes::add_notes_for_settings_that_have_moved();
 }
 add_action( 'woocommerce_updated', 'wc_admin_woocommerce_updated' );
+
+/*
+ * Remove the emoji script as it always defaults to replacing emojis with Twemoji images.
+ * Gutenberg has also disabled emojis. More on that here -> https://github.com/WordPress/gutenberg/pull/6151
+ */
+remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );

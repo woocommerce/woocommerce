@@ -10,12 +10,12 @@ import { Component } from '@wordpress/element';
  */
 import { Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
+import { numberFormat } from '@woocommerce/number';
 
 /**
  * Internal dependencies
  */
 import ReportTable from 'analytics/components/report-table';
-import { numberFormat } from 'lib/number';
 
 export default class StockReportTable extends Component {
 	constructor() {

@@ -12,11 +12,18 @@ import { stringifyQuery } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import { getResourceIdentifier, getResourcePrefix } from '../../utils';
-import { NAMESPACE } from '../../constants';
-import { SWAGGERNAMESPACE } from 'store/constants';
+import { getResourceIdentifier, getResourcePrefix } from 'wc-api/utils';
+import { NAMESPACE, SWAGGERNAMESPACE } from 'wc-api/constants';
 
-const statEndpoints = [ 'coupons', 'downloads', 'orders', 'products', 'revenue', 'taxes' ];
+const statEndpoints = [
+	'coupons',
+	'downloads',
+	'orders',
+	'products',
+	'revenue',
+	'taxes',
+	'customers',
+];
 // TODO: Remove once swagger endpoints are phased out.
 const swaggerEndpoints = [ 'categories' ];
 
@@ -28,6 +35,7 @@ const typeEndpointMap = {
 	'report-stats-query-downloads': 'downloads',
 	'report-stats-query-coupons': 'coupons',
 	'report-stats-query-taxes': 'taxes',
+	'report-stats-query-customers': 'customers',
 };
 
 function read( resourceNames, fetch = apiFetch ) {

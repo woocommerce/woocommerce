@@ -16,7 +16,7 @@ import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
 import ActivityHeader from '../activity-header';
 import { EmptyContent, Section } from '@woocommerce/components';
 import sanitizeHTML from 'lib/sanitize-html';
-import { QUERY_DEFAULTS } from 'store/constants';
+import { QUERY_DEFAULTS } from 'wc-api/constants';
 
 class InboxPanel extends Component {
 	render() {

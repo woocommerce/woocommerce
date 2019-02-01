@@ -13,12 +13,12 @@ import { map } from 'lodash';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
+import { numberFormat } from '@woocommerce/number';
 
 /**
  * Internal dependencies
  */
 import CategoryBreacrumbs from './breadcrumbs';
-import { numberFormat } from 'lib/number';
 import ReportTable from 'analytics/components/report-table';
 import withSelect from 'wc-api/with-select';
 
@@ -68,11 +68,10 @@ class CategoriesReportTable extends Component {
 	}
 
 	getRowsContent( categoryStats ) {
-		const { query } = this.props;
 		return map( categoryStats, categoryStat => {
 			const { category_id, items_sold, net_revenue, products_count, orders_count } = categoryStat;
 			const { categories, query } = this.props;
-			const category = categories[ category_id ];
+			const category = categories.get( category_id );
 			const persistedQuery = getPersistedQuery( query );
 
 			return [
@@ -154,6 +153,7 @@ class CategoriesReportTable extends Component {
 				getSummary={ this.getSummary }
 				itemIdField="category_id"
 				query={ query }
+				searchBy="categories"
 				labels={ labels }
 				tableQuery={ {
 					orderby: query.orderby || 'items_sold',
@@ -169,14 +169,14 @@ class CategoriesReportTable extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getCategories, getCategoriesError, isGetCategoriesRequesting } = select( 'wc-api' );
+		const { getItems, getItemsError, isGetItemsRequesting } = select( 'wc-api' );
 		const tableQuery = {
 			per_page: -1,
 		};
 
-		const categories = getCategories( tableQuery );
-		const isError = Boolean( getCategoriesError( tableQuery ) );
-		const isRequesting = isGetCategoriesRequesting( tableQuery );
+		const categories = getItems( 'categories', tableQuery );
+		const isError = Boolean( getItemsError( 'categories', tableQuery ) );
+		const isRequesting = isGetItemsRequesting( 'categories', tableQuery );
 
 		return { categories, isError, isRequesting };
 	} )

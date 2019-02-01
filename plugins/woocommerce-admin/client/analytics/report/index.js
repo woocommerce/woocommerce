@@ -5,6 +5,7 @@
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { Component, Fragment } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { find } from 'lodash';
 
@@ -12,6 +13,7 @@ import { find } from 'lodash';
  * WooCommerce dependencies
  */
 import { useFilters } from '@woocommerce/components';
+import { getQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -27,6 +29,8 @@ import TaxesReport from './taxes';
 import DownloadsReport from './downloads';
 import StockReport from './stock';
 import CustomersReport from './customers';
+import { searchItemsByString } from 'wc-api/items/utils';
+import withSelect from 'wc-api/with-select';
 
 const REPORTS_FILTER = 'woocommerce-reports-list';
 
@@ -131,4 +135,27 @@ Report.propTypes = {
 	params: PropTypes.object.isRequired,
 };
 
-export default useFilters( REPORTS_FILTER )( Report );
+export default compose(
+	useFilters( REPORTS_FILTER ),
+	withSelect( ( select, props ) => {
+		const { search } = getQuery();
+
+		if ( ! search ) {
+			return {};
+		}
+
+		const { report } = props.params;
+		const items = searchItemsByString( select, report, search );
+		const ids = Object.keys( items );
+		if ( ! ids.length ) {
+			return {}; // @TODO if no results were found, we should avoid making a server request.
+		}
+
+		return {
+			query: {
+				...props.query,
+				[ report ]: ids.join( ',' ),
+			},
+		};
+	} )
+)( Report );

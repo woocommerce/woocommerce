@@ -29,7 +29,7 @@ function wc_admin_register_script() {
 	wp_register_script(
 		'wc-currency',
 		wc_admin_url( 'dist/currency/index.js' ),
-		array(),
+		array( 'wc-number' ),
 		filemtime( wc_admin_dir_path( 'dist/currency/index.js' ) ),
 		true
 	);
@@ -39,6 +39,14 @@ function wc_admin_register_script() {
 		wc_admin_url( 'dist/navigation/index.js' ),
 		array(),
 		filemtime( wc_admin_dir_path( 'dist/navigation/index.js' ) ),
+		true
+	);
+
+	wp_register_script(
+		'wc-number',
+		wc_admin_url( 'dist/number/index.js' ),
+		array(),
+		filemtime( wc_admin_dir_path( 'dist/number/index.js' ) ),
 		true
 	);
 
@@ -64,6 +72,7 @@ function wc_admin_register_script() {
 			'wc-currency',
 			'wc-date',
 			'wc-navigation',
+			'wc-number',
 		),
 		filemtime( wc_admin_dir_path( 'dist/components/index.js' ) ),
 		true
@@ -197,10 +206,13 @@ function wc_admin_print_script_settings() {
 		),
 		'currentUserData'       => $current_user_data,
 	);
+	$settings = wc_admin_add_custom_settings( $settings );
 
 	foreach ( $preload_data_endpoints as $key => $endpoint ) {
 		$settings['dataEndpoints'][ $key ] = $preload_data[ $endpoint ]['body'];
 	}
+
+	$settings = apply_filters( 'wc_admin_wc_settings', $settings );
 	?>
 	<script type="text/javascript">
 		<?php
@@ -211,6 +223,23 @@ function wc_admin_print_script_settings() {
 	<?php
 }
 add_action( 'admin_print_footer_scripts', 'wc_admin_print_script_settings', 1 );
+
+/**
+ * Add in custom settings used for WC Admin.
+ *
+ * @param array $settings Array of settings to merge into.
+ * @return array
+ */
+function wc_admin_add_custom_settings( $settings ) {
+	$wc_rest_settings_options_controller = new WC_REST_Setting_Options_Controller();
+	$wc_admin_group_settings             = $wc_rest_settings_options_controller->get_group_settings( 'wc_admin' );
+	$settings['wcAdminSettings']         = array();
+
+	foreach ( $wc_admin_group_settings as $setting ) {
+		$settings['wcAdminSettings'][ $setting['id'] ] = $setting['value'];
+	}
+	return $settings;
+}
 
 /**
  * Load plugin text domain for translations.

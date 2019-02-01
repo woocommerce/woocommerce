@@ -1,16 +1,15 @@
 /** @format */
 .woocommerce-flag {
-	&.is-round {
-		overflow: hidden;
-		border-radius: 50%;
-
-		img {
-			width: auto;
-			height: 100%;
-		}
+	span {
+		vertical-align: middle;
 	}
 
 	.woocommerce-flag__fallback {
 		background: $core-grey-light-500;
+		color: transparent;
+		width: 24px;
+		height: 18px;
+		display: block;
+		overflow: hidden;
 	}
 }

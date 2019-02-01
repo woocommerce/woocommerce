@@ -54,7 +54,7 @@
 			}
 		}
 
-		&.has-search {
+		&.has-search:not(.has-compare) {
 			.woocommerce-card__action {
 				grid-template-columns: 1fr auto;
 

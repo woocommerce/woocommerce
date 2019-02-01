@@ -125,6 +125,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-downloads-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-downloads-stats-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-customers-query.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-customers-stats-query.php';
 
 		// Data stores.
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-data-store.php';
@@ -141,6 +142,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-downloads-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-downloads-stats-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-customers-data-store.php';
+		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-customers-stats-data-store.php';
 
 		// Data triggers.
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-notes-data-store.php';
@@ -165,11 +167,13 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-categories-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-reviews-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-setting-options-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-system-status-tools-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-categories-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-coupons-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-coupons-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-customers-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-customers-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-files-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-downloads-stats-controller.php';
@@ -183,6 +187,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-stock-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-taxes-controller.php';
 
 		$controllers = apply_filters(
 			'woocommerce_admin_rest_controllers',
@@ -198,6 +203,7 @@ class WC_Admin_Api_Init {
 				'WC_Admin_REST_Product_Categories_Controller',
 				'WC_Admin_REST_Product_Reviews_Controller',
 				'WC_Admin_REST_Reports_Controller',
+				'WC_Admin_REST_Setting_Options_Controller',
 				'WC_Admin_REST_System_Status_Tools_Controller',
 				'WC_Admin_REST_Reports_Products_Controller',
 				'WC_Admin_REST_Reports_Variations_Controller',
@@ -214,6 +220,8 @@ class WC_Admin_Api_Init {
 				'WC_Admin_REST_Reports_Downloads_Controller',
 				'WC_Admin_REST_Reports_Downloads_Stats_Controller',
 				'WC_Admin_REST_Reports_Customers_Controller',
+				'WC_Admin_REST_Reports_Customers_Stats_Controller',
+				'WC_Admin_REST_Taxes_Controller',
 			)
 		);
 
@@ -361,6 +369,31 @@ class WC_Admin_Api_Init {
 		) {
 			$endpoints['/wc/v4/products/reviews'][0] = $endpoints['/wc/v4/products/reviews'][2];
 			$endpoints['/wc/v4/products/reviews'][1] = $endpoints['/wc/v4/products/reviews'][3];
+		}
+
+		// Override /wc/v4/taxes.
+		if ( isset( $endpoints['/wc/v4/taxes'] )
+			&& isset( $endpoints['/wc/v4/taxes'][3] )
+			&& isset( $endpoints['/wc/v4/taxes'][2] )
+			&& $endpoints['/wc/v4/taxes'][2]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+			&& $endpoints['/wc/v4/taxes'][3]['callback'][0] instanceof WC_Admin_REST_Orders_Controller
+		) {
+			$endpoints['/wc/v4/taxes'][0] = $endpoints['/wc/v4/taxes'][2];
+			$endpoints['/wc/v4/taxes'][1] = $endpoints['/wc/v4/taxes'][3];
+		}
+
+		// Override /wc/v4/settings/$group_id.
+		if ( isset( $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'] )
+			&& isset( $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][5] )
+			&& isset( $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][4] )
+			&& isset( $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][3] )
+			&& $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][3]['callback'][0] instanceof WC_Admin_REST_Setting_Options_Controller
+			&& $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][4]['callback'][0] instanceof WC_Admin_REST_Setting_Options_Controller
+			&& $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][5]['callback'][0] instanceof WC_Admin_REST_Setting_Options_Controller
+		) {
+			$endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][0] = $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][3];
+			$endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][1] = $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][4];
+			$endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][2] = $endpoints['/wc/v4/settings/(?P<group_id>[\w-]+)'][5];
 		}
 
 		return $endpoints;
@@ -631,6 +664,7 @@ class WC_Admin_Api_Init {
 				'report-downloads-stats' => 'WC_Admin_Reports_Downloads_Stats_Data_Store',
 				'admin-note'             => 'WC_Admin_Notes_Data_Store',
 				'report-customers'       => 'WC_Admin_Reports_Customers_Data_Store',
+				'report-customers-stats' => 'WC_Admin_Reports_Customers_Stats_Data_Store',
 			)
 		);
 	}
@@ -686,7 +720,9 @@ class WC_Admin_Api_Init {
 			status varchar(200) NOT NULL,
 			customer_id BIGINT UNSIGNED NOT NULL,
 			PRIMARY KEY (order_id),
-			KEY date_created (date_created)
+			KEY date_created (date_created),
+			KEY customer_id (customer_id),
+			KEY status (status)
 		  ) $collate;
 		  CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 			order_item_id BIGINT UNSIGNED NOT NULL,
@@ -754,7 +790,7 @@ class WC_Admin_Api_Init {
 				first_name varchar(255) NOT NULL,
 				last_name varchar(255) NOT NULL,
 				email varchar(100) NOT NULL,
-				date_last_active timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
+				date_last_active timestamp NULL default null,
 				date_registered timestamp NULL default null,
 				country char(2) DEFAULT '' NOT NULL,
 				postcode varchar(20) DEFAULT '' NOT NULL,

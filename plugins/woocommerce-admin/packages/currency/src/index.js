@@ -6,9 +6,9 @@ import { get, isNaN } from 'lodash';
 import { sprintf } from '@wordpress/i18n';
 
 /**
- * Internal dependencies
+ * WooCommerce dependencies
  */
-import { numberFormat } from 'lib/number';
+import { numberFormat } from '@woocommerce/number';
 
 /**
  * Formats money with a given currency code. Uses site's currency settings for formatting.

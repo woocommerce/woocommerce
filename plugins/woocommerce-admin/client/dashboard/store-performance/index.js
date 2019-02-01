@@ -15,6 +15,8 @@ import { find } from 'lodash';
  */
 import { getCurrentDates, appendTimestamp, getDateParamsFromQuery } from '@woocommerce/date';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
+import { calculateDelta, formatValue } from '@woocommerce/number';
+import { formatCurrency } from '@woocommerce/currency';
 
 /**
  * Internal dependencies
@@ -31,7 +33,6 @@ import {
 } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 import './style.scss';
-import { calculateDelta, formatValue } from 'lib/number';
 
 class StorePerformance extends Component {
 	constructor( props ) {
@@ -128,9 +129,15 @@ class StorePerformance extends Component {
 							'';
 						const reportUrl =
 							( href && getNewPath( persistedQuery, href, { chart: primaryItem.chart } ) ) || '';
+						const isCurrency = 'currency' === primaryItem.format;
+
 						const delta = calculateDelta( primaryItem.value, secondaryItem.value );
-						const primaryValue = formatValue( primaryItem.format, primaryItem.value );
-						const secondaryValue = formatValue( secondaryItem.format, secondaryItem.value );
+						const primaryValue = isCurrency
+							? formatCurrency( primaryItem.value )
+							: formatValue( primaryItem.format, primaryItem.value );
+						const secondaryValue = isCurrency
+							? formatCurrency( secondaryItem.value )
+							: formatValue( secondaryItem.format, secondaryItem.value );
 
 						return (
 							<SummaryNumber

@@ -96,7 +96,6 @@
 		align-items: center;
 		padding: $gap-small;
 		color: $woocommerce;
-		text-decoration: underline; // @todo Not actually a link, should underline?
 		text-align: left;
 		background: $core-grey-light-100;
 		border-bottom: 1px solid $core-grey-light-500;
@@ -122,5 +121,19 @@
 		.woocommerce-search__result-thumbnail {
 			margin-right: $gap-small;
 		}
+	}
+}
+
+.woocommerce-search__result-name {
+	text-decoration: underline; // @todo Not actually a link, should underline?
+}
+
+.woocommerce-search__clear {
+	position: absolute;
+	right: 10px;
+	top: calc( 50% - 10px );
+
+	& > .dashicon {
+		color: #c9c9c9;
 	}
 }

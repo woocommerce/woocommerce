@@ -24,7 +24,7 @@ import VariationsReportTable from './table-variations';
 export default class ProductsReport extends Component {
 	render() {
 		const { path, query } = this.props;
-		const isProductDetailsView = query.products && 1 === query.products.split( ',' ).length;
+		const isProductDetailsView = query.filter === 'single_product';
 
 		const itemsLabel = isProductDetailsView
 			? __( '%s variations', 'wc-admin' )

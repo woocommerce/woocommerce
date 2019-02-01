@@ -13,13 +13,13 @@ import { map } from 'lodash';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link, Tag } from '@woocommerce/components';
+import { numberFormat } from '@woocommerce/number';
 
 /**
  * Internal dependencies
  */
 import CategoryBreacrumbs from '../categories/breadcrumbs';
 import { isLowStock } from './utils';
-import { numberFormat } from 'lib/number';
 import ReportTable from 'analytics/components/report-table';
 import withSelect from 'wc-api/with-select';
 import './style.scss';
@@ -119,11 +119,11 @@ class ProductsReportTable extends Component {
 				filter: 'single_product',
 				products: product_id,
 			} );
-			const categories = this.props.categories;
+			const { categories } = this.props;
 
 			const productCategories =
 				( category_ids &&
-					category_ids.map( category_id => categories[ category_id ] ).filter( Boolean ) ) ||
+					category_ids.map( category_id => categories.get( category_id ) ).filter( Boolean ) ) ||
 				[];
 
 			return [
@@ -245,6 +245,7 @@ class ProductsReportTable extends Component {
 				itemIdField="product_id"
 				labels={ labels }
 				query={ query }
+				searchBy="products"
 				tableQuery={ {
 					orderby: query.orderby || 'items_sold',
 					order: query.order || 'desc',
@@ -259,14 +260,14 @@ class ProductsReportTable extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getCategories, getCategoriesError, isGetCategoriesRequesting } = select( 'wc-api' );
+		const { getItems, getItemsError, isGetItemsRequesting } = select( 'wc-api' );
 		const tableQuery = {
 			per_page: -1,
 		};
 
-		const categories = getCategories( tableQuery );
-		const isError = Boolean( getCategoriesError( tableQuery ) );
-		const isRequesting = isGetCategoriesRequesting( tableQuery );
+		const categories = getItems( 'categories', tableQuery );
+		const isError = Boolean( getItemsError( 'categories', tableQuery ) );
+		const isRequesting = isGetItemsRequesting( 'categories', tableQuery );
 
 		return { categories, isError, isRequesting };
 	} )

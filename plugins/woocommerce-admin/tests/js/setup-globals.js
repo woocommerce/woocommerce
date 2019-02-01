@@ -27,6 +27,7 @@ const wooCommercePackages = [
 	'currency',
 	'date',
 	'navigation',
+	'number',
 ];
 
 wordPressPackages.forEach( lib => {
