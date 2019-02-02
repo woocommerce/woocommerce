@@ -100,7 +100,7 @@ class WC_Regenerate_Images {
 	public static function add_uncropped_metadata( $meta_data ) {
 		$size_data = wc_get_image_size( 'woocommerce_thumbnail' );
 		if ( isset( $meta_data['sizes'], $meta_data['sizes']['woocommerce_thumbnail'] ) ) {
-			$meta_data['sizes']['woocommerce_thumbnail']['uncropped'] = empty( $size_settings['height'] );
+			$meta_data['sizes']['woocommerce_thumbnail']['uncropped'] = empty( $size_data['height'] );
 		}
 		return $meta_data;
 	}
