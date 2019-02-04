@@ -23,9 +23,7 @@ module.exports = function( grunt ) {
 				'<%= dirs.js %>/admin/*.js',
 				'!<%= dirs.js %>/admin/*.min.js',
 				'<%= dirs.js %>/frontend/*.js',
-				'!<%= dirs.js %>/frontend/*.min.js',
-				'includes/gateways/simplify-commerce/assets/js/*.js',
-				'!includes/gateways/simplify-commerce/assets/js/*.min.js'
+				'!<%= dirs.js %>/frontend/*.min.js'
 			]
 		},
 
