@@ -228,7 +228,7 @@ class WC_Meta_Box_Product_Data {
 		$attributes = array();
 
 		if ( ! $data ) {
-			$data = $_POST;
+			$data = stripslashes_deep( $_POST );
 		}
 
 		if ( isset( $data['attribute_names'], $data['attribute_values'] ) ) {
