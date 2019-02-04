@@ -4,12 +4,12 @@
  */
 import { Component, createElement } from '@wordpress/element';
 import { parse } from 'qs';
-import { find, last } from 'lodash';
+import { find, last, isEqual } from 'lodash';
 
 /**
  * WooCommerce dependencies
  */
-import { getPersistedQuery, stringifyQuery } from '@woocommerce/navigation';
+import { getNewPath, getPersistedQuery, history, stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -64,11 +64,35 @@ const getPages = () => {
 };
 
 class Controller extends Component {
+	componentDidUpdate( prevProps ) {
+		const prevQuery = this.getQuery( prevProps.location.search );
+		const prevBaseQuery = this.getBaseQuery( prevProps.location.search );
+		const baseQuery = this.getBaseQuery( this.props.location.search );
+
+		if ( prevQuery.page > 1 && ! isEqual( prevBaseQuery, baseQuery ) ) {
+			history.replace( getNewPath( { page: 1 } ) );
+		}
+	}
+
+	getQuery( searchString ) {
+		if ( ! searchString ) {
+			return {};
+		}
+
+		const search = searchString.substring( 1 );
+		return parse( search );
+	}
+
+	getBaseQuery( searchString ) {
+		const query = this.getQuery( searchString );
+		delete query.page;
+		return query;
+	}
+
 	render() {
 		// Pass URL parameters (example :report -> params.report) and query string parameters
 		const { path, url, params } = this.props.match;
-		const search = this.props.location.search.substring( 1 );
-		const query = parse( search );
+		const query = this.getQuery( this.props.location.search );
 		const page = find( getPages(), { path } );
 		window.wpNavMenuUrlUpdate( page, query );
 		window.wpNavMenuClassChange( page );
