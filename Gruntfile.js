@@ -307,15 +307,14 @@ module.exports = function( grunt ) {
 			},
 			dist: {
 				src:  [
-					'**/*.php',                                                  // Include all files
-					'!apigen/**',                                                // Exclude apigen/
-					'!includes/api/legacy/**',                                   // Exclude legacy REST API
-					'!includes/gateways/simplify-commerce/includes/Simplify/**', // Exclude simplify commerce SDK
-					'!includes/libraries/**',                                    // Exclude libraries/
-					'!node_modules/**',                                          // Exclude node_modules/
-					'!tests/cli/**',                                             // Exclude tests/cli/
-					'!tmp/**',                                                   // Exclude tmp/
-					'!vendor/**'                                                 // Exclude vendor/
+					'**/*.php', // Include all php files.
+					'!apigen/**',
+					'!includes/api/legacy/**',
+					'!includes/libraries/**',
+					'!node_modules/**',
+					'!tests/cli/**',
+					'!tmp/**',
+					'!vendor/**'
 				]
 			}
 		},

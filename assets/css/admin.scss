@@ -583,17 +583,6 @@
 	 color: inherit;
  }
 
- .simplify-commerce-banner {
-	 overflow: hidden;
-
-	 img {
-		 float: right;
-		 padding: 15px 0;
-		 margin-left: 1em;
-		 width: 200px;
-	 }
- }
-
  /**
   * Help Tip
   */
@@ -3686,15 +3675,15 @@
 			 padding: 0 15px 10px 0;
 		 }
 	 }
-	 
+
 	 .wc-shipping-zone-settings {
-	 
+
 		 td.forminp {
 			 input, textarea {
 				 width: 448px;
 				 padding: 6px 11px;
 			 }
-			 
+
 			 .select2-search input {
 				 padding: 6px;
 			 }
