@@ -37,6 +37,13 @@ class WC_Checkout {
 	protected $legacy_posted_data = array();
 
 	/**
+	 * Caches customer object. @see get_value.
+	 *
+	 * @var WC_Customer
+	 */
+	private $logged_in_customer = null;
+
+	/**
 	 * Gets the main WC_Checkout Instance.
 	 *
 	 * @since 2.1
@@ -314,13 +321,14 @@ class WC_Checkout {
 			}
 
 			$fields_prefix = array(
-				'shipping'  => true,
-				'billing'   => true,
+				'shipping' => true,
+				'billing'  => true,
 			);
+
 			$shipping_fields = array(
-				'shipping_method'   => true,
-				'shipping_total'    => true,
-				'shipping_tax'      => true,
+				'shipping_method' => true,
+				'shipping_total'  => true,
+				'shipping_tax'    => true,
 			);
 			foreach ( $data as $key => $value ) {
 				if ( is_callable( array( $order, "set_{$key}" ) ) ) {
@@ -713,7 +721,7 @@ class WC_Checkout {
 
 				if ( in_array( 'email', $format, true ) && '' !== $data[ $key ] ) {
 					$email_is_valid = is_email( $data[ $key ] );
-					$data[ $key ] = sanitize_email( $data[ $key ] );
+					$data[ $key ]   = sanitize_email( $data[ $key ] );
 
 					if ( $validate_fieldset && ! $email_is_valid ) {
 						/* translators: %s: email address */
@@ -1108,29 +1116,52 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Gets the value either from the posted data, or from the users meta data.
+	 * Gets the value either from POST, or from the customer object. Sets the default values in checkout fields.
 	 *
-	 * @param string $input Input key.
-	 * @return string
+	 * @param string $input Name of the input we want to grab data for. e.g. billing_country.
+	 * @return string The default value.
 	 */
 	public function get_value( $input ) {
+		// If the form was posted, get the posted value. This will only tend to happen when JavaScript is disabled client side.
 		if ( ! empty( $_POST[ $input ] ) ) { // WPCS: input var ok, CSRF OK.
 			return wc_clean( wp_unslash( $_POST[ $input ] ) ); // WPCS: input var ok, CSRF OK.
 		}
 
+		// Allow 3rd parties to short circuit the logic and return their own default value.
 		$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
 
-		if ( null !== $value ) {
+		if ( ! is_null( $value ) ) {
 			return $value;
 		}
 
-		if ( is_callable( array( WC()->customer, "get_$input" ) ) ) {
-			$value = WC()->customer->{"get_$input"}();
-		} elseif ( WC()->customer->meta_exists( $input ) ) {
-			$value = WC()->customer->get_meta( $input, true );
+		/**
+		 * For logged in customers, pull data from their account rather than the session which may contain incomplete data.
+		 * Another reason is that WC sets shipping address to the billing address on the checkout updates unless the
+		 * "ship to another address" box is checked. @see issue #20975.
+		 */
+		$customer_object = false;
+
+		if ( is_user_logged_in() ) {
+			// Load customer object, but keep it cached to avoid reloading it multiple times.
+			if ( is_null( $this->logged_in_customer ) ) {
+				$this->logged_in_customer = new WC_Customer( get_current_user_id() );
+			}
+			$customer_object = $this->logged_in_customer;
 		}
 
-		$value = $value ? $value : null; // Empty value should return null.
+		if ( ! $customer_object ) {
+			$customer_object = WC()->customer;
+		}
+
+		if ( is_callable( array( $customer_object, "get_$input" ) ) ) {
+			$value = $customer_object->{"get_$input"}();
+		} elseif ( $customer_object->meta_exists( $input ) ) {
+			$value = $customer_object->get_meta( $input, true );
+		}
+
+		if ( '' === $value ) {
+			$value = null;
+		}
 
 		return apply_filters( 'default_checkout_' . $input, $value, $input );
 	}
