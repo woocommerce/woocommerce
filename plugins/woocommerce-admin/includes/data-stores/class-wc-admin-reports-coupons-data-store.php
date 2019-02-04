@@ -351,7 +351,7 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 			 * @param int $coupon_id Coupon ID.
 			 * @param int $order_id  Order ID.
 			 */
-			do_action( 'woocommerce_update_reports_coupon', $coupon_id, $order_id );
+			do_action( 'woocommerce_reports_update_coupon', $coupon_id, $order_id );
 		}
 	}
 

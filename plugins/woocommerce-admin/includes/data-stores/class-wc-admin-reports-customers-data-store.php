@@ -441,7 +441,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		 *
 		 * @param int $customer_id Customer ID.
 		 */
-		do_action( 'woocommerce_new_reports_customer', $customer_id );
+		do_action( 'woocommerce_reports_new_customer', $customer_id );
 
 		return $result ? $customer_id : false;
 	}
@@ -572,7 +572,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		 *
 		 * @param int $customer_id Customer ID.
 		 */
-		do_action( 'woocommerce_update_reports_customer', $customer_id );
+		do_action( 'woocommerce_reports_update_customer', $customer_id );
 		return $results;
 	}
 

@@ -457,7 +457,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		 *
 		 * @param int $order_id Order ID.
 		 */
-		do_action( 'woocommerce_update_reports_order_stats', $order->get_id() );
+		do_action( 'woocommerce_reports_update_order_stats', $order->get_id() );
 		return $results;
 	}
 
