@@ -178,8 +178,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			$order->set_shipping_total( 0 );
 			$order->set_cart_tax( 0 );
 			$order->save();
-			// Wait one second to avoid potentially ambiguous new/returning customer.
-			sleep( 1 );
+
+			WC_Helper_Queue::run_all_pending();
 		}
 
 		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
@@ -3329,6 +3329,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$order_2->set_status( $order_status );
 		$order_2->calculate_totals();
 		$order_2->save();
+
+		WC_Helper_Queue::run_all_pending();
 
 		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 
