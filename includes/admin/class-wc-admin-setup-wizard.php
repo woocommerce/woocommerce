@@ -91,6 +91,7 @@ class WC_Admin_Setup_Wizard {
 	protected function is_default_theme() {
 		return wc_is_active_theme(
 			array(
+				'twentynineteen',
 				'twentyseventeen',
 				'twentysixteen',
 				'twentyfifteen',
