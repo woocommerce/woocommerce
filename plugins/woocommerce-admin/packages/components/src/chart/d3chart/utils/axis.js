@@ -210,7 +210,7 @@ export const drawAxis = ( node, params, xOffset ) => {
 			d3AxisBottom( xScale )
 				.tickValues( ticks )
 				.tickFormat( ( d, i ) => params.interval === 'hour'
-					? params.xFormat( d )
+					? params.xFormat( d instanceof Date ? d : moment( d ).toDate() )
 					: removeDuplicateDates( d, i, ticks, params.xFormat ) )
 		);
 

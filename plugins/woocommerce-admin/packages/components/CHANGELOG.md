@@ -1,3 +1,7 @@
+# 1.5.0 (unreleased)
+- Fix X-axis labels in hourly bar charts.
+- New `<Search>` prop named `showClearButton`, that will display a 'Clear' button when the search box contains one or more tags.
+
 # 1.4.2
 - Add emoji-flags dependency
 
@@ -5,7 +9,6 @@
 - Chart component: format numbers and prices using store currency settings.
 - Make `href`/linking optional in SummaryNumber.
 - Fix SummaryNumber example code.
-- New `<Search>` prop named `showClearButton`, that will display a 'Clear' button when the search box contains one or more tags.
 
 # 1.4.0
 - Add download log ip address autocompleter to search component
