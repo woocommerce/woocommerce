@@ -273,7 +273,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$image_url = $this->set_product_image( $product );
 
 		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image_url . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" />',
+			'<img width="186" height="144" src="' . $image_url . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" sizes="100vw" />',
 			$product->get_image()
 		);
 
@@ -295,7 +295,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$image_url = $this->set_product_image( $variable_product );
 
 		$this->assertEquals(
-			'<img width="186" height="144" src="' . $image_url . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" />',
+			'<img width="186" height="144" src="' . $image_url . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" sizes="100vw" />',
 			$variation_1->get_image()
 		);
 
@@ -313,7 +313,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	public function test_get_image_should_return_place_holder_image() {
 		$product = new WC_Product();
 		$image_url = wc_placeholder_img_src();
-		$expected_result = '<img src="' . $image_url . '" alt="Placeholder" width="300" class="woocommerce-placeholder wp-post-image" height="300" />';
+		$expected_result = '<img src="' . $image_url . '" alt="Placeholder" width="300" class="woocommerce-placeholder wp-post-image" height="300" sizes="100vw" />';
 
 		$this->assertEquals( $expected_result, $product->get_image() );
 		$this->assertEquals( $expected_result, $product->get_image( 'woocommerce_thumbnail', array(), true ) );
