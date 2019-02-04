@@ -179,6 +179,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-products-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-categories-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-reviews-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-variations-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-setting-options-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-system-status-tools-controller.php';
@@ -215,6 +216,7 @@ class WC_Admin_Api_Init {
 				'WC_Admin_REST_Products_Controller',
 				'WC_Admin_REST_Product_Categories_Controller',
 				'WC_Admin_REST_Product_Reviews_Controller',
+				'WC_Admin_REST_Product_Variations_Controller',
 				'WC_Admin_REST_Reports_Controller',
 				'WC_Admin_REST_Setting_Options_Controller',
 				'WC_Admin_REST_System_Status_Tools_Controller',
@@ -382,6 +384,17 @@ class WC_Admin_Api_Init {
 		) {
 			$endpoints['/wc/v4/products/reviews'][0] = $endpoints['/wc/v4/products/reviews'][2];
 			$endpoints['/wc/v4/products/reviews'][1] = $endpoints['/wc/v4/products/reviews'][3];
+		}
+
+		// Override /wc/v4/products/$product_id/variations.
+		if ( isset( $endpoints['products/(?P<product_id>[\d]+)/variations'] )
+			&& isset( $endpoints['products/(?P<product_id>[\d]+)/variations'][3] )
+			&& isset( $endpoints['products/(?P<product_id>[\d]+)/variations'][2] )
+			&& $endpoints['products/(?P<product_id>[\d]+)/variations'][2]['callback'][0] instanceof WC_Admin_REST_Product_Variations_Controller
+			&& $endpoints['products/(?P<product_id>[\d]+)/variations'][3]['callback'][0] instanceof WC_Admin_REST_Product_Variations_Controller
+		) {
+			$endpoints['products/(?P<product_id>[\d]+)/variations'][0] = $endpoints['products/(?P<product_id>[\d]+)/variations'][2];
+			$endpoints['products/(?P<product_id>[\d]+)/variations'][1] = $endpoints['products/(?P<product_id>[\d]+)/variations'][3];
 		}
 
 		// Override /wc/v4/taxes.
