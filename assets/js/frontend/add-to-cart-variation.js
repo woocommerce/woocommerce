@@ -380,11 +380,9 @@
 
 			// Check if current selection is in attached options.
 			if ( selected_attr_val ) {
-				if ( 0 === attached_options_count ) {
-					selected_attr_val_valid = false;
-				} else {
-					selected_attr_val_valid = false;
+				selected_attr_val_valid = false;
 
+				if ( 0 !== attached_options_count ) {
 					new_attr_select.find( 'option.attached.enabled' ).each( function( index, el ) {
 						var option_value = $( this ).val();
 
