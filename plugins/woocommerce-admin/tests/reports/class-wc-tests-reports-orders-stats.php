@@ -179,8 +179,11 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			$order->set_cart_tax( 0 );
 			$order->save();
 
-			WC_Helper_Queue::run_all_pending();
+			// Wait one second to avoid potentially ambiguous new/returning customer.
+			sleep( 1 );
 		}
+
+		WC_Helper_Queue::run_all_pending();
 
 		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 
@@ -205,8 +208,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'taxes'                   => 0,
 				'shipping'                => 0,
 				'net_revenue'             => 100,
-				'num_returning_customers' => 0,
-				'num_new_customers'       => 1,
+				'num_returning_customers' => 1,
+				'num_new_customers'       => 0,
 				'products'                => 1,
 				'segments'                => array(),
 			),
@@ -228,8 +231,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'num_items_sold'          => 4,
 						'avg_items_per_order'     => 4,
 						'avg_order_value'         => 100,
-						'num_returning_customers' => 0,
-						'num_new_customers'       => 1,
+						'num_returning_customers' => 1,
+						'num_new_customers'       => 0,
 						'segments'                => array(),
 					),
 				),
