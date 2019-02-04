@@ -171,6 +171,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Use Shortcode block on default WooCommerce pages. #21817
 * Tweak - Show full category hierarchy in product URLs when term IDs are not sequential. #22526
 * Template - Moved the order of rememberme checkboxes for accessibility so they tab in order. #21454
+* Template - New structure for attributes template, including new `woocommerce_display_product_attributes` filter. #22480
 * Dev - Introduce `woocommerce_reviews_title` filter. #22216
 * Dev - Added `woocommerce_cheque_process_payment_order_status` filter allowing plugins to change the order status to the Cheque gateway. #21402
 * Dev - Add the current coupon object to the `woocommerce_get_shop_coupon_data` filter. #21442
@@ -211,6 +212,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Moved core state codes to a single file. #22339
 * Dev - Adds filter for product categories displayed by `product_categories` shortcode. #22571
 * Dev - Moves cart hash calculation to WC_Cart class. #21050
+* Dev - Removed deprecated Simplify gateway. #22410
 * Fix - Hide ratings on the shop page when reviews are disabled. #22476
 * Fix - Fix W3C validation of single product page quantity input. #22333
 * Fix - Give product variations a unique guid after creation. #22324
@@ -225,7 +227,10 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - PR state codes. #22339
 * Fix - Allow selecting states from the Country / State drop-down for your store address when you have the option enabled to sell to specific countries. #22339
 * Fix - Restrict the price filter widget to filtering the main product query. #22621
+* Fix - Default placeholder image resizing. #22443
+* Fix - For logged in customers, pull default address fields from customer object, not session object, to avoid incorrect mixes of data. #22392
 * Performance - Prime caches when reading variations. #22587
+* Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 * Localization - Added US Minor Outlying Islands as states to avoid confusion with US. #22468
 * Localization - Dutch postcode validation. #22316
