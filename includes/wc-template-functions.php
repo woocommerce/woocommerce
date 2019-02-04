@@ -2226,6 +2226,10 @@ if ( ! function_exists( 'woocommerce_get_loop_display_mode' ) ) {
 			$display_type = '' === $display_type ? get_option( 'woocommerce_category_archive_display', '' ) : $display_type;
 		}
 
+		if ( ( ! is_shop() || 'subcategories' !== $display_type ) && 1 < wc_get_loop_prop( 'current_page' ) ) {
+			return 'products';
+		}
+
 		// Ensure valid value.
 		if ( '' === $display_type || ! in_array( $display_type, array( 'products', 'subcategories', 'both' ), true ) ) {
 			$display_type = 'products';
