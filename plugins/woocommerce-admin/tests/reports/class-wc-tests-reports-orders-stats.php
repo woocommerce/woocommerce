@@ -206,6 +206,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 0,
 				'num_new_customers'       => 1,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => array(
 				array(
@@ -227,6 +228,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'avg_order_value'         => 100,
 						'num_returning_customers' => 0,
 						'num_new_customers'       => 1,
+						'segments'                => array(),
 					),
 				),
 			),
@@ -259,6 +261,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 1,
 				'num_new_customers'       => 0,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => array(
 				array(
@@ -280,6 +283,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'avg_order_value'         => 75,
 						'num_returning_customers' => 1,
 						'num_new_customers'       => 0,
+						'segments'                => array(),
 					),
 				),
 			),
