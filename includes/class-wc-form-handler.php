@@ -1081,21 +1081,27 @@ class WC_Form_Handler {
 					throw new Exception( $new_customer->get_error_message() );
 				}
 
+				if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) ) {
+					wc_add_notice( __( 'Your account was created successfully and a password has been sent to your email address.', 'woocommerce' ) );
+				} else {
+					wc_add_notice( __( 'Your account was created successfully. Your login details have been sent to your email address.', 'woocommerce' ) );
+				}
+
+				// Only redirect after a forced login - otherwise output a success notice.
 				if ( apply_filters( 'woocommerce_registration_auth_new_customer', true, $new_customer ) ) {
 					wc_set_customer_auth_cookie( $new_customer );
+
+					if ( ! empty( $_POST['redirect'] ) ) {
+						$redirect = wp_sanitize_redirect( wp_unslash( $_POST['redirect'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+					} elseif ( wc_get_raw_referer() ) {
+						$redirect = wc_get_raw_referer();
+					} else {
+						$redirect = wc_get_page_permalink( 'myaccount' );
+					}
+
+					wp_redirect( wp_validate_redirect( apply_filters( 'woocommerce_registration_redirect', $redirect ), wc_get_page_permalink( 'myaccount' ) ) ); //phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
+					exit;
 				}
-
-				if ( ! empty( $_POST['redirect'] ) ) {
-					$redirect = wp_sanitize_redirect( wp_unslash( $_POST['redirect'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				} elseif ( wc_get_raw_referer() ) {
-					$redirect = wc_get_raw_referer();
-				} else {
-					$redirect = wc_get_page_permalink( 'myaccount' );
-				}
-
-				wp_safe_redirect( wp_validate_redirect( apply_filters( 'woocommerce_registration_redirect', $redirect ), wc_get_page_permalink( 'myaccount' ) ) );
-				exit;
-
 			} catch ( Exception $e ) {
 				wc_add_notice( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . $e->getMessage(), 'error' );
 			}
