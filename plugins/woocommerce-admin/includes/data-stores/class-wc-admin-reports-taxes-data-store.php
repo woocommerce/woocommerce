@@ -73,7 +73,7 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 		add_action( 'save_post', array( __CLASS__, 'sync_order_taxes' ) );
 		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order_taxes' ) );
 		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order_taxes' ) );
-		add_action( 'woocommerce_delete_reports_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 15 );
+		add_action( 'woocommerce_reports_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 15 );
 	}
 
 	/**
@@ -311,6 +311,6 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 		 * @param int $tax_rate_id Tax Rate ID.
 		 * @param int $order_id    Order ID.
 		 */
-		do_action( 'woocommerce_delete_reports_tax', 0, $order_id );
+		do_action( 'woocommerce_reports_delete_tax', 0, $order_id );
 	}
 }

@@ -479,7 +479,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		 *
 		 * @param int $order_id Order ID.
 		 */
-		do_action( 'woocommerce_delete_reports_order_stats', $order_id );
+		do_action( 'woocommerce_reports_delete_order_stats', $order_id );
 	}
 
 
