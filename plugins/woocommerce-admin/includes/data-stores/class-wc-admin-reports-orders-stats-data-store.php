@@ -73,10 +73,6 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * Set up all the hooks for maintaining and populating table data.
 	 */
 	public static function init() {
-		add_action( 'save_post', array( __CLASS__, 'sync_order' ) );
-		// @todo: this is required as order update skips save_post.
-		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order' ) );
-		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order' ) );
 		add_action( 'woocommerce_refund_deleted', array( __CLASS__, 'sync_on_refund_delete' ), 10, 2 );
 		add_action( 'delete_post', array( __CLASS__, 'delete_order' ) );
 	}
@@ -248,10 +244,8 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 
 			$unique_products       = $this->get_unique_product_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
 			$totals[0]['products'] = $unique_products;
-
 			$segmenting            = new WC_Admin_Reports_Orders_Stats_Segmenting( $query_args, $this->report_columns );
 			$totals[0]['segments'] = $segmenting->get_totals_segments( $totals_query, $table_name );
-
 			$totals                = (object) $this->cast_numbers( $totals[0] );
 
 			$db_intervals = $wpdb->get_col(
@@ -360,18 +354,19 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * Add order information to the lookup table when orders are created or modified.
 	 *
 	 * @param int $post_id Post ID.
+	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
 	 */
 	public static function sync_order( $post_id ) {
 		if ( 'shop_order' !== get_post_type( $post_id ) ) {
-			return;
+			return -1;
 		}
 
 		$order = wc_get_order( $post_id );
 		if ( ! $order ) {
-			return;
+			return -1;
 		}
 
-		self::update( $order );
+		return self::update( $order );
 	}
 
 	/**
@@ -388,14 +383,14 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * Update the database with stats data.
 	 *
 	 * @param WC_Order $order Order to update row for.
-	 * @return int|bool|null Number or rows modified or false on failure.
+	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
 	 */
 	public static function update( $order ) {
 		global $wpdb;
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
 
 		if ( ! $order->get_id() || ! $order->get_date_created() ) {
-			return false;
+			return -1;
 		}
 
 		$data   = array(
@@ -437,7 +432,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 
 				if ( $customer_id ) {
 					$data['customer_id'] = $customer_id;
-					$format[] = '%d';
+					$format[]            = '%d';
 				}
 			}
 		} else {
@@ -445,12 +440,12 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 
 			if ( $customer && $customer['customer_id'] ) {
 				$data['customer_id'] = $customer['customer_id'];
-				$format[] = '%d';
+				$format[]            = '%d';
 			}
 		}
 
 		// Update or add the information to the DB.
-		$results = $wpdb->replace( $table_name, $data, $format );
+		$result = $wpdb->replace( $table_name, $data, $format );
 
 		/**
 		 * Fires when order's stats reports are updated.
@@ -458,7 +453,8 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		 * @param int $order_id Order ID.
 		 */
 		do_action( 'woocommerce_reports_update_order_stats', $order->get_id() );
-		return $results;
+
+		return ( 1 === $result );
 	}
 
 	/**

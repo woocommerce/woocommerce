@@ -107,6 +107,14 @@ describe( 'Y scales', () => {
 			expect( scaleLinear().domain ).toHaveBeenLastCalledWith( [ 0, 15000000 ] );
 			expect( scaleLinear().rangeRound ).toHaveBeenLastCalledWith( [ 100, 0 ] );
 		} );
+
+		it( 'avoids the domain starting and ending at the same point when yMax is 0', () => {
+			getYScale( 100, 0 );
+
+			const args = scaleLinear().domain.mock.calls;
+			const lastArgs = args[ args.length - 1 ][ 0 ];
+			expect( lastArgs[ 0 ] ).toBeLessThan( lastArgs[ 1 ] );
+		} );
 	} );
 
 	describe( 'getYTickOffset', () => {
@@ -115,6 +123,14 @@ describe( 'Y scales', () => {
 
 			expect( scaleLinear().domain ).toHaveBeenLastCalledWith( [ 0, 15000000 ] );
 			expect( scaleLinear().rangeRound ).toHaveBeenLastCalledWith( [ 112, 12 ] );
+		} );
+
+		it( 'avoids the domain starting and ending at the same point when yMax is 0', () => {
+			getYTickOffset( 100, 0 );
+
+			const args = scaleLinear().domain.mock.calls;
+			const lastArgs = args[ args.length - 1 ][ 0 ];
+			expect( lastArgs[ 0 ] ).toBeLessThan( lastArgs[ 1 ] );
 		} );
 	} );
 } );

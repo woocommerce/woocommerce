@@ -204,25 +204,23 @@ class ProductsReportTable extends Component {
 	}
 
 	getSummary( totals ) {
-		if ( ! totals ) {
-			return [];
-		}
+		const { products_count = 0, items_sold = 0, net_revenue = 0, orders_count = 0 } = totals;
 		return [
 			{
-				label: _n( 'product sold', 'products sold', totals.products_count, 'wc-admin' ),
-				value: numberFormat( totals.products_count ),
+				label: _n( 'product sold', 'products sold', products_count, 'wc-admin' ),
+				value: numberFormat( products_count ),
 			},
 			{
-				label: _n( 'item sold', 'items sold', totals.items_sold, 'wc-admin' ),
-				value: numberFormat( totals.items_sold ),
+				label: _n( 'item sold', 'items sold', items_sold, 'wc-admin' ),
+				value: numberFormat( items_sold ),
 			},
 			{
 				label: __( 'net revenue', 'wc-admin' ),
-				value: formatCurrency( totals.net_revenue ),
+				value: formatCurrency( net_revenue ),
 			},
 			{
-				label: _n( 'orders', 'orders', totals.orders_count, 'wc-admin' ),
-				value: numberFormat( totals.orders_count ),
+				label: _n( 'orders', 'orders', orders_count, 'wc-admin' ),
+				value: numberFormat( orders_count ),
 			},
 		];
 	}
@@ -259,7 +257,12 @@ class ProductsReportTable extends Component {
 }
 
 export default compose(
-	withSelect( select => {
+	withSelect( ( select, props ) => {
+		const { query } = props;
+		if ( query.search && ! ( query.products && query.products.length ) ) {
+			return {};
+		}
+
 		const { getItems, getItemsError, isGetItemsRequesting } = select( 'wc-api' );
 		const tableQuery = {
 			per_page: -1,

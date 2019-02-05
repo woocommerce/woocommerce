@@ -36,10 +36,12 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		$refund = wc_create_refund(
 			array(
-				'amount'         => 12,
-				'order_id'       => $order->get_id(),
+				'amount'   => 12,
+				'order_id' => $order->get_id(),
 			)
 		);
+
+		WC_Helper_Queue::run_all_pending();
 
 		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 
@@ -140,6 +142,162 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 		$this->assertEquals( $expected_stats, json_decode( json_encode( $query->get_data() ), true ) );
+	}
+
+	/**
+	 * Test that querying statuses includes the default or query-specific statuses.
+	 */
+	public function test_populate_and_query_statuses() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Populate all of the data.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order_types = array(
+			array(
+				'status' => 'refunded',
+				'total'  => 50,
+			),
+			array(
+				'status' => 'completed',
+				'total'  => 100,
+			),
+			array(
+				'status' => 'failed',
+				'total'  => 75,
+			),
+		);
+
+		foreach ( $order_types as $order_type ) {
+			$order = WC_Helper_Order::create_order( 1, $product );
+			$order->set_status( $order_type['status'] );
+			$order->set_total( $order_type['total'] );
+			$order->set_shipping_total( 0 );
+			$order->set_cart_tax( 0 );
+			$order->save();
+
+			// Wait one second to avoid potentially ambiguous new/returning customer.
+			sleep( 1 );
+		}
+
+		WC_Helper_Queue::run_all_pending();
+
+		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+
+		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = date( 'Y-m-d H:59:59', $order->get_date_created()->getOffsetTimestamp() );
+
+		// Query default statuses that should not include excluded or refunded order statuses.
+		$args           = array(
+			'interval' => 'hour',
+			'after'    => $start_time,
+			'before'   => $end_time,
+		);
+		$expected_stats = array(
+			'totals'    => array(
+				'orders_count'            => 1,
+				'num_items_sold'          => 4,
+				'avg_items_per_order'     => 4,
+				'avg_order_value'         => 100,
+				'gross_revenue'           => 100,
+				'coupons'                 => 0,
+				'refunds'                 => 0,
+				'taxes'                   => 0,
+				'shipping'                => 0,
+				'net_revenue'             => 100,
+				'num_returning_customers' => 1,
+				'num_new_customers'       => 0,
+				'products'                => 1,
+				'segments'                => array(),
+			),
+			'intervals' => array(
+				array(
+					'interval'       => date( 'Y-m-d H', $order->get_date_created()->getOffsetTimestamp() ),
+					'date_start'     => $start_time,
+					'date_start_gmt' => $start_time,
+					'date_end'       => $end_time,
+					'date_end_gmt'   => $end_time,
+					'subtotals'      => array(
+						'gross_revenue'           => 100,
+						'net_revenue'             => 100,
+						'coupons'                 => 0,
+						'shipping'                => 0,
+						'taxes'                   => 0,
+						'refunds'                 => 0,
+						'orders_count'            => 1,
+						'num_items_sold'          => 4,
+						'avg_items_per_order'     => 4,
+						'avg_order_value'         => 100,
+						'num_returning_customers' => 1,
+						'num_new_customers'       => 0,
+						'segments'                => array(),
+					),
+				),
+			),
+			'total'     => 1,
+			'pages'     => 1,
+			'page_no'   => 1,
+		);
+
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $args ) ), true ) );
+
+		// Query an excluded status which should still return orders with the queried status.
+		$args           = array(
+			'interval'  => 'hour',
+			'after'     => $start_time,
+			'before'    => $end_time,
+			'status_is' => array( 'failed' ),
+		);
+		$expected_stats = array(
+			'totals'    => array(
+				'orders_count'            => 1,
+				'num_items_sold'          => 4,
+				'avg_items_per_order'     => 4,
+				'avg_order_value'         => 75,
+				'gross_revenue'           => 75,
+				'coupons'                 => 0,
+				'refunds'                 => 0,
+				'taxes'                   => 0,
+				'shipping'                => 0,
+				'net_revenue'             => 75,
+				'num_returning_customers' => 1,
+				'num_new_customers'       => 0,
+				'products'                => 1,
+				'segments'                => array(),
+			),
+			'intervals' => array(
+				array(
+					'interval'       => date( 'Y-m-d H', $order->get_date_created()->getOffsetTimestamp() ),
+					'date_start'     => $start_time,
+					'date_start_gmt' => $start_time,
+					'date_end'       => $end_time,
+					'date_end_gmt'   => $end_time,
+					'subtotals'      => array(
+						'gross_revenue'           => 75,
+						'net_revenue'             => 75,
+						'coupons'                 => 0,
+						'shipping'                => 0,
+						'taxes'                   => 0,
+						'refunds'                 => 0,
+						'orders_count'            => 1,
+						'num_items_sold'          => 4,
+						'avg_items_per_order'     => 4,
+						'avg_order_value'         => 75,
+						'num_returning_customers' => 1,
+						'num_new_customers'       => 0,
+						'segments'                => array(),
+					),
+				),
+			),
+			'total'     => 1,
+			'pages'     => 1,
+			'page_no'   => 1,
+		);
+
+		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $args ) ), true ) );
 	}
 
 	/**
@@ -329,6 +487,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				}
 			}
 		}
+
+		WC_Helper_Queue::run_all_pending();
 
 		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 
@@ -1543,6 +1703,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$returning_order->set_total( 110 ); // $25x4 products + $10 shipping.
 		$returning_order->set_date_created( $order_1_time + 1 ); // This is guaranteed to belong to the same hour by the adjustment to $order_1_time.
 		$returning_order->save();
+
+		WC_Helper_Queue::run_all_pending();
 
 		$query_args = array(
 			'after'    => $current_hour_start->format( WC_Admin_Reports_Interval::$sql_datetime_format ), // I don't think this makes sense.... date( 'Y-m-d H:i:s', $orders[0]->get_date_created()->getOffsetTimestamp() + 1 ), // Date after initial order to get a returning customer.
@@ -3170,6 +3332,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$order_2->set_status( $order_status );
 		$order_2->calculate_totals();
 		$order_2->save();
+
+		WC_Helper_Queue::run_all_pending();
 
 		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 

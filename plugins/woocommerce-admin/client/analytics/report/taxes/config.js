@@ -49,7 +49,7 @@ export const filters = [
 				settings: {
 					type: 'taxes',
 					param: 'taxes',
-					getLabels: getRequestByIdString( NAMESPACE + 'taxes', tax => ( {
+					getLabels: getRequestByIdString( NAMESPACE + '/taxes', tax => ( {
 						id: tax.id,
 						label: getTaxCode( tax ),
 					} ) ),

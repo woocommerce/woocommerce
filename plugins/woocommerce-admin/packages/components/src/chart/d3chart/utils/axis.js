@@ -197,7 +197,7 @@ export const drawAxis = ( node, params, xOffset ) => {
 			: compareStrings( formatter( prevMonth ), formatter( monthDate ) ).join( ' ' );
 	};
 
-	const yGrids = getYGrids( params.yMax );
+	const yGrids = getYGrids( params.yMax === 0 ? 1 : params.yMax );
 
 	const ticks = params.xTicks.map( d => ( params.type === 'line' ? moment( d ).toDate() : d ) );
 
@@ -210,7 +210,7 @@ export const drawAxis = ( node, params, xOffset ) => {
 			d3AxisBottom( xScale )
 				.tickValues( ticks )
 				.tickFormat( ( d, i ) => params.interval === 'hour'
-					? params.xFormat( d )
+					? params.xFormat( d instanceof Date ? d : moment( d ).toDate() )
 					: removeDuplicateDates( d, i, ticks, params.xFormat ) )
 		);
 
@@ -257,7 +257,7 @@ export const drawAxis = ( node, params, xOffset ) => {
 		.attr( 'text-anchor', 'start' )
 		.call(
 			d3AxisLeft( params.yTickOffset )
-				.tickValues( yGrids )
+				.tickValues( params.yMax === 0 ? [ yGrids[ 0 ] ] : yGrids )
 				.tickFormat( d => params.yFormat( d !== 0 ? d : 0 ) )
 		);
 
