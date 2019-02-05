@@ -60,7 +60,7 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 	 */
 	public function __construct() {
 		global $wpdb;
-		$table_name                          = $wpdb->prefix . self::TABLE_NAME;
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
 		// Avoid ambigious columns in SQL query.
 		$this->report_columns['tax_rate_id']  = $table_name . '.' . $this->report_columns['tax_rate_id'];
 		$this->report_columns['orders_count'] = str_replace( 'order_id', $table_name . '.order_id', $this->report_columns['orders_count'] );
@@ -278,6 +278,14 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 					'%f',
 				)
 			);
+
+			/**
+			 * Fires when tax's reports are updated.
+			 *
+			 * @param int $tax_rate_id Tax Rate ID.
+			 * @param int $order_id    Order ID.
+			 */
+			do_action( 'woocommerce_reports_update_tax', $tax_item->get_rate_id(), $order->get_id() );
 
 			$num_updated += intval( $result );
 		}

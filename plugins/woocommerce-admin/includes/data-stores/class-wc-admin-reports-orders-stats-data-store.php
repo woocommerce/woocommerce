@@ -244,10 +244,8 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 
 			$unique_products       = $this->get_unique_product_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
 			$totals[0]['products'] = $unique_products;
-
 			$segmenting            = new WC_Admin_Reports_Orders_Stats_Segmenting( $query_args, $this->report_columns );
 			$totals[0]['segments'] = $segmenting->get_totals_segments( $totals_query, $table_name );
-
 			$totals                = (object) $this->cast_numbers( $totals[0] );
 
 			$db_intervals = $wpdb->get_col(
@@ -434,7 +432,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 
 				if ( $customer_id ) {
 					$data['customer_id'] = $customer_id;
-					$format[] = '%d';
+					$format[]            = '%d';
 				}
 			}
 		} else {
@@ -442,12 +440,19 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 
 			if ( $customer && $customer['customer_id'] ) {
 				$data['customer_id'] = $customer['customer_id'];
-				$format[] = '%d';
+				$format[]            = '%d';
 			}
 		}
 
 		// Update or add the information to the DB.
 		$result = $wpdb->replace( $table_name, $data, $format );
+
+		/**
+		 * Fires when order's stats reports are updated.
+		 *
+		 * @param int $order_id Order ID.
+		 */
+		do_action( 'woocommerce_reports_update_order_stats', $order->get_id() );
 
 		return ( 1 === $result );
 	}

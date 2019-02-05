@@ -278,7 +278,7 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 			$this->include_extended_info( $coupon_data, $query_args );
 
 			$coupon_data = array_map( array( $this, 'cast_numbers' ), $coupon_data );
-			$data         = (object) array(
+			$data        = (object) array(
 				'data'    => $coupon_data,
 				'total'   => $db_records_count,
 				'pages'   => $total_pages,
@@ -320,11 +320,12 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 		$num_updated  = 0;
 
 		foreach ( $coupon_items as $coupon_item ) {
-			$result = $wpdb->replace(
+			$coupon_id = wc_get_coupon_id_by_code( $coupon_item->get_code() );
+			$result    = $wpdb->replace(
 				$wpdb->prefix . self::TABLE_NAME,
 				array(
 					'order_id'        => $order_id,
-					'coupon_id'       => wc_get_coupon_id_by_code( $coupon_item->get_code() ),
+					'coupon_id'       => $coupon_id,
 					'discount_amount' => $coupon_item->get_discount(),
 					'date_created'    => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 				),
@@ -335,6 +336,14 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 					'%s',
 				)
 			);
+
+			/**
+			 * Fires when coupon's reports are updated.
+			 *
+			 * @param int $coupon_id Coupon ID.
+			 * @param int $order_id  Order ID.
+			 */
+			do_action( 'woocommerce_reports_update_coupon', $coupon_id, $order_id );
 
 			$num_updated += intval( $result );
 		}

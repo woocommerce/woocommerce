@@ -434,8 +434,16 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 				'%s',
 			)
 		);
+		$customer_id = $wpdb->insert_id;
 
-		return $result ? $wpdb->insert_id : false;
+		/**
+		 * Fires when customser's reports are created.
+		 *
+		 * @param int $customer_id Customer ID.
+		 */
+		do_action( 'woocommerce_reports_new_customer', $customer_id );
+
+		return $result ? $customer_id : false;
 	}
 
 	/**
@@ -557,7 +565,15 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			$format[]            = '%d';
 		}
 
-		return $wpdb->replace( $wpdb->prefix . self::TABLE_NAME, $data, $format );
+		$results = $wpdb->replace( $wpdb->prefix . self::TABLE_NAME, $data, $format );
+
+		/**
+		 * Fires when customser's reports are updated.
+		 *
+		 * @param int $customer_id Customer ID.
+		 */
+		do_action( 'woocommerce_reports_update_customer', $customer_id );
+		return $results;
 	}
 
 	/**

@@ -354,6 +354,14 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 					array( 'order_item_id' => $order_item_id ),
 					array( '%d' )
 				); // WPCS: cache ok, DB call ok.
+
+				/**
+				 * Fires when product's reports are deleted.
+				 *
+				 * @param int $order_item_id Order Item ID.
+				 * @param int $order_id      Order ID.
+				 */
+				do_action( 'woocommerce_reports_delete_product', $order_item_id, $order->get_id() );
 			} else {
 				$result = $wpdb->replace(
 					$wpdb->prefix . self::TABLE_NAME,
@@ -391,6 +399,14 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 						'%f', // refund_amount.
 					)
 				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+
+				/**
+				 * Fires when product's reports are updated.
+				 *
+				 * @param int $order_item_id Order Item ID.
+				 * @param int $order_id      Order ID.
+				 */
+				do_action( 'woocommerce_reports_update_product', $order_item_id, $order->get_id() );
 			}
 
 			$num_updated += intval( $result );
@@ -398,5 +414,4 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 
 		return ( count( $order_items ) === $num_updated );
 	}
-
 }
