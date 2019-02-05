@@ -165,4 +165,18 @@ jQuery( function( $ ) {
 	$( document.body ).on( 'adding_to_cart', function() {
 		$( '.hide_cart_widget_if_empty' ).closest( '.widget_shopping_cart' ).show();
 	});
+
+	// Customiser support.
+	var hasSelectiveRefresh = (
+		'undefined' !== typeof wp &&
+		wp.customize &&
+		wp.customize.selectiveRefresh &&
+		wp.customize.widgetsPreview &&
+		wp.customize.widgetsPreview.WidgetPartial
+	);
+	if ( hasSelectiveRefresh ) {
+		wp.customize.selectiveRefresh.bind( 'partial-content-rendered', function() {
+			refresh_cart_fragment();
+		} );
+	}
 });
