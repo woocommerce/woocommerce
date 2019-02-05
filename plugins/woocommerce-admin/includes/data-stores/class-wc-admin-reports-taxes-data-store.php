@@ -60,20 +60,10 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 	 */
 	public function __construct() {
 		global $wpdb;
-		$table_name                          = $wpdb->prefix . self::TABLE_NAME;
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
 		// Avoid ambigious columns in SQL query.
 		$this->report_columns['tax_rate_id']  = $table_name . '.' . $this->report_columns['tax_rate_id'];
 		$this->report_columns['orders_count'] = str_replace( 'order_id', $table_name . '.order_id', $this->report_columns['orders_count'] );
-	}
-
-	/**
-	 * Set up all the hooks for maintaining and populating table data.
-	 */
-	public static function init() {
-		add_action( 'save_post', array( __CLASS__, 'sync_order_taxes' ) );
-		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order_taxes' ) );
-		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order_taxes' ) );
-		add_action( 'woocommerce_reports_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 15 );
 	}
 
 	/**
@@ -256,17 +246,20 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 	 * Create or update an entry in the wc_order_tax_lookup table for an order.
 	 *
 	 * @param int $order_id Order ID.
-	 * @return void
+	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
 	 */
 	public static function sync_order_taxes( $order_id ) {
 		global $wpdb;
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
-			return;
+			return -1;
 		}
 
-		foreach ( $order->get_items( 'tax' ) as $tax_item ) {
-			$wpdb->replace(
+		$tax_items   = $order->get_items( 'tax' );
+		$num_updated = 0;
+
+		foreach ( $tax_items as $tax_item ) {
+			$result = $wpdb->replace(
 				$wpdb->prefix . self::TABLE_NAME,
 				array(
 					'order_id'     => $order->get_id(),
@@ -285,7 +278,19 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 					'%f',
 				)
 			);
+
+			/**
+			 * Fires when tax's reports are updated.
+			 *
+			 * @param int $tax_rate_id Tax Rate ID.
+			 * @param int $order_id    Order ID.
+			 */
+			do_action( 'woocommerce_reports_update_tax', $tax_item->get_rate_id(), $order->get_id() );
+
+			$num_updated += intval( $result );
 		}
+
+		return ( count( $tax_items ) === $num_updated );
 	}
 
 	/**

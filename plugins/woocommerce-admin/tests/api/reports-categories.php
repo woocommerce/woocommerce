@@ -64,6 +64,8 @@ class WC_Tests_API_Reports_Categories extends WC_REST_Unit_Test_Case {
 		$order->set_total( 100 ); // $25 x 4.
 		$order->save();
 
+		WC_Helper_Queue::run_all_pending();
+
 		$uncategorized_term = get_term_by( 'slug', 'uncategorized', 'product_cat' );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );

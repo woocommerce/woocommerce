@@ -121,9 +121,7 @@ export default class CouponsReportTable extends Component {
 	}
 
 	getSummary( totals ) {
-		if ( ! totals ) {
-			return [];
-		}
+		const { download_count = 0 } = totals;
 		const { query } = this.props;
 		const dates = getCurrentDates( query );
 		const after = moment( dates.primary.after );
@@ -136,8 +134,8 @@ export default class CouponsReportTable extends Component {
 				value: numberFormat( days ),
 			},
 			{
-				label: _n( 'download', 'downloads', totals.download_count, 'wc-admin' ),
-				value: numberFormat( totals.download_count ),
+				label: _n( 'download', 'downloads', download_count, 'wc-admin' ),
+				value: numberFormat( download_count ),
 			},
 		];
 	}

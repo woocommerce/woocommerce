@@ -103,25 +103,23 @@ export default class StockReportTable extends Component {
 	}
 
 	getSummary( totals ) {
-		if ( ! totals ) {
-			return [];
-		}
+		const { products = 0, out_of_stock = 0, low_stock = 0, in_stock = 0 } = totals;
 		return [
 			{
-				label: _n( 'product', 'products', totals.products, 'wc-admin' ),
-				value: numberFormat( totals.products ),
+				label: _n( 'product', 'products', products, 'wc-admin' ),
+				value: numberFormat( products ),
 			},
 			{
-				label: __( 'out of stock', totals.out_of_stock, 'wc-admin' ),
-				value: numberFormat( totals.out_of_stock ),
+				label: __( 'out of stock', out_of_stock, 'wc-admin' ),
+				value: numberFormat( out_of_stock ),
 			},
 			{
-				label: __( 'low stock', totals.low_stock, 'wc-admin' ),
-				value: numberFormat( totals.low_stock ),
+				label: __( 'low stock', low_stock, 'wc-admin' ),
+				value: numberFormat( low_stock ),
 			},
 			{
-				label: __( 'in stock', totals.in_stock, 'wc-admin' ),
-				value: numberFormat( totals.in_stock ),
+				label: __( 'in stock', in_stock, 'wc-admin' ),
+				value: numberFormat( in_stock ),
 			},
 		];
 	}

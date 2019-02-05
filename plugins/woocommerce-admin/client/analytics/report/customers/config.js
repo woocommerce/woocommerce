@@ -57,7 +57,7 @@ export const advancedFilters = {
 			input: {
 				component: 'Search',
 				type: 'customers',
-				getLabels: getRequestByIdString( NAMESPACE + 'customers', customer => ( {
+				getLabels: getRequestByIdString( NAMESPACE + '/customers', customer => ( {
 					id: customer.id,
 					label: [ customer.first_name, customer.last_name ].filter( Boolean ).join( ' ' ),
 				} ) ),
@@ -157,7 +157,7 @@ export const advancedFilters = {
 			input: {
 				component: 'Search',
 				type: 'emails',
-				getLabels: getRequestByIdString( NAMESPACE + 'customers', customer => ( {
+				getLabels: getRequestByIdString( NAMESPACE + '/customers', customer => ( {
 					id: customer.id,
 					label: customer.email,
 				} ) ),

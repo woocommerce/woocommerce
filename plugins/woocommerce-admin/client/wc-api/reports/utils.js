@@ -239,7 +239,7 @@ export function getReportChartData( endpoint, dataType, query, select ) {
 		isError: false,
 		isRequesting: false,
 		data: {
-			totals: null,
+			totals: {},
 			intervals: [],
 		},
 	};
@@ -355,6 +355,7 @@ export function getReportTableData( endpoint, urlQuery, select, query = {} ) {
 		isError: false,
 		items: {
 			data: [],
+			totalResults: 0,
 		},
 	};
 

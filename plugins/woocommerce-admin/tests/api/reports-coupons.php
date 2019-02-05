@@ -82,6 +82,8 @@ class WC_Tests_API_Reports_Coupons extends WC_REST_Unit_Test_Case {
 		$order_2c->calculate_totals();
 		$order_2c->save();
 
+		WC_Helper_Queue::run_all_pending();
+
 		$response       = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$coupon_reports = $response->get_data();
 
