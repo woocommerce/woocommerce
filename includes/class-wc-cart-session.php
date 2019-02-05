@@ -253,18 +253,34 @@ final class WC_Cart_Session {
 	}
 
 	/**
-	 * Set cart hash cookie and items in cart.
+	 * Set cart hash cookie and items in cart if not already set.
 	 *
 	 * @param bool $set Should cookies be set (true) or unset.
 	 */
 	private function set_cart_cookies( $set = true ) {
 		if ( $set ) {
-			wc_setcookie( 'woocommerce_items_in_cart', 1 );
-			wc_setcookie( 'woocommerce_cart_hash', WC()->cart->get_cart_hash() );
-		} elseif ( isset( $_COOKIE['woocommerce_items_in_cart'] ) ) { // WPCS: input var ok.
-			wc_setcookie( 'woocommerce_items_in_cart', 0, time() - HOUR_IN_SECONDS );
-			wc_setcookie( 'woocommerce_cart_hash', '', time() - HOUR_IN_SECONDS );
+			$setcookies = array(
+				'woocommerce_items_in_cart' => '1',
+				'woocommerce_cart_hash'     => WC()->cart->get_cart_hash(),
+			);
+			foreach ( $setcookies as $name => $value ) {
+				if ( ! isset( $_COOKIE[ $name ] ) || $_COOKIE[ $name ] !== $value ) {
+					wc_setcookie( $name, $value );
+				}
+			}
+		} else {
+			$unsetcookies = array(
+				'woocommerce_items_in_cart',
+				'woocommerce_cart_hash',
+			);
+			foreach ( $unsetcookies as $name ) {
+				if ( isset( $_COOKIE[ $name ] ) ) {
+					wc_setcookie( $name, 0, time() - HOUR_IN_SECONDS );
+					unset( $_COOKIE[ $name ] );
+				}
+			}
 		}
+
 		do_action( 'woocommerce_set_cart_cookies', $set );
 	}
 
