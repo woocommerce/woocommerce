@@ -72,7 +72,7 @@ export const getYMax = lineData => {
  */
 export const getYScale = ( height, yMax ) =>
 	d3ScaleLinear()
-		.domain( [ 0, yMax ] )
+		.domain( [ 0, yMax === 0 ? 1 : yMax ] )
 		.rangeRound( [ height, 0 ] );
 
 /**
@@ -83,5 +83,5 @@ export const getYScale = ( height, yMax ) =>
  */
 export const getYTickOffset = ( height, yMax ) =>
 	d3ScaleLinear()
-		.domain( [ 0, yMax ] )
+		.domain( [ 0, yMax === 0 ? 1 : yMax ] )
 		.rangeRound( [ height + 12, 12 ] );

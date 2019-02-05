@@ -67,15 +67,6 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 	}
 
 	/**
-	 * Set up all the hooks for maintaining and populating table data.
-	 */
-	public static function init() {
-		add_action( 'save_post', array( __CLASS__, 'sync_order_taxes' ) );
-		add_action( 'clean_post_cache', array( __CLASS__, 'sync_order_taxes' ) );
-		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'sync_order_taxes' ) );
-	}
-
-	/**
 	 * Updates the database query with parameters used for Taxes report: categories and order status.
 	 *
 	 * @param array $query_args Query arguments supplied by the user.
@@ -255,17 +246,20 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 	 * Create or update an entry in the wc_order_tax_lookup table for an order.
 	 *
 	 * @param int $order_id Order ID.
-	 * @return void
+	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
 	 */
 	public static function sync_order_taxes( $order_id ) {
 		global $wpdb;
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
-			return;
+			return -1;
 		}
 
-		foreach ( $order->get_items( 'tax' ) as $tax_item ) {
-			$wpdb->replace(
+		$tax_items   = $order->get_items( 'tax' );
+		$num_updated = 0;
+
+		foreach ( $tax_items as $tax_item ) {
+			$result = $wpdb->replace(
 				$wpdb->prefix . self::TABLE_NAME,
 				array(
 					'order_id'     => $order->get_id(),
@@ -284,7 +278,11 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 					'%f',
 				)
 			);
+
+			$num_updated += intval( $result );
 		}
+
+		return ( count( $tax_items ) === $num_updated );
 	}
 
 }

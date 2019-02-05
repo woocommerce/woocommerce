@@ -129,21 +129,19 @@ export default class CouponsReportTable extends Component {
 	}
 
 	getSummary( totals ) {
-		if ( ! totals ) {
-			return [];
-		}
+		const { coupons_count = 0, orders_count = 0, amount = 0 } = totals;
 		return [
 			{
-				label: _n( 'coupon', 'coupons', totals.coupons_count, 'wc-admin' ),
-				value: numberFormat( totals.coupons_count ),
+				label: _n( 'coupon', 'coupons', coupons_count, 'wc-admin' ),
+				value: numberFormat( coupons_count ),
 			},
 			{
-				label: _n( 'order', 'orders', totals.orders_count, 'wc-admin' ),
-				value: numberFormat( totals.orders_count ),
+				label: _n( 'order', 'orders', orders_count, 'wc-admin' ),
+				value: numberFormat( orders_count ),
 			},
 			{
 				label: __( 'amount discounted', 'wc-admin' ),
-				value: formatCurrency( totals.amount ),
+				value: formatCurrency( amount ),
 			},
 		];
 	}

@@ -153,43 +153,48 @@ class RevenueReportTable extends Component {
 		} );
 	}
 
-	getSummary( totals, totalResults ) {
-		if ( ! totals ) {
-			return [];
-		}
-
+	getSummary( totals, totalResults = 0 ) {
+		const {
+			orders_count = 0,
+			gross_revenue = 0,
+			refunds = 0,
+			coupons = 0,
+			taxes = 0,
+			shipping = 0,
+			net_revenue = 0,
+		} = totals;
 		return [
 			{
 				label: _n( 'day', 'days', totalResults, 'wc-admin' ),
 				value: numberFormat( totalResults ),
 			},
 			{
-				label: _n( 'order', 'orders', totals.orders_count, 'wc-admin' ),
-				value: numberFormat( totals.orders_count ),
+				label: _n( 'order', 'orders', orders_count, 'wc-admin' ),
+				value: numberFormat( orders_count ),
 			},
 			{
 				label: __( 'gross revenue', 'wc-admin' ),
-				value: formatCurrency( totals.gross_revenue ),
+				value: formatCurrency( gross_revenue ),
 			},
 			{
 				label: __( 'refunds', 'wc-admin' ),
-				value: formatCurrency( totals.refunds ),
+				value: formatCurrency( refunds ),
 			},
 			{
 				label: __( 'coupons', 'wc-admin' ),
-				value: formatCurrency( totals.coupons ),
+				value: formatCurrency( coupons ),
 			},
 			{
 				label: __( 'taxes', 'wc-admin' ),
-				value: formatCurrency( totals.taxes ),
+				value: formatCurrency( taxes ),
 			},
 			{
 				label: __( 'shipping', 'wc-admin' ),
-				value: formatCurrency( totals.shipping ),
+				value: formatCurrency( shipping ),
 			},
 			{
 				label: __( 'net revenue', 'wc-admin' ),
-				value: formatCurrency( totals.net_revenue ),
+				value: formatCurrency( net_revenue ),
 			},
 		];
 	}

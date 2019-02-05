@@ -111,27 +111,24 @@ class CategoriesReportTable extends Component {
 		} );
 	}
 
-	getSummary( totals, totalResults ) {
-		if ( ! totals ) {
-			return [];
-		}
-
+	getSummary( totals, totalResults = 0 ) {
+		const { items_sold = 0, net_revenue = 0, orders_count = 0 } = totals;
 		return [
 			{
 				label: _n( 'category', 'categories', totalResults, 'wc-admin' ),
 				value: numberFormat( totalResults ),
 			},
 			{
-				label: _n( 'item sold', 'items sold', totals.items_sold, 'wc-admin' ),
-				value: numberFormat( totals.items_sold ),
+				label: _n( 'item sold', 'items sold', items_sold, 'wc-admin' ),
+				value: numberFormat( items_sold ),
 			},
 			{
 				label: __( 'net revenue', 'wc-admin' ),
-				value: formatCurrency( totals.net_revenue ),
+				value: formatCurrency( net_revenue ),
 			},
 			{
-				label: _n( 'orders', 'orders', totals.orders_count, 'wc-admin' ),
-				value: numberFormat( totals.orders_count ),
+				label: _n( 'order', 'orders', orders_count, 'wc-admin' ),
+				value: numberFormat( orders_count ),
 			},
 		];
 	}
@@ -168,7 +165,12 @@ class CategoriesReportTable extends Component {
 }
 
 export default compose(
-	withSelect( select => {
+	withSelect( ( select, props ) => {
+		const { query } = props;
+		if ( query.search && ! ( query.categories && query.categories.length ) ) {
+			return {};
+		}
+
 		const { getItems, getItemsError, isGetItemsRequesting } = select( 'wc-api' );
 		const tableQuery = {
 			per_page: -1,

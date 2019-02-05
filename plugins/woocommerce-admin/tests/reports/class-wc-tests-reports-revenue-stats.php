@@ -37,6 +37,8 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
 		$order->save();
 
+		WC_Helper_Queue::run_all_pending();
+
 		// /reports/revenue/stats is mapped to Orders_Data_Store.
 		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 
@@ -62,7 +64,8 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 				'avg_order_value'         => 80,
 				'num_returning_customers' => 0,
 				'num_new_customers'       => 1,
-				'products'                => '1',
+				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => array(
 				array(
@@ -84,6 +87,7 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 						'avg_order_value'         => 80,
 						'num_returning_customers' => 0,
 						'num_new_customers'       => 1,
+						'segments'                => array(),
 					),
 				),
 			),
@@ -107,6 +111,7 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 				'shipping'       => 10,
 				'net_revenue'    => 80,
 				'products'       => '1',
+				'segments'       => array(),
 			),
 			'intervals' => array(
 				array(
@@ -124,6 +129,7 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 						'taxes'          => 7,
 						'shipping'       => 10,
 						'net_revenue'    => 80,
+						'segments'       => array(),
 					),
 				),
 			),

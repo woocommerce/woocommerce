@@ -148,7 +148,7 @@ export default compose(
 		const items = searchItemsByString( select, report, search );
 		const ids = Object.keys( items );
 		if ( ! ids.length ) {
-			return {}; // @TODO if no results were found, we should avoid making a server request.
+			return {};
 		}
 
 		return {

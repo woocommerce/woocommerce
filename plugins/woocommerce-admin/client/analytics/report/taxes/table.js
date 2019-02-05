@@ -111,29 +111,33 @@ export default class TaxesReportTable extends Component {
 	}
 
 	getSummary( totals ) {
-		if ( ! totals ) {
-			return [];
-		}
+		const {
+			tax_codes = 0,
+			total_tax = 0,
+			order_tax = 0,
+			shipping_tax = 0,
+			orders_count = 0,
+		} = totals;
 		return [
 			{
-				label: _n( 'tax code', 'tax codes', totals.tax_codes, 'wc-admin' ),
-				value: numberFormat( totals.tax_codes ),
+				label: _n( 'tax code', 'tax codes', tax_codes, 'wc-admin' ),
+				value: numberFormat( tax_codes ),
 			},
 			{
 				label: __( 'total tax', 'wc-admin' ),
-				value: formatCurrency( totals.total_tax ),
+				value: formatCurrency( total_tax ),
 			},
 			{
 				label: __( 'order tax', 'wc-admin' ),
-				value: formatCurrency( totals.order_tax ),
+				value: formatCurrency( order_tax ),
 			},
 			{
 				label: __( 'shipping tax', 'wc-admin' ),
-				value: formatCurrency( totals.shipping_tax ),
+				value: formatCurrency( shipping_tax ),
 			},
 			{
-				label: _n( 'order', 'orders', totals.orders, 'wc-admin' ),
-				value: numberFormat( totals.orders_count ),
+				label: _n( 'order', 'orders', orders_count, 'wc-admin' ),
+				value: numberFormat( orders_count ),
 			},
 		];
 	}

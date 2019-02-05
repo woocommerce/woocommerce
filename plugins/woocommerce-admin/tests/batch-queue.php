@@ -136,7 +136,7 @@ class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
 		// insert a blocking job.
 		WC_Admin_Api_Init::queue()->schedule_single( time(), 'blocking_job', array( 'stuff' ) );
 		// queue an action that depends on blocking job.
-		WC_Admin_Api_Init::queue_dependent_action( 'dependent_action', 'blocking_job' );
+		WC_Admin_Api_Init::queue_dependent_action( 'dependent_action', array(), 'blocking_job' );
 		// verify that the action was properly blocked.
 		$this->assertEmpty(
 			WC_Admin_Api_Init::queue()->search(
@@ -151,13 +151,13 @@ class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
 			WC_Admin_Api_Init::queue()->search(
 				array(
 					'hook' => WC_Admin_Api_Init::QUEUE_DEPEDENT_ACTION,
-					'args' => array( 'dependent_action', 'blocking_job' ),
+					'args' => array( 'dependent_action', array(), 'blocking_job' ),
 				)
 			)
 		);
 
 		// queue an action that isn't blocked.
-		WC_Admin_Api_Init::queue_dependent_action( 'another_dependent_action', 'nonexistant_blocking_job' );
+		WC_Admin_Api_Init::queue_dependent_action( 'another_dependent_action', array(), 'nonexistant_blocking_job' );
 		// verify that the dependent action was queued.
 		$this->assertCount(
 			1,
@@ -172,7 +172,7 @@ class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
 			WC_Admin_Api_Init::queue()->search(
 				array(
 					'hook' => WC_Admin_Api_Init::QUEUE_DEPEDENT_ACTION,
-					'args' => array( 'another_dependent_action', 'nonexistant_blocking_job' ),
+					'args' => array( 'another_dependent_action', array(), 'nonexistant_blocking_job' ),
 				)
 			)
 		);

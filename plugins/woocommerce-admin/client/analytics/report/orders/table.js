@@ -182,42 +182,48 @@ export default class OrdersReportTable extends Component {
 	}
 
 	getSummary( totals ) {
-		if ( ! totals ) {
-			return [];
-		}
+		const {
+			orders_count = 0,
+			num_new_customers = 0,
+			num_returning_customers = 0,
+			products = 0,
+			num_items_sold = 0,
+			coupons = 0,
+			net_revenue = 0,
+		} = totals;
 		return [
 			{
-				label: _n( 'order', 'orders', totals.orders_count, 'wc-admin' ),
-				value: numberFormat( totals.orders_count ),
+				label: _n( 'order', 'orders', orders_count, 'wc-admin' ),
+				value: numberFormat( orders_count ),
 			},
 			{
-				label: _n( 'new customer', 'new customers', totals.num_new_customers, 'wc-admin' ),
-				value: numberFormat( totals.num_new_customers ),
+				label: _n( 'new customer', 'new customers', num_new_customers, 'wc-admin' ),
+				value: numberFormat( num_new_customers ),
 			},
 			{
 				label: _n(
 					'returning customer',
 					'returning customers',
-					totals.num_returning_customers,
+					num_returning_customers,
 					'wc-admin'
 				),
-				value: numberFormat( totals.num_returning_customers ),
+				value: numberFormat( num_returning_customers ),
 			},
 			{
-				label: _n( 'product', 'products', totals.products, 'wc-admin' ),
-				value: numberFormat( totals.products ),
+				label: _n( 'product', 'products', products, 'wc-admin' ),
+				value: numberFormat( products ),
 			},
 			{
-				label: _n( 'item sold', 'items sold', totals.num_items_sold, 'wc-admin' ),
-				value: numberFormat( totals.num_items_sold ),
+				label: _n( 'item sold', 'items sold', num_items_sold, 'wc-admin' ),
+				value: numberFormat( num_items_sold ),
 			},
 			{
-				label: _n( 'coupon', 'coupons', totals.coupons, 'wc-admin' ),
-				value: numberFormat( totals.coupons ),
+				label: _n( 'coupon', 'coupons', coupons, 'wc-admin' ),
+				value: numberFormat( coupons ),
 			},
 			{
 				label: __( 'net revenue', 'wc-admin' ),
-				value: formatCurrency( totals.net_revenue ),
+				value: formatCurrency( net_revenue ),
 			},
 		];
 	}

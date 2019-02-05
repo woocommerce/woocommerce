@@ -95,7 +95,7 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 			$sql_query_params['where_clause'] .= " AND {$wpdb->prefix}term_taxonomy.term_id IN ({$included_categories})";
 		}
 
-		// TODO: only products in the category C or orders with products from category C (and, possibly others?).
+		// @todo: only products in the category C or orders with products from category C (and, possibly others?).
 		$included_products = $this->get_included_products( $query_args );
 		if ( $included_products ) {
 			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";
