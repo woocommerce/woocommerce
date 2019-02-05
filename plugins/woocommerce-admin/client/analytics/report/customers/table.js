@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { Tooltip } from '@wordpress/components';
 
@@ -191,25 +191,28 @@ export default class CustomersReportTable extends Component {
 	}
 
 	getSummary( totals ) {
-		if ( ! totals ) {
-			return [];
-		}
+		const {
+			customers_count = 0,
+			avg_orders_count = 0,
+			avg_total_spend = 0,
+			avg_avg_order_value = 0,
+		} = totals;
 		return [
 			{
-				label: __( 'customers', 'wc-admin' ),
-				value: numberFormat( totals.customers_count ),
+				label: _n( 'customer', 'customers', customers_count, 'wc-admin' ),
+				value: numberFormat( customers_count ),
 			},
 			{
-				label: __( 'average orders', 'wc-admin' ),
-				value: numberFormat( totals.avg_orders_count ),
+				label: _n( 'average order', 'average orders', avg_orders_count, 'wc-admin' ),
+				value: numberFormat( avg_orders_count ),
 			},
 			{
 				label: __( 'average lifetime spend', 'wc-admin' ),
-				value: formatCurrency( totals.avg_total_spend ),
+				value: formatCurrency( avg_total_spend ),
 			},
 			{
 				label: __( 'average order value', 'wc-admin' ),
-				value: formatCurrency( totals.avg_avg_order_value ),
+				value: formatCurrency( avg_avg_order_value ),
 			},
 		];
 	}
