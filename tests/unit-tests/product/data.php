@@ -323,7 +323,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	public function test_get_image_should_return_place_holder_image() {
 		$product = new WC_Product();
 
-		$this->assertContains( $product->get_image(), wc_placeholder_img_src() );
+		$this->assertContains( wc_placeholder_img_src(), $product->get_image() );
 	}
 
 	/**
