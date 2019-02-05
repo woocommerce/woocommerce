@@ -228,6 +228,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Allow selecting states from the Country / State drop-down for your store address when you have the option enabled to sell to specific countries. #22339
 * Fix - Restrict the price filter widget to filtering the main product query. #22621
 * Fix - Default placeholder image resizing. #22443
+* Fix - HTML tags should be stripped from description in Structured Data of Product. #22596
 * Fix - For logged in customers, pull default address fields from customer object, not session object, to avoid incorrect mixes of data. #22392
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
