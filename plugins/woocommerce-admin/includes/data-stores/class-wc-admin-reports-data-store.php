@@ -76,7 +76,15 @@ class WC_Admin_Reports_Data_Store {
 			// @todo: should return WP_Error here perhaps?
 		}
 		if ( $a[ $this->order_by ] === $b[ $this->order_by ] ) {
-			return 0;
+			// As relative order is undefined in case of equality in usort, second-level sorting by date needs to be enforced
+			// so that paging is stable.
+			if ( $a['time_interval'] === $b['time_interval'] ) {
+				return 0; // This should never happen.
+			} elseif ( $a['time_interval'] > $b['time_interval'] ) {
+				return 1;
+			} elseif ( $a['time_interval'] < $b['time_interval'] ) {
+				return -1;
+			}
 		} elseif ( $a[ $this->order_by ] > $b[ $this->order_by ] ) {
 			return strtolower( $this->order ) === 'desc' ? -1 : 1;
 		} elseif ( $a[ $this->order_by ] < $b[ $this->order_by ] ) {
@@ -174,12 +182,17 @@ class WC_Admin_Reports_Data_Store {
 	 * @param int      $db_interval_count Database interval count.
 	 * @param int      $expected_interval_count Expected interval count on the output.
 	 * @param string   $order_by Order by field.
+	 * @param string   $order ASC or DESC.
 	 */
-	protected function remove_extra_records( &$data, $page_no, $items_per_page, $db_interval_count, $expected_interval_count, $order_by ) {
+	protected function remove_extra_records( &$data, $page_no, $items_per_page, $db_interval_count, $expected_interval_count, $order_by, $order ) {
 		if ( 'date' === strtolower( $order_by ) ) {
 			$offset = 0;
 		} else {
-			$offset = ( $page_no - 1 ) * $items_per_page - $db_interval_count;
+			if ( 'asc' === strtolower( $order ) ) {
+				$offset = ( $page_no - 1 ) * $items_per_page;
+			} else {
+				$offset = ( $page_no - 1 ) * $items_per_page - $db_interval_count;
+			}
 			$offset = $offset < 0 ? 0 : $offset;
 		}
 		$count = $expected_interval_count - ( $page_no - 1 ) * $items_per_page;
