@@ -83,6 +83,13 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 	}
 
 	/**
+	 * Set up all the hooks for maintaining and populating table data.
+	 */
+	public static function init() {
+		add_action( 'woocommerce_reports_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 10 );
+	}
+
+	/**
 	 * Fills ORDER BY clause of SQL request based on user supplied parameters.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
@@ -212,7 +219,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		$week_back  = $now - WEEK_IN_SECONDS;
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
-		$defaults = array(
+		$defaults   = array(
 			'per_page'         => get_option( 'posts_per_page' ),
 			'page'             => 1,
 			'order'            => 'DESC',
@@ -418,5 +425,31 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		}
 
 		return ( count( $order_items ) === $num_updated );
+	}
+
+	/**
+	 * Clean products data when an order is deleted.
+	 *
+	 * @param int $order_id Order ID.
+	 */
+	public static function sync_on_order_delete( $order_id ) {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM ${table_name} WHERE order_id = %d",
+				$order_id
+			)
+		);
+
+		/**
+		 * Fires when product's reports are removed from database.
+		 *
+		 * @param int $product_id Product ID.
+		 * @param int $order_id   Order ID.
+		 */
+		do_action( 'woocommerce_reports_delete_product', 0, $order_id );
 	}
 }
