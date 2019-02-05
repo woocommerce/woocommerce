@@ -6,7 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Component, createRef, Fragment } from '@wordpress/element';
 import { formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
-import { get, isEqual, partial } from 'lodash';
+import { get, isEqual, partial, isEmpty } from 'lodash';
 import Gridicon from 'gridicons';
 import { IconButton, NavigableMenu, SelectControl } from '@wordpress/components';
 import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
@@ -57,18 +57,29 @@ function getOrderedKeys( props, previousOrderedKeys = [] ) {
 				return accum;
 			}, [] )
 		),
-	].map( key => {
+	].map( ( key ) => {
 		const previousKey = previousOrderedKeys.find( item => key === item.key );
+		const defaultVisibleStatus = 'item-comparison' === props.mode ? false : true;
 		return {
 			key,
 			total: props.data.reduce( ( a, c ) => a + c[ key ].value, 0 ),
-			visible: previousKey ? previousKey.visible : true,
+			visible: previousKey ? previousKey.visible : defaultVisibleStatus,
 			focus: true,
 		};
 	} );
-	if ( props.mode === 'item-comparison' ) {
+
+	if ( 'item-comparison' === props.mode ) {
 		updatedKeys.sort( ( a, b ) => b.total - a.total );
+		if ( isEmpty( previousOrderedKeys ) ) {
+			return updatedKeys.filter( key => key.total > 0 ).map( ( key, index ) => {
+				return {
+					...key,
+					visible: index < 5 || key.visible,
+				};
+			} );
+		}
 	}
+
 	return updatedKeys;
 }
 
@@ -94,7 +105,7 @@ class Chart extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { data } = this.props;
+		const { data, query, mode } = this.props;
 		if ( ! isEqual( [ ...data ].sort(), [ ...prevProps.data ].sort() ) ) {
 			/**
 			 * Only update the orderedKeys when data is present so that
@@ -103,6 +114,16 @@ class Chart extends Component {
 			const orderedKeys = data.length
 				? getOrderedKeys( this.props, this.state.orderedKeys )
 				: this.state.orderedKeys;
+			/* eslint-disable react/no-did-update-set-state */
+			this.setState( {
+				orderedKeys,
+				visibleData: this.getVisibleData( data, orderedKeys ),
+			} );
+			/* eslint-enable react/no-did-update-set-state */
+		}
+
+		if ( 'item-comparison' === mode && ! isEqual( query, prevProps.query ) ) {
+			const orderedKeys = getOrderedKeys( this.props );
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( {
 				orderedKeys,
@@ -267,7 +288,7 @@ class Chart extends Component {
 		const chartDirection = legendPosition === 'side' ? 'row' : 'column';
 
 		const chartHeight = this.getChartHeight();
-		const legend = (
+		const legend = isRequesting ? null : (
 			<D3Legend
 				colorScheme={ d3InterpolateViridis }
 				data={ orderedKeys }

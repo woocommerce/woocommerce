@@ -60,6 +60,7 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 				'net_revenue',
 				'orders_count',
 				'products_count',
+				'variations_count',
 			),
 		);
 
@@ -187,6 +188,13 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 							'type'        => 'integer',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
+						),
+						'segment_label' => array(
+							'description' => __( 'Human readable segment label, either product or variation name.', 'wc-admin' ),
+							'type'        => 'string',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'enum'        => array( 'day', 'week', 'month', 'year' ),
 						),
 						'subtotals'  => array(
 							'description' => __( 'Interval subtotals.', 'wc-admin' ),
@@ -376,6 +384,15 @@ class WC_Admin_REST_Reports_Products_Stats_Controller extends WC_REST_Reports_Co
 		);
 		$params['products']   = array(
 			'description'       => __( 'Limit result to items with specified product ids.', 'wc-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
+		);
+		$params['variations']   = array(
+			'description'       => __( 'Limit result to items with specified variation ids.', 'wc-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',

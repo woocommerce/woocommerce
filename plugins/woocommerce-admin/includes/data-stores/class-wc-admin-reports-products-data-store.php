@@ -140,6 +140,11 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";
 		}
 
+		$included_variations = $this->get_included_variations( $query_args );
+		if ( $included_variations ) {
+			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.variation_id IN ({$included_variations})";
+		}
+
 		$order_status_filter = $this->get_status_subquery( $query_args );
 		if ( $order_status_filter ) {
 			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";

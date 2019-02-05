@@ -2,6 +2,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
@@ -36,7 +37,7 @@ class D3Legend extends Component {
 	}
 
 	updateListScroll() {
-		if ( ! this.listRef ) {
+		if ( ! this || ! this.listRef ) {
 			return;
 		}
 		const list = this.listRef.current;
@@ -93,7 +94,12 @@ class D3Legend extends Component {
 							<button
 								onClick={ handleLegendToggle }
 								id={ row.key }
-								disabled={ ( row.visible && numberOfRowsVisible <= 1 ) || ! interactive }
+								disabled={
+									( row.visible && numberOfRowsVisible <= 1 ) ||
+									( ! row.visible && numberOfRowsVisible >= 5 ) ||
+									! interactive
+								}
+								title={ numberOfRowsVisible >= 5 ? __( 'You may select up to 5 items.', 'wc-admin' ) : '' }
 							>
 								<div className="woocommerce-legend__item-container" id={ row.key }>
 									<span

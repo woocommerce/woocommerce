@@ -21,10 +21,11 @@ class WC_Admin_Reports_Products_Stats_Segmenting extends WC_Admin_Reports_Segmen
 	 */
 	protected function get_segment_selections_product_level( $products_table ) {
 		$columns_mapping = array(
-			'items_sold'     => "SUM($products_table.product_qty) as items_sold",
-			'net_revenue'    => "SUM($products_table.product_net_revenue ) AS net_revenue",
-			'orders_count'   => "COUNT( DISTINCT $products_table.order_id ) AS orders_count",
-			'products_count' => "COUNT( DISTINCT $products_table.product_id ) AS products_count",
+			'items_sold'       => "SUM($products_table.product_qty) as items_sold",
+			'net_revenue'      => "SUM($products_table.product_net_revenue ) AS net_revenue",
+			'orders_count'     => "COUNT( DISTINCT $products_table.order_id ) AS orders_count",
+			'products_count'   => "COUNT( DISTINCT $products_table.product_id ) AS products_count",
+			'variations_count' => "COUNT( DISTINCT $products_table.variation_id ) AS variations_count",
 		);
 
 		return $this->prepare_selections( $columns_mapping );

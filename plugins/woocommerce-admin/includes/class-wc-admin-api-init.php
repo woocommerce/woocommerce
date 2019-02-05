@@ -180,6 +180,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-orders-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-products-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-categories-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-variations-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-reviews-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-product-variations-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-controller.php';
@@ -217,6 +218,7 @@ class WC_Admin_Api_Init {
 				'WC_Admin_REST_Orders_Controller',
 				'WC_Admin_REST_Products_Controller',
 				'WC_Admin_REST_Product_Categories_Controller',
+				'WC_Admin_REST_Product_Variations_Controller',
 				'WC_Admin_REST_Product_Reviews_Controller',
 				'WC_Admin_REST_Product_Variations_Controller',
 				'WC_Admin_REST_Reports_Controller',

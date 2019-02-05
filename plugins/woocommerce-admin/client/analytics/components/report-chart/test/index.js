@@ -8,6 +8,7 @@ import { shallow } from 'enzyme';
  * Internal dependencies
  */
 import { ReportChart } from '../';
+import { getChartMode } from '../utils';
 
 jest.mock( '@woocommerce/components', () => ( {
 	...require.requireActual( '@woocommerce/components' ),
@@ -30,7 +31,7 @@ const selectedChart = {
 };
 
 describe( 'ReportChart', () => {
-	test( 'should not set the mode prop by default', () => {
+	test( 'should set the time-comparison mode prop by default', () => {
 		const reportChart = shallow(
 			<ReportChart
 				path={ path }
@@ -42,7 +43,7 @@ describe( 'ReportChart', () => {
 		);
 		const chart = reportChart.find( 'Chart' );
 
-		expect( chart.props().mode ).toBeUndefined();
+		expect( chart.props().mode ).toEqual( 'time-comparison' );
 	} );
 
 	test( 'should set the mode prop depending on the active filter', () => {
@@ -62,19 +63,7 @@ describe( 'ReportChart', () => {
 			},
 		];
 		const query = { filter: 'lorem-ipsum', filter2: 'ipsum-lorem' };
-		const reportChart = shallow(
-			<ReportChart
-				filters={ filters }
-				path={ path }
-				primaryData={ data }
-				query={ query }
-				secondaryData={ data }
-				selectedChart={ selectedChart }
-			/>
-		);
-
-		const chart = reportChart.find( 'Chart' );
-
-		expect( chart.props().mode ).toEqual( 'item-comparison' );
+		const mode = getChartMode( filters, query );
+		expect( mode ).toEqual( 'item-comparison' );
 	} );
 } );

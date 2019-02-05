@@ -20,6 +20,13 @@ class WC_Admin_Reports_Segmenting {
 	protected $all_segment_ids = false;
 
 	/**
+	 * Array of all segment labels.
+	 *
+	 * @var array
+	 */
+	protected $segment_labels = array();
+
+	/**
 	 * Query arguments supplied by the user for data store.
 	 *
 	 * @var array
@@ -88,10 +95,12 @@ class WC_Admin_Reports_Segmenting {
 
 		foreach ( $segments_db_result as $segment_data ) {
 			$segment_id = $segment_data[ $segment_dimension ];
+			$segment_labels  = $this->get_segment_labels();
 			unset( $segment_data[ $segment_dimension ] );
 			$segment_datum                 = array(
-				'segment_id' => $segment_id,
-				'subtotals'  => $segment_data,
+				'segment_id'    => $segment_id,
+				'segment_label' => $segment_labels[ $segment_id ],
+				'subtotals'     => $segment_data,
 			);
 			$segment_result[ $segment_id ] = $segment_datum;
 		}
@@ -133,13 +142,15 @@ class WC_Admin_Reports_Segmenting {
 	 */
 	protected function merge_segment_totals_results( $segment_dimension, $result1, $result2 ) {
 		$result_segments = array();
+		$segment_labels  = $this->get_segment_labels();
 
 		foreach ( $result1 as $segment_data ) {
 			$segment_id = $segment_data[ $segment_dimension ];
 			unset( $segment_data[ $segment_dimension ] );
 			$result_segments[ $segment_id ] = array(
-				'segment_id' => $segment_id,
-				'subtotals'  => $segment_data,
+				'segment_label' => $segment_labels[ $segment_id ],
+				'segment_id'    => $segment_id,
+				'subtotals'     => $segment_data,
 			);
 		}
 
@@ -148,8 +159,9 @@ class WC_Admin_Reports_Segmenting {
 			unset( $segment_data[ $segment_dimension ] );
 			if ( ! isset( $result_segments[ $segment_id ] ) ) {
 				$result_segments[ $segment_id ] = array(
-					'segment_id' => $segment_id,
-					'subtotals'  => array(),
+					'segment_label' => $segment_labels[ $segment_id ],
+					'segment_id'    => $segment_id,
+					'subtotals'     => array(),
 				);
 			}
 			$result_segments[ $segment_id ]['subtotals'] = array_merge( $result_segments[ $segment_id ]['subtotals'], $segment_data );
@@ -196,6 +208,7 @@ class WC_Admin_Reports_Segmenting {
 	 */
 	protected function merge_segment_intervals_results( $segment_dimension, $result1, $result2 ) {
 		$result_segments = array();
+		$segment_labels = $this->get_segment_labels();
 
 		foreach ( $result1 as $segment_data ) {
 			$time_interval = $segment_data['time_interval'];
@@ -208,8 +221,9 @@ class WC_Admin_Reports_Segmenting {
 			$segment_id = $segment_data[ $segment_dimension ];
 			unset( $segment_data[ $segment_dimension ] );
 			$segment_datum = array(
-				'segment_id' => $segment_id,
-				'subtotals'  => $segment_data,
+				'segment_label' => $segment_labels[ $segment_id ],
+				'segment_id'    => $segment_id,
+				'subtotals'     => $segment_data,
 			);
 			$result_segments[ $time_interval ]['segments'][ $segment_id ] = $segment_datum;
 		}
@@ -227,8 +241,9 @@ class WC_Admin_Reports_Segmenting {
 
 			if ( ! isset( $result_segments[ $time_interval ]['segments'][ $segment_id ] ) ) {
 				$result_segments[ $time_interval ]['segments'][ $segment_id ] = array(
-					'segment_id' => $segment_id,
-					'subtotals'  => array(),
+					'segment_label' => $segment_labels[ $segment_id ],
+					'segment_id'    => $segment_id,
+					'subtotals'     => array(),
 				);
 			}
 			$result_segments[ $time_interval ]['segments'][ $segment_id ]['subtotals'] = array_merge( $result_segments[ $time_interval ]['segments'][ $segment_id ]['subtotals'], $segment_data );
@@ -251,6 +266,8 @@ class WC_Admin_Reports_Segmenting {
 			$segment_dimension = substr( strstr( $segment_dimension, '.' ), 1 );
 		}
 
+		$segment_labels = $this->get_segment_labels();
+
 		foreach ( $segments_db_result as $segment_data ) {
 			$time_interval = $segment_data['time_interval'];
 			if ( ! isset( $aggregated_segment_result[ $time_interval ] ) ) {
@@ -262,8 +279,9 @@ class WC_Admin_Reports_Segmenting {
 			$segment_id = $segment_data[ $segment_dimension ];
 			unset( $segment_data[ $segment_dimension ] );
 			$segment_datum = array(
-				'segment_id' => $segment_id,
-				'subtotals'  => $segment_data,
+				'segment_label' => $segment_labels[ $segment_id ],
+				'segment_id'    => $segment_id,
+				'subtotals'     => $segment_data,
 			);
 			$aggregated_segment_result[ $time_interval ]['segments'][ $segment_id ] = $segment_datum;
 		}
@@ -284,13 +302,25 @@ class WC_Admin_Reports_Segmenting {
 			return;
 		}
 
+		$segments       = array();
+		$segment_labels = array();
+
 		if ( 'product' === $this->query_args['segmentby'] ) {
-			$segments = wc_get_products(
-				array(
-					'return' => 'ids',
-					'limit'  => -1,
-				)
+			$args = array(
+				'return' => 'objects',
+				'limit'  => -1,
 			);
+
+			if ( isset( $this->query_args['product_includes'] ) ) {
+				$args['include'] = $this->query_args['product_includes'];
+			}
+
+			$segment_objects = wc_get_products( $args );
+			foreach ( $segment_objects as $segment ) {
+				$id = $segment->get_id();
+				$segments[] = $id;
+				$segment_labels[ $id ] = $segment->get_name();
+			}
 		} elseif ( 'variation' === $this->query_args['segmentby'] ) {
 			// @todo: assuming that this will only be used for one product, check assumption.
 			if ( ! isset( $this->query_args['product_includes'] ) || count( $this->query_args['product_includes'] ) !== 1 ) {
@@ -298,14 +328,24 @@ class WC_Admin_Reports_Segmenting {
 				return;
 			}
 
-			$segments = wc_get_products(
-				array(
-					'return' => 'ids',
-					'limit'  => - 1,
-					'type'   => 'variation',
-					'parent' => $this->query_args['product_includes'][0],
-				)
+			$args = array(
+				'return' => 'objects',
+				'limit'  => -1,
+				'type'   => 'variation',
+				'parent' => $this->query_args['product_includes'][0],
 			);
+
+			if ( isset( $this->query_args['variations'] ) ) {
+				$args['include'] = $this->query_args['variations'];
+			}
+
+			$segment_objects = wc_get_products( $args );
+
+			foreach ( $segment_objects as $segment ) {
+				$id = $segment->get_id();
+				$segments[] = $id;
+				$segment_labels[ $id ] = $segment->get_name();
+			}
 		} elseif ( 'category' === $this->query_args['segmentby'] ) {
 			$categories = get_categories(
 				array(
@@ -338,6 +378,7 @@ class WC_Admin_Reports_Segmenting {
 		}
 
 		$this->all_segment_ids = $segments;
+		$this->segment_labels  = $segment_labels;
 	}
 
 	/**
@@ -351,6 +392,19 @@ class WC_Admin_Reports_Segmenting {
 		}
 
 		return $this->all_segment_ids;
+	}
+
+	/**
+	 * Return all segment labels for given segmentby query parameter.
+	 *
+	 * @return array
+	 */
+	protected function get_segment_labels() {
+		if ( ! is_array( $this->all_segment_ids ) ) {
+			$this->set_all_segments();
+		}
+
+		return $this->segment_labels;
 	}
 
 	/**
@@ -395,11 +449,13 @@ class WC_Admin_Reports_Segmenting {
 			$segments = array();
 		}
 		$all_segment_ids = $this->get_all_segments();
+		$segment_labels  = $this->get_segment_labels();
 		foreach ( $all_segment_ids as $segment_id ) {
 			if ( ! isset( $segments[ $segment_id ] ) ) {
 				$segments[ $segment_id ] = array(
-					'segment_id' => $segment_id,
-					'subtotals'  => $segment_subtotals,
+					'segment_id'    => $segment_id,
+					'segment_label' => $segment_labels[ $segment_id ],
+					'subtotals'     => $segment_subtotals,
 				);
 			}
 		}
