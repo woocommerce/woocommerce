@@ -38,6 +38,8 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
 		$order->save();
 
+		WC_Helper_Queue::run_all_pending();
+
 		$data_store = new WC_Admin_Reports_Products_Data_Store();
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() + HOUR_IN_SECONDS );
@@ -112,6 +114,8 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$order_2->set_total( 77 ); // $20x4 products + $10 shipping - $20 discount + $7 tax.
 		$order_2->set_date_created( $date_created_2 );
 		$order_2->save();
+
+		WC_Helper_Queue::run_all_pending();
 
 		$data_store = new WC_Admin_Reports_Products_Data_Store();
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
@@ -211,6 +215,9 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 		$order->set_shipping_tax( 2 );
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
 		$order->save();
+
+		WC_Helper_Queue::run_all_pending();
+
 		$data_store = new WC_Admin_Reports_Products_Data_Store();
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() + HOUR_IN_SECONDS );
@@ -288,6 +295,8 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 			);
 			break;
 		}
+
+		WC_Helper_Queue::run_all_pending();
 
 		$data_store = new WC_Admin_Reports_Products_Data_Store();
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );

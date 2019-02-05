@@ -38,6 +38,11 @@ class WC_Admin_Api_Init {
 	const ORDERS_LOOKUP_BATCH_INIT = 'wc-admin_orders_lookup_batch_init';
 
 	/**
+	 * Action hook for processing a batch of orders.
+	 */
+	const SINGLE_ORDER_ACTION = 'wc-admin_process_order';
+
+	/**
 	 * Queue instance.
 	 *
 	 * @var WC_Queue_Interface
@@ -59,19 +64,16 @@ class WC_Admin_Api_Init {
 		add_filter( 'rest_endpoints', array( 'WC_Admin_Api_Init', 'filter_rest_endpoints' ), 10, 1 );
 		add_filter( 'woocommerce_debug_tools', array( 'WC_Admin_Api_Init', 'add_regenerate_tool' ) );
 
-		// Initialize Orders data store class's static vars.
-		add_action( 'woocommerce_after_register_post_type', array( 'WC_Admin_Api_Init', 'orders_data_store_init' ), 20 );
-		// Initialize Customers Report data store sync hooks.
-		// Note: we need to hook in before `wc_current_user_is_active`.
-		// See: https://github.com/woocommerce/woocommerce/blob/942615101ba00c939c107c3a4820c3d466864872/includes/wc-user-functions.php#L749.
-		add_action( 'wp_loaded', array( 'WC_Admin_Api_Init', 'customers_report_data_store_init' ) );
+		// Initialize syncing hooks.
+		add_action( 'wp_loaded', array( __CLASS__, 'orders_lookup_update_init' ) );
 
 		// Initialize scheduled action handlers.
 		add_action( self::QUEUE_BATCH_ACTION, array( __CLASS__, 'queue_batches' ), 10, 3 );
-		add_action( self::QUEUE_DEPEDENT_ACTION, array( __CLASS__, 'queue_dependent_action' ), 10, 2 );
+		add_action( self::QUEUE_DEPEDENT_ACTION, array( __CLASS__, 'queue_dependent_action' ), 10, 3 );
 		add_action( self::CUSTOMERS_BATCH_ACTION, array( __CLASS__, 'customer_lookup_process_batch' ) );
 		add_action( self::ORDERS_BATCH_ACTION, array( __CLASS__, 'orders_lookup_process_batch' ) );
 		add_action( self::ORDERS_LOOKUP_BATCH_INIT, array( __CLASS__, 'orders_lookup_batch_init' ) );
+		add_action( self::SINGLE_ORDER_ACTION, array( __CLASS__, 'orders_lookup_process_order' ) );
 
 		// Add currency symbol to orders endpoint response.
 		add_filter( 'woocommerce_rest_prepare_shop_order_object', array( __CLASS__, 'add_currency_symbol_to_order_response' ) );
@@ -433,7 +435,7 @@ class WC_Admin_Api_Init {
 		// so that the orders can be associated with the `customer_id` column.
 		self::customer_lookup_batch_init();
 		// Queue orders lookup to occur after customers lookup generation is done.
-		self::queue_dependent_action( self::ORDERS_LOOKUP_BATCH_INIT, self::CUSTOMERS_BATCH_ACTION );
+		self::queue_dependent_action( self::ORDERS_LOOKUP_BATCH_INIT, array(), self::CUSTOMERS_BATCH_ACTION );
 	}
 
 	/**
@@ -457,16 +459,58 @@ class WC_Admin_Api_Init {
 	}
 
 	/**
-	 * Init orders data store.
+	 * Schedule an action to process a single Order.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return void
 	 */
-	public static function orders_data_store_init() {
+	public static function schedule_single_order_process( $order_id ) {
+		if ( 'shop_order' !== get_post_type( $order_id ) ) {
+			return;
+		}
+
+		// This can get called multiple times for a single order, so we look
+		// for existing pending jobs for the same order to avoid duplicating efforts.
+		$existing_jobs = self::queue()->search(
+			array(
+				'status'   => 'pending',
+				'per_page' => 1,
+				'claimed'  => false,
+				'search'   => "[{$order_id}]",
+			)
+		);
+
+		if ( $existing_jobs ) {
+			$existing_job = current( $existing_jobs );
+
+			// Bail out if there's a pending single order action, or a pending dependent action.
+			if (
+				( self::SINGLE_ORDER_ACTION === $existing_job->get_hook() ) ||
+				(
+					self::QUEUE_DEPEDENT_ACTION === $existing_job->get_hook() &&
+					in_array( self::SINGLE_ORDER_ACTION, $existing_job->get_args() )
+				)
+			) {
+				return;
+			}
+		}
+
+		// We want to ensure that customer lookup updates are scheduled before order updates.
+		self::queue_dependent_action( self::SINGLE_ORDER_ACTION, array( $order_id ), self::CUSTOMERS_BATCH_ACTION );
+	}
+
+	/**
+	 * Attach order lookup update hooks.
+	 */
+	public static function orders_lookup_update_init() {
 		// Activate WC_Order extension.
 		WC_Admin_Order::add_filters();
-		// Initialize data stores.
+
+		add_action( 'save_post_shop_order', array( __CLASS__, 'schedule_single_order_process' ) );
+		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'schedule_single_order_process' ) );
+
 		WC_Admin_Reports_Orders_Stats_Data_Store::init();
-		WC_Admin_Reports_Products_Data_Store::init();
-		WC_Admin_Reports_Taxes_Data_Store::init();
-		WC_Admin_Reports_Coupons_Data_Store::init();
+		WC_Admin_Reports_Customers_Data_Store::init();
 	}
 
 	/**
@@ -512,19 +556,35 @@ class WC_Admin_Api_Init {
 		$order_ids = $order_query->get_orders();
 
 		foreach ( $order_ids as $order_id ) {
-			// @todo: schedule single order update if this fails?
-			WC_Admin_Reports_Orders_Stats_Data_Store::sync_order( $order_id );
-			WC_Admin_Reports_Products_Data_Store::sync_order_products( $order_id );
-			WC_Admin_Reports_Coupons_Data_Store::sync_order_coupons( $order_id );
-			WC_Admin_Reports_Taxes_Data_Store::sync_order_taxes( $order_id );
+			self::orders_lookup_process_order( $order_id );
 		}
 	}
 
 	/**
-	 * Init customers report data store.
+	 * Process a single order to update lookup tables for.
+	 * If an error is encountered in one of the updates, a retry action is scheduled.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return void
 	 */
-	public static function customers_report_data_store_init() {
-		WC_Admin_Reports_Customers_Data_Store::init();
+	public static function orders_lookup_process_order( $order_id ) {
+		$result = array_sum(
+			array(
+				WC_Admin_Reports_Orders_Stats_Data_Store::sync_order( $order_id ),
+				WC_Admin_Reports_Products_Data_Store::sync_order_products( $order_id ),
+				WC_Admin_Reports_Coupons_Data_Store::sync_order_coupons( $order_id ),
+				WC_Admin_Reports_Taxes_Data_Store::sync_order_taxes( $order_id ),
+			)
+		);
+
+		// If all updates were either skipped or successful, we're done.
+		// The update methods return -1 for skip, or a boolean success indicator.
+		if ( 4 === absint( $result ) ) {
+			return;
+		}
+
+		// Otherwise assume an error occurred and reschedule.
+		self::schedule_single_order_process( $order_id );
 	}
 
 	/**
@@ -592,9 +652,10 @@ class WC_Admin_Api_Init {
 	 * Queue an action to run after another.
 	 *
 	 * @param string $action Action to run after prerequisite.
+	 * @param array  $action_args Action arguments.
 	 * @param string $prerequisite_action Prerequisite action.
 	 */
-	public static function queue_dependent_action( $action, $prerequisite_action ) {
+	public static function queue_dependent_action( $action, $action_args, $prerequisite_action ) {
 		$blocking_jobs = self::queue()->search(
 			array(
 				'status'   => 'pending',
@@ -613,10 +674,10 @@ class WC_Admin_Api_Init {
 			self::queue()->schedule_single(
 				$after_blocking_job,
 				self::QUEUE_DEPEDENT_ACTION,
-				array( $action, $prerequisite_action )
+				array( $action, $action_args, $prerequisite_action )
 			);
 		} else {
-			self::queue()->schedule_single( time() + 5, $action );
+			self::queue()->schedule_single( time() + 5, $action, $action_args );
 		}
 	}
 

@@ -71,6 +71,8 @@ class WC_Tests_API_Reports_Products_Stats extends WC_REST_Unit_Test_Case {
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
 		$order->save();
 
+		WC_Helper_Queue::run_all_pending();
+
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(

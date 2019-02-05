@@ -39,6 +39,8 @@ class WC_Tests_Reports_Variations extends WC_Unit_Test_Case {
 		$order->set_status( 'completed' );
 		$order->save();
 
+		WC_Helper_Queue::run_all_pending();
+
 		$data_store = new WC_Admin_Reports_Variations_Data_Store();
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
 		$end_time   = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() + HOUR_IN_SECONDS );
@@ -105,6 +107,8 @@ class WC_Tests_Reports_Variations extends WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order( 1, $variation );
 		$order->set_status( 'completed' );
 		$order->save();
+
+		WC_Helper_Queue::run_all_pending();
 
 		$data_store = new WC_Admin_Reports_Variations_Data_Store();
 		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
