@@ -4,9 +4,12 @@
  */
 @import './legend.scss';
 
+.woocommerce-chart__body-row .d3-chart__container {
+	width: calc( 100% - 320px );
+}
+
 .d3-chart__container {
 	position: relative;
-	width: 100%;
 
 	svg {
 		overflow: visible;

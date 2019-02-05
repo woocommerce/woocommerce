@@ -19,13 +19,14 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 	 * @var array
 	 */
 	protected $column_types = array(
-		'date_start'     => 'strval',
-		'date_end'       => 'strval',
-		'product_id'     => 'intval',
-		'items_sold'     => 'intval',
-		'net_revenue'    => 'floatval',
-		'orders_count'   => 'intval',
-		'products_count' => 'intval',
+		'date_start'       => 'strval',
+		'date_end'         => 'strval',
+		'product_id'       => 'intval',
+		'items_sold'       => 'intval',
+		'net_revenue'      => 'floatval',
+		'orders_count'     => 'intval',
+		'products_count'   => 'intval',
+		'variations_count' => 'intval',
 	);
 
 	/**
@@ -34,10 +35,11 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 	 * @var array
 	 */
 	protected $report_columns = array(
-		'items_sold'     => 'SUM(product_qty) as items_sold',
-		'net_revenue'    => 'SUM(product_net_revenue) AS net_revenue',
-		'orders_count'   => 'COUNT(DISTINCT order_id) as orders_count',
-		'products_count' => 'COUNT(DISTINCT product_id) as products_count',
+		'items_sold'       => 'SUM(product_qty) as items_sold',
+		'net_revenue'      => 'SUM(product_net_revenue) AS net_revenue',
+		'orders_count'     => 'COUNT(DISTINCT order_id) as orders_count',
+		'products_count'   => 'COUNT(DISTINCT product_id) as products_count',
+		'variations_count' => 'COUNT(DISTINCT variation_id) as variations_count',
 	);
 
 	/**
@@ -68,6 +70,11 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 		$included_products = $this->get_included_products( $query_args );
 		if ( $included_products ) {
 			$products_where_clause .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";
+		}
+
+		$included_variations = $this->get_included_variations( $query_args );
+		if ( $included_variations ) {
+			$products_where_clause .= " AND {$order_product_lookup_table}.variation_id IN ({$included_variations})";
 		}
 
 		$order_status_filter = $this->get_status_subquery( $query_args );

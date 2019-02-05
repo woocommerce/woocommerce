@@ -686,6 +686,24 @@ class WC_Admin_Reports_Data_Store {
 	}
 
 	/**
+	 * Returns comma separated ids of allowed variations, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_included_variations( $query_args ) {
+		$included_variations = array();
+		$operator            = $this->get_match_operator( $query_args );
+
+		if ( isset( $query_args['variations'] ) && is_array( $query_args['variations'] ) && count( $query_args['variations'] ) > 0 ) {
+			$included_variations = array_filter( array_map( 'intval', $query_args['variations'] ) );
+		}
+
+		$included_variations_str = implode( ',', $included_variations );
+		return $included_variations_str;
+	}
+
+	/**
 	 * Returns comma separated ids of excluded products, based on query arguments from the user.
 	 *
 	 * @param array $query_args Parameters supplied by the user.

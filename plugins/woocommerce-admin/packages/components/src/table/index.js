@@ -45,8 +45,7 @@ import TableSummary from './summary';
 class TableCard extends Component {
 	constructor( props ) {
 		super( props );
-		const { compareBy, query } = props;
-
+		const { query, compareBy } = this.props;
 		const showCols = props.headers.map( ( { key, hiddenByDefault } ) => ! hiddenByDefault && key ).filter( Boolean );
 		const selectedRows = query.filter ? getIdsFromQuery( query[ compareBy ] ) : [];
 
@@ -143,11 +142,10 @@ class TableCard extends Component {
 	}
 
 	onCompare() {
-		const { compareBy, compareParam, onQueryChange } = this.props;
-		const { selectedRows } = this.state;
-		if ( compareBy ) {
-			onQueryChange( 'compare' )( compareBy, compareParam, selectedRows.join( ',' ) );
-		}
+		// Reset selected rows so the user can start a comparison again.
+		this.setState( {
+			selectedRows: [],
+		} );
 	}
 
 	onSearch( values ) {

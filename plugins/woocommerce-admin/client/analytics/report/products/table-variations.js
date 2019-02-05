@@ -139,12 +139,11 @@ export default class VariationsReportTable extends Component {
 	}
 
 	getSummary( totals ) {
-		const { products_count = 0, items_sold = 0, net_revenue = 0, orders_count = 0 } = totals;
+		const { variations_count = 0, items_sold = 0, net_revenue = 0, orders_count = 0 } = totals;
 		return [
 			{
-				// @TODO: When primaryData is segmented, fix this to reflect variations, not products.
-				label: _n( 'variation sold', 'variations sold', products_count, 'wc-admin' ),
-				value: numberFormat( products_count ),
+				label: _n( 'variation sold', 'variations sold', variations_count, 'wc-admin' ),
+				value: numberFormat( variations_count ),
 			},
 			{
 				label: _n( 'item sold', 'items sold', items_sold, 'wc-admin' ),
@@ -176,7 +175,7 @@ export default class VariationsReportTable extends Component {
 				endpoint="variations"
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
-				itemIdField="product_id"
+				itemIdField="variation_id"
 				labels={ labels }
 				query={ query }
 				getSummary={ this.getSummary }

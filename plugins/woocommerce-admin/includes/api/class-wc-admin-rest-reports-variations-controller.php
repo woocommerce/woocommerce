@@ -290,7 +290,7 @@ class WC_Admin_REST_Reports_Variations_Controller extends WC_REST_Reports_Contro
 			'default'           => 'date',
 			'enum'              => array(
 				'date',
-				'gross_revenue',
+				'net_revenue',
 				'orders_count',
 				'items_sold',
 			),

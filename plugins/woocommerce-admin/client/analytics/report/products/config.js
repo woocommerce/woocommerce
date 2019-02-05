@@ -29,7 +29,7 @@ export const charts = [
 
 const filterConfig = {
 	label: __( 'Show', 'wc-admin' ),
-	staticParams: [ 'chart' ],
+	staticParams: [],
 	param: 'filter',
 	showFilters: () => true,
 	filters: [
@@ -114,19 +114,20 @@ const filterConfig = {
 			label: __( 'Top Products by Items Sold', 'wc-admin' ),
 			value: 'top_items',
 			chartMode: 'item-comparison',
-			query: { orderby: 'items_sold', order: 'desc' },
+			query: { orderby: 'items_sold', order: 'desc', chart: 'items_sold' },
 		},
 		{
 			label: __( 'Top Products by Net Revenue', 'wc-admin' ),
 			value: 'top_sales',
 			chartMode: 'item-comparison',
-			query: { orderby: 'net_revenue', order: 'desc' },
+			query: { orderby: 'net_revenue', order: 'desc', chart: 'net_revenue' },
 		},
 	],
 };
 
 const variationsConfig = {
-	showFilters: query => 'single_product' === query.filter && !! query.products,
+	showFilters: query =>
+		'single_product' === query.filter && !! query.products && query[ 'is-variable' ],
 	staticParams: [ 'filter', 'products' ],
 	param: 'filter-variations',
 	filters: [
@@ -151,13 +152,13 @@ const variationsConfig = {
 			label: __( 'Top Variations by Items Sold', 'wc-admin' ),
 			chartMode: 'item-comparison',
 			value: 'top_items',
-			query: { orderby: 'items_sold', order: 'desc' },
+			query: { orderby: 'items_sold', order: 'desc', chart: 'item_sold' },
 		},
 		{
 			label: __( 'Top Variations by Net Revenue', 'wc-admin' ),
 			chartMode: 'item-comparison',
 			value: 'top_sales',
-			query: { orderby: 'net_revenue', order: 'desc' },
+			query: { orderby: 'net_revenue', order: 'desc', chart: 'net_revenue' },
 		},
 	],
 };

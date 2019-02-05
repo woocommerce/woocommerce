@@ -176,6 +176,11 @@ export const compareStrings = ( s1, s2, splitChar = new RegExp( [ ' |,' ], 'g' )
 export const getYGrids = ( yMax ) => {
 	const yGrids = [];
 
+	// If all values are 0, yMax can become NaN.
+	if ( isNaN( yMax ) ) {
+		return null;
+	}
+
 	for ( let i = 0; i < 4; i++ ) {
 		const value = yMax > 1 ? Math.round( i / 3 * yMax ) : i / 3 * yMax;
 		if ( yGrids[ yGrids.length - 1 ] !== value ) {
@@ -237,29 +242,31 @@ export const drawAxis = ( node, params, xOffset ) => {
 				.tickFormat( '' )
 		);
 
-	node
-		.append( 'g' )
-		.attr( 'class', 'grid' )
-		.attr( 'transform', `translate(-${ params.margin.left }, 0)` )
-		.call(
-			d3AxisLeft( params.yScale )
-				.tickValues( yGrids )
-				.tickSize( -params.width - params.margin.left - params.margin.right )
-				.tickFormat( '' )
-		)
-		.call( g => g.select( '.domain' ).remove() );
+	if ( yGrids ) {
+		node
+			.append( 'g' )
+			.attr( 'class', 'grid' )
+			.attr( 'transform', `translate(-${ params.margin.left }, 0)` )
+			.call(
+				d3AxisLeft( params.yScale )
+					.tickValues( yGrids )
+					.tickSize( -params.width - params.margin.left - params.margin.right )
+					.tickFormat( '' )
+			)
+			.call( g => g.select( '.domain' ).remove() );
 
-	node
-		.append( 'g' )
-		.attr( 'class', 'axis y-axis' )
-		.attr( 'aria-hidden', 'true' )
-		.attr( 'transform', 'translate(-50, 0)' )
-		.attr( 'text-anchor', 'start' )
-		.call(
-			d3AxisLeft( params.yTickOffset )
-				.tickValues( params.yMax === 0 ? [ yGrids[ 0 ] ] : yGrids )
-				.tickFormat( d => params.yFormat( d !== 0 ? d : 0 ) )
-		);
+		node
+			.append( 'g' )
+			.attr( 'class', 'axis y-axis' )
+			.attr( 'aria-hidden', 'true' )
+			.attr( 'transform', 'translate(-50, 0)' )
+			.attr( 'text-anchor', 'start' )
+			.call(
+				d3AxisLeft( params.yTickOffset )
+					.tickValues( params.yMax === 0 ? [ yGrids[ 0 ] ] : yGrids )
+					.tickFormat( d => params.yFormat( d !== 0 ? d : 0 ) )
+			);
+	}
 
 	node.selectAll( '.domain' ).remove();
 	node
