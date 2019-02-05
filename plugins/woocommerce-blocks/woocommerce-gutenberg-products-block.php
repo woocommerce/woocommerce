@@ -430,6 +430,8 @@ function wgpb_print_script_settings() {
 		'max_rows'          => wc_get_theme_support( 'product_grid::max_rows', 6 ),
 		'default_rows'      => wc_get_default_product_rows_per_page(),
 		'placeholderImgSrc' => wc_placeholder_img_src(),
+		'min_height'        => wc_get_theme_support( 'featured_block::min_height', 500 ),
+		'default_height'    => wc_get_theme_support( 'featured_block::default_height', 500 ),
 	);
 	?>
 	<script type="text/javascript">

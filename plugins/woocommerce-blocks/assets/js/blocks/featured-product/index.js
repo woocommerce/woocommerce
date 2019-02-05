@@ -51,6 +51,14 @@ registerBlockType( 'woocommerce/featured-product', {
 		},
 
 		/**
+		 * A fixed height for the block.
+		 */
+		height: {
+			type: 'number',
+			default: wc_product_block_data.default_height,
+		},
+
+		/**
 		 * ID for a custom image, overriding the product's featured image.
 		 */
 		mediaId: {
