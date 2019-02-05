@@ -62,7 +62,7 @@
     "stylelint": "9.10.1",
     "stylelint-config-wordpress": "13.1.0",
     "webpack": "4.29.1",
-    "webpack-cli": "3.2.1"
+    "webpack-cli": "3.2.3"
   },
   "engines": {
     "node": "10.15.1",
