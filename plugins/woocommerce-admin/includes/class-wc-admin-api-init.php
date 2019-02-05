@@ -781,8 +781,8 @@ class WC_Admin_Api_Init {
 				"{$wpdb->prefix}wc_order_product_lookup",
 				"{$wpdb->prefix}wc_order_tax_lookup",
 				"{$wpdb->prefix}wc_order_coupon_lookup",
-				"{$wpdb->prefix}woocommerce_admin_notes",
-				"{$wpdb->prefix}woocommerce_admin_note_actions",
+				"{$wpdb->prefix}wc_admin_notes",
+				"{$wpdb->prefix}wc_admin_note_actions",
 				"{$wpdb->prefix}wc_customer_lookup",
 			)
 		);
@@ -860,7 +860,7 @@ class WC_Admin_Api_Init {
 			KEY coupon_id (coupon_id),
 			KEY date_created (date_created)
 		  ) $collate;
-			CREATE TABLE {$wpdb->prefix}woocommerce_admin_notes (
+			CREATE TABLE {$wpdb->prefix}wc_admin_notes (
 				note_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 				name varchar(255) NOT NULL,
 				type varchar(20) NOT NULL,
@@ -875,7 +875,7 @@ class WC_Admin_Api_Init {
 				date_reminder datetime NULL default null,
 				PRIMARY KEY (note_id)
 				) $collate;
-			CREATE TABLE {$wpdb->prefix}woocommerce_admin_note_actions (
+			CREATE TABLE {$wpdb->prefix}wc_admin_note_actions (
 				action_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 				note_id BIGINT UNSIGNED NOT NULL,
 				name varchar(255) NOT NULL,

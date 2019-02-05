@@ -37,7 +37,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 		$note_to_be_inserted['date_created']  = gmdate( 'Y-m-d H:i:s', $date_created );
 		$note_to_be_inserted['date_reminder'] = null;
 
-		$wpdb->insert( $wpdb->prefix . 'woocommerce_admin_notes', $note_to_be_inserted );
+		$wpdb->insert( $wpdb->prefix . 'wc_admin_notes', $note_to_be_inserted );
 		$note_id = $wpdb->insert_id;
 		$note->set_id( $note_id );
 		$note->save_meta_data();
@@ -68,7 +68,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 		if ( 0 !== $note_id || '0' !== $note_id ) {
 			$note_row = $wpdb->get_row(
 				$wpdb->prepare(
-					"SELECT name, type, locale, title, content, icon, content_data, status, source, date_created, date_reminder FROM {$wpdb->prefix}woocommerce_admin_notes WHERE note_id = %d LIMIT 1",
+					"SELECT name, type, locale, title, content, icon, content_data, status, source, date_created, date_reminder FROM {$wpdb->prefix}wc_admin_notes WHERE note_id = %d LIMIT 1",
 					$note->get_id()
 				)
 			);
@@ -134,7 +134,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 			}
 
 			$wpdb->update(
-				$wpdb->prefix . 'woocommerce_admin_notes',
+				$wpdb->prefix . 'wc_admin_notes',
 				array(
 					'name'          => $note->get_name(),
 					'type'          => $note->get_type(),
@@ -174,8 +174,8 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 		$note_id = $note->get_id();
 		if ( $note_id ) {
 			global $wpdb;
-			$wpdb->delete( $wpdb->prefix . 'woocommerce_admin_notes', array( 'note_id' => $note_id ) );
-			$wpdb->delete( $wpdb->prefix . 'woocommerce_admin_note_actions', array( 'note_id' => $note_id ) );
+			$wpdb->delete( $wpdb->prefix . 'wc_admin_notes', array( 'note_id' => $note_id ) );
+			$wpdb->delete( $wpdb->prefix . 'wc_admin_note_actions', array( 'note_id' => $note_id ) );
 			$note->set_id( null );
 		}
 
@@ -197,7 +197,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 
 		$actions = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT name, label, query FROM {$wpdb->prefix}woocommerce_admin_note_actions WHERE note_id = %d",
+				"SELECT name, label, query FROM {$wpdb->prefix}wc_admin_note_actions WHERE note_id = %d",
 				$note->get_id()
 			)
 		);
@@ -223,10 +223,10 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		global $wpdb;
-		$wpdb->delete( $wpdb->prefix . 'woocommerce_admin_note_actions', array( 'note_id' => $note->get_id() ) );
+		$wpdb->delete( $wpdb->prefix . 'wc_admin_note_actions', array( 'note_id' => $note->get_id() ) );
 		foreach ( $note->get_actions( 'edit' ) as $action ) {
 			$wpdb->insert(
-				$wpdb->prefix . 'woocommerce_admin_note_actions',
+				$wpdb->prefix . 'wc_admin_note_actions',
 				array(
 					'note_id' => $note->get_id(),
 					'name'    => $action->name,
@@ -273,14 +273,14 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( empty( $escaped_where_types ) ) {
 			$query = $wpdb->prepare(
-				"SELECT note_id, title, content FROM {$wpdb->prefix}woocommerce_admin_notes ORDER BY note_id DESC LIMIT %d, %d",
+				"SELECT note_id, title, content FROM {$wpdb->prefix}wc_admin_notes ORDER BY note_id DESC LIMIT %d, %d",
 				$offset,
 				$per_page
 			);
 		} else {
 			$query = $wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-				"SELECT note_id, title, content FROM {$wpdb->prefix}woocommerce_admin_notes WHERE type IN ($escaped_where_types) ORDER BY note_id DESC LIMIT %d, %d",
+				"SELECT note_id, title, content FROM {$wpdb->prefix}wc_admin_notes WHERE type IN ($escaped_where_types) ORDER BY note_id DESC LIMIT %d, %d",
 				$offset,
 				$per_page
 			);
@@ -296,7 +296,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function get_notes_count() {
 		global $wpdb;
-		return $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_admin_notes" );
+		return $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_admin_notes" );
 	}
 
 	/**
@@ -309,7 +309,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 		global $wpdb;
 		return $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT note_id FROM {$wpdb->prefix}woocommerce_admin_notes WHERE name = %s ORDER BY note_id ASC",
+				"SELECT note_id FROM {$wpdb->prefix}wc_admin_notes WHERE name = %s ORDER BY note_id ASC",
 				$name
 			)
 		);
