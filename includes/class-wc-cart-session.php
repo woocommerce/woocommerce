@@ -47,13 +47,19 @@ final class WC_Cart_Session {
 	public function init() {
 		add_action( 'wp_loaded', array( $this, 'get_cart_from_session' ) );
 		add_action( 'woocommerce_cart_emptied', array( $this, 'destroy_cart_session' ) );
-		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );
-		add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'set_session' ) );
-		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 );
 		add_action( 'woocommerce_cart_updated', array( $this, 'persistent_cart_update' ) );
+
+		// Cookie events - cart cookies need to be set before headers are sent.
+		if ( function_exists( 'header_register_callback' ) ) {
+			header_register_callback( array( $this, 'maybe_set_cart_cookies' ) ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.header_register_callbackFound
+		} else {
+			add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
+			add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );
+			add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 );
+		}
 	}
 
 	/**
