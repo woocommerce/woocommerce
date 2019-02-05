@@ -52,6 +52,13 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 	}
 
 	/**
+	 * Set up all the hooks for maintaining and populating table data.
+	 */
+	public static function init() {
+		add_action( 'woocommerce_reports_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 5 );
+	}
+
+	/**
 	 * Returns comma separated ids of included coupons, based on query arguments from the user.
 	 *
 	 * @param array $query_args Parameters supplied by the user.

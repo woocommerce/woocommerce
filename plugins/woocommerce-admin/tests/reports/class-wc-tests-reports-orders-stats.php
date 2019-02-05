@@ -3306,6 +3306,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$order->apply_coupon( $coupon );
 		$order->save();
 
+		WC_Helper_Queue::run_all_pending();
+
 		// Check if lookup tables are populated.
 		foreach ( $tables as $table ) {
 			$results = $wpdb->get_results(
