@@ -24,6 +24,7 @@ jQuery( function( $ ) {
 
 			if ( $( document.body ).hasClass( 'woocommerce-order-pay' ) ) {
 				this.$order_review.on( 'click', 'input[name="payment_method"]', this.payment_method_selected );
+				this.$order_review.attr( 'novalidate', 'novalidate' );
 			}
 
 			// Prevent HTML5 validation which can conflict.
