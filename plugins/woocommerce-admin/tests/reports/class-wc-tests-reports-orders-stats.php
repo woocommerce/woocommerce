@@ -3869,6 +3869,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			$orders[] = $order;
 		}
 
+		WC_Helper_Queue::run_all_pending();
+
 		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 
 		// Tests for before & after set to current hour.
@@ -3915,6 +3917,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => array(
 				array(
@@ -3936,6 +3939,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'avg_order_value'         => $net_revenue / $orders_count,
 						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
+						'segments'                => array(),
 					),
 				),
 			),
@@ -4043,6 +4047,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 					'avg_order_value'         => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
 					'num_returning_customers' => 0,
 					'num_new_customers'       => $new_customers,
+					'segments'                => array(),
 				),
 			);
 
@@ -4073,6 +4078,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => $expected_intervals,
 			'total'     => $interval_count,
@@ -4180,6 +4186,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 					'avg_order_value'         => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
 					'num_returning_customers' => 0,
 					'num_new_customers'       => $new_customers,
+					'segments'                => array(),
 				),
 			);
 
@@ -4210,6 +4217,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => $expected_intervals,
 			'total'     => $interval_count,
@@ -4328,6 +4336,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 					'avg_order_value'         => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
 					'num_returning_customers' => 0,
 					'num_new_customers'       => $new_customers,
+					'segments'                => array(),
 				),
 			);
 
@@ -4358,6 +4367,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => array_slice( $expected_intervals, 0, $per_page ),
 			'total'     => 11,
@@ -4392,6 +4402,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => array_slice( $expected_intervals, $per_page ),
 			'total'     => 11,
@@ -4445,6 +4456,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => array_slice( $expected_intervals, 0, $per_page ),
 			'total'     => 11,
@@ -4480,6 +4492,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => array_slice( $expected_intervals, $per_page ),
 			'total'     => 11,
@@ -4618,6 +4631,8 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			$orders[] = $order;
 		}
 
+		WC_Helper_Queue::run_all_pending();
+
 		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 
 		// Tests for before & after set to current hour.
@@ -4666,6 +4681,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => array(
 				array(
@@ -4687,6 +4703,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'avg_order_value'         => $net_revenue / $orders_count,
 						'num_returning_customers' => 0,
 						'num_new_customers'       => $new_customers,
+						'segments'                => array(),
 					),
 				),
 			),
@@ -4793,6 +4810,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 					'avg_order_value'         => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
 					'num_returning_customers' => 0,
 					'num_new_customers'       => $new_customers,
+					'segments'                => array(),
 				),
 			);
 
@@ -4840,6 +4858,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => $expected_intervals,
 			'total'     => $interval_count,
@@ -4967,6 +4986,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 					'avg_order_value'         => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
 					'num_returning_customers' => 0,
 					'num_new_customers'       => $new_customers,
+					'segments'                => array(),
 				),
 			);
 
@@ -5001,6 +5021,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => $expected_intervals,
 			'total'     => $interval_count,
@@ -5133,6 +5154,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 					'avg_order_value'         => 0 === $orders_count ? 0 : $net_revenue / $orders_count,
 					'num_returning_customers' => 0,
 					'num_new_customers'       => $new_customers,
+					'segments'                => array(),
 				),
 			);
 
@@ -5167,6 +5189,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => array_slice( $expected_intervals, 0, $per_page ),
 			'total'     => 11,
@@ -5200,6 +5223,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => array_slice( $expected_intervals, $per_page ),
 			'total'     => 11,
@@ -5253,6 +5277,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => array_slice( $expected_intervals, 0, $per_page ),
 			'total'     => 11,
@@ -5289,6 +5314,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'num_returning_customers' => 0,
 				'num_new_customers'       => $new_customers,
 				'products'                => 1,
+				'segments'                => array(),
 			),
 			'intervals' => array_slice( $expected_intervals, $per_page ),
 			'total'     => 11,
