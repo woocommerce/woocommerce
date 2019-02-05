@@ -29,6 +29,7 @@ class WC_Block_Featured_Product {
 		'align'        => 'none',
 		'contentAlign' => 'center',
 		'dimRatio'     => 50,
+		'height'       => false,
 		'linkText'     => false,
 		'mediaId'      => 0,
 		'mediaSrc'     => '',
@@ -52,6 +53,9 @@ class WC_Block_Featured_Product {
 		$attributes = wp_parse_args( $attributes, self::$defaults );
 		if ( ! $attributes['linkText'] ) {
 			$attributes['linkText'] = __( 'Shop now', 'woo-gutenberg-products-block' );
+		}
+		if ( ! $attributes['height'] ) {
+			$attributes['height'] = wc_get_theme_support( 'featured_block::default_height', 500 );
 		}
 
 		$title = sprintf(
@@ -100,7 +104,11 @@ class WC_Block_Featured_Product {
 	 * @return string
 	 */
 	public static function get_styles( $attributes, $product ) {
-		$image_size = ( 'none' !== $attributes['align'] ) ? 'full' : 'large';
+		$image_size = 'large';
+		if ( 'none' !== $attributes['align'] || $attributes['height'] > 800 ) {
+			$image_size = 'full';
+		}
+
 		if ( $attributes['mediaId'] ) {
 			$image = wp_get_attachment_image_url( $attributes['mediaId'], $image_size );
 		} else {
@@ -113,6 +121,10 @@ class WC_Block_Featured_Product {
 
 		if ( isset( $attributes['customOverlayColor'] ) ) {
 			$style .= sprintf( 'background-color:%s;', esc_attr( $attributes['customOverlayColor'] ) );
+		}
+
+		if ( isset( $attributes['height'] ) ) {
+			$style .= sprintf( 'min-height:%dpx;', intval( $attributes['height'] ) );
 		}
 
 		return $style;
