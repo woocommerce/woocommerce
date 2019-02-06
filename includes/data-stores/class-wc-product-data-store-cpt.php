@@ -128,11 +128,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$this->update_attributes( $product, true );
 			$this->update_version_and_type( $product );
 			$this->handle_updated_props( $product );
+			$this->clear_caches( $product );
 
 			$product->save_meta_data();
 			$product->apply_changes();
-
-			$this->clear_caches( $product );
 
 			do_action( 'woocommerce_new_product', $id );
 		}
@@ -245,10 +244,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$this->update_attributes( $product );
 		$this->update_version_and_type( $product );
 		$this->handle_updated_props( $product );
+		$this->clear_caches( $product );
 
 		$product->apply_changes();
-
-		$this->clear_caches( $product );
 
 		do_action( 'woocommerce_update_product', $product->get_id() );
 	}
@@ -714,7 +712,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 
 			if ( ! is_wp_error( wp_set_post_terms( $product->get_id(), $terms, 'product_visibility', false ) ) ) {
-				delete_transient( 'wc_featured_products' );
 				do_action( 'woocommerce_product_set_visibility', $product->get_id(), $product->get_catalog_visibility() );
 			}
 		}
@@ -737,8 +734,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			if ( $attributes ) {
 				foreach ( $attributes as $attribute_key => $attribute ) {
 					$value = '';
-
-					delete_transient( 'wc_layered_nav_counts_' . $attribute_key );
 
 					if ( is_null( $attribute ) ) {
 						if ( taxonomy_exists( $attribute_key ) ) {
@@ -830,6 +825,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected function clear_caches( &$product ) {
 		wc_delete_product_transients( $product->get_id() );
+		if ( $product->get_parent_id( 'edit' ) ) {
+			wc_delete_product_transients( $product->get_parent_id( 'edit' ) );
+			WC_Cache_Helper::incr_cache_prefix( 'product_' . $product->get_parent_id( 'edit' ) );
+		}
+		WC_Cache_Helper::invalidate_attribute_count( array_keys( $product->get_attributes() ) );
 		WC_Cache_Helper::incr_cache_prefix( 'product_' . $product->get_id() );
 	}
 

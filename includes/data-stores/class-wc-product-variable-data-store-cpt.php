@@ -169,7 +169,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$variation_attributes = array();
 		$attributes           = $product->get_attributes();
 		$child_ids            = $product->get_children();
-		$cache_key            = WC_Cache_Helper::get_cache_prefix( 'products' ) . 'product_variation_attributes_' . $product->get_id();
+		$cache_key            = WC_Cache_Helper::get_cache_prefix( 'product_' . $product->get_id() ) . 'product_variation_attributes_' . $product->get_id();
 		$cache_group          = 'products';
 		$cached_data          = wp_cache_get( $cache_key, $cache_group );
 
@@ -253,9 +253,16 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		 *
 		 * @since 2.5.0 a single transient is used per product for all prices, rather than many transients per product.
 		 */
-		$transient_name = 'wc_var_prices_' . $product->get_id();
+		$transient_name    = 'wc_var_prices_' . $product->get_id();
+		$transient_version = WC_Cache_Helper::get_transient_version( 'product' );
+		$price_hash        = $this->get_price_hash( $product, $for_display );
 
-		$price_hash = $this->get_price_hash( $product, $for_display );
+		// Check if prices array is stale.
+		if ( ! isset( $this->prices_array['version'] ) || $this->prices_array['version'] !== $transient_version ) {
+			$this->prices_array = array(
+				'version' => $transient_version,
+			);
+		}
 
 		/**
 		 * $this->prices_array is an array of values which may have been modified from what is stored in transients - this may not match $transient_cached_prices_array.
@@ -265,8 +272,10 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			$transient_cached_prices_array = array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) );
 
 			// If the product version has changed since the transient was last saved, reset the transient cache.
-			if ( empty( $transient_cached_prices_array['version'] ) || WC_Cache_Helper::get_transient_version( 'product' ) !== $transient_cached_prices_array['version'] ) {
-				$transient_cached_prices_array = array( 'version' => WC_Cache_Helper::get_transient_version( 'product' ) );
+			if ( ! isset( $transient_cached_prices_array['version'] ) || $transient_version !== $transient_cached_prices_array['version'] ) {
+				$transient_cached_prices_array = array(
+					'version' => $transient_version,
+				);
 			}
 
 			// If the prices are not stored for this hash, generate them and add to the transient.
@@ -401,14 +410,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			}
 		}
 
-		$price_hash[] = WC_Cache_Helper::get_transient_version( 'product' );
-		$price_hash   = md5(
-			wp_json_encode(
-				apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $product, $for_display )
-			)
-		);
-
-		return $price_hash;
+		return md5( wp_json_encode( apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $product, $for_display ) ) );
 	}
 
 	/**

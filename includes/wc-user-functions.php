@@ -95,7 +95,8 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		}
 
 		$new_customer_data = apply_filters(
-			'woocommerce_new_customer_data', array(
+			'woocommerce_new_customer_data',
+			array(
 				'user_login' => $username,
 				'user_pass'  => $password,
 				'user_email' => $email,
@@ -215,10 +216,13 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		return $result;
 	}
 
-	$transient_name = 'wc_cbp_' . md5( $customer_email . $user_id . WC_Cache_Helper::get_transient_version( 'orders' ) );
-	$result         = get_transient( $transient_name );
+	$transient_name    = 'wc_customer_bought_product_' . md5( $customer_email . $user_id );
+	$transient_version = WC_Cache_Helper::get_transient_version( 'orders' );
+	$transient_value   = get_transient( $transient_name );
 
-	if ( false === $result ) {
+	if ( isset( $transient_value['value'], $transient_value['version'] ) && $transient_value['version'] === $transient_version ) {
+		$result = $transient_value['value'];
+	} else {
 		$customer_data = array( $user_id );
 
 		if ( $user_id ) {
@@ -255,7 +259,12 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		); // WPCS: unprepared SQL ok.
 		$result = array_map( 'absint', $result );
 
-		set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
+		$transient_value = array(
+			'version' => $transient_version,
+			'value'   => $result,
+		);
+
+		set_transient( $transient_name, $transient_value, DAY_IN_SECONDS * 30 );
 	}
 	return in_array( absint( $product_id ), $result, true );
 }
@@ -579,7 +588,11 @@ function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 	global $wpdb;
 
 	$wpdb->update(
-		$wpdb->postmeta, array( 'meta_value' => 0 ), array(
+		$wpdb->postmeta,
+		array(
+			'meta_value' => 0,
+		),
+		array(
 			'meta_key'   => '_customer_user',
 			'meta_value' => $user_id,
 		)
