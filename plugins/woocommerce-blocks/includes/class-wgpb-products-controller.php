@@ -233,9 +233,7 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 		$orderby       = $request->get_param( 'orderby' );
 		$order         = $request->get_param( 'order' );
 		$cat_operator  = $request->get_param( 'cat_operator' );
-		$attributes    = $request->get_param( 'attributes' );
 		$attr_operator = $request->get_param( 'attr_operator' );
-		$tax_relation  = $request->get_param( 'tax_relation' );
 
 		$ordering_args   = WC()->query->get_catalog_ordering_args( $orderby, $order );
 		$args['orderby'] = $ordering_args['orderby'];
@@ -253,29 +251,11 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 			}
 		}
 
-		$tax_query = array();
-		if ( $attributes ) {
-			foreach ( $attributes as $attribute => $attribute_terms ) {
-				if ( in_array( $attribute, wc_get_attribute_taxonomy_names(), true ) ) {
-					$tax_query[] = array(
-						'taxonomy' => $attribute,
-						'field'    => 'term_id',
-						'terms'    => $attribute_terms,
-						'operator' => ! $attr_operator ? 'IN' : $attr_operator,
-					);
+		if ( $attr_operator && isset( $args['tax_query'] ) ) {
+			foreach ( $args['tax_query'] as $i => $tax_query ) {
+				if ( in_array( $tax_query['taxonomy'], wc_get_attribute_taxonomy_names(), true ) ) {
+					$args['tax_query'][ $i ]['operator'] = $attr_operator;
 				}
-			}
-		}
-
-		// Merge attribute `$tax_query`s into the request's WP_Query args.
-		if ( ! empty( $tax_query ) ) {
-			if ( ! empty( $args['tax_query'] ) ) {
-				$args['tax_query'] = array_merge( $tax_query, $args['tax_query'] ); // WPCS: slow query ok.
-			} else {
-				$args['tax_query'] = $tax_query; // WPCS: slow query ok.
-			}
-			if ( ! empty( $tax_relation ) && count( $tax_query ) > 1 ) {
-				$args['tax_query']['relation'] = 'AND' === $tax_relation ? 'AND' : 'OR';
 			}
 		}
 
@@ -309,8 +289,7 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 	/**
 	 * Update the collection params.
 	 *
-	 * Adds new options for 'orderby', and new parameters 'cat_operator', 'attributes',
-	 * 'attr_operator', and 'tax_relation'.
+	 * Adds new options for 'orderby', and new parameters 'cat_operator', 'attr_operator'.
 	 *
 	 * @return array
 	 */
@@ -327,34 +306,10 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 		$params['attr_operator']   = array(
 			'description'       => __( 'Operator to compare product attribute terms.', 'woo-gutenberg-products-block' ),
 			'type'              => 'string',
-			'enum'              => array( 'IN', 'AND' ),
+			'enum'              => array( 'IN', 'NOT IN', 'AND' ),
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['tax_relation']    = array(
-			'description'       => __( 'The logical relationship between each inner taxonomy array when there is more than one.', 'woo-gutenberg-products-block' ),
-			'type'              => 'string',
-			'enum'              => array( 'AND', 'OR' ),
-			'sanitize_callback' => 'sanitize_text_field',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-
-		$attr_properties = array();
-		foreach ( wc_get_attribute_taxonomy_names() as $name ) {
-			$attr_properties[ $name ] = array(
-				'type'  => 'array',
-				'items' => array( 'type' => 'string' ),
-			);
-		}
-		$params['attributes'] = array(
-			'description'       => __( 'Map of attributes to selected terms.', 'woo-gutenberg-products-block' ),
-			'type'              => 'object',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		if ( ! empty( $attr_properties ) ) {
-			$params['attributes']['properties']           = $attr_properties;
-			$params['attributes']['additionalProperties'] = false;
-		}
 
 		return $params;
 	}
