@@ -131,6 +131,17 @@ function wc_delete_product_transients( $post_id = 0 ) {
 }
 
 /**
+ * Delete a cached product object.
+ *
+ * @since 3.6
+ * @param int Product ID
+ */
+function wc_delete_cached_product( $product_id ) {
+	wp_cache_delete( $product_id, 'products' );
+}
+add_action( 'clean_post_cache', 'wc_delete_cached_product' );
+
+/**
  * Function that returns an array containing the IDs of the products that are on sale.
  *
  * @since 2.0
