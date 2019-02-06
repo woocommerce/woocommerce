@@ -130,14 +130,11 @@ class WC_Tests_API_Products_By_Attributes_Controller extends WC_REST_Unit_Test_C
 	public function test_get_products_by_multiple_terms_all() {
 		wp_set_current_user( $this->user );
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products' );
+		$request->set_param( 'attribute', 'pa_size' );
 		$request->set_param(
-			'attributes',
-			array(
-				'pa_color' => array(
-					$this->attr_term_ids['red'],
-					$this->attr_term_ids['blue'],
-				),
-			)
+			'attribute_term',
+			// Terms list needs to be a string.
+			$this->attr_term_ids['medium'] . ',' . $this->attr_term_ids['large']
 		);
 		$request->set_param( 'attr_operator', 'AND' );
 
@@ -145,69 +142,5 @@ class WC_Tests_API_Products_By_Attributes_Controller extends WC_REST_Unit_Test_C
 		$response_products = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 1, count( $response_products ) );
-	}
-
-	/**
-	 * Test getting products by multiple terms in multiple attributes, matching any.
-	 *
-	 * @since 1.2.0
-	 */
-	public function test_get_products_by_multiple_terms_multiple_attrs_any() {
-		wp_set_current_user( $this->user );
-		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products' );
-		$request->set_param(
-			'attributes',
-			array(
-				'pa_color' => array( $this->attr_term_ids['red'] ),
-				'pa_size'  => array( $this->attr_term_ids['large'] ),
-			)
-		);
-		$request->set_param( 'attr_operator', 'IN' );
-		$request->set_param( 'tax_relation', 'OR' );
-
-		$response          = $this->server->dispatch( $request );
-		$response_products = $response->get_data();
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $response_products ) );
-	}
-
-	/**
-	 * Test getting products by multiple terms in multiple attributes, matching all.
-	 *
-	 * @since 1.2.0
-	 */
-	public function test_get_products_by_multiple_terms_multiple_attrs_all() {
-		wp_set_current_user( $this->user );
-		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products' );
-		$request->set_param(
-			'attributes',
-			array(
-				'pa_color' => array( $this->attr_term_ids['blue'] ),
-				'pa_size'  => array( $this->attr_term_ids['medium'] ),
-			)
-		);
-		$request->set_param( 'attr_operator', 'AND' );
-		$request->set_param( 'tax_relation', 'AND' );
-
-		$response          = $this->server->dispatch( $request );
-		$response_products = $response->get_data();
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $response_products ) );
-	}
-
-	/**
-	 * Test getting products by attributes that don't exist.
-	 *
-	 * Note: This test is currently skipped because the API isn't registering the attribute
-	 * properties correctly, and therefor not validating attribute names against "real" attributes.
-	 *
-	 * @since 1.2.0
-	 */
-	public function xtest_get_products_by_fake_attrs() {
-		wp_set_current_user( $this->user );
-		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products' );
-		$request->set_param( 'attributes', array( 'pa_fake' => array( 21 ) ) );
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 400, $response->get_status() );
 	}
 }
