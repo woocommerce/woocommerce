@@ -560,7 +560,7 @@ function wc_get_product_class( $class = '', $product_id = null ) {
 		$product    = $product_id;
 		$product_id = $product_id->get_id();
 	} else {
-		$product = wc_get_product( $post->ID );
+		$product = wc_get_product( $product_id );
 	}
 
 	if ( ! is_array( $class ) ) {
