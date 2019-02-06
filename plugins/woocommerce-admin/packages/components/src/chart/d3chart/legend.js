@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
@@ -12,6 +12,7 @@ import PropTypes from 'prop-types';
  */
 import { getFormatter } from './utils/index';
 import { getColor } from './utils/color';
+import { selectionLimit } from '../constants';
 
 /**
  * A legend specifically designed for the WooCommerce admin charts.
@@ -60,7 +61,9 @@ class D3Legend extends Component {
 		} = this.props;
 		const { isScrollable } = this.state;
 		const numberOfRowsVisible = data.filter( row => row.visible ).length;
-		const showTotalLabel = legendDirection === 'column' && data.length > 5 && totalLabel;
+		const showTotalLabel = legendDirection === 'column' && data.length > numberOfRowsVisible && totalLabel;
+
+		const visibleKeys = data.filter( key => key.visible );
 
 		return (
 			<div
@@ -96,10 +99,13 @@ class D3Legend extends Component {
 								id={ row.key }
 								disabled={
 									( row.visible && numberOfRowsVisible <= 1 ) ||
-									( ! row.visible && numberOfRowsVisible >= 5 ) ||
+									( ! row.visible && numberOfRowsVisible >= selectionLimit ) ||
 									! interactive
 								}
-								title={ numberOfRowsVisible >= 5 ? __( 'You may select up to 5 items.', 'wc-admin' ) : '' }
+								title={ numberOfRowsVisible >= selectionLimit
+									? sprintf( __( 'You may select up to %d items.', 'wc-admin' ), selectionLimit )
+									: ''
+								}
 							>
 								<div className="woocommerce-legend__item-container" id={ row.key }>
 									<span
@@ -107,7 +113,7 @@ class D3Legend extends Component {
 											'woocommerce-legend__item-checkmark-checked': row.visible,
 										} ) }
 										id={ row.key }
-										style={ { color: getColor( row.key, data, colorScheme ) } }
+										style={ { color: getColor( row.key, visibleKeys, colorScheme ) } }
 									/>
 									<span className="woocommerce-legend__item-title" id={ row.key }>
 										{ row.key }

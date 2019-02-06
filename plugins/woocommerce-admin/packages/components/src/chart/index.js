@@ -24,6 +24,7 @@ import { updateQueryString } from '@woocommerce/navigation';
 import ChartPlaceholder from './placeholder';
 import { H, Section } from '../section';
 import { D3Chart, D3Legend } from './d3chart';
+import { selectionLimit } from './constants';
 
 function getD3CurrencyFormat( symbol, position ) {
 	switch ( position ) {
@@ -74,7 +75,7 @@ function getOrderedKeys( props, previousOrderedKeys = [] ) {
 			return updatedKeys.filter( key => key.total > 0 ).map( ( key, index ) => {
 				return {
 					...key,
-					visible: index < 5 || key.visible,
+					visible: index < selectionLimit || key.visible,
 				};
 			} );
 		}

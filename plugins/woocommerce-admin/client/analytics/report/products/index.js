@@ -31,7 +31,7 @@ class ProductsReport extends Component {
 		const isProductDetailsView =
 			'top_items' === query.filter ||
 			'top_sales' === query.filter ||
-			'single_product' === query.filter;
+			'compare-products' === query.filter;
 
 		const mode =
 			isProductDetailsView || ( isSingleProductView && isSingleProductVariable )

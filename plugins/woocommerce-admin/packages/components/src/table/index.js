@@ -142,10 +142,11 @@ class TableCard extends Component {
 	}
 
 	onCompare() {
-		// Reset selected rows so the user can start a comparison again.
-		this.setState( {
-			selectedRows: [],
-		} );
+		const { compareBy, compareParam, onQueryChange } = this.props;
+		const { selectedRows } = this.state;
+		if ( compareBy ) {
+			onQueryChange( 'compare' )( compareBy, compareParam, selectedRows.join( ',' ) );
+		}
 	}
 
 	onSearch( values ) {

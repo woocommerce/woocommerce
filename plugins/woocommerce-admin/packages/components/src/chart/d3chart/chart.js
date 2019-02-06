@@ -116,6 +116,7 @@ class D3Chart extends Component {
 		const compact = this.shouldBeCompact();
 		const uniqueKeys = getUniqueKeys( data );
 		const newOrderedKeys = orderedKeys || getOrderedKeys( data, uniqueKeys );
+		const visibleKeys = newOrderedKeys.filter( key => key.visible );
 		const lineData = getLineData( data, newOrderedKeys );
 		const yMax = getYMax( lineData );
 		const yScale = getYScale( adjHeight, yMax );
@@ -135,6 +136,7 @@ class D3Chart extends Component {
 			margin,
 			mode,
 			orderedKeys: newOrderedKeys,
+			visibleKeys,
 			parseDate,
 			tooltipPosition,
 			tooltipLabelFormat: getFormatter( tooltipLabelFormat, d3TimeFormat ),

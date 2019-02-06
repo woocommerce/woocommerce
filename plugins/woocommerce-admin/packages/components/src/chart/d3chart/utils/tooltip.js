@@ -115,13 +115,13 @@ const getTooltipRowLabel = ( d, row, params ) => {
 };
 
 export const showTooltip = ( params, d, position ) => {
-	const keys = params.orderedKeys.filter( row => row.visible ).map(
+	const keys = params.visibleKeys.map(
 		row => `
 				<li class="key-row">
 					<div class="key-container">
 						<span
 							class="key-color"
-							style="background-color:${ getColor( row.key, params.orderedKeys, params.colorScheme ) }">
+							style="background-color:${ getColor( row.key, params.visibleKeys, params.colorScheme ) }">
 						</span>
 						<span class="key-key">${ getTooltipRowLabel( d, row, params ) }</span>
 					</div>
