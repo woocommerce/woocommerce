@@ -26,7 +26,7 @@ class WC_Cache_Helper {
 		add_action( 'shutdown', array( __CLASS__, 'delete_transients_on_shutdown' ), 10 );
 		add_action( 'template_redirect', array( __CLASS__, 'geolocation_ajax_redirect' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
-		add_action( 'delete_version_transients', array( __CLASS__, 'delete_version_transients' ), 10, 2 );
+		add_action( 'delete_version_transients', array( __CLASS__, 'delete_version_transients' ), 10 );
 		add_action( 'wp', array( __CLASS__, 'prevent_caching' ) );
 		add_action( 'clean_term_cache', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
 		add_action( 'edit_terms', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
