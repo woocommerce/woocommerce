@@ -9,7 +9,7 @@ import { find, last, isEqual } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { getNewPath, getPersistedQuery, history, stringifyQuery } from '@woocommerce/navigation';
+import { getNewPath, getPersistedQuery, getHistory, stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -70,7 +70,7 @@ class Controller extends Component {
 		const baseQuery = this.getBaseQuery( this.props.location.search );
 
 		if ( prevQuery.page > 1 && ! isEqual( prevBaseQuery, baseQuery ) ) {
-			history.replace( getNewPath( { page: 1 } ) );
+			getHistory().replace( getNewPath( { page: 1 } ) );
 		}
 	}
 
