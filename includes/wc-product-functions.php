@@ -105,7 +105,9 @@ function wc_delete_product_transients( $post_id = 0 ) {
 		'wc_low_stock_count',
 	);
 
-	WC_Cache_Helper::queue_delete_transient( $transients_to_clear );
+	foreach ( $transients_to_clear as $transient ) {
+		delete_transient( $transient );
+	}
 
 	if ( $post_id > 0 ) {
 		// Transient names that include an ID - since they are dynamic they cannot be cleaned in bulk without the ID.

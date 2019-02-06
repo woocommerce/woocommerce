@@ -167,7 +167,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$variation_attributes = array();
 		$attributes           = $product->get_attributes();
 		$child_ids            = $product->get_children();
-		$cache_key            = WC_Cache_Helper::get_cache_prefix( 'products' ) . 'product_variation_attributes_' . $product->get_id();
+		$cache_key            = WC_Cache_Helper::get_cache_prefix( 'product_' . $product->get_id() ) . 'product_variation_attributes_' . $product->get_id();
 		$cache_group          = 'products';
 		$cached_data          = wp_cache_get( $cache_key, $cache_group );
 
