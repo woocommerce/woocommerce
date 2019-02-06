@@ -129,15 +129,17 @@ ProductsReport.propTypes = {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
-		const { getProducts, isGetProductsRequesting, getProductsError } = select( 'wc-api' );
+		const { getItems, isGetItemsRequesting, getItemsError } = select( 'wc-api' );
 		const isSingleProductView = query.products && 1 === query.products.split( ',' ).length;
 		if ( isSingleProductView ) {
-			const includeArgs = { include: query.products };
+			const productId = parseInt( query.products );
+			const includeArgs = { include: productId };
 			// TODO Look at similar usage to populate tags in the Search component.
-			const products = getProducts( includeArgs );
-			const isVariable = products[ 0 ] && 'variable' === products[ 0 ].type;
-			const isProductsRequesting = isGetProductsRequesting( includeArgs );
-			const isProductsError = getProductsError( includeArgs );
+			const products = getItems( 'products', includeArgs );
+			const isVariable =
+				products && products.get( productId ) && 'variable' === products.get( productId ).type;
+			const isProductsRequesting = isGetItemsRequesting( 'products', includeArgs );
+			const isProductsError = Boolean( getItemsError( 'products', includeArgs ) );
 			return {
 				query: {
 					...query,
