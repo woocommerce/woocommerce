@@ -317,7 +317,7 @@ function wc_placeholder_img( $size = 'woocommerce_thumbnail' ) {
 	$dimensions        = wc_get_image_size( $size );
 	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
 
-	if ( ! empty( $placeholder_image ) && is_numeric( $placeholder_image ) ) {
+	if ( wp_attachment_is_image( $placeholder_image ) ) {
 		$image_html = wp_get_attachment_image(
 			$placeholder_image,
 			$size,
