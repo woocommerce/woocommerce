@@ -27,7 +27,7 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 			'refunds'        => "SUM($products_table.refund_amount) AS refunds",
 			'taxes'          => "SUM($products_table.tax_amount) AS taxes",
 			'shipping'       => "SUM($products_table.shipping_amount) AS shipping",
-			// @todo: product_net_revenue should already have refunds subtracted, so it should not be here. Pls check.
+			// @todo product_net_revenue should already have refunds subtracted, so it should not be here. Pls check.
 			'net_revenue'    => "SUM($products_table.product_net_revenue) AS net_revenue",
 		);
 
@@ -354,7 +354,7 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 		// while coupon and customer are bound to order, so we don't need the extra JOIN for those.
 		// This also means that segment selections need to be calculated differently.
 		if ( 'product' === $this->query_args['segmentby'] ) {
-			// @todo: how to handle shipping taxes when grouped by product?
+			// @todo How to handle shipping taxes when grouped by product?
 			$segmenting_selections     = array(
 				'product_level' => $this->get_segment_selections_product_level( $product_segmenting_table ),
 				'order_level'   => $this->get_segment_selections_order_level( $unique_orders_table ),

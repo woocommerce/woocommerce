@@ -160,7 +160,7 @@ class D3Chart extends Component {
 	render() {
 		const { className, data, height, type } = this.props;
 		if ( isEmpty( data ) ) {
-			return null; // TODO: improve messaging
+			return null; // @todo Improve messaging
 		}
 		const computedWidth = this.getWidth();
 		return (

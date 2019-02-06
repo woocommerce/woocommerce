@@ -139,7 +139,7 @@ class WC_Admin_Order extends WC_Order {
 	 *
 	 * Loosely based on code in includes/admin/meta-boxes/views/html-order-item(s).php.
 	 *
-	 * @todo: if WC is currently not tax enabled, but it was before (or vice versa), would this work correctly?
+	 * @todo If WC is currently not tax enabled, but it was before (or vice versa), would this work correctly?
 	 *
 	 * @param WC_Order_Item $item Line item from order.
 	 *

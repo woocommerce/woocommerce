@@ -54,7 +54,7 @@ function wc_admin_get_current_screen_id() {
 /**
  * Returns breadcrumbs for the current page.
  *
- * TODO When merging to core, we should explore a better API for defining breadcrumbs, instead of just defining an array.
+ * @todo When merging to core, we should explore a better API for defining breadcrumbs, instead of just defining an array.
  */
 function wc_admin_get_embed_breadcrumbs() {
 	$current_screen_id = wc_admin_get_current_screen_id();
@@ -210,7 +210,8 @@ function wc_admin_get_embed_breadcrumbs() {
  * `wc_admin_get_embed_enabled_screen_ids`,  `wc_admin_get_embed_enabled_plugin_screen_ids`,
  * `wc_admin_get_embed_enabled_screen_ids` should be considered temporary functions for the feature plugin.
  *  This is separate from WC's screen_id functions so that extensions explictly have to opt-in to the feature plugin.
- *  TODO When merging to core, we should explore a better API for opting into the new header for extensions.
+ *
+ *  @todo When merging to core, we should explore a better API for opting into the new header for extensions.
  */
 function wc_admin_get_embed_enabled_core_screen_ids() {
 	$screens = array(

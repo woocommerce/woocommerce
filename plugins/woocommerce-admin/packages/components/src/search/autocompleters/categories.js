@@ -62,7 +62,7 @@ export default {
 	},
 	getOptionLabel( cat, query ) {
 		const match = computeSuggestionMatch( cat.name, query ) || {};
-		// @todo bring back ProductImage, but allow for product category image
+		// @todo Bring back ProductImage, but allow for product category image
 		return [
 			<span key="name" className="woocommerce-search__result-name" aria-label={ cat.name }>
 				{ match.suggestionBeforeMatch }

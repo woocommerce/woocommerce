@@ -49,7 +49,7 @@ class WC_Admin_Reports_Data_Store {
 	 */
 	protected $report_columns = array();
 
-	// @todo: this does not really belong here, maybe factor out the comparison as separate class?
+	// @todo This does not really belong here, maybe factor out the comparison as separate class?
 	/**
 	 * Order by property, used in the cmp function.
 	 *
@@ -73,7 +73,7 @@ class WC_Admin_Reports_Data_Store {
 	private function interval_cmp( $a, $b ) {
 		if ( '' === $this->order_by || '' === $this->order ) {
 			return 0;
-			// @todo: should return WP_Error here perhaps?
+			// @todo Should return WP_Error here perhaps?
 		}
 		if ( $a[ $this->order_by ] === $b[ $this->order_by ] ) {
 			// As relative order is undefined in case of equality in usort, second-level sorting by date needs to be enforced
@@ -129,7 +129,7 @@ class WC_Admin_Reports_Data_Store {
 	 * @return stdClass
 	 */
 	protected function fill_in_missing_intervals( $db_intervals, $datetime_start, $datetime_end, $time_interval, &$data ) {
-		// @todo: this is ugly and messy.
+		// @todo This is ugly and messy.
 		// At this point, we don't know when we can stop iterating, as the ordering can be based on any value.
 		$end_datetime = new DateTime( $datetime_end );
 		$time_ids     = array_flip( wp_list_pluck( $data->intervals, 'time_interval' ) );
@@ -140,7 +140,7 @@ class WC_Admin_Reports_Data_Store {
 		foreach ( $totals_arr as $key => $val ) {
 			$totals_arr[ $key ] = 0;
 		}
-		// @todo: should 'products' be in intervals?
+		// @todo Should 'products' be in intervals?
 		unset( $totals_arr['products'] );
 		while ( $datetime <= $end_datetime ) {
 			$next_start = WC_Admin_Reports_Interval::iterate( $datetime, $time_interval );
@@ -349,7 +349,7 @@ class WC_Admin_Reports_Data_Store {
 					$start_iteration = 0;
 				}
 				if ( $start_iteration ) {
-					// @todo: is this correct? should it only be added if iterate runs? other two iterate instances, too?
+					// @todo Is this correct? should it only be added if iterate runs? other two iterate instances, too?
 					$new_start_date_timestamp = (int) $new_start_date->format( 'U' ) + 1;
 					$new_start_date->setTimestamp( $new_start_date_timestamp );
 				}
@@ -475,7 +475,7 @@ class WC_Admin_Reports_Data_Store {
 			$datetime = new DateTime( $interval['datetime_anchor'] );
 
 			$prev_start = WC_Admin_Reports_Interval::iterate( $datetime, $time_interval, true );
-			// @todo: not sure if the +1/-1 here are correct, especially as they are applied before the ?: below.
+			// @todo Not sure if the +1/-1 here are correct, especially as they are applied before the ?: below.
 			$prev_start_timestamp = (int) $prev_start->format( 'U' ) + 1;
 			$prev_start->setTimestamp( $prev_start_timestamp );
 			if ( $datetime_start ) {

@@ -31,7 +31,7 @@ function createWcApiStore() {
 	return {
 		// The wrapped function for getSelectors is temporary code.
 		//
-		// TODO: Remove the `() =>` after the `@wordpress/data` PR is merged:
+		// @todo Remove the `() =>` after the `@wordpress/data` PR is merged:
 		// https://github.com/WordPress/gutenberg/pull/11460
 		//
 		getSelectors: () => context => {

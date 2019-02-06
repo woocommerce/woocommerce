@@ -153,7 +153,7 @@ function wc_admin_print_script_settings() {
 	$tracking_script  = '';
 	if ( $tracking_enabled && defined( 'JETPACK__VERSION' ) ) {
 		$tracking_script  = "var wc_tracking_script = document.createElement( 'script' );\n";
-		$tracking_script .= "wc_tracking_script.src = '//stats.wp.com/w.js';\n"; // TODO Version/cache buster.
+		$tracking_script .= "wc_tracking_script.src = '//stats.wp.com/w.js';\n"; // @todo Version/cache buster.
 		$tracking_script .= "wc_tracking_script.type = 'text/javascript';\n";
 		$tracking_script .= "wc_tracking_script.async = true;\n";
 		$tracking_script .= "wc_tracking_script.defer = true;\n";
@@ -183,11 +183,11 @@ function wc_admin_print_script_settings() {
 	}
 
 	/**
-	 * TODO: On merge, once plugin images are added to core WooCommerce, `wcAdminAssetUrl` can be retired, and
+	 * Settings and variables can be passed here for access in the app.
+	 *
+	 * @todo On merge, once plugin images are added to core WooCommerce, `wcAdminAssetUrl` can be retired, and
 	 * `wcAssetUrl` can be used in its place throughout the codebase.
 	 */
-
-	// Settings and variables can be passed here for access in the app.
 	$settings = array(
 		'adminUrl'              => admin_url(),
 		'wcAssetUrl'            => plugins_url( 'assets/', WC_PLUGIN_FILE ),

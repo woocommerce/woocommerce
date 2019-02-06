@@ -12,8 +12,8 @@ export function recordEvent( eventName, eventProperties ) {
 		return false;
 	}
 
-	// TODO - should we add validation/whitelist of tracks
-	// TODO - Don't send tracks in dev envs maybe based off WP_DEBUG?
+	// @todo Should we add validation/whitelist of tracks
+	// @todo Don't send tracks in dev envs maybe based off WP_DEBUG?
 	const event = `wca_${ eventName }`;
 
 	// Should already be initialized via inline ./lib/clicent-assets.php

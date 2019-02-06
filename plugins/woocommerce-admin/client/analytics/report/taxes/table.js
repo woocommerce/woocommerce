@@ -32,7 +32,7 @@ export default class TaxesReportTable extends Component {
 		return [
 			{
 				label: __( 'Tax Code', 'wc-admin' ),
-				// @TODO it should be the tax code, not the ID
+				// @todo It should be the tax code, not the ID
 				key: 'tax_rate_id',
 				required: true,
 				isLeftAligned: true,
@@ -74,7 +74,7 @@ export default class TaxesReportTable extends Component {
 		return map( taxes, tax => {
 			const { order_tax, orders_count, tax_rate, tax_rate_id, total_tax, shipping_tax } = tax;
 
-			// @TODO must link to the tax detail report
+			// @todo Must link to the tax detail report
 			const taxLink = (
 				<Link href="" type="wc-admin">
 					{ getTaxCode( tax ) }

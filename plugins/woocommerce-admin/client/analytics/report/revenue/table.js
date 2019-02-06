@@ -106,7 +106,7 @@ class RevenueReportTable extends Component {
 				taxes,
 			} = row.subtotals;
 
-			// @TODO How to create this per-report? Can use `w`, `year`, `m` to build time-specific order links
+			// @todo How to create this per-report? Can use `w`, `year`, `m` to build time-specific order links
 			// we need to know which kind of report this is, and parse the `label` to get this row's date
 			const orderLink = (
 				<Link
@@ -223,7 +223,7 @@ export default compose(
 		const datesFromQuery = getCurrentDates( query );
 		const { getReportStats, getReportStatsError, isReportStatsRequesting } = select( 'wc-api' );
 
-		// TODO Support hour here when viewing a single day
+		// @todo Support hour here when viewing a single day
 		const tableQuery = {
 			interval: 'day',
 			orderby: query.orderby || 'date',

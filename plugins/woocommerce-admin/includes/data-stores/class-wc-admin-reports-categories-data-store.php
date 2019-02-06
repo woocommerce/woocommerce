@@ -82,7 +82,7 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 		$sql_query_params = $this->get_time_period_sql_params( $query_args, $order_product_lookup_table );
 
 		// join wp_order_product_lookup_table with relationships and taxonomies
-		// @TODO: How to handle custom product tables?
+		// @todo How to handle custom product tables?
 		$sql_query_params['from_clause'] .= " LEFT JOIN {$wpdb->prefix}term_relationships ON {$order_product_lookup_table}.product_id = {$wpdb->prefix}term_relationships.object_id";
 		$sql_query_params['from_clause'] .= " LEFT JOIN {$wpdb->prefix}term_taxonomy ON {$wpdb->prefix}term_relationships.term_taxonomy_id = {$wpdb->prefix}term_taxonomy.term_taxonomy_id";
 
@@ -95,7 +95,7 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 			$sql_query_params['where_clause'] .= " AND {$wpdb->prefix}term_taxonomy.term_id IN ({$included_categories})";
 		}
 
-		// @todo: only products in the category C or orders with products from category C (and, possibly others?).
+		// @todo Only products in the category C or orders with products from category C (and, possibly others?).
 		$included_products = $this->get_included_products( $query_args );
 		if ( $included_products ) {
 			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";

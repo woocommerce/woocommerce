@@ -101,7 +101,7 @@ class ProductsReportTable extends Component {
 				items_sold,
 				net_revenue,
 				orders_count,
-				variations = [], // @TODO
+				variations = [],
 			} = row;
 			const {
 				category_ids,

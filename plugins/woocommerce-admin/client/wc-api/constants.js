@@ -6,7 +6,7 @@ import { MINUTE } from '@fresh-data/framework';
 
 export const NAMESPACE = '/wc/v4';
 
-// TODO: Remove once swagger endpoints are phased out.
+// @todo Remove once swagger endpoints are phased out.
 export const SWAGGERNAMESPACE = 'https://virtserver.swaggerhub.com/peterfabian/wc-v3-api/1.0.0/';
 
 export const DEFAULT_REQUIREMENT = {

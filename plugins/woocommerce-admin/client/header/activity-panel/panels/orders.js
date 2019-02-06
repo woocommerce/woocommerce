@@ -41,7 +41,7 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 		const title = __( 'There was an error getting your orders. Please try again.', 'wc-admin' );
 		const actionLabel = __( 'Reload', 'wc-admin' );
 		const actionCallback = () => {
-			// TODO Add tracking for how often an error is displayed, and the reload action is clicked.
+			// @todo Add tracking for how often an error is displayed, and the reload action is clicked.
 			window.location.reload();
 		};
 
@@ -83,7 +83,7 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 					),
 					components: {
 						orderLink: <Link href={ 'post.php?action=edit&post=' + order.id } type="wp-admin" />,
-						// @TODO: Hook up customer name link
+						// @todo Hook up customer name link
 						customerLink: <Link href={ '#' } type="wp-admin" />,
 						destinationFlag: <Flag order={ order } round={ false } />,
 					},

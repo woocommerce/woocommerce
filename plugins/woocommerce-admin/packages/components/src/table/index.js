@@ -129,7 +129,7 @@ class TableCard extends Component {
 	onClickDownload() {
 		const { query, onClickDownload, title } = this.props;
 
-		// @TODO The current implementation only downloads the contents displayed in the table.
+		// @todo The current implementation only downloads the contents displayed in the table.
 		// Another solution is required when the data set is larger (see #311).
 		downloadCSVFile(
 			generateCSVFileName( title, query ),

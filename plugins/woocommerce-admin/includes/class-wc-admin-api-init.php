@@ -729,7 +729,7 @@ class WC_Admin_Api_Init {
 		$customer_ids = $customer_query->get_results();
 
 		foreach ( $customer_ids as $customer_id ) {
-			// @todo: schedule single customer update if this fails?
+			// @todo Schedule single customer update if this fails?
 			WC_Admin_Reports_Customers_Data_Store::update_registered_customer( $customer_id );
 		}
 	}
@@ -776,7 +776,7 @@ class WC_Admin_Api_Init {
 		return array_merge(
 			$wc_tables,
 			array(
-				// @todo: will this work on multisite?
+				// @todo Will this work on multisite?
 				"{$wpdb->prefix}wc_order_stats",
 				"{$wpdb->prefix}wc_order_product_lookup",
 				"{$wpdb->prefix}wc_order_tax_lookup",

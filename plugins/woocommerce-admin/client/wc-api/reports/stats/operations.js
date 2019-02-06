@@ -24,7 +24,7 @@ const statEndpoints = [
 	'taxes',
 	'customers',
 ];
-// TODO: Remove once swagger endpoints are phased out.
+// @todo Remove once swagger endpoints are phased out.
 const swaggerEndpoints = [ 'categories' ];
 
 const typeEndpointMap = {

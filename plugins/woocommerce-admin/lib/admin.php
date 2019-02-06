@@ -283,9 +283,8 @@ add_action( 'admin_notices', 'wc_admin_admin_after_notices', PHP_INT_MAX );
 /**
  * Edits Admin title based on section of wc-admin.
  *
- * @TODO Can we do some URL rewriting so we can figure out which page they are on server side?
- *
  * @param string $admin_title Modifies admin title.
+ * @todo Can we do some URL rewriting so we can figure out which page they are on server side?
  */
 function wc_admin_admin_title( $admin_title ) {
 	if ( ! wc_admin_is_admin_page() && ! wc_admin_is_embed_enabled_wc_page() ) {
@@ -344,8 +343,8 @@ function wc_admin_output_breadcrumb( $section ) {
 /**
  * Set up a div for the header embed to render into.
  * The initial contents here are meant as a place loader for when the PHP page initialy loads.
-
- * TODO Icon Placeholders for the ActivityPanel, when we implement the new designs.
+ *
+ * @todo Icon Placeholders for the ActivityPanel, when we implement the new designs.
  */
 function woocommerce_embed_page_header() {
 	if ( ! wc_admin_is_embed_enabled_wc_page() ) {

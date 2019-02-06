@@ -85,7 +85,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * @param array $intervals_query Array of options for intervals db query.
 	 */
 	protected function orders_stats_sql_filter( $query_args, &$totals_query, &$intervals_query ) {
-		// @todo: performance of all of this?
+		// @todo Performance of all of this?
 		global $wpdb;
 
 		$from_clause        = '';
@@ -94,7 +94,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 
 		$where_filters = array();
 
-		// @todo: maybe move the sql inside the get_included/excluded functions?
+		// @todo Maybe move the sql inside the get_included/excluded functions?
 		// Products filters.
 		$included_products = $this->get_included_products( $query_args );
 		$excluded_products = $this->get_excluded_products( $query_args );

@@ -82,7 +82,7 @@ describe( 'Leaderboard', () => {
 		expect( firstRow[ 3 ].value ).toBe( getCurrencyFormatDecimal( mockData[ 0 ].net_revenue ) );
 	} );
 
-	// TODO: Since this now uses fresh-data / wc-api, the API testing needs to be revisted.
+	// @todo Since this now uses fresh-data / wc-api, the API testing needs to be revisted.
 	xtest( 'should load report stats from API', () => {
 		const getReportStatsMock = jest.fn().mockReturnValue( { data: mockData } );
 		const isReportStatsRequestingMock = jest.fn().mockReturnValue( false );

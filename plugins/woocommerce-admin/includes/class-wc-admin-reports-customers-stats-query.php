@@ -34,7 +34,7 @@ class WC_Admin_Reports_Customers_Stats_Query extends WC_Admin_Reports_Query {
 			'page'     => 1,
 			'order'    => 'DESC',
 			'orderby'  => 'date_registered',
-			'fields'   => '*', // @todo: needed?
+			'fields'   => '*', // @todo Needed?
 		);
 	}
 

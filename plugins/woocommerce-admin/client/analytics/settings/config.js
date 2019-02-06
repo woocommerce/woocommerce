@@ -59,7 +59,7 @@ export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 			),
 			components: {
 				strong: <strong />,
-				moreLink: <Link href="#" type="external" />, // @TODO: this needs to be replaced with a real link.
+				moreLink: <Link href="#" type="external" />, // @todo This needs to be replaced with a real link.
 			},
 		} ),
 		initialValue: wcSettings.wcAdminSettings.woocommerce_excluded_report_order_statuses || [],

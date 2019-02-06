@@ -2,7 +2,7 @@
  * NOTE: This is temporary code. It exists only until a version of `@wordpress/data`
  * is released which supports this functionality.
  *
- * TODO: Remove this and use `@wordpress/data` `withSelect` instead after
+ * @todo Remove this and use `@wordpress/data` `withSelect` instead after
  * this PR is merged: https://github.com/WordPress/gutenberg/pull/11460
  *
  * @format

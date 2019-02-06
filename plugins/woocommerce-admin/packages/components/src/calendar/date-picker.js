@@ -65,7 +65,7 @@ class DatePicker extends Component {
 
 	render() {
 		const { date, text, dateFormat, error } = this.props;
-		// @TODO: make upstream Gutenberg change to invalidate certain days.
+		// @todo Make upstream Gutenberg change to invalidate certain days.
 		// const isOutsideRange = getOutsideRange( invalidDays );
 		return (
 			<Dropdown

@@ -55,13 +55,13 @@ class WC_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 	public function test_get_reports() {
 		wp_set_current_user( $this->user );
 
-		// @todo update after report interface is done.
+		// @todo Update after report interface is done.
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$reports  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $reports ) ); // totals and intervals.
-		// $this->assertEquals( array(), $reports ); // @todo update results after implement report interface.
+		// $this->assertEquals( array(), $reports ); // @todo Update results after implement report interface.
 	}
 
 	/**

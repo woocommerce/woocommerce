@@ -26,7 +26,7 @@ class InboxPanel extends Component {
 			const title = __( 'There was an error getting your inbox. Please try again.', 'wc-admin' );
 			const actionLabel = __( 'Reload', 'wc-admin' );
 			const actionCallback = () => {
-				// TODO Add tracking for how often an error is displayed, and the reload action is clicked.
+				// @todo Add tracking for how often an error is displayed, and the reload action is clicked.
 				window.location.reload();
 			};
 

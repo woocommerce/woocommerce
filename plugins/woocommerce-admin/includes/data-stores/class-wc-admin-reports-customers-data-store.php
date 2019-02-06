@@ -41,7 +41,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		'customer_id'      => 'customer_id',
 		'user_id'          => 'user_id',
 		'username'         => 'username',
-		'name'             => "CONCAT_WS( ' ', first_name, last_name ) as name", // @todo: what does this mean for RTL?
+		'name'             => "CONCAT_WS( ' ', first_name, last_name ) as name", // @todo What does this mean for RTL?
 		'email'            => 'email',
 		'country'          => 'country',
 		'city'             => 'city',

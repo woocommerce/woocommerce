@@ -143,7 +143,7 @@ class Pagination extends Component {
 	}
 
 	renderPerPagePicker() {
-		// TODO Replace this with a styleized Select drop-down/control?
+		// @todo Replace this with a styleized Select drop-down/control?
 		const pickerOptions = PER_PAGE_OPTIONS.map( option => {
 			return { value: option, label: option };
 		} );

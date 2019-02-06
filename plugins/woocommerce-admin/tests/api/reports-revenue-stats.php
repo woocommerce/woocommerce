@@ -64,8 +64,8 @@ class WC_Tests_API_Reports_Revenue_Stats extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $data ) ); // @todo update results after implement report interface.
-		// $this->assertEquals( array(), $reports ); // @todo update results after implement report interface.
+		$this->assertEquals( 2, count( $data ) ); // @todo Update results after implement report interface.
+		// $this->assertEquals( array(), $reports ); // @todo Update results after implement report interface.
 	}
 
 	/**

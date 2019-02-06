@@ -322,7 +322,7 @@ class WC_Admin_Reports_Segmenting {
 				$segment_labels[ $id ] = $segment->get_name();
 			}
 		} elseif ( 'variation' === $this->query_args['segmentby'] ) {
-			// @todo: assuming that this will only be used for one product, check assumption.
+			// @todo Assuming that this will only be used for one product, check assumption.
 			if ( ! isset( $this->query_args['product_includes'] ) || count( $this->query_args['product_includes'] ) !== 1 ) {
 				$this->all_segment_ids = array();
 				return;
@@ -354,8 +354,8 @@ class WC_Admin_Reports_Segmenting {
 			);
 			$segments   = wp_list_pluck( $categories, 'cat_ID' );
 		} elseif ( 'coupon' === $this->query_args['segmentby'] ) {
-			// @todo: switch to a non-direct-SQL way to get all coupons?
-			// @todo: These are only currently existing coupons, but we should add also deleted ones, if they have been used at least once.
+			// @todo Switch to a non-direct-SQL way to get all coupons?
+			// @todo These are only currently existing coupons, but we should add also deleted ones, if they have been used at least once.
 			$coupon_ids = $wpdb->get_results( "SELECT ID FROM {$wpdb->prefix}posts WHERE post_type='shop_coupon' AND post_status='publish'", ARRAY_A ); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 			$segments   = wp_list_pluck( $coupon_ids, 'ID' );
 		} elseif ( 'customer_type' === $this->query_args['segmentby'] ) {
@@ -363,7 +363,7 @@ class WC_Admin_Reports_Segmenting {
 			// 1 -- returning customer
 			$segments = array( 0, 1 );
 		} elseif ( 'tax_rate_id' === $this->query_args['segmentby'] ) {
-			// @todo: do we need to include tax rates that existed in the past, but have never been used? I guess there are other, more pressing problems...
+			// @todo Do we need to include tax rates that existed in the past, but have never been used? I guess there are other, more pressing problems...
 			// Current tax rates UNION previously used tax rates.
 			$tax_rate_ids = $wpdb->get_results(
 				"SELECT tax_rate_id FROM {$wpdb->prefix}woocommerce_tax_rates

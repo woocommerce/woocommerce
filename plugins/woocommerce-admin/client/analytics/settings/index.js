@@ -61,7 +61,7 @@ class Settings extends Component {
 
 	saveChanges = () => {
 		this.props.updateSettings( this.state.settings );
-		// @TODO: Need a confirmation on successful update.
+		// @todo Need a confirmation on successful update.
 	};
 
 	handleInputChange( e ) {

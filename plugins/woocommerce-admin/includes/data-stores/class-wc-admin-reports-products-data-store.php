@@ -347,7 +347,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			$coupon_amount       = $order->get_item_coupon_amount( $order_item );
 
 			// Tax amount.
-			// @todo: check if this calculates tax correctly with refunds.
+			// @todo Check if this calculates tax correctly with refunds.
 			$tax_amount = 0;
 
 			$order_taxes = $order->get_taxes();
@@ -357,7 +357,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 				$tax_amount += isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : 0;
 			}
 
-			// @todo: should net revenue be affected by refunds, as refunds are tracked separately?
+			// @todo Should net revenue be affected by refunds, as refunds are tracked separately?
 			$net_revenue = $order_item->get_subtotal( 'edit' ) - $amount_refunded;
 
 			if ( $quantity_refunded >= $order_item->get_quantity( 'edit' ) ) {
@@ -390,7 +390,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 						'tax_amount'            => $tax_amount,
 						'shipping_amount'       => $shipping_amount,
 						'shipping_tax_amount'   => $shipping_tax_amount,
-						// @todo: can this be incorrect if modified by filters?
+						// @todo Can this be incorrect if modified by filters?
 						'product_gross_revenue' => $net_revenue + $tax_amount + $shipping_amount + $shipping_tax_amount,
 						'refund_amount'         => $amount_refunded,
 					),

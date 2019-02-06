@@ -89,7 +89,7 @@ class ActivityPanel extends Component {
 		} );
 	}
 
-	// TODO Pull in dynamic unread status/count
+	// @todo Pull in dynamic unread status/count
 	getTabs() {
 		return [
 			{

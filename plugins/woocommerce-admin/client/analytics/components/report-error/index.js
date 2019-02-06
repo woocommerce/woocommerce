@@ -25,7 +25,7 @@ class ReportError extends Component {
 			title = __( 'There was an error getting your stats. Please try again.', 'wc-admin' );
 			actionLabel = __( 'Reload', 'wc-admin' );
 			actionCallback = () => {
-				// TODO Add tracking for how often an error is displayed, and the reload action is clicked.
+				// @todo Add tracking for how often an error is displayed, and the reload action is clicked.
 				window.location.reload();
 			};
 		} else if ( isEmpty ) {
