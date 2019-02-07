@@ -591,6 +591,8 @@ class WC_Frontend_Scripts {
 				$params = false;
 		}
 
+		$params = apply_filters_deprecated( $handle . '_params', array( $params ), '3.0.0', 'woocommerce_get_script_data' );
+
 		return apply_filters( 'woocommerce_get_script_data', $params, $handle );
 	}
 
