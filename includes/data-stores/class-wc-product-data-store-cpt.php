@@ -141,9 +141,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Method to read a product from the database.
 	 *
 	 * @param WC_Product $product Product object.
+	 * @param string     $use_product_cache Optional. yes|no flag indicating whether to use the product object cache. Default yes. 
 	 * @throws Exception If invalid product.
 	 */
-	public function read( &$product ) {
+	public function read( &$product, $use_product_cache = 'yes' ) {
 		$product->set_defaults();
 		$post_object = get_post( $product->get_id() );
 
@@ -151,7 +152,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			throw new Exception( __( 'Invalid product.', 'woocommerce' ) );
 		}
 
-		$_product = wp_cache_get( $product->get_id(), 'products' );
+		$_product = 'yes' === $use_product_cache ? wp_cache_get( $product->get_id(), 'products' ) : null;
 		if ( ! $_product ) {
 			$product->set_props(
 				array(
@@ -174,7 +175,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$this->read_product_data( $product );
 			$this->read_extra_data( $product );
 			$product->set_object_read( true );
-			wp_cache_add( $product->get_id(), $product, 'products' );
+			if ( 'yes' === $use_product_cache ) {
+				wp_cache_add( $product->get_id(), $product, 'products' );
+			}
 		} else {
 			$product = $_product;
 		}
