@@ -365,7 +365,7 @@ class WC_Meta_Box_Product_Data {
 				'backorders'         => isset( $_POST['_backorders'] ) ? wc_clean( wp_unslash( $_POST['_backorders'] ) ) : null,
 				'stock_status'       => wc_clean( wp_unslash( $_POST['_stock_status'] ) ),
 				'stock_quantity'     => $stock,
-				'low_stock_amount'   => wc_stock_amount( wp_unslash( $_POST['_low_stock_amount'] ) ),
+				'low_stock_amount'   => isset( $_POST['_low_stock_amount'] ) ? wc_stock_amount( wp_unslash( $_POST['_low_stock_amount'] ) ) : null,
 				'download_limit'     => '' === $_POST['_download_limit'] ? '' : absint( wp_unslash( $_POST['_download_limit'] ) ),
 				'download_expiry'    => '' === $_POST['_download_expiry'] ? '' : absint( wp_unslash( $_POST['_download_expiry'] ) ),
 				'downloads'          => self::prepare_downloads(
