@@ -494,10 +494,8 @@ function wc_product_post_class( $classes, $class = '', $post_id = 0 ) {
 		if ( $product->get_type() ) {
 			$classes[] = 'product-type-' . $product->get_type();
 		}
-		if ( $product->is_type( 'variable' ) ) {
-			if ( ! $product->get_default_attributes() ) {
-				$classes[] = 'has-default-attributes';
-			}
+		if ( $product->is_type( 'variable' ) && $product->get_default_attributes() ) {
+			$classes[] = 'has-default-attributes';
 		}
 	}
 
@@ -546,7 +544,11 @@ function wc_get_product_taxonomy_class( $term_ids, $taxonomy ) {
 /**
  * Retrieves the classes for the post div as an array.
  *
- * This method is clone from WordPress's get_post_class(), allowing removing taxonomies.
+ * This method was modified from WordPress's get_post_class() to allow the removal of taxonomies
+ * (for performance reasons).
+ *
+ * Previously wc_product_post_class was hooked into post_class. That still happens, but this function
+ * negates the need for it and thus unhooks it when running the post_class hook. @since 3.6.0
  *
  * @since 3.4.0
  * @param string|array           $class      One or more classes to add to the class list.
@@ -557,87 +559,96 @@ function wc_get_product_class( $class = '', $product_id = null ) {
 	if ( is_a( $product_id, 'WC_Product' ) ) {
 		$product    = $product_id;
 		$product_id = $product_id->get_id();
-		$post       = get_post( $product_id );
 	} else {
-		$post    = get_post( $product_id );
-		$product = wc_get_product( $post->ID );
+		$product = wc_get_product( $product_id );
 	}
 
-	$classes = array();
-
-	if ( $class ) {
-		if ( ! is_array( $class ) ) {
-			$class = preg_split( '#\s+#', $class );
-		}
-		$classes = array_map( 'esc_attr', $class );
+	if ( ! is_array( $class ) ) {
+		$classes = preg_split( '#\s+#', $class );
 	} else {
-		// Ensure that we always coerce class to being an array.
-		$class = array();
+		$classes = $class;
 	}
 
-	if ( ! $post || ! $product ) {
-		return $classes;
+	if ( ! $product ) {
+		return array_map( 'esc_attr', $classes );
 	}
 
-	$classes[] = 'post-' . $post->ID;
-	if ( ! is_admin() ) {
-		$classes[] = $post->post_type;
-	}
-	$classes[] = 'type-' . $post->post_type;
-	$classes[] = 'status-' . $post->post_status;
+	$classes = array_merge(
+		$classes,
+		array(
+			'product',
+			'type-product',
+			'post-' . $product->get_id(),
+			'status-' . $product->get_status(),
+			wc_get_loop_class(),
+			$product->get_stock_status(),
+		),
+		wc_get_product_taxonomy_class( $product->get_category_ids(), 'product_cat' ),
+		wc_get_product_taxonomy_class( $product->get_tag_ids(), 'product_tag' )
+	);
 
-	// Post format.
-	if ( post_type_supports( $post->post_type, 'post-formats' ) ) {
-		$post_format = get_post_format( $post->ID );
-
-		if ( $post_format && ! is_wp_error( $post_format ) ) {
-			$classes[] = 'format-' . sanitize_html_class( $post_format );
-		} else {
-			$classes[] = 'format-standard';
-		}
-	}
-
-	// Post requires password.
-	$post_password_required = post_password_required( $post->ID );
-	if ( $post_password_required ) {
-		$classes[] = 'post-password-required';
-	} elseif ( ! empty( $post->post_password ) ) {
-		$classes[] = 'post-password-protected';
-	}
-
-	// Post thumbnails.
-	if ( current_theme_supports( 'post-thumbnails' ) && $product->get_image_id() && ! is_attachment( $post ) && ! $post_password_required ) {
+	if ( $product->get_image_id() ) {
 		$classes[] = 'has-post-thumbnail';
 	}
-
-	// Sticky for Sticky Posts.
-	if ( is_sticky( $post->ID ) ) {
-		if ( is_home() && ! is_paged() ) {
-			$classes[] = 'sticky';
-		} elseif ( is_admin() ) {
-			$classes[] = 'status-sticky';
-		}
+	if ( $product->get_post_password() ) {
+		$classes[] = post_password_required( $product->get_id() ) ? 'post-password-required' : 'post-password-protected';
+	}
+	if ( $product->is_on_sale() ) {
+		$classes[] = 'sale';
+	}
+	if ( $product->is_featured() ) {
+		$classes[] = 'featured';
+	}
+	if ( $product->is_downloadable() ) {
+		$classes[] = 'downloadable';
+	}
+	if ( $product->is_virtual() ) {
+		$classes[] = 'virtual';
+	}
+	if ( $product->is_sold_individually() ) {
+		$classes[] = 'sold-individually';
+	}
+	if ( $product->is_taxable() ) {
+		$classes[] = 'taxable';
+	}
+	if ( $product->is_shipping_taxable() ) {
+		$classes[] = 'shipping-taxable';
+	}
+	if ( $product->is_purchasable() ) {
+		$classes[] = 'purchasable';
+	}
+	if ( $product->get_type() ) {
+		$classes[] = 'product-type-' . $product->get_type();
+	}
+	if ( $product->is_type( 'variable' ) && $product->get_default_attributes() ) {
+		$classes[] = 'has-default-attributes';
 	}
 
-	// Hentry for hAtom compliance.
-	$classes[] = 'hentry';
-
-	// Include attributes and any extra taxonomy.
+	// Include attributes and any extra taxonomies only if enabled via the hook - this is a performance issue.
 	if ( apply_filters( 'woocommerce_get_product_class_include_taxonomies', false ) ) {
 		$taxonomies = get_taxonomies( array( 'public' => true ) );
+		$type       = 'variation' === $product->get_type() ? 'product_variation' : 'product';
 		foreach ( (array) $taxonomies as $taxonomy ) {
-			if ( is_object_in_taxonomy( $post->post_type, $taxonomy ) && ! in_array( $taxonomy, array( 'product_cat', 'product_tag' ), true ) ) {
-				$classes = array_merge( $classes, wc_get_product_taxonomy_class( (array) get_the_terms( $post->ID, $taxonomy ), $taxonomy ) );
+			if ( is_object_in_taxonomy( $type, $taxonomy ) && ! in_array( $taxonomy, array( 'product_cat', 'product_tag' ), true ) ) {
+				$classes = array_merge( $classes, wc_get_product_taxonomy_class( (array) get_the_terms( $product->get_id(), $taxonomy ), $taxonomy ) );
 			}
 		}
 	}
-	// Categories.
-	$classes = array_merge( $classes, wc_get_product_taxonomy_class( $product->get_category_ids(), 'product_cat' ) );
 
-	// Tags.
-	$classes = array_merge( $classes, wc_get_product_taxonomy_class( $product->get_tag_ids(), 'product_tag' ) );
+	// If using `wc_get_product_class` instead of `get_post_class`, we don't need to hook `wc_product_post_class` function.
+	$filtered = has_filter( 'post_class', 'wc_product_post_class' );
 
-	return array_filter( array_unique( apply_filters( 'post_class', $classes, $class, $post->ID ) ) );
+	if ( $filtered ) {
+		remove_filter( 'post_class', 'wc_product_post_class', 20, 3 );
+	}
+
+	$classes = apply_filters( 'post_class', $classes, $class, $product->get_id() );
+
+	if ( $filtered ) {
+		add_filter( 'post_class', 'wc_product_post_class', 20, 3 );
+	}
+
+	return array_filter( array_map( 'esc_attr', array_unique( $classes ) ) );
 }
 
 /**

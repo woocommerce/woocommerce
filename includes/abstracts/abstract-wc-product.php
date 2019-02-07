@@ -88,6 +88,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'attributes'         => array(),
 		'default_attributes' => array(),
 		'menu_order'         => 0,
+		'post_password'      => '',
 		'virtual'            => false,
 		'downloadable'       => false,
 		'category_ids'       => array(),
@@ -547,6 +548,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_menu_order( $context = 'view' ) {
 		return $this->get_prop( 'menu_order', $context );
+	}
+
+	/**
+	 * Get post password.
+	 *
+	 * @since  3.6.0
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return int
+	 */
+	public function get_post_password( $context = 'view' ) {
+		return $this->get_prop( 'post_password', $context );
 	}
 
 	/**
@@ -1122,6 +1134,16 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function set_menu_order( $menu_order ) {
 		$this->set_prop( 'menu_order', intval( $menu_order ) );
+	}
+
+	/**
+	 * Set post password.
+	 *
+	 * @since 3.6.0
+	 * @param int $post_password Post password.
+	 */
+	public function set_post_password( $post_password ) {
+		$this->set_prop( 'post_password', $post_password );
 	}
 
 	/**
