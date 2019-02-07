@@ -98,7 +98,7 @@
     "readline-sync": "1.4.9",
     "recast": "0.16.2",
     "replace": "1.0.1",
-    "rimraf": "2.6.2",
+    "rimraf": "2.6.3",
     "rtlcss": "2.4.0",
     "sass-loader": "7.1.0",
     "style-loader": "0.23.1",
