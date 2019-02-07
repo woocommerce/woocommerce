@@ -75,7 +75,8 @@ class ProductsReportTable extends Component {
 			},
 			{
 				label: __( 'Variations', 'wc-admin' ),
-				key: 'variation',
+				key: 'variations',
+				isSortable: true,
 			},
 			{
 				label: __( 'Status', 'wc-admin' ),
@@ -95,14 +96,7 @@ class ProductsReportTable extends Component {
 		const persistedQuery = getPersistedQuery( query );
 
 		return map( data, row => {
-			const {
-				product_id,
-				extended_info,
-				items_sold,
-				net_revenue,
-				orders_count,
-				variations = [],
-			} = row;
+			const { product_id, extended_info, items_sold, net_revenue, orders_count } = row;
 			const {
 				category_ids,
 				low_stock_amount,
@@ -110,6 +104,7 @@ class ProductsReportTable extends Component {
 				sku,
 				stock_status,
 				stock_quantity,
+				variations = [],
 			} = extended_info;
 			const ordersLink = getNewPath( persistedQuery, 'orders', {
 				filter: 'advanced',

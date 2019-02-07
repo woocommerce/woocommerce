@@ -40,6 +40,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		'stock_quantity'   => 'intval',
 		'low_stock_amount' => 'intval',
 		'category_ids'     => 'array_values',
+		'variations'       => 'array_values',
 		'sku'              => 'strval',
 	);
 
@@ -69,6 +70,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		'stock_quantity',
 		'low_stock_amount',
 		'category_ids',
+		'variations',
 		'sku',
 	);
 
@@ -110,6 +112,10 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 
 		if ( 'postmeta.meta_value' === $sql_query['order_by_clause'] ) {
 			$sql_query['from_clause'] .= " JOIN {$wpdb->prefix}postmeta AS postmeta ON {$order_product_lookup_table}.product_id = postmeta.post_id AND postmeta.meta_key = '_sku'";
+		}
+
+		if ( 'variations' === $sql_query['order_by_clause'] ) {
+			$sql_query['from_clause'] .= " LEFT JOIN ( SELECT post_parent, COUNT(*) AS variations FROM {$wpdb->prefix}posts WHERE post_type = 'product_variation' GROUP BY post_parent ) AS _variations ON {$order_product_lookup_table}.product_id = _variations.post_parent";
 		}
 
 		if ( isset( $query_args['order'] ) ) {
@@ -189,7 +195,14 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 				$product             = wc_get_product( $product_data['product_id'] );
 				$extended_attributes = apply_filters( 'woocommerce_rest_reports_products_extended_attributes', $this->extended_attributes, $product_data );
 				foreach ( $extended_attributes as $extended_attribute ) {
-					$function = 'get_' . $extended_attribute;
+					if ( 'variations' === $extended_attribute ) {
+						if ( ! $product->is_type( 'variable' ) ) {
+							continue;
+						}
+						$function = 'get_children';
+					} else {
+						$function = 'get_' . $extended_attribute;
+					}
 					if ( is_callable( array( $product, $function ) ) ) {
 						$value                                = $product->{$function}();
 						$extended_info[ $extended_attribute ] = $value;

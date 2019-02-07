@@ -258,6 +258,87 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test variable products extended info.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_variable_product_extended_info() {
+		WC_Helper_Reports::reset_stats_dbs();
+		// Populate all of the data.
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Test Product' );
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 25 );
+		$product->set_low_stock_amount( 5 );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_name( 'Test Variation' );
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_color' => 'green' ) );
+		$variation->set_sku( 'test-sku' );
+		$variation->set_regular_price( 25 );
+		$variation->set_manage_stock( true );
+		$variation->set_stock_quantity( 25 );
+		$variation->set_low_stock_amount( 5 );
+		$variation->save();
+
+		$term = wp_insert_term( 'Test Category', 'product_cat' );
+		wp_set_object_terms( $product->get_id(), $term['term_id'], 'product_cat' );
+
+		$order = WC_Helper_Order::create_order( 1, $variation );
+		$order->set_status( 'completed' );
+		$order->set_shipping_total( 10 );
+		$order->set_discount_total( 20 );
+		$order->set_discount_tax( 0 );
+		$order->set_cart_tax( 5 );
+		$order->set_shipping_tax( 2 );
+		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		$data_store = new WC_Admin_Reports_Products_Data_Store();
+		$start_time = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = date( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() + HOUR_IN_SECONDS );
+		$args       = array(
+			'after'         => $start_time,
+			'before'        => $end_time,
+			'extended_info' => 1,
+		);
+		// Test retrieving the stats through the data store.
+		$data = $data_store->get_data( $args );
+		// Get updated product data.
+		$product       = wc_get_product( $product->get_id() );
+		$expected_data = (object) array(
+			'total'   => 1,
+			'pages'   => 1,
+			'page_no' => 1,
+			'data'    => array(
+				0 => array(
+					'product_id'    => $product->get_id(),
+					'items_sold'    => 4,
+					'net_revenue'   => 100.0, // $25 * 4.
+					'orders_count'  => 1,
+					'extended_info' => array(
+						'name'             => $product->get_name(),
+						'image'            => $product->get_image(),
+						'permalink'        => $product->get_permalink(),
+						'price'            => (float) $product->get_price(),
+						'stock_status'     => $product->get_stock_status(),
+						'stock_quantity'   => $product->get_stock_quantity(),
+						'low_stock_amount' => $product->get_low_stock_amount(),
+						'category_ids'     => array_values( $product->get_category_ids() ),
+						'sku'              => $product->get_sku(),
+						'variations'       => $product->get_children(),
+					),
+				),
+			),
+		);
+		$this->assertEquals( $expected_data, $data );
+	}
+
+	/**
 	 * Tests that line item refunds are reflected in product stats.
 	 */
 	public function test_populate_and_refund() {
