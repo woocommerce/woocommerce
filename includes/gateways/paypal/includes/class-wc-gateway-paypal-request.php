@@ -167,10 +167,12 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		return apply_filters(
-			'woocommerce_paypal_args', array_merge(
+			'woocommerce_paypal_args',
+			array_merge(
 				$this->get_transaction_args( $order ),
 				$this->get_line_item_args( $order, true )
-			), $order
+			),
+			$order
 		);
 
 	}
@@ -185,10 +187,12 @@ class WC_Gateway_Paypal_Request {
 		WC_Gateway_Paypal::log( 'Generating payment form for order ' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
 
 		$paypal_args = apply_filters(
-			'woocommerce_paypal_args', array_merge(
+			'woocommerce_paypal_args',
+			array_merge(
 				$this->get_transaction_args( $order ),
 				$this->get_line_item_args( $order )
-			), $order
+			),
+			$order
 		);
 
 		return $this->fix_request_length( $order, $paypal_args );
@@ -339,9 +343,10 @@ class WC_Gateway_Paypal_Request {
 
 		foreach ( $order->get_items() as $item ) {
 			$item_name = $item->get_name();
-			$item_meta = strip_tags(
+			$item_meta = wp_strip_all_tags(
 				wc_display_item_meta(
-					$item, array(
+					$item,
+					array(
 						'before'    => '',
 						'separator' => ', ',
 						'after'     => '',
@@ -370,9 +375,10 @@ class WC_Gateway_Paypal_Request {
 	 */
 	protected function get_order_item_name( $order, $item ) {
 		$item_name = $item->get_name();
-		$item_meta = strip_tags(
+		$item_meta = wp_strip_all_tags(
 			wc_display_item_meta(
-				$item, array(
+				$item,
+				array(
 					'before'    => '',
 					'separator' => ', ',
 					'after'     => '',
@@ -444,12 +450,12 @@ class WC_Gateway_Paypal_Request {
 		// Products.
 		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
 			if ( 'fee' === $item['type'] ) {
-				$item_line_total   = $this->number_format( $item['line_total'], $order );
+				$item_line_total = $this->number_format( $item['line_total'], $order );
 				$this->add_line_item( $item->get_name(), 1, $item_line_total );
 			} else {
-				$product           = $item->get_product();
-				$sku               = $product ? $product->get_sku() : '';
-				$item_line_total   = $this->number_format( $order->get_item_subtotal( $item, false ), $order );
+				$product         = $item->get_product();
+				$sku             = $product ? $product->get_sku() : '';
+				$item_line_total = $this->number_format( $order->get_item_subtotal( $item, false ), $order );
 				$this->add_line_item( $this->get_order_item_name( $order, $item ), $item->get_quantity(), $item_line_total, $sku );
 			}
 		}
@@ -467,12 +473,17 @@ class WC_Gateway_Paypal_Request {
 		$index = ( count( $this->line_items ) / 4 ) + 1;
 
 		$item = apply_filters(
-			'woocommerce_paypal_line_item', array(
+			'woocommerce_paypal_line_item',
+			array(
 				'item_name'   => html_entity_decode( wc_trim_string( $item_name ? $item_name : __( 'Item', 'woocommerce' ), 127 ), ENT_NOQUOTES, 'UTF-8' ),
 				'quantity'    => (int) $quantity,
 				'amount'      => wc_float_to_string( (float) $amount ),
 				'item_number' => $item_number,
-			), $item_name, $quantity, $amount, $item_number
+			),
+			$item_name,
+			$quantity,
+			$amount,
+			$item_number
 		);
 
 		$this->line_items[ 'item_name_' . $index ]   = $this->limit_length( $item['item_name'], 127 );
