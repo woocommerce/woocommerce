@@ -100,6 +100,7 @@ class ProductsReportTable extends Component {
 			const {
 				category_ids,
 				low_stock_amount,
+				manage_stock,
 				name,
 				sku,
 				stock_status,
@@ -120,6 +121,14 @@ class ProductsReportTable extends Component {
 				( category_ids &&
 					category_ids.map( category_id => categories.get( category_id ) ).filter( Boolean ) ) ||
 				[];
+
+			const stockStatus = isLowStock( stock_status, stock_quantity, low_stock_amount ) ? (
+				<Link href={ 'post.php?action=edit&post=' + product_id } type="wp-admin">
+					{ _x( 'Low', 'Indication of a low quantity', 'wc-admin' ) }
+				</Link>
+			) : (
+				stockStatuses[ stock_status ]
+			);
 
 			return [
 				{
@@ -181,17 +190,11 @@ class ProductsReportTable extends Component {
 					value: variations.length,
 				},
 				{
-					display: isLowStock( stock_status, stock_quantity, low_stock_amount ) ? (
-						<Link href={ 'post.php?action=edit&post=' + product_id } type="wp-admin">
-							{ _x( 'Low', 'Indication of a low quantity', 'wc-admin' ) }
-						</Link>
-					) : (
-						stockStatuses[ stock_status ]
-					),
-					value: stockStatuses[ stock_status ],
+					display: manage_stock ? stockStatus : __( 'N/A', 'wc-admin' ),
+					value: manage_stock ? stockStatuses[ stock_status ] : null,
 				},
 				{
-					display: numberFormat( stock_quantity ),
+					display: manage_stock ? numberFormat( stock_quantity ) : __( 'N/A', 'wc-admin' ),
 					value: stock_quantity,
 				},
 			];

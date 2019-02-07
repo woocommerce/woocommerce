@@ -247,6 +247,7 @@ class WC_Tests_Reports_Products extends WC_Unit_Test_Case {
 						'price'            => (float) $product->get_price(),
 						'stock_status'     => $product->get_stock_status(),
 						'stock_quantity'   => $product->get_stock_quantity(),
+						'manage_stock'     => $product->get_manage_stock(),
 						'low_stock_amount' => $product->get_low_stock_amount(),
 						'category_ids'     => array_values( $product->get_category_ids() ),
 						'sku'              => $product->get_sku(),

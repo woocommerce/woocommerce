@@ -107,12 +107,13 @@ class WC_Tests_API_Reports_Stock extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 6, count( $properties ) );
+		$this->assertEquals( 7, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'parent_id', $properties );
 		$this->assertArrayHasKey( 'name', $properties );
 		$this->assertArrayHasKey( 'sku', $properties );
 		$this->assertArrayHasKey( 'stock_status', $properties );
 		$this->assertArrayHasKey( 'stock_quantity', $properties );
+		$this->assertArrayHasKey( 'manage_stock', $properties );
 	}
 }

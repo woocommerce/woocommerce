@@ -68,6 +68,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		'permalink',
 		'stock_status',
 		'stock_quantity',
+		'manage_stock',
 		'low_stock_amount',
 		'category_ids',
 		'variations',
