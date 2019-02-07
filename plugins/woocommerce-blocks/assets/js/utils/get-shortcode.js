@@ -1,12 +1,15 @@
-export default function getShortcode( { attributes }, name ) {
+export default function getShortcode( props, name ) {
+	const blockAttributes = props.attributes;
 	const {
+		attributes,
+		attrOperator,
 		categories,
 		catOperator,
 		orderby,
 		products,
-	} = attributes;
-	const columns = attributes.columns || wc_product_block_data.default_columns;
-	const rows = attributes.rows || wc_product_block_data.default_rows;
+	} = blockAttributes;
+	const columns = blockAttributes.columns || wc_product_block_data.default_columns;
+	const rows = blockAttributes.rows || wc_product_block_data.default_rows;
 
 	const shortcodeAtts = new Map();
 	shortcodeAtts.set( 'limit', rows * columns );
@@ -16,6 +19,14 @@ export default function getShortcode( { attributes }, name ) {
 		shortcodeAtts.set( 'category', categories.join( ',' ) );
 		if ( catOperator && 'all' === catOperator ) {
 			shortcodeAtts.set( 'cat_operator', 'AND' );
+		}
+	}
+
+	if ( attributes && attributes.length ) {
+		shortcodeAtts.set( 'terms', attributes.map( ( { id } ) => id ).join( ',' ) );
+		shortcodeAtts.set( 'attribute', attributes[ 0 ].attr_slug );
+		if ( attrOperator && 'all' === attrOperator ) {
+			shortcodeAtts.set( 'terms_operator', 'AND' );
 		}
 	}
 
@@ -58,6 +69,11 @@ export default function getShortcode( { attributes }, name ) {
 			break;
 		case 'woocommerce/product-category':
 			if ( ! categories || ! categories.length ) {
+				return '';
+			}
+			break;
+		case 'woocommerce/products-by-attribute':
+			if ( ! attributes || ! attributes.length ) {
 				return '';
 			}
 			break;

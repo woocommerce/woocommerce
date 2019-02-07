@@ -111,6 +111,19 @@
 			flex: 1;
 		}
 
+		&.depth-0 + .depth-1 {
+			// Hide the border on the preceding list item
+			margin-top: -1px;
+		}
+
+		&:not(.depth-0) {
+			border-bottom: 0 !important;
+		}
+
+		&:not(.depth-0) + .depth-0 {
+			border-top: 1px solid $core-grey-light-500;
+		}
+
 		// Anything deeper than 5 levels will use this fallback depth
 		&[class*="depth-"] .woocommerce-search-list__item-label:before {
 			margin-right: $gap-smallest;
