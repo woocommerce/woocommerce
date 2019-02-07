@@ -191,7 +191,7 @@ class WC_Geolocation {
 	 * @param  bool   $api_fallback If true, uses geolocation APIs if the database file doesn't exist (can be slower).
 	 * @return array
 	 */
-	public static function geolocate_ip( $ip_address = '', $fallback = true, $api_fallback = true ) {
+	public static function geolocate_ip( $ip_address = '', $fallback = false, $api_fallback = true ) {
 		// Filter to allow custom geolocation of the IP address.
 		$country_code = apply_filters( 'woocommerce_geolocate_ip', false, $ip_address, $fallback, $api_fallback );
 
@@ -215,6 +215,11 @@ class WC_Geolocation {
 					$country_code = self::geolocate_via_api( $ip_address );
 				} else {
 					$country_code = '';
+				}
+
+				if ( ! $country_code && $fallback ) {
+					// May be a local environment - find external IP.
+					return self::geolocate_ip( self::get_external_ip_address(), false, $api_fallback );
 				}
 			}
 		}
