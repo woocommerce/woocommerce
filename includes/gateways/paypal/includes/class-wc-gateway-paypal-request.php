@@ -91,12 +91,15 @@ class WC_Gateway_Paypal_Request {
 	 * @return string
 	 */
 	protected function limit_length( $string, $limit = 127 ) {
-		// As the output is to be used in http_build_query which applies URL encoding, the string needs to be
-		// cut as if it was URL-encoded, but returned non-encoded (it will be encoded by http_build_query later).
-		$url_encoded_str = rawurlencode( $string );
-
-		if ( strlen( $url_encoded_str ) > $limit ) {
-			$string = rawurldecode( substr( $url_encoded_str, 0, $limit - 3 ) . '...' );
+		$str_limit = $limit - 3;
+		if ( function_exists( 'mb_strimwidth' ) ) {
+			if ( mb_strlen( $string ) > $limit ) {
+				$string = mb_strimwidth( $string, 0, $str_limit ) . '...';
+			}
+		} else {
+			if ( strlen( $string ) > $limit ) {
+				$string = substr( $string, 0, $str_limit ) . '...';
+			}
 		}
 		return $string;
 	}
