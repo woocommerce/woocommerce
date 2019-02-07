@@ -1,6 +1,6 @@
 {
   "name": "@woocommerce/components",
-  "version": "1.4.2",
+  "version": "1.5.0",
   "description": "UI components for WooCommerce.",
   "author": "Automattic",
   "license": "GPL-2.0-or-later",
@@ -25,7 +25,7 @@
     "@woocommerce/csv-export": "^1.0.3",
     "@woocommerce/currency": "^1.1.0",
     "@woocommerce/date": "^1.0.6",
-    "@woocommerce/navigation": "^1.1.1",
+    "@woocommerce/navigation": "^2.0.0",
     "@wordpress/components": "7.0.5",
     "@wordpress/compose": "3.0.0",
     "@wordpress/date": "3.0.1",
