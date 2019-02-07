@@ -3,7 +3,6 @@
 /**
  * External dependencies
  */
-import { isEmpty } from 'lodash';
 import { Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -161,9 +160,6 @@ class D3Chart extends Component {
 
 	render() {
 		const { className, data, height, type } = this.props;
-		if ( isEmpty( data ) ) {
-			return null; // @todo Improve messaging
-		}
 		const computedWidth = this.getWidth();
 		return (
 			<div

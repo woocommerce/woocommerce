@@ -80,7 +80,9 @@ const SummaryNumber = ( {
 				<span className="woocommerce-summary__item-label">{ label }</span>
 
 				<span className="woocommerce-summary__item-data">
-					<span className="woocommerce-summary__item-value">{ value }</span>
+					<span className="woocommerce-summary__item-value">
+						{ ! isNil( value ) ? value : __( 'N/A', 'wc-admin' ) }
+					</span>
 					<div
 						className="woocommerce-summary__item-delta"
 						role="presentation"

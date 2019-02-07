@@ -3,7 +3,6 @@
 /**
  * External dependencies
  */
-import { max as d3Max } from 'd3-array';
 import {
 	scaleBand as d3ScaleBand,
 	scaleLinear as d3ScaleLinear,
@@ -59,7 +58,11 @@ export const getXLineScale = ( uniqueDates, width ) =>
  * @returns {number} the maximum value in the timeseries multiplied by 4/3
  */
 export const getYMax = lineData => {
-	const yMax = 4 / 3 * d3Max( lineData, d => d3Max( d.values.map( date => date.value ) ) );
+	const maxValue = Math.max( ...lineData.map( d => Math.max( ...d.values.map( date => date.value ) ) ) );
+	if ( ! Number.isFinite( maxValue ) || maxValue <= 0 ) {
+		return 0;
+	}
+	const yMax = 4 / 3 * maxValue;
 	const pow3Y = Math.pow( 10, ( ( Math.log( yMax ) * Math.LOG10E + 1 ) | 0 ) - 2 ) * 3;
 	return Math.ceil( Math.ceil( yMax / pow3Y ) * pow3Y );
 };

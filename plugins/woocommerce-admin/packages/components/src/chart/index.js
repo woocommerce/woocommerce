@@ -106,15 +106,15 @@ class Chart extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { data, query, mode } = this.props;
+		const { data, query, isRequesting, mode } = this.props;
 		if ( ! isEqual( [ ...data ].sort(), [ ...prevProps.data ].sort() ) ) {
 			/**
 			 * Only update the orderedKeys when data is present so that
 			 * selection may persist while requesting new data.
 			 */
-			const orderedKeys = data.length
-				? getOrderedKeys( this.props, this.state.orderedKeys )
-				: this.state.orderedKeys;
+			const orderedKeys = isRequesting && ! data.length
+				? this.state.orderedKeys
+				: getOrderedKeys( this.props, this.state.orderedKeys );
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( {
 				orderedKeys,

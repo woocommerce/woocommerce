@@ -15,7 +15,8 @@ describe( 'ReportSummary', () => {
 		primaryValue,
 		secondaryValue,
 		isError = false,
-		isRequesting = false
+		isRequesting = false,
+		props
 	) {
 		const selectedChart = {
 			key: 'gross_revenue',
@@ -44,6 +45,7 @@ describe( 'ReportSummary', () => {
 				query={ query }
 				selectedChart={ selectedChart }
 				summaryData={ summaryData }
+				{ ...props }
 			/>
 		);
 	}
@@ -91,6 +93,17 @@ describe( 'ReportSummary', () => {
 		expect( summaryNumber.props().value ).toBe( null );
 		expect( summaryNumber.props().prevValue ).toBe( null );
 		expect( summaryNumber.props().delta ).toBe( null );
+	} );
+
+	test( 'should show 0s when displaying an empty search', () => {
+		const reportChart = renderChart( 'number', null, undefined, false, false, {
+			emptySearchResults: true,
+		} );
+		const summaryNumber = reportChart.find( 'SummaryNumber' );
+
+		expect( summaryNumber.props().value ).toBe( '0' );
+		expect( summaryNumber.props().prevValue ).toBe( '0' );
+		expect( summaryNumber.props().delta ).toBe( 0 );
 	} );
 
 	test( 'should display ReportError when isError is true', () => {
