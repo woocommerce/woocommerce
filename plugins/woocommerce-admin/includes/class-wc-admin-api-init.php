@@ -672,12 +672,24 @@ class WC_Admin_Api_Init {
 			)
 		);
 
-		if ( $blocking_jobs ) {
-			$blocking_job       = current( $blocking_jobs );
-			$after_blocking_job = $blocking_job->get_schedule()->next()->getTimestamp() + 5;
+		$next_job_schedule = null;
+		$blocking_job_hook = null;
 
+		if ( $blocking_jobs ) {
+			$blocking_job      = current( $blocking_jobs );
+			$blocking_job_hook = $blocking_job->get_hook();
+			$next_job_schedule = $blocking_job->get_schedule()->next();
+		}
+
+		// Eliminate the false positive scenario where the blocking job is
+		// actually another queued dependent action awaiting the same prerequisite.
+		// Also, ensure that the next schedule is a DateTime (it can be null).
+		if (
+			is_a( $next_job_schedule, 'DateTime' ) &&
+			( self::QUEUE_DEPEDENT_ACTION !== $blocking_job_hook )
+		) {
 			self::queue()->schedule_single(
-				$after_blocking_job,
+				$next_job_schedule->getTimestamp() + 5,
 				self::QUEUE_DEPEDENT_ACTION,
 				array( $action, $action_args, $prerequisite_action )
 			);
