@@ -525,9 +525,10 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 
 		$customer_orders = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM ${orders_stats_table} WHERE customer_id = %d AND date_created < %s",
+				"SELECT COUNT(*) FROM ${orders_stats_table} WHERE customer_id = %d AND date_created < %s AND order_id != %d",
 				$customer_id,
-				date( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() )
+				date( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ),
+				$order->get_id()
 			)
 		);
 

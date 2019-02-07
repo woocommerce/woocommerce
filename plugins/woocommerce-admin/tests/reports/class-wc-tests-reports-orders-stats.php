@@ -180,7 +180,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			$order->save();
 
 			// Wait one second to avoid potentially ambiguous new/returning customer.
-			sleep( 1 );
+			sleep( 1 ); // @todo Remove this after p90Yrv-XN-p2 is resolved.
 		}
 
 		WC_Helper_Queue::run_all_pending();
@@ -4732,6 +4732,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			) as $order_time
 		) {
 			// Order with 1 product.
+			sleep( 1 ); // @todo Remove this after p90Yrv-XN-p2 is resolved.
 			$order = WC_Helper_Order::create_order( $customer->get_id(), $product );
 			$order->set_date_created( $order_time );
 			$order->set_status( $order_status );
