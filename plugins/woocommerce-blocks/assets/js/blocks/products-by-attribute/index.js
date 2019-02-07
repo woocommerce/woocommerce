@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import Gridicon from 'gridicons';
+import { RawHTML } from '@wordpress/element';
 import { registerBlockType } from '@wordpress/blocks';
 
 /**
@@ -10,6 +11,7 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import './style.scss';
 import Block from './block';
+import getShortcode from '../../utils/get-shortcode';
 
 registerBlockType( 'woocommerce/products-by-attribute', {
 	title: __( 'Products by Attribute', 'woo-gutenberg-products-block' ),
@@ -81,9 +83,18 @@ registerBlockType( 'woocommerce/products-by-attribute', {
 	},
 
 	/**
-	 * Block content is rendered in PHP, not via save function.
+	 * Save the block content in the post content. Block content is saved as a products shortcode.
+	 *
+	 * @return string
 	 */
-	save() {
-		return null;
+	save( props ) {
+		const {
+			align,
+		} = props.attributes; /* eslint-disable-line react/prop-types */
+		return (
+			<RawHTML className={ align ? `align${ align }` : '' }>
+				{ getShortcode( props, 'woocommerce/products-by-attribute' ) }
+			</RawHTML>
+		);
 	},
 } );

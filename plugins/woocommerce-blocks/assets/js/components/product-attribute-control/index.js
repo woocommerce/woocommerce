@@ -5,7 +5,7 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 import { Component, Fragment } from '@wordpress/element';
-import { find } from 'lodash';
+import { debounce, filter, find, uniqBy } from 'lodash';
 import PropTypes from 'prop-types';
 import { SelectControl } from '@wordpress/components';
 
@@ -22,29 +22,28 @@ class ProductAttributeControl extends Component {
 		this.state = {
 			list: [],
 			loading: true,
+			attribute: 0,
+			termsLoading: true,
 		};
+
+		this.debouncedGetTerms = debounce( this.getTerms.bind( this ), 200 );
+		this.renderItem = this.renderItem.bind( this );
+		this.onSelectAttribute = this.onSelectAttribute.bind( this );
 	}
 
 	componentDidMount() {
-		const getTermsInAttribute = ( { id } ) => {
-			return apiFetch( {
-				path: addQueryArgs( `/wc-pb/v3/products/attributes/${ id }/terms`, {
-					per_page: -1,
-				} ),
-			} ).then( ( terms ) => terms.map( ( t ) => ( { ...t, parent: id } ) ) );
-		};
-
+		const { selected } = this.props;
 		apiFetch( {
 			path: addQueryArgs( '/wc-pb/v3/products/attributes', { per_page: -1 } ),
 		} )
-			.then( ( attributes ) => {
-				// Fetch the terms list for each attribute group, then flatten them into one list.
-				Promise.all( attributes.map( getTermsInAttribute ) ).then( ( results ) => {
-					const list = attributes.map( ( a ) => ( { ...a, parent: 0 } ) );
-					results.forEach( ( terms ) => {
-						list.push( ...terms );
-					} );
-					this.setState( { list, loading: false } );
+			.then( ( list ) => {
+				list = list.map( ( item ) => ( { ...item, parent: 0 } ) );
+				this.setState( ( { attribute } ) => {
+					if ( ! attribute && selected.length > 0 ) {
+						const item = find( list, { slug: selected[ 0 ].attr_slug } );
+						attribute = item ? item.id : 0;
+					}
+					return { list, attribute, loading: false };
 				} );
 			} )
 			.catch( () => {
@@ -52,8 +51,55 @@ class ProductAttributeControl extends Component {
 			} );
 	}
 
+	componentDidUpdate( prevProps, prevState ) {
+		if ( prevState.attribute !== this.state.attribute ) {
+			this.debouncedGetTerms();
+		}
+	}
+
+	getTerms() {
+		const { attribute } = this.state;
+		if ( ! attribute ) {
+			return;
+		}
+
+		apiFetch( {
+			path: addQueryArgs( `/wc-pb/v3/products/attributes/${ attribute }/terms`, {
+				per_page: -1,
+			} ),
+		} )
+			.then( ( terms ) => {
+				terms = terms.map( ( term ) => ( { ...term, parent: attribute } ) );
+				this.setState( ( { list } ) => ( {
+					list: uniqBy( [ ...list, ...terms ], 'id' ),
+					termsLoading: false,
+				} ) );
+			} )
+			.catch( () => {
+				this.setState( { termsLoading: false } );
+			} );
+	}
+
+	onSelectAttribute( item ) {
+		return () => {
+			if ( item.id === this.state.attribute ) {
+				return;
+			}
+			this.props.onChange( [] );
+			this.setState( ( { list } ) => {
+				// Remove all other attribute terms from the list.
+				const updatedList = filter( list, { parent: 0 } );
+				return {
+					list: updatedList,
+					attribute: item.id,
+				};
+			} );
+		};
+	}
+
 	renderItem( args ) {
 		const { item, search, depth = 0 } = args;
+		const { attribute } = this.state;
 		const classes = [
 			'woocommerce-product-attributes__item',
 			'woocommerce-search-list__item',
@@ -68,13 +114,13 @@ class ProductAttributeControl extends Component {
 		if ( ! item.breadcrumbs.length ) {
 			classes.push( 'is-not-active' );
 			return (
-				<div className={ classes.join( ' ' ) }>
-					<span className="woocommerce-search-list__item-label">
-						<span className="woocommerce-search-list__item-name">
-							{ item.name }
-						</span>
-					</span>
-				</div>
+				<SearchListItem
+					{ ...args }
+					className={ classes.join( ' ' ) }
+					isSingle
+					isSelected={ attribute === item.id }
+					onSelect={ this.onSelectAttribute }
+				/>
 			);
 		}
 
@@ -125,27 +171,41 @@ class ProductAttributeControl extends Component {
 					className="woocommerce-product-attributes"
 					list={ list }
 					isLoading={ loading }
-					selected={ selected.map( ( { id } ) => find( list, { id } ) ).filter( Boolean ) }
+					selected={ selected
+						.map( ( { id } ) => find( list, { id } ) )
+						.filter( Boolean ) }
 					onChange={ onChange }
 					renderItem={ this.renderItem }
 					messages={ messages }
 					isHierarchical
 				/>
-				{ ( !! onOperatorChange ) && (
+				{ !! onOperatorChange && (
 					<div className={ selected.length < 2 ? 'screen-reader-text' : '' }>
 						<SelectControl
 							className="woocommerce-product-attributes__operator"
-							label={ __( 'Display products matching', 'woo-gutenberg-products-block' ) }
-							help={ __( 'Pick at least two attributes to use this setting.', 'woo-gutenberg-products-block' ) }
+							label={ __(
+								'Display products matching',
+								'woo-gutenberg-products-block'
+							) }
+							help={ __(
+								'Pick at least two attributes to use this setting.',
+								'woo-gutenberg-products-block'
+							) }
 							value={ operator }
 							onChange={ onOperatorChange }
 							options={ [
 								{
-									label: __( 'Any selected attributes', 'woo-gutenberg-products-block' ),
+									label: __(
+										'Any selected attributes',
+										'woo-gutenberg-products-block'
+									),
 									value: 'any',
 								},
 								{
-									label: __( 'All selected attributes', 'woo-gutenberg-products-block' ),
+									label: __(
+										'All selected attributes',
+										'woo-gutenberg-products-block'
+									),
 									value: 'all',
 								},
 							] }

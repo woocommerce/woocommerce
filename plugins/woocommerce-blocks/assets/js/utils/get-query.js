@@ -40,19 +40,12 @@ export default function getQuery( blockAttributes, name ) {
 		}
 	}
 
-	if ( attributes ) {
-		query.attributes = attributes.reduce( ( accumulator, { attr_slug, id } ) => { // eslint-disable-line camelcase
-			if ( accumulator[ attr_slug ] ) {
-				accumulator[ attr_slug ].push( id );
-			} else {
-				accumulator[ attr_slug ] = [ id ];
-			}
-			return accumulator;
-		}, {} );
+	if ( attributes && attributes.length > 0 ) {
+		query.attribute_term = attributes.map( ( { id } ) => id ).join( ',' );
+		query.attribute = attributes[ 0 ].attr_slug;
 
 		if ( attrOperator ) {
 			query.attr_operator = 'all' === attrOperator ? 'AND' : 'IN';
-			query.tax_relation = 'all' === attrOperator ? 'AND' : 'OR';
 		}
 	}
 
