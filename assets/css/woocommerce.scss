@@ -1670,6 +1670,16 @@ p.demo_store,
 			color: $red;
 		}
 	}
+
+	.woocommerce-form-login {
+		.woocommerce-form-login__submit {
+			float: left;
+			margin-right: 1em;
+		}
+		.woocommerce-form-login__rememberme {
+			display: inline-block;
+		}
+	}
 }
 
 .woocommerce-no-js {

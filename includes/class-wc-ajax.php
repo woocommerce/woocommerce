@@ -179,7 +179,7 @@ class WC_AJAX {
 					'div.widget_shopping_cart_content' => '<div class="widget_shopping_cart_content">' . $mini_cart . '</div>',
 				)
 			),
-			'cart_hash' => apply_filters( 'woocommerce_add_to_cart_hash', WC()->cart->get_cart_for_session() ? md5( json_encode( WC()->cart->get_cart_for_session() ) ) : '', WC()->cart->get_cart_for_session() ),
+			'cart_hash' => WC()->cart->get_cart_hash(),
 		);
 
 		wp_send_json( $data );
@@ -335,18 +335,19 @@ class WC_AJAX {
 		WC()->customer->save();
 		WC()->cart->calculate_totals();
 
-		// Get order review fragment
+		// Get order review fragment.
 		ob_start();
 		woocommerce_order_review();
 		$woocommerce_order_review = ob_get_clean();
 
-		// Get checkout payment fragment
+		// Get checkout payment fragment.
 		ob_start();
 		woocommerce_checkout_payment();
 		$woocommerce_checkout_payment = ob_get_clean();
 
-		// Get messages if reload checkout is not true
-		if ( ! isset( WC()->session->reload_checkout ) ) {
+		// Get messages if reload checkout is not true.
+		$reload_checkout = isset( WC()->session->reload_checkout ) ? true : false;
+		if ( ! $reload_checkout ) {
 			$messages = wc_print_notices( true );
 		} else {
 			$messages = '';
@@ -358,9 +359,10 @@ class WC_AJAX {
 			array(
 				'result'    => empty( $messages ) ? 'success' : 'failure',
 				'messages'  => $messages,
-				'reload'    => isset( WC()->session->reload_checkout ) ? 'true' : 'false',
+				'reload'    => $reload_checkout ? 'true' : 'false',
 				'fragments' => apply_filters(
-					'woocommerce_update_order_review_fragments', array(
+					'woocommerce_update_order_review_fragments',
+					array(
 						'.woocommerce-checkout-review-order-table' => $woocommerce_order_review,
 						'.woocommerce-checkout-payment' => $woocommerce_checkout_payment,
 					)
@@ -616,7 +618,7 @@ class WC_AJAX {
 		$response = array();
 
 		try {
-			parse_str( $_POST['data'], $data );
+			parse_str( wp_unslash( $_POST['data'] ), $data );
 
 			$attributes   = WC_Meta_Box_Product_Data::prepare_attributes( $data );
 			$product_id   = absint( $_POST['post_id'] );

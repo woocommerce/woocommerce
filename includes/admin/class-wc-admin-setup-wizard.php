@@ -91,6 +91,7 @@ class WC_Admin_Setup_Wizard {
 	protected function is_default_theme() {
 		return wc_is_active_theme(
 			array(
+				'twentynineteen',
 				'twentyseventeen',
 				'twentysixteen',
 				'twentyfifteen',
@@ -1054,6 +1055,10 @@ class WC_Admin_Setup_Wizard {
 	 */
 	public function wc_setup_shipping_save() {
 		check_admin_referer( 'wc-setup' );
+
+		if ( ! did_action( 'rest_api_init' ) ) {
+			WC()->api->rest_api_includes();
+		}
 
 		// @codingStandardsIgnoreStart
 		$setup_domestic   = isset( $_POST['shipping_zones']['domestic']['enabled'] ) && ( 'yes' === $_POST['shipping_zones']['domestic']['enabled'] );

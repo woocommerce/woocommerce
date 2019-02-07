@@ -602,7 +602,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		// Test GET requests.
 		$get_response            = wp_safe_remote_get( 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
 		$get_response_successful = false;
-		if ( ! is_wp_error( $post_response ) && $post_response['response']['code'] >= 200 && $post_response['response']['code'] < 300 ) {
+		if ( ! is_wp_error( $get_response ) && $get_response['response']['code'] >= 200 && $get_response['response']['code'] < 300 ) {
 			$get_response_successful = true;
 		}
 

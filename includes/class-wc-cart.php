@@ -1954,4 +1954,18 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		return get_option( 'woocommerce_tax_display_cart' );
 	}
+
+	/**
+	 * Returns the hash based on cart contents.
+	 *
+	 * @since 3.6.0
+	 * @return string hash for cart content
+	 */
+	public function get_cart_hash() {
+		$cart_session = $this->session->get_cart_for_session();
+		$hash         = $cart_session ? md5( wp_json_encode( $cart_session ) . $this->get_total( 'edit' ) ) : '';
+		$hash         = apply_filters_deprecated( 'woocommerce_add_to_cart_hash', array( $hash, $cart_session ), '3.6.0', 'woocommerce_cart_hash' );
+
+		return apply_filters( 'woocommerce_cart_hash', $hash, $cart_session );
+	}
 }

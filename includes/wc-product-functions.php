@@ -92,62 +92,36 @@ function wc_product_dimensions_enabled() {
 }
 
 /**
- * Clear all transients cache for product data.
+ * Clear transient cache for product data.
  *
- * @param int $post_id (default: 0).
+ * @param int $post_id (default: 0) The product ID.
  */
 function wc_delete_product_transients( $post_id = 0 ) {
-	// Core transients.
+	// Transient data to clear with a fixed name which may be stale after product updates.
 	$transients_to_clear = array(
 		'wc_products_onsale',
 		'wc_featured_products',
 		'wc_outofstock_count',
 		'wc_low_stock_count',
-		'wc_count_comments',
 	);
 
-	// Transient names that include an ID.
-	$post_transient_names = array(
-		'wc_product_children_',
-		'wc_var_prices_',
-		'wc_related_',
-		'wc_child_has_weight_',
-		'wc_child_has_dimensions_',
-	);
-
-	if ( $post_id > 0 ) {
-		foreach ( $post_transient_names as $transient ) {
-			$transients_to_clear[] = $transient . $post_id;
-		}
-
-		// Does this product have a parent?
-		$product = wc_get_product( $post_id );
-
-		if ( $product ) {
-			if ( $product->get_parent_id() > 0 ) {
-				wc_delete_product_transients( $product->get_parent_id() );
-			}
-
-			if ( 'variable' === $product->get_type() ) {
-				wp_cache_delete(
-					WC_Cache_Helper::get_cache_prefix( 'products' ) . 'product_variation_attributes_' . $product->get_id(),
-					'products'
-				);
-			}
-
-			$attributes = $product->get_attributes();
-
-			if ( $attributes ) {
-				foreach ( $attributes as $attribute_key => $attribute ) {
-					$transients_to_clear[] = 'wc_layered_nav_counts_' . $attribute_key;
-				}
-			}
-		}
-	}
-
-	// Delete transients.
 	foreach ( $transients_to_clear as $transient ) {
 		delete_transient( $transient );
+	}
+
+	if ( $post_id > 0 ) {
+		// Transient names that include an ID - since they are dynamic they cannot be cleaned in bulk without the ID.
+		$post_transient_names = array(
+			'wc_product_children_',
+			'wc_var_prices_',
+			'wc_related_',
+			'wc_child_has_weight_',
+			'wc_child_has_dimensions_',
+		);
+
+		foreach ( $post_transient_names as $transient ) {
+			delete_transient( $transient . $post_id );
+		}
 	}
 
 	// Increments the transient version to invalidate cache.
@@ -280,11 +254,10 @@ function wc_product_post_type_link( $permalink, $post ) {
 }
 add_filter( 'post_type_link', 'wc_product_post_type_link', 10, 2 );
 
-
 /**
- * Get the placeholder image URL for products etc.
+ * Get the placeholder image URL either from media, or use the fallback image.
  *
- * @param string $size Image size.
+ * @param string $size Thumbnail size to use.
  * @return string
  */
 function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
@@ -309,13 +282,31 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
 /**
  * Get the placeholder image.
  *
+ * Uses wp_get_attachment_image if using an attachment ID @since 3.6.0 to handle responsiveness.
+ *
  * @param string $size Image size.
  * @return string
  */
 function wc_placeholder_img( $size = 'woocommerce_thumbnail' ) {
-	$dimensions = wc_get_image_size( $size );
+	$dimensions        = wc_get_image_size( $size );
+	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
 
-	return apply_filters( 'woocommerce_placeholder_img', '<img src="' . wc_placeholder_img_src( $size ) . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />', $size, $dimensions );
+	if ( wp_attachment_is_image( $placeholder_image ) ) {
+		$image_html = wp_get_attachment_image(
+			$placeholder_image,
+			$size,
+			false,
+			array(
+				'alt'   => __( 'Placeholder', 'woocommerce' ),
+				'class' => 'woocommerce-placeholder wp-post-image',
+			)
+		);
+	} else {
+		$image      = wc_placeholder_img_src( $size );
+		$image_html = '<img src="' . esc_attr( $image ) . '" alt="' . esc_attr__( 'Placeholder', 'woocommerce' ) . '" width="' . esc_attr( $dimensions['width'] ) . '" class="woocommerce-placeholder wp-post-image" height="' . esc_attr( $dimensions['height'] ) . '" />';
+	}
+
+	return apply_filters( 'woocommerce_placeholder_img', $image_html, $size, $dimensions );
 }
 
 /**

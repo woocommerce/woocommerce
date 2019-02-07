@@ -410,7 +410,7 @@ function get_woocommerce_currencies() {
 					'NZD' => __( 'New Zealand dollar', 'woocommerce' ),
 					'OMR' => __( 'Omani rial', 'woocommerce' ),
 					'PAB' => __( 'Panamanian balboa', 'woocommerce' ),
-					'PEN' => __( 'Peruvian nuevo sol', 'woocommerce' ),
+					'PEN' => __( 'Sol', 'woocommerce' ),
 					'PGK' => __( 'Papua New Guinean kina', 'woocommerce' ),
 					'PHP' => __( 'Philippine peso', 'woocommerce' ),
 					'PKR' => __( 'Pakistani rupee', 'woocommerce' ),
@@ -596,7 +596,7 @@ function get_woocommerce_currency_symbol( $currency = '' ) {
 			'NZD' => '&#36;',
 			'OMR' => '&#x631;.&#x639;.',
 			'PAB' => 'B/.',
-			'PEN' => 'S/.',
+			'PEN' => 'S/',
 			'PGK' => 'K',
 			'PHP' => '&#8369;',
 			'PKR' => '&#8360;',
@@ -1459,27 +1459,35 @@ function wc_postcode_location_matcher( $postcode, $objects, $object_id_key, $obj
 function wc_get_shipping_method_count( $include_legacy = false ) {
 	global $wpdb;
 
-	$transient_name = 'wc_shipping_method_count_' . ( $include_legacy ? 1 : 0 ) . '_' . WC_Cache_Helper::get_transient_version( 'shipping' );
-	$method_count   = get_transient( $transient_name );
+	$transient_name    = $include_legacy ? 'wc_shipping_method_count_legacy' : 'wc_shipping_method_count';
+	$transient_version = WC_Cache_Helper::get_transient_version( 'shipping' );
+	$transient_value   = get_transient( $transient_name );
 
-	if ( false === $method_count ) {
-		$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ) );
-
-		if ( $include_legacy ) {
-			// Count activated methods that don't support shipping zones.
-			$methods = WC()->shipping()->get_shipping_methods();
-
-			foreach ( $methods as $method ) {
-				if ( isset( $method->enabled ) && 'yes' === $method->enabled && ! $method->supports( 'shipping-zones' ) ) {
-					$method_count++;
-				}
-			}
-		}
-
-		set_transient( $transient_name, $method_count, DAY_IN_SECONDS * 30 );
+	if ( isset( $transient_value['value'], $transient_value['version'] ) && $transient_value['version'] === $transient_version ) {
+		return absint( $transient_value['value'] );
 	}
 
-	return absint( $method_count );
+	$method_count = absint( $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_shipping_zone_methods" ) );
+
+	if ( $include_legacy ) {
+		// Count activated methods that don't support shipping zones.
+		$methods = WC()->shipping()->get_shipping_methods();
+
+		foreach ( $methods as $method ) {
+			if ( isset( $method->enabled ) && 'yes' === $method->enabled && ! $method->supports( 'shipping-zones' ) ) {
+				$method_count++;
+			}
+		}
+	}
+
+	$transient_value = array(
+		'version' => $transient_version,
+		'value'   => $method_count,
+	);
+
+	set_transient( $transient_name, $transient_value, DAY_IN_SECONDS * 30 );
+
+	return $method_count;
 }
 
 /**

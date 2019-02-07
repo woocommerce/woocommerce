@@ -80,6 +80,17 @@
 			visibility: visible;
 		 }
 	}
+
+	.woocommerce-form-login {
+		.woocommerce-form-login__submit {
+			float: left;
+			margin-right: 1em;
+		}
+		.woocommerce-form-login__rememberme {
+			display: inline-block;
+			line-height: 3em;
+		}
+	}
 }
 
 .woocommerce-breadcrumb {

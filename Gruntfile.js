@@ -1,6 +1,7 @@
 /* jshint node:true */
 module.exports = function( grunt ) {
 	'use strict';
+	const sass = require( 'node-sass' );
 
 	grunt.initConfig({
 
@@ -22,9 +23,7 @@ module.exports = function( grunt ) {
 				'<%= dirs.js %>/admin/*.js',
 				'!<%= dirs.js %>/admin/*.min.js',
 				'<%= dirs.js %>/frontend/*.js',
-				'!<%= dirs.js %>/frontend/*.min.js',
-				'includes/gateways/simplify-commerce/assets/js/*.js',
-				'!includes/gateways/simplify-commerce/assets/js/*.min.js'
+				'!<%= dirs.js %>/frontend/*.min.js'
 			]
 		},
 
@@ -75,9 +74,13 @@ module.exports = function( grunt ) {
 					'<%= dirs.js %>/jquery-flot/jquery.flot.time.min.js': ['<%= dirs.js %>/jquery-flot/jquery.flot.time.js'],
 					'<%= dirs.js %>/jquery-payment/jquery.payment.min.js': ['<%= dirs.js %>/jquery-payment/jquery.payment.js'],
 					'<%= dirs.js %>/jquery-qrcode/jquery.qrcode.min.js': ['<%= dirs.js %>/jquery-qrcode/jquery.qrcode.js'],
-					'<%= dirs.js %>/jquery-serializejson/jquery.serializejson.min.js': ['<%= dirs.js %>/jquery-serializejson/jquery.serializejson.js'],
+					'<%= dirs.js %>/jquery-serializejson/jquery.serializejson.min.js': [
+						'<%= dirs.js %>/jquery-serializejson/jquery.serializejson.js'
+					],
 					'<%= dirs.js %>/jquery-tiptip/jquery.tipTip.min.js': ['<%= dirs.js %>/jquery-tiptip/jquery.tipTip.js'],
-					'<%= dirs.js %>/jquery-ui-touch-punch/jquery-ui-touch-punch.min.js': ['<%= dirs.js %>/jquery-ui-touch-punch/jquery-ui-touch-punch.js'],
+					'<%= dirs.js %>/jquery-ui-touch-punch/jquery-ui-touch-punch.min.js': [
+						'<%= dirs.js %>/jquery-ui-touch-punch/jquery-ui-touch-punch.js'
+					],
 					'<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.init.min.js': ['<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.init.js'],
 					'<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.min.js': ['<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.js'],
 					'<%= dirs.js %>/flexslider/jquery.flexslider.min.js': ['<%= dirs.js %>/flexslider/jquery.flexslider.js'],
@@ -112,6 +115,7 @@ module.exports = function( grunt ) {
 		sass: {
 			compile: {
 				options: {
+					implementation: sass,
 					sourceMap: 'none'
 				},
 				files: [{
@@ -260,7 +264,9 @@ module.exports = function( grunt ) {
 			contributors: {
 				command: [
 					'echo "Generating contributor list since <%= fromDate %>"',
-					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce --fromDate <%= fromDate %> --authToken <%= authToken %> --cols 6 --sortBy contributions --format md --sortOrder desc --showlogin true > contributors.md'
+					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce --fromDate <%= fromDate %>' +
+					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format md --sortOrder desc' +
+					' --showlogin true > contributors.md'
 				].join( '&&' )
 			}
 		},
@@ -277,7 +283,8 @@ module.exports = function( grunt ) {
 						{
 							config: 'authToken',
 							type: 'input',
-							message: '(optional) Provide a personal access token. This will allow 5000 requests per hour rather than 60 - use if nothing is generated.'
+							message: '(optional) Provide a personal access token.' +
+							' This will allow 5000 requests per hour rather than 60 - use if nothing is generated.'
 						}
 					]
 				}
@@ -298,15 +305,14 @@ module.exports = function( grunt ) {
 			},
 			dist: {
 				src:  [
-					'**/*.php',                                                  // Include all files
-					'!apigen/**',                                                // Exclude apigen/
-					'!includes/api/legacy/**',                                   // Exclude legacy REST API
-					'!includes/gateways/simplify-commerce/includes/Simplify/**', // Exclude simplify commerce SDK
-					'!includes/libraries/**',                                    // Exclude libraries/
-					'!node_modules/**',                                          // Exclude node_modules/
-					'!tests/cli/**',                                             // Exclude tests/cli/
-					'!tmp/**',                                                   // Exclude tmp/
-					'!vendor/**'                                                 // Exclude vendor/
+					'**/*.php', // Include all php files.
+					'!apigen/**',
+					'!includes/api/legacy/**',
+					'!includes/libraries/**',
+					'!node_modules/**',
+					'!tests/cli/**',
+					'!tmp/**',
+					'!vendor/**'
 				]
 			}
 		},

@@ -303,3 +303,4 @@ add_action( 'woocommerce_account_content', 'woocommerce_output_all_notices', 5 )
 add_action( 'woocommerce_before_customer_login_form', 'woocommerce_output_all_notices', 10 );
 add_action( 'woocommerce_before_lost_password_form', 'woocommerce_output_all_notices', 10 );
 add_action( 'before_woocommerce_pay', 'woocommerce_output_all_notices', 10 );
+add_action( 'woocommerce_before_reset_password_form', 'woocommerce_output_all_notices', 10 );

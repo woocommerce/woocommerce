@@ -403,7 +403,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$subtotal += $item->get_subtotal();
 		}
 
-		return apply_filters( 'woocommerce_order_get_subtotal', (double) $subtotal, $this );
+		return apply_filters( 'woocommerce_order_get_subtotal', (float) $subtotal, $this );
 	}
 
 	/**
@@ -692,13 +692,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	protected function type_to_group( $type ) {
-		$type_to_group = apply_filters( 'woocommerce_order_type_to_group', array(
-			'line_item' => 'line_items',
-			'tax'       => 'tax_lines',
-			'shipping'  => 'shipping_lines',
-			'fee'       => 'fee_lines',
-			'coupon'    => 'coupon_lines',
-		) );
+		$type_to_group = apply_filters(
+			'woocommerce_order_type_to_group',
+			array(
+				'line_item' => 'line_items',
+				'tax'       => 'tax_lines',
+				'shipping'  => 'shipping_lines',
+				'fee'       => 'fee_lines',
+				'coupon'    => 'coupon_lines',
+			)
+		);
 		return isset( $type_to_group[ $type ] ) ? $type_to_group[ $type ] : '';
 	}
 
@@ -952,10 +955,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$this->set_coupon_discount_amounts( $discounts );
-		$this->set_item_discount_amounts( $discounts );
+		$this->save();
 
 		// Recalculate totals and taxes.
-		$this->calculate_totals( true );
+		$this->recalculate_coupons();
 
 		// Record usage so counts and validation is correct.
 		$used_by = $this->get_user_id();
@@ -1285,12 +1288,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax_based_on = 'billing';
 		}
 
-		$args = wp_parse_args( $args, array(
-			'country'  => 'billing' === $tax_based_on ? $this->get_billing_country() : $this->get_shipping_country(),
-			'state'    => 'billing' === $tax_based_on ? $this->get_billing_state() : $this->get_shipping_state(),
-			'postcode' => 'billing' === $tax_based_on ? $this->get_billing_postcode() : $this->get_shipping_postcode(),
-			'city'     => 'billing' === $tax_based_on ? $this->get_billing_city() : $this->get_shipping_city(),
-		) );
+		$args = wp_parse_args(
+			$args,
+			array(
+				'country'  => 'billing' === $tax_based_on ? $this->get_billing_country() : $this->get_shipping_country(),
+				'state'    => 'billing' === $tax_based_on ? $this->get_billing_state() : $this->get_shipping_state(),
+				'postcode' => 'billing' === $tax_based_on ? $this->get_billing_postcode() : $this->get_shipping_postcode(),
+				'city'     => 'billing' === $tax_based_on ? $this->get_billing_city() : $this->get_shipping_city(),
+			)
+		);
 
 		// Default to base.
 		if ( 'base' === $tax_based_on || empty( $args['country'] ) ) {
@@ -1619,10 +1625,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( 'excl' === $tax_display ) {
 			$ex_tax_label = $this->get_prices_include_tax() ? 1 : 0;
 
-			$subtotal = wc_price( $this->get_line_subtotal( $item ), array(
-				'ex_tax_label' => $ex_tax_label,
-				'currency'     => $this->get_currency(),
-			) );
+			$subtotal = wc_price(
+				$this->get_line_subtotal( $item ),
+				array(
+					'ex_tax_label' => $ex_tax_label,
+					'currency'     => $this->get_currency(),
+				)
+			);
 		} else {
 			$subtotal = wc_price( $this->get_line_subtotal( $item, true ), array( 'currency' => $this->get_currency() ) );
 		}

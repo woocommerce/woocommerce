@@ -78,7 +78,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			$settings = apply_filters(
 				'woocommerce_shipping_settings',
 				array(
-
 					array(
 						'title' => __( 'Shipping options', 'woocommerce' ),
 						'type'  => 'title',
@@ -242,8 +241,8 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			wp_die( esc_html__( 'Zone does not exist!', 'woocommerce' ) );
 		}
 
-		$allowed_countries    = WC()->countries->get_shipping_countries();
-		$shipping_continents  = WC()->countries->get_shipping_continents();
+		$allowed_countries   = WC()->countries->get_shipping_countries();
+		$shipping_continents = WC()->countries->get_shipping_continents();
 
 		// Prepare locations.
 		$locations = array();
