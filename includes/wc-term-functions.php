@@ -74,8 +74,6 @@ add_action( 'pre_get_terms', 'wc_change_pre_get_terms', 10, 1 );
 /**
  * Adjust term query to handle custom sorting parameters.
  *
- * @deprecated 3.6.0 No longer used as WP supports meta based sorting.
- *
  * @param array $clauses    Clauses.
  * @param array $taxonomies Taxonomies.
  * @param array $args       Arguments.
