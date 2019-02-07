@@ -151,8 +151,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			throw new Exception( __( 'Invalid product.', 'woocommerce' ) );
 		}
 
-	    $_product = wp_cache_get( $product->get_id(), 'products' );
-    	if ( ! $_product ) {
+		$_product = wp_cache_get( $product->get_id(), 'products' );
+		if ( ! $_product ) {
 			$product->set_props(
 				array(
 					'name'              => $post_object->post_title,
@@ -174,7 +174,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$this->read_product_data( $product );
 			$this->read_extra_data( $product );
 			$product->set_object_read( true );
-	        wp_cache_add( $product->get_id(), $product, 'products' );
+			wp_cache_add( $product->get_id(), $product, 'products' );
 		} else {
 			$product = $_product;
 		}
@@ -836,7 +836,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 3.0.0
 	 */
 	protected function clear_caches( &$product ) {
-		wc_delete_cached_product( $product->get_id() );
+		wc_clean_product_cache( $product->get_id() );
 		wc_delete_product_transients( $product->get_id() );
 		if ( $product->get_parent_id( 'edit' ) ) {
 			wc_delete_product_transients( $product->get_parent_id( 'edit' ) );
