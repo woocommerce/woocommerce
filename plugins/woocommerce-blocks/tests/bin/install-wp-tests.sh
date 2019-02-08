@@ -146,9 +146,6 @@ install_deps() {
 	php wp-cli.phar core config --dbname=$DB_NAME --dbuser=$DB_USER --dbpass=$DB_PASS --dbhost=$DB_HOST --dbprefix=wptests_
 	php wp-cli.phar core install --url="$WP_SITE_URL" --title="Example" --admin_user=admin --admin_password=password --admin_email=info@example.com --path=$WP_CORE_DIR --skip-email
 
-	# Install Gutenberg
-	php wp-cli.phar plugin install gutenberg --activate
-
 	# Install WooCommerce
 	cd "wp-content/plugins/"
 	# As zip file does not include tests, we have to get it from git repo.

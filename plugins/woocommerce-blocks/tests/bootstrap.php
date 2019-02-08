@@ -89,9 +89,6 @@ function wgpb_test_includes() {
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
-	echo esc_html( 'Loading Gutenberg' . PHP_EOL );
-	require dirname( dirname( dirname( __FILE__ ) ) ) . '/gutenberg/gutenberg.php';
-
 	echo esc_html( 'Loading WooCommerce' . PHP_EOL );
 	define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 	define( 'WC_USE_TRANSACTIONS', false );
