@@ -250,7 +250,7 @@ class WC_Post_Data {
 	public static function update_post_metadata( $check, $object_id, $meta_key, $meta_value, $prev_value ) {
 		// Delete product cache if someone uses meta directly.
 		if ( in_array( get_post_type( $object_id ), array( 'product', 'product_variation' ), true ) ) {
-			wp_cache_delete( 'product-' . $object_id, 'products' );
+			wc_clean_product_cache( $object_id );
 		}
 
 		if ( ! empty( $meta_value ) && is_float( $meta_value ) && ! registered_meta_key_exists( 'post', $meta_key ) && in_array( get_post_type( $object_id ), array_merge( wc_get_order_types(), array( 'shop_coupon', 'product', 'product_variation' ) ), true ) ) {

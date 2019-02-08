@@ -479,7 +479,7 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	 */
 	public function clear_transients( $object ) {
 		wc_delete_product_transients( $object->get_parent_id() );
-		wp_cache_delete( 'product-' . $object->get_parent_id(), 'products' );
+		wc_clean_product_cache( $object->get_parent_id() );
 	}
 
 	/**

@@ -1579,7 +1579,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 
 		// Clear caches here so in sync with any new variations/children.
 		wc_delete_product_transients( $product->get_id() );
-		wp_cache_delete( 'product-' . $product->get_id(), 'products' );
+		wc_clean_product_cache( $product->get_id() );
 
 		return true;
 	}
