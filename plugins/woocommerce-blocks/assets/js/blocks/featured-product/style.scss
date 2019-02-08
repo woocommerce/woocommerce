@@ -35,8 +35,7 @@
 
 		.wc-block-featured-product__title,
 		.wc-block-featured-product__description,
-		.wc-block-featured-product__price,
-		.wc-block-featured-product__link {
+		.wc-block-featured-product__price {
 			margin-left: 0;
 			text-align: left;
 		}
@@ -47,8 +46,7 @@
 
 		.wc-block-featured-product__title,
 		.wc-block-featured-product__description,
-		.wc-block-featured-product__price,
-		.wc-block-featured-product__link {
+		.wc-block-featured-product__price {
 			margin-right: 0;
 			text-align: right;
 		}
@@ -56,14 +54,10 @@
 
 	.wc-block-featured-product__title,
 	.wc-block-featured-product__description,
-	.wc-block-featured-product__price,
-	.wc-block-featured-product__link {
+	.wc-block-featured-product__price {
 		color: $white;
 		line-height: 1.25;
-		z-index: 1;
 		margin-bottom: 0;
-		width: 100%;
-		padding: 0 48px 16px 48px;
 		text-align: center;
 
 		a,
@@ -72,6 +66,15 @@
 		a:active {
 			color: $white;
 		}
+	}
+
+	.wc-block-featured-product__title,
+	.wc-block-featured-product__description,
+	.wc-block-featured-product__price,
+	.wc-block-featured-product__link {
+		width: 100%;
+		padding: 0 48px 16px 48px;
+		z-index: 1;
 	}
 
 	.wc-block-featured-product__title {
