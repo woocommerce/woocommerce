@@ -177,7 +177,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$this->read_extra_data( $product );
 			$product->set_object_read( true );
 			if ( 'yes' === $use_product_cache ) {
-				wp_cache_add( $product->get_id(), $product, 'products' );
+				wp_cache_add( 'product-' . $product->get_id(), $product, 'products' );
 			}
 		} else {
 			$product = $_product;

@@ -137,7 +137,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
  * @param int Product ID
  */
 function wc_clean_product_cache( $product_id ) {
-	wp_cache_delete( $product_id, 'products' );
+	wp_cache_delete( 'product-' . $product_id, 'products' );
 }
 add_action( 'clean_post_cache', 'wc_clean_product_cache' );
 
