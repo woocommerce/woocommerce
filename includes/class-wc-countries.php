@@ -91,6 +91,24 @@ class WC_Countries {
 	}
 
 	/**
+	 * Get calling code for a country code.
+	 *
+	 * @since 3.6.0
+	 * @param string $cc Country code.
+	 * @return string
+	 */
+	public function get_calling_code_for_country( $cc ) {
+		$codes = wp_cache_get( 'calling-codes', 'countries' );
+
+		if ( ! $codes ) {
+			$codes = json_decode( file_get_contents( WC()->plugin_path() . '/i18n/phone.json' ), true ); // Data from http://country.io/phone.json.
+			wp_cache_set( 'calling-codes', $codes, 'countries' );
+		}
+
+		return isset( $codes[ $cc ] ) ? $codes[ $cc ] : '';
+	}
+
+	/**
 	 * Get continents that the store ships to.
 	 *
 	 * @since 3.6.0
