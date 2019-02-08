@@ -140,6 +140,7 @@ function wc_admin_plugins_loaded() {
 	}
 
 	// Initialize the WC API extensions.
+	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-reports-sync.php';
 	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-install.php';
 	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-api-init.php';
 
