@@ -1016,6 +1016,7 @@ function wc_get_core_supported_themes() {
 /**
  * When a term is split, ensure meta data maintained.
  *
+ * @deprecated 3.6.0
  * @param  int    $old_term_id      Old term ID.
  * @param  int    $new_term_id      New term ID.
  * @param  string $term_taxonomy_id Term taxonomy ID.
