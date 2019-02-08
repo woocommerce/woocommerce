@@ -238,6 +238,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Performance - Improved how versioned transients are set/cleanup to avoid cron. #22511
 * Performance - Optimized product CSS class functions to avoid multiple product reads and duplication. #22610
 * Performance - Improved caching of template loader, product types, and layered nav widget. #22612
+* Performance - Remove external lookup of IP addresses on localhost. #22608
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 * Localization - Added US Minor Outlying Islands as states to avoid confusion with US. #22468
 * Localization - Dutch postcode validation. #22316
