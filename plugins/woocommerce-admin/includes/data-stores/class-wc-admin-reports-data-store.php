@@ -526,17 +526,21 @@ class WC_Admin_Reports_Data_Store {
 	/**
 	 * Change structure of intervals to form a correct response.
 	 *
+	 * Also converts local datetimes to GMT and adds them to the intervals.
+	 *
 	 * @param array $intervals Time interval, e.g. day, week, month.
 	 */
 	protected function create_interval_subtotals( &$intervals ) {
 		foreach ( $intervals as $key => $interval ) {
+			$start_gmt = WC_Admin_Reports_Interval::convert_local_datetime_to_gmt( $interval['date_start'] );
+			$end_gmt   = WC_Admin_Reports_Interval::convert_local_datetime_to_gmt( $interval['date_end'] );
 			// Move intervals result to subtotals object.
 			$intervals[ $key ] = array(
 				'interval'       => $interval['time_interval'],
 				'date_start'     => $interval['date_start'],
-				'date_start_gmt' => $interval['date_start'],
+				'date_start_gmt' => $start_gmt->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 				'date_end'       => $interval['date_end'],
-				'date_end_gmt'   => $interval['date_end'],
+				'date_end_gmt'   => $end_gmt->format( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			);
 
 			unset( $interval['interval'] );
