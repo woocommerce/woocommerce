@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { InnerBlocks } from '@wordpress/editor';
 import { registerBlockType } from '@wordpress/blocks';
 
 /**
@@ -131,6 +132,6 @@ registerBlockType( 'woocommerce/featured-product', {
 	 * Block content is rendered in PHP, not via save function.
 	 */
 	save() {
-		return null;
+		return <InnerBlocks.Content />;
 	},
 } );

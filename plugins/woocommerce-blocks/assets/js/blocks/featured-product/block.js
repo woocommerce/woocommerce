@@ -6,11 +6,11 @@ import apiFetch from '@wordpress/api-fetch';
 import {
 	AlignmentToolbar,
 	BlockControls,
+	InnerBlocks,
 	InspectorControls,
 	MediaUpload,
 	MediaUploadCheck,
 	PanelColorSettings,
-	RichText,
 	withColors,
 } from '@wordpress/editor';
 import {
@@ -218,7 +218,6 @@ class FeaturedProduct extends Component {
 			dimRatio,
 			editMode,
 			height,
-			linkText,
 			showDesc,
 			showPrice,
 		} = attributes;
@@ -318,13 +317,19 @@ class FeaturedProduct extends Component {
 											dangerouslySetInnerHTML={ { __html: product.price_html } }
 										/>
 									) }
-									<div className="wc-block-featured-product__link wp-block-button">
-										<RichText
-											value={ linkText }
-											onChange={ ( value ) => setAttributes( { linkText: value } ) }
-											formattingControls={ [ 'bold', 'italic', 'strikethrough' ] }
-											className="wp-block-button__link"
-											keepPlaceholderOnFocus
+									<div className="wc-block-featured-product__link">
+										<InnerBlocks
+											template={ [
+												[
+													'core/button',
+													{
+														text: __( 'Shop now', 'woo-gutenberg-products-block' ),
+														url: product.permalink,
+														align: 'center',
+													},
+												],
+											] }
+											templateLock="all"
 										/>
 									</div>
 								</div>

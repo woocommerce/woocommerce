@@ -276,6 +276,7 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 
 		$data['id']                = $raw_data['id'];
 		$data['name']              = $raw_data['name'];
+		$data['permalink']         = $raw_data['permalink'];
 		$data['sku']               = $raw_data['sku'];
 		$data['description']       = $raw_data['description'];
 		$data['short_description'] = $raw_data['short_description'];
@@ -330,6 +331,7 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 
 		$schema['properties']['id']                = $raw_schema['properties']['id'];
 		$schema['properties']['name']              = $raw_schema['properties']['name'];
+		$schema['properties']['permalink']         = $raw_schema['properties']['permalink'];
 		$schema['properties']['sku']               = $raw_schema['properties']['sku'];
 		$schema['properties']['description']       = $raw_schema['properties']['description'];
 		$schema['properties']['short_description'] = $raw_schema['properties']['short_description'];
