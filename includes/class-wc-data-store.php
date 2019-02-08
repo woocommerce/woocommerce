@@ -154,9 +154,8 @@ class WC_Data_Store {
 	 *
 	 * @since 3.0.0
 	 * @param WC_Data $data WooCommerce data instance.
-	 * @param string  $use_product_cache Optional. yes|no flag indicating whether to use the product object cache. Default yes. 
 	 */
-	public function read( &$data, $use_product_cache = 'yes' ) {
+	public function read( &$data ) {
 		$this->instance->read( $data, $use_product_cache );
 	}
 

@@ -40,6 +40,11 @@ class WC_Product_Factory {
 			}
 		}
 
+		$_product = wp_cache_get( 'product-' . $product_id, 'products' );
+		if ( $_product ) {
+			return $_product;
+		}
+
 		$classname = $this->get_product_classname( $product_id, $product_type );
 
 		try {
