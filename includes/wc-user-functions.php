@@ -122,11 +122,11 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
  * @param int $customer_id Customer ID.
  */
 function wc_set_customer_auth_cookie( $customer_id ) {
-	global $current_user;
-
-	$current_user = get_user_by( 'id', $customer_id ); // WPCS: override ok.
-
+	wp_set_current_user( $customer_id );
 	wp_set_auth_cookie( $customer_id, true );
+
+	// Update session.
+	WC()->session->init_session_cookie();
 }
 
 /**

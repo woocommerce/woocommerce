@@ -954,7 +954,6 @@ class WC_Checkout {
 				throw new Exception( $customer_id->get_error_message() );
 			}
 
-			wp_set_current_user( $customer_id );
 			wc_set_customer_auth_cookie( $customer_id );
 
 			// As we are now logged in, checkout will need to refresh to show logged in data.
