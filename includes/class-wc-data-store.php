@@ -156,7 +156,7 @@ class WC_Data_Store {
 	 * @param WC_Data $data WooCommerce data instance.
 	 */
 	public function read( &$data ) {
-		$this->instance->read( $data, $use_product_cache );
+		$this->instance->read( $data );
 	}
 
 	/**
