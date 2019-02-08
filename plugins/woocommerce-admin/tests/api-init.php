@@ -16,7 +16,7 @@ class WC_Tests_API_Init extends WC_REST_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 		$this->queue = new WC_Admin_Test_Action_Queue();
-		WC_Admin_Api_Init::set_queue( $this->queue );
+		WC_Admin_Reports_Sync::set_queue( $this->queue );
 	}
 
 	/**
@@ -24,7 +24,7 @@ class WC_Tests_API_Init extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown() {
 		parent::tearDown();
-		WC_Admin_Api_Init::set_queue( null );
+		WC_Admin_Reports_Sync::set_queue( null );
 		$this->queue->actions = array();
 	}
 
@@ -70,13 +70,13 @@ class WC_Tests_API_Init extends WC_REST_Unit_Test_Case {
 		add_filter( 'query', array( $this, 'filter_order_query' ) );
 
 		// Initiate sync.
-		WC_Admin_Api_Init::orders_lookup_process_order( $order->get_id() );
+		WC_Admin_Reports_Sync::orders_lookup_process_order( $order->get_id() );
 
 		// Verify that a retry job was scheduled.
 		$this->assertCount( 1, $this->queue->actions );
 		$this->assertArraySubset(
 			array(
-				'hook' => WC_Admin_Api_Init::SINGLE_ORDER_ACTION,
+				'hook' => WC_Admin_Reports_Sync::SINGLE_ORDER_ACTION,
 				'args' => array( $order->get_id() ),
 			),
 			$this->queue->actions[0]
