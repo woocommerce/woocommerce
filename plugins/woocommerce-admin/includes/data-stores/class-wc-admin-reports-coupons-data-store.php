@@ -319,6 +319,8 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 		global $wpdb;
 
 		$order = wc_get_order( $order_id );
+
+		// Skip `shop_order_refunds` when factoring stats on coupon usage.
 		if ( ! $order || 'shop_order' !== $order->get_type() ) {
 			return -1;
 		}

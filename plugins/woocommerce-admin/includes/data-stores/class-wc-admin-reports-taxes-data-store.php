@@ -258,6 +258,8 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 	public static function sync_order_taxes( $order_id ) {
 		global $wpdb;
 		$order = wc_get_order( $order_id );
+
+		// Skip `shop_order_refunds` when factoring stats on order tax.
 		if ( ! $order || 'shop_order' !== $order->get_type() ) {
 			return -1;
 		}
