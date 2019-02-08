@@ -138,10 +138,12 @@ class WGPB_Product_Attributes_Controller extends WC_REST_Product_Attributes_Cont
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
-		$data = array(
-			'id'   => (int) $item->attribute_id,
-			'name' => $item->attribute_label,
-			'slug' => wc_attribute_taxonomy_name( $item->attribute_name ),
+		$taxonomy = wc_attribute_taxonomy_name( $item->attribute_name );
+		$data     = array(
+			'id'    => (int) $item->attribute_id,
+			'name'  => $item->attribute_label,
+			'slug'  => $taxonomy,
+			'count' => wp_count_terms( $taxonomy ),
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -169,9 +171,15 @@ class WGPB_Product_Attributes_Controller extends WC_REST_Product_Attributes_Cont
 			'properties' => array(),
 		);
 
-		$schema['properties']['id']   = $raw_schema['properties']['id'];
-		$schema['properties']['name'] = $raw_schema['properties']['name'];
-		$schema['properties']['slug'] = $raw_schema['properties']['slug'];
+		$schema['properties']['id']    = $raw_schema['properties']['id'];
+		$schema['properties']['name']  = $raw_schema['properties']['name'];
+		$schema['properties']['slug']  = $raw_schema['properties']['slug'];
+		$schema['properties']['count'] = array(
+			'description' => __( 'Number of terms in the attribute taxonomy.', 'woo-gutenberg-products-block' ),
+			'type'        => 'integer',
+			'context'     => array( 'view', 'edit' ),
+			'readonly'    => true,
+		);
 
 		return $this->add_additional_fields_schema( $schema );
 	}
