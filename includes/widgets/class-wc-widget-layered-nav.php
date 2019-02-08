@@ -451,6 +451,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$term_counts        = $this->get_filtered_term_product_counts( wp_list_pluck( $terms, 'term_id' ), $taxonomy, $query_type );
 		$_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes();
 		$found              = false;
+		$base_link          = $this->get_current_page_url();
 
 		foreach ( $terms as $term ) {
 			$current_values = isset( $_chosen_attributes[ $taxonomy ]['terms'] ) ? $_chosen_attributes[ $taxonomy ]['terms'] : array();
@@ -477,7 +478,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 				$current_filter[] = $term->slug;
 			}
 
-			$link = remove_query_arg( $filter_name, $this->get_current_page_url() );
+			$link = remove_query_arg( $filter_name, $base_link );
 
 			// Add current filters to URL.
 			foreach ( $current_filter as $key => $value ) {
@@ -504,8 +505,8 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			}
 
 			if ( $count > 0 || $option_is_set ) {
-				$link      = esc_url( apply_filters( 'woocommerce_layered_nav_link', $link, $term, $taxonomy ) );
-				$term_html = '<a rel="nofollow" href="' . $link . '">' . esc_html( $term->name ) . '</a>';
+				$link      = apply_filters( 'woocommerce_layered_nav_link', $link, $term, $taxonomy );
+				$term_html = '<a rel="nofollow" href="' . esc_url( $link ) . '">' . esc_html( $term->name ) . '</a>';
 			} else {
 				$link      = false;
 				$term_html = '<span>' . esc_html( $term->name ) . '</span>';
@@ -514,7 +515,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			$term_html .= ' ' . apply_filters( 'woocommerce_layered_nav_count', '<span class="count">(' . absint( $count ) . ')</span>', $count, $term );
 
 			echo '<li class="woocommerce-widget-layered-nav-list__item wc-layered-nav-term ' . ( $option_is_set ? 'woocommerce-widget-layered-nav-list__item--chosen chosen' : '' ) . '">';
-			echo wp_kses_post( apply_filters( 'woocommerce_layered_nav_term_html', $term_html, $term, $link, $count ) );
+			echo apply_filters( 'woocommerce_layered_nav_term_html', $term_html, $term, $link, $count ); // WPCS: XSS ok.
 			echo '</li>';
 		}
 

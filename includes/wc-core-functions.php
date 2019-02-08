@@ -157,21 +157,35 @@ function wc_update_order( $args ) {
  * @param string $name Template name (default: '').
  */
 function wc_get_template_part( $slug, $name = '' ) {
-	$template = '';
+	$cache_key = sanitize_key( implode( '-', array( 'template-part', $slug, $name ) ) );
+	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
 
-	// Look in yourtheme/slug-name.php and yourtheme/woocommerce/slug-name.php.
-	if ( $name && ! WC_TEMPLATE_DEBUG_MODE ) {
-		$template = locate_template( array( "{$slug}-{$name}.php", WC()->template_path() . "{$slug}-{$name}.php" ) );
-	}
+	if ( ! $template ) {
+		if ( $name ) {
+			$template = WC_TEMPLATE_DEBUG_MODE ? '' : locate_template(
+				array(
+					"{$slug}-{$name}.php",
+					WC()->template_path() . "{$slug}-{$name}.php",
+				)
+			);
 
-	// Get default slug-name.php.
-	if ( ! $template && $name && file_exists( WC()->plugin_path() . "/templates/{$slug}-{$name}.php" ) ) {
-		$template = WC()->plugin_path() . "/templates/{$slug}-{$name}.php";
-	}
+			if ( ! $template ) {
+				$fallback = WC()->plugin_path() . "/templates/{$slug}-{$name}.php";
+				$template = file_exists( $fallback ) ? $fallback : '';
+			}
+		}
 
-	// If template file doesn't exist, look in yourtheme/slug.php and yourtheme/woocommerce/slug.php.
-	if ( ! $template && ! WC_TEMPLATE_DEBUG_MODE ) {
-		$template = locate_template( array( "{$slug}.php", WC()->template_path() . "{$slug}.php" ) );
+		if ( ! $template ) {
+			// If template file doesn't exist, look in yourtheme/slug.php and yourtheme/woocommerce/slug.php.
+			$template = WC_TEMPLATE_DEBUG_MODE ? '' : locate_template(
+				array(
+					"{$slug}.php",
+					WC()->template_path() . "{$slug}.php",
+				)
+			);
+		}
+
+		wp_cache_set( $cache_key, $template, 'woocommerce' );
 	}
 
 	// Allow 3rd party plugins to filter template file from their plugin.
@@ -191,21 +205,30 @@ function wc_get_template_part( $slug, $name = '' ) {
  * @param string $default_path  Default path. (default: '').
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
-	$located = wc_locate_template( $template_name, $template_path, $default_path );
+	$cache_key = sanitize_key( implode( '-', array( 'template', $template_name, $template_path, $default_path ) ) );
+	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
+
+	if ( ! $template ) {
+		$template = wc_locate_template( $template_name, $template_path, $default_path );
+		wp_cache_set( $cache_key, $template, 'woocommerce' );
+	}
 
 	// Allow 3rd party plugin filter template file from their plugin.
-	$located = apply_filters( 'wc_get_template', $located, $template_name, $args, $template_path, $default_path );
+	$filter_template = apply_filters( 'wc_get_template', $template, $template_name, $args, $template_path, $default_path );
 
-	if ( ! file_exists( $located ) ) {
-		/* translators: %s template */
-		wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $located . '</code>' ), '2.1' );
-		return;
+	if ( $filter_template !== $template ) {
+		if ( ! file_exists( $filter_template ) ) {
+			/* translators: %s template */
+			wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $template . '</code>' ), '2.1' );
+			return;
+		}
+		$template = $filter_template;
 	}
 
 	$action_args = array(
 		'template_name' => $template_name,
 		'template_path' => $template_path,
-		'located'       => $located,
+		'located'       => $template,
 		'args'          => $args,
 	);
 
@@ -215,7 +238,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 
 	do_action( 'woocommerce_before_template_part', $action_args['template_name'], $action_args['template_path'], $action_args['located'], $action_args['args'] );
 
-	include $located;
+	include $template;
 
 	do_action( 'woocommerce_after_template_part', $action_args['template_name'], $action_args['template_path'], $action_args['located'], $action_args['args'] );
 }
