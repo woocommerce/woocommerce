@@ -98,16 +98,12 @@ function do_wc_admin_daily() {
 add_action( 'wc_admin_daily', 'do_wc_admin_daily' );
 
 /**
- * Activates wc-admin plugin when installed.
+ * Initializes wc-admin daily action when plugin activated.
  */
 function activate_wc_admin_plugin() {
 	if ( ! dependencies_satisfied() ) {
 		return;
 	}
-	// Initialize the WC API extensions.
-	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-api-init.php';
-
-	WC_Admin_Api_Init::install();
 
 	if ( ! wp_next_scheduled( 'wc_admin_daily' ) ) {
 		wp_schedule_event( time(), 'daily', 'wc_admin_daily' );
@@ -135,23 +131,6 @@ function deactivate_wc_admin_plugin() {
 register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, 'deactivate_wc_admin_plugin' );
 
 /**
- * Update the database tables if needed. This hooked function does NOT need to
- * be ported to WooCommerce's code base - WC_Install will do this on plugin
- * update automatically.
- */
-function wc_admin_init() {
-	if ( ! dependencies_satisfied() ) {
-		return;
-	}
-
-	// Only create/update tables on init if WP_DEBUG is true.
-	if ( defined( 'WP_DEBUG' ) && WP_DEBUG && wc_admin_build_file_exists() ) {
-		WC_Admin_Api_Init::create_db_tables();
-	}
-}
-add_action( 'init', 'wc_admin_init' );
-
-/**
  * Set up the plugin, only if we can detect both Gutenberg and WooCommerce
  */
 function wc_admin_plugins_loaded() {
@@ -161,6 +140,7 @@ function wc_admin_plugins_loaded() {
 	}
 
 	// Initialize the WC API extensions.
+	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-install.php';
 	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-api-init.php';
 
 	// Some common utilities.
