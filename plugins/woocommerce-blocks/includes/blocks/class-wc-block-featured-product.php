@@ -104,6 +104,7 @@ class WC_Block_Featured_Product {
 	 * @return string
 	 */
 	public static function get_styles( $attributes, $product ) {
+		$style      = '';
 		$image_size = 'large';
 		if ( 'none' !== $attributes['align'] || $attributes['height'] > 800 ) {
 			$image_size = 'full';
@@ -116,7 +117,7 @@ class WC_Block_Featured_Product {
 		}
 
 		if ( ! empty( $image ) ) {
-			$style = sprintf( 'background-image:url(%s);', esc_url( $image ) );
+			$style .= sprintf( 'background-image:url(%s);', esc_url( $image ) );
 		}
 
 		if ( isset( $attributes['customOverlayColor'] ) ) {
