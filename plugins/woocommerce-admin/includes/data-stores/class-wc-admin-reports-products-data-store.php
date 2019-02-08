@@ -381,6 +381,9 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 					array( '%d' )
 				); // WPCS: cache ok, DB call ok.
 
+				// Deleting 0 items here isn't a problem, and we should force a successful return.
+				$result = ( 0 === $result ) ? 1 : $result;
+
 				/**
 				 * Fires when product's reports are deleted.
 				 *
