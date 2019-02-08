@@ -122,19 +122,18 @@ class WC_Admin_Reports_Data_Store {
 	 * Fills in interval gaps from DB with 0-filled objects.
 	 *
 	 * @param array    $db_intervals   Array of all intervals present in the db.
-	 * @param DateTime $datetime_start Start date.
-	 * @param DateTime $datetime_end   End date.
+	 * @param DateTime $start_datetime Start date.
+	 * @param DateTime $end_datetime   End date.
 	 * @param string   $time_interval  Time interval, e.g. day, week, month.
 	 * @param stdClass $data           Data with SQL extracted intervals.
 	 * @return stdClass
 	 */
-	protected function fill_in_missing_intervals( $db_intervals, $datetime_start, $datetime_end, $time_interval, &$data ) {
+	protected function fill_in_missing_intervals( $db_intervals, $start_datetime, $end_datetime, $time_interval, &$data ) {
 		// @todo This is ugly and messy.
+		$local_tz = new DateTimeZone( wc_timezone_string() );
 		// At this point, we don't know when we can stop iterating, as the ordering can be based on any value.
-		$end_datetime = new DateTime( $datetime_end );
 		$time_ids     = array_flip( wp_list_pluck( $data->intervals, 'time_interval' ) );
 		$db_intervals = array_flip( $db_intervals );
-		$datetime     = new DateTime( $datetime_start );
 		// Totals object used to get all needed properties.
 		$totals_arr = get_object_vars( $data->totals );
 		foreach ( $totals_arr as $key => $val ) {
@@ -142,9 +141,9 @@ class WC_Admin_Reports_Data_Store {
 		}
 		// @todo Should 'products' be in intervals?
 		unset( $totals_arr['products'] );
-		while ( $datetime <= $end_datetime ) {
-			$next_start = WC_Admin_Reports_Interval::iterate( $datetime, $time_interval );
-			$time_id    = WC_Admin_Reports_Interval::time_interval_id( $time_interval, $datetime );
+		while ( $start_datetime <= $end_datetime ) {
+			$next_start = WC_Admin_Reports_Interval::iterate( $start_datetime, $time_interval );
+			$time_id    = WC_Admin_Reports_Interval::time_interval_id( $time_interval, $start_datetime );
 			// Either create fill-zero interval or use data from db.
 			if ( $next_start > $end_datetime ) {
 				$interval_end = $end_datetime->format( 'Y-m-d H:i:s' );
@@ -152,25 +151,46 @@ class WC_Admin_Reports_Data_Store {
 				$prev_end_timestamp = (int) $next_start->format( 'U' ) - 1;
 				$prev_end           = new DateTime();
 				$prev_end->setTimestamp( $prev_end_timestamp );
+				$prev_end->setTimezone( $local_tz );
 				$interval_end = $prev_end->format( 'Y-m-d H:i:s' );
 			}
 			if ( array_key_exists( $time_id, $time_ids ) ) {
 				// For interval present in the db for this time frame, just fill in dates.
 				$record               = &$data->intervals[ $time_ids[ $time_id ] ];
-				$record['date_start'] = $datetime->format( 'Y-m-d H:i:s' );
+				$record['date_start'] = $start_datetime->format( 'Y-m-d H:i:s' );
 				$record['date_end']   = $interval_end;
 			} elseif ( ! array_key_exists( $time_id, $db_intervals ) ) {
 				// For intervals present in the db outside of this time frame, do nothing.
 				// For intervals not present in the db, fabricate it.
 				$record_arr                  = array();
 				$record_arr['time_interval'] = $time_id;
-				$record_arr['date_start']    = $datetime->format( 'Y-m-d H:i:s' );
+				$record_arr['date_start']    = $start_datetime->format( 'Y-m-d H:i:s' );
 				$record_arr['date_end']      = $interval_end;
 				$data->intervals[]           = array_merge( $record_arr, $totals_arr );
 			}
-			$datetime = $next_start;
+			$start_datetime = $next_start;
 		}
 		return $data;
+	}
+
+	/**
+	 * Converts input datetime parameters to local timezone.
+	 *
+	 * @param array $query_args Array of query arguments.
+	 */
+	protected function normalize_timezones( &$query_args ) {
+		$local_tz = new DateTimeZone( wc_timezone_string() );
+		foreach ( array( 'before', 'after' ) as $query_arg_key ) {
+			if ( isset( $query_args[ $query_arg_key ] ) ) {
+				// Assume that unspecified timezone is a local timezone.
+				$datetime = new DateTime( $query_args[ $query_arg_key ], $local_tz );
+				// In case timezone was forced by using +HH:MM, convert to local timezone.
+				$datetime->setTimezone( $local_tz );
+				$query_args[ $query_arg_key ] = $datetime;
+			} else {
+				$query_args[ $query_arg_key ] = null;
+			}
+		}
 	}
 
 	/**
@@ -285,6 +305,7 @@ class WC_Admin_Reports_Data_Store {
 		if ( $db_interval_count === $expected_interval_count ) {
 			return;
 		}
+		$local_tz = new DateTimeZone( wc_timezone_string() );
 		if ( 'date' === strtolower( $query_args['orderby'] ) ) {
 			// page X in request translates to slightly different dates in the db, in case some
 			// records are missing from the db.
@@ -292,9 +313,9 @@ class WC_Admin_Reports_Data_Store {
 			$end_iteration   = 0;
 			if ( 'asc' === strtolower( $query_args['order'] ) ) {
 				// ORDER BY date ASC.
-				$new_start_date    = new DateTime( $query_args['after'] );
+				$new_start_date    = $query_args['after'];
 				$intervals_to_skip = ( $query_args['page'] - 1 ) * $intervals_query['per_page'];
-				$latest_end_date   = new DateTime( $query_args['before'] );
+				$latest_end_date   = $query_args['before'];
 				for ( $i = 0; $i < $intervals_to_skip; $i++ ) {
 					if ( $new_start_date > $latest_end_date ) {
 						$new_start_date  = $latest_end_date;
@@ -323,9 +344,9 @@ class WC_Admin_Reports_Data_Store {
 				}
 			} else {
 				// ORDER BY date DESC.
-				$new_end_date        = new DateTime( $query_args['before'] );
+				$new_end_date        = $query_args['before'];
 				$intervals_to_skip   = ( $query_args['page'] - 1 ) * $intervals_query['per_page'];
-				$earliest_start_date = new DateTime( $query_args['after'] );
+				$earliest_start_date = $query_args['after'];
 				for ( $i = 0; $i < $intervals_to_skip; $i++ ) {
 					if ( $new_end_date < $earliest_start_date ) {
 						$new_end_date  = $earliest_start_date;
@@ -354,11 +375,13 @@ class WC_Admin_Reports_Data_Store {
 					$new_start_date->setTimestamp( $new_start_date_timestamp );
 				}
 			}
-			$query_args['adj_after']               = $new_start_date->format( WC_Admin_Reports_Interval::$iso_datetime_format );
-			$query_args['adj_before']              = $new_end_date->format( WC_Admin_Reports_Interval::$iso_datetime_format );
+			$query_args['adj_after']               = $new_start_date;
+			$query_args['adj_before']              = $new_end_date;
+			$adj_after                             = $new_start_date->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+			$adj_before                            = $new_end_date->format( WC_Admin_Reports_Interval::$sql_datetime_format );
 			$intervals_query['where_time_clause']  = '';
-			$intervals_query['where_time_clause'] .= " AND {$table_name}.date_created <= '{$query_args['adj_before']}'";
-			$intervals_query['where_time_clause'] .= " AND {$table_name}.date_created >= '{$query_args['adj_after']}'";
+			$intervals_query['where_time_clause'] .= " AND {$table_name}.date_created <= '$adj_before'";
+			$intervals_query['where_time_clause'] .= " AND {$table_name}.date_created >= '$adj_after'";
 			$intervals_query['limit']              = 'LIMIT 0,' . $intervals_query['per_page'];
 		} else {
 			if ( 'asc' === $query_args['order'] ) {
@@ -465,21 +488,21 @@ class WC_Admin_Reports_Data_Store {
 	 *
 	 * E.g. if there are db records for only Tuesday and Thursday this week, the actual week interval is [Mon, Sun], not [Tue, Thu].
 	 *
-	 * @param DateTime $datetime_start Start date.
-	 * @param DateTime $datetime_end End date.
+	 * @param DateTime $start_datetime Start date.
+	 * @param DateTime $end_datetime End date.
 	 * @param string   $time_interval Time interval, e.g. day, week, month.
 	 * @param array    $intervals Array of intervals extracted from SQL db.
 	 */
-	protected function update_interval_boundary_dates( $datetime_start, $datetime_end, $time_interval, &$intervals ) {
+	protected function update_interval_boundary_dates( $start_datetime, $end_datetime, $time_interval, &$intervals ) {
+		$local_tz = new DateTimeZone( wc_timezone_string() );
 		foreach ( $intervals as $key => $interval ) {
-			$datetime = new DateTime( $interval['datetime_anchor'] );
+			$datetime = new DateTime( $interval['datetime_anchor'], $local_tz );
 
 			$prev_start = WC_Admin_Reports_Interval::iterate( $datetime, $time_interval, true );
 			// @todo Not sure if the +1/-1 here are correct, especially as they are applied before the ?: below.
 			$prev_start_timestamp = (int) $prev_start->format( 'U' ) + 1;
 			$prev_start->setTimestamp( $prev_start_timestamp );
-			if ( $datetime_start ) {
-				$start_datetime                  = new DateTime( $datetime_start );
+			if ( $start_datetime ) {
 				$date_start                      = $prev_start < $start_datetime ? $start_datetime : $prev_start;
 				$intervals[ $key ]['date_start'] = $date_start->format( 'Y-m-d H:i:s' );
 			} else {
@@ -489,8 +512,7 @@ class WC_Admin_Reports_Data_Store {
 			$next_end           = WC_Admin_Reports_Interval::iterate( $datetime, $time_interval );
 			$next_end_timestamp = (int) $next_end->format( 'U' ) - 1;
 			$next_end->setTimestamp( $next_end_timestamp );
-			if ( $datetime_end ) {
-				$end_datetime                  = new DateTime( $datetime_end );
+			if ( $end_datetime ) {
 				$date_end                      = $next_end > $end_datetime ? $end_datetime : $next_end;
 				$intervals[ $key ]['date_end'] = $date_end->format( 'Y-m-d H:i:s' );
 			} else {
@@ -541,15 +563,13 @@ class WC_Admin_Reports_Data_Store {
 		);
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
-			$datetime                        = new DateTime( $query_args['before'] );
-			$datetime_str                    = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+			$datetime_str                    = $query_args['before']->format( WC_Admin_Reports_Interval::$sql_datetime_format );
 			$sql_query['where_time_clause'] .= " AND {$table_name}.date_created <= '$datetime_str'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
-			$datetime                        = new DateTime( $query_args['after'] );
-			$datetime_str                    = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+			$datetime_str                    = $query_args['after']->format( WC_Admin_Reports_Interval::$sql_datetime_format );
 			$sql_query['where_time_clause'] .= " AND {$table_name}.date_created >= '$datetime_str'";
 		}
 

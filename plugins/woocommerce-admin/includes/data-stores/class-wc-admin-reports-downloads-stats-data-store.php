@@ -61,6 +61,7 @@ class WC_Admin_Reports_Downloads_Stats_Data_Store extends WC_Admin_Reports_Downl
 			'interval' => 'week',
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
+		$this->normalize_timezones( $query_args );
 
 		if ( empty( $query_args['before'] ) ) {
 			$query_args['before'] = date( WC_Admin_Reports_Interval::$iso_datetime_format, $now );

@@ -220,16 +220,14 @@ class WC_Admin_Reports_Downloads_Data_Store extends WC_Admin_Reports_Data_Store 
 			'where_clause'      => '',
 		);
 
-		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
-			$datetime                        = new DateTime( $query_args['before'] );
-			$datetime_str                    = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+		if ( $query_args['before'] ) {
+			$datetime_str                    = $query_args['after']->format( WC_Admin_Reports_Interval::$sql_datetime_format );
 			$sql_query['where_time_clause'] .= " AND {$table_name}.timestamp <= '$datetime_str'";
 
 		}
 
-		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
-			$datetime                        = new DateTime( $query_args['after'] );
-			$datetime_str                    = $datetime->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+		if ( $query_args['after'] ) {
+			$datetime_str                    = $query_args['after']->format( WC_Admin_Reports_Interval::$sql_datetime_format );
 			$sql_query['where_time_clause'] .= " AND {$table_name}.timestamp >= '$datetime_str'";
 		}
 
@@ -287,6 +285,7 @@ class WC_Admin_Reports_Downloads_Data_Store extends WC_Admin_Reports_Data_Store 
 			'fields'   => '*',
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
+		$this->normalize_timezones( $query_args );
 
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = wp_cache_get( $cache_key, $this->cache_group );
