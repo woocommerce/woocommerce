@@ -435,9 +435,6 @@ class WC_Admin_Reports_Interval {
 	 * @return DateTime
 	 */
 	public static function iterate( $datetime, $time_interval, $reversed = false ) {
-		// $result_datetime           =
-		// $result_timestamp_adjusted = $result_datetime->format( 'U' ) - 1;
-		// $result_datetime->setTimestamp( $result_timestamp_adjusted );
 		return call_user_func( array( __CLASS__, "next_{$time_interval}_start" ), $datetime, $reversed );
 	}
 
