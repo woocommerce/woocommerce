@@ -2723,7 +2723,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				break;
 			case 'radio':
-				$label_id = current( array_keys( $args['options'] ) );
+				$label_id .= '_' . current( array_keys( $args['options'] ) );
 
 				if ( ! empty( $args['options'] ) ) {
 					foreach ( $args['options'] as $option_key => $option_text ) {
