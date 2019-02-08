@@ -334,7 +334,7 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 					'order_id'        => $order_id,
 					'coupon_id'       => $coupon_id,
 					'discount_amount' => $coupon_item->get_discount(),
-					'date_created'    => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+					'date_created'    => $order->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format ),
 				),
 				array(
 					'%d',

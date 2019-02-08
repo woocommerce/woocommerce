@@ -270,7 +270,7 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 				$wpdb->prefix . self::TABLE_NAME,
 				array(
 					'order_id'     => $order->get_id(),
-					'date_created' => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+					'date_created' => $order->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format ),
 					'tax_rate_id'  => $tax_item->get_rate_id(),
 					'shipping_tax' => $tax_item->get_shipping_tax_total(),
 					'order_tax'    => $tax_item->get_tax_total(),

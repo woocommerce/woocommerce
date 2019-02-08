@@ -385,7 +385,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 						'customer_id'           => ( 0 < $order->get_customer_id( 'edit' ) ) ? $order->get_customer_id( 'edit' ) : null,
 						'product_qty'           => $product_qty,
 						'product_net_revenue'   => $net_revenue,
-						'date_created'          => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+						'date_created'          => $order->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format ),
 						'coupon_amount'         => $coupon_amount,
 						'tax_amount'            => $tax_amount,
 						'shipping_amount'       => $shipping_amount,
