@@ -1102,7 +1102,7 @@ function wc_get_customer_default_location() {
 			$ua = strtolower( wc_get_user_agent() );
 
 			if ( ! strstr( $ua, 'bot' ) && ! strstr( $ua, 'spider' ) && ! strstr( $ua, 'crawl' ) ) {
-				$location = WC_Geolocation::geolocate_ip( '', true, false );
+				$location = WC_Geolocation::geolocate_ip( '', false, false );
 			}
 
 			// Base fallback.
