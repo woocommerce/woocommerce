@@ -164,12 +164,15 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Customer notes containing URLs now automatically converts to clickable links. #21927
 * Enhancement - Add increase and decrease stock options to bulk edit form. #22475
 * Enhancement - Allow states in zones to be searched by country name. #22339
+* Enhancement - Added registration success notices to account pages. #22650
+* Enhancement - Store notice is visible again if the notice text is changed. #22645
 * Tweak - Generalize shipping estimate text on cart page. #22467
 * Tweak - Include auto draft orders in order list filters. #22380
 * Tweak - Only include the network orders widget on the main site dashboard. #22318
 * Tweak - Only show available shipping continents when selecting shipping zone region. #22131
 * Tweak - Use Shortcode block on default WooCommerce pages. #21817
 * Tweak - Show full category hierarchy in product URLs when term IDs are not sequential. #22526
+* Tweak - Make sure account and checkout endpoints only work under account and checkout pages. #22631
 * Template - Moved the order of rememberme checkboxes for accessibility so they tab in order. #21454
 * Template - New structure for attributes template, including new `woocommerce_display_product_attributes` filter. #22480
 * Dev - Introduce `woocommerce_reviews_title` filter. #22216
@@ -234,6 +237,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
 * Performance - Improved how versioned transients are set/cleanup to avoid cron. #22511
 * Performance - Optimized product CSS class functions to avoid multiple product reads and duplication. #22610
+* Performance - Improved caching of template loader, product types, and layered nav widget. #22612
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 * Localization - Added US Minor Outlying Islands as states to avoid confusion with US. #22468
 * Localization - Dutch postcode validation. #22316
