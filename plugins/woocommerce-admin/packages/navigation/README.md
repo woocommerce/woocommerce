@@ -12,16 +12,16 @@ npm install @woocommerce/navigation --save
 
 ## Usage
 
-### history
+### getHistory
 
 A single history object used to perform path changes. This needs to be passed into ReactRouter to use the other path functions from this library.
 
 ```jsx
-import { history } from '@woocommerce/navigation';
+import { getHistory } from '@woocommerce/navigation';
 
 render() {
 	return (
-		<Router history={ history }>
+		<Router history={ getHistory() }>
 			…
 		</Router>
 	);

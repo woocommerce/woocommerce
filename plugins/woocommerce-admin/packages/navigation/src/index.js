@@ -8,10 +8,10 @@ import { parse, stringify } from 'qs';
 /**
  * Internal dependencies
  */
-import history from './history';
+import { getHistory } from './history';
 
 // Expose history so all uses get the same history object.
-export { history };
+export { getHistory };
 
 // Export all filter utilities
 export * from './filters';
@@ -35,7 +35,7 @@ export const getAdminLink = path => wcSettings.adminUrl + path;
  *
  * @return {String}  Current path.
  */
-export const getPath = () => history.location.pathname;
+export const getPath = () => getHistory().location.pathname;
 
 /**
  * Converts a query object to a query string.
@@ -89,7 +89,7 @@ export function getNewPath( query, path = getPath(), currentQuery = getQuery() )
  * @return {Object}  Current query object, defaults to empty object.
  */
 export function getQuery() {
-	const search = history.location.search;
+	const search = getHistory().location.search;
 	if ( search.length ) {
 		return parse( search.substring( 1 ) ) || {};
 	}
@@ -125,5 +125,5 @@ export function onQueryChange( param, path = getPath(), query = getQuery() ) {
  */
 export function updateQueryString( query, path = getPath(), currentQuery = getQuery() ) {
 	const newPath = getNewPath( query, path, currentQuery );
-	history.push( newPath );
+	getHistory().push( newPath );
 }

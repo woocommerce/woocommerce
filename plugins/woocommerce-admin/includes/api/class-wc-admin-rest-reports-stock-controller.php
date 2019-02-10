@@ -199,6 +199,7 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 			'sku'            => $product->get_sku(),
 			'stock_status'   => $product->get_stock_status(),
 			'stock_quantity' => (float) $product->get_stock_quantity(),
+			'manage_stock'   => $product->get_manage_stock(),
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -302,6 +303,12 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 				'stock_quantity' => array(
 					'description' => __( 'Stock quantity.', 'wc-admin' ),
 					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'manage_stock'   => array(
+					'description' => __( 'Manage stock.', 'wc-admin' ),
+					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),

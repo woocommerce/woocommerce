@@ -10,7 +10,7 @@ import { __, sprintf } from '@wordpress/i18n';
  * WooCommerce dependencies
  */
 import { Card } from '@woocommerce/components';
-import { getAdminLink, history } from '@woocommerce/navigation';
+import { getAdminLink, getHistory } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -26,7 +26,7 @@ class ChartBlock extends Component {
 			return null;
 		}
 
-		history.push( 'analytics/' + charts[ 0 ].endpoint + '?chart=' + charts[ 0 ].key );
+		getHistory().push( 'analytics/' + charts[ 0 ].endpoint + '?chart=' + charts[ 0 ].key );
 	};
 
 	render() {

@@ -224,6 +224,12 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 						'context'     => array( 'view', 'edit' ),
 						'description' => __( 'Product inventory threshold for low stock.', 'wc-admin' ),
 					),
+					'variations'      => array(
+						'type'        => 'array',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Product variations IDs.', 'wc-admin' ),
+					),
 					'sku'              => array(
 						'type'        => 'string',
 						'readonly'    => true,
@@ -291,6 +297,7 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 				'orders_count',
 				'items_sold',
 				'product_name',
+				'variations',
 				'sku',
 			),
 			'validate_callback' => 'rest_validate_request_arg',

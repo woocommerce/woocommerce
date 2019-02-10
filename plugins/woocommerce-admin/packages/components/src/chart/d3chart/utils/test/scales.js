@@ -98,6 +98,10 @@ describe( 'Y scales', () => {
 		it( 'calculate the correct maximum y value', () => {
 			expect( getYMax( testLineData ) ).toEqual( 15000000 );
 		} );
+
+		it( 'return 0 if there is no line data', () => {
+			expect( getYMax( [] ) ).toEqual( 0 );
+		} );
 	} );
 
 	describe( 'getYScale', () => {

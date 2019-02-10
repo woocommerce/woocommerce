@@ -27,9 +27,27 @@ import withSelect from 'wc-api/with-select';
  * Component to render summary numbers in reports.
  */
 export class ReportSummary extends Component {
+	formatVal( val, type ) {
+		return 'currency' === type ? formatCurrency( val ) : formatValue( type, val );
+	}
+
+	getValues( key, type ) {
+		const { emptySearchResults, summaryData } = this.props;
+		const { totals } = summaryData;
+
+		const primaryValue = emptySearchResults ? 0 : totals.primary[ key ];
+		const secondaryValue = emptySearchResults ? 0 : totals.secondary[ key ];
+
+		return {
+			delta: calculateDelta( primaryValue, secondaryValue ),
+			prevValue: this.formatVal( secondaryValue, type ),
+			value: this.formatVal( primaryValue, type ),
+		};
+	}
+
 	render() {
 		const { charts, query, selectedChart, summaryData } = this.props;
-		const { totals, isError, isRequesting } = summaryData;
+		const { isError, isRequesting } = summaryData;
 
 		if ( isError ) {
 			return <ReportError isError />;
@@ -39,23 +57,14 @@ export class ReportSummary extends Component {
 			return <SummaryListPlaceholder numberOfItems={ charts.length } />;
 		}
 
-		const primaryTotals = totals.primary || {};
-		const secondaryTotals = totals.secondary || {};
 		const { compare } = getDateParamsFromQuery( query );
 
 		const renderSummaryNumbers = ( { onToggle } ) =>
 			charts.map( chart => {
 				const { key, label, type } = chart;
-				const isCurrency = 'currency' === type;
-				const delta = calculateDelta( primaryTotals[ key ], secondaryTotals[ key ] );
 				const href = getNewPath( { chart: key } );
-				const prevValue = isCurrency
-					? formatCurrency( secondaryTotals[ key ] )
-					: formatValue( type, secondaryTotals[ key ] );
 				const isSelected = selectedChart.key === key;
-				const value = isCurrency
-					? formatCurrency( primaryTotals[ key ] )
-					: formatValue( type, primaryTotals[ key ] );
+				const { delta, prevValue, value } = this.getValues( key, type );
 
 				return (
 					<SummaryNumber
@@ -105,11 +114,31 @@ ReportSummary.propTypes = {
 		 */
 		key: PropTypes.string.isRequired,
 	} ).isRequired,
+	/**
+	 * Data to display in the SummaryNumbers.
+	 */
+	summaryData: PropTypes.object,
+};
+
+ReportSummary.defaultProps = {
+	summaryData: {
+		totals: {
+			primary: {},
+			secondary: {},
+		},
+		isError: false,
+		isRequesting: false,
+	},
 };
 
 export default compose(
 	withSelect( ( select, props ) => {
 		const { query, endpoint } = props;
+		if ( query.search && ! ( query[ endpoint ] && query[ endpoint ].length ) ) {
+			return {
+				emptySearchResults: true,
+			};
+		}
 		const summaryData = getSummaryNumbers( endpoint, query, select );
 
 		return {

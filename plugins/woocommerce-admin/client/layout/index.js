@@ -11,7 +11,7 @@ import { get } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { history } from '@woocommerce/navigation';
+import { getHistory } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -83,7 +83,7 @@ Layout.propTypes = {
 export class PageLayout extends Component {
 	render() {
 		return (
-			<Router history={ history }>
+			<Router history={ getHistory() }>
 				<Switch>
 					{ getPages().map( page => {
 						return <Route key={ page.path } path={ page.path } exact component={ Layout } />;

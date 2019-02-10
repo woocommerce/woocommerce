@@ -3,7 +3,6 @@
 /**
  * External dependencies
  */
-import { isEmpty } from 'lodash';
 import { Component, createRef } from '@wordpress/element';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -116,6 +115,7 @@ class D3Chart extends Component {
 		const compact = this.shouldBeCompact();
 		const uniqueKeys = getUniqueKeys( data );
 		const newOrderedKeys = orderedKeys || getOrderedKeys( data, uniqueKeys );
+		const visibleKeys = newOrderedKeys.filter( key => key.visible );
 		const lineData = getLineData( data, newOrderedKeys );
 		const yMax = getYMax( lineData );
 		const yScale = getYScale( adjHeight, yMax );
@@ -135,6 +135,7 @@ class D3Chart extends Component {
 			margin,
 			mode,
 			orderedKeys: newOrderedKeys,
+			visibleKeys,
 			parseDate,
 			tooltipPosition,
 			tooltipLabelFormat: getFormatter( tooltipLabelFormat, d3TimeFormat ),
@@ -159,9 +160,6 @@ class D3Chart extends Component {
 
 	render() {
 		const { className, data, height, type } = this.props;
-		if ( isEmpty( data ) ) {
-			return null; // @todo Improve messaging
-		}
 		const computedWidth = this.getWidth();
 		return (
 			<div

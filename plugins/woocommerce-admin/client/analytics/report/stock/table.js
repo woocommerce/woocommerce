@@ -60,7 +60,7 @@ export default class StockReportTable extends Component {
 		const { stockStatuses } = wcSettings;
 
 		return products.map( product => {
-			const { id, name, parent_id, sku, stock_quantity, stock_status } = product;
+			const { id, manage_stock, name, parent_id, sku, stock_quantity, stock_status } = product;
 
 			const productDetailLink = getNewPath( persistedQuery, 'products', {
 				filter: 'single_product',
@@ -95,7 +95,7 @@ export default class StockReportTable extends Component {
 					value: stock_status,
 				},
 				{
-					display: numberFormat( stock_quantity ),
+					display: manage_stock ? numberFormat( stock_quantity ) : __( 'N/A', 'wc-admin' ),
 					value: stock_quantity,
 				},
 			];

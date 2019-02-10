@@ -76,7 +76,7 @@ export const drawBars = ( node, data, params ) => {
 		.attr( 'y', d => params.yScale( d.value ) )
 		.attr( 'width', params.xGroupScale.bandwidth() )
 		.attr( 'height', d => params.height - params.yScale( d.value ) )
-		.attr( 'fill', d => getColor( d.key, params.orderedKeys, params.colorScheme ) )
+		.attr( 'fill', d => getColor( d.key, params.visibleKeys, params.colorScheme ) )
 		.attr( 'pointer-events', 'none' )
 		.attr( 'tabindex', '0' )
 		.attr( 'aria-label', d => {

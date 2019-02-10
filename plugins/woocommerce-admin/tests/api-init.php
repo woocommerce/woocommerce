@@ -35,12 +35,14 @@ class WC_Tests_API_Init extends WC_REST_Unit_Test_Case {
 	 * @return string
 	 */
 	public function filter_order_query( $query ) {
+		global $wpdb;
+
 		if (
 			0 === strpos( $query, 'REPLACE INTO' ) &&
 			false !== strpos( $query, WC_Admin_Reports_Orders_Stats_Data_Store::TABLE_NAME )
 		) {
 			remove_filter( 'query', array( $this, 'filter_order_query' ) );
-			return 'THIS WONT MATCH';
+			return "DESCRIBE $wpdb->posts"; // Execute any random query.
 		}
 
 		return $query;
