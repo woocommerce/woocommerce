@@ -221,7 +221,7 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 			'extended_info' => false,
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
-		$this->normalize_timezones( $query_args );
+		$this->normalize_timezones( $query_args, $defaults );
 
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = wp_cache_get( $cache_key, $this->cache_group );

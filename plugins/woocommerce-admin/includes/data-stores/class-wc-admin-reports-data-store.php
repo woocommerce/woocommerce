@@ -174,11 +174,13 @@ class WC_Admin_Reports_Data_Store {
 	}
 
 	/**
-	 * Converts input datetime parameters to local timezone.
+	 * Converts input datetime parameters to local timezone. If there are no inputs from the user in query_args,
+	 * uses default from $defaults.
 	 *
 	 * @param array $query_args Array of query arguments.
+	 * @param array $defaults Array of default values.
 	 */
-	protected function normalize_timezones( &$query_args ) {
+	protected function normalize_timezones( &$query_args, $defaults ) {
 		$local_tz = new DateTimeZone( wc_timezone_string() );
 		foreach ( array( 'before', 'after' ) as $query_arg_key ) {
 			if ( isset( $query_args[ $query_arg_key ] ) ) {
@@ -188,7 +190,7 @@ class WC_Admin_Reports_Data_Store {
 				$datetime->setTimezone( $local_tz );
 				$query_args[ $query_arg_key ] = $datetime;
 			} else {
-				$query_args[ $query_arg_key ] = null;
+				$query_args[ $query_arg_key ] = isset( $defaults[ $query_arg_key ] ) ? $defaults[ $query_arg_key ] : null;
 			}
 		}
 	}
