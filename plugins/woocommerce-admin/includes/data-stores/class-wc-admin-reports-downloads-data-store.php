@@ -221,7 +221,7 @@ class WC_Admin_Reports_Downloads_Data_Store extends WC_Admin_Reports_Data_Store 
 		);
 
 		if ( $query_args['before'] ) {
-			$datetime_str                    = $query_args['after']->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+			$datetime_str                    = $query_args['before']->format( WC_Admin_Reports_Interval::$sql_datetime_format );
 			$sql_query['where_time_clause'] .= " AND {$table_name}.timestamp <= '$datetime_str'";
 
 		}
