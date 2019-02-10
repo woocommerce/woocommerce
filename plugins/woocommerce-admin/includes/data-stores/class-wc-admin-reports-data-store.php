@@ -183,12 +183,15 @@ class WC_Admin_Reports_Data_Store {
 	protected function normalize_timezones( &$query_args, $defaults ) {
 		$local_tz = new DateTimeZone( wc_timezone_string() );
 		foreach ( array( 'before', 'after' ) as $query_arg_key ) {
-			if ( isset( $query_args[ $query_arg_key ] ) ) {
+			if ( isset( $query_args[ $query_arg_key ] ) && is_string( $query_args[ $query_arg_key ] ) ) {
 				// Assume that unspecified timezone is a local timezone.
 				$datetime = new DateTime( $query_args[ $query_arg_key ], $local_tz );
 				// In case timezone was forced by using +HH:MM, convert to local timezone.
 				$datetime->setTimezone( $local_tz );
 				$query_args[ $query_arg_key ] = $datetime;
+			} elseif ( isset( $query_args[ $query_arg_key ] ) && is_a( $query_args[ $query_arg_key ], 'DateTime' ) ) {
+				// In case timezone is in other timezone, convert to local timezone.
+				$query_args[ $query_arg_key ]->setTimezone( $local_tz );
 			} else {
 				$query_args[ $query_arg_key ] = isset( $defaults[ $query_arg_key ] ) ? $defaults[ $query_arg_key ] : null;
 			}
