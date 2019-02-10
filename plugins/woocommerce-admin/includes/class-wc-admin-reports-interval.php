@@ -39,6 +39,32 @@ class WC_Admin_Reports_Interval {
 	}
 
 	/**
+	 * Returns default 'before' parameter for the reports.
+	 *
+	 * @return DateTime
+	 */
+	public static function default_before() {
+		$datetime = new DateTime();
+		$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+		return $datetime;
+	}
+
+	/**
+	 * Returns default 'after' parameter for the reports.
+	 *
+	 * @return DateTime
+	 */
+	public static function default_after() {
+		$now       = time();
+		$week_back = $now - WEEK_IN_SECONDS;
+
+		$datetime = new DateTime();
+		$datetime->setTimestamp( $week_back );
+		$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+		return $datetime;
+	}
+
+	/**
 	 * Returns date format to be used as grouping clause in SQL.
 	 *
 	 * @param string $time_interval Time interval.
