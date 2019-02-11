@@ -350,6 +350,7 @@ class WC_Query {
 	 */
 	public function remove_product_query_filters( $posts ) {
 		$this->remove_ordering_args();
+		remove_filter( 'posts_clauses', array( $this, 'price_filter_post_clauses' ), 10, 2 );
 		return $posts;
 	}
 
@@ -403,6 +404,9 @@ class WC_Query {
 
 		// Store reference to this query.
 		self::$product_query = $q;
+
+		// Additonal hooks to change WP Query.
+		add_filter( 'posts_clauses', array( $this, 'price_filter_post_clauses' ), 10, 2 );
 
 		do_action( 'woocommerce_product_query', $q, $this );
 	}
@@ -496,15 +500,64 @@ class WC_Query {
 	}
 
 	/**
+	 * Custom query used to filter products by price from the wc_product_sorting table.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param array    $args Query args.
+	 * @param WC_Query $wp_query WC_Query object.
+	 *
+	 * @return array
+	 */
+	public function price_filter_post_clauses( $args, $wp_query ) {
+		global $wpdb;
+
+		if ( ! $wp_query->is_main_query() || ( ! isset( $_GET['max_price'] ) && ! isset( $_GET['min_price'] ) ) ) {
+			return $args;
+		}
+
+		$min = isset( $_GET['min_price'] ) ? floatval( $_GET['min_price'] ) : 0;
+		$max = isset( $_GET['max_price'] ) ? floatval( $_GET['max_price'] ) : 9999999999;
+
+		/**
+		 * Adjust if the store taxes are not displayed how they are stored.
+		 * Kicks in when prices excluding tax are displayed including tax.
+		 */
+		if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
+			$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
+			$class_min   = $min;
+			$class_max   = $max;
+
+			foreach ( $tax_classes as $tax_class ) {
+				$tax_rates = WC_Tax::get_rates( $tax_class );
+
+				if ( $tax_rates ) {
+					$class_min = $min + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
+					$class_max = $max - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $max, $tax_rates ) );
+				}
+			}
+
+			$min = $class_min;
+			$max = $class_max;
+		}
+
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
+		$args['where']  .= $wpdb->prepare(
+			' AND wc_product_sorting.min_price >= %f AND wc_product_sorting.max_price <= %f ',
+			$min,
+			$max
+		);
+		return $args;
+	}
+
+	/**
 	 * Handle numeric price sorting.
 	 *
 	 * @param array $args Query args.
 	 * @return array
 	 */
 	public function order_by_price_asc_post_clauses( $args ) {
-		global $wpdb;
-
-		$args['join']   .= " LEFT JOIN {$wpdb->prefix}wc_product_sorting wc_product_sorting ON $wpdb->posts.ID = wc_product_sorting.product_id ";
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
 		$args['orderby'] = ' wc_product_sorting.min_price ASC, wc_product_sorting.product_id ASC ';
 		return $args;
 	}
@@ -516,9 +569,7 @@ class WC_Query {
 	 * @return array
 	 */
 	public function order_by_price_desc_post_clauses( $args ) {
-		global $wpdb;
-
-		$args['join']   .= " LEFT JOIN {$wpdb->prefix}wc_product_sorting wc_product_sorting ON $wpdb->posts.ID = wc_product_sorting.product_id ";
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
 		$args['orderby'] = ' wc_product_sorting.max_price DESC, wc_product_sorting.product_id DESC ';
 		return $args;
 	}
@@ -532,9 +583,7 @@ class WC_Query {
 	 * @return array
 	 */
 	public function order_by_popularity_post_clauses( $args ) {
-		global $wpdb;
-
-		$args['join']   .= " LEFT JOIN {$wpdb->prefix}wc_product_sorting wc_product_sorting ON $wpdb->posts.ID = wc_product_sorting.product_id ";
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
 		$args['orderby'] = ' wc_product_sorting.total_sales DESC, wc_product_sorting.product_id DESC ';
 		return $args;
 	}
@@ -546,11 +595,24 @@ class WC_Query {
 	 * @return array
 	 */
 	public function order_by_rating_post_clauses( $args ) {
-		global $wpdb;
-
-		$args['join']   .= " LEFT JOIN {$wpdb->prefix}wc_product_sorting wc_product_sorting ON $wpdb->posts.ID = wc_product_sorting.product_id ";
+		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
 		$args['orderby'] = ' wc_product_sorting.average_rating DESC, wc_product_sorting.product_id DESC ';
 		return $args;
+	}
+
+	/**
+	 * Join wc_product_sorting to posts if not already joined.
+	 *
+	 * @param string $sql SQL join.
+	 * @return string
+	 */
+	private function append_product_sorting_table_join( $sql ) {
+		global $wpdb;
+
+		if ( ! strstr( $sql, 'wc_product_sorting' ) ) {
+			$sql .= " LEFT JOIN {$wpdb->prefix}wc_product_sorting wc_product_sorting ON $wpdb->posts.ID = wc_product_sorting.product_id ";
+		}
+		return $sql;
 	}
 
 	/**
@@ -563,9 +625,6 @@ class WC_Query {
 	public function get_meta_query( $meta_query = array(), $main_query = false ) {
 		if ( ! is_array( $meta_query ) ) {
 			$meta_query = array();
-		}
-		if ( $main_query ) {
-			$meta_query['price_filter'] = $this->price_filter_meta_query();
 		}
 		return array_filter( apply_filters( 'woocommerce_product_query_meta_query', $meta_query, $this ) );
 	}
@@ -635,22 +694,6 @@ class WC_Query {
 		}
 
 		return array_filter( apply_filters( 'woocommerce_product_query_tax_query', $tax_query, $this ) );
-	}
-
-	/**
-	 * Return a meta query for filtering by price.
-	 *
-	 * @return array
-	 */
-	private function price_filter_meta_query() {
-		if ( isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) ) { // WPCS: input var ok, CSRF ok.
-			$meta_query                 = wc_get_min_max_price_meta_query( $_GET ); // WPCS: input var ok, CSRF ok.
-			$meta_query['price_filter'] = true;
-
-			return $meta_query;
-		}
-
-		return array();
 	}
 
 	/**
