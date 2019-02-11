@@ -819,6 +819,15 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
   KEY permission_id (permission_id),
   KEY timestamp (timestamp)
 ) $collate;
+CREATE TABLE {$wpdb->prefix}wc_product_sorting (
+  `product_id` bigint(20) NOT NULL,
+  `price` double NULL default NULL,
+  `min_price` double NULL default NULL,
+  `max_price` double NULL default NULL,
+  `average_rating` float NULL default 0,
+  `total_sales` double NULL default 0,
+  PRIMARY KEY  (`product_id`)
+  ) $collate;
 		";
 
 		/**
