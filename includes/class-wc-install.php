@@ -815,7 +815,7 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
   permission_id BIGINT UNSIGNED NOT NULL,
   user_id BIGINT UNSIGNED NULL,
   user_ip_address VARCHAR(100) NULL DEFAULT '',
-  PRIMARY KEY (download_log_id),
+  PRIMARY KEY  (download_log_id),
   KEY permission_id (permission_id),
   KEY timestamp (timestamp)
 ) $collate;
@@ -826,7 +826,10 @@ CREATE TABLE {$wpdb->prefix}wc_product_sorting (
   `max_price` double NULL default NULL,
   `average_rating` float NULL default 0,
   `total_sales` double NULL default 0,
-  PRIMARY KEY  (`product_id`)
+  PRIMARY KEY  (`product_id`),
+  KEY product_id_price (`product_id`,`max_price`,`min_price`)
+  KEY product_id_average_rating (`product_id`,`average_rating`)
+  KEY product_id_total_sales (`product_id`,`total_sales`)
   ) $collate;
 		";
 
