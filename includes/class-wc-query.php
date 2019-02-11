@@ -481,24 +481,14 @@ class WC_Query {
 				$args['order']   = ( 'ASC' === $order ) ? 'ASC' : 'DESC';
 				break;
 			case 'price':
-				if ( 'DESC' === $order ) {
-					add_filter( 'posts_clauses', array( $this, 'order_by_price_desc_post_clauses' ) );
-				} else {
-					add_filter( 'posts_clauses', array( $this, 'order_by_price_asc_post_clauses' ) );
-				}
+				$callback = 'DESC' === $order ? 'order_by_price_desc_post_clauses' : 'order_by_price_asc_post_clauses';
+				add_filter( 'posts_clauses', array( $this, $callback ) );
 				break;
 			case 'popularity':
-				$args['meta_key'] = 'total_sales'; // @codingStandardsIgnoreLine
-
-				// Sorting handled later though a hook.
 				add_filter( 'posts_clauses', array( $this, 'order_by_popularity_post_clauses' ) );
 				break;
 			case 'rating':
-				$args['meta_key'] = '_wc_average_rating'; // @codingStandardsIgnoreLine
-				$args['orderby']  = array(
-					'meta_value_num' => 'DESC',
-					'ID'             => 'ASC',
-				);
+				add_filter( 'posts_clauses', array( $this, 'order_by_rating_post_clauses' ) );
 				break;
 		}
 
@@ -515,7 +505,7 @@ class WC_Query {
 		global $wpdb;
 
 		$args['join']   .= " LEFT JOIN {$wpdb->prefix}wc_product_sorting wc_product_sorting ON $wpdb->posts.ID = wc_product_sorting.product_id ";
-		$args['orderby'] = " wc_product_sorting.min_price ASC, $wpdb->posts.ID ASC ";
+		$args['orderby'] = ' wc_product_sorting.min_price ASC, wc_product_sorting.product_id ASC ';
 		return $args;
 	}
 
@@ -529,12 +519,12 @@ class WC_Query {
 		global $wpdb;
 
 		$args['join']   .= " LEFT JOIN {$wpdb->prefix}wc_product_sorting wc_product_sorting ON $wpdb->posts.ID = wc_product_sorting.product_id ";
-		$args['orderby'] = " wc_product_sorting.max_price DESC, $wpdb->posts.ID DESC ";
+		$args['orderby'] = ' wc_product_sorting.max_price DESC, wc_product_sorting.product_id DESC ';
 		return $args;
 	}
 
 	/**
-	 * WP Core doens't let us change the sort direction for individual orderby params - https://core.trac.wordpress.org/ticket/17065.
+	 * WP Core does not let us change the sort direction for individual orderby params - https://core.trac.wordpress.org/ticket/17065.
 	 *
 	 * This lets us sort by meta value desc, and have a second orderby param.
 	 *
@@ -543,7 +533,23 @@ class WC_Query {
 	 */
 	public function order_by_popularity_post_clauses( $args ) {
 		global $wpdb;
-		$args['orderby'] = "$wpdb->postmeta.meta_value+0 DESC, $wpdb->posts.post_date DESC";
+
+		$args['join']   .= " LEFT JOIN {$wpdb->prefix}wc_product_sorting wc_product_sorting ON $wpdb->posts.ID = wc_product_sorting.product_id ";
+		$args['orderby'] = ' wc_product_sorting.total_sales DESC, wc_product_sorting.product_id DESC ';
+		return $args;
+	}
+
+	/**
+	 * Order by rating post clauses.
+	 *
+	 * @param array $args Query args.
+	 * @return array
+	 */
+	public function order_by_rating_post_clauses( $args ) {
+		global $wpdb;
+
+		$args['join']   .= " LEFT JOIN {$wpdb->prefix}wc_product_sorting wc_product_sorting ON $wpdb->posts.ID = wc_product_sorting.product_id ";
+		$args['orderby'] = ' wc_product_sorting.average_rating DESC, wc_product_sorting.product_id DESC ';
 		return $args;
 	}
 
@@ -754,30 +760,6 @@ class WC_Query {
 	}
 
 	// @codingStandardsIgnoreStart
-	/**
-	 * Order by rating post clauses.
-	 *
-	 * @deprecated 3.0.0
-	 * @param array $args
-	 * @return array
-	 */
-	public function order_by_rating_post_clauses( $args ) {
-		global $wpdb;
-
-		wc_deprecated_function( 'order_by_rating_post_clauses', '3.0' );
-
-		$args['fields'] .= ", AVG( $wpdb->commentmeta.meta_value ) as average_rating ";
-		$args['where']  .= " AND ( $wpdb->commentmeta.meta_key = 'rating' OR $wpdb->commentmeta.meta_key IS null ) ";
-		$args['join']   .= "
-			LEFT OUTER JOIN $wpdb->comments ON($wpdb->posts.ID = $wpdb->comments.comment_post_ID)
-			LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)
-		";
-		$args['orderby'] = "average_rating DESC, $wpdb->posts.post_date DESC";
-		$args['groupby'] = "$wpdb->posts.ID";
-
-		return $args;
-	}
-
 	/**
 	 * Return a meta query for filtering by rating.
 	 *
