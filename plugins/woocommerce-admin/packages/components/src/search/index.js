@@ -50,6 +50,7 @@ class Search extends Component {
 		this.updateSearch = this.updateSearch.bind( this );
 		this.onFocus = this.onFocus.bind( this );
 		this.onBlur = this.onBlur.bind( this );
+		this.onKeyDown = this.onKeyDown.bind( this );
 	}
 
 	selectResult( value ) {
@@ -154,6 +155,15 @@ class Search extends Component {
 		this.setState( { isActive: false } );
 	}
 
+	onKeyDown( event ) {
+		const { value } = this.state;
+		const { selected, onChange } = this.props;
+
+		if ( 8 === event.keyCode && ! value && selected.length ) {
+			onChange( [ ...selected.slice( 0, -1 ) ] );
+		}
+	}
+
 	render() {
 		const autocompleter = this.getAutocompleter();
 		const {
@@ -220,6 +230,7 @@ class Search extends Component {
 										aria-activedescendant={ activeId }
 										onFocus={ this.onFocus }
 										onBlur={ this.onBlur }
+										onKeyDown={ this.onKeyDown }
 										aria-describedby={
 											shouldRenderTags ? `search-inline-input-${ instanceId }` : null
 										}
