@@ -1012,3 +1012,51 @@ function wc_get_core_supported_themes() {
 	wc_deprecated_function( 'wc_get_core_supported_themes()', '3.3' );
 	return array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
 }
+
+/**
+ * Get min/max price meta query args.
+ *
+ * @deprecated 3.6.0
+ * @since 3.0.0
+ * @param array $args Min price and max price arguments.
+ * @return array
+ */
+function wc_get_min_max_price_meta_query( $args ) {
+	wc_deprecated_function( 'wc_get_min_max_price_meta_query()', '3.6' );
+
+	$min = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
+	$max = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : 9999999999;
+
+	/**
+	 * Adjust if the store taxes are not displayed how they are stored.
+	 * Kicks in when prices excluding tax are displayed including tax.
+	 */
+	if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
+		$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
+		$class_min   = $min;
+		$class_max   = $max;
+
+		foreach ( $tax_classes as $tax_class ) {
+			$tax_rates = WC_Tax::get_rates( $tax_class );
+
+			if ( $tax_rates ) {
+				$class_min = $min + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
+				$class_max = $max - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $max, $tax_rates ) );
+			}
+		}
+
+		$min = $class_min;
+		$max = $class_max;
+	}
+
+	return apply_filters(
+		'woocommerce_get_min_max_price_meta_query',
+		array(
+			'key'     => '_price',
+			'value'   => array( $min, $max ),
+			'compare' => 'BETWEEN',
+			'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
+		),
+		$args
+	);
+}
