@@ -512,31 +512,10 @@ class WC_Query {
 	 * @return array
 	 */
 	public function order_by_price_asc_post_clauses( $args ) {
-		global $wpdb, $wp_query;
+		global $wpdb;
 
-		if ( isset( $wp_query->queried_object, $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy ) && is_a( $wp_query->queried_object, 'WP_Term' ) ) {
-			$search_within_terms   = get_terms(
-				array(
-					'taxonomy' => $wp_query->queried_object->taxonomy,
-					'child_of' => $wp_query->queried_object->term_id,
-					'fields'   => 'tt_ids',
-				)
-			);
-			$search_within_terms[] = $wp_query->queried_object->term_taxonomy_id;
-			$args['join']         .= " INNER JOIN (
-				SELECT post_id, min( meta_value+0 ) price
-				FROM $wpdb->postmeta
-				INNER JOIN (
-					SELECT $wpdb->term_relationships.object_id
-					FROM $wpdb->term_relationships
-					WHERE 1=1
-					AND $wpdb->term_relationships.term_taxonomy_id IN (" . implode( ',', array_map( 'absint', $search_within_terms ) ) . ")
-				) as products_within_terms ON $wpdb->postmeta.post_id = products_within_terms.object_id
-				WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
-		} else {
-			$args['join'] .= " INNER JOIN ( SELECT post_id, min( meta_value+0 ) price FROM $wpdb->postmeta WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
-		}
-		$args['orderby'] = " price_query.price ASC, $wpdb->posts.ID ASC ";
+		$args['join']   .= " LEFT JOIN {$wpdb->prefix}wc_product_sorting wc_product_sorting ON $wpdb->posts.ID = wc_product_sorting.product_id ";
+		$args['orderby'] = " wc_product_sorting.min_price ASC, $wpdb->posts.ID ASC ";
 		return $args;
 	}
 
@@ -547,32 +526,10 @@ class WC_Query {
 	 * @return array
 	 */
 	public function order_by_price_desc_post_clauses( $args ) {
-		global $wpdb, $wp_query;
+		global $wpdb;
 
-		if ( isset( $wp_query->queried_object, $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy ) && is_a( $wp_query->queried_object, 'WP_Term' ) ) {
-			$search_within_terms   = get_terms(
-				array(
-					'taxonomy' => $wp_query->queried_object->taxonomy,
-					'child_of' => $wp_query->queried_object->term_id,
-					'fields'   => 'tt_ids',
-				)
-			);
-			$search_within_terms[] = $wp_query->queried_object->term_taxonomy_id;
-			$args['join']         .= " INNER JOIN (
-				SELECT post_id, max( meta_value+0 ) price
-				FROM $wpdb->postmeta
-				INNER JOIN (
-					SELECT $wpdb->term_relationships.object_id
-					FROM $wpdb->term_relationships
-					WHERE 1=1
-					AND $wpdb->term_relationships.term_taxonomy_id IN (" . implode( ',', array_map( 'absint', $search_within_terms ) ) . ")
-				) as products_within_terms ON $wpdb->postmeta.post_id = products_within_terms.object_id
-				WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
-		} else {
-			$args['join'] .= " INNER JOIN ( SELECT post_id, max( meta_value+0 ) price FROM $wpdb->postmeta WHERE meta_key='_price' GROUP BY post_id ) as price_query ON $wpdb->posts.ID = price_query.post_id ";
-		}
-
-		$args['orderby'] = " price_query.price DESC, $wpdb->posts.ID DESC ";
+		$args['join']   .= " LEFT JOIN {$wpdb->prefix}wc_product_sorting wc_product_sorting ON $wpdb->posts.ID = wc_product_sorting.product_id ";
+		$args['orderby'] = " wc_product_sorting.max_price DESC, $wpdb->posts.ID DESC ";
 		return $args;
 	}
 
