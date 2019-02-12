@@ -2,6 +2,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { format as formatDate } from '@wordpress/date';
@@ -89,6 +90,7 @@ export class ReportChart extends Component {
 
 	renderChart( mode, isRequesting, chartData ) {
 		const {
+			emptySearchResults,
 			interactiveLegend,
 			itemsLabel,
 			legendPosition,
@@ -101,11 +103,15 @@ export class ReportChart extends Component {
 		const currentInterval = getIntervalForQuery( query );
 		const allowedIntervals = getAllowedIntervalsForQuery( query );
 		const formats = getDateFormatsForInterval( currentInterval, primaryData.data.intervals.length );
+		const emptyMessage = emptySearchResults
+			? __( 'No data for the current search', 'wc-admin' )
+			: __( 'No data for the selected date range', 'wc-admin' );
 		return (
 			<Chart
 				allowedIntervals={ allowedIntervals }
 				data={ chartData }
 				dateParser={ '%Y-%m-%dT%H:%M:%S' }
+				emptyMessage={ emptyMessage }
 				interactiveLegend={ interactiveLegend }
 				interval={ currentInterval }
 				isRequesting={ isRequesting }
@@ -222,6 +228,7 @@ export default compose(
 
 		if ( query.search && ! ( query[ endpoint ] && query[ endpoint ].length ) ) {
 			return {
+				emptySearchResults: true,
 				mode: chartMode,
 			};
 		}

@@ -15,6 +15,29 @@
 		overflow: visible;
 	}
 
+	.d3-chart__empty-message {
+		align-items: center;
+		bottom: 0;
+		color: $core-grey-dark-300;
+		display: flex;
+		@include font-size( 18 );
+		font-weight: bold;
+		justify-content: center;
+		left: 0;
+		line-height: 1.5;
+		margin: 0 auto;
+		max-width: 50%;
+		padding-bottom: 48px;
+		position: absolute;
+		right: 0;
+		top: 0;
+		text-align: center;
+
+		@include breakpoint( '<782px' ) {
+			@include font-size( 13 );
+		}
+	}
+
 	.d3-chart__tooltip {
 		border: 1px solid $core-grey-light-700;
 		position: absolute;

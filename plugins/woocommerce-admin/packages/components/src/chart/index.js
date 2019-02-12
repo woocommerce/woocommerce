@@ -266,7 +266,9 @@ class Chart extends Component {
 	render() {
 		const { interactiveLegend, orderedKeys, visibleData, width } = this.state;
 		const {
+			baseValue,
 			dateParser,
+			emptyMessage,
 			interval,
 			isRequesting,
 			isViewportLarge,
@@ -376,10 +378,12 @@ class Chart extends Component {
 						{ ! isRequesting &&
 							width > 0 && (
 								<D3Chart
+									baseValue={ baseValue }
 									colorScheme={ d3InterpolateViridis }
 									data={ visibleData }
 									dateParser={ dateParser }
 									height={ chartHeight }
+									emptyMessage={ emptyMessage }
 									interval={ interval }
 									margin={ margin }
 									mode={ mode }
@@ -412,6 +416,11 @@ Chart.propTypes = {
 	 */
 	allowedIntervals: PropTypes.array,
 	/**
+	 * Base chart value. If no data value is different than the baseValue, the
+	 * `emptyMessage` will be displayed if provided.
+	 */
+	baseValue: PropTypes.number,
+	/**
 	 * An array of data.
 	 */
 	data: PropTypes.array.isRequired,
@@ -419,6 +428,11 @@ Chart.propTypes = {
 	 * Format to parse dates into d3 time format
 	 */
 	dateParser: PropTypes.string.isRequired,
+	/**
+	 * The message to be displayed if there is no data to render. If no message is provided,
+	 * nothing will be displayed.
+	 */
+	emptyMessage: PropTypes.string,
 	/**
 	 * Label describing the legend items.
 	 */
@@ -500,6 +514,7 @@ Chart.propTypes = {
 };
 
 Chart.defaultProps = {
+	baseValue: 0,
 	data: [],
 	dateParser: '%Y-%m-%dT%H:%M:%S',
 	interactiveLegend: true,

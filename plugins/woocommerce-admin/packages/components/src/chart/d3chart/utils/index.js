@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import { find, get } from 'lodash';
+import { find, get, isNil } from 'lodash';
 import { format as d3Format } from 'd3-format';
 import { line as d3Line } from 'd3-shape';
 import moment from 'moment';
@@ -135,3 +135,22 @@ export const getDateSpaces = ( data, uniqueDates, width, xLineScale ) =>
 				} ),
 		};
 	} );
+
+/**
+ * Check whether data is empty.
+ * @param {array} data - the chart component's `data` prop.
+ * @param {number} baseValue - base value to test data values against.
+ * @returns {boolean} `false` if there was at least one data value different than
+ * the baseValue.
+ */
+export const isDataEmpty = ( data, baseValue = 0 ) => {
+	for ( let i = 0; i < data.length; i++ ) {
+		for ( const [ key, item ] of Object.entries( data[ i ] ) ) {
+			if ( key !== 'date' && ! isNil( item.value ) && item.value !== baseValue ) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+};

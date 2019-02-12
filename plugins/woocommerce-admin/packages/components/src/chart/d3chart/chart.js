@@ -20,6 +20,7 @@ import {
 	getUniqueKeys,
 	getUniqueDates,
 	getFormatter,
+	isDataEmpty,
 } from './utils/index';
 import {
 	getXScale,
@@ -62,6 +63,7 @@ class D3Chart extends Component {
 		const xOffset = type === 'line' && adjParams.uniqueDates.length <= 1
 			? adjParams.width / 2
 			: 0;
+
 		drawAxis( g, adjParams, xOffset );
 		type === 'line' && drawLines( g, data, adjParams, xOffset );
 		type === 'bar' && drawBars( g, data, adjParams );
@@ -124,6 +126,7 @@ class D3Chart extends Component {
 		const xLineScale = getXLineScale( uniqueDates, adjWidth );
 		const xScale = getXScale( uniqueDates, adjWidth, compact );
 		const xTicks = getXTicks( uniqueDates, adjWidth, mode, interval );
+
 		return {
 			adjHeight,
 			adjWidth,
@@ -158,6 +161,16 @@ class D3Chart extends Component {
 		};
 	}
 
+	getEmptyMessage() {
+		const { baseValue, data, emptyMessage } = this.props;
+
+		if ( emptyMessage && isDataEmpty( data, baseValue ) ) {
+			return (
+				<div className="d3-chart__empty-message">{ emptyMessage }</div>
+			);
+		}
+	}
+
 	render() {
 		const { className, data, height, type } = this.props;
 		const computedWidth = this.getWidth();
@@ -166,6 +179,7 @@ class D3Chart extends Component {
 				className={ classNames( 'd3-chart__container', className ) }
 				style={ { height } }
 			>
+				{ this.getEmptyMessage() }
 				<div className="d3-chart__tooltip" ref={ this.tooltipRef } />
 				<D3Base
 					className={ classNames( this.props.className ) }
@@ -184,6 +198,11 @@ class D3Chart extends Component {
 
 D3Chart.propTypes = {
 	/**
+	 * Base chart value. If no data value is different than the baseValue, the
+	 * `emptyMessage` will be displayed if provided.
+	 */
+	baseValue: PropTypes.number,
+	/**
 	 * Additional CSS classes.
 	 */
 	className: PropTypes.string,
@@ -199,6 +218,11 @@ D3Chart.propTypes = {
 	 * Format to parse dates into d3 time format
 	 */
 	dateParser: PropTypes.string.isRequired,
+	/**
+	 * The message to be displayed if there is no data to render. If no message is provided,
+	 * nothing will be displayed.
+	 */
+	emptyMessage: PropTypes.string,
 	/**
 	 * Height of the `svg`.
 	 */
@@ -264,6 +288,7 @@ D3Chart.propTypes = {
 };
 
 D3Chart.defaultProps = {
+	baseValue: 0,
 	data: [],
 	dateParser: '%Y-%m-%dT%H:%M:%S',
 	height: 200,

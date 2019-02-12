@@ -16,6 +16,7 @@ import {
 	getLineData,
 	getUniqueKeys,
 	getUniqueDates,
+	isDataEmpty,
 } from '../index';
 import { getXLineScale } from '../scales';
 
@@ -92,5 +93,65 @@ describe( 'getDateSpaces', () => {
 		expect( testDateSpaces[ testDateSpaces.length - 1 ].date ).toEqual( '2018-06-04T00:00:00' );
 		expect( testDateSpaces[ testDateSpaces.length - 1 ].start ).toEqual( 90 );
 		expect( testDateSpaces[ testDateSpaces.length - 1 ].width ).toEqual( 10 );
+	} );
+} );
+
+describe( 'isDataEmpty', () => {
+	it( 'should return true when all data values are 0 and no baseValue is provided', () => {
+		const data = [
+			{
+				lorem: {
+					value: 0,
+				},
+				ipsum: {
+					value: 0,
+				},
+			},
+		];
+		expect( isDataEmpty( data ) ).toBeTruthy();
+	} );
+
+	it( 'should return true when all data values match the base value', () => {
+		const data = [
+			{
+				lorem: {
+					value: 100,
+				},
+				ipsum: {
+					value: 100,
+				},
+			},
+		];
+		expect( isDataEmpty( data, 100 ) ).toBeTruthy();
+	} );
+
+	it( 'should return false if at least one data values doesn\'t match the base value', () => {
+		const data = [
+			{
+				lorem: {
+					value: 100,
+				},
+				ipsum: {
+					value: 0,
+				},
+			},
+		];
+		expect( isDataEmpty( data, 100 ) ).toBeFalsy();
+	} );
+
+	it( 'should return true when all data values match the base value or are null/undefined', () => {
+		const data = [
+			{
+				lorem: {
+					value: 100,
+				},
+				ipsum: {
+					value: null,
+				},
+				dolor: {
+				},
+			},
+		];
+		expect( isDataEmpty( data, 100 ) ).toBeTruthy();
 	} );
 } );
