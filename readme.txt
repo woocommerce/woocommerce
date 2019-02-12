@@ -173,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Use Shortcode block on default WooCommerce pages. #21817
 * Tweak - Show full category hierarchy in product URLs when term IDs are not sequential. #22526
 * Tweak - Make sure account and checkout endpoints only work under account and checkout pages. #22631
+* Tweak - Show loading graphic when order form is submitted. #22664
 * Template - Moved the order of rememberme checkboxes for accessibility so they tab in order. #21454
 * Template - New structure for attributes template, including new `woocommerce_display_product_attributes` filter. #22480
 * Dev - Introduce `woocommerce_reviews_title` filter. #22216
@@ -216,6 +217,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Adds filter for product categories displayed by `product_categories` shortcode. #22571
 * Dev - Moves cart hash calculation to WC_Cart class. #21050
 * Dev - Removed deprecated Simplify gateway. #22410
+* Dev - Added `woocommerce_paypal_force_one_line_item` filter to control how items are sent to PayPal. #22653
 * Fix - Hide ratings on the shop page when reviews are disabled. #22476
 * Fix - Fix W3C validation of single product page quantity input. #22333
 * Fix - Give product variations a unique guid after creation. #22324
@@ -233,6 +235,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Default placeholder image resizing. #22443
 * Fix - HTML tags should be stripped from description in Structured Data of Product. #22596
 * Fix - For logged in customers, pull default address fields from customer object, not session object, to avoid incorrect mixes of data. #22392
+* Fix - Misc tax rounding improvements. #22420
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
 * Performance - Improved how versioned transients are set/cleanup to avoid cron. #22511
