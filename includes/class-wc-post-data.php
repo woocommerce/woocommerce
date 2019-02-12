@@ -109,9 +109,6 @@ class WC_Post_Data {
 	 * @param array  $old_tt_ids Old array of term taxonomy IDs.
 	 */
 	public static function set_object_terms( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
-		foreach ( array_merge( $tt_ids, $old_tt_ids ) as $id ) {
-			delete_transient( 'wc_ln_count_' . md5( sanitize_key( $taxonomy ) . sanitize_key( $id ) ) );
-		}
 		if ( in_array( get_post_type( $object_id ), array( 'product', 'product_variation' ), true ) ) {
 			self::delete_product_query_transients();
 		}
