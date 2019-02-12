@@ -14,10 +14,24 @@
 			{
 				slug: 'products-empty-memberships',
 				context: 'products-list-empty-body',
+				'show-if-installed': [ 'woocommerce-subscriptions' ],
 				content: '<div class="card">' +
 						'<h2>Memberships</h2>' +
 						'<p>Give members access to restricted content or products</p>' +
 						'<a class="button" href="https://woocommerce.com/products/woocommerce-memberships/">From $149</a>' +
+					'</div>'
+			},
+			{
+				slug: 'products-empty-addons',
+				context: 'products-list-empty-body',
+				'show-if-installed': [
+					'woocommerce-subscriptions',
+					'woocommerce-memberships',
+				],
+				content: '<div class="card">' +
+						'<h2>Product Add-Ons</h2>' +
+						'<p>Offer add-ons like gift wrapping, special messages or other special options for your products.</p>' +
+						'<a class="button" href="https://woocommerce.com/products/product-add-ons/">From $149</a>' +
 					'</div>'
 			},
 			{
@@ -61,6 +75,17 @@
 
 			// hide promos for things the user already has installed
 			promos = _.filter( promos, ( promo ) => ! _.contains( installed_woo_plugins, promo['hide-if-installed'] ) );
+
+			// hide promos that are not applicable based on user's installed extensions
+			promos = _.filter( promos, ( promo ) => {
+				if ( ! promo['show-if-installed'] ) {
+					// this promotion is relevant to all
+					return true;
+				}
+
+				// if the user has any of the prerequisites, show the promo
+				return ( _.intersection( installed_woo_plugins, promo['show-if-installed'] ).length > 0 );
+			} );
 
 			return promos;
 		}
