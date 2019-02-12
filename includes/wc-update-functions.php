@@ -740,7 +740,7 @@ function wc_update_240_shipping_methods() {
 		if ( version_compare( $shipping_method->get_option( 'version', 0 ), '2.4.0', '<' ) ) {
 			$shipping_classes  = WC()->shipping()->get_shipping_classes();
 			$has_classes       = count( $shipping_classes ) > 0;
-			$cost_key          = $has_classes ? 'no_class_cost': 'cost';
+			$cost_key          = $has_classes ? 'no_class_cost' : 'cost';
 			$min_fee           = $shipping_method->get_option( 'minimum_fee' );
 			$math_cost_strings = array(
 				'cost'          => array(),
@@ -1931,4 +1931,18 @@ function wc_update_354_modify_shop_manager_caps() {
  */
 function wc_update_354_db_version() {
 	WC_Install::update_db_version( '3.5.4' );
+}
+
+/**
+ * Update product lookup tables in bulk.
+ */
+function wc_update_360_product_lookup_tables() {
+	wc_update_product_lookup_tables();
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_360_db_version() {
+	WC_Install::update_db_version( '3.6.0' );
 }
