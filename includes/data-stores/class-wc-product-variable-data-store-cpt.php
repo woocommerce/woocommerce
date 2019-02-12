@@ -584,15 +584,25 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		delete_post_meta( $product->get_id(), '_regular_price' );
 
 		if ( $prices ) {
-			sort( $prices );
+			sort( $prices, SORT_NUMERIC );
 			// To allow sorting and filtering by multiple values, we have no choice but to store child prices in this manner.
-			foreach ( $prices as $price ) {
+			foreach ( $prices as $key => $price ) {
 				if ( is_null( $price ) || '' === $price ) {
 					continue;
 				}
 				add_post_meta( $product->get_id(), '_price', $price, false );
 			}
 		}
+
+		$this->update_lookup_table( $product->get_id(), 'wc_product_sorting' );
+
+		/**
+		 * Fire an action for this direct update so it can be detected by other code.
+		 *
+		 * @since 3.6
+		 * @param int $product_id Product ID that was updated directly.
+		 */
+		do_action( 'woocommerce_updated_product_price', $product->get_id() );
 	}
 
 	/**

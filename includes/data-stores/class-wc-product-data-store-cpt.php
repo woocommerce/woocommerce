@@ -624,6 +624,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
+		if ( array_intersect( $this->updated_props, array( 'price', 'total_sales', 'average_rating' ) ) ) {
+			$this->update_lookup_table( $product->get_id(), 'wc_product_sorting' );
+		}
+
 		// Trigger action so 3rd parties can deal with updated props.
 		do_action( 'woocommerce_product_object_updated_props', $product, $this->updated_props );
 
@@ -1255,6 +1259,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		wp_cache_delete( $product_id_with_stock, 'post_meta' );
+
+		/**
+		 * Fire an action for this direct update so it can be detected by other code.
+		 *
+		 * @since 3.6
+		 * @param int $product_id_with_stock Product ID that was updated directly.
+		 */
+		do_action( 'woocommerce_updated_product_stock', $product_id_with_stock );
 	}
 
 	/**
@@ -1306,12 +1318,23 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		wp_cache_delete( $product_id, 'post_meta' );
+
+		$this->update_lookup_table( $product_id, 'wc_product_sorting' );
+
+		/**
+		 * Fire an action for this direct update so it can be detected by other code.
+		 *
+		 * @since 3.6
+		 * @param int $product_id Product ID that was updated directly.
+		 */
+		do_action( 'woocommerce_updated_product_sales', $product_id );
 	}
 
 	/**
 	 * Update a products average rating meta.
 	 *
 	 * @since 3.0.0
+	 * @todo Deprecate unused function?
 	 * @param WC_Product $product Product object.
 	 */
 	public function update_average_rating( $product ) {
@@ -1323,6 +1346,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Update a products review count meta.
 	 *
 	 * @since 3.0.0
+	 * @todo Deprecate unused function?
 	 * @param WC_Product $product Product object.
 	 */
 	public function update_review_count( $product ) {
@@ -1333,6 +1357,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Update a products rating counts.
 	 *
 	 * @since 3.0.0
+	 * @todo Deprecate unused function?
 	 * @param WC_Product $product Product object.
 	 */
 	public function update_rating_counts( $product ) {
@@ -1819,5 +1844,28 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		return $products;
+	}
+
+	/**
+	 * Get data to save to a lookup table.
+	 *
+	 * @since 3.6.0
+	 * @param int    $id ID of object to update.
+	 * @param string $table Lookup table name.
+	 * @return array
+	 */
+	protected function get_data_for_lookup_table( $id, $table ) {
+		if ( 'wc_product_sorting' === $table ) {
+			$price_meta = (array) get_post_meta( $id, '_price', false );
+			return array(
+				'product_id'     => absint( $id ),
+				'price'          => reset( $price_meta ),
+				'min_price'      => reset( $price_meta ),
+				'max_price'      => end( $price_meta ),
+				'average_rating' => get_post_meta( $id, '_wc_average_rating', true ),
+				'total_sales'    => get_post_meta( $id, 'total_sales', true ),
+			);
+		}
+		return array();
 	}
 }
