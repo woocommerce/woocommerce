@@ -1,7 +1,7 @@
 /* jshint node:true */
 module.exports = function( grunt ) {
 	'use strict';
-	const sass = require( 'node-sass' );
+	var sass = require( 'node-sass' );
 
 	grunt.initConfig({
 
