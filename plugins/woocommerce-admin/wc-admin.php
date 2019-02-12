@@ -160,6 +160,10 @@ function wc_admin_plugins_loaded() {
 		return;
 	}
 
+	if ( ! function_exists( 'wc_admin_get_feature_config' ) ) {
+		require_once dirname( __FILE__ ) . '/includes/feature-config.php';
+	}
+
 	// Initialize the WC API extensions.
 	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-api-init.php';
 

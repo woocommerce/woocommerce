@@ -6,6 +6,7 @@ const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const { get } = require( 'lodash' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
+const { DefinePlugin } = require( 'webpack' );
 
 /**
  * WordPress dependencies
@@ -13,6 +14,13 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
+
+// @todo Add a `beta` phase and build process so that we can separate final .org versions from beta GitHub versions.
+let WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'core';
+if ( [ 'development', 'plugin', 'core' ].indexOf( WC_ADMIN_PHASE ) === -1 ) {
+	WC_ADMIN_PHASE = 'core';
+}
+const WC_ADMIN_CONFIG = require( path.join( __dirname, 'config', WC_ADMIN_PHASE + '.json' ) );
 
 const externals = {
 	'@wordpress/api-fetch': { this: [ 'wp', 'apiFetch' ] },
@@ -136,6 +144,10 @@ const webpackConfig = {
 		},
 	},
 	plugins: [
+		// Inject the current feature flags.
+		new DefinePlugin( {
+			'window.wcAdminFeatures': { ...WC_ADMIN_CONFIG.features },
+		} ),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );

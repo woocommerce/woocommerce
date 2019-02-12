@@ -124,3 +124,16 @@ require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-helper-reports.p
 require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-helper-admin-notes.php';
 require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-test-action-queue.php';
 require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-helper-queue.php';
+
+/**
+ * Set the environment and feature flags to 'develop' when running tests, instead of what is set in the generated `config/feature-flags.php`.
+ * This matches how we mock the flags in jest.
+ */
+function wc_admin_get_feature_config() {
+	$config = json_decode( file_get_contents( dirname( dirname( __FILE__ ) ) . '/config/development.json' ) );
+	$flags  = array();
+	foreach ( $config->features as $feature => $bool ) {
+		$flags[ $feature ] = $bool;
+	}
+	return $flags;
+}

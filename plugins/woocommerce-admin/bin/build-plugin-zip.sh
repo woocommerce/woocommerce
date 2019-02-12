@@ -63,6 +63,7 @@ fi
 
 # Run the build.
 status "Generating build... 👷‍♀️"
+npm run build:feature-config
 npm run build
 npm run docs
 
