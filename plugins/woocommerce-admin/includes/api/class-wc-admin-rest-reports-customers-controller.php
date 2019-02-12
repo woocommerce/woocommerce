@@ -46,7 +46,7 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		$args['order']               = $request['order'];
 		$args['orderby']             = $request['orderby'];
 		$args['match']               = $request['match'];
-		$args['name']                = $request['name'];
+		$args['search']              = $request['search'];
 		$args['username']            = $request['username'];
 		$args['email']               = $request['email'];
 		$args['country']             = $request['country'];
@@ -333,8 +333,8 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['name']                    = array(
-			'description'       => __( 'Limit response to objects with a specfic customer name.', 'wc-admin' ),
+		$params['search']                  = array(
+			'description'       => __( 'Limit response to objects with a customer name containing the search term.', 'wc-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

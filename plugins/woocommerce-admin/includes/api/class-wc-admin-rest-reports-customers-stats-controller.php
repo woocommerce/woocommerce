@@ -41,7 +41,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 		$args['registered_before']   = $request['registered_before'];
 		$args['registered_after']    = $request['registered_after'];
 		$args['match']               = $request['match'];
-		$args['name']                = $request['name'];
+		$args['search']              = $request['search'];
 		$args['username']            = $request['username'];
 		$args['email']               = $request['email'];
 		$args['country']             = $request['country'];
@@ -246,7 +246,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['name']                    = array(
+		$params['search']                  = array(
 			'description'       => __( 'Limit response to objects with a specfic customer name.', 'wc-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',

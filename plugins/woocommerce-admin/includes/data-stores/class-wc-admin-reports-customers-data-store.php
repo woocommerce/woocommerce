@@ -230,8 +230,10 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			}
 		}
 
-		if ( ! empty( $query_args['name'] ) ) {
-			$where_clauses[] = $wpdb->prepare( "CONCAT_WS( ' ', first_name, last_name ) = %s", $query_args['name'] );
+		if ( ! empty( $query_args['search'] ) ) {
+			$name_like = '%' . $wpdb->esc_like( $query_args['search'] ) . '%';
+			$where_clauses[] = $wpdb->prepare( "CONCAT_WS( ' ', first_name, last_name ) LIKE %s", $name_like );
+		}
 		}
 
 		$numeric_params = array(

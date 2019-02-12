@@ -173,7 +173,6 @@ class WC_Admin_Api_Init {
 	public function rest_api_init() {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-admin-notes-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-coupons-controller.php';
-		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-customers-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-data-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-data-countries-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-data-download-ips-controller.php';
@@ -205,6 +204,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-stock-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-taxes-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-customers-controller.php';
 
 		$controllers = apply_filters(
 			'woocommerce_admin_rest_controllers',
