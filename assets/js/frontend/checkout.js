@@ -24,6 +24,7 @@ jQuery( function( $ ) {
 
 			if ( $( document.body ).hasClass( 'woocommerce-order-pay' ) ) {
 				this.$order_review.on( 'click', 'input[name="payment_method"]', this.payment_method_selected );
+				this.$order_review.on( 'submit', this.submitOrder );
 			}
 
 			// Prevent HTML5 validation which can conflict.
@@ -413,6 +414,22 @@ jQuery( function( $ ) {
 
 			});
 		},
+		blockOnSubmit: function( $form ) {
+			var form_data = $form.data();
+
+			if ( 1 !== form_data['blockUI.isBlocked'] ) {
+				$form.block({
+					message: null,
+					overlayCSS: {
+						background: '#fff',
+						opacity: 0.6
+					}
+				});
+			}
+		},
+		submitOrder: function() {
+			wc_checkout_form.blockOnSubmit( $( this ) );
+		},
 		submit: function() {
 			wc_checkout_form.reset_update_checkout_timer();
 			var $form = $( this );
@@ -426,17 +443,7 @@ jQuery( function( $ ) {
 
 				$form.addClass( 'processing' );
 
-				var form_data = $form.data();
-
-				if ( 1 !== form_data['blockUI.isBlocked'] ) {
-					$form.block({
-						message: null,
-						overlayCSS: {
-							background: '#fff',
-							opacity: 0.6
-						}
-					});
-				}
+				wc_checkout_form.blockOnSubmit( $form );
 
 				// ajaxSetup is global, but we use it to ensure JSON is valid once returned.
 				$.ajaxSetup( {
