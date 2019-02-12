@@ -79,7 +79,6 @@ class WC_Admin_Install {
 
 		delete_transient( 'wc_admin_installing' );
 
-		do_action( 'woocommerce_flush_rewrite_rules' ); // ?
 		do_action( 'wc_admin_installed' );
 	}
 
@@ -219,7 +218,6 @@ class WC_Admin_Install {
 		global $wpdb;
 
 		return array(
-			// @todo Will this work on multisite?
 			"{$wpdb->prefix}wc_order_stats",
 			"{$wpdb->prefix}wc_order_product_lookup",
 			"{$wpdb->prefix}wc_order_tax_lookup",
