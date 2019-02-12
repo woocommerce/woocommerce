@@ -25,7 +25,7 @@ if ( ! defined( 'WC_ADMIN_PLUGIN_FILE' ) ) {
 }
 
 /**
- * Notify users of the plugin requirements
+ * Notify users of the plugin requirements.
  */
 function wc_admin_plugins_notice() {
 	// The notice varies by WordPress version.
@@ -40,9 +40,9 @@ function wc_admin_plugins_notice() {
 		);
 	} else {
 		$message = sprintf(
-			/* translators: 1: URL of Gutenberg plugin, 2: URL of WooCommerce plugin */
-			__( 'The WooCommerce Admin feature plugin requires both <a href="%1$s">Gutenberg</a> and <a href="%2$s">WooCommerce</a> (>3.5) to be installed and active.', 'wc-admin' ),
-			'https://wordpress.org/plugins/gutenberg/',
+			/* translators: 1: URL of WordPress.org, 2: URL of WooCommerce plugin */
+			__( 'The WooCommerce Admin feature plugin requires both <a href="%1$s">WordPress</a> 5.0 or greater and <a href="%2$s">WooCommerce</a> 3.5 or greater to be installed and active.', 'wc-admin' ),
+			'https://wordpress.org/',
 			'https://wordpress.org/plugins/woocommerce/'
 		);
 	}
@@ -50,7 +50,7 @@ function wc_admin_plugins_notice() {
 }
 
 /**
- * Notify users that the plugin needs to be built
+ * Notify users that the plugin needs to be built.
  */
 function wc_admin_build_notice() {
 	$message_one = __( 'You have installed a development version of WooCommerce Admin which requires files to be built. From the plugin directory, run <code>npm install</code> to install dependencies, <code>npm run build</code> to build the files.', 'wc-admin' );
@@ -73,11 +73,8 @@ function dependencies_satisfied() {
 		return false;
 	}
 
-	$wordpress_version            = get_bloginfo( 'version' );
-	$wordpress_includes_gutenberg = version_compare( $wordpress_version, '4.9.9', '>' );
-	$gutenberg_plugin_active      = defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' );
-
-	return $wordpress_includes_gutenberg || $gutenberg_plugin_active;
+	$wordpress_version = get_bloginfo( 'version' );
+	return version_compare( $wordpress_version, '4.9.9', '>' );
 }
 
 /**

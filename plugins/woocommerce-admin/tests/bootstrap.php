@@ -46,12 +46,8 @@ function wc_admin_install() {
 	}
 
 	// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
-	if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
-		$GLOBALS['wp_roles']->reinit();
-	} else {
-		$GLOBALS['wp_roles'] = null; // WPCS: override ok.
-		wp_roles();
-	}
+	$GLOBALS['wp_roles'] = null; // WPCS: override ok.
+	wp_roles();
 
 	echo esc_html( 'Installing wc-admin...' . PHP_EOL );
 }
@@ -94,16 +90,6 @@ function wc_test_includes() {
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
-	if ( version_compare( $GLOBALS['wp_version'], '4.9.9', '<=' ) ) { // < 5.0 fails for "5.0-alpha-12345-src
-		$_tests_wp_core_dir = getenv( 'WP_CORE_DIR' );
-
-		if ( ! $_tests_wp_core_dir ) {
-			$_tests_wp_core_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress';
-		}
-
-		require $_tests_wp_core_dir . '/wp-content/plugins/gutenberg/gutenberg.php';
-	}
-
 	define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 	define( 'WC_USE_TRANSACTIONS', false );
 	require_once wc_dir() . '/woocommerce.php';
