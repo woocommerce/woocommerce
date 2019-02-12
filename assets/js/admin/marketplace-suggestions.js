@@ -1,7 +1,7 @@
 /* global installed_woo_plugins */
-( function( $, woocommerce_admin ) {
+( function( $, installed_woo_plugins ) {
 	$( function() {
-		if ( 'undefined' === typeof woocommerce_admin ) {
+		if ( 'undefined' === typeof installed_woo_plugins ) {
 			return;
 		}
 
@@ -133,4 +133,4 @@
 
 	});
 
-})( jQuery, woocommerce_admin );
+})( jQuery, installed_woo_plugins );
