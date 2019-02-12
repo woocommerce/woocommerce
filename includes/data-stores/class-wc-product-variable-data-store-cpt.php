@@ -586,7 +586,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		if ( $prices ) {
 			sort( $prices, SORT_NUMERIC );
 			// To allow sorting and filtering by multiple values, we have no choice but to store child prices in this manner.
-			foreach ( $prices as $key => $price ) {
+			foreach ( $prices as $price ) {
 				if ( is_null( $price ) || '' === $price ) {
 					continue;
 				}
