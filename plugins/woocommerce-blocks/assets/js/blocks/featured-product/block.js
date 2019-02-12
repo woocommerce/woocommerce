@@ -126,18 +126,6 @@ class FeaturedProduct extends Component {
 
 		return (
 			<InspectorControls key="inspector">
-				<PanelBody
-					title={ __( 'Product', 'woo-gutenberg-products-block' ) }
-					initialOpen={ false }
-				>
-					<ProductControl
-						selected={ attributes.productId || 0 }
-						onChange={ ( value = [] ) => {
-							const id = value[ 0 ] ? value[ 0 ].id : 0;
-							setAttributes( { productId: id, mediaId: 0, mediaSrc: '' } );
-						} }
-					/>
-				</PanelBody>
 				<PanelBody title={ __( 'Content', 'woo-gutenberg-products-block' ) }>
 					<ToggleControl
 						label={ __( 'Show description', 'woo-gutenberg-products-block' ) }
@@ -254,16 +242,6 @@ class FeaturedProduct extends Component {
 						onChange={ ( nextAlign ) => {
 							setAttributes( { contentAlign: nextAlign } );
 						} }
-					/>
-					<Toolbar
-						controls={ [
-							{
-								icon: 'edit',
-								title: __( 'Edit' ),
-								onClick: () => setAttributes( { editMode: ! editMode } ),
-								isActive: editMode,
-							},
-						] }
 					/>
 					<MediaUploadCheck>
 						<Toolbar>
