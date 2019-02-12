@@ -151,7 +151,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 
 		$sql = "
 			SELECT min( min_price ) as min_price, MAX( max_price ) as max_price
-			FROM {$wpdb->prefix}wc_product_sorting
+			FROM {$wpdb->wc_product_sorting}
 			WHERE product_id IN (
 				SELECT ID FROM {$wpdb->posts}
 				" . $tax_query_sql['join'] . $meta_query_sql['join'] . "

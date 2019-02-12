@@ -648,14 +648,19 @@ final class WooCommerce {
 	}
 
 	/**
-	 * WooCommerce Payment Token Meta API and Term/Order item Meta - set table names.
+	 * Set tablenames inside WPDB object.
 	 */
 	public function wpdb_table_fix() {
 		global $wpdb;
+
 		$wpdb->payment_tokenmeta = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
-		$wpdb->order_itemmeta    = $wpdb->prefix . 'woocommerce_order_itemmeta';
 		$wpdb->tables[]          = 'woocommerce_payment_tokenmeta';
-		$wpdb->tables[]          = 'woocommerce_order_itemmeta';
+
+		$wpdb->order_itemmeta = $wpdb->prefix . 'woocommerce_order_itemmeta';
+		$wpdb->tables[]       = 'woocommerce_order_itemmeta';
+
+		$wpdb->wc_product_sorting = $wpdb->prefix . 'wc_product_sorting';
+		$wpdb->tables[]           = 'wc_product_sorting';
 
 		if ( get_option( 'db_version' ) < 34370 ) {
 			$wpdb->woocommerce_termmeta = $wpdb->prefix . 'woocommerce_termmeta';

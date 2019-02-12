@@ -534,7 +534,7 @@ class WC_Data_Store_WP {
 
 		if ( ! empty( $update_data ) && $update_data !== $existing_data ) {
 			$wpdb->replace(
-				$wpdb->prefix . $table,
+				$wpdb->$table,
 				$update_data
 			);
 			wp_cache_set( 'lookup_table', $update_data, 'object_' . $id );

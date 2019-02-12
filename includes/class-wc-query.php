@@ -500,7 +500,7 @@ class WC_Query {
 	}
 
 	/**
-	 * Custom query used to filter products by price from the wc_product_sorting table.
+	 * Custom query used to filter products by price.
 	 *
 	 * @since 3.6.0
 	 *
@@ -610,7 +610,7 @@ class WC_Query {
 		global $wpdb;
 
 		if ( ! strstr( $sql, 'wc_product_sorting' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->prefix}wc_product_sorting wc_product_sorting ON $wpdb->posts.ID = wc_product_sorting.product_id ";
+			$sql .= " LEFT JOIN {$wpdb->wc_product_sorting} wc_product_sorting ON $wpdb->posts.ID = wc_product_sorting.product_id ";
 		}
 		return $sql;
 	}

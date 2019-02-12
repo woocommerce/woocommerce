@@ -1274,22 +1274,19 @@ function wc_update_product_lookup_tables() {
 	global $wpdb;
 
 	$result = $wpdb->query(
-		$wpdb->prepare(
-			"
-			INSERT IGNORE INTO {$wpdb->prefix}wc_product_sorting (`product_id`, `price`, `min_price`, `max_price`, `average_rating`, `total_sales`)
-			SELECT posts.ID, MIN(meta1.meta_value), MIN(meta1.meta_value), MAX(meta1.meta_value), meta2.meta_value, meta3.meta_value
-			FROM {$wpdb->posts} posts
-			LEFT JOIN {$wpdb->postmeta} meta1 ON posts.ID = meta1.post_id
-			LEFT JOIN {$wpdb->postmeta} meta2 ON posts.ID = meta2.post_id
-			LEFT JOIN {$wpdb->postmeta} meta3 ON posts.ID = meta3.post_id
-			WHERE posts.post_type = 'product'
-			AND meta1.meta_key = '_price'
-			AND meta1.meta_value <> ''
-			AND meta2.meta_key = '_wc_average_rating'
-			AND meta3.meta_key = 'total_sales'
-			GROUP BY posts.ID
-			",
-			$default_category
-		)
+		"
+		INSERT IGNORE INTO {$wpdb->wc_product_sorting} (`product_id`, `price`, `min_price`, `max_price`, `average_rating`, `total_sales`)
+		SELECT posts.ID, MIN(meta1.meta_value), MIN(meta1.meta_value), MAX(meta1.meta_value), meta2.meta_value, meta3.meta_value
+		FROM {$wpdb->posts} posts
+		LEFT JOIN {$wpdb->postmeta} meta1 ON posts.ID = meta1.post_id
+		LEFT JOIN {$wpdb->postmeta} meta2 ON posts.ID = meta2.post_id
+		LEFT JOIN {$wpdb->postmeta} meta3 ON posts.ID = meta3.post_id
+		WHERE posts.post_type = 'product'
+		AND meta1.meta_key = '_price'
+		AND meta1.meta_value <> ''
+		AND meta2.meta_key = '_wc_average_rating'
+		AND meta3.meta_key = 'total_sales'
+		GROUP BY posts.ID
+		"
 	);
 }

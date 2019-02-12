@@ -650,6 +650,8 @@ class WC_Install {
 			$collate = $wpdb->get_charset_collate();
 		}
 
+		$price_decimals = max( 2, absint( wc_get_price_decimals() ) );
+
 		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -825,14 +827,14 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_product_sorting (
   `product_id` bigint(20) NOT NULL,
-  `price` double NULL default NULL,
-  `min_price` double NULL default NULL,
-  `max_price` double NULL default NULL,
-  `average_rating` float NULL default 0,
-  `total_sales` double NULL default 0,
+  `price` decimal(10,{$price_decimals}) NULL default NULL,
+  `min_price` decimal(10,{$price_decimals}) NULL default NULL,
+  `max_price` decimal(10,{$price_decimals}) NULL default NULL,
+  `average_rating` decimal(10,2) NULL default 0,
+  `total_sales` bigint(20) NULL default 0,
   PRIMARY KEY  (`product_id`),
-  KEY product_id_price (`product_id`,`max_price`,`min_price`)
-  KEY product_id_average_rating (`product_id`,`average_rating`)
+  KEY product_id_price (`product_id`,`max_price`,`min_price`),
+  KEY product_id_average_rating (`product_id`,`average_rating`),
   KEY product_id_total_sales (`product_id`,`total_sales`)
   ) $collate;
 		";
