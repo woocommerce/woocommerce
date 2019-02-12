@@ -13,6 +13,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <div class="marketplace-suggestions-container"
 	data-marketplace-suggestions-context="<?php echo esc_attr( $context ); ?>"
-	style="text-align: center; margin-top: 2em"
 	>
 </div>
