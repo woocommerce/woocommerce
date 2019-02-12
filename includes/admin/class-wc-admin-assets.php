@@ -422,7 +422,13 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					array( $this, 'get_plugin_slug' ),
 					array_keys( WC_Helper::get_local_woo_plugins() )
 				);
-				wp_register_script( 'marketplace-suggestions', WC()->plugin_url() . '/assets/js/admin/marketplace-suggestions' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
+				wp_register_script(
+					'marketplace-suggestions',
+					WC()->plugin_url() . '/assets/js/admin/marketplace-suggestions' . $suffix . '.js',
+					array( 'jquery', 'underscore' ),
+					WC_VERSION,
+					true
+				);
 				wp_localize_script( 'marketplace-suggestions', 'installed_woo_plugins', $woo_plugin_slugs );
 				wp_enqueue_script( 'marketplace-suggestions' );
 			}
