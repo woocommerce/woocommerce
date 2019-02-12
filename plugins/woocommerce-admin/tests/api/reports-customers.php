@@ -52,7 +52,7 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 	 * @param array $schema Item to check schema.
 	 */
 	public function assert_report_item_schema( $schema ) {
-		$this->assertArrayHasKey( 'customer_id', $schema );
+		$this->assertArrayHasKey( 'id', $schema );
 		$this->assertArrayHasKey( 'user_id', $schema );
 		$this->assertArrayHasKey( 'name', $schema );
 		$this->assertArrayHasKey( 'username', $schema );

@@ -172,7 +172,7 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 			'title'      => 'report_customers',
 			'type'       => 'object',
 			'properties' => array(
-				'customer_id'          => array(
+				'id'                   => array(
 					'description' => __( 'Customer ID.', 'wc-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),

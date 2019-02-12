@@ -25,7 +25,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 * @var array
 	 */
 	protected $column_types = array(
-		'customer_id'     => 'intval',
+		'id'              => 'intval',
 		'user_id'         => 'intval',
 		'orders_count'    => 'intval',
 		'total_spend'     => 'floatval',
@@ -38,7 +38,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 * @var array
 	 */
 	protected $report_columns = array(
-		'customer_id'      => 'customer_id',
+		'id'               => 'customer_id as id',
 		'user_id'          => 'user_id',
 		'username'         => 'username',
 		'name'             => "CONCAT_WS( ' ', first_name, last_name ) as name", // @todo What does this mean for RTL?
@@ -60,7 +60,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		global $wpdb;
 
 		// Initialize some report columns that need disambiguation.
-		$this->report_columns['customer_id']     = $wpdb->prefix . self::TABLE_NAME . '.customer_id';
+		$this->report_columns['id']              = $wpdb->prefix . self::TABLE_NAME . '.customer_id as id';
 		$this->report_columns['date_last_order'] = "MAX( {$wpdb->prefix}wc_order_stats.date_created ) as date_last_order";
 	}
 
