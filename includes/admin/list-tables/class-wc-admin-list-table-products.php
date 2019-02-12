@@ -51,6 +51,27 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		echo '<a class="woocommerce-BlankState-cta button-primary button" href="' . esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ) . '">' . esc_html__( 'Create your first product!', 'woocommerce' ) . '</a>';
 		echo '<a class="woocommerce-BlankState-cta button" href="' . esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) . '">' . esc_html__( 'Import products from a CSV file', 'woocommerce' ) . '</a>';
 		echo '</div>';
+
+		$this->render_marketplace_suggestion_empty_state();
+	}
+
+
+	/**
+	 * Render container for marketplace suggestions.
+	 */
+	protected function render_marketplace_suggestion_empty_state() {
+		wc_get_template(
+			'marketplace-suggestions/container.php',
+			array(
+				'context' => 'products-list-empty-header',
+			)
+		);
+		wc_get_template(
+			'marketplace-suggestions/container.php',
+			array(
+				'context' => 'products-list-empty-body',
+			)
+		);
 	}
 
 	/**
