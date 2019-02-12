@@ -234,6 +234,11 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			$name_like = '%' . $wpdb->esc_like( $query_args['search'] ) . '%';
 			$where_clauses[] = $wpdb->prepare( "CONCAT_WS( ' ', first_name, last_name ) LIKE %s", $name_like );
 		}
+
+		// Allow a list of customer IDs to be specified.
+		if ( ! empty( $query_args['customers'] ) ) {
+			$included_customers = implode( ',', $query_args['customers'] );
+			$where_clauses[] = "{$customer_lookup_table}.customer_id IN ({$included_customers})";
 		}
 
 		$numeric_params = array(
