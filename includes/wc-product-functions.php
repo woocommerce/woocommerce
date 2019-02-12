@@ -420,6 +420,7 @@ function wc_scheduled_sales() {
 		}
 		do_action( 'wc_after_products_starting_sales', $product_ids );
 
+		WC_Cache_Helper::get_transient_version( 'product', true );
 		delete_transient( 'wc_products_onsale' );
 	}
 
@@ -1291,5 +1292,4 @@ function wc_update_product_lookup_tables() {
 			$default_category
 		)
 	);
-	wp_cache_flush();
 }
