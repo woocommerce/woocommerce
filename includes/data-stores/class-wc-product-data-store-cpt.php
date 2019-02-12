@@ -624,7 +624,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		if ( array_intersect( $this->updated_props, array( 'price', 'total_sales', 'average_rating' ) ) ) {
+		if ( array_intersect( $this->updated_props, array( 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating' ) ) ) {
 			$this->update_lookup_table( $product->get_id(), 'wc_product_sorting' );
 		}
 
