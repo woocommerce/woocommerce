@@ -37,9 +37,9 @@ function wc_admin_install() {
 	define( 'WC_REMOVE_ALL_DATA', true );
 
 	// Initialize the WC API extensions.
-	require_once dirname( dirname( __FILE__ ) ) . '/includes/class-wc-admin-api-init.php';
+	require_once dirname( dirname( __FILE__ ) ) . '/includes/class-wc-admin-install.php';
 
-	WC_Admin_Api_Init::install();
+	WC_Admin_Install::create_tables();
 
 	if ( ! wp_next_scheduled( 'wc_admin_daily' ) ) {
 		wp_schedule_event( time(), 'daily', 'wc_admin_daily' );
