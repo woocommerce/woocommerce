@@ -416,6 +416,27 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					)
 				);
 			}
+
+			if ( in_array( $screen_id, array( 'edit-product' ), true ) ) {
+				$woo_plugin_slugs = array_map(
+					array( $this, 'get_plugin_slug' ),
+					array_keys( WC_Helper::get_local_woo_plugins() )
+				);
+				wp_register_script( 'marketplace-suggestions', WC()->plugin_url() . '/assets/js/admin/marketplace-suggestions' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
+				wp_localize_script( 'marketplace-suggestions', 'installed_woo_plugins', $woo_plugin_slugs );
+				wp_enqueue_script( 'marketplace-suggestions' );
+			}
+
+		}
+
+		/**
+		 * Utility for getting plugin slug from file.
+		 *
+		 * @param string $plugin_file Plugin filename.
+		 * @return string
+		 */
+		protected function get_plugin_slug( $plugin_file ) {
+			return dirname( $plugin_file );
 		}
 	}
 
