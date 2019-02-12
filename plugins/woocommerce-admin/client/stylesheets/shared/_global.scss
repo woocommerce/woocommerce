@@ -56,11 +56,13 @@
 
 	.components-button.is-button.is-primary {
 		color: $white;
-	}
 
-	.components-button.is-button.is-primary:hover,
-	.components-button.is-button.is-primary:active,
-	.components-button.is-button.is-primary:focus {
-		color: $white;
+		&:not(:disabled) {
+			&:hover,
+			&:active,
+			&:focus {
+				color: $white;
+			}
+		}
 	}
 }
