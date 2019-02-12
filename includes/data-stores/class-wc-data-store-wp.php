@@ -511,4 +511,33 @@ class WC_Data_Store_WP {
 
 		return apply_filters( 'wp_search_stopwords', $stopwords );
 	}
+
+	/**
+	 * Update a lookup table for an object.
+	 *
+	 * @since 3.6.0
+	 * @param int    $id ID of object to update.
+	 * @param string $table Lookup table name.
+	 */
+	protected function update_lookup_table( $id, $table ) {
+		global $wpdb;
+
+		$id    = absint( $id );
+		$table = sanitize_key( $table );
+
+		if ( empty( $id ) || empty( $table ) ) {
+			return false;
+		}
+
+		$existing_data = wp_cache_get( 'lookup_table', 'object_' . $id );
+		$update_data   = $this->get_data_for_lookup_table( $id, $table );
+
+		if ( ! empty( $update_data ) && $update_data !== $existing_data ) {
+			$wpdb->replace(
+				$wpdb->prefix . $table,
+				$update_data
+			);
+			wp_cache_set( 'lookup_table', $update_data, 'object_' . $id );
+		}
+	}
 }
