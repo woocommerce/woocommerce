@@ -263,7 +263,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$status = get_post_status( absint( $arg ) );
 
 			// Ignore auto drafts for all resources.
-			if ( in_array( $status, array( 'auto-draft', 'wc-auto-draft', 'new' ), true ) ) {
+			if ( in_array( $status, array( 'auto-draft', 'new' ), true ) ) {
 				return false;
 			}
 
@@ -964,11 +964,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				'delete_user',
 			),
 			'order.created'    => array(
-				'woocommerce_process_shop_order_meta',
 				'woocommerce_new_order',
 			),
 			'order.updated'    => array(
-				'woocommerce_process_shop_order_meta',
 				'woocommerce_update_order',
 				'woocommerce_order_refunded',
 			),
