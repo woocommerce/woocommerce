@@ -8,3 +8,18 @@
 	text-align: center;
 	margin-top: 2em;
 }
+
+.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-body"] {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+
+	.marketplace-card {
+		border: 1px solid #e5e5e5;
+		box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+		background: #fff;
+		margin: 1em;
+		width: 230px;
+		padding: 2em;
+	}
+}

@@ -15,7 +15,7 @@
 				slug: 'products-empty-memberships',
 				context: 'products-list-empty-body',
 				'show-if-installed': [ 'woocommerce-subscriptions' ],
-				content: '<div class="card">' +
+				content: '<div class="marketplace-card">' +
 						'<h2>Memberships</h2>' +
 						'<p>Give members access to restricted content or products</p>' +
 						'<a class="button" href="https://woocommerce.com/products/woocommerce-memberships/">From $149</a>' +
@@ -28,7 +28,7 @@
 					'woocommerce-subscriptions',
 					'woocommerce-memberships'
 				],
-				content: '<div class="card">' +
+				content: '<div class="marketplace-card">' +
 						'<h2>Product Add-Ons</h2>' +
 						'<p>Offer add-ons like gift wrapping, special messages or other special options for your products.</p>' +
 						'<a class="button" href="https://woocommerce.com/products/product-add-ons/">From $149</a>' +
@@ -38,7 +38,7 @@
 				slug: 'products-empty-product-bundles',
 				context: 'products-list-empty-body',
 				'hide-if-installed': 'woocommerce-product-bundles',
-				content: '<div class="card">' +
+				content: '<div class="marketplace-card">' +
 						'<h2>Product Bundles</h2>' +
 						'<p>Offer customizable bundles and assembled products</p>' +
 						'<a class="button" href="https://woocommerce.com/products/product-bundles/">From $49</a>' +
@@ -47,7 +47,7 @@
 			{
 				slug: 'products-empty-composite-products',
 				context: 'products-list-empty-body',
-				content: '<div class="card">' +
+				content: '<div class="marketplace-card">' +
 						'<h2>Composite Products</h2>' +
 						'<p>Create and offer product kits with configurable components</p>' +
 						'<a class="button" href=https://woocommerce.com/products/composite-products/">From $79</a>' +
@@ -56,14 +56,14 @@
 			{
 				slug: 'products-empty-more',
 				context: 'products-list-empty-body',
-				content: '<div class="card"><h2>More Extensions</h2></div>'
+				content: '<div class="marketplace-card"><h2>More Extensions</h2></div>'
 			},
 			{
 				slug: 'products-list-enhancements-category',
 				context: 'products-list-inline',
 				content: '<tr><td></td>' +
 					'<td colspan="6"><h2>Looking to optimize your product pages?</h2></td>' +
-					'<td colspan="4" style="vertical-align: middle">' +
+					'<td colspan="4">' +
 					'<a class="button" href="https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/">' +
 						'Explore enhancements</a></td></tr>'
 			}
