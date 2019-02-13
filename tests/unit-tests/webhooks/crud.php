@@ -147,7 +147,6 @@ class WC_Tests_CRUD_Webhooks extends WC_Unit_Test_Case {
 		$object = new WC_Webhook();
 		$object->set_topic( 'order.created' );
 		$expected = array(
-			'woocommerce_process_shop_order_meta',
 			'woocommerce_new_order',
 		);
 		$this->assertEquals( $expected, $object->get_hooks() );
