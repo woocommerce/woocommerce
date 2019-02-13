@@ -50,7 +50,8 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 		if ( '' === $current_section ) {
 			$settings = apply_filters(
-				'woocommerce_payment_gateways_settings', array(
+				'woocommerce_payment_gateways_settings',
+				array(
 					array(
 						'title' => __( 'Payment methods', 'woocommerce' ),
 						'desc'  => __( 'Installed payment methods are listed below and can be sorted to control their display order on the frontend.', 'woocommerce' ),
@@ -94,10 +95,9 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 					break;
 				}
 			}
-		} else {
-			$settings = $this->get_settings();
-			WC_Admin_Settings::output_fields( $settings );
 		}
+		$settings = $this->get_settings( $current_section );
+		WC_Admin_Settings::output_fields( $settings );
 	}
 
 	/**
