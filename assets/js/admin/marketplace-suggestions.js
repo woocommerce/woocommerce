@@ -5,11 +5,11 @@
 			return;
 		}
 
-		const marketplaceSuggestionsApiData = [
+		var marketplaceSuggestionsApiData = [
 			{
 				slug: 'products-empty-header',
 				context: 'products-list-empty-header',
-				content: '<h1>Selling something different?</h1><p>You can install extensions to sell all kinds of things!</p>',
+				content: '<h1>Selling something different?</h1><p>You can install extensions to sell all kinds of things!</p>'
 			},
 			{
 				slug: 'products-empty-memberships',
@@ -26,7 +26,7 @@
 				context: 'products-list-empty-body',
 				'show-if-installed': [
 					'woocommerce-subscriptions',
-					'woocommerce-memberships',
+					'woocommerce-memberships'
 				],
 				content: '<div class="card">' +
 						'<h2>Product Add-Ons</h2>' +
@@ -66,18 +66,22 @@
 					'<td colspan="4" style="vertical-align: middle">' +
 					'<a class="button" href="https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/">' +
 						'Explore enhancements</a></td></tr>'
-			},
+			}
 		];
 
 		function getRelevantPromotions( displayContext ) {
 			// select based on display context
-			var promos = _.filter( marketplaceSuggestionsApiData, ( promo ) => displayContext === promo.context );
+			var promos = _.filter( marketplaceSuggestionsApiData, function( promo ) {
+				return ( displayContext === promo.context );
+			} );
 
 			// hide promos for things the user already has installed
-			promos = _.filter( promos, ( promo ) => ! _.contains( installed_woo_plugins, promo['hide-if-installed'] ) );
+			promos = _.filter( promos, function( promo ) {
+				return ! _.contains( installed_woo_plugins, promo['hide-if-installed'] );
+			} );
 
 			// hide promos that are not applicable based on user's installed extensions
-			promos = _.filter( promos, ( promo ) => {
+			promos = _.filter( promos, function( promo ) {
 				if ( ! promo['show-if-installed'] ) {
 					// this promotion is relevant to all
 					return true;
@@ -93,10 +97,10 @@
 		// iterate over all suggestions containers, rendering promos
 		$( '.marketplace-suggestions-container' ).each( function() {
 			// determine the context / placement we're populating
-			const context = this.dataset.marketplaceSuggestionsContext;
+			var context = this.dataset.marketplaceSuggestionsContext;
 
 			// find promotions that target this context
-			const promos = getRelevantPromotions( context );
+			var promos = getRelevantPromotions( context );
 
 			// render the promo content
 			for ( var i in promos ) {
@@ -106,18 +110,18 @@
 
 		// render inline promos in products list
 		$( '.wp-admin.admin-bar.edit-php.post-type-product table.wp-list-table.posts tbody').first().each( function() {
-			const context = 'products-list-inline';
+			var context = 'products-list-inline';
 
 			// find promotions that target this context
-			const promos = getRelevantPromotions( context );
+			var promos = getRelevantPromotions( context );
 
 			// render one of the promos
 			if ( promos && promos.length ) {
-				const content = $( promos[ 0 ].content );
+				var content = $( promos[ 0 ].content );
 
 				// where should we put it in the list?
-				const rows = $( this ).children();
-				const minRow = 3;
+				var rows = $( this ).children();
+				var minRow = 3;
 
 				if ( rows.length <= minRow ) {
 					// if small number of rows, append at end
