@@ -148,8 +148,11 @@ class WC_Breadcrumb {
 			$this->prepend_shop_page();
 
 			$terms = wc_get_product_terms(
-				$post->ID, 'product_cat', apply_filters(
-					'woocommerce_breadcrumb_product_terms_args', array(
+				$post->ID,
+				'product_cat',
+				apply_filters(
+					'woocommerce_breadcrumb_product_terms_args',
+					array(
 						'orderby' => 'parent',
 						'order'   => 'DESC',
 					)
@@ -240,7 +243,7 @@ class WC_Breadcrumb {
 
 		if ( ! $_name ) {
 			$product_post_type = get_post_type_object( 'product' );
-			$_name             = $product_post_type->labels->singular_name;
+			$_name             = $product_post_type->labels->name;
 		}
 
 		$this->add_crumb( $_name, get_post_type_archive_link( 'product' ) );
@@ -253,7 +256,7 @@ class WC_Breadcrumb {
 		$post_type = get_post_type_object( get_post_type() );
 
 		if ( $post_type ) {
-			$this->add_crumb( $post_type->labels->singular_name, get_post_type_archive_link( get_post_type() ) );
+			$this->add_crumb( $post_type->labels->name, get_post_type_archive_link( get_post_type() ) );
 		}
 	}
 
