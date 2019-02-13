@@ -61,13 +61,46 @@
 			{
 				slug: 'products-list-enhancements-category',
 				context: 'products-list-inline',
-				content: '<tr class="marketplace-list-banner"><td></td>' +
-					'<td colspan="5"><h2>Looking to optimize your product pages?</h2></td>' +
-					'<td class="marketplace-list-linkout" colspan="4">' +
-					'<a class="button" href="https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/">' +
-						'Explore enhancements</a></td></tr>'
+				title: 'Looking to optimize your product pages?',
+				'button-text': 'Explore enhancements',
+				url: 'https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/',
 			}
 		];
+
+		function renderTableBanner( title, url, buttonText ) {
+			if ( ! title || ! url ) {
+				return;
+			}
+
+			if ( ! buttonText ) {
+				buttonText = 'Go';
+			}
+
+			var row = document.createElement( 'tr' );
+			row.classList.add( 'marketplace-list-banner' );
+
+			var titleColumn = document.createElement( 'td' );
+			titleColumn.setAttribute( 'colspan', 5 );
+			titleColumn.classList.add( 'marketplace-list-title' );
+			var titleHeading = document.createElement( 'h2' );
+			titleColumn.append( titleHeading );
+			titleHeading.textContent = title;
+
+			row.appendChild( titleColumn );
+
+			var linkoutColumn = document.createElement( 'td' );
+			linkoutColumn.setAttribute( 'colspan', 4 );
+			linkoutColumn.classList.add( 'marketplace-list-linkout' );
+			var linkoutButton = document.createElement( 'a' );
+			linkoutColumn.append( linkoutButton );
+			linkoutButton.classList.add( 'button' );
+			linkoutButton.setAttribute( 'href', url );
+			linkoutButton.textContent = buttonText;
+
+			row.appendChild( linkoutColumn );
+
+			return row;
+		}
 
 		var visibleSuggestions = [];
 
@@ -117,11 +150,18 @@
 
 			// find promotions that target this context
 			var promos = getRelevantPromotions( context );
+			if ( ! promos || ! promos.length ) {
+				return;
+			}
 
-			// render one of the promos
-			if ( promos && promos.length ) {
-				var content = $( promos[ 0 ].content );
+			// render first promo
+			var content = renderTableBanner(
+				promos[ 0 ].title,
+				promos[ 0 ].url,
+				promos[ 0 ]['button-text']
+			);
 
+			if ( content ) {
 				// where should we put it in the list?
 				var rows = $( this ).children();
 				var minRow = 3;
@@ -134,6 +174,7 @@
 					// for more rows, append
 					$( rows[ minRow - 1 ] ).after( content );
 				}
+
 				visibleSuggestions.push( context );
 			}
 		} );
