@@ -290,6 +290,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$rest_api_versions = wc_get_webhook_rest_api_versions();
 		$version_suffix    = end( $rest_api_versions ) !== $this->get_api_version() ? strtoupper( str_replace( 'wp_api', '', $this->get_api_version() ) ) : '';
 
+		// Load REST API endpoints to generate payload.
+		if ( ! did_action( 'rest_api_init' ) ) {
+			WC()->api->rest_api_includes();
+		}
+
 		switch ( $resource ) {
 			case 'coupon':
 			case 'customer':
