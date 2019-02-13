@@ -10,9 +10,9 @@
   "version": "1.0.0",
   "homepage": "http://github.com/woocommerce/woocommerce-beta-tester",
   "devDependencies": {
-    "clean-css-cli": "^4.1.11",
-    "less": "^3.0.4",
-    "uglify-js": "^3.4.0"
+    "clean-css-cli": "^4.2.1",
+    "less": "^3.9.0",
+    "uglify-js": "^3.4.9"
   },
   "assets": {
     "js": {
