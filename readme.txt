@@ -166,6 +166,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Allow states in zones to be searched by country name. #22339
 * Enhancement - Added registration success notices to account pages. #22650
 * Enhancement - Store notice is visible again if the notice text is changed. #22645
+* Enhancement - Add aria-label attribute to shop orderby selector to improve accessibility. #22683
 * Tweak - Generalize shipping estimate text on cart page. #22467
 * Tweak - Include auto draft orders in order list filters. #22380
 * Tweak - Only include the network orders widget on the main site dashboard. #22318
@@ -218,6 +219,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Moves cart hash calculation to WC_Cart class. #21050
 * Dev - Removed deprecated Simplify gateway. #22410
 * Dev - Added `woocommerce_paypal_force_one_line_item` filter to control how items are sent to PayPal. #22653
+* Dev - Added `woocommerce_update_product_stock_query` to filter the direct sql query to update product stock. #22672
+* Dev - Added `woocommerce_product_loop_title_classes` filter to modify product title loop classes. #22717
 * Fix - Hide ratings on the shop page when reviews are disabled. #22476
 * Fix - Fix W3C validation of single product page quantity input. #22333
 * Fix - Give product variations a unique guid after creation. #22324
@@ -236,6 +239,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - HTML tags should be stripped from description in Structured Data of Product. #22596
 * Fix - For logged in customers, pull default address fields from customer object, not session object, to avoid incorrect mixes of data. #22392
 * Fix - Misc tax rounding improvements. #22420
+* Fix - Respect shop page subcategories setting when `page/N/` is added to the URL. #22589
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
 * Performance - Improved how versioned transients are set/cleanup to avoid cron. #22511
