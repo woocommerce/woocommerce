@@ -21,6 +21,7 @@ import { Controller, getPages } from './controller';
 import Header from 'header';
 import Notices from './notices';
 import { recordPageView } from 'lib/tracks';
+import TransientNotices from './transient-notices';
 
 class Layout extends Component {
 	componentDidMount() {
@@ -62,6 +63,8 @@ class Layout extends Component {
 		return (
 			<div className="woocommerce-layout">
 				{ window.wcAdminFeatures[ 'activity-panels' ] && <Slot name="header" /> }
+				<TransientNotices />
+
 				<div className="woocommerce-layout__primary" id="woocommerce-layout__primary">
 					<Notices />
 					{ ! isEmbeded && (
