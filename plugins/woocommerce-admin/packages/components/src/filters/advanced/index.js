@@ -9,6 +9,7 @@ import { partial, findIndex, difference, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import Gridicon from 'gridicons';
 import interpolateComponents from 'interpolate-components';
+import classnames from 'classnames';
 
 /**
  * WooCommerce dependencies
@@ -234,7 +235,10 @@ class AdvancedFilters extends Component {
 									/>
 								) }
 								<IconButton
-									className="woocommerce-filters-advanced__remove"
+									className={ classnames(
+										'woocommerce-filters-advanced__line-item',
+										'woocommerce-filters-advanced__remove'
+									) }
 									label={ labels.remove }
 									onClick={ partial( this.removeFilter, key ) }
 									icon={ <Gridicon icon="cross-small" /> }

@@ -215,7 +215,7 @@ class DateFilter extends Component {
 		} );
 		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (
-			<fieldset tabIndex="0">
+			<fieldset className="woocommerce-filters-advanced__line-item" tabIndex="0">
 				<legend className="screen-reader-text">{ labels.add || '' }</legend>
 				<div
 					className={ classnames( 'woocommerce-filters-advanced__fieldset', {
