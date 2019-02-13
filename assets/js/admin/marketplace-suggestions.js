@@ -69,6 +69,8 @@
 			}
 		];
 
+		var visibleSuggestions = [];
+
 		function getRelevantPromotions( displayContext ) {
 			// select based on display context
 			var promos = _.filter( marketplaceSuggestionsApiData, function( promo ) {
@@ -105,6 +107,7 @@
 			// render the promo content
 			for ( var i in promos ) {
 				$( this ).append( promos[ i ].content );
+				visibleSuggestions.push( promos[i].context );
 			}
 		} );
 
@@ -131,9 +134,14 @@
 					// for more rows, append
 					$( rows[ minRow - 1 ] ).after( content );
 				}
-
+				visibleSuggestions.push( context );
 			}
 		} );
+
+		// streamline layout if we're showing empty product list promos
+		if ( _.contains( visibleSuggestions, 'products-list-empty-body' ) ) {
+			$('#wpfooter').hide();
+		}
 
 	});
 
