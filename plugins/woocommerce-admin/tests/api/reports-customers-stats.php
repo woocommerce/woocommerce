@@ -142,7 +142,7 @@ class WC_Tests_API_Reports_Customers_Stats extends WC_REST_Unit_Test_Case {
 		// Test name parameter (case with no matches).
 		$request->set_query_params(
 			array(
-				'name' => 'Nota Customername',
+				'search' => 'Nota Customername',
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -157,8 +157,8 @@ class WC_Tests_API_Reports_Customers_Stats extends WC_REST_Unit_Test_Case {
 		// Test name and last_order parameters.
 		$request->set_query_params(
 			array(
-				'name'             => 'Jeff',
-				'last_order_after' => date( 'Y-m-d' ) . 'T00:00:00Z',
+				'search'             => 'Jeff',
+				'last_order_after'   => date( 'Y-m-d' ) . 'T00:00:00Z',
 			)
 		);
 		$response = $this->server->dispatch( $request );

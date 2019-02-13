@@ -41,7 +41,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 		$args['registered_before']   = $request['registered_before'];
 		$args['registered_after']    = $request['registered_after'];
 		$args['match']               = $request['match'];
-		$args['name']                = $request['name'];
+		$args['search']              = $request['search'];
 		$args['username']            = $request['username'];
 		$args['email']               = $request['email'];
 		$args['country']             = $request['country'];
@@ -55,6 +55,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 		$args['avg_order_value_max'] = $request['avg_order_value_max'];
 		$args['last_order_before']   = $request['last_order_before'];
 		$args['last_order_after']    = $request['last_order_after'];
+		$args['customers']           = $request['customers'];
 
 		$between_params_numeric    = array( 'orders_count', 'total_spend', 'avg_order_value' );
 		$normalized_params_numeric = WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params_numeric, false );
@@ -246,7 +247,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['name']                    = array(
+		$params['search']                  = array(
 			'description'       => __( 'Limit response to objects with a specfic customer name.', 'wc-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -358,6 +359,16 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['customers']              = array(
+			'description'       => __( 'Limit result to items with specified customer ids.', 'wc-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
+
 		);
 
 		return $params;
