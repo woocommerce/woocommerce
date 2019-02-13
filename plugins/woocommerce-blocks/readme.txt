@@ -10,24 +10,27 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 == Description ==
 
-WooCommerce Blocks are the easiest, most flexible way to display your products on posts and pages! New for version 1.3.0: We've added six new blocks! 
+WooCommerce Blocks are the easiest, most flexible way to display your products on posts and pages!
 
-**NEW: Featured Product Block**
+**NEW: Products by Attribute Block**
+Display a grid of products from your selected attributes.
+
+**Featured Product Block**
 Select and display a single product in a new, high impact fashion. Control text alignment, hide or show the price and description, add a color overlay, change the button call to action, and override the product photo. 
 
-**NEW: Hand-Picked products Block**
-Display a grid of hand picked products. Products can be ordred in various ways.
+**Hand-Picked products Block**
+Display a grid of hand picked products. Products can be ordered in various ways.
 
-**NEW: Best Selling Products Block**
+**Best Selling Products Block**
 Display a grid of your best selling products, filterable by category.
 
-**NEW: Top Rated Products Block**
+**Top Rated Products Block**
 Display a grid of your top rated products, filterable by category.
 
-**NEW: Newest Products Block**
+**Newest Products Block**
 Display a grid of your newest products, filterable by category.
 
-**NEW: On Sale Products Block**
+**On Sale Products Block**
 Display a grid of on sale products, filterable by category.
 
 **Products by Category Block**
@@ -87,6 +90,21 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 5. WooCommerce Product Blocks in the block inserter menu
 
 == Changelog ==
+
+== 1.4.0 - 2019-02-12 =
+
+- Feature: Added new block: "Products by Attribute"
+- Enhancement: Added the ability to resize the Featured Product block (a default and minimum height can be set by your theme)
+- Enhancement: Updated button on Featured Product block to match core button block behavior
+- Components: Added new control component `GridLayoutControl` to manage row/column layout values
+- Components: Updated `ProductAttributeControl` to list only attribute types, then once selected, list terms in that attribute
+- UX: Remove ability to change selected product in Featured Product block, to prevent "sticky" product links.
+- Fix: A product without an image will now use the placeholder image in grid-layout block previews
+- Fix: Previously, there was a PHP notice when a Featured Product has no background image
+- Fix: There is now an enforced limit on column and row counts (which can be set by your theme)
+- API: Added `attr_operator` support to products endpoint to compare product attribute terms
+- Build: Update packages
+- Build: Remove unnecessary internationalization build step
 
 == 1.3.1 - 2019-01-17 =
 
