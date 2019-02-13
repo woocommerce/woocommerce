@@ -28,7 +28,7 @@ class WC_Breadcrumb {
 	 */
 	public function add_crumb( $name, $link = '' ) {
 		$this->crumbs[] = array(
-			strip_tags( $name ),
+			wp_strip_all_tags( $name ),
 			$link,
 		);
 	}
@@ -371,7 +371,7 @@ class WC_Breadcrumb {
 	 * Add a breadcrumb for pagination.
 	 */
 	private function paged_trail() {
-		if ( get_query_var( 'paged' ) ) {
+		if ( get_query_var( 'paged' ) && 'subcategories' !== woocommerce_get_loop_display_mode() ) {
 			/* translators: %d: page number */
 			$this->add_crumb( sprintf( __( 'Page %d', 'woocommerce' ), get_query_var( 'paged' ) ) );
 		}
