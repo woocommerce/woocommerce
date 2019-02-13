@@ -123,7 +123,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return bool       True if webhook should be delivered, false otherwise.
 	 */
 	private function should_deliver( $arg ) {
-		$should_deliver = $this->is_active() && $this->is_valid_topic() && $this->is_valid_action( $arg );
+		$should_deliver = $this->is_active() && $this->is_valid_topic() && $this->is_valid_action( $arg ) && $this->is_valid_resource( $arg );
 
 		/**
 		 * Let other plugins intercept deliver for some messages queue like rabbit/zeromq.
@@ -245,6 +245,32 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			return false;
 		} elseif ( 'updated' === $this->get_event() && $resource_created ) {
 			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Checks the resource for this webhook is valid e.g. valid post status.
+	 *
+	 * @since  3.6.0
+	 * @param  mixed $arg First hook argument.
+	 * @return bool       True if validation passes.
+	 */
+	private function is_valid_resource( $arg ) {
+		$resource = $this->get_resource();
+
+		if ( in_array( $resource, array( 'order', 'product', 'coupon' ), true ) ) {
+			$status = get_post_status( absint( $arg ) );
+
+			// Ignore auto drafts for all resources.
+			if ( in_array( $status, array( 'auto-draft', 'wc-auto-draft', 'new' ), true ) ) {
+				return false;
+			}
+
+			// Ignore standard drafts for orders.
+			if ( 'order' === $resource && 'draft' === $status ) {
+				return false;
+			}
 		}
 		return true;
 	}
