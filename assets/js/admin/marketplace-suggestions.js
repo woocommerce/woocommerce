@@ -108,8 +108,8 @@
 			return row;
 		}
 
-		function renderListItem( title, copy, url, buttonText ) {
-			if ( ! title || ! url ) {
+		function renderListItem( title, url, buttonText, copy ) {
+			if ( ! title ) {
 				return;
 			}
 
@@ -124,12 +124,16 @@
 			titleHeading.textContent = title;
 			container.appendChild( titleHeading );
 
-			var body = document.createElement( 'p' );
-			body.textContent = copy;
-			container.appendChild( body );
+			if ( copy ) {
+				var body = document.createElement( 'p' );
+				body.textContent = copy;
+				container.appendChild( body );
+			}
 
-			var linkoutButton = renderLinkoutButton( url, buttonText );
-			container.appendChild( linkoutButton );
+			if ( url ) {
+				var linkoutButton = renderLinkoutButton( url, buttonText );
+				container.appendChild( linkoutButton );
+			}
 
 			return container;
 		}
@@ -173,9 +177,9 @@
 			for ( var i in promos ) {
 				var content = renderListItem(
 					promos[ i ].title,
-					promos[ i ].copy,
 					promos[ i ].url,
-					promos[ i ]['button-text']
+					promos[ i ]['button-text'],
+					promos[ i ].copy
 				);
 				$( this ).append( content );
 				visibleSuggestions.push( promos[i].context );
