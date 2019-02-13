@@ -9,55 +9,54 @@
 			{
 				slug: 'products-empty-header',
 				context: 'products-list-empty-header',
-				content: '<h1>Selling something different?</h1><p>You can install extensions to sell all kinds of things!</p>'
+				title: 'Ready to start selling something awesome?',
+				copy: 'Create your first product, import your product data, or browse extensions'
 			},
 			{
 				slug: 'products-empty-memberships',
 				context: 'products-list-empty-body',
-				'show-if-installed': [ 'woocommerce-subscriptions' ],
-				content: '<div class="marketplace-card">' +
-						'<h2>Memberships</h2>' +
-						'<p>Give members access to restricted content or products</p>' +
-						'<a class="button" href="https://woocommerce.com/products/woocommerce-memberships/">From $149</a>' +
-					'</div>'
+				title: 'Selling something else?',
+				copy: 'Extensions allow you to sell other types of products including bookings, subscriptions, or memberships',
+				'button-text': 'Browse extensions',
+				url: 'https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/',
 			},
-			{
-				slug: 'products-empty-addons',
-				context: 'products-list-empty-body',
-				'show-if-installed': [
-					'woocommerce-subscriptions',
-					'woocommerce-memberships'
-				],
-				content: '<div class="marketplace-card">' +
-						'<h2>Product Add-Ons</h2>' +
-						'<p>Offer add-ons like gift wrapping, special messages or other special options for your products.</p>' +
-						'<a class="button" href="https://woocommerce.com/products/product-add-ons/">From $149</a>' +
-					'</div>'
-			},
-			{
-				slug: 'products-empty-product-bundles',
-				context: 'products-list-empty-body',
-				'hide-if-installed': 'woocommerce-product-bundles',
-				content: '<div class="marketplace-card">' +
-						'<h2>Product Bundles</h2>' +
-						'<p>Offer customizable bundles and assembled products</p>' +
-						'<a class="button" href="https://woocommerce.com/products/product-bundles/">From $49</a>' +
-					'</div>'
-			},
-			{
-				slug: 'products-empty-composite-products',
-				context: 'products-list-empty-body',
-				content: '<div class="marketplace-card">' +
-						'<h2>Composite Products</h2>' +
-						'<p>Create and offer product kits with configurable components</p>' +
-						'<a class="button" href=https://woocommerce.com/products/composite-products/">From $79</a>' +
-					'</div>'
-			},
-			{
-				slug: 'products-empty-more',
-				context: 'products-list-empty-body',
-				content: '<div class="marketplace-card"><h2>More Extensions</h2></div>'
-			},
+			// {
+			// 	slug: 'products-empty-addons',
+			// 	context: 'products-list-empty-body',
+			// 	'show-if-installed': [
+			// 		'woocommerce-subscriptions',
+			// 		'woocommerce-memberships'
+			// 	],
+			// 	content: '<div class="marketplace-card">' +
+			// 			'<h2>Product Add-Ons</h2>' +
+			// 			'<p>Offer add-ons like gift wrapping, special messages or other special options for your products.</p>' +
+			// 			'<a class="button" href="https://woocommerce.com/products/product-add-ons/">From $149</a>' +
+			// 		'</div>'
+			// },
+			// {
+			// 	slug: 'products-empty-product-bundles',
+			// 	context: 'products-list-empty-body',
+			// 	'hide-if-installed': 'woocommerce-product-bundles',
+			// 	content: '<div class="marketplace-card">' +
+			// 			'<h2>Product Bundles</h2>' +
+			// 			'<p>Offer customizable bundles and assembled products</p>' +
+			// 			'<a class="button" href="https://woocommerce.com/products/product-bundles/">From $49</a>' +
+			// 		'</div>'
+			// },
+			// {
+			// 	slug: 'products-empty-composite-products',
+			// 	context: 'products-list-empty-body',
+			// 	content: '<div class="marketplace-card">' +
+			// 			'<h2>Composite Products</h2>' +
+			// 			'<p>Create and offer product kits with configurable components</p>' +
+			// 			'<a class="button" href=https://woocommerce.com/products/composite-products/">From $79</a>' +
+			// 		'</div>'
+			// },
+			// {
+			// 	slug: 'products-empty-more',
+			// 	context: 'products-list-empty-body',
+			// 	content: '<div class="marketplace-card"><h2>More Extensions</h2></div>'
+			// },
 			{
 				slug: 'products-list-enhancements-category',
 				context: 'products-list-inline',
@@ -66,6 +65,16 @@
 				url: 'https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/',
 			}
 		];
+
+		function renderLinkoutButton( url, buttonText ) {
+			var linkoutButton = document.createElement( 'a' );
+
+			linkoutButton.classList.add( 'button' );
+			linkoutButton.setAttribute( 'href', url );
+			linkoutButton.textContent = buttonText;
+
+			return linkoutButton;
+		}
 
 		function renderTableBanner( title, url, buttonText ) {
 			if ( ! title || ! url ) {
@@ -91,15 +100,38 @@
 			var linkoutColumn = document.createElement( 'td' );
 			linkoutColumn.setAttribute( 'colspan', 4 );
 			linkoutColumn.classList.add( 'marketplace-list-linkout' );
-			var linkoutButton = document.createElement( 'a' );
+			var linkoutButton = renderLinkoutButton( url, buttonText );
 			linkoutColumn.append( linkoutButton );
-			linkoutButton.classList.add( 'button' );
-			linkoutButton.setAttribute( 'href', url );
-			linkoutButton.textContent = buttonText;
 
 			row.appendChild( linkoutColumn );
 
 			return row;
+		}
+
+		function renderListItem( title, copy, url, buttonText ) {
+			if ( ! title || ! url ) {
+				return;
+			}
+
+			if ( ! buttonText ) {
+				buttonText = 'Go';
+			}
+
+			var container = document.createElement( 'div' );
+			container.classList.add( 'marketplace-list-container' );
+
+			var titleHeading = document.createElement( 'h4' );
+			titleHeading.textContent = title;
+			container.appendChild( titleHeading );
+
+			var body = document.createElement( 'p' );
+			body.textContent = copy;
+			container.appendChild( body );
+
+			var linkoutButton = renderLinkoutButton( url, buttonText );
+			container.appendChild( linkoutButton );
+
+			return container;
 		}
 
 		var visibleSuggestions = [];
@@ -139,7 +171,13 @@
 
 			// render the promo content
 			for ( var i in promos ) {
-				$( this ).append( promos[ i ].content );
+				var content = renderListItem(
+					promos[ i ].title,
+					promos[ i ].copy,
+					promos[ i ].url,
+					promos[ i ]['button-text']
+				);
+				$( this ).append( content );
 				visibleSuggestions.push( promos[i].context );
 			}
 		} );
