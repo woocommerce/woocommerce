@@ -61,9 +61,9 @@
 			{
 				slug: 'products-list-enhancements-category',
 				context: 'products-list-inline',
-				content: '<tr><td></td>' +
-					'<td colspan="6"><h2>Looking to optimize your product pages?</h2></td>' +
-					'<td colspan="4">' +
+				content: '<tr class="marketplace-list-banner"><td></td>' +
+					'<td colspan="5"><h2>Looking to optimize your product pages?</h2></td>' +
+					'<td class="marketplace-list-linkout" colspan="4">' +
 					'<a class="button" href="https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/">' +
 						'Explore enhancements</a></td></tr>'
 			}

@@ -3,6 +3,28 @@
  * Styling for in-product marketplace suggestions.
  */
 
+.marketplace-list-banner {
+
+	h2 {
+		color: #555;
+	}
+
+	td {
+		vertical-align: middle;
+	}
+
+	td.marketplace-list-linkout {
+		text-align: right;
+		padding-right: 3em;
+	}
+}
+
+@media screen and (max-width: 782px) {
+
+	.marketplace-list-banner {
+		display: none;
+	}
+}
 
 .marketplace-suggestions-container {
 	text-align: center;
