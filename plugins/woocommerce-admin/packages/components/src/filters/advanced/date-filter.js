@@ -186,7 +186,7 @@ class DateFilter extends Component {
 	}
 
 	render() {
-		const { config, filter, isEnglish } = this.props;
+		const { className, config, filter, isEnglish } = this.props;
 		const { rule } = filter;
 		const { labels, rules } = config;
 		const screenReaderText = this.getScreenReaderText( filter, config );
@@ -195,7 +195,7 @@ class DateFilter extends Component {
 			components: {
 				rule: (
 					<SelectControl
-						className="woocommerce-filters-advanced__rule"
+						className={ classnames( className, 'woocommerce-filters-advanced__rule' ) }
 						options={ rules }
 						value={ rule }
 						onChange={ this.onRuleChange }
@@ -204,7 +204,7 @@ class DateFilter extends Component {
 				),
 				filter: (
 					<div
-						className={ classnames( 'woocommerce-filters-advanced__input-range', {
+						className={ classnames( className, 'woocommerce-filters-advanced__input-range', {
 							'is-between': 'between' === rule,
 						} ) }
 					>

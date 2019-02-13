@@ -185,7 +185,7 @@ class NumberFilter extends Component {
 	}
 
 	render() {
-		const { config, filter, onFilterChange, isEnglish } = this.props;
+		const { className, config, filter, onFilterChange, isEnglish } = this.props;
 		const { key, rule } = filter;
 		const { labels, rules } = config;
 
@@ -194,7 +194,7 @@ class NumberFilter extends Component {
 			components: {
 				rule: (
 					<SelectControl
-						className="woocommerce-filters-advanced__rule"
+						className={ classnames( className, 'woocommerce-filters-advanced__rule' ) }
 						options={ rules }
 						value={ rule }
 						onChange={ partial( onFilterChange, key, 'rule' ) }
@@ -203,7 +203,7 @@ class NumberFilter extends Component {
 				),
 				filter: (
 					<div
-						className={ classnames( 'woocommerce-filters-advanced__input-range', {
+						className={ classnames( className, 'woocommerce-filters-advanced__input-range', {
 							'is-between': 'between' === rule,
 						} ) }
 					>

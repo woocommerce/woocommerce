@@ -191,6 +191,7 @@ class AdvancedFilters extends Component {
 							<li className="woocommerce-filters-advanced__list-item" key={ key }>
 								{ 'SelectControl' === input.component && (
 									<SelectFilter
+										className="woocommerce-filters-advanced__fieldset-item"
 										filter={ filter }
 										config={ config.filters[ key ] }
 										onFilterChange={ this.onFilterChange }
@@ -199,6 +200,7 @@ class AdvancedFilters extends Component {
 								) }
 								{ 'Search' === input.component && (
 									<SearchFilter
+										className="woocommerce-filters-advanced__fieldset-item"
 										filter={ filter }
 										config={ config.filters[ key ] }
 										onFilterChange={ this.onFilterChange }
@@ -208,6 +210,7 @@ class AdvancedFilters extends Component {
 								) }
 								{ 'Number' === input.component && (
 									<NumberFilter
+										className="woocommerce-filters-advanced__fieldset-item"
 										filter={ filter }
 										config={ config.filters[ key ] }
 										onFilterChange={ this.onFilterChange }
@@ -217,6 +220,7 @@ class AdvancedFilters extends Component {
 								) }
 								{ 'Currency' === input.component && (
 									<NumberFilter
+										className="woocommerce-filters-advanced__fieldset-item"
 										filter={ filter }
 										config={ { ...config.filters[ key ], ...{ input: { type: 'currency', component: 'Currency' } } } }
 										onFilterChange={ this.onFilterChange }
@@ -226,6 +230,7 @@ class AdvancedFilters extends Component {
 								) }
 								{ 'Date' === input.component && (
 									<DateFilter
+										className="woocommerce-filters-advanced__fieldset-item"
 										filter={ filter }
 										config={ config.filters[ key ] }
 										onFilterChange={ this.onFilterChange }

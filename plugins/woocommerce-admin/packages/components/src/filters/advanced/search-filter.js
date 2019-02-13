@@ -72,7 +72,7 @@ class SearchFilter extends Component {
 	}
 
 	render() {
-		const { config, filter, onFilterChange, isEnglish } = this.props;
+		const { className, config, filter, onFilterChange, isEnglish } = this.props;
 		const { selected } = this.state;
 		const { key, rule } = filter;
 		const { input, labels, rules } = config;
@@ -81,7 +81,7 @@ class SearchFilter extends Component {
 			components: {
 				rule: (
 					<SelectControl
-						className="woocommerce-filters-advanced__rule"
+						className={ classnames( className, 'woocommerce-filters-advanced__rule' ) }
 						options={ rules }
 						value={ rule }
 						onChange={ partial( onFilterChange, key, 'rule' ) }
@@ -90,7 +90,7 @@ class SearchFilter extends Component {
 				),
 				filter: (
 					<Search
-						className="woocommerce-filters-advanced__input"
+						className={ classnames( className, 'woocommerce-filters-advanced__input' ) }
 						onChange={ this.onSearchChange }
 						type={ input.type }
 						placeholder={ labels.placeholder }

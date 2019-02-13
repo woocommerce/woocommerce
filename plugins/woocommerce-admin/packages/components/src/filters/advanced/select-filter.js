@@ -64,7 +64,7 @@ class SelectFilter extends Component {
 	}
 
 	render() {
-		const { config, filter, onFilterChange, isEnglish } = this.props;
+		const { className, config, filter, onFilterChange, isEnglish } = this.props;
 		const { options } = this.state;
 		const { key, rule, value } = filter;
 		const { labels, rules } = config;
@@ -73,7 +73,7 @@ class SelectFilter extends Component {
 			components: {
 				rule: (
 					<SelectControl
-						className="woocommerce-filters-advanced__rule"
+						className={ classnames( className, 'woocommerce-filters-advanced__rule' ) }
 						options={ rules }
 						value={ rule }
 						onChange={ partial( onFilterChange, key, 'rule' ) }
@@ -82,7 +82,7 @@ class SelectFilter extends Component {
 				),
 				filter: options ? (
 					<SelectControl
-						className="woocommerce-filters-advanced__input"
+						className={ classnames( className, 'woocommerce-filters-advanced__input' ) }
 						options={ options }
 						value={ value }
 						onChange={ partial( onFilterChange, filter.key, 'value' ) }
