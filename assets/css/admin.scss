@@ -5517,10 +5517,6 @@
 	 @include icon( '\e600' );
  }
 
- .post-type-product .woocommerce-BlankState-message::before {
-	 @include icon( '\e006' );
- }
-
  .woocommerce-BlankState--api .woocommerce-BlankState-message::before {
 	 @include icon( '\e01c' );
  }
@@ -5529,28 +5525,40 @@
 	 @include icon( '\e01b' );
  }
 
- .woocommerce-BlankState {
+ .post-type-product .woocommerce-BlankState {
+ 	 background-color: white;
+ 	 max-width: 800px;
+	 padding: 4em 6em;
 	 text-align: center;
-	 padding: 5em 0 0;
+	 margin: auto;
 
 	 .woocommerce-BlankState-message {
-		 color: #aaa;
+		 margin: 0 auto 1.5em;
+		 line-height: 1.5em;
+		 max-width: 500px;
+	 }
+
+	 .woocommerce-BlankState-cta {
+		 font-size: 1.2em;
+		 padding: 0.75em 1.5em;
+		 margin: 0 .25em;
+		 height: auto;
+		 display: inline-block !important
+	 }
+ }
+
+ .woocommerce-BlankState {
+ 	 background-color: white;
+ 	 max-width: 800px;
+	 padding: 4em;
+	 text-align: center;
+	 margin: auto;
+
+	 .woocommerce-BlankState-message {
 		 margin: 0 auto 1.5em;
 		 line-height: 1.5em;
 		 font-size: 1.2em;
 		 max-width: 500px;
-
-		 &::before {
-			 color: #ddd;
-			 text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.8);
-			 font-size: 8em;
-			 display: block;
-			 position: relative !important;
-			 top: auto;
-			 left: auto;
-			 line-height: 1em;
-			 margin: 0 0 0.1875em;
-		 }
 	 }
 
 	 .woocommerce-BlankState-cta {

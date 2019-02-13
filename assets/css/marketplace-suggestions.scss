@@ -3,7 +3,7 @@
  * Styling for in-product marketplace suggestions.
  */
 
-.marketplace-list-banner {
+.marketplace-table-banner {
 
 	h2 {
 		color: #555;
@@ -13,11 +13,11 @@
 		vertical-align: middle;
 	}
 
-	td.marketplace-list-title {
+	td.marketplace-table-title {
 		padding-left: 4em;
 	}
 
-	td.marketplace-list-linkout {
+	td.marketplace-table-linkout {
 		text-align: right;
 		padding-right: 3em;
 	}
@@ -25,41 +25,29 @@
 
 @media screen and (max-width: 782px) {
 
-	.marketplace-list-banner {
+	.marketplace-table-banner {
 		display: none;
 	}
 }
 
-.marketplace-suggestions-container {
-	text-align: center;
-	margin-top: 2em;
-}
-
 .marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-body"] {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: center;
+	margin-top: 4em;
+	text-align: left;
 
-	.marketplace-card {
-		border: 1px solid #e5e5e5;
-		box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
-		background: #fff;
-		display: flex;
-		flex-direction: column;
-		justify-content: space-between;
-		margin: 1em;
-		padding: 1.5em;
-		text-align: left;
-		width: 230px;
+	.marketplace-listitem-container {
+		border-top: 1px solid #ccc;
 
-		h2 {
-			margin-top: 0;
+		h4 {
 			margin-bottom: 0.5em;
 		}
 
-		.button {
-			width: 110px;
-			text-align: center;
+		p {
+			margin-top: 0;
+		}
+
+		a.button {
+			display: inline-block;
 		}
 	}
+
 }

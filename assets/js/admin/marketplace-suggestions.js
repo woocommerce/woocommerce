@@ -7,12 +7,6 @@
 
 		var marketplaceSuggestionsApiData = [
 			{
-				slug: 'products-empty-header',
-				context: 'products-list-empty-header',
-				title: 'Ready to start selling something awesome?',
-				copy: 'Create your first product, import your product data, or browse extensions'
-			},
-			{
 				slug: 'products-empty-memberships',
 				context: 'products-list-empty-body',
 				title: 'Selling something else?',
@@ -86,11 +80,11 @@
 			}
 
 			var row = document.createElement( 'tr' );
-			row.classList.add( 'marketplace-list-banner' );
+			row.classList.add( 'marketplace-table-banner' );
 
 			var titleColumn = document.createElement( 'td' );
 			titleColumn.setAttribute( 'colspan', 5 );
-			titleColumn.classList.add( 'marketplace-list-title' );
+			titleColumn.classList.add( 'marketplace-table-title' );
 			var titleHeading = document.createElement( 'h2' );
 			titleColumn.append( titleHeading );
 			titleHeading.textContent = title;
@@ -99,7 +93,7 @@
 
 			var linkoutColumn = document.createElement( 'td' );
 			linkoutColumn.setAttribute( 'colspan', 4 );
-			linkoutColumn.classList.add( 'marketplace-list-linkout' );
+			linkoutColumn.classList.add( 'marketplace-table-linkout' );
 			var linkoutButton = renderLinkoutButton( url, buttonText );
 			linkoutColumn.append( linkoutButton );
 
@@ -118,7 +112,7 @@
 			}
 
 			var container = document.createElement( 'div' );
-			container.classList.add( 'marketplace-list-container' );
+			container.classList.add( 'marketplace-listitem-container' );
 
 			var titleHeading = document.createElement( 'h4' );
 			titleHeading.textContent = title;
