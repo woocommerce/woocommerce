@@ -156,10 +156,20 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			$order->set_date_paid( $order->get_date_created( 'edit' ) );
 		}
 
+		// Also grab the current status so we can compare.
+		$previous_status = get_post_status( $order->get_id() );
+
 		// Update the order.
 		parent::update( $order );
 
-		do_action( 'woocommerce_update_order', $order->get_id() );
+		// Fire a hook depending on the status - this should be considered a creation if it was previously draft status.
+		$new_status = $order->get_status( 'edit' );
+
+		if ( $new_status !== $previous_status && in_array( $previous_status, array( 'new', 'auto-draft', 'draft' ), true ) ) {
+			do_action( 'woocommerce_new_order', $order->get_id() );
+		} else {
+			do_action( 'woocommerce_update_order', $order->get_id() );
+		}
 	}
 
 	/**
@@ -482,8 +492,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		 * @var array
 		 */
 		$search_fields = array_map(
-			'wc_clean', apply_filters(
-				'woocommerce_shop_order_search_fields', array(
+			'wc_clean',
+			apply_filters(
+				'woocommerce_shop_order_search_fields',
+				array(
 					'_billing_address_index',
 					'_shipping_address_index',
 					'_billing_last_name',
