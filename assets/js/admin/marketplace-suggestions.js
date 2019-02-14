@@ -10,53 +10,45 @@
 				slug: 'products-empty-memberships',
 				context: 'products-list-empty-body',
 				title: 'Selling something else?',
-				copy: 'Extensions allow you to sell other types of products including bookings, subscriptions, or memberships',
+				copy: 'Extensions allow you to sell other types of products including bookings, subscriptions, or memberships.',
 				'button-text': 'Browse extensions',
-				url: 'https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/',
+				url: 'https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/'
 			},
-			// {
-			// 	slug: 'products-empty-addons',
-			// 	context: 'products-list-empty-body',
-			// 	'show-if-installed': [
-			// 		'woocommerce-subscriptions',
-			// 		'woocommerce-memberships'
-			// 	],
-			// 	content: '<div class="marketplace-card">' +
-			// 			'<h2>Product Add-Ons</h2>' +
-			// 			'<p>Offer add-ons like gift wrapping, special messages or other special options for your products.</p>' +
-			// 			'<a class="button" href="https://woocommerce.com/products/product-add-ons/">From $149</a>' +
-			// 		'</div>'
-			// },
-			// {
-			// 	slug: 'products-empty-product-bundles',
-			// 	context: 'products-list-empty-body',
-			// 	'hide-if-installed': 'woocommerce-product-bundles',
-			// 	content: '<div class="marketplace-card">' +
-			// 			'<h2>Product Bundles</h2>' +
-			// 			'<p>Offer customizable bundles and assembled products</p>' +
-			// 			'<a class="button" href="https://woocommerce.com/products/product-bundles/">From $49</a>' +
-			// 		'</div>'
-			// },
-			// {
-			// 	slug: 'products-empty-composite-products',
-			// 	context: 'products-list-empty-body',
-			// 	content: '<div class="marketplace-card">' +
-			// 			'<h2>Composite Products</h2>' +
-			// 			'<p>Create and offer product kits with configurable components</p>' +
-			// 			'<a class="button" href=https://woocommerce.com/products/composite-products/">From $79</a>' +
-			// 		'</div>'
-			// },
-			// {
-			// 	slug: 'products-empty-more',
-			// 	context: 'products-list-empty-body',
-			// 	content: '<div class="marketplace-card"><h2>More Extensions</h2></div>'
-			// },
+			{
+				slug: 'products-empty-addons',
+				context: 'products-list-empty-body',
+				'show-if-installed': [
+					'woocommerce-subscriptions',
+					'woocommerce-memberships'
+				],
+				title: 'Product Add-Ons',
+				copy: 'Offer add-ons like gift wrapping, special messages or other special options for your products.',
+				'button-text': 'From $149',
+				url: 'https://woocommerce.com/products/product-add-ons/'
+			},
+			{
+				slug: 'products-empty-product-bundles',
+				context: 'products-list-empty-body',
+				'hide-if-installed': 'woocommerce-product-bundles',
+				title: 'Product Bundles',
+				copy: 'Offer customizable bundles and assembled products.',
+				'button-text': 'From $49',
+				url: 'https://woocommerce.com/products/product-bundles/'
+			},
+			{
+				slug: 'products-empty-composite-products',
+				context: 'products-list-empty-body',
+				title: 'Composite Products',
+				copy: 'Create and offer product kits with configurable components.',
+				'button-text': 'From $79',
+				url: 'https://woocommerce.com/products/composite-products/'
+			},
 			{
 				slug: 'products-list-enhancements-category',
 				context: 'products-list-inline',
 				title: 'Looking to optimize your product pages?',
 				'button-text': 'Explore enhancements',
-				url: 'https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/',
+				url: 'https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/'
 			}
 		];
 
@@ -217,6 +209,8 @@
 
 		// streamline layout if we're showing empty product list promos
 		if ( _.contains( visibleSuggestions, 'products-list-empty-body' ) ) {
+			$('h1.wp-heading-inline').hide();
+			$('#screen-meta-links').hide();
 			$('#wpfooter').hide();
 		}
 
