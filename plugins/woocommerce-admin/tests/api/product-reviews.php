@@ -23,7 +23,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 
-		$this->user     = $this->factory->user->create(
+		$this->user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
@@ -35,7 +35,7 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_product_review_embed() {
 		wp_set_current_user( $this->user );
-		$product    = WC_Helper_Product::create_simple_product();
+		$product = WC_Helper_Product::create_simple_product();
 		WC_Helper_Product::create_product_review( $product->get_id() );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products/reviews' );
