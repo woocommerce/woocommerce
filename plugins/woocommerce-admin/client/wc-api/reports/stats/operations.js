@@ -21,6 +21,7 @@ const statEndpoints = [
 	'orders',
 	'products',
 	'revenue',
+	'stock',
 	'taxes',
 	'customers',
 ];
@@ -34,6 +35,7 @@ const typeEndpointMap = {
 	'report-stats-query-categories': 'categories',
 	'report-stats-query-downloads': 'downloads',
 	'report-stats-query-coupons': 'coupons',
+	'report-stats-query-stock': 'stock',
 	'report-stats-query-taxes': 'taxes',
 	'report-stats-query-customers': 'customers',
 };

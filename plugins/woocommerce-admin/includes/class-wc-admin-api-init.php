@@ -68,6 +68,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-downloads-stats-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-customers-query.php';
 		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-customers-stats-query.php';
+		require_once dirname( __FILE__ ) . '/class-wc-admin-reports-stock-stats-query.php';
 
 		// Data stores.
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-data-store.php';
@@ -85,6 +86,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-downloads-stats-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-customers-data-store.php';
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-customers-stats-data-store.php';
+		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-reports-stock-stats-data-store.php';
 
 		// Data triggers.
 		require_once dirname( __FILE__ ) . '/data-stores/class-wc-admin-notes-data-store.php';
@@ -130,6 +132,7 @@ class WC_Admin_Api_Init {
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-taxes-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-stock-controller.php';
+		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-reports-stock-stats-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-taxes-controller.php';
 		require_once dirname( __FILE__ ) . '/api/class-wc-admin-rest-customers-controller.php';
 
@@ -163,6 +166,7 @@ class WC_Admin_Api_Init {
 				'WC_Admin_REST_Reports_Coupons_Controller',
 				'WC_Admin_REST_Reports_Coupons_Stats_Controller',
 				'WC_Admin_REST_Reports_Stock_Controller',
+				'WC_Admin_REST_Reports_Stock_Stats_Controller',
 				'WC_Admin_REST_Reports_Downloads_Controller',
 				'WC_Admin_REST_Reports_Downloads_Stats_Controller',
 				'WC_Admin_REST_Reports_Customers_Controller',
@@ -366,22 +370,23 @@ class WC_Admin_Api_Init {
 		return array_merge(
 			$data_stores,
 			array(
-				'report-revenue-stats'  => 'WC_Admin_Reports_Orders_Stats_Data_Store',
-				'report-orders'         => 'WC_Admin_Reports_Orders_Data_Store',
-				'report-orders-stats'   => 'WC_Admin_Reports_Orders_Stats_Data_Store',
-				'report-products'       => 'WC_Admin_Reports_Products_Data_Store',
-				'report-variations'     => 'WC_Admin_Reports_Variations_Data_Store',
-				'report-products-stats' => 'WC_Admin_Reports_Products_Stats_Data_Store',
-				'report-categories'     => 'WC_Admin_Reports_Categories_Data_Store',
-				'report-taxes'          => 'WC_Admin_Reports_Taxes_Data_Store',
-				'report-taxes-stats'    => 'WC_Admin_Reports_Taxes_Stats_Data_Store',
-				'report-coupons'        => 'WC_Admin_Reports_Coupons_Data_Store',
-				'report-coupons-stats'  => 'WC_Admin_Reports_Coupons_Stats_Data_Store',
-				'report-downloads'      => 'WC_Admin_Reports_Downloads_Data_Store',
+				'report-revenue-stats'   => 'WC_Admin_Reports_Orders_Stats_Data_Store',
+				'report-orders'          => 'WC_Admin_Reports_Orders_Data_Store',
+				'report-orders-stats'    => 'WC_Admin_Reports_Orders_Stats_Data_Store',
+				'report-products'        => 'WC_Admin_Reports_Products_Data_Store',
+				'report-variations'      => 'WC_Admin_Reports_Variations_Data_Store',
+				'report-products-stats'  => 'WC_Admin_Reports_Products_Stats_Data_Store',
+				'report-categories'      => 'WC_Admin_Reports_Categories_Data_Store',
+				'report-taxes'           => 'WC_Admin_Reports_Taxes_Data_Store',
+				'report-taxes-stats'     => 'WC_Admin_Reports_Taxes_Stats_Data_Store',
+				'report-coupons'         => 'WC_Admin_Reports_Coupons_Data_Store',
+				'report-coupons-stats'   => 'WC_Admin_Reports_Coupons_Stats_Data_Store',
+				'report-downloads'       => 'WC_Admin_Reports_Downloads_Data_Store',
 				'report-downloads-stats' => 'WC_Admin_Reports_Downloads_Stats_Data_Store',
 				'admin-note'             => 'WC_Admin_Notes_Data_Store',
 				'report-customers'       => 'WC_Admin_Reports_Customers_Data_Store',
 				'report-customers-stats' => 'WC_Admin_Reports_Customers_Stats_Data_Store',
+				'report-stock-stats'     => 'WC_Admin_Reports_Stock_Stats_Data_Store',
 			)
 		);
 	}

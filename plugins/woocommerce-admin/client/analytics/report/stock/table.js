@@ -103,23 +103,27 @@ export default class StockReportTable extends Component {
 	}
 
 	getSummary( totals ) {
-		const { products = 0, out_of_stock = 0, low_stock = 0, in_stock = 0 } = totals;
+		const { products = 0, outofstock = 0, lowstock = 0, instock = 0, onbackorder = 0 } = totals;
 		return [
 			{
 				label: _n( 'product', 'products', products, 'wc-admin' ),
 				value: numberFormat( products ),
 			},
 			{
-				label: __( 'out of stock', out_of_stock, 'wc-admin' ),
-				value: numberFormat( out_of_stock ),
+				label: __( 'out of stock', outofstock, 'wc-admin' ),
+				value: numberFormat( outofstock ),
 			},
 			{
-				label: __( 'low stock', low_stock, 'wc-admin' ),
-				value: numberFormat( low_stock ),
+				label: __( 'low stock', lowstock, 'wc-admin' ),
+				value: numberFormat( lowstock ),
 			},
 			{
-				label: __( 'in stock', in_stock, 'wc-admin' ),
-				value: numberFormat( in_stock ),
+				label: __( 'on backorder', onbackorder, 'wc-admin' ),
+				value: numberFormat( onbackorder ),
+			},
+			{
+				label: __( 'in stock', instock, 'wc-admin' ),
+				value: numberFormat( instock ),
 			},
 		];
 	}
@@ -132,7 +136,7 @@ export default class StockReportTable extends Component {
 				endpoint="stock"
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
-				// getSummary={ this.getSummary }
+				getSummary={ this.getSummary }
 				query={ query }
 				tableQuery={ {
 					orderby: query.orderby || 'stock_status',

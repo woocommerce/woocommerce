@@ -59,9 +59,8 @@ class WC_Tests_API_Reports_Customers_Stats extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertCount( 2, $properties );
+		$this->assertCount( 1, $properties );
 		$this->assertArrayHasKey( 'totals', $properties );
-		$this->assertArrayHasKey( 'intervals', $properties );
 		$this->assertCount( 4, $properties['totals']['properties'] );
 		$this->assertArrayHasKey( 'customers_count', $properties['totals']['properties'] );
 		$this->assertArrayHasKey( 'avg_orders_count', $properties['totals']['properties'] );

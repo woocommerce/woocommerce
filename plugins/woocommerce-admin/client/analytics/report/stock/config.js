@@ -17,6 +17,7 @@ export const filters = [
 			{ label: __( 'Out of Stock', 'wc-admin' ), value: 'outofstock' },
 			{ label: __( 'Low Stock', 'wc-admin' ), value: 'lowstock' },
 			{ label: __( 'In Stock', 'wc-admin' ), value: 'instock' },
+			{ label: __( 'On Backorder', 'wc-admin' ), value: 'onbackorder' },
 		],
 	},
 ];
