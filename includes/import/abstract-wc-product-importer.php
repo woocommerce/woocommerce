@@ -236,6 +236,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				unset( $data['manage_stock'], $data['stock_status'], $data['backorders'], $data['low_stock_amount'] );
 			}
 
+			if ( 'variation' === $object->get_type() ) {
+				if ( isset( $data['status'] ) && -1 === $data['status'] ) {
+					$data['status'] = 0; // Variations cannot be drafts - set to private.
+				}
+			}
+
 			if ( 'importing' === $object->get_status() ) {
 				$object->set_status( 'publish' );
 				$object->set_slug( '' );
