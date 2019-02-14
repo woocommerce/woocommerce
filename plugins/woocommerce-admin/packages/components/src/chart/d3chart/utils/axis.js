@@ -192,7 +192,7 @@ export const getYGrids = ( yMax ) => {
 };
 
 export const drawAxis = ( node, params, xOffset ) => {
-	const xScale = params.type === 'line' ? params.xLineScale : params.xScale;
+	const xScale = params.chartType === 'line' ? params.xLineScale : params.xScale;
 	const removeDuplicateDates = ( d, i, ticks, formatter ) => {
 		const monthDate = moment( d ).toDate();
 		let prevMonth = i !== 0 ? ticks[ i - 1 ] : ticks[ i ];
@@ -204,7 +204,7 @@ export const drawAxis = ( node, params, xOffset ) => {
 
 	const yGrids = getYGrids( params.yMax === 0 ? 1 : params.yMax );
 
-	const ticks = params.xTicks.map( d => ( params.type === 'line' ? moment( d ).toDate() : d ) );
+	const ticks = params.xTicks.map( d => ( params.chartType === 'line' ? moment( d ).toDate() : d ) );
 
 	node
 		.append( 'g' )

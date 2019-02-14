@@ -46,7 +46,7 @@ class D3Chart extends Component {
 	}
 
 	drawChart( node ) {
-		const { data, margin, type } = this.props;
+		const { data, margin, chartType } = this.props;
 		const params = this.getParams();
 		const adjParams = Object.assign( {}, params, {
 			height: params.adjHeight,
@@ -60,18 +60,18 @@ class D3Chart extends Component {
 			.append( 'g' )
 			.attr( 'transform', `translate(${ margin.left },${ margin.top })` );
 
-		const xOffset = type === 'line' && adjParams.uniqueDates.length <= 1
+		const xOffset = chartType === 'line' && adjParams.uniqueDates.length <= 1
 			? adjParams.width / 2
 			: 0;
 
 		drawAxis( g, adjParams, xOffset );
-		type === 'line' && drawLines( g, data, adjParams, xOffset );
-		type === 'bar' && drawBars( g, data, adjParams );
+		chartType === 'line' && drawLines( g, data, adjParams, xOffset );
+		chartType === 'bar' && drawBars( g, data, adjParams );
 	}
 
 	shouldBeCompact() {
-		const {	data, margin, type, width } = this.props;
-		if ( type !== 'bar' ) {
+		const {	data, margin, chartType, width } = this.props;
+		if ( chartType !== 'bar' ) {
 			return false;
 		}
 		const widthWithoutMargins = width - margin.left - margin.right;
@@ -82,8 +82,8 @@ class D3Chart extends Component {
 	}
 
 	getWidth() {
-		const {	data, margin, type, width } = this.props;
-		if ( type !== 'bar' ) {
+		const {	data, margin, chartType, width } = this.props;
+		if ( chartType !== 'bar' ) {
 			return width;
 		}
 		const columnsPerDate = data && data.length ? Object.keys( data[ 0 ] ).length - 1 : 0;
@@ -106,7 +106,7 @@ class D3Chart extends Component {
 			tooltipLabelFormat,
 			tooltipValueFormat,
 			tooltipTitle,
-			type,
+			chartType,
 			xFormat,
 			x2Format,
 			yFormat,
@@ -144,7 +144,7 @@ class D3Chart extends Component {
 			tooltipLabelFormat: getFormatter( tooltipLabelFormat, d3TimeFormat ),
 			tooltipValueFormat: getFormatter( tooltipValueFormat ),
 			tooltipTitle,
-			type,
+			chartType,
 			uniqueDates,
 			uniqueKeys,
 			valueType,
@@ -172,7 +172,7 @@ class D3Chart extends Component {
 	}
 
 	render() {
-		const { className, data, height, type } = this.props;
+		const { className, data, height, chartType } = this.props;
 		const computedWidth = this.getWidth();
 		return (
 			<div
@@ -188,7 +188,7 @@ class D3Chart extends Component {
 					height={ height }
 					orderedKeys={ this.props.orderedKeys }
 					tooltipRef={ this.tooltipRef }
-					type={ type }
+					chartType={ chartType }
 					width={ computedWidth }
 				/>
 			</div>
@@ -268,7 +268,7 @@ D3Chart.propTypes = {
 	/**
 	 * Chart type of either `line` or `bar`.
 	 */
-	type: PropTypes.oneOf( [ 'bar', 'line' ] ),
+	chartType: PropTypes.oneOf( [ 'bar', 'line' ] ),
 	/**
 	 * Width of the `svg`.
 	 */
@@ -302,7 +302,7 @@ D3Chart.defaultProps = {
 	tooltipPosition: 'over',
 	tooltipLabelFormat: '%B %d, %Y',
 	tooltipValueFormat: ',',
-	type: 'line',
+	chartType: 'line',
 	width: 600,
 	xFormat: '%Y-%m-%d',
 	x2Format: '',

@@ -47,7 +47,7 @@ export default class D3Base extends Component {
 			! isEqual( this.props.orderedKeys, nextProps.orderedKeys ) ||
 			this.props.drawChart !== nextProps.drawChart ||
 			this.props.height !== nextProps.height ||
-			this.props.type !== nextProps.type ||
+			this.props.chartType !== nextProps.chartType ||
 			this.props.width !== nextProps.width
 		);
 	}
@@ -105,5 +105,5 @@ D3Base.propTypes = {
 	className: PropTypes.string,
 	data: PropTypes.array,
 	orderedKeys: PropTypes.array, // required to detect changes in data
-	type: PropTypes.string,
+	chartType: PropTypes.string,
 };
