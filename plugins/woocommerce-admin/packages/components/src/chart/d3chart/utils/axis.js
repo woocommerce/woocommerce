@@ -22,7 +22,7 @@ const mostPoints = 31;
 */
 const getFactors = inputNum => {
 	const numFactors = [];
-	for ( let i = 1; i <= Math.floor( Math.sqrt( inputNum ) ); i += 1 ) {
+	for ( let i = 1; i <= Math.floor( Math.sqrt( inputNum ) ); i++ ) {
 		if ( inputNum % i === 0 ) {
 			numFactors.push( i );
 			inputNum / i !== i && numFactors.push( inputNum / i );
@@ -176,11 +176,6 @@ export const compareStrings = ( s1, s2, splitChar = new RegExp( [ ' |,' ], 'g' )
 export const getYGrids = ( yMax ) => {
 	const yGrids = [];
 
-	// If all values are 0, yMax can become NaN.
-	if ( isNaN( yMax ) ) {
-		return null;
-	}
-
 	for ( let i = 0; i < 4; i++ ) {
 		const value = yMax > 1 ? Math.round( i / 3 * yMax ) : i / 3 * yMax;
 		if ( yGrids[ yGrids.length - 1 ] !== value ) {
@@ -191,87 +186,90 @@ export const getYGrids = ( yMax ) => {
 	return yGrids;
 };
 
-export const drawAxis = ( node, params, xOffset ) => {
-	const xScale = params.chartType === 'line' ? params.xLineScale : params.xScale;
-	const removeDuplicateDates = ( d, i, ticks, formatter ) => {
-		const monthDate = moment( d ).toDate();
-		let prevMonth = i !== 0 ? ticks[ i - 1 ] : ticks[ i ];
-		prevMonth = prevMonth instanceof Date ? prevMonth : moment( prevMonth ).toDate();
-		return i === 0
-			? formatter( monthDate )
-			: compareStrings( formatter( prevMonth ), formatter( monthDate ) ).join( ' ' );
-	};
+const removeDuplicateDates = ( d, i, ticks, formatter ) => {
+	const monthDate = moment( d ).toDate();
+	let prevMonth = i !== 0 ? ticks[ i - 1 ] : ticks[ i ];
+	prevMonth = prevMonth instanceof Date ? prevMonth : moment( prevMonth ).toDate();
+	return i === 0
+		? formatter( monthDate )
+		: compareStrings( formatter( prevMonth ), formatter( monthDate ) ).join( ' ' );
+};
 
-	const yGrids = getYGrids( params.yMax === 0 ? 1 : params.yMax );
-
-	const ticks = params.xTicks.map( d => ( params.chartType === 'line' ? moment( d ).toDate() : d ) );
+const drawXAxis = ( node, params, scales, formats ) => {
+	const height = scales.yScale.range()[ 0 ];
+	let ticks = getXTicks( params.uniqueDates, scales.xScale.range()[ 1 ], params.mode, params.interval );
+	if ( params.type === 'line' ) {
+		ticks = ticks.map( d => moment( d ).toDate() );
+	}
 
 	node
 		.append( 'g' )
 		.attr( 'class', 'axis' )
 		.attr( 'aria-hidden', 'true' )
-		.attr( 'transform', `translate(${ xOffset }, ${ params.height })` )
+		.attr( 'transform', `translate(0, ${ height })` )
 		.call(
-			d3AxisBottom( xScale )
+			d3AxisBottom( scales.xScale )
 				.tickValues( ticks )
 				.tickFormat( ( d, i ) => params.interval === 'hour'
-					? params.xFormat( d instanceof Date ? d : moment( d ).toDate() )
-					: removeDuplicateDates( d, i, ticks, params.xFormat ) )
+					? formats.xFormat( d instanceof Date ? d : moment( d ).toDate() )
+					: removeDuplicateDates( d, i, ticks, formats.xFormat ) )
 		);
 
 	node
 		.append( 'g' )
 		.attr( 'class', 'axis axis-month' )
 		.attr( 'aria-hidden', 'true' )
-		.attr( 'transform', `translate(${ xOffset }, ${ params.height + 20 })` )
+		.attr( 'transform', `translate(0, ${ height + 14 })` )
 		.call(
-			d3AxisBottom( xScale )
+			d3AxisBottom( scales.xScale )
 				.tickValues( ticks )
-				.tickFormat( ( d, i ) => removeDuplicateDates( d, i, ticks, params.x2Format ) )
-		)
-		.call( g => g.select( '.domain' ).remove() );
+				.tickFormat( ( d, i ) => removeDuplicateDates( d, i, ticks, formats.x2Format ) )
+		);
 
 	node
 		.append( 'g' )
 		.attr( 'class', 'pipes' )
-		.attr( 'transform', `translate(${ xOffset }, ${ params.height })` )
+		.attr( 'transform', `translate(0, ${ height })` )
 		.call(
-			d3AxisBottom( xScale )
+			d3AxisBottom( scales.xScale )
 				.tickValues( ticks )
 				.tickSize( 5 )
 				.tickFormat( '' )
 		);
+};
 
-	if ( yGrids ) {
-		node
-			.append( 'g' )
-			.attr( 'class', 'grid' )
-			.attr( 'transform', `translate(-${ params.margin.left }, 0)` )
-			.call(
-				d3AxisLeft( params.yScale )
-					.tickValues( yGrids )
-					.tickSize( -params.width - params.margin.left - params.margin.right )
-					.tickFormat( '' )
-			)
-			.call( g => g.select( '.domain' ).remove() );
+const drawYAxis = ( node, scales, formats, margin ) => {
+	const yGrids = getYGrids( scales.yScale.domain()[ 1 ] );
+	const width = scales.xScale.range()[ 1 ];
 
-		node
-			.append( 'g' )
-			.attr( 'class', 'axis y-axis' )
-			.attr( 'aria-hidden', 'true' )
-			.attr( 'transform', 'translate(-50, 0)' )
-			.attr( 'text-anchor', 'start' )
-			.call(
-				d3AxisLeft( params.yTickOffset )
-					.tickValues( params.yMax === 0 ? [ yGrids[ 0 ] ] : yGrids )
-					.tickFormat( d => params.yFormat( d !== 0 ? d : 0 ) )
-			);
-	}
+	node
+		.append( 'g' )
+		.attr( 'class', 'grid' )
+		.attr( 'transform', `translate(-${ margin.left }, 0)` )
+		.call(
+			d3AxisLeft( scales.yScale )
+				.tickValues( yGrids )
+				.tickSize( -width - margin.left - margin.right )
+				.tickFormat( '' )
+		);
+
+	node
+		.append( 'g' )
+		.attr( 'class', 'axis y-axis' )
+		.attr( 'aria-hidden', 'true' )
+		.attr( 'transform', 'translate(-50, 12)' )
+		.attr( 'text-anchor', 'start' )
+		.call(
+			d3AxisLeft( scales.yScale )
+				.tickValues( scales.yMax === 0 ? [ yGrids[ 0 ] ] : yGrids )
+				.tickFormat( d => formats.yFormat( d !== 0 ? d : 0 ) )
+		);
+};
+
+export const drawAxis = ( node, params, scales, formats, margin ) => {
+	drawXAxis( node, params, scales, formats );
+	drawYAxis( node, scales, formats, margin );
 
 	node.selectAll( '.domain' ).remove();
-	node
-		.selectAll( '.axis' )
-		.selectAll( '.tick' )
-		.select( 'line' )
-		.remove();
+	node.selectAll( '.axis .tick line' ).remove();
 };

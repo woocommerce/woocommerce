@@ -20,6 +20,7 @@ import Flag from '../../flag';
 export default {
 	name: 'countries',
 	className: 'woocommerce-search__country-result',
+	isDebounced: true,
 	options() {
 		return wcSettings.dataEndpoints.countries || [];
 	},

@@ -25,7 +25,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 * @var array
 	 */
 	protected $column_types = array(
-		'customer_id'     => 'intval',
+		'id'              => 'intval',
 		'user_id'         => 'intval',
 		'orders_count'    => 'intval',
 		'total_spend'     => 'floatval',
@@ -38,7 +38,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 * @var array
 	 */
 	protected $report_columns = array(
-		'customer_id'      => 'customer_id',
+		'id'               => 'customer_id as id',
 		'user_id'          => 'user_id',
 		'username'         => 'username',
 		'name'             => "CONCAT_WS( ' ', first_name, last_name ) as name", // @todo What does this mean for RTL?
@@ -60,7 +60,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		global $wpdb;
 
 		// Initialize some report columns that need disambiguation.
-		$this->report_columns['customer_id']     = $wpdb->prefix . self::TABLE_NAME . '.customer_id';
+		$this->report_columns['id']              = $wpdb->prefix . self::TABLE_NAME . '.customer_id as id';
 		$this->report_columns['date_last_order'] = "MAX( {$wpdb->prefix}wc_order_stats.date_created ) as date_last_order";
 	}
 
@@ -230,8 +230,15 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			}
 		}
 
-		if ( ! empty( $query_args['name'] ) ) {
-			$where_clauses[] = $wpdb->prepare( "CONCAT_WS( ' ', first_name, last_name ) = %s", $query_args['name'] );
+		if ( ! empty( $query_args['search'] ) ) {
+			$name_like = '%' . $wpdb->esc_like( $query_args['search'] ) . '%';
+			$where_clauses[] = $wpdb->prepare( "CONCAT_WS( ' ', first_name, last_name ) LIKE %s", $name_like );
+		}
+
+		// Allow a list of customer IDs to be specified.
+		if ( ! empty( $query_args['customers'] ) ) {
+			$included_customers = implode( ',', $query_args['customers'] );
+			$where_clauses[] = "{$customer_lookup_table}.customer_id IN ({$included_customers})";
 		}
 
 		$numeric_params = array(
@@ -253,17 +260,18 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			$subclauses = array();
 			$min_param  = $numeric_param . '_min';
 			$max_param  = $numeric_param . '_max';
+			$or_equal   = isset( $query_args[ $min_param ] ) && isset( $query_args[ $max_param ] ) ? '=' : '';
 
 			if ( isset( $query_args[ $min_param ] ) ) {
 				$subclauses[] = $wpdb->prepare(
-					"{$param_info['column']} >= {$param_info['format']}",
+					"{$param_info['column']} >{$or_equal} {$param_info['format']}",
 					$query_args[ $min_param ]
 				); // WPCS: unprepared SQL ok.
 			}
 
 			if ( isset( $query_args[ $max_param ] ) ) {
 				$subclauses[] = $wpdb->prepare(
-					"{$param_info['column']} <= {$param_info['format']}",
+					"{$param_info['column']} <{$or_equal} {$param_info['format']}",
 					$query_args[ $max_param ]
 				); // WPCS: unprepared SQL ok.
 			}
@@ -514,6 +522,24 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		); // WPCS: unprepared SQL ok.
 
 		return $customer_id ? (int) $customer_id : false;
+	}
+
+	/**
+	 * Retrieve the oldest orders made by a customer.
+	 *
+	 * @param int $customer_id Customer ID.
+	 * @return array Orders.
+	 */
+	public static function get_oldest_orders( $customer_id ) {
+		global $wpdb;
+		$orders_table = $wpdb->prefix . 'wc_order_stats';
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT order_id, date_created FROM {$orders_table} WHERE customer_id = %d ORDER BY date_created, order_id ASC LIMIT 2",
+				$customer_id
+			)
+		); // WPCS: unprepared SQL ok.
 	}
 
 	/**

@@ -515,24 +515,57 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * @return bool
 	 */
 	protected static function is_returning_customer( $order ) {
-		global $wpdb;
-		$customer_id        = WC_Admin_Reports_Customers_Data_Store::get_customer_id_by_user_id( $order->get_user_id() );
-		$orders_stats_table = $wpdb->prefix . self::TABLE_NAME;
+		$customer_id = WC_Admin_Reports_Customers_Data_Store::get_customer_id_by_user_id( $order->get_user_id() );
 
 		if ( ! $customer_id ) {
 			return false;
 		}
 
-		$customer_orders = $wpdb->get_var(
+		$oldest_orders = WC_Admin_Reports_Customers_Data_Store::get_oldest_orders( $customer_id );
+
+		if ( empty( $oldest_orders ) ) {
+			return false;
+		}
+
+		$first_order = $oldest_orders[0];
+
+		// Order is older than previous first order.
+		if ( $order->get_date_created() < new WC_DateTime( $first_order->date_created ) ) {
+			self::set_customer_first_order( $customer_id, $order->get_id() );
+			return false;
+		}
+		// First order date has changed and next oldest is now the first order.
+		$second_order = isset( $oldest_orders[1] ) ? $oldest_orders[1] : false;
+		if (
+			(int) $order->get_id() === (int) $first_order->order_id &&
+			$order->get_date_created() > new WC_DateTime( $first_order->date_created ) &&
+			$second_order &&
+			new WC_DateTime( $second_order->date_created ) < $order->get_date_created()
+		) {
+			self::set_customer_first_order( $customer_id, $second_order->order_id );
+			return true;
+		}
+
+		return (int) $order->get_id() !== (int) $first_order->order_id;
+	}
+
+	/**
+	 * Set a customer's first order and all others to returning.
+	 *
+	 * @param int $customer_id Customer ID.
+	 * @param int $order_id Order ID.
+	 */
+	protected static function set_customer_first_order( $customer_id, $order_id ) {
+		global $wpdb;
+		$orders_stats_table = $wpdb->prefix . self::TABLE_NAME;
+
+		$wpdb->query(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM ${orders_stats_table} WHERE customer_id = %d AND date_created < %s AND order_id != %d",
-				$customer_id,
-				date( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ),
-				$order->get_id()
+				"UPDATE ${orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d",
+				$order_id,
+				$customer_id
 			)
 		);
-
-		return $customer_orders >= 1;
 	}
 
 	/**

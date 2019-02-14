@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import { find, forEach, isNull, get } from 'lodash';
+import { find, forEach, isNull, get, includes } from 'lodash';
 import moment from 'moment';
 
 /**
@@ -51,6 +51,9 @@ export function getFilterQuery( endpoint, query ) {
 	}
 	return {};
 }
+
+// Some stats endpoints don't have interval data, so they can ignore after/before params and omit that part of the response.
+const noIntervalEndpoints = [ 'stock', 'customers' ];
 
 /**
  * Add timestamp to advanced filter parameters involving date. The api
@@ -136,10 +139,11 @@ export function getQueryFromConfig( config, advancedFilters, query ) {
 /**
  * Returns true if a report object is empty.
  *
- * @param  {Object} report  Report to check
+ * @param  {Object}  report   Report to check
+ * @param  {String}  endpoint Endpoint slug
  * @return {Boolean}        True if report is data is empty.
  */
-export function isReportDataEmpty( report ) {
+export function isReportDataEmpty( report, endpoint ) {
 	if ( ! report ) {
 		return true;
 	}
@@ -149,7 +153,9 @@ export function isReportDataEmpty( report ) {
 	if ( ! report.data.totals || isNull( report.data.totals ) ) {
 		return true;
 	}
-	if ( ! report.data.intervals || 0 === report.data.intervals.length ) {
+
+	const checkIntervals = ! includes( noIntervalEndpoints, endpoint );
+	if ( checkIntervals && ( ! report.data.intervals || 0 === report.data.intervals.length ) ) {
 		return true;
 	}
 	return false;
@@ -168,15 +174,19 @@ function getRequestQuery( endpoint, dataType, query ) {
 	const interval = getIntervalForQuery( query );
 	const filterQuery = getFilterQuery( endpoint, query );
 	const end = datesFromQuery[ dataType ].before;
-	return {
-		order: 'asc',
-		interval,
-		per_page: MAX_PER_PAGE,
-		after: appendTimestamp( datesFromQuery[ dataType ].after, 'start' ),
-		before: appendTimestamp( end, 'end' ),
-		segmentby: query.segmentby,
-		...filterQuery,
-	};
+
+	const noIntervals = includes( noIntervalEndpoints, endpoint );
+	return noIntervals
+		? { ...filterQuery }
+		: {
+				order: 'asc',
+				interval,
+				per_page: MAX_PER_PAGE,
+				after: appendTimestamp( datesFromQuery[ dataType ].after, 'start' ),
+				before: appendTimestamp( end, 'end' ),
+				segmentby: query.segmentby,
+				...filterQuery,
+			};
 }
 
 /**
@@ -250,7 +260,7 @@ export function getReportChartData( endpoint, dataType, query, select ) {
 		return { ...response, isRequesting: true };
 	} else if ( getReportStatsError( endpoint, requestQuery ) ) {
 		return { ...response, isError: true };
-	} else if ( isReportDataEmpty( stats ) ) {
+	} else if ( isReportDataEmpty( stats, endpoint ) ) {
 		return { ...response, isEmpty: true };
 	}
 

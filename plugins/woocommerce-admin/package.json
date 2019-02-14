@@ -1,6 +1,6 @@
 {
   "name": "wc-admin",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "main": "js/index.js",
   "author": "Automattic",
   "license": "GPL-2.0-or-later",
@@ -16,7 +16,7 @@
     "prebuild": "npm run -s install-if-deps-outdated",
     "build:packages": "node ./bin/packages/build.js",
     "build:core": "cross-env NODE_ENV=production webpack",
-    "build": "npm run build:packages && npm run build:core",
+    "build": "npm run build:feature-config && npm run build:packages && npm run build:core",
     "build:release": "cross-env WC_ADMIN_PHASE=plugin ./bin/build-plugin-zip.sh",
     "build:feature-config": "php bin/generate-feature-config.php",
     "postbuild": "npm run -s i18n:php && npm run -s i18n:pot",

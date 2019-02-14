@@ -40,7 +40,12 @@ class SearchFilter extends Component {
 	}
 
 	updateLabels( selected ) {
-		this.setState( { selected } );
+		const prevIds = this.state.selected.map( item => item.id );
+		const ids = selected.map( item => item.id );
+
+		if ( ! isEqual( ids.sort(), prevIds.sort() ) ) {
+			this.setState( { selected } );
+		}
 	}
 
 	onSearchChange( values ) {
