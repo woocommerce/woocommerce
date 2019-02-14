@@ -45,7 +45,7 @@ export const advancedFilters = {
 				remove: __( 'Remove product filter', 'wc-admin' ),
 				rule: __( 'Select a product filter match', 'wc-admin' ),
 				/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
-				title: __( 'Product {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( 'Product', 'wc-admin' ),
 				filter: __( 'Select product', 'wc-admin' ),
 			},
 			rules: [
@@ -73,7 +73,7 @@ export const advancedFilters = {
 				remove: __( 'Remove customer username filter', 'wc-admin' ),
 				rule: __( 'Select a customer username filter match', 'wc-admin' ),
 				/* translators: A sentence describing a customer username filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
-				title: __( 'Username {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( 'Username', 'wc-admin' ),
 				filter: __( 'Select customer username', 'wc-admin' ),
 			},
 			rules: [
@@ -101,7 +101,7 @@ export const advancedFilters = {
 				remove: __( 'Remove order number filter', 'wc-admin' ),
 				rule: __( 'Select a order number filter match', 'wc-admin' ),
 				/* translators: A sentence describing a order number filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
-				title: __( 'Order number {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( 'Order number', 'wc-admin' ),
 				filter: __( 'Select order number', 'wc-admin' ),
 			},
 			rules: [
@@ -135,7 +135,7 @@ export const advancedFilters = {
 				remove: __( 'Remove IP address filter', 'wc-admin' ),
 				rule: __( 'Select an IP address filter match', 'wc-admin' ),
 				/* translators: A sentence describing a order number filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
-				title: __( 'IP Address {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( 'IP Address', 'wc-admin' ),
 				filter: __( 'Select IP address', 'wc-admin' ),
 			},
 			rules: [

@@ -190,8 +190,12 @@ class NumberFilter extends Component {
 		const { labels, rules } = config;
 
 		const children = interpolateComponents( {
-			mixedString: labels.title,
+			mixedString: sprintf(
+				'{{title}}%s{{/title}} {{rule /}} {{filter /}}',
+				labels.title
+			),
 			components: {
+				title: <span className={ className } />,
 				rule: (
 					<SelectControl
 						className={ classnames( className, 'woocommerce-filters-advanced__rule' ) }

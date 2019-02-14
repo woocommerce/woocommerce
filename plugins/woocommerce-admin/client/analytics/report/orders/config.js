@@ -61,7 +61,7 @@ export const advancedFilters = {
 				remove: __( 'Remove order status filter', 'wc-admin' ),
 				rule: __( 'Select an order status filter match', 'wc-admin' ),
 				/* translators: A sentence describing an Order Status filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
-				title: __( 'Order Status {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( 'Order Status', 'wc-admin' ),
 				filter: __( 'Select an order status', 'wc-admin' ),
 			},
 			rules: [
@@ -91,7 +91,7 @@ export const advancedFilters = {
 				remove: __( 'Remove products filter', 'wc-admin' ),
 				rule: __( 'Select a product filter match', 'wc-admin' ),
 				/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
-				title: __( 'Product {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( 'Product', 'wc-admin' ),
 				filter: __( 'Select products', 'wc-admin' ),
 			},
 			rules: [
@@ -119,7 +119,7 @@ export const advancedFilters = {
 				remove: __( 'Remove coupon filter', 'wc-admin' ),
 				rule: __( 'Select a coupon filter match', 'wc-admin' ),
 				/* translators: A sentence describing a Coupon filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
-				title: __( 'Coupon Code {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( 'Coupon Code', 'wc-admin' ),
 				filter: __( 'Select coupon codes', 'wc-admin' ),
 			},
 			rules: [
@@ -146,7 +146,7 @@ export const advancedFilters = {
 				remove: __( 'Remove customer filter', 'wc-admin' ),
 				rule: __( 'Select a customer filter match', 'wc-admin' ),
 				/* translators: A sentence describing a Customer filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
-				title: __( 'Customer is {{filter /}}', 'wc-admin' ),
+				title: __( 'Customer is', 'wc-admin' ),
 				filter: __( 'Select a customer type', 'wc-admin' ),
 			},
 			input: {
