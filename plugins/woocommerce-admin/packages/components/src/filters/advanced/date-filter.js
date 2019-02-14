@@ -7,7 +7,7 @@ import interpolateComponents from 'interpolate-components';
 import { SelectControl } from '@wordpress/components';
 import { find, partial } from 'lodash';
 import classnames from 'classnames';
-import { sprintf, __, _x } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
 
 /**
  * WooCommerce dependencies
@@ -191,10 +191,7 @@ class DateFilter extends Component {
 		const { labels, rules } = config;
 		const screenReaderText = this.getScreenReaderText( filter, config );
 		const children = interpolateComponents( {
-			mixedString: sprintf(
-				'{{title}}%s{{/title}} {{rule /}} {{filter /}}',
-				labels.title
-			),
+			mixedString: labels.title,
 			components: {
 				title: <span className={ className } />,
 				rule: (

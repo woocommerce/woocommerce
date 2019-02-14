@@ -8,7 +8,6 @@ import { find, partial } from 'lodash';
 import PropTypes from 'prop-types';
 import interpolateComponents from 'interpolate-components';
 import classnames from 'classnames';
-import { sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -70,10 +69,7 @@ class SelectFilter extends Component {
 		const { key, rule, value } = filter;
 		const { labels, rules } = config;
 		const children = interpolateComponents( {
-			mixedString: sprintf(
-				'{{title}}%s{{/title}} {{rule /}} {{filter /}}',
-				labels.title
-			),
+			mixedString: labels.title,
 			components: {
 				title: <span className={ className } />,
 				rule: (

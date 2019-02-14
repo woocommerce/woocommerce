@@ -190,10 +190,7 @@ class NumberFilter extends Component {
 		const { labels, rules } = config;
 
 		const children = interpolateComponents( {
-			mixedString: sprintf(
-				'{{title}}%s{{/title}} {{rule /}} {{filter /}}',
-				labels.title
-			),
+			mixedString: labels.title,
 			components: {
 				title: <span className={ className } />,
 				rule: (
