@@ -94,8 +94,8 @@ class WC_Admin_Reports_Segmenting {
 		}
 
 		foreach ( $segments_db_result as $segment_data ) {
-			$segment_id = $segment_data[ $segment_dimension ];
-			$segment_labels  = $this->get_segment_labels();
+			$segment_id     = $segment_data[ $segment_dimension ];
+			$segment_labels = $this->get_segment_labels();
 			unset( $segment_data[ $segment_dimension ] );
 			$segment_datum                 = array(
 				'segment_id'    => $segment_id,
@@ -208,7 +208,7 @@ class WC_Admin_Reports_Segmenting {
 	 */
 	protected function merge_segment_intervals_results( $segment_dimension, $result1, $result2 ) {
 		$result_segments = array();
-		$segment_labels = $this->get_segment_labels();
+		$segment_labels  = $this->get_segment_labels();
 
 		foreach ( $result1 as $segment_data ) {
 			$time_interval = $segment_data['time_interval'];
@@ -317,8 +317,8 @@ class WC_Admin_Reports_Segmenting {
 
 			$segment_objects = wc_get_products( $args );
 			foreach ( $segment_objects as $segment ) {
-				$id = $segment->get_id();
-				$segments[] = $id;
+				$id                    = $segment->get_id();
+				$segments[]            = $id;
 				$segment_labels[ $id ] = $segment->get_name();
 			}
 		} elseif ( 'variation' === $this->query_args['segmentby'] ) {
@@ -342,17 +342,24 @@ class WC_Admin_Reports_Segmenting {
 			$segment_objects = wc_get_products( $args );
 
 			foreach ( $segment_objects as $segment ) {
-				$id = $segment->get_id();
-				$segments[] = $id;
+				$id                    = $segment->get_id();
+				$segments[]            = $id;
 				$segment_labels[ $id ] = $segment->get_name();
 			}
 		} elseif ( 'category' === $this->query_args['segmentby'] ) {
-			$categories = get_categories(
-				array(
-					'taxonomy' => 'product_cat',
-				)
+			$args = array(
+				'taxonomy' => 'product_cat',
 			);
-			$segments   = wp_list_pluck( $categories, 'cat_ID' );
+
+			if ( isset( $this->query_args['categories'] ) ) {
+				$args['include'] = $this->query_args['categories'];
+			}
+
+			$categories = get_categories( $args );
+
+			$segments       = wp_list_pluck( $categories, 'cat_ID' );
+			$segment_labels = wp_list_pluck( $categories, 'name', 'cat_ID' );
+
 		} elseif ( 'coupon' === $this->query_args['segmentby'] ) {
 			// @todo Switch to a non-direct-SQL way to get all coupons?
 			// @todo These are only currently existing coupons, but we should add also deleted ones, if they have been used at least once.
