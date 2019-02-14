@@ -116,7 +116,7 @@ require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-helper-queue.php
  * This matches how we mock the flags in jest.
  */
 function wc_admin_get_feature_config() {
-	$config = json_decode( file_get_contents( dirname( dirname( __FILE__ ) ) . '/config/development.json' ) );
+	$config = json_decode( file_get_contents( dirname( dirname( __FILE__ ) ) . '/config/development.json' ) ); // @codingStandardsIgnoreLine.
 	$flags  = array();
 	foreach ( $config->features as $feature => $bool ) {
 		$flags[ $feature ] = $bool;
