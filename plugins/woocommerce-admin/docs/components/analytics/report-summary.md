@@ -42,3 +42,17 @@ The query string represented in object form.
 
 Properties of the selected chart.
 
+### `summaryData`
+
+- Type: Object
+- Default: `{
+    totals: {
+        primary: {},
+        secondary: {},
+    },
+    isError: false,
+    isRequesting: false,
+}`
+
+Data to display in the SummaryNumbers.
+

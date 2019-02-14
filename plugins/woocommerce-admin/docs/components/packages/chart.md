@@ -13,6 +13,14 @@ Props
 
 Allowed intervals to show in a dropdown.
 
+### `baseValue`
+
+- Type: Number
+- Default: `0`
+
+Base chart value. If no data value is different than the baseValue, the
+`emptyMessage` will be displayed if provided.
+
 ### `data`
 
 - Type: Array
@@ -26,6 +34,14 @@ An array of data.
 - Default: `'%Y-%m-%dT%H:%M:%S'`
 
 Format to parse dates into d3 time format
+
+### `emptyMessage`
+
+- Type: String
+- Default: null
+
+The message to be displayed if there is no data to render. If no message is provided,
+nothing will be displayed.
 
 ### `itemsLabel`
 
