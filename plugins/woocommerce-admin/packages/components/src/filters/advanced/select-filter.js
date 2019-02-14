@@ -71,7 +71,7 @@ class SelectFilter extends Component {
 		const { labels, rules } = config;
 		const children = interpolateComponents( {
 			mixedString: sprintf(
-				'{{title}}%s{{/title}}' + ( rules ? ' {{rule /}}' : '' ) + ' {{filter /}}',
+				'{{title}}%s{{/title}} {{rule /}} {{filter /}}',
 				labels.title
 			),
 			components: {
