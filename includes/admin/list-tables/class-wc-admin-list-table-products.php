@@ -47,12 +47,15 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	protected function render_blank_state() {
 		echo '<div class="woocommerce-BlankState">';
+
 		echo '<h2 class="woocommerce-BlankState-message">' . esc_html__( 'Ready to start selling something awesome?', 'woocommerce' ) . '</h2>';
-		echo '<a class="woocommerce-BlankState-cta button-primary button" href="' . esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ) . '">' . esc_html__( 'Create your first product!', 'woocommerce' ) . '</a>';
+		echo '<p class="woocommerce-BlankState-intro">' . esc_html__( 'Create your first product, import your product data, or browse extensions', 'woocommerce' ) . '</p>';
+		echo '<a class="woocommerce-BlankState-cta button-primary button" href="' . esc_url( admin_url( 'post-new.php?post_type=product&tutorial=true' ) ) . '">' . esc_html__( 'Add new product', 'woocommerce' ) . '</a>';
 		echo '<a class="woocommerce-BlankState-cta button" href="' . esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ) . '">' . esc_html__( 'Import products from a CSV file', 'woocommerce' ) . '</a>';
-		echo '</div>';
 
 		$this->render_marketplace_suggestion_empty_state();
+
+		echo '</div>';
 	}
 
 
@@ -60,12 +63,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * Render container for marketplace suggestions.
 	 */
 	protected function render_marketplace_suggestion_empty_state() {
-		wc_get_template(
-			'marketplace-suggestions/container.php',
-			array(
-				'context' => 'products-list-empty-header',
-			)
-		);
 		wc_get_template(
 			'marketplace-suggestions/container.php',
 			array(
