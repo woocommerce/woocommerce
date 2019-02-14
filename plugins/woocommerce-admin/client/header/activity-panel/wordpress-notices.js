@@ -137,6 +137,7 @@ class WordPressNotices extends Component {
 		}
 
 		if ( 'dolly' === element.id ) {
+			element.style.display = 'none';
 			return false;
 		}
 
