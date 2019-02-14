@@ -198,7 +198,7 @@ const removeDuplicateDates = ( d, i, ticks, formatter ) => {
 const drawXAxis = ( node, params, scales, formats ) => {
 	const height = scales.yScale.range()[ 0 ];
 	let ticks = getXTicks( params.uniqueDates, scales.xScale.range()[ 1 ], params.mode, params.interval );
-	if ( params.type === 'line' ) {
+	if ( params.chartType === 'line' ) {
 		ticks = ticks.map( d => moment( d ).toDate() );
 	}
 
