@@ -133,6 +133,11 @@
 
 		.woocommerce-filters-advanced__fieldset-item {
 			@include set-grid-item-position( 3, 3 );
+
+			&:nth-child(1) {
+				display: flex;
+				align-items: center;
+			}
 		}
 
 		@include breakpoint( '<782px' ) {
