@@ -59,7 +59,7 @@ export class Autocomplete extends Component {
 		this.reset = this.reset.bind( this );
 		this.search = this.search.bind( this );
 		this.handleKeyDown = this.handleKeyDown.bind( this );
-		this.debouncedLoadOptions = debounce( this.loadOptions, 250 );
+		this.debouncedLoadOptions = debounce( this.loadOptions, 400 );
 
 		this.state = this.constructor.getInitialState();
 	}
