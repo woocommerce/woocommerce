@@ -52,13 +52,26 @@ export const getXLineScale = ( uniqueDates, width ) =>
 		] )
 		.rangeRound( [ 0, width ] );
 
+const getMaxYValue = data => {
+	let maxYValue = Number.NEGATIVE_INFINITY;
+	data.map( d => {
+		for ( const [ key, item ] of Object.entries( d ) ) {
+			if ( key !== 'date' && Number.isFinite( item.value ) && item.value > maxYValue ) {
+				maxYValue = item.value;
+			}
+		}
+	} );
+
+	return maxYValue;
+};
+
 /**
  * Describes and rounds the maximum y value to the nearest thousand, ten-thousand, million etc. In case it is a decimal number, ceils it.
- * @param {array} lineData - from `getLineData`
+ * @param {array} data - The chart component's `data` prop.
  * @returns {number} the maximum value in the timeseries multiplied by 4/3
  */
-export const getYMax = lineData => {
-	const maxValue = Math.max( ...lineData.map( d => Math.max( ...d.values.map( date => date.value ) ) ) );
+export const getYMax = data => {
+	const maxValue = getMaxYValue( data );
 	if ( ! Number.isFinite( maxValue ) || maxValue <= 0 ) {
 		return 0;
 	}
@@ -70,21 +83,10 @@ export const getYMax = lineData => {
 /**
  * Describes getYScale
  * @param {number} height - calculated height of the charting space
- * @param {number} yMax - from `getYMax`
+ * @param {number} yMax - maximum y value
  * @returns {function} the D3 linear scale from 0 to the value from `getYMax`
  */
 export const getYScale = ( height, yMax ) =>
 	d3ScaleLinear()
 		.domain( [ 0, yMax === 0 ? 1 : yMax ] )
 		.rangeRound( [ height, 0 ] );
-
-/**
- * Describes getyTickOffset
- * @param {number} height - calculated height of the charting space
- * @param {number} yMax - from `getYMax`
- * @returns {function} the D3 linear scale from 0 to the value from `getYMax`, offset by 12 pixels down
- */
-export const getYTickOffset = ( height, yMax ) =>
-	d3ScaleLinear()
-		.domain( [ 0, yMax === 0 ? 1 : yMax ] )
-		.rangeRound( [ height + 12, 12 ] );

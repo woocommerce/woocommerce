@@ -10,6 +10,7 @@
 
 .d3-chart__container {
 	position: relative;
+	width: 100%;
 
 	svg {
 		overflow: visible;
@@ -157,8 +158,12 @@
 
 	.focus-grid {
 		line {
-			stroke: $core-grey-light-700;
+			stroke: rgba( 0, 0, 0, 0.1 );
 			stroke-width: 1px;
 		}
+	}
+
+	.barfocus {
+		fill: rgba( 0, 0, 0, 0.1 );
 	}
 }
