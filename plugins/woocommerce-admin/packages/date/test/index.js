@@ -697,7 +697,7 @@ describe( 'getPreviousDate', () => {
 describe( 'getChartTypeForQuery', () => {
 	it( 'should return allowed type', () => {
 		const query = {
-			type: 'bar',
+			chartType: 'bar',
 		};
 		expect( getChartTypeForQuery( query ) ).toBe( 'bar' );
 	} );
@@ -708,7 +708,7 @@ describe( 'getChartTypeForQuery', () => {
 
 	it( 'should return line for not allowed type', () => {
 		const query = {
-			type: 'burrito',
+			chartType: 'burrito',
 		};
 		expect( getChartTypeForQuery( query ) ).toBe( 'line' );
 	} );
