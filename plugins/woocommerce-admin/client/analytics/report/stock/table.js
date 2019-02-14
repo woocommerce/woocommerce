@@ -76,7 +76,7 @@ export default class StockReportTable extends Component {
 			);
 
 			const stockStatusLink = (
-				<Link href={ 'post.php?action=edit&post=' + parent_id || id } type="wp-admin">
+				<Link href={ 'post.php?action=edit&post=' + ( parent_id || id ) } type="wp-admin">
 					{ stockStatuses[ stock_status ] }
 				</Link>
 			);
