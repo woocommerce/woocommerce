@@ -136,7 +136,7 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$request  = new WP_REST_Request( 'GET', $this->endpoint );
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
 				'per_page' => 5,
@@ -175,8 +175,8 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		// Test name and last_order parameters.
 		$request->set_query_params(
 			array(
-				'search'             => 'Justin',
-				'last_order_after'   => date( 'Y-m-d' ) . 'T00:00:00Z',
+				'search'           => 'Justin',
+				'last_order_after' => date( 'Y-m-d' ) . 'T00:00:00Z',
 			)
 		);
 		$response = $this->server->dispatch( $request );
