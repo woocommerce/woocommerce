@@ -86,13 +86,13 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 
 		WC_Helper_Queue::run_all_pending();
 
-		$time = time();
+		$time    = time();
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'before'   => date( 'Y-m-d 23:59:59', $time ),
-				'after'    => date( 'Y-m-d H:00:00', $time - ( 7 * DAY_IN_SECONDS ) ),
-				'stats' => 'orders/orders_count,downloads/download_count,test/bogus_stat',
+				'before' => date( 'Y-m-d 23:59:59', $time ),
+				'after'  => date( 'Y-m-d H:00:00', $time - ( 7 * DAY_IN_SECONDS ) ),
+				'stats'  => 'orders/orders_count,downloads/download_count,test/bogus_stat',
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -126,8 +126,8 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'before'   => date( 'Y-m-d 23:59:59', $time ),
-				'after'    => date( 'Y-m-d H:00:00', $time - ( 7 * DAY_IN_SECONDS ) ),
+				'before' => date( 'Y-m-d 23:59:59', $time ),
+				'after'  => date( 'Y-m-d H:00:00', $time - ( 7 * DAY_IN_SECONDS ) ),
 			)
 		);
 		$response = $this->server->dispatch( $request );
