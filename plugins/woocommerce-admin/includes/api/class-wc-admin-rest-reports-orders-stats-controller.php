@@ -170,7 +170,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 			),
 			'avg_items_per_order'     => array(
 				'description' => __( 'Average items per order', 'wc-admin' ),
-				'type'        => 'integer',
+				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),

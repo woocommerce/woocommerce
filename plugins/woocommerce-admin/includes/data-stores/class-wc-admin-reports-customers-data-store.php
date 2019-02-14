@@ -524,6 +524,24 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	}
 
 	/**
+	 * Retrieve the oldest orders made by a customer.
+	 *
+	 * @param int $customer_id Customer ID.
+	 * @return array Orders.
+	 */
+	public static function get_oldest_orders( $customer_id ) {
+		global $wpdb;
+		$orders_table = $wpdb->prefix . 'wc_order_stats';
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT order_id, date_created FROM {$orders_table} WHERE customer_id = %d ORDER BY date_created, order_id ASC LIMIT 2",
+				$customer_id
+			)
+		); // WPCS: unprepared SQL ok.
+	}
+
+	/**
 	 * Update the database with customer data.
 	 *
 	 * @param int $user_id WP User ID to update customer data for.
