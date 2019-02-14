@@ -355,6 +355,7 @@ class WC_Admin_Reports_Segmenting {
 				$args['include'] = $this->query_args['categories'];
 			}
 
+			// @todo: Look into `wc_get_products` or data store methods and not directly touching the database or post types.
 			$categories = get_categories( $args );
 
 			$segments       = wp_list_pluck( $categories, 'cat_ID' );
@@ -374,15 +375,17 @@ class WC_Admin_Reports_Segmenting {
 			// 1 -- returning customer
 			$segments = array( 0, 1 );
 		} elseif ( 'tax_rate_id' === $this->query_args['segmentby'] ) {
-			// @todo Do we need to include tax rates that existed in the past, but have never been used? I guess there are other, more pressing problems...
-			// Current tax rates UNION previously used tax rates.
-			$tax_rate_ids = $wpdb->get_results(
-				"SELECT tax_rate_id FROM {$wpdb->prefix}woocommerce_tax_rates
-						UNION 
-						SELECT DISTINCT meta_value FROM {$wpdb->prefix}woocommerce_order_itemmeta where meta_key='rate_id'",
-				ARRAY_A
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
-			$segments     = wp_list_pluck( $tax_rate_ids, 'tax_rate_id' );
+			$args = array();
+			if ( isset( $this->query_args['taxes'] ) ) {
+				$args['include'] = $this->query_args['taxes'];
+			}
+			$taxes = WC_Admin_Reports_Taxes_Stats_Data_Store::get_taxes( $args );
+
+			foreach ( $taxes as $tax ) {
+				$id                    = $tax['tax_rate_id'];
+				$segments[]            = $id;
+				$segment_labels[ $id ] = WC_Tax::get_rate_code( (object) $tax );
+			}
 		} else {
 			// Catch all default.
 			$segments = array();

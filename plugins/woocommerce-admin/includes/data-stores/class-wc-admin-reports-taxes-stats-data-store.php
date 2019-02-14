@@ -103,6 +103,30 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 	}
 
 	/**
+	 * Get taxes associated with a store.
+	 *
+	 * @param array $args Array of args to filter the query by. Supports `include`.
+	 * @return array An array of all taxes.
+	 */
+	public static function get_taxes( $args ) {
+		global $wpdb;
+		$query = "
+			SELECT 
+				tax_rate_id, 
+				tax_rate_country, 
+				tax_rate_state, 
+				tax_rate_name, 
+				tax_rate_priority 
+			FROM {$wpdb->prefix}woocommerce_tax_rates
+		";
+		if ( ! empty( $args['include'] ) ) {
+			$included_taxes = implode( ',', $args['include'] );
+			$query .= " WHERE tax_rate_id IN ({$included_taxes})";
+		}
+		return $wpdb->get_results( $query, ARRAY_A ); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+	}
+
+	/**
 	 * Returns the report data based on parameters supplied by the user.
 	 *
 	 * @param array $query_args  Query parameters.

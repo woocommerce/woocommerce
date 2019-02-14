@@ -3,11 +3,17 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
+import { find } from 'lodash';
+
+/**
+ * WooCommerce dependencies
+ */
+import { getIdsFromQuery, stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
-import { getRequestByIdString } from 'lib/async-requests';
 import { getTaxCode } from './utils';
 import { NAMESPACE } from 'wc-api/constants';
 
@@ -52,15 +58,30 @@ export const filters = [
 			{ label: __( 'All Taxes', 'wc-admin' ), value: 'all' },
 			{
 				label: __( 'Comparison', 'wc-admin' ),
-				value: 'compare-tax-codes',
+				value: 'compare-taxes',
 				chartMode: 'item-comparison',
 				settings: {
 					type: 'taxes',
 					param: 'taxes',
-					getLabels: getRequestByIdString( NAMESPACE + '/taxes', tax => ( {
-						id: tax.id,
-						label: getTaxCode( tax ),
-					} ) ),
+					// @TODO: Core /taxes endpoint should support a collection param 'include'.
+					getLabels: function( queryString = '' ) {
+						const idList = getIdsFromQuery( queryString );
+						if ( idList.length < 1 ) {
+							return Promise.resolve( [] );
+						}
+						const payload = stringifyQuery( {
+							per_page: -1,
+						} );
+						return apiFetch( { path: NAMESPACE + '/taxes' + payload } ).then( taxes => {
+							return idList.map( id => {
+								const tax = find( taxes, { id } );
+								return {
+									id: tax.id,
+									label: getTaxCode( tax ),
+								};
+							} );
+						} );
+					},
 					labels: {
 						helpText: __( 'Select at least two tax codes to compare', 'wc-admin' ),
 						placeholder: __( 'Search for tax codes to compare', 'wc-admin' ),
