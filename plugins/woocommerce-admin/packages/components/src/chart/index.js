@@ -289,7 +289,6 @@ class Chart extends Component {
 		const legendPosition = this.getLegendPosition();
 		const legendDirection = legendPosition === 'top' ? 'row' : 'column';
 		const chartDirection = legendPosition === 'side' ? 'row' : 'column';
-//		const type = chartType;
 
 		const chartHeight = this.getChartHeight();
 		const legend = isRequesting ? null : (
