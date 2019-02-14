@@ -1,56 +1,9 @@
-/* global installed_woo_plugins */
+/* global installed_woo_plugins ajaxurl */
 ( function( $, installed_woo_plugins ) {
 	$( function() {
 		if ( 'undefined' === typeof installed_woo_plugins ) {
 			return;
 		}
-
-		var marketplaceSuggestionsApiData = [
-			{
-				slug: 'products-empty-memberships',
-				context: 'products-list-empty-body',
-				title: 'Selling something else?',
-				copy: 'Extensions allow you to sell other types of products including bookings, subscriptions, or memberships.',
-				'button-text': 'Browse extensions',
-				url: 'https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/'
-			},
-			{
-				slug: 'products-empty-addons',
-				context: 'products-list-empty-body',
-				'show-if-installed': [
-					'woocommerce-subscriptions',
-					'woocommerce-memberships'
-				],
-				title: 'Product Add-Ons',
-				copy: 'Offer add-ons like gift wrapping, special messages or other special options for your products.',
-				'button-text': 'From $149',
-				url: 'https://woocommerce.com/products/product-add-ons/'
-			},
-			{
-				slug: 'products-empty-product-bundles',
-				context: 'products-list-empty-body',
-				'hide-if-installed': 'woocommerce-product-bundles',
-				title: 'Product Bundles',
-				copy: 'Offer customizable bundles and assembled products.',
-				'button-text': 'From $49',
-				url: 'https://woocommerce.com/products/product-bundles/'
-			},
-			{
-				slug: 'products-empty-composite-products',
-				context: 'products-list-empty-body',
-				title: 'Composite Products',
-				copy: 'Create and offer product kits with configurable components.',
-				'button-text': 'From $79',
-				url: 'https://woocommerce.com/products/composite-products/'
-			},
-			{
-				slug: 'products-list-enhancements-category',
-				context: 'products-list-inline',
-				title: 'Looking to optimize your product pages?',
-				'button-text': 'Explore enhancements',
-				url: 'https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/'
-			}
-		];
 
 		function renderLinkoutButton( url, buttonText ) {
 			var linkoutButton = document.createElement( 'a' );
@@ -126,7 +79,7 @@
 
 		var visibleSuggestions = [];
 
-		function getRelevantPromotions( displayContext ) {
+		function getRelevantPromotions( marketplaceSuggestionsApiData, displayContext ) {
 			// select based on display context
 			var promos = _.filter( marketplaceSuggestionsApiData, function( promo ) {
 				return ( displayContext === promo.context );
@@ -151,69 +104,84 @@
 			return promos;
 		}
 
-		// iterate over all suggestions containers, rendering promos
-		$( '.marketplace-suggestions-container' ).each( function() {
-			// determine the context / placement we're populating
-			var context = this.dataset.marketplaceSuggestionsContext;
-
-			// find promotions that target this context
-			var promos = getRelevantPromotions( context );
-
-			// render the promo content
-			for ( var i in promos ) {
-				var content = renderListItem(
-					promos[ i ].title,
-					promos[ i ].url,
-					promos[ i ]['button-text'],
-					promos[ i ].copy
-				);
-				$( this ).append( content );
-				visibleSuggestions.push( promos[i].context );
+		function hidePageElementsForOnboardingStyle() {
+			if ( _.contains( visibleSuggestions, 'products-list-empty-body' ) ) {
+				$('h1.wp-heading-inline').hide();
+				$('#screen-meta-links').hide();
+				$('#wpfooter').hide();
 			}
-		} );
-
-		// render inline promos in products list
-		$( '.wp-admin.admin-bar.edit-php.post-type-product table.wp-list-table.posts tbody').first().each( function() {
-			var context = 'products-list-inline';
-
-			// find promotions that target this context
-			var promos = getRelevantPromotions( context );
-			if ( ! promos || ! promos.length ) {
-				return;
-			}
-
-			// render first promo
-			var content = renderTableBanner(
-				promos[ 0 ].title,
-				promos[ 0 ].url,
-				promos[ 0 ]['button-text']
-			);
-
-			if ( content ) {
-				// where should we put it in the list?
-				var rows = $( this ).children();
-				var minRow = 3;
-
-				if ( rows.length <= minRow ) {
-					// if small number of rows, append at end
-					$( this ).append( content );
-				}
-				else {
-					// for more rows, append
-					$( rows[ minRow - 1 ] ).after( content );
-				}
-
-				visibleSuggestions.push( context );
-			}
-		} );
-
-		// streamline layout if we're showing empty product list promos
-		if ( _.contains( visibleSuggestions, 'products-list-empty-body' ) ) {
-			$('h1.wp-heading-inline').hide();
-			$('#screen-meta-links').hide();
-			$('#wpfooter').hide();
 		}
+
+		function displaySuggestions( marketplaceSuggestionsApiData ) {
+
+			// iterate over all suggestions containers, rendering promos
+			$( '.marketplace-suggestions-container' ).each( function() {
+				// determine the context / placement we're populating
+				var context = this.dataset.marketplaceSuggestionsContext;
+
+				// find promotions that target this context
+				var promos = getRelevantPromotions( marketplaceSuggestionsApiData, context );
+
+				// render the promo content
+				for ( var i in promos ) {
+					var content = renderListItem(
+						promos[ i ].title,
+						promos[ i ].url,
+						promos[ i ]['button-text'],
+						promos[ i ].copy
+					);
+					$( this ).append( content );
+					visibleSuggestions.push( promos[i].context );
+				}
+			} );
+
+			// render inline promos in products list
+			$( '.wp-admin.admin-bar.edit-php.post-type-product table.wp-list-table.posts tbody').first().each( function() {
+				var context = 'products-list-inline';
+
+				// find promotions that target this context
+				var promos = getRelevantPromotions( marketplaceSuggestionsApiData, context );
+				if ( ! promos || ! promos.length ) {
+					return;
+				}
+
+				// render first promo
+				var content = renderTableBanner(
+					promos[ 0 ].title,
+					promos[ 0 ].url,
+					promos[ 0 ]['button-text']
+				);
+
+				if ( content ) {
+					// where should we put it in the list?
+					var rows = $( this ).children();
+					var minRow = 3;
+
+					if ( rows.length <= minRow ) {
+						// if small number of rows, append at end
+						$( this ).append( content );
+					}
+					else {
+						// for more rows, append
+						$( rows[ minRow - 1 ] ).after( content );
+					}
+
+					visibleSuggestions.push( context );
+				}
+			} );
+
+			hidePageElementsForOnboardingStyle();
+		}
+
+		var data =
+		jQuery.getJSON(
+			ajaxurl,
+			{
+				'action': 'marketplace_suggestions',
+			},
+			displaySuggestions
+		);
 
 	});
 
-})( jQuery, installed_woo_plugins );
+})( jQuery, installed_woo_plugins, ajaxurl );
