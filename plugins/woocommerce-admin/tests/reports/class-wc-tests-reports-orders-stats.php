@@ -573,7 +573,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// * Order status filter
 		// ** Status is, positive filter for 2 statuses, i.e. all orders.
@@ -587,7 +587,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			),
 		);
 
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ** Status is, positive filter for 1 status -> half orders.
 		$query_args = array(
@@ -662,7 +662,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ** Status is not, negative filter for 1 status -> half orders.
 		$query_args = array(
@@ -737,7 +737,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ** Status is not, negative filter for 2 statuses -> no orders.
 		$query_args = array(
@@ -795,7 +795,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ** Status is + Status is not, positive filter for 2 statuses, negative for 1 -> half of orders.
 		$query_args = array(
@@ -874,7 +874,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// * Product filter
 		// ** Product includes, positive filter for 2 products, i.e. 2 orders out of 3.
@@ -949,7 +949,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ** Product includes, positive filter for 1 product, 1/3 of orders
 		$query_args = array(
@@ -1021,7 +1021,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ** Product excludes, negative filter for 1 product, 2/3 of orders.
 		$query_args = array(
@@ -1094,7 +1094,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ** Product excludes, negative filter for 2 products, 1/3 of orders
 		$query_args = array(
@@ -1166,7 +1166,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ** Product includes + product excludes, positive filter for 2 products, negative for 1 -> 1/3 of orders, only orders with product 2 and product 2 + product 4
 		$query_args = array(
@@ -1241,7 +1241,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// * Coupon filters
 		// ** Coupon includes, positive filter for 2 coupons, i.e. 2/3 of orders.
@@ -1318,7 +1318,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ** Coupon includes, positive filter for 1 coupon, 1/3 of orders
 		$query_args = array(
@@ -1392,7 +1392,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ** Coupon excludes, negative filter for 1 coupon, 2/3 of orders
 		$query_args = array(
@@ -1466,7 +1466,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ** Coupon excludes, negative filter for 2 coupons, 1/3 of orders
 		$query_args = array(
@@ -1542,7 +1542,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ** Coupon includes + coupon excludes, positive filter for 2 coupon, negative for 1, 1/3 orders
 		$query_args = array(
@@ -1621,7 +1621,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// * Customer filters
 		// ** Customer new
@@ -1684,7 +1684,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ** Customer returning
 		$query_args = array(
@@ -1759,7 +1759,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query};" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query};" );
 
 		// Combinations: match all
 		// status_is + product_includes.
@@ -1834,7 +1834,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// status_is + coupon_includes.
 		$query_args = array(
@@ -1912,7 +1912,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// product_includes + coupon_includes.
 		$query_args = array(
@@ -1986,7 +1986,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// status_is + product_includes + coupon_includes.
 		$query_args = array(
@@ -2063,7 +2063,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// status_is + status_is_not + product_includes.
 		$query_args = array(
@@ -2144,7 +2144,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// status_is + status_is_not + product_includes + product_excludes.
 		$query_args = array(
@@ -2226,7 +2226,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// status_is + status_is_not + product_includes + product_excludes + coupon_includes.
 		$query_args = array(
@@ -2310,7 +2310,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// status_is + status_is_not + product_includes + product_excludes + coupon_includes + coupon_excludes.
 		$query_args = array(
@@ -2398,7 +2398,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// Combinations: match any
 		// status_is + status_is_not, all orders.
@@ -2478,7 +2478,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// status_is OR product_includes.
 		$query_args = array(
@@ -2557,7 +2557,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// status_is OR coupon_includes.
 		$query_args = array(
@@ -2636,7 +2636,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// status_is OR coupon_excludes.
 		$query_args = array(
@@ -2715,7 +2715,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// product_includes OR coupon_includes.
 		$query_args = array(
@@ -2794,7 +2794,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// status_is OR product_includes OR coupon_includes.
 		$query_args = array(
@@ -2876,7 +2876,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// status_is OR status_is_not OR product_includes.
 		$query_args = array(
@@ -2961,7 +2961,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// status_is OR status_is_not OR product_includes OR product_excludes.
 		$query_args = array(
@@ -3046,7 +3046,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// status_is OR status_is_not OR product_includes OR product_excludes OR coupon_includes.
 		$query_args = array(
@@ -3134,7 +3134,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// status_is OR status_is_not OR product_includes OR product_excludes OR coupon_includes OR coupon_excludes.
 		$query_args = array(
@@ -3225,7 +3225,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 	}
 
@@ -3849,7 +3849,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 		$actual         = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true );
-		$this->assertEquals( $expected_stats, $actual, 'Segmenting by product, expected: ' . print_r( $expected_stats, true ) . '; actual: ' . print_r( $actual, true ) );
+		$this->assertEquals( $expected_stats, $actual, 'Segmenting by product, expected: ' . $this->return_print_r( $expected_stats ) . '; actual: ' . $this->return_print_r( $actual ) );
 	}
 
 	/**
@@ -4049,7 +4049,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 1,
 			'page_no'   => 1,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ASC -- only 1 interval, so should be the same.
 		$query_args = array(
@@ -4059,7 +4059,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'orderby'  => 'date',
 			'order'    => 'asc',
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		/*
 		 * Test for [-5 hours, now] -- partial 1 page.
@@ -4187,7 +4187,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 		$actual         = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true );
-		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ASC -- reverse the intervals array, but numbers stay the same.
 		$query_args                  = array(
@@ -4200,7 +4200,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$expected_stats['intervals'] = array_reverse( $expected_stats['intervals'] );
 
 		$actual = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true );
-		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		/*
 		 * Test for [-9 hours, now] -- full 1 page.
@@ -4325,7 +4325,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ASC -- same values, just reverse order of intervals.
 		$query_args = array(
@@ -4339,7 +4339,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$expected_stats['intervals'] = array_reverse( $expected_stats['intervals'] );
 
 		$actual = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true );
-		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		/*
 		 * Test for [-10 hours, now] -- 1 page full, 1 interval on 2nd page.
@@ -4474,7 +4474,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// Page 2.
 		$query_args = array(
@@ -4509,7 +4509,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 2,
 		);
 
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		/*
 		 * Test for [-10 hours, now] -- 1 page full, 1 interval on 2nd page.
@@ -4563,7 +4563,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// Page 2.
 		$query_args = array(
@@ -4599,7 +4599,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 2,
 		);
 
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// Now the same should be done for days, weeks, months and years. But I'm too low on mana to do that.
 	}
@@ -4813,7 +4813,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 		$actual         = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true );
-		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// ASC -- only 1 interval, so should be the same.
 		$query_args = array(
@@ -4823,7 +4823,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'orderby'  => 'orders_count',
 			'order'    => 'asc',
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		/*
 		 * Test for [-5 hours, now] -- partial 1 page.
@@ -4967,7 +4967,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 		$actual         = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true );
-		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		/*
 		 * 5 hour time window, ASC ordering -- numbers stay the same, but first include zero intervals in asc order, then the rest.
@@ -4994,7 +4994,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		);
 
 		$actual = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true );
-		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		/*
 		 * Test for [-9 hours, now] -- full 1 page.
@@ -5129,7 +5129,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		/*
 		 * ASC ordering -- same values, different intervals order.
@@ -5158,7 +5158,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		);
 
 		$actual = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true );
-		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		/*
 		 * Test for [-10 hours, now] -- 1 page full, 1 interval on 2nd page.
@@ -5296,7 +5296,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 		$actual         = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true );
-		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// Page 2.
 		$query_args = array(
@@ -5330,7 +5330,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'pages'     => 2,
 			'page_no'   => 2,
 		);
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		/*
 		 * Test for [-10 hours, now] -- 1 page full, 1 interval on 2nd page.
@@ -5386,7 +5386,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		);
 
 		$actual = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true );
-		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, $actual, 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 
 		// Page 2.
 		$query_args = array(
@@ -5422,6 +5422,19 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 2,
 		);
 
-		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . print_r( $query_args, true ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
+	}
+
+	/**
+	 * Pass input variable through print_r.
+	 *
+	 * @since 3.5.4
+	 * @param  string|array|object $data Variable data to be passed through print_r.
+	 * @return string
+	 */
+	private function return_print_r( $data ) {
+		// @codingStandardsIgnoreStart
+		return print_r( $data, true );
+		// @codingStandardsIgnoreEnd
 	}
 }
