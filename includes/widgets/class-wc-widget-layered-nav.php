@@ -417,7 +417,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 		$query_hash = md5( $query );
 
 		// Maybe store a transient of the count values.
-		$cache = false;//apply_filters( 'woocommerce_layered_nav_count_maybe_cache', true );
+		$cache = apply_filters( 'woocommerce_layered_nav_count_maybe_cache', true );
 		if ( true === $cache ) {
 			$cached_counts = (array) get_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ) );
 		} else {
