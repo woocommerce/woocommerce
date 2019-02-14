@@ -135,6 +135,11 @@ class WordPressNotices extends Component {
 		if ( 'message' === element.id && 'updated' === element.className ) {
 			return false;
 		}
+
+		if ( 'dolly' === element.id ) {
+			return false;
+		}
+
 		return true;
 	}
 
