@@ -11,7 +11,7 @@ export const SWAGGERNAMESPACE = 'https://virtserver.swaggerhub.com/peterfabian/w
 
 export const DEFAULT_REQUIREMENT = {
 	timeout: 1 * MINUTE,
-	freshness: 5 * MINUTE,
+	freshness: 30 * MINUTE,
 };
 
 // WordPress & WooCommerce both set a hard limit of 100 for the per_page parameter
