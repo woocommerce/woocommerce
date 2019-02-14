@@ -39,7 +39,7 @@ export const advancedFilters = {
 				remove: __( 'Remove customer name filter', 'wc-admin' ),
 				rule: __( 'Select a customer name filter match', 'wc-admin' ),
 				/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
-				title: __( 'Name {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( '{{title}}Name{{/title}} {{rule /}} {{filter /}}', 'wc-admin' ),
 				filter: __( 'Select customer name', 'wc-admin' ),
 			},
 			rules: [
@@ -70,7 +70,7 @@ export const advancedFilters = {
 				remove: __( 'Remove country filter', 'wc-admin' ),
 				rule: __( 'Select a country filter match', 'wc-admin' ),
 				/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
-				title: __( 'Country {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( '{{title}}Country{{/title}} {{rule /}} {{filter /}}', 'wc-admin' ),
 				filter: __( 'Select country', 'wc-admin' ),
 			},
 			rules: [
@@ -111,7 +111,7 @@ export const advancedFilters = {
 				remove: __( 'Remove customer username filter', 'wc-admin' ),
 				rule: __( 'Select a customer username filter match', 'wc-admin' ),
 				/* translators: A sentence describing a customer username filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
-				title: __( 'Username {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( '{{title}}Username{{/title}} {{rule /}} {{filter /}}', 'wc-admin' ),
 				filter: __( 'Select customer username', 'wc-admin' ),
 			},
 			rules: [
@@ -139,7 +139,7 @@ export const advancedFilters = {
 				remove: __( 'Remove customer email filter', 'wc-admin' ),
 				rule: __( 'Select a customer email filter match', 'wc-admin' ),
 				/* translators: A sentence describing a customer email filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
-				title: __( 'Email {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( '{{title}}Email{{/title}} {{rule /}} {{filter /}}', 'wc-admin' ),
 				filter: __( 'Select customer email', 'wc-admin' ),
 			},
 			rules: [
@@ -168,7 +168,7 @@ export const advancedFilters = {
 				add: __( 'No. of Orders', 'wc-admin' ),
 				remove: __( 'Remove order  filter', 'wc-admin' ),
 				rule: __( 'Select an order count filter match', 'wc-admin' ),
-				title: __( 'No. of Orders {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( '{{title}}No. of Orders{{/title}} {{rule /}} {{filter /}}', 'wc-admin' ),
 			},
 			rules: [
 				{
@@ -196,7 +196,7 @@ export const advancedFilters = {
 				add: __( 'Total Spend', 'wc-admin' ),
 				remove: __( 'Remove total spend filter', 'wc-admin' ),
 				rule: __( 'Select a total spend filter match', 'wc-admin' ),
-				title: __( 'Total Spend {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( '{{title}}Total Spend{{/title}} {{rule /}} {{filter /}}', 'wc-admin' ),
 			},
 			rules: [
 				{
@@ -224,7 +224,7 @@ export const advancedFilters = {
 				add: __( 'AOV', 'wc-admin' ),
 				remove: __( 'Remove average older value filter', 'wc-admin' ),
 				rule: __( 'Select an average order value filter match', 'wc-admin' ),
-				title: __( 'AOV {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( '{{title}}AOV{{/title}} {{rule /}} {{filter /}}', 'wc-admin' ),
 			},
 			rules: [
 				{
@@ -254,7 +254,7 @@ export const advancedFilters = {
 				remove: __( 'Remove registered filter', 'wc-admin' ),
 				rule: __( 'Select a registered filter match', 'wc-admin' ),
 				/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
-				title: __( 'Registered {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( '{{title}}Registered{{/title}} {{rule /}} {{filter /}}', 'wc-admin' ),
 				filter: __( 'Select registered date', 'wc-admin' ),
 			},
 			rules: [
@@ -284,7 +284,7 @@ export const advancedFilters = {
 				remove: __( 'Remove last active filter', 'wc-admin' ),
 				rule: __( 'Select a last active filter match', 'wc-admin' ),
 				/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cCsm3GeXJbE */
-				title: __( 'Last active {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( '{{title}}Last active{{/title}} {{rule /}} {{filter /}}', 'wc-admin' ),
 				filter: __( 'Select registered date', 'wc-admin' ),
 			},
 			rules: [

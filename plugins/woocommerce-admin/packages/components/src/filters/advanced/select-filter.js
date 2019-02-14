@@ -64,16 +64,17 @@ class SelectFilter extends Component {
 	}
 
 	render() {
-		const { config, filter, onFilterChange, isEnglish } = this.props;
+		const { className, config, filter, onFilterChange, isEnglish } = this.props;
 		const { options } = this.state;
 		const { key, rule, value } = filter;
 		const { labels, rules } = config;
 		const children = interpolateComponents( {
 			mixedString: labels.title,
 			components: {
+				title: <span className={ className } />,
 				rule: (
 					<SelectControl
-						className="woocommerce-filters-advanced__rule"
+						className={ classnames( className, 'woocommerce-filters-advanced__rule' ) }
 						options={ rules }
 						value={ rule }
 						onChange={ partial( onFilterChange, key, 'rule' ) }
@@ -82,7 +83,7 @@ class SelectFilter extends Component {
 				),
 				filter: options ? (
 					<SelectControl
-						className="woocommerce-filters-advanced__input"
+						className={ classnames( className, 'woocommerce-filters-advanced__input' ) }
 						options={ options }
 						value={ value }
 						onChange={ partial( onFilterChange, filter.key, 'value' ) }
@@ -98,7 +99,7 @@ class SelectFilter extends Component {
 
 		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (
-			<fieldset tabIndex="0">
+			<fieldset className="woocommerce-filters-advanced__line-item" tabIndex="0">
 				<legend className="screen-reader-text">
 					{ labels.add || '' }
 				</legend>

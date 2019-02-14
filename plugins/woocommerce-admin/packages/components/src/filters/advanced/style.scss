@@ -45,16 +45,20 @@
 	padding: 0 $gap 0 0;
 	margin: 0;
 	display: grid;
-	grid-template-columns: auto 40px;
+	grid-template-columns: 1fr 40px;
 	background-color: $core-grey-light-100;
 	border-bottom: 1px solid $core-grey-light-700;
 
-	fieldset {
-		padding: $gap-smaller $gap-smaller $gap-smaller $gap;
-	}
-
 	&:hover {
 		background-color: $core-grey-light-200;
+	}
+
+	.woocommerce-filters-advanced__line-item {
+		@include set-grid-item-position( 2, 2 );
+	}
+
+	fieldset {
+		padding: $gap-smaller $gap-smaller $gap-smaller $gap;
 	}
 
 	.woocommerce-filters-advanced__remove {
@@ -125,7 +129,16 @@
 
 	&.is-english {
 		display: grid;
-		grid-template-columns: 100px 150px auto;
+		grid-template-columns: 100px 150px 1fr;
+
+		.woocommerce-filters-advanced__fieldset-item {
+			@include set-grid-item-position( 3, 3 );
+
+			&:nth-child(1) {
+				display: flex;
+				align-items: center;
+			}
+		}
 
 		@include breakpoint( '<782px' ) {
 			display: block;
