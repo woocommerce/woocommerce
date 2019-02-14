@@ -260,17 +260,18 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			$subclauses = array();
 			$min_param  = $numeric_param . '_min';
 			$max_param  = $numeric_param . '_max';
+			$or_equal   = isset( $query_args[ $min_param ] ) && isset( $query_args[ $max_param ] ) ? '=' : '';
 
 			if ( isset( $query_args[ $min_param ] ) ) {
 				$subclauses[] = $wpdb->prepare(
-					"{$param_info['column']} >= {$param_info['format']}",
+					"{$param_info['column']} >{$or_equal} {$param_info['format']}",
 					$query_args[ $min_param ]
 				); // WPCS: unprepared SQL ok.
 			}
 
 			if ( isset( $query_args[ $max_param ] ) ) {
 				$subclauses[] = $wpdb->prepare(
-					"{$param_info['column']} <= {$param_info['format']}",
+					"{$param_info['column']} <{$or_equal} {$param_info['format']}",
 					$query_args[ $max_param ]
 				); // WPCS: unprepared SQL ok.
 			}
