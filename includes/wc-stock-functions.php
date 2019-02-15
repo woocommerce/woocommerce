@@ -195,7 +195,7 @@ function wc_reduce_stock_levels( $order_id ) {
  *
  * @since 3.5.0
  * @param WC_Order $order order object.
- * @param array $changes Array of changes.
+ * @param array    $changes Array of changes.
  */
 function wc_trigger_stock_change_notifications( $order, $changes ) {
 	if ( empty( $changes ) ) {
@@ -216,7 +216,8 @@ function wc_trigger_stock_change_notifications( $order, $changes ) {
 
 		if ( $change['to'] < 0 ) {
 			do_action(
-				'woocommerce_product_on_backorder', array(
+				'woocommerce_product_on_backorder',
+				array(
 					'product'  => wc_get_product( $change['product']->get_id() ),
 					'order_id' => $order->get_id(),
 					'quantity' => abs( $change['from'] - $change['to'] ),
@@ -320,7 +321,7 @@ function wc_get_held_stock_quantity( $product, $exclude_order_id = 0 ) {
 /**
  * Return low stock amount to determine if notification needs to be sent
  *
- * @param  WC_Product $product
+ * @param  WC_Product $product Product to retrieve the low stock amount.
  * @since  3.5.0
  * @return int
  */

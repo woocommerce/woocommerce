@@ -134,7 +134,7 @@ function wc_delete_product_transients( $post_id = 0 ) {
  * Remove a product object from the product cache.
  *
  * @since 3.6.0
- * @param int Product ID
+ * @param int $product_id Product ID.
  */
 function wc_clean_product_cache( $product_id ) {
 	wp_cache_delete( 'product-' . $product_id, 'products' );
