@@ -1283,7 +1283,7 @@ function wc_update_product_lookup_tables() {
 			LEFT JOIN {$wpdb->postmeta} meta2 ON posts.ID = meta2.post_id AND meta2.meta_key = '_wc_average_rating'
 			LEFT JOIN {$wpdb->postmeta} meta3 ON posts.ID = meta3.post_id AND meta3.meta_key = 'total_sales'
 		WHERE
-			posts.post_type = 'product'
+			posts.post_type IN ('product', 'product_variation')
 			AND meta1.meta_value <> ''
 		GROUP BY
 			posts.ID
