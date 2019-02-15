@@ -35,7 +35,7 @@ function wc_admin_plugins_notice() {
 	if ( $wordpress_includes_gutenberg ) {
 		$message = sprintf(
 			/* translators: URL of WooCommerce plugin */
-			__( 'The WooCommerce Admin feature plugin requires <a href="%s">WooCommerce</a> (>3.5) to be installed and active.', 'wc-admin' ),
+			__( 'The WooCommerce Admin feature plugin requires <a href="%s">WooCommerce</a> 3.5 or greater to be installed and active.', 'wc-admin' ),
 			'https://wordpress.org/plugins/woocommerce/'
 		);
 	} else {
