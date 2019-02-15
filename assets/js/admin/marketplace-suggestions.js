@@ -5,6 +5,22 @@
 			return;
 		}
 
+		function renderDismissButton( suggestionSlug ) {
+			var dismissButton = document.createElement( 'a' );
+
+			// TODO
+			// escaping/don't concatenate
+			// hostname & base url
+			// actual ajax API url
+			// ajax vs page-reload api
+			// var dismissUrl = 'http://localhost:6322/wp-admin/?' + suggestionSlug + '=0';
+
+			dismissButton.classList.add( 'suggestion-dismiss' );
+			dismissButton.setAttribute( 'href', '#' );
+
+			return dismissButton;
+		}
+
 		function renderLinkoutButton( url, buttonText ) {
 			var linkoutButton = document.createElement( 'a' );
 
@@ -15,7 +31,7 @@
 			return linkoutButton;
 		}
 
-		function renderTableBanner( title, url, buttonText ) {
+		function renderTableBanner( slug, title, url, buttonText ) {
 			if ( ! title || ! url ) {
 				return;
 			}
@@ -31,16 +47,17 @@
 			titleColumn.setAttribute( 'colspan', 5 );
 			titleColumn.classList.add( 'marketplace-table-title' );
 			var titleHeading = document.createElement( 'h2' );
-			titleColumn.append( titleHeading );
+			titleColumn.appendChild( titleHeading );
 			titleHeading.textContent = title;
 
 			row.appendChild( titleColumn );
 
 			var linkoutColumn = document.createElement( 'td' );
-			linkoutColumn.setAttribute( 'colspan', 4 );
+			linkoutColumn.setAttribute( 'colspan', 5 );
 			linkoutColumn.classList.add( 'marketplace-table-linkout' );
 			var linkoutButton = renderLinkoutButton( url, buttonText );
-			linkoutColumn.append( linkoutButton );
+			linkoutColumn.appendChild( linkoutButton );
+			linkoutColumn.appendChild( renderDismissButton( slug ) )
 
 			row.appendChild( linkoutColumn );
 
@@ -147,6 +164,7 @@
 
 				// render first promo
 				var content = renderTableBanner(
+					promos[ 0 ].slug,
 					promos[ 0 ].title,
 					promos[ 0 ].url,
 					promos[ 0 ]['button-text']

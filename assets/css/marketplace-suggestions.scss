@@ -3,6 +3,17 @@
  * Styling for in-product marketplace suggestions.
  */
 
+@import "mixins";
+@import "variables";
+
+.suggestion-dismiss::before {
+
+	@include iconbeforedashicons( "\f335" );
+
+	color: #ccc;
+	font-size: 1.5em;
+}
+
 .marketplace-table-banner {
 
 	h2 {
@@ -14,12 +25,22 @@
 	}
 
 	td.marketplace-table-title {
+		border-left: 4px solid $woocommerce;
 		padding-left: 4em;
 	}
 
 	td.marketplace-table-linkout {
 		text-align: right;
-		padding-right: 3em;
+		padding-right: 1em;
+
+		a.button {
+			margin-right: 0.5em;
+		}
+
+		a.suggestion-dismiss {
+			position: relative;
+			top: 4px;
+		}
 	}
 }
 
