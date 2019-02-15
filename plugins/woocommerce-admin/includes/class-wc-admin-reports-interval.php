@@ -27,6 +27,44 @@ class WC_Admin_Reports_Interval {
 	public static $sql_datetime_format = 'Y-m-d H:i:s';
 
 	/**
+	 * Converts local datetime to GMT/UTC time.
+	 *
+	 * @param string $datetime_string String representation of local datetime.
+	 * @return DateTime
+	 */
+	public static function convert_local_datetime_to_gmt( $datetime_string ) {
+		$datetime = new DateTime( $datetime_string, new DateTimeZone( wc_timezone_string() ) );
+		$datetime->setTimezone( new DateTimeZone( 'GMT' ) );
+		return $datetime;
+	}
+
+	/**
+	 * Returns default 'before' parameter for the reports.
+	 *
+	 * @return DateTime
+	 */
+	public static function default_before() {
+		$datetime = new DateTime();
+		$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+		return $datetime;
+	}
+
+	/**
+	 * Returns default 'after' parameter for the reports.
+	 *
+	 * @return DateTime
+	 */
+	public static function default_after() {
+		$now       = time();
+		$week_back = $now - WEEK_IN_SECONDS;
+
+		$datetime = new DateTime();
+		$datetime->setTimestamp( $week_back );
+		$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+		return $datetime;
+	}
+
+	/**
 	 * Returns date format to be used as grouping clause in SQL.
 	 *
 	 * @param string $time_interval Time interval.
@@ -62,7 +100,7 @@ class WC_Admin_Reports_Interval {
 	/**
 	 * Returns quarter for the DateTime.
 	 *
-	 * @param DateTime $datetime Date & time.
+	 * @param DateTime $datetime Local date & time.
 	 * @return int|null
 	 */
 	public static function quarter( $datetime ) {
@@ -94,7 +132,7 @@ class WC_Admin_Reports_Interval {
 	 * The first week of the year is considered to be the week containing January 1.
 	 * The second week starts on the next $first_day_of_week.
 	 *
-	 * @param DateTime $datetime          Date for which the week number is to be calculated.
+	 * @param DateTime $datetime          Local date for which the week number is to be calculated.
 	 * @param int      $first_day_of_week 0 for Sunday to 6 for Saturday.
 	 * @return int
 	 */
@@ -112,7 +150,7 @@ class WC_Admin_Reports_Interval {
 	 *
 	 * @see WC_Admin_Reports_Interval::simple_week_number()
 	 *
-	 * @param DateTime $datetime          Date for which the week number is to be calculated.
+	 * @param DateTime $datetime          Local date for which the week number is to be calculated.
 	 * @param int      $first_day_of_week 0 for Sunday to 6 for Saturday.
 	 * @return int
 	 */
@@ -159,22 +197,21 @@ class WC_Admin_Reports_Interval {
 	/**
 	 * Calculates number of time intervals between two dates, closed interval on both sides.
 	 *
-	 * @param string $start    Start date & time.
-	 * @param string $end      End date & time.
-	 * @param string $interval Time interval increment, e.g. hour, day, week.
+	 * @param DateTime $start_datetime Start date & time.
+	 * @param DateTime $end_datetime End date & time.
+	 * @param string   $interval Time interval increment, e.g. hour, day, week.
+	 *
 	 * @return int
 	 */
-	public static function intervals_between( $start, $end, $interval ) {
-		$start_datetime = new DateTime( $start );
-		$end_datetime   = new DateTime( $end );
-
+	public static function intervals_between( $start_datetime, $end_datetime, $interval ) {
 		switch ( $interval ) {
 			case 'hour':
 				$end_timestamp   = (int) $end_datetime->format( 'U' );
 				$start_timestamp = (int) $start_datetime->format( 'U' );
 				$addendum        = 0;
-				$end_min_sec     = $end_timestamp % HOUR_IN_SECONDS;
-				$start_min_sec   = $start_timestamp % HOUR_IN_SECONDS;
+				// modulo HOUR_IN_SECONDS would normally work, but there are non-full hour timezones, e.g. Nepal.
+				$start_min_sec = (int) $start_datetime->format( 'i' ) * MINUTE_IN_SECONDS + (int) $start_datetime->format( 's' );
+				$end_min_sec   = (int) $end_datetime->format( 'i' ) * MINUTE_IN_SECONDS + (int) $end_datetime->format( 's' );
 				if ( $end_min_sec < $start_min_sec ) {
 					$addendum = 1;
 				}
@@ -185,8 +222,8 @@ class WC_Admin_Reports_Interval {
 				$end_timestamp      = (int) $end_datetime->format( 'U' );
 				$start_timestamp    = (int) $start_datetime->format( 'U' );
 				$addendum           = 0;
-				$end_hour_min_sec   = $end_timestamp % DAY_IN_SECONDS;
-				$start_hour_min_sec = $start_timestamp % DAY_IN_SECONDS;
+				$end_hour_min_sec   = (int) $end_datetime->format( 'H' ) * HOUR_IN_SECONDS + (int) $end_datetime->format( 'i' ) * MINUTE_IN_SECONDS + (int) $end_datetime->format( 's' );
+				$start_hour_min_sec = (int) $start_datetime->format( 'H' ) * HOUR_IN_SECONDS + (int) $start_datetime->format( 'i' ) * MINUTE_IN_SECONDS + (int) $start_datetime->format( 's' );
 				if ( $end_hour_min_sec < $start_hour_min_sec ) {
 					$addendum = 1;
 				}
@@ -234,7 +271,8 @@ class WC_Admin_Reports_Interval {
 	public static function next_hour_start( $datetime, $reversed = false ) {
 		$hour_increment         = $reversed ? 0 : 1;
 		$timestamp              = (int) $datetime->format( 'U' );
-		$hours_offset_timestamp = ( floor( $timestamp / HOUR_IN_SECONDS ) + $hour_increment ) * HOUR_IN_SECONDS;
+		$seconds_into_hour      = (int) $datetime->format( 'i' ) * MINUTE_IN_SECONDS + (int) $datetime->format( 's' );
+		$hours_offset_timestamp = $timestamp + ( $hour_increment * HOUR_IN_SECONDS - $seconds_into_hour );
 
 		if ( $reversed ) {
 			$hours_offset_timestamp --;
@@ -242,6 +280,7 @@ class WC_Admin_Reports_Interval {
 
 		$hours_offset_time = new DateTime();
 		$hours_offset_time->setTimestamp( $hours_offset_timestamp );
+		$hours_offset_time->setTimezone( new DateTimeZone( wc_timezone_string() ) );
 		return $hours_offset_time;
 	}
 
@@ -253,19 +292,19 @@ class WC_Admin_Reports_Interval {
 	 * @return DateTime
 	 */
 	public static function next_day_start( $datetime, $reversed = false ) {
-		$day_increment      = $reversed ? -1 : 1;
+		$day_increment      = $reversed ? 0 : 1;
 		$timestamp          = (int) $datetime->format( 'U' );
-		$next_day_timestamp = ( floor( $timestamp / DAY_IN_SECONDS ) + $day_increment ) * DAY_IN_SECONDS;
-		$next_day           = new DateTime();
-		$next_day->setTimestamp( $next_day_timestamp );
+		$seconds_into_day   = (int) $datetime->format( 'H' ) * HOUR_IN_SECONDS + (int) $datetime->format( 'i' ) * MINUTE_IN_SECONDS + (int) $datetime->format( 's' );
+		$next_day_timestamp = $timestamp + ( $day_increment * DAY_IN_SECONDS - $seconds_into_day );
 
 		// The day boundary is actually next midnight when going in reverse, so set it to day -1 at 23:59:59.
 		if ( $reversed ) {
-			$timestamp            = (int) $next_day->format( 'U' );
-			$end_of_day_timestamp = floor( $timestamp / DAY_IN_SECONDS ) * DAY_IN_SECONDS + DAY_IN_SECONDS - 1;
-			$next_day->setTimestamp( $end_of_day_timestamp );
+			$next_day_timestamp --;
 		}
 
+		$next_day = new DateTime();
+		$next_day->setTimestamp( $next_day_timestamp );
+		$next_day->setTimezone( new DateTimeZone( wc_timezone_string() ) );
 		return $next_day;
 	}
 
@@ -308,7 +347,7 @@ class WC_Admin_Reports_Interval {
 		$month           = (int) $datetime->format( 'm' );
 
 		if ( $reversed ) {
-			$beg_of_month_datetime       = new DateTime( "$year-$month-01 00:00:00" );
+			$beg_of_month_datetime       = new DateTime( "$year-$month-01 00:00:00", new DateTimeZone( wc_timezone_string() ) );
 			$timestamp                   = (int) $beg_of_month_datetime->format( 'U' );
 			$end_of_prev_month_timestamp = $timestamp - 1;
 			$datetime->setTimestamp( $end_of_prev_month_timestamp );
@@ -319,7 +358,7 @@ class WC_Admin_Reports_Interval {
 				$year ++;
 			}
 			$day      = '01';
-			$datetime = new DateTime( "$year-$month-$day 00:00:00" );
+			$datetime = new DateTime( "$year-$month-$day 00:00:00", new DateTimeZone( wc_timezone_string() ) );
 		}
 
 		return $datetime;
@@ -375,7 +414,7 @@ class WC_Admin_Reports_Interval {
 				}
 				break;
 		}
-		$datetime = new DateTime( "$year-$month-01 00:00:00" );
+		$datetime = new DateTime( "$year-$month-01 00:00:00", new DateTimeZone( wc_timezone_string() ) );
 		if ( $reversed ) {
 			$timestamp                   = (int) $datetime->format( 'U' );
 			$end_of_prev_month_timestamp = $timestamp - 1;
@@ -399,13 +438,13 @@ class WC_Admin_Reports_Interval {
 		$day            = '01';
 
 		if ( $reversed ) {
-			$datetime                   = new DateTime( "$year-$month-$day 00:00:00" );
+			$datetime                   = new DateTime( "$year-$month-$day 00:00:00", new DateTimeZone( wc_timezone_string() ) );
 			$timestamp                  = (int) $datetime->format( 'U' );
 			$end_of_prev_year_timestamp = $timestamp - 1;
 			$datetime->setTimestamp( $end_of_prev_year_timestamp );
 		} else {
 			$year    += $year_increment;
-			$datetime = new DateTime( "$year-$month-$day 00:00:00" );
+			$datetime = new DateTime( "$year-$month-$day 00:00:00", new DateTimeZone( wc_timezone_string() ) );
 		}
 
 		return $datetime;
@@ -422,9 +461,6 @@ class WC_Admin_Reports_Interval {
 	 * @return DateTime
 	 */
 	public static function iterate( $datetime, $time_interval, $reversed = false ) {
-		// $result_datetime           =
-		// $result_timestamp_adjusted = $result_datetime->format( 'U' ) - 1;
-		// $result_datetime->setTimestamp( $result_timestamp_adjusted );
 		return call_user_func( array( __CLASS__, "next_{$time_interval}_start" ), $datetime, $reversed );
 	}
 

@@ -207,8 +207,6 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
-		$now        = time();
-		$week_back  = $now - WEEK_IN_SECONDS;
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
@@ -216,13 +214,14 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 			'page'          => 1,
 			'order'         => 'DESC',
 			'orderby'       => 'coupon_id',
-			'before'        => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
-			'after'         => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
+			'before'        => WC_Admin_Reports_Interval::default_before(),
+			'after'         => WC_Admin_Reports_Interval::default_after(),
 			'fields'        => '*',
 			'coupons'       => array(),
 			'extended_info' => false,
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
+		$this->normalize_timezones( $query_args, $defaults );
 
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = wp_cache_get( $cache_key, $this->cache_group );
@@ -336,7 +335,7 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 					'order_id'        => $order_id,
 					'coupon_id'       => $coupon_id,
 					'discount_amount' => $coupon_item->get_discount(),
-					'date_created'    => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+					'date_created'    => $order->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format ),
 				),
 				array(
 					'%d',

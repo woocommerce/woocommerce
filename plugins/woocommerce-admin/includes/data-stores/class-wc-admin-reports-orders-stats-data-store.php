@@ -180,8 +180,6 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
-		$now        = time();
-		$week_back  = $now - WEEK_IN_SECONDS;
 
 		// These defaults are only applied when not using REST API, as the API has its own defaults that overwrite these for most values (except before, after, etc).
 		$defaults   = array(
@@ -189,8 +187,8 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 			'page'             => 1,
 			'order'            => 'DESC',
 			'orderby'          => 'date',
-			'before'           => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
-			'after'            => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
+			'before'           => WC_Admin_Reports_Interval::default_before(),
+			'after'            => WC_Admin_Reports_Interval::default_after(),
 			'interval'         => 'week',
 			'fields'           => '*',
 			'segmentby'        => '',
@@ -206,6 +204,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 			'categories'       => array(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
+		$this->normalize_timezones( $query_args, $defaults );
 
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = wp_cache_get( $cache_key, $this->cache_group );

@@ -97,7 +97,7 @@ class WC_Admin_Install {
 		$tables = "
 		CREATE TABLE {$wpdb->prefix}wc_order_stats (
 			order_id bigint(20) unsigned NOT NULL,
-			date_created timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
+			date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			num_items_sold int(11) UNSIGNED DEFAULT 0 NOT NULL,
 			gross_total double DEFAULT 0 NOT NULL,
 			coupon_total double DEFAULT 0 NOT NULL,
@@ -119,7 +119,7 @@ class WC_Admin_Install {
 			product_id BIGINT UNSIGNED NOT NULL,
 			variation_id BIGINT UNSIGNED NOT NULL,
 			customer_id BIGINT UNSIGNED NULL,
-			date_created timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
+			date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			product_qty INT UNSIGNED NOT NULL,
 			product_net_revenue double DEFAULT 0 NOT NULL,
 			product_gross_revenue double DEFAULT 0 NOT NULL,
@@ -137,7 +137,7 @@ class WC_Admin_Install {
 		  CREATE TABLE {$wpdb->prefix}wc_order_tax_lookup (
 		  	order_id BIGINT UNSIGNED NOT NULL,
 		  	tax_rate_id BIGINT UNSIGNED NOT NULL,
-		  	date_created timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
+		  	date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 		  	shipping_tax double DEFAULT 0 NOT NULL,
 		  	order_tax double DEFAULT 0 NOT NULL,
 		  	total_tax double DEFAULT 0 NOT NULL,
@@ -148,7 +148,7 @@ class WC_Admin_Install {
 		  CREATE TABLE {$wpdb->prefix}wc_order_coupon_lookup (
 			order_id BIGINT UNSIGNED NOT NULL,
 			coupon_id BIGINT UNSIGNED NOT NULL,
-			date_created timestamp DEFAULT '0000-00-00 00:00:00' NOT NULL,
+			date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
 			discount_amount double DEFAULT 0 NOT NULL,
 			PRIMARY KEY (order_id, coupon_id),
 			KEY coupon_id (coupon_id),

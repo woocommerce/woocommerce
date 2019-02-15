@@ -135,8 +135,6 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
-		$now        = time();
-		$week_back  = $now - WEEK_IN_SECONDS;
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
@@ -144,12 +142,13 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 			'page'     => 1,
 			'order'    => 'DESC',
 			'orderby'  => 'tax_rate_id',
-			'before'   => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
-			'after'    => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
+			'before'   => WC_Admin_Reports_Interval::default_before(),
+			'after'    => WC_Admin_Reports_Interval::default_after(),
 			'fields'   => '*',
 			'taxes'    => array(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
+		$this->normalize_timezones( $query_args, $defaults );
 
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = wp_cache_get( $cache_key, $this->cache_group );
@@ -272,7 +271,7 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 				$wpdb->prefix . self::TABLE_NAME,
 				array(
 					'order_id'     => $order->get_id(),
-					'date_created' => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+					'date_created' => $order->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format ),
 					'tax_rate_id'  => $tax_item->get_rate_id(),
 					'shipping_tax' => $tax_item->get_shipping_tax_total(),
 					'order_tax'    => $tax_item->get_tax_total(),
