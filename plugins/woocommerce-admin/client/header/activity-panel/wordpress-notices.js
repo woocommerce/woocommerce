@@ -116,32 +116,38 @@ class WordPressNotices extends Component {
 
 	// Some messages should not be displayed in the toggle, like Jetpack JITM messages or update/success messages
 	shouldCollapseNotice( element ) {
-		if ( element.classList.contains( 'jetpack-jitm-message' ) ) {
-			return false;
-		}
+		const noticesToHide = [
+			[ null, [ 'jetpack-jitm-message' ] ], // ID and/or array of classes
+			[ 'woocommerce_errors', null ],
+			[ null, [ 'hidden' ] ],
+			[ 'message', [ 'notice', 'updated' ] ],
+			[ 'dolly', null ],
+		];
 
-		if ( 'woocommerce_errors' === element.id ) {
-			return false;
-		}
+		let collapse = true;
+		for ( let i = 0; collapse && i < noticesToHide.length; i++ ) {
+			const [ id, classes ] = noticesToHide[ i ];
 
-		if ( element.classList.contains( 'hidden' ) ) {
-			return false;
-		}
-
-		if ( 'message' === element.id && element.classList.contains( 'notice' ) ) {
-			return false;
-		}
-
-		if ( 'message' === element.id && 'updated' === element.className ) {
-			return false;
+			if ( Array.isArray( classes ) ) {
+				for ( let j = 0; j < classes.length; j++ ) {
+					if (
+						element.classList.contains( classes[ j ] ) &&
+						( ! id || ( id && id === element.id ) )
+					) {
+						collapse = false;
+						break;
+					}
+				}
+			} else if ( id && id === element.id ) {
+				collapse = false;
+			}
 		}
 
 		if ( 'dolly' === element.id ) {
 			element.style.display = 'none';
-			return false;
 		}
 
-		return true;
+		return collapse;
 	}
 
 	updateCount() {
