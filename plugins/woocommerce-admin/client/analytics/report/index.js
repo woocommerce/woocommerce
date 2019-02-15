@@ -35,7 +35,7 @@ import withSelect from 'wc-api/with-select';
 const REPORTS_FILTER = 'woocommerce-reports-list';
 
 const getReports = () => {
-	const reports = applyFilters( REPORTS_FILTER, [
+	const reports = [
 		{
 			report: 'revenue',
 			title: __( 'Revenue', 'wc-admin' ),
@@ -86,9 +86,9 @@ const getReports = () => {
 			title: __( 'Downloads', 'wc-admin' ),
 			component: DownloadsReport,
 		},
-	] );
+	];
 
-	return reports;
+	return applyFilters( REPORTS_FILTER, reports );
 };
 
 class Report extends Component {

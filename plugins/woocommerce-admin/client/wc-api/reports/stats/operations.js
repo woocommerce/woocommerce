@@ -13,7 +13,7 @@ import { stringifyQuery } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { getResourceIdentifier, getResourcePrefix } from 'wc-api/utils';
-import { NAMESPACE, SWAGGERNAMESPACE } from 'wc-api/constants';
+import { NAMESPACE } from 'wc-api/constants';
 
 const statEndpoints = [
 	'coupons',
@@ -21,11 +21,10 @@ const statEndpoints = [
 	'orders',
 	'products',
 	'revenue',
+	'stock',
 	'taxes',
 	'customers',
 ];
-// @todo Remove once swagger endpoints are phased out.
-const swaggerEndpoints = [ 'categories' ];
 
 const typeEndpointMap = {
 	'report-stats-query-orders': 'orders',
@@ -34,6 +33,7 @@ const typeEndpointMap = {
 	'report-stats-query-categories': 'categories',
 	'report-stats-query-downloads': 'downloads',
 	'report-stats-query-coupons': 'coupons',
+	'report-stats-query-stock': 'stock',
 	'report-stats-query-taxes': 'taxes',
 	'report-stats-query-customers': 'customers',
 };
@@ -53,9 +53,7 @@ function read( resourceNames, fetch = apiFetch ) {
 			parse: false,
 		};
 
-		if ( swaggerEndpoints.indexOf( endpoint ) >= 0 ) {
-			fetchArgs.url = SWAGGERNAMESPACE + 'reports/' + endpoint + '/stats' + stringifyQuery( query );
-		} else if ( statEndpoints.indexOf( endpoint ) >= 0 ) {
+		if ( statEndpoints.indexOf( endpoint ) >= 0 ) {
 			fetchArgs.path = NAMESPACE + '/reports/' + endpoint + '/stats' + stringifyQuery( query );
 		} else {
 			fetchArgs.path = endpoint + stringifyQuery( query );

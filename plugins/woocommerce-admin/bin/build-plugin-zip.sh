@@ -63,6 +63,7 @@ fi
 
 # Run the build.
 status "Generating build... 👷‍♀️"
+npm run build:feature-config
 npm run build
 npm run docs
 
@@ -79,6 +80,6 @@ zip -r wc-admin.zip \
 	$build_files \
 	languages/wc-admin.pot \
 	languages/wc-admin.php \
-	README.md
+	readme.txt
 
 success "Done. You've built WooCommerce Admin! 🎉 "

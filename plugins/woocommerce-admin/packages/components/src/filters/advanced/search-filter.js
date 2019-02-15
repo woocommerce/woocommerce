@@ -40,7 +40,12 @@ class SearchFilter extends Component {
 	}
 
 	updateLabels( selected ) {
-		this.setState( { selected } );
+		const prevIds = this.state.selected.map( item => item.id );
+		const ids = selected.map( item => item.id );
+
+		if ( ! isEqual( ids.sort(), prevIds.sort() ) ) {
+			this.setState( { selected } );
+		}
 	}
 
 	onSearchChange( values ) {
@@ -72,16 +77,17 @@ class SearchFilter extends Component {
 	}
 
 	render() {
-		const { config, filter, onFilterChange, isEnglish } = this.props;
+		const { className, config, filter, onFilterChange, isEnglish } = this.props;
 		const { selected } = this.state;
 		const { key, rule } = filter;
 		const { input, labels, rules } = config;
 		const children = interpolateComponents( {
 			mixedString: labels.title,
 			components: {
+				title: <span className={ className } />,
 				rule: (
 					<SelectControl
-						className="woocommerce-filters-advanced__rule"
+						className={ classnames( className, 'woocommerce-filters-advanced__rule' ) }
 						options={ rules }
 						value={ rule }
 						onChange={ partial( onFilterChange, key, 'rule' ) }
@@ -90,7 +96,7 @@ class SearchFilter extends Component {
 				),
 				filter: (
 					<Search
-						className="woocommerce-filters-advanced__input"
+						className={ classnames( className, 'woocommerce-filters-advanced__input' ) }
 						onChange={ this.onSearchChange }
 						type={ input.type }
 						placeholder={ labels.placeholder }
@@ -106,7 +112,7 @@ class SearchFilter extends Component {
 
 		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (
-			<fieldset tabIndex="0">
+			<fieldset className="woocommerce-filters-advanced__line-item" tabIndex="0">
 				<legend className="screen-reader-text">
 					{ labels.add || '' }
 				</legend>

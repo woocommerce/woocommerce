@@ -184,43 +184,17 @@ class WC_Admin_Reports_Downloads_Stats_Data_Store extends WC_Admin_Reports_Downl
 	}
 
 	/**
-	 * Sorts intervals according to user's request.
+	 * Normalizes order_by clause to match to SQL query.
 	 *
-	 * They are pre-sorted in SQL, but after adding gaps, they need to be sorted including the added ones.
-	 *
-	 * @param stdClass $data      Data object, must contain an array under $data->intervals.
-	 * @param string   $sort_by   Ordering property.
-	 * @param string   $direction DESC/ASC.
-	 */
-	protected function sort_intervals( &$data, $sort_by, $direction ) {
-		if ( 'date' === $sort_by ) {
-			$this->order_by = 'time_interval';
-		} else {
-			$this->order_by = $sort_by;
-		}
-
-		$this->order    = $direction;
-		usort( $data->intervals, array( $this, 'interval_cmp' ) );
-	}
-
-	/**
-	 * Compares two report data objects by pre-defined object property and ASC/DESC ordering.
-	 *
-	 * @param stdClass $a Object a.
-	 * @param stdClass $b Object b.
+	 * @param string $order_by Order by option requeste by user.
 	 * @return string
 	 */
-	protected function interval_cmp( $a, $b ) {
-		if ( '' === $this->order_by || '' === $this->order ) {
-			return 0;
+	protected function normalize_order_by( $order_by ) {
+		if ( 'date' === $order_by ) {
+			return 'time_interval';
 		}
-		if ( $a[ $this->order_by ] === $b[ $this->order_by ] ) {
-			return 0;
-		} elseif ( $a[ $this->order_by ] > $b[ $this->order_by ] ) {
-			return strtolower( $this->order ) === 'desc' ? -1 : 1;
-		} elseif ( $a[ $this->order_by ] < $b[ $this->order_by ] ) {
-			return strtolower( $this->order ) === 'desc' ? 1 : -1;
-		}
+
+		return $order_by;
 	}
 
 }

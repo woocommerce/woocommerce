@@ -227,6 +227,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		if ( 'date' === $order_by ) {
 			return 'date_created';
 		}
+
+		return $order_by;
 	}
 
 	/**
@@ -313,7 +315,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			"SELECT order_id, ID as product_id, post_title as product_name, product_qty as product_quantity
 				FROM {$wpdb->prefix}posts
 				JOIN {$order_product_lookup_table} ON {$order_product_lookup_table}.product_id = {$wpdb->prefix}posts.ID
-				WHERE 
+				WHERE
 					order_id IN ({$included_order_ids})
 				",
 			ARRAY_A
@@ -337,7 +339,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 			"SELECT order_id, coupon_id, post_title as coupon_code
 				FROM {$wpdb->prefix}posts
 				JOIN {$order_coupon_lookup_table} ON {$order_coupon_lookup_table}.coupon_id = {$wpdb->prefix}posts.ID
-				WHERE 
+				WHERE
 					order_id IN ({$included_order_ids})
 				",
 			ARRAY_A

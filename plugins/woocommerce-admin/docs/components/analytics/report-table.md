@@ -68,9 +68,8 @@ The name of the property in the item object which contains the id.
 
 ### `primaryData`
 
-- **Required**
 - Type: Object
-- Default: null
+- Default: `{}`
 
 Primary data of that report. If it's not provided, it will be automatically
 loaded via the provided `endpoint`.
@@ -78,7 +77,13 @@ loaded via the provided `endpoint`.
 ### `tableData`
 
 - Type: Object
-- Default: `{}`
+- Default: `{
+    items: {
+        data: [],
+        totalResults: 0,
+    },
+    query: {},
+}`
 
 Table data of that report. If it's not provided, it will be automatically
 loaded via the provided `endpoint`.

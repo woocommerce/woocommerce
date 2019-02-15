@@ -8,6 +8,7 @@ build-style
 languages/*
 !languages/README.md
 wc-admin.zip
+includes/feature-config.php
 
 # Directories/files that may appear in your environment
 .DS_Store

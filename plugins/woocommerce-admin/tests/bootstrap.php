@@ -37,21 +37,17 @@ function wc_admin_install() {
 	define( 'WC_REMOVE_ALL_DATA', true );
 
 	// Initialize the WC API extensions.
-	require_once dirname( dirname( __FILE__ ) ) . '/includes/class-wc-admin-api-init.php';
+	require_once dirname( dirname( __FILE__ ) ) . '/includes/class-wc-admin-install.php';
 
-	WC_Admin_Api_Init::install();
+	WC_Admin_Install::create_tables();
 
 	if ( ! wp_next_scheduled( 'wc_admin_daily' ) ) {
 		wp_schedule_event( time(), 'daily', 'wc_admin_daily' );
 	}
 
 	// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
-	if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
-		$GLOBALS['wp_roles']->reinit();
-	} else {
-		$GLOBALS['wp_roles'] = null; // WPCS: override ok.
-		wp_roles();
-	}
+	$GLOBALS['wp_roles'] = null; // WPCS: override ok.
+	wp_roles();
 
 	echo esc_html( 'Installing wc-admin...' . PHP_EOL );
 }
@@ -94,16 +90,6 @@ function wc_test_includes() {
  * Manually load the plugin being tested.
  */
 function _manually_load_plugin() {
-	if ( version_compare( $GLOBALS['wp_version'], '4.9.9', '<=' ) ) { // < 5.0 fails for "5.0-alpha-12345-src
-		$_tests_wp_core_dir = getenv( 'WP_CORE_DIR' );
-
-		if ( ! $_tests_wp_core_dir ) {
-			$_tests_wp_core_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress';
-		}
-
-		require $_tests_wp_core_dir . '/wp-content/plugins/gutenberg/gutenberg.php';
-	}
-
 	define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 	define( 'WC_USE_TRANSACTIONS', false );
 	require_once wc_dir() . '/woocommerce.php';
@@ -124,3 +110,16 @@ require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-helper-reports.p
 require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-helper-admin-notes.php';
 require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-test-action-queue.php';
 require_once dirname( __FILE__ ) . '/framework/helpers/class-wc-helper-queue.php';
+
+/**
+ * Set the environment and feature flags to 'develop' when running tests, instead of what is set in the generated `config/feature-flags.php`.
+ * This matches how we mock the flags in jest.
+ */
+function wc_admin_get_feature_config() {
+	$config = json_decode( file_get_contents( dirname( dirname( __FILE__ ) ) . '/config/development.json' ) );
+	$flags  = array();
+	foreach ( $config->features as $feature => $bool ) {
+		$flags[ $feature ] = $bool;
+	}
+	return $flags;
+}

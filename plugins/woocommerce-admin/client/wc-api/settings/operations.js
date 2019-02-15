@@ -48,13 +48,13 @@ function updateSettings( resourceNames, data, fetch ) {
 				method: 'POST',
 				data: { value: settingsData[ setting ] },
 			} )
-				.then( settingsToSettingsResource )
+				.then( settingToSettingsResource.bind( null, data.settings ) )
 				.catch( error => {
 					return { [ resourceName ]: { error } };
 				} );
 		} );
 
-		return [ promises ];
+		return promises;
 	}
 	return [];
 }
@@ -63,6 +63,11 @@ function settingsToSettingsResource( settings ) {
 	const settingsData = {};
 	settings.forEach( setting => ( settingsData[ setting.id ] = setting.value ) );
 	return { [ 'settings' ]: { data: settingsData } };
+}
+
+function settingToSettingsResource( settings, setting ) {
+	settings[ setting.id ] = setting.value;
+	return { [ 'settings' ]: { data: settings } };
 }
 
 export default {

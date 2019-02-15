@@ -61,8 +61,15 @@ export class ReportSummary extends Component {
 
 		const renderSummaryNumbers = ( { onToggle } ) =>
 			charts.map( chart => {
-				const { key, label, type } = chart;
-				const href = getNewPath( { chart: key } );
+				const { key, order, orderby, label, type } = chart;
+				const newPath = { chart: key };
+				if ( orderby ) {
+					newPath.orderby = orderby;
+				}
+				if ( order ) {
+					newPath.order = order;
+				}
+				const href = getNewPath( newPath );
 				const isSelected = selectedChart.key === key;
 				const { delta, prevValue, value } = this.getValues( key, type );
 

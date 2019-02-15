@@ -21,6 +21,10 @@ function wc_admin_is_admin_page() {
  * `wc_get_screen_ids` will also return IDs for extensions that have properly registered themselves.
  */
 function wc_admin_is_embed_enabled_wc_page() {
+	if ( ! wc_admin_is_feature_enabled( 'activity-panels' ) ) {
+		return false;
+	}
+
 	$screen_id = wc_admin_get_current_screen_id();
 	if ( ! $screen_id ) {
 		return false;
@@ -66,106 +70,110 @@ function wc_admin_register_page( $options ) {
 function wc_admin_register_pages() {
 	global $menu, $submenu;
 
-	add_submenu_page(
-		'woocommerce',
-		__( 'WooCommerce Dashboard', 'wc-admin' ),
-		__( 'Dashboard', 'wc-admin' ),
-		'manage_options',
-		'wc-admin',
-		'wc_admin_page'
-	);
+	if ( wc_admin_is_feature_enabled( 'dashboard' ) ) {
+		add_submenu_page(
+			'woocommerce',
+			__( 'WooCommerce Dashboard', 'wc-admin' ),
+			__( 'Dashboard', 'wc-admin' ),
+			'manage_options',
+			'wc-admin',
+			'wc_admin_page'
+		);
+	}
 
-	add_menu_page(
-		__( 'WooCommerce Analytics', 'wc-admin' ),
-		__( 'Analytics', 'wc-admin' ),
-		'manage_options',
-		'wc-admin#/analytics/revenue',
-		'wc_admin_page',
-		'dashicons-chart-bar',
-		56 // After WooCommerce & Product menu items.
-	);
+	if ( wc_admin_is_feature_enabled( 'analytics' ) ) {
+		add_menu_page(
+			__( 'WooCommerce Analytics', 'wc-admin' ),
+			__( 'Analytics', 'wc-admin' ),
+			'manage_options',
+			'wc-admin#/analytics/revenue',
+			'wc_admin_page',
+			'dashicons-chart-bar',
+			56 // After WooCommerce & Product menu items.
+		);
 
-	wc_admin_register_page(
-		array(
-			'title'  => __( 'Revenue', 'wc-admin' ),
-			'parent' => '/analytics/revenue',
-			'path'   => '/analytics/revenue',
-		)
-	);
+		wc_admin_register_page(
+			array(
+				'title'  => __( 'Revenue', 'wc-admin' ),
+				'parent' => '/analytics/revenue',
+				'path'   => '/analytics/revenue',
+			)
+		);
 
-	wc_admin_register_page(
-		array(
-			'title'  => __( 'Orders', 'wc-admin' ),
-			'parent' => '/analytics/revenue',
-			'path'   => '/analytics/orders',
-		)
-	);
+		wc_admin_register_page(
+			array(
+				'title'  => __( 'Orders', 'wc-admin' ),
+				'parent' => '/analytics/revenue',
+				'path'   => '/analytics/orders',
+			)
+		);
 
-	wc_admin_register_page(
-		array(
-			'title'  => __( 'Products', 'wc-admin' ),
-			'parent' => '/analytics/revenue',
-			'path'   => '/analytics/products',
-		)
-	);
+		wc_admin_register_page(
+			array(
+				'title'  => __( 'Products', 'wc-admin' ),
+				'parent' => '/analytics/revenue',
+				'path'   => '/analytics/products',
+			)
+		);
 
-	wc_admin_register_page(
-		array(
-			'title'  => __( 'Categories', 'wc-admin' ),
-			'parent' => '/analytics/revenue',
-			'path'   => '/analytics/categories',
-		)
-	);
+		wc_admin_register_page(
+			array(
+				'title'  => __( 'Categories', 'wc-admin' ),
+				'parent' => '/analytics/revenue',
+				'path'   => '/analytics/categories',
+			)
+		);
 
-	wc_admin_register_page(
-		array(
-			'title'  => __( 'Coupons', 'wc-admin' ),
-			'parent' => '/analytics/revenue',
-			'path'   => '/analytics/coupons',
-		)
-	);
+		wc_admin_register_page(
+			array(
+				'title'  => __( 'Coupons', 'wc-admin' ),
+				'parent' => '/analytics/revenue',
+				'path'   => '/analytics/coupons',
+			)
+		);
 
-	wc_admin_register_page(
-		array(
-			'title'  => __( 'Taxes', 'wc-admin' ),
-			'parent' => '/analytics/revenue',
-			'path'   => '/analytics/taxes',
-		)
-	);
+		wc_admin_register_page(
+			array(
+				'title'  => __( 'Taxes', 'wc-admin' ),
+				'parent' => '/analytics/revenue',
+				'path'   => '/analytics/taxes',
+			)
+		);
 
-	wc_admin_register_page(
-		array(
-			'title'  => __( 'Downloads', 'wc-admin' ),
-			'parent' => '/analytics/revenue',
-			'path'   => '/analytics/downloads',
-		)
-	);
+		wc_admin_register_page(
+			array(
+				'title'  => __( 'Downloads', 'wc-admin' ),
+				'parent' => '/analytics/revenue',
+				'path'   => '/analytics/downloads',
+			)
+		);
 
-	wc_admin_register_page(
-		array(
-			'title'  => __( 'Stock', 'wc-admin' ),
-			'parent' => '/analytics/revenue',
-			'path'   => '/analytics/stock',
-		)
-	);
+		wc_admin_register_page(
+			array(
+				'title'  => __( 'Stock', 'wc-admin' ),
+				'parent' => '/analytics/revenue',
+				'path'   => '/analytics/stock',
+			)
+		);
 
-	wc_admin_register_page(
-		array(
-			'title'  => __( 'Customers', 'wc-admin' ),
-			'parent' => '/analytics/revenue',
-			'path'   => '/analytics/customers',
-		)
-	);
+		wc_admin_register_page(
+			array(
+				'title'  => __( 'Customers', 'wc-admin' ),
+				'parent' => '/analytics/revenue',
+				'path'   => '/analytics/customers',
+			)
+		);
 
-	wc_admin_register_page(
-		array(
-			'title'  => __( 'Settings', 'wc-admin' ),
-			'parent' => '/analytics/revenue',
-			'path'   => '/analytics/settings',
-		)
-	);
+		wc_admin_register_page(
+			array(
+				'title'  => __( 'Settings', 'wc-admin' ),
+				'parent' => '/analytics/revenue',
+				'path'   => '/analytics/settings',
+			)
+		);
+	}
 
-	if ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
+	if ( wc_admin_is_feature_enabled( 'devdocs' ) && defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
 		wc_admin_register_page(
 			array(
 				'title'  => 'DevDocs',
@@ -236,7 +244,7 @@ function wc_admin_enqueue_script() {
 add_action( 'admin_enqueue_scripts', 'wc_admin_enqueue_script' );
 
 /**
- * Adds an admin body class.
+ * Adds body classes to the main wp-admin wrapper, allowing us to better target elements in specific scenarios.
  *
  * @param string $admin_body_class Body class to add.
  */
@@ -252,6 +260,18 @@ function wc_admin_admin_body_class( $admin_body_class = '' ) {
 	if ( wc_admin_is_embed_enabled_wc_page() ) {
 		$classes[] = 'woocommerce-embed-page';
 	}
+
+	if ( function_exists( 'wc_admin_get_feature_config' ) ) {
+		$features = wc_admin_get_feature_config();
+		foreach ( $features as $feature_key => $bool ) {
+			if ( true === $bool ) {
+				$classes[] = sanitize_html_class( 'woocommerce-feature-enabled-' . $feature_key );
+			} else {
+				$classes[] = sanitize_html_class( 'woocommerce-feature-disabled-' . $feature_key );
+			}
+		}
+	}
+
 	$admin_body_class = implode( ' ', array_unique( $classes ) );
 	return " $admin_body_class ";
 }
@@ -261,7 +281,7 @@ add_filter( 'admin_body_class', 'wc_admin_admin_body_class' );
  * Runs before admin notices action and hides them.
  */
 function wc_admin_admin_before_notices() {
-	if ( ! wc_admin_is_admin_page() && ! wc_admin_is_embed_enabled_wc_page() ) {
+	if ( ( ! wc_admin_is_admin_page() && ! wc_admin_is_embed_enabled_wc_page() ) || ! wc_admin_is_feature_enabled( 'activity-panels' ) ) {
 		return;
 	}
 	echo '<div class="woocommerce-layout__notice-list-hide" id="wp__notice-list">';
@@ -273,7 +293,7 @@ add_action( 'admin_notices', 'wc_admin_admin_before_notices', 0 );
  * Runs after admin notices and closes div.
  */
 function wc_admin_admin_after_notices() {
-	if ( ! wc_admin_is_admin_page() && ! wc_admin_is_embed_enabled_wc_page() ) {
+	if ( ( ! wc_admin_is_admin_page() && ! wc_admin_is_embed_enabled_wc_page() ) || ! wc_admin_is_feature_enabled( 'activity-panels' ) ) {
 		return;
 	}
 	echo '</div>';

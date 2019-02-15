@@ -2,7 +2,6 @@
 /**
  * External dependencies
  */
-import { utcParse as d3UTCParse } from 'd3-time-format';
 import { scaleBand, scaleLinear, scaleTime } from 'd3-scale';
 
 /**
@@ -11,11 +10,9 @@ import { scaleBand, scaleLinear, scaleTime } from 'd3-scale';
 import dummyOrders from './fixtures/dummy-orders';
 import {
 	getOrderedKeys,
-	getLineData,
-	getUniqueKeys,
 	getUniqueDates,
 } from '../index';
-import { getXGroupScale, getXScale, getXLineScale, getYMax, getYScale, getYTickOffset } from '../scales';
+import { getXGroupScale, getXScale, getXLineScale, getYMax, getYScale } from '../scales';
 
 jest.mock( 'd3-scale', () => ( {
 	...require.requireActual( 'd3-scale' ),
@@ -37,13 +34,10 @@ jest.mock( 'd3-scale', () => ( {
 	} ),
 } ) );
 
-const testUniqueKeys = getUniqueKeys( dummyOrders );
-const testOrderedKeys = getOrderedKeys( dummyOrders, testUniqueKeys );
-const testLineData = getLineData( dummyOrders, testOrderedKeys );
+const testOrderedKeys = getOrderedKeys( dummyOrders );
 
 describe( 'X scales', () => {
-	const parseDate = d3UTCParse( '%Y-%m-%dT%H:%M:%S' );
-	const testUniqueDates = getUniqueDates( testLineData, parseDate );
+	const testUniqueDates = getUniqueDates( dummyOrders, '%Y-%m-%dT%H:%M:%S' );
 
 	describe( 'getXScale', () => {
 		it( 'creates band scale with correct parameters', () => {
@@ -96,7 +90,7 @@ describe( 'X scales', () => {
 describe( 'Y scales', () => {
 	describe( 'getYMax', () => {
 		it( 'calculate the correct maximum y value', () => {
-			expect( getYMax( testLineData ) ).toEqual( 15000000 );
+			expect( getYMax( dummyOrders ) ).toEqual( 15000000 );
 		} );
 
 		it( 'return 0 if there is no line data', () => {
@@ -114,23 +108,6 @@ describe( 'Y scales', () => {
 
 		it( 'avoids the domain starting and ending at the same point when yMax is 0', () => {
 			getYScale( 100, 0 );
-
-			const args = scaleLinear().domain.mock.calls;
-			const lastArgs = args[ args.length - 1 ][ 0 ];
-			expect( lastArgs[ 0 ] ).toBeLessThan( lastArgs[ 1 ] );
-		} );
-	} );
-
-	describe( 'getYTickOffset', () => {
-		it( 'creates linear scale with correct parameters', () => {
-			getYTickOffset( 100, 15000000 );
-
-			expect( scaleLinear().domain ).toHaveBeenLastCalledWith( [ 0, 15000000 ] );
-			expect( scaleLinear().rangeRound ).toHaveBeenLastCalledWith( [ 112, 12 ] );
-		} );
-
-		it( 'avoids the domain starting and ending at the same point when yMax is 0', () => {
-			getYTickOffset( 100, 0 );
 
 			const args = scaleLinear().domain.mock.calls;
 			const lastArgs = args[ args.length - 1 ][ 0 ];

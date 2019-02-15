@@ -9,6 +9,7 @@ import { partial, findIndex, difference, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 import Gridicon from 'gridicons';
 import interpolateComponents from 'interpolate-components';
+import classnames from 'classnames';
 
 /**
  * WooCommerce dependencies
@@ -190,6 +191,7 @@ class AdvancedFilters extends Component {
 							<li className="woocommerce-filters-advanced__list-item" key={ key }>
 								{ 'SelectControl' === input.component && (
 									<SelectFilter
+										className="woocommerce-filters-advanced__fieldset-item"
 										filter={ filter }
 										config={ config.filters[ key ] }
 										onFilterChange={ this.onFilterChange }
@@ -198,6 +200,7 @@ class AdvancedFilters extends Component {
 								) }
 								{ 'Search' === input.component && (
 									<SearchFilter
+										className="woocommerce-filters-advanced__fieldset-item"
 										filter={ filter }
 										config={ config.filters[ key ] }
 										onFilterChange={ this.onFilterChange }
@@ -207,6 +210,7 @@ class AdvancedFilters extends Component {
 								) }
 								{ 'Number' === input.component && (
 									<NumberFilter
+										className="woocommerce-filters-advanced__fieldset-item"
 										filter={ filter }
 										config={ config.filters[ key ] }
 										onFilterChange={ this.onFilterChange }
@@ -216,6 +220,7 @@ class AdvancedFilters extends Component {
 								) }
 								{ 'Currency' === input.component && (
 									<NumberFilter
+										className="woocommerce-filters-advanced__fieldset-item"
 										filter={ filter }
 										config={ { ...config.filters[ key ], ...{ input: { type: 'currency', component: 'Currency' } } } }
 										onFilterChange={ this.onFilterChange }
@@ -225,6 +230,7 @@ class AdvancedFilters extends Component {
 								) }
 								{ 'Date' === input.component && (
 									<DateFilter
+										className="woocommerce-filters-advanced__fieldset-item"
 										filter={ filter }
 										config={ config.filters[ key ] }
 										onFilterChange={ this.onFilterChange }
@@ -234,7 +240,10 @@ class AdvancedFilters extends Component {
 									/>
 								) }
 								<IconButton
-									className="woocommerce-filters-advanced__remove"
+									className={ classnames(
+										'woocommerce-filters-advanced__line-item',
+										'woocommerce-filters-advanced__remove'
+									) }
 									label={ labels.remove }
 									onClick={ partial( this.removeFilter, key ) }
 									icon={ <Gridicon icon="cross-small" /> }

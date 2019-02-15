@@ -21,44 +21,52 @@ import Dashboard from 'dashboard';
 import DevDocs from 'devdocs';
 
 const getPages = () => {
-	const pages = [
-		{
-			container: Dashboard,
-			path: '/',
-			wpOpenMenu: 'toplevel_page_woocommerce',
-			wpClosedMenu: 'toplevel_page_wc-admin--analytics-revenue',
-		},
-		{
-			container: Analytics,
-			path: '/analytics',
-			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
-			wpClosedMenu: 'toplevel_page_woocommerce',
-		},
-		{
-			container: AnalyticsSettings,
-			path: '/analytics/settings',
-			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
-			wpClosedMenu: 'toplevel_page_woocommerce',
-		},
-		{
-			container: AnalyticsReport,
-			path: '/analytics/:report',
-			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
-			wpClosedMenu: 'toplevel_page_woocommerce',
-		},
-		{
+	const pages = [];
+
+	if ( window.wcAdminFeatures.devdocs ) {
+		pages.push( {
 			container: DevDocs,
 			path: '/devdocs',
 			wpOpenMenu: 'toplevel_page_woocommerce',
 			wpClosedMenu: 'toplevel_page_wc-admin--analytics-revenue',
-		},
-		{
+		} );
+		pages.push( {
 			container: DevDocs,
 			path: '/devdocs/:component',
 			wpOpenMenu: 'toplevel_page_woocommerce',
 			wpClosedMenu: 'toplevel_page_wc-admin--analytics-revenue',
-		},
-	];
+		} );
+	}
+
+	if ( window.wcAdminFeatures.dashboard ) {
+		pages.push( {
+			container: Dashboard,
+			path: '/',
+			wpOpenMenu: 'toplevel_page_woocommerce',
+			wpClosedMenu: 'toplevel_page_wc-admin--analytics-revenue',
+		} );
+	}
+
+	if ( window.wcAdminFeatures.analytics ) {
+		pages.push( {
+			container: Analytics,
+			path: '/analytics',
+			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
+			wpClosedMenu: 'toplevel_page_woocommerce',
+		} );
+		pages.push( {
+			container: AnalyticsSettings,
+			path: '/analytics/settings',
+			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
+			wpClosedMenu: 'toplevel_page_woocommerce',
+		} );
+		pages.push( {
+			container: AnalyticsReport,
+			path: '/analytics/:report',
+			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
+			wpClosedMenu: 'toplevel_page_woocommerce',
+		} );
+	}
 
 	return pages;
 };

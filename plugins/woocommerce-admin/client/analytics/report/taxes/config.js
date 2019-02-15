@@ -15,21 +15,29 @@ export const charts = [
 	{
 		key: 'total_tax',
 		label: __( 'Total Tax', 'wc-admin' ),
+		order: 'desc',
+		orderby: 'total_tax',
 		type: 'currency',
 	},
 	{
 		key: 'order_tax',
 		label: __( 'Order Tax', 'wc-admin' ),
+		order: 'desc',
+		orderby: 'order_tax',
 		type: 'currency',
 	},
 	{
 		key: 'shipping_tax',
 		label: __( 'Shipping Tax', 'wc-admin' ),
+		order: 'desc',
+		orderby: 'shipping_tax',
 		type: 'currency',
 	},
 	{
 		key: 'orders_count',
 		label: __( 'Orders Count', 'wc-admin' ),
+		order: 'desc',
+		orderby: 'orders_count',
 		type: 'number',
 	},
 ];

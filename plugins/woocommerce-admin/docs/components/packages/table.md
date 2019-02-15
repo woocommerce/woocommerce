@@ -132,13 +132,6 @@ The total number of rows to display per page.
 
 The string to use as a query parameter when searching row items.
 
-### `searchParam`
-
-- Type: String
-- Default: null
-
-Url query parameter search function operates on
-
 ### `showMenu`
 
 - Type: Boolean

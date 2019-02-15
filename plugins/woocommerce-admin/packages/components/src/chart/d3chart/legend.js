@@ -61,7 +61,7 @@ class D3Legend extends Component {
 		} = this.props;
 		const { isScrollable } = this.state;
 		const numberOfRowsVisible = data.filter( row => row.visible ).length;
-		const showTotalLabel = legendDirection === 'column' && data.length > numberOfRowsVisible && totalLabel;
+		const showTotalLabel = legendDirection === 'column' && data.length > selectionLimit && totalLabel;
 
 		const visibleKeys = data.filter( key => key.visible );
 

@@ -186,16 +186,17 @@ class DateFilter extends Component {
 	}
 
 	render() {
-		const { config, filter, isEnglish } = this.props;
+		const { className, config, filter, isEnglish } = this.props;
 		const { rule } = filter;
 		const { labels, rules } = config;
 		const screenReaderText = this.getScreenReaderText( filter, config );
 		const children = interpolateComponents( {
 			mixedString: labels.title,
 			components: {
+				title: <span className={ className } />,
 				rule: (
 					<SelectControl
-						className="woocommerce-filters-advanced__rule"
+						className={ classnames( className, 'woocommerce-filters-advanced__rule' ) }
 						options={ rules }
 						value={ rule }
 						onChange={ this.onRuleChange }
@@ -204,7 +205,7 @@ class DateFilter extends Component {
 				),
 				filter: (
 					<div
-						className={ classnames( 'woocommerce-filters-advanced__input-range', {
+						className={ classnames( className, 'woocommerce-filters-advanced__input-range', {
 							'is-between': 'between' === rule,
 						} ) }
 					>
@@ -215,7 +216,7 @@ class DateFilter extends Component {
 		} );
 		/*eslint-disable jsx-a11y/no-noninteractive-tabindex*/
 		return (
-			<fieldset tabIndex="0">
+			<fieldset className="woocommerce-filters-advanced__line-item" tabIndex="0">
 				<legend className="screen-reader-text">{ labels.add || '' }</legend>
 				<div
 					className={ classnames( 'woocommerce-filters-advanced__fieldset', {
