@@ -55,12 +55,17 @@ class WC_AJAX {
 	 * @since 2.5.0
 	 */
 	private static function wc_ajax_headers() {
-		send_origin_headers();
-		header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
-		header( 'X-Robots-Tag: noindex' );
-		send_nosniff_header();
-		wc_nocache_headers();
-		status_header( 200 );
+		if ( ! headers_sent() ) {
+			send_origin_headers();
+			send_nosniff_header();
+			wc_nocache_headers();
+			header( 'Content-Type: text/html; charset=' . get_option( 'blog_charset' ) );
+			header( 'X-Robots-Tag: noindex' );
+			status_header( 200 );
+		} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			headers_sent( $file, $line );
+			trigger_error( "wc_ajax_headers cannot set headers - headers already sent by {$file} on line {$line}", E_USER_NOTICE ); // @codingStandardsIgnoreLine
+		}
 	}
 
 	/**
