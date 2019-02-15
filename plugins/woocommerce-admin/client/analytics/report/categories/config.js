@@ -13,16 +13,22 @@ export const charts = [
 	{
 		key: 'items_sold',
 		label: __( 'Items Sold', 'wc-admin' ),
+		order: 'desc',
+		orderby: 'items_sold',
 		type: 'number',
 	},
 	{
 		key: 'net_revenue',
 		label: __( 'Net Revenue', 'wc-admin' ),
+		order: 'desc',
+		orderby: 'net_revenue',
 		type: 'currency',
 	},
 	{
 		key: 'orders_count',
 		label: __( 'Orders Count', 'wc-admin' ),
+		order: 'desc',
+		orderby: 'orders_count',
 		type: 'number',
 	},
 ];

@@ -20,6 +20,8 @@ export const charts = [
 	{
 		key: 'net_revenue',
 		label: __( 'Net Revenue', 'wc-admin' ),
+		order: 'desc',
+		orderby: 'net_total',
 		type: 'currency',
 	},
 	{
@@ -30,6 +32,8 @@ export const charts = [
 	{
 		key: 'avg_items_per_order',
 		label: __( 'Average Items Per Order', 'wc-admin' ),
+		order: 'desc',
+		orderby: 'num_items_sold',
 		type: 'average',
 	},
 ];

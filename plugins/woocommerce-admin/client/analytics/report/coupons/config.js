@@ -13,11 +13,15 @@ export const charts = [
 	{
 		key: 'orders_count',
 		label: __( 'Discounted Orders', 'wc-admin' ),
+		order: 'desc',
+		orderby: 'orders_count',
 		type: 'number',
 	},
 	{
 		key: 'amount',
 		label: __( 'Amount', 'wc-admin' ),
+		order: 'desc',
+		orderby: 'amount',
 		type: 'currency',
 	},
 ];
