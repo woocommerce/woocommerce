@@ -15,9 +15,6 @@
 }
 
 .woocommerce-segmented-selection__item {
-	display: block;
-	@include set-grid-item-position( 2, 10 );
-
 	&:nth-child(2n) {
 		border-left: 1px solid $core-grey-light-700;
 		border-top: 1px solid $core-grey-light-700;
