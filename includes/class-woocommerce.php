@@ -659,8 +659,8 @@ final class WooCommerce {
 		$wpdb->order_itemmeta = $wpdb->prefix . 'woocommerce_order_itemmeta';
 		$wpdb->tables[]       = 'woocommerce_order_itemmeta';
 
-		$wpdb->wc_product_sorting = $wpdb->prefix . 'wc_product_sorting';
-		$wpdb->tables[]           = 'wc_product_sorting';
+		$wpdb->wc_product_meta_lookup = $wpdb->prefix . 'wc_product_meta_lookup';
+		$wpdb->tables[]           = 'wc_product_meta_lookup';
 
 		if ( get_option( 'db_version' ) < 34370 ) {
 			$wpdb->woocommerce_termmeta = $wpdb->prefix . 'woocommerce_termmeta';

@@ -825,13 +825,14 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
   KEY permission_id (permission_id),
   KEY timestamp (timestamp)
 ) $collate;
-CREATE TABLE {$wpdb->prefix}wc_product_sorting (
+CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `product_id` bigint(20) NOT NULL,
   `price` decimal(10,{$price_decimals}) NULL default NULL,
   `min_price` decimal(10,{$price_decimals}) NULL default NULL,
   `max_price` decimal(10,{$price_decimals}) NULL default NULL,
   `average_rating` decimal(10,2) NULL default 0,
   `total_sales` bigint(20) NULL default 0,
+  `stock` bigint(20) NULL default NULL,
   PRIMARY KEY  (`product_id`),
   KEY product_id_price (`product_id`,`max_price`,`min_price`),
   KEY product_id_average_rating (`product_id`,`average_rating`),
@@ -870,7 +871,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		$tables = array(
 			"{$wpdb->prefix}wc_download_log",
-			"{$wpdb->prefix}wc_product_sorting",
+			"{$wpdb->prefix}wc_product_meta_lookup",
 			"{$wpdb->prefix}wc_webhooks",
 			"{$wpdb->prefix}woocommerce_api_keys",
 			"{$wpdb->prefix}woocommerce_attribute_taxonomies",

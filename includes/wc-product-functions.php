@@ -1275,7 +1275,7 @@ function wc_update_product_lookup_tables() {
 
 	$result = $wpdb->query(
 		"
-		INSERT IGNORE INTO {$wpdb->wc_product_sorting} (`product_id`, `price`, `min_price`, `max_price`, `average_rating`, `total_sales`)
+		INSERT IGNORE INTO {$wpdb->wc_product_meta_lookup} (`product_id`, `price`, `min_price`, `max_price`, `average_rating`, `total_sales`)
 		SELECT posts.ID, MIN(meta1.meta_value), MIN(meta1.meta_value), MAX(meta1.meta_value), meta2.meta_value, meta3.meta_value
 		FROM {$wpdb->posts} posts
 		LEFT JOIN {$wpdb->postmeta} meta1 ON posts.ID = meta1.post_id

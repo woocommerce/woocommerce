@@ -543,7 +543,7 @@ class WC_Query {
 
 		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
 		$args['where']  .= $wpdb->prepare(
-			' AND wc_product_sorting.min_price >= %f AND wc_product_sorting.max_price <= %f ',
+			' AND wc_product_meta_lookup.min_price >= %f AND wc_product_meta_lookup.max_price <= %f ',
 			$min,
 			$max
 		);
@@ -558,7 +558,7 @@ class WC_Query {
 	 */
 	public function order_by_price_asc_post_clauses( $args ) {
 		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
-		$args['orderby'] = ' wc_product_sorting.min_price ASC, wc_product_sorting.product_id ASC ';
+		$args['orderby'] = ' wc_product_meta_lookup.min_price ASC, wc_product_meta_lookup.product_id ASC ';
 		return $args;
 	}
 
@@ -570,7 +570,7 @@ class WC_Query {
 	 */
 	public function order_by_price_desc_post_clauses( $args ) {
 		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
-		$args['orderby'] = ' wc_product_sorting.max_price DESC, wc_product_sorting.product_id DESC ';
+		$args['orderby'] = ' wc_product_meta_lookup.max_price DESC, wc_product_meta_lookup.product_id DESC ';
 		return $args;
 	}
 
@@ -584,7 +584,7 @@ class WC_Query {
 	 */
 	public function order_by_popularity_post_clauses( $args ) {
 		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
-		$args['orderby'] = ' wc_product_sorting.total_sales DESC, wc_product_sorting.product_id DESC ';
+		$args['orderby'] = ' wc_product_meta_lookup.total_sales DESC, wc_product_meta_lookup.product_id DESC ';
 		return $args;
 	}
 
@@ -596,12 +596,12 @@ class WC_Query {
 	 */
 	public function order_by_rating_post_clauses( $args ) {
 		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
-		$args['orderby'] = ' wc_product_sorting.average_rating DESC, wc_product_sorting.product_id DESC ';
+		$args['orderby'] = ' wc_product_meta_lookup.average_rating DESC, wc_product_meta_lookup.product_id DESC ';
 		return $args;
 	}
 
 	/**
-	 * Join wc_product_sorting to posts if not already joined.
+	 * Join wc_product_meta_lookup to posts if not already joined.
 	 *
 	 * @param string $sql SQL join.
 	 * @return string
@@ -609,8 +609,8 @@ class WC_Query {
 	private function append_product_sorting_table_join( $sql ) {
 		global $wpdb;
 
-		if ( ! strstr( $sql, 'wc_product_sorting' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_sorting} wc_product_sorting ON $wpdb->posts.ID = wc_product_sorting.product_id ";
+		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
+			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
 		}
 		return $sql;
 	}

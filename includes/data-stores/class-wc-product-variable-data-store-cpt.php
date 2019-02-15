@@ -594,7 +594,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			}
 		}
 
-		$this->update_lookup_table( $product->get_id(), 'wc_product_sorting' );
+		$this->update_lookup_table( $product->get_id(), 'wc_product_meta_lookup' );
 
 		/**
 		 * Fire an action for this direct update so it can be detected by other code.
