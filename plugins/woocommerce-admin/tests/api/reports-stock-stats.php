@@ -74,7 +74,7 @@ class WC_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 			$in_stock->save();
 		}
 
-		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request  = new WP_REST_Request( 'GET', $this->endpoint );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
 
@@ -94,7 +94,7 @@ class WC_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 		$backorder_stock->set_stock_status( 'onbackorder' );
 		$backorder_stock->save();
 
-		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request  = new WP_REST_Request( 'GET', $this->endpoint );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
 

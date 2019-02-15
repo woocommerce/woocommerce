@@ -77,7 +77,7 @@ class WC_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case {
 		$object->set_user_ip_address( '1.2.3.4' );
 		$id = $object->save();
 
-		$time = time();
+		$time    = time();
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(

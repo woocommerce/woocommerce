@@ -97,7 +97,7 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 		);
 
 		// Test retrieving the stats from the data store.
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $data_store->get_data( $args ) ), true ) );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true ) );
 
 		// Test retrieving the stats through the query class.
 		$expected_stats = array(
@@ -138,6 +138,6 @@ class WC_Admin_Tests_Reports_Revenue_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 		$query          = new WC_Admin_Reports_Revenue_Query( $args );
-		$this->assertEquals( $expected_stats, json_decode( json_encode( $query->get_data() ), true ) );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $query->get_data() ), true ) );
 	}
 }

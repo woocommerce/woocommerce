@@ -61,7 +61,8 @@ class WC_Tests_API_Reports_Orders_Stats extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $reports ) ); // totals and intervals.
-		// $this->assertEquals( array(), $reports ); // @todo Update results after implement report interface.
+		// @todo Update results after implement report interface.
+		// $this->assertEquals( array(), $reports ); // @codingStandardsIgnoreLine.
 	}
 
 	/**

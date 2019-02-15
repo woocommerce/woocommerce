@@ -871,9 +871,9 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		$params   = array( 'a', 'b', 'c', 'd' );
 		$result   = WC_Admin_Reports_Interval::normalize_between_params( $request, $params, true );
 		$expected = array(
-			'b_after' => 1,
+			'b_after'  => 1,
 			'b_before' => 5,
-			'c_after' => 2,
+			'c_after'  => 2,
 			'c_before' => 4,
 		);
 

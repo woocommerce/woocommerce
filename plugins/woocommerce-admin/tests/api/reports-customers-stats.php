@@ -40,7 +40,7 @@ class WC_Tests_API_Reports_Customers_Stats extends WC_REST_Unit_Test_Case {
 	 *
 	 * @since 3.5.0
 	 */
-	public function _test_register_routes() {
+	public function test_register_routes() {
 		$routes = $this->server->get_routes();
 
 		$this->assertArrayHasKey( $this->endpoint, $routes );
@@ -156,8 +156,8 @@ class WC_Tests_API_Reports_Customers_Stats extends WC_REST_Unit_Test_Case {
 		// Test name and last_order parameters.
 		$request->set_query_params(
 			array(
-				'search'             => 'Jeff',
-				'last_order_after'   => date( 'Y-m-d' ) . 'T00:00:00Z',
+				'search'           => 'Jeff',
+				'last_order_after' => date( 'Y-m-d' ) . 'T00:00:00Z',
 			)
 		);
 		$response = $this->server->dispatch( $request );
