@@ -57,6 +57,7 @@
 		align-items: center;
 		background-color: $white;
 		color: $core-grey-dark-500;
+		cursor: pointer;
 		display: inline-flex;
 		flex-direction: row;
 		flex-wrap: nowrap;
@@ -71,7 +72,6 @@
 			flex-wrap: nowrap;
 			position: relative;
 			padding: 3px 0 3px 24px;
-			cursor: pointer;
 			font-size: 13px;
 			user-select: none;
 			width: 100%;
