@@ -1275,18 +1275,31 @@ function wc_update_product_lookup_tables() {
 
 	$result = $wpdb->query(
 		"
-		INSERT IGNORE INTO {$wpdb->wc_product_meta_lookup} (`product_id`, `price`, `min_price`, `max_price`, `average_rating`, `total_sales`)
-		SELECT posts.ID, MIN(meta1.meta_value), MIN(meta1.meta_value), MAX(meta1.meta_value), meta2.meta_value, meta3.meta_value
+		INSERT IGNORE INTO {$wpdb->wc_product_meta_lookup} (`product_id`, `min_price`, `max_price`, `average_rating`, `total_sales`)
+		SELECT
+			posts.ID, MIN(meta1.meta_value), MAX(meta1.meta_value), meta2.meta_value, meta3.meta_value
 		FROM {$wpdb->posts} posts
-		LEFT JOIN {$wpdb->postmeta} meta1 ON posts.ID = meta1.post_id
-		LEFT JOIN {$wpdb->postmeta} meta2 ON posts.ID = meta2.post_id
-		LEFT JOIN {$wpdb->postmeta} meta3 ON posts.ID = meta3.post_id
-		WHERE posts.post_type = 'product'
-		AND meta1.meta_key = '_price'
-		AND meta1.meta_value <> ''
-		AND meta2.meta_key = '_wc_average_rating'
-		AND meta3.meta_key = 'total_sales'
-		GROUP BY posts.ID
+			LEFT JOIN {$wpdb->postmeta} meta1 ON posts.ID = meta1.post_id AND meta1.meta_key = '_price'
+			LEFT JOIN {$wpdb->postmeta} meta2 ON posts.ID = meta2.post_id AND meta2.meta_key = '_wc_average_rating'
+			LEFT JOIN {$wpdb->postmeta} meta3 ON posts.ID = meta3.post_id AND meta3.meta_key = 'total_sales'
+		WHERE
+			posts.post_type = 'product'
+			AND meta1.meta_value <> ''
+		GROUP BY
+			posts.ID
+		"
+	);
+
+	$result = $wpdb->query(
+		"
+		UPDATE
+			{$wpdb->wc_product_meta_lookup} lookup_table
+			LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_manage_stock'
+			LEFT JOIN {$wpdb->postmeta} meta2 ON lookup_table.product_id = meta2.post_id AND meta2.meta_key = '_stock'
+		SET
+			lookup_table.stock = meta2.meta_value
+		WHERE
+			meta1.meta_value = 'yes'
 		"
 	);
 }

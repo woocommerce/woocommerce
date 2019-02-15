@@ -827,7 +827,6 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `product_id` bigint(20) NOT NULL,
-  `price` decimal(10,{$price_decimals}) NULL default NULL,
   `min_price` decimal(10,{$price_decimals}) NULL default NULL,
   `max_price` decimal(10,{$price_decimals}) NULL default NULL,
   `average_rating` decimal(10,2) NULL default 0,
