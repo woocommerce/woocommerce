@@ -252,7 +252,7 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 				'expected' => array(
 					'orderby'  => 'popularity',
 					'order'    => 'DESC',
-					'meta_key' => 'total_sales',
+					'meta_key' => '',
 				),
 			),
 			array(

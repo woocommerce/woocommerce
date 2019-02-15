@@ -870,6 +870,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		$tables = array(
 			"{$wpdb->prefix}wc_download_log",
+			"{$wpdb->prefix}wc_product_sorting",
 			"{$wpdb->prefix}wc_webhooks",
 			"{$wpdb->prefix}woocommerce_api_keys",
 			"{$wpdb->prefix}woocommerce_attribute_taxonomies",
