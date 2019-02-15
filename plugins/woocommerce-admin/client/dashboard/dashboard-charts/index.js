@@ -78,11 +78,11 @@ class DashboardCharts extends Component {
 		};
 	}
 
-	handleTypeToggle( type ) {
+	handleTypeToggle( chartType ) {
 		return () => {
-			this.setState( { chartType: type } );
+			this.setState( { chartType } );
 			const userDataFields = {
-				[ 'dashboard_chart_type' ]: type,
+				[ 'dashboard_chart_type' ]: chartType,
 			};
 			this.props.updateCurrentUserData( userDataFields );
 		};
@@ -146,7 +146,7 @@ class DashboardCharts extends Component {
 	render() {
 		const { path } = this.props;
 		const { chartType, hiddenChartKeys, interval } = this.state;
-		const query = { ...this.props.query, type: chartType, interval };
+		const query = { ...this.props.query, chartType, interval };
 		return (
 			<Fragment>
 				<div className="woocommerce-dashboard__dashboard-charts">
@@ -163,24 +163,25 @@ class DashboardCharts extends Component {
 						>
 							<IconButton
 								className={ classNames( 'woocommerce-chart__type-button', {
-									'woocommerce-chart__type-button-selected': ! query.type || query.type === 'line',
+									'woocommerce-chart__type-button-selected':
+										! query.chartType || query.chartType === 'line',
 								} ) }
 								icon={ <Gridicon icon="line-graph" /> }
 								title={ __( 'Line chart', 'wc-admin' ) }
-								aria-checked={ query.type === 'line' }
+								aria-checked={ query.chartType === 'line' }
 								role="menuitemradio"
-								tabIndex={ query.type === 'line' ? 0 : -1 }
+								tabIndex={ query.chartType === 'line' ? 0 : -1 }
 								onClick={ this.handleTypeToggle( 'line' ) }
 							/>
 							<IconButton
 								className={ classNames( 'woocommerce-chart__type-button', {
-									'woocommerce-chart__type-button-selected': query.type === 'bar',
+									'woocommerce-chart__type-button-selected': query.chartType === 'bar',
 								} ) }
 								icon={ <Gridicon icon="stats-alt" /> }
 								title={ __( 'Bar chart', 'wc-admin' ) }
-								aria-checked={ query.type === 'bar' }
+								aria-checked={ query.chartType === 'bar' }
 								role="menuitemradio"
-								tabIndex={ query.type === 'bar' ? 0 : -1 }
+								tabIndex={ query.chartType === 'bar' ? 0 : -1 }
 								onClick={ this.handleTypeToggle( 'bar' ) }
 							/>
 						</NavigableMenu>

@@ -143,10 +143,10 @@ class Chart extends Component {
 		window.removeEventListener( 'resize', this.updateDimensions );
 	}
 
-	handleTypeToggle( type ) {
-		if ( this.props.type !== type ) {
+	handleTypeToggle( chartType ) {
+		if ( this.props.chartType !== chartType ) {
 			const { path, query } = this.props;
-			updateQueryString( { type }, path, query );
+			updateQueryString( { chartType }, path, query );
 		}
 	}
 
@@ -279,7 +279,7 @@ class Chart extends Component {
 			tooltipLabelFormat,
 			tooltipValueFormat,
 			tooltipTitle,
-			type,
+			chartType,
 			valueType,
 			xFormat,
 			x2Format,
@@ -335,24 +335,24 @@ class Chart extends Component {
 						>
 							<IconButton
 								className={ classNames( 'woocommerce-chart__type-button', {
-									'woocommerce-chart__type-button-selected': type === 'line',
+									'woocommerce-chart__type-button-selected': chartType === 'line',
 								} ) }
 								icon={ <Gridicon icon="line-graph" /> }
 								title={ __( 'Line chart', 'wc-admin' ) }
-								aria-checked={ type === 'line' }
+								aria-checked={ chartType === 'line' }
 								role="menuitemradio"
-								tabIndex={ type === 'line' ? 0 : -1 }
+								tabIndex={ chartType === 'line' ? 0 : -1 }
 								onClick={ partial( this.handleTypeToggle, 'line' ) }
 							/>
 							<IconButton
 								className={ classNames( 'woocommerce-chart__type-button', {
-									'woocommerce-chart__type-button-selected': type === 'bar',
+									'woocommerce-chart__type-button-selected': chartType === 'bar',
 								} ) }
 								icon={ <Gridicon icon="stats-alt" /> }
 								title={ __( 'Bar chart', 'wc-admin' ) }
-								aria-checked={ type === 'bar' }
+								aria-checked={ chartType === 'bar' }
 								role="menuitemradio"
-								tabIndex={ type === 'bar' ? 0 : -1 }
+								tabIndex={ chartType === 'bar' ? 0 : -1 }
 								onClick={ partial( this.handleTypeToggle, 'bar' ) }
 							/>
 						</NavigableMenu>
@@ -392,7 +392,7 @@ class Chart extends Component {
 									tooltipValueFormat={ tooltipValueFormat }
 									tooltipPosition={ isViewportLarge ? 'over' : 'below' }
 									tooltipTitle={ tooltipTitle }
-									type={ type }
+									chartType={ chartType }
 									width={ chartDirection === 'row' ? width - 320 : width }
 									xFormat={ xFormat }
 									x2Format={ x2Format }
@@ -420,6 +420,10 @@ Chart.propTypes = {
 	 * `emptyMessage` will be displayed if provided.
 	 */
 	baseValue: PropTypes.number,
+	/**
+	 * Chart type of either `line` or `bar`.
+	 */
+	chartType: PropTypes.oneOf( [ 'bar', 'line' ] ),
 	/**
 	 * An array of data.
 	 */
@@ -492,10 +496,6 @@ Chart.propTypes = {
 	 */
 	tooltipTitle: PropTypes.string,
 	/**
-	 * Chart type of either `line` or `bar`.
-	 */
-	type: PropTypes.oneOf( [ 'bar', 'line' ] ),
-	/**
 	 * What type of data is to be displayed? Number, Average, String?
 	 */
 	valueType: PropTypes.string,
@@ -515,6 +515,7 @@ Chart.propTypes = {
 
 Chart.defaultProps = {
 	baseValue: 0,
+	chartType: 'line',
 	data: [],
 	dateParser: '%Y-%m-%dT%H:%M:%S',
 	interactiveLegend: true,
@@ -524,7 +525,6 @@ Chart.defaultProps = {
 	showHeaderControls: true,
 	tooltipLabelFormat: '%B %d, %Y',
 	tooltipValueFormat: ',',
-	type: 'line',
 	xFormat: '%d',
 	x2Format: '%b %Y',
 	yFormat: '$.3s',

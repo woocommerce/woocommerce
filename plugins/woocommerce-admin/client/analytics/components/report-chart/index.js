@@ -125,7 +125,7 @@ export class ReportChart extends Component {
 				tooltipLabelFormat={ formats.tooltipLabelFormat }
 				tooltipTitle={ ( 'time-comparison' === mode && selectedChart.label ) || null }
 				tooltipValueFormat={ getTooltipValueFormat( selectedChart.type ) }
-				type={ getChartTypeForQuery( query ) }
+				chartType={ getChartTypeForQuery( query ) }
 				valueType={ selectedChart.type }
 				xFormat={ formats.xFormat }
 				x2Format={ formats.x2Format }
