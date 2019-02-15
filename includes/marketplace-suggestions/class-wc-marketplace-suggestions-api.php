@@ -104,10 +104,62 @@ function wc_marketplace_suggestions_ajax_handler() {
 	wp_die();
 }
 
+
+
+/**
+ * Return an array of suggestions the user has dismissed.
+ */
+function wc_marketplace_suggestions_get_dismissed() {
+	$dismissed_suggestions = array();
+
+	$dismissed_suggestions_data = get_user_option( 'wc_marketplace_suggestions_dismissed_suggestions', get_current_user_id() );
+	if ( $dismissed_suggestions_data ) {
+		$dismissed_suggestions = json_decode( $dismissed_suggestions_data );
+		if ( ! is_array( $dismissed_suggestions ) ) {
+			$dismissed_suggestions = array();
+		}
+	}
+
+	return $dismissed_suggestions;
+}
+
+/**
+ * Suggestion data GET handler.
+ */
+function wc_marketplace_suggestions_dismiss_handler() {
+	if ( ! check_ajax_referer( 'add_dismissed_marketplace_suggestion' ) ) {
+		wp_die();
+	}
+
+	$post_data       = wp_unslash( $_POST );
+	$suggestion_slug = sanitize_text_field( $post_data['slug'] );
+	if ( ! $suggestion_slug ) {
+		wp_die();
+	}
+
+	$dismissed_suggestions = wc_marketplace_suggestions_get_dismissed();
+
+	if ( in_array( $suggestion_slug, $dismissed_suggestions, true ) ) {
+		wp_die();
+	}
+
+	$dismissed_suggestions[] = $suggestion_slug;
+
+	// Could also store these in transient, with a long expiry (e.g. 6 months).
+	update_user_option(
+		get_current_user_id(),
+		'wc_marketplace_suggestions_dismissed_suggestions',
+		wp_json_encode( $dismissed_suggestions )
+	);
+
+	wp_die();
+}
+
 /**
  * Initialise
  */
 function wc_marketplace_suggestions_api_init() {
 	add_action( 'wp_ajax_marketplace_suggestions', 'wc_marketplace_suggestions_ajax_handler' );
+	add_action( 'wp_ajax_add_dismissed_marketplace_suggestion', 'wc_marketplace_suggestions_dismiss_handler' );
 }
 wc_marketplace_suggestions_api_init();

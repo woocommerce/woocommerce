@@ -1,8 +1,19 @@
-/* global installed_woo_plugins ajaxurl */
-( function( $, installed_woo_plugins ) {
+/* global marketplace_suggestions ajaxurl */
+( function( $, marketplace_suggestions ) {
 	$( function() {
-		if ( 'undefined' === typeof installed_woo_plugins ) {
+		if ( 'undefined' === typeof marketplace_suggestions ) {
 			return;
+		}
+
+		function saveDismissedSuggestion( suggestionSlug ) {
+			jQuery.post(
+				ajaxurl,
+				{
+					'action': 'add_dismissed_marketplace_suggestion',
+					'_wpnonce': marketplace_suggestions.dismiss_suggestion_nonce,
+					'slug': suggestionSlug,
+				}
+			);
 		}
 
 		function renderDismissButton( suggestionSlug ) {
@@ -17,6 +28,9 @@
 
 			dismissButton.classList.add( 'suggestion-dismiss' );
 			dismissButton.setAttribute( 'href', '#' );
+			dismissButton.onclick = function() {
+				saveDismissedSuggestion( suggestionSlug );
+			}
 
 			return dismissButton;
 		}
@@ -102,9 +116,15 @@
 				return ( displayContext === promo.context );
 			} );
 
+			// hide promos the user has dismissed
+			promos = _.filter( promos, function( promo ) {
+				return ! _.contains( marketplace_suggestions.dismissed_suggestions, promo.slug );
+			} );
+
+
 			// hide promos for things the user already has installed
 			promos = _.filter( promos, function( promo ) {
-				return ! _.contains( installed_woo_plugins, promo['hide-if-installed'] );
+				return ! _.contains( marketplace_suggestions.installed_woo_plugins, promo['hide-if-installed'] );
 			} );
 
 			// hide promos that are not applicable based on user's installed extensions
@@ -115,7 +135,7 @@
 				}
 
 				// if the user has any of the prerequisites, show the promo
-				return ( _.intersection( installed_woo_plugins, promo['show-if-installed'] ).length > 0 );
+				return ( _.intersection( marketplace_suggestions.installed_woo_plugins, promo['show-if-installed'] ).length > 0 );
 			} );
 
 			return promos;
@@ -202,4 +222,4 @@
 
 	});
 
-})( jQuery, installed_woo_plugins, ajaxurl );
+})( jQuery, marketplace_suggestions, ajaxurl );
