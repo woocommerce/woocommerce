@@ -532,11 +532,17 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 */
 	public static function get_oldest_orders( $customer_id ) {
 		global $wpdb;
-		$orders_table = $wpdb->prefix . 'wc_order_stats';
+		$orders_table                = $wpdb->prefix . 'wc_order_stats';
+		$excluded_statuses           = array_map( array( __CLASS__, 'normalize_order_status' ), self::get_excluded_report_order_statuses() );
+		$excluded_statuses_condition = '';
+		if ( ! empty( $excluded_statuses ) ) {
+			$excluded_statuses_str       = implode( "','", $excluded_statuses );
+			$excluded_statuses_condition = "AND status NOT IN ('{$excluded_statuses_str}')";
+		}
 
 		return $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT order_id, date_created FROM {$orders_table} WHERE customer_id = %d ORDER BY date_created, order_id ASC LIMIT 2",
+				"SELECT order_id, date_created FROM {$orders_table} WHERE customer_id = %d {$excluded_statuses_condition} ORDER BY date_created, order_id ASC LIMIT 2",
 				$customer_id
 			)
 		); // WPCS: unprepared SQL ok.
