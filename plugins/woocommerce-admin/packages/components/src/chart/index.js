@@ -421,6 +421,10 @@ Chart.propTypes = {
 	 */
 	baseValue: PropTypes.number,
 	/**
+	 * Chart type of either `line` or `bar`.
+	 */
+	chartType: PropTypes.oneOf( [ 'bar', 'line' ] ),
+	/**
 	 * An array of data.
 	 */
 	data: PropTypes.array.isRequired,
@@ -492,10 +496,6 @@ Chart.propTypes = {
 	 */
 	tooltipTitle: PropTypes.string,
 	/**
-	 * Chart type of either `line` or `bar`.
-	 */
-	chartType: PropTypes.oneOf( [ 'bar', 'line' ] ),
-	/**
 	 * What type of data is to be displayed? Number, Average, String?
 	 */
 	valueType: PropTypes.string,
@@ -515,6 +515,7 @@ Chart.propTypes = {
 
 Chart.defaultProps = {
 	baseValue: 0,
+	chartType: 'line',
 	data: [],
 	dateParser: '%Y-%m-%dT%H:%M:%S',
 	interactiveLegend: true,
@@ -524,7 +525,6 @@ Chart.defaultProps = {
 	showHeaderControls: true,
 	tooltipLabelFormat: '%B %d, %Y',
 	tooltipValueFormat: ',',
-	chartType: 'line',
 	xFormat: '%d',
 	x2Format: '%b %Y',
 	yFormat: '$.3s',

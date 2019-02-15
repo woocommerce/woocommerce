@@ -80,7 +80,7 @@ class DashboardCharts extends Component {
 
 	handleTypeToggle( chartType ) {
 		return () => {
-			this.setState( { chartType: chartType } );
+			this.setState( { chartType } );
 			const userDataFields = {
 				[ 'dashboard_chart_type' ]: chartType,
 			};
@@ -146,7 +146,7 @@ class DashboardCharts extends Component {
 	render() {
 		const { path } = this.props;
 		const { chartType, hiddenChartKeys, interval } = this.state;
-		const query = { ...this.props.query, chartType: chartType, interval };
+		const query = { ...this.props.query, chartType, interval };
 		return (
 			<Fragment>
 				<div className="woocommerce-dashboard__dashboard-charts">

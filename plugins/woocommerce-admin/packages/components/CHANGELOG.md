@@ -2,6 +2,7 @@
 - Chart component: new props `emptyMessage` and `baseValue`. When an empty message is provided, it will be displayed on top of the chart if there are no values different than `baseValue`.
 - Chart component: remove d3-array dependency.
 - Chart component: fix display when there is no data.
+- Chart component: change chart type query parameter to `chartType`.
 - Improves display of charts where all values are 0.
 - Fix X-axis labels in hourly bar charts.
 - New `<Search>` prop named `showClearButton`, that will display a 'Clear' button when the search box contains one or more tags.
