@@ -1736,7 +1736,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$shipping = wc_price( $this->get_shipping_total(), array( 'currency' => $this->get_currency() ) );
 
 				if ( (float) $this->get_shipping_tax() > 0 && $this->get_prices_include_tax() ) {
-					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>', $this, $tax_display );
+					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', ' <small class="tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>', $this, $tax_display );
 				}
 			} else {
 
@@ -1744,12 +1744,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$shipping = wc_price( $this->get_shipping_total() + $this->get_shipping_tax(), array( 'currency' => $this->get_currency() ) );
 
 				if ( (float) $this->get_shipping_tax() > 0 && ! $this->get_prices_include_tax() ) {
-					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', '&nbsp;<small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>', $this, $tax_display );
+					$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_tax_label', ' <small class="tax_label">' . WC()->countries->inc_tax_or_vat() . '</small>', $this, $tax_display );
 				}
 			}
 
 			/* translators: %s: method */
-			$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_shipped_via', '&nbsp;<small class="shipped_via">' . sprintf( __( 'via %s', 'woocommerce' ), $this->get_shipping_method() ) . '</small>', $this );
+			$shipping .= apply_filters( 'woocommerce_order_shipping_to_display_shipped_via', ' <small class="shipped_via">' . sprintf( __( 'via %s', 'woocommerce' ), $this->get_shipping_method() ) . '</small>', $this );
 
 		} elseif ( $this->get_shipping_method() ) {
 			$shipping = $this->get_shipping_method();
