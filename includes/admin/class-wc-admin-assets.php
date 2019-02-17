@@ -435,7 +435,15 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					WC_VERSION,
 					true
 				);
-				wp_localize_script( 'marketplace-suggestions', 'installed_woo_plugins', $woo_plugin_slugs );
+				wp_localize_script(
+					'marketplace-suggestions',
+					'marketplace_suggestions',
+					array(
+						'dismiss_suggestion_nonce' => wp_create_nonce( 'add_dismissed_marketplace_suggestion' ),
+						'installed_woo_plugins'    => $woo_plugin_slugs,
+						'dismissed_suggestions'    => wc_marketplace_suggestions_get_dismissed(),
+					)
+				);
 				wp_enqueue_script( 'marketplace-suggestions' );
 			}
 
