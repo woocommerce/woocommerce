@@ -5,7 +5,12 @@
 			return;
 		}
 
-		function saveDismissedSuggestion( suggestionSlug ) {
+		function dismissSuggestion( suggestionSlug ) {
+			// hide the suggestion in the UI
+			var selector = '.marketplace-suggestions-container[data-suggestion-slug=' + suggestionSlug + ']';
+			$( selector ).fadeOut();
+
+			// save dismissal in user settings
 			jQuery.post(
 				ajaxurl,
 				{
@@ -19,17 +24,10 @@
 		function renderDismissButton( suggestionSlug ) {
 			var dismissButton = document.createElement( 'a' );
 
-			// TODO
-			// escaping/don't concatenate
-			// hostname & base url
-			// actual ajax API url
-			// ajax vs page-reload api
-			// var dismissUrl = 'http://localhost:6322/wp-admin/?' + suggestionSlug + '=0';
-
 			dismissButton.classList.add( 'suggestion-dismiss' );
 			dismissButton.setAttribute( 'href', '#' );
 			dismissButton.onclick = function() {
-				saveDismissedSuggestion( suggestionSlug );
+				dismissSuggestion( suggestionSlug );
 			}
 
 			return dismissButton;
@@ -55,7 +53,9 @@
 			}
 
 			var row = document.createElement( 'tr' );
+			row.classList.add( 'marketplace-suggestions-container' );
 			row.classList.add( 'marketplace-table-banner' );
+			row.dataset.suggestionSlug = slug;
 
 			var titleColumn = document.createElement( 'td' );
 			titleColumn.setAttribute( 'colspan', 5 );
@@ -78,7 +78,7 @@
 			return row;
 		}
 
-		function renderListItem( title, url, buttonText, copy ) {
+		function renderListItem( slug, title, url, buttonText, copy ) {
 			if ( ! title ) {
 				return;
 			}
@@ -89,6 +89,7 @@
 
 			var container = document.createElement( 'div' );
 			container.classList.add( 'marketplace-listitem-container' );
+			container.dataset.suggestionSlug = slug;
 
 			var titleHeading = document.createElement( 'h4' );
 			titleHeading.textContent = title;
@@ -104,6 +105,8 @@
 				var linkoutButton = renderLinkoutButton( url, buttonText );
 				container.appendChild( linkoutButton );
 			}
+
+			container.appendChild( renderDismissButton( slug ) )
 
 			return container;
 		}
@@ -162,6 +165,7 @@
 				// render the promo content
 				for ( var i in promos ) {
 					var content = renderListItem(
+						promos[ i ].slug,
 						promos[ i ].title,
 						promos[ i ].url,
 						promos[ i ]['button-text'],
