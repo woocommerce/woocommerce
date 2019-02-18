@@ -1166,11 +1166,11 @@ p.demo_store,
 	td.product-name {
 
 		dl.variation,
- .wc-item-meta {
+		.wc-item-meta {
 			list-style: none outside;
 
 			dt,
- .wc-item-meta-label {
+			.wc-item-meta-label {
 				float: left;
 				clear: both;
 				margin-right: 0.25em;
@@ -2107,7 +2107,7 @@ p.demo_store,
 			color: $secondarytext;
 
 			input.input-text,
- textarea {
+			textarea {
 				border-color: darken($secondary, 15%);
 				border-top-color: darken($secondary, 20%);
 			}

@@ -335,11 +335,11 @@ a.remove {
 }
 
 dl.variation,
- .wc-item-meta {
+.wc-item-meta {
 	list-style: none outside;
 
 	dt,
- .wc-item-meta-label {
+	.wc-item-meta-label {
 		float: left;
 		clear: both;
 		margin-right: 0.25em;
@@ -887,7 +887,7 @@ table.variations {
 .cart_totals {
 
 	th,
- td {
+	td {
 		vertical-align: top;
 		padding: 1em 0;
 		line-height: 1.5em;
@@ -1202,7 +1202,7 @@ table.variations {
 		color: #444;
 
 		&.next,
- &.prev {
+		&.prev {
 			color: #ddd;
 		}
 	}
