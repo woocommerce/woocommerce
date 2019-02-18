@@ -50,6 +50,10 @@ class WC_REST_Authentication {
 	 * @return bool
 	 */
 	protected function is_request_to_rest_api() {
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
+		}
+
 		$rest_prefix = trailingslashit( rest_get_url_prefix() );
 
 		// Allow third party plugins use our authentication methods.
