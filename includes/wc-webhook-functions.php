@@ -65,7 +65,7 @@ add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10,
  * @return bool
  */
 function wc_is_webhook_valid_topic( $topic ) {
-	$invalid_topics  = array(
+	$invalid_topics = array(
 		'action.woocommerce_login_credentials',
 		'action.woocommerce_product_csv_importer_check_import_file_path',
 		'action.woocommerce_webhook_should_deliver',

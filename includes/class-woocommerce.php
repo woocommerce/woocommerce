@@ -183,7 +183,7 @@ final class WooCommerce {
 	 */
 	public function log_errors() {
 		$error = error_get_last();
-		if ( in_array( $error['type'], array( E_ERROR, E_PARSE, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR ) ) ) {
+		if ( in_array( $error['type'], array( E_ERROR, E_PARSE, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR ), true ) ) {
 			$logger = wc_get_logger();
 			$logger->critical(
 				/* translators: 1: error message 2: file name and path 3: line number */
