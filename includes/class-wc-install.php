@@ -124,11 +124,6 @@ class WC_Install {
 			'wc_update_354_modify_shop_manager_caps',
 			'wc_update_354_db_version',
 		),
-		),
-		'3.5.3' => array(
-			'wc_update_353_db_version',
-			'wc_update_353_set_attrib_values_to_excerpt',
-		)
 	);
 
 	/**

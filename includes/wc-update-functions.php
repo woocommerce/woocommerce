@@ -1932,32 +1932,3 @@ function wc_update_354_modify_shop_manager_caps() {
 function wc_update_354_db_version() {
 	WC_Install::update_db_version( '3.5.4' );
 }
-
-/**
- * Update DB Version.
- */
-function wc_update_353_db_version() {
-	WC_Install::update_db_version( '3.5.3' );
-}
-
-/*
- * Add attribute values to post_excerpt to allow searching variations without JOINs for each attribute.
- */
-function wc_update_353_set_attrib_values_to_excerpt() {
-	global $wpdb;
-
-	$variation_ids = $wpdb->get_results( "SELECT ID from {$wpdb->prefix}posts WHERE post_type='product_variation'", ARRAY_A );
-	foreach ( $variation_ids as $variation_id ) {
-		$variation_id = $variation_id['ID'];
-		$variation_product = wc_get_product( $variation_id );
-		$attribute_values  = wc_get_formatted_variation( $variation_product, true, false );
-		if ( '' !== $attribute_values ) {
-			$wpdb->query(
-				$wpdb->prepare(
-					"UPDATE {$wpdb->prefix}posts SET post_excerpt=%s WHERE ID=%d",
-					$attribute_values, $variation_id
-				)
-			);
-		}
-	}
-}
