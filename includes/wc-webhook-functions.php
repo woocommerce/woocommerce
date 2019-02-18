@@ -143,7 +143,7 @@ function wc_load_webhooks( $status = '', $limit = null ) {
 		$webhook->enqueue();
 		$loaded ++;
 
-		if ( $loaded >= $limit ) {
+		if ( ! is_null( $limit ) && $loaded >= $limit ) {
 			break;
 		}
 	}
