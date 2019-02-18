@@ -67,11 +67,9 @@ export default class StockReportTable extends Component {
 				products: parent_id || id,
 			} );
 
-			const formattedName = name.replace( ' - ', ' / ' );
-
 			const nameLink = (
 				<Link href={ productDetailLink } type="wc-admin">
-					{ formattedName }
+					{ name }
 				</Link>
 			);
 
@@ -84,7 +82,7 @@ export default class StockReportTable extends Component {
 			return [
 				{
 					display: nameLink,
-					value: formattedName,
+					value: name,
 				},
 				{
 					display: sku,

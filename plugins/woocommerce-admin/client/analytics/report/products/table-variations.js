@@ -84,7 +84,7 @@ export default class VariationsReportTable extends Component {
 		return map( data, row => {
 			const { items_sold, net_revenue, orders_count, extended_info, product_id } = row;
 			const { stock_status, stock_quantity, low_stock_amount, sku } = extended_info;
-			const name = get( row, [ 'extended_info', 'name' ], '' ).replace( ' - ', ' / ' );
+			const name = get( row, [ 'extended_info', 'name' ], '' );
 			const ordersLink = getNewPath( persistedQuery, 'orders', {
 				filter: 'advanced',
 				product_includes: query.products,
