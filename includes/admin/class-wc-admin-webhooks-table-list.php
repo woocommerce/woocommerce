@@ -86,8 +86,10 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 					add_query_arg(
 						array(
 							'delete' => $webhook->get_id(),
-						), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' )
-					), 'delete-webhook'
+						),
+						admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' )
+					),
+					'delete-webhook'
 				)
 			) . '">' . esc_html__( 'Delete permanently', 'woocommerce' ) . '</a>',
 		);
@@ -262,7 +264,10 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 		echo '<label class="screen-reader-text" for="' . esc_attr( $input_id ) . '">' . esc_html( $text ) . ':</label>';
 		echo '<input type="search" id="' . esc_attr( $input_id ) . '" name="s" value="' . esc_attr( $search_query ) . '" />';
 		submit_button(
-			$text, '', '', false,
+			$text,
+			'',
+			'',
+			false,
 			array(
 				'id' => 'search-submit',
 			)
