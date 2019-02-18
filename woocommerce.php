@@ -30,7 +30,7 @@ if ( ! class_exists( 'WooCommerce' ) ) {
  * @since  2.1
  * @return WooCommerce
  */
-function WC() { // phpcs:ignore
+function WC() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
 	return WooCommerce::instance();
 }
 
