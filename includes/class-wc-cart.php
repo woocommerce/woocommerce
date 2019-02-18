@@ -869,7 +869,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				$tax_totals[ $code ]->is_compound      = WC_Tax::is_compound( $key );
 				$tax_totals[ $code ]->label            = WC_Tax::get_rate_label( $key );
 				$tax_totals[ $code ]->amount          += wc_round_tax_total( $tax );
-				$tax_totals[ $code ]->formatted_amount = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ) );
+				$tax_totals[ $code ]->formatted_amount = wc_price( $tax_totals[ $code ]->amount );
 			}
 		}
 
@@ -1425,7 +1425,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			if ( $coupon->is_valid() ) {
 
 				// Get user and posted emails to compare.
-				$current_user = wp_get_current_user();
+				$current_user  = wp_get_current_user();
 				$billing_email = isset( $posted['billing_email'] ) ? $posted['billing_email'] : '';
 				$check_emails  = array_unique(
 					array_filter(
@@ -1916,10 +1916,10 @@ class WC_Cart extends WC_Legacy_Cart {
 			if ( ! $compound && WC_Tax::is_compound( $key ) ) {
 				continue;
 			}
-			$total += $tax;
+			$total += wc_round_tax_total( $tax );
 		}
 		if ( $display ) {
-			$total = wc_round_tax_total( $total );
+			$total = wc_format_decimal( $total, wc_get_price_decimals() );
 		}
 		return apply_filters( 'woocommerce_cart_taxes_total', $total, $compound, $display, $this );
 	}
@@ -1953,5 +1953,19 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		return get_option( 'woocommerce_tax_display_cart' );
+	}
+
+	/**
+	 * Returns the hash based on cart contents.
+	 *
+	 * @since 3.6.0
+	 * @return string hash for cart content
+	 */
+	public function get_cart_hash() {
+		$cart_session = $this->session->get_cart_for_session();
+		$hash         = $cart_session ? md5( wp_json_encode( $cart_session ) . $this->get_total( 'edit' ) ) : '';
+		$hash         = apply_filters_deprecated( 'woocommerce_add_to_cart_hash', array( $hash, $cart_session ), '3.6.0', 'woocommerce_cart_hash' );
+
+		return apply_filters( 'woocommerce_cart_hash', $hash, $cart_session );
 	}
 }

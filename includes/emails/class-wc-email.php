@@ -600,8 +600,10 @@ class WC_Email extends WC_Settings_API {
 		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 		add_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
 
-		$message = apply_filters( 'woocommerce_mail_content', $this->style_inline( $message ) );
-		$return  = wp_mail( $to, $subject, $message, $headers, $attachments );
+		$message              = apply_filters( 'woocommerce_mail_content', $this->style_inline( $message ) );
+		$mail_callback        = apply_filters( 'woocommerce_mail_callback', 'wp_mail', $this );
+		$mail_callback_params = apply_filters( 'woocommerce_mail_callback_params', array( $to, $subject, $message, $headers, $attachments ), $this );
+		$return               = call_user_func_array( $mail_callback, $mail_callback_params );
 
 		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );

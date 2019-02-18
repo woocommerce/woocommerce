@@ -205,7 +205,7 @@ class WC_Order_Item_Meta {
 				$formatted_meta[ $formatted_meta_key ] = array(
 					'key'   => $meta_key,
 					'label' => wc_attribute_label( $attribute_key, $this->product ),
-					'value' => apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value ),
+					'value' => apply_filters( 'woocommerce_order_item_display_meta_value', $meta_value, $this->meta, $this->item ),
 				);
 			}
 		}

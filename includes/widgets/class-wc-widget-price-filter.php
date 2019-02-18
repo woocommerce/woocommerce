@@ -31,11 +31,13 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			),
 		);
 		$suffix                   = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-		wp_register_script( 'accounting', WC()->plugin_url() . '/assets/js/accounting/accounting' . $suffix . '.js', array( 'jquery' ), '0.4.2' );
+		wp_register_script( 'accounting', WC()->plugin_url() . '/assets/js/accounting/accounting' . $suffix . '.js', array( 'jquery' ), '0.4.2', true );
 		wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), WC_VERSION, true );
 		wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch', 'accounting' ), WC_VERSION, true );
 		wp_localize_script(
-			'wc-price-slider', 'woocommerce_price_slider_params', array(
+			'wc-price-slider',
+			'woocommerce_price_slider_params',
+			array(
 				'currency_format_num_decimals' => 0,
 				'currency_format_symbol'       => get_woocommerce_currency_symbol(),
 				'currency_format_decimal_sep'  => esc_attr( wc_get_price_decimal_separator() ),
@@ -66,7 +68,9 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			return;
 		}
 
-		if ( ! WC()->query->get_main_query()->post_count ) {
+		$min_price = isset( $_GET['min_price'] ) ? wc_clean( wp_unslash( $_GET['min_price'] ) ) : null; // WPCS: input var ok, CSRF ok.
+		$max_price = isset( $_GET['max_price'] ) ? wc_clean( wp_unslash( $_GET['max_price'] ) ) : null; // WPCS: input var ok, CSRF ok.
+		if ( ! wc()->query->get_main_query()->post_count && null === $min_price && null === $max_price ) {
 			return;
 		}
 
@@ -89,8 +93,8 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			$form_action = preg_replace( '%\/page/[0-9]+%', '', home_url( trailingslashit( $wp->request ) ) );
 		}
 
-		$min_price = isset( $_GET['min_price'] ) ? wc_clean( wp_unslash( $_GET['min_price'] ) ) : apply_filters( 'woocommerce_price_filter_widget_min_amount', $min ); // WPCS: input var ok, CSRF ok.
-		$max_price = isset( $_GET['max_price'] ) ? wc_clean( wp_unslash( $_GET['max_price'] ) ) : apply_filters( 'woocommerce_price_filter_widget_max_amount', $max ); // WPCS: input var ok, CSRF ok.
+		$min_price = null !== $min_price ? $min_price : apply_filters( 'woocommerce_price_filter_widget_min_amount', $min );
+		$max_price = null !== $max_price ? $max_price : apply_filters( 'woocommerce_price_filter_widget_max_amount', $max );
 
 		echo '<form method="get" action="' . esc_url( $form_action ) . '">
 			<div class="price_slider_wrapper">
@@ -102,7 +106,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 					<div class="price_label" style="display:none;">
 						' . esc_html__( 'Price:', 'woocommerce' ) . ' <span class="from"></span> &mdash; <span class="to"></span>
 					</div>
-					' . wc_query_string_form_fields( null, array( 'min_price', 'max_price' ), '', true ) . '
+					' . wc_query_string_form_fields( null, array( 'min_price', 'max_price', 'paged' ), '', true ) . '
 					<div class="clear"></div>
 				</div>
 			</div>

@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
  * @return bool
  */
 function wc_disable_admin_bar( $show_admin_bar ) {
-	if ( apply_filters( 'woocommerce_disable_admin_bar', get_option( 'woocommerce_lock_down_admin', 'yes' ) === 'yes' ) && ! ( current_user_can( 'edit_posts' ) || current_user_can( 'manage_woocommerce' ) ) ) {
+	if ( apply_filters( 'woocommerce_disable_admin_bar', true ) && ! ( current_user_can( 'edit_posts' ) || current_user_can( 'manage_woocommerce' ) ) ) {
 		$show_admin_bar = false;
 	}
 
@@ -95,7 +95,8 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		}
 
 		$new_customer_data = apply_filters(
-			'woocommerce_new_customer_data', array(
+			'woocommerce_new_customer_data',
+			array(
 				'user_login' => $username,
 				'user_pass'  => $password,
 				'user_email' => $email,
@@ -121,11 +122,11 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
  * @param int $customer_id Customer ID.
  */
 function wc_set_customer_auth_cookie( $customer_id ) {
-	global $current_user;
-
-	$current_user = get_user_by( 'id', $customer_id ); // WPCS: override ok.
-
+	wp_set_current_user( $customer_id );
 	wp_set_auth_cookie( $customer_id, true );
+
+	// Update session.
+	WC()->session->init_session_cookie();
 }
 
 /**
@@ -215,10 +216,13 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		return $result;
 	}
 
-	$transient_name = 'wc_cbp_' . md5( $customer_email . $user_id . WC_Cache_Helper::get_transient_version( 'orders' ) );
-	$result         = get_transient( $transient_name );
+	$transient_name    = 'wc_customer_bought_product_' . md5( $customer_email . $user_id );
+	$transient_version = WC_Cache_Helper::get_transient_version( 'orders' );
+	$transient_value   = get_transient( $transient_name );
 
-	if ( false === $result ) {
+	if ( isset( $transient_value['value'], $transient_value['version'] ) && $transient_value['version'] === $transient_version ) {
+		$result = $transient_value['value'];
+	} else {
 		$customer_data = array( $user_id );
 
 		if ( $user_id ) {
@@ -255,7 +259,12 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		); // WPCS: unprepared SQL ok.
 		$result = array_map( 'absint', $result );
 
-		set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
+		$transient_value = array(
+			'version' => $transient_version,
+			'value'   => $result,
+		);
+
+		set_transient( $transient_name, $transient_value, DAY_IN_SECONDS * 30 );
 	}
 	return in_array( absint( $product_id ), $result, true );
 }
@@ -355,6 +364,31 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 	return $allcaps;
 }
 add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
+
+/**
+ * Safe way of allowing shop managers restricted capabilities that will remove
+ * access to the capabilities if WooCommerce is deactivated.
+ *
+ * @since 3.5.4
+ * @param bool[]   $allcaps Array of key/value pairs where keys represent a capability name and boolean values
+ *                          represent whether the user has that capability.
+ * @param string[] $caps    Required primitive capabilities for the requested capability.
+ * @param array    $args Arguments that accompany the requested capability check.
+ * @param WP_User  $user    The user object.
+ * @return bool[]
+ */
+function wc_shop_manager_has_capability( $allcaps, $caps, $args, $user ) {
+
+	if ( wc_user_has_role( $user, 'shop_manager' ) ) {
+		/**
+		 * @see wc_modify_map_meta_cap, which limits editing to customers.
+		 */
+		$allcaps['edit_users'] = true;
+	}
+
+	return $allcaps;
+}
+add_filter( 'user_has_cap', 'wc_shop_manager_has_capability', 10, 4 );
 
 /**
  * Modify the list of editable roles to prevent non-admin adding admin users.
@@ -554,7 +588,11 @@ function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 	global $wpdb;
 
 	$wpdb->update(
-		$wpdb->postmeta, array( 'meta_value' => 0 ), array(
+		$wpdb->postmeta,
+		array(
+			'meta_value' => 0,
+		),
+		array(
 			'meta_key'   => '_customer_user',
 			'meta_value' => $user_id,
 		)

@@ -973,7 +973,7 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( isset( $variations ) && is_array( $variations ) ) {
 				// start by normalizing the passed variations
 				foreach ( $variations as $key => $value ) {
-					$key = str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) ); // from get_attributes in class-wc-api-products.php
+					$key = str_replace( 'attribute_', '', wc_attribute_taxonomy_slug( $key ) ); // from get_attributes in class-wc-api-products.php
 					$variations_normalized[ $key ] = strtolower( $value );
 				}
 				// now search through each product child and see if our passed variations match anything
@@ -981,7 +981,7 @@ class WC_API_Orders extends WC_API_Resource {
 					$meta = array();
 					foreach ( get_post_meta( $variation ) as $key => $value ) {
 						$value = $value[0];
-						$key = str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) );
+						$key = str_replace( 'attribute_', '', wc_attribute_taxonomy_slug( $key ) );
 						$meta[ $key ] = strtolower( $value );
 					}
 					// if the variation array is a part of the $meta array, we found our match

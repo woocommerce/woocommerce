@@ -352,7 +352,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 				} else {
 					$default[] = array(
 						'id'     => 0,
-						'name'   => str_replace( 'pa_', '', $key ),
+						'name'   => wc_attribute_taxonomy_slug( $key ),
 						'option' => $value,
 					);
 				}

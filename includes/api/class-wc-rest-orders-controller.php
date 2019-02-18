@@ -162,7 +162,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 				// Make sure customer is part of blog.
 				if ( is_multisite() && ! is_user_member_of_blog( $request['customer_id'] ) ) {
-					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id_network', __( 'Customer ID does not belong to this site.', 'woocommerce' ), 400 );
+					add_user_to_blog( get_current_blog_id(), $request['customer_id'], 'customer' );
 				}
 			}
 
@@ -210,7 +210,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
-		// This is needed to get around an array to string notice in WC_REST_Orders_Controller::prepare_objects_query.
+		// This is needed to get around an array to string notice in WC_REST_Orders_V2_Controller::prepare_objects_query.
 		$statuses = $request['status'];
 		unset( $request['status'] );
 		$args = parent::prepare_objects_query( $request );
@@ -227,6 +227,9 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 				$args['post_status'][] = $status;
 			}
 		}
+
+		// Put the statuses back for further processing (next/prev links, etc).
+		$request['status'] = $statuses;
 
 		return $args;
 	}

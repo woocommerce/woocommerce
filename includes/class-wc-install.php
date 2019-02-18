@@ -120,6 +120,10 @@ class WC_Install {
 		'3.5.2' => array(
 			'wc_update_352_drop_download_log_fk',
 		),
+		'3.5.4' => array(
+			'wc_update_354_modify_shop_manager_caps',
+			'wc_update_354_db_version',
+		),
 	);
 
 	/**
@@ -418,17 +422,17 @@ class WC_Install {
 				'cart'      => array(
 					'name'    => _x( 'cart', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'Cart', 'Page title', 'woocommerce' ),
-					'content' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']',
+					'content' => '<!-- wp:shortcode -->[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']<!-- /wp:shortcode -->',
 				),
 				'checkout'  => array(
 					'name'    => _x( 'checkout', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'Checkout', 'Page title', 'woocommerce' ),
-					'content' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
+					'content' => '<!-- wp:shortcode -->[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']<!-- /wp:shortcode -->',
 				),
 				'myaccount' => array(
 					'name'    => _x( 'my-account', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'My account', 'Page title', 'woocommerce' ),
-					'content' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
+					'content' => '<!-- wp:shortcode -->[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']<!-- /wp:shortcode -->',
 				),
 			)
 		);
@@ -955,7 +959,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 				'read'                   => true,
 				'read_private_pages'     => true,
 				'read_private_posts'     => true,
-				'edit_users'             => true,
 				'edit_posts'             => true,
 				'edit_pages'             => true,
 				'edit_published_posts'   => true,
@@ -1127,16 +1130,17 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	private static function create_placeholder_image() {
 		$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
 
-		if ( ! is_numeric( $placeholder_image ) ) {
-			return;
-		}
-
-		if ( ! empty( $placeholder_image ) && is_numeric( $placeholder_image ) && wp_attachment_is_image( $placeholder_image ) ) {
-			return;
+		// Validate current setting if set. If set, return.
+		if ( ! empty( $placeholder_image ) ) {
+			if ( ! is_numeric( $placeholder_image ) ) {
+				return;
+			} elseif ( $placeholder_image && wp_attachment_is_image( $placeholder_image ) ) {
+				return;
+			}
 		}
 
 		$upload_dir = wp_upload_dir();
-		$source     = WC()->plugin_path() . '/assets/images/placeholder.png';
+		$source     = WC()->plugin_path() . '/assets/images/placeholder-attachment.png';
 		$filename   = $upload_dir['basedir'] . '/woocommerce-placeholder.png';
 
 		if ( ! file_exists( $filename ) ) {

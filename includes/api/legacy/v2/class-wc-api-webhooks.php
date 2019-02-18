@@ -195,7 +195,7 @@ class WC_API_Webhooks extends WC_API_Resource {
 				'post_status'   => 'publish',
 				'ping_status'   => 'closed',
 				'post_author'   => get_current_user_id(),
-				'post_password' => strlen( ( $password = uniqid( 'webhook_' ) ) ) > 20 ? substr( $password, 0, 20 ) : $password,
+				'post_password' => 'webhook_' . wp_generate_password(),
 				'post_title'    => ! empty( $data['name'] ) ? $data['name'] : sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ),
 			), $data, $this );
 

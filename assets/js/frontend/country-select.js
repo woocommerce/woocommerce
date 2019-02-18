@@ -56,7 +56,7 @@ jQuery( function( $ ) {
 		var wc_country_select_select2 = function() {
 			$( 'select.country_select:visible, select.state_select:visible' ).each( function() {
 				var select2_args = $.extend({
-					placeholderOption: 'first',
+					placeholder: $( this ).attr( 'data-placeholder' ) || $( this ).attr( 'placeholder' ) || '',
 					width: '100%'
 				}, getEnhancedSelectFormatString() );
 
@@ -99,7 +99,15 @@ jQuery( function( $ ) {
 			if ( $.isEmptyObject( states[ country ] ) ) {
 
 				$statebox.closest( 'p.form-row' ).hide().find( '.select2-container' ).remove();
-				$statebox.replaceWith( '<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" placeholder="' + placeholder + '" />' );
+				$statebox.replaceWith(
+					'<input type="hidden" class="hidden" name="' +
+					input_name +
+					'" id="' +
+					input_id +
+					'" value="" placeholder="' +
+					placeholder +
+					'" />'
+				);
 
 				$( document.body ).trigger( 'country_to_state_changed', [ country, $wrapper ] );
 
@@ -118,7 +126,15 @@ jQuery( function( $ ) {
 
 				if ( $statebox.is( 'input' ) ) {
 					// Change for select
-					$statebox.replaceWith( '<select name="' + input_name + '" id="' + input_id + '" class="state_select" data-placeholder="' + placeholder + '"></select>' );
+					$statebox.replaceWith(
+						'<select name="' +
+						input_name +
+						'" id="' +
+						input_id +
+						'" class="state_select" data-placeholder="' +
+						placeholder +
+						'"></select>'
+					);
 					$statebox = $wrapper.find( '#billing_state, #shipping_state, #calc_shipping_state' );
 				}
 
@@ -132,14 +148,30 @@ jQuery( function( $ ) {
 			if ( $statebox.is( 'select' ) ) {
 
 				$parent.show().find( '.select2-container' ).remove();
-				$statebox.replaceWith( '<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />' );
+				$statebox.replaceWith(
+					'<input type="text" class="input-text" name="' +
+					input_name +
+					'" id="' +
+					input_id +
+					'" placeholder="' +
+					placeholder +
+					'" />'
+				);
 
 				$( document.body ).trigger( 'country_to_state_changed', [country, $wrapper ] );
 
 			} else if ( $statebox.is( 'input[type="hidden"]' ) ) {
 
 				$parent.show().find( '.select2-container' ).remove();
-				$statebox.replaceWith( '<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />' );
+				$statebox.replaceWith(
+					'<input type="text" class="input-text" name="' +
+					input_name +
+					'" id="' +
+					input_id +
+					'" placeholder="' +
+					placeholder +
+					'" />'
+				);
 
 				$( document.body ).trigger( 'country_to_state_changed', [country, $wrapper ] );
 
@@ -148,6 +180,26 @@ jQuery( function( $ ) {
 
 		$( document.body ).trigger( 'country_to_state_changing', [country, $wrapper ] );
 
+	});
+
+	$( document.body ).on( 'wc_address_i18n_ready', function() {
+		// Init country selects with their default value once the page loads.
+		$('.woocommerce-billing-fields, .woocommerce-shipping-fields, .woocommerce-shipping-calculator').each( function() {
+			var $wrapper       = $( this ),
+				$country_input = $wrapper.find( '#billing_country, #shipping_country, #calc_shipping_country' );
+
+			if ( 0 === $country_input.length ) {
+				return;
+			}
+
+			var country = $country_input.val();
+
+			if ( 0 === country.length ) {
+				return;
+			}
+
+			$( document.body ).trigger( 'country_to_state_changing', [country, $wrapper ] );
+		});
 	});
 
 });
