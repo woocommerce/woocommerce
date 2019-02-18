@@ -195,22 +195,23 @@ class WC_Structured_Data {
 		$shop_name = get_bloginfo( 'name' );
 		$shop_url  = home_url();
 		$currency  = get_woocommerce_currency();
+		$permalink = get_permalink( $product->get_id() );
 
 		$markup = array(
 			'@type' => 'Product',
-			'@id'   => get_permalink( $product->get_id() ),
+			'@id'   => $permalink . '#product', // Append '#product' to differentiate between this @id and the @id generated for the Breadcrumblist.
 			'name'  => $product->get_name(),
 		);
 
 		if ( apply_filters( 'woocommerce_structured_data_product_limit', is_product_taxonomy() || is_shop() ) ) {
-			$markup['url'] = $markup['@id'];
+			$markup['url'] = $permalink;
 
 			$this->set_data( apply_filters( 'woocommerce_structured_data_product_limited', $markup, $product ) );
 			return;
 		}
 
 		$markup['image']       = wp_get_attachment_url( $product->get_image_id() );
-		$markup['description'] = wpautop( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) );
+		$markup['description'] = wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) );
 		$markup['sku']         = $product->get_sku();
 
 		if ( '' !== $product->get_price() ) {
@@ -250,7 +251,7 @@ class WC_Structured_Data {
 			$markup_offer += array(
 				'priceCurrency' => $currency,
 				'availability'  => 'https://schema.org/' . ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
-				'url'           => $markup['@id'],
+				'url'           => $permalink,
 				'seller'        => array(
 					'@type' => 'Organization',
 					'name'  => $shop_name,
@@ -261,7 +262,7 @@ class WC_Structured_Data {
 			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
 		}
 
-		if ( $product->get_review_count() && 'yes' === get_option( 'woocommerce_enable_review_rating' ) ) {
+		if ( $product->get_review_count() && wc_review_ratings_enabled() ) {
 			$markup['aggregateRating'] = array(
 				'@type'       => 'AggregateRating',
 				'ratingValue' => $product->get_average_rating(),
@@ -329,12 +330,6 @@ class WC_Structured_Data {
 		$markup['itemListElement'] = array();
 
 		foreach ( $crumbs as $key => $crumb ) {
-			// Don't add the current page to the breadcrumb list on product pages,
-			// otherwise Google will not recognize both the BreadcrumbList and Product structured data.
-			if ( is_product() && count( $crumbs ) - 1 === $key ) {
-				continue;
-			}
-
 			$markup['itemListElement'][ $key ] = array(
 				'@type'    => 'ListItem',
 				'position' => $key + 1,

@@ -408,7 +408,11 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 
 		// Update status.
 		if ( ! empty( $request['status'] ) ) {
-			$webhook->set_status( $request['status'] );
+			if ( wc_is_webhook_valid_status( strtolower( $request['status'] ) ) ) {
+				$webhook->set_status( $request['status'] );
+			} else {
+				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_status", __( 'Webhook status must be valid.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
 		}
 
 		$post = $this->prepare_item_for_database( $request );
@@ -503,8 +507,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			$data->post_author = get_current_user_id();
 
 			// Post password.
-			$password = strlen( uniqid( 'webhook_' ) );
-			$data->post_password = $password > 20 ? substr( $password, 0, 20 ) : $password;
+			$data->post_password = 'webhook_' . wp_generate_password();
 
 			// Post status.
 			$data->post_status = 'publish';
@@ -626,11 +629,8 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 					'description' => __( 'Webhook status.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'active',
-					'enum'        => array( 'active', 'paused', 'disabled' ),
+					'enum'        => array_keys( wc_get_webhook_statuses() ),
 					'context'     => array( 'view', 'edit' ),
-					'arg_options' => array(
-						'sanitize_callback' => 'wc_is_webhook_valid_topic',
-					),
 				),
 				'topic' => array(
 					'description' => __( 'Webhook topic.', 'woocommerce' ),

@@ -119,15 +119,13 @@ jQuery( function( $ ) {
 	AddToCartHandler.prototype.updateCartPage = function() {
 		var page = window.location.toString().replace( 'add-to-cart', 'added-to-cart' );
 
-		$( '.shop_table.cart' ).load( page + ' .shop_table.cart:eq(0) > *', function() {
-			$( '.shop_table.cart' ).stop( true ).css( 'opacity', '1' ).unblock();
+		$.get( page, function( data ) {
+			$( '.shop_table.cart:eq(0)' ).replaceWith( $( data ).find( '.shop_table.cart:eq(0)' ) );
+			$( '.cart_totals:eq(0)' ).replaceWith( $( data ).find( '.cart_totals:eq(0)' ) );
+			$( '.cart_totals, .shop_table.cart' ).stop( true ).css( 'opacity', '1' ).unblock();
 			$( document.body ).trigger( 'cart_page_refreshed' );
-		});
-
-		$( '.cart_totals' ).load( page + ' .cart_totals:eq(0) > *', function() {
-			$( '.cart_totals' ).stop( true ).css( 'opacity', '1' ).unblock();
 			$( document.body ).trigger( 'cart_totals_refreshed' );
-		});
+		} );
 	};
 
 	/**

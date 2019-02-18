@@ -5,6 +5,10 @@
  * @package WooCommerce\Tests\API
  * @since 3.5.0
  */
+
+/**
+ * Class WC_Tests_API_Orders
+ */
 class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 	/**
@@ -121,9 +125,11 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 	public function test_get_item_refund_id() {
 		wp_set_current_user( $this->user );
 		$order    = WC_Helper_Order::create_order();
-		$refund   = wc_create_refund( array(
-			'order_id' => $order->get_id(),
-		) );
+		$refund   = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+			)
+		);
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/orders/' . $refund->get_id() ) );
 		$this->assertEquals( 404, $response->get_status() );
 	}
@@ -273,7 +279,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'payment_method'       => 'bacs',
-				'payment_method_title' => '<h1>Sanitize this too <script>alert(1);</script></h1>'
+				'payment_method_title' => '<h1>Sanitize this too <script>alert(1);</script></h1>',
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -292,7 +298,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		$product = WC_Helper_Product::create_simple_product();
 
-		// non-existent customer
+		// Non-existent customer.
 		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
 		$request->set_body_params(
 			array(
@@ -426,13 +432,6 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
 		$request->set_body_params(
 			array(
-				'line_items'   => array(
-					array(
-						'id'         => $order_item->get_id(),
-						'product_id' => $order_item->get_product_id(),
-						'subtotal'   => '35.00',
-					),
-				),
 				'coupon_lines' => array(
 					array(
 						'code' => 'fake-coupon',

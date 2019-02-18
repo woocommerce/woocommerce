@@ -184,10 +184,16 @@ class WC_Gateway_Paypal_Request {
 	protected function get_paypal_args( $order ) {
 		WC_Gateway_Paypal::log( 'Generating payment form for order ' . $order->get_order_number() . '. Notify URL: ' . $this->notify_url );
 
+		$force_one_line_item = apply_filters( 'woocommerce_paypal_force_one_line_item', false, $order );
+
+		if ( ( wc_tax_enabled() && wc_prices_include_tax() ) || ! $this->line_items_valid( $order ) ) {
+			$force_one_line_item = true;
+		}
+
 		$paypal_args = apply_filters(
 			'woocommerce_paypal_args', array_merge(
 				$this->get_transaction_args( $order ),
-				$this->get_line_item_args( $order )
+				$this->get_line_item_args( $order, $force_one_line_item )
 			), $order
 		);
 
@@ -297,11 +303,8 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	protected function get_line_item_args( $order, $force_one_line_item = false ) {
-		if ( wc_tax_enabled() && wc_prices_include_tax() || ! $this->line_items_valid( $order ) ) {
-			$force_one_line_item = true;
-		}
-
 		$line_item_args = array();
+
 		if ( $force_one_line_item ) {
 			/**
 			 * Send order as a single item.

@@ -100,7 +100,7 @@ class WC_Regenerate_Images {
 	public static function add_uncropped_metadata( $meta_data ) {
 		$size_data = wc_get_image_size( 'woocommerce_thumbnail' );
 		if ( isset( $meta_data['sizes'], $meta_data['sizes']['woocommerce_thumbnail'] ) ) {
-			$meta_data['sizes']['woocommerce_thumbnail']['uncropped'] = empty( $size_settings['height'] );
+			$meta_data['sizes']['woocommerce_thumbnail']['uncropped'] = empty( $size_data['height'] );
 		}
 		return $meta_data;
 	}
@@ -346,6 +346,11 @@ class WC_Regenerate_Images {
 		}
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		// Fix for images with no metadata.
+		if ( ! is_array( $metadata ) ) {
+			$metadata = array();
+		}
 
 		// We only want to regen a specific image size.
 		add_filter( 'intermediate_image_sizes', array( __CLASS__, 'adjust_intermediate_image_sizes' ) );

@@ -933,6 +933,9 @@ function wc_format_postcode( $postcode, $country ) {
 		case 'US':
 			$postcode = rtrim( substr_replace( $postcode, '-', 5, 0 ), '-' );
 			break;
+		case 'NL':
+			$postcode = substr_replace( $postcode, ' ', 4, 0 );
+			break;
 	}
 
 	return apply_filters( 'woocommerce_format_postcode', $postcode, $country );

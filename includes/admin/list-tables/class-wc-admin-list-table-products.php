@@ -161,7 +161,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		echo '</strong>';
 
 		if ( $this->object->get_parent_id() > 0 ) {
-			echo '&nbsp;&nbsp;&larr; <a href="' . esc_url( get_edit_post_link( $this->object->get_parent_id() ) ) . '">' . get_the_title( $this->object->get_parent_id() ) . '</a>';
+			echo '&nbsp;&nbsp;&larr; <a href="' . esc_url( get_edit_post_link( $this->object->get_parent_id() ) ) . '">' . get_the_title( $this->object->get_parent_id() ) . '</a>'; // @codingStandardsIgnoreLine.
 		}
 
 		get_inline_data( $post );
@@ -169,7 +169,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		/* Custom inline data for woocommerce. */
 		echo '
 			<div class="hidden" id="woocommerce_inline_' . absint( $this->object->get_id() ) . '">
-				<div class="menu_order">' . absint( $this->object->get_menu_order() ) . '</div>
+				<div class="menu_order">' . esc_html( $this->object->get_menu_order() ) . '</div>
 				<div class="sku">' . esc_html( $this->object->get_sku() ) . '</div>
 				<div class="regular_price">' . esc_html( $this->object->get_regular_price() ) . '</div>
 				<div class="sale_price">' . esc_html( $this->object->get_sale_price() ) . '</div>
