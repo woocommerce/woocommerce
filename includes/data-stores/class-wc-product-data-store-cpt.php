@@ -920,7 +920,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function get_featured_product_ids() {
 		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 
-		// phpcs:disable
 		return get_posts(
 			array(
 				'post_type'      => array( 'product', 'product_variation' ),
@@ -943,7 +942,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'fields'         => 'id=>parent',
 			)
 		);
-		// phpcs:enable
 	}
 
 	/**
