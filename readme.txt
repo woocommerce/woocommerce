@@ -221,6 +221,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Added `woocommerce_paypal_force_one_line_item` filter to control how items are sent to PayPal. #22653
 * Dev - Added `woocommerce_update_product_stock_query` to filter the direct sql query to update product stock. #22672
 * Dev - Added `woocommerce_product_loop_title_classes` filter to modify product title loop classes. #22717
+* Dev - Delay `woocommerce_loaded` hook until all plugins are loaded. #22536
 * Fix - Hide ratings on the shop page when reviews are disabled. #22476
 * Fix - Fix W3C validation of single product page quantity input. #22333
 * Fix - Give product variations a unique guid after creation. #22324
