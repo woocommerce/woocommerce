@@ -61,9 +61,12 @@ class WC_Gateway_Paypal_Request {
 	 * @return string
 	 */
 	public function get_request_url( $order, $sandbox = false ) {
-		$this->endpoint = $sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr?test_ipn=1&' : 'https://www.paypal.com/cgi-bin/webscr?';
-		$paypal_args    = $this->get_paypal_args( $order );
-		$mask           = array(
+		$this->endpoint    = $sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr?test_ipn=1&' : 'https://www.paypal.com/cgi-bin/webscr?';
+		$paypal_args       = $this->get_paypal_args( $order );
+		$paypal_args['bn'] = 'WooThemes_Cart'; // Append WooCommerce PayPal Partner Attribution ID. This should not be overridden for this gateway.
+
+		// Mask (remove) PII from the logs.
+		$mask = array(
 			'first_name'    => '***',
 			'last_name'     => '***',
 			'address1'      => '***',
@@ -125,7 +128,6 @@ class WC_Gateway_Paypal_Request {
 				'page_style'    => $this->gateway->get_option( 'page_style' ),
 				'image_url'     => esc_url_raw( $this->gateway->get_option( 'image_url' ) ),
 				'paymentaction' => $this->gateway->get_option( 'paymentaction' ),
-				'bn'            => 'WooThemes_Cart',
 				'invoice'       => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), 127 ),
 				'custom'        => wp_json_encode(
 					array(
