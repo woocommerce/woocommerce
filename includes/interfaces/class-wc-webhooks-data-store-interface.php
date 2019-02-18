@@ -29,9 +29,8 @@ interface WC_Webhook_Data_Store_Interface {
 	 *
 	 * @since  3.2.0
 	 * @throws InvalidArgumentException If a $status value is passed in that is not in the known wc_get_webhook_statuses() keys.
-	 * @param  string   $status Optional - status to filter results by. Must be a key in return value of @see wc_get_webhook_statuses(). @since 3.5.0.
-	 * @param  null|int $limit Limit returned results. @since 3.5.0.
+	 * @param  string   $status Optional - status to filter results by. Must be a key in return value of @see wc_get_webhook_statuses(). @since 3.6.0.
 	 * @return int[]
 	 */
-	public function get_webhooks_ids( $status = '', $limit = null );
+	public function get_webhooks_ids( $status = '' );
 }

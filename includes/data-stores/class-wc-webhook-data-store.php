@@ -206,11 +206,9 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	 * @since  3.3.0
 	 * @throws InvalidArgumentException If a $status value is passed in that is not in the known wc_get_webhook_statuses() keys.
 	 * @param  string   $status Optional - status to filter results by. Must be a key in return value of @see wc_get_webhook_statuses(). @since 3.6.0.
-	 * @param  null|int $limit Limit returned results. @since 3.6.0.
 	 * @return int[]
 	 */
-	public function get_webhooks_ids( $status = '', $limit = null ) {
-
+	public function get_webhooks_ids( $status = '' ) {
 		if ( ! empty( $status ) ) {
 			$this->validate_status( $status );
 		}
@@ -224,12 +222,8 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 					'status' => $status,
 				)
 			);
-			$ids = array_map( 'intval', $ids );
+			$ids = array_map( 'absint', $ids );
 			set_transient( $this->get_transient_key( $status ), $ids );
-		}
-
-		if ( null !== $limit && $limit > 0 ) {
-			$ids = array_slice( $ids, 0, absint( $limit ) );
 		}
 
 		return $ids;

@@ -135,7 +135,7 @@ function wc_get_webhook_statuses() {
  */
 function wc_load_webhooks( $status = '', $limit = null ) {
 	$data_store = WC_Data_Store::load( 'webhook' );
-	$webhooks   = $data_store->get_webhooks_ids( $status, $limit );
+	$webhooks   = $data_store->get_webhooks_ids( $status );
 	$loaded     = false;
 
 	foreach ( $webhooks as $webhook_id ) {
