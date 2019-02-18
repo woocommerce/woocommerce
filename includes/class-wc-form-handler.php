@@ -149,11 +149,18 @@ class WC_Form_Handler {
 				}
 			}
 
-			// Set prop in customer object.
-			if ( is_callable( array( $customer, "set_$key" ) ) ) {
-				$customer->{"set_$key"}( $value );
-			} else {
-				$customer->update_meta_data( $key, $value );
+			try {
+				// Set prop in customer object.
+				if ( is_callable( array( $customer, "set_$key" ) ) ) {
+					$customer->{"set_$key"}( $value );
+				} else {
+					$customer->update_meta_data( $key, $value );
+				}
+			} catch ( WC_Data_Exception $e ) {
+				// Set notices. Ignore invalid billing email, since is already validated.
+				if ( 'customer_invalid_billing_email' !== $e->getErrorCode() ) {
+					wc_add_notice( $e->getMessage(), 'error' );
+				}
 			}
 		}
 
