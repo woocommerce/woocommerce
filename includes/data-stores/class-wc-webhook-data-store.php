@@ -336,6 +336,27 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	}
 
 	/**
+	 * Count webhooks.
+	 *
+	 * @since 3.6.0
+	 * @param string $status Status to count.
+	 * @return int
+	 */
+	protected function get_webhook_count( $status = 'active' ) {
+		global $wpdb;
+
+		$count = wp_cache_get( $status . '_count', 'webhooks' );
+
+		if ( false === $count ) {
+			$count = absint( $wpdb->get_var( $wpdb->prepare( "SELECT count( webhook_id ) FROM {$wpdb->prefix}wc_webhooks WHERE `status` = %s;", $status ) ) );
+
+			wp_cache_add( $status . '_count', $count, 'webhooks' );
+		}
+
+		return $count;
+	}
+
+	/**
 	 * Get total webhook counts by status.
 	 *
 	 * @return array
@@ -345,16 +366,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		$counts   = array();
 
 		foreach ( $statuses as $status ) {
-			$count = count(
-				$this->search_webhooks(
-					array(
-						'limit'  => -1,
-						'status' => $status,
-					)
-				)
-			);
-
-			$counts[ $status ] = $count;
+			$counts[ $status ] = $this->get_webhook_count( $status );
 		}
 
 		return $counts;
