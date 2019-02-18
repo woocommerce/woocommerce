@@ -190,7 +190,7 @@ function woocommerce_settings_get_option( $option_name, $default = '' ) {
  */
 function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 	if ( 'line_item' !== $item->get_type() ) {
-		return;
+		return false;
 	}
 
 	$product               = $item->get_product();
@@ -198,7 +198,7 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 	$already_reduced_stock = wc_stock_amount( $item->get_meta( '_reduced_stock', true ) );
 
 	if ( ! $product || ! $product->managing_stock() || ! $already_reduced_stock || $item_quantity === $already_reduced_stock ) {
-		return;
+		return false;
 	}
 
 	$diff = $item_quantity - $already_reduced_stock;
