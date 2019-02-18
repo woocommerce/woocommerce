@@ -76,27 +76,34 @@ a.suggestion-dismiss::before {
 }
 
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
-.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-body"],
-.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"] {
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-body"] {
 	text-align: left;
 	border: 1px solid #ccc;
 	border-bottom: none;
 
+	.marketplace-listitem-container {
+		padding: 1.5em;
+	}
+
+	h4 {
+		margin: 0;
+	}
+
 	&:last-child {
 		border-bottom: 1px solid #ccc;
 	}
+}
+
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-body"] {
+	text-align: left;
 
 	.marketplace-listitem-container {
 		align-items: center;
 		display: flex;
-		padding: 1.5em;
 
 		.marketplace-listitem-container-content {
 			flex: 1 0 70%;
-
-			h4 {
-				margin: 0;
-			}
 
 			p {
 				margin-top: 0.5em;

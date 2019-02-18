@@ -63,7 +63,7 @@ function wc_marketplace_suggestions_ajax_handler() {
 			{
 				"slug": "products-empty-footer-browse-all",
 				"context": "products-list-empty-footer",
-				"title": "Browse all extensions",
+				"link-text": "Browse all extensions",
 				"url": "https://woocommerce.com/product-category/woocommerce-extensions/",
 				"allow-dismiss": false
 			},

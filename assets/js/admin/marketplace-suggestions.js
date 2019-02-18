@@ -34,12 +34,16 @@
 			return dismissButton;
 		}
 
-		function renderLinkoutButton( url, buttonText ) {
+		function renderLinkout( url, text, isButton ) {
 			var linkoutButton = document.createElement( 'a' );
 
-			linkoutButton.classList.add( 'button' );
 			linkoutButton.setAttribute( 'href', url );
-			linkoutButton.textContent = buttonText;
+			linkoutButton.setAttribute( 'target', 'blank' );
+			linkoutButton.textContent = text;
+
+			if (isButton) {
+				linkoutButton.classList.add( 'button' );
+			}
 
 			return linkoutButton;
 		}
@@ -70,7 +74,7 @@
 			var linkoutColumn = document.createElement( 'td' );
 			linkoutColumn.setAttribute( 'colspan', 5 );
 			linkoutColumn.classList.add( 'marketplace-table-linkout' );
-			var linkoutButton = renderLinkoutButton( url, buttonText );
+			var linkoutButton = renderLinkout( url, buttonText );
 			linkoutColumn.appendChild( linkoutButton );
 			if ( allowDismiss ) {
 				linkoutColumn.appendChild( renderDismissButton( slug ) )
@@ -81,15 +85,7 @@
 			return row;
 		}
 
-		function renderListItem( slug, title, url, buttonText, copy, allowDismiss ) {
-			if ( ! title ) {
-				return;
-			}
-
-			if ( ! buttonText ) {
-				buttonText = 'Go';
-			}
-
+		function renderListItem( slug, title, url, linkText, linkIsButton, copy, allowDismiss ) {
 			var container = document.createElement( 'div' );
 			container.classList.add( 'marketplace-listitem-container' );
 			container.dataset.suggestionSlug = slug;
@@ -99,9 +95,11 @@
 			var right = document.createElement( 'div' );
 			right.classList.add( 'marketplace-listitem-container-cta' );
 
-			var titleHeading = document.createElement( 'h4' );
-			titleHeading.textContent = title;
-			left.appendChild( titleHeading );
+			if ( title ) {
+				var titleHeading = document.createElement( 'h4' );
+				titleHeading.textContent = title;
+				left.appendChild( titleHeading );
+			}
 
 			if ( copy ) {
 				var body = document.createElement( 'p' );
@@ -109,9 +107,9 @@
 				left.appendChild( body );
 			}
 
-			if ( url ) {
-				var linkoutButton = renderLinkoutButton( url, buttonText );
-				right.appendChild( linkoutButton );
+			if ( url && linkText ) {
+				var linkoutElement = renderLinkout( url, linkText, linkIsButton );
+				right.appendChild( linkoutElement );
 			}
 
 			if ( allowDismiss ) {
@@ -175,11 +173,19 @@
 
 				// render the promo content
 				for ( var i in promos ) {
+					var linkText = promos[ i ]['link-text'];
+					var linkoutIsButton = false;
+					if ( promos[ i ]['button-text'] ) {
+						linkText = promos[ i ]['button-text'];
+						linkoutIsButton = true;
+					}
+
 					var content = renderListItem(
 						promos[ i ].slug,
 						promos[ i ].title,
 						promos[ i ].url,
-						promos[ i ]['button-text'],
+						linkText,
+						linkoutIsButton,
 						promos[ i ].copy,
 						promos[ 0 ]['allow-dismiss']
 					);
