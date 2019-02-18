@@ -205,7 +205,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	 *
 	 * @since  3.3.0
 	 * @throws InvalidArgumentException If a $status value is passed in that is not in the known wc_get_webhook_statuses() keys.
-	 * @param  string   $status Optional - status to filter results by. Must be a key in return value of @see wc_get_webhook_statuses(). @since 3.6.0.
+	 * @param  string $status Optional - status to filter results by. Must be a key in return value of @see wc_get_webhook_statuses(). @since 3.6.0.
 	 * @return int[]
 	 */
 	public function get_webhooks_ids( $status = '' ) {
@@ -271,15 +271,15 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			'post_modified' => 'date_modified_gmt',
 		);
 		$orderby         = isset( $orderby_mapping[ $args['orderby'] ] ) ? $orderby_mapping[ $args['orderby'] ] : 'webhook_id';
-
-		$limit         = -1 < $args['limit'] ? sprintf( 'LIMIT %d', $args['limit'] ) : '';
-		$offset        = 0 < $args['offset'] ? sprintf( 'OFFSET %d', $args['offset'] ) : '';
-		$status        = ! empty( $args['status'] ) ? "AND `status` = '" . sanitize_key( isset( $statuses[ $args['status'] ] ) ? $statuses[ $args['status'] ] : $args['status'] ) . "'" : '';
-		$search        = ! empty( $args['search'] ) ? "AND `name` LIKE '%" . $wpdb->esc_like( sanitize_text_field( $args['search'] ) ) . "%'" : '';
-		$include       = '';
-		$exclude       = '';
-		$date_created  = '';
-		$date_modified = '';
+		$order           = "ORDER BY {$orderby} " . esc_sql( strtoupper( $args['order'] ) );
+		$limit           = -1 < $args['limit'] ? $wpdb->prepare( 'LIMIT %d', $args['limit'] ) : '';
+		$offset          = 0 < $args['offset'] ? $wpdb->prepare( 'OFFSET %d', $args['offset'] ) : '';
+		$status          = ! empty( $args['status'] ) ? $wpdb->prepare( 'AND `status` = %s', isset( $statuses[ $args['status'] ] ) ? $statuses[ $args['status'] ] : $args['status'] ) : '';
+		$search          = ! empty( $args['search'] ) ? "AND `name` LIKE '%" . $wpdb->esc_like( sanitize_text_field( $args['search'] ) ) . "%'" : '';
+		$include         = '';
+		$exclude         = '';
+		$date_created    = '';
+		$date_modified   = '';
 
 		if ( ! empty( $args['include'] ) ) {
 			$args['include'] = implode( ',', wp_parse_id_list( $args['include'] ) );
@@ -295,17 +295,15 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			$args['after']  = empty( $args['after'] ) ? '0000-00-00' : $args['after'];
 			$args['before'] = empty( $args['before'] ) ? current_time( 'mysql', 1 ) : $args['before'];
 
-			$date_created = "AND `date_created_gmt` BETWEEN STR_TO_DATE('" . $args['after'] . "', '%Y-%m-%d %H:%i:%s') and STR_TO_DATE('" . $args['before'] . "', '%Y-%m-%d %H:%i:%s')";
+			$date_created = "AND `date_created_gmt` BETWEEN STR_TO_DATE('" . esc_sql( $args['after'] ) . "', '%Y-%m-%d %H:%i:%s') and STR_TO_DATE('" . esc_sql( $args['before'] ) . "', '%Y-%m-%d %H:%i:%s')";
 		}
 
 		if ( ! empty( $args['modified_after'] ) || ! empty( $args['modified_before'] ) ) {
 			$args['modified_after']  = empty( $args['modified_after'] ) ? '0000-00-00' : $args['modified_after'];
 			$args['modified_before'] = empty( $args['modified_before'] ) ? current_time( 'mysql', 1 ) : $args['modified_before'];
 
-			$date_modified = "AND `date_modified_gmt` BETWEEN STR_TO_DATE('" . $args['modified_after'] . "', '%Y-%m-%d %H:%i:%s') and STR_TO_DATE('" . $args['modified_before'] . "', '%Y-%m-%d %H:%i:%s')";
+			$date_modified = "AND `date_modified_gmt` BETWEEN STR_TO_DATE('" . esc_sql( $args['modified_after'] ) . "', '%Y-%m-%d %H:%i:%s') and STR_TO_DATE('" . esc_sql( $args['modified_before'] ) . "', '%Y-%m-%d %H:%i:%s')";
 		}
-
-		$order = "ORDER BY {$orderby} " . strtoupper( sanitize_key( $args['order'] ) );
 
 		// Check for cache.
 		$cache_key = WC_Cache_Helper::get_cache_prefix( 'webhooks' ) . 'search_webhooks' . md5( implode( ',', $args ) );
@@ -330,9 +328,8 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			{$offset}"
 		);
 
-		$results = $wpdb->get_results( $query ); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+		$ids = wp_parse_id_list( $wpdb->get_col( $query ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
-		$ids = wp_list_pluck( $results, 'webhook_id' );
 		wp_cache_set( $cache_key, $ids, 'webhook_search_results' );
 
 		return $ids;
