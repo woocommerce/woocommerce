@@ -146,7 +146,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 			$wpdb->prefix . 'wc_webhooks',
 			$data,
 			array(
-				'webhook_id' => $webhook->get_id( 'edit' ),
+				'webhook_id' => $webhook->get_id(),
 			)
 		); // WPCS: DB call ok.
 
@@ -171,9 +171,8 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	 *
 	 * @since 3.3.0
 	 * @param WC_Webhook $webhook      Webhook instance.
-	 * @param bool       $force_delete Skip trash bin forcing to delete.
 	 */
-	public function delete( &$webhook, $force_delete = false ) {
+	public function delete( &$webhook ) {
 		global $wpdb;
 
 		$wpdb->delete(

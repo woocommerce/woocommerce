@@ -115,7 +115,7 @@ jQuery( function( $ ) {
 		this.openPhotoswipe       = this.openPhotoswipe.bind( this );
 
 		if ( this.flexslider_enabled ) {
-			this.initFlexslider();
+			this.initFlexslider( args.flexslider );
 			$target.on( 'woocommerce_gallery_reset_slide_position', this.onResetSlidePosition );
 		} else {
 			this.$target.css( 'opacity', 1 );
@@ -134,7 +134,7 @@ jQuery( function( $ ) {
 	/**
 	 * Initialize flexSlider.
 	 */
-	ProductGallery.prototype.initFlexslider = function() {
+	ProductGallery.prototype.initFlexslider = function( args ) {
 		var $target = this.$target,
 			gallery = this;
 
@@ -146,7 +146,7 @@ jQuery( function( $ ) {
 			after: function( slider ) {
 				gallery.initZoomForTarget( gallery.$images.eq( slider.currentSlide ) );
 			}
-		}, wc_single_product_params.flexslider );
+		}, args );
 
 		$target.flexslider( options );
 
@@ -307,6 +307,12 @@ jQuery( function( $ ) {
 	 * Initialize all galleries on page.
 	 */
 	$( '.woocommerce-product-gallery' ).each( function() {
-		$( this ).wc_product_gallery();
+		
+		$( this ).trigger( 'wc-product-gallery-before-init', [ this, wc_single_product_params ] );
+		
+		$( this ).wc_product_gallery( wc_single_product_params );
+		
+		$( this ).trigger( 'wc-product-gallery-after-init', [ this, wc_single_product_params ] );
+		
 	} );
 } );

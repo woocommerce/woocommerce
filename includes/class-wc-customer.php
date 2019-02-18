@@ -137,7 +137,8 @@ class WC_Customer extends WC_Legacy_Customer {
 	public function delete_and_reassign( $reassign = null ) {
 		if ( $this->data_store ) {
 			$this->data_store->delete(
-				$this, array(
+				$this,
+				array(
 					'force_delete' => true,
 					'reassign'     => $reassign,
 				)
@@ -817,12 +818,16 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $city     City.
 	 */
 	public function set_billing_location( $country, $state = '', $postcode = '', $city = '' ) {
-		$billing             = $this->get_prop( 'billing', 'edit' );
-		$billing['country']  = $country;
-		$billing['state']    = $state;
-		$billing['postcode'] = $postcode;
-		$billing['city']     = $city;
-		$this->set_prop( 'billing', $billing );
+		$address_data = $this->get_prop( 'billing', 'edit' );
+
+		$address_data['address_1'] = '';
+		$address_data['address_2'] = '';
+		$address_data['city']      = $city;
+		$address_data['state']     = $state;
+		$address_data['postcode']  = $postcode;
+		$address_data['country']   = $country;
+
+		$this->set_prop( 'billing', $address_data );
 	}
 
 	/**
@@ -834,12 +839,16 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $city     City.
 	 */
 	public function set_shipping_location( $country, $state = '', $postcode = '', $city = '' ) {
-		$shipping             = $this->get_prop( 'shipping', 'edit' );
-		$shipping['country']  = $country;
-		$shipping['state']    = $state;
-		$shipping['postcode'] = $postcode;
-		$shipping['city']     = $city;
-		$this->set_prop( 'shipping', $shipping );
+		$address_data = $this->get_prop( 'shipping', 'edit' );
+
+		$address_data['address_1'] = '';
+		$address_data['address_2'] = '';
+		$address_data['city']      = $city;
+		$address_data['state']     = $state;
+		$address_data['postcode']  = $postcode;
+		$address_data['country']   = $country;
+
+		$this->set_prop( 'shipping', $address_data );
 	}
 
 	/**

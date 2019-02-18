@@ -504,8 +504,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			$data->post_author = get_current_user_id();
 
 			// Post password.
-			$password = strlen( uniqid( 'webhook_' ) );
-			$data->post_password = $password > 20 ? substr( $password, 0, 20 ) : $password;
+			$data->post_password = 'webhook_' . wp_generate_password();
 
 			// Post status.
 			$data->post_status = 'publish';

@@ -145,6 +145,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$product->apply_changes();
 
 			$this->update_version_and_type( $product );
+			$this->update_guid( $product );
 
 			$this->clear_caches( $product );
 
@@ -427,7 +428,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$attributes             = $product->get_attributes();
 			$updated_attribute_keys = array();
 			foreach ( $attributes as $key => $value ) {
-				update_post_meta( $product->get_id(), 'attribute_' . $key, $value );
+				update_post_meta( $product->get_id(), 'attribute_' . $key, wp_slash( $value ) );
 				$updated_attribute_keys[] = 'attribute_' . $key;
 			}
 
@@ -470,5 +471,27 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		parent::update_post_meta( $product, $force );
+	}
+
+	/**
+	 * Update product variation guid.
+	 *
+	 * @param WC_Product_Variation $product Product variation object.
+	 *
+	 * @since 3.6.0
+	 */
+	protected function update_guid( $product ) {
+		global $wpdb;
+
+		$guid = home_url(
+			add_query_arg(
+				array(
+					'post_type' => 'product_variation',
+					'p'         => $product->get_id(),
+				),
+				''
+			)
+		);
+		$wpdb->update( $wpdb->posts, array( 'guid' => $guid ), array( 'ID' => $product->get_id() ) );
 	}
 }

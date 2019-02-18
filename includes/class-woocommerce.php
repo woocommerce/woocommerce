@@ -154,7 +154,18 @@ final class WooCommerce {
 		$this->define_constants();
 		$this->includes();
 		$this->init_hooks();
+	}
 
+	/**
+	 * When WP has loaded all plugins, trigger the `woocommerce_loaded` hook.
+	 *
+	 * This ensures `woocommerce_loaded` is called only after all other plugins
+	 * are loaded, to avoid issues caused by plugin directory naming changing
+	 * the load order. See #21524 for details.
+	 *
+	 * @since 3.6.0
+	 */
+	public function on_plugins_loaded() {
 		do_action( 'woocommerce_loaded' );
 	}
 
@@ -166,6 +177,8 @@ final class WooCommerce {
 	private function init_hooks() {
 		register_activation_hook( WC_PLUGIN_FILE, array( 'WC_Install', 'install' ) );
 		register_shutdown_function( array( $this, 'log_errors' ) );
+
+		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), -1 );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'init', array( $this, 'init' ), 0 );
@@ -525,7 +538,11 @@ final class WooCommerce {
 	 * Ensure theme and server variable compatibility and setup image sizes.
 	 */
 	public function setup_environment() {
-		/* @deprecated 2.2 Use WC()->template_path() instead. */
+		/**
+		 * WC_TEMPLATE_PATH constant.
+		 *
+		 * @deprecated 2.2 Use WC()->template_path() instead.
+		 */
 		$this->define( 'WC_TEMPLATE_PATH', $this->template_path() );
 
 		$this->add_thumbnail_support();
@@ -564,7 +581,11 @@ final class WooCommerce {
 		add_image_size( 'woocommerce_single', $single['width'], $single['height'], $single['crop'] );
 		add_image_size( 'woocommerce_gallery_thumbnail', $gallery_thumbnail['width'], $gallery_thumbnail['height'], $gallery_thumbnail['crop'] );
 
-		// Registered for bw compat. @todo remove in 4.0.
+		/**
+		 * Legacy image sizes.
+		 *
+		 * @deprecated These sizes will be removed in 4.0.
+		 */
 		add_image_size( 'shop_catalog', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
 		add_image_size( 'shop_single', $single['width'], $single['height'], $single['crop'] );
 		add_image_size( 'shop_thumbnail', $gallery_thumbnail['width'], $gallery_thumbnail['height'], $gallery_thumbnail['crop'] );
