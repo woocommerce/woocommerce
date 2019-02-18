@@ -238,7 +238,7 @@ final class WooCommerce {
 	 */
 	public function is_rest_api_request() {
 		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
-			return apply_filters( 'woocommerce_is_rest_api_request', false );
+			return false;
 		}
 
 		// REST API prefix.
