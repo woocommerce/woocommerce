@@ -5902,6 +5902,10 @@ table.bar_chart {
 	@include icon( "\e600" );
 }
 
+.post-type-product .woocommerce-BlankState-message::before {
+	@include icon( '\e006' );
+}
+
 .woocommerce-BlankState--api .woocommerce-BlankState-message::before {
 
 	@include icon( "\e01c" );
@@ -5913,26 +5917,18 @@ table.bar_chart {
 }
 
 .post-type-product .woocommerce-BlankState {
-	background-color: white;
-	max-width: 800px;
-	padding: 4em 6em;
+	max-width: 764px;
 	text-align: center;
 	margin: auto;
-    margin-top: 4em;
 
 	.woocommerce-BlankState-message {
 		color: #444;
-		margin: 0 auto 1.5em;
-		line-height: 1.5em;
-		max-width: 500px;
+		font-size: 1.5em;
+		margin: 0 auto 1em;
 	}
 
-	.woocommerce-BlankState-cta {
-		font-size: 1.2em;
-		padding: 0.75em 1.5em;
-		margin: 0 0.25em;
-		height: auto;
-		display: inline-block !important;
+	.woocommerce-BlankState-message::before {
+		font-size: 6em;
 	}
 }
 

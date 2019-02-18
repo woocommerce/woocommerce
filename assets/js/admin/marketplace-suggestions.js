@@ -155,7 +155,6 @@
 
 		function hidePageElementsForOnboardingStyle() {
 			if ( _.contains( visibleSuggestions, 'products-list-empty-body' ) ) {
-				$('h1.wp-heading-inline').hide();
 				$('#screen-meta-links').hide();
 				$('#wpfooter').hide();
 			}
