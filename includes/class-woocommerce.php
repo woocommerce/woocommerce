@@ -236,19 +236,18 @@ final class WooCommerce {
 	 *
 	 * @return bool
 	 */
-	private static function is_rest_api_request() {
-		$request_uri = $_SERVER['REQUEST_URI']; // @codingStandardsIgnoreLine
-		if ( empty( $request_uri ) ) {
-			return false;
+	public function is_rest_api_request() {
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return apply_filters( 'woocommerce_is_rest_api_request', false );
 		}
 
 		// REST API prefix.
 		$rest_prefix = trailingslashit( rest_get_url_prefix() );
 
 		// Check if this is a WC endpoint.
-		$is_woocommerce_endpoint = ( false !== strpos( $request_uri, $rest_prefix . 'wc/' ) );
+		$is_woocommerce_endpoint = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix . 'wc/' ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-		return apply_filters( 'woocommerce_is_request_to_nonlegacy_rest_api', $is_woocommerce_endpoint );
+		return apply_filters( 'woocommerce_is_rest_api_request', $is_woocommerce_endpoint );
 	}
 
 	/**
