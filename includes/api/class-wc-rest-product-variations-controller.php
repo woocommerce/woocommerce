@@ -760,62 +760,6 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Set post_status.
 		$args['post_status'] = $request['status'];
 
-		// Taxonomy query to filter products by type, category,
-		// tag, shipping class, and attribute.
-		$tax_query = array();
-
-		// Map between taxonomy name and arg's key.
-		$taxonomies = array(
-			'product_cat'            => 'category',
-			'product_tag'            => 'tag',
-			'product_shipping_class' => 'shipping_class',
-		);
-
-		// Set tax_query for each passed arg.
-		foreach ( $taxonomies as $taxonomy => $key ) {
-			if ( ! empty( $request[ $key ] ) ) {
-				$tax_query[] = array(
-					'taxonomy' => $taxonomy,
-					'field'    => 'term_id',
-					'terms'    => $request[ $key ],
-				);
-			}
-		}
-
-		// Filter product type by slug.
-		if ( ! empty( $request['type'] ) ) {
-			$tax_query[] = array(
-				'taxonomy' => 'product_type',
-				'field'    => 'slug',
-				'terms'    => $request['type'],
-			);
-		}
-
-		// Filter by attribute and term.
-		if ( ! empty( $request['attribute'] ) && ! empty( $request['attribute_term'] ) ) {
-			if ( in_array( $request['attribute'], wc_get_attribute_taxonomy_names(), true ) ) {
-				$tax_query[] = array(
-					'taxonomy' => $request['attribute'],
-					'field'    => 'term_id',
-					'terms'    => $request['attribute_term'],
-				);
-			}
-		}
-
-		if ( ! empty( $tax_query ) ) {
-			$args['tax_query'] = $tax_query; // WPCS: slow query ok.
-		}
-
-		// Filter featured.
-		if ( is_bool( $request['featured'] ) ) {
-			$args['tax_query'][] = array(
-				'taxonomy' => 'product_visibility',
-				'field'    => 'name',
-				'terms'    => 'featured',
-				'operator' => true === $request['featured'] ? 'IN' : 'NOT IN',
-			);
-		}
-
 		// Filter by sku.
 		if ( ! empty( $request['sku'] ) ) {
 			$skus = explode( ',', $request['sku'] );
@@ -825,7 +769,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			}
 
 			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args, array(
+				$args,
+				array(
 					'key'     => '_sku',
 					'value'   => $skus,
 					'compare' => 'IN',
@@ -836,7 +781,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Filter by tax class.
 		if ( ! empty( $request['tax_class'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args, array(
+				$args,
+				array(
 					'key'   => '_tax_class',
 					'value' => 'standard' !== $request['tax_class'] ? $request['tax_class'] : '',
 				)
@@ -851,7 +797,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Filter product based on stock_status.
 		if ( ! empty( $request['stock_status'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args, array(
+				$args,
+				array(
 					'key'   => '_stock_status',
 					'value' => $request['stock_status'],
 				)
@@ -889,7 +836,17 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	public function get_collection_params() {
 		$params = parent::get_collection_params();
 
-		unset( $params['in_stock'] );
+		unset(
+			$params['in_stock'],
+			$params['type'],
+			$params['featured'],
+			$params['category'],
+			$params['tag'],
+			$params['shipping_class'],
+			$params['attribute'],
+			$params['attribute_term']
+		);
+
 		$params['stock_status'] = array(
 			'description'       => __( 'Limit result set to products with specified stock status.', 'woocommerce' ),
 			'type'              => 'string',

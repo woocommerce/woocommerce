@@ -27,7 +27,6 @@ filter:
     - sample-data/
     - i18n/
     - includes/api/legacy/
-    - includes/gateways/simplify-commerce/includes/
     - includes/legacy/
     - includes/libraries/
     - includes/shipping/legacy-*

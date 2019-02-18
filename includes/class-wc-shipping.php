@@ -95,10 +95,10 @@ class WC_Shipping {
 	public function __get( $name ) {
 		// Grab from cart for backwards compatibility with versions prior to 3.2.
 		if ( 'shipping_total' === $name ) {
-			return wc()->cart->get_shipping_total();
+			return WC()->cart->get_shipping_total();
 		}
 		if ( 'shipping_taxes' === $name ) {
-			return wc()->cart->get_shipping_taxes();
+			return WC()->cart->get_shipping_taxes();
 		}
 	}
 
@@ -151,7 +151,7 @@ class WC_Shipping {
 	 * If a $package is passed some methods may add themselves conditionally and zones will be used.
 	 *
 	 * @param array $package Package information.
-	 * @return array
+	 * @return WC_Shipping_Method[]
 	 */
 	public function load_shipping_methods( $package = array() ) {
 		if ( ! empty( $package ) ) {
@@ -209,7 +209,7 @@ class WC_Shipping {
 	/**
 	 * Returns all registered shipping methods for usage.
 	 *
-	 * @return array
+	 * @return WC_Shipping_Method[]
 	 */
 	public function get_shipping_methods() {
 		if ( is_null( $this->shipping_methods ) ) {
@@ -226,7 +226,8 @@ class WC_Shipping {
 	public function get_shipping_classes() {
 		if ( empty( $this->shipping_classes ) ) {
 			$classes                = get_terms(
-				'product_shipping_class', array(
+				'product_shipping_class',
+				array(
 					'hide_empty' => '0',
 					'orderby'    => 'name',
 				)
@@ -317,9 +318,12 @@ class WC_Shipping {
 				unset( $package_to_hash['contents'][ $item_id ]['data'] );
 			}
 
+			// Get rates stored in the WC session data for this package.
+			$wc_session_key = 'shipping_for_package_' . $package_key;
+			$stored_rates   = WC()->session->get( $wc_session_key );
+
+			// Calculate the hash for this package so we can tell if it's changed since last calculation.
 			$package_hash = 'wc_ship_' . md5( wp_json_encode( $package_to_hash ) . WC_Cache_Helper::get_transient_version( 'shipping' ) );
-			$session_key  = 'shipping_for_package_' . $package_key;
-			$stored_rates = WC()->session->get( $session_key );
 
 			if ( ! is_array( $stored_rates ) || $package_hash !== $stored_rates['package_hash'] || 'yes' === get_option( 'woocommerce_shipping_debug_mode', 'no' ) ) {
 				foreach ( $this->load_shipping_methods( $package ) as $shipping_method ) {
@@ -333,7 +337,8 @@ class WC_Shipping {
 
 				// Store in session to avoid recalculation.
 				WC()->session->set(
-					$session_key, array(
+					$wc_session_key,
+					array(
 						'package_hash' => $package_hash,
 						'rates'        => $package['rates'],
 					)

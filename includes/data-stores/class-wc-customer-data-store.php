@@ -117,11 +117,13 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		wp_update_user(
 			apply_filters(
-				'woocommerce_update_customer_args', array(
+				'woocommerce_update_customer_args',
+				array(
 					'ID'           => $customer->get_id(),
 					'role'         => $customer->get_role(),
 					'display_name' => $customer->get_display_name(),
-				), $customer
+				),
+				$customer
 			)
 		);
 		$wp_user = new WP_User( $customer->get_id() );
@@ -147,16 +149,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			throw new Exception( __( 'Invalid customer.', 'woocommerce' ) );
 		}
 
-		// Only users on this site should be read.
-		if ( is_multisite() && ! is_user_member_of_blog( $customer->get_id() ) ) {
-			throw new Exception( __( 'Invalid customer.', 'woocommerce' ) );
-		}
-
 		$customer_id = $customer->get_id();
 
 		// Load meta but exclude deprecated props.
 		$user_meta = array_diff_key(
-			array_map( 'wc_flatten_meta_callback', get_user_meta( $customer_id ) ),
+			array_change_key_case( array_map( 'wc_flatten_meta_callback', get_user_meta( $customer_id ) ) ),
 			array_flip( array( 'country', 'state', 'postcode', 'city', 'address', 'address_2', 'default', 'location' ) )
 		);
 
@@ -186,11 +183,13 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	public function update( &$customer ) {
 		wp_update_user(
 			apply_filters(
-				'woocommerce_update_customer_args', array(
+				'woocommerce_update_customer_args',
+				array(
 					'ID'           => $customer->get_id(),
 					'user_email'   => $customer->get_email(),
 					'display_name' => $customer->get_display_name(),
-				), $customer
+				),
+				$customer
 			)
 		);
 
@@ -225,7 +224,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		}
 
 		$args = wp_parse_args(
-			$args, array(
+			$args,
+			array(
 				'reassign' => 0,
 			)
 		);
@@ -326,7 +326,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		global $wpdb;
 
 		$last_order = $wpdb->get_var(
-			// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 			"SELECT posts.ID
 			FROM $wpdb->posts AS posts
 			LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
@@ -359,7 +359,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			global $wpdb;
 
 			$count = $wpdb->get_var(
-				// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
+				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 				"SELECT COUNT(*)
 				FROM $wpdb->posts as posts
 				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
@@ -394,7 +394,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 			$statuses = array_map( 'esc_sql', wc_get_is_paid_statuses() );
 			$spent    = $wpdb->get_var(
-				// phpcs:disable WordPress.WP.PreparedSQL.NotPrepared
+				// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 				apply_filters(
 					'woocommerce_customer_get_total_spent_query',
 					"SELECT SUM(meta2.meta_value)
@@ -437,18 +437,23 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		$query = new WP_User_Query(
 			apply_filters(
-				'woocommerce_customer_search_customers', array(
+				'woocommerce_customer_search_customers',
+				array(
 					'search'         => '*' . esc_attr( $term ) . '*',
 					'search_columns' => array( 'user_login', 'user_url', 'user_email', 'user_nicename', 'display_name' ),
 					'fields'         => 'ID',
 					'number'         => $limit,
-				), $term, $limit, 'main_query'
+				),
+				$term,
+				$limit,
+				'main_query'
 			)
 		);
 
 		$query2 = new WP_User_Query(
 			apply_filters(
-				'woocommerce_customer_search_customers', array(
+				'woocommerce_customer_search_customers',
+				array(
 					'fields'     => 'ID',
 					'number'     => $limit,
 					'meta_query' => array(
@@ -464,7 +469,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 							'compare' => 'LIKE',
 						),
 					),
-				), $term, $limit, 'meta_query'
+				),
+				$term,
+				$limit,
+				'meta_query'
 			)
 		);
 

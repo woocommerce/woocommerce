@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit();
 
 				<h2><?php esc_html_e( 'Manage your subscriptions, get important product notifications, and updates, all from the convenience of your WooCommerce dashboard', 'woocommerce' ); ?></h2>
 				<p><?php esc_html_e( 'Once connected, your WooCommerce.com purchases will be listed here.', 'woocommerce' ); ?></p>
-				<p><a class="button button-primary" href="<?php echo esc_url( $connect_url ); ?>"><?php esc_html_e( 'Connect', 'woocommerce' ); ?></a></p>
+				<p><a class="button button-primary button-helper-connect" href="<?php echo esc_url( $connect_url ); ?>"><?php esc_html_e( 'Connect', 'woocommerce' ); ?></a></p>
 			</div>
 		</div>
 </div>

@@ -80,7 +80,8 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		}
 		$this->assertCount( 1, $product->get_attributes() );
 		$this->assertContains(
-			current( $product->get_attributes() )->get_data(), array(
+			current( $product->get_attributes() )->get_data(),
+			array(
 				'attribute_id' => 0,
 				'name'         => 'Test Attribute',
 				'options'      => array( 'Fish', 'Fingers' ),
@@ -268,6 +269,9 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>50.00</span>', $product->get_price_html() );
 	}
 
+	/**
+	 * Test: test_get_image_should_return_product_image.
+	 */
 	public function test_get_image_should_return_product_image() {
 		$product = new WC_Product();
 		$image_url = $this->set_product_image( $product );
@@ -288,6 +292,9 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Test: test_get_image_should_return_parent_product_image.
+	 */
 	public function test_get_image_should_return_parent_product_image() {
 		$variable_product = WC_Helper_Product::create_variation_product();
 		$variations = $variable_product->get_children();
@@ -299,7 +306,7 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			$variation_1->get_image()
 		);
 
-		$this->assertEquals(
+		$this->assertContains(
 			'<img width="186" height="144" src="' . $image_url . '" class="attachment-single size-single" alt="" />',
 			$variation_1->get_image( 'single' )
 		);
@@ -310,15 +317,18 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Test: test_get_image_should_return_place_holder_image.
+	 */
 	public function test_get_image_should_return_place_holder_image() {
 		$product = new WC_Product();
-		$image_url = wc_placeholder_img_src();
-		$expected_result = '<img src="' . $image_url . '" alt="Placeholder" width="300" class="woocommerce-placeholder wp-post-image" height="300" />';
 
-		$this->assertEquals( $expected_result, $product->get_image() );
-		$this->assertEquals( $expected_result, $product->get_image( 'woocommerce_thumbnail', array(), true ) );
+		$this->assertContains( wc_placeholder_img_src(), $product->get_image() );
 	}
 
+	/**
+	 * Test: test_get_image_should_return_empty_string.
+	 */
 	public function test_get_image_should_return_empty_string() {
 		$product = new WC_Product();
 		$this->assertEquals( '', $product->get_image( 'woocommerce_thumbnail', array(), false ) );

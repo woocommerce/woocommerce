@@ -10,12 +10,6 @@ div.woocommerce-message {
 	overflow: hidden;
 	position: relative;
 	border-left-color: #cc99c2 !important;
-	p {
-		max-width: 700px;
-	}
-	p:last-child {
-		max-width: inherit;
-	}
 }
 
 p.woocommerce-actions,
@@ -76,7 +70,6 @@ div.woocommerce-no-shipping-methods-notice {
 	p {
 		position: relative;
 		z-index: 1;
-		max-width: 700px;
 		line-height: 1.5em;
 		margin: 12px 0;
 

@@ -59,8 +59,8 @@ abstract class WC_Widget extends WP_Widget {
 	 */
 	public function __construct() {
 		$widget_ops = array(
-			'classname'   => $this->widget_cssclass,
-			'description' => $this->widget_description,
+			'classname'                   => $this->widget_cssclass,
+			'description'                 => $this->widget_description,
 			'customize_selective_refresh' => true,
 		);
 
@@ -123,6 +123,24 @@ abstract class WC_Widget extends WP_Widget {
 	}
 
 	/**
+	 * Get this widgets title.
+	 *
+	 * @param array $instance Array of instance options.
+	 * @return string
+	 */
+	protected function get_instance_title( $instance ) {
+		if ( isset( $instance['title'] ) ) {
+			return $instance['title'];
+		}
+
+		if ( isset( $this->settings, $this->settings['title'], $this->settings['title']['std'] ) ) {
+			return $this->settings['title']['std'];
+		}
+
+		return '';
+	}
+
+	/**
 	 * Output the html at the start of a widget.
 	 *
 	 * @param array $args Arguments.
@@ -131,7 +149,9 @@ abstract class WC_Widget extends WP_Widget {
 	public function widget_start( $args, $instance ) {
 		echo $args['before_widget']; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 
-		if ( $title = apply_filters( 'widget_title', empty( $instance['title'] ) ? '' : $instance['title'], $instance, $this->id_base ) ) { // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found, WordPress.CodeAnalysis.AssignmentInCondition.Found
+		$title = apply_filters( 'widget_title', $this->get_instance_title( $instance ), $instance, $this->id_base );
+
+		if ( $title ) {
 			echo $args['before_title'] . $title . $args['after_title']; // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 		}
 	}
@@ -225,7 +245,7 @@ abstract class WC_Widget extends WP_Widget {
 				case 'text':
 					?>
 					<p>
-						<label for="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>"><?php echo $setting['label']; ?></label><?php // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+						<label for="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>"><?php echo wp_kses_post( $setting['label'] ); ?></label><?php // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
 						<input class="widefat <?php echo esc_attr( $class ); ?>" id="<?php echo esc_attr( $this->get_field_id( $key ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( $key ) ); ?>" type="text" value="<?php echo esc_attr( $value ); ?>" />
 					</p>
 					<?php
@@ -299,7 +319,7 @@ abstract class WC_Widget extends WP_Widget {
 			$link = get_term_link( get_query_var( 'product_tag' ), 'product_tag' );
 		} else {
 			$queried_object = get_queried_object();
-			$link = get_term_link( $queried_object->slug, $queried_object->taxonomy );
+			$link           = get_term_link( $queried_object->slug, $queried_object->taxonomy );
 		}
 
 		// Min/Max.
@@ -327,6 +347,11 @@ abstract class WC_Widget extends WP_Widget {
 		// Post Type Arg.
 		if ( isset( $_GET['post_type'] ) ) {
 			$link = add_query_arg( 'post_type', wc_clean( wp_unslash( $_GET['post_type'] ) ), $link );
+
+			// Prevent post type and page id when pretty permalinks are disabled.
+			if ( is_shop() ) {
+				$link = remove_query_arg( 'page_id', $link );
+			}
 		}
 
 		// Min Rating Arg.
@@ -337,7 +362,7 @@ abstract class WC_Widget extends WP_Widget {
 		// All current filters.
 		if ( $_chosen_attributes = WC_Query::get_layered_nav_chosen_attributes() ) { // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found, WordPress.CodeAnalysis.AssignmentInCondition.Found
 			foreach ( $_chosen_attributes as $name => $data ) {
-				$filter_name = sanitize_title( str_replace( 'pa_', '', $name ) );
+				$filter_name = wc_attribute_taxonomy_slug( $name );
 				if ( ! empty( $data['terms'] ) ) {
 					$link = add_query_arg( 'filter_' . $filter_name, implode( ',', $data['terms'] ), $link );
 				}
@@ -347,7 +372,7 @@ abstract class WC_Widget extends WP_Widget {
 			}
 		}
 
-		return $link;
+		return apply_filters( 'woocommerce_widget_get_current_page_url', $link, $this );
 	}
 
 	/**
