@@ -136,15 +136,19 @@ function wc_get_webhook_statuses() {
 function wc_load_webhooks( $status = '', $limit = null ) {
 	$data_store = WC_Data_Store::load( 'webhook' );
 	$webhooks   = $data_store->get_webhooks_ids( $status );
-	$loaded     = false;
+	$loaded     = 0;
 
 	foreach ( $webhooks as $webhook_id ) {
 		$webhook = new WC_Webhook( $webhook_id );
 		$webhook->enqueue();
-		$loaded = true;
+		$loaded ++;
+
+		if ( $loaded >= $limit ) {
+			break;
+		}
 	}
 
-	return $loaded;
+	return 0 < $loaded;
 }
 
 /**
