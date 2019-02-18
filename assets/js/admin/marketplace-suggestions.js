@@ -44,7 +44,7 @@
 			return linkoutButton;
 		}
 
-		function renderTableBanner( slug, title, url, buttonText ) {
+		function renderTableBanner( slug, title, url, buttonText, allowDismiss ) {
 			if ( ! title || ! url ) {
 				return;
 			}
@@ -72,14 +72,16 @@
 			linkoutColumn.classList.add( 'marketplace-table-linkout' );
 			var linkoutButton = renderLinkoutButton( url, buttonText );
 			linkoutColumn.appendChild( linkoutButton );
-			linkoutColumn.appendChild( renderDismissButton( slug ) )
+			if ( allowDismiss ) {
+				linkoutColumn.appendChild( renderDismissButton( slug ) )
+			}
 
 			row.appendChild( linkoutColumn );
 
 			return row;
 		}
 
-		function renderListItem( slug, title, url, buttonText, copy ) {
+		function renderListItem( slug, title, url, buttonText, copy, allowDismiss ) {
 			if ( ! title ) {
 				return;
 			}
@@ -112,15 +114,15 @@
 				right.appendChild( linkoutButton );
 			}
 
-			right.appendChild( renderDismissButton( slug ) )
+			if ( allowDismiss ) {
+				right.appendChild( renderDismissButton( slug ) )
+			}
 
 			container.appendChild( left );
 			container.appendChild( right );
 
 			return container;
 		}
-
-		var visibleSuggestions = [];
 
 		function getRelevantPromotions( marketplaceSuggestionsApiData, displayContext ) {
 			// select based on display context
@@ -153,7 +155,7 @@
 			return promos;
 		}
 
-		function hidePageElementsForOnboardingStyle() {
+		function hidePageElementsForOnboardingStyle( visibleSuggestions ) {
 			if ( _.contains( visibleSuggestions, 'products-list-empty-body' ) ) {
 				$('#screen-meta-links').hide();
 				$('#wpfooter').hide();
@@ -161,6 +163,7 @@
 		}
 
 		function displaySuggestions( marketplaceSuggestionsApiData ) {
+			var visibleSuggestions = [];
 
 			// iterate over all suggestions containers, rendering promos
 			$( '.marketplace-suggestions-container' ).each( function() {
@@ -177,9 +180,11 @@
 						promos[ i ].title,
 						promos[ i ].url,
 						promos[ i ]['button-text'],
-						promos[ i ].copy
+						promos[ i ].copy,
+						promos[ 0 ]['allow-dismiss']
 					);
 					$( this ).append( content );
+					$( this ).addClass( 'showing-suggestion' );
 					visibleSuggestions.push( promos[i].context );
 				}
 			} );
@@ -199,7 +204,8 @@
 					promos[ 0 ].slug,
 					promos[ 0 ].title,
 					promos[ 0 ].url,
-					promos[ 0 ]['button-text']
+					promos[ 0 ]['button-text'],
+					promos[ 0 ]['allow-dismiss']
 				);
 
 				if ( content ) {
@@ -220,7 +226,7 @@
 				}
 			} );
 
-			hidePageElementsForOnboardingStyle();
+			hidePageElementsForOnboardingStyle( visibleSuggestions );
 		}
 
 		var data =

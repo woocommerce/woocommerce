@@ -60,21 +60,46 @@ a.suggestion-dismiss::before {
 	}
 }
 
-.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-body"] {
-	margin-top: 4em;
+.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-header"],
+.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-body"],
+.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-footer"] {
+	border: none;
+	border-bottom: none;
+}
+
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"] {
+
+	h4 {
+		font-size: 1.1em;
+	}
+}
+
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-body"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"] {
 	text-align: left;
 	border: 1px solid #ccc;
+	border-bottom: none;
+
+	&:last-child {
+		border-bottom: 1px solid #ccc;
+	}
 
 	.marketplace-listitem-container {
 		align-items: center;
 		display: flex;
-		padding: 1em;
+		padding: 1.5em;
 
 		.marketplace-listitem-container-content {
 			flex: 1 0 70%;
 
 			h4 {
-				margin: 0 0 0.5em;
+				margin: 0;
+			}
+
+			p {
+				margin-top: 0.5em;
 			}
 		}
 
@@ -100,5 +125,4 @@ a.suggestion-dismiss::before {
 		}
 
 	}
-
 }

@@ -55,6 +55,19 @@ function wc_marketplace_suggestions_ajax_handler() {
 		// Return temporary hard-coded test data until we get our API data in place.
 		echo '[
 			{
+				"slug": "products-empty-header-product-types",
+				"context": "products-list-empty-header",
+				"title": "Other types of products",
+				"allow-dismiss": false
+			},
+			{
+				"slug": "products-empty-footer-browse-all",
+				"context": "products-list-empty-footer",
+				"title": "Browse all extensions",
+				"url": "https://woocommerce.com/product-category/woocommerce-extensions/",
+				"allow-dismiss": false
+			},
+			{
 				"slug": "products-empty-memberships",
 				"context": "products-list-empty-body",
 				"hide-if-installed": "woocommerce-memberships",
