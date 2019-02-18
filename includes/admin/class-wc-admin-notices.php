@@ -31,7 +31,6 @@ class WC_Admin_Notices {
 		'template_files'          => 'template_file_check_notice',
 		'legacy_shipping'         => 'legacy_shipping_notice',
 		'no_shipping_methods'     => 'no_shipping_methods_notice',
-		'simplify_commerce'       => 'simplify_commerce_notice',
 		'regenerating_thumbnails' => 'regenerating_thumbnails_notice',
 		'no_secure_connection'    => 'secure_connection_notice',
 		'wootenberg'              => 'wootenberg_feature_plugin_notice',
@@ -81,17 +80,9 @@ class WC_Admin_Notices {
 	 * Reset notices for themes when switched or a new version of WC is installed.
 	 */
 	public static function reset_admin_notices() {
-		$simplify_options = get_option( 'woocommerce_simplify_commerce_settings', array() );
-		$location         = wc_get_base_location();
-
-		if ( ! class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) && ! empty( $simplify_options['enabled'] ) && 'yes' === $simplify_options['enabled'] && in_array( $location['country'], apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) ), true ) ) {
-			self::add_notice( 'simplify_commerce' );
-		}
-
 		if ( ! self::is_ssl() ) {
 			self::add_notice( 'no_secure_connection' );
 		}
-
 		self::add_wootenberg_feature_plugin_notice();
 		self::add_notice( 'template_files' );
 	}
@@ -329,18 +320,10 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Simplify Commerce is being removed from core.
+	 * Simplify Commerce is no longer in core.
 	 */
 	public static function simplify_commerce_notice() {
-		$location = wc_get_base_location();
-
-		if ( class_exists( 'WC_Gateway_Simplify_Commerce_Loader' ) || ! in_array( $location['country'], apply_filters( 'woocommerce_gateway_simplify_commerce_supported_countries', array( 'US', 'IE' ) ), true ) ) {
-			self::remove_notice( 'simplify_commerce' );
-			return;
-		}
-		if ( empty( $_GET['action'] ) ) { // WPCS: input var ok, CSRF ok.
-			include dirname( __FILE__ ) . '/views/html-notice-simplify-commerce.php';
-		}
+		wc_deprecated_function( 'WC_Admin_Notices::simplify_commerce_notice', '3.6.0' );
 	}
 
 	/**
@@ -404,7 +387,7 @@ class WC_Admin_Notices {
 	 * @since  3.5.1
 	 */
 	protected static function is_ssl() {
-		$shop_page = 0 < wc_get_page_id( 'shop' ) ? get_permalink( wc_get_page_id( 'shop' ) ) : get_home_url();
+		$shop_page = wc_get_page_permalink( 'shop' );
 
 		return ( is_ssl() && 'https' === substr( $shop_page, 0, 5 ) );
 	}

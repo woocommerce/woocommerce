@@ -8830,7 +8830,7 @@ msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:1872
 msgid ""
-"Select from the list below to enable automated taxes and MailChimp’s "
+"Select from the list below to enable automated taxes and Mailchimp’s "
 "best-in-class email services — and design your store with our official, "
 "free WooCommerce theme."
 msgstr ""
@@ -8870,22 +8870,22 @@ msgid "automated taxes icon"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:1909
-msgid "MailChimp"
+msgid "Mailchimp"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:1910
 msgid ""
-"Join the 16 million customers who use MailChimp. Sync list and store data "
+"Join the 16 million customers who use Mailchimp. Sync list and store data "
 "to send automated emails, and targeted campaigns."
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:1912
-msgid "MailChimp icon"
+msgid "Mailchimp icon"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:1913
 #: includes/admin/class-wc-admin-setup-wizard.php:1955
-msgid "MailChimp for WooCommerce"
+msgid "Mailchimp for WooCommerce"
 msgstr ""
 
 #: includes/admin/class-wc-admin-setup-wizard.php:2006

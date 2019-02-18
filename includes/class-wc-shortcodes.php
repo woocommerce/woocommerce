@@ -174,7 +174,10 @@ class WC_Shortcodes {
 			'child_of'   => $atts['parent'],
 		);
 
-		$product_categories = get_terms( 'product_cat', $args );
+		$product_categories = apply_filters(
+			'woocommerce_product_categories',
+			get_terms( 'product_cat', $args )
+		);
 
 		if ( '' !== $atts['parent'] ) {
 			$product_categories = wp_list_filter( $product_categories, array(
