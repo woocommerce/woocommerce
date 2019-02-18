@@ -6,11 +6,20 @@
 @import "mixins";
 @import "variables";
 
-.suggestion-dismiss::before {
+a.suggestion-dismiss {
+	border: none;
+	box-shadow: none;
+	color: #ccc;
+}
+
+a.suggestion-dismiss:hover {
+	color: #aaa;
+}
+
+a.suggestion-dismiss::before {
 
 	@include iconbeforedashicons( "\f335" );
 
-	color: #ccc;
 	font-size: 1.5em;
 }
 
@@ -56,20 +65,41 @@
 	text-align: left;
 
 	.marketplace-listitem-container {
+		align-items: center;
+		display: flex;
 		border-top: 1px solid #ccc;
 		margin-top: 2em;
 
-		h4 {
-			margin-bottom: 0.5em;
+		.marketplace-listitem-container-content {
+			flex: 1 0 70%;
+
+			h4 {
+				margin: 1.33em 0 0.5em;
+			}
+		}
+
+		.marketplace-listitem-container-cta {
+			flex: 1 1 30%;
+			padding-top: 1.33em;
+			text-align: right;
+
+			a.button {
+				display: inline-block;
+				min-width: 120px;
+				text-align: center;
+			}
+
+			.suggestion-dismiss {
+				text-decoration: none;
+				position: relative;
+				top: 7px;
+			}
 		}
 
 		p {
-			margin-top: 0;
+			margin: 0;
 		}
 
-		a.button {
-			display: inline-block;
-		}
 	}
 
 }

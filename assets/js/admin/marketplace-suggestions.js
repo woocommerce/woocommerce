@@ -7,7 +7,7 @@
 
 		function dismissSuggestion( suggestionSlug ) {
 			// hide the suggestion in the UI
-			var selector = '.marketplace-suggestions-container[data-suggestion-slug=' + suggestionSlug + ']';
+			var selector = '[data-suggestion-slug=' + suggestionSlug + ']';
 			$( selector ).fadeOut();
 
 			// save dismissal in user settings
@@ -26,7 +26,8 @@
 
 			dismissButton.classList.add( 'suggestion-dismiss' );
 			dismissButton.setAttribute( 'href', '#' );
-			dismissButton.onclick = function() {
+			dismissButton.onclick = function( event ) {
+				event.preventDefault();
 				dismissSuggestion( suggestionSlug );
 			}
 
@@ -91,22 +92,30 @@
 			container.classList.add( 'marketplace-listitem-container' );
 			container.dataset.suggestionSlug = slug;
 
+			var left = document.createElement( 'div' );
+			left.classList.add( 'marketplace-listitem-container-content' );
+			var right = document.createElement( 'div' );
+			right.classList.add( 'marketplace-listitem-container-cta' );
+
 			var titleHeading = document.createElement( 'h4' );
 			titleHeading.textContent = title;
-			container.appendChild( titleHeading );
+			left.appendChild( titleHeading );
 
 			if ( copy ) {
 				var body = document.createElement( 'p' );
 				body.textContent = copy;
-				container.appendChild( body );
+				left.appendChild( body );
 			}
 
 			if ( url ) {
 				var linkoutButton = renderLinkoutButton( url, buttonText );
-				container.appendChild( linkoutButton );
+				right.appendChild( linkoutButton );
 			}
 
-			container.appendChild( renderDismissButton( slug ) )
+			right.appendChild( renderDismissButton( slug ) )
+
+			container.appendChild( left );
+			container.appendChild( right );
 
 			return container;
 		}

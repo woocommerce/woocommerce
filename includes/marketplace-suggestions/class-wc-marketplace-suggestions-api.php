@@ -57,10 +57,11 @@ function wc_marketplace_suggestions_ajax_handler() {
 			{
 				"slug": "products-empty-memberships",
 				"context": "products-list-empty-body",
-				"title": "Selling something else?",
-				"copy": "Extensions allow you to sell other types of products including bookings, subscriptions, or memberships.",
-				"button-text": "Browse extensions",
-				"url": "https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/"
+				"hide-if-installed": "woocommerce-memberships",
+				"title": "Memberships",
+				"copy": "Give members access to restricted content or products, for a fee or for free.",
+				"button-text": "From $149",
+				"url": "https://woocommerce.com/products/woocommerce-memberships/"
 			},
 			{
 				"slug": "products-empty-addons",
