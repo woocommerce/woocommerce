@@ -327,21 +327,6 @@ class WC_API_Webhooks extends WC_API_Resource {
 	}
 
 	/**
-	 * Get webhooks total results
-	 *
-	 * @since 3.3.0
-	 * @param array $args Request arguments for filtering query.
-	 * @return array
-	 */
-	private function get_webhooks_total_results( $args = array() ) {
-		$data_store     = WC_Data_Store::load( 'webhook' );
-		$args['limit']  = -1;
-		$args['offset'] = 0;
-
-		return count( $data_store->search_webhooks( $args ) );
-	}
-
-	/**
 	 * Helper method to get webhook post objects
 	 *
 	 * @since 2.2
@@ -390,6 +375,8 @@ class WC_API_Webhooks extends WC_API_Resource {
 			unset( $args['date_query'] );
 		}
 
+		$args['paginate'] = true;
+
 		// Get the webhooks.
 		$data_store = WC_Data_Store::load( 'webhook' );
 		$results    = $data_store->search_webhooks( $args );
@@ -397,12 +384,12 @@ class WC_API_Webhooks extends WC_API_Resource {
 		// Get total items.
 		$headers              = new stdClass;
 		$headers->page        = $page;
-		$headers->total       = $this->get_webhooks_total_results( $args );
+		$headers->total       = $results->total;
 		$headers->is_single   = $args['limit'] > $headers->total;
-		$headers->total_pages = ceil( $headers->total / $args['limit'] );
+		$headers->total_pages = $results->max_num_pages;
 
 		return array(
-			'results' => $results,
+			'results' => $results->webhooks,
 			'headers' => $headers,
 		);
 	}

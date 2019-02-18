@@ -233,7 +233,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 	 * Search webhooks.
 	 *
 	 * @param  array $args Search arguments.
-	 * @return array
+	 * @return array|object
 	 */
 	public function search_webhooks( $args ) {
 		global $wpdb;
@@ -241,10 +241,11 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		$args = wp_parse_args(
 			$args,
 			array(
-				'limit'   => 10,
-				'offset'  => 0,
-				'order'   => 'DESC',
-				'orderby' => 'id',
+				'limit'    => 10,
+				'offset'   => 0,
+				'order'    => 'DESC',
+				'orderby'  => 'id',
+				'paginate' => false,
 			)
 		);
 
@@ -306,33 +307,59 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 		}
 
 		// Check for cache.
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'webhooks' ) . 'search_webhooks' . md5( implode( ',', $args ) );
-		$ids       = wp_cache_get( $cache_key, 'webhook_search_results' );
+		$cache_key   = WC_Cache_Helper::get_cache_prefix( 'webhooks' ) . 'search_webhooks' . md5( implode( ',', $args ) );
+		$cache_value = wp_cache_get( $cache_key, 'webhook_search_results' );
 
-		if ( false !== $ids ) {
-			return $ids;
+		if ( $cache_value ) {
+			return $cache_value;
 		}
 
-		$query = trim(
-			"SELECT webhook_id
-			FROM {$wpdb->prefix}wc_webhooks
-			WHERE 1=1
-			{$status}
-			{$search}
-			{$include}
-			{$exclude}
-			{$date_created}
-			{$date_modified}
-			{$order}
-			{$limit}
-			{$offset}"
-		);
+		if ( $args['paginate'] ) {
+			$query = trim(
+				"SELECT SQL_CALC_FOUND_ROWS webhook_id
+				FROM {$wpdb->prefix}wc_webhooks
+				WHERE 1=1
+				{$status}
+				{$search}
+				{$include}
+				{$exclude}
+				{$date_created}
+				{$date_modified}
+				{$order}
+				{$limit}
+				{$offset}"
+			);
 
-		$ids = wp_parse_id_list( $wpdb->get_col( $query ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$webhook_ids  = wp_parse_id_list( $wpdb->get_col( $query ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$total        = (int) $wpdb->get_var( 'SELECT FOUND_ROWS();' );
+			$return_value = (object) array(
+				'webhooks'      => $webhook_ids,
+				'total'         => $total,
+				'max_num_pages' => $args['limit'] > 1 ? ceil( $total / $args['limit'] ) : 1,
+			);
+		} else {
+			$query = trim(
+				"SELECT webhook_id
+				FROM {$wpdb->prefix}wc_webhooks
+				WHERE 1=1
+				{$status}
+				{$search}
+				{$include}
+				{$exclude}
+				{$date_created}
+				{$date_modified}
+				{$order}
+				{$limit}
+				{$offset}"
+			);
 
-		wp_cache_set( $cache_key, $ids, 'webhook_search_results' );
+			$webhook_ids  = wp_parse_id_list( $wpdb->get_col( $query ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$return_value = $webhook_ids;
+		}
 
-		return $ids;
+		wp_cache_set( $cache_key, $return_value, 'webhook_search_results' );
+
+		return $return_value;
 	}
 
 	/**
