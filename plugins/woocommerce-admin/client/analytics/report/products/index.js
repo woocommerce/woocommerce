@@ -28,10 +28,13 @@ class ProductsReport extends Component {
 	getChartMeta() {
 		const { query, isSingleProductView, isSingleProductVariable } = this.props;
 
-		const isProductDetailsView =
-			'top_items' === query.filter ||
-			'top_sales' === query.filter ||
-			'compare-products' === query.filter;
+		const isProductDetailsView = [
+			'top_items',
+			'top_sales',
+			'compare-products',
+			'single_category',
+			'compare-categories',
+		].includes( query.filter );
 
 		const mode =
 			isProductDetailsView || ( isSingleProductView && isSingleProductVariable )

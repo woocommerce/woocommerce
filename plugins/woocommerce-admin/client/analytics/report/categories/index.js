@@ -23,14 +23,11 @@ import ReportSummary from 'analytics/components/report-summary';
 export default class CategoriesReport extends Component {
 	getChartMeta() {
 		const { query } = this.props;
-		const isCategoryDetailsView =
-			'top_items' === query.filter ||
-			'top_revenue' === query.filter ||
-			'compare-categories' === query.filter;
 
-		const isSingleCategoryView = query.categories && 1 === query.categories.split( ',' ).length;
-		const mode =
-			isCategoryDetailsView || isSingleCategoryView ? 'item-comparison' : 'time-comparison';
+		const isCategoryDetailsView = [ 'top_items', 'top_revenue', 'compare-categories' ].includes(
+			query.filter
+		);
+		const mode = isCategoryDetailsView ? 'item-comparison' : 'time-comparison';
 		const itemsLabel = __( '%d categories', 'wc-admin' );
 
 		return {

@@ -36,7 +36,7 @@ export const charts = [
 export const filters = [
 	{
 		label: __( 'Show', 'wc-admin' ),
-		staticParams: [ 'chart' ],
+		staticParams: [],
 		param: 'filter',
 		showFilters: () => true,
 		filters: [
@@ -83,13 +83,13 @@ export const filters = [
 				label: __( 'Top Categories by Items Sold', 'wc-admin' ),
 				value: 'top_items',
 				chartMode: 'item-comparison',
-				query: { orderby: 'items_sold', order: 'desc' },
+				query: { orderby: 'items_sold', order: 'desc', chart: 'items_sold' },
 			},
 			{
 				label: __( 'Top Categories by Net Revenue', 'wc-admin' ),
 				value: 'top_revenue',
 				chartMode: 'item-comparison',
-				query: { orderby: 'net_revenue', order: 'desc' },
+				query: { orderby: 'net_revenue', order: 'desc', chart: 'net_revenue' },
 			},
 		],
 	},
