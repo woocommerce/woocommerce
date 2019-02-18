@@ -265,7 +265,7 @@ final class WooCommerce {
 			case 'cron':
 				return defined( 'DOING_CRON' );
 			case 'frontend':
-				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! self::is_rest_api_request();
+				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! $this->is_rest_api_request();
 		}
 	}
 
