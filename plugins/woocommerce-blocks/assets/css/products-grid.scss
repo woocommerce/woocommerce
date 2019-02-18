@@ -6,6 +6,13 @@
 	overflow: hidden;
 }
 
+// Align the block icons in edit mode
+.components-placeholder__label .gridicon,
+.components-placeholder__label .material-icon {
+	margin-right: 1ch;
+	fill: currentColor;
+}
+
 .wc-block-products-grid {
 	overflow: hidden;
 	display: flex;
