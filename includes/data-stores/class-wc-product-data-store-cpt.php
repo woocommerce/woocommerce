@@ -163,6 +163,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'short_description' => $post_object->post_excerpt,
 				'parent_id'         => $post_object->post_parent,
 				'menu_order'        => $post_object->menu_order,
+				'post_password'     => $post_object->post_password,
 				'reviews_allowed'   => 'open' === $post_object->comment_status,
 			)
 		);
