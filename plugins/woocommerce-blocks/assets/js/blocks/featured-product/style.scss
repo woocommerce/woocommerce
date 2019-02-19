@@ -21,15 +21,6 @@
 		align-content: center;
 	}
 
-	&.components-placeholder {
-		// Reset the background for the placeholders.
-		background-color: rgba( 139, 139, 150, .1 );
-	}
-
-	.components-resizable-box__handle {
-		z-index: 10;
-	}
-
 	&.has-left-content {
 		justify-content: flex-start;
 
