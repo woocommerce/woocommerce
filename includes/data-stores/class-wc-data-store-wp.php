@@ -218,9 +218,13 @@ class WC_Data_Store_WP {
 	}
 
 	/**
-	 * Update non-empty meta, or delete it.
+	 * Update meta data in, or delete it from, the database.
 	 *
-	 * Numeric meta is stored regardless. Also, data-stores can force meta to exist using ``.
+	 * Avoids storing meta when it's either an empty string or empty array.
+	 * Other empty values such as numeric 0 and null should still be stored.
+	 * Data-stores can force meta to exist using `must_exist_meta_keys`.
+	 *
+	 * Note: WordPress `get_metadata` function returns an empty string when meta data does not exist.
 	 *
 	 * @param WC_Data $object The WP_Data object (WC_Coupon for coupons, etc).
 	 * @param string  $meta_key Meta key to update.
@@ -231,10 +235,10 @@ class WC_Data_Store_WP {
 	 * @return bool True if updated/deleted.
 	 */
 	protected function update_or_delete_post_meta( $object, $meta_key, $meta_value ) {
-		if ( ! empty( $meta_value ) || is_numeric( $meta_value ) || in_array( $meta_key, $this->must_exist_meta_keys, true ) ) {
-			$updated = update_post_meta( $object->get_id(), $meta_key, $meta_value );
-		} else {
+		if ( in_array( $meta_value, array( array(), '' ), true ) && ! in_array( $meta_key, $this->must_exist_meta_keys, true ) ) {
 			$updated = delete_post_meta( $object->get_id(), $meta_key );
+		} else {
+			$updated = update_post_meta( $object->get_id(), $meta_key, $meta_value );
 		}
 
 		return (bool) $updated;
