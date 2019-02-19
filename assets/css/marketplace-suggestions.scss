@@ -90,6 +90,9 @@ a.suggestion-dismiss::before {
 
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-inline"] {
 
+	// hide by default (mobile first)
+	display: none;
+
 	td:first-child {
 		border-left: 4px solid $woocommerce;
 	}
@@ -112,6 +115,15 @@ a.suggestion-dismiss::before {
 			}
 		}
 	}
+
+	@media screen and (min-width: 800px) {
+
+		// Display inline table suggestion on desktop only.
+		// The table columns are dynamic, so there's no good way to style the row
+		// content correctly when columns are hidden.
+		display: table-row;
+	}
+
 }
 
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
