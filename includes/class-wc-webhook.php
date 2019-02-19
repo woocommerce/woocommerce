@@ -123,60 +123,156 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return bool       True if webhook should be delivered, false otherwise.
 	 */
 	private function should_deliver( $arg ) {
-		$should_deliver = true;
-		$current_action = current_action();
+		$should_deliver = $this->is_active() && $this->is_valid_topic() && $this->is_valid_action( $arg ) && $this->is_valid_resource( $arg );
 
-		// Only active webhooks can be delivered.
-		if ( 'active' !== $this->get_status() ) {
-			$should_deliver = false;
-		} elseif ( in_array( $current_action, array( 'delete_post', 'wp_trash_post', 'untrashed_post' ), true ) ) {
-			// Only deliver deleted/restored event for coupons, orders, and products.
-			if ( isset( $GLOBALS['post_type'] ) && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ), true ) ) {
-				$should_deliver = false;
-			}
-
-			// Check if is delivering for the correct resource.
-			if ( isset( $GLOBALS['post_type'] ) && str_replace( 'shop_', '', $GLOBALS['post_type'] ) !== $this->get_resource() ) {
-				$should_deliver = false;
-			}
-		} elseif ( 'delete_user' === $current_action ) {
-			$user = get_userdata( absint( $arg ) );
-
-			// Only deliver deleted customer event for users with customer role.
-			if ( ! $user || ! in_array( 'customer', (array) $user->roles, true ) ) {
-				$should_deliver = false;
-			}
-		} elseif ( 'order' === $this->get_resource() && ! in_array( get_post_type( absint( $arg ) ), wc_get_order_types( 'order-webhooks' ), true ) ) {
-			// Only if the custom order type has chosen to exclude order webhooks from triggering along with its own webhooks.
-			$should_deliver = false;
-
-		} elseif ( 0 === strpos( $current_action, 'woocommerce_process_shop' ) || 0 === strpos( $current_action, 'woocommerce_process_product' ) ) {
-			// The `woocommerce_process_shop_*` and `woocommerce_process_product_*` hooks
-			// fire for create and update of products and orders, so check the post
-			// creation date to determine the actual event.
-			$resource = get_post( absint( $arg ) );
-
-			// Drafts don't have post_date_gmt so calculate it here.
-			$gmt_date = get_gmt_from_date( $resource->post_date );
-
-			// A resource is considered created when the hook is executed within 10 seconds of the post creation date.
-			$resource_created = ( ( time() - 10 ) <= strtotime( $gmt_date ) );
-
-			if ( 'created' === $this->get_event() && ! $resource_created ) {
-				$should_deliver = false;
-			} elseif ( 'updated' === $this->get_event() && $resource_created ) {
-				$should_deliver = false;
-			}
-		}
-
-		if ( ! wc_is_webhook_valid_topic( $this->get_topic() ) ) {
-			$should_deliver = false;
-		}
-
-		/*
+		/**
 		 * Let other plugins intercept deliver for some messages queue like rabbit/zeromq.
+		 *
+		 * @param bool       $should_deliver True if the webhook should be sent, or false to not send it.
+		 * @param WC_Webhook $this The current webhook class.
+		 * @param mixed      $arg First hook argument.
 		 */
 		return apply_filters( 'woocommerce_webhook_should_deliver', $should_deliver, $this, $arg );
+	}
+
+	/**
+	 * Returns if webhook is active.
+	 *
+	 * @since  3.6.0
+	 * @return bool  True if validation passes.
+	 */
+	private function is_active() {
+		return 'active' === $this->get_status();
+	}
+
+	/**
+	 * Returns if topic is valid.
+	 *
+	 * @since  3.6.0
+	 * @return bool  True if validation passes.
+	 */
+	private function is_valid_topic() {
+		return wc_is_webhook_valid_topic( $this->get_topic() );
+	}
+
+	/**
+	 * Validates the criteria for certain actions.
+	 *
+	 * @since  3.6.0
+	 * @param  mixed $arg First hook argument.
+	 * @return bool       True if validation passes.
+	 */
+	private function is_valid_action( $arg ) {
+		$current_action = current_action();
+		$return         = true;
+
+		switch ( $current_action ) {
+			case 'delete_post':
+			case 'wp_trash_post':
+			case 'untrashed_post':
+				$return = $this->is_valid_post_action( $arg );
+				break;
+			case 'delete_user':
+				$return = $this->is_valid_user_action( $arg );
+				break;
+		}
+
+		if ( 0 === strpos( $current_action, 'woocommerce_process_shop' ) || 0 === strpos( $current_action, 'woocommerce_process_product' ) ) {
+			$return = $this->is_valid_processing_action( $arg );
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Validates post actions.
+	 *
+	 * @since  3.6.0
+	 * @param  mixed $arg First hook argument.
+	 * @return bool       True if validation passes.
+	 */
+	private function is_valid_post_action( $arg ) {
+		// Only deliver deleted/restored event for coupons, orders, and products.
+		if ( isset( $GLOBALS['post_type'] ) && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ), true ) ) {
+			return false;
+		}
+
+		// Check if is delivering for the correct resource.
+		if ( isset( $GLOBALS['post_type'] ) && str_replace( 'shop_', '', $GLOBALS['post_type'] ) !== $this->get_resource() ) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Validates user actions.
+	 *
+	 * @since  3.6.0
+	 * @param  mixed $arg First hook argument.
+	 * @return bool       True if validation passes.
+	 */
+	private function is_valid_user_action( $arg ) {
+		$user = get_userdata( absint( $arg ) );
+
+		// Only deliver deleted customer event for users with customer role.
+		if ( ! $user || ! in_array( 'customer', (array) $user->roles, true ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validates WC processing actions.
+	 *
+	 * @since  3.6.0
+	 * @param  mixed $arg First hook argument.
+	 * @return bool       True if validation passes.
+	 */
+	private function is_valid_processing_action( $arg ) {
+		// The `woocommerce_process_shop_*` and `woocommerce_process_product_*` hooks
+		// fire for create and update of products and orders, so check the post
+		// creation date to determine the actual event.
+		$resource = get_post( absint( $arg ) );
+
+		// Drafts don't have post_date_gmt so calculate it here.
+		$gmt_date = get_gmt_from_date( $resource->post_date );
+
+		// A resource is considered created when the hook is executed within 10 seconds of the post creation date.
+		$resource_created = ( ( time() - 10 ) <= strtotime( $gmt_date ) );
+
+		if ( 'created' === $this->get_event() && ! $resource_created ) {
+			return false;
+		} elseif ( 'updated' === $this->get_event() && $resource_created ) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Checks the resource for this webhook is valid e.g. valid post status.
+	 *
+	 * @since  3.6.0
+	 * @param  mixed $arg First hook argument.
+	 * @return bool       True if validation passes.
+	 */
+	private function is_valid_resource( $arg ) {
+		$resource = $this->get_resource();
+
+		if ( in_array( $resource, array( 'order', 'product', 'coupon' ), true ) ) {
+			$status = get_post_status( absint( $arg ) );
+
+			// Ignore auto drafts for all resources.
+			if ( in_array( $status, array( 'auto-draft', 'new' ), true ) ) {
+				return false;
+			}
+
+			// Ignore standard drafts for orders.
+			if ( 'order' === $resource && 'draft' === $status ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -868,11 +964,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				'delete_user',
 			),
 			'order.created'    => array(
-				'woocommerce_process_shop_order_meta',
 				'woocommerce_new_order',
 			),
 			'order.updated'    => array(
-				'woocommerce_process_shop_order_meta',
 				'woocommerce_update_order',
 				'woocommerce_order_refunded',
 			),
