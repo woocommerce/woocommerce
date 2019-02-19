@@ -54,52 +54,10 @@
 			return linkoutButton;
 		}
 
-		function renderTableBanner( slug, title, url, buttonText, allowDismiss ) {
-			if ( ! title || ! url ) {
-				return;
-			}
-
-			if ( ! buttonText ) {
-				buttonText = 'Go';
-			}
-
-			var row = document.createElement( 'tr' );
-			row.classList.add( 'marketplace-suggestions-container' );
-			row.classList.add( 'marketplace-table-banner' );
-			row.dataset.suggestionSlug = slug;
-
-			var titleColumn = document.createElement( 'td' );
-			titleColumn.setAttribute( 'colspan', 5 );
-			titleColumn.classList.add( 'marketplace-table-title' );
-			var titleHeading = document.createElement( 'h2' );
-			titleColumn.appendChild( titleHeading );
-			titleHeading.textContent = title;
-
-			row.appendChild( titleColumn );
-
-			var linkoutColumn = document.createElement( 'td' );
-			linkoutColumn.setAttribute( 'colspan', 5 );
-			linkoutColumn.classList.add( 'marketplace-table-linkout' );
-			var linkoutButton = renderLinkout( url, buttonText, true );
-			linkoutColumn.appendChild( linkoutButton );
-			if ( allowDismiss ) {
-				linkoutColumn.appendChild( renderDismissButton( slug ) )
-			}
-
-			row.appendChild( linkoutColumn );
-
-			return row;
-		}
-
-		function renderListItem( slug, title, url, linkText, linkIsButton, copy, allowDismiss ) {
-			var container = document.createElement( 'div' );
-			container.classList.add( 'marketplace-listitem-container' );
-			container.dataset.suggestionSlug = slug;
-
+		function renderSuggestionContent( slug, title, copy ) {
 			var left = document.createElement( 'div' );
-			left.classList.add( 'marketplace-listitem-container-content' );
-			var right = document.createElement( 'div' );
-			right.classList.add( 'marketplace-listitem-container-cta' );
+
+			left.classList.add( 'marketplace-suggestion-container-content' );
 
 			if ( title ) {
 				var titleHeading = document.createElement( 'h4' );
@@ -113,6 +71,13 @@
 				left.appendChild( body );
 			}
 
+			return left;
+		}
+
+		function renderSuggestionCTA( slug, url, linkText, linkIsButton, allowDismiss ) {
+			var right = document.createElement( 'div' );
+
+			right.classList.add( 'marketplace-suggestion-container-cta' );
 			if ( url && linkText ) {
 				var linkoutElement = renderLinkout( url, linkText, linkIsButton );
 				right.appendChild( linkoutElement );
@@ -122,8 +87,57 @@
 				right.appendChild( renderDismissButton( slug ) )
 			}
 
-			container.appendChild( left );
-			container.appendChild( right );
+			return right;
+		}
+
+		function renderTableBanner( slug, title, copy, url, buttonText, allowDismiss ) {
+			if ( ! title || ! url ) {
+				return;
+			}
+
+			if ( ! buttonText ) {
+				buttonText = 'Go';
+			}
+
+			var row = document.createElement( 'tr' );
+			row.classList.add( 'marketplace-table-banner' );
+			row.classList.add( 'marketplace-suggestions-container' );
+			row.classList.add( 'showing-suggestion' );
+			row.dataset.marketplaceSuggestionsContext = 'products-list-inline';
+			row.dataset.suggestionSlug = slug;
+
+			var cell = document.createElement( 'td' );
+			cell.setAttribute( 'colspan', 10 );
+
+			var container = document.createElement( 'div' );
+			container.classList.add( 'marketplace-suggestion-container' );
+			container.dataset.suggestionSlug = slug;
+
+
+			container.appendChild(
+				renderSuggestionContent( slug, title, copy )
+			);
+			container.appendChild(
+				renderSuggestionCTA( slug, url, buttonText, true, allowDismiss )
+			);
+
+			cell.appendChild( container );
+			row.appendChild( cell );
+
+			return row;
+		}
+
+		function renderListItem( slug, title, copy, url, linkText, linkIsButton, allowDismiss ) {
+			var container = document.createElement( 'div' );
+			container.classList.add( 'marketplace-suggestion-container' );
+			container.dataset.suggestionSlug = slug;
+
+			container.appendChild(
+				renderSuggestionContent( slug, title, copy )
+			);
+			container.appendChild(
+				renderSuggestionCTA( slug, url, linkText, linkIsButton, allowDismiss )
+			);
 
 			return container;
 		}
@@ -138,7 +152,6 @@
 			promos = _.filter( promos, function( promo ) {
 				return ! _.contains( marketplace_suggestions.dismissed_suggestions, promo.slug );
 			} );
-
 
 			// hide promos for things the user already has installed
 			promos = _.filter( promos, function( promo ) {
@@ -201,10 +214,10 @@
 					var content = renderListItem(
 						promos[ i ].slug,
 						promos[ i ].title,
+						promos[ i ].copy,
 						promos[ i ].url,
 						linkText,
 						linkoutIsButton,
-						promos[ i ].copy,
 						allowDismiss
 					);
 					$( this ).append( content );
@@ -233,6 +246,7 @@
 				var content = renderTableBanner(
 					promos[ 0 ].slug,
 					promos[ 0 ].title,
+					promos[ 0 ].copy,
 					promos[ 0 ].url,
 					promos[ 0 ]['button-text'],
 					allowDismiss
