@@ -124,7 +124,7 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
-	 * Should we show the MailChimp install option?
+	 * Should we show the Mailchimp install option?
 	 * True only if the user can install plugins.
 	 *
 	 * @return boolean
@@ -1873,7 +1873,7 @@ class WC_Admin_Setup_Wizard {
 					&& $this->should_show_automated_tax()
 					&& $this->should_show_mailchimp()
 					) :
-				esc_html_e( 'Select from the list below to enable automated taxes and MailChimp’s best-in-class email services — and design your store with our official, free WooCommerce theme.', 'woocommerce' );
+				esc_html_e( 'Select from the list below to enable automated taxes and Mailchimp’s best-in-class email services — and design your store with our official, free WooCommerce theme.', 'woocommerce' );
 			else :
 				esc_html_e( 'Enhance your store with these recommended features.', 'woocommerce' );
 			endif;
@@ -1910,11 +1910,11 @@ class WC_Admin_Setup_Wizard {
 				if ( $this->should_show_mailchimp() ) :
 					$this->display_recommended_item( array(
 						'type'        => 'mailchimp',
-						'title'       => __( 'MailChimp', 'woocommerce' ),
-						'description' => __( 'Join the 16 million customers who use MailChimp. Sync list and store data to send automated emails, and targeted campaigns.', 'woocommerce' ),
+						'title'       => __( 'Mailchimp', 'woocommerce' ),
+						'description' => __( 'Join the 16 million customers who use Mailchimp. Sync list and store data to send automated emails, and targeted campaigns.', 'woocommerce' ),
 						'img_url'     => WC()->plugin_url() . '/assets/images/obw-mailchimp-icon.svg',
-						'img_alt'     => __( 'MailChimp icon', 'woocommerce' ),
-						'plugins'     => array( array( 'name' => __( 'MailChimp for WooCommerce', 'woocommerce' ), 'slug' => 'mailchimp-for-woocommerce' ) ),
+						'img_alt'     => __( 'Mailchimp icon', 'woocommerce' ),
+						'plugins'     => array( array( 'name' => __( 'Mailchimp for WooCommerce', 'woocommerce' ), 'slug' => 'mailchimp-for-woocommerce' ) ),
 					) );
 				endif;
 			?>
@@ -1950,13 +1950,13 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		if ( $setup_mailchimp ) {
-			// Prevent MailChimp from redirecting to its settings page during the OBW flow.
+			// Prevent Mailchimp from redirecting to its settings page during the OBW flow.
 			add_option( 'mailchimp_woocommerce_plugin_do_activation_redirect', false );
 
 			$this->install_plugin(
 				'mailchimp-for-woocommerce',
 				array(
-					'name'      => __( 'MailChimp for WooCommerce', 'woocommerce' ),
+					'name'      => __( 'Mailchimp for WooCommerce', 'woocommerce' ),
 					'repo-slug' => 'mailchimp-for-woocommerce',
 					'file'      => 'mailchimp-woocommerce.php',
 				)

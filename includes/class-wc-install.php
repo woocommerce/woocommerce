@@ -1365,7 +1365,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	}
 
 	/**
-	 * Removes redirect added during MailChimp plugin's activation.
+	 * Removes redirect added during Mailchimp plugin's activation.
 	 *
 	 * @param string $option Option name.
 	 * @param string $value  Option value.
