@@ -44,10 +44,10 @@
     "grunt-sass": "~2.1.0",
     "grunt-shell": "~2.1.0",
     "grunt-stylelint": "~0.10.0",
-    "grunt-wp-i18n": "~1.0.1",
+    "grunt-wp-i18n": "^1.0.3",
     "istanbul": "^1.0.0-alpha",
     "mocha": "^5.2.0",
-    "stylelint": "~9.2.1",
+    "stylelint": "^9.10.1",
     "wc-e2e-page-objects": "0.10.0"
   },
   "engines": {
