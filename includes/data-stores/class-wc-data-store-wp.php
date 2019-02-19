@@ -231,8 +231,8 @@ class WC_Data_Store_WP {
 	 * @return bool True if updated/deleted.
 	 */
 	protected function update_or_delete_post_meta( $object, $meta_key, $meta_value ) {
-		if ( ! empty( $value ) || is_numeric( $value ) || in_array( $meta_key, $this->must_exist_meta_keys, true ) ) {
-			$updated = update_post_meta( $object->get_id(), $meta_key, $value );
+		if ( ! empty( $meta_value ) || is_numeric( $meta_value ) || in_array( $meta_key, $this->must_exist_meta_keys, true ) ) {
+			$updated = update_post_meta( $object->get_id(), $meta_key, $meta_value );
 		} else {
 			$updated = delete_post_meta( $object->get_id(), $meta_key );
 		}
