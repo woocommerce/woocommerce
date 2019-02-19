@@ -241,6 +241,29 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Returns true if the request is a non-legacy REST API request.
+	 *
+	 * Legacy REST requests should still run some extra code for backwards compatibility.
+	 *
+	 * @todo: replace this function once core WP function is available: https://core.trac.wordpress.org/ticket/42061.
+	 *
+	 * @return bool
+	 */
+	public function is_rest_api_request() {
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
+		}
+
+		// REST API prefix.
+		$rest_prefix = trailingslashit( rest_get_url_prefix() );
+
+		// Check if this is a WC endpoint.
+		$is_woocommerce_endpoint = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix . 'wc/' ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		return apply_filters( 'woocommerce_is_rest_api_request', $is_woocommerce_endpoint );
+	}
+
+	/**
 	 * What type of request is this?
 	 *
 	 * @param  string $type admin, ajax, cron or frontend.
@@ -255,7 +278,7 @@ final class WooCommerce {
 			case 'cron':
 				return defined( 'DOING_CRON' );
 			case 'frontend':
-				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! defined( 'REST_REQUEST' );
+				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! $this->is_rest_api_request();
 		}
 	}
 
