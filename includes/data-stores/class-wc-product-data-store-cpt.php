@@ -68,6 +68,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	);
 
 	/**
+	 * Meta data which should exist in the DB, even if empty.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @var array
+	 */
+	protected $must_exist_meta_keys = array(
+		'_tax_class',
+	);
+
+	/**
 	 * If we have already saved our extra data, don't do automatic / default handling.
 	 *
 	 * @var bool
@@ -552,27 +563,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				case 'downloadable':
 				case 'manage_stock':
 				case 'sold_individually':
-					$updated = update_post_meta( $product->get_id(), $meta_key, wc_bool_to_string( $value ) );
+					$value = wc_bool_to_string( $value );
 					break;
 				case 'gallery_image_ids':
-					$updated = update_post_meta( $product->get_id(), $meta_key, implode( ',', $value ) );
-					break;
-				case 'image_id':
-					if ( ! empty( $value ) ) {
-						set_post_thumbnail( $product->get_id(), $value );
-					} else {
-						delete_post_meta( $product->get_id(), '_thumbnail_id' );
-					}
-					$updated = true;
+					$value = implode( ',', $value );
 					break;
 				case 'date_on_sale_from':
 				case 'date_on_sale_to':
-					$updated = update_post_meta( $product->get_id(), $meta_key, $value ? $value->getTimestamp() : '' );
-					break;
-				default:
-					$updated = update_post_meta( $product->get_id(), $meta_key, $value );
+					$value = $value ? $value->getTimestamp() : '';
 					break;
 			}
+
+			$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value );
+
 			if ( $updated ) {
 				$this->updated_props[] = $prop;
 			}
@@ -581,15 +584,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Update extra data associated with the product like button text or product URL for external products.
 		if ( ! $this->extra_data_saved ) {
 			foreach ( $extra_data_keys as $key ) {
-				if ( ! array_key_exists( '_' . $key, $props_to_update ) ) {
+				$meta_key = '_' . $key;
+				$function = 'get_' . $key;
+				if ( ! array_key_exists( $meta_key, $props_to_update ) ) {
 					continue;
 				}
-				$function = 'get_' . $key;
 				if ( is_callable( array( $product, $function ) ) ) {
-					$value = $product->{$function}( 'edit' );
-					$value = is_string( $value ) ? wp_slash( $value ) : $value;
+					$value   = $product->{$function}( 'edit' );
+					$value   = is_string( $value ) ? wp_slash( $value ) : $value;
+					$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value );
 
-					if ( update_post_meta( $product->get_id(), '_' . $key, $value ) ) {
+					if ( $updated ) {
 						$this->updated_props[] = $key;
 					}
 				}
@@ -772,7 +777,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				}
 			}
 			// Note, we use wp_slash to add extra level of escaping. See https://codex.wordpress.org/Function_Reference/update_post_meta#Workaround.
-			update_post_meta( $product->get_id(), '_product_attributes', wp_slash( $meta_values ) );
+			$this->update_or_delete_post_meta( $product, '_product_attributes', wp_slash( $meta_values ) );
 		}
 	}
 
@@ -804,7 +809,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				do_action( 'woocommerce_process_product_file_download_paths', $product->get_id(), 0, $downloads );
 			}
 
-			return update_post_meta( $product->get_id(), '_downloadable_files', $meta_values );
+			return $this->update_or_delete_post_meta( $product, '_downloadable_files', wp_slash( $meta_values ) );
 		}
 		return false;
 	}
