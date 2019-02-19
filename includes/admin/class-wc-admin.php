@@ -32,6 +32,10 @@ class WC_Admin {
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
 		add_action( 'wp_ajax_setup_wizard_check_jetpack', array( $this, 'setup_wizard_check_jetpack' ) );
+
+		if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
+			add_action( 'init', array( 'WC_Site_Tracking', 'init' ) );
+		}
 	}
 
 	/**
@@ -58,6 +62,11 @@ class WC_Admin {
 		include_once dirname( __FILE__ ) . '/class-wc-admin-pointers.php';
 		include_once dirname( __FILE__ ) . '/class-wc-admin-importers.php';
 		include_once dirname( __FILE__ ) . '/class-wc-admin-exporters.php';
+
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-site-tracking.php';
 
 		// Help Tabs
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
