@@ -81,6 +81,7 @@ describe( 'getQuery', () => {
 		test( 'should return a general query with no category', () => {
 			const query = getQuery( attributes );
 			expect( query ).toEqual( {
+				catalog_visibility: 'visible',
 				orderby: 'date',
 				per_page: 12,
 				status: 'publish',
@@ -91,6 +92,7 @@ describe( 'getQuery', () => {
 			attributes.categories = [];
 			const query = getQuery( attributes );
 			expect( query ).toEqual( {
+				catalog_visibility: 'visible',
 				orderby: 'date',
 				per_page: 12,
 				status: 'publish',
@@ -101,6 +103,7 @@ describe( 'getQuery', () => {
 			attributes.categories = [ 1 ];
 			const query = getQuery( attributes );
 			expect( query ).toEqual( {
+				catalog_visibility: 'visible',
 				category: '1',
 				orderby: 'date',
 				per_page: 12,
@@ -112,6 +115,7 @@ describe( 'getQuery', () => {
 			attributes.categories = [ 1, 2 ];
 			const query = getQuery( attributes );
 			expect( query ).toEqual( {
+				catalog_visibility: 'visible',
 				category: '1,2',
 				orderby: 'date',
 				per_page: 12,

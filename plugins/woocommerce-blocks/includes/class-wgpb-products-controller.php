@@ -230,10 +230,11 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 	protected function prepare_objects_query( $request ) {
 		$args = parent::prepare_objects_query( $request );
 
-		$orderby       = $request->get_param( 'orderby' );
-		$order         = $request->get_param( 'order' );
-		$cat_operator  = $request->get_param( 'cat_operator' );
-		$attr_operator = $request->get_param( 'attr_operator' );
+		$orderby            = $request->get_param( 'orderby' );
+		$order              = $request->get_param( 'order' );
+		$cat_operator       = $request->get_param( 'cat_operator' );
+		$attr_operator      = $request->get_param( 'attr_operator' );
+		$catalog_visibility = $request->get_param( 'catalog_visibility' );
 
 		$ordering_args   = WC()->query->get_catalog_ordering_args( $orderby, $order );
 		$args['orderby'] = $ordering_args['orderby'];
@@ -257,6 +258,18 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 					$args['tax_query'][ $i ]['operator'] = $attr_operator;
 				}
 			}
+		}
+
+		if ( in_array( $catalog_visibility, array_keys( wc_get_product_visibility_options() ), true ) ) {
+			$exclude_from_catalog = 'search' === $catalog_visibility ? '' : 'exclude-from-catalog';
+			$exclude_from_search  = 'catalog' === $catalog_visibility ? '' : 'exclude-from-search';
+
+			$args['tax_query'][] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'name',
+				'terms'    => array( $exclude_from_catalog, $exclude_from_search ),
+				'operator' => 'hidden' === $catalog_visibility ? 'AND' : 'NOT IN',
+			);
 		}
 
 		return $args;
@@ -295,19 +308,26 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                    = parent::get_collection_params();
-		$params['orderby']['enum'] = array_merge( $params['orderby']['enum'], array( 'price', 'popularity', 'rating', 'menu_order' ) );
-		$params['cat_operator']    = array(
+		$params                       = parent::get_collection_params();
+		$params['orderby']['enum']    = array_merge( $params['orderby']['enum'], array( 'price', 'popularity', 'rating', 'menu_order' ) );
+		$params['cat_operator']       = array(
 			'description'       => __( 'Operator to compare product category terms.', 'woo-gutenberg-products-block' ),
 			'type'              => 'string',
 			'enum'              => array( 'IN', 'NOT IN', 'AND' ),
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['attr_operator']   = array(
+		$params['attr_operator']      = array(
 			'description'       => __( 'Operator to compare product attribute terms.', 'woo-gutenberg-products-block' ),
 			'type'              => 'string',
 			'enum'              => array( 'IN', 'NOT IN', 'AND' ),
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['catalog_visibility'] = array(
+			'description'       => __( 'Determines if hidden or visible catalog products are shown.', 'woo-gutenberg-products-block' ),
+			'type'              => 'string',
+			'enum'              => array( 'visible', 'catalog', 'search', 'hidden' ),
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
