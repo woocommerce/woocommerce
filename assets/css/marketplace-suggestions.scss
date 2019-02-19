@@ -6,10 +6,13 @@
 @import "mixins";
 @import "variables";
 
+$suggestions-pale-gray: #ddd;
+$suggestions-copy-text: #444;
+
 a.suggestion-dismiss {
 	border: none;
 	box-shadow: none;
-	color: #ccc;
+	color: $suggestions-pale-gray;
 }
 
 a.suggestion-dismiss:hover {
@@ -53,13 +56,6 @@ a.suggestion-dismiss::before {
 	}
 }
 
-@media screen and (min-width: 600px) {
-
-	.marketplace-table-banner {
-		display: none;
-	}
-}
-
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"] {
 
@@ -91,6 +87,7 @@ a.suggestion-dismiss::before {
 			p {
 				margin: 0;
 				margin-bottom: 0.5em;
+				color: $suggestions-copy-text;
 			}
 		}
 
@@ -114,16 +111,16 @@ a.suggestion-dismiss::before {
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-body"] {
 
 	text-align: left;
-	border: 1px solid #ccc;
+	border: 1px solid $suggestions-pale-gray;
 	border-bottom: none;
 
 	&:last-child {
-		border-bottom: 1px solid #ccc;
+		border-bottom: 1px solid $suggestions-pale-gray;
 	}
 
 	.marketplace-listitem-container {
 		padding: 1.5em;
-		border-bottom: 1px solid #ccc;
+		border-bottom: 1px solid $suggestions-pale-gray;
 
 		// Allows us to position the dismiss x button relative to container on mobile.
 		position: relative;

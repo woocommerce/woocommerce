@@ -80,7 +80,7 @@
 			var linkoutColumn = document.createElement( 'td' );
 			linkoutColumn.setAttribute( 'colspan', 5 );
 			linkoutColumn.classList.add( 'marketplace-table-linkout' );
-			var linkoutButton = renderLinkout( url, buttonText );
+			var linkoutButton = renderLinkout( url, buttonText, true );
 			linkoutColumn.appendChild( linkoutButton );
 			if ( allowDismiss ) {
 				linkoutColumn.appendChild( renderDismissButton( slug ) )
