@@ -40,15 +40,17 @@ class WC_Product_Factory {
 			}
 		}
 
-		$_product = wp_cache_get( 'product-' . $product_id, 'products' );
-		if ( $_product ) {
-			return $_product;
+		$product = wp_cache_get( 'product-' . $product_id, 'products' );
+		if ( $product ) {
+			return $product;
 		}
 
 		$classname = $this->get_product_classname( $product_id, $product_type );
 
 		try {
-			return new $classname( $product_id, $deprecated );
+			$product = new $classname( $product_id, $deprecated );
+			wp_cache_set( 'product-' . $product->get_id(), $product, 'products' );
+			return $product;
 		} catch ( Exception $e ) {
 			return false;
 		}
