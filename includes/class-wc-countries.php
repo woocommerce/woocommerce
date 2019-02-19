@@ -1253,6 +1253,7 @@ class WC_Countries {
 		foreach ( $fields as $key => $value ) {
 			if ( 'state' === $key ) {
 				$value['country_field'] = $type . 'country';
+				$value['country']       = $country;
 			}
 			$address_fields[ $type . $key ] = $value;
 		}

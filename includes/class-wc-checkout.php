@@ -205,13 +205,30 @@ class WC_Checkout {
 			return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
 		}
 
+		// Fields are based on billing/shipping country. Grab those values but ensure they are valid for the store before using.
+		$billing_country   = $this->get_value( 'billing_country' );
+		$billing_country   = empty( $billing_country ) ? WC()->countries->get_base_country() : $billing_country;
+		$allowed_countries = WC()->countries->get_allowed_countries();
+
+		if ( ! array_key_exists( $billing_country, $allowed_countries ) ) {
+			$billing_country = current( array_keys( $allowed_countries ) );
+		}
+
+		$shipping_country  = $this->get_value( 'shipping_country' );
+		$shipping_country  = empty( $shipping_country ) ? WC()->countries->get_base_country() : $shipping_country;
+		$allowed_countries = WC()->countries->get_shipping_countries();
+
+		if ( ! array_key_exists( $shipping_country, $allowed_countries ) ) {
+			$shipping_country = current( array_keys( $allowed_countries ) );
+		}
+
 		$this->fields = array(
 			'billing'  => WC()->countries->get_address_fields(
-				$this->get_value( 'billing_country' ),
+				$billing_country,
 				'billing_'
 			),
 			'shipping' => WC()->countries->get_address_fields(
-				$this->get_value( 'shipping_country' ),
+				$shipping_country,
 				'shipping_'
 			),
 			'account'  => array(),
