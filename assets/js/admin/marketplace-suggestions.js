@@ -44,6 +44,12 @@
 			if (isButton) {
 				linkoutButton.classList.add( 'button' );
 			}
+			else {
+				linkoutButton.classList.add( 'linkout' );
+				var linkoutIcon = document.createElement( 'span' );
+				linkoutIcon.classList.add( 'dashicons', 'dashicons-external' );
+				linkoutButton.appendChild( linkoutIcon );
+			}
 
 			return linkoutButton;
 		}

@@ -60,13 +60,6 @@ a.suggestion-dismiss::before {
 	}
 }
 
-.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-header"],
-.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-body"],
-.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-footer"] {
-	border: none;
-	border-bottom: none;
-}
-
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"] {
 
@@ -75,28 +68,7 @@ a.suggestion-dismiss::before {
 	}
 }
 
-.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
-.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"],
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-body"] {
-	text-align: left;
-	border: 1px solid #ccc;
-	border-bottom: none;
-
-	.marketplace-listitem-container {
-		padding: 1.5em;
-	}
-
-	h4 {
-		margin: 0;
-	}
-
-	&:last-child {
-		border-bottom: 1px solid #ccc;
-	}
-}
-
-.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-body"] {
-	text-align: left;
 
 	.marketplace-listitem-container {
 		align-items: center;
@@ -113,11 +85,46 @@ a.suggestion-dismiss::before {
 		.marketplace-listitem-container-cta {
 			flex: 1 1 30%;
 			text-align: right;
+		}
+	}
+}
+
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-body"] {
+
+	text-align: left;
+	border: 1px solid #ccc;
+	border-bottom: none;
+
+	h4 {
+		margin: 0;
+	}
+
+	&:last-child {
+		border-bottom: 1px solid #ccc;
+	}
+
+	.marketplace-listitem-container {
+		padding: 1.5em;
+
+		.marketplace-listitem-container-cta {
 
 			a.button {
 				display: inline-block;
 				min-width: 120px;
 				text-align: center;
+			}
+
+			a.linkout {
+				font-size: 1.1em;
+				text-decoration: none;
+			}
+
+			a.linkout .dashicons {
+				margin-left: 4px;
+				bottom: 2px;
+				position: relative;
 			}
 
 			.suggestion-dismiss {
@@ -127,9 +134,11 @@ a.suggestion-dismiss::before {
 			}
 		}
 
-		p {
-			margin: 0;
-		}
+		.marketplace-listitem-container-content {
 
+			p {
+				margin: 0;
+			}
+		}
 	}
 }
