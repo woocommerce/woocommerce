@@ -54,6 +54,18 @@
 			return linkoutButton;
 		}
 
+		function renderSuggestionIcon( slug, iconUrl ) {
+			if ( !iconUrl ) {
+				return null;
+			}
+
+			var image = document.createElement( 'img' );
+			image.src = iconUrl;
+			image.classList.add( 'marketplace-suggestion-icon' );
+
+			return image;
+		}
+
 		function renderSuggestionContent( slug, title, copy ) {
 			var left = document.createElement( 'div' );
 
@@ -90,7 +102,7 @@
 			return right;
 		}
 
-		function renderTableBanner( slug, title, copy, url, buttonText, allowDismiss ) {
+		function renderTableBanner( slug, iconUrl, title, copy, url, buttonText, allowDismiss ) {
 			if ( ! title || ! url ) {
 				return;
 			}
@@ -113,7 +125,10 @@
 			container.classList.add( 'marketplace-suggestion-container' );
 			container.dataset.suggestionSlug = slug;
 
-
+			var icon = renderSuggestionIcon( slug, iconUrl );
+			if ( icon ) {
+				container.appendChild( icon );
+			}
 			container.appendChild(
 				renderSuggestionContent( slug, title, copy )
 			);
@@ -127,11 +142,15 @@
 			return row;
 		}
 
-		function renderListItem( slug, title, copy, url, linkText, linkIsButton, allowDismiss ) {
+		function renderListItem( slug, iconUrl, title, copy, url, linkText, linkIsButton, allowDismiss ) {
 			var container = document.createElement( 'div' );
 			container.classList.add( 'marketplace-suggestion-container' );
 			container.dataset.suggestionSlug = slug;
 
+			var icon = renderSuggestionIcon( slug, iconUrl );
+			if ( icon ) {
+				container.appendChild( icon );
+			}
 			container.appendChild(
 				renderSuggestionContent( slug, title, copy )
 			);
@@ -213,6 +232,7 @@
 
 					var content = renderListItem(
 						promos[ i ].slug,
+						promos[ i ].icon,
 						promos[ i ].title,
 						promos[ i ].copy,
 						promos[ i ].url,
@@ -245,6 +265,7 @@
 				// render first promo
 				var content = renderTableBanner(
 					promos[ 0 ].slug,
+					promos[ 0 ].icon,
 					promos[ 0 ].title,
 					promos[ 0 ].copy,
 					promos[ 0 ].url,

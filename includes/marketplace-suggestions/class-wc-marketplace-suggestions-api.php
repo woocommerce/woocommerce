@@ -69,6 +69,7 @@ function wc_marketplace_suggestions_ajax_handler() {
 			},
 			{
 				"slug": "products-empty-memberships",
+				"icon": "https://woocommerce.com/wp-content/uploads/2018/06/icon.png",
 				"context": "products-list-empty-body",
 				"hide-if-installed": "woocommerce-memberships",
 				"title": "Memberships",
@@ -90,6 +91,7 @@ function wc_marketplace_suggestions_ajax_handler() {
 			},
 			{
 				"slug": "products-empty-product-bundles",
+				"icon": "https://woocommerce.com/wp-content/uploads/2018/06/icon.png",
 				"context": "products-list-empty-body",
 				"hide-if-installed": "woocommerce-product-bundles",
 				"title": "Product Bundles",
@@ -105,8 +107,16 @@ function wc_marketplace_suggestions_ajax_handler() {
 				"button-text": "From $79",
 				"url": "https://woocommerce.com/products/composite-products/"
 			},
-			{
+ 			{
 				"slug": "products-list-enhancements-category",
+				"icon": "https://woocommerce.com/wp-content/uploads/2018/06/icon.png",
+				"context": "products-list-inline",
+				"title": "Looking to optimize your product pages?",
+				"button-text": "Explore enhancements",
+				"url": "https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/"
+			},
+ 			{
+				"slug": "products-list-enhancements-category-noimage",
 				"context": "products-list-inline",
 				"title": "Looking to optimize your product pages?",
 				"button-text": "Explore enhancements",

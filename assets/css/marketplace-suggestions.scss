@@ -26,19 +26,6 @@ a.suggestion-dismiss::before {
 	font-size: 1.5em;
 }
 
-.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
-.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"] {
-
-	.marketplace-suggestion-container-content {
-
-		h4 {
-			font-size: 1.1em;
-			margin: 0;
-			margin-bottom: 0;
-		}
-	}
-}
-
 .marketplace-suggestions-container.showing-suggestion {
 	text-align: left;
 
@@ -47,11 +34,19 @@ a.suggestion-dismiss::before {
 		display: flex;
 		flex-direction: column;
 
-		// Allows us to position the dismiss x button relative to container on mobile.
+		// Allows us to position the dismiss x button
+		// relative to container on mobile.
 		position: relative;
 
+		img.marketplace-suggestion-icon {
+			height: 40px;
+			margin-right: 1.5em;
+			margin-bottom: 1em;
+			flex: 0 0 40px;
+		}
+
 		.marketplace-suggestion-container-content {
-			flex: 1 0 70%;
+			flex: 1 1 60%;
 
 			h4 {
 				margin: 0;
@@ -84,6 +79,39 @@ a.suggestion-dismiss::before {
 			align-items: center;
 			flex-direction: row;
 
+			img.marketplace-suggestion-icon {
+				// display: inline-block;
+			}
+		}
+	}
+}
+
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"] {
+
+	.marketplace-suggestion-container {
+
+		.marketplace-suggestion-container-content {
+
+			h4 {
+				font-size: 1.1em;
+				margin: 0;
+				margin-bottom: 0;
+			}
+		}
+	}
+}
+
+// Optimise footer suggestion layout for left-aligned CTA link button only.
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"] {
+
+	.marketplace-suggestion-container {
+
+		flex-direction: row-reverse;
+
+		.marketplace-suggestion-container-cta {
+
+			text-align: left;
 		}
 	}
 }
@@ -100,9 +128,16 @@ a.suggestion-dismiss::before {
 	.marketplace-suggestion-container {
 		padding: 0.5em 0 0.5em 1em;
 
-		h4 {
-			margin: 0;
-			font-size: 1.2em;
+		img.marketplace-suggestion-icon {
+			margin-bottom: 0;
+		}
+
+		.marketplace-suggestion-container-content {
+
+			h4 {
+				margin: 0;
+				font-size: 1.2em;
+			}
 		}
 
 		.marketplace-suggestion-container-cta {
