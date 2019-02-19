@@ -159,10 +159,16 @@
 			return promos;
 		}
 
-		function hidePageElementsForOnboardingStyle( visibleSuggestions ) {
-			if ( _.contains( visibleSuggestions, 'products-list-empty-body' ) ) {
-				$('#screen-meta-links').hide();
-				$('#wpfooter').hide();
+		function hidePageElementsForEmptyState( visibleSuggestions ) {
+			var showingProductsEmptyStateSuggestions = _.contains( visibleSuggestions, 'products-list-empty-body' );
+			if ( showingProductsEmptyStateSuggestions ) {
+				$( '#screen-meta-links' ).hide();
+				$( '#wpfooter' ).hide();
+			}
+			if ( ! showingProductsEmptyStateSuggestions ) {
+				// hide the header & footer, they don't make sense without specific promotion content
+				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-header"]' ).hide();
+				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-footer"]' ).hide();
 			}
 		}
 
@@ -186,6 +192,12 @@
 						linkoutIsButton = true;
 					}
 
+					// dismiss is allowed by default
+					var allowDismiss = true;
+					if ( promos[ 0 ]['allow-dismiss'] === false ) {
+						allowDismiss = false;
+					}
+
 					var content = renderListItem(
 						promos[ i ].slug,
 						promos[ i ].title,
@@ -193,7 +205,7 @@
 						linkText,
 						linkoutIsButton,
 						promos[ i ].copy,
-						promos[ 0 ]['allow-dismiss']
+						allowDismiss
 					);
 					$( this ).append( content );
 					$( this ).addClass( 'showing-suggestion' );
@@ -211,13 +223,19 @@
 					return;
 				}
 
+				// dismiss is allowed by default
+				var allowDismiss = true;
+				if ( promos[ 0 ]['allow-dismiss'] === false ) {
+					allowDismiss = false;
+				}
+
 				// render first promo
 				var content = renderTableBanner(
 					promos[ 0 ].slug,
 					promos[ 0 ].title,
 					promos[ 0 ].url,
 					promos[ 0 ]['button-text'],
-					promos[ 0 ]['allow-dismiss']
+					allowDismiss
 				);
 
 				if ( content ) {
@@ -238,7 +256,7 @@
 				}
 			} );
 
-			hidePageElementsForOnboardingStyle( visibleSuggestions );
+			hidePageElementsForEmptyState( visibleSuggestions );
 		}
 
 		var data =
