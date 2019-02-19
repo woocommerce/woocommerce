@@ -156,7 +156,7 @@ export class Autocomplete extends Component {
 		const promise = ( this.activePromise = Promise.resolve(
 			typeof options === 'function' ? options( query ) : options
 		).then( optionsData => {
-			if ( ! optionsData ) {
+			if ( ! optionsData || ! this.state.query ) {
 				return;
 			}
 			const { selected } = this.props;
@@ -275,7 +275,9 @@ export class Autocomplete extends Component {
 	}
 
 	isExpanded( props, state ) {
-		return state.filteredOptions.length > 0 || ( props.completer.getFreeTextOptions && state.query );
+		const { filteredOptions, query } = state;
+
+		return filteredOptions.length > 0 || ( props.completer.getFreeTextOptions && query );
 	}
 
 	componentDidUpdate( prevProps, prevState ) {
