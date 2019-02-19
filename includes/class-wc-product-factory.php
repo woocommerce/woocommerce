@@ -49,7 +49,9 @@ class WC_Product_Factory {
 
 		try {
 			$product = new $classname( $product_id, $deprecated );
-			wp_cache_set( 'product-' . $product->get_id(), $product, 'products' );
+			if ( apply_filters( 'woocommerce_cache_products', true ) ) {
+				wp_cache_set( 'product-' . $product->get_id(), $product, 'products' );
+			}
 			return $product;
 		} catch ( Exception $e ) {
 			return false;
