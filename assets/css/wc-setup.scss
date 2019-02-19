@@ -962,7 +962,7 @@ h3.jetpack-reasons {
 	& > * {
 		display: block;
 	}
-	
+
 	.plugin-install-info-list-item::after {
 		content: ', ';
 	}
@@ -1299,7 +1299,7 @@ p.jetpack-terms {
 		}
 
 		&.recommended-item-icon-mailchimp {
-			background-color: #209bbb;
+			background-color: #ffe01b;
 			height: 2em;
 			padding: ( 3.5em - 2em ) / 2;
 		}
