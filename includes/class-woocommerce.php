@@ -688,7 +688,15 @@ final class WooCommerce {
 			return;
 		}
 
-		wc_load_webhooks();
+		/**
+		 * Hook: woocommerce_load_webhooks_limit.
+		 *
+		 * @since 3.6.0
+		 * @param int $limit Used to limit how many webhooks are loaded. Default: no limit.
+		 */
+		$limit = apply_filters( 'woocommerce_load_webhooks_limit', null );
+
+		wc_load_webhooks( 'active', $limit );
 	}
 
 	/**
