@@ -134,4 +134,86 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( '10', $products[0]['price'] );
 		$this->assertEquals( '15', $products[1]['price'] );
 	}
+
+	/**
+	 * Test product_visibility queries.
+	 *
+	 * @since 1.3.1
+	 */
+	public function test_product_visibility() {
+		wp_set_current_user( $this->user );
+		$visible_product = WC_Helper_Product::create_simple_product();
+		$visible_product->set_name( 'Visible Product' );
+		$visible_product->set_catalog_visibility( 'visible' );
+		$visible_product->save();
+
+		$catalog_product = WC_Helper_Product::create_simple_product();
+		$catalog_product->set_name( 'Catalog Product' );
+		$catalog_product->set_catalog_visibility( 'catalog' );
+		$catalog_product->save();
+
+		$search_product = WC_Helper_Product::create_simple_product();
+		$search_product->set_name( 'Search Product' );
+		$search_product->set_catalog_visibility( 'search' );
+		$search_product->save();
+
+		$hidden_product = WC_Helper_Product::create_simple_product();
+		$hidden_product->set_name( 'Hidden Product' );
+		$hidden_product->set_catalog_visibility( 'hidden' );
+		$hidden_product->save();
+
+		$query_params = array(
+			'catalog_visibility' => 'visible',
+		);
+		$request      = new WP_REST_REQUEST( 'GET', '/wc-pb/v3/products' );
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $products ) );
+		$this->assertEquals( 'Visible Product', $products[0]['name'] );
+
+		$query_params = array(
+			'catalog_visibility' => 'catalog',
+			'orderby'            => 'id',
+			'order'              => 'asc',
+		);
+		$request      = new WP_REST_REQUEST( 'GET', '/wc-pb/v3/products' );
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, count( $products ) );
+		$this->assertEquals( 'Visible Product', $products[0]['name'] );
+		$this->assertEquals( 'Catalog Product', $products[1]['name'] );
+
+		$query_params = array(
+			'catalog_visibility' => 'search',
+			'orderby'            => 'id',
+			'order'              => 'asc',
+		);
+		$request      = new WP_REST_REQUEST( 'GET', '/wc-pb/v3/products' );
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, count( $products ) );
+		$this->assertEquals( 'Visible Product', $products[0]['name'] );
+		$this->assertEquals( 'Search Product', $products[1]['name'] );
+
+		$query_params = array(
+			'catalog_visibility' => 'hidden',
+		);
+		$request      = new WP_REST_REQUEST( 'GET', '/wc-pb/v3/products' );
+		$request->set_query_params( $query_params );
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $products ) );
+		$this->assertEquals( 'Hidden Product', $products[0]['name'] );
+	}
 }

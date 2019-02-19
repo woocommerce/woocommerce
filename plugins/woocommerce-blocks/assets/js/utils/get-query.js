@@ -13,6 +13,7 @@ export default function getQuery( blockAttributes, name ) {
 	const query = {
 		status: 'publish',
 		per_page: rows * columns,
+		catalog_visibility: 'visible',
 	};
 
 	if ( categories && categories.length ) {

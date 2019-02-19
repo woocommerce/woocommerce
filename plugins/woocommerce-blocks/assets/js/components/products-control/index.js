@@ -24,7 +24,11 @@ class ProductsControl extends Component {
 
 	componentDidMount() {
 		apiFetch( {
-			path: addQueryArgs( '/wc-pb/v3/products', { per_page: -1, status: 'publish' } ),
+			path: addQueryArgs( '/wc-pb/v3/products', {
+				per_page: -1,
+				catalog_visibility: 'visible',
+				status: 'publish',
+			} ),
 		} )
 			.then( ( list ) => {
 				this.setState( { list, loading: false } );

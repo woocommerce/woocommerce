@@ -26,6 +26,7 @@ class ProductControl extends Component {
 		apiFetch( {
 			path: addQueryArgs( '/wc-pb/v3/products', {
 				per_page: -1,
+				catalog_visibility: 'visible',
 				status: 'publish',
 			} ),
 		} )
