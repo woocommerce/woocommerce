@@ -167,6 +167,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Added registration success notices to account pages. #22650
 * Enhancement - Store notice is visible again if the notice text is changed. #22645
 * Enhancement - Add aria-label attribute to shop orderby selector to improve accessibility. #22683
+* Enhancement - When adding, editing, and deleting items manually from orders, the corresponding product stock will be updated to reflect the event and an order note will log the event. #22329
 * Tweak - Generalize shipping estimate text on cart page. #22467
 * Tweak - Include auto draft orders in order list filters. #22380
 * Tweak - Only include the network orders widget on the main site dashboard. #22318
@@ -222,6 +223,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Added `woocommerce_update_product_stock_query` to filter the direct sql query to update product stock. #22672
 * Dev - Added `woocommerce_product_loop_title_classes` filter to modify product title loop classes. #22717
 * Dev - Delay `woocommerce_loaded` hook until all plugins are loaded. #22536
+* Dev - Added `woocommerce_product_price_class` filter to modify product price classes. #22748
 * Fix - Hide ratings on the shop page when reviews are disabled. #22476
 * Fix - Fix W3C validation of single product page quantity input. #22333
 * Fix - Give product variations a unique guid after creation. #22324
@@ -241,12 +243,21 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - For logged in customers, pull default address fields from customer object, not session object, to avoid incorrect mixes of data. #22392
 * Fix - Misc tax rounding improvements. #22420
 * Fix - Respect shop page subcategories setting when `page/N/` is added to the URL. #22589
+* Fix - Check for decoded taxonomy name when unsetting product terms. #22740
+* Fix - If date paid is not set but payment complete status has passed, set it. #22735
+* Fix - Prevent webhooks for drafts, and correct create vs updated for manual orders. #22731
+* Fix - Ignore invalid default customer locations. #22357
+* Fix - The state select field was missing a placeholder. #22357
+* Fix - Fix state field rendering when customer address is not in a valid selling country. #22357
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
 * Performance - Improved how versioned transients are set/cleanup to avoid cron. #22511
 * Performance - Optimized product CSS class functions to avoid multiple product reads and duplication. #22610
 * Performance - Improved caching of template loader, product types, and layered nav widget. #22612
 * Performance - Remove external lookup of IP addresses on localhost. #22608
+* Performance - Improved speed of the `find_matching_product_variation` variation lookup function. #22423
+* Performance - Prevent frontend code from being loaded during REST API. #21090
+* Performance - Load only active webhooks on pages and allow limits to be set by developers. #22760
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 * Localization - Added US Minor Outlying Islands as states to avoid confusion with US. #22468
 * Localization - Dutch postcode validation. #22316
@@ -254,6 +265,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Localization - Added new Venezuelan currency Bs S. #22435
 * Localization - Added Danish locale. #22495
 * Localization - Update Peruvian currency. #22602
+* Localization - Update CA address format. #22692
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
