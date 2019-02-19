@@ -22,6 +22,7 @@ import Header from 'header';
 import Notices from './notices';
 import { recordPageView } from 'lib/tracks';
 import TransientNotices from './transient-notices';
+import StoreAlerts from './store-alerts';
 
 class Layout extends Component {
 	componentDidMount() {
@@ -66,6 +67,8 @@ class Layout extends Component {
 				<TransientNotices />
 
 				<div className="woocommerce-layout__primary" id="woocommerce-layout__primary">
+					<StoreAlerts />
+
 					<Notices />
 					{ ! isEmbeded && (
 						<div className="woocommerce-layout__main">
