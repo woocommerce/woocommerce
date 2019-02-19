@@ -140,7 +140,7 @@ return array(
 	'LT' => __( 'Lithuania', 'woocommerce' ),
 	'LU' => __( 'Luxembourg', 'woocommerce' ),
 	'MO' => __( 'Macao S.A.R., China', 'woocommerce' ),
-	'MK' => __( 'Macedonia', 'woocommerce' ),
+	'MK' => __( 'North Macedonia', 'woocommerce' ),
 	'MG' => __( 'Madagascar', 'woocommerce' ),
 	'MW' => __( 'Malawi', 'woocommerce' ),
 	'MY' => __( 'Malaysia', 'woocommerce' ),
