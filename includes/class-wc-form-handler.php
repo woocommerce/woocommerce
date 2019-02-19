@@ -81,6 +81,12 @@ class WC_Form_Handler {
 			return;
 		}
 
+		$customer = new WC_Customer( $user_id );
+
+		if ( ! $customer ) {
+			return;
+		}
+
 		$load_address = isset( $wp->query_vars['edit-address'] ) ? wc_edit_address_i18n( sanitize_title( $wp->query_vars['edit-address'] ), true ) : 'billing';
 
 		if ( ! isset( $_POST[ $load_address . '_country' ] ) ) {
@@ -111,8 +117,7 @@ class WC_Form_Handler {
 			}
 
 			if ( ! empty( $value ) ) {
-
-				// Validation rules.
+				// Validation and formatting rules.
 				if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
 					foreach ( $field['validate'] as $rule ) {
 						switch ( $rule ) {
@@ -143,36 +148,46 @@ class WC_Form_Handler {
 					}
 				}
 			}
-		}
 
-		do_action( 'woocommerce_after_save_address_validation', $user_id, $load_address, $address );
-
-		if ( 0 === wc_notice_count( 'error' ) ) {
-
-			$customer = new WC_Customer( $user_id );
-
-			if ( $customer ) {
-				foreach ( $address as $key => $field ) {
-					if ( is_callable( array( $customer, "set_$key" ) ) ) {
-						$customer->{"set_$key"}( $value );
-					} else {
-						$customer->update_meta_data( $key, $value );
-					}
-
-					if ( WC()->customer && is_callable( array( WC()->customer, "set_$key" ) ) ) {
-						WC()->customer->{"set_$key"}( $value );
-					}
+			try {
+				// Set prop in customer object.
+				if ( is_callable( array( $customer, "set_$key" ) ) ) {
+					$customer->{"set_$key"}( $value );
+				} else {
+					$customer->update_meta_data( $key, $value );
 				}
-				$customer->save();
+			} catch ( WC_Data_Exception $e ) {
+				// Set notices. Ignore invalid billing email, since is already validated.
+				if ( 'customer_invalid_billing_email' !== $e->getErrorCode() ) {
+					wc_add_notice( $e->getMessage(), 'error' );
+				}
 			}
-
-			wc_add_notice( __( 'Address changed successfully.', 'woocommerce' ) );
-
-			do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
-
-			wp_safe_redirect( wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) );
-			exit;
 		}
+
+		/**
+		 * Hook: woocommerce_after_save_address_validation.
+		 *
+		 * Allow developers to add custom validation logic and throw an error to prevent save.
+		 *
+		 * @param int         $user_id User ID being saved.
+		 * @param string      $load_address Type of address e.g. billing or shipping.
+		 * @param array       $address The address fields.
+		 * @param WC_Customer $customer The customer object being saved. @since 3.6.0
+		 */
+		do_action( 'woocommerce_after_save_address_validation', $user_id, $load_address, $address, $customer );
+
+		if ( 0 < wc_notice_count( 'error' ) ) {
+			return;
+		}
+
+		$customer->save();
+
+		wc_add_notice( __( 'Address changed successfully.', 'woocommerce' ) );
+
+		do_action( 'woocommerce_customer_save_address', $user_id, $load_address );
+
+		wp_safe_redirect( wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) );
+		exit;
 	}
 
 	/**
