@@ -748,6 +748,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 						if ( taxonomy_exists( $attribute_key ) ) {
 							// Handle attributes that have been unset.
 							wp_set_object_terms( $product->get_id(), array(), $attribute_key );
+						} elseif ( taxonomy_exists( urldecode( $attribute_key ) ) ) {
+							// Handle attributes that have been unset.
+							wp_set_object_terms( $product->get_id(), array(), urldecode( $attribute_key ) );
 						}
 						continue;
 
