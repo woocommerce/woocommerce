@@ -478,12 +478,12 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				 * that don't have address indexes yet.
 				 */
 				$sql   = "INSERT INTO {$wpdb->postmeta}( post_id, meta_key, meta_value )
-					SELECT post_id, '%s', GROUP_CONCAT( meta_value SEPARATOR ' ' )
+					SELECT post_id, %s, GROUP_CONCAT( meta_value SEPARATOR ' ' )
 					FROM {$wpdb->postmeta}
-					WHERE meta_key IN ( '%s', '%s' )
+					WHERE meta_key IN ( %s, %s )
 					AND post_id IN ( SELECT DISTINCT post_id FROM {$wpdb->postmeta}
-						WHERE post_id NOT IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='%s' )
-						AND post_id IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key='%s' ) )
+						WHERE post_id NOT IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key=%s )
+						AND post_id IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key=%s ) )
 					GROUP BY post_id";
 				$rows  = $wpdb->query( $wpdb->prepare( $sql, '_billing_address_index', '_billing_first_name', '_billing_last_name', '_billing_address_index', '_billing_last_name' ) ); // WPCS: unprepared SQL ok.
 				$rows += $wpdb->query( $wpdb->prepare( $sql, '_shipping_address_index', '_shipping_first_name', '_shipping_last_name', '_shipping_address_index', '_shipping_last_name' ) ); // WPCS: unprepared SQL ok.
