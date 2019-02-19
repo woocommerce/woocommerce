@@ -8,7 +8,7 @@ import { RawHTML } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import './style.scss';
+import './editor.scss';
 import Block from './block';
 import getShortcode from '../../utils/get-shortcode';
 import { IconWidgets } from '../../components/icons';
