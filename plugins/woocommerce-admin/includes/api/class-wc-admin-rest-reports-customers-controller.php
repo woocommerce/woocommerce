@@ -47,6 +47,7 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		$args['orderby']             = $request['orderby'];
 		$args['match']               = $request['match'];
 		$args['search']              = $request['search'];
+		$args['searchby']            = $request['searchby'];
 		$args['username']            = $request['username'];
 		$args['email']               = $request['email'];
 		$args['country']             = $request['country'];
@@ -335,9 +336,19 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['search']                  = array(
-			'description'       => __( 'Limit response to objects with a customer name containing the search term.', 'wc-admin' ),
+			'description'       => __( 'Limit response to objects with a customer field containing the search term. Searches the field provided by `searchby`.', 'wc-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['searchby']     = array(
+			'description'       => 'Limit results with `search` and `searchby` to specific fields containing the search term.',
+			'type'              => 'string',
+			'default'           => 'name',
+			'enum'              => array(
+				'name',
+				'username',
+				'email',
+			),
 		);
 		$params['username']                = array(
 			'description'       => __( 'Limit response to objects with a specfic username.', 'wc-admin' ),
@@ -455,7 +466,6 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 			'items'             => array(
 				'type' => 'integer',
 			),
-
 		);
 
 		return $params;

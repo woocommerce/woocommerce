@@ -230,9 +230,22 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			}
 		}
 
+		$search_params = array(
+			'name',
+			'username',
+			'email',
+		);
+
 		if ( ! empty( $query_args['search'] ) ) {
 			$name_like = '%' . $wpdb->esc_like( $query_args['search'] ) . '%';
-			$where_clauses[] = $wpdb->prepare( "CONCAT_WS( ' ', first_name, last_name ) LIKE %s", $name_like );
+
+			if ( empty( $query_args['searchby'] ) || 'name' === $query_args['searchby'] || ! in_array( $query_args['searchby'], $search_params ) ) {
+				$searchby = "CONCAT_WS( ' ', first_name, last_name )";
+			} else {
+				$searchby = $query_args['searchby'];
+			}
+
+			$where_clauses[] = $wpdb->prepare( "{$searchby} LIKE %s", $name_like ); // WPCS: unprepared SQL ok.
 		}
 
 		// Allow a list of customer IDs to be specified.

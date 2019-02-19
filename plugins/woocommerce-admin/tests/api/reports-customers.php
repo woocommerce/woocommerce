@@ -112,14 +112,23 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_reports() {
+		global $wpdb;
+
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
 
 		$test_customers = array();
 
+		$customer_names = array( 'Alice', 'Betty', 'Catherine', 'Dan', 'Eric', 'Fred', 'Greg', 'Henry', 'Ivan', 'Justin' );
+
 		// Create 10 test customers.
 		for ( $i = 1; $i <= 10; $i++ ) {
-			$test_customers[] = WC_Helper_Customer::create_customer( "customer{$i}", 'password', "customer{$i}@example.com" );
+			$name = $customer_names[ $i - 1 ];
+			$email = 'customer+' . strtolower( $name ) . '@example.com';
+			$customer = WC_Helper_Customer::create_customer( "customer{$i}", 'password', $email );
+			$customer->set_first_name( $name );
+			$customer->save();
+			$test_customers[] = $customer;
 		}
 
 		// Create a test product for use in an order.
@@ -172,10 +181,49 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 0, $reports );
 
+		// Test name parameter (partial match).
+		$request->set_query_params(
+			array(
+				'search' => 're',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $reports );
+
+		// Test email search.
+		$request->set_query_params(
+			array(
+				'search'   => 'customer+justin',
+				'searchby' => 'email',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+
+		// Test username search.
+		$request->set_query_params(
+			array(
+				'search'   => 'customer1',
+				'searchby' => 'username',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		// customer1 and customer10.
+		$this->assertCount( 2, $reports );
+
 		// Test name and last_order parameters.
 		$request->set_query_params(
 			array(
-				'search'           => 'Justin',
+				'search'           => 'Alice',
 				'last_order_after' => date( 'Y-m-d' ) . 'T00:00:00Z',
 			)
 		);
@@ -184,8 +232,29 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 1, $reports );
+
 		$this->assertEquals( $test_customers[0]->get_id(), $reports[0]['user_id'] );
 		$this->assertEquals( 1, $reports[0]['orders_count'] );
 		$this->assertEquals( 100, $reports[0]['total_spend'] );
+
+		$customer_id = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT customer_id FROM {$wpdb->prefix}wc_customer_lookup WHERE user_id = %d",
+				$reports[0]['user_id']
+			)
+		);
+
+		// Test customers param.
+		$request->set_query_params(
+			array(
+				'customers' => $customer_id,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+		$this->assertEquals( $test_customers[0]->get_id(), $reports[0]['user_id'] );
 	}
 }

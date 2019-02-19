@@ -27,7 +27,8 @@ export default {
 		let payload = '';
 		if ( search ) {
 			const query = {
-				email: search,
+				search,
+				searchby: 'email',
 				per_page: 10,
 			};
 			payload = stringifyQuery( query );

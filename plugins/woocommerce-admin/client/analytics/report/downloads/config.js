@@ -66,7 +66,7 @@ export const advancedFilters = {
 				getLabels: getProductLabels,
 			},
 		},
-		user: {
+		customer: {
 			labels: {
 				add: __( 'Username', 'wc-admin' ),
 				placeholder: __( 'Search customer username', 'wc-admin' ),

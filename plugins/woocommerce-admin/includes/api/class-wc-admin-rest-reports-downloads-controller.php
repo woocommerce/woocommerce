@@ -35,7 +35,6 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_REST_Reports_Control
 	 * Get items.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 *
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
@@ -111,6 +110,8 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_REST_Reports_Control
 		$filename                    = basename( $file_path );
 		$response->data['file_name'] = apply_filters( 'woocommerce_file_download_filename', $filename, $product_id );
 		$response->data['file_path'] = $file_path;
+		$customer                    = new WC_Customer( $data['user_id'] );
+		$response->data['username']  = $customer->get_username();
 
 		/**
 		 * Filter a report returned from the API.
@@ -134,10 +135,6 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_REST_Reports_Control
 		$links = array(
 			'product' => array(
 				'href'       => rest_url( sprintf( '/%s/%s/%d', $this->namespace, 'products', $object['product_id'] ) ),
-				'embeddable' => true,
-			),
-			'user' => array(
-				'href'       => rest_url( 'wp/v2/users/' . $object['user_id'] ),
 				'embeddable' => true,
 			),
 		);
@@ -215,6 +212,12 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_REST_Reports_Control
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
 					'description' => __( 'User ID for the downloader.', 'wc-admin' ),
+				),
+				'username' => array(
+					'type'        => 'string',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'User name of the downloader.', 'wc-admin' ),
 				),
 				'ip_address' => array(
 					'type'        => 'string',
@@ -330,7 +333,7 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_REST_Reports_Control
 				'type' => 'integer',
 			),
 		);
-		$params['user_includes'] = array(
+		$params['customer_includes'] = array(
 			'description'       => __( 'Limit response to objects that have the specified user ids.', 'wc-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -339,7 +342,7 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_REST_Reports_Control
 				'type' => 'integer',
 			),
 		);
-		$params['user_excludes'] = array(
+		$params['customer_excludes'] = array(
 			'description'       => __( 'Limit response to objects that don\'t have the specified user ids.', 'wc-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',

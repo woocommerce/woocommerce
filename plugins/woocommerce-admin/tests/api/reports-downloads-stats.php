@@ -126,6 +126,100 @@ class WC_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test getting report with user filter.
+	 */
+	public function test_get_report_with_user_filter() {
+		global $wpdb;
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+		$time = time();
+
+		// First set of data.
+		$prod_download = new WC_Product_Download();
+		$prod_download->set_file( plugin_dir_url( __FILE__ ) . '/assets/images/help.png' );
+		$prod_download->set_id( 1 );
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_downloadable( 'yes' );
+		$product->set_downloads( array( $prod_download ) );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( 'completed' );
+		$order->set_total( 25 );
+		$order->save();
+		$order_1 = $order->get_id();
+
+		$download = new WC_Customer_Download();
+		$download->set_user_id( 1 );
+		$download->set_order_id( $order->get_id() );
+		$download->set_product_id( $product->get_id() );
+		$download->set_download_id( $prod_download->get_id() );
+		$download->save();
+
+		for ( $i = 1; $i < 3; $i++ ) {
+			$object = new WC_Customer_Download_Log();
+			$object->set_permission_id( $download->get_id() );
+			$object->set_user_id( 1 );
+			$object->set_user_ip_address( '1.2.3.4' );
+			$id = $object->save();
+		}
+
+		$order = WC_Helper_Order::create_order( 2, $product );
+		$order->set_status( 'completed' );
+		$order->set_total( 10 );
+		$order->save();
+
+		$download = new WC_Customer_Download();
+		$download->set_user_id( 2 );
+		$download->set_order_id( $order->get_id() );
+		$download->set_product_id( $product->get_id() );
+		$download->set_download_id( $prod_download->get_id() );
+		$download->save();
+
+		$object = new WC_Customer_Download_Log();
+		$object->set_permission_id( $download->get_id() );
+		$object->set_user_id( 2 );
+		$object->set_user_ip_address( '5.4.3.2.1' );
+		$object->save();
+
+		$customer_id = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT customer_id FROM {$wpdb->prefix}wc_customer_lookup WHERE user_id = %d",
+				1
+			)
+		);
+
+		// Test includes filtering.
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'customer_includes' => $customer_id,
+			)
+		);
+		$response        = $this->server->dispatch( $request );
+		$reports         = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, $reports['totals']['download_count'] );
+
+		// Test excludes filtering.
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'customer_excludes' => $customer_id,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, $reports['totals']['download_count'] );
+	}
+
+	/**
 	 * Test getting report ordering.
 	 */
 	public function test_get_report_orderby() {

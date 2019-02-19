@@ -122,27 +122,32 @@ class WC_Admin_Reports_Downloads_Data_Store extends WC_Admin_Reports_Data_Store 
 			)";
 		}
 
-		$included_users = $this->get_included_users( $query_args );
-		$excluded_users = $this->get_excluded_users( $query_args );
-		if ( $included_users ) {
+		$customer_lookup_table  = $wpdb->prefix . 'wc_customer_lookup';
+		$included_customers = $this->get_included_customers( $query_args );
+		$excluded_customers = $this->get_excluded_customers( $query_args );
+		if ( $included_customers ) {
 			$where_filters[] = " {$lookup_table}.permission_id IN (
 			SELECT
 				DISTINCT {$wpdb->prefix}woocommerce_downloadable_product_permissions.permission_id
 			FROM
 				{$wpdb->prefix}woocommerce_downloadable_product_permissions
 			WHERE
-				{$wpdb->prefix}woocommerce_downloadable_product_permissions.user_id IN ({$included_users})
+				{$wpdb->prefix}woocommerce_downloadable_product_permissions.user_id IN (
+					SELECT {$customer_lookup_table}.user_id FROM {$customer_lookup_table} WHERE {$customer_lookup_table}.customer_id IN ({$included_customers})
+				)
 			)";
 		}
 
-		if ( $excluded_users ) {
+		if ( $excluded_customers ) {
 			$where_filters[] = " {$lookup_table}.permission_id NOT IN (
 			SELECT
 				DISTINCT {$wpdb->prefix}woocommerce_downloadable_product_permissions.permission_id
 			FROM
 				{$wpdb->prefix}woocommerce_downloadable_product_permissions
 			WHERE
-				{$wpdb->prefix}woocommerce_downloadable_product_permissions.user_id IN ({$excluded_users})
+				{$wpdb->prefix}woocommerce_downloadable_product_permissions.user_id IN (
+					SELECT {$customer_lookup_table}.user_id FROM {$customer_lookup_table} WHERE {$customer_lookup_table}.customer_id IN ({$excluded_customers})
+				)
 			)";
 		}
 
@@ -205,6 +210,35 @@ class WC_Admin_Reports_Downloads_Data_Store extends WC_Admin_Reports_Data_Store 
 		return $excluded_ips_str;
 	}
 
+	/**
+	 * Returns comma separated ids of included customers, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_included_customers( $query_args ) {
+		$included_customers_str = '';
+
+		if ( isset( $query_args['customer_includes'] ) && is_array( $query_args['customer_includes'] ) && count( $query_args['customer_includes'] ) > 0 ) {
+			$included_customers_str = implode( ',', $query_args['customer_includes'] );
+		}
+		return $included_customers_str;
+	}
+
+	/**
+	 * Returns comma separated ids of excluded customers, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_excluded_customers( $query_args ) {
+		$excluded_customer_str = '';
+
+		if ( isset( $query_args['customer_excludes'] ) && is_array( $query_args['customer_excludes'] ) && count( $query_args['customer_excludes'] ) > 0 ) {
+			$excluded_customer_str = implode( ',', $query_args['customer_excludes'] );
+		}
+		return $excluded_customer_str;
+	}
 
 	/**
 	 * Fills WHERE clause of SQL request with date-related constraints.

@@ -30,6 +30,7 @@ export default {
 		if ( name ) {
 			const query = {
 				search: name,
+				searchby: 'name',
 				per_page: 10,
 			};
 			payload = stringifyQuery( query );

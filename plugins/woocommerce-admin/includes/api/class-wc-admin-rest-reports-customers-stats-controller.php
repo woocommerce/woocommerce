@@ -197,9 +197,19 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['search']                  = array(
-			'description'       => __( 'Limit response to objects with a specfic customer name.', 'wc-admin' ),
+			'description'       => __( 'Limit response to objects with a customer field containing the search term. Searches the field provided by `searchby`.', 'wc-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['searchby']     = array(
+			'description'       => 'Limit results with `search` and `searchby` to specific fields containing the search term.',
+			'type'              => 'string',
+			'default'           => 'name',
+			'enum'              => array(
+				'name',
+				'username',
+				'email',
+			),
 		);
 		$params['username']                = array(
 			'description'       => __( 'Limit response to objects with a specfic username.', 'wc-admin' ),
@@ -309,7 +319,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['customers']              = array(
+		$params['customers']               = array(
 			'description'       => __( 'Limit result to items with specified customer ids.', 'wc-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
@@ -317,7 +327,6 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 			'items'             => array(
 				'type' => 'integer',
 			),
-
 		);
 
 		return $params;
