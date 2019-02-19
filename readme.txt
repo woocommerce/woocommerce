@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, claudiulodro,
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.7
 Tested up to: 5.0
-Stable tag: 3.5.4
+Stable tag: 3.5.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -157,6 +157,54 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 6. A product archive (grid).
 
 == Changelog ==
+
+= 3.5.5 - 2019-02-20 =
+* Fix - Fix error on product category when sorting by multiple fields. #22066
+* Fix - Recalculate coupon totals after adding a coupon to an order. #22580
+* Fix - Include refunded orders in top sellers, earners sales by product. #22581
+* Fix - Fix issue where "Any" attributes on variable products not always selectable on front end. #22067
+* Fix - Ensure partial refunds fire order.updated webhooks. #22072
+* Fix - Reload the cart page when the cart is empty. #22114
+* Fix - Always show the price filter widget when filtering products by price. #22303
+* Fix - Added body `{padding: 0;}` CSS rule to the email-styles.php to fix the iOS emails layout issue. #22309
+* Fix - Update variable product default attributes to reflect attribute terms slug edit. #22398
+* Fix - Adds all 3 callback arguments to the `woocommerce_order_item_display_meta_value` filter called from the `get_formatted_legacy` method of the WC_Order_Item_Meta class. #22411
+* Fix - Remove html from add coupon error alert during manual order entry. #22424
+* Fix - Include tax in subtotals when validating coupon minimum and maximum in manual order entry. #22464
+* Fix - Fix ssl check in case shop page no longer exists. #22531
+* Fix - Exclude `paged` from price slider and rating filter. #22533
+* Fix - Limit bulk variation percentage price adjustment to decimal places in pricing settings. #22537
+* Fix - Fix category image `name` field to be used for API POST/PUT. #22553
+* Fix - Fix remote request test in `get_environment_info()`. #22551
+* Fix - Fix notices when images have no metadata or their metadata is removed. #22562
+* Fix - Check for presence of 'save' entry in post data when determining whether to save settings. #22572
+* Fix - Additional CSS support for more input types on variations panel in admin. #22590
+* Fix - Over escaping rating widget html. #22593
+* Fix - Update cron sale price removal to remove the price at midnight after the sale ends. #22609
+* Fix - WC_Log_Handler_File::remove - fix for MS Windows #22624
+* Fix - Only require flat shipping rate when shipping method is enabled in the On-Boarding Wizard. #22599
+* Fix - Fix wrong variable check in `add_uncropped_metadata`. #22638
+* Fix - No alert for mis-matched password reset. #22642
+* Fix - Hold-stock behavior between simple products and variable products was different. #22646
+* Fix - OBW: Offer Storefront when WP 5.0 default theme is active #22649
+* Fix - Add novalidate attribute to payment form to prevent hidden fields preventing submission. #22662
+* Fix - Switch span to paragraph for descriptions in admin user profile view to correct spacing. #22663
+* Fix - Added POST variable check in product data meta box. #22681
+* Fix - PayPal item name encoding. #22684
+* Fix - Move PayPal BN partner ID. #22763
+* Fix - The "for" attribute of a label for a radio input is invalid in `woocommerce_form_field`. #22690
+* Fix - Custom payment options sections was not loading settings. #22704
+* Fix - Breadcrumbs on custom post types was using the singular name instead of plural. #22705
+* Fix - Fixed generate webhook signature when secret contains special chars. #22722
+* Fix - Set correct item meta after restocking items with refunds. #22729
+* Fix - Sales by Product to consistently calculate net sales counts and amounts. #22711
+* Fix - Importer - Variations cannot be drafts so set to private. #22736
+* Fix - Next/previous links for orders REST endpoint when `status` query parameter is present. #22741
+* Fix - Default value passed to sorting dropdown #22677
+* Tweak - Updates Mailchimp branding in setup wizard. #22514
+* Tweak - Refactor `@id` generation for product structured data to prevent plugin conflicts. #22554
+* Tweak - Keep count of the number of times custom coupons apply. #22529
+* Tweak - Change WooCommerce emails footer from `Powered by WooCommerce` to `Built with WooCommerce`. #22530
 
 = 3.5.4 - 2019-01-21 =
 * Tweak - Allow limited html in woocommerce_rating_filter_count filter. #21904
