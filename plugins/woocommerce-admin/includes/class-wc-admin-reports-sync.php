@@ -132,6 +132,11 @@ class WC_Admin_Reports_Sync {
 			return;
 		}
 
+		if ( apply_filters( 'woocommerce_disable_order_scheduling', false ) ) {
+			self::orders_lookup_process_order( $order_id );
+			return;
+		}
+
 		// This can get called multiple times for a single order, so we look
 		// for existing pending jobs for the same order to avoid duplicating efforts.
 		$existing_jobs = self::queue()->search(
@@ -169,7 +174,7 @@ class WC_Admin_Reports_Sync {
 		// Activate WC_Order extension.
 		WC_Admin_Order::add_filters();
 
-		add_action( 'save_post_shop_order', array( __CLASS__, 'schedule_single_order_process' ) );
+		add_action( 'save_post', array( __CLASS__, 'schedule_single_order_process' ) );
 		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'schedule_single_order_process' ) );
 
 		WC_Admin_Reports_Orders_Stats_Data_Store::init();
@@ -219,7 +224,7 @@ class WC_Admin_Reports_Sync {
 				'order'   => 'ASC',
 			)
 		);
-		$order_ids = $order_query->get_orders();
+		$order_ids   = $order_query->get_orders();
 
 		foreach ( $order_ids as $order_id ) {
 			self::orders_lookup_process_order( $order_id );
