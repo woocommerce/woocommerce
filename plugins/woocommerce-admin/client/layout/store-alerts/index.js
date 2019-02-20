@@ -7,6 +7,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { IconButton, Button, Dashicon } from '@wordpress/components';
 import classnames from 'classnames';
 import interpolateComponents from 'interpolate-components';
+import PropTypes from 'prop-types';
 
 /**
  * WooCommerce dependencies
@@ -161,6 +162,17 @@ class StoreAlerts extends Component {
 }
 
 export default StoreAlerts;
+
+StoreAlerts.propTypes = {
+	alerts: PropTypes.arrayOf(
+		PropTypes.shape( {
+			title: PropTypes.string,
+			type: PropTypes.string,
+			message: PropTypes.string,
+			action: PropTypes.object,
+		} )
+	),
+};
 
 StoreAlerts.defaultProps = {
 	alerts: dummy || [],
