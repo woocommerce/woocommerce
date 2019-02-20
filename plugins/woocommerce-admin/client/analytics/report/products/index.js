@@ -133,7 +133,8 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
 		const { getItems, isGetItemsRequesting, getItemsError } = select( 'wc-api' );
-		const isSingleProductView = query.products && 1 === query.products.split( ',' ).length;
+		const isSingleProductView =
+			! query.search && query.products && 1 === query.products.split( ',' ).length;
 		if ( isSingleProductView ) {
 			const productId = parseInt( query.products );
 			const includeArgs = { include: productId };
