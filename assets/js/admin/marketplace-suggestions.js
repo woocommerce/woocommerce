@@ -5,6 +5,18 @@
 			return;
 		}
 
+		// Stand-in wcSettings.recordEvent for until tracks PR is merged.
+		// https://github.com/woocommerce/woocommerce/pull/22746
+		window.wcSettings = window.wcSettings || {};
+		window.wcSettings.recordEvent = window.wcSettings.recordEvent  || function() { };
+
+		// Tracks events sent in this file:
+		// - marketplace_suggestion_displayed
+		// - marketplace_suggestion_clicked
+		// - marketplace_suggestion_dismissed
+		// All are prefixed by {WC_Tracks::PREFIX}.
+		// All have one property for `suggestionSlug`, to identify the specific suggestion message.
+
 		function dismissSuggestion( suggestionSlug ) {
 			// hide the suggestion in the UI
 			var selector = '[data-suggestion-slug=' + suggestionSlug + ']';
@@ -19,6 +31,10 @@
 					'slug': suggestionSlug,
 				}
 			);
+
+			window.wcSettings.recordEvent( 'marketplace_suggestion_dismissed', {
+				suggestionSlug: suggestionSlug
+			} );
 		}
 
 		function renderDismissButton( suggestionSlug ) {
@@ -34,12 +50,18 @@
 			return dismissButton;
 		}
 
-		function renderLinkout( url, text, isButton ) {
+		function renderLinkout( slug, url, text, isButton ) {
 			var linkoutButton = document.createElement( 'a' );
 
 			linkoutButton.setAttribute( 'href', url );
 			linkoutButton.setAttribute( 'target', 'blank' );
 			linkoutButton.textContent = text;
+
+			linkoutButton.onclick = function( event ) {
+				window.wcSettings.recordEvent( 'marketplace_suggestion_clicked', {
+					suggestionSlug: slug
+				} );
+			}
 
 			if (isButton) {
 				linkoutButton.classList.add( 'button' );
@@ -91,7 +113,7 @@
 
 			right.classList.add( 'marketplace-suggestion-container-cta' );
 			if ( url && linkText ) {
-				var linkoutElement = renderLinkout( url, linkText, linkIsButton );
+				var linkoutElement = renderLinkout( slug, url, linkText, linkIsButton );
 				right.appendChild( linkoutElement );
 			}
 
@@ -243,53 +265,63 @@
 					$( this ).append( content );
 					$( this ).addClass( 'showing-suggestion' );
 					visibleSuggestions.push( promos[i].context );
+
+					window.wcSettings.recordEvent( 'marketplace_suggestion_displayed', {
+						suggestionSlug: promos[ i ].slug
+					} );
 				}
 			} );
 
 			// render inline promos in products list
-			$( '.wp-admin.admin-bar.edit-php.post-type-product table.wp-list-table.posts tbody').first().each( function() {
-				var context = 'products-list-inline';
+			if ( 0 === visibleSuggestions.length ) {
+				$( '.wp-admin.admin-bar.edit-php.post-type-product table.wp-list-table.posts tbody').first().each( function() {
+					var context = 'products-list-inline';
 
-				// find promotions that target this context
-				var promos = getRelevantPromotions( marketplaceSuggestionsApiData, context );
-				if ( ! promos || ! promos.length ) {
-					return;
-				}
-
-				// dismiss is allowed by default
-				var allowDismiss = true;
-				if ( promos[ 0 ]['allow-dismiss'] === false ) {
-					allowDismiss = false;
-				}
-
-				// render first promo
-				var content = renderTableBanner(
-					promos[ 0 ].slug,
-					promos[ 0 ].icon,
-					promos[ 0 ].title,
-					promos[ 0 ].copy,
-					promos[ 0 ].url,
-					promos[ 0 ]['button-text'],
-					allowDismiss
-				);
-
-				if ( content ) {
-					// where should we put it in the list?
-					var rows = $( this ).children();
-					var minRow = 3;
-
-					if ( rows.length <= minRow ) {
-						// if small number of rows, append at end
-						$( this ).append( content );
-					}
-					else {
-						// for more rows, append
-						$( rows[ minRow - 1 ] ).after( content );
+					// find promotions that target this context
+					var promos = getRelevantPromotions( marketplaceSuggestionsApiData, context );
+					if ( ! promos || ! promos.length ) {
+						return;
 					}
 
-					visibleSuggestions.push( context );
-				}
-			} );
+					// dismiss is allowed by default
+					var allowDismiss = true;
+					if ( promos[ 0 ]['allow-dismiss'] === false ) {
+						allowDismiss = false;
+					}
+
+					// render first promo
+					var content = renderTableBanner(
+						promos[ 0 ].slug,
+						promos[ 0 ].icon,
+						promos[ 0 ].title,
+						promos[ 0 ].copy,
+						promos[ 0 ].url,
+						promos[ 0 ]['button-text'],
+						allowDismiss
+					);
+
+					if ( content ) {
+						// where should we put it in the list?
+						var rows = $( this ).children();
+						var minRow = 3;
+
+						if ( rows.length <= minRow ) {
+							// if small number of rows, append at end
+							$( this ).append( content );
+						}
+						else {
+							// for more rows, append
+							$( rows[ minRow - 1 ] ).after( content );
+						}
+
+						visibleSuggestions.push( context );
+
+						window.wcSettings.recordEvent( 'marketplace_suggestion_displayed', {
+							suggestionSlug: promos[ 0 ].slug
+						} );
+					}
+				} );
+			}
 
 			hidePageElementsForEmptyState( visibleSuggestions );
 		}
