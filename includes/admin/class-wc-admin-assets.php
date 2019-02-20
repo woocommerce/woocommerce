@@ -424,10 +424,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			}
 
 			if ( in_array( $screen_id, array( 'edit-product' ), true ) ) {
-				$woo_plugin_slugs = array_map(
-					array( $this, 'get_plugin_slug' ),
-					array_keys( WC_Helper::get_local_woo_plugins() )
-				);
+				$woo_plugin_slugs = WC_Helper::get_local_woo_plugin_slugs();
 				wp_register_script(
 					'marketplace-suggestions',
 					WC()->plugin_url() . '/assets/js/admin/marketplace-suggestions' . $suffix . '.js',
