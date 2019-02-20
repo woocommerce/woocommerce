@@ -30,6 +30,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		'status'         => 'strval',
 		'customer_id'    => 'intval',
 		'net_total'      => 'floatval',
+		'gross_total'    => 'floatval',
+		'refund_total'   => 'floatval',
 		'num_items_sold' => 'intval',
 		'customer_type'  => 'strval',
 	);
@@ -45,6 +47,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		'status'         => 'REPLACE(status, "wc-", "") as status',
 		'customer_id'    => 'customer_id',
 		'net_total'      => 'net_total',
+		'gross_total'    => 'gross_total',
+		'refund_total'   => 'refund_total',
 		'num_items_sold' => 'num_items_sold',
 		'customer_type'  => '(CASE WHEN returning_customer <> 0 THEN "returning" ELSE "new" END) as customer_type',
 	);
@@ -243,6 +247,8 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		$mapped_products    = $this->map_array_by_key( $products, 'product_id' );
 		$coupons            = $this->get_coupons_by_order_ids( array_keys( $mapped_orders ) );
 		$product_categories = $this->get_product_categories_by_product_ids( array_keys( $mapped_products ) );
+		$customers          = $this->get_customers_by_orders( $orders_data );
+		$mapped_customers   = $this->map_array_by_key( $customers, 'customer_id' );
 
 		$mapped_data = array();
 		foreach ( $products as $product ) {
@@ -280,8 +286,12 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 				'products'   => array(),
 				'categories' => array(),
 				'coupons'    => array(),
+				'customer'   => array(),
 			);
 			$orders_data[ $key ]['extended_info'] = isset( $mapped_data[ $order_data['order_id'] ] ) ? array_merge( $defaults, $mapped_data[ $order_data['order_id'] ] ) : $defaults;
+			if ( $order_data['customer_id'] && isset( $mapped_customers[ $order_data['customer_id'] ] ) ) {
+				$orders_data[ $key ]['extended_info']['customer'] = $mapped_customers[ $order_data['customer_id'] ];
+			}
 		}
 	}
 
@@ -322,6 +332,32 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 		return $products;
+	}
+
+	/**
+	 * Get customer data from order IDs.
+	 *
+	 * @param array $orders Array of orders.
+	 * @return array
+	 */
+	protected function get_customers_by_orders( $orders ) {
+		global $wpdb;
+		$customer_lookup_table = $wpdb->prefix . 'wc_customer_lookup';
+
+		$customer_ids = array();
+		foreach ( $orders as $order ) {
+			if ( $order['customer_id'] ) {
+				$customer_ids[] = $order['customer_id'];
+			}
+		}
+		$customer_ids = implode( ',', $customer_ids );
+
+		$customers = $wpdb->get_results(
+			"SELECT * FROM {$customer_lookup_table} WHERE customer_id IN ({$customer_ids})",
+			ARRAY_A
+		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+
+		return $customers;
 	}
 
 	/**

@@ -24,7 +24,7 @@ import {
 	Section,
 } from '@woocommerce/components';
 import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
-import { getAdminLink } from '@woocommerce/navigation';
+import { getAdminLink, getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -32,7 +32,6 @@ import { getAdminLink } from '@woocommerce/navigation';
 import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
 import ActivityHeader from '../activity-header';
 import ActivityOutboundLink from '../activity-outbound-link';
-import { getOrderRefundTotal } from 'lib/order-values';
 import { QUERY_DEFAULTS } from 'wc-api/constants';
 import withSelect from 'wc-api/with-select';
 
@@ -64,28 +63,56 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 		</EllipsisMenu>
 	);
 
-	const orderCardTitle = ( order, address ) => {
-		const name = `${ address.first_name } ${ address.last_name }`;
+	const getCustomerString = order => {
+		const extended_info = order.extended_info || {};
+		const { first_name, last_name } = extended_info.customer || {};
+
+		if ( ! first_name && ! last_name ) {
+			return '';
+		}
+
+		const name = [ first_name, last_name ].join( ' ' );
+		return sprintf(
+			__(
+				/* translators: describes who placed an order, e.g. Order #123 placed by John Doe */
+				'placed by {{customerLink}}%(customerName)s{{/customerLink}}',
+				'wc-admin'
+			),
+			{
+				customerName: name,
+			}
+		);
+	};
+
+	const orderCardTitle = order => {
+		const { extended_info, order_id } = order;
+		const { customer } = extended_info || {};
+		const customerUrl = customer.customer_id
+			? getNewPath( {}, '/analytics/customers', {
+					filter: 'single_customer',
+					customer_id: customer.customer_id,
+				} )
+			: null;
 
 		return (
 			<Fragment>
 				{ interpolateComponents( {
 					mixedString: sprintf(
 						__(
-							/* eslint-disable-next-line max-len */
-							'Order {{orderLink}}#%(orderNumber)s{{/orderLink}} placed by {{customerLink}}%(customerName)s{{/customerLink}} {{destinationFlag/}}',
+							'Order {{orderLink}}#%(orderNumber)s{{/orderLink}} %(customerString)s {{destinationFlag/}}',
 							'wc-admin'
 						),
 						{
-							orderNumber: order.number,
-							customerName: name,
+							orderNumber: order_id,
+							customerString: getCustomerString( order ),
 						}
 					),
 					components: {
-						orderLink: <Link href={ 'post.php?action=edit&post=' + order.id } type="wp-admin" />,
-						// @todo Hook up customer name link
-						customerLink: <Link href={ '#' } type="wp-admin" />,
-						destinationFlag: <Flag order={ order } round={ false } />,
+						orderLink: <Link href={ 'post.php?action=edit&post=' + order_id } type="wp-admin" />,
+						destinationFlag: customer.country ? (
+							<Flag code={ customer.country } round={ false } />
+						) : null,
+						customerLink: customerUrl ? <Link href={ customerUrl } type="wc-admin" /> : <span />,
 					},
 				} ) }
 			</Fragment>
@@ -93,20 +120,20 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 	};
 
 	const cards = [];
-	orders.forEach( ( order, id ) => {
-		// We want the billing address, but shipping can be used as a fallback.
-		const address = { ...order.shipping, ...order.billing };
-		const productsCount = order.line_items.reduce( ( total, line ) => total + line.quantity, 0 );
+	orders.forEach( order => {
+		const extended_info = order.extended_info || {};
+		const productsCount =
+			extended_info && extended_info.products ? extended_info.products.length : 0;
 
-		const total = order.total;
-		const refundValue = getOrderRefundTotal( order );
-		const remainingTotal = getCurrencyFormatDecimal( order.total ) + refundValue;
+		const total = order.gross_total;
+		const refundValue = order.refund_total;
+		const remainingTotal = getCurrencyFormatDecimal( total ) + refundValue;
 
 		cards.push(
 			<ActivityCard
-				key={ id }
+				key={ order.order_id }
 				className="woocommerce-order-activity-card"
-				title={ orderCardTitle( order, address ) }
+				title={ orderCardTitle( order ) }
 				date={ order.date_created }
 				subtitle={
 					<div>
@@ -118,16 +145,15 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 						</span>
 						{ refundValue ? (
 							<span>
-								<s>{ formatCurrency( total, order.currency_symbol ) }</s>{' '}
-								{ formatCurrency( remainingTotal, order.currency_symbol ) }
+								<s>{ formatCurrency( total ) }</s> { formatCurrency( remainingTotal ) }
 							</span>
 						) : (
-							<span>{ formatCurrency( total, order.currency_symbol ) }</span>
+							<span>{ formatCurrency( total ) }</span>
 						) }
 					</div>
 				}
 				actions={
-					<Button isDefault href={ getAdminLink( 'post.php?action=edit&post=' + order.id ) }>
+					<Button isDefault href={ getAdminLink( 'post.php?action=edit&post=' + order.order_id ) }>
 						{ __( 'Begin fulfillment' ) }
 					</Button>
 				}
@@ -162,29 +188,30 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 }
 
 OrdersPanel.propTypes = {
-	orders: PropTypes.instanceOf( Map ).isRequired,
+	orders: PropTypes.array.isRequired,
 	isError: PropTypes.bool,
 	isRequesting: PropTypes.bool,
 };
 
 OrdersPanel.defaultProps = {
-	orders: new Map(),
+	orders: [],
 	isError: false,
 	isRequesting: false,
 };
 
 export default compose(
 	withSelect( select => {
-		const { getItems, getItemsError, isGetItemsRequesting } = select( 'wc-api' );
+		const { getReportItems, getReportItemsError, isReportItemsRequesting } = select( 'wc-api' );
 		const ordersQuery = {
 			page: 1,
 			per_page: QUERY_DEFAULTS.pageSize,
-			status: 'processing',
+			status_is: [ 'processing', 'on-hold' ],
+			extended_info: true,
 		};
 
-		const orders = getItems( 'orders', ordersQuery );
-		const isError = Boolean( getItemsError( 'orders', ordersQuery ) );
-		const isRequesting = isGetItemsRequesting( 'orders', ordersQuery );
+		const orders = getReportItems( 'orders', ordersQuery ).data;
+		const isError = Boolean( getReportItemsError( 'orders', ordersQuery ) );
+		const isRequesting = isReportItemsRequesting( 'orders', ordersQuery );
 
 		return { orders, isError, isRequesting };
 	} )
