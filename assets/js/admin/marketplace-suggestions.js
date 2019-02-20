@@ -228,7 +228,8 @@
 			}
 		}
 
-		function displaySuggestions( marketplaceSuggestionsApiData ) {
+		function displaySuggestions( jsonResponse ) {
+			var marketplaceSuggestionsApiData = jsonResponse.data || [];
 			var visibleSuggestions = [];
 
 			// iterate over all suggestions containers, rendering promos
