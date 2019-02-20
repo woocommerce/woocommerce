@@ -963,17 +963,17 @@ class WC_Checkout {
 		if ( $customer_id && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
 			$customer = new WC_Customer( $customer_id );
 
-			if ( ! empty( $data['billing_first_name'] ) ) {
+			if ( ! empty( $data['billing_first_name'] ) && '' === $customer->get_first_name() ) {
 				$customer->set_first_name( $data['billing_first_name'] );
 			}
 
-			if ( ! empty( $data['billing_last_name'] ) ) {
+			if ( ! empty( $data['billing_last_name'] ) && '' === $customer->get_last_name() ) {
 				$customer->set_last_name( $data['billing_last_name'] );
 			}
 
 			// If the display name is an email, update to the user's full name.
 			if ( is_email( $customer->get_display_name() ) ) {
-				$customer->set_display_name( $data['billing_first_name'] . ' ' . $data['billing_last_name'] );
+				$customer->set_display_name( $customer->get_first_name() . ' ' . $customer->get_last_name() );
 			}
 
 			foreach ( $data as $key => $value ) {
