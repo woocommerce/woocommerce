@@ -107,6 +107,75 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test creation of various user roles
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_user_creation() {
+		wp_set_current_user( $this->user );
+		$admin_id = wp_insert_user(
+			array(
+				'user_login' => 'testadmin',
+				'user_pass'  => null,
+				'role'       => 'administrator',
+			)
+		);
+
+		// Admin user without orders should not be shown.
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params( array( 'per_page' => 10 ) );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+		$headers  = $response->get_headers();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 0, $reports );
+
+		// Creating an order with admin should return the admin.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( $admin_id, $product );
+		$order->set_status( 'processing' );
+		$order->set_total( 100 );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params( array( 'per_page' => 10 ) );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+		$headers  = $response->get_headers();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+		$this->assertEquals( $admin_id, $reports[0]['user_id'] );
+
+		// Creating a customer should show up regardless of orders.
+		$customer = WC_Helper_Customer::create_customer( 'customer', 'password', 'customer@example.com' );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'per_page' => 10,
+				'order'    => 'asc',
+				'orderby'  => 'username',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+		$headers  = $response->get_headers();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $reports );
+		$this->assertEquals( $customer->get_id(), $reports[0]['user_id'] );
+		$this->assertEquals( $admin_id, $reports[1]['user_id'] );
+	}
+
+	/**
 	 * Test getting reports.
 	 *
 	 * @since 3.5.0

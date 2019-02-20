@@ -414,52 +414,77 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	}
 
 	/**
-	 * Gets the guest (no user_id) customer ID or creates a new one for
-	 * the corresponding billing email in the provided WC_Order
+	 * Returns an existing customer ID for an order if one exists.
 	 *
-	 * @param WC_Order $order Order to get/create guest customer data with.
-	 * @return int|false The ID of the retrieved/created customer, or false on error.
+	 * @param object $order WC Order.
+	 * @return int|bool
 	 */
-	public function get_or_create_guest_customer_from_order( $order ) {
+	public static function get_existing_customer_id_from_order( $order ) {
+		$user_id = $order->get_customer_id();
+
+		if ( 0 === $user_id ) {
+			$email = $order->get_billing_email( 'edit' );
+
+			if ( $email ) {
+				return self::get_guest_id_by_email( $email );
+			} else {
+				return false;
+			}
+		} else {
+			return self::get_customer_id_by_user_id( $user_id );
+		}
+	}
+
+	/**
+	 * Get or create a customer from a given order.
+	 *
+	 * @param object $order WC Order.
+	 * @return int|bool
+	 */
+	public static function get_or_create_customer_from_order( $order ) {
 		global $wpdb;
+		$returning_customer_id = self::get_existing_customer_id_from_order( $order );
 
-		$email = $order->get_billing_email( 'edit' );
-
-		if ( empty( $email ) ) {
-			return false;
+		if ( $returning_customer_id ) {
+			return $returning_customer_id;
 		}
 
-		$existing_guest = $this->get_guest_by_email( $email );
-
-		if ( $existing_guest ) {
-			return $existing_guest['customer_id'];
-		}
-
-		$result = $wpdb->insert(
-			$wpdb->prefix . self::TABLE_NAME,
-			array(
-				'first_name'       => $order->get_billing_first_name( 'edit' ),
-				'last_name'        => $order->get_billing_last_name( 'edit' ),
-				'email'            => $email,
-				'city'             => $order->get_billing_city( 'edit' ),
-				'postcode'         => $order->get_billing_postcode( 'edit' ),
-				'country'          => $order->get_billing_country( 'edit' ),
-				'date_last_active' => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
-			),
-			array(
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-			)
+		$data   = array(
+			'first_name'       => $order->get_billing_first_name( 'edit' ),
+			'last_name'        => $order->get_billing_last_name( 'edit' ),
+			'email'            => $order->get_billing_email( 'edit' ),
+			'city'             => $order->get_billing_city( 'edit' ),
+			'postcode'         => $order->get_billing_postcode( 'edit' ),
+			'country'          => $order->get_billing_country( 'edit' ),
+			'date_last_active' => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 		);
+		$format = array(
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+		);
+
+		// Add registered customer data.
+		if ( 0 !== $order->get_user_id() ) {
+			$user_id                 = $order->get_user_id();
+			$customer                = new WC_Customer( $user_id );
+			$data['user_id']         = $user_id;
+			$data['username']        = $customer->get_username( 'edit' );
+			$data['date_registered'] = $customer->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format );
+			$format[]                = '%d';
+			$format[]                = '%s';
+			$format[]                = '%s';
+		}
+
+		$result      = $wpdb->insert( $wpdb->prefix . self::TABLE_NAME, $data, $format );
 		$customer_id = $wpdb->insert_id;
 
 		/**
-		 * Fires when customser's reports are created.
+		 * Fires when a new report customer is created.
 		 *
 		 * @param int $customer_id Customer ID.
 		 */
@@ -469,53 +494,23 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	}
 
 	/**
-	 * Retrieve a guest (no user_id) customer row by email.
+	 * Retrieve a guest ID (when user_id is null) by email.
 	 *
 	 * @param string $email Email address.
 	 * @return false|array Customer array if found, boolean false if not.
 	 */
-	public function get_guest_by_email( $email ) {
+	public static function get_guest_id_by_email( $email ) {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . self::TABLE_NAME;
-		$guest_row  = $wpdb->get_row(
+		$table_name  = $wpdb->prefix . self::TABLE_NAME;
+		$customer_id = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT * FROM {$table_name} WHERE email = %s AND user_id IS NULL LIMIT 1",
+				"SELECT customer_id FROM {$table_name} WHERE email = %s AND user_id IS NULL LIMIT 1",
 				$email
-			),
-			ARRAY_A
+			)
 		); // WPCS: unprepared SQL ok.
 
-		if ( $guest_row ) {
-			return $this->cast_numbers( $guest_row );
-		}
-
-		return false;
-	}
-
-	/**
-	 * Retrieve a registered customer row by user_id.
-	 *
-	 * @param string|int $user_id User ID.
-	 * @return false|array Customer array if found, boolean false if not.
-	 */
-	public function get_customer_by_user_id( $user_id ) {
-		global $wpdb;
-
-		$table_name = $wpdb->prefix . self::TABLE_NAME;
-		$customer   = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT * FROM {$table_name} WHERE user_id = %d LIMIT 1",
-				$user_id
-			),
-			ARRAY_A
-		); // WPCS: unprepared SQL ok.
-
-		if ( $customer ) {
-			return $this->cast_numbers( $customer );
-		}
-
-		return false;
+		return $customer_id ? (int) $customer_id : false;
 	}
 
 	/**
@@ -573,7 +568,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 
 		$customer = new WC_Customer( $user_id );
 
-		if ( $customer->get_id() != $user_id ) {
+		if ( ! self::is_valid_customer( $user_id ) ) {
 			return false;
 		}
 
@@ -620,6 +615,26 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		 */
 		do_action( 'woocommerce_reports_update_customer', $customer_id );
 		return $results;
+	}
+
+	/**
+	 * Check if a user ID is a valid customer or other user role with past orders.
+	 *
+	 * @param int $user_id User ID.
+	 * @return bool
+	 */
+	protected static function is_valid_customer( $user_id ) {
+		$customer = new WC_Customer( $user_id );
+
+		if ( $customer->get_id() !== $user_id ) {
+			return false;
+		}
+
+		if ( $customer->get_order_count() < 1 && 'customer' !== $customer->get_role() ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

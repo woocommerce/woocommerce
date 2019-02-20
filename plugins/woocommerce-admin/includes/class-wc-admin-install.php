@@ -112,8 +112,8 @@ class WC_Admin_Install {
 			KEY date_created (date_created),
 			KEY customer_id (customer_id),
 			KEY status (status)
-		  ) $collate;
-		  CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
+		) $collate;
+		CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 			order_item_id BIGINT UNSIGNED NOT NULL,
 			order_id BIGINT UNSIGNED NOT NULL,
 			product_id BIGINT UNSIGNED NOT NULL,
@@ -133,19 +133,19 @@ class WC_Admin_Install {
 			KEY product_id (product_id),
 			KEY customer_id (customer_id),
 			KEY date_created (date_created)
-		  ) $collate;
-		  CREATE TABLE {$wpdb->prefix}wc_order_tax_lookup (
-		  	order_id BIGINT UNSIGNED NOT NULL,
-		  	tax_rate_id BIGINT UNSIGNED NOT NULL,
-		  	date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-		  	shipping_tax double DEFAULT 0 NOT NULL,
-		  	order_tax double DEFAULT 0 NOT NULL,
-		  	total_tax double DEFAULT 0 NOT NULL,
-		  	PRIMARY KEY (order_id, tax_rate_id),
-		  	KEY tax_rate_id (tax_rate_id),
-		  	KEY date_created (date_created)
-		  ) $collate;
-		  CREATE TABLE {$wpdb->prefix}wc_order_coupon_lookup (
+		) $collate;
+		CREATE TABLE {$wpdb->prefix}wc_order_tax_lookup (
+			order_id BIGINT UNSIGNED NOT NULL,
+			tax_rate_id BIGINT UNSIGNED NOT NULL,
+			date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+			shipping_tax double DEFAULT 0 NOT NULL,
+			order_tax double DEFAULT 0 NOT NULL,
+			total_tax double DEFAULT 0 NOT NULL,
+			PRIMARY KEY (order_id, tax_rate_id),
+			KEY tax_rate_id (tax_rate_id),
+			KEY date_created (date_created)
+		) $collate;
+		CREATE TABLE {$wpdb->prefix}wc_order_coupon_lookup (
 			order_id BIGINT UNSIGNED NOT NULL,
 			coupon_id BIGINT UNSIGNED NOT NULL,
 			date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
@@ -153,48 +153,48 @@ class WC_Admin_Install {
 			PRIMARY KEY (order_id, coupon_id),
 			KEY coupon_id (coupon_id),
 			KEY date_created (date_created)
-		  ) $collate;
-			CREATE TABLE {$wpdb->prefix}wc_admin_notes (
-				note_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-				name varchar(255) NOT NULL,
-				type varchar(20) NOT NULL,
-				locale varchar(20) NOT NULL,
-				title longtext NOT NULL,
-				content longtext NOT NULL,
-				icon varchar(200) NOT NULL,
-				content_data longtext NULL default null,
-				status varchar(200) NOT NULL,
-				source varchar(200) NOT NULL,
-				date_created datetime NOT NULL default '0000-00-00 00:00:00',
-				date_reminder datetime NULL default null,
-				PRIMARY KEY (note_id)
-				) $collate;
-			CREATE TABLE {$wpdb->prefix}wc_admin_note_actions (
-				action_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-				note_id BIGINT UNSIGNED NOT NULL,
-				name varchar(255) NOT NULL,
-				label varchar(255) NOT NULL,
-				query longtext NOT NULL,
-				PRIMARY KEY (action_id),
-				KEY note_id (note_id)
-				) $collate;
-			CREATE TABLE {$wpdb->prefix}wc_customer_lookup (
-				customer_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-				user_id BIGINT UNSIGNED DEFAULT NULL,
-				username varchar(60) DEFAULT '' NOT NULL,
-				first_name varchar(255) NOT NULL,
-				last_name varchar(255) NOT NULL,
-				email varchar(100) NOT NULL,
-				date_last_active timestamp NULL default null,
-				date_registered timestamp NULL default null,
-				country char(2) DEFAULT '' NOT NULL,
-				postcode varchar(20) DEFAULT '' NOT NULL,
-				city varchar(100) DEFAULT '' NOT NULL,
-				PRIMARY KEY (customer_id),
-				UNIQUE KEY user_id (user_id),
-				KEY email (email)
-				) $collate;
-			";
+		) $collate;
+		CREATE TABLE {$wpdb->prefix}wc_admin_notes (
+			note_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+			name varchar(255) NOT NULL,
+			type varchar(20) NOT NULL,
+			locale varchar(20) NOT NULL,
+			title longtext NOT NULL,
+			content longtext NOT NULL,
+			icon varchar(200) NOT NULL,
+			content_data longtext NULL default null,
+			status varchar(200) NOT NULL,
+			source varchar(200) NOT NULL,
+			date_created datetime NOT NULL default '0000-00-00 00:00:00',
+			date_reminder datetime NULL default null,
+			PRIMARY KEY (note_id)
+		) $collate;
+		CREATE TABLE {$wpdb->prefix}wc_admin_note_actions (
+			action_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+			note_id BIGINT UNSIGNED NOT NULL,
+			name varchar(255) NOT NULL,
+			label varchar(255) NOT NULL,
+			query longtext NOT NULL,
+			PRIMARY KEY (action_id),
+			KEY note_id (note_id)
+		) $collate;
+		CREATE TABLE {$wpdb->prefix}wc_customer_lookup (
+			customer_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+			user_id BIGINT UNSIGNED DEFAULT NULL,
+			username varchar(60) DEFAULT '' NOT NULL,
+			first_name varchar(255) NOT NULL,
+			last_name varchar(255) NOT NULL,
+			email varchar(100) NULL default NULL,
+			date_last_active timestamp NULL default null,
+			date_registered timestamp NULL default null,
+			country char(2) DEFAULT '' NOT NULL,
+			postcode varchar(20) DEFAULT '' NOT NULL,
+			city varchar(100) DEFAULT '' NOT NULL,
+			PRIMARY KEY (customer_id),
+			UNIQUE KEY user_id (user_id),
+			KEY email (email)
+		) $collate;
+		";
 
 		return $tables;
 	}
