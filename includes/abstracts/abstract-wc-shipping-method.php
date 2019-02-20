@@ -456,11 +456,13 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	public function get_option( $key, $empty_value = null ) {
 		// Instance options take priority over global options.
 		if ( $this->instance_id && array_key_exists( $key, $this->get_instance_form_fields() ) ) {
-			return $this->get_instance_option( $key, $empty_value );
+			$instance_option = apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_option', $this->get_instance_option( $key, $empty_value ), $this );
+			return $instance_option;
 		}
 
 		// Return global option.
-		return parent::get_option( $key, $empty_value );
+		$global_option = apply_filters( 'woocommerce_shipping_' . $this->id . '_global_option', parent::get_option( $key, $empty_value ), $this );
+		return $global_option;
 	}
 
 	/**
