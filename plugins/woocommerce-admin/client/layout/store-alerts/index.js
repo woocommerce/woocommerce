@@ -105,12 +105,12 @@ class StoreAlerts extends Component {
 		const alert = alerts[ currentIndex ] ? alerts[ currentIndex ] : null;
 		const type = alert && alert.type ? alert.type : null;
 		const icon = type && alertTypes[ type ] ? alertTypes[ type ].icon : null;
-
 		const className = classnames( 'woocommerce-store-alerts', {
 			'is-alert-emergency': 'emergency' === type,
 			'is-alert-alert': 'alert' === type,
 			'is-alert-critical': 'critical' === type,
 		} );
+
 		return (
 			numberOfAlerts > 0 && (
 				<Card
