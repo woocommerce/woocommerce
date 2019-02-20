@@ -21,6 +21,13 @@ Allowed intervals to show in a dropdown.
 Base chart value. If no data value is different than the baseValue, the
 `emptyMessage` will be displayed if provided.
 
+### `chartType`
+
+- Type: One of: 'bar', 'line'
+- Default: `'line'`
+
+Chart type of either `line` or `bar`.
+
 ### `data`
 
 - Type: Array
@@ -142,13 +149,6 @@ A number formatting string or function to format the value displayed in the tool
 - Default: null
 
 A string to use as a title for the tooltip. Takes preference over `tooltipLabelFormat`.
-
-### `type`
-
-- Type: One of: 'bar', 'line'
-- Default: `'line'`
-
-Chart type of either `line` or `bar`.
 
 ### `valueType`
 
