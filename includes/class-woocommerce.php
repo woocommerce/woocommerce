@@ -384,11 +384,6 @@ final class WooCommerce {
 
 		if ( $this->is_request( 'admin' ) ) {
 			include_once WC_ABSPATH . 'includes/admin/class-wc-admin.php';
-
-			/**
-			 * Marketplace suggestions & related REST API.
-			 */
-			include_once WC_ABSPATH . 'includes/marketplace-suggestions/class-wc-marketplace-suggestions.php';
 		}
 
 		if ( $this->is_request( 'frontend' ) ) {

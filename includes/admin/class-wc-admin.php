@@ -85,6 +85,9 @@ class WC_Admin {
 		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-plugin-info.php';
 		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-compat.php';
 		include_once dirname( __FILE__ ) . '/helper/class-wc-helper.php';
+
+		// Marketplace suggestions & related REST API.
+		include_once dirname( __FILE__ ) . '/marketplace-suggestions/class-wc-marketplace-suggestions.php';
 	}
 
 	/**
