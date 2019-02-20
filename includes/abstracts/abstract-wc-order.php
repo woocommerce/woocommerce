@@ -1444,7 +1444,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$cart_subtotal     = 0;
 		$cart_total        = 0;
-		$fee_total         = 0;
+		$fees_total         = 0;
 		$shipping_total    = 0;
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
@@ -1464,18 +1464,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Sum fee costs.
 		foreach ( $this->get_fees() as $item ) {
-			$amount = $item->get_amount();
+			$fee_total = $item->get_total();
 
-			if ( 0 > $amount ) {
-				$item->set_total( $amount );
-				$max_discount = round( $cart_total + $fee_total + $shipping_total, wc_get_price_decimals() ) * -1;
+			if ( 0 > $fee_total ) {
+				$max_discount = round( $cart_total + $fees_total + $shipping_total, wc_get_price_decimals() ) * -1;
 
-				if ( $item->get_total() < $max_discount ) {
+				if ( $fee_total < $max_discount ) {
 					$item->set_total( $max_discount );
 				}
 			}
 
-			$fee_total += $item->get_total();
+			$fees_total += $item->get_total();
 		}
 
 		// Calculate taxes for items, shipping, discounts. Note; this also triggers save().
@@ -1498,7 +1497,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$this->set_discount_total( $cart_subtotal - $cart_total );
 		$this->set_discount_tax( wc_round_tax_total( $cart_subtotal_tax - $cart_total_tax ) );
-		$this->set_total( round( $cart_total + $fee_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() ) );
+		$this->set_total( round( $cart_total + $fees_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() ) );
 
 		do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $this );
 
