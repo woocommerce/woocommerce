@@ -153,7 +153,7 @@ class WC_Structured_Data {
 		$data  = $this->get_structured_data( $types );
 
 		if ( $data ) {
-			echo '<script type="application/ld+json">' . wp_json_encode( $data ) . '</script>';
+			echo '<script type="application/ld+json">' . wc_esc_json( wp_json_encode( $data ), true ) . '</script>';
 		}
 	}
 
