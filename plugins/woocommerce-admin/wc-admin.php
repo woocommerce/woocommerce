@@ -137,21 +137,21 @@ function wc_admin_plugins_loaded() {
 	}
 
 	if ( ! function_exists( 'wc_admin_get_feature_config' ) ) {
-		require_once dirname( __FILE__ ) . '/includes/feature-config.php';
+		require_once WC_ADMIN_ABSPATH . '/includes/feature-config.php';
 	}
 
 	// Initialize the WC API extensions.
-	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-reports-sync.php';
-	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-install.php';
-	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-api-init.php';
+	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-sync.php';
+	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-install.php';
+	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-api-init.php';
 
 	// Some common utilities.
-	require_once dirname( __FILE__ ) . '/lib/common.php';
+	require_once WC_ADMIN_ABSPATH . '/lib/common.php';
 
 	// Admin note providers.
-	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-new-sales-record.php';
-	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-settings-notes.php';
-	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-woo-subscriptions-notes.php';
+	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-notes-new-sales-record.php';
+	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-notes-settings-notes.php';
+	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-notes-woo-subscriptions-notes.php';
 
 	// Verify we have a proper build.
 	if ( ! wc_admin_build_file_exists() ) {
@@ -160,10 +160,10 @@ function wc_admin_plugins_loaded() {
 	}
 
 	// Register script files.
-	require_once dirname( __FILE__ ) . '/lib/client-assets.php';
+	require_once WC_ADMIN_ABSPATH . '/lib/client-assets.php';
 
 	// Create the Admin pages.
-	require_once dirname( __FILE__ ) . '/lib/admin.php';
+	require_once WC_ADMIN_ABSPATH . '/lib/admin.php';
 }
 add_action( 'plugins_loaded', 'wc_admin_plugins_loaded' );
 
