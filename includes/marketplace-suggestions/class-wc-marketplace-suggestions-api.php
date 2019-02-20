@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * @return array of json API data
  */
 function wc_marketplace_suggestions_get_api_data() {
-	$suggestion_data_url = 'https://d3t0oesq8995hv.cloudfront.net/add-ons/suggestions.json';
+	$suggestion_data_url = 'https://d3t0oesq8995hv.cloudfront.net/add-ons/marketplace-suggestions.json';
 
 	$suggestion_data = get_transient( 'wc_marketplace_suggestions' );
 
@@ -35,7 +35,7 @@ function wc_marketplace_suggestions_get_api_data() {
 	// Parse the data to check for any errors.
 	// If it's valid, store structure in transient.
 	$suggestions = json_decode( wp_remote_retrieve_body( $raw_suggestions ) );
-	if ( $suggestions && is_object( $suggestions ) ) {
+	if ( $suggestions && is_array( $suggestions ) ) {
 		set_transient( 'wc_marketplace_suggestions', $suggestions, WEEK_IN_SECONDS );
 		return $suggestions;
 	}
@@ -49,81 +49,7 @@ function wc_marketplace_suggestions_get_api_data() {
 function wc_marketplace_suggestions_ajax_handler() {
 	$suggestion_data = wc_marketplace_suggestions_get_api_data();
 
-	if ( $suggestion_data ) {
-		echo wp_json_encode( $suggestion_data );
-	} else {
-		// Return temporary hard-coded test data until we get our API data in place.
-		echo '[
-			{
-				"slug": "products-empty-header-product-types",
-				"context": "products-list-empty-header",
-				"title": "Other types of products",
-				"allow-dismiss": false
-			},
-			{
-				"slug": "products-empty-footer-browse-all",
-				"context": "products-list-empty-footer",
-				"link-text": "Browse all extensions",
-				"url": "https://woocommerce.com/product-category/woocommerce-extensions/",
-				"allow-dismiss": false
-			},
-			{
-				"slug": "products-empty-memberships",
-				"icon": "https://woocommerce.com/wp-content/uploads/2018/06/icon.png",
-				"context": "products-list-empty-body",
-				"hide-if-installed": "woocommerce-memberships",
-				"title": "Memberships",
-				"copy": "Give members access to restricted content or products, for a fee or for free.",
-				"button-text": "From $149",
-				"url": "https://woocommerce.com/products/woocommerce-memberships/"
-			},
-			{
-				"slug": "products-empty-addons",
-				"context": "products-list-empty-body",
-				"show-if-installed": [
-					"woocommerce-subscriptions",
-					"woocommerce-memberships"
-				],
-				"title": "Product Add-Ons",
-				"copy": "Offer add-ons like gift wrapping, special messages or other special options for your products.",
-				"button-text": "From $149",
-				"url": "https://woocommerce.com/products/product-add-ons/"
-			},
-			{
-				"slug": "products-empty-product-bundles",
-				"icon": "https://woocommerce.com/wp-content/uploads/2018/06/icon.png",
-				"context": "products-list-empty-body",
-				"hide-if-installed": "woocommerce-product-bundles",
-				"title": "Product Bundles",
-				"copy": "Offer customizable bundles and assembled products.",
-				"button-text": "From $49",
-				"url": "https://woocommerce.com/products/product-bundles/"
-			},
-			{
-				"slug": "products-empty-composite-products",
-				"context": "products-list-empty-body",
-				"title": "Composite Products",
-				"copy": "Create and offer product kits with configurable components.",
-				"button-text": "From $79",
-				"url": "https://woocommerce.com/products/composite-products/"
-			},
- 			{
-				"slug": "products-list-enhancements-category",
-				"icon": "https://woocommerce.com/wp-content/uploads/2018/06/icon.png",
-				"context": "products-list-inline",
-				"title": "Looking to optimize your product pages?",
-				"button-text": "Explore enhancements",
-				"url": "https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/"
-			},
- 			{
-				"slug": "products-list-enhancements-category-noimage",
-				"context": "products-list-inline",
-				"title": "Looking to optimize your product pages?",
-				"button-text": "Explore enhancements",
-				"url": "https://woocommerce.com/product-category/woocommerce-extensions/product-extensions/"
-			}
-		]';
-	}
+	echo wp_json_encode( $suggestion_data );
 
 	wp_die();
 }
