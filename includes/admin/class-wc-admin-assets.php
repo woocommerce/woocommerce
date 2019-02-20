@@ -256,7 +256,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'wc-admin-order-meta-boxes',
 					'woocommerce_admin_meta_boxes_order',
 					array(
-						'countries'              => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
+						'countries'              => wp_json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
 						'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
 						'default_country'        => isset( $default_location['country'] ) ? $default_location['country'] : '',
 						'default_state'          => isset( $default_location['state'] ) ? $default_location['state'] : '',
@@ -411,7 +411,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'wc-users',
 					'wc_users_params',
 					array(
-						'countries'              => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
+						'countries'              => wp_json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
 						'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
 					)
 				);

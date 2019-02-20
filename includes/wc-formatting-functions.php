@@ -1366,6 +1366,23 @@ function wc_implode_html_attributes( $raw_attributes ) {
 }
 
 /**
+ * Escape JSON for use on HTML or attribute text nodes.
+ *
+ * @since 3.5.5
+ * @param string $json JSON to escape.
+ * @param bool   $html True if escaping for HTML text node, false for attributes. Determines how quotes are handled.
+ * @return string Escaped JSON.
+ */
+function wc_esc_json( $json, $html = false ) {
+	return _wp_specialchars(
+		$json,
+		$html ? ENT_NOQUOTES : ENT_QUOTES, // Escape quotes in attribute nodes only,
+		'UTF-8',                           // json_encode() outputs UTF-8 (really just ASCII), not the blog's charset.
+		true                               // Double escape entities: `&amp;` -> `&amp;amp;`
+	);
+}
+
+/**
  * Parse a relative date option from the settings API into a standard format.
  *
  * @since 3.4.0

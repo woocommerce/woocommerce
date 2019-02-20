@@ -306,10 +306,12 @@ class WC_Report_Customers extends WC_Admin_Report {
 		$customer_orders = $this->prepare_chart_data( $customer_orders, 'post_date', 'total_orders', $this->chart_interval, $this->start_date, $this->chart_groupby );
 		$guest_orders    = $this->prepare_chart_data( $guest_orders, 'post_date', 'total_orders', $this->chart_interval, $this->start_date, $this->chart_groupby );
 
-		$chart_data = array(
-			'signups'         => array_values( $signups ),
-			'customer_orders' => array_values( $customer_orders ),
-			'guest_orders'    => array_values( $guest_orders ),
+		$chart_data = wp_json_encode(
+			array(
+				'signups'         => array_values( $signups ),
+				'customer_orders' => array_values( $customer_orders ),
+				'guest_orders'    => array_values( $guest_orders ),
+			)
 		);
 		?>
 		<div class="chart-container">
@@ -319,7 +321,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 			var main_chart;
 
 			jQuery(function(){
-				var chart_data = jQuery.parseJSON( '<?php echo wp_json_encode( $chart_data ); ?>' );
+				var chart_data = JSON.parse( decodeURIComponent( '<?php echo rawurlencode( $chart_data ); ?>' ) );
 
 				var drawGraph = function( highlight ) {
 					var series = [
@@ -388,7 +390,7 @@ class WC_Report_Customers extends WC_Admin_Report {
 								tickColor: 'transparent',
 								mode: "time",
 								timeformat: "<?php echo ( 'day' === $this->chart_groupby ) ? '%d %b' : '%b'; ?>",
-								monthNames: <?php echo wp_json_encode( array_values( $wp_locale->month_abbrev ) ); ?>,
+								monthNames: JSON.parse( decodeURIComponent( '<?php echo rawurlencode( wp_json_encode( array_values( $wp_locale->month_abbrev ) ) ); ?>' ) ),
 								tickLength: 1,
 								minTickSize: [1, "<?php echo esc_html( $this->chart_groupby ); ?>"],
 								tickSize: [1, "<?php echo esc_html( $this->chart_groupby ); ?>"],

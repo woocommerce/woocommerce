@@ -432,7 +432,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 
 		$this->assertEquals( print_r( $arr, true ), wc_print_r( $arr, true ) );
 		$this->assertEquals( var_export( $arr, true ), wc_print_r( $arr, true ) );
-		$this->assertEquals( json_encode( $arr ), wc_print_r( $arr, true ) );
+		$this->assertEquals( wp_json_encode( $arr ), wc_print_r( $arr, true ) );
 		$this->assertEquals( serialize( $arr ), wc_print_r( $arr, true ) );
 		$this->assertFalse( wc_print_r( $arr, true ) );
 
