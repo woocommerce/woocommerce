@@ -64,8 +64,10 @@ const alertTypes = {
 class StoreAlerts extends Component {
 	constructor( props ) {
 		super( props );
+		const { alerts } = this.props;
+
 		this.state = {
-			currentAlert: 0,
+			currentAlert: alerts ? 0 : null,
 		};
 
 		this.previousAlert = this.previousAlert.bind( this );
@@ -74,7 +76,8 @@ class StoreAlerts extends Component {
 	}
 
 	totalAlerts() {
-		return dummy.length;
+		const { alerts } = this.props;
+		return alerts.length;
 	}
 
 	previousAlert( event ) {
@@ -100,8 +103,9 @@ class StoreAlerts extends Component {
 	}
 
 	render() {
+		const { alerts } = this.props;
 		const { currentAlert } = this.state;
-		const alert = dummy[ currentAlert ] ? dummy[ currentAlert ] : null;
+		const alert = alerts[ currentAlert ] ? alerts[ currentAlert ] : null;
 		const type = alertTypes[ alert.type ] ? alertTypes[ alert.type ] : null;
 		const className = classnames( 'woocommerce-store-alerts', {
 			'is-alert-emergency': type && 'emergency' === alert.type,
@@ -158,3 +162,7 @@ class StoreAlerts extends Component {
 }
 
 export default StoreAlerts;
+
+StoreAlerts.defaultProps = {
+	alerts: dummy || [],
+};
