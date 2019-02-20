@@ -11,7 +11,6 @@ import { first, get } from 'lodash';
 /**
  * Internal dependencies
  */
-import { getColor } from './color';
 import { smallBreak, wideBreak } from './breakpoints';
 
 /**
@@ -112,7 +111,7 @@ export const drawLines = ( node, data, params, scales, formats, tooltip ) => {
 			.attr( 'stroke-width', lineStroke )
 			.attr( 'stroke-linejoin', 'round' )
 			.attr( 'stroke-linecap', 'round' )
-			.attr( 'stroke', d => getColor( d.key, params.visibleKeys, params.colorScheme ) )
+			.attr( 'stroke', d => params.getColor( d.key ) )
 			.style( 'opacity', d => {
 				const opacity = d.focus ? 1 : 0.1;
 				return d.visible ? opacity : 0;
@@ -128,7 +127,7 @@ export const drawLines = ( node, data, params, scales, formats, tooltip ) => {
 			.enter()
 			.append( 'circle' )
 			.attr( 'r', dotRadius )
-			.attr( 'fill', d => getColor( d.key, params.visibleKeys, params.colorScheme ) )
+			.attr( 'fill', d => params.getColor( d.key ) )
 			.attr( 'stroke', '#fff' )
 			.attr( 'stroke-width', lineStroke + 1 )
 			.style( 'opacity', d => {
@@ -176,7 +175,7 @@ export const drawLines = ( node, data, params, scales, formats, tooltip ) => {
 		.enter()
 		.append( 'circle' )
 		.attr( 'r', dotRadius + 2 )
-		.attr( 'fill', d => getColor( d.key, params.visibleKeys, params.colorScheme ) )
+		.attr( 'fill', d => params.getColor( d.key ) )
 		.attr( 'stroke', '#fff' )
 		.attr( 'stroke-width', lineStroke + 2 )
 		.attr( 'cx', d => scales.xScale( moment( d.date ).toDate() ) )

@@ -267,6 +267,7 @@ class Chart extends Component {
 		const { interactiveLegend, orderedKeys, visibleData, width } = this.state;
 		const {
 			baseValue,
+			chartType,
 			dateParser,
 			emptyMessage,
 			interval,
@@ -279,7 +280,6 @@ class Chart extends Component {
 			tooltipLabelFormat,
 			tooltipValueFormat,
 			tooltipTitle,
-			chartType,
 			valueType,
 			xFormat,
 			x2Format,
@@ -379,6 +379,7 @@ class Chart extends Component {
 							width > 0 && (
 								<D3Chart
 									baseValue={ baseValue }
+									chartType={ chartType }
 									colorScheme={ d3InterpolateViridis }
 									data={ visibleData }
 									dateParser={ dateParser }
@@ -392,7 +393,6 @@ class Chart extends Component {
 									tooltipValueFormat={ tooltipValueFormat }
 									tooltipPosition={ isViewportLarge ? 'over' : 'below' }
 									tooltipTitle={ tooltipTitle }
-									chartType={ chartType }
 									width={ chartDirection === 'row' ? width - 320 : width }
 									xFormat={ xFormat }
 									x2Format={ x2Format }

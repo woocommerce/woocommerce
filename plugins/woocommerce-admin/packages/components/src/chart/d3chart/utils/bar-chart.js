@@ -7,11 +7,6 @@ import { get } from 'lodash';
 import { event as d3Event } from 'd3-selection';
 import moment from 'moment';
 
-/**
- * Internal dependencies
- */
-import { getColor } from './color';
-
 export const drawBars = ( node, data, params, scales, formats, tooltip ) => {
 	const height = scales.yScale.range()[ 0 ];
 	const barGroup = node
@@ -64,7 +59,7 @@ export const drawBars = ( node, data, params, scales, formats, tooltip ) => {
 		.attr( 'y', d => scales.yScale( d.value ) )
 		.attr( 'width', scales.xGroupScale.bandwidth() )
 		.attr( 'height', d => height - scales.yScale( d.value ) )
-		.attr( 'fill', d => getColor( d.key, params.visibleKeys, params.colorScheme ) )
+		.attr( 'fill', d => params.getColor( d.key ) )
 		.attr( 'pointer-events', 'none' )
 		.attr( 'tabindex', '0' )
 		.attr( 'aria-label', d => {

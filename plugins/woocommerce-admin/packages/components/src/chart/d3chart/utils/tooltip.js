@@ -6,11 +6,6 @@
 import { select as d3Select } from 'd3-selection';
 import moment from 'moment';
 
-/**
- * Internal dependencies
- */
-import { getColor } from './color';
-
 class ChartTooltip {
 	constructor() {
 		this.ref = null;
@@ -20,7 +15,7 @@ class ChartTooltip {
 		this.labelFormat = '';
 		this.valueFormat = '';
 		this.visibleKeys = '';
-		this.colorScheme = null;
+		this.getColor = null;
 		this.margin = 24;
 	}
 
@@ -128,7 +123,7 @@ class ChartTooltip {
 						<div class="key-container">
 							<span
 								class="key-color"
-								style="background-color: ${ getColor( row.key, this.visibleKeys, this.colorScheme ) }">
+								style="background-color: ${ this.getColor( row.key ) }">
 							</span>
 							<span class="key-key">${ this.getTooltipRowLabel( d, row ) }</span>
 						</div>
