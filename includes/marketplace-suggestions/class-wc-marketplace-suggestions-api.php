@@ -16,30 +16,29 @@ defined( 'ABSPATH' ) || exit;
  * @return array of json API data
  */
 function wc_marketplace_suggestions_get_api_data() {
-	$suggestion_data_url = 'https://d3t0oesq8995hv.cloudfront.net/add-ons/marketplace-suggestions.json';
-
 	$suggestion_data = get_transient( 'wc_marketplace_suggestions' );
-
 	if ( false !== $suggestion_data ) {
 		return $suggestion_data;
 	}
 
-	$raw_suggestions = wp_safe_remote_get(
+	$suggestion_data_url = 'https://d3t0oesq8995hv.cloudfront.net/add-ons/marketplace-suggestions.json';
+	$raw_suggestions     = wp_remote_get(
 		$suggestion_data_url,
 		array( 'user-agent' => 'WooCommerce Marketplace Suggestions' )
 	);
-	if ( is_wp_error( $raw_suggestions ) ) {
-		return array();
-	}
 
 	// Parse the data to check for any errors.
 	// If it's valid, store structure in transient.
-	$suggestions = json_decode( wp_remote_retrieve_body( $raw_suggestions ) );
-	if ( $suggestions && is_array( $suggestions ) ) {
-		set_transient( 'wc_marketplace_suggestions', $suggestions, WEEK_IN_SECONDS );
-		return $suggestions;
+	if ( ! is_wp_error( $raw_suggestions ) ) {
+		$suggestions = json_decode( wp_remote_retrieve_body( $raw_suggestions ) );
+		if ( $suggestions && is_array( $suggestions ) ) {
+			set_transient( 'wc_marketplace_suggestions', $suggestions, WEEK_IN_SECONDS );
+			return $suggestions;
+		}
 	}
 
+	// Cache empty suggestions data to reduce requests if there are any issues with API.
+	set_transient( 'wc_marketplace_suggestions', '[]', DAY_IN_SECONDS );
 	return array();
 }
 
@@ -48,10 +47,7 @@ function wc_marketplace_suggestions_get_api_data() {
  */
 function wc_marketplace_suggestions_ajax_handler() {
 	$suggestion_data = wc_marketplace_suggestions_get_api_data();
-
-	echo wp_json_encode( $suggestion_data );
-
-	wp_die();
+	wp_send_json_success( $suggestion_data );
 }
 
 
