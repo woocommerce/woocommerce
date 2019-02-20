@@ -44,7 +44,19 @@ jQuery( function( $ ) {
 		} )
 		// Star ratings for comments
 		.on( 'init', '#rating', function() {
-			$( '#rating' ).hide().before( '<p class="stars"><span><a class="star-1" href="#">1</a><a class="star-2" href="#">2</a><a class="star-3" href="#">3</a><a class="star-4" href="#">4</a><a class="star-5" href="#">5</a></span></p>' );
+			$( '#rating' )
+				.hide()
+				.before(
+					'<p class="stars">\
+						<span>\
+							<a class="star-1" href="#">1</a>\
+							<a class="star-2" href="#">2</a>\
+							<a class="star-3" href="#">3</a>\
+							<a class="star-4" href="#">4</a>\
+							<a class="star-5" href="#">5</a>\
+						</span>\
+					</p>'
+				);
 		} )
 		.on( 'click', '#respond p.stars a', function() {
 			var $star   	= $( this ),
@@ -307,12 +319,12 @@ jQuery( function( $ ) {
 	 * Initialize all galleries on page.
 	 */
 	$( '.woocommerce-product-gallery' ).each( function() {
-		
+
 		$( this ).trigger( 'wc-product-gallery-before-init', [ this, wc_single_product_params ] );
-		
+
 		$( this ).wc_product_gallery( wc_single_product_params );
-		
+
 		$( this ).trigger( 'wc-product-gallery-after-init', [ this, wc_single_product_params ] );
-		
+
 	} );
 } );
