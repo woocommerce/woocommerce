@@ -222,6 +222,12 @@ jQuery( function( $ ) {
 
 			zoomTarget.trigger( 'zoom.destroy' );
 			zoomTarget.zoom( zoom_options );
+
+			setTimeout( function() {
+				if ( zoomTarget.find(':hover').length ) {
+					zoomTarget.trigger( 'mouseover' );
+				}
+			}, 100 );
 		}
 	};
 
