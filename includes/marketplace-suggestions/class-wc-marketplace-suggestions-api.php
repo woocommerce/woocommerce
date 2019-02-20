@@ -56,9 +56,9 @@ function wc_marketplace_suggestions_ajax_handler() {
 function wc_marketplace_suggestions_get_dismissed() {
 	$dismissed_suggestions = array();
 
-	$dismissed_suggestions_data = get_user_option( 'wc_marketplace_suggestions_dismissed_suggestions', get_current_user_id() );
+	$dismissed_suggestions_data = get_user_meta( 'wc_marketplace_suggestions_dismissed_suggestions', get_current_user_id() );
 	if ( $dismissed_suggestions_data ) {
-		$dismissed_suggestions = json_decode( $dismissed_suggestions_data );
+		$dismissed_suggestions = $dismissed_suggestions_data;
 		if ( ! is_array( $dismissed_suggestions ) ) {
 			$dismissed_suggestions = array();
 		}
@@ -88,12 +88,10 @@ function wc_marketplace_suggestions_dismiss_handler() {
 	}
 
 	$dismissed_suggestions[] = $suggestion_slug;
-
-	// Could also store these in transient, with a long expiry (e.g. 6 months).
-	update_user_option(
+	update_user_meta(
 		get_current_user_id(),
 		'wc_marketplace_suggestions_dismissed_suggestions',
-		wp_json_encode( $dismissed_suggestions )
+		$dismissed_suggestions
 	);
 
 	wp_die();
