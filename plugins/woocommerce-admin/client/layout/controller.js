@@ -169,6 +169,9 @@ window.wpNavMenuClassChange = function( page ) {
 	closedMenu.classList.remove( 'wp-has-current-submenu' );
 	closedMenu.classList.remove( 'wp-menu-open' );
 	closedMenu.classList.add( 'wp-not-current-submenu' );
+
+	const wpWrap = document.querySelector( '#wpwrap' );
+	wpWrap.classList.remove( 'wp-responsive-open' );
 };
 
 export { Controller, getPages };
