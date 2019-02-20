@@ -384,9 +384,7 @@ add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
 function wc_shop_manager_has_capability( $allcaps, $caps, $args, $user ) {
 
 	if ( wc_user_has_role( $user, 'shop_manager' ) ) {
-		/**
-		 * @see wc_modify_map_meta_cap, which limits editing to customers.
-		 */
+		// @see wc_modify_map_meta_cap, which limits editing to customers.
 		$allcaps['edit_users'] = true;
 	}
 
