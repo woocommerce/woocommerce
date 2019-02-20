@@ -11,82 +11,6 @@ defined( 'ABSPATH' ) || exit;
  * This class adds actions to track usage of WooCommerce.
  */
 class WC_Site_Tracking {
-
-	/**
-	 * Send a Tracks event when a product is updated.
-	 *
-	 * @param int   $product_id Product id.
-	 * @param array $post WordPress post.
-	 */
-	public static function tracks_product_updated( $product_id, $post ) {
-		if ( 'product' !== $post->post_type ) {
-			return;
-		}
-
-		$properties = array(
-			'product_id' => $product_id,
-		);
-
-		WC_Tracks::record_event( 'product_edit', $properties );
-	}
-
-	/**
-	 * Route product importer action to the right callback.
-	 *
-	 * @return void
-	 */
-	public static function tracks_product_importer() {
-		if ( ! isset( $_REQUEST['step'] ) ) {
-			return;
-		}
-
-		if ( 'import' === $_REQUEST['step'] ) {
-			return self::tracks_product_importer_start();
-		}
-
-		if ( 'done' === $_REQUEST['step'] ) {
-			return self::tracks_product_importer_complete();
-		}
-	}
-
-	/**
-	 * Send a Tracks event when the product importer is started.
-	 *
-	 * @return void
-	 */
-	public static function tracks_product_importer_start() {
-		if ( ! isset( $_REQUEST['file'] ) || ! isset( $_REQUEST['_wpnonce'] ) ) {
-			return;
-		}
-
-		$properties = array(
-			'update_existing' => isset( $_REQUEST['update_existing'] ) ? (bool) $_REQUEST['update_existing'] : false,
-			'delimiter'       => empty( $_REQUEST['delimiter'] ) ? ',' : wc_clean( wp_unslash( $_REQUEST['delimiter'] ) ),
-		);
-
-		WC_Tracks::record_event( 'product_import_start', $properties );
-	}
-
-	/**
-	 * Send a Tracks event when the product importer has finished.
-	 *
-	 * @return void
-	 */
-	public static function tracks_product_importer_complete() {
-		if ( ! isset( $_REQUEST['nonce'] ) ) {
-			return;
-		}
-
-		$properties = array(
-			'imported' => isset( $_GET['products-imported'] ) ? absint( $_GET['products-imported'] ) : 0,
-			'updated'  => isset( $_GET['products-updated'] ) ? absint( $_GET['products-updated'] ) : 0,
-			'failed'   => isset( $_GET['products-failed'] ) ? absint( $_GET['products-failed'] ) : 0,
-			'skipped'  => isset( $_GET['products-skipped'] ) ? absint( $_GET['products-skipped'] ) : 0,
-		);
-
-		WC_Tracks::record_event( 'product_import_complete', $properties );
-	}
-
 	/**
 	 * Check if tracking is enabled.
 	 *
@@ -152,7 +76,20 @@ class WC_Site_Tracking {
 
 		self::enqueue_scripts();
 
-		add_action( 'edit_post', array( 'WC_Site_Tracking', 'tracks_product_updated' ), 10, 2 );
-		add_action( 'product_page_product_importer', array( __CLASS__, 'tracks_product_importer' ) );
+		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-products-tracking.php';
+		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-importer-tracking.php';
+
+		$tracking_classes = array(
+			'WC_Importer_Tracking',
+			'WC_Products_Tracking',
+		);
+
+		foreach ( $tracking_classes as $tracking_class ) {
+			$init_method = array( $tracking_class, 'init' );
+
+			if ( is_callable( $init_method ) ) {
+				call_user_func( $init_method );
+			}
+		}
 	}
 }
