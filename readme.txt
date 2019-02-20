@@ -159,6 +159,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 == Changelog ==
 
 = 3.5.5 - 2019-02-20 =
+* Fix - Fix allow product low stock threshold be the WC settings default. #22777
 * Fix - Fix error on product category when sorting by multiple fields. #22066
 * Fix - Recalculate coupon totals after adding a coupon to an order. #22580
 * Fix - Include refunded orders in top sellers, earners sales by product. #22581
@@ -205,6 +206,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Refactor `@id` generation for product structured data to prevent plugin conflicts. #22554
 * Tweak - Keep count of the number of times custom coupons apply. #22529
 * Tweak - Change WooCommerce emails footer from `Powered by WooCommerce` to `Built with WooCommerce`. #22530
+* Security - Improved escaping for Photoswipe captions.
+* Security - Improved escaping for JSON attributes and structured data.
 
 = 3.5.4 - 2019-01-21 =
 * Tweak - Allow limited html in woocommerce_rating_filter_count filter. #21904
