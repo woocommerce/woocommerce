@@ -20,7 +20,9 @@
 		function dismissSuggestion( suggestionSlug ) {
 			// hide the suggestion in the UI
 			var selector = '[data-suggestion-slug=' + suggestionSlug + ']';
-			$( selector ).fadeOut();
+			$( selector ).fadeOut( function() {
+				$( this ).remove();
+			});
 
 			// save dismissal in user settings
 			jQuery.post(
