@@ -145,15 +145,22 @@ export default compose(
 		}
 
 		const { report } = props.params;
-		const items = searchItemsByString( select, report, search );
+		const searchWords = search.split( ',' ).map( searchWord => searchWord.replace( '%2C', ',' ) );
+		const items = searchItemsByString( select, report, searchWords );
 		const ids = Object.keys( items );
 		if ( ! ids.length ) {
-			return {};
+			return {
+				query: {
+					...props.query,
+					search: searchWords,
+				},
+			};
 		}
 
 		return {
 			query: {
 				...props.query,
+				search: searchWords,
 				[ report ]: ids.join( ',' ),
 			},
 		};

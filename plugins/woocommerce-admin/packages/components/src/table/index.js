@@ -161,7 +161,9 @@ class TableCard extends Component {
 
 	onSearch( values ) {
 		const { compareParam } = this.props;
-		const labels = values.map( v => v.label );
+		// A comma is used as a separator between search terms, so we want to escape
+		// any comma they contain.
+		const labels = values.map( v => v.label.replace( ',', '%2C' ) );
 		if ( labels.length ) {
 			updateQueryString( {
 				filter: undefined,
@@ -252,8 +254,7 @@ class TableCard extends Component {
 			totalRows,
 		} = this.props;
 		const { selectedRows, showCols } = this.state;
-		const searchedValues = query.search ? query.search.split( ',' ) : [];
-		const searchedLabels = searchedValues.map( v => ( { id: v, label: v } ) );
+		const searchedLabels = Array.isArray( query.search ) ? query.search.map( v => ( { id: v, label: v } ) ) : [];
 		const allHeaders = this.props.headers;
 		let headers = this.getVisibleHeaders();
 		let rows = this.getVisibleRows();
