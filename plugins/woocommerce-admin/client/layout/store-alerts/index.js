@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { IconButton, Button, Dashicon } from '@wordpress/components';
 import classnames from 'classnames';
+import interpolateComponents from 'interpolate-components';
 
 /**
  * WooCommerce dependencies
@@ -129,7 +130,13 @@ class StoreAlerts extends Component {
 								role="status"
 								aria-live="polite"
 							>
-								{ currentAlert + 1 } { __( 'of', 'wc-admin' ) } { this.totalAlerts() }
+								{ interpolateComponents( {
+									mixedString: __( '{{current /}} of {{total /}}', 'wc-admin' ),
+									components: {
+										current: <Fragment>{ currentAlert + 1 }</Fragment>,
+										total: <Fragment>{ this.totalAlerts() }</Fragment>,
+									},
+								} ) }
 							</span>
 							<IconButton
 								icon="arrow-right-alt2"
