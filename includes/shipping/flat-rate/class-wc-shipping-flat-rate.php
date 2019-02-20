@@ -111,7 +111,9 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				'percent' => '',
 				'min_fee' => '',
 				'max_fee' => '',
-			), $atts, 'fee'
+			),
+			$atts,
+			'fee'
 		);
 
 		$calculated_fee = 0;
@@ -146,12 +148,13 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 		// Calculate the costs.
 		$has_costs = false; // True when a cost is set. False if all costs are blank strings.
-		$cost      = apply_filters( 'woocommerce_' . $this->id . '_shipping_cost', $this->get_option( 'cost' ), $this );
+		$cost      = $this->get_option( 'cost' );
 
 		if ( '' !== $cost ) {
 			$has_costs    = true;
 			$rate['cost'] = $this->evaluate_cost(
-				$cost, array(
+				$cost,
+				array(
 					'qty'  => $this->get_package_item_qty( $package ),
 					'cost' => $package['contents_cost'],
 				)
@@ -169,7 +172,6 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				// Also handles BW compatibility when slugs were used instead of ids.
 				$shipping_class_term = get_term_by( 'slug', $shipping_class, 'product_shipping_class' );
 				$class_cost_string   = $shipping_class_term && $shipping_class_term->term_id ? $this->get_option( 'class_cost_' . $shipping_class_term->term_id, $this->get_option( 'class_cost_' . $shipping_class, '' ) ) : $this->get_option( 'no_class_cost', '' );
-				$class_cost_string   = apply_filters( 'woocommerce_' . $this->id . '_shipping_class_cost', $class_cost_string, $shipping_class_term, $this );
 
 				if ( '' === $class_cost_string ) {
 					continue;
@@ -177,7 +179,8 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 				$has_costs  = true;
 				$class_cost = $this->evaluate_cost(
-					$class_cost_string, array(
+					$class_cost_string,
+					array(
 						'qty'  => array_sum( wp_list_pluck( $products, 'quantity' ) ),
 						'cost' => array_sum( wp_list_pluck( $products, 'line_total' ) ),
 					)
