@@ -50,8 +50,6 @@ function wc_marketplace_suggestions_ajax_handler() {
 	wp_send_json_success( $suggestion_data );
 }
 
-
-
 /**
  * Return an array of suggestions the user has dismissed.
  */
