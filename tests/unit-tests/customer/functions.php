@@ -45,6 +45,19 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$userdata = get_userdata( $id );
 		$this->assertEquals( 'fred2', $userdata->user_login );
 
+		// Test extra arguments to generate display_name.
+		$id       = wc_create_new_customer(
+			'john.doe@example.com',
+			'',
+			'testpassword',
+			array(
+				'first_name' => 'John',
+				'last_name'  => 'Doe'
+			)
+		);
+		$userdata = get_userdata( $id );
+		$this->assertEquals( 'John Doe', $userdata->display_name );
+
 		// No password.
 		update_option( 'woocommerce_registration_generate_password', 'no' );
 		$id = wc_create_new_customer( 'joe@example.com', 'joecustomer', '' );
