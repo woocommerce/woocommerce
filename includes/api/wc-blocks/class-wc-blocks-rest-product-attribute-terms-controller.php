@@ -2,7 +2,7 @@
 /**
  * REST API Product Attribute Terms controller customized for Products Block.
  *
- * Handles requests to the /products/categories endpoint.
+ * Handles requests to the /products/attributes/<attribute_id/terms endpoint.
  *
  * @package WooCommerce\Blocks\Products\Rest\Controller
  */
@@ -114,8 +114,11 @@ class WC_REST_Blocks_Product_Attribute_Terms_Controller extends WC_REST_Product_
 			'name'      => $item->name,
 			'slug'      => $item->slug,
 			'count'     => (int) $item->count,
-			'attr_name' => $attribute->name,
-			'attr_slug' => $attribute->slug,
+			'attribute' => array(
+				'id'    => $attribute->id,
+				'name'  => $attribute->name,
+				'slug'  => $attribute->slug,
+			),
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -138,7 +141,7 @@ class WC_REST_Blocks_Product_Attribute_Terms_Controller extends WC_REST_Product_
 		$raw_schema = parent::get_item_schema();
 		$schema     = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'product_block_category',
+			'title'      => 'product_attribute_term',
 			'type'       => 'object',
 			'properties' => array(),
 		);
@@ -147,20 +150,30 @@ class WC_REST_Blocks_Product_Attribute_Terms_Controller extends WC_REST_Product_
 		$schema['properties']['name']      = $raw_schema['properties']['name'];
 		$schema['properties']['slug']      = $raw_schema['properties']['slug'];
 		$schema['properties']['count']     = $raw_schema['properties']['count'];
-		$schema['properties']['attr_name'] = array(
-			'description' => __( 'Attribute group name.', 'woo-gutenberg-products-block' ),
-			'type'        => 'string',
+		$schema['properties']['attribute'] = array(
+			'description' => __( 'Attribute.', 'woocommerce' ),
+			'type'        => 'object',
 			'context'     => array( 'view', 'edit' ),
-			'arg_options' => array(
-				'sanitize_callback' => 'sanitize_text_field',
-			),
-		);
-		$schema['properties']['attr_slug'] = array(
-			'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woo-gutenberg-products-block' ),
-			'type'        => 'string',
-			'context'     => array( 'view', 'edit' ),
-			'arg_options' => array(
-				'sanitize_callback' => 'sanitize_title',
+			'readonly'    => true,
+			'properties' => array(
+				'id' => array(
+					'description' => __( 'Attribute ID.', 'woocommerce' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'name' => array(
+					'description' => __( 'Attribute name.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+				),
+				'slug' => array(
+					'description' => __( 'Attribute slug.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 			),
 		);
 
