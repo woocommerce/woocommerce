@@ -67,7 +67,7 @@ class Layout extends Component {
 				<TransientNotices />
 
 				<div className="woocommerce-layout__primary" id="woocommerce-layout__primary">
-					<StoreAlerts />
+					{ window.wcAdminFeatures[ 'store-alerts' ] && <StoreAlerts /> }
 
 					<Notices />
 					{ ! isEmbeded && (
