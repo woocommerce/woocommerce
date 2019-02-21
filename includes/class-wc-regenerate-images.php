@@ -248,7 +248,7 @@ class WC_Regenerate_Images {
 	 * @return boolean
 	 */
 	public static function is_regeneratable( $attachment ) {
-		if ( 'site-icon' === get_post_meta( $attachment->ID, '_wp_attachment_context', true ) ) {
+		if ( 'site-icon' === get_post_meta( is_object( $attachment ) ? $attachment->ID : $attachment, '_wp_attachment_context', true ) ) {
 			return false;
 		}
 
@@ -317,9 +317,8 @@ class WC_Regenerate_Images {
 		$wp_uploads     = wp_upload_dir( null, false );
 		$wp_uploads_dir = $wp_uploads['basedir'];
 		$wp_uploads_url = $wp_uploads['baseurl'];
-		$attachment     = get_post( $attachment_id );
 
-		if ( ! $attachment || 'attachment' !== $attachment->post_type || ! self::is_regeneratable( $attachment ) ) {
+		if ( ! self::is_regeneratable( $attachment_id ) ) {
 			return $image;
 		}
 
