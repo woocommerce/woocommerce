@@ -24,6 +24,7 @@ class WC_Importer_Tracking {
 	 * @return void
 	 */
 	public static function track_product_importer() {
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
 		if ( ! isset( $_REQUEST['step'] ) ) {
 			return;
 		}
@@ -35,6 +36,7 @@ class WC_Importer_Tracking {
 		if ( 'done' === $_REQUEST['step'] ) {
 			return self::track_product_importer_complete();
 		}
+		// phpcs:enable
 	}
 
 	/**
@@ -43,6 +45,7 @@ class WC_Importer_Tracking {
 	 * @return void
 	 */
 	public static function track_product_importer_start() {
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
 		if ( ! isset( $_REQUEST['file'] ) || ! isset( $_REQUEST['_wpnonce'] ) ) {
 			return;
 		}
@@ -51,6 +54,7 @@ class WC_Importer_Tracking {
 			'update_existing' => isset( $_REQUEST['update_existing'] ) ? (bool) $_REQUEST['update_existing'] : false,
 			'delimiter'       => empty( $_REQUEST['delimiter'] ) ? ',' : wc_clean( wp_unslash( $_REQUEST['delimiter'] ) ),
 		);
+		// phpcs:enable
 
 		WC_Tracks::record_event( 'product_import_start', $properties );
 	}
@@ -61,6 +65,7 @@ class WC_Importer_Tracking {
 	 * @return void
 	 */
 	public static function track_product_importer_complete() {
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
 		if ( ! isset( $_REQUEST['nonce'] ) ) {
 			return;
 		}
@@ -71,6 +76,7 @@ class WC_Importer_Tracking {
 			'failed'   => isset( $_GET['products-failed'] ) ? absint( $_GET['products-failed'] ) : 0,
 			'skipped'  => isset( $_GET['products-skipped'] ) ? absint( $_GET['products-skipped'] ) : 0,
 		);
+		// phpcs:enable
 
 		WC_Tracks::record_event( 'product_import_complete', $properties );
 	}
