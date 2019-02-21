@@ -53,12 +53,47 @@ class WC_Site_Tracking {
 	}
 
 	/**
+	 * Add scripts required to record events from javascript.
+	 */
+	public static function enqueue_scripts() {
+
+		// Add w.js to the page.
+		wp_enqueue_script( 'woo-tracks', 'https://stats.wp.com/w.js', array(), gmdate( 'YW' ), true );
+
+		// Expose tracking via a function in the wcTracks global namespace.
+		wc_enqueue_js(
+			"
+			window.wcTracks = window.wcTracks || {};
+			window.wcTracks.recordEvent = function( name, properties ) {
+				var eventName = '" . WC_Tracks::PREFIX . "' + name;
+				var eventProperties = properties || {};
+				eventProperties.url = '" . home_url() . "'
+				window._tkq = window._tkq || [];
+				window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );
+			}
+		"
+		);
+	}
+
+	/**
 	 * Init tracking.
 	 */
 	public static function init() {
+
 		if ( ! self::is_tracking_enabled() ) {
+
+			// Define window.wcTracks.recordEvent in case there is an attempt to use it when tracking is turned off.
+			wc_enqueue_js(
+				'
+				window.wcTracks = window.wcTracks || {};
+				window.wcTracks.recordEvent = function() {};
+			'
+			);
+
 			return;
 		}
+
+		self::enqueue_scripts();
 
 		add_action( 'edit_post', array( 'WC_Site_Tracking', 'tracks_product_updated' ), 10, 2 );
 	}
