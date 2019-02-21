@@ -165,6 +165,9 @@ a.suggestion-dismiss::before {
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"],
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-body"] {
 
+	// hide by default (mobile first)
+	display: none;
+
 	border: 1px solid $suggestions-pale-gray;
 	border-bottom: none;
 
@@ -209,6 +212,11 @@ a.suggestion-dismiss::before {
 	}
 
 	@media screen and (min-width: 600px) {
+
+		// Display onboarding table suggestion on desktop only. (for now)
+		// There's limited room on mobile, and there are edge-case
+		// styling issues in some browsers.
+		display: block;
 
 		.marketplace-suggestion-container {
 			border-bottom: none;
