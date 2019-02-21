@@ -76,10 +76,12 @@ class WC_Site_Tracking {
 
 		self::enqueue_scripts();
 
-		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-products-tracking.php';
+		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-extensions-tracking.php';
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-importer-tracking.php';
+		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-products-tracking.php';
 
 		$tracking_classes = array(
+			'WC_Extensions_Tracking',
 			'WC_Importer_Tracking',
 			'WC_Products_Tracking',
 		);
