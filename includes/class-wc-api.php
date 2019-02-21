@@ -203,7 +203,7 @@ class WC_API extends WC_Legacy_API {
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-network-orders-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-order-notes-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-order-refunds-controller.php';
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-product-attribute-terms-controller.php';
+		include_once dirname( __FILE__ ) . '/api/v3/class-wc-rest-product-attribute-terms-v3-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-product-attributes-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-product-categories-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-product-reviews-controller.php';
@@ -235,6 +235,9 @@ class WC_API extends WC_Legacy_API {
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-data-continents-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-data-countries-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-data-currencies-controller.php';
+
+		// REST API v4 controllers.
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-product-attribute-terms-controller.php';
 	}
 
 	/**
@@ -310,7 +313,7 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Order_Notes_Controller',
 			'WC_REST_Order_Refunds_Controller',
 			'WC_REST_Orders_Controller',
-			'WC_REST_Product_Attribute_Terms_Controller',
+			'WC_REST_Product_Attribute_Terms_V3_Controller',
 			'WC_REST_Product_Attributes_Controller',
 			'WC_REST_Product_Categories_Controller',
 			'WC_REST_Product_Reviews_Controller',
@@ -342,6 +345,9 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Data_Continents_Controller',
 			'WC_REST_Data_Countries_Controller',
 			'WC_REST_Data_Currencies_Controller',
+
+			// REST API v4 controllers.
+			'WC_REST_Product_Attribute_Terms_Controller',
 		);
 
 		foreach ( $controllers as $controller ) {
