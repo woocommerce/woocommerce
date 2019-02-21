@@ -31,9 +31,9 @@ class WC_Tests_API_Products_Attributes_Terms_Controller extends WC_REST_Unit_Tes
 			)
         );
         
-        $this->editor = $this->factory->user->create(
+        $this->contributor = $this->factory->user->create(
 			array(
-				'role' => 'editor',
+				'role' => 'contributor',
 			)
 		);
 
@@ -56,8 +56,11 @@ class WC_Tests_API_Products_Attributes_Terms_Controller extends WC_REST_Unit_Tes
 		$this->assertEquals( 200, $response->get_status() );
         $this->assertEquals( 3, count( $response_terms ) );
         $term = $response_terms[0];
-        $this->assertArrayHasKey( 'attr_name', $term );
-        $this->assertArrayHasKey( 'attr_slug', $term );
+		$this->assertArrayHasKey( 'attribute', $term );
+		$attribute = $term['attribute'];
+        $this->assertArrayHasKey( 'id', $attribute );
+        $this->assertArrayHasKey( 'name', $attribute );
+        $this->assertArrayHasKey( 'slug', $attribute );
     }
     
     /**
@@ -91,7 +94,7 @@ class WC_Tests_API_Products_Attributes_Terms_Controller extends WC_REST_Unit_Tes
 	 * @since 3.6.0
 	 */
 	public function test_get_attribute_terms_editor() {
-        wp_set_current_user( $this->editor );
+        wp_set_current_user( $this->contributor );
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/attributes/'. $this->attr_size['attribute_id'] . '/terms' );
 
         $response       = $this->server->dispatch( $request );
