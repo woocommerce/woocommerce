@@ -5,10 +5,9 @@
 			return;
 		}
 
-		// Stand-in wcSettings.recordEvent for until tracks PR is merged.
-		// https://github.com/woocommerce/woocommerce/pull/22746
-		window.wcSettings = window.wcSettings || {};
-		window.wcSettings.recordEvent = window.wcSettings.recordEvent  || function() { };
+		// Stand-in wcTracks.recordEvent in case tracks is not available (for any reason).
+		window.wcTracks = window.wcTracks || {};
+		window.wcTracks.recordEvent = window.wcTracks.recordEvent  || function() { };
 
 		// Tracks events sent in this file:
 		// - marketplace_suggestion_displayed
@@ -35,7 +34,7 @@
 				}
 			);
 
-			window.wcSettings.recordEvent( 'marketplace_suggestion_dismissed', {
+			window.wcTracks.recordEvent( 'marketplace_suggestion_dismissed', {
 				suggestionSlug: suggestionSlug
 			} );
 		}
@@ -63,7 +62,7 @@
 			linkoutButton.textContent = text;
 
 			linkoutButton.onclick = function( event ) {
-				window.wcSettings.recordEvent( 'marketplace_suggestion_clicked', {
+				window.wcTracks.recordEvent( 'marketplace_suggestion_clicked', {
 					suggestionSlug: slug
 				} );
 			}
@@ -284,7 +283,7 @@
 					$( this ).addClass( 'showing-suggestion' );
 					visibleSuggestions.push( promos[i].context );
 
-					window.wcSettings.recordEvent( 'marketplace_suggestion_displayed', {
+					window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
 						suggestionSlug: promos[ i ].slug
 					} );
 				}
@@ -334,7 +333,7 @@
 
 						visibleSuggestions.push( context );
 
-						window.wcSettings.recordEvent( 'marketplace_suggestion_displayed', {
+						window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
 							suggestionSlug: promos[ 0 ].slug
 						} );
 					}
