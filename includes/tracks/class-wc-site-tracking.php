@@ -11,25 +11,6 @@ defined( 'ABSPATH' ) || exit;
  * This class adds actions to track usage of WooCommerce.
  */
 class WC_Site_Tracking {
-
-	/**
-	 * Send a Tracks event when a product is updated.
-	 *
-	 * @param int   $product_id Product id.
-	 * @param array $post WordPress post.
-	 */
-	public static function tracks_product_updated( $product_id, $post ) {
-		if ( 'product' !== $post->post_type ) {
-			return;
-		}
-
-		$properties = array(
-			'product_id' => $product_id,
-		);
-
-		WC_Tracks::record_event( 'product_edit', $properties );
-	}
-
 	/**
 	 * Check if tracking is enabled.
 	 *
@@ -95,6 +76,22 @@ class WC_Site_Tracking {
 
 		self::enqueue_scripts();
 
-		add_action( 'edit_post', array( 'WC_Site_Tracking', 'tracks_product_updated' ), 10, 2 );
+		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-extensions-tracking.php';
+		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-importer-tracking.php';
+		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-products-tracking.php';
+
+		$tracking_classes = array(
+			'WC_Extensions_Tracking',
+			'WC_Importer_Tracking',
+			'WC_Products_Tracking',
+		);
+
+		foreach ( $tracking_classes as $tracking_class ) {
+			$init_method = array( $tracking_class, 'init' );
+
+			if ( is_callable( $init_method ) ) {
+				call_user_func( $init_method );
+			}
+		}
 	}
 }
