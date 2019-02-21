@@ -204,7 +204,7 @@ function wgpb_register_scripts() {
 	wp_register_style(
 		'wc-block-style',
 		plugins_url( 'build/style.css', __FILE__ ),
-		array( 'wp-edit-blocks' ),
+		array(),
 		wgpb_get_file_version( '/build/style.css' )
 	);
 
