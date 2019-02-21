@@ -1076,13 +1076,23 @@ class WC_AJAX {
 		$response = array();
 
 		try {
-			$order_id = absint( $_POST['order_id'] );
-			$order    = wc_get_order( $order_id );
-			$result   = $order->apply_coupon( wc_clean( $_POST['coupon'] ) );
+			$order_id           = absint( $_POST['order_id'] );
+			$order              = wc_get_order( $order_id );
+			$calculate_tax_args = array(
+				'country'  => strtoupper( wc_clean( $_POST['country'] ) ),
+				'state'    => strtoupper( wc_clean( $_POST['state'] ) ),
+				'postcode' => strtoupper( wc_clean( $_POST['postcode'] ) ),
+				'city'     => strtoupper( wc_clean( $_POST['city'] ) ),
+			);
+
+			$result = $order->apply_coupon( wc_clean( $_POST['coupon'] ) );
 
 			if ( is_wp_error( $result ) ) {
 				throw new Exception( html_entity_decode( wp_strip_all_tags( $result->get_error_message() ) ) );
 			}
+
+			$order->calculate_taxes( $calculate_tax_args );
+			$order->calculate_totals( false );
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
@@ -1108,10 +1118,18 @@ class WC_AJAX {
 		$response = array();
 
 		try {
-			$order_id = absint( $_POST['order_id'] );
-			$order    = wc_get_order( $order_id );
+			$order_id           = absint( $_POST['order_id'] );
+			$order              = wc_get_order( $order_id );
+			$calculate_tax_args = array(
+				'country'  => strtoupper( wc_clean( $_POST['country'] ) ),
+				'state'    => strtoupper( wc_clean( $_POST['state'] ) ),
+				'postcode' => strtoupper( wc_clean( $_POST['postcode'] ) ),
+				'city'     => strtoupper( wc_clean( $_POST['city'] ) ),
+			);
 
 			$order->remove_coupon( wc_clean( $_POST['coupon'] ) );
+			$order->calculate_taxes( $calculate_tax_args );
+			$order->calculate_totals( false );
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
