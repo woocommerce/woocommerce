@@ -153,7 +153,7 @@ class WC_Marketplace_Suggestions {
 		}
 
 		// Cache empty suggestions data to reduce requests if there are any issues with API.
-		set_transient( 'wc_marketplace_suggestions', '[]', DAY_IN_SECONDS );
+		set_transient( 'wc_marketplace_suggestions', array(), DAY_IN_SECONDS );
 		return array();
 	}
 }
