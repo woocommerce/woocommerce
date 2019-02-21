@@ -121,7 +121,6 @@ class WordPressNotices extends Component {
 			[ 'woocommerce_errors', null ],
 			[ null, [ 'hidden' ] ],
 			[ 'message', [ 'notice', 'updated' ] ],
-			[ 'dolly', null ],
 		];
 
 		let collapse = true;
@@ -141,10 +140,6 @@ class WordPressNotices extends Component {
 			} else if ( id && id === element.id ) {
 				collapse = false;
 			}
-		}
-
-		if ( 'dolly' === element.id ) {
-			element.style.display = 'none';
 		}
 
 		return collapse;
