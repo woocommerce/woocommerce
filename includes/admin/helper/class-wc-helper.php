@@ -693,6 +693,10 @@ class WC_Helper {
 
 		// Bail if the user clicked deny.
 		if ( ! empty( $_GET['deny'] ) ) {
+			/**
+			 * Fires when the Helper connection process is denied/cancelled.
+			 */
+			do_action( 'woocommerce_helper_denied' );
 			wp_safe_redirect( admin_url( 'admin.php?page=wc-addons&section=helper' ) );
 			die();
 		}
