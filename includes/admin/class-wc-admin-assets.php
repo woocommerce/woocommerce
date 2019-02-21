@@ -423,7 +423,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				);
 			}
 
-			if ( in_array( $screen_id, array( 'edit-product' ), true ) ) {
+			if ( WC_Marketplace_Suggestions::allow_suggestions() && in_array( $screen_id, array( 'edit-product' ), true ) ) {
 				$woo_plugin_slugs = WC_Helper::get_local_woo_plugin_slugs();
 				wp_register_script(
 					'marketplace-suggestions',

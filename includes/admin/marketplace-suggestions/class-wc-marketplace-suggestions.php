@@ -20,6 +20,9 @@ class WC_Marketplace_Suggestions {
 	 * Initialise.
 	 */
 	public static function init() {
+		if ( ! self::allow_suggestions() ) {
+			return;
+		}
 		// Register ajax api handlers.
 		add_action( 'wp_ajax_marketplace_suggestions', array( __CLASS__, 'get_suggestion_json_data_handler' ) );
 		add_action( 'wp_ajax_add_dismissed_marketplace_suggestion', array( __CLASS__, 'post_add_dismissed_suggestion_handler' ) );
@@ -99,6 +102,14 @@ class WC_Marketplace_Suggestions {
 	 */
 	public static function render_suggestions_container( $context ) {
 		include 'templates/container.php';
+	}
+
+	/**
+	 * Returns false if user has disabled all suggestions via option.
+	 */
+	public static function allow_suggestions() {
+		$option = get_option( 'woocommerce_allow_marketplace_suggestions', 'yes' );
+		return ( 'yes' === $option || 'true' === $option || 1 === $option );
 	}
 
 	/**
