@@ -1014,6 +1014,11 @@ class WC_Helper {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
+		$woo_plugins = get_transient( 'wc_helper_installed_woo_plugins' );
+		if ( false !== $woo_plugins ) {
+			return $woo_plugins;
+		}
+
 		$plugins     = get_plugins();
 		$woo_plugins = array();
 
@@ -1050,6 +1055,7 @@ class WC_Helper {
 			$woo_plugins[ $filename ] = $data;
 		}
 
+		set_transient( 'wc_helper_installed_woo_plugins', $woo_plugins, DAY_IN_SECONDS );
 		return $woo_plugins;
 	}
 
@@ -1058,15 +1064,8 @@ class WC_Helper {
 	 * (Cached for 1 day.)
 	 */
 	public static function get_local_woo_plugin_slugs() {
-		$woo_plugin_slugs = get_transient( 'wc_helper_installed_woo_plugin_slugs' );
-		if ( false === $woo_plugin_slugs ) {
-			$plugins = self::get_local_woo_plugins();
-			foreach ( $plugins as $filename => $data ) {
-				$woo_plugin_slugs[] = $data['slug'];
-			}
-			set_transient( 'wc_helper_installed_woo_plugin_slugs', $woo_plugin_slugs, DAY_IN_SECONDS );
-		}
-		return $woo_plugin_slugs;
+		$slugs = wp_list_pluck( self::get_local_woo_plugins(), 'slug' );
+		return array_values( $slugs );
 	}
 
 	/**
