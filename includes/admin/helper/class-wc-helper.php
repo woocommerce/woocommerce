@@ -665,6 +665,11 @@ class WC_Helper {
 			wp_die( 'Something went wrong' );
 		}
 
+		/**
+		 * Fires when the Helper connection process is initiated.
+		 */
+		do_action( 'woocommerce_helper_connect_start' );
+
 		$connect_url = add_query_arg(
 			array(
 				'home_url'     => rawurlencode( home_url() ),
@@ -688,6 +693,10 @@ class WC_Helper {
 
 		// Bail if the user clicked deny.
 		if ( ! empty( $_GET['deny'] ) ) {
+			/**
+			 * Fires when the Helper connection process is denied/cancelled.
+			 */
+			do_action( 'woocommerce_helper_denied' );
 			wp_safe_redirect( admin_url( 'admin.php?page=wc-addons&section=helper' ) );
 			die();
 		}
@@ -741,6 +750,11 @@ class WC_Helper {
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
 
+		/**
+		 * Fires when the Helper connection process has completed successfully.
+		 */
+		do_action( 'woocommerce_helper_connected' );
+
 		// Enable tracking when connected.
 		if ( class_exists( 'WC_Tracker' ) ) {
 			update_option( 'woocommerce_allow_tracking', 'yes' );
@@ -767,6 +781,11 @@ class WC_Helper {
 			self::log( 'Could not verify nonce in _helper_auth_disconnect' );
 			wp_die( 'Could not verify nonce' );
 		}
+
+		/**
+		 * Fires when the Helper has been disconnected.
+		 */
+		do_action( 'woocommerce_helper_disconnected' );
 
 		$redirect_uri = add_query_arg(
 			array(
@@ -803,6 +822,11 @@ class WC_Helper {
 			self::log( 'Could not verify nonce in _helper_auth_refresh' );
 			wp_die( 'Could not verify nonce' );
 		}
+
+		/**
+		 * Fires when Helper subscriptions are refreshed.
+		 */
+		do_action( 'woocommerce_helper_subscriptions_refresh' );
 
 		$redirect_uri = add_query_arg(
 			array(
