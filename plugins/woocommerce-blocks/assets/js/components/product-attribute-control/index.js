@@ -7,14 +7,13 @@ import apiFetch from '@wordpress/api-fetch';
 import { Component, Fragment } from '@wordpress/element';
 import { debounce, find } from 'lodash';
 import PropTypes from 'prop-types';
+import { SearchListControl, SearchListItem } from '@woocommerce/components';
 import { SelectControl, Spinner } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import SearchListControl from '../search-list-control';
-import SearchListItem from '../search-list-control/item';
 
 class ProductAttributeControl extends Component {
 	constructor() {

@@ -7,11 +7,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { Component, Fragment } from '@wordpress/element';
 import { find } from 'lodash';
 import PropTypes from 'prop-types';
-
-/**
- * Internal dependencies
- */
-import SearchListControl from '../search-list-control';
+import { SearchListControl } from '@woocommerce/components';
 
 class ProductControl extends Component {
 	constructor() {
