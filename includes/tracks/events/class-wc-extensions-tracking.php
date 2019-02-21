@@ -16,6 +16,7 @@ class WC_Extensions_Tracking {
 	 */
 	public static function init() {
 		add_action( 'load-woocommerce_page_wc-addons', array( __CLASS__, 'track_extensions_page' ) );
+		add_action( 'woocommerce_helper_connect_start', array( __CLASS__, 'track_helper_connection_start' ) );
 	}
 
 	/**
@@ -35,5 +36,12 @@ class WC_Extensions_Tracking {
 		// phpcs:enable
 
 		WC_Tracks::record_event( $event, $properties );
+	}
+
+	/**
+	 * Send a Tracks even when a Helper connection process is initiated.
+	 */
+	public static function track_helper_connection_start() {
+		WC_Tracks::record_event( 'extensions_subscriptions_connect' );
 	}
 }

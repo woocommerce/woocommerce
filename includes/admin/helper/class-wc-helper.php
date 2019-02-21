@@ -665,6 +665,11 @@ class WC_Helper {
 			wp_die( 'Something went wrong' );
 		}
 
+		/**
+		 * Fires when the Helper connection process is initiated.
+		 */
+		do_action( 'woocommerce_helper_connect_start' );
+
 		$connect_url = add_query_arg(
 			array(
 				'home_url'     => rawurlencode( home_url() ),
