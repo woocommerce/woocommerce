@@ -1,9 +1,12 @@
 /** @format */
+@mixin store-alerts-box-shadow( $color ) {
+	box-shadow: 0 0 8px -2px rgba(0, 0, 0, 0.3), inset 4px 0 0 0 $color;
+}
 
 .woocommerce-store-alerts {
-	margin-right: 40px;
+	margin-right: $gutter-large;
 	margin-right: var(--large-gap);
-	padding: 20px 20px 20px 24px;
+	padding: $gap-large;
 	border: 0;
 
 	.woocommerce-card__header {
@@ -26,37 +29,40 @@
 }
 
 .is-alert-emergency {
-	box-shadow: 0px 0px 8px -2px rgba(0, 0, 0, 0.3), inset 4px 0px 0px 0px #dc3232;
+	$alert-color: #dc3232;
+	@include store-alerts-box-shadow( $alert-color );
 
 	.woocommerce-card__title {
 		svg {
-			color: #dc3232;
+			color: $alert-color;
 		}
 	}
 }
 
 .is-alert-alert {
-	box-shadow: 0px 0px 8px -2px rgba(0, 0, 0, 0.3), inset 4px 0px 0px 0px #11a0d2;
+	$alert-color: #11a0d2;
+	@include store-alerts-box-shadow( $alert-color );
 
 	.woocommerce-card__title {
 		svg {
-			color: #11a0d2;
+			color: $alert-color;
 		}
 	}
 }
 
 .is-alert-critical {
-	box-shadow: 0px 0px 8px -2px rgba(0, 0, 0, 0.3), inset 4px 0px 0px 0px #ffb900;
+	$alert-color: #ffb900;
+	@include store-alerts-box-shadow( $alert-color );
 
 	.woocommerce-card__title {
 		svg {
-			color: #ffb900;
+			color: $alert-color;
 		}
 	}
 }
 
 .woocommerce-store-alerts__message {
-	margin-bottom: 14px;
+	margin-bottom: 16px;
 }
 
 .woocommerce-store-alerts__pagination {
