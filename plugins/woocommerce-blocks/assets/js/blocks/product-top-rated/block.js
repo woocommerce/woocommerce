@@ -4,10 +4,11 @@
 import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
-import { InspectorControls } from '@wordpress/editor';
+import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import { debounce } from 'lodash';
 import Gridicon from 'gridicons';
+import { InspectorControls } from '@wordpress/editor';
 import { PanelBody, Placeholder, Spinner } from '@wordpress/components';
 import PropTypes from 'prop-types';
 
@@ -15,6 +16,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import getQuery from '../../utils/get-query';
+import GridContentControl from '../../components/grid-content-control';
 import GridLayoutControl from '../../components/grid-layout-control';
 import ProductCategoryControl from '../../components/product-category-control';
 import ProductPreview from '../../components/product-preview';
@@ -40,9 +42,12 @@ class ProductTopRatedBlock extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const hasChange = [ 'rows', 'columns', 'categories', 'catOperator' ].reduce( ( acc, key ) => {
-			return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
-		}, false );
+		const hasChange = [ 'rows', 'columns', 'categories', 'catOperator' ].reduce(
+			( acc, key ) => {
+				return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
+			},
+			false
+		);
 		if ( hasChange ) {
 			this.debouncedGetProducts();
 		}
@@ -65,7 +70,13 @@ class ProductTopRatedBlock extends Component {
 
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
-		const { categories, catOperator, columns, rows } = attributes;
+		const {
+			categories,
+			catOperator,
+			columns,
+			contentVisibility,
+			rows,
+		} = attributes;
 
 		return (
 			<InspectorControls key="inspector">
@@ -77,6 +88,15 @@ class ProductTopRatedBlock extends Component {
 						columns={ columns }
 						rows={ rows }
 						setAttributes={ setAttributes }
+					/>
+				</PanelBody>
+				<PanelBody
+					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+					initialOpen
+				>
+					<GridContentControl
+						settings={ contentVisibility }
+						onChange={ ( value ) => setAttributes( { contentVisibility: value } ) }
 					/>
 				</PanelBody>
 				<PanelBody
@@ -103,24 +123,23 @@ class ProductTopRatedBlock extends Component {
 	}
 
 	render() {
-		const { columns } = this.props.attributes;
-		const { loaded, products } = this.state;
-		const classes = [ 'wc-block-products-grid', 'wc-block-top-rated-products' ];
-		if ( columns ) {
-			classes.push( `cols-${ columns }` );
-		}
-		if ( products && ! products.length ) {
-			if ( ! loaded ) {
-				classes.push( 'is-loading' );
-			} else {
-				classes.push( 'is-not-found' );
-			}
-		}
+		const { columns, contentVisibility } = this.props.attributes;
+		const { loaded, products = [] } = this.state;
+		const classes = classnames( {
+			'wc-block-products-grid': true,
+			'wc-block-top-rated-products': true,
+			[ `cols-${ columns }` ]: columns,
+			'is-loading': ! loaded,
+			'is-not-found': loaded && ! products.length,
+			'is-hidden-title': ! contentVisibility.title,
+			'is-hidden-price': ! contentVisibility.price,
+			'is-hidden-button': ! contentVisibility.button,
+		} );
 
 		return (
 			<Fragment>
 				{ this.getInspectorControls() }
-				<div className={ classes.join( ' ' ) }>
+				<div className={ classes }>
 					{ products.length ? (
 						products.map( ( product ) => (
 							<ProductPreview product={ product } key={ product.id } />

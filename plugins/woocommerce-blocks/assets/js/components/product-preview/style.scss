@@ -32,6 +32,24 @@
 		}
 	}
 
+	.is-hidden-title & {
+		.wc-product-preview__title {
+			display: none;
+		}
+	}
+
+	.is-hidden-price & {
+		.wc-product-preview__price {
+			display: none;
+		}
+	}
+
+	.is-hidden-button & {
+		.wp-block-button {
+			display: none;
+		}
+	}
+
 	.editor-block-preview & {
 		.wc-product-preview__title {
 			font-size: 0.7em;

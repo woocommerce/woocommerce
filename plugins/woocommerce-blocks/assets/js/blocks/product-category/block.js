@@ -13,6 +13,7 @@ import {
 	Toolbar,
 	withSpokenMessages,
 } from '@wordpress/components';
+import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
@@ -21,6 +22,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import getQuery from '../../utils/get-query';
+import GridContentControl from '../../components/grid-content-control';
 import GridLayoutControl from '../../components/grid-layout-control';
 import ProductCategoryControl from '../../components/product-category-control';
 import ProductOrderbyControl from '../../components/product-orderby-control';
@@ -83,7 +85,7 @@ class ProductByCategoryBlock extends Component {
 
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
-		const { columns, catOperator, orderby, rows } = attributes;
+		const { columns, catOperator, contentVisibility, orderby, rows } = attributes;
 
 		return (
 			<InspectorControls key="inspector">
@@ -111,6 +113,15 @@ class ProductByCategoryBlock extends Component {
 						columns={ columns }
 						rows={ rows }
 						setAttributes={ setAttributes }
+					/>
+				</PanelBody>
+				<PanelBody
+					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+					initialOpen
+				>
+					<GridContentControl
+						settings={ contentVisibility }
+						onChange={ ( value ) => setAttributes( { contentVisibility: value } ) }
 					/>
 				</PanelBody>
 				<PanelBody
@@ -170,19 +181,23 @@ class ProductByCategoryBlock extends Component {
 
 	render() {
 		const { setAttributes } = this.props;
-		const { categories, columns, editMode } = this.props.attributes;
-		const { loaded, products } = this.state;
-		const classes = [ 'wc-block-products-grid', 'wc-block-products-category' ];
-		if ( columns ) {
-			classes.push( `cols-${ columns }` );
-		}
-		if ( products && ! products.length ) {
-			if ( ! loaded ) {
-				classes.push( 'is-loading' );
-			} else {
-				classes.push( 'is-not-found' );
-			}
-		}
+		const {
+			categories,
+			columns,
+			contentVisibility,
+			editMode,
+		} = this.props.attributes;
+		const { loaded, products = [] } = this.state;
+		const classes = classnames( {
+			'wc-block-products-grid': true,
+			'wc-block-products-category': true,
+			[ `cols-${ columns }` ]: columns,
+			'is-loading': ! loaded,
+			'is-not-found': loaded && ! products.length,
+			'is-hidden-title': ! contentVisibility.title,
+			'is-hidden-price': ! contentVisibility.price,
+			'is-hidden-button': ! contentVisibility.button,
+		} );
 
 		const nothingFound = ! categories.length ?
 			__(
@@ -214,7 +229,7 @@ class ProductByCategoryBlock extends Component {
 				{ editMode ? (
 					this.renderEditMode()
 				) : (
-					<div className={ classes.join( ' ' ) }>
+					<div className={ classes }>
 						{ products.length ? (
 							products.map( ( product ) => (
 								<ProductPreview product={ product } key={ product.id } />
