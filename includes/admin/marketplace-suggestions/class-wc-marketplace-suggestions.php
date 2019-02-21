@@ -23,9 +23,10 @@ class WC_Marketplace_Suggestions {
 		if ( ! self::allow_suggestions() ) {
 			return;
 		}
+
 		// Register ajax api handlers.
-		add_action( 'wp_ajax_marketplace_suggestions', array( __CLASS__, 'get_suggestion_json_data_handler' ) );
-		add_action( 'wp_ajax_add_dismissed_marketplace_suggestion', array( __CLASS__, 'post_add_dismissed_suggestion_handler' ) );
+		add_action( 'wp_ajax_woocommerce_marketplace_suggestions', array( __CLASS__, 'get_suggestion_json_data_handler' ) );
+		add_action( 'wp_ajax_woocommerce_add_dismissed_marketplace_suggestion', array( __CLASS__, 'post_add_dismissed_suggestion_handler' ) );
 
 		// Register hooks for rendering suggestions container markup.
 		add_action( 'wc_marketplace_suggestions_products_empty_state', array( __CLASS__, 'render_products_list_empty_state' ) );

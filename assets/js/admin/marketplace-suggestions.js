@@ -29,7 +29,7 @@
 			jQuery.post(
 				ajaxurl,
 				{
-					'action': 'add_dismissed_marketplace_suggestion',
+					'action': 'woocommerce_add_dismissed_marketplace_suggestion',
 					'_wpnonce': marketplace_suggestions.dismiss_suggestion_nonce,
 					'slug': suggestionSlug,
 				}
@@ -350,7 +350,7 @@
 		jQuery.getJSON(
 			ajaxurl,
 			{
-				'action': 'marketplace_suggestions',
+				'action': 'woocommerce_marketplace_suggestions',
 			},
 			displaySuggestions
 		);
