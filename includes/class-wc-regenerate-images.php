@@ -306,11 +306,6 @@ class WC_Regenerate_Images {
 	 * @return string
 	 */
 	private static function resize_and_return_image( $attachment_id, $image, $size, $icon ) {
-		$image_size     = wc_get_image_size( $size );
-		$wp_uploads     = wp_upload_dir( null, false );
-		$wp_uploads_dir = $wp_uploads['basedir'];
-		$wp_uploads_url = $wp_uploads['baseurl'];
-
 		if ( ! self::is_regeneratable( $attachment_id ) ) {
 			return $image;
 		}
@@ -328,6 +323,8 @@ class WC_Regenerate_Images {
 		self::$regenerate_size = is_customize_preview() ? $size . '_preview' : $size;
 
 		if ( is_customize_preview() ) {
+			$image_size = wc_get_image_size( $size );
+
 			// Make sure registered image size matches the size we're requesting.
 			add_image_size( self::$regenerate_size, absint( $image_size['width'] ), absint( $image_size['height'] ), $image_size['crop'] );
 
