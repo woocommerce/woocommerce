@@ -782,6 +782,11 @@ class WC_Helper {
 			wp_die( 'Could not verify nonce' );
 		}
 
+		/**
+		 * Fires when the Helper has been disconnected.
+		 */
+		do_action( 'woocommerce_helper_disconnected' );
+
 		$redirect_uri = add_query_arg(
 			array(
 				'page'             => 'wc-addons',
