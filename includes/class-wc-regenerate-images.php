@@ -232,7 +232,10 @@ class WC_Regenerate_Images {
 		}
 
 		if ( ! $ratio_match ) {
-			return self::resize_and_return_image( $attachment_id, $image, $size, $icon );
+			// Check if the actual image has a larger dimension than the requested image size. Smaller images are not enlarged.
+			if ( $image[1] > $image_size['width'] || $image[2] > $image_size['height'] ) {
+				return self::resize_and_return_image( $attachment_id, $image, $size, $icon );
+			}
 		}
 
 		return $image;
