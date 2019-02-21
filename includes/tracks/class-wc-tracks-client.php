@@ -109,7 +109,7 @@ class WC_Tracks_Client {
 		}
 
 		// Start with a previously set cookie.
-		$anon_id = isset( $_COOKIE['tk_ai'] ) ? wp_unslash( $_COOKIE['tk_ai'] ) : false; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$anon_id = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : false; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		// If there is no cookie, apply a saved id.
 		if ( ! $anon_id ) {
