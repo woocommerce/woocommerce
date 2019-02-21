@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import classnames from 'classnames';
 import Gridicon from 'gridicons';
 import { RawHTML } from '@wordpress/element';
 import { registerBlockType } from '@wordpress/blocks';
@@ -59,6 +60,18 @@ registerBlockType( 'woocommerce/products-by-attribute', {
 		},
 
 		/**
+		 * Content visibility setting
+		 */
+		contentVisibility: {
+			type: 'object',
+			default: {
+				title: true,
+				price: true,
+				button: true,
+			},
+		},
+
+		/**
 		 * How to order the products: 'date', 'popularity', 'price_asc', 'price_desc' 'rating', 'title'.
 		 */
 		orderby: {
@@ -90,9 +103,18 @@ registerBlockType( 'woocommerce/products-by-attribute', {
 	save( props ) {
 		const {
 			align,
+			contentVisibility,
 		} = props.attributes; /* eslint-disable-line react/prop-types */
+		const classes = classnames(
+			align ? `align${ align }` : '',
+			{
+				'is-hidden-title': ! contentVisibility.title,
+				'is-hidden-price': ! contentVisibility.price,
+				'is-hidden-button': ! contentVisibility.button,
+			}
+		);
 		return (
-			<RawHTML className={ align ? `align${ align }` : '' }>
+			<RawHTML className={ classes }>
 				{ getShortcode( props, 'woocommerce/products-by-attribute' ) }
 			</RawHTML>
 		);

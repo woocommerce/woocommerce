@@ -14,6 +14,7 @@ import {
 	Toolbar,
 	withSpokenMessages,
 } from '@wordpress/components';
+import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
@@ -22,6 +23,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import getQuery from '../../utils/get-query';
+import GridContentControl from '../../components/grid-content-control';
 import { IconWidgets } from '../../components/icons';
 import ProductsControl from '../../components/products-control';
 import ProductOrderbyControl from '../../components/product-orderby-control';
@@ -76,7 +78,7 @@ class ProductsBlock extends Component {
 
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
-		const { columns, orderby } = attributes;
+		const { columns, contentVisibility, orderby } = attributes;
 
 		return (
 			<InspectorControls key="inspector">
@@ -90,6 +92,15 @@ class ProductsBlock extends Component {
 						onChange={ ( value ) => setAttributes( { columns: value } ) }
 						min={ wc_product_block_data.min_columns }
 						max={ wc_product_block_data.max_columns }
+					/>
+				</PanelBody>
+				<PanelBody
+					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
+					initialOpen
+				>
+					<GridContentControl
+						settings={ contentVisibility }
+						onChange={ ( value ) => setAttributes( { contentVisibility: value } ) }
 					/>
 				</PanelBody>
 				<PanelBody
@@ -157,20 +168,19 @@ class ProductsBlock extends Component {
 
 	render() {
 		const { setAttributes } = this.props;
-		const { columns, editMode } = this.props.attributes;
-		const { loaded, products } = this.state;
-		const hasSelectedProducts = products && products.length;
-		const classes = [ 'wc-block-products-grid', 'wc-block-handpicked-products' ];
-		if ( columns ) {
-			classes.push( `cols-${ columns }` );
-		}
-		if ( ! hasSelectedProducts ) {
-			if ( ! loaded ) {
-				classes.push( 'is-loading' );
-			} else {
-				classes.push( 'is-not-found' );
-			}
-		}
+		const { columns, contentVisibility, editMode } = this.props.attributes;
+		const { loaded, products = [] } = this.state;
+		const hasSelectedProducts = products.length > 0;
+		const classes = classnames( {
+			'wc-block-products-grid': true,
+			'wc-block-handpicked-products': true,
+			[ `cols-${ columns }` ]: columns,
+			'is-loading': ! loaded,
+			'is-not-found': loaded && ! hasSelectedProducts,
+			'is-hidden-title': ! contentVisibility.title,
+			'is-hidden-price': ! contentVisibility.price,
+			'is-hidden-button': ! contentVisibility.button,
+		} );
 
 		return (
 			<Fragment>
@@ -190,7 +200,7 @@ class ProductsBlock extends Component {
 				{ editMode ? (
 					this.renderEditMode()
 				) : (
-					<div className={ classes.join( ' ' ) }>
+					<div className={ classes }>
 						{ hasSelectedProducts ? (
 							products.map( ( product ) => (
 								<ProductPreview product={ product } key={ product.id } />

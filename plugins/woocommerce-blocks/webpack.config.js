@@ -49,7 +49,7 @@ const GutenbergBlocksConfig = {
 		'products-attribute': './assets/js/blocks/products-by-attribute/index.js',
 		'featured-product': './assets/js/blocks/featured-product/index.js',
 		// Global styles
-		styles: [ './assets/css/editor.scss' ],
+		styles: [ './assets/css/style.scss', './assets/css/editor.scss' ],
 	},
 	output: {
 		path: path.resolve( __dirname, './build/' ),

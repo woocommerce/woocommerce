@@ -30,4 +30,16 @@ export default {
 		type: 'string',
 		default: 'any',
 	},
+
+	/**
+	 * Content visibility setting
+	 */
+	contentVisibility: {
+		type: 'object',
+		default: {
+			title: true,
+			price: true,
+			button: true,
+		},
+	},
 };

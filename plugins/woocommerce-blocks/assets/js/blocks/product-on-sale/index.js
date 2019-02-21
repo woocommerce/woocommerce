@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import classnames from 'classnames';
 import Gridicon from 'gridicons';
 import { registerBlockType } from '@wordpress/blocks';
 import { RawHTML } from '@wordpress/element';
@@ -52,9 +53,18 @@ registerBlockType( 'woocommerce/product-on-sale', {
 	save( props ) {
 		const {
 			align,
+			contentVisibility,
 		} = props.attributes; /* eslint-disable-line react/prop-types */
+		const classes = classnames(
+			align ? `align${ align }` : '',
+			{
+				'is-hidden-title': ! contentVisibility.title,
+				'is-hidden-price': ! contentVisibility.price,
+				'is-hidden-button': ! contentVisibility.button,
+			}
+		);
 		return (
-			<RawHTML className={ align ? `align${ align }` : '' }>
+			<RawHTML className={ classes }>
 				{ getShortcode( props, 'woocommerce/product-on-sale' ) }
 			</RawHTML>
 		);

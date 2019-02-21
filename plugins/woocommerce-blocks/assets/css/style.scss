@@ -1,0 +1,25 @@
+.wp-block-woocommerce-handpicked-products,
+.wp-block-woocommerce-product-best-sellers,
+.wp-block-woocommerce-product-category,
+.wp-block-woocommerce-product-new,
+.wp-block-woocommerce-product-on-sale,
+.wp-block-woocommerce-product-top-rated,
+.wp-block-woocommerce-products-by-attribute {
+	&.is-hidden-title {
+		.woocommerce-loop-product__title {
+			display: none !important;
+		}
+	}
+
+	&.is-hidden-price {
+		.price {
+			display: none !important;
+		}
+	}
+
+	&.is-hidden-button {
+		.button[data-product_sku] {
+			display: none !important;
+		}
+	}
+}
