@@ -99,15 +99,10 @@ class WC_Marketplace_Suggestions {
 	/**
 	 * Should suggestions be displayed?
 	 *
-	 * User can disabled all suggestions via option.
-	 * We also currently only support English suggestions.
-	 *
 	 * @return bool
 	 */
 	public static function allow_suggestions() {
-		$option = get_option( 'woocommerce_allow_marketplace_suggestions', 'yes' );
-		$allow  = ( 'yes' === $option || 'true' === $option || 1 === $option );
-
+		// We currently only support English suggestions.
 		$locale             = get_locale();
 		$suggestion_locales = array(
 			'en_AU',
@@ -117,9 +112,17 @@ class WC_Marketplace_Suggestions {
 			'en_US',
 			'en_ZA',
 		);
-		$language_supported = in_array( $locale, $suggestion_locales, true );
+		if ( ! in_array( $locale, $suggestion_locales, true ) ) {
+			return false;
+		}
 
-		return ( $allow && $language_supported );
+		// Suggestions are only displayed if user can install plugins.
+		if ( ! current_user_can( 'install_plugins' ) ) {
+			return false;
+		}
+
+		// User can disabled all suggestions via filter.
+		return apply_filters( 'woocommerce_allow_marketplace_suggestions', true );
 	}
 
 	/**
