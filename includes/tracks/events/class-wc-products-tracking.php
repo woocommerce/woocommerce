@@ -80,9 +80,11 @@ class WC_Products_Tracking {
 			return;
 		}
 
+		$category   = get_term( $category_id, 'product_cat' );
 		$properties = array(
 			'category_id' => $category_id,
-			'source'      => ( 'add-tag' === $_POST['action'] ) ? 'categories' : 'product',
+			'parent_id'   => $category->parent,
+			'page'        => ( 'add-tag' === $_POST['action'] ) ? 'categories' : 'product',
 		);
 
 		WC_Tracks::record_event( 'product_category_add', $properties );
