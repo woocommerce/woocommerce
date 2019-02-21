@@ -18,6 +18,7 @@ class WC_Extensions_Tracking {
 		add_action( 'load-woocommerce_page_wc-addons', array( __CLASS__, 'track_extensions_page' ) );
 		add_action( 'woocommerce_helper_connect_start', array( __CLASS__, 'track_helper_connection_start' ) );
 		add_action( 'woocommerce_helper_denied', array( __CLASS__, 'track_helper_connection_cancelled' ) );
+		add_action( 'woocommerce_helper_connected', array( __CLASS__, 'track_helper_connection_complete' ) );
 	}
 
 	/**
@@ -51,5 +52,12 @@ class WC_Extensions_Tracking {
 	 */
 	public static function track_helper_connection_cancelled() {
 		WC_Tracks::record_event( 'extensions_subscriptions_cancelled' );
+	}
+
+	/**
+	 * Send a Tracks even when a Helper connection process completed successfully.
+	 */
+	public static function track_helper_connection_complete() {
+		WC_Tracks::record_event( 'extensions_subscriptions_connected' );
 	}
 }

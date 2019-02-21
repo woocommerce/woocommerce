@@ -750,6 +750,11 @@ class WC_Helper {
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
 
+		/**
+		 * Fires when the Helper connection process has completed successfully.
+		 */
+		do_action( 'woocommerce_helper_connected' );
+
 		// Enable tracking when connected.
 		if ( class_exists( 'WC_Tracker' ) ) {
 			update_option( 'woocommerce_allow_tracking', 'yes' );
