@@ -161,7 +161,7 @@ class WC_Admin_Order extends WC_Order {
 			if ( $tax_data ) {
 				foreach ( $order_taxes as $tax_item ) {
 					$tax_item_id    = $tax_item->get_rate_id();
-					$tax_item_total = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : '';
+					$tax_item_total = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : 0;
 					$refunded       = $this->get_tax_refunded_for_item( $item_id, $tax_item_id, 'shipping' );
 					if ( $refunded ) {
 						$total_shipping_tax_amount += $tax_item_total - $refunded;
