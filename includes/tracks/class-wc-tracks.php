@@ -72,11 +72,14 @@ class WC_Tracks {
 	 * @return array Blog details.
 	 */
 	public static function get_blog_details( $user_id ) {
+		$product_counts = WC_Tracker::get_product_counts();
+
 		return array(
-			// @todo Add revenue/product info and url similar to wc-tracker.
-			'url'       => get_option( 'siteurl' ),
-			'blog_lang' => get_user_locale( $user_id ),
-			'blog_id'   => ( class_exists( 'Jetpack' ) && Jetpack_Options::get_option( 'id' ) ) || null,
+			// @todo Add revenue info and url similar to wc-tracker.
+			'url'            => get_option( 'siteurl' ),
+			'blog_lang'      => get_user_locale( $user_id ),
+			'blog_id'        => ( class_exists( 'Jetpack' ) && Jetpack_Options::get_option( 'id' ) ) || null,
+			'products_count' => $product_counts['total'],
 		);
 	}
 
