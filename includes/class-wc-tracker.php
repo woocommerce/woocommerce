@@ -299,7 +299,7 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	private static function get_product_counts() {
+	public static function get_product_counts() {
 		$product_count          = array();
 		$product_count_data     = wp_count_posts( 'product' );
 		$product_count['total'] = $product_count_data->publish;
