@@ -23,11 +23,17 @@ class WC_Extensions_Tracking {
 	 */
 	public static function track_extensions_page() {
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		$event      = 'extensions_view';
 		$properties = array(
 			'section' => empty( $_REQUEST['section'] ) ? '_featured' : wc_clean( wp_unslash( $_REQUEST['section'] ) ),
 		);
+
+		if ( ! empty( $_REQUEST['search'] ) ) {
+			$event                     = 'extensions_view_search';
+			$properties['search_term'] = wc_clean( wp_unslash( $_REQUEST['search'] ) );
+		}
 		// phpcs:enable
 
-		WC_Tracks::record_event( 'extensions_view', $properties );
+		WC_Tracks::record_event( $event, $properties );
 	}
 }
