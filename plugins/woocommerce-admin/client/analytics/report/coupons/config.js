@@ -70,8 +70,18 @@ export const filters = [
 					},
 				},
 			},
-			{ label: __( 'Top Coupons by Discounted Orders', 'wc-admin' ), value: 'top_orders' },
-			{ label: __( 'Top Coupons by Amount Discounted', 'wc-admin' ), value: 'top_discount' },
+			{
+				label: __( 'Top Coupons by Discounted Orders', 'wc-admin' ),
+				value: 'top_orders',
+				chartMode: 'item-comparison',
+				query: { orderby: 'orders_count', order: 'desc', chart: 'orders_count' },
+			},
+			{
+				label: __( 'Top Coupons by Amount Discounted', 'wc-admin' ),
+				value: 'top_discount',
+				chartMode: 'item-comparison',
+				query: { orderby: 'amount', order: 'desc', chart: 'amount' },
+			},
 		],
 	},
 ];

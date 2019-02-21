@@ -385,4 +385,22 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 		do_action( 'woocommerce_reports_delete_coupon', 0, $order_id );
 	}
 
+	/**
+	 * Gets coupons based on the provided arguments.
+	 *
+	 * @todo Upon core merge, including this in core's `class-wc-coupon-data-store-cpt.php` might make more sense.
+	 * @param array $args Array of args to filter the query by. Supports `include`.
+	 * @return array Array of results.
+	 */
+	public static function get_coupons( $args ) {
+		global $wpdb;
+		$query = "SELECT ID, post_title FROM {$wpdb->prefix}posts WHERE post_type='shop_coupon'";
+
+		if ( ! empty( $args['include'] ) ) {
+			$included_coupons = implode( ',', $args['include'] );
+			$query .= " AND ID IN ({$included_coupons})";
+		}
+
+		return $wpdb->get_results( $query );  // WPCS: cache ok, DB call ok, unprepared SQL ok.
+	}
 }
