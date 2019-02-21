@@ -278,6 +278,21 @@ function wc_admin_admin_body_class( $admin_body_class = '' ) {
 add_filter( 'admin_body_class', 'wc_admin_admin_body_class' );
 
 /**
+ * Removes notices that should not be displayed on WC Admin pages.
+ */
+function wc_admin_remove_notices() {
+	if ( ! wc_admin_is_admin_page() && ! wc_admin_is_embed_enabled_wc_page() ) {
+		return;
+	}
+
+	// Hello Dolly.
+	if ( function_exists( 'hello_dolly' ) ) {
+		remove_action( 'admin_notices', 'hello_dolly' );
+	}
+}
+add_action( 'admin_head', 'wc_admin_remove_notices' );
+
+/**
  * Runs before admin notices action and hides them.
  */
 function wc_admin_admin_before_notices() {
