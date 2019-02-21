@@ -32,6 +32,7 @@
 	}
 
 	@include breakpoint( '<782px' ) {
+		margin-bottom: $gap-large;
 		padding: $gap;
 
 		.woocommerce-card__header {
