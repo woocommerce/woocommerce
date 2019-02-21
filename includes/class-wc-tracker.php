@@ -493,7 +493,7 @@ class WC_Tracker {
 	 *
 	 * @return array
 	 */
-	private static function get_order_totals() {
+	public static function get_order_totals() {
 		global $wpdb;
 
 		$gross_total = $wpdb->get_var( "

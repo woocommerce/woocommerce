@@ -49,6 +49,8 @@ class WC_Site_Tracking {
 				var eventName = '" . WC_Tracks::PREFIX . "' + name;
 				var eventProperties = properties || {};
 				eventProperties.url = '" . home_url() . "'
+				eventProperties.products_count = '" . WC_Tracks::get_products_count() . "'
+				eventProperties.orders_gross = '" . WC_Tracks::get_total_revenue() . "'
 				window._tkq = window._tkq || [];
 				window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );
 			}
