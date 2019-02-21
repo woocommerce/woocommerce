@@ -73,7 +73,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wc_deprecated_function( 'The woocommerce_admin_css action', '2.3', 'admin_enqueue_scripts' );
 			}
 
-			if ( in_array( $screen_id, array( 'edit-product' ), true ) ) {
+			if ( WC_Marketplace_Suggestions::allow_suggestions() && in_array( $screen_id, array( 'edit-product' ), true ) ) {
 				wp_enqueue_style( 'woocommerce_admin_marketplace_styles' );
 			}
 		}
