@@ -244,8 +244,7 @@
 		}
 
 		// Render suggestion data in appropriate places in UI.
-		function displaySuggestions( jsonResponse ) {
-			var marketplaceSuggestionsApiData = jsonResponse.data || [];
+		function displaySuggestions( marketplaceSuggestionsApiData ) {
 			var visibleSuggestions = [];
 
 			// iterate over all suggestions containers, rendering promos
@@ -345,16 +344,9 @@
 			hidePageElementsForEmptyState( visibleSuggestions );
 		}
 
-		// Top-level AJAX request to get suggestion data then render suggestions.
-		var data =
-		jQuery.getJSON(
-			ajaxurl,
-			{
-				'action': 'woocommerce_marketplace_suggestions',
-			},
-			displaySuggestions
-		);
-
+		if ( marketplace_suggestions.suggestions_data ) {
+			displaySuggestions( marketplace_suggestions.suggestions_data );
+		}
 	});
 
 })( jQuery, marketplace_suggestions, ajaxurl );

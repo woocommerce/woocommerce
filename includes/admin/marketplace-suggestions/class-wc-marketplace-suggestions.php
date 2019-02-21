@@ -25,19 +25,10 @@ class WC_Marketplace_Suggestions {
 		}
 
 		// Register ajax api handlers.
-		add_action( 'wp_ajax_woocommerce_marketplace_suggestions', array( __CLASS__, 'get_suggestion_json_data_handler' ) );
 		add_action( 'wp_ajax_woocommerce_add_dismissed_marketplace_suggestion', array( __CLASS__, 'post_add_dismissed_suggestion_handler' ) );
 
 		// Register hooks for rendering suggestions container markup.
 		add_action( 'wc_marketplace_suggestions_products_empty_state', array( __CLASS__, 'render_products_list_empty_state' ) );
-	}
-
-	/**
-	 * Suggestion data GET handler.
-	 */
-	public static function get_suggestion_json_data_handler() {
-		$suggestion_data = self::get_suggestions_api_data();
-		wp_send_json_success( $suggestion_data );
 	}
 
 	/**
@@ -136,7 +127,7 @@ class WC_Marketplace_Suggestions {
 	 *
 	 * @return array of json API data
 	 */
-	private static function get_suggestions_api_data() {
+	public static function get_suggestions_api_data() {
 		$suggestion_data = get_transient( 'wc_marketplace_suggestions' );
 		if ( false !== $suggestion_data ) {
 			return $suggestion_data;

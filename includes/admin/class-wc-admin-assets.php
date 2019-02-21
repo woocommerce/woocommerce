@@ -439,6 +439,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'dismiss_suggestion_nonce' => wp_create_nonce( 'add_dismissed_marketplace_suggestion' ),
 						'installed_woo_plugins'    => $woo_plugin_slugs,
 						'dismissed_suggestions'    => WC_Marketplace_Suggestions::get_dismissed_suggestions(),
+						'suggestions_data'         => WC_Marketplace_Suggestions::get_suggestions_api_data(),
 					)
 				);
 				wp_enqueue_script( 'marketplace-suggestions' );
