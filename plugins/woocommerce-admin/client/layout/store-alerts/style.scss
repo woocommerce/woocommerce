@@ -27,6 +27,10 @@
 		padding: 0;
 	}
 
+	a.components-button.is-button {
+		color: $core-grey-dark-500;
+	}
+
 	@include breakpoint( '<782px' ) {
 		padding: $gap;
 

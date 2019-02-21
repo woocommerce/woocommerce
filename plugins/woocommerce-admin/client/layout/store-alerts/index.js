@@ -152,7 +152,7 @@ class StoreAlerts extends Component {
 					}
 				>
 					<div className="woocommerce-store-alerts__message">{ alert.message }</div>
-					<Button isPrimary className="woocommerce-store-alerts__button" href={ alert.action.url }>
+					<Button isDefault className="woocommerce-store-alerts__button" href={ alert.action.url }>
 						{ alert.action.label }
 					</Button>
 				</Card>
