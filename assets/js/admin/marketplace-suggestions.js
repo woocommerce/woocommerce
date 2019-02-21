@@ -17,6 +17,7 @@
 		// All are prefixed by {WC_Tracks::PREFIX}.
 		// All have one property for `suggestionSlug`, to identify the specific suggestion message.
 
+		// Dismiss the specified suggestion from the UI, and save the dismissal in settings.
 		function dismissSuggestion( suggestionSlug ) {
 			// hide the suggestion in the UI
 			var selector = '[data-suggestion-slug=' + suggestionSlug + ']';
@@ -39,6 +40,7 @@
 			} );
 		}
 
+		// Render DOM element for suggestion dismiss button.
 		function renderDismissButton( suggestionSlug ) {
 			var dismissButton = document.createElement( 'a' );
 
@@ -52,6 +54,7 @@
 			return dismissButton;
 		}
 
+		// Render DOM element for suggestion linkout, optionally with button style.
 		function renderLinkout( slug, url, text, isButton ) {
 			var linkoutButton = document.createElement( 'a' );
 
@@ -78,6 +81,7 @@
 			return linkoutButton;
 		}
 
+		// Render DOM element for suggestion icon image.
 		function renderSuggestionIcon( slug, iconUrl ) {
 			if ( !iconUrl ) {
 				return null;
@@ -90,6 +94,7 @@
 			return image;
 		}
 
+		// Render DOM elements for suggestion content.
 		function renderSuggestionContent( slug, title, copy ) {
 			var left = document.createElement( 'div' );
 
@@ -110,6 +115,7 @@
 			return left;
 		}
 
+		// Render DOM elements for suggestion call-to-action – button or link with dismiss 'x'.
 		function renderSuggestionCTA( slug, url, linkText, linkIsButton, allowDismiss ) {
 			var right = document.createElement( 'div' );
 
@@ -126,6 +132,8 @@
 			return right;
 		}
 
+		// Render a "table banner" style suggestion.
+		// These are used in admin lists, e.g. products list.
 		function renderTableBanner( slug, iconUrl, title, copy, url, buttonText, allowDismiss ) {
 			if ( ! title || ! url ) {
 				return;
@@ -166,6 +174,8 @@
 			return row;
 		}
 
+		// Render a "list item" style suggestion.
+		// These are used in onboarding style contexts, e.g. products list empty state.
 		function renderListItem( slug, iconUrl, title, copy, url, linkText, linkIsButton, allowDismiss ) {
 			var container = document.createElement( 'div' );
 			container.classList.add( 'marketplace-suggestion-container' );
@@ -185,6 +195,7 @@
 			return container;
 		}
 
+		// Filter suggestion data to remove less-relevant suggestions.
 		function getRelevantPromotions( marketplaceSuggestionsApiData, displayContext ) {
 			// select based on display context
 			var promos = _.filter( marketplaceSuggestionsApiData, function( promo ) {
@@ -215,19 +226,24 @@
 			return promos;
 		}
 
+		// Show and hide page elements dependent on suggestion state.
 		function hidePageElementsForEmptyState( visibleSuggestions ) {
 			var showingProductsEmptyStateSuggestions = _.contains( visibleSuggestions, 'products-list-empty-body' );
+
+			// Streamline onboarding UI if we're in 'empty state' welcome mode.
 			if ( showingProductsEmptyStateSuggestions ) {
 				$( '#screen-meta-links' ).hide();
 				$( '#wpfooter' ).hide();
 			}
+
+			// Hide the header & footer, they don't make sense without specific promotion content
 			if ( ! showingProductsEmptyStateSuggestions ) {
-				// hide the header & footer, they don't make sense without specific promotion content
 				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-header"]' ).hide();
 				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-footer"]' ).hide();
 			}
 		}
 
+		// Render suggestion data in appropriate places in UI.
 		function displaySuggestions( jsonResponse ) {
 			var marketplaceSuggestionsApiData = jsonResponse.data || [];
 			var visibleSuggestions = [];
@@ -329,6 +345,7 @@
 			hidePageElementsForEmptyState( visibleSuggestions );
 		}
 
+		// Top-level AJAX request to get suggestion data then render suggestions.
 		var data =
 		jQuery.getJSON(
 			ajaxurl,
