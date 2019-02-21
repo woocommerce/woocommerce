@@ -55,52 +55,51 @@ class WC_Tests_API_Reports_Taxes_Stats extends WC_REST_Unit_Test_Case {
 		WC_Helper_Reports::reset_stats_dbs();
 
 		// Populate all of the data.
+		$tax = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '7',
+				'tax_rate_name'     => 'TestTax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
 		$product = new WC_Product_Simple();
 		$product->set_name( 'Test Product' );
 		$product->set_regular_price( 25 );
+		$product->set_tax_class( 'TestTax' );
 		$product->save();
 
-		$wpdb->insert(
-			$wpdb->prefix . 'woocommerce_tax_rates',
-			array(
-				'tax_rate_id'       => 1,
-				'tax_rate'          => '7',
-				'tax_rate_country'  => 'US',
-				'tax_rate_state'    => 'GA',
-				'tax_rate_name'     => 'TestTax',
-				'tax_rate_priority' => 1,
-				'tax_rate_order'    => 1,
-			)
-		);
-
+		update_option( 'woocommerce_calc_taxes', 'yes' );
 		$order = WC_Helper_Order::create_order( 1, $product );
 		$order->set_status( 'completed' );
 		$order->set_total( 100 ); // $25 x 4.
+		$order->calculate_taxes();
 		$order->save();
 
-		// @todo Remove this once order data is synced to wc_order_tax_lookup
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_order_tax_lookup',
-			array(
-				'order_id'     => 1,
-				'tax_rate_id'  => 1,
-				'date_created' => date( 'Y-m-d H:i:s' ),
-				'shipping_tax' => 2,
-				'order_tax'    => 5,
-				'total_tax'    => 7,
-			)
-		);
-		$wpdb->insert(
-			$wpdb->prefix . 'wc_order_tax_lookup',
-			array(
-				'order_id'     => 2,
-				'tax_rate_id'  => 1,
-				'date_created' => date( 'Y-m-d H:i:s' ),
-				'shipping_tax' => 1,
-				'order_tax'    => 8,
-				'total_tax'    => 9,
-			)
-		);
+		// Add refunds to line items.
+		foreach ( $order->get_items() as $item_id => $item ) {
+			$refund    = array(
+				'amount'     => 1,
+				'reason'     => 'Testing line item refund',
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 1,
+						'refund_total' => 1,
+						'refund_tax'   => array( $tax => 1 ),
+					),
+				),
+			);
+			$wc_refund = wc_create_refund( $refund );
+		}
+
+		WC_Helper_Queue::run_all_pending();
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$reports  = $response->get_data();
@@ -111,10 +110,10 @@ class WC_Tests_API_Reports_Taxes_Stats extends WC_REST_Unit_Test_Case {
 		$tax_report = reset( $reports );
 
 		$this->assertEquals( 1, $tax_report['tax_codes'] );
-		$this->assertEquals( 16, $tax_report['total_tax'] );
-		$this->assertEquals( 13, $tax_report['order_tax'] );
-		$this->assertEquals( 3, $tax_report['shipping_tax'] );
-		$this->assertEquals( 2, $tax_report['orders_count'] );
+		$this->assertEquals( 6.7, $tax_report['total_tax'] ); // 110 * 0.07 (tax rate) - 1 (refund)
+		$this->assertEquals( 6, $tax_report['order_tax'] ); // 100 * 0.07 (tax rate) - 1 (refund)
+		$this->assertEquals( 0.7, $tax_report['shipping_tax'] );
+		$this->assertEquals( 1, $tax_report['orders_count'] );
 	}
 
 	/**

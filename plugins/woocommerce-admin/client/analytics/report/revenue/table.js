@@ -240,8 +240,8 @@ export default compose(
 		return {
 			tableData: {
 				items: {
-					data: get( revenueData, [ 'data', 'intervals' ] ),
-					totalResults: get( revenueData, [ 'totalResults' ] ),
+					data: get( revenueData, [ 'data', 'intervals' ], [] ),
+					totalResults: get( revenueData, [ 'totalResults' ], 0 ),
 				},
 				isError,
 				isRequesting,

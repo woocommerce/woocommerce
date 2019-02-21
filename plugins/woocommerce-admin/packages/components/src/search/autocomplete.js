@@ -59,7 +59,7 @@ export class Autocomplete extends Component {
 		this.reset = this.reset.bind( this );
 		this.search = this.search.bind( this );
 		this.handleKeyDown = this.handleKeyDown.bind( this );
-		this.debouncedLoadOptions = debounce( this.loadOptions, 250 );
+		this.debouncedLoadOptions = debounce( this.loadOptions, 400 );
 
 		this.state = this.constructor.getInitialState();
 	}
@@ -156,7 +156,7 @@ export class Autocomplete extends Component {
 		const promise = ( this.activePromise = Promise.resolve(
 			typeof options === 'function' ? options( query ) : options
 		).then( optionsData => {
-			if ( ! optionsData ) {
+			if ( ! optionsData || ! this.state.query ) {
 				return;
 			}
 			const { selected } = this.props;
@@ -275,7 +275,9 @@ export class Autocomplete extends Component {
 	}
 
 	isExpanded( props, state ) {
-		return state.filteredOptions.length > 0 || ( props.completer.getFreeTextOptions && state.query );
+		const { filteredOptions, query } = state;
+
+		return filteredOptions.length > 0 || ( props.completer.getFreeTextOptions && query );
 	}
 
 	componentDidUpdate( prevProps, prevState ) {

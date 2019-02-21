@@ -25,7 +25,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 * @var array
 	 */
 	protected $column_types = array(
-		'customer_id'     => 'intval',
+		'id'              => 'intval',
 		'user_id'         => 'intval',
 		'orders_count'    => 'intval',
 		'total_spend'     => 'floatval',
@@ -38,7 +38,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 * @var array
 	 */
 	protected $report_columns = array(
-		'customer_id'      => 'customer_id',
+		'id'               => 'customer_id as id',
 		'user_id'          => 'user_id',
 		'username'         => 'username',
 		'name'             => "CONCAT_WS( ' ', first_name, last_name ) as name", // @todo What does this mean for RTL?
@@ -60,7 +60,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		global $wpdb;
 
 		// Initialize some report columns that need disambiguation.
-		$this->report_columns['customer_id']     = $wpdb->prefix . self::TABLE_NAME . '.customer_id';
+		$this->report_columns['id']              = $wpdb->prefix . self::TABLE_NAME . '.customer_id as id';
 		$this->report_columns['date_last_order'] = "MAX( {$wpdb->prefix}wc_order_stats.date_created ) as date_last_order";
 	}
 
@@ -230,8 +230,28 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			}
 		}
 
-		if ( ! empty( $query_args['name'] ) ) {
-			$where_clauses[] = $wpdb->prepare( "CONCAT_WS( ' ', first_name, last_name ) = %s", $query_args['name'] );
+		$search_params = array(
+			'name',
+			'username',
+			'email',
+		);
+
+		if ( ! empty( $query_args['search'] ) ) {
+			$name_like = '%' . $wpdb->esc_like( $query_args['search'] ) . '%';
+
+			if ( empty( $query_args['searchby'] ) || 'name' === $query_args['searchby'] || ! in_array( $query_args['searchby'], $search_params ) ) {
+				$searchby = "CONCAT_WS( ' ', first_name, last_name )";
+			} else {
+				$searchby = $query_args['searchby'];
+			}
+
+			$where_clauses[] = $wpdb->prepare( "{$searchby} LIKE %s", $name_like ); // WPCS: unprepared SQL ok.
+		}
+
+		// Allow a list of customer IDs to be specified.
+		if ( ! empty( $query_args['customers'] ) ) {
+			$included_customers = implode( ',', $query_args['customers'] );
+			$where_clauses[] = "{$customer_lookup_table}.customer_id IN ({$included_customers})";
 		}
 
 		$numeric_params = array(
@@ -253,17 +273,18 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			$subclauses = array();
 			$min_param  = $numeric_param . '_min';
 			$max_param  = $numeric_param . '_max';
+			$or_equal   = isset( $query_args[ $min_param ] ) && isset( $query_args[ $max_param ] ) ? '=' : '';
 
 			if ( isset( $query_args[ $min_param ] ) ) {
 				$subclauses[] = $wpdb->prepare(
-					"{$param_info['column']} >= {$param_info['format']}",
+					"{$param_info['column']} >{$or_equal} {$param_info['format']}",
 					$query_args[ $min_param ]
 				); // WPCS: unprepared SQL ok.
 			}
 
 			if ( isset( $query_args[ $max_param ] ) ) {
 				$subclauses[] = $wpdb->prepare(
-					"{$param_info['column']} <= {$param_info['format']}",
+					"{$param_info['column']} <{$or_equal} {$param_info['format']}",
 					$query_args[ $max_param ]
 				); // WPCS: unprepared SQL ok.
 			}
@@ -312,6 +333,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			'fields'   => '*',
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
+		$this->normalize_timezones( $query_args, $defaults );
 
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = wp_cache_get( $cache_key, $this->cache_group );
@@ -392,52 +414,77 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	}
 
 	/**
-	 * Gets the guest (no user_id) customer ID or creates a new one for
-	 * the corresponding billing email in the provided WC_Order
+	 * Returns an existing customer ID for an order if one exists.
 	 *
-	 * @param WC_Order $order Order to get/create guest customer data with.
-	 * @return int|false The ID of the retrieved/created customer, or false on error.
+	 * @param object $order WC Order.
+	 * @return int|bool
 	 */
-	public function get_or_create_guest_customer_from_order( $order ) {
+	public static function get_existing_customer_id_from_order( $order ) {
+		$user_id = $order->get_customer_id();
+
+		if ( 0 === $user_id ) {
+			$email = $order->get_billing_email( 'edit' );
+
+			if ( $email ) {
+				return self::get_guest_id_by_email( $email );
+			} else {
+				return false;
+			}
+		} else {
+			return self::get_customer_id_by_user_id( $user_id );
+		}
+	}
+
+	/**
+	 * Get or create a customer from a given order.
+	 *
+	 * @param object $order WC Order.
+	 * @return int|bool
+	 */
+	public static function get_or_create_customer_from_order( $order ) {
 		global $wpdb;
+		$returning_customer_id = self::get_existing_customer_id_from_order( $order );
 
-		$email = $order->get_billing_email( 'edit' );
-
-		if ( empty( $email ) ) {
-			return false;
+		if ( $returning_customer_id ) {
+			return $returning_customer_id;
 		}
 
-		$existing_guest = $this->get_guest_by_email( $email );
-
-		if ( $existing_guest ) {
-			return $existing_guest['customer_id'];
-		}
-
-		$result = $wpdb->insert(
-			$wpdb->prefix . self::TABLE_NAME,
-			array(
-				'first_name'       => $order->get_billing_first_name( 'edit' ),
-				'last_name'        => $order->get_billing_last_name( 'edit' ),
-				'email'            => $email,
-				'city'             => $order->get_billing_city( 'edit' ),
-				'postcode'         => $order->get_billing_postcode( 'edit' ),
-				'country'          => $order->get_billing_country( 'edit' ),
-				'date_last_active' => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
-			),
-			array(
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-				'%s',
-			)
+		$data   = array(
+			'first_name'       => $order->get_billing_first_name( 'edit' ),
+			'last_name'        => $order->get_billing_last_name( 'edit' ),
+			'email'            => $order->get_billing_email( 'edit' ),
+			'city'             => $order->get_billing_city( 'edit' ),
+			'postcode'         => $order->get_billing_postcode( 'edit' ),
+			'country'          => $order->get_billing_country( 'edit' ),
+			'date_last_active' => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 		);
+		$format = array(
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+		);
+
+		// Add registered customer data.
+		if ( 0 !== $order->get_user_id() ) {
+			$user_id                 = $order->get_user_id();
+			$customer                = new WC_Customer( $user_id );
+			$data['user_id']         = $user_id;
+			$data['username']        = $customer->get_username( 'edit' );
+			$data['date_registered'] = $customer->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format );
+			$format[]                = '%d';
+			$format[]                = '%s';
+			$format[]                = '%s';
+		}
+
+		$result      = $wpdb->insert( $wpdb->prefix . self::TABLE_NAME, $data, $format );
 		$customer_id = $wpdb->insert_id;
 
 		/**
-		 * Fires when customser's reports are created.
+		 * Fires when a new report customer is created.
 		 *
 		 * @param int $customer_id Customer ID.
 		 */
@@ -447,53 +494,23 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	}
 
 	/**
-	 * Retrieve a guest (no user_id) customer row by email.
+	 * Retrieve a guest ID (when user_id is null) by email.
 	 *
 	 * @param string $email Email address.
 	 * @return false|array Customer array if found, boolean false if not.
 	 */
-	public function get_guest_by_email( $email ) {
+	public static function get_guest_id_by_email( $email ) {
 		global $wpdb;
 
-		$table_name = $wpdb->prefix . self::TABLE_NAME;
-		$guest_row  = $wpdb->get_row(
+		$table_name  = $wpdb->prefix . self::TABLE_NAME;
+		$customer_id = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT * FROM {$table_name} WHERE email = %s AND user_id IS NULL LIMIT 1",
+				"SELECT customer_id FROM {$table_name} WHERE email = %s AND user_id IS NULL LIMIT 1",
 				$email
-			),
-			ARRAY_A
+			)
 		); // WPCS: unprepared SQL ok.
 
-		if ( $guest_row ) {
-			return $this->cast_numbers( $guest_row );
-		}
-
-		return false;
-	}
-
-	/**
-	 * Retrieve a registered customer row by user_id.
-	 *
-	 * @param string|int $user_id User ID.
-	 * @return false|array Customer array if found, boolean false if not.
-	 */
-	public function get_customer_by_user_id( $user_id ) {
-		global $wpdb;
-
-		$table_name = $wpdb->prefix . self::TABLE_NAME;
-		$customer   = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT * FROM {$table_name} WHERE user_id = %d LIMIT 1",
-				$user_id
-			),
-			ARRAY_A
-		); // WPCS: unprepared SQL ok.
-
-		if ( $customer ) {
-			return $this->cast_numbers( $customer );
-		}
-
-		return false;
+		return $customer_id ? (int) $customer_id : false;
 	}
 
 	/**
@@ -517,6 +534,30 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	}
 
 	/**
+	 * Retrieve the oldest orders made by a customer.
+	 *
+	 * @param int $customer_id Customer ID.
+	 * @return array Orders.
+	 */
+	public static function get_oldest_orders( $customer_id ) {
+		global $wpdb;
+		$orders_table                = $wpdb->prefix . 'wc_order_stats';
+		$excluded_statuses           = array_map( array( __CLASS__, 'normalize_order_status' ), self::get_excluded_report_order_statuses() );
+		$excluded_statuses_condition = '';
+		if ( ! empty( $excluded_statuses ) ) {
+			$excluded_statuses_str       = implode( "','", $excluded_statuses );
+			$excluded_statuses_condition = "AND status NOT IN ('{$excluded_statuses_str}')";
+		}
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT order_id, date_created FROM {$orders_table} WHERE customer_id = %d {$excluded_statuses_condition} ORDER BY date_created, order_id ASC LIMIT 2",
+				$customer_id
+			)
+		); // WPCS: unprepared SQL ok.
+	}
+
+	/**
 	 * Update the database with customer data.
 	 *
 	 * @param int $user_id WP User ID to update customer data for.
@@ -527,7 +568,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 
 		$customer = new WC_Customer( $user_id );
 
-		if ( $customer->get_id() != $user_id ) {
+		if ( ! self::is_valid_customer( $user_id ) ) {
 			return false;
 		}
 
@@ -541,7 +582,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			'city'             => $customer->get_billing_city( 'edit' ),
 			'postcode'         => $customer->get_billing_postcode( 'edit' ),
 			'country'          => $customer->get_billing_country( 'edit' ),
-			'date_registered'  => date( 'Y-m-d H:i:s', $customer->get_date_created( 'edit' )->getTimestamp() ),
+			'date_registered'  => $customer->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format ),
 			'date_last_active' => $last_active ? date( 'Y-m-d H:i:s', $last_active ) : null,
 		);
 		$format      = array(
@@ -574,6 +615,26 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		 */
 		do_action( 'woocommerce_reports_update_customer', $customer_id );
 		return $results;
+	}
+
+	/**
+	 * Check if a user ID is a valid customer or other user role with past orders.
+	 *
+	 * @param int $user_id User ID.
+	 * @return bool
+	 */
+	protected static function is_valid_customer( $user_id ) {
+		$customer = new WC_Customer( $user_id );
+
+		if ( $customer->get_id() !== $user_id ) {
+			return false;
+		}
+
+		if ( $customer->get_order_count() < 1 && 'customer' !== $customer->get_role() ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

@@ -207,8 +207,6 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
-		$now        = time();
-		$week_back  = $now - WEEK_IN_SECONDS;
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
@@ -216,13 +214,14 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 			'page'          => 1,
 			'order'         => 'DESC',
 			'orderby'       => 'coupon_id',
-			'before'        => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
-			'after'         => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
+			'before'        => WC_Admin_Reports_Interval::default_before(),
+			'after'         => WC_Admin_Reports_Interval::default_after(),
 			'fields'        => '*',
 			'coupons'       => array(),
 			'extended_info' => false,
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
+		$this->normalize_timezones( $query_args, $defaults );
 
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = wp_cache_get( $cache_key, $this->cache_group );
@@ -336,7 +335,7 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 					'order_id'        => $order_id,
 					'coupon_id'       => $coupon_id,
 					'discount_amount' => $coupon_item->get_discount(),
-					'date_created'    => date( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+					'date_created'    => $order->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format ),
 				),
 				array(
 					'%d',
@@ -386,4 +385,22 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 		do_action( 'woocommerce_reports_delete_coupon', 0, $order_id );
 	}
 
+	/**
+	 * Gets coupons based on the provided arguments.
+	 *
+	 * @todo Upon core merge, including this in core's `class-wc-coupon-data-store-cpt.php` might make more sense.
+	 * @param array $args Array of args to filter the query by. Supports `include`.
+	 * @return array Array of results.
+	 */
+	public static function get_coupons( $args ) {
+		global $wpdb;
+		$query = "SELECT ID, post_title FROM {$wpdb->prefix}posts WHERE post_type='shop_coupon'";
+
+		if ( ! empty( $args['include'] ) ) {
+			$included_coupons = implode( ',', $args['include'] );
+			$query .= " AND ID IN ({$included_coupons})";
+		}
+
+		return $wpdb->get_results( $query );  // WPCS: cache ok, DB call ok, unprepared SQL ok.
+	}
 }

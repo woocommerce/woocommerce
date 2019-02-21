@@ -24,7 +24,8 @@ export default {
 		let payload = '';
 		if ( search ) {
 			const query = {
-				username: search,
+				search,
+				searchby: 'username',
 				per_page: 10,
 			};
 			payload = stringifyQuery( query );

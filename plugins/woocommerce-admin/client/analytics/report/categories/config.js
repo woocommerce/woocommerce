@@ -13,16 +13,22 @@ export const charts = [
 	{
 		key: 'items_sold',
 		label: __( 'Items Sold', 'wc-admin' ),
+		order: 'desc',
+		orderby: 'items_sold',
 		type: 'number',
 	},
 	{
 		key: 'net_revenue',
 		label: __( 'Net Revenue', 'wc-admin' ),
+		order: 'desc',
+		orderby: 'net_revenue',
 		type: 'currency',
 	},
 	{
 		key: 'orders_count',
 		label: __( 'Orders Count', 'wc-admin' ),
+		order: 'desc',
+		orderby: 'orders_count',
 		type: 'number',
 	},
 ];
@@ -30,7 +36,7 @@ export const charts = [
 export const filters = [
 	{
 		label: __( 'Show', 'wc-admin' ),
-		staticParams: [ 'chart' ],
+		staticParams: [],
 		param: 'filter',
 		showFilters: () => true,
 		filters: [
@@ -77,13 +83,13 @@ export const filters = [
 				label: __( 'Top Categories by Items Sold', 'wc-admin' ),
 				value: 'top_items',
 				chartMode: 'item-comparison',
-				query: { orderby: 'items_sold', order: 'desc' },
+				query: { orderby: 'items_sold', order: 'desc', chart: 'items_sold' },
 			},
 			{
 				label: __( 'Top Categories by Net Revenue', 'wc-admin' ),
 				value: 'top_revenue',
 				chartMode: 'item-comparison',
-				query: { orderby: 'net_revenue', order: 'desc' },
+				query: { orderby: 'net_revenue', order: 'desc', chart: 'net_revenue' },
 			},
 		],
 	},

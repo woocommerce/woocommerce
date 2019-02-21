@@ -60,10 +60,11 @@ class D3Legend extends Component {
 			totalLabel,
 		} = this.props;
 		const { isScrollable } = this.state;
-		const numberOfRowsVisible = data.filter( row => row.visible ).length;
-		const showTotalLabel = legendDirection === 'column' && data.length > numberOfRowsVisible && totalLabel;
+		const visibleData = data.filter( key => key.visible );
+		const numberOfRowsVisible = visibleData.length;
+		const showTotalLabel = legendDirection === 'column' && data.length > selectionLimit && totalLabel;
 
-		const visibleKeys = data.filter( key => key.visible );
+		const keys = data.length > selectionLimit ? visibleData : data;
 
 		return (
 			<div
@@ -113,7 +114,7 @@ class D3Legend extends Component {
 											'woocommerce-legend__item-checkmark-checked': row.visible,
 										} ) }
 										id={ row.key }
-										style={ { color: getColor( row.key, visibleKeys, colorScheme ) } }
+										style={ { color: getColor( keys, colorScheme )( row.key ) } }
 									/>
 									<span className="woocommerce-legend__item-title" id={ row.key }>
 										{ row.key }

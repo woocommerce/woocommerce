@@ -2,12 +2,25 @@
 
 .woocommerce-search {
 	position: relative;
+	min-width: 0;
+
+	>div {
+		min-width: 0;
+	}
 
 	.woocommerce-search__icon {
 		position: absolute;
 		top: 10px;
 		left: 10px;
 		fill: $core-grey-light-900;
+	}
+
+	.woocommerce-tag {
+		max-width: 100%;
+	}
+
+	.woocommerce-tag .woocommerce-tag__text {
+		max-width: calc(100% - 24px);
 	}
 
 	&:not(.has-inline-tags) {
@@ -37,7 +50,12 @@
 			box-shadow: inset 0 0 0 $input-active-inner, 0 0 1px 2px $input-active-outer;
 		}
 
+		&.has-tags {
+			padding-right: 36px;
+		}
+
 		.woocommerce-search__token-list {
+			max-width: 100%;
 			display: inline-block;
 			padding: 1px 0;
 		}
@@ -50,6 +68,7 @@
 		box-shadow: none;
 		padding: 2px 0;
 		line-height: 20px;
+		max-width: 100%;
 		min-width: 70px;
 		font-size: inherit;
 		vertical-align: middle;

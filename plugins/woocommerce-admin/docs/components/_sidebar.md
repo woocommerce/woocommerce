@@ -26,6 +26,7 @@
     * [Pagination](components/packages/pagination.md)
     * [ProductImage](components/packages/product-image.md)
     * [Rating](components/packages/rating.md)
+    * [SearchListControl](components/packages/search-list-control.md)
     * [Search](components/packages/search.md)
     * [SectionHeader](components/packages/section-header.md)
     * [Section](components/packages/section.md)

@@ -180,8 +180,6 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
-		$now        = time();
-		$week_back  = $now - WEEK_IN_SECONDS;
 
 		// These defaults are only applied when not using REST API, as the API has its own defaults that overwrite these for most values (except before, after, etc).
 		$defaults   = array(
@@ -189,8 +187,8 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 			'page'             => 1,
 			'order'            => 'DESC',
 			'orderby'          => 'date',
-			'before'           => date( WC_Admin_Reports_Interval::$iso_datetime_format, $now ),
-			'after'            => date( WC_Admin_Reports_Interval::$iso_datetime_format, $week_back ),
+			'before'           => WC_Admin_Reports_Interval::default_before(),
+			'after'            => WC_Admin_Reports_Interval::default_after(),
 			'interval'         => 'week',
 			'fields'           => '*',
 			'segmentby'        => '',
@@ -206,6 +204,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 			'categories'       => array(),
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
+		$this->normalize_timezones( $query_args, $defaults );
 
 		$cache_key = $this->get_cache_key( $query_args );
 		$data      = wp_cache_get( $cache_key, $this->cache_group );
@@ -402,9 +401,10 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 			'refund_total'       => $order->get_total_refunded(),
 			'tax_total'          => $order->get_total_tax(),
 			'shipping_total'     => $order->get_shipping_total(),
-			'net_total'          => (float) $order->get_total() - (float) $order->get_total_tax() - (float) $order->get_shipping_total(),
+			'net_total'          => self::get_net_total( $order ),
 			'returning_customer' => self::is_returning_customer( $order ),
 			'status'             => self::normalize_order_status( $order->get_status() ),
+			'customer_id'        => WC_Admin_Reports_Customers_Data_Store::get_or_create_customer_from_order( $order ),
 		);
 		$format = array(
 			'%d',
@@ -418,31 +418,8 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 			'%f',
 			'%d',
 			'%s',
+			'%d',
 		);
-
-		// Ensure we're associating this order with a Customer in the lookup table.
-		$order_user_id        = $order->get_customer_id();
-		$customers_data_store = new WC_Admin_Reports_Customers_Data_Store();
-
-		if ( 0 === $order_user_id ) {
-			$email = $order->get_billing_email( 'edit' );
-
-			if ( $email ) {
-				$customer_id = $customers_data_store->get_or_create_guest_customer_from_order( $order );
-
-				if ( $customer_id ) {
-					$data['customer_id'] = $customer_id;
-					$format[]            = '%d';
-				}
-			}
-		} else {
-			$customer = $customers_data_store->get_customer_by_user_id( $order_user_id );
-
-			if ( $customer && $customer['customer_id'] ) {
-				$data['customer_id'] = $customer['customer_id'];
-				$format[]            = '%d';
-			}
-		}
 
 		// Update or add the information to the DB.
 		$result = $wpdb->replace( $table_name, $data, $format );
@@ -509,30 +486,87 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	}
 
 	/**
+	 * Get the net amount from an order without shipping, tax, or refunds.
+	 *
+	 * @param array $order WC_Order object.
+	 * @return float
+	 */
+	protected static function get_net_total( $order ) {
+		$net_total = $order->get_total() - $order->get_total_tax() - $order->get_shipping_total();
+
+		$refunds = $order->get_refunds();
+		foreach ( $refunds as $refund ) {
+			$net_total += $refund->get_total() - $refund->get_total_tax() - $refund->get_shipping_total();
+		}
+
+		return $net_total > 0 ? (float) $net_total : 0;
+	}
+
+	/**
 	 * Check to see if an order's customer has made previous orders or not
 	 *
 	 * @param array $order WC_Order object.
 	 * @return bool
 	 */
 	protected static function is_returning_customer( $order ) {
-		global $wpdb;
-		$customer_id        = WC_Admin_Reports_Customers_Data_Store::get_customer_id_by_user_id( $order->get_user_id() );
-		$orders_stats_table = $wpdb->prefix . self::TABLE_NAME;
+		$customer_id = WC_Admin_Reports_Customers_Data_Store::get_customer_id_by_user_id( $order->get_user_id() );
 
 		if ( ! $customer_id ) {
 			return false;
 		}
 
-		$customer_orders = $wpdb->get_var(
+		$oldest_orders = WC_Admin_Reports_Customers_Data_Store::get_oldest_orders( $customer_id );
+
+		if ( empty( $oldest_orders ) ) {
+			return false;
+		}
+
+		$first_order       = $oldest_orders[0];
+		$second_order      = isset( $oldest_orders[1] ) ? $oldest_orders[1] : false;
+		$excluded_statuses = self::get_excluded_report_order_statuses();
+
+		// Order is older than previous first order.
+		if ( $order->get_date_created() < new WC_DateTime( $first_order->date_created ) &&
+			! in_array( $order->get_status(), $excluded_statuses, true )
+		) {
+			self::set_customer_first_order( $customer_id, $order->get_id() );
+			return false;
+		}
+
+		// The current order is the oldest known order.
+		$is_first_order = (int) $order->get_id() === (int) $first_order->order_id;
+		// Order date has changed and next oldest is now the first order.
+		$date_change = $second_order &&
+			$order->get_date_created() > new WC_DateTime( $first_order->date_created ) &&
+			new WC_DateTime( $second_order->date_created ) < $order->get_date_created();
+		// Status has changed to an excluded status and next oldest order is now the first order.
+		$status_change = $second_order &&
+			in_array( $order->get_status(), $excluded_statuses, true );
+		if ( $is_first_order && ( $date_change || $status_change ) ) {
+			self::set_customer_first_order( $customer_id, $second_order->order_id );
+			return true;
+		}
+
+		return (int) $order->get_id() !== (int) $first_order->order_id;
+	}
+
+	/**
+	 * Set a customer's first order and all others to returning.
+	 *
+	 * @param int $customer_id Customer ID.
+	 * @param int $order_id Order ID.
+	 */
+	protected static function set_customer_first_order( $customer_id, $order_id ) {
+		global $wpdb;
+		$orders_stats_table = $wpdb->prefix . self::TABLE_NAME;
+
+		$wpdb->query(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM ${orders_stats_table} WHERE customer_id = %d AND date_created < %s AND order_id != %d",
-				$customer_id,
-				date( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ),
-				$order->get_id()
+				"UPDATE ${orders_stats_table} SET returning_customer = CASE WHEN order_id = %d THEN false ELSE true END WHERE customer_id = %d",
+				$order_id,
+				$customer_id
 			)
 		);
-
-		return $customer_orders >= 1;
 	}
 
 	/**

@@ -23,7 +23,7 @@ class WC_Tests_API_Products extends WC_REST_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 
-		$this->user     = $this->factory->user->create(
+		$this->user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
@@ -52,7 +52,7 @@ class WC_Tests_API_Products extends WC_REST_Unit_Test_Case {
 		);
 
 		foreach ( $properties as $property_key => $property ) {
-			if ( in_array( $property_key, $properties_to_embed ) ) {
+			if ( in_array( $property_key, $properties_to_embed, true ) ) {
 				$this->assertEquals( array( 'view', 'edit', 'embed' ), $property['context'] );
 			}
 		}

@@ -297,12 +297,20 @@ class WC_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_report_with_user_filter() {
 		$test_info = $this->filter_setup();
+		global $wpdb;
+
+		$customer_id = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT customer_id FROM {$wpdb->prefix}wc_customer_lookup WHERE user_id = %d",
+				1
+			)
+		);
 
 		// Test includes filtering.
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'user_includes' => 1,
+				'customer_includes' => $customer_id,
 			)
 		);
 		$response        = $this->server->dispatch( $request );
@@ -318,7 +326,7 @@ class WC_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'user_excludes' => 1,
+				'customer_excludes' => $customer_id,
 			)
 		);
 		$response        = $this->server->dispatch( $request );
@@ -388,7 +396,7 @@ class WC_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 10, count( $properties ) );
+		$this->assertEquals( 11, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'product_id', $properties );
 		$this->assertArrayHasKey( 'date', $properties );
@@ -398,6 +406,7 @@ class WC_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'file_path', $properties );
 		$this->assertArrayHasKey( 'order_id', $properties );
 		$this->assertArrayHasKey( 'user_id', $properties );
+		$this->assertArrayHasKey( 'username', $properties );
 		$this->assertArrayHasKey( 'ip_address', $properties );
 	}
 }

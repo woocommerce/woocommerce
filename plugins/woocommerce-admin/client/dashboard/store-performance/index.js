@@ -22,7 +22,6 @@ import { formatCurrency } from '@woocommerce/currency';
  * Internal dependencies
  */
 import {
-	Card,
 	EllipsisMenu,
 	MenuItem,
 	MenuTitle,
@@ -160,7 +159,7 @@ class StorePerformance extends Component {
 		return (
 			<Fragment>
 				<SectionHeader title={ __( 'Store Performance', 'wc-admin' ) } menu={ this.renderMenu() } />
-				<Card className="woocommerce-dashboard__store-performance">{ this.renderList() }</Card>
+				<div className="woocommerce-dashboard__store-performance">{ this.renderList() }</div>
 			</Fragment>
 		);
 	}

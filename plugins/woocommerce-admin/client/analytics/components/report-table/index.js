@@ -194,7 +194,9 @@ export default compose(
 		if ( query.search && ! ( query[ endpoint ] && query[ endpoint ].length ) ) {
 			return {};
 		}
-		const chartEndpoint = 'variations' === endpoint ? 'products' : endpoint;
+		const chartEndpoint = [ 'variations', 'categories' ].includes( endpoint )
+			? 'products'
+			: endpoint;
 		const primaryData = getSummary
 			? getReportChartData( chartEndpoint, 'primary', query, select )
 			: {};

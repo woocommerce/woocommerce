@@ -7,7 +7,7 @@
  * Author URI: https://woocommerce.com/
  * Text Domain: wc-admin
  * Domain Path: /languages
- * Version: 0.6.0
+ * Version: 0.7.0
  *
  * @package WC_Admin
  */
@@ -25,7 +25,7 @@ if ( ! defined( 'WC_ADMIN_PLUGIN_FILE' ) ) {
 }
 
 /**
- * Notify users of the plugin requirements
+ * Notify users of the plugin requirements.
  */
 function wc_admin_plugins_notice() {
 	// The notice varies by WordPress version.
@@ -35,14 +35,14 @@ function wc_admin_plugins_notice() {
 	if ( $wordpress_includes_gutenberg ) {
 		$message = sprintf(
 			/* translators: URL of WooCommerce plugin */
-			__( 'The WooCommerce Admin feature plugin requires <a href="%s">WooCommerce</a> (>3.5) to be installed and active.', 'wc-admin' ),
+			__( 'The WooCommerce Admin feature plugin requires <a href="%s">WooCommerce</a> 3.5 or greater to be installed and active.', 'wc-admin' ),
 			'https://wordpress.org/plugins/woocommerce/'
 		);
 	} else {
 		$message = sprintf(
-			/* translators: 1: URL of Gutenberg plugin, 2: URL of WooCommerce plugin */
-			__( 'The WooCommerce Admin feature plugin requires both <a href="%1$s">Gutenberg</a> and <a href="%2$s">WooCommerce</a> (>3.5) to be installed and active.', 'wc-admin' ),
-			'https://wordpress.org/plugins/gutenberg/',
+			/* translators: 1: URL of WordPress.org, 2: URL of WooCommerce plugin */
+			__( 'The WooCommerce Admin feature plugin requires both <a href="%1$s">WordPress</a> 5.0 or greater and <a href="%2$s">WooCommerce</a> 3.5 or greater to be installed and active.', 'wc-admin' ),
+			'https://wordpress.org/',
 			'https://wordpress.org/plugins/woocommerce/'
 		);
 	}
@@ -50,7 +50,7 @@ function wc_admin_plugins_notice() {
 }
 
 /**
- * Notify users that the plugin needs to be built
+ * Notify users that the plugin needs to be built.
  */
 function wc_admin_build_notice() {
 	$message_one = __( 'You have installed a development version of WooCommerce Admin which requires files to be built. From the plugin directory, run <code>npm install</code> to install dependencies, <code>npm run build</code> to build the files.', 'wc-admin' );
@@ -73,11 +73,8 @@ function dependencies_satisfied() {
 		return false;
 	}
 
-	$wordpress_version            = get_bloginfo( 'version' );
-	$wordpress_includes_gutenberg = version_compare( $wordpress_version, '4.9.9', '>' );
-	$gutenberg_plugin_active      = defined( 'GUTENBERG_DEVELOPMENT_MODE' ) || defined( 'GUTENBERG_VERSION' );
-
-	return $wordpress_includes_gutenberg || $gutenberg_plugin_active;
+	$wordpress_version = get_bloginfo( 'version' );
+	return version_compare( $wordpress_version, '4.9.9', '>' );
 }
 
 /**
@@ -98,16 +95,12 @@ function do_wc_admin_daily() {
 add_action( 'wc_admin_daily', 'do_wc_admin_daily' );
 
 /**
- * Activates wc-admin plugin when installed.
+ * Initializes wc-admin daily action when plugin activated.
  */
 function activate_wc_admin_plugin() {
 	if ( ! dependencies_satisfied() ) {
 		return;
 	}
-	// Initialize the WC API extensions.
-	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-api-init.php';
-
-	WC_Admin_Api_Init::install();
 
 	if ( ! wp_next_scheduled( 'wc_admin_daily' ) ) {
 		wp_schedule_event( time(), 'daily', 'wc_admin_daily' );
@@ -135,23 +128,6 @@ function deactivate_wc_admin_plugin() {
 register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, 'deactivate_wc_admin_plugin' );
 
 /**
- * Update the database tables if needed. This hooked function does NOT need to
- * be ported to WooCommerce's code base - WC_Install will do this on plugin
- * update automatically.
- */
-function wc_admin_init() {
-	if ( ! dependencies_satisfied() ) {
-		return;
-	}
-
-	// Only create/update tables on init if WP_DEBUG is true.
-	if ( defined( 'WP_DEBUG' ) && WP_DEBUG && wc_admin_build_file_exists() ) {
-		WC_Admin_Api_Init::create_db_tables();
-	}
-}
-add_action( 'init', 'wc_admin_init' );
-
-/**
  * Set up the plugin, only if we can detect both Gutenberg and WooCommerce
  */
 function wc_admin_plugins_loaded() {
@@ -160,16 +136,22 @@ function wc_admin_plugins_loaded() {
 		return;
 	}
 
+	if ( ! function_exists( 'wc_admin_get_feature_config' ) ) {
+		require_once WC_ADMIN_ABSPATH . '/includes/feature-config.php';
+	}
+
 	// Initialize the WC API extensions.
-	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-api-init.php';
+	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-sync.php';
+	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-install.php';
+	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-api-init.php';
 
 	// Some common utilities.
-	require_once dirname( __FILE__ ) . '/lib/common.php';
+	require_once WC_ADMIN_ABSPATH . '/lib/common.php';
 
 	// Admin note providers.
-	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-new-sales-record.php';
-	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-settings-notes.php';
-	require_once dirname( __FILE__ ) . '/includes/class-wc-admin-notes-woo-subscriptions-notes.php';
+	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-notes-new-sales-record.php';
+	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-notes-settings-notes.php';
+	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-notes-woo-subscriptions-notes.php';
 
 	// Verify we have a proper build.
 	if ( ! wc_admin_build_file_exists() ) {
@@ -178,10 +160,10 @@ function wc_admin_plugins_loaded() {
 	}
 
 	// Register script files.
-	require_once dirname( __FILE__ ) . '/lib/client-assets.php';
+	require_once WC_ADMIN_ABSPATH . '/lib/client-assets.php';
 
 	// Create the Admin pages.
-	require_once dirname( __FILE__ ) . '/lib/admin.php';
+	require_once WC_ADMIN_ABSPATH . '/lib/admin.php';
 }
 add_action( 'plugins_loaded', 'wc_admin_plugins_loaded' );
 

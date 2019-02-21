@@ -49,6 +49,8 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 		$args['match']               = $request['match'];
 		$args['product_includes']    = (array) $request['product_includes'];
 		$args['product_excludes']    = (array) $request['product_excludes'];
+		$args['customer_includes']   = (array) $request['customer_includes'];
+		$args['customer_excludes']   = (array) $request['customer_excludes'];
 		$args['order_includes']      = (array) $request['order_includes'];
 		$args['order_excludes']      = (array) $request['order_excludes'];
 		$args['ip_address_includes'] = (array) $request['ip_address_includes'];
@@ -329,8 +331,8 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 				'type' => 'integer',
 			),
 		);
-		$params['user_includes'] = array(
-			'description'       => __( 'Limit response to objects that have the specified user ids.', 'wc-admin' ),
+		$params['customer_includes'] = array(
+			'description'       => __( 'Limit response to objects that have the specified customer ids.', 'wc-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -338,8 +340,8 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 				'type' => 'integer',
 			),
 		);
-		$params['user_excludes'] = array(
-			'description'       => __( 'Limit response to objects that don\'t have the specified user ids.', 'wc-admin' ),
+		$params['customer_excludes'] = array(
+			'description'       => __( 'Limit response to objects that don\'t have the specified customer ids.', 'wc-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',

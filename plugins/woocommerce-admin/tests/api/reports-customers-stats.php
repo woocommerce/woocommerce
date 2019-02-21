@@ -40,7 +40,7 @@ class WC_Tests_API_Reports_Customers_Stats extends WC_REST_Unit_Test_Case {
 	 *
 	 * @since 3.5.0
 	 */
-	public function _test_register_routes() {
+	public function test_register_routes() {
 		$routes = $this->server->get_routes();
 
 		$this->assertArrayHasKey( $this->endpoint, $routes );
@@ -59,9 +59,8 @@ class WC_Tests_API_Reports_Customers_Stats extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertCount( 2, $properties );
+		$this->assertCount( 1, $properties );
 		$this->assertArrayHasKey( 'totals', $properties );
-		$this->assertArrayHasKey( 'intervals', $properties );
 		$this->assertCount( 4, $properties['totals']['properties'] );
 		$this->assertArrayHasKey( 'customers_count', $properties['totals']['properties'] );
 		$this->assertArrayHasKey( 'avg_orders_count', $properties['totals']['properties'] );
@@ -142,7 +141,7 @@ class WC_Tests_API_Reports_Customers_Stats extends WC_REST_Unit_Test_Case {
 		// Test name parameter (case with no matches).
 		$request->set_query_params(
 			array(
-				'name' => 'Nota Customername',
+				'search' => 'Nota Customername',
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -157,7 +156,7 @@ class WC_Tests_API_Reports_Customers_Stats extends WC_REST_Unit_Test_Case {
 		// Test name and last_order parameters.
 		$request->set_query_params(
 			array(
-				'name'             => 'Jeff',
+				'search'           => 'Jeff',
 				'last_order_after' => date( 'Y-m-d' ) . 'T00:00:00Z',
 			)
 		);

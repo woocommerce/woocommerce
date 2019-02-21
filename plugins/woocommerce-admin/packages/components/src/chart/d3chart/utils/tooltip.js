@@ -6,143 +6,148 @@
 import { select as d3Select } from 'd3-selection';
 import moment from 'moment';
 
-/**
- * Internal dependencies
- */
-import { getColor } from './color';
+class ChartTooltip {
+	constructor() {
+		this.ref = null;
+		this.chart = null;
+		this.position = '';
+		this.title = '';
+		this.labelFormat = '';
+		this.valueFormat = '';
+		this.visibleKeys = '';
+		this.getColor = null;
+		this.margin = 24;
+	}
 
-export const hideTooltip = ( parentNode, tooltipNode ) => {
-	d3Select( parentNode )
-		.selectAll( '.barfocus, .focus-grid' )
-		.attr( 'opacity', '0' );
-	d3Select( tooltipNode )
-		.style( 'visibility', 'hidden' );
-};
+	calculateXPosition(
+		elementCoords,
+		chartCoords,
+		elementWidthRatio,
+	) {
+		const tooltipSize = this.ref.getBoundingClientRect();
+		const d3BaseCoords = d3Select( '.d3-base' ).node().getBoundingClientRect();
+		const leftMargin = Math.max( d3BaseCoords.left, chartCoords.left );
 
-const calculateTooltipXPosition = (
-	elementCoords,
-	chartCoords,
-	tooltipSize,
-	tooltipMargin,
-	elementWidthRatio,
-	tooltipPosition
-) => {
-	const d3BaseCoords = d3Select( '.d3-base' ).node().getBoundingClientRect();
-	const leftMargin = Math.max( d3BaseCoords.left, chartCoords.left );
+		if ( this.position === 'below' ) {
+			return Math.max(
+				this.margin,
+				Math.min(
+					elementCoords.left + elementCoords.width * 0.5 - tooltipSize.width / 2 - leftMargin,
+					d3BaseCoords.width - tooltipSize.width - this.margin
+				)
+			);
+		}
 
-	if ( tooltipPosition === 'below' ) {
-		return Math.max(
-			tooltipMargin,
-			Math.min(
-				elementCoords.left + elementCoords.width * 0.5 - tooltipSize.width / 2 - leftMargin,
-				d3BaseCoords.width - tooltipSize.width - tooltipMargin
-			)
+		const xPosition =
+			elementCoords.left + elementCoords.width * elementWidthRatio + this.margin - leftMargin;
+
+		if ( xPosition + tooltipSize.width + this.margin > d3BaseCoords.width ) {
+			return Math.max(
+				this.margin,
+				elementCoords.left +
+					elementCoords.width * ( 1 - elementWidthRatio ) -
+					tooltipSize.width -
+					this.margin -
+					leftMargin
+			);
+		}
+
+		return xPosition;
+	}
+
+	calculateYPosition(
+		elementCoords,
+		chartCoords,
+	) {
+		if ( this.position === 'below' ) {
+			return chartCoords.height;
+		}
+
+		const tooltipSize = this.ref.getBoundingClientRect();
+		const yPosition = elementCoords.top + this.margin - chartCoords.top;
+		if ( yPosition + tooltipSize.height + this.margin > chartCoords.height ) {
+			return Math.max( 0, elementCoords.top - tooltipSize.height - this.margin - chartCoords.top );
+		}
+
+		return yPosition;
+	}
+
+	calculatePosition( element, elementWidthRatio = 1 ) {
+		const elementCoords = element.getBoundingClientRect();
+		const chartCoords = this.chart.getBoundingClientRect();
+
+		if ( this.position === 'below' ) {
+			elementWidthRatio = 0;
+		}
+
+		return {
+			x: this.calculateXPosition(
+				elementCoords,
+				chartCoords,
+				elementWidthRatio,
+			),
+			y: this.calculateYPosition(
+				elementCoords,
+				chartCoords,
+			),
+		};
+	}
+
+	hide() {
+		d3Select( this.chart )
+			.selectAll( '.barfocus, .focus-grid' )
+			.attr( 'opacity', '0' );
+		d3Select( this.ref )
+			.style( 'visibility', 'hidden' );
+	}
+
+	getTooltipRowLabel( d, row ) {
+		if ( d[ row.key ].labelDate ) {
+			return this.labelFormat( moment( d[ row.key ].labelDate ).toDate() );
+		}
+		return row.key;
+	}
+
+	show( d, triggerElement, parentNode, elementWidthRatio = 1 ) {
+		if ( ! this.visibleKeys.length ) {
+			return;
+		}
+		d3Select( parentNode )
+			.select( '.focus-grid, .barfocus' )
+			.attr( 'opacity', '1' );
+		const position = this.calculatePosition( triggerElement, elementWidthRatio );
+
+		const keys = this.visibleKeys.map(
+			row => `
+					<li class="key-row">
+						<div class="key-container">
+							<span
+								class="key-color"
+								style="background-color: ${ this.getColor( row.key ) }">
+							</span>
+							<span class="key-key">${ this.getTooltipRowLabel( d, row ) }</span>
+						</div>
+						<span class="key-value">${ this.valueFormat( d[ row.key ].value ) }</span>
+					</li>
+				`
 		);
+
+		const tooltipTitle = this.title
+			? this.title
+			: this.labelFormat( moment( d.date ).toDate() );
+
+		d3Select( this.ref )
+			.style( 'left', position.x + 'px' )
+			.style( 'top', position.y + 'px' )
+			.style( 'visibility', 'visible' ).html( `
+				<div>
+					<h4>${ tooltipTitle }</h4>
+					<ul>
+					${ keys.join( '' ) }
+					</ul>
+				</div>
+			` );
 	}
+}
 
-	const xPosition =
-		elementCoords.left + elementCoords.width * elementWidthRatio + tooltipMargin - leftMargin;
-
-	if ( xPosition + tooltipSize.width + tooltipMargin > d3BaseCoords.width ) {
-		return Math.max(
-			tooltipMargin,
-			elementCoords.left +
-				elementCoords.width * ( 1 - elementWidthRatio ) -
-				tooltipSize.width -
-				tooltipMargin -
-				leftMargin
-		);
-	}
-
-	return xPosition;
-};
-
-const calculateTooltipYPosition = (
-	elementCoords,
-	chartCoords,
-	tooltipSize,
-	tooltipMargin,
-	tooltipPosition
-) => {
-	if ( tooltipPosition === 'below' ) {
-		return chartCoords.height;
-	}
-
-	const yPosition = elementCoords.top + tooltipMargin - chartCoords.top;
-	if ( yPosition + tooltipSize.height + tooltipMargin > chartCoords.height ) {
-		return Math.max( 0, elementCoords.top - tooltipSize.height - tooltipMargin - chartCoords.top );
-	}
-
-	return yPosition;
-};
-
-export const calculateTooltipPosition = ( element, chart, tooltipPosition, elementWidthRatio = 1 ) => {
-	const elementCoords = element.getBoundingClientRect();
-	const chartCoords = chart.getBoundingClientRect();
-	const tooltipSize = d3Select( '.d3-chart__tooltip' )
-		.node()
-		.getBoundingClientRect();
-	const tooltipMargin = 24;
-
-	if ( tooltipPosition === 'below' ) {
-		elementWidthRatio = 0;
-	}
-
-	return {
-		x: calculateTooltipXPosition(
-			elementCoords,
-			chartCoords,
-			tooltipSize,
-			tooltipMargin,
-			elementWidthRatio,
-			tooltipPosition
-		),
-		y: calculateTooltipYPosition(
-			elementCoords,
-			chartCoords,
-			tooltipSize,
-			tooltipMargin,
-			tooltipPosition
-		),
-	};
-};
-
-const getTooltipRowLabel = ( d, row, params ) => {
-	if ( d[ row.key ].labelDate ) {
-		return params.tooltipLabelFormat( moment( d[ row.key ].labelDate ).toDate() );
-	}
-	return row.key;
-};
-
-export const showTooltip = ( params, d, position ) => {
-	const keys = params.visibleKeys.map(
-		row => `
-				<li class="key-row">
-					<div class="key-container">
-						<span
-							class="key-color"
-							style="background-color:${ getColor( row.key, params.visibleKeys, params.colorScheme ) }">
-						</span>
-						<span class="key-key">${ getTooltipRowLabel( d, row, params ) }</span>
-					</div>
-					<span class="key-value">${ params.tooltipValueFormat( d[ row.key ].value ) }</span>
-				</li>
-			`
-	);
-
-	const tooltipTitle = params.tooltipTitle
-		? params.tooltipTitle
-		: params.tooltipLabelFormat( moment( d.date ).toDate() );
-
-	d3Select( params.tooltip )
-		.style( 'left', position.x + 'px' )
-		.style( 'top', position.y + 'px' )
-		.style( 'visibility', 'visible' ).html( `
-			<div>
-				<h4>${ tooltipTitle }</h4>
-				<ul>
-				${ keys.join( '' ) }
-				</ul>
-			</div>
-		` );
-};
+export default ChartTooltip;

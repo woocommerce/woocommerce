@@ -7,6 +7,13 @@ A search box which autocompletes results while typing, allowing for the user to 
 Props
 -----
 
+### `allowFreeTextSearch`
+
+- Type: Boolean
+- Default: `false`
+
+Render additional options in the autocompleter to allow free text entering depending on the type.
+
 ### `className`
 
 - Type: String
@@ -53,6 +60,13 @@ search box.
 - Default: `false`
 
 Render tags inside input, otherwise render below input.
+
+### `showClearButton`
+
+- Type: Boolean
+- Default: `false`
+
+Render a 'Clear' button next to the input box to remove its contents.
 
 ### `staticResults`
 

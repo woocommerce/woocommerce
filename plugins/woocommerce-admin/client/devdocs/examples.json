@@ -18,6 +18,7 @@
   { "component": "ProductImage" },
   { "component": "Rating" },
   { "component": "Search" },
+  { "component": "SearchListControl" },
   { "component": "Section" },
   { "component": "SegmentedSelection" },
   { "component": "SplitButton" },

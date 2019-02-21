@@ -38,9 +38,14 @@ Current path
 
 ### `primaryData`
 
-- **Required**
 - Type: Object
-- Default: null
+- Default: `{
+    data: {
+        intervals: [],
+    },
+    isError: false,
+    isRequesting: false,
+}`
 
 Primary data to display in the chart.
 
@@ -54,9 +59,14 @@ The query string represented in object form.
 
 ### `secondaryData`
 
-- **Required**
 - Type: Object
-- Default: null
+- Default: `{
+    data: {
+        intervals: [],
+    },
+    isError: false,
+    isRequesting: false,
+}`
 
 Secondary data to display in the chart.
 

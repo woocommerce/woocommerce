@@ -59,7 +59,8 @@ class TableCard extends Component {
 	}
 
 	componentDidUpdate( { query: prevQuery, headers: prevHeaders } ) {
-		const { compareBy, headers, query } = this.props;
+		const { compareBy, headers, onColumnsChange, query } = this.props;
+		const { showCols } = this.state;
 
 		if ( query.filter || prevQuery.filter ) {
 			const prevIds = prevQuery.filter ? getIdsFromQuery( prevQuery[ compareBy ] ) : [];
@@ -78,6 +79,15 @@ class TableCard extends Component {
 				showCols: headers.map( ( { key, hiddenByDefault } ) => ! hiddenByDefault && key ).filter( Boolean ),
 			} );
 			/* eslint-enable react/no-did-update-set-state */
+		}
+		if ( query.orderby !== prevQuery.orderby && ! showCols.includes( query.orderby ) ) {
+			const newShowCols = showCols.concat( query.orderby );
+			/* eslint-disable react/no-did-update-set-state */
+			this.setState( {
+				showCols: newShowCols,
+			} );
+			/* eslint-enable react/no-did-update-set-state */
+			onColumnsChange( newShowCols );
 		}
 	}
 
@@ -151,7 +161,9 @@ class TableCard extends Component {
 
 	onSearch( values ) {
 		const { compareParam } = this.props;
-		const labels = values.map( v => v.label );
+		// A comma is used as a separator between search terms, so we want to escape
+		// any comma they contain.
+		const labels = values.map( v => v.label.replace( ',', '%2C' ) );
 		if ( labels.length ) {
 			updateQueryString( {
 				filter: undefined,
@@ -242,8 +254,7 @@ class TableCard extends Component {
 			totalRows,
 		} = this.props;
 		const { selectedRows, showCols } = this.state;
-		const searchedValues = query.search ? query.search.split( ',' ) : [];
-		const searchedLabels = searchedValues.map( v => ( { id: v, label: v } ) );
+		const searchedLabels = Array.isArray( query.search ) ? query.search.map( v => ( { id: v, label: v } ) ) : [];
 		const allHeaders = this.props.headers;
 		let headers = this.getVisibleHeaders();
 		let rows = this.getVisibleRows();

@@ -10,11 +10,6 @@ import { isEqual, throttle } from 'lodash';
 import { select as d3Select } from 'd3-selection';
 
 /**
- * Internal dependencies
- */
-import { hideTooltip } from '../utils/tooltip';
-
-/**
  * Provides foundation to use D3 within React.
  *
  * React is responsible for determining when a chart should be updated (e.g. whenever data changes or the browser is
@@ -30,10 +25,6 @@ export default class D3Base extends Component {
 		super( props );
 
 		this.chartRef = createRef();
-
-		this.delayedScroll = throttle( () => {
-			hideTooltip( this.chartRef.current, props.tooltipRef.current );
-		}, 300 );
 	}
 
 	componentDidMount() {
@@ -47,7 +38,7 @@ export default class D3Base extends Component {
 			! isEqual( this.props.orderedKeys, nextProps.orderedKeys ) ||
 			this.props.drawChart !== nextProps.drawChart ||
 			this.props.height !== nextProps.height ||
-			this.props.type !== nextProps.type ||
+			this.props.chartType !== nextProps.chartType ||
 			this.props.width !== nextProps.width
 		);
 	}
@@ -58,6 +49,13 @@ export default class D3Base extends Component {
 
 	componentWillUnmount() {
 		this.deleteChart();
+	}
+
+	delayedScroll() {
+		const { tooltip } = this.props;
+		return throttle( () => {
+			tooltip && tooltip.hide();
+		}, 300 );
 	}
 
 	deleteChart() {
@@ -95,8 +93,9 @@ export default class D3Base extends Component {
 	}
 
 	render() {
+		const { className } = this.props;
 		return (
-			<div className={ classNames( 'd3-base', this.props.className ) } ref={ this.chartRef } onScroll={ this.delayedScroll } />
+			<div className={ classNames( 'd3-base', className ) } ref={ this.chartRef } onScroll={ this.delayedScroll() } />
 		);
 	}
 }
@@ -105,5 +104,6 @@ D3Base.propTypes = {
 	className: PropTypes.string,
 	data: PropTypes.array,
 	orderedKeys: PropTypes.array, // required to detect changes in data
-	type: PropTypes.string,
+	tooltip: PropTypes.object,
+	chartType: PropTypes.string,
 };

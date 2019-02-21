@@ -1,0 +1,8 @@
+{
+	"features": {
+		"activity-panels": false,
+		"analytics": true,
+		"dashboard": true,
+		"devdocs": false
+	}
+}

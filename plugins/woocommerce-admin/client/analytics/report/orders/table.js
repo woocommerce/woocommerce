@@ -45,7 +45,6 @@ export default class OrdersReportTable extends Component {
 				screenReaderLabel: __( 'Order ID', 'wc-admin' ),
 				key: 'id',
 				required: true,
-				isSortable: true,
 			},
 			{
 				label: __( 'Status', 'wc-admin' ),
@@ -68,9 +67,9 @@ export default class OrdersReportTable extends Component {
 			},
 			{
 				label: __( 'Items Sold', 'wc-admin' ),
-				key: 'items_sold',
+				key: 'num_items_sold',
 				required: false,
-				isSortable: false,
+				isSortable: true,
 				isNumeric: true,
 			},
 			{
@@ -83,9 +82,9 @@ export default class OrdersReportTable extends Component {
 			{
 				label: __( 'N. Revenue', 'wc-admin' ),
 				screenReaderLabel: __( 'Net Revenue', 'wc-admin' ),
-				key: 'net_revenue',
+				key: 'net_total',
 				required: true,
-				isSortable: false,
+				isSortable: true,
 				isNumeric: true,
 			},
 		];

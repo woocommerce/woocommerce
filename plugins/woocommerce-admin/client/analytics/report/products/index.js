@@ -28,10 +28,13 @@ class ProductsReport extends Component {
 	getChartMeta() {
 		const { query, isSingleProductView, isSingleProductVariable } = this.props;
 
-		const isProductDetailsView =
-			'top_items' === query.filter ||
-			'top_sales' === query.filter ||
-			'compare-products' === query.filter;
+		const isProductDetailsView = [
+			'top_items',
+			'top_sales',
+			'compare-products',
+			'single_category',
+			'compare-categories',
+		].includes( query.filter );
 
 		const mode =
 			isProductDetailsView || ( isSingleProductView && isSingleProductVariable )
@@ -41,8 +44,8 @@ class ProductsReport extends Component {
 			isSingleProductView && isSingleProductVariable ? 'variations' : 'products';
 		const label =
 			isSingleProductView && isSingleProductVariable
-				? __( '%s variations', 'wc-admin' )
-				: __( '%s products', 'wc-admin' );
+				? __( '%d variations', 'wc-admin' )
+				: __( '%d products', 'wc-admin' );
 
 		return {
 			compareObject,
@@ -130,7 +133,8 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { query } = props;
 		const { getItems, isGetItemsRequesting, getItemsError } = select( 'wc-api' );
-		const isSingleProductView = query.products && 1 === query.products.split( ',' ).length;
+		const isSingleProductView =
+			! query.search && query.products && 1 === query.products.split( ',' ).length;
 		if ( isSingleProductView ) {
 			const productId = parseInt( query.products );
 			const includeArgs = { include: productId };

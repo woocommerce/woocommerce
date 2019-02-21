@@ -41,7 +41,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 		$args['registered_before']   = $request['registered_before'];
 		$args['registered_after']    = $request['registered_after'];
 		$args['match']               = $request['match'];
-		$args['name']                = $request['name'];
+		$args['search']              = $request['search'];
 		$args['username']            = $request['username'];
 		$args['email']               = $request['email'];
 		$args['country']             = $request['country'];
@@ -55,6 +55,7 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 		$args['avg_order_value_max'] = $request['avg_order_value_max'];
 		$args['last_order_before']   = $request['last_order_before'];
 		$args['last_order_after']    = $request['last_order_after'];
+		$args['customers']           = $request['customers'];
 
 		$between_params_numeric    = array( 'orders_count', 'total_spend', 'avg_order_value' );
 		$normalized_params_numeric = WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params_numeric, false );
@@ -77,8 +78,6 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 		$report_data     = $customers_query->get_data();
 		$out_data        = array(
 			'totals'    => $report_data,
-			// @todo Is this needed? the single element array tricks the isReportDataEmpty() selector.
-			'intervals' => array( (object) array() ),
 		);
 
 		return rest_ensure_response( $out_data );
@@ -161,55 +160,6 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 					'readonly'    => true,
 					'properties'  => $totals,
 				),
-				'intervals' => array( // @todo Remove this?
-					'description' => __( 'Reports data grouped by intervals.', 'wc-admin' ),
-					'type'        => 'array',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-					'items'       => array(
-						'type'       => 'object',
-						'properties' => array(
-							'interval'       => array(
-								'description' => __( 'Type of interval.', 'wc-admin' ),
-								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-								'enum'        => array( 'day', 'week', 'month', 'year' ),
-							),
-							'date_start'     => array(
-								'description' => __( "The date the report start, in the site's timezone.", 'wc-admin' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'date_start_gmt' => array(
-								'description' => __( 'The date the report start, as GMT.', 'wc-admin' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'date_end'       => array(
-								'description' => __( "The date the report end, in the site's timezone.", 'wc-admin' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'date_end_gmt'   => array(
-								'description' => __( 'The date the report end, as GMT.', 'wc-admin' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'subtotals'      => array(
-								'description' => __( 'Interval subtotals.', 'wc-admin' ),
-								'type'        => 'object',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-								'properties'  => $totals,
-							),
-						),
-					),
-				),
 			),
 		);
 
@@ -246,10 +196,20 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['name']                    = array(
-			'description'       => __( 'Limit response to objects with a specfic customer name.', 'wc-admin' ),
+		$params['search']                  = array(
+			'description'       => __( 'Limit response to objects with a customer field containing the search term. Searches the field provided by `searchby`.', 'wc-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['searchby']     = array(
+			'description'       => 'Limit results with `search` and `searchby` to specific fields containing the search term.',
+			'type'              => 'string',
+			'default'           => 'name',
+			'enum'              => array(
+				'name',
+				'username',
+				'email',
+			),
 		);
 		$params['username']                = array(
 			'description'       => __( 'Limit response to objects with a specfic username.', 'wc-admin' ),
@@ -358,6 +318,15 @@ class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_C
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['customers']               = array(
+			'description'       => __( 'Limit result to items with specified customer ids.', 'wc-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
 		);
 
 		return $params;

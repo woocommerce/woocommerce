@@ -35,7 +35,7 @@ import withSelect from 'wc-api/with-select';
 const REPORTS_FILTER = 'woocommerce-reports-list';
 
 const getReports = () => {
-	const reports = applyFilters( REPORTS_FILTER, [
+	const reports = [
 		{
 			report: 'revenue',
 			title: __( 'Revenue', 'wc-admin' ),
@@ -86,9 +86,9 @@ const getReports = () => {
 			title: __( 'Downloads', 'wc-admin' ),
 			component: DownloadsReport,
 		},
-	] );
+	];
 
-	return reports;
+	return applyFilters( REPORTS_FILTER, reports );
 };
 
 class Report extends Component {
@@ -145,15 +145,22 @@ export default compose(
 		}
 
 		const { report } = props.params;
-		const items = searchItemsByString( select, report, search );
+		const searchWords = search.split( ',' ).map( searchWord => searchWord.replace( '%2C', ',' ) );
+		const items = searchItemsByString( select, report, searchWords );
 		const ids = Object.keys( items );
 		if ( ! ids.length ) {
-			return {};
+			return {
+				query: {
+					...props.query,
+					search: searchWords,
+				},
+			};
 		}
 
 		return {
 			query: {
 				...props.query,
+				search: searchWords,
 				[ report ]: ids.join( ',' ),
 			},
 		};

@@ -425,9 +425,9 @@ export function getIntervalForQuery( query ) {
  * @param  {Object} query Current query
  * @return {String} Current chart type.
  */
-export function getChartTypeForQuery( { type } ) {
-	if ( [ 'line', 'bar' ].includes( type ) ) {
-		return type;
+export function getChartTypeForQuery( { chartType } ) {
+	if ( [ 'line', 'bar' ].includes( chartType ) ) {
+		return chartType;
 	}
 	return 'line';
 }

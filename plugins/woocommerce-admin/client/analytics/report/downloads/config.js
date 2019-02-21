@@ -45,7 +45,7 @@ export const advancedFilters = {
 				remove: __( 'Remove product filter', 'wc-admin' ),
 				rule: __( 'Select a product filter match', 'wc-admin' ),
 				/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
-				title: __( 'Product {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( '{{title}}Product{{/title}} {{rule /}} {{filter /}}', 'wc-admin' ),
 				filter: __( 'Select product', 'wc-admin' ),
 			},
 			rules: [
@@ -66,14 +66,14 @@ export const advancedFilters = {
 				getLabels: getProductLabels,
 			},
 		},
-		user: {
+		customer: {
 			labels: {
 				add: __( 'Username', 'wc-admin' ),
 				placeholder: __( 'Search customer username', 'wc-admin' ),
 				remove: __( 'Remove customer username filter', 'wc-admin' ),
 				rule: __( 'Select a customer username filter match', 'wc-admin' ),
 				/* translators: A sentence describing a customer username filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
-				title: __( 'Username {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( '{{title}}Username{{/title}} {{rule /}} {{filter /}}', 'wc-admin' ),
 				filter: __( 'Select customer username', 'wc-admin' ),
 			},
 			rules: [
@@ -101,7 +101,7 @@ export const advancedFilters = {
 				remove: __( 'Remove order number filter', 'wc-admin' ),
 				rule: __( 'Select a order number filter match', 'wc-admin' ),
 				/* translators: A sentence describing a order number filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
-				title: __( 'Order number {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( '{{title}}Order number{{/title}} {{rule /}} {{filter /}}', 'wc-admin' ),
 				filter: __( 'Select order number', 'wc-admin' ),
 			},
 			rules: [
@@ -135,7 +135,7 @@ export const advancedFilters = {
 				remove: __( 'Remove IP address filter', 'wc-admin' ),
 				rule: __( 'Select an IP address filter match', 'wc-admin' ),
 				/* translators: A sentence describing a order number filter. See screen shot for context: https://cloudup.com/ccxhyH2mEDg */
-				title: __( 'IP Address {{rule /}} {{filter /}}', 'wc-admin' ),
+				title: __( '{{title}}IP Address{{/title}} {{rule /}} {{filter /}}', 'wc-admin' ),
 				filter: __( 'Select IP address', 'wc-admin' ),
 			},
 			rules: [

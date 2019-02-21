@@ -4,6 +4,7 @@
  */
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
+import { __ } from '@wordpress/i18n';
 
 /**
  * WooCommerce dependencies
@@ -20,8 +21,32 @@ import ReportChart from 'analytics/components/report-chart';
 import ReportSummary from 'analytics/components/report-summary';
 
 export default class CouponsReport extends Component {
+	getChartMeta() {
+		const { query } = this.props;
+		const isCompareView = [ 'top_orders', 'top_discount', 'compare-coupons' ].includes(
+			query.filter
+		);
+
+		const mode = isCompareView ? 'item-comparison' : 'time-comparison';
+		const itemsLabel = __( '%d coupons', 'wc-admin' );
+
+		return {
+			itemsLabel,
+			mode,
+		};
+	}
+
 	render() {
 		const { query, path } = this.props;
+		const { mode, itemsLabel } = this.getChartMeta();
+
+		const chartQuery = {
+			...query,
+		};
+
+		if ( 'item-comparison' === mode ) {
+			chartQuery.segmentby = 'coupon';
+		}
 
 		return (
 			<Fragment>
@@ -29,14 +54,17 @@ export default class CouponsReport extends Component {
 				<ReportSummary
 					charts={ charts }
 					endpoint="coupons"
-					query={ query }
+					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
 				<ReportChart
+					filters={ filters }
 					charts={ charts }
+					mode={ mode }
 					endpoint="coupons"
 					path={ path }
-					query={ query }
+					query={ chartQuery }
+					itemsLabel={ itemsLabel }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
 				<CouponsReportTable query={ query } />

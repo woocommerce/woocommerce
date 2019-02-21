@@ -207,6 +207,7 @@ class Search extends Component {
 							<div
 								className={ classnames( 'woocommerce-search__inline-container', {
 									'is-active': isActive,
+									'has-tags': inlineTags && shouldRenderTags,
 								} ) }
 								onClick={ () => {
 									this.input.current.focus();

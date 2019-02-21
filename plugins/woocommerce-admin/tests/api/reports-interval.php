@@ -12,34 +12,48 @@
 class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 
 	/**
+	 * Local timezone used throughout the tests.
+	 *
+	 * @var DateTimeZone
+	 */
+	protected static $local_tz;
+
+	/**
+	 * Set current local timezone.
+	 */
+	public static function setUpBeforeClass() {
+		self::$local_tz = new DateTimeZone( wc_timezone_string() );
+	}
+
+	/**
 	 * Test quarter function.
 	 */
 	public function test_quarter() {
-		$datetime = new DateTime( '2017-12-31T00:00:00Z' );
+		$datetime = new DateTime( '2017-12-31T00:00:00', self::$local_tz );
 		$this->assertEquals( 4, WC_Admin_Reports_Interval::quarter( $datetime ) );
 
-		$datetime = new DateTime( '2018-01-01T00:00:00Z' );
+		$datetime = new DateTime( '2018-01-01T00:00:00', self::$local_tz );
 		$this->assertEquals( 1, WC_Admin_Reports_Interval::quarter( $datetime ) );
 
-		$datetime = new DateTime( '2018-03-31T23:59:59Z' );
+		$datetime = new DateTime( '2018-03-31T23:59:59', self::$local_tz );
 		$this->assertEquals( 1, WC_Admin_Reports_Interval::quarter( $datetime ) );
 
-		$datetime = new DateTime( '2018-04-01T00:00:00Z' );
+		$datetime = new DateTime( '2018-04-01T00:00:00', self::$local_tz );
 		$this->assertEquals( 2, WC_Admin_Reports_Interval::quarter( $datetime ) );
 
-		$datetime = new DateTime( '2018-06-30T23:59:59Z' );
+		$datetime = new DateTime( '2018-06-30T23:59:59', self::$local_tz );
 		$this->assertEquals( 2, WC_Admin_Reports_Interval::quarter( $datetime ) );
 
-		$datetime = new DateTime( '2018-07-01T00:00:00Z' );
+		$datetime = new DateTime( '2018-07-01T00:00:00', self::$local_tz );
 		$this->assertEquals( 3, WC_Admin_Reports_Interval::quarter( $datetime ) );
 
-		$datetime = new DateTime( '2018-09-30T23:59:59Z' );
+		$datetime = new DateTime( '2018-09-30T23:59:59', self::$local_tz );
 		$this->assertEquals( 3, WC_Admin_Reports_Interval::quarter( $datetime ) );
 
-		$datetime = new DateTime( '2018-10-01T00:00:00Z' );
+		$datetime = new DateTime( '2018-10-01T00:00:00', self::$local_tz );
 		$this->assertEquals( 4, WC_Admin_Reports_Interval::quarter( $datetime ) );
 
-		$datetime = new DateTime( '2018-12-31T23:59:59Z' );
+		$datetime = new DateTime( '2018-12-31T23:59:59', self::$local_tz );
 		$this->assertEquals( 4, WC_Admin_Reports_Interval::quarter( $datetime ) );
 	}
 
@@ -322,7 +336,7 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 
 		foreach ( $expected_week_no as $date => $week_numbers ) {
 			for ( $first_day_of_week = 1; $first_day_of_week <= 7; $first_day_of_week++ ) {
-				$datetime = new DateTime( $date );
+				$datetime = new DateTime( $date, self::$local_tz );
 				$this->assertEquals( $expected_week_no[ $date ][ $first_day_of_week ], WC_Admin_Reports_Interval::simple_week_number( $datetime, $first_day_of_week ), "First day of week: $first_day_of_week; Date: $date" );
 			}
 		}
@@ -366,7 +380,7 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			'2012-01-06' => 1,
 		);
 		foreach ( $expected_week_no as $date => $week_numbers ) {
-			$datetime = new DateTime( $date );
+			$datetime = new DateTime( $date, self::$local_tz );
 			$this->assertEquals( $expected_week_no[ $date ], WC_Admin_Reports_Interval::week_number( $datetime, 1 ), "ISO week number for date: $date" );
 		}
 	}
@@ -379,8 +393,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		$test_settings = array(
 			// 0 interval length, should just return 1.
 			array(
-				'start'      => '2017-12-24T11:00:00Z',
-				'end'        => '2017-12-24T11:00:00Z',
+				'start'      => '2017-12-24T11:00:00',
+				'end'        => '2017-12-24T11:00:00',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 1,
@@ -393,8 +407,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			),
 			// <1 hour interval length -> should return 1 for all
 			array(
-				'start'      => '2017-12-24T11:00:00Z',
-				'end'        => '2017-12-24T11:40:00Z',
+				'start'      => '2017-12-24T11:00:00',
+				'end'        => '2017-12-24T11:40:00',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 1,
@@ -407,8 +421,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			),
 			// 1.66 hour interval length -> 2 hours, 1 for the rest
 			array(
-				'start'      => '2017-12-24T11:00:00Z',
-				'end'        => '2017-12-24T12:40:00Z',
+				'start'      => '2017-12-24T11:00:00',
+				'end'        => '2017-12-24T12:40:00',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 2,
@@ -421,8 +435,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			),
 			// 8.0186111 hours interval length -> 10 hours, 2 days, 1 for the rest
 			array(
-				'start'      => '2019-01-16T16:59:00Z',
-				'end'        => '2019-01-17T01:00:07Z',
+				'start'      => '2019-01-16T16:59:00',
+				'end'        => '2019-01-17T01:00:07',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 10,
@@ -435,8 +449,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			),
 			// 23:59:59 h:m:s interval -> 24 hours, 2 days, 1 for the rest
 			array(
-				'start'      => '2017-12-24T11:00:00Z',
-				'end'        => '2017-12-25T10:59:59Z',
+				'start'      => '2017-12-24T11:00:00',
+				'end'        => '2017-12-25T10:59:59',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 24,
@@ -449,8 +463,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			),
 			// 24 hour inclusive interval -> 25 hours, 2 days, 1 for the rest
 			array(
-				'start'      => '2017-12-24T11:00:00Z',
-				'end'        => '2017-12-25T11:00:00Z',
+				'start'      => '2017-12-24T11:00:00',
+				'end'        => '2017-12-25T11:00:00',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 25,
@@ -463,8 +477,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			),
 			// 1 month interval spanning 1 month -> 720 hours, 30 days, 5 iso weeks, 1 months
 			array(
-				'start'      => '2017-11-01T00:00:00Z',
-				'end'        => '2017-11-30T23:59:59Z',
+				'start'      => '2017-11-01T00:00:00',
+				'end'        => '2017-11-30T23:59:59',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 720,
@@ -477,8 +491,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			),
 			// 1 month interval spanning 2 months, but 1 quarter and 1 year -> 721 hours, 31 days, 5 iso weeks, 2 months
 			array(
-				'start'      => '2017-11-24T11:00:00Z',
-				'end'        => '2017-12-24T11:00:00Z',
+				'start'      => '2017-11-24T11:00:00',
+				'end'        => '2017-12-24T11:00:00',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 30 * 24 + 1, // 30 full days + 1 second from next hour
@@ -491,8 +505,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			),
 			// 1 month + 14 hour interval spanning 2 months in 1 quarter -> 735 hours, 32 days, 6 iso weeks, 2 months
 			array(
-				'start'      => '2017-11-24T11:00:00Z',
-				'end'        => '2017-12-25T01:00:00Z',
+				'start'      => '2017-11-24T11:00:00',
+				'end'        => '2017-12-25T01:00:00',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 30 * 24 + 13 + 2, // 30 full days + 13 full hours on Nov 24 + 2 hours on Dec 25
@@ -505,8 +519,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			),
 			// 1 month interval spanning 2 months and 2 quarters, 1 year -> 720 hours, 31 days, 6 iso weeks, 2 months, 2 q, 1 y
 			array(
-				'start'      => '2017-09-24T11:00:00Z',
-				'end'        => '2017-10-24T10:59:59Z',
+				'start'      => '2017-09-24T11:00:00',
+				'end'        => '2017-10-24T10:59:59',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 30 * 24,
@@ -519,8 +533,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			),
 			// 1 month interval spanning 2 months and 2 quarters, 2 years -> 744 hours, 32 days, 6 iso weeks, 2 months, 2 quarters, 2 years
 			array(
-				'start'      => '2017-12-24T11:00:00Z',
-				'end'        => '2018-01-24T10:59:59Z',
+				'start'      => '2017-12-24T11:00:00',
+				'end'        => '2018-01-24T10:59:59',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 31 * 24,
@@ -533,8 +547,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			),
 			// 3 months interval spanning 1 quarter, 1 year -> 2208 hours, 92 days, 14 iso weeks, 3 months, 1 quarters, 1 years
 			array(
-				'start'      => '2017-10-01T00:00:00Z',
-				'end'        => '2017-12-31T23:59:59Z',
+				'start'      => '2017-10-01T00:00:00',
+				'end'        => '2017-12-31T23:59:59',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 92 * 24, // 92 days
@@ -547,8 +561,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			),
 			// 3 months + 1 day interval spanning 2 quarters, 1 year -> 2208 hours, 92 days, 14 iso weeks, 3 months, 2 quarters, 1 years
 			array(
-				'start'      => '2017-09-30T00:00:00Z',
-				'end'        => '2017-12-30T23:59:59Z',
+				'start'      => '2017-09-30T00:00:00',
+				'end'        => '2017-12-30T23:59:59',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 92 * 24, // 92 days
@@ -561,8 +575,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			),
 			// 3 months + 1 day interval spanning 2 quarters, 2 years -> 2232 hours, 93 days, 14 iso weeks, 3 months, 2 quarters, 2 years
 			array(
-				'start'      => '2017-10-31T00:00:00Z',
-				'end'        => '2018-01-31T23:59:59Z',
+				'start'      => '2017-10-31T00:00:00',
+				'end'        => '2018-01-31T23:59:59',
 				'week_start' => 1,
 				'intervals'  => array(
 					'hour'    => 93 * 24, // 93 days
@@ -575,8 +589,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			),
 			// 9 months + 1 day interval spanning 2 quarters, 2 years.
 			array(
-				'start'      => '2017-04-01T00:00:00Z',
-				'end'        => '2018-01-01T00:00:00Z',
+				'start'      => '2017-04-01T00:00:00',
+				'end'        => '2018-01-01T00:00:00',
 				'week_start' => 1,
 				'intervals'  => array(
 					'month'   => 9 + 1,
@@ -586,8 +600,8 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 			),
 			// 9 months + 1 day interval spanning 2 quarters, 2 years.
 			array(
-				'start'      => '2015-04-01T00:00:00Z',
-				'end'        => '2018-01-01T00:00:00Z',
+				'start'      => '2015-04-01T00:00:00',
+				'end'        => '2018-01-01T00:00:00',
 				'week_start' => 1,
 				'intervals'  => array(
 					'day'     => 1007,            // This includes leap year in 2016.
@@ -601,7 +615,9 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		foreach ( $test_settings as $setting ) {
 			update_option( 'start_of_week', $setting['week_start'] );
 			foreach ( $setting['intervals'] as $interval => $exp_value ) {
-				$this->assertEquals( $exp_value, WC_Admin_Reports_Interval::intervals_between( $setting['start'], $setting['end'], $interval ), "First Day of Week: {$setting['week_start']}; Start: {$setting['start']}; End: {$setting['end']}; Interval: {$interval}" );
+				$start_datetime = new DateTime( $setting['start'], self::$local_tz );
+				$end_datetime   = new DateTime( $setting['end'], self::$local_tz );
+				$this->assertEquals( $exp_value, WC_Admin_Reports_Interval::intervals_between( $start_datetime, $end_datetime, $interval ), "First Day of Week: {$setting['week_start']}; Start: {$setting['start']}; End: {$setting['end']}; Interval: {$interval}" );
 			}
 		}
 	}
@@ -611,17 +627,17 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	 */
 	public function test_next_hour_start() {
 		$settings = array(
-			'2017-12-30T00:00:00Z' => array(
+			'2017-12-30T00:00:00' => array(
 				0 => '2017-12-30T01:00:00',
 				1 => '2017-12-29T23:59:59',
 			),
-			'2017-12-30T10:00:00Z' => array(
+			'2017-12-30T10:00:00' => array(
 				0 => '2017-12-30T11:00:00',
 				1 => '2017-12-30T09:59:59',
 			),
 		);
 		foreach ( $settings as $datetime_s => $setting ) {
-			$datetime = new DateTime( $datetime_s );
+			$datetime = new DateTime( $datetime_s, self::$local_tz );
 			foreach ( $setting as $reversed => $exp_value ) {
 				$result_dt = WC_Admin_Reports_Interval::next_hour_start( $datetime, $reversed );
 				$this->assertEquals( $exp_value, $result_dt->format( WC_Admin_Reports_Interval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
@@ -634,17 +650,17 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	 */
 	public function test_next_day_start() {
 		$settings = array(
-			'2017-12-30T00:00:00Z' => array(
+			'2017-12-30T00:00:00' => array(
 				0 => '2017-12-31T00:00:00',
 				1 => '2017-12-29T23:59:59',
 			),
-			'2017-12-30T10:00:00Z' => array(
+			'2017-12-30T10:00:00' => array(
 				0 => '2017-12-31T00:00:00',
 				1 => '2017-12-29T23:59:59',
 			),
 		);
 		foreach ( $settings as $datetime_s => $setting ) {
-			$datetime = new DateTime( $datetime_s );
+			$datetime = new DateTime( $datetime_s, self::$local_tz );
 			foreach ( $setting as $reversed => $exp_value ) {
 				$result_dt = WC_Admin_Reports_Interval::next_day_start( $datetime, $reversed );
 				$this->assertEquals( $exp_value, $result_dt->format( WC_Admin_Reports_Interval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
@@ -658,41 +674,41 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	public function test_next_week_start_ISO_week() {
 		update_option( 'start_of_week', 1 );
 		$settings = array(
-			'2017-12-30T00:00:00Z' => array(
+			'2017-12-30T00:00:00' => array(
 				0 => '2018-01-01T00:00:00',
 				1 => '2017-12-24T23:59:59',
 			),
-			'2017-12-30T10:00:00Z' => array(
+			'2017-12-30T10:00:00' => array(
 				0 => '2018-01-01T00:00:00',
 				1 => '2017-12-24T23:59:59',
 			),
-			'2010-12-25T10:00:00Z' => array(
+			'2010-12-25T10:00:00' => array(
 				0 => '2010-12-27T00:00:00',
 				1 => '2010-12-19T23:59:59',
 			),
-			'2010-12-26T10:00:00Z' => array(
+			'2010-12-26T10:00:00' => array(
 				0 => '2010-12-27T00:00:00',
 				1 => '2010-12-19T23:59:59',
 			),
-			'2010-12-27T00:00:00Z' => array(
+			'2010-12-27T00:00:00' => array(
 				0 => '2011-01-03T00:00:00',
 				1 => '2010-12-26T23:59:59',
 			),
-			'2010-12-31T00:00:00Z' => array(
+			'2010-12-31T00:00:00' => array(
 				0 => '2011-01-03T00:00:00',
 				1 => '2010-12-26T23:59:59',
 			),
-			'2011-01-01T00:00:00Z' => array(
+			'2011-01-01T00:00:00' => array(
 				0 => '2011-01-03T00:00:00',
 				1 => '2010-12-26T23:59:59',
 			),
-			'2011-01-03T00:00:00Z' => array(
+			'2011-01-03T00:00:00' => array(
 				0 => '2011-01-10T00:00:00',
 				1 => '2011-01-02T23:59:59',
 			),
 		);
 		foreach ( $settings as $datetime_s => $setting ) {
-			$datetime = new DateTime( $datetime_s );
+			$datetime = new DateTime( $datetime_s, self::$local_tz );
 			foreach ( $setting as $reversed => $exp_value ) {
 				$result_dt = WC_Admin_Reports_Interval::next_week_start( $datetime, $reversed );
 				$this->assertEquals( $exp_value, $result_dt->format( WC_Admin_Reports_Interval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
@@ -706,25 +722,25 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	public function test_next_week_start_Sunday_based_week() {
 		update_option( 'start_of_week', 7 );
 		$settings = array(
-			'2010-12-25T10:00:00Z' => array(
+			'2010-12-25T10:00:00' => array(
 				0 => '2010-12-26T00:00:00',
 				1 => '2010-12-18T23:59:59',
 			),
-			'2010-12-26T10:00:00Z' => array(
+			'2010-12-26T10:00:00' => array(
 				0 => '2011-01-01T00:00:00',
 				1 => '2010-12-25T23:59:59',
 			),
-			'2011-01-01T00:00:00Z' => array(
+			'2011-01-01T00:00:00' => array(
 				0 => '2011-01-02T00:00:00',
 				1 => '2010-12-31T23:59:59',
 			),
-			'2011-01-02T00:00:00Z' => array(
+			'2011-01-02T00:00:00' => array(
 				0 => '2011-01-09T00:00:00',
 				1 => '2011-01-01T23:59:59',
 			),
 		);
 		foreach ( $settings as $datetime_s => $setting ) {
-			$datetime = new DateTime( $datetime_s );
+			$datetime = new DateTime( $datetime_s, self::$local_tz );
 			foreach ( $setting as $reversed => $exp_value ) {
 				$result_dt = WC_Admin_Reports_Interval::next_week_start( $datetime, $reversed );
 				$this->assertEquals( $exp_value, $result_dt->format( WC_Admin_Reports_Interval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
@@ -737,18 +753,18 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	 */
 	public function test_next_month_start() {
 		$settings = array(
-			'2017-12-30T00:00:00Z' => array(
+			'2017-12-30T00:00:00' => array(
 				0 => '2018-01-01T00:00:00',
 				1 => '2017-11-30T23:59:59',
 			),
 			// Leap year reversed test.
-			'2016-03-05T10:00:00Z' => array(
+			'2016-03-05T10:00:00' => array(
 				0 => '2016-04-01T00:00:00',
 				1 => '2016-02-29T23:59:59',
 			),
 		);
 		foreach ( $settings as $datetime_s => $setting ) {
-			$datetime = new DateTime( $datetime_s );
+			$datetime = new DateTime( $datetime_s, self::$local_tz );
 			foreach ( $setting as $reversed => $exp_value ) {
 				$result_dt = WC_Admin_Reports_Interval::next_month_start( $datetime, $reversed );
 				$this->assertEquals( $exp_value, $result_dt->format( WC_Admin_Reports_Interval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
@@ -761,21 +777,29 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	 */
 	public function test_next_quarter_start() {
 		$settings = array(
-			'2017-12-31T00:00:00Z' => array(
+			'2017-12-31T00:00:00' => array(
 				0 => '2018-01-01T00:00:00',
 				1 => '2017-09-30T23:59:59',
 			),
-			'2018-01-01T10:00:00Z' => array(
+			'2018-01-01T10:00:00' => array(
 				0 => '2018-04-01T00:00:00',
 				1 => '2017-12-31T23:59:59',
 			),
-			'2018-02-14T10:00:00Z' => array(
+			'2018-02-14T10:00:00' => array(
 				0 => '2018-04-01T00:00:00',
 				1 => '2017-12-31T23:59:59',
+			),
+			'2018-04-14T10:00:00' => array(
+				0 => '2018-07-01T00:00:00',
+				1 => '2018-03-31T23:59:59',
+			),
+			'2018-07-14T10:00:00' => array(
+				0 => '2018-10-01T00:00:00',
+				1 => '2018-06-30T23:59:59',
 			),
 		);
 		foreach ( $settings as $datetime_s => $setting ) {
-			$datetime = new DateTime( $datetime_s );
+			$datetime = new DateTime( $datetime_s, self::$local_tz );
 			foreach ( $setting as $reversed => $exp_value ) {
 				$result_dt = WC_Admin_Reports_Interval::next_quarter_start( $datetime, $reversed );
 				$this->assertEquals( $exp_value, $result_dt->format( WC_Admin_Reports_Interval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
@@ -788,21 +812,21 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 	 */
 	public function test_next_year_start() {
 		$settings = array(
-			'2017-12-31T23:59:59Z' => array(
+			'2017-12-31T23:59:59' => array(
 				0 => '2018-01-01T00:00:00',
 				1 => '2016-12-31T23:59:59',
 			),
-			'2017-01-01T00:00:00Z' => array(
+			'2017-01-01T00:00:00' => array(
 				0 => '2018-01-01T00:00:00',
 				1 => '2016-12-31T23:59:59',
 			),
-			'2017-04-23T14:53:00Z' => array(
+			'2017-04-23T14:53:00' => array(
 				0 => '2018-01-01T00:00:00',
 				1 => '2016-12-31T23:59:59',
 			),
 		);
 		foreach ( $settings as $datetime_s => $setting ) {
-			$datetime = new DateTime( $datetime_s );
+			$datetime = new DateTime( $datetime_s, self::$local_tz );
 			foreach ( $setting as $reversed => $exp_value ) {
 				$result_dt = WC_Admin_Reports_Interval::next_year_start( $datetime, $reversed );
 				$this->assertEquals( $exp_value, $result_dt->format( WC_Admin_Reports_Interval::$iso_datetime_format ), __FUNCTION__ . ": DT: $datetime_s; R: $reversed" );
@@ -847,9 +871,9 @@ class WC_Tests_Reports_Interval_Stats extends WC_Unit_Test_Case {
 		$params   = array( 'a', 'b', 'c', 'd' );
 		$result   = WC_Admin_Reports_Interval::normalize_between_params( $request, $params, true );
 		$expected = array(
-			'b_after' => 1,
+			'b_after'  => 1,
 			'b_before' => 5,
-			'c_after' => 2,
+			'c_after'  => 2,
 			'c_before' => 4,
 		);
 

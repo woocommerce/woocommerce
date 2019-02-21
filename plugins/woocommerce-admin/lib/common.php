@@ -280,3 +280,18 @@ function wc_admin_currency_settings() {
 		)
 	);
 }
+
+/**
+ * Returns if a specific wc-admin feature is enabled.
+ *
+ * @param  string $feature Feature slug.
+ * @return bool Returns true if the feature is enabled.
+ * }
+ */
+function wc_admin_is_feature_enabled( $feature ) {
+	if ( ! function_exists( 'wc_admin_get_feature_config' ) ) {
+		return false;
+	}
+	$features = wc_admin_get_feature_config();
+	return isset( $features[ $feature ] ) && true === $features[ $feature ];
+}
