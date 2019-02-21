@@ -244,7 +244,7 @@ class WC_Regenerate_Images {
 	/**
 	 * Ensure we are dealing with the correct image attachment
 	 *
-	 * @param WP_Post $attachment Attachment object.
+	 * @param int|WP_Post $attachment Attachment object or ID.
 	 * @return boolean
 	 */
 	public static function is_regeneratable( $attachment ) {
