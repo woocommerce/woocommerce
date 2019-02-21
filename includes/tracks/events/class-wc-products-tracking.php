@@ -67,14 +67,17 @@ class WC_Products_Tracking {
 	 * @param int $category_id Category ID.
 	 */
 	public static function track_product_category_created( $category_id ) {
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
 		// Only track category creation from the edit product screen or the
 		// category management screen (which both occur via AJAX).
 		if (
 			! defined( 'DOING_AJAX' ) ||
 			empty( $_POST['action'] ) ||
 			(
-				'add-tag' !== $_POST['action'] &&      // Product Categories screen.
-				'add-product_cat' !== $_POST['action'] // Edit Product screen.
+				// Product Categories screen.
+				'add-tag' !== $_POST['action'] &&
+				// Edit Product screen.
+				'add-product_cat' !== $_POST['action']
 			)
 		) {
 			return;
@@ -86,6 +89,7 @@ class WC_Products_Tracking {
 			'parent_id'   => $category->parent,
 			'page'        => ( 'add-tag' === $_POST['action'] ) ? 'categories' : 'product',
 		);
+		// phpcs:enable
 
 		WC_Tracks::record_event( 'product_category_add', $properties );
 	}
