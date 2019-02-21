@@ -823,6 +823,11 @@ class WC_Helper {
 			wp_die( 'Could not verify nonce' );
 		}
 
+		/**
+		 * Fires when Helper subscriptions are refreshed.
+		 */
+		do_action( 'woocommerce_helper_subscriptions_refresh' );
+
 		$redirect_uri = add_query_arg(
 			array(
 				'page'             => 'wc-addons',

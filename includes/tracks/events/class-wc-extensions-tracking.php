@@ -20,6 +20,7 @@ class WC_Extensions_Tracking {
 		add_action( 'woocommerce_helper_denied', array( __CLASS__, 'track_helper_connection_cancelled' ) );
 		add_action( 'woocommerce_helper_connected', array( __CLASS__, 'track_helper_connection_complete' ) );
 		add_action( 'woocommerce_helper_disconnected', array( __CLASS__, 'track_helper_disconnected' ) );
+		add_action( 'woocommerce_helper_subscriptions_refresh', array( __CLASS__, 'track_helper_subscriptions_refresh' ) );
 	}
 
 	/**
@@ -67,5 +68,12 @@ class WC_Extensions_Tracking {
 	 */
 	public static function track_helper_disconnected() {
 		WC_Tracks::record_event( 'extensions_subscriptions_disconnect' );
+	}
+
+	/**
+	 * Send a Tracks even when Helper subscriptions are refreshed.
+	 */
+	public static function track_helper_subscriptions_refresh() {
+		WC_Tracks::record_event( 'extensions_subscriptions_update' );
 	}
 }
