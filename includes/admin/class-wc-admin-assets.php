@@ -447,15 +447,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 		}
 
-		/**
-		 * Utility for getting plugin slug from file.
-		 *
-		 * @param string $plugin_file Plugin filename.
-		 * @return string
-		 */
-		protected function get_plugin_slug( $plugin_file ) {
-			return dirname( $plugin_file );
-		}
 	}
 
 endif;
