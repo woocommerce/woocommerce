@@ -203,7 +203,14 @@ class WC_Regenerate_Images {
 			return $image;
 		}
 
-		$image_size  = wc_get_image_size( $size );
+		// Get image size - use cache if set.
+		$image_size = wp_cache_get( 'size-' . $size, 'regenerate-images' );
+
+		if ( ! $image_size ) {
+			$image_size = wc_get_image_size( $size );
+			wp_cache_set( 'size-' . $size, $image_size, 'regenerate-images' );
+		}
+
 		$ratio_match = false;
 
 		// If '' is passed to either size, we test ratios against the original file. It's uncropped.
