@@ -26,6 +26,16 @@
 	.woocommerce-card__body {
 		padding: 0;
 	}
+
+	@include breakpoint( '<782px' ) {
+		padding: $gap;
+
+		.woocommerce-card__header {
+			display: flex;
+			flex-direction: column-reverse;
+			align-items: flex-start;
+		}
+	}
 }
 
 .is-alert-emergency {
@@ -72,6 +82,8 @@
 	border-bottom: 2px solid $button-border;
 	border-radius: 4px;
 	background: $button;
+	margin-left: 16px;
+	min-width: 120px;
 
 	.components-button {
 		padding: 4px;
@@ -82,5 +94,15 @@
 		border-width: 0 1px;
 		border-color: $button-border;
 		border-style: solid;
+	}
+
+	@include breakpoint( '<782px' ) {
+		margin-left: 0;
+		margin-bottom: 14px;
+
+		.woocommerce-store-alerts__pagination-label {
+			flex: 1 1 auto;
+			text-align: center;
+		}
 	}
 }
