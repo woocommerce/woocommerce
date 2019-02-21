@@ -57,34 +57,9 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 
 		echo '</div>';
 
-		$this->render_marketplace_suggestion_empty_state();
+		do_action( 'wc_marketplace_suggestions_products_empty_state' );
 
 		echo '</div>';
-	}
-
-
-	/**
-	 * Render container for marketplace suggestions.
-	 */
-	protected function render_marketplace_suggestion_empty_state() {
-		wc_get_template(
-			'marketplace-suggestions/container.php',
-			array(
-				'context' => 'products-list-empty-header',
-			)
-		);
-		wc_get_template(
-			'marketplace-suggestions/container.php',
-			array(
-				'context' => 'products-list-empty-body',
-			)
-		);
-		wc_get_template(
-			'marketplace-suggestions/container.php',
-			array(
-				'context' => 'products-list-empty-footer',
-			)
-		);
 	}
 
 	/**
