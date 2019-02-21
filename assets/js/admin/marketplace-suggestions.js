@@ -22,7 +22,7 @@
 			var selector = '[data-suggestion-slug=' + suggestionSlug + ']';
 			$( selector ).fadeOut( function() {
 				$( this ).remove();
-			});
+			} );
 
 			// save dismissal in user settings
 			jQuery.post(
@@ -67,7 +67,7 @@
 				} );
 			}
 
-			if (isButton) {
+			if ( isButton ) {
 				linkoutButton.classList.add( 'button' );
 			}
 			else {
@@ -82,7 +82,7 @@
 
 		// Render DOM element for suggestion icon image.
 		function renderSuggestionIcon( slug, iconUrl ) {
-			if ( !iconUrl ) {
+			if ( ! iconUrl ) {
 				return null;
 			}
 
@@ -302,7 +302,7 @@
 
 					// dismiss is allowed by default
 					var allowDismiss = true;
-					if ( promos[ 0 ]['allow-dismiss'] === false ) {
+					if ( false === promos[ 0 ]['allow-dismiss'] ) {
 						allowDismiss = false;
 					}
 
