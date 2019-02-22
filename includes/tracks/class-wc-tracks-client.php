@@ -99,9 +99,10 @@ class WC_Tracks_Client {
 	 * @return array Identity properties.
 	 */
 	public static function get_identity( $user_id ) {
-		if ( class_exists( 'Jetpack' ) ) {
+		$jetpack_lib_file = trailingslashit( WP_PLUGIN_DIR ) . 'jetpack/_inc/lib/tracks/client.php';
 
-			include_once trailingslashit( WP_PLUGIN_DIR ) . 'jetpack/_inc/lib/tracks/client.php';
+		if ( file_exists( $jetpack_lib_file ) ) {
+			include_once $jetpack_lib_file;
 
 			if ( function_exists( 'jetpack_tracks_get_identity' ) ) {
 				return jetpack_tracks_get_identity( $user_id );
