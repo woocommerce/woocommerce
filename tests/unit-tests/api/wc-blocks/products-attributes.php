@@ -67,7 +67,7 @@ class WC_Tests_API_Products_Attributes_Controller extends WC_REST_Unit_Test_Case
 	 *
 	 * @since 3.6.0
 	 */
-	public function test_get_invalid_attribute_terms() {
+	public function test_get_invalid_attribute() {
 		wp_set_current_user( $this->user );
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/attributes/11111' );
 
@@ -80,7 +80,7 @@ class WC_Tests_API_Products_Attributes_Controller extends WC_REST_Unit_Test_Case
 	 *
 	 * @since 3.6.0
 	 */
-	public function test_get_unauthed_attribute_terms() {
+	public function test_get_unauthed_attribute() {
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/attributes/' . $this->attr_size['attribute_id'] );
 
 		$response = $this->server->dispatch( $request );
@@ -88,11 +88,11 @@ class WC_Tests_API_Products_Attributes_Controller extends WC_REST_Unit_Test_Case
 	}
 
 	/**
-	 * Test getting attribute terms as editor.
+	 * Test getting attribute as editor.
 	 *
 	 * @since 3.6.0
 	 */
-	public function test_get_attribute_terms_editor() {
+	public function test_get_attribute_editor() {
 		wp_set_current_user( $this->contributor );
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/attributes/' . $this->attr_size['attribute_id'] );
 
