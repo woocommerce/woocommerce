@@ -29,6 +29,7 @@ class WC_Marketplace_Suggestions {
 
 		// Register hooks for rendering suggestions container markup.
 		add_action( 'wc_marketplace_suggestions_products_empty_state', array( __CLASS__, 'render_products_list_empty_state' ) );
+		add_action( 'wc_marketplace_suggestions_orders_empty_state', array( __CLASS__, 'render_orders_list_empty_state' ) );
 	}
 
 	/**
@@ -85,6 +86,15 @@ class WC_Marketplace_Suggestions {
 		self::render_suggestions_container( 'products-list-empty-header' );
 		self::render_suggestions_container( 'products-list-empty-body' );
 		self::render_suggestions_container( 'products-list-empty-footer' );
+	}
+
+	/**
+	 * Render suggestions containers in orders list empty state.
+	 */
+	public static function render_orders_list_empty_state() {
+		self::render_suggestions_container( 'orders-list-empty-header' );
+		self::render_suggestions_container( 'orders-list-empty-body' );
+		self::render_suggestions_container( 'orders-list-empty-footer' );
 	}
 
 	/**
