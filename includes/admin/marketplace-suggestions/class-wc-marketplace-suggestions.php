@@ -24,11 +24,42 @@ class WC_Marketplace_Suggestions {
 			return;
 		}
 
+		// Add suggestions to the product tabs.
+		add_action( 'woocommerce_product_data_tabs', array( __CLASS__, 'product_data_tabs' ) );
+		add_action( 'woocommerce_product_data_panels', array( __CLASS__, 'product_data_panels' ) );
+
 		// Register ajax api handlers.
 		add_action( 'wp_ajax_woocommerce_add_dismissed_marketplace_suggestion', array( __CLASS__, 'post_add_dismissed_suggestion_handler' ) );
 
 		// Register hooks for rendering suggestions container markup.
 		add_action( 'wc_marketplace_suggestions_products_empty_state', array( __CLASS__, 'render_products_list_empty_state' ) );
+	}
+
+	/**
+	 * Product data tabs filter
+	 *
+	 * Adds a new Extensions tab to the product data meta box.
+	 *
+	 * @param array $tabs Existing tabs
+	 *
+	 * @return array
+	 */
+	public static function product_data_tabs( $tabs ) {
+		$tabs['marketplace-suggestions'] = array(
+			'label' => _x( 'Extensions', 'Marketplace extensions', 'woocommerce' ),
+			'target' => 'marketplace_suggestions',
+			'class' => array(),
+			'priority' => 1000,
+		);
+
+		return $tabs;
+	}
+
+	/**
+	 * Render additional panels in the proudct data metabox.
+	 */
+	public static function product_data_panels() {
+		include __DIR__ . '/templates/html-product-data-extensions.php';
 	}
 
 	/**
@@ -93,7 +124,7 @@ class WC_Marketplace_Suggestions {
 	 * @param string $context Suggestion context name (rendered as a css class).
 	 */
 	public static function render_suggestions_container( $context ) {
-		include 'templates/container.php';
+		include __DIR__ . '/templates/container.php';
 	}
 
 	/**
@@ -105,7 +136,7 @@ class WC_Marketplace_Suggestions {
 	 */
 	public static function show_suggestions_for_screen( $screen_id ) {
 		// We only show suggestions on certain admin screens.
-		if ( ! in_array( $screen_id, array( 'edit-product', 'edit-shop_order' ), true ) ) {
+		if ( ! in_array( $screen_id, array( 'edit-product', 'edit-shop_order', 'product' ), true ) ) {
 			return false;
 		}
 
