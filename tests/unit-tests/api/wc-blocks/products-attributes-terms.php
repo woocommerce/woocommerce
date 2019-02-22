@@ -29,9 +29,9 @@ class WC_Tests_API_Products_Attributes_Terms_Controller extends WC_REST_Unit_Tes
 			array(
 				'role' => 'administrator',
 			)
-        );
-        
-        $this->contributor = $this->factory->user->create(
+		);
+
+		$this->contributor = $this->factory->user->create(
 			array(
 				'role' => 'contributor',
 			)
@@ -48,58 +48,58 @@ class WC_Tests_API_Products_Attributes_Terms_Controller extends WC_REST_Unit_Tes
 	 * @since 3.6.0
 	 */
 	public function test_get_terms() {
-        wp_set_current_user( $this->user );
+		wp_set_current_user( $this->user );
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/attributes/' . $this->attr_color['attribute_id'] . '/terms' );
 
 		$response       = $this->server->dispatch( $request );
 		$response_terms = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
-        $this->assertEquals( 3, count( $response_terms ) );
-        $term = $response_terms[0];
+		$this->assertEquals( 3, count( $response_terms ) );
+		$term = $response_terms[0];
 		$this->assertArrayHasKey( 'attribute', $term );
 		$attribute = $term['attribute'];
-        $this->assertArrayHasKey( 'id', $attribute );
-        $this->assertArrayHasKey( 'name', $attribute );
-        $this->assertArrayHasKey( 'slug', $attribute );
-    }
-    
-    /**
+		$this->assertArrayHasKey( 'id', $attribute );
+		$this->assertArrayHasKey( 'name', $attribute );
+		$this->assertArrayHasKey( 'slug', $attribute );
+	}
+
+	/**
 	 * Test getting invalid attribute terms.
 	 *
 	 * @since 3.6.0
 	 */
 	public function test_get_invalid_attribute_terms() {
-        wp_set_current_user( $this->user );
+		wp_set_current_user( $this->user );
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/attributes/99999/terms' );
 
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 404, $response->get_status() );
-    }
-    
-    /**
+	}
+
+	/**
 	 * Test un-authorized getting attribute terms.
 	 *
 	 * @since 3.6.0
 	 */
 	public function test_get_unauthed_attribute_terms() {
-		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/attributes/'. $this->attr_size['attribute_id'] . '/terms' );
+		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/attributes/' . $this->attr_size['attribute_id'] . '/terms' );
 
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
-    /**
+	/**
 	 * Test getting attribute terms as editor.
 	 *
 	 * @since 3.6.0
 	 */
 	public function test_get_attribute_terms_editor() {
-        wp_set_current_user( $this->contributor );
-		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/attributes/'. $this->attr_size['attribute_id'] . '/terms' );
+		wp_set_current_user( $this->contributor );
+		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/attributes/' . $this->attr_size['attribute_id'] . '/terms' );
 
-        $response       = $this->server->dispatch( $request );
-        $response_terms = $response->get_data();
+		$response       = $this->server->dispatch( $request );
+		$response_terms = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
-        $this->assertEquals( 4, count( $response_terms ) );
+		$this->assertEquals( 4, count( $response_terms ) );
 	}
 }
