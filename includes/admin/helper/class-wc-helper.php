@@ -836,7 +836,7 @@ class WC_Helper {
 		$request = WC_Helper_API::post(
 			'activate', array(
 				'authenticated' => true,
-				'body'          => json_encode(
+				'body'          => wp_json_encode(
 					array(
 						'product_key' => $product_key,
 					)
@@ -888,7 +888,7 @@ class WC_Helper {
 		$request = WC_Helper_API::post(
 			'deactivate', array(
 				'authenticated' => true,
-				'body'          => json_encode(
+				'body'          => wp_json_encode(
 					array(
 						'product_key' => $product_key,
 					)
@@ -1206,7 +1206,7 @@ class WC_Helper {
 		$request = WC_Helper_API::post(
 			'activate', array(
 				'authenticated' => true,
-				'body'          => json_encode(
+				'body'          => wp_json_encode(
 					array(
 						'product_key' => $subscription['product_key'],
 					)
@@ -1272,7 +1272,7 @@ class WC_Helper {
 			$request = WC_Helper_API::post(
 				'deactivate', array(
 					'authenticated' => true,
-					'body'          => json_encode(
+					'body'          => wp_json_encode(
 						array(
 							'product_key' => $subscription['product_key'],
 						)

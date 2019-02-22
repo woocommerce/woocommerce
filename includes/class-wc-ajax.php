@@ -842,7 +842,7 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Add order item via ajax.
+	 * Add order item via ajax. Used on the edit order screen in WP Admim.
 	 */
 	public static function add_order_item() {
 		check_ajax_referer( 'order-item', 'security' );
@@ -858,26 +858,25 @@ class WC_AJAX {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 			}
 
-			$order_id     = absint( wp_unslash( $_POST['order_id'] ) ); // WPCS: input var ok.
-			$order        = wc_get_order( $order_id );
+			$order_id = absint( wp_unslash( $_POST['order_id'] ) ); // WPCS: input var ok.
+			$order    = wc_get_order( $order_id );
 
 			if ( ! $order ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
 			}
 
 			// If we passed through items it means we need to save first before adding a new one.
-			$items = ( ! empty( $_POST['items'] ) ) ? $_POST['items'] : '';
-
-			if ( ! empty( $items ) ) {
+			if ( ! empty( $_POST['items'] ) ) {
 				$save_items = array();
-				parse_str( $items, $save_items );
-				// Save order items.
+				parse_str( wp_unslash( $_POST['items'] ), $save_items );
 				wc_save_order_items( $order->get_id(), $save_items );
 			}
 
 			$items_to_add = array_filter( wp_unslash( (array) $_POST['data'] ) );
 
 			// Add items to order.
+			$order_notes = array();
+
 			foreach ( $items_to_add as $item ) {
 				if ( ! isset( $item['id'], $item['qty'] ) || empty( $item['id'] ) ) {
 					continue;
@@ -893,17 +892,41 @@ class WC_AJAX {
 				$item_id                 = $order->add_product( $product, $qty );
 				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id );
 				$added_items[ $item_id ] = $item;
+				$order_notes[ $item_id ] = $product->get_formatted_name();
+
+				if ( $product->managing_stock() ) {
+					$new_stock               = wc_update_product_stock( $product, $qty, 'decrease' );
+					$order_notes[ $item_id ] = $product->get_formatted_name() . ' &ndash; ' . ( $new_stock + $qty ) . '&rarr;' . $new_stock;
+					$item->add_meta_data( '_reduced_stock', $qty, true );
+					$item->save();
+				}
 
 				do_action( 'woocommerce_ajax_add_order_item_meta', $item_id, $item, $order );
 			}
+
+			/* translators: %s item name. */
+			$order->add_order_note( sprintf( __( 'Added line items: %s', 'woocommerce' ), implode( ', ', $order_notes ) ), false, true );
 
 			do_action( 'woocommerce_ajax_order_items_added', $added_items, $order );
 
 			$data = get_post_meta( $order_id );
 
+			// Get HTML to return.
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
-			$response['html'] = ob_get_clean();
+			$items_html = ob_get_clean();
+
+			ob_start();
+			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			include 'admin/meta-boxes/views/html-order-notes.php';
+			$notes_html = ob_get_clean();
+
+			wp_send_json_success(
+				array(
+					'html'       => $items_html,
+					'notes_html' => $notes_html,
+				)
+			);
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
@@ -1114,14 +1137,23 @@ class WC_AJAX {
 		$response = array();
 
 		try {
-			$order_id           = absint( $_POST['order_id'] );
-			$order_item_ids     = $_POST['order_item_ids'];
-			$items              = ( ! empty( $_POST['items'] ) ) ? $_POST['items'] : '';
+			$order_id = absint( $_POST['order_id'] );
+			$order    = wc_get_order( $order_id );
+
+			if ( ! $order ) {
+				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
+			}
+
+			if ( ! isset( $_POST['order_item_ids'] ) ) {
+				throw new Exception( __( 'Invalid items', 'woocommerce' ) );
+			}
+
+			$order_item_ids     = wp_unslash( $_POST['order_item_ids'] );
 			$calculate_tax_args = array(
-				'country'  => strtoupper( wc_clean( $_POST['country'] ) ),
-				'state'    => strtoupper( wc_clean( $_POST['state'] ) ),
-				'postcode' => strtoupper( wc_clean( $_POST['postcode'] ) ),
-				'city'     => strtoupper( wc_clean( $_POST['city'] ) ),
+				'country'  => strtoupper( wc_clean( wp_unslash( $_POST['country'] ) ) ),
+				'state'    => strtoupper( wc_clean( wp_unslash( $_POST['state'] ) ) ),
+				'postcode' => strtoupper( wc_clean( wp_unslash( $_POST['postcode'] ) ) ),
+				'city'     => strtoupper( wc_clean( wp_unslash( $_POST['city'] ) ) ),
 			);
 
 			if ( ! is_array( $order_item_ids ) && is_numeric( $order_item_ids ) ) {
@@ -1129,16 +1161,33 @@ class WC_AJAX {
 			}
 
 			// If we passed through items it means we need to save first before deleting.
-			if ( ! empty( $items ) ) {
+			if ( ! empty( $_POST['items'] ) ) {
 				$save_items = array();
-				parse_str( $items, $save_items );
-				// Save order items
-				wc_save_order_items( $order_id, $save_items );
+				parse_str( wp_unslash( $_POST['items'] ), $save_items );
+				wc_save_order_items( $order->get_id(), $save_items );
 			}
 
-			if ( sizeof( $order_item_ids ) > 0 ) {
-				foreach ( $order_item_ids as $id ) {
-					wc_delete_order_item( absint( $id ) );
+			if ( ! empty( $order_item_ids ) ) {
+				$order_notes = array();
+
+				foreach ( $order_item_ids as $item_id ) {
+					$item_id                 = absint( $item_id );
+					$item                    = $order->get_item( $item_id );
+
+					// Before deleting the item, adjust any stock values already reduced.
+					if ( $item->is_type( 'line_item' ) ) {
+						$changed_stock = wc_maybe_adjust_line_item_product_stock( $item, 0 );
+
+						if ( $changed_stock && ! is_wp_error( $changed_stock ) ) {
+							/* translators: %1$s: item name %2$s: stock change */
+							$order->add_order_note( sprintf( __( 'Deleted %1$s and adjusted stock (%2$s)', 'woocommerce' ), $item->get_name(), $changed_stock['from'] . '&rarr;' . $changed_stock['to'] ), false, true );
+						} else {
+							/* translators: %s item name. */
+							$order->add_order_note( sprintf( __( 'Deleted %s', 'woocommerce' ), $item->get_name() ), false, true );
+						}
+					}
+
+					wc_delete_order_item( $item_id );
 				}
 			}
 
@@ -1146,9 +1195,22 @@ class WC_AJAX {
 			$order->calculate_taxes( $calculate_tax_args );
 			$order->calculate_totals( false );
 
+			// Get HTML to return.
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
-			$response['html'] = ob_get_clean();
+			$items_html = ob_get_clean();
+
+			ob_start();
+			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			include 'admin/meta-boxes/views/html-order-notes.php';
+			$notes_html = ob_get_clean();
+
+			wp_send_json_success(
+				array(
+					'html'       => $items_html,
+					'notes_html' => $notes_html,
+				)
+			);
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
@@ -1244,7 +1306,23 @@ class WC_AJAX {
 
 			// Return HTML items
 			$order = wc_get_order( $order_id );
+
+			// Get HTML to return.
+			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
+			$items_html = ob_get_clean();
+
+			ob_start();
+			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			include 'admin/meta-boxes/views/html-order-notes.php';
+			$notes_html = ob_get_clean();
+
+			wp_send_json_success(
+				array(
+					'html'       => $items_html,
+					'notes_html' => $notes_html,
+				)
+			);
 		}
 		wp_die();
 	}

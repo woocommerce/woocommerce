@@ -484,14 +484,6 @@ class WC_Post_Types {
 		$order_statuses = apply_filters(
 			'woocommerce_register_shop_order_post_statuses',
 			array(
-				'wc-auto-draft'     => array(
-					'public'                    => false,
-					'exclude_from_search'       => false,
-					'show_in_admin_all_list'    => true,
-					'show_in_admin_status_list' => true,
-					/* translators: %s: number of orders */
-					'label_count'               => _n_noop( 'Draft <span class="count">(%s)</span>', 'Draft <span class="count">(%s)</span>', 'woocommerce' ),
-				),
 				'wc-pending'    => array(
 					'label'                     => _x( 'Pending payment', 'Order status', 'woocommerce' ),
 					'public'                    => false,
