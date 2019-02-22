@@ -99,10 +99,10 @@ class WC_Tracks_Client {
 	 * @return array Identity properties.
 	 */
 	public static function get_identity( $user_id ) {
-		$jetpack_lib_file = trailingslashit( WP_PLUGIN_DIR ) . 'jetpack/_inc/lib/tracks/client.php';
+		$jetpack_lib = trailingslashit( WP_PLUGIN_DIR ) . 'jetpack/_inc/lib/tracks/client.php';
 
-		if ( class_exists( 'Jetpack' ) && file_exists( $jetpack_lib_file ) ) {
-			include_once $jetpack_lib_file;
+		if ( class_exists( 'Jetpack' ) && file_exists( $jetpack_lib ) ) {
+			include_once $jetpack_lib;
 
 			if ( function_exists( 'jetpack_tracks_get_identity' ) ) {
 				return jetpack_tracks_get_identity( $user_id );
@@ -120,6 +120,7 @@ class WC_Tracks_Client {
 		// If an id is still not found, create one and save it.
 		if ( ! $anon_id ) {
 			$anon_id = self::get_anon_id();
+
 			update_user_meta( $user_id, '_woocommerce_tracks_anon_id', $anon_id );
 		}
 
@@ -145,7 +146,7 @@ class WC_Tracks_Client {
 
 			// Did the browser send us a cookie?
 			if ( isset( $_COOKIE['tk_ai'] ) ) {
-					$anon_id = sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) );
+				$anon_id = sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) );
 			} else {
 
 				$binary = '';
