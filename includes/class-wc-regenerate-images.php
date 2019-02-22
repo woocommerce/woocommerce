@@ -235,6 +235,30 @@ class WC_Regenerate_Images {
 	}
 
 	/**
+	 * Get full size image dimensions.
+	 *
+	 * @param int $attachment_id Attachment ID of image.
+	 * @return array Width and height. Empty array if the dimensions cannot be found.
+	 */
+	private static function get_full_size_image_dimensions( $attachment_id ) {
+		$imagedata = wp_get_attachment_metadata( $attachment_id );
+
+		if ( ! $imagedata ) {
+			return array();
+		}
+
+		if ( ! isset( $imagedata['file'] ) && isset( $imagedata['sizes']['full'] ) ) {
+			$imagedata['height'] = $imagedata['sizes']['full']['height'];
+			$imagedata['width']  = $imagedata['sizes']['full']['width'];
+		}
+
+		return array(
+			'width'  => $imagedata['width'],
+			'height' => $imagedata['height'],
+		);
+	}
+
+	/**
 	 * Ensure we are dealing with the correct image attachment
 	 *
 	 * @param int|WP_Post $attachment Attachment object or ID.
