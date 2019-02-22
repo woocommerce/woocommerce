@@ -10,9 +10,7 @@ Feature plugin for the Gutenberg Products block.
 
 ## Getting started with the development version:
 
-1. Make sure you have:
-  - the latest version of the Gutenberg plugin and WooCommerce 3.3.1+ installed and active
-  - ***OR*** WordPress 5.0 (beta) and WooCommerce 3.5.1+
+1. Make sure you have WordPress 5.0+ and WooCommerce 3.5.1+
 2. Get a copy of this plugin using the green "Clone or download" button on the right.
 3. `npm install` to install the dependencies.
 4. `npm run build` (build once) or `npm start` (keep watching for changes) to compile the code.

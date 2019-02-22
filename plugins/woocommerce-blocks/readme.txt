@@ -42,15 +42,7 @@ We've also improved the category selection filter. If you select two or more cat
 
 = Minimum Requirements =
 
-* WordPress 4.9.x
-* Gutenberg plugin 4.6 or greater
-* WooCommerce 3.3.1 or greater
-* PHP version 5.2.4 or greater (PHP 7.2 or greater is recommended)
-* MySQL version 5.0 or greater (MySQL 5.6 or greater is recommended)
-
-OR
-
-* WordPress 5.0.x
+* WordPress 5.0
 * WooCommerce 3.5.1 or greater
 * PHP version 5.2.4 or greater (PHP 7.2 or greater is recommended)
 * MySQL version 5.0 or greater (MySQL 5.6 or greater is recommended)
