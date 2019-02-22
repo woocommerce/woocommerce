@@ -93,9 +93,50 @@ class WC_Tracks_Client {
 	}
 
 	/**
+	 * Get a user's identity to send to Tracks. If Jetpack exists, default to its implementation.
+	 *
+	 * @param int $user_id User id.
+	 * @return array Identity properties.
+	 */
+	public static function get_identity( $user_id ) {
+		$jetpack_lib = trailingslashit( WP_PLUGIN_DIR ) . 'jetpack/_inc/lib/tracks/client.php';
+
+		if ( class_exists( 'Jetpack' ) && file_exists( $jetpack_lib ) ) {
+			include_once $jetpack_lib;
+
+			if ( function_exists( 'jetpack_tracks_get_identity' ) ) {
+				return jetpack_tracks_get_identity( $user_id );
+			}
+		}
+
+		// Start with a previously set cookie.
+		$anon_id = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : false;
+
+		// If there is no cookie, apply a saved id.
+		if ( ! $anon_id ) {
+			$anon_id = get_user_meta( $user_id, '_woocommerce_tracks_anon_id', true );
+		}
+
+		// If an id is still not found, create one and save it.
+		if ( ! $anon_id ) {
+			$anon_id = self::get_anon_id();
+
+			update_user_meta( $user_id, '_woocommerce_tracks_anon_id', $anon_id );
+		}
+
+		if ( ! isset( $_COOKIE['tk_ai'] ) ) {
+			wc_setcookie( 'tk_ai', $anon_id );
+		}
+
+		return array(
+			'_ut' => 'anon',
+			'_ui' => $anon_id,
+		);
+	}
+
+	/**
 	 * Grabs the user's anon id from cookies, or generates and sets a new one
 	 *
-	 * @todo: Determine the best way to identify sites/users with/without Jetpack connection.
 	 * @return string An anon id for the user
 	 */
 	public static function get_anon_id() {
@@ -104,25 +145,26 @@ class WC_Tracks_Client {
 		if ( ! isset( $anon_id ) ) {
 
 			// Did the browser send us a cookie?
-			if ( isset( $_COOKIE['tk_ai'] ) && preg_match( '#^[A-Za-z0-9+/=]{24}$#', wp_unslash( $_COOKIE['tk_ai'] ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				$anon_id = wp_unslash( $_COOKIE['tk_ai'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			if ( isset( $_COOKIE['tk_ai'] ) ) {
+				$anon_id = sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) );
 			} else {
 
 				$binary = '';
 
-				// Generate a new anonId and try to save it in the browser's cookies
+				// Generate a new anonId and try to save it in the browser's cookies.
 				// Note that base64-encoding an 18 character string generates a 24-character anon id.
 				for ( $i = 0; $i < 18; ++$i ) {
 					$binary .= chr( wp_rand( 0, 255 ) );
 				}
 
-				$anon_id = 'jetpack:' . base64_encode( $binary );
+				$anon_id = 'woo:' . base64_encode( $binary );
 
-				if ( ! headers_sent()
-					&& ! ( defined( 'REST_REQUEST' ) && REST_REQUEST )
-					&& ! ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
+				// Don't set cookie on API requests.
+				if (
+					! ( defined( 'REST_REQUEST' ) && REST_REQUEST ) &&
+					! ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
 				) {
-					setcookie( 'tk_ai', $anon_id );
+					wc_setcookie( 'tk_ai', $anon_id );
 				}
 			}
 		}
