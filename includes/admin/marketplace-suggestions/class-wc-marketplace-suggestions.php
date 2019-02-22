@@ -46,7 +46,7 @@ class WC_Marketplace_Suggestions {
 	 */
 	public static function product_data_tabs( $tabs ) {
 		$tabs['marketplace-suggestions'] = array(
-			'label' => _x( 'Extensions', 'Marketplace extensions', 'woocommerce' ),
+			'label' => _x( 'Get more options', 'Marketplace suggestions', 'woocommerce' ),
 			'target' => 'marketplace_suggestions',
 			'class' => array(),
 			'priority' => 1000,
