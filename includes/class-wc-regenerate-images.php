@@ -377,6 +377,23 @@ class WC_Regenerate_Images {
 	}
 
 	/**
+	 * Image downsize, without this classes filtering on the results.
+	 *
+	 * @param int    $attachment_id Attachment ID.
+	 * @param string $size Size to downsize to.
+	 * @return string New image URL.
+	 */
+	private static function unfiltered_image_downsize( $attachment_id, $size ) {
+		remove_action( 'image_get_intermediate_size', array( __CLASS__, 'filter_image_get_intermediate_size' ), 10, 3 );
+
+		$return = image_downsize( $attachment_id, $size );
+
+		add_action( 'image_get_intermediate_size', array( __CLASS__, 'filter_image_get_intermediate_size' ), 10, 3 );
+
+		return $return;
+	}
+
+	/**
 	 * Get list of images and queue them for regeneration
 	 *
 	 * @return void
