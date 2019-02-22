@@ -110,23 +110,28 @@ class WC_Regenerate_Images {
 	 *
 	 * @param array  $image Image dimensions array.
 	 * @param string $size Named size.
-	 * @return bool
+	 * @return bool True if they match. False if they do not (may trigger regen).
 	 */
 	protected static function image_size_matches_settings( $image, $size ) {
-		$size_data = wc_get_image_size( $size );
+		$target_size = wc_get_image_size( $size );
+		$uncropped   = '' === $target_size['width'] || '' === $target_size['height'];
 
-		// Size is invalid if the widths or crop setting don't match.
-		if ( $size_data['width'] !== $image['width'] ) {
-			return false;
-		}
+		if ( ! $uncropped ) {
+			$ratio_match = wp_image_matches_ratio( $image['width'], $image['height'], $target_size['width'], $target_size['height'] );
 
-		// Size is invalid if the heights don't match.
-		if ( $size_data['height'] && $size_data['height'] !== $image['height'] ) {
-			return false;
+			// Size is invalid if the widths or crop setting don't match.
+			if ( $ratio_match && $target_size['width'] !== $image['width'] ) {
+				return false;
+			}
+
+			// Size is invalid if the heights don't match.
+			if ( $ratio_match && $target_size['height'] && $target_size['height'] !== $image['height'] ) {
+				return false;
+			}
 		}
 
 		// If cropping mode has changed, regenerate the image.
-		if ( '' === $size_data['height'] && empty( $image['uncropped'] ) ) {
+		if ( $uncropped && empty( $image['uncropped'] ) ) {
 			return false;
 		}
 
@@ -203,32 +208,42 @@ class WC_Regenerate_Images {
 			return $image;
 		}
 
-		$image_size  = wc_get_image_size( $size );
-		$ratio_match = false;
+		$target_size  = wc_get_image_size( $size );
+		$image_width  = $image[1];
+		$image_height = $image[2];
+		$ratio_match  = false;
+		$uncropped    = '' === $target_size['width'] || '' === $target_size['height'];
 
 		// If '' is passed to either size, we test ratios against the original file. It's uncropped.
-		if ( '' === $image_size['width'] || '' === $image_size['height'] ) {
-			$imagedata = wp_get_attachment_metadata( $attachment_id );
+		if ( $uncropped ) {
+			$full_size = self::get_full_size_image_dimensions( $attachment_id );
 
-			if ( ! $imagedata ) {
+			if ( ! $full_size ) {
 				return $image;
 			}
 
-			if ( ! isset( $imagedata['file'] ) && isset( $imagedata['sizes']['full'] ) ) {
-				$imagedata['height'] = $imagedata['sizes']['full']['height'];
-				$imagedata['width']  = $imagedata['sizes']['full']['width'];
-			}
-
-			$ratio_match = wp_image_matches_ratio( $image[1], $image[2], $imagedata['width'], $imagedata['height'] );
+			$ratio_match = wp_image_matches_ratio( $image_width, $image_height, $full_size['width'], $full_size['height'] );
 		} else {
-			$ratio_match = wp_image_matches_ratio( $image[1], $image[2], $image_size['width'], $image_size['height'] );
+			$ratio_match = wp_image_matches_ratio( $image_width, $image_height, $target_size['width'], $target_size['height'] );
 		}
 
 		if ( ! $ratio_match ) {
-			// Check if the actual image has a larger dimension than the requested image size. Smaller images are not enlarged.
-			if ( $image[1] > $image_size['width'] || $image[2] > $image_size['height'] ) {
-				return self::resize_and_return_image( $attachment_id, $image, $size, $icon );
+			$full_size = self::get_full_size_image_dimensions( $attachment_id );
+
+			if ( ! $full_size ) {
+				return $image;
 			}
+
+			// Check if the actual image has a larger dimension than the requested image size. Smaller images are not zoom-cropped.
+			if ( $image_width === $target_size['width'] && $full_size['height'] < $target_size['height'] ) {
+				return $image;
+			}
+
+			if ( $image_height === $target_size['height'] && $full_size['width'] < $target_size['width'] ) {
+				return $image;
+			}
+
+			return self::resize_and_return_image( $attachment_id, $image, $size, $icon );
 		}
 
 		return $image;
