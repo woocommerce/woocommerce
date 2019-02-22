@@ -265,14 +265,30 @@ if ( wc_tax_enabled() ) {
 			<td class="total"><?php echo wc_price( $order->get_total() - $order->get_total_refunded(), array( 'currency' => $order->get_currency() ) ); // WPCS: XSS ok. ?></td>
 		</tr>
 		<tr>
-			<td class="label"><label for="refund_amount"><?php esc_html_e( 'Refund amount', 'woocommerce' ); ?>:</label></td>
+			<td class="label">
+				<label for="refund_amount">
+					<?php echo wc_help_tip( __( 'Refund the line items above. This will show the total amount to be refunded', 'woocommerce' ) ); ?>
+					<?php esc_html_e( 'Refund amount', 'woocommerce' ); ?>:
+				</label>
+			</td>
 			<td class="total">
-				<input type="text" id="refund_amount" name="refund_amount" class="wc_input_price" />
+				<input type="text" id="refund_amount" name="refund_amount" class="wc_input_price" <?php
+				if ( wc_tax_enabled() ) {
+					// If taxes are enabled, using this refund amount can cause issues due to taxes not being refunded also.
+					// The refunds should be added to the line items, not the order as a whole.
+					echo 'readonly';
+				}
+				?>/>
 				<div class="clear"></div>
 			</td>
 		</tr>
 		<tr>
-			<td class="label"><label for="refund_reason"><?php echo wc_help_tip( __( 'Note: the refund reason will be visible by the customer.', 'woocommerce' ) ); ?> <?php esc_html_e( 'Reason for refund (optional):', 'woocommerce' ); ?></label></td>
+			<td class="label">
+				<label for="refund_reason">
+					<?php echo wc_help_tip( __( 'Note: the refund reason will be visible by the customer.', 'woocommerce' ) ); ?>
+					<?php esc_html_e( 'Reason for refund (optional):', 'woocommerce' ); ?>
+				</label>
+			</td>
 			<td class="total">
 				<input type="text" id="refund_reason" name="refund_reason" />
 				<div class="clear"></div>
