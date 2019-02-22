@@ -158,6 +158,10 @@
 	}
 }
 
+.wp-responsive-open .woocommerce-layout__activity-panel-mobile-toggle {
+	display: none;
+}
+
 .woocommerce-layout__activity-panel-toggle-bubble.has-unread::after {
 	content: ' ';
 	position: absolute;
