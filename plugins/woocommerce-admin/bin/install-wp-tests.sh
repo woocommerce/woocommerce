@@ -17,6 +17,14 @@ TMPDIR=$(echo $TMPDIR | sed -e "s/\/$//")
 WP_TESTS_DIR=${WP_TESTS_DIR-$TMPDIR/wordpress-tests-lib}
 WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress/}
 
+# Error if WP < 5
+if [[ $WP_VERSION =~ ^([0-9]+)[0-9\.]+\-? ]]; then
+	if [ "5" -gt "${BASH_REMATCH[1]}" ]; then
+		echo "You must use WordPress 5.0 or greater."
+		exit 1
+	fi
+fi
+
 download() {
     if [ `which curl` ]; then
         curl -s "$1" > "$2";
@@ -167,13 +175,6 @@ install_deps() {
 	curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 	php wp-cli.phar core config --dbname=$DB_NAME --dbuser=$DB_USER --dbpass=$DB_PASS --dbhost=$DB_HOST --dbprefix=wptests_
 	php wp-cli.phar core install --url="$WP_SITE_URL" --title="Example" --admin_user=admin --admin_password=password --admin_email=info@example.com --path=$WP_CORE_DIR --skip-email
-
-	# Install Gutenberg if WP < 5
-	if [[ $WP_VERSION =~ ^([0-9]+)[0-9\.]+\-? ]]; then
-		if [ "5" -gt "${BASH_REMATCH[1]}" ]; then
-			php wp-cli.phar plugin install gutenberg --activate
-		fi
-	fi
 
 	# Install WooCommerce
 	cd "wp-content/plugins/"
