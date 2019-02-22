@@ -50,6 +50,8 @@ class WC_Settings_Tracking {
 	 */
 	public static function init() {
 		self::instance();
+
+		add_action( 'woocommerce_settings_page_init', array( __CLASS__, 'track_settings_page_view' ) );
 	}
 
 	/**
@@ -122,5 +124,19 @@ class WC_Settings_Tracking {
 		}
 
 		WC_Tracks::record_event( 'settings_change', $properties );
+	}
+
+	/**
+	 * Send a Tracks event for WooCommerce settings page views.
+	 */
+	public static function track_settings_page_view() {
+		global $current_tab, $current_section;
+
+		$properties = array(
+			'tab'     => $current_tab,
+			'section' => empty( $current_section ) ? null : $current_section,
+		);
+
+		WC_Tracks::record_event( 'settings_view', $properties );
 	}
 }
