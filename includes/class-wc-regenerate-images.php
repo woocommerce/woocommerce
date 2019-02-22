@@ -371,7 +371,7 @@ class WC_Regenerate_Images {
 		}
 
 		// Now we've done our regen, attempt to return the new size.
-		$new_image = image_downsize( $attachment_id, self::$regenerate_size );
+		$new_image = self::unfiltered_image_downsize( $attachment_id, self::$regenerate_size );
 
 		return $new_image ? $new_image : $image;
 	}
