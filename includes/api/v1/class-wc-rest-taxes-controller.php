@@ -235,6 +235,14 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 			$query .= " AND tax_rate_class = '$class'";
 		}
 
+		/**
+		 * Filter the query string to conditionally return tax codes in the REST API.
+		 *
+		 * @param string $query         Query string used to look up tax codes.
+		 * @param array  $prepared_args Array of arguments for $wpdb->get_results().
+		 */
+		$query = apply_filters( 'woocommerce_rest_tax_query_string', $query, $prepared_args );
+
 		// Order tax rates.
 		$order_by = sprintf( ' ORDER BY %s', sanitize_key( $prepared_args['orderby'] ) );
 
