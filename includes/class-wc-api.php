@@ -237,7 +237,7 @@ class WC_API extends WC_Legacy_API {
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-data-currencies-controller.php';
 
 		// Blocks REST API V1 controllers.
-		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-blocks-rest-product-attribute-terms-controller.php';
+		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-product-attribute-terms-controller.php';
 	}
 
 	/**

@@ -49,7 +49,7 @@ class WC_REST_Blocks_Product_Attribute_Terms_Controller extends WC_REST_Product_
 			array(
 				'args'   => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
 				),
@@ -81,7 +81,7 @@ class WC_REST_Blocks_Product_Attribute_Terms_Controller extends WC_REST_Product_
 		// Get taxonomy.
 		$taxonomy = $this->get_taxonomy( $request );
 		if ( ! $taxonomy || ! taxonomy_exists( $taxonomy ) ) {
-			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Taxonomy does not exist.', 'woo-gutenberg-products-block' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Taxonomy does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		// Check permissions for a single term.
@@ -90,7 +90,7 @@ class WC_REST_Blocks_Product_Attribute_Terms_Controller extends WC_REST_Product_
 			$term = get_term( $id, $taxonomy );
 
 			if ( is_wp_error( $term ) || ! $term || $term->taxonomy !== $taxonomy ) {
-				return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Resource does not exist.', 'woo-gutenberg-products-block' ), array( 'status' => 404 ) );
+				return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 			}
 		}
 
@@ -164,9 +164,9 @@ class WC_REST_Blocks_Product_Attribute_Terms_Controller extends WC_REST_Product_
 				),
 				'name' => array(
 					'description' => __( 'Attribute name.', 'woocommerce' ),
-						'type'        => 'string',
-						'context'     => array( 'view', 'edit' ),
-						'readonly'    => true,
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'slug' => array(
 					'description' => __( 'Attribute slug.', 'woocommerce' ),
