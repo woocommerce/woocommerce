@@ -73,7 +73,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wc_deprecated_function( 'The woocommerce_admin_css action', '2.3', 'admin_enqueue_scripts' );
 			}
 
-			if ( WC_Marketplace_Suggestions::allow_suggestions() && in_array( $screen_id, array( 'edit-product' ), true ) ) {
+			if ( WC_Marketplace_Suggestions::show_suggestions_for_screen( $screen_id ) ) {
 				wp_enqueue_style( 'woocommerce_admin_marketplace_styles' );
 			}
 		}
@@ -423,7 +423,9 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				);
 			}
 
-			if ( WC_Marketplace_Suggestions::allow_suggestions() && in_array( $screen_id, array( 'edit-product' ), true ) ) {
+			error_log( $screen_id );
+
+			if ( WC_Marketplace_Suggestions::show_suggestions_for_screen( $screen_id ) ) {
 				$woo_plugin_slugs = WC_Helper::get_local_woo_plugin_slugs();
 				wp_register_script(
 					'marketplace-suggestions',

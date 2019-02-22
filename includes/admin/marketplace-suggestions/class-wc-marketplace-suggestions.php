@@ -99,6 +99,23 @@ class WC_Marketplace_Suggestions {
 	/**
 	 * Should suggestions be displayed?
 	 *
+	 * @param string $screen_id The current admin screen.
+	 *
+	 * @return bool
+	 */
+	public static function show_suggestions_for_screen( $screen_id ) {
+		// We only show suggestions on certain admin screens.
+		if ( ! in_array( $screen_id, array( 'edit-product', 'edit-shop_order' ), true ) ) {
+			return false;
+		}
+
+		return self::allow_suggestions();
+	}
+
+
+	/**
+	 * Should suggestions be displayed?
+	 *
 	 * @return bool
 	 */
 	public static function allow_suggestions() {
