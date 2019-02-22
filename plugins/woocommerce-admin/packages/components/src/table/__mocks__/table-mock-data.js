@@ -50,7 +50,7 @@ export default [
 		},
 		{
 			display: '€0.00',
-			value: 0,
+			value: null,
 		},
 		{
 			display: '€0.00',
