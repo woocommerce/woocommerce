@@ -55,28 +55,21 @@ class WC_Tracks_Client {
 	 * Synchronously request the pixel.
 	 *
 	 * @param string $pixel pixel url and query string.
-	 * @return bool|WP_Error         True on success, WP_Error on failure.
+	 * @return bool Always returns true.
 	 */
 	public static function record_pixel( $pixel ) {
 		// Add the Request Timestamp and URL terminator just before the HTTP request.
 		$pixel .= '&_rt=' . self::build_timestamp() . '&_=_';
 
-		$response = wp_safe_remote_get(
+		wp_safe_remote_get(
 			$pixel,
 			array(
-				'blocking'    => true, // The default, but being explicit here.
+				'blocking'    => false,
 				'redirection' => 2,
 				'httpversion' => '1.1',
+				'timeout'     => 1,
 			)
 		);
-
-		if ( is_wp_error( $response ) ) {
-			return $response;
-		}
-
-		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			return new WP_Error( 'request_failed', 'Tracks pixel request failed', $code );
-		}
 
 		return true;
 	}
