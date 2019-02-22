@@ -5546,4 +5546,115 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, $actual_data->totals->num_returning_customers );
 		$this->assertEquals( 0, $actual_data->totals->num_new_customers );
 	}
+
+	/**
+	 * Test new and returning registered customer.
+	 */
+	public function test_registered_returning_customer() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$customer_1 = WC_Helper_Customer::create_customer( 'cust_1_new', 'pwd_1', 'new_customer@mail.com' );
+
+		// Create a test product for use in an order.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
+
+		// All empty in the beginning.
+		$query_args = array(
+			'interval' => 'hour',
+		);
+		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
+		$this->assertEquals( 0, $actual_data->totals->num_returning_customers );
+		$this->assertEquals( 0, $actual_data->totals->num_new_customers );
+
+		// Create an order an hour before the order 1, so that the guest customer will become returning customer later.
+		$order_1_time = time();
+
+		$order_0_time = $order_1_time - HOUR_IN_SECONDS;
+
+		$order_0 = WC_Helper_Order::create_order( $customer_1->get_id(), $product );
+		$order_0->set_date_created( $order_0_time );
+		$order_0->set_status( 'processing' );
+		$order_0->set_total( 100 );
+		$order_0->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		$start_time = date( 'Y-m-d H:00:00', $order_0->get_date_created()->getOffsetTimestamp() );
+		$end_time   = date( 'Y-m-d H:59:59', $order_0->get_date_created()->getOffsetTimestamp() );
+		$query_args = array(
+			'interval' => 'hour',
+			'after'    => $start_time,
+			'before'   => $end_time,
+		);
+		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
+		$this->assertEquals( 0, $actual_data->totals->num_returning_customers );
+		$this->assertEquals( 1, $actual_data->totals->num_new_customers );
+
+		// Place an order 'one hour later', 2 orders, but still just one customer.
+		$order_1 = WC_Helper_Order::create_order( $customer_1->get_id(), $product );
+		$order_1->set_date_created( $order_1_time );
+		$order_1->set_status( 'processing' );
+		$order_1->set_total( 100 );
+		$order_1->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		// Time frame includes both orders -> customer is a new customer.
+		$start_time = date( 'Y-m-d H:00:00', $order_0->get_date_created()->getOffsetTimestamp() );
+		$end_time   = date( 'Y-m-d H:59:59', $order_1->get_date_created()->getOffsetTimestamp() );
+		$query_args = array(
+			'interval' => 'hour',
+			'after'    => $start_time,
+			'before'   => $end_time,
+		);
+
+		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
+		$this->assertEquals( 0, $actual_data->totals->num_returning_customers );
+		$this->assertEquals( 1, $actual_data->totals->num_new_customers );
+
+		// Time frame includes only second order -> customer is a returning customer.
+		$after_order_0 = new DateTime();
+		$after_order_0->setTimestamp( $order_0_time + 1 );
+
+		$start_time   = date( 'Y-m-d H:i:s', $order_0_time + 1 );
+		$end_time     = date( 'Y-m-d H:59:59', $order_1->get_date_created()->getOffsetTimestamp() );
+		$query_args   = array(
+			'interval' => 'hour',
+			'after'    => $start_time,
+			'before'   => $end_time,
+		);
+
+		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
+		$this->assertEquals( 1, $actual_data->totals->num_returning_customers );
+		$this->assertEquals( 0, $actual_data->totals->num_new_customers );
+
+		// Wait a bit so that orders are not created at the same second.
+		sleep( 1 );
+
+		$order_2 = WC_Helper_Order::create_order( $customer_1->get_id(), $product );
+		$order_2->set_date_created( $order_1_time );
+		$order_2->set_status( 'processing' );
+		$order_2->set_total( 100 );
+		$order_2->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		// Time frame includes second and third order -> there is one returning customer.
+		$start_time   = date( 'Y-m-d H:i:s', $order_0_time + 1 );
+		$end_time   = date( 'Y-m-d H:59:59', $order_2->get_date_created()->getOffsetTimestamp() );
+		$query_args = array(
+			'interval' => 'day', // to skip cache.
+			'after'    => $start_time,
+			'before'   => $end_time,
+		);
+		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
+		// It's still the same customer who ordered for the first time in this hour, they just placed 2 orders.
+		$this->assertEquals( 1, $actual_data->totals->num_returning_customers );
+		$this->assertEquals( 0, $actual_data->totals->num_new_customers );
+	}
 }
