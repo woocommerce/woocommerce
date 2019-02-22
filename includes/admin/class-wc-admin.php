@@ -88,6 +88,7 @@ class WC_Admin {
 
 		// Marketplace suggestions & related REST API.
 		include_once dirname( __FILE__ ) . '/marketplace-suggestions/class-wc-marketplace-suggestions.php';
+		include_once dirname( __FILE__ ) . '/marketplace-suggestions/class-wc-marketplace-updater.php';
 	}
 
 	/**
