@@ -287,7 +287,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * Should contain the fields token_id, gateway_id, token, user_id, type, is_default.
 	 *
 	 * @since 3.0.0
-	 * @param id $user_id User ID.
+	 * @param int $user_id User ID.
 	 * @return object
 	 */
 	public function get_users_default_token( $user_id ) {
