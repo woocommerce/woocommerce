@@ -7,8 +7,8 @@
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Text Domain:  woo-gutenberg-products-block
- * WC requires at least: 3.3
- * WC tested up to: 3.5
+ * WC requires at least: 3.5
+ * WC tested up to: 3.6
  *
  * @package WooCommerce\Blocks
  */
@@ -415,93 +415,3 @@ function wgpb_register_api_routes() {
 	$attribute_terms = new WGPB_Product_Attribute_Terms_Controller();
 	$attribute_terms->register_routes();
 }
-
-/**
- * Brings some extra required shortcode features from WC core 3.4+ to this feature plugin.
- *
- * @todo Remove this function when merging into core because it won't be necessary.
- *
- * @param array  $args WP_Query args.
- * @param array  $attributes Shortcode attributes.
- * @param string $type Type of shortcode currently processing.
- */
-function wgpb_extra_shortcode_features( $args, $attributes, $type ) {
-	if ( 'products' !== $type ) {
-		return $args;
-	}
-
-	// Enable term ids in the category shortcode.
-	if ( ! empty( $attributes['category'] ) ) {
-		$categories = array_map( 'sanitize_title', explode( ',', $attributes['category'] ) );
-		$field      = 'slug';
-
-		if ( empty( $args['tax_query'] ) ) {
-			$args['tax_query'] = array(); // WPCS: slow query ok.
-		}
-
-		// Unset old category tax query.
-		foreach ( $args['tax_query'] as $index => $tax_query ) {
-			if ( 'product_cat' === $tax_query['taxonomy'] ) {
-				unset( $args['tax_query'][ $index ] );
-			}
-		}
-
-		if ( is_numeric( $categories[0] ) ) {
-			$categories = array_map( 'absint', $categories );
-			$field      = 'term_id';
-		}
-		$args['tax_query'][] = array(
-			'taxonomy'         => 'product_cat',
-			'terms'            => $categories,
-			'field'            => $field,
-			'operator'         => $attributes['cat_operator'],
-
-			// See https://github.com/woocommerce/woocommerce/pull/20207/files#diff-9982e2749834d5232f1ed411b6c20312.
-			'include_children' => 'AND' === $attributes['cat_operator'] ? false : true,
-		);
-	}
-
-	// Enable term ids in the attributes shortcode and just-attribute queries.
-	if ( ! empty( $attributes['attribute'] ) || ! empty( $attributes['terms'] ) ) {
-		$taxonomy = strstr( $attributes['attribute'], 'pa_' ) ? sanitize_title( $attributes['attribute'] ) : 'pa_' . sanitize_title( $attributes['attribute'] );
-		$terms    = $attributes['terms'] ? array_map( 'sanitize_title', explode( ',', $attributes['terms'] ) ) : array();
-		$field    = 'slug';
-
-		if ( empty( $args['tax_query'] ) ) {
-			$args['tax_query'] = array(); // WPCS: slow query ok.
-		}
-
-		// Unset old attribute tax query.
-		foreach ( $args['tax_query'] as $index => $tax_query ) {
-			if ( $taxonomy === $tax_query['taxonomy'] ) {
-				unset( $args['tax_query'][ $index ] );
-			}
-		}
-
-		if ( $terms && is_numeric( $terms[0] ) ) {
-			$terms = array_map( 'absint', $terms );
-			$field = 'term_id';
-		}
-
-		// If no terms were specified get all products that are in the attribute taxonomy.
-		if ( ! $terms ) {
-			$terms = get_terms(
-				array(
-					'taxonomy' => $taxonomy,
-					'fields'   => 'ids',
-				)
-			);
-			$field = 'term_id';
-		}
-
-		$args['tax_query'][] = array(
-			'taxonomy' => $taxonomy,
-			'terms'    => $terms,
-			'field'    => $field,
-			'operator' => $attributes['terms_operator'],
-		);
-	}
-
-	return $args;
-}
-add_filter( 'woocommerce_shortcode_products_query', 'wgpb_extra_shortcode_features', 10, 3 );
