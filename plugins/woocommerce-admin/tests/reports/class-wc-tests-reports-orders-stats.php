@@ -5442,7 +5442,6 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	 * Test new and returning guest customer.
 	 */
 	public function test_guest_returning_customer() {
-		global $wpdb;
 		WC_Helper_Reports::reset_stats_dbs();
 
 		// Create a test product for use in an order.
