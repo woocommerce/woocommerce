@@ -101,7 +101,7 @@ class WC_Tracks_Client {
 	public static function get_identity( $user_id ) {
 		$jetpack_lib_file = trailingslashit( WP_PLUGIN_DIR ) . 'jetpack/_inc/lib/tracks/client.php';
 
-		if ( file_exists( $jetpack_lib_file ) ) {
+		if ( class_exists( 'Jetpack' ) && file_exists( $jetpack_lib_file ) ) {
 			include_once $jetpack_lib_file;
 
 			if ( function_exists( 'jetpack_tracks_get_identity' ) ) {
