@@ -49,10 +49,17 @@ class WC_Tracks_Event {
 	/**
 	 * Record Tracks event
 	 *
-	 * @return bool|WP_Error True on success, WP_Error on failure.
+	 * @return bool Always returns true.
 	 */
 	public function record() {
-		return WC_Tracks_Client::record_event( $this );
+		if (
+			( defined( 'DOING_AJAX' ) && DOING_AJAX ) ||
+			( defined( 'REST_REQUEST' ) && REST_REQUEST )
+		) {
+			return WC_Tracks_Client::record_event( $this );
+		}
+
+		return WC_Tracks_Footer_Pixel::record_event( $this );
 	}
 
 	/**
