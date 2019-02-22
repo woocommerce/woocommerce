@@ -423,8 +423,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				);
 			}
 
-			error_log( $screen_id );
-
 			if ( WC_Marketplace_Suggestions::show_suggestions_for_screen( $screen_id ) ) {
 				$woo_plugin_slugs = WC_Helper::get_local_woo_plugin_slugs();
 				wp_register_script(
