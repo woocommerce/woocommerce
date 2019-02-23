@@ -10,7 +10,8 @@ module.exports = function( grunt ) {
 			css: 'assets/css',
 			fonts: 'assets/fonts',
 			images: 'assets/images',
-			js: 'assets/js'
+			js: 'assets/js',
+			php: 'includes'
 		},
 
 		// JavaScript linting with JSHint.
@@ -295,6 +296,13 @@ module.exports = function( grunt ) {
 		clean: {
 			apidocs: {
 				src: [ 'wc-apidocs' ]
+			},
+			blocks: {
+				src: [
+					'<%= dirs.js %>/blocks',
+					'<%= dirs.css %>/blocks',
+					'<%= dirs.php %>/blocks'
+				]
 			}
 		},
 
@@ -335,6 +343,35 @@ module.exports = function( grunt ) {
 					'<%= dirs.css %>/*.css'
 				]
 			}
+		},
+
+		// Copy block files from npm package.
+		copy: {
+			js: {
+				expand: true,
+				cwd: 'node_modules/@woocommerce/block-library/build',
+				src: '*.js',
+				dest: '<%= dirs.js %>/blocks/',
+				rename: ( dest, src ) => dest + src.replace( '.js', '.min.js' ),
+				options: {
+					process: ( content ) => content.replace( /'woo-gutenberg-products-block'/g, "'woocommerce'" )
+				}
+			},
+			css: {
+				expand: true,
+				cwd: 'node_modules/@woocommerce/block-library/build',
+				src: '*.css',
+				dest: '<%= dirs.css %>/blocks/'
+			},
+			php: {
+				expand: true,
+				cwd: 'node_modules/@woocommerce/block-library/assets/php',
+				src: '*.php',
+				dest: '<%= dirs.php %>/blocks/',
+				options: {
+					process: ( content ) => content.replace( /'woo-gutenberg-products-block'/g, "'woocommerce'" )
+				}
+			}
 		}
 	});
 
@@ -351,6 +388,7 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );
+	grunt.loadNpmTasks( 'grunt-contrib-copy' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 	grunt.loadNpmTasks( 'grunt-prompt' );
@@ -359,6 +397,7 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'default', [
 		'js',
 		'css',
+		'blocks',
 		'i18n'
 	]);
 
@@ -375,6 +414,11 @@ module.exports = function( grunt ) {
 		'postcss',
 		'cssmin',
 		'concat'
+	]);
+
+	grunt.registerTask( 'blocks', [
+		'clean:blocks',
+		'copy'
 	]);
 
 	grunt.registerTask( 'docs', [
