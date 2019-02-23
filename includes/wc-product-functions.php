@@ -848,11 +848,11 @@ function wc_get_product_tax_class_options() {
  * @return array
  */
 function wc_get_product_stock_status_options() {
-	return array(
+	return apply_filters( 'wc_product_stock_status_options', array(
 		'instock'     => __( 'In stock', 'woocommerce' ),
 		'outofstock'  => __( 'Out of stock', 'woocommerce' ),
 		'onbackorder' => __( 'On backorder', 'woocommerce' ),
-	);
+	) );
 }
 
 /**
