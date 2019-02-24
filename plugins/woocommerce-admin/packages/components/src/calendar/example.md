@@ -37,7 +37,7 @@ const MyDateRange =  withState( {
 					onUpdate={ onRangeUpdate }
 					shortDateFormat={ dateFormat }
 					focusedInput={ focusedInput }
-					invalidDays="future"
+					isInvalidDate={ date => moment().isBefore( moment( date ), 'date' ) }
 				/>
 			</Section>
 	
@@ -49,7 +49,7 @@ const MyDateRange =  withState( {
 					error={ afterError } 
 					onUpdate={ onDatePickerUpdate }
 					dateFormat={ dateFormat }
-					invalidDays="none"
+					isInvalidDate={ date => moment( date ).day() === 1 }
 				/>
 			</Section>
 		</div>
