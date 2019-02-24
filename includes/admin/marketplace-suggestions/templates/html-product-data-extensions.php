@@ -1,6 +1,9 @@
 <?php
 /**
- * The Extensions tab HTML in the product tabs
+ * The marketplace suggestions tab HTML in the product tabs
+ *
+ * @package WooCommerce\Classes
+ * @since   3.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -10,8 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 ?>
 <div id="marketplace_suggestions" class="panel woocommerce_options_panel hidden">
 	<?php
-		WC_Marketplace_Suggestions::render_suggestions_container( 'product-edit-header' );
+		WC_Marketplace_Suggestions::render_suggestions_container( 'product-edit-meta-tab-header' );
 		WC_Marketplace_Suggestions::render_suggestions_container( 'product-edit-meta-tab-body' );
-		WC_Marketplace_Suggestions::render_suggestions_container( 'product-edit-footer' );
+		WC_Marketplace_Suggestions::render_suggestions_container( 'product-edit-meta-tab-footer' );
 	?>
 </div>
