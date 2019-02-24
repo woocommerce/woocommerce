@@ -41,7 +41,6 @@ a.suggestion-dismiss::before {
 		img.marketplace-suggestion-icon {
 			height: 40px;
 			margin-right: 1.5em;
-			margin-bottom: 1em;
 			flex: 0 0 40px;
 		}
 
@@ -164,6 +163,41 @@ a.suggestion-dismiss::before {
 
 }
 
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-header"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-footer"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-body"] {
+
+	.marketplace-suggestion-container {
+		padding: 1em 1.5em;
+
+		.marketplace-suggestion-container-content {
+
+			p {
+				margin: 0;
+				padding: 0;
+			}
+		}
+
+		.marketplace-suggestion-container-cta {
+
+			.suggestion-dismiss {
+				margin-left: 1em;
+			}
+		}
+	}
+}
+
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-body"] {
+
+	.marketplace-suggestion-container {
+		padding: 1.5em;
+		padding-bottom: 0;
+	}
+}
+
+
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"],
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-body"],
@@ -182,12 +216,10 @@ a.suggestion-dismiss::before {
 	}
 
 	.marketplace-suggestion-container {
-		padding: 1.5em;
-		border-bottom: 1px solid $suggestions-pale-gray;
+		border-bottom: none;
 
 		&:last-child {
 			border-bottom: none;
-			padding-bottom: 1.5em;
 		}
 
 		.marketplace-suggestion-container-cta {
@@ -210,9 +242,9 @@ a.suggestion-dismiss::before {
 			}
 
 			.suggestion-dismiss {
-				position: absolute;
-				top: 1em;
-				right: 1em;
+				position: relative;
+				top: 5px;
+				right: auto;
 			}
 		}
 	}
@@ -223,19 +255,5 @@ a.suggestion-dismiss::before {
 		// There's limited room on mobile, and there are edge-case
 		// styling issues in some browsers.
 		display: block;
-
-		.marketplace-suggestion-container {
-			border-bottom: none;
-			padding-bottom: 0;
-
-			.marketplace-suggestion-container-cta {
-
-				.suggestion-dismiss {
-					position: relative;
-					top: 7px;
-					right: auto;
-				}
-			}
-		}
 	}
 }
