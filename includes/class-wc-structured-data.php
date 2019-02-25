@@ -203,15 +203,16 @@ class WC_Structured_Data {
 			'name'  => $product->get_name(),
 		);
 
+		$markup['image']       = wp_get_attachment_url( $product->get_image_id() );
+		$markup['description'] = wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) );
+		$markup['sku']         = $product->get_sku();
+		$markup['brand']       = '';
+
 		if ( apply_filters( 'woocommerce_structured_data_product_aggregator_page', is_product_taxonomy() || is_shop() ) ) {
 			$markup['url'] = $permalink;
 
 			$markup = apply_filters( 'woocommerce_structured_data_product_aggregated', $markup, $product );
 		}
-
-		$markup['image']       = wp_get_attachment_url( $product->get_image_id() );
-		$markup['description'] = wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) );
-		$markup['sku']         = $product->get_sku();
 
 		if ( '' !== $product->get_price() ) {
 			if ( $product->is_type( 'variable' ) ) {
