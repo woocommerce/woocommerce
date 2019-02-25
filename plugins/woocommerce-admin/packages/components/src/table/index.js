@@ -151,7 +151,7 @@ class TableCard extends Component {
 	}
 
 	onSearch( values ) {
-		const { compareParam } = this.props;
+		const { compareParam, searchBy } = this.props;
 		// A comma is used as a separator between search terms, so we want to escape
 		// any comma they contain.
 		const labels = values.map( v => v.label.replace( ',', '%2C' ) );
@@ -159,6 +159,7 @@ class TableCard extends Component {
 			updateQueryString( {
 				filter: undefined,
 				[ compareParam ]: undefined,
+				[ searchBy ]: undefined,
 				search: uniq( labels ).join( ',' ),
 			} );
 		} else {
