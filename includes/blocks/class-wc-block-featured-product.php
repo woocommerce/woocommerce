@@ -3,6 +3,7 @@
  * Display the featured product block in the content.
  *
  * @package WooCommerce\Blocks
+ * @version 3.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
