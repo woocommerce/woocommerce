@@ -37,7 +37,7 @@ class ReportTable extends Component {
 	}
 
 	onColumnsChange( shownColumns ) {
-		const { columnPrefsKey, getHeadersContent } = this.props;
+		const { columnPrefsKey, getHeadersContent, updateCurrentUserData } = this.props;
 		const columns = getHeadersContent().map( header => header.key );
 		const hiddenColumns = columns.filter( column => ! shownColumns.includes( column ) );
 
@@ -45,7 +45,7 @@ class ReportTable extends Component {
 			const userDataFields = {
 				[ columnPrefsKey ]: hiddenColumns,
 			};
-			this.props.updateCurrentUserData( userDataFields );
+			updateCurrentUserData( userDataFields );
 		}
 	}
 

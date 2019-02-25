@@ -9,7 +9,7 @@ import { compose } from '@wordpress/compose';
 import Gridicon from 'gridicons';
 import { isEqual, xor } from 'lodash';
 import PropTypes from 'prop-types';
-import { ToggleControl, IconButton, NavigableMenu, SelectControl } from '@wordpress/components';
+import { IconButton, NavigableMenu, SelectControl } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 
 /**
@@ -89,16 +89,20 @@ class DashboardCharts extends Component {
 	}
 
 	renderMenu() {
+		const { hiddenChartKeys } = this.state;
+
 		return (
 			<EllipsisMenu label={ __( 'Choose which charts to display', 'wc-admin' ) }>
 				{ uniqCharts.map( chart => {
 					return (
-						<MenuItem onInvoke={ this.toggle( chart.key ) } key={ chart.key }>
-							<ToggleControl
-								label={ __( `${ chart.label }`, 'wc-admin' ) }
-								checked={ ! this.state.hiddenChartKeys.includes( chart.key ) }
-								onChange={ this.toggle( chart.key ) }
-							/>
+						<MenuItem
+							checked={ ! hiddenChartKeys.includes( chart.key ) }
+							isCheckbox
+							isClickable
+							key={ chart.key }
+							onInvoke={ this.toggle( chart.key ) }
+						>
+							{ __( `${ chart.label }`, 'wc-admin' ) }
 						</MenuItem>
 					);
 				} ) }

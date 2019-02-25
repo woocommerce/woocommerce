@@ -3,7 +3,6 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { ToggleControl } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
@@ -71,12 +70,14 @@ class StorePerformance extends Component {
 				{ indicators.map( ( indicator, i ) => {
 					const checked = ! this.state.userPrefs.includes( indicator.stat );
 					return (
-						<MenuItem onInvoke={ this.toggle( indicator.stat ) } key={ i }>
-							<ToggleControl
-								label={ sprintf( __( 'Show %s', 'wc-admin' ), indicator.label ) }
-								checked={ checked }
-								onChange={ this.toggle( indicator.stat ) }
-							/>
+						<MenuItem
+							checked={ checked }
+							isCheckbox
+							isClickable
+							key={ i }
+							onInvoke={ this.toggle( indicator.stat ) }
+						>
+							{ sprintf( __( 'Show %s', 'wc-admin' ), indicator.label ) }
 						</MenuItem>
 					);
 				} ) }
