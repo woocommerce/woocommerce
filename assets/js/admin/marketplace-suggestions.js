@@ -198,6 +198,9 @@
 		function getRelevantPromotions( marketplaceSuggestionsApiData, displayContext ) {
 			// select based on display context
 			var promos = _.filter( marketplaceSuggestionsApiData, function( promo ) {
+				if ( _.isArray( promo.context ) ) {
+					return _.contains( promo.context, displayContext );
+				}
 				return ( displayContext === promo.context );
 			} );
 
@@ -226,8 +229,8 @@
 		}
 
 		// Show and hide page elements dependent on suggestion state.
-		function hidePageElementsForEmptyState( visibleSuggestions ) {
-			var showingProductsEmptyStateSuggestions = _.contains( visibleSuggestions, 'products-list-empty-body' );
+		function hidePageElementsForEmptyState( usedSuggestionsContexts ) {
+			var showingProductsEmptyStateSuggestions = _.contains( usedSuggestionsContexts, 'products-list-empty-body' );
 
 			// Streamline onboarding UI if we're in 'empty state' welcome mode.
 			if ( showingProductsEmptyStateSuggestions ) {
@@ -244,7 +247,7 @@
 
 		// Render suggestion data in appropriate places in UI.
 		function displaySuggestions( marketplaceSuggestionsApiData ) {
-			var visibleSuggestions = [];
+			var usedSuggestionsContexts = [];
 
 			// iterate over all suggestions containers, rendering promos
 			$( '.marketplace-suggestions-container' ).each( function() {
@@ -256,6 +259,11 @@
 
 				// render the promo content
 				for ( var i in promos ) {
+					// only show a max of 5 suggestions per container
+					if ( i >= 5 ) {
+						break;
+					}
+
 					var linkText = promos[ i ]['link-text'];
 					var linkoutIsButton = false;
 					if ( promos[ i ]['button-text'] ) {
@@ -281,7 +289,7 @@
 					);
 					$( this ).append( content );
 					$( this ).addClass( 'showing-suggestion' );
-					visibleSuggestions.push( promos[i].context );
+					usedSuggestionsContexts.push( context );
 
 					window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
 						suggestionSlug: promos[ i ].slug
@@ -290,7 +298,7 @@
 			} );
 
 			// render inline promos in products list
-			if ( 0 === visibleSuggestions.length ) {
+			if ( 0 === usedSuggestionsContexts.length ) {
 				$( '.wp-admin.admin-bar.edit-php.post-type-product table.wp-list-table.posts tbody').first().each( function() {
 					var context = 'products-list-inline';
 
@@ -331,7 +339,7 @@
 							$( rows[ minRow - 1 ] ).after( content );
 						}
 
-						visibleSuggestions.push( context );
+						usedSuggestionsContexts.push( context );
 
 						window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
 							suggestionSlug: promos[ 0 ].slug
@@ -340,7 +348,7 @@
 				} );
 			}
 
-			hidePageElementsForEmptyState( visibleSuggestions );
+			hidePageElementsForEmptyState( usedSuggestionsContexts );
 		}
 
 		if ( marketplace_suggestions.suggestions_data ) {

@@ -40,15 +40,15 @@ class WC_Marketplace_Suggestions {
 	 *
 	 * Adds a new Extensions tab to the product data meta box.
 	 *
-	 * @param array $tabs Existing tabs
+	 * @param array $tabs Existing tabs.
 	 *
 	 * @return array
 	 */
 	public static function product_data_tabs( $tabs ) {
 		$tabs['marketplace-suggestions'] = array(
-			'label' => _x( 'Get more options', 'Marketplace suggestions', 'woocommerce' ),
-			'target' => 'marketplace_suggestions',
-			'class' => array(),
+			'label'    => _x( 'Get more options', 'Marketplace suggestions', 'woocommerce' ),
+			'target'   => 'marketplace_suggestions',
+			'class'    => array(),
 			'priority' => 1000,
 		);
 
@@ -59,7 +59,7 @@ class WC_Marketplace_Suggestions {
 	 * Render additional panels in the proudct data metabox.
 	 */
 	public static function product_data_panels() {
-		include __DIR__ . '/templates/html-product-data-extensions.php';
+		include dirname( __FILE__ ) . '/templates/html-product-data-extensions.php';
 	}
 
 	/**
@@ -124,7 +124,7 @@ class WC_Marketplace_Suggestions {
 	 * @param string $context Suggestion context name (rendered as a css class).
 	 */
 	public static function render_suggestions_container( $context ) {
-		include __DIR__ . '/templates/container.php';
+		include dirname( __FILE__ ) . '/views/container.php';
 	}
 
 	/**
