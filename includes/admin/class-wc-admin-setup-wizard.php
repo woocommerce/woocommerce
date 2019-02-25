@@ -4,13 +4,10 @@
  *
  * Takes new users through some basic steps to setup their store.
  *
- * @package     WooCommerce/Admin
- * @version     2.6.0
+ * @package WooCommerce/Admin
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Setup_Wizard class.
@@ -49,22 +46,43 @@ class WC_Admin_Setup_Wizard {
 	);
 
 	/**
-	 * Hook in tabs.
+	 * Singleton instance.
+	 *
+	 * @var WC_Admin_Setup_Wizard|null
 	 */
-	public function __construct() {
-		if ( apply_filters( 'woocommerce_enable_setup_wizard', true ) && current_user_can( 'manage_woocommerce' ) ) {
-			add_action( 'admin_menu', array( $this, 'admin_menus' ) );
-			add_action( 'admin_init', array( $this, 'setup_wizard' ) );
-			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+	protected static $instance = null;
+
+	/**
+	 * Return singleston instance.
+	 *
+	 * @static
+	 * @return WC_Admin_Setup_Wizard
+	 */
+	final public static function instance() {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
 		}
+		return self::$instance;
 	}
 
 	/**
-	 * Add admin menus/screens.
+	 * Singleton. Prevent clone.
 	 */
-	public function admin_menus() {
-		add_dashboard_page( '', '', 'manage_options', 'wc-setup', '' );
+	final public function __clone() {
+		trigger_error( 'Singleton. No cloning allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 	}
+
+	/**
+	 * Singleton. Prevent serialization.
+	 */
+	final public function __wakeup() {
+		trigger_error( 'Singleton. No serialization allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent construct.
+	 */
+	final private function __construct() {}
 
 	/**
 	 * The theme "extra" should only be shown if the current user can modify themes
@@ -205,9 +223,8 @@ class WC_Admin_Setup_Wizard {
 	 * Show the setup wizard.
 	 */
 	public function setup_wizard() {
-		if ( empty( $_GET['page'] ) || 'wc-setup' !== $_GET['page'] ) { // WPCS: CSRF ok, input var ok.
-			return;
-		}
+		$this->enqueue_scripts();
+
 		$default_steps = array(
 			'store_setup' => array(
 				'name'    => __( 'Store setup', 'woocommerce' ),
@@ -2328,5 +2345,3 @@ class WC_Admin_Setup_Wizard {
 		<?php
 	}
 }
-
-new WC_Admin_Setup_Wizard();

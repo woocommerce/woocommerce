@@ -2,20 +2,10 @@
 /**
  * Adds settings to the permalinks admin settings page
  *
- * @class       WC_Admin_Permalink_Settings
- * @author      WooThemes
- * @category    Admin
  * @package     WooCommerce/Admin
- * @version     2.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
-if ( class_exists( 'WC_Admin_Permalink_Settings', false ) ) {
-	return new WC_Admin_Permalink_Settings();
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Permalink_Settings Class.
@@ -30,9 +20,48 @@ class WC_Admin_Permalink_Settings {
 	private $permalinks = array();
 
 	/**
-	 * Hook in tabs.
+	 * Singleton instance.
+	 *
+	 * @var WC_Admin_Permalink_Settings|null
 	 */
-	public function __construct() {
+	protected static $instance = null;
+
+	/**
+	 * Return singleston instance.
+	 *
+	 * @static
+	 * @return WC_Admin_Permalink_Settings
+	 */
+	final public static function instance() {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * Singleton. Prevent clone.
+	 */
+	final public function __clone() {
+		trigger_error( 'Singleton. No cloning allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent serialization.
+	 */
+	final public function __wakeup() {
+		trigger_error( 'Singleton. No serialization allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent construct.
+	 */
+	final private function __construct() {}
+
+	/**
+	 * Add options and handle save.
+	 */
+	public function init() {
 		$this->settings_init();
 		$this->settings_save();
 	}
@@ -167,10 +196,6 @@ class WC_Admin_Permalink_Settings {
 	 * Save the settings.
 	 */
 	public function settings_save() {
-		if ( ! is_admin() ) {
-			return;
-		}
-
 		// We need to save the options ourselves; settings api does not trigger save for the permalinks page.
 		if ( isset( $_POST['permalink_structure'], $_POST['wc-permalinks-nonce'], $_POST['woocommerce_product_category_slug'], $_POST['woocommerce_product_tag_slug'], $_POST['woocommerce_product_attribute_slug'] ) && wp_verify_nonce( wp_unslash( $_POST['wc-permalinks-nonce'] ), 'wc-permalinks' ) ) { // WPCS: input var ok, sanitization ok.
 			wc_switch_to_site_locale();
@@ -213,5 +238,3 @@ class WC_Admin_Permalink_Settings {
 		}
 	}
 }
-
-return new WC_Admin_Permalink_Settings();

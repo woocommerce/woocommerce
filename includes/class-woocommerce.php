@@ -28,7 +28,7 @@ final class WooCommerce {
 	 * @var WooCommerce
 	 * @since 2.1
 	 */
-	protected static $_instance = null;
+	protected static $instance = null;
 
 	/**
 	 * Session instance.
@@ -111,10 +111,10 @@ final class WooCommerce {
 	 * @return WooCommerce - Main instance.
 	 */
 	public static function instance() {
-		if ( is_null( self::$_instance ) ) {
-			self::$_instance = new self();
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
 		}
-		return self::$_instance;
+		return self::$instance;
 	}
 
 	/**
@@ -152,6 +152,16 @@ final class WooCommerce {
 	 */
 	public function __construct() {
 		$this->define_constants();
+
+		/**
+		 * Class autoloader.
+		 */
+		$loader = include_once WC_ABSPATH . 'vendor/autoload.php';
+
+		if ( ! $loader ) {
+			throw new Exception( 'vendor/autoload.php missing please run `composer install`' );
+		}
+
 		$this->includes();
 		$this->init_hooks();
 	}
@@ -284,13 +294,10 @@ final class WooCommerce {
 
 	/**
 	 * Include required core files used in admin and on the frontend.
+	 *
+	 * @throws Exception When composer install hasn't been ran.
 	 */
 	public function includes() {
-		/**
-		 * Class autoloader.
-		 */
-		include_once WC_ABSPATH . 'includes/class-wc-autoloader.php';
-
 		/**
 		 * Interfaces.
 		 */
@@ -419,7 +426,7 @@ final class WooCommerce {
 		}
 
 		if ( $this->is_request( 'admin' ) ) {
-			include_once WC_ABSPATH . 'includes/admin/class-wc-admin.php';
+			WC_Admin::instance()->init();
 		}
 
 		if ( $this->is_request( 'frontend' ) ) {

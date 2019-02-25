@@ -14,22 +14,13 @@ defined( 'ABSPATH' ) || exit;
 class WC_Admin_Webhooks {
 
 	/**
-	 * Initialize the webhooks admin actions.
-	 */
-	public function __construct() {
-		add_action( 'admin_init', array( $this, 'actions' ) );
-		add_action( 'woocommerce_settings_page_init', array( $this, 'screen_option' ) );
-		add_filter( 'woocommerce_save_settings_advanced_webhooks', array( $this, 'allow_save_settings' ) );
-	}
-
-	/**
 	 * Check if should allow save settings.
 	 * This prevents "Your settings have been saved." notices on the table list.
 	 *
 	 * @param  bool $allow If allow save settings.
 	 * @return bool
 	 */
-	public function allow_save_settings( $allow ) {
+	public static function allow_save_settings( $allow ) {
 		if ( ! isset( $_GET['edit-webhook'] ) ) { // WPCS: input var okay, CSRF ok.
 			return false;
 		}
@@ -42,14 +33,14 @@ class WC_Admin_Webhooks {
 	 *
 	 * @return bool
 	 */
-	private function is_webhook_settings_page() {
+	private static function is_webhook_settings_page() {
 		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && 'wc-settings' === $_GET['page'] && 'advanced' === $_GET['tab'] && 'webhooks' === $_GET['section']; // WPCS: input var okay, CSRF ok.
 	}
 
 	/**
 	 * Save method.
 	 */
-	private function save() {
+	private static function save() {
 		check_admin_referer( 'woocommerce-settings' );
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
@@ -168,14 +159,14 @@ class WC_Admin_Webhooks {
 	/**
 	 * Delete webhook.
 	 */
-	private function delete() {
+	private static function delete() {
 		check_admin_referer( 'delete-webhook' );
 
 		if ( isset( $_GET['delete'] ) ) { // WPCS: input var okay, CSRF ok.
 			$webhook_id = absint( $_GET['delete'] ); // WPCS: input var okay, CSRF ok.
 
 			if ( $webhook_id ) {
-				$this->bulk_delete( array( $webhook_id ) );
+				self::bulk_delete( array( $webhook_id ) );
 			}
 		}
 	}
@@ -183,16 +174,16 @@ class WC_Admin_Webhooks {
 	/**
 	 * Webhooks admin actions.
 	 */
-	public function actions() {
-		if ( $this->is_webhook_settings_page() ) {
+	public static function actions() {
+		if ( self::is_webhook_settings_page() ) {
 			// Save.
 			if ( isset( $_POST['save'] ) && isset( $_POST['webhook_id'] ) ) { // WPCS: input var okay, CSRF ok.
-				$this->save();
+				self::save();
 			}
 
 			// Delete webhook.
 			if ( isset( $_GET['delete'] ) ) { // WPCS: input var okay, CSRF ok.
-				$this->delete();
+				self::delete();
 			}
 		}
 	}
@@ -244,10 +235,10 @@ class WC_Admin_Webhooks {
 	/**
 	 * Add screen option.
 	 */
-	public function screen_option() {
+	public static function screen_option() {
 		global $webhooks_table_list;
 
-		if ( ! isset( $_GET['edit-webhook'] ) && $this->is_webhook_settings_page() ) { // WPCS: input var okay, CSRF ok.
+		if ( ! isset( $_GET['edit-webhook'] ) && self::is_webhook_settings_page() ) { // WPCS: input var okay, CSRF ok.
 			$webhooks_table_list = new WC_Admin_Webhooks_Table_List();
 
 			// Add screen option.
@@ -345,5 +336,3 @@ class WC_Admin_Webhooks {
 		wc_deprecated_function( 'WC_Admin_Webhooks::get_logs_navigation', '3.3' );
 	}
 }
-
-new WC_Admin_Webhooks();

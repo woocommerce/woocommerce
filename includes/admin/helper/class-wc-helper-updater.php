@@ -318,5 +318,3 @@ class WC_Helper_Updater {
 		delete_transient( '_woocommerce_helper_updates_count' );
 	}
 }
-
-WC_Helper_Updater::load();

@@ -14,22 +14,13 @@ defined( 'ABSPATH' ) || exit;
 class WC_Admin_API_Keys {
 
 	/**
-	 * Initialize the API Keys admin actions.
-	 */
-	public function __construct() {
-		add_action( 'admin_init', array( $this, 'actions' ) );
-		add_action( 'woocommerce_settings_page_init', array( $this, 'screen_option' ) );
-		add_filter( 'woocommerce_save_settings_advanced_keys', array( $this, 'allow_save_settings' ) );
-	}
-
-	/**
 	 * Check if should allow save settings.
 	 * This prevents "Your settings have been saved." notices on the table list.
 	 *
 	 * @param  bool $allow If allow save settings.
 	 * @return bool
 	 */
-	public function allow_save_settings( $allow ) {
+	public static function allow_save_settings( $allow ) {
 		if ( ! isset( $_GET['create-key'], $_GET['edit-key'] ) ) { // WPCS: input var okay, CSRF ok.
 			return false;
 		}
@@ -42,7 +33,7 @@ class WC_Admin_API_Keys {
 	 *
 	 * @return bool
 	 */
-	private function is_api_keys_settings_page() {
+	private static function is_api_keys_settings_page() {
 		return isset( $_GET['page'], $_GET['tab'], $_GET['section'] ) && 'wc-settings' === $_GET['page'] && 'advanced' === $_GET['tab'] && 'keys' === $_GET['section']; // WPCS: input var okay, CSRF ok.
 	}
 
@@ -73,10 +64,10 @@ class WC_Admin_API_Keys {
 	/**
 	 * Add screen option.
 	 */
-	public function screen_option() {
+	public static function screen_option() {
 		global $keys_table_list;
 
-		if ( ! isset( $_GET['create-key'] ) && ! isset( $_GET['edit-key'] ) && $this->is_api_keys_settings_page() ) { // WPCS: input var okay, CSRF ok.
+		if ( ! isset( $_GET['create-key'] ) && ! isset( $_GET['edit-key'] ) && self::is_api_keys_settings_page() ) { // WPCS: input var okay, CSRF ok.
 			$keys_table_list = new WC_Admin_API_Keys_Table_List();
 
 			// Add screen option.
@@ -161,16 +152,16 @@ class WC_Admin_API_Keys {
 	/**
 	 * API Keys admin actions.
 	 */
-	public function actions() {
-		if ( $this->is_api_keys_settings_page() ) {
+	public static function actions() {
+		if ( self::is_api_keys_settings_page() ) {
 			// Revoke key.
 			if ( isset( $_REQUEST['revoke-key'] ) ) { // WPCS: input var okay, CSRF ok.
-				$this->revoke_key();
+				self::revoke_key();
 			}
 
 			// Bulk actions.
 			if ( isset( $_REQUEST['action'] ) && isset( $_REQUEST['key'] ) ) { // WPCS: input var okay, CSRF ok.
-				$this->bulk_actions();
+				self::bulk_actions();
 			}
 		}
 	}
@@ -190,7 +181,7 @@ class WC_Admin_API_Keys {
 	/**
 	 * Revoke key.
 	 */
-	private function revoke_key() {
+	private static function revoke_key() {
 		global $wpdb;
 
 		check_admin_referer( 'revoke' );
@@ -200,7 +191,7 @@ class WC_Admin_API_Keys {
 			$user_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT user_id FROM {$wpdb->prefix}woocommerce_api_keys WHERE key_id = %d", $key_id ) );
 
 			if ( $key_id && $user_id && ( current_user_can( 'edit_user', $user_id ) || get_current_user_id() === $user_id ) ) {
-				$this->remove_key( $key_id );
+				self::remove_key( $key_id );
 			} else {
 				wp_die( esc_html__( 'You do not have permission to revoke this API Key', 'woocommerce' ) );
 			}
@@ -213,7 +204,7 @@ class WC_Admin_API_Keys {
 	/**
 	 * Bulk actions.
 	 */
-	private function bulk_actions() {
+	private static function bulk_actions() {
 		check_admin_referer( 'woocommerce-settings' );
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
@@ -225,7 +216,7 @@ class WC_Admin_API_Keys {
 			$keys   = isset( $_REQUEST['key'] ) ? array_map( 'absint', (array) $_REQUEST['key'] ) : array(); // WPCS: input var okay, CSRF ok.
 
 			if ( 'revoke' === $action ) {
-				$this->bulk_revoke_key( $keys );
+				self::bulk_revoke_key( $keys );
 			}
 		}
 	}
@@ -235,14 +226,14 @@ class WC_Admin_API_Keys {
 	 *
 	 * @param array $keys API Keys.
 	 */
-	private function bulk_revoke_key( $keys ) {
+	private static function bulk_revoke_key( $keys ) {
 		if ( ! current_user_can( 'remove_users' ) ) {
 			wp_die( esc_html__( 'You do not have permission to revoke API Keys', 'woocommerce' ) );
 		}
 
 		$qty = 0;
 		foreach ( $keys as $key_id ) {
-			$result = $this->remove_key( $key_id );
+			$result = self::remove_key( $key_id );
 
 			if ( $result ) {
 				$qty++;
@@ -260,7 +251,7 @@ class WC_Admin_API_Keys {
 	 * @param  int $key_id API Key ID.
 	 * @return bool
 	 */
-	private function remove_key( $key_id ) {
+	private static function remove_key( $key_id ) {
 		global $wpdb;
 
 		$delete = $wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ), array( '%d' ) );
@@ -268,5 +259,3 @@ class WC_Admin_API_Keys {
 		return $delete;
 	}
 }
-
-new WC_Admin_API_Keys();

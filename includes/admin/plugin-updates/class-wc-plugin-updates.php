@@ -2,13 +2,10 @@
 /**
  * Class for displaying plugin warning notifications and determining 3rd party plugin compatibility.
  *
- * @package     WooCommerce/Admin
- * @version     3.2.0
+ * @package WooCommerce/Admin
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Plugin_Updates Class.

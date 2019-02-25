@@ -2,17 +2,10 @@
 /**
  * Manages WooCommerce plugin updating on the Updates screen.
  *
- * @package     WooCommerce/Admin
- * @version     3.2.0
+ * @package WooCommerce/Admin
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
-if ( ! class_exists( 'WC_Plugin_Updates' ) ) {
-	include_once dirname( __FILE__ ) . '/class-wc-plugin-updates.php';
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Class WC_Updates_Screen_Updates
@@ -20,9 +13,48 @@ if ( ! class_exists( 'WC_Plugin_Updates' ) ) {
 class WC_Updates_Screen_Updates extends WC_Plugin_Updates {
 
 	/**
-	 * Constructor.
+	 * Singleton instance.
+	 *
+	 * @var WC_Plugins_Screen_Updates|null
 	 */
-	public function __construct() {
+	protected static $instance = null;
+
+	/**
+	 * Return singleston instance.
+	 *
+	 * @static
+	 * @return WC_Plugins_Screen_Updates
+	 */
+	final public static function instance() {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * Singleton. Prevent clone.
+	 */
+	final public function __clone() {
+		trigger_error( 'Singleton. No cloning allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent serialization.
+	 */
+	final public function __wakeup() {
+		trigger_error( 'Singleton. No serialization allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent construct.
+	 */
+	final private function __construct() {}
+
+	/**
+	 * Hook into WP actions/filters.
+	 */
+	public function init() {
 		add_action( 'admin_print_footer_scripts', array( $this, 'update_screen_modal' ) );
 	}
 
@@ -92,4 +124,3 @@ class WC_Updates_Screen_Updates extends WC_Plugin_Updates {
 		$this->generic_modal_js();
 	}
 }
-new WC_Updates_Screen_Updates();

@@ -2,15 +2,10 @@
 /**
  * Adds and controls pointers for contextual help/tutorials
  *
- * @author   WooThemes
- * @category Admin
  * @package  WooCommerce/Admin
- * @version  2.4.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Pointers Class.
@@ -18,34 +13,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Pointers {
 
 	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		add_action( 'admin_enqueue_scripts', array( $this, 'setup_pointers_for_screen' ) );
-	}
-
-	/**
-	 * Setup pointers for screen.
-	 */
-	public function setup_pointers_for_screen() {
-		if ( ! $screen = get_current_screen() ) {
-			return;
-		}
-
-		switch ( $screen->id ) {
-			case 'product':
-				$this->create_product_tutorial();
-				break;
-		}
-	}
-
-	/**
 	 * Pointers for creating a product.
 	 */
 	public function create_product_tutorial() {
-		if ( ! isset( $_GET['tutorial'] ) || ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
 		// These pointers will chain - they will not be shown at once.
 		$pointers = array(
 			'pointers' => array(
@@ -281,6 +251,11 @@ class WC_Admin_Pointers {
 			});"
 		);
 	}
-}
 
-new WC_Admin_Pointers();
+	/**
+	 * Setup pointers for screen.
+	 *
+	 * @deprecated
+	 */
+	public function setup_pointers_for_screen() {}
+}

@@ -1,7 +1,11 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+/**
+ * WooCommerce extension helper.
+ *
+ * @package WooCommerce/Admin/Helper
+ */
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Helper Class
@@ -33,12 +37,18 @@ class WC_Helper {
 		add_action( 'woocommerce_helper_output', array( __CLASS__, 'render_helper_output' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'admin_enqueue_scripts' ) );
 
-		// Attempt to toggle subscription state upon plugin activation/deactivation
+		// Attempt to toggle subscription state upon plugin activation/deactivation.
 		add_action( 'activated_plugin', array( __CLASS__, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( __CLASS__, 'deactivated_plugin' ) );
 
-		// Add some nags about extension updates
+		// Add some nags about extension updates.
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
+
+		// Include rest of helper.
+		WC_Helper_API::load();
+		WC_Helper_Compat::load();
+		WC_Helper_Plugin_Info::load();
+		WC_Helper_Updater::load();
 
 		do_action( 'woocommerce_helper_loaded' );
 	}
@@ -1498,5 +1508,3 @@ class WC_Helper {
 		self::$log->log( $level, $message, array( 'source' => 'helper' ) );
 	}
 }
-
-WC_Helper::load();

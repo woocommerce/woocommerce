@@ -4,19 +4,10 @@
  *
  * Functions used for displaying sales and customer reports in admin.
  *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin/Reports
- * @version     2.0.0
+ * @package WooCommerce/Admin/Reports
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
-if ( class_exists( 'WC_Admin_Reports', false ) ) {
-	return;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports Class.

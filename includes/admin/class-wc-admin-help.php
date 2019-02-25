@@ -2,17 +2,10 @@
 /**
  * Add some content to the help tab
  *
- * @package     WooCommerce/Admin
- * @version     2.1.0
+ * @package WooCommerce/Admin
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
-if ( class_exists( 'WC_Admin_Help', false ) ) {
-	return new WC_Admin_Help();
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Help Class.
@@ -20,10 +13,51 @@ if ( class_exists( 'WC_Admin_Help', false ) ) {
 class WC_Admin_Help {
 
 	/**
-	 * Hook in tabs.
+	 * Singleton instance.
+	 *
+	 * @var WC_Admin_Help|null
 	 */
-	public function __construct() {
-		add_action( 'current_screen', array( $this, 'add_tabs' ), 50 );
+	protected static $instance = null;
+
+	/**
+	 * Return singleston instance.
+	 *
+	 * @static
+	 * @return WC_Admin_Help
+	 */
+	final public static function instance() {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * Singleton. Prevent clone.
+	 */
+	final public function __clone() {
+		trigger_error( 'Singleton. No cloning allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent serialization.
+	 */
+	final public function __wakeup() {
+		trigger_error( 'Singleton. No serialization allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent construct.
+	 */
+	final private function __construct() {}
+
+	/**
+	 * Add help tabs.
+	 */
+	public function init() {
+		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
+			$this->add_tabs();
+		}
 	}
 
 	/**
@@ -32,7 +66,7 @@ class WC_Admin_Help {
 	public function add_tabs() {
 		$screen = get_current_screen();
 
-		if ( ! $screen || ! in_array( $screen->id, wc_get_screen_ids() ) ) {
+		if ( ! $screen || ! in_array( $screen->id, wc_get_screen_ids(), true ) ) {
 			return;
 		}
 
@@ -104,5 +138,3 @@ class WC_Admin_Help {
 		);
 	}
 }
-
-return new WC_Admin_Help();

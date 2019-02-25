@@ -37,19 +37,56 @@ class WC_Admin_Notices {
 	);
 
 	/**
-	 * Constructor.
+	 * Singleton instance.
+	 *
+	 * @var WC_Admin_Notices|null
+	 */
+	protected static $instance = null;
+
+	/**
+	 * Return singleston instance.
+	 *
+	 * @static
+	 * @return WC_Admin_Notices
+	 */
+	final public static function instance() {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * Singleton. Prevent clone.
+	 */
+	final public function __clone() {
+		trigger_error( 'Singleton. No cloning allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent serialization.
+	 */
+	final public function __wakeup() {
+		trigger_error( 'Singleton. No serialization allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent construct.
+	 */
+	final private function __construct() {}
+
+	/**
+	 * Hook into WP actions/filters.
 	 */
 	public static function init() {
 		self::$notices = get_option( 'woocommerce_admin_notices', array() );
 
-		add_action( 'switch_theme', array( __CLASS__, 'reset_admin_notices' ) );
-		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
-		add_action( 'wp_loaded', array( __CLASS__, 'hide_notices' ) );
-		add_action( 'shutdown', array( __CLASS__, 'store_notices' ) );
-
-		if ( current_user_can( 'manage_woocommerce' ) ) {
-			add_action( 'admin_print_styles', array( __CLASS__, 'add_notices' ) );
-			add_action( 'activate_gutenberg/gutenberg.php', array( __CLASS__, 'add_wootenberg_feature_plugin_notice_on_gutenberg_activate' ) );
+		if ( isset( $this ) && $this instanceof WC_Admin_Notices ) {
+			add_action( 'switch_theme', array( $this, 'reset_admin_notices' ) );
+			add_action( 'woocommerce_installed', array( $this, 'reset_admin_notices' ) );
+			add_action( 'wp_loaded', array( $this, 'hide_notices' ) );
+			add_action( 'shutdown', array( $this, 'store_notices' ) );
+			add_action( 'admin_print_styles', array( $this, 'add_notices' ) );
 		}
 	}
 
@@ -144,6 +181,10 @@ class WC_Admin_Notices {
 	 * Add notices + styles if needed.
 	 */
 	public static function add_notices() {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
 		$notices = self::get_notices();
 
 		if ( empty( $notices ) ) {
@@ -393,5 +434,3 @@ class WC_Admin_Notices {
 	}
 
 }
-
-WC_Admin_Notices::init();

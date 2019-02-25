@@ -193,5 +193,3 @@ class WC_Helper_Compat {
 		include WC_Helper::get_view_filename( 'html-helper-compat.php' );
 	}
 }
-
-WC_Helper_Compat::load();

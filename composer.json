@@ -9,6 +9,17 @@
   "require": {
     "composer/installers": "~1.6"
   },
+  "autoload": {
+    "classmap": ["includes/"],
+    "files": [
+      "includes/admin/wc-meta-box-functions.php",
+      "includes/admin/wc-admin-functions.php"
+    ]
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "classmap-authoritative": true
+  },
   "require-dev": {
     "apigen/apigen": "4.1.2",
     "nette/utils": "2.5.3",

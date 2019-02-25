@@ -2,15 +2,10 @@
 /**
  * Addons Page
  *
- * @author   WooThemes
- * @category Admin
  * @package  WooCommerce/Admin
- * @version  2.5.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Addons Class.

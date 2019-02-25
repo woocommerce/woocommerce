@@ -27,7 +27,18 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 		$this->label = __( 'Advanced', 'woocommerce' );
 
 		parent::__construct();
-		$this->notices();
+
+		$current_section = WC_Admin_Settings::get_current_section();
+
+		if ( 'keys' === $current_section ) {
+			WC_Admin_API_Keys::actions();
+			WC_Admin_API_Keys::notices();
+			WC_Admin_API_Keys::screen_option();
+		} elseif ( 'webhooks' === $current_section ) {
+			WC_Admin_Webhooks::actions();
+			WC_Admin_Webhooks::notices();
+			WC_Admin_Webhooks::screen_option();
+		}
 	}
 
 	/**
@@ -337,22 +348,10 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	}
 
 	/**
-	 * Notices.
-	 */
-	private function notices() {
-		if ( isset( $_GET['section'] ) && 'webhooks' === $_GET['section'] ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Webhooks::notices();
-		}
-		if ( isset( $_GET['section'] ) && 'keys' === $_GET['section'] ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_API_Keys::notices();
-		}
-	}
-
-	/**
 	 * Output the settings.
 	 */
 	public function output() {
-		global $current_section;
+		$current_section = WC_Admin_Settings::get_current_section();
 
 		if ( 'webhooks' === $current_section ) {
 			WC_Admin_Webhooks::page_output();
@@ -368,7 +367,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * Save settings.
 	 */
 	public function save() {
-		global $current_section;
+		$current_section = WC_Admin_Settings::get_current_section();
 
 		if ( apply_filters( 'woocommerce_rest_api_valid_to_save', ! in_array( $current_section, array( 'keys', 'webhooks' ), true ) ) ) {
 			$settings = $this->get_settings( $current_section );

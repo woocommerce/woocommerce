@@ -40,5 +40,3 @@ class WC_Helper_File_Headers {
 		return $headers;
 	}
 }
-
-WC_Helper_File_Headers::load();

@@ -71,5 +71,3 @@ class WC_Helper_Plugin_Info {
 		return $response;
 	}
 }
-
-WC_Helper_Plugin_Info::load();

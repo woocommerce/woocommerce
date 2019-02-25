@@ -2,18 +2,10 @@
 /**
  * Post Types Admin
  *
- * @package  WooCommerce/admin
- * @version  3.3.0
+ * @package WooCommerce/admin
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
-if ( class_exists( 'WC_Admin_Post_Types', false ) ) {
-	new WC_Admin_Post_Types();
-	return;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Post_Types Class.
@@ -23,9 +15,48 @@ if ( class_exists( 'WC_Admin_Post_Types', false ) ) {
 class WC_Admin_Post_Types {
 
 	/**
-	 * Constructor.
+	 * Singleton instance.
+	 *
+	 * @var WC_Admin_Post_Types|null
 	 */
-	public function __construct() {
+	protected static $instance = null;
+
+	/**
+	 * Return singleston instance.
+	 *
+	 * @static
+	 * @return WC_Admin_Post_Types
+	 */
+	final public static function instance() {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * Singleton. Prevent clone.
+	 */
+	final public function __clone() {
+		trigger_error( 'Singleton. No cloning allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent serialization.
+	 */
+	final public function __wakeup() {
+		trigger_error( 'Singleton. No serialization allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent construct.
+	 */
+	final private function __construct() {}
+
+	/**
+	 * Hook into WP actions/filters.
+	 */
+	public function init() {
 		include_once dirname( __FILE__ ) . '/class-wc-admin-meta-boxes.php';
 
 		if ( ! function_exists( 'duplicate_post_plugin_activation' ) ) {
@@ -99,6 +130,8 @@ class WC_Admin_Post_Types {
 			case 'edit-product':
 				include_once 'list-tables/class-wc-admin-list-table-products.php';
 				$wc_list_table = new WC_Admin_List_Table_Products();
+
+
 				break;
 		}
 
@@ -896,5 +929,3 @@ class WC_Admin_Post_Types {
 		return $post_states;
 	}
 }
-
-new WC_Admin_Post_Types();

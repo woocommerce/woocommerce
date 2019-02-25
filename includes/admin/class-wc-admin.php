@@ -2,16 +2,10 @@
 /**
  * WooCommerce Admin
  *
- * @class    WC_Admin
- * @author   WooThemes
- * @category Admin
  * @package  WooCommerce/Admin
- * @version  2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin class.
@@ -19,19 +13,101 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin {
 
 	/**
-	 * Constructor.
+	 * Singleton instance.
+	 *
+	 * @var WC_Admin|null
 	 */
-	public function __construct() {
-		add_action( 'plugins_loaded', array( $this, 'preload_helper' ), 9 );
-		add_action( 'init', array( $this, 'includes' ) );
-		add_action( 'current_screen', array( $this, 'conditional_includes' ) );
+	protected static $instance = null;
+
+	/**
+	 * Return singleston instance.
+	 *
+	 * @static
+	 * @return WC_Admin
+	 */
+	final public static function instance() {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * Singleton. Prevent clone.
+	 */
+	final public function __clone() {
+		trigger_error( 'Singleton. No cloning allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent serialization.
+	 */
+	final public function __wakeup() {
+		trigger_error( 'Singleton. No serialization allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent construct.
+	 */
+	final private function __construct() {}
+
+	/**
+	 * Hook into WP actions/filters.
+	 */
+	public function init() {
+		add_action( 'plugins_loaded', array( 'WC_Helper_File_Headers', 'load' ) );
+		add_action( 'init', array( 'WC_Helper', 'load' ) );
+		add_action( 'init', array( WC_Admin_Importers::instance(), 'init' ) );
+		add_action( 'init', array( WC_Admin_Post_Types::instance(), 'init' ) );
+		add_action( 'init', array( WC_Admin_Taxonomies::instance(), 'init' ) );
+		add_action( 'init', array( WC_Admin_Menus::instance(), 'init' ) );
+		add_action( 'init', array( WC_Admin_Customize::instance(), 'init' ) );
+		add_action( 'init', array( WC_Admin_Assets::instance(), 'init' ) );
+		add_action( 'init', array( WC_Admin_Notices::instance(), 'init' ) );
+
 		add_action( 'admin_init', array( $this, 'buffer' ), 1 );
+		add_action( 'admin_init', array( $this, 'maybe_show_setup_wizard' ) );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
+
+		add_action( 'current_screen', array( $this, 'setup_current_screen' ) );
+
 		add_action( 'admin_footer', 'wc_print_js', 25 );
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
+
 		add_action( 'wp_ajax_setup_wizard_check_jetpack', array( $this, 'setup_wizard_check_jetpack' ) );
+	}
+
+	/**
+	 * Load WC admin classes on screens where they are used.
+	 */
+	public function setup_current_screen() {
+		$current_screen = get_current_screen();
+
+		if ( in_array( $current_screen->id, array( 'dashboard', 'dashboard-network' ), true ) ) {
+			WC_Admin_Dashboard::instance()->init();
+		}
+
+		if ( 'options-permalink' === $current_screen->id ) {
+			WC_Admin_Permalink_Settings::instance()->init();
+		}
+
+		if ( 'plugins' === $current_screen->id ) {
+			WC_Plugins_Screen_Updates::instance()->init();
+		}
+
+		if ( 'update-core' === $current_screen->id ) {
+			WC_Updates_Screen_Updates::instance()->init();
+		}
+
+		if ( in_array( $current_screen->id, array( 'users', 'user', 'profile', 'user-edit' ), true ) ) {
+			WC_Admin_Profile::instance()->init();
+		}
+
+		if ( in_array( $current_screen->id, wc_get_screen_ids(), true ) ) {
+			WC_Admin_Help::instance()->init();
+		}
 	}
 
 	/**
@@ -42,86 +118,11 @@ class WC_Admin {
 	}
 
 	/**
-	 * Include any classes we need within admin.
+	 * Show the setup wizard if the query string is present.
 	 */
-	public function includes() {
-		include_once dirname( __FILE__ ) . '/wc-admin-functions.php';
-		include_once dirname( __FILE__ ) . '/wc-meta-box-functions.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-post-types.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-taxonomies.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-menus.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-customize.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-notices.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-assets.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-api-keys.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-webhooks.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-pointers.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-importers.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-exporters.php';
-
-		// Help Tabs
-		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
-			include_once dirname( __FILE__ ) . '/class-wc-admin-help.php';
-		}
-
-		// Setup/welcome
-		if ( ! empty( $_GET['page'] ) ) {
-			switch ( $_GET['page'] ) {
-				case 'wc-setup':
-					include_once dirname( __FILE__ ) . '/class-wc-admin-setup-wizard.php';
-					break;
-			}
-		}
-
-		// Importers
-		if ( defined( 'WP_LOAD_IMPORTERS' ) ) {
-			include_once dirname( __FILE__ ) . '/class-wc-admin-importers.php';
-		}
-
-		// Helper
-		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-options.php';
-		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-api.php';
-		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-updater.php';
-		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-plugin-info.php';
-		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-compat.php';
-		include_once dirname( __FILE__ ) . '/helper/class-wc-helper.php';
-	}
-
-	/**
-	 * Preloads some functionality of the Helper to be loaded on the `plugins_loaded` hook
-	 */
-	public function preload_helper() {
-		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-file-headers.php';
-	}
-
-	/**
-	 * Include admin files conditionally.
-	 */
-	public function conditional_includes() {
-		if ( ! $screen = get_current_screen() ) {
-			return;
-		}
-
-		switch ( $screen->id ) {
-			case 'dashboard':
-			case 'dashboard-network':
-				include 'class-wc-admin-dashboard.php';
-				break;
-			case 'options-permalink':
-				include 'class-wc-admin-permalink-settings.php';
-				break;
-			case 'plugins':
-				include 'plugin-updates/class-wc-plugins-screen-updates.php';
-				break;
-			case 'update-core':
-				include 'plugin-updates/class-wc-updates-screen-updates.php';
-				break;
-			case 'users':
-			case 'user':
-			case 'profile':
-			case 'user-edit':
-				include 'class-wc-admin-profile.php';
-				break;
+	public function maybe_show_setup_wizard() {
+		if ( ! empty( $_GET['wc-setup'] ) && apply_filters( 'woocommerce_enable_setup_wizard', true ) && current_user_can( 'manage_woocommerce' ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			WC_Admin_Setup_Wizard::instance()->setup_wizard();
 		}
 	}
 
@@ -278,6 +279,25 @@ class WC_Admin {
 			)
 		);
 	}
-}
 
-return new WC_Admin();
+	/**
+	 * Include any classes we need within admin.
+	 *
+	 * @deprecated in favour of autoloader.
+	 */
+	public function includes() {}
+
+	/**
+	 * Preloads some functionality of the Helper to be loaded on the `plugins_loaded` hook.
+	 *
+	 * @deprecated in favour of autoloader.
+	 */
+	public function preload_helper() {}
+
+	/**
+	 * Include admin files conditionally.
+	 *
+	 * @deprecated in favour of autoloader.
+	 */
+	public function conditional_includes() {}
+}

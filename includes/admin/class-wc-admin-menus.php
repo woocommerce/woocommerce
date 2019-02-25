@@ -3,14 +3,9 @@
  * Setup menus in WP admin.
  *
  * @package WooCommerce\Admin
- * @version 2.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
-
-if ( class_exists( 'WC_Admin_Menus', false ) ) {
-	return new WC_Admin_Menus();
-}
 
 /**
  * WC_Admin_Menus Class.
@@ -18,9 +13,48 @@ if ( class_exists( 'WC_Admin_Menus', false ) ) {
 class WC_Admin_Menus {
 
 	/**
-	 * Hook in tabs.
+	 * Singleton instance.
+	 *
+	 * @var WC_Admin_Post_Types|null
 	 */
-	public function __construct() {
+	protected static $instance = null;
+
+	/**
+	 * Return singleston instance.
+	 *
+	 * @static
+	 * @return WC_Admin_Post_Types
+	 */
+	final public static function instance() {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * Singleton. Prevent clone.
+	 */
+	final public function __clone() {
+		trigger_error( 'Singleton. No cloning allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent serialization.
+	 */
+	final public function __wakeup() {
+		trigger_error( 'Singleton. No serialization allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent construct.
+	 */
+	final private function __construct() {}
+
+	/**
+	 * Hook into WP actions/filters.
+	 */
+	public function init() {
 		// Add menus.
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'reports_menu' ), 20 );
@@ -59,6 +93,10 @@ class WC_Admin_Menus {
 		add_menu_page( __( 'WooCommerce', 'woocommerce' ), __( 'WooCommerce', 'woocommerce' ), 'manage_woocommerce', 'woocommerce', null, null, '55.5' );
 
 		add_submenu_page( 'edit.php?post_type=product', __( 'Attributes', 'woocommerce' ), __( 'Attributes', 'woocommerce' ), 'manage_product_terms', 'product_attributes', array( $this, 'attributes_page' ) );
+
+		if ( ! empty( $_GET['wc-setup'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			add_dashboard_page( '', '', 'manage_options', 'wc-setup', '' ); // Placeholder page for setup wizard.
+		}
 	}
 
 	/**
@@ -82,38 +120,10 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Loads gateways and shipping methods into memory for use within settings.
+	 * Init admin settings screens.
 	 */
 	public function settings_page_init() {
-		global $current_tab, $current_section;
-
-		WC()->payment_gateways();
-		WC()->shipping();
-
-		// Include settings pages.
-		WC_Admin_Settings::get_settings_pages();
-
-		// Get current tab/section.
-		$current_tab     = empty( $_GET['tab'] ) ? 'general' : sanitize_title( wp_unslash( $_GET['tab'] ) ); // WPCS: input var okay, CSRF ok.
-		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( wp_unslash( $_REQUEST['section'] ) ); // WPCS: input var okay, CSRF ok.
-
-		// Save settings if data has been posted.
-		if ( '' !== $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}_{$current_section}", ! empty( $_POST['save'] ) ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Settings::save();
-		} elseif ( '' === $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}", ! empty( $_POST['save'] ) ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Settings::save();
-		}
-
-		// Add any posted messages.
-		if ( ! empty( $_GET['wc_error'] ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Settings::add_error( wp_kses_post( wp_unslash( $_GET['wc_error'] ) ) ); // WPCS: input var okay, CSRF ok.
-		}
-
-		if ( ! empty( $_GET['wc_message'] ) ) { // WPCS: input var okay, CSRF ok.
-			WC_Admin_Settings::add_message( wp_kses_post( wp_unslash( $_GET['wc_message'] ) ) ); // WPCS: input var okay, CSRF ok.
-		}
-
-		do_action( 'woocommerce_settings_page_init' );
+		WC_Admin_Settings::init();
 	}
 
 	/**
@@ -366,5 +376,3 @@ class WC_Admin_Menus {
 		);
 	}
 }
-
-return new WC_Admin_Menus();

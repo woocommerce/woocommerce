@@ -2,26 +2,15 @@
 /**
  * Handles taxonomies in admin
  *
- * @class    WC_Admin_Taxonomies
- * @version  2.3.10
- * @package  WooCommerce/Admin
+ * @package WooCommerce/Admin
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Taxonomies class.
  */
 class WC_Admin_Taxonomies {
-
-	/**
-	 * Class instance.
-	 *
-	 * @var WC_Admin_Taxonomies instance
-	 */
-	protected static $instance = false;
 
 	/**
 	 * Default category ID.
@@ -31,19 +20,55 @@ class WC_Admin_Taxonomies {
 	private $default_cat_id = 0;
 
 	/**
-	 * Get class instance
+	 * Singleton instance.
+	 *
+	 * @var WC_Admin_Taxonomies|null
 	 */
-	public static function get_instance() {
-		if ( ! self::$instance ) {
+	protected static $instance = null;
+
+	/**
+	 * Return singleston instance.
+	 *
+	 * @static
+	 * @return WC_Admin_Taxonomies
+	 */
+	final public static function instance() {
+		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
 		}
 		return self::$instance;
 	}
 
 	/**
-	 * Constructor.
+	 * Get class instance
 	 */
-	public function __construct() {
+	public static function get_instance() {
+		return self::instance();
+	}
+
+	/**
+	 * Singleton. Prevent clone.
+	 */
+	final public function __clone() {
+		trigger_error( 'Singleton. No cloning allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent serialization.
+	 */
+	final public function __wakeup() {
+		trigger_error( 'Singleton. No serialization allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent construct.
+	 */
+	final private function __construct() {}
+
+	/**
+	 * Hook into WP actions/filters.
+	 */
+	public function init() {
 		// Default category ID.
 		$this->default_cat_id = get_option( 'default_product_cat', 0 );
 
@@ -491,5 +516,3 @@ class WC_Admin_Taxonomies {
 		");
 	}
 }
-
-$wc_admin_taxonomies = WC_Admin_Taxonomies::get_instance();
