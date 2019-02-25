@@ -205,12 +205,12 @@ class WC_Structured_Data {
 
 		if ( apply_filters( 'woocommerce_structured_data_product_aggregator_page', is_product_taxonomy() || is_shop() ) ) {
 			$markup['url'] = $permalink;
-			
+
 			$markup = apply_filters( 'woocommerce_structured_data_product_aggregated', $markup, $product );
 		}
 
 		$markup['image']       = wp_get_attachment_url( $product->get_image_id() );
-		$markup['description'] = wpautop( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) );
+		$markup['description'] = wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) );
 		$markup['sku']         = $product->get_sku();
 
 		if ( '' !== $product->get_price() ) {
@@ -261,7 +261,7 @@ class WC_Structured_Data {
 			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
 		}
 
-		if ( $product->get_review_count() && 'yes' === get_option( 'woocommerce_enable_review_rating' ) ) {
+		if ( $product->get_review_count() && wc_review_ratings_enabled() ) {
 			$markup['aggregateRating'] = array(
 				'@type'       => 'AggregateRating',
 				'ratingValue' => $product->get_average_rating(),
