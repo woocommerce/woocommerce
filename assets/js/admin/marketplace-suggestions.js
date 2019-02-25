@@ -259,6 +259,11 @@
 
 				// render the promo content
 				for ( var i in promos ) {
+					// only show a max of 5 suggestions per container
+					if ( i >= 5 ) {
+						break;
+					}
+
 					var linkText = promos[ i ]['link-text'];
 					var linkoutIsButton = false;
 					if ( promos[ i ]['button-text'] ) {
