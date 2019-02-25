@@ -231,7 +231,7 @@
 		// Show and hide page elements dependent on suggestion state.
 		function hidePageElementsForEmptyState( usedSuggestionsContexts ) {
 			var showingEmptyStateSuggestions = _.intersection(
-				visibleSuggestions,
+				usedSuggestionsContexts,
 				[ 'products-list-empty-body', 'orders-list-empty-body' ]
 			).length > 0;
 
