@@ -11,9 +11,28 @@
   },
   "autoload": {
     "classmap": ["includes/"],
+    "exclude-from-classmap": ["/tests/", "**/legacy/", "**/deprecated/"],
     "files": [
+      "includes/wc-core-functions.php",
       "includes/admin/wc-meta-box-functions.php",
-      "includes/admin/wc-admin-functions.php"
+      "includes/admin/wc-admin-functions.php",
+      "includes/wc-attribute-functions.php",
+      "includes/wc-cart-functions.php",
+      "includes/wc-conditional-functions.php",
+      "includes/wc-coupon-functions.php",
+      "includes/wc-deprecated-functions.php",
+      "includes/wc-formatting-functions.php",
+      "includes/wc-notice-functions.php",
+      "includes/wc-order-functions.php",
+      "includes/wc-order-item-functions.php",
+      "includes/wc-page-functions.php",
+      "includes/wc-product-functions.php",
+      "includes/wc-rest-functions.php",
+      "includes/wc-stock-functions.php",
+      "includes/wc-term-functions.php",
+      "includes/wc-user-functions.php",
+      "includes/wc-webhook-functions.php",
+      "includes/wc-widget-functions.php"
     ]
   },
   "config": {

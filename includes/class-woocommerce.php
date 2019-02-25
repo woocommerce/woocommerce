@@ -301,7 +301,6 @@ final class WooCommerce {
 		/**
 		 * Core classes.
 		 */
-		include_once WC_ABSPATH . 'includes/wc-core-functions.php';
 		include_once WC_ABSPATH . 'includes/class-wc-datetime.php';
 		include_once WC_ABSPATH . 'includes/class-wc-post-types.php';
 		include_once WC_ABSPATH . 'includes/class-wc-install.php';
@@ -445,8 +444,6 @@ final class WooCommerce {
 	 * Include required frontend files.
 	 */
 	public function frontend_includes() {
-		include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
-		include_once WC_ABSPATH . 'includes/wc-notice-functions.php';
 		include_once WC_ABSPATH . 'includes/wc-template-hooks.php';
 		include_once WC_ABSPATH . 'includes/class-wc-template-loader.php';
 		include_once WC_ABSPATH . 'includes/class-wc-frontend-scripts.php';

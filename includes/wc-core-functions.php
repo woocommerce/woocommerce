@@ -12,24 +12,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// Include core functions (available in both admin and frontend).
-require WC_ABSPATH . 'includes/wc-conditional-functions.php';
-require WC_ABSPATH . 'includes/wc-coupon-functions.php';
-require WC_ABSPATH . 'includes/wc-user-functions.php';
-require WC_ABSPATH . 'includes/wc-deprecated-functions.php';
-require WC_ABSPATH . 'includes/wc-formatting-functions.php';
-require WC_ABSPATH . 'includes/wc-order-functions.php';
-require WC_ABSPATH . 'includes/wc-order-item-functions.php';
-require WC_ABSPATH . 'includes/wc-page-functions.php';
-require WC_ABSPATH . 'includes/wc-product-functions.php';
-require WC_ABSPATH . 'includes/wc-stock-functions.php';
-require WC_ABSPATH . 'includes/wc-account-functions.php';
-require WC_ABSPATH . 'includes/wc-term-functions.php';
-require WC_ABSPATH . 'includes/wc-attribute-functions.php';
-require WC_ABSPATH . 'includes/wc-rest-functions.php';
-require WC_ABSPATH . 'includes/wc-widget-functions.php';
-require WC_ABSPATH . 'includes/wc-webhook-functions.php';
-
 /**
  * Filters on data used in admin and frontend.
  */
