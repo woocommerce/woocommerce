@@ -95,7 +95,9 @@ class Leaderboards extends Component {
 			},
 		];
 		return (
-			<EllipsisMenu label={ __( 'Choose which leaderboards to display', 'wc-admin' ) }>
+			<EllipsisMenu
+				label={ __( 'Choose which leaderboards to display and the number of rows', 'wc-admin' ) }
+			>
 				<Fragment>
 					<MenuTitle>{ __( 'Leaderboards', 'wc-admin' ) }</MenuTitle>
 					{ allLeaderboards.map( leaderboard => {
@@ -109,9 +111,9 @@ class Leaderboards extends Component {
 							</MenuItem>
 						);
 					} ) }
-					<MenuTitle>{ __( 'Rows Per Table', 'wc-admin' ) }</MenuTitle>
 					<SelectControl
-						className="woocommerce-ellipsis-menu__item"
+						className="woocommerce-dashboard__dashboard-leaderboards__select"
+						label={ <MenuTitle>{ __( 'Rows Per Table', 'wc-admin' ) }</MenuTitle> }
 						value={ rowsPerTable }
 						options={ Array.from( { length: 20 }, ( v, key ) => ( {
 							v: key + 1,
