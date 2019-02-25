@@ -134,7 +134,7 @@ class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
 		WC_Admin_Reports_Sync::set_queue( null );
 
 		// insert a blocking job.
-		WC_Admin_Reports_Sync::queue()->schedule_single( time(), 'blocking_job', array( 'stuff' ) );
+		WC_Admin_Reports_Sync::queue()->schedule_single( time(), 'blocking_job', array( 'stuff' ), WC_Admin_Reports_Sync::QUEUE_GROUP );
 		// queue an action that depends on blocking job.
 		WC_Admin_Reports_Sync::queue_dependent_action( 'dependent_action', array(), 'blocking_job' );
 		// verify that the action was properly blocked.
