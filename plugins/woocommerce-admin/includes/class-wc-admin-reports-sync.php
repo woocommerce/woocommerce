@@ -42,6 +42,11 @@ class WC_Admin_Reports_Sync {
 	const SINGLE_ORDER_ACTION = 'wc-admin_process_order';
 
 	/**
+	 * Action hook for processing a batch of orders.
+	 */
+	const QUEUE_GROUP = 'wc-admin-data';
+
+	/**
 	 * Queue instance.
 	 *
 	 * @var WC_Queue_Interface
@@ -145,6 +150,7 @@ class WC_Admin_Reports_Sync {
 				'per_page' => 1,
 				'claimed'  => false,
 				'search'   => "[{$order_id}]",
+				'group'    => self::QUEUE_GROUP,
 			)
 		);
 
@@ -308,13 +314,14 @@ class WC_Admin_Reports_Sync {
 				self::queue()->schedule_single(
 					$action_timestamp,
 					self::QUEUE_BATCH_ACTION,
-					array( $batch_start, $batch_end, $single_batch_action )
+					array( $batch_start, $batch_end, $single_batch_action ),
+					self::QUEUE_GROUP
 				);
 			}
 		} else {
 			// Otherwise, queue the single batches.
 			for ( $i = $range_start; $i <= $range_end; $i++ ) {
-				self::queue()->schedule_single( $action_timestamp, $single_batch_action, array( $i ) );
+				self::queue()->schedule_single( $action_timestamp, $single_batch_action, array( $i ), self::QUEUE_GROUP );
 			}
 		}
 	}
@@ -335,6 +342,7 @@ class WC_Admin_Reports_Sync {
 				'per_page' => 1,
 				'claimed'  => false,
 				'search'   => $prerequisite_action, // search is used instead of hook to find queued batch creation.
+				'group'    => self::QUEUE_GROUP,
 			)
 		);
 
@@ -357,10 +365,11 @@ class WC_Admin_Reports_Sync {
 			self::queue()->schedule_single(
 				$next_job_schedule->getTimestamp() + 5,
 				self::QUEUE_DEPEDENT_ACTION,
-				array( $action, $action_args, $prerequisite_action )
+				array( $action, $action_args, $prerequisite_action ),
+				self::QUEUE_GROUP
 			);
 		} else {
-			self::queue()->schedule_single( time() + 5, $action, $action_args );
+			self::queue()->schedule_single( time() + 5, $action, $action_args, self::QUEUE_GROUP );
 		}
 	}
 
