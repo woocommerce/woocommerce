@@ -1,20 +1,14 @@
 <?php
+/**
+ * Most stocked report.
+ *
+ * @package WooCommerce/Admin/Reports
+ */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
-if ( ! class_exists( 'WC_Report_Stock' ) ) {
-	require_once dirname( __FILE__ ) . '/class-wc-report-stock.php';
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Report_Most_Stocked.
- *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin/Reports
- * @version     2.1.0
+ * WC_Report_Most_Stocked class.
  */
 class WC_Report_Most_Stocked extends WC_Report_Stock {
 

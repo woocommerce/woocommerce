@@ -133,5 +133,3 @@ class WC_Helper_API {
 		return $endpoint;
 	}
 }
-
-WC_Helper_API::load();

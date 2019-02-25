@@ -57,11 +57,11 @@ class WC_Admin_Post_Types {
 	 * Hook into WP actions/filters.
 	 */
 	public function init() {
-		include_once dirname( __FILE__ ) . '/class-wc-admin-meta-boxes.php';
-
 		if ( ! function_exists( 'duplicate_post_plugin_activation' ) ) {
-			include_once 'class-wc-admin-duplicate-product.php';
+			WC_Admin_Duplicate_Product::instance()->init();
 		}
+
+		WC_Admin_Meta_Boxes::instance()->init();
 
 		// Load correct list table classes for current screen.
 		add_action( 'current_screen', array( $this, 'setup_screen' ) );
@@ -120,18 +120,15 @@ class WC_Admin_Post_Types {
 
 		switch ( $screen_id ) {
 			case 'edit-shop_order':
-				include_once 'list-tables/class-wc-admin-list-table-orders.php';
-				$wc_list_table = new WC_Admin_List_Table_Orders();
+				WC_Admin_List_Table_Orders::instance()->init();
 				break;
 			case 'edit-shop_coupon':
 				include_once 'list-tables/class-wc-admin-list-table-coupons.php';
-				$wc_list_table = new WC_Admin_List_Table_Coupons();
+				WC_Admin_List_Table_Coupons::instance()->init();
 				break;
 			case 'edit-product':
 				include_once 'list-tables/class-wc-admin-list-table-products.php';
-				$wc_list_table = new WC_Admin_List_Table_Products();
-
-
+				WC_Admin_List_Table_Products::instance()->init();
 				break;
 		}
 

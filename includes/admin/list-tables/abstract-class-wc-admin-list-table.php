@@ -10,10 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( class_exists( 'WC_Admin_List_Table', false ) ) {
-	return;
-}
-
 /**
  * WC_Admin_List_Table Class.
  */
@@ -34,9 +30,9 @@ abstract class WC_Admin_List_Table {
 	protected $object = null;
 
 	/**
-	 * Constructor.
+	 * Hook into WP actions/filters.
 	 */
-	public function __construct() {
+	public function init() {
 		if ( $this->list_table_type ) {
 			add_action( 'manage_posts_extra_tablenav', array( $this, 'maybe_render_blank_state' ) );
 			add_filter( 'view_mode_post_types', array( $this, 'disable_view_mode' ) );

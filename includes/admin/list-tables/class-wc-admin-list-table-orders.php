@@ -10,14 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( class_exists( 'WC_Admin_List_Table_Orders', false ) ) {
-	return;
-}
-
-if ( ! class_exists( 'WC_Admin_List_Table', false ) ) {
-	include_once 'abstract-class-wc-admin-list-table.php';
-}
-
 /**
  * WC_Admin_List_Table_Orders Class.
  */
@@ -31,10 +23,44 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	protected $list_table_type = 'shop_order';
 
 	/**
-	 * Constructor.
+	 * Singleton instance.
+	 *
+	 * @var WC_Admin_List_Table_Orders|null
 	 */
-	public function __construct() {
-		parent::__construct();
+	protected static $instance = null;
+
+	/**
+	 * Return singleston instance.
+	 *
+	 * @static
+	 * @return WC_Admin_List_Table_Orders
+	 */
+	final public static function instance() {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * Singleton. Prevent clone.
+	 */
+	final public function __clone() {
+		trigger_error( 'Singleton. No cloning allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent serialization.
+	 */
+	final public function __wakeup() {
+		trigger_error( 'Singleton. No serialization allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Hook into WP actions/filters.
+	 */
+	public function init() {
+		parent::init();
 		add_action( 'admin_notices', array( $this, 'bulk_admin_notices' ) );
 		add_action( 'admin_footer', array( $this, 'order_preview_template' ) );
 		add_filter( 'get_search_query', array( $this, 'search_label' ) );

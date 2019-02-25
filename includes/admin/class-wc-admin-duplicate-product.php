@@ -1,8 +1,4 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * Duplicate product functionality
  *
@@ -12,9 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version     3.0.0
  */
 
-if ( class_exists( 'WC_Admin_Duplicate_Product', false ) ) {
-	return new WC_Admin_Duplicate_Product();
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Duplicate_Product Class.
@@ -22,9 +16,48 @@ if ( class_exists( 'WC_Admin_Duplicate_Product', false ) ) {
 class WC_Admin_Duplicate_Product {
 
 	/**
-	 * Constructor.
+	 * Singleton instance.
+	 *
+	 * @var WC_Admin_Duplicate_Product|null
 	 */
-	public function __construct() {
+	protected static $instance = null;
+
+	/**
+	 * Return singleston instance.
+	 *
+	 * @static
+	 * @return WC_Admin_Duplicate_Product
+	 */
+	final public static function instance() {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * Singleton. Prevent clone.
+	 */
+	final public function __clone() {
+		trigger_error( 'Singleton. No cloning allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent serialization.
+	 */
+	final public function __wakeup() {
+		trigger_error( 'Singleton. No serialization allowed!', E_USER_ERROR ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+	}
+
+	/**
+	 * Singleton. Prevent construct.
+	 */
+	final private function __construct() {}
+
+	/**
+	 * Hook into WP actions/filters.
+	 */
+	public function init() {
 		add_action( 'admin_action_duplicate_product', array( $this, 'duplicate_product_action' ) );
 		add_filter( 'post_row_actions', array( $this, 'dupe_link' ), 10, 2 );
 		add_action( 'post_submitbox_start', array( $this, 'dupe_button' ) );
@@ -217,4 +250,4 @@ class WC_Admin_Duplicate_Product {
 	}
 }
 
-return new WC_Admin_Duplicate_Product();
+return WC_Admin_Duplicate_Product::instance();
