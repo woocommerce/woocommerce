@@ -11,11 +11,9 @@
 class WC_Tracks {
 
 	/**
-	 * Prefix.
-	 *
-	 * @todo Find a good prefix.
+	 * Tracks event name prefix.
 	 */
-	const PREFIX = 'wca_test_';
+	const PREFIX = 'wcadmin_';
 
 	/**
 	 * Gather blog related properties.
