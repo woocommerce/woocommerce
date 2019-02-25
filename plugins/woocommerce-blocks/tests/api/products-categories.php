@@ -15,7 +15,7 @@ class WC_Tests_API_Products_By_Categories_Controller extends WC_REST_Unit_Test_C
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc-pb/v3';
+	protected $endpoint = '/wc-blocks/v1';
 
 	/**
 	 * Setup test products data. Called before every test.
@@ -74,7 +74,7 @@ class WC_Tests_API_Products_By_Categories_Controller extends WC_REST_Unit_Test_C
 
 		$cats = $this->categories['parent']['term_id'] . ',' . $this->categories['single']['term_id'];
 
-		$request = new WP_REST_Request( 'GET', '/wc-pb/v3/products' );
+		$request = new WP_REST_Request( 'GET', '/wc-blocks/v1/products' );
 		$request->set_param( 'category', $cats );
 		$request->set_param( 'cat_operator', 'IN' );
 
@@ -95,7 +95,7 @@ class WC_Tests_API_Products_By_Categories_Controller extends WC_REST_Unit_Test_C
 
 		$cats = $this->categories['child']['term_id'] . ',' . $this->categories['single']['term_id'];
 
-		$request = new WP_REST_Request( 'GET', '/wc-pb/v3/products' );
+		$request = new WP_REST_Request( 'GET', '/wc-blocks/v1/products' );
 		$request->set_param( 'category', $cats );
 		$request->set_param( 'cat_operator', 'IN' );
 
@@ -116,7 +116,7 @@ class WC_Tests_API_Products_By_Categories_Controller extends WC_REST_Unit_Test_C
 
 		$cats = $this->categories['child']['term_id'] . ',' . $this->categories['single']['term_id'];
 
-		$request = new WP_REST_Request( 'GET', '/wc-pb/v3/products' );
+		$request = new WP_REST_Request( 'GET', '/wc-blocks/v1/products' );
 		$request->set_param( 'category', $cats );
 		$request->set_param( 'cat_operator', 'AND' );
 
@@ -137,7 +137,7 @@ class WC_Tests_API_Products_By_Categories_Controller extends WC_REST_Unit_Test_C
 
 		$cats = $this->categories['parent']['term_id'] . ',' . $this->categories['single']['term_id'];
 
-		$request = new WP_REST_Request( 'GET', '/wc-pb/v3/products' );
+		$request = new WP_REST_Request( 'GET', '/wc-blocks/v1/products' );
 		$request->set_param( 'category', $cats );
 		$request->set_param( 'cat_operator', 'AND' );
 

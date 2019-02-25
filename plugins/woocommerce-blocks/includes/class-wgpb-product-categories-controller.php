@@ -23,7 +23,7 @@ class WGPB_Product_Categories_Controller extends WC_REST_Product_Categories_Cont
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc-pb/v3';
+	protected $namespace = 'wc-blocks/v1';
 
 	/**
 	 * Register the routes for products.
