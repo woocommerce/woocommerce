@@ -123,11 +123,9 @@ class WC_Admin_Post_Types {
 				WC_Admin_List_Table_Orders::instance()->init();
 				break;
 			case 'edit-shop_coupon':
-				include_once 'list-tables/class-wc-admin-list-table-coupons.php';
 				WC_Admin_List_Table_Coupons::instance()->init();
 				break;
 			case 'edit-product':
-				include_once 'list-tables/class-wc-admin-list-table-products.php';
 				WC_Admin_List_Table_Products::instance()->init();
 				break;
 		}

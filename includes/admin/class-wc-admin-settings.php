@@ -117,10 +117,7 @@ class WC_Admin_Settings {
 	 */
 	public static function get_settings_pages() {
 		if ( empty( self::$settings ) ) {
-			$settings = array();
-
-			include_once dirname( __FILE__ ) . '/settings/class-wc-settings-page.php';
-
+			$settings   = array();
 			$settings[] = include 'settings/class-wc-settings-general.php';
 			$settings[] = include 'settings/class-wc-settings-products.php';
 			$settings[] = include 'settings/class-wc-settings-tax.php';

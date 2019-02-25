@@ -135,7 +135,6 @@ class WC_Admin_Exporters {
 	 * Export page UI.
 	 */
 	public function product_exporter() {
-		include_once WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php';
 		include_once dirname( __FILE__ ) . '/views/html-admin-page-product-export.php';
 	}
 
@@ -144,7 +143,6 @@ class WC_Admin_Exporters {
 	 */
 	public function download_export_file() {
 		if ( isset( $_GET['action'], $_GET['nonce'] ) && wp_verify_nonce( wp_unslash( $_GET['nonce'] ), 'product-csv' ) && 'download_product_csv' === wp_unslash( $_GET['action'] ) ) { // WPCS: input var ok, sanitization ok.
-			include_once WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php';
 			$exporter = new WC_Product_CSV_Exporter();
 
 			if ( ! empty( $_GET['filename'] ) ) { // WPCS: input var ok.
@@ -164,8 +162,6 @@ class WC_Admin_Exporters {
 		if ( ! $this->export_allowed() ) {
 			wp_send_json_error( array( 'message' => __( 'Insufficient privileges to export products.', 'woocommerce' ) ) );
 		}
-
-		include_once WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php';
 
 		$step     = isset( $_POST['step'] ) ? absint( $_POST['step'] ) : 1; // WPCS: input var ok, sanitization ok.
 		$exporter = new WC_Product_CSV_Exporter();

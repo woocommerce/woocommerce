@@ -135,10 +135,6 @@ class WC_Admin_Importers {
 			wp_safe_redirect( admin_url( 'edit.php?post_type=product&page=product_importer' ) );
 			exit;
 		}
-
-		include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
-		include_once WC_ABSPATH . 'includes/admin/importers/class-wc-product-csv-importer-controller.php';
-
 		$importer = new WC_Product_CSV_Importer_Controller();
 		$importer->dispatch();
 	}
@@ -246,9 +242,6 @@ class WC_Admin_Importers {
 		if ( ! $this->import_allowed() || ! isset( $_POST['file'] ) ) { // PHPCS: input var ok.
 			wp_send_json_error( array( 'message' => __( 'Insufficient privileges to import products.', 'woocommerce' ) ) );
 		}
-
-		include_once WC_ABSPATH . 'includes/admin/importers/class-wc-product-csv-importer-controller.php';
-		include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
 
 		$file   = wc_clean( wp_unslash( $_POST['file'] ) ); // PHPCS: input var ok.
 		$params = array(

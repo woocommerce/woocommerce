@@ -22,8 +22,6 @@ class WC_Admin_Reports {
 		$first_tab      = array_keys( $reports );
 		$current_tab    = ! empty( $_GET['tab'] ) && array_key_exists( $_GET['tab'], $reports ) ? sanitize_title( $_GET['tab'] ) : $first_tab[0];
 		$current_report = isset( $_GET['report'] ) ? sanitize_title( $_GET['report'] ) : current( array_keys( $reports[ $current_tab ]['reports'] ) );
-
-		include_once dirname( __FILE__ ) . '/reports/class-wc-admin-report.php';
 		include_once dirname( __FILE__ ) . '/views/html-admin-page-reports.php';
 	}
 
@@ -157,8 +155,6 @@ class WC_Admin_Reports {
 	public static function get_report( $name ) {
 		$name  = sanitize_title( str_replace( '_', '-', $name ) );
 		$class = 'WC_Report_' . str_replace( '-', '_', $name );
-
-		include_once apply_filters( 'wc_admin_reports_path', 'reports/class-wc-report-' . $name . '.php', $name, $class );
 
 		if ( ! class_exists( $class ) ) {
 			return;

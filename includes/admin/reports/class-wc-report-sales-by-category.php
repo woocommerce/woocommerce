@@ -222,8 +222,6 @@ class WC_Report_Sales_By_Category extends WC_Admin_Report {
 						$r['value']        = 'id';
 						$r['selected']     = $this->show_categories;
 
-						include_once WC()->plugin_path() . '/includes/walkers/class-wc-product-cat-dropdown-walker.php';
-
 						echo wc_walk_category_dropdown_tree( $categories, 0, $r ); // @codingStandardsIgnoreLine
 					?>
 				</select>

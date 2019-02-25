@@ -118,8 +118,6 @@ class WC_Admin_Dashboard {
 	 * @return object
 	 */
 	private function get_sales_report_data() {
-		include_once dirname( __FILE__ ) . '/reports/class-wc-report-sales-by-date.php';
-
 		$sales_by_date                 = new WC_Report_Sales_By_Date();
 		$sales_by_date->start_date     = strtotime( date( 'Y-m-01', current_time( 'timestamp' ) ) );
 		$sales_by_date->end_date       = current_time( 'timestamp' );
@@ -133,8 +131,6 @@ class WC_Admin_Dashboard {
 	 * Show status widget.
 	 */
 	public function status_widget() {
-		include_once dirname( __FILE__ ) . '/reports/class-wc-admin-report.php';
-
 		$reports = new WC_Admin_Report();
 
 		echo '<ul class="wc_status_list">';
