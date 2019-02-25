@@ -299,46 +299,6 @@ final class WooCommerce {
 	 */
 	public function includes() {
 		/**
-		 * Interfaces.
-		 */
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-abstract-order-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-coupon-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-customer-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-customer-download-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-customer-download-log-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-object-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-order-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-order-item-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-order-item-product-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-order-item-type-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-order-refund-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-payment-token-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-product-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-product-variable-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-shipping-zone-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-logger-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-log-handler-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-webhooks-data-store-interface.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-queue-interface.php';
-
-		/**
-		 * Abstract classes.
-		 */
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-data.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-object-query.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-token.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-product.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-order.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-settings-api.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-shipping-method.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-gateway.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-integration.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-log-handler.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-deprecated-hooks.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-session.php';
-		include_once WC_ABSPATH . 'includes/abstracts/abstract-wc-privacy.php';
-
-		/**
 		 * Core classes.
 		 */
 		include_once WC_ABSPATH . 'includes/wc-core-functions.php';
