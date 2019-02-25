@@ -1,9 +1,8 @@
 <?php
 /**
- * REST API Marketplace suggestions API
+ * Marketplace suggestions
  *
- * Handles requests for marketplace suggestions data & rendering
- * templates for suggestion DOM content.
+ * Behaviour for displaying in-context suggestions for marketplace extensions.
  *
  * @package WooCommerce\Classes
  * @since   3.6.0
@@ -12,7 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * REST API Marketplace suggestions API and related logic.
+ * Marketplace suggestions core behaviour.
  */
 class WC_Marketplace_Suggestions {
 

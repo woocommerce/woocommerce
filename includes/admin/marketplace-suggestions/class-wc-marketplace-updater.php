@@ -1,4 +1,13 @@
 <?php
+/**
+ * Marketplace suggestions updater
+ *
+ * Uses WC_Queue to ensure marketplace suggestions data is up to date and cached locally.
+ *
+ * @package WooCommerce\Classes
+ * @since   3.6.0
+ */
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -6,6 +15,9 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Marketplace_Updater {
 
+	/**
+	 * Setup.
+	 */
 	public static function load() {
 		add_action( 'init', array( __CLASS__, 'init' ) );
 	}
@@ -15,7 +27,7 @@ class WC_Marketplace_Updater {
 	 */
 	public static function init() {
 		$queue = WC()->queue();
-		$next = $queue->get_next( 'woocommerce_update_marketplace_suggestions' );
+		$next  = $queue->get_next( 'woocommerce_update_marketplace_suggestions' );
 		if ( ! $next ) {
 			$queue->schedule_recurring( time(), WEEK_IN_SECONDS, 'woocommerce_update_marketplace_suggestions' );
 		}
@@ -27,15 +39,18 @@ class WC_Marketplace_Updater {
 	 * Fetches new marketplace data, updates wc_marketplace_suggestions.
 	 */
 	public static function update_marketplace_suggestions() {
-		$data = get_option( 'woocommerce_marketplace_suggestions', array(
-			'suggestions' => array(),
-			'updated' => time(),
-		) );
+		$data = get_option(
+			'woocommerce_marketplace_suggestions',
+			array(
+				'suggestions' => array(),
+				'updated'     => time(),
+			)
+		);
 
 		$data['updated'] = time();
 
-		$url = 'https://d3t0oesq8995hv.cloudfront.net/add-ons/marketplace-suggestions.json';
-		$request = wp_remote_get( $url );
+		$url     = 'https://d3t0oesq8995hv.cloudfront.net/add-ons/marketplace-suggestions.json';
+		$request = wp_safe_remote_get( $url );
 
 		if ( is_wp_error( $request ) ) {
 			self::retry();
