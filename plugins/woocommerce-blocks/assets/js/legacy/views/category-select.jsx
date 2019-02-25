@@ -165,7 +165,7 @@ class ProductCategoryList extends Component {
 	 * @return string
 	 */
 	getQuery() {
-		const endpoint = '/wc-pb/v3/products/categories';
+		const endpoint = '/wc-blocks/v1/products/categories';
 		return endpoint;
 	}
 

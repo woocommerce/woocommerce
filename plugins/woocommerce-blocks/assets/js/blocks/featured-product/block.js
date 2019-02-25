@@ -106,7 +106,7 @@ class FeaturedProduct extends Component {
 			return;
 		}
 		apiFetch( {
-			path: `/wc-pb/v3/products/${ productId }`,
+			path: `/wc-blocks/v1/products/${ productId }`,
 		} )
 			.then( ( product ) => {
 				this.setState( { product, loaded: true } );

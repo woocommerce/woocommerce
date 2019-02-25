@@ -199,7 +199,7 @@ class ProductAttributeList extends Component {
 	 * @return string
 	 */
 	getQuery() {
-		const endpoint = '/wc-pb/v3/products/attributes';
+		const endpoint = '/wc-blocks/v1/products/attributes';
 		return endpoint;
 	}
 
@@ -386,7 +386,7 @@ class AttributeTerms extends Component {
 	 * @return string
 	 */
 	getQuery() {
-		const endpoint = '/wc-pb/v3/products/attributes/' + this.props.attribute.id + '/terms';
+		const endpoint = '/wc-blocks/v1/products/attributes/' + this.props.attribute.id + '/terms';
 		return endpoint;
 	}
 

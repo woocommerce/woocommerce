@@ -56,7 +56,7 @@ class ProductTopRatedBlock extends Component {
 	getProducts() {
 		apiFetch( {
 			path: addQueryArgs(
-				'/wc-pb/v3/products',
+				'/wc-blocks/v1/products',
 				getQuery( this.props.attributes, this.props.name )
 			),
 		} )

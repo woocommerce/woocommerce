@@ -73,7 +73,7 @@ class ProductsByAttributeBlock extends Component {
 		}
 		apiFetch( {
 			path: addQueryArgs(
-				'/wc-pb/v3/products',
+				'/wc-blocks/v1/products',
 				getQuery( blockAttributes, this.props.name )
 			),
 		} )

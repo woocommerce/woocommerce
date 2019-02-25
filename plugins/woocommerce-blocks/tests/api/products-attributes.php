@@ -15,7 +15,7 @@ class WC_Tests_API_Products_By_Attributes_Controller extends WC_REST_Unit_Test_C
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc-pb/v3';
+	protected $endpoint = '/wc-blocks/v1';
 
 	/**
 	 * Setup test products data. Called before every test.

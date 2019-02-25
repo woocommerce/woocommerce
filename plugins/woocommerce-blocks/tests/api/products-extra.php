@@ -15,7 +15,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc-pb/v3';
+	protected $endpoint = '/wc-blocks/v1';
 
 	/**
 	 * Setup test products data. Called before every test.
@@ -50,8 +50,8 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
 
-		$this->assertArrayHasKey( '/wc-pb/v3/products', $routes );
-		$this->assertArrayHasKey( '/wc-pb/v3/products/(?P<id>[\d]+)', $routes );
+		$this->assertArrayHasKey( '/wc-blocks/v1/products', $routes );
+		$this->assertArrayHasKey( '/wc-blocks/v1/products/(?P<id>[\d]+)', $routes );
 	}
 
 	/**
@@ -64,7 +64,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 		WC_Helper_Product::create_external_product();
 		sleep( 1 ); // So both products have different timestamps.
 		$product  = WC_Helper_Product::create_simple_product();
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc-pb/v3/products' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc-blocks/v1/products' ) );
 		$products = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -84,7 +84,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 	public function test_get_products_as_contributor() {
 		wp_set_current_user( $this->contributor );
 		WC_Helper_Product::create_simple_product();
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc-pb/v3/products' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc-blocks/v1/products' ) );
 		$this->assertEquals( 200, $response->get_status() );
 	}
 
@@ -96,7 +96,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 	public function test_get_products_as_subscriber() {
 		wp_set_current_user( $this->subscriber );
 		WC_Helper_Product::create_simple_product();
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc-pb/v3/products' ) );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc-blocks/v1/products' ) );
 		$this->assertEquals( 403, $response->get_status() );
 	}
 
@@ -119,7 +119,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 		);
 		$product->save();
 
-		$request = new WP_REST_Request( 'GET', '/wc-pb/v3/products' );
+		$request = new WP_REST_Request( 'GET', '/wc-blocks/v1/products' );
 		$request->set_param( 'orderby', 'price' );
 		$request->set_param( 'order', 'asc' );
 		$response = $this->server->dispatch( $request );
@@ -165,7 +165,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 		$query_params = array(
 			'catalog_visibility' => 'visible',
 		);
-		$request      = new WP_REST_REQUEST( 'GET', '/wc-pb/v3/products' );
+		$request      = new WP_REST_REQUEST( 'GET', '/wc-blocks/v1/products' );
 		$request->set_query_params( $query_params );
 		$response = $this->server->dispatch( $request );
 		$products = $response->get_data();
@@ -179,7 +179,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 			'orderby'            => 'id',
 			'order'              => 'asc',
 		);
-		$request      = new WP_REST_REQUEST( 'GET', '/wc-pb/v3/products' );
+		$request      = new WP_REST_REQUEST( 'GET', '/wc-blocks/v1/products' );
 		$request->set_query_params( $query_params );
 		$response = $this->server->dispatch( $request );
 		$products = $response->get_data();
@@ -194,7 +194,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 			'orderby'            => 'id',
 			'order'              => 'asc',
 		);
-		$request      = new WP_REST_REQUEST( 'GET', '/wc-pb/v3/products' );
+		$request      = new WP_REST_REQUEST( 'GET', '/wc-blocks/v1/products' );
 		$request->set_query_params( $query_params );
 		$response = $this->server->dispatch( $request );
 		$products = $response->get_data();
@@ -207,7 +207,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 		$query_params = array(
 			'catalog_visibility' => 'hidden',
 		);
-		$request      = new WP_REST_REQUEST( 'GET', '/wc-pb/v3/products' );
+		$request      = new WP_REST_REQUEST( 'GET', '/wc-blocks/v1/products' );
 		$request->set_query_params( $query_params );
 		$response = $this->server->dispatch( $request );
 		$products = $response->get_data();

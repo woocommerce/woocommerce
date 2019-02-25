@@ -23,7 +23,7 @@ class WGPB_Product_Attribute_Terms_Controller extends WC_REST_Product_Attribute_
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc-pb/v3';
+	protected $namespace = 'wc-blocks/v1';
 
 	/**
 	 * Register the routes for products.
