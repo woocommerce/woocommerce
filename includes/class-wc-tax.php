@@ -1078,4 +1078,3 @@ class WC_Tax {
 		return $rates;
 	}
 }
-WC_Tax::init();

@@ -1123,5 +1123,3 @@ class WC_Form_Handler {
 		}
 	}
 }
-
-WC_Form_Handler::init();

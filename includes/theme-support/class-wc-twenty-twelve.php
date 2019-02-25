@@ -50,5 +50,3 @@ class WC_Twenty_Twelve {
 		echo '</div></div>';
 	}
 }
-
-WC_Twenty_Twelve::init();

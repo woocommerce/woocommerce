@@ -17,7 +17,11 @@ class WC_AJAX {
 	 * Hook in ajax handlers.
 	 */
 	public static function init() {
-		add_action( 'init', array( __CLASS__, 'define_ajax' ), 0 );
+		if ( ! WP_DEBUG || ( WP_DEBUG && ! WP_DEBUG_DISPLAY ) ) {
+			@ini_set( 'display_errors', 0 ); // Turn off display_errors during AJAX events to prevent malformed JSON.
+		}
+		$GLOBALS['wpdb']->hide_errors();
+
 		add_action( 'template_redirect', array( __CLASS__, 'do_wc_ajax' ), 0 );
 		self::add_ajax_events();
 	}
@@ -31,20 +35,6 @@ class WC_AJAX {
 	 */
 	public static function get_endpoint( $request = '' ) {
 		return esc_url_raw( apply_filters( 'woocommerce_ajax_get_endpoint', add_query_arg( 'wc-ajax', $request, remove_query_arg( array( 'remove_item', 'add-to-cart', 'added-to-cart', 'order_again', '_wpnonce' ), home_url( '/', 'relative' ) ) ), $request ) );
-	}
-
-	/**
-	 * Set WC AJAX constant and headers.
-	 */
-	public static function define_ajax() {
-		if ( ! empty( $_GET['wc-ajax'] ) ) {
-			wc_maybe_define_constant( 'DOING_AJAX', true );
-			wc_maybe_define_constant( 'WC_DOING_AJAX', true );
-			if ( ! WP_DEBUG || ( WP_DEBUG && ! WP_DEBUG_DISPLAY ) ) {
-				@ini_set( 'display_errors', 0 ); // Turn off display_errors during AJAX events to prevent malformed JSON.
-			}
-			$GLOBALS['wpdb']->hide_errors();
-		}
 	}
 
 	/**
@@ -2845,6 +2835,11 @@ class WC_AJAX {
 		wp_send_json_error( 'invalid_gateway_id' );
 		wp_die();
 	}
-}
 
-WC_AJAX::init();
+	/**
+	 * Set WC AJAX constant and headers.
+	 *
+	 * @deprecated
+	 */
+	public static function define_ajax() {}
+}

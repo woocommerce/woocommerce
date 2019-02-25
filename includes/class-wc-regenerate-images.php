@@ -44,8 +44,6 @@ class WC_Regenerate_Images {
 		}
 
 		if ( apply_filters( 'woocommerce_background_image_regeneration', true ) ) {
-			include_once WC_ABSPATH . 'includes/class-wc-regenerate-images-request.php';
-
 			self::$background_process = new WC_Regenerate_Images_Request();
 
 			add_action( 'admin_init', array( __CLASS__, 'regenerating_notice' ) );
@@ -407,5 +405,3 @@ class WC_Regenerate_Images {
 		self::$background_process->save()->dispatch();
 	}
 }
-
-add_action( 'init', array( 'WC_Regenerate_Images', 'init' ) );

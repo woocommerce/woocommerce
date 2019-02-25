@@ -606,5 +606,3 @@ class WC_Post_Types {
 		return $post_types;
 	}
 }
-
-WC_Post_types::init();

@@ -428,5 +428,3 @@ class WC_Comments {
 		return $comment_data;
 	}
 }
-
-WC_Comments::init();

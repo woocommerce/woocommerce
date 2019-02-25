@@ -283,5 +283,3 @@ class WC_Cache_Helper {
 		}
 	}
 }
-
-WC_Cache_Helper::init();

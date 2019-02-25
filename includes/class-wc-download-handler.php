@@ -586,5 +586,3 @@ class WC_Download_Handler {
 		wp_die( $message, $title, array( 'response' => $status ) ); // WPCS: XSS ok.
 	}
 }
-
-WC_Download_Handler::init();

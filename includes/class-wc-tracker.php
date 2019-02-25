@@ -28,7 +28,9 @@ class WC_Tracker {
 	 * Hook into cron event.
 	 */
 	public static function init() {
-		add_action( 'woocommerce_tracker_send_event', array( __CLASS__, 'send_tracking_data' ) );
+		if ( 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
+			add_action( 'woocommerce_tracker_send_event', array( __CLASS__, 'send_tracking_data' ) );
+		}
 	}
 
 	/**
@@ -563,5 +565,3 @@ class WC_Tracker {
 		) );
 	}
 }
-
-WC_Tracker::init();

@@ -14,13 +14,13 @@ defined( 'ABSPATH' ) || exit;
 class WC_Shop_Customizer {
 
 	/**
-	 * Constructor.
+	 * Init customizer sections.
 	 */
-	public function __construct() {
-		add_action( 'customize_register', array( $this, 'add_sections' ) );
-		add_action( 'customize_controls_print_styles', array( $this, 'add_styles' ) );
-		add_action( 'customize_controls_print_scripts', array( $this, 'add_scripts' ), 30 );
-		add_action( 'wp_enqueue_scripts', array( $this, 'add_frontend_scripts' ) );
+	public static function init() {
+		add_action( 'customize_register', array( __CLASS__, 'add_sections' ) );
+		add_action( 'customize_controls_print_styles', array( __CLASS__, 'add_styles' ) );
+		add_action( 'customize_controls_print_scripts', array( __CLASS__, 'add_scripts' ), 30 );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_frontend_scripts' ) );
 	}
 
 	/**
@@ -28,7 +28,7 @@ class WC_Shop_Customizer {
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
-	public function add_sections( $wp_customize ) {
+	public static function add_sections( $wp_customize ) {
 		$wp_customize->add_panel( 'woocommerce', array(
 			'priority'       => 200,
 			'capability'     => 'manage_woocommerce',
@@ -36,16 +36,16 @@ class WC_Shop_Customizer {
 			'title'          => __( 'WooCommerce', 'woocommerce' ),
 		) );
 
-		$this->add_store_notice_section( $wp_customize );
-		$this->add_product_catalog_section( $wp_customize );
-		$this->add_product_images_section( $wp_customize );
-		$this->add_checkout_section( $wp_customize );
+		self::add_store_notice_section( $wp_customize );
+		self::add_product_catalog_section( $wp_customize );
+		self::add_product_images_section( $wp_customize );
+		self::add_checkout_section( $wp_customize );
 	}
 
 	/**
 	 * Frontend CSS styles.
 	 */
-	public function add_frontend_scripts() {
+	public static function add_frontend_scripts() {
 		if ( ! is_customize_preview() || ! is_store_notice_showing() ) {
 			return;
 		}
@@ -57,7 +57,7 @@ class WC_Shop_Customizer {
 	/**
 	 * CSS styles to improve our form.
 	 */
-	public function add_styles() {
+	public static function add_styles() {
 		?>
 		<style type="text/css">
 			.woocommerce-cropping-control {
@@ -87,7 +87,7 @@ class WC_Shop_Customizer {
 	/**
 	 * Scripts to improve our form.
 	 */
-	public function add_scripts() {
+	public static function add_scripts() {
 		$min_rows    = wc_get_theme_support( 'product_grid::min_rows', 1 );
 		$max_rows    = wc_get_theme_support( 'product_grid::max_rows', '' );
 		$min_columns = wc_get_theme_support( 'product_grid::min_columns', 1 );
@@ -254,7 +254,7 @@ class WC_Shop_Customizer {
 	 * @param string $value '', 'subcategories', or 'both'.
 	 * @return string
 	 */
-	public function sanitize_archive_display( $value ) {
+	public static function sanitize_archive_display( $value ) {
 		$options = array( '', 'subcategories', 'both' );
 
 		return in_array( $value, $options, true ) ? $value : '';
@@ -266,7 +266,7 @@ class WC_Shop_Customizer {
 	 * @param string $value An array key from the below array.
 	 * @return string
 	 */
-	public function sanitize_default_catalog_orderby( $value ) {
+	public static function sanitize_default_catalog_orderby( $value ) {
 		$options = apply_filters( 'woocommerce_default_catalog_orderby_options', array(
 			'menu_order' => __( 'Default sorting (custom ordering + name)', 'woocommerce' ),
 			'popularity' => __( 'Popularity (sales)', 'woocommerce' ),
@@ -284,7 +284,7 @@ class WC_Shop_Customizer {
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
-	private function add_store_notice_section( $wp_customize ) {
+	private static function add_store_notice_section( $wp_customize ) {
 		$wp_customize->add_section(
 			'woocommerce_store_notice',
 			array(
@@ -353,7 +353,7 @@ class WC_Shop_Customizer {
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
-	public function add_product_catalog_section( $wp_customize ) {
+	public static function add_product_catalog_section( $wp_customize ) {
 		$wp_customize->add_section(
 			'woocommerce_product_catalog',
 			array(
@@ -369,7 +369,7 @@ class WC_Shop_Customizer {
 				'default'           => '',
 				'type'              => 'option',
 				'capability'        => 'manage_woocommerce',
-				'sanitize_callback' => array( $this, 'sanitize_archive_display' ),
+				'sanitize_callback' => array( __CLASS__, 'sanitize_archive_display' ),
 			)
 		);
 
@@ -395,7 +395,7 @@ class WC_Shop_Customizer {
 				'default'           => '',
 				'type'              => 'option',
 				'capability'        => 'manage_woocommerce',
-				'sanitize_callback' => array( $this, 'sanitize_archive_display' ),
+				'sanitize_callback' => array( __CLASS__, 'sanitize_archive_display' ),
 			)
 		);
 
@@ -421,7 +421,7 @@ class WC_Shop_Customizer {
 				'default'           => 'menu_order',
 				'type'              => 'option',
 				'capability'        => 'manage_woocommerce',
-				'sanitize_callback' => array( $this, 'sanitize_default_catalog_orderby' ),
+				'sanitize_callback' => array( __CLASS__, 'sanitize_default_catalog_orderby' ),
 			)
 		);
 
@@ -512,7 +512,7 @@ class WC_Shop_Customizer {
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
-	private function add_product_images_section( $wp_customize ) {
+	private static function add_product_images_section( $wp_customize ) {
 		if ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'photon' ) ) {
 			$regen_description = ''; // Nothing to report; Jetpack will handle magically.
 		} elseif ( apply_filters( 'woocommerce_background_image_regeneration', true ) && ! is_multisite() ) {
@@ -661,7 +661,7 @@ class WC_Shop_Customizer {
 	 *
 	 * @param WP_Customize_Manager $wp_customize Theme Customizer object.
 	 */
-	public function add_checkout_section( $wp_customize ) {
+	public static function add_checkout_section( $wp_customize ) {
 		$wp_customize->add_section(
 			'woocommerce_checkout',
 			array(
@@ -685,7 +685,7 @@ class WC_Shop_Customizer {
 					'default'           => 'phone' === $field ? 'required' : 'optional',
 					'type'              => 'option',
 					'capability'        => 'manage_woocommerce',
-					'sanitize_callback' => array( $this, 'sanitize_checkout_field_display' ),
+					'sanitize_callback' => array( __CLASS__, 'sanitize_checkout_field_display' ),
 				)
 			);
 			$wp_customize->add_control(
@@ -841,10 +841,8 @@ class WC_Shop_Customizer {
 	 * @param string $value '', 'subcategories', or 'both'.
 	 * @return string
 	 */
-	public function sanitize_checkout_field_display( $value ) {
+	public static function sanitize_checkout_field_display( $value ) {
 		$options = array( 'hidden', 'optional', 'required' );
 		return in_array( $value, $options, true ) ? $value : '';
 	}
 }
-
-new WC_Shop_Customizer();

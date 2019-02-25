@@ -152,16 +152,6 @@ final class WooCommerce {
 	 */
 	public function __construct() {
 		$this->define_constants();
-
-		/**
-		 * Class autoloader.
-		 */
-		$loader = include_once WC_ABSPATH . 'vendor/autoload.php';
-
-		if ( ! $loader ) {
-			throw new Exception( 'vendor/autoload.php missing please run `composer install`' );
-		}
-
 		$this->includes();
 		$this->init_hooks();
 	}
@@ -194,6 +184,8 @@ final class WooCommerce {
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
+		add_action( 'init', array( 'WC_Regenerate_Images', 'init' ) );
+		add_action( 'init', array( 'WC_Template_Loader', 'init' ) );
 		add_action( 'init', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
@@ -236,6 +228,11 @@ final class WooCommerce {
 		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
+
+		if ( ! empty( $_GET['wc-ajax'] ) ) {
+			add_filter( 'wp_doing_ajax', '__return_true' );
+			$this->define( 'WC_DOING_AJAX', true );
+		}
 	}
 
 	/**
@@ -284,9 +281,11 @@ final class WooCommerce {
 			case 'admin':
 				return is_admin();
 			case 'ajax':
-				return defined( 'DOING_AJAX' );
+				return wp_doing_ajax();
 			case 'cron':
 				return defined( 'DOING_CRON' );
+			case 'cli':
+				return defined( 'WP_CLI' ) && WP_CLI;
 			case 'frontend':
 				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! $this->is_rest_api_request();
 		}
@@ -299,61 +298,21 @@ final class WooCommerce {
 	 */
 	public function includes() {
 		/**
-		 * Core classes.
+		 * Class autoloader.
 		 */
-		include_once WC_ABSPATH . 'includes/class-wc-datetime.php';
-		include_once WC_ABSPATH . 'includes/class-wc-post-types.php';
-		include_once WC_ABSPATH . 'includes/class-wc-install.php';
-		include_once WC_ABSPATH . 'includes/class-wc-geolocation.php';
-		include_once WC_ABSPATH . 'includes/class-wc-download-handler.php';
-		include_once WC_ABSPATH . 'includes/class-wc-comments.php';
-		include_once WC_ABSPATH . 'includes/class-wc-post-data.php';
-		include_once WC_ABSPATH . 'includes/class-wc-ajax.php';
-		include_once WC_ABSPATH . 'includes/class-wc-emails.php';
-		include_once WC_ABSPATH . 'includes/class-wc-data-exception.php';
-		include_once WC_ABSPATH . 'includes/class-wc-query.php';
-		include_once WC_ABSPATH . 'includes/class-wc-meta-data.php';
-		include_once WC_ABSPATH . 'includes/class-wc-order-factory.php';
-		include_once WC_ABSPATH . 'includes/class-wc-order-query.php';
-		include_once WC_ABSPATH . 'includes/class-wc-product-factory.php';
-		include_once WC_ABSPATH . 'includes/class-wc-product-query.php';
-		include_once WC_ABSPATH . 'includes/class-wc-payment-tokens.php';
-		include_once WC_ABSPATH . 'includes/class-wc-shipping-zone.php';
-		include_once WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-cc.php';
-		include_once WC_ABSPATH . 'includes/gateways/class-wc-payment-gateway-echeck.php';
-		include_once WC_ABSPATH . 'includes/class-wc-countries.php';
-		include_once WC_ABSPATH . 'includes/class-wc-integrations.php';
-		include_once WC_ABSPATH . 'includes/class-wc-cache-helper.php';
-		include_once WC_ABSPATH . 'includes/class-wc-https.php';
-		include_once WC_ABSPATH . 'includes/class-wc-deprecated-action-hooks.php';
-		include_once WC_ABSPATH . 'includes/class-wc-deprecated-filter-hooks.php';
-		include_once WC_ABSPATH . 'includes/class-wc-background-emailer.php';
-		include_once WC_ABSPATH . 'includes/class-wc-discounts.php';
-		include_once WC_ABSPATH . 'includes/class-wc-cart-totals.php';
-		include_once WC_ABSPATH . 'includes/customizer/class-wc-shop-customizer.php';
-		include_once WC_ABSPATH . 'includes/class-wc-regenerate-images.php';
-		include_once WC_ABSPATH . 'includes/class-wc-privacy.php';
-		include_once WC_ABSPATH . 'includes/class-wc-structured-data.php';
-		include_once WC_ABSPATH . 'includes/class-wc-shortcodes.php';
-		include_once WC_ABSPATH . 'includes/class-wc-logger.php';
-		include_once WC_ABSPATH . 'includes/queue/class-wc-action-queue.php';
-		include_once WC_ABSPATH . 'includes/queue/class-wc-queue.php';
+		$loader = include_once WC_ABSPATH . 'vendor/autoload.php';
 
-		/**
-		 * REST API.
-		 */
-		include_once WC_ABSPATH . 'includes/legacy/class-wc-legacy-api.php';
-		include_once WC_ABSPATH . 'includes/class-wc-api.php';
-		include_once WC_ABSPATH . 'includes/class-wc-auth.php';
-		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
+		if ( ! $loader ) {
+			throw new Exception( 'vendor/autoload.php missing please run `composer install`' );
+		}
 
 		/**
 		 * Libraries
 		 */
 		include_once WC_ABSPATH . 'includes/libraries/action-scheduler/action-scheduler.php';
 
-		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			include_once WC_ABSPATH . 'includes/class-wc-cli.php';
+		if ( $this->is_request( 'cli' ) ) {
+			WC_CLI::init();
 		}
 
 		if ( $this->is_request( 'admin' ) ) {
@@ -364,13 +323,31 @@ final class WooCommerce {
 			$this->frontend_includes();
 		}
 
-		if ( $this->is_request( 'cron' ) && 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
-			include_once WC_ABSPATH . 'includes/class-wc-tracker.php';
+		if ( $this->is_request( 'cron' ) ) {
+			WC_Tracker::init();
+		}
+
+		if ( $this->is_request( 'ajax' ) ) {
+			WC_AJAX::init();
 		}
 
 		$this->theme_support_includes();
+
+		// Classes loaded before 'init'.
 		$this->query = new WC_Query();
 		$this->api   = new WC_API();
+		$this->auth  = new WC_Auth();
+
+		// Init static classes.
+		WC_Cache_Helper::init();
+		WC_Comments::init();
+		WC_Download_Handler::init();
+		WC_Geolocation::init();
+		WC_HTTPS::init();
+		WC_Install::init();
+		WC_Post_Types::init();
+		WC_Post_Data::init();
+		WC_Shop_Customizer::init();
 	}
 
 	/**
@@ -379,36 +356,19 @@ final class WooCommerce {
 	 * @since 3.3.0
 	 */
 	private function theme_support_includes() {
-		if ( wc_is_active_theme( array( 'twentynineteen', 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
-			switch ( get_template() ) {
-				case 'twentyten':
-					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-ten.php';
-					break;
-				case 'twentyeleven':
-					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-eleven.php';
-					break;
-				case 'twentytwelve':
-					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-twelve.php';
-					break;
-				case 'twentythirteen':
-					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-thirteen.php';
-					break;
-				case 'twentyfourteen':
-					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-fourteen.php';
-					break;
-				case 'twentyfifteen':
-					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-fifteen.php';
-					break;
-				case 'twentysixteen':
-					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-sixteen.php';
-					break;
-				case 'twentyseventeen':
-					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-seventeen.php';
-					break;
-				case 'twentynineteen':
-					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-nineteen.php';
-					break;
-			}
+		$support_classes = array(
+			'twentyten'       => 'WC_Twenty_Ten',
+			'twentyeleven'    => 'WC_Twenty_Eleven',
+			'twentytwelve'    => 'WC_Twenty_Twelve',
+			'twentythirteen'  => 'WC_Twenty_Thirteen',
+			'twentyfourteen'  => 'WC_Twenty_Fourteen',
+			'twentyfifteen'   => 'WC_Twenty_Fifteen',
+			'twentysixteen'   => 'WC_Twenty_Sixteen',
+			'twentyseventeen' => 'WC_Twenty_Seventeen',
+			'twentynineteen'  => 'WC_Twenty_Nineteen',
+		);
+		if ( array_key_exists( get_template(), $support_classes ) ) {
+			$support_classes[ get_template() ]::init();
 		}
 	}
 
@@ -416,16 +376,15 @@ final class WooCommerce {
 	 * Include required frontend files.
 	 */
 	public function frontend_includes() {
+		WC_Embed::init();
+		WC_Frontend_Scripts::init();
+		WC_Form_Handler::init();
+		WC_Tax::init();
+
+		/**
+		 * Template hooks hook in template functions.
+		 */
 		include_once WC_ABSPATH . 'includes/wc-template-hooks.php';
-		include_once WC_ABSPATH . 'includes/class-wc-template-loader.php';
-		include_once WC_ABSPATH . 'includes/class-wc-frontend-scripts.php';
-		include_once WC_ABSPATH . 'includes/class-wc-form-handler.php';
-		include_once WC_ABSPATH . 'includes/class-wc-cart.php';
-		include_once WC_ABSPATH . 'includes/class-wc-tax.php';
-		include_once WC_ABSPATH . 'includes/class-wc-shipping-zones.php';
-		include_once WC_ABSPATH . 'includes/class-wc-customer.php';
-		include_once WC_ABSPATH . 'includes/class-wc-embed.php';
-		include_once WC_ABSPATH . 'includes/class-wc-session-handler.php';
 	}
 
 	/**
@@ -451,6 +410,7 @@ final class WooCommerce {
 		$this->countries                           = new WC_Countries();
 		$this->integrations                        = new WC_Integrations();
 		$this->structured_data                     = new WC_Structured_Data();
+		$this->privacy                             = new WC_Privacy();
 		$this->deprecated_hook_handlers['actions'] = new WC_Deprecated_Action_Hooks();
 		$this->deprecated_hook_handlers['filters'] = new WC_Deprecated_Filter_Hooks();
 
@@ -462,8 +422,7 @@ final class WooCommerce {
 			$this->session->init();
 
 			$this->customer = new WC_Customer( get_current_user_id(), true );
-			// Cart needs the customer info.
-			$this->cart = new WC_Cart();
+			$this->cart     = new WC_Cart();
 
 			// Customer should be saved during shutdown.
 			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );

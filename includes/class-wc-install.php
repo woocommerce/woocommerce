@@ -243,8 +243,8 @@ class WC_Install {
 	 * @since 3.2.0
 	 */
 	private static function setup_environment() {
-		WC_Post_types::register_post_types();
-		WC_Post_types::register_taxonomies();
+		WC_Post_Types::register_post_types();
+		WC_Post_Types::register_taxonomies();
 		WC()->query->init_query_vars();
 		WC()->query->add_endpoints();
 		WC_API::add_endpoint();
@@ -1450,5 +1450,3 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 		}
 	}
 }
-
-WC_Install::init();

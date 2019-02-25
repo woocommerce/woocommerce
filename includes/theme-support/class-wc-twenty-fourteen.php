@@ -51,5 +51,3 @@ class WC_Twenty_Fourteen {
 		get_sidebar( 'content' );
 	}
 }
-
-WC_Twenty_Fourteen::init();

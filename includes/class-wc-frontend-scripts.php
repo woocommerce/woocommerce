@@ -605,5 +605,3 @@ class WC_Frontend_Scripts {
 		}
 	}
 }
-
-WC_Frontend_Scripts::init();

@@ -134,5 +134,3 @@ class WC_HTTPS {
 		}
 	}
 }
-
-WC_HTTPS::init();

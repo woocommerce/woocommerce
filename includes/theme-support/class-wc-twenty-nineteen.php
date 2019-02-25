@@ -123,5 +123,3 @@ class WC_Twenty_Nineteen {
 		return $css;
 	}
 }
-
-WC_Twenty_Nineteen::init();

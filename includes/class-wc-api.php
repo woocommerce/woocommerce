@@ -13,6 +13,10 @@
 
 defined( 'ABSPATH' ) || exit;
 
+if ( ! class_exists( 'WC_Legacy_API', false ) ) {
+	include_once WC_ABSPATH . 'includes/legacy/class-wc-legacy-api.php';
+}
+
 /**
  * WC_API class.
  */

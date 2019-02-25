@@ -49,5 +49,3 @@ class WC_Twenty_Eleven {
 		echo '</div></div>';
 	}
 }
-
-WC_Twenty_Eleven::init();

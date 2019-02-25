@@ -418,4 +418,3 @@ class WC_Auth {
 		}
 	}
 }
-new WC_Auth();

@@ -174,5 +174,3 @@ class WC_Embed {
 		<?php
 	}
 }
-
-WC_Embed::init();

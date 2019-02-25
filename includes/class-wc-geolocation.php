@@ -373,5 +373,3 @@ class WC_Geolocation {
 		return $country_code;
 	}
 }
-
-WC_Geolocation::init();

@@ -553,5 +553,3 @@ class WC_Template_Loader {
 		return $tabs;
 	}
 }
-
-add_action( 'init', array( 'WC_Template_Loader', 'init' ) );

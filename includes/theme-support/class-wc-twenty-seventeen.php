@@ -105,5 +105,3 @@ class WC_Twenty_Seventeen {
 		return $css;
 	}
 }
-
-WC_Twenty_Seventeen::init();

@@ -8,10 +8,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! class_exists( 'WC_Privacy_Background_Process', false ) ) {
-	include_once dirname( __FILE__ ) . '/class-wc-privacy-background-process.php';
-}
-
 /**
  * WC_Privacy Class.
  */
@@ -33,10 +29,6 @@ class WC_Privacy extends WC_Abstract_Privacy {
 		if ( ! self::$background_process ) {
 			self::$background_process = new WC_Privacy_Background_Process();
 		}
-
-		// Include supporting classes.
-		include_once 'class-wc-privacy-erasers.php';
-		include_once 'class-wc-privacy-exporters.php';
 
 		// This hook registers WooCommerce data exporters.
 		$this->add_exporter( 'woocommerce-customer-data', __( 'WooCommerce Customer Data', 'woocommerce' ), array( 'WC_Privacy_Exporters', 'customer_data_exporter' ) );
@@ -349,5 +341,3 @@ class WC_Privacy extends WC_Abstract_Privacy {
 		return $count;
 	}
 }
-
-new WC_Privacy();

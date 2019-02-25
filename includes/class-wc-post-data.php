@@ -541,5 +541,3 @@ class WC_Post_Data {
 		}
 	}
 }
-
-WC_Post_Data::init();
