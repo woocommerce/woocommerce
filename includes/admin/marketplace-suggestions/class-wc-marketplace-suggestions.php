@@ -103,7 +103,7 @@ class WC_Marketplace_Suggestions {
 	 * @param string $context Suggestion context name (rendered as a css class).
 	 */
 	public static function render_suggestions_container( $context ) {
-		include 'templates/container.php';
+		include dirname( __FILE__ ) . '/views/container.php';
 	}
 
 	/**
