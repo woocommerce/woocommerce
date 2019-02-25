@@ -198,6 +198,9 @@
 		function getRelevantPromotions( marketplaceSuggestionsApiData, displayContext ) {
 			// select based on display context
 			var promos = _.filter( marketplaceSuggestionsApiData, function( promo ) {
+				if ( _.isArray( promo.context ) ) {
+					return _.contains( promo.context, displayContext );
+				}
 				return ( displayContext === promo.context );
 			} );
 
