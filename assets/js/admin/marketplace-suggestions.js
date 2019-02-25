@@ -227,18 +227,23 @@
 
 		// Show and hide page elements dependent on suggestion state.
 		function hidePageElementsForEmptyState( visibleSuggestions ) {
-			var showingProductsEmptyStateSuggestions = _.contains( visibleSuggestions, 'products-list-empty-body' );
+			var showingEmptyStateSuggestions = _.intersection(
+				visibleSuggestions,
+				[ 'products-list-empty-body', 'orders-list-empty-body' ]
+			).length > 0;
 
 			// Streamline onboarding UI if we're in 'empty state' welcome mode.
-			if ( showingProductsEmptyStateSuggestions ) {
+			if ( showingEmptyStateSuggestions ) {
 				$( '#screen-meta-links' ).hide();
 				$( '#wpfooter' ).hide();
 			}
 
 			// Hide the header & footer, they don't make sense without specific promotion content
-			if ( ! showingProductsEmptyStateSuggestions ) {
+			if ( ! showingEmptyStateSuggestions ) {
 				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-header"]' ).hide();
 				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-footer"]' ).hide();
+				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="orders-list-empty-header"]' ).hide();
+				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="orders-list-empty-footer"]' ).hide();
 			}
 		}
 
