@@ -93,11 +93,5 @@ class WC_Site_Tracking {
 				call_user_func( $init_method );
 			}
 		}
-
-		add_filter( 'http_request_args', function( $r, $url ) {
-			error_log( $r['method'] . ' ' . $url );
-			return $r;
-		},10, 2 );
-
 	}
 }
