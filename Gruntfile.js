@@ -352,7 +352,6 @@ module.exports = function( grunt ) {
 				cwd: 'node_modules/@woocommerce/block-library/build',
 				src: '*.js',
 				dest: '<%= dirs.js %>/blocks/',
-				rename: ( dest, src ) => dest + src.replace( '.js', '.min.js' ),
 				options: {
 					process: ( content ) => content.replace( /'woo-gutenberg-products-block'/g, "'woocommerce'" )
 				}
