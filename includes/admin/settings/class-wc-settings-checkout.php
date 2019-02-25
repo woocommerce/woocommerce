@@ -8,4 +8,4 @@
 
 defined( 'ABSPATH' ) || exit;
 
-return include 'class-wc-settings-payment-gateways.php';
+return new WC_Settings_Payment_Gateways();
