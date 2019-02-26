@@ -248,7 +248,7 @@
 
 			// hide promos for things the user already has installed
 			promos = _.filter( promos, function( promo ) {
-				return ! _.contains( marketplace_suggestions.installed_woo_plugins, promo['hide-if-installed'] );
+				return ! _.contains( marketplace_suggestions.active_plugins, promo['hide-if-installed'] );
 			} );
 
 			// hide promos that are not applicable based on user's installed extensions
@@ -259,7 +259,7 @@
 				}
 
 				// if the user has any of the prerequisites, show the promo
-				return ( _.intersection( marketplace_suggestions.installed_woo_plugins, promo['show-if-installed'] ).length > 0 );
+				return ( _.intersection( marketplace_suggestions.active_plugins, promo['show-if-installed'] ).length > 0 );
 			} );
 
 			return promos;

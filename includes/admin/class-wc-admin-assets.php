@@ -73,7 +73,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wc_deprecated_function( 'The woocommerce_admin_css action', '2.3', 'admin_enqueue_scripts' );
 			}
 
-			if ( WC_Marketplace_Suggestions::show_suggestions_for_screen( $screen_id ) ) {
+			if ( WC_Marketplace_Suggestions::allow_suggestions() && in_array( $screen_id, array( 'edit-product' ), true ) ) {
 				wp_enqueue_style( 'woocommerce_admin_marketplace_styles' );
 			}
 		}
@@ -424,7 +424,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			}
 
 			if ( WC_Marketplace_Suggestions::show_suggestions_for_screen( $screen_id ) ) {
-				$woo_plugin_slugs = WC_Helper::get_local_woo_plugin_slugs();
+				$active_plugin_slugs = array_map( 'dirname', get_option( 'active_plugins' ) );
 				wp_register_script(
 					'marketplace-suggestions',
 					WC()->plugin_url() . '/assets/js/admin/marketplace-suggestions' . $suffix . '.js',
@@ -437,7 +437,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'marketplace_suggestions',
 					array(
 						'dismiss_suggestion_nonce' => wp_create_nonce( 'add_dismissed_marketplace_suggestion' ),
-						'installed_woo_plugins'    => $woo_plugin_slugs,
+						'active_plugins'           => $active_plugin_slugs,
 						'dismissed_suggestions'    => WC_Marketplace_Suggestions::get_dismissed_suggestions(),
 						'suggestions_data'         => WC_Marketplace_Suggestions::get_suggestions_api_data(),
 					)
