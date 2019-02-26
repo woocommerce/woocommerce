@@ -49,7 +49,7 @@ class WC_REST_Blocks_Products_Controller extends WC_REST_Products_Controller {
 			array(
 				'args'   => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'woo-gutenberg-products-block' ),
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
 				),
@@ -78,7 +78,7 @@ class WC_REST_Blocks_Products_Controller extends WC_REST_Products_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! current_user_can( 'edit_posts' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woo-gutenberg-products-block' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -92,7 +92,7 @@ class WC_REST_Blocks_Products_Controller extends WC_REST_Products_Controller {
 	 */
 	public function get_item_permissions_check( $request ) {
 		if ( ! current_user_can( 'edit_posts' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woo-gutenberg-products-block' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -311,21 +311,21 @@ class WC_REST_Blocks_Products_Controller extends WC_REST_Products_Controller {
 		$params                       = parent::get_collection_params();
 		$params['orderby']['enum']    = array_merge( $params['orderby']['enum'], array( 'price', 'popularity', 'rating', 'menu_order' ) );
 		$params['cat_operator']       = array(
-			'description'       => __( 'Operator to compare product category terms.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Operator to compare product category terms.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array( 'IN', 'NOT IN', 'AND' ),
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['attr_operator']      = array(
-			'description'       => __( 'Operator to compare product attribute terms.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Operator to compare product attribute terms.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array( 'IN', 'NOT IN', 'AND' ),
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['catalog_visibility'] = array(
-			'description'       => __( 'Determines if hidden or visible catalog products are shown.', 'woo-gutenberg-products-block' ),
+			'description'       => __( 'Determines if hidden or visible catalog products are shown.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array( 'visible', 'catalog', 'search', 'hidden' ),
 			'sanitize_callback' => 'sanitize_text_field',
