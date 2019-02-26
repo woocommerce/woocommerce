@@ -249,6 +249,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Ignore invalid default customer locations. #22357
 * Fix - The state select field was missing a placeholder. #22357
 * Fix - Fix state field rendering when customer address is not in a valid selling country. #22357
+* Fix - Correctly handle negative fees when using the REST API. #22782
+* Fix - Make sure local_pickup taxes do not hang around when local_pickup is not available for the selected location during checkout. #22826
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
 * Performance - Improved how versioned transients are set/cleanup to avoid cron. #22511
