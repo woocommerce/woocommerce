@@ -23,7 +23,7 @@ class WC_Orders_Tracking {
 	 * Send a Tracks event when the Orders page is viewed.
 	 */
 	public static function track_orders_view() {
-		if ( isset( $_GET['post_type'] ) && 'shop_order' === sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) ) {
+		if ( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			WC_Tracks::record_event( 'orders_view' );
 		}
 	}
