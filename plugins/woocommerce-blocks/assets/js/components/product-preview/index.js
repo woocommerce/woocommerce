@@ -25,7 +25,10 @@ const ProductPreview = ( { product } ) => {
 	return (
 		<div className="wc-product-preview">
 			{ image }
-			<div className="wc-product-preview__title">{ product.name }</div>
+			<div
+				className="wc-product-preview__title"
+				dangerouslySetInnerHTML={ { __html: product.name } }
+			/>
 			<div
 				className="wc-product-preview__price"
 				dangerouslySetInnerHTML={ { __html: product.price_html } }

@@ -10,9 +10,12 @@ exports[`ProductPreview should render a single product preview with an image 1`]
   />
   <div
     className="wc-product-preview__title"
-  >
-    Winter Jacket
-  </div>
+    dangerouslySetInnerHTML={
+      Object {
+        "__html": "Winter Jacket",
+      }
+    }
+  />
   <div
     className="wc-product-preview__price"
     dangerouslySetInnerHTML={
@@ -43,9 +46,12 @@ exports[`ProductPreview should render a single product preview without an image 
   />
   <div
     className="wc-product-preview__title"
-  >
-    Winter Jacket
-  </div>
+    dangerouslySetInnerHTML={
+      Object {
+        "__html": "Winter Jacket",
+      }
+    }
+  />
   <div
     className="wc-product-preview__price"
     dangerouslySetInnerHTML={
