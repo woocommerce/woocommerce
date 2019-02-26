@@ -53,11 +53,48 @@
 			return dismissButton;
 		}
 
+		function addUTMParameters( context, url ) {
+			var utmParams = {
+				utm_source: 'unknown',
+				utm_campaign: 'marketplacesuggestions',
+				utm_medium: 'product'
+			};
+			var sourceContextMap = {
+				'productstable': [
+					'products-list-inline'
+				],
+				'productsempty': [
+					'products-list-empty-header',
+					'products-list-empty-footer',
+					'products-list-empty-body'
+				],
+				'ordersempty': [
+					'orders-list-empty-header',
+					'orders-list-empty-footer',
+					'orders-list-empty-body'
+				],
+				'editproduct': [
+					'product-edit-meta-tab-header',
+					'product-edit-meta-tab-footer',
+					'product-edit-meta-tab-body'
+				]
+			};
+			var utmSource = _.findKey( sourceContextMap, function( sourceInfo ) {
+				return _.contains( sourceInfo, context );
+			} );
+			if ( utmSource ) {
+				utmParams.utm_source = utmSource;
+			}
+
+			return url + '?' + jQuery.param( utmParams );
+		}
+
 		// Render DOM element for suggestion linkout, optionally with button style.
-		function renderLinkout( slug, url, text, isButton ) {
+		function renderLinkout( context, slug, url, text, isButton ) {
 			var linkoutButton = document.createElement( 'a' );
 
-			linkoutButton.setAttribute( 'href', url );
+			var utmUrl = addUTMParameters( context, url );
+			linkoutButton.setAttribute( 'href', utmUrl );
 			linkoutButton.setAttribute( 'target', 'blank' );
 			linkoutButton.textContent = text;
 
@@ -115,12 +152,12 @@
 		}
 
 		// Render DOM elements for suggestion call-to-action – button or link with dismiss 'x'.
-		function renderSuggestionCTA( slug, url, linkText, linkIsButton, allowDismiss ) {
+		function renderSuggestionCTA( context, slug, url, linkText, linkIsButton, allowDismiss ) {
 			var right = document.createElement( 'div' );
 
 			right.classList.add( 'marketplace-suggestion-container-cta' );
 			if ( url && linkText ) {
-				var linkoutElement = renderLinkout( slug, url, linkText, linkIsButton );
+				var linkoutElement = renderLinkout( context, slug, url, linkText, linkIsButton );
 				right.appendChild( linkoutElement );
 			}
 
@@ -133,7 +170,7 @@
 
 		// Render a "table banner" style suggestion.
 		// These are used in admin lists, e.g. products list.
-		function renderTableBanner( slug, iconUrl, title, copy, url, buttonText, allowDismiss ) {
+		function renderTableBanner( context, slug, iconUrl, title, copy, url, buttonText, allowDismiss ) {
 			if ( ! title || ! url ) {
 				return;
 			}
@@ -164,7 +201,7 @@
 				renderSuggestionContent( slug, title, copy )
 			);
 			container.appendChild(
-				renderSuggestionCTA( slug, url, buttonText, true, allowDismiss )
+				renderSuggestionCTA( context, slug, url, buttonText, true, allowDismiss )
 			);
 
 			cell.appendChild( container );
@@ -175,7 +212,7 @@
 
 		// Render a "list item" style suggestion.
 		// These are used in onboarding style contexts, e.g. products list empty state.
-		function renderListItem( slug, iconUrl, title, copy, url, linkText, linkIsButton, allowDismiss ) {
+		function renderListItem( context, slug, iconUrl, title, copy, url, linkText, linkIsButton, allowDismiss ) {
 			var container = document.createElement( 'div' );
 			container.classList.add( 'marketplace-suggestion-container' );
 			container.dataset.suggestionSlug = slug;
@@ -188,7 +225,7 @@
 				renderSuggestionContent( slug, title, copy )
 			);
 			container.appendChild(
-				renderSuggestionCTA( slug, url, linkText, linkIsButton, allowDismiss )
+				renderSuggestionCTA( context, slug, url, linkText, linkIsButton, allowDismiss )
 			);
 
 			return container;
@@ -211,7 +248,7 @@
 
 			// hide promos for things the user already has installed
 			promos = _.filter( promos, function( promo ) {
-				return ! _.contains( marketplace_suggestions.installed_woo_plugins, promo['hide-if-installed'] );
+				return ! _.contains( marketplace_suggestions.active_plugins, promo['hide-if-installed'] );
 			} );
 
 			// hide promos that are not applicable based on user's installed extensions
@@ -222,7 +259,7 @@
 				}
 
 				// if the user has any of the prerequisites, show the promo
-				return ( _.intersection( marketplace_suggestions.installed_woo_plugins, promo['show-if-installed'] ).length > 0 );
+				return ( _.intersection( marketplace_suggestions.active_plugins, promo['show-if-installed'] ).length > 0 );
 			} );
 
 			return promos;
@@ -230,18 +267,23 @@
 
 		// Show and hide page elements dependent on suggestion state.
 		function hidePageElementsForSuggestionState( usedSuggestionsContexts ) {
-			var showingProductsEmptyStateSuggestions = _.contains( usedSuggestionsContexts, 'products-list-empty-body' );
+			var showingEmptyStateSuggestions = _.intersection(
+				usedSuggestionsContexts,
+				[ 'products-list-empty-body', 'orders-list-empty-body' ]
+			).length > 0;
 
 			// Streamline onboarding UI if we're in 'empty state' welcome mode.
-			if ( showingProductsEmptyStateSuggestions ) {
+			if ( showingEmptyStateSuggestions ) {
 				$( '#screen-meta-links' ).hide();
 				$( '#wpfooter' ).hide();
 			}
 
 			// Hide the header & footer, they don't make sense without specific promotion content
-			if ( ! showingProductsEmptyStateSuggestions ) {
+			if ( ! showingEmptyStateSuggestions ) {
 				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-header"]' ).hide();
 				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-footer"]' ).hide();
+				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="orders-list-empty-header"]' ).hide();
+				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="orders-list-empty-footer"]' ).hide();
 			}
 
 			var showingProductMetaboxSuggestions = _.contains( usedSuggestionsContexts, 'product-edit-meta-tab-body' );
@@ -284,6 +326,7 @@
 					}
 
 					var content = renderListItem(
+						context,
 						promos[ i ].slug,
 						promos[ i ].icon,
 						promos[ i ].title,
@@ -322,6 +365,7 @@
 
 					// render first promo
 					var content = renderTableBanner(
+						context,
 						promos[ 0 ].slug,
 						promos[ 0 ].icon,
 						promos[ 0 ].title,

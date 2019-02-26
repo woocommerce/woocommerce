@@ -88,7 +88,9 @@ a.suggestion-dismiss::before {
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"],
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-header"],
-.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-footer"] {
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-footer"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="orders-list-empty-header"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="orders-list-empty-footer"] {
 
 	.marketplace-suggestion-container {
 
@@ -105,7 +107,8 @@ a.suggestion-dismiss::before {
 
 // Optimise footer suggestion layout for left-aligned CTA link button only.
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"],
-.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-footer"] {
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-footer"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="orders-list-empty-footer"] {
 
 	.marketplace-suggestion-container {
 
@@ -181,14 +184,17 @@ a.suggestion-dismiss::before {
 }
 
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
-.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"] {
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="orders-list-empty-header"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="orders-list-empty-footer"] {
 
 	.marketplace-suggestion-container {
 		padding: 1.5em;
 	}
 }
 
-.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-body"] {
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-body"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="orders-list-empty-body"] {
 
 	.marketplace-suggestion-container {
 		padding: 0.75em 1.5em;

@@ -5921,26 +5921,6 @@ table.bar_chart {
 	@include icon( "\e01b" );
 }
 
-.post-type-product .woocommerce-BlankState {
-	max-width: 764px;
-	text-align: center;
-	margin: auto;
-
-	.woocommerce-BlankState-message {
-		color: #444;
-		font-size: 1.5em;
-		margin: 0 auto 1em;
-	}
-
-	.woocommerce-BlankState-message::before {
-		font-size: 120px;
-	}
-
-	.woocommerce-BlankState-buttons {
-		margin-bottom: 4em;
-	}
-}
-
 .woocommerce-BlankState {
 	text-align: center;
 	padding: 5em 0 0;
@@ -5971,6 +5951,27 @@ table.bar_chart {
 		margin: 0 0.25em;
 		height: auto;
 		display: inline-block !important;
+	}
+}
+
+.post-type-product .woocommerce-BlankState,
+.post-type-shop_order .woocommerce-BlankState {
+	max-width: 764px;
+	text-align: center;
+	margin: auto;
+
+	.woocommerce-BlankState-message {
+		color: #444;
+		font-size: 1.5em;
+		margin: 0 auto 1em;
+	}
+
+	.woocommerce-BlankState-message::before {
+		font-size: 120px;
+	}
+
+	.woocommerce-BlankState-buttons {
+		margin-bottom: 4em;
 	}
 }
 
