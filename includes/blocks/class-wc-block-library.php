@@ -40,7 +40,6 @@ class WC_Block_Library {
 	 * @param bool   $has_i18n  Optional. Whether to add a script translation call to this file. Default 'false'.
 	 */
 	protected static function register_script( $handle, $src, $deps = array(), $has_i18n = true ) {
-		wp_deregister_script( $handle );
 		$filename = str_replace( plugins_url( '/', WC_PLUGIN_FILE ), '', $src );
 		$ver = self::get_file_version( $filename );
 		wp_register_script( $handle, $src, $deps, $ver, true );
@@ -61,7 +60,6 @@ class WC_Block_Library {
 	 *                       'all', 'print' and 'screen', or media queries like '(orientation: portrait)' and '(max-width: 640px)'.
 	 */
 	protected static function register_style( $handle, $src, $deps = array(), $media = 'all' ) {
-		wp_deregister_style( $handle );
 		$filename = str_replace( plugins_url( '/', WC_PLUGIN_FILE ), '', $src );
 		$ver = self::get_file_version( $filename );
 		wp_register_style( $handle, $src, $deps, $ver, $media );
