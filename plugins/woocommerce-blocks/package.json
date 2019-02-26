@@ -1,7 +1,7 @@
 {
   "name": "woocommerce-product-blocks",
   "title": "WooCommerce Blocks",
-  "version": "1.4.0",
+  "version": "2.0.0-dev",
   "homepage": "https://woocommerce.com/",
   "repository": {
     "type": "git",

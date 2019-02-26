@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce Blocks
  * Plugin URI: https://github.com/woocommerce/woocommerce-gutenberg-products-block
  * Description: WooCommerce blocks for the Gutenberg editor.
- * Version: 1.5.0-dev
+ * Version: 2.0.0-dev
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Text Domain:  woo-gutenberg-products-block
@@ -15,7 +15,7 @@
 
 defined( 'ABSPATH' ) || die();
 
-define( 'WGPB_VERSION', '1.4.0' );
+define( 'WGPB_VERSION', '2.0.0-dev' );
 
 define( 'WGPB_DEVELOPMENT_MODE', true );
 
@@ -23,7 +23,7 @@ define( 'WGPB_DEVELOPMENT_MODE', true );
  * Load up the assets if Gutenberg is active.
  */
 function wgpb_initialize() {
-	$files_exist = file_exists( plugin_dir_path( __FILE__ ) . '/build/products-block.js' );
+	$files_exist = file_exists( plugin_dir_path( __FILE__ ) . '/build/featured-product.js' );
 
 	if ( $files_exist && function_exists( 'register_block_type' ) ) {
 		add_action( 'init', 'wgpb_register_blocks' );
@@ -79,15 +79,6 @@ function wgpb_add_block_category( $categories ) {
 function wgpb_register_blocks() {
 	include_once dirname( __FILE__ ) . '/includes/blocks/class-wc-block-featured-product.php';
 
-	// Legacy block.
-	register_block_type(
-		'woocommerce/products',
-		array(
-			'editor_script' => 'woocommerce-products-block-editor',
-			'editor_style'  => 'woocommerce-products-block-editor',
-		)
-	);
-	// New blocks.
 	register_block_type(
 		'woocommerce/handpicked-products',
 		array(
@@ -175,15 +166,6 @@ function wgpb_register_scripts() {
 		'wp-url',
 		'lodash',
 		'wc-vendors',
-	);
-
-	// @todo Remove this dependency (as it adds a separate react instance).
-	wp_register_script(
-		'react-transition-group',
-		plugins_url( 'assets/js/vendor/react-transition-group.js', __FILE__ ),
-		array(),
-		'2.2.1',
-		true
 	);
 
 	wp_register_script(
@@ -302,25 +284,6 @@ function wgpb_register_scripts() {
 
 	if ( function_exists( 'wp_set_script_translations' ) ) {
 		wp_set_script_translations( 'wc-products-attribute', 'woo-gutenberg-products-block', plugin_dir_path( __FILE__ ) . 'languages' );
-	}
-
-	wp_register_script(
-		'woocommerce-products-block-editor',
-		plugins_url( 'build/products-block.js', __FILE__ ),
-		array( 'wp-api-fetch', 'wp-element', 'wp-components', 'wp-blocks', 'wp-editor', 'wp-i18n', 'react-transition-group' ),
-		wgpb_get_file_version( '/build/products-block.js' ),
-		true
-	);
-
-	wp_register_style(
-		'woocommerce-products-block-editor',
-		plugins_url( 'build/products-block.css', __FILE__ ),
-		array( 'wc-vendors', 'wp-edit-blocks' ),
-		wgpb_get_file_version( '/build/products-block.css' )
-	);
-
-	if ( function_exists( 'wp_set_script_translations' ) ) {
-		wp_set_script_translations( 'woocommerce-products-block-editor', 'woo-gutenberg-products-block', plugin_dir_path( __FILE__ ) . 'languages' );
 	}
 
 	add_action( 'admin_print_footer_scripts', 'wgpb_print_script_settings', 1 );
