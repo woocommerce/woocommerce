@@ -3,8 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
+import { createBlock, registerBlockType } from '@wordpress/blocks';
+import { without } from 'lodash';
 import Gridicon from 'gridicons';
-import { registerBlockType } from '@wordpress/blocks';
 import { RawHTML } from '@wordpress/element';
 
 /**
@@ -12,7 +13,7 @@ import { RawHTML } from '@wordpress/element';
  */
 import Block from './block';
 import getShortcode from '../../utils/get-shortcode';
-import sharedAttributes from '../../utils/shared-attributes';
+import sharedAttributes, { sharedAttributeBlockTypes } from '../../utils/shared-attributes';
 
 registerBlockType( 'woocommerce/product-best-sellers', {
 	title: __( 'Best Selling Products', 'woo-gutenberg-products-block' ),
@@ -28,6 +29,18 @@ registerBlockType( 'woocommerce/product-best-sellers', {
 	},
 	attributes: {
 		...sharedAttributes,
+	},
+	transforms: {
+		from: [
+			{
+				type: 'block',
+				blocks: without( sharedAttributeBlockTypes, 'woocommerce/product-best-sellers' ),
+				transform: ( attributes ) => createBlock(
+					'woocommerce/product-best-sellers',
+					attributes
+				),
+			},
+		],
 	},
 
 	/**
