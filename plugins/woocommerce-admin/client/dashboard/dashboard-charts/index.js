@@ -7,7 +7,7 @@ import classNames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import Gridicon from 'gridicons';
-import { isEqual, xor } from 'lodash';
+import { xor } from 'lodash';
 import PropTypes from 'prop-types';
 import { IconButton, NavigableMenu, SelectControl } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
@@ -36,35 +36,6 @@ class DashboardCharts extends Component {
 		};
 
 		this.toggle = this.toggle.bind( this );
-	}
-
-	componentDidUpdate( {
-		userPrefCharts: prevUserPrefCharts,
-		userPrefChartType: prevUserPrefChartType,
-		userPrefChartInterval: prevUserPrefChartInterval,
-	} ) {
-		const { userPrefCharts, userPrefChartInterval, userPrefChartType } = this.props;
-		if ( userPrefCharts && ! isEqual( userPrefCharts, prevUserPrefCharts ) ) {
-			/* eslint-disable react/no-did-update-set-state */
-			this.setState( {
-				hiddenChartKeys: userPrefCharts,
-			} );
-			/* eslint-enable react/no-did-update-set-state */
-		}
-		if ( userPrefChartType && userPrefChartType !== prevUserPrefChartType ) {
-			/* eslint-disable react/no-did-update-set-state */
-			this.setState( {
-				chartType: userPrefChartType,
-			} );
-			/* eslint-enable react/no-did-update-set-state */
-		}
-		if ( userPrefChartInterval !== prevUserPrefChartInterval ) {
-			/* eslint-disable react/no-did-update-set-state */
-			this.setState( {
-				interval: userPrefChartInterval,
-			} );
-			/* eslint-enable react/no-did-update-set-state */
-		}
 	}
 
 	toggle( key ) {

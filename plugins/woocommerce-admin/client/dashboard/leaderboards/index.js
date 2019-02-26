@@ -5,7 +5,7 @@
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { isEqual, xor } from 'lodash';
+import { xor } from 'lodash';
 import PropTypes from 'prop-types';
 import { SelectControl } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
@@ -33,30 +33,6 @@ class Leaderboards extends Component {
 		};
 
 		this.toggle = this.toggle.bind( this );
-	}
-
-	componentDidUpdate( {
-		userPrefLeaderboardRows: prevUserPrefLeaderboardRows,
-		userPrefLeaderboards: prevUserPrefLeaderboards,
-	} ) {
-		const { userPrefLeaderboardRows, userPrefLeaderboards } = this.props;
-		if ( userPrefLeaderboards && ! isEqual( userPrefLeaderboards, prevUserPrefLeaderboards ) ) {
-			/* eslint-disable react/no-did-update-set-state */
-			this.setState( {
-				hiddenLeaderboardKeys: userPrefLeaderboards,
-			} );
-			/* eslint-enable react/no-did-update-set-state */
-		}
-		if (
-			userPrefLeaderboardRows &&
-			parseInt( userPrefLeaderboardRows ) !== parseInt( prevUserPrefLeaderboardRows )
-		) {
-			/* eslint-disable react/no-did-update-set-state */
-			this.setState( {
-				rowsPerTable: parseInt( userPrefLeaderboardRows ),
-			} );
-			/* eslint-enable react/no-did-update-set-state */
-		}
 	}
 
 	toggle( key ) {
