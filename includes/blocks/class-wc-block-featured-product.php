@@ -58,7 +58,7 @@ class WC_Block_Featured_Product {
 
 		$title = sprintf(
 			'<h2 class="wc-block-featured-product__title">%s</h2>',
-			esc_html( $product->get_title() )
+			wp_kses_post( $product->get_title() )
 		);
 
 		$desc_str = sprintf(
