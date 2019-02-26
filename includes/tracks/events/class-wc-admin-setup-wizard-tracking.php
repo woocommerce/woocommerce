@@ -122,6 +122,4 @@ class WC_Admin_Setup_Wizard_Tracking {
 
 		WC_Tracks::record_event( 'obw_shipping', $properties );
 	}
-
-
 }
