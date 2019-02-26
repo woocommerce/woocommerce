@@ -17,7 +17,7 @@ import {
 	generateCSVDataFromTable,
 	generateCSVFileName,
 } from '@woocommerce/csv-export';
-import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
+import { getIdsFromQuery, getSearchWords, updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -246,7 +246,8 @@ class TableCard extends Component {
 			totalRows,
 		} = this.props;
 		const { selectedRows, showCols } = this.state;
-		const searchedLabels = Array.isArray( query.search ) ? query.search.map( v => ( { id: v, label: v } ) ) : [];
+		const searchWords = getSearchWords( query );
+		const searchedLabels = searchWords.map( v => ( { id: v, label: v } ) );
 		const allHeaders = this.props.headers;
 		let headers = this.getVisibleHeaders();
 		let rows = this.getVisibleRows();
