@@ -57,7 +57,7 @@ class WC_Tracks {
 	/**
 	 * Get total product counts.
 	 *
-	 * @return array
+	 * @return int Number of products.
 	 */
 	public static function get_products_count() {
 		$product_counts = WC_Tracker::get_product_counts();
