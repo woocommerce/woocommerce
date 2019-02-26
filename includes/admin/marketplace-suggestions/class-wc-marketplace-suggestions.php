@@ -1,9 +1,8 @@
 <?php
 /**
- * REST API Marketplace suggestions API
+ * Marketplace suggestions
  *
- * Handles requests for marketplace suggestions data & rendering
- * templates for suggestion DOM content.
+ * Behaviour for displaying in-context suggestions for marketplace extensions.
  *
  * @package WooCommerce\Classes
  * @since   3.6.0
@@ -12,7 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * REST API Marketplace suggestions API and related logic.
+ * Marketplace suggestions core behaviour.
  */
 class WC_Marketplace_Suggestions {
 
@@ -131,30 +130,8 @@ class WC_Marketplace_Suggestions {
 	 * @return array of json API data
 	 */
 	public static function get_suggestions_api_data() {
-		$suggestion_data = get_transient( 'wc_marketplace_suggestions' );
-		if ( false !== $suggestion_data ) {
-			return $suggestion_data;
-		}
-
-		$suggestion_data_url = 'https://d3t0oesq8995hv.cloudfront.net/add-ons/marketplace-suggestions.json';
-		$raw_suggestions     = wp_remote_get(
-			$suggestion_data_url,
-			array( 'user-agent' => 'WooCommerce Marketplace Suggestions' )
-		);
-
-		// Parse the data to check for any errors.
-		// If it's valid, store structure in transient.
-		if ( ! is_wp_error( $raw_suggestions ) ) {
-			$suggestions = json_decode( wp_remote_retrieve_body( $raw_suggestions ) );
-			if ( $suggestions && is_array( $suggestions ) ) {
-				set_transient( 'wc_marketplace_suggestions', $suggestions, WEEK_IN_SECONDS );
-				return $suggestions;
-			}
-		}
-
-		// Cache empty suggestions data to reduce requests if there are any issues with API.
-		set_transient( 'wc_marketplace_suggestions', array(), DAY_IN_SECONDS );
-		return array();
+		$data = get_option( 'woocommerce_marketplace_suggestions', array() );
+		return ! empty( $data['suggestions'] ) ? $data['suggestions'] : array();
 	}
 }
 
