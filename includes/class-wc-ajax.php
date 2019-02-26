@@ -333,6 +333,9 @@ class WC_AJAX {
 		}
 
 		WC()->customer->save();
+
+		// Calculate shipping before totals. This will ensure any shipping methods that affect things like taxes are chosen prior to final totals being calculated. Ref: #22708
+		WC()->cart->calculate_shipping();
 		WC()->cart->calculate_totals();
 
 		// Get order review fragment.
