@@ -367,6 +367,7 @@ module.exports = function( grunt ) {
 				cwd: 'node_modules/@woocommerce/block-library/assets/php',
 				src: '*.php',
 				dest: '<%= dirs.php %>/blocks/',
+				rename: ( dest, src ) => dest + '/' + src.replace( '-wgpb-', '-wc-' ),
 				options: {
 					process: ( content ) => content
 						// Replace textdomain.
@@ -383,6 +384,8 @@ module.exports = function( grunt ) {
 						)
 						// Replace class & constant prefixes.
 						.replace( /WGPB_/g, 'WC_' )
+						// Replace file imports
+						.replace( /-wgpb-/g, '-wc-' )
 				}
 			}
 		}
