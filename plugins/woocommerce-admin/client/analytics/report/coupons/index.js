@@ -37,7 +37,7 @@ export default class CouponsReport extends Component {
 	}
 
 	render() {
-		const { query, path } = this.props;
+		const { isRequesting, query, path } = this.props;
 		const { mode, itemsLabel } = this.getChartMeta();
 
 		const chartQuery = {
@@ -67,7 +67,7 @@ export default class CouponsReport extends Component {
 					itemsLabel={ itemsLabel }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
-				<CouponsReportTable query={ query } />
+				<CouponsReportTable isRequesting={ isRequesting } query={ query } />
 			</Fragment>
 		);
 	}

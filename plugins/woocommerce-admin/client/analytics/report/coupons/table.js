@@ -156,7 +156,7 @@ export default class CouponsReportTable extends Component {
 	}
 
 	render() {
-		const { query } = this.props;
+		const { isRequesting, query } = this.props;
 
 		return (
 			<ReportTable
@@ -165,6 +165,7 @@ export default class CouponsReportTable extends Component {
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
+				isRequesting={ isRequesting }
 				itemIdField="coupon_id"
 				query={ query }
 				searchBy="coupons"

@@ -65,6 +65,7 @@ class ReportTable extends Component {
 			getHeadersContent,
 			getRowsContent,
 			getSummary,
+			isRequesting,
 			itemIdField,
 			primaryData,
 			tableData,
@@ -84,7 +85,7 @@ class ReportTable extends Component {
 			return <ReportError isError />;
 		}
 
-		const isRequesting = tableData.isRequesting || primaryData.isRequesting;
+		const isLoading = isRequesting || tableData.isRequesting || primaryData.isRequesting;
 		const totals = get( primaryData, [ 'data', 'totals' ], {} );
 		const totalResults = items.totalResults;
 		const { headers, ids, rows, summary } = applyFilters( TABLE_FILTER, {
@@ -104,7 +105,7 @@ class ReportTable extends Component {
 				downloadable
 				headers={ filteredHeaders }
 				ids={ ids }
-				isLoading={ isRequesting }
+				isLoading={ isLoading }
 				onQueryChange={ onQueryChange }
 				onColumnsChange={ this.onColumnsChange }
 				rows={ rows }
@@ -190,8 +191,16 @@ ReportTable.defaultProps = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { endpoint, getSummary, query, tableData, tableQuery, columnPrefsKey } = props;
-		if ( query.search && ! ( query[ endpoint ] && query[ endpoint ].length ) ) {
+		const {
+			endpoint,
+			getSummary,
+			isRequesting,
+			query,
+			tableData,
+			tableQuery,
+			columnPrefsKey,
+		} = props;
+		if ( isRequesting || ( query.search && ! ( query[ endpoint ] && query[ endpoint ].length ) ) ) {
 			return {};
 		}
 		const chartEndpoint = [ 'variations', 'categories' ].includes( endpoint )

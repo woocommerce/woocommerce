@@ -37,7 +37,7 @@ export default class CategoriesReport extends Component {
 	}
 
 	render() {
-		const { query, path } = this.props;
+		const { isRequesting, query, path } = this.props;
 		const { mode, itemsLabel } = this.getChartMeta();
 
 		const chartQuery = {
@@ -67,7 +67,7 @@ export default class CategoriesReport extends Component {
 					itemsLabel={ itemsLabel }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
-				<CategoriesReportTable query={ query } />
+				<CategoriesReportTable isRequesting={ isRequesting } query={ query } />
 			</Fragment>
 		);
 	}

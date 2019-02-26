@@ -34,7 +34,7 @@ export default class TaxesReport extends Component {
 	}
 
 	render() {
-		const { query, path } = this.props;
+		const { isRequesting, query, path } = this.props;
 		const { mode, itemsLabel } = this.getChartMeta();
 
 		const chartQuery = {
@@ -63,7 +63,7 @@ export default class TaxesReport extends Component {
 					itemsLabel={ itemsLabel }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
-				<TaxesReportTable query={ query } />
+				<TaxesReportTable isRequesting={ isRequesting } query={ query } />
 			</Fragment>
 		);
 	}

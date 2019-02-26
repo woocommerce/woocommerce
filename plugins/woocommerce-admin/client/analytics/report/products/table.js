@@ -224,7 +224,7 @@ class ProductsReportTable extends Component {
 	}
 
 	render() {
-		const { query } = this.props;
+		const { query, isRequesting } = this.props;
 
 		const labels = {
 			helpText: __( 'Select at least two products to compare', 'wc-admin' ),
@@ -239,6 +239,7 @@ class ProductsReportTable extends Component {
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
 				itemIdField="product_id"
+				isRequesting={ isRequesting }
 				labels={ labels }
 				query={ query }
 				searchBy="products"
@@ -256,8 +257,8 @@ class ProductsReportTable extends Component {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { query } = props;
-		if ( query.search && ! ( query.products && query.products.length ) ) {
+		const { query, isRequesting } = props;
+		if ( isRequesting || ( query.search && ! ( query.products && query.products.length ) ) ) {
 			return {};
 		}
 
@@ -268,8 +269,8 @@ export default compose(
 
 		const categories = getItems( 'categories', tableQuery );
 		const isError = Boolean( getItemsError( 'categories', tableQuery ) );
-		const isRequesting = isGetItemsRequesting( 'categories', tableQuery );
+		const isLoading = isGetItemsRequesting( 'categories', tableQuery );
 
-		return { categories, isError, isRequesting };
+		return { categories, isError, isRequesting: isLoading };
 	} )
 )( ProductsReportTable );

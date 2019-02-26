@@ -134,7 +134,7 @@ class CategoriesReportTable extends Component {
 	}
 
 	render() {
-		const { query } = this.props;
+		const { isRequesting, query } = this.props;
 
 		const labels = {
 			helpText: __( 'Select at least two categories to compare', 'wc-admin' ),
@@ -148,6 +148,7 @@ class CategoriesReportTable extends Component {
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
+				isRequesting={ isRequesting }
 				itemIdField="category_id"
 				query={ query }
 				searchBy="categories"
@@ -166,8 +167,8 @@ class CategoriesReportTable extends Component {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { query } = props;
-		if ( query.search && ! ( query.categories && query.categories.length ) ) {
+		const { isRequesting, query } = props;
+		if ( isRequesting || ( query.search && ! ( query.categories && query.categories.length ) ) ) {
 			return {};
 		}
 
@@ -177,9 +178,9 @@ export default compose(
 		};
 
 		const categories = getItems( 'categories', tableQuery );
-		const isError = Boolean( getItemsError( 'categories', tableQuery ) );
-		const isRequesting = isGetItemsRequesting( 'categories', tableQuery );
+		const isCategoriesError = Boolean( getItemsError( 'categories', tableQuery ) );
+		const isCategoriesRequesting = isGetItemsRequesting( 'categories', tableQuery );
 
-		return { categories, isError, isRequesting };
+		return { categories, isError: isCategoriesError, isRequesting: isCategoriesRequesting };
 	} )
 )( CategoriesReportTable );

@@ -194,7 +194,7 @@ function getRequestQuery( endpoint, dataType, query ) {
  *
  * @param  {String} endpoint Report  API Endpoint
  * @param  {Object} query  query parameters in the url
- * @param {object} select Instance of @wordpress/select
+ * @param  {Object} select Instance of @wordpress/select
  * @return {Object}  Object containing summary number responses.
  */
 export function getSummaryNumbers( endpoint, query, select ) {
@@ -237,7 +237,7 @@ export function getSummaryNumbers( endpoint, query, select ) {
  * @param  {String} endpoint Report  API Endpoint
  * @param  {String} dataType 'primary' or 'secondary'
  * @param  {Object} query  query parameters in the url
- * @param {object} select Instance of @wordpress/select
+ * @param  {Object} select Instance of @wordpress/select
  * @return {Object}  Object containing API request information (response, fetching, and error details)
  */
 export function getReportChartData( endpoint, dataType, query, select ) {

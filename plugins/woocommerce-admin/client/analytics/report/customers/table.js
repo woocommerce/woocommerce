@@ -218,7 +218,7 @@ export default class CustomersReportTable extends Component {
 	}
 
 	render() {
-		const { query } = this.props;
+		const { isRequesting, query } = this.props;
 
 		return (
 			<ReportTable
@@ -226,6 +226,7 @@ export default class CustomersReportTable extends Component {
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
 				getSummary={ this.getSummary }
+				isRequesting={ isRequesting }
 				itemIdField="id"
 				query={ query }
 				labels={ { placeholder: __( 'Search by customer name', 'wc-admin' ) } }
