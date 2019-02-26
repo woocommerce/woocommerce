@@ -53,11 +53,48 @@
 			return dismissButton;
 		}
 
+		function addUTMParameters( context, url ) {
+			var utmParams = {
+				utm_source: 'unknown',
+				utm_campaign: 'marketplacesuggestions',
+				utm_medium: 'product'
+			};
+			var sourceContextMap = {
+				'productstable': [
+					'products-list-inline'
+				],
+				'productsempty': [
+					'products-list-empty-header',
+					'products-list-empty-footer',
+					'products-list-empty-body'
+				],
+				'ordersempty': [
+					'orders-list-empty-header',
+					'orders-list-empty-footer',
+					'orders-list-empty-body'
+				],
+				'editproduct': [
+					'product-edit-meta-tab-header',
+					'product-edit-meta-tab-footer',
+					'product-edit-meta-tab-body'
+				]
+			};
+			var utmSource = _.findKey( sourceContextMap, function( sourceInfo ) {
+				return _.contains( sourceInfo, context );
+			} );
+			if ( utmSource ) {
+				utmParams.utm_source = utmSource;
+			}
+
+			return url + '?' + jQuery.param( utmParams );
+		}
+
 		// Render DOM element for suggestion linkout, optionally with button style.
-		function renderLinkout( slug, url, text, isButton ) {
+		function renderLinkout( context, slug, url, text, isButton ) {
 			var linkoutButton = document.createElement( 'a' );
 
-			linkoutButton.setAttribute( 'href', url );
+			var utmUrl = addUTMParameters( context, url );
+			linkoutButton.setAttribute( 'href', utmUrl );
 			linkoutButton.setAttribute( 'target', 'blank' );
 			linkoutButton.textContent = text;
 
@@ -115,12 +152,12 @@
 		}
 
 		// Render DOM elements for suggestion call-to-action – button or link with dismiss 'x'.
-		function renderSuggestionCTA( slug, url, linkText, linkIsButton, allowDismiss ) {
+		function renderSuggestionCTA( context, slug, url, linkText, linkIsButton, allowDismiss ) {
 			var right = document.createElement( 'div' );
 
 			right.classList.add( 'marketplace-suggestion-container-cta' );
 			if ( url && linkText ) {
-				var linkoutElement = renderLinkout( slug, url, linkText, linkIsButton );
+				var linkoutElement = renderLinkout( context, slug, url, linkText, linkIsButton );
 				right.appendChild( linkoutElement );
 			}
 
@@ -133,7 +170,7 @@
 
 		// Render a "table banner" style suggestion.
 		// These are used in admin lists, e.g. products list.
-		function renderTableBanner( slug, iconUrl, title, copy, url, buttonText, allowDismiss ) {
+		function renderTableBanner( context, slug, iconUrl, title, copy, url, buttonText, allowDismiss ) {
 			if ( ! title || ! url ) {
 				return;
 			}
@@ -164,7 +201,7 @@
 				renderSuggestionContent( slug, title, copy )
 			);
 			container.appendChild(
-				renderSuggestionCTA( slug, url, buttonText, true, allowDismiss )
+				renderSuggestionCTA( context, slug, url, buttonText, true, allowDismiss )
 			);
 
 			cell.appendChild( container );
@@ -175,7 +212,7 @@
 
 		// Render a "list item" style suggestion.
 		// These are used in onboarding style contexts, e.g. products list empty state.
-		function renderListItem( slug, iconUrl, title, copy, url, linkText, linkIsButton, allowDismiss ) {
+		function renderListItem( context, slug, iconUrl, title, copy, url, linkText, linkIsButton, allowDismiss ) {
 			var container = document.createElement( 'div' );
 			container.classList.add( 'marketplace-suggestion-container' );
 			container.dataset.suggestionSlug = slug;
@@ -188,7 +225,7 @@
 				renderSuggestionContent( slug, title, copy )
 			);
 			container.appendChild(
-				renderSuggestionCTA( slug, url, linkText, linkIsButton, allowDismiss )
+				renderSuggestionCTA( context, slug, url, linkText, linkIsButton, allowDismiss )
 			);
 
 			return container;
@@ -278,6 +315,7 @@
 					}
 
 					var content = renderListItem(
+						context,
 						promos[ i ].slug,
 						promos[ i ].icon,
 						promos[ i ].title,
@@ -316,6 +354,7 @@
 
 					// render first promo
 					var content = renderTableBanner(
+						context,
 						promos[ 0 ].slug,
 						promos[ 0 ].icon,
 						promos[ 0 ].title,
