@@ -3,8 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
+import { createBlock, registerBlockType } from '@wordpress/blocks';
+import { without } from 'lodash';
 import Gridicon from 'gridicons';
-import { registerBlockType } from '@wordpress/blocks';
 import { RawHTML } from '@wordpress/element';
 
 /**
@@ -12,7 +13,7 @@ import { RawHTML } from '@wordpress/element';
  */
 import Block from './block';
 import getShortcode from '../../utils/get-shortcode';
-import sharedAttributes from '../../utils/shared-attributes';
+import sharedAttributes, { sharedAttributeBlockTypes } from '../../utils/shared-attributes';
 
 registerBlockType( 'woocommerce/product-on-sale', {
 	title: __( 'On Sale Products', 'woo-gutenberg-products-block' ),
@@ -36,6 +37,18 @@ registerBlockType( 'woocommerce/product-on-sale', {
 			type: 'string',
 			default: 'date',
 		},
+	},
+	transforms: {
+		from: [
+			{
+				type: 'block',
+				blocks: without( sharedAttributeBlockTypes, 'woocommerce/product-on-sale' ),
+				transform: ( attributes ) => createBlock(
+					'woocommerce/product-on-sale',
+					attributes
+				),
+			},
+		],
 	},
 
 	/**

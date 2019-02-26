@@ -1,3 +1,12 @@
+
+export const sharedAttributeBlockTypes = [
+	'woocommerce/product-best-sellers',
+	'woocommerce/product-category',
+	'woocommerce/product-new',
+	'woocommerce/product-on-sale',
+	'woocommerce/product-top-rated',
+];
+
 export default {
 	/**
 	 * Number of columns.
