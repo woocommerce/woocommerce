@@ -829,11 +829,13 @@ class WC_Tax {
 
 		$wpdb->insert( $wpdb->prefix . 'woocommerce_tax_rates', self::prepare_tax_rate( $tax_rate ) );
 
+		$tax_rate_id = $wpdb->insert_id;
+
 		WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 
-		do_action( 'woocommerce_tax_rate_added', $wpdb->insert_id, $tax_rate );
+		do_action( 'woocommerce_tax_rate_added', $tax_rate_id, $tax_rate );
 
-		return $wpdb->insert_id;
+		return $tax_rate_id;
 	}
 
 	/**
