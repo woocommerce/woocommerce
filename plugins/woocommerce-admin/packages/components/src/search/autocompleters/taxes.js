@@ -29,7 +29,7 @@ export default {
 		let payload = '';
 		if ( search ) {
 			const query = {
-				search,
+				code: search,
 				per_page: 10,
 			};
 			payload = stringifyQuery( query );
