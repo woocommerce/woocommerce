@@ -37,9 +37,7 @@ function findModuleMatch( module, match ) {
 const GutenbergBlocksConfig = {
 	mode: NODE_ENV,
 	entry: {
-		// Legacy block
-		'products-block': './assets/js/legacy/products-block.jsx',
-		// New blocks
+		// Blocks
 		'handpicked-products': './assets/js/blocks/handpicked-products/index.js',
 		'product-best-sellers': './assets/js/blocks/product-best-sellers/index.js',
 		'product-category': './assets/js/blocks/product-category/index.js',
