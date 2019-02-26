@@ -305,33 +305,32 @@
 				// find promotions that target this context
 				var promos = getRelevantPromotions( marketplaceSuggestionsApiData, context );
 
-				// render the promo content
-				for ( var i in promos ) {
-					// only show a max of 5 suggestions per container
-					if ( i >= 5 ) {
-						break;
-					}
+				// shuffle/randomly select five suggestions to display
+				var suggestionsToDisplay = _.sample( promos, 5 );
 
-					var linkText = promos[ i ]['link-text'];
+				// render the promo content
+				for ( var i in suggestionsToDisplay ) {
+
+					var linkText = suggestionsToDisplay[ i ]['link-text'];
 					var linkoutIsButton = false;
-					if ( promos[ i ]['button-text'] ) {
-						linkText = promos[ i ]['button-text'];
+					if ( suggestionsToDisplay[ i ]['button-text'] ) {
+						linkText = suggestionsToDisplay[ i ]['button-text'];
 						linkoutIsButton = true;
 					}
 
 					// dismiss is allowed by default
 					var allowDismiss = true;
-					if ( promos[ 0 ]['allow-dismiss'] === false ) {
+					if ( suggestionsToDisplay[ i ]['allow-dismiss'] === false ) {
 						allowDismiss = false;
 					}
 
 					var content = renderListItem(
 						context,
-						promos[ i ].slug,
-						promos[ i ].icon,
-						promos[ i ].title,
-						promos[ i ].copy,
-						promos[ i ].url,
+						suggestionsToDisplay[ i ].slug,
+						suggestionsToDisplay[ i ].icon,
+						suggestionsToDisplay[ i ].title,
+						suggestionsToDisplay[ i ].copy,
+						suggestionsToDisplay[ i ].url,
 						linkText,
 						linkoutIsButton,
 						allowDismiss
@@ -341,7 +340,7 @@
 					usedSuggestionsContexts.push( context );
 
 					window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
-						suggestionSlug: promos[ i ].slug
+						suggestionSlug: suggestionsToDisplay[ i ].slug
 					} );
 				}
 			} );
@@ -357,21 +356,24 @@
 						return;
 					}
 
+					// shuffle/randomly select the suggestion to display
+					var suggestionToDisplay = _.sample( promos );
+
 					// dismiss is allowed by default
 					var allowDismiss = true;
-					if ( false === promos[ 0 ]['allow-dismiss'] ) {
+					if ( false === suggestionToDisplay['allow-dismiss'] ) {
 						allowDismiss = false;
 					}
 
 					// render first promo
 					var content = renderTableBanner(
 						context,
-						promos[ 0 ].slug,
-						promos[ 0 ].icon,
-						promos[ 0 ].title,
-						promos[ 0 ].copy,
-						promos[ 0 ].url,
-						promos[ 0 ]['button-text'],
+						suggestionToDisplay.slug,
+						suggestionToDisplay.icon,
+						suggestionToDisplay.title,
+						suggestionToDisplay.copy,
+						suggestionToDisplay.url,
+						suggestionToDisplay['button-text'],
 						allowDismiss
 					);
 
@@ -392,7 +394,7 @@
 						usedSuggestionsContexts.push( context );
 
 						window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
-							suggestionSlug: promos[ 0 ].slug
+							suggestionSlug: suggestionToDisplay.slug
 						} );
 					}
 				} );
