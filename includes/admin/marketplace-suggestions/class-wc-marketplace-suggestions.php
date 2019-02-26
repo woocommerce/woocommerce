@@ -28,6 +28,7 @@ class WC_Marketplace_Suggestions {
 
 		// Register hooks for rendering suggestions container markup.
 		add_action( 'wc_marketplace_suggestions_products_empty_state', array( __CLASS__, 'render_products_list_empty_state' ) );
+		add_action( 'wc_marketplace_suggestions_orders_empty_state', array( __CLASS__, 'render_orders_list_empty_state' ) );
 	}
 
 	/**
@@ -87,6 +88,15 @@ class WC_Marketplace_Suggestions {
 	}
 
 	/**
+	 * Render suggestions containers in orders list empty state.
+	 */
+	public static function render_orders_list_empty_state() {
+		self::render_suggestions_container( 'orders-list-empty-header' );
+		self::render_suggestions_container( 'orders-list-empty-body' );
+		self::render_suggestions_container( 'orders-list-empty-footer' );
+	}
+
+	/**
 	 * Render a suggestions container element, with the specified context.
 	 *
 	 * @param string $context Suggestion context name (rendered as a css class).
@@ -94,6 +104,23 @@ class WC_Marketplace_Suggestions {
 	public static function render_suggestions_container( $context ) {
 		include dirname( __FILE__ ) . '/views/container.php';
 	}
+
+	/**
+	 * Should suggestions be displayed?
+	 *
+	 * @param string $screen_id The current admin screen.
+	 *
+	 * @return bool
+	 */
+	public static function show_suggestions_for_screen( $screen_id ) {
+		// We only show suggestions on certain admin screens.
+		if ( ! in_array( $screen_id, array( 'edit-product', 'edit-shop_order' ), true ) ) {
+			return false;
+		}
+
+		return self::allow_suggestions();
+	}
+
 
 	/**
 	 * Should suggestions be displayed?
@@ -136,3 +163,4 @@ class WC_Marketplace_Suggestions {
 }
 
 WC_Marketplace_Suggestions::init();
+
