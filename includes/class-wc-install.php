@@ -144,6 +144,8 @@ class WC_Install {
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
+		add_action( 'woocommerce_plugin_background_installer', array( __CLASS__, 'background_installer' ), 10, 2 );
+		add_action( 'woocommerce_theme_background_installer', array( __CLASS__, 'theme_background_installer' ), 10, 1 );
 	}
 
 	/**
@@ -1221,6 +1223,154 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	}
 
 	/**
+	 * Install a plugin from .org in the background via a cron job (used by
+	 * installer - opt in).
+	 *
+	 * @param string $plugin_to_install_id Plugin ID.
+	 * @param array  $plugin_to_install Plugin information.
+	 *
+	 * @throws Exception If unable to proceed with plugin installation.
+	 * @since  2.6.0
+	 */
+	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
+		// Explicitly clear the event.
+		$args = func_get_args();
+		wp_clear_scheduled_hook( 'woocommerce_plugin_background_installer', $args );
+
+		if ( ! empty( $plugin_to_install['repo-slug'] ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+			require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+			WP_Filesystem();
+
+			$skin              = new Automatic_Upgrader_Skin();
+			$upgrader          = new WP_Upgrader( $skin );
+			$installed_plugins = array_reduce( array_keys( get_plugins() ), array( __CLASS__, 'associate_plugin_file' ) );
+			if ( empty( $installed_plugins ) ) {
+				$installed_plugins = array();
+			}
+			$plugin_slug       = $plugin_to_install['repo-slug'];
+			$plugin_file       = isset( $plugin_to_install['file'] ) ? $plugin_to_install['file'] : $plugin_slug . '.php';
+			$installed         = false;
+			$activate          = false;
+
+			// See if the plugin is installed already.
+			if ( isset( $installed_plugins[ $plugin_file ] ) ) {
+				$installed = true;
+				$activate  = ! is_plugin_active( $installed_plugins[ $plugin_file ] );
+			}
+
+			// Install this thing!
+			if ( ! $installed ) {
+				// Suppress feedback.
+				ob_start();
+
+				try {
+					$plugin_information = plugins_api(
+						'plugin_information',
+						array(
+							'slug'   => $plugin_slug,
+							'fields' => array(
+								'short_description' => false,
+								'sections'          => false,
+								'requires'          => false,
+								'rating'            => false,
+								'ratings'           => false,
+								'downloaded'        => false,
+								'last_updated'      => false,
+								'added'             => false,
+								'tags'              => false,
+								'homepage'          => false,
+								'donate_link'       => false,
+								'author_profile'    => false,
+								'author'            => false,
+							),
+						)
+					);
+
+					if ( is_wp_error( $plugin_information ) ) {
+						throw new Exception( $plugin_information->get_error_message() );
+					}
+
+					$package  = $plugin_information->download_link;
+					$download = $upgrader->download_package( $package );
+
+					if ( is_wp_error( $download ) ) {
+						throw new Exception( $download->get_error_message() );
+					}
+
+					$working_dir = $upgrader->unpack_package( $download, true );
+
+					if ( is_wp_error( $working_dir ) ) {
+						throw new Exception( $working_dir->get_error_message() );
+					}
+
+					$result = $upgrader->install_package(
+						array(
+							'source'                      => $working_dir,
+							'destination'                 => WP_PLUGIN_DIR,
+							'clear_destination'           => false,
+							'abort_if_destination_exists' => false,
+							'clear_working'               => true,
+							'hook_extra'                  => array(
+								'type'   => 'plugin',
+								'action' => 'install',
+							),
+						)
+					);
+
+					if ( is_wp_error( $result ) ) {
+						throw new Exception( $result->get_error_message() );
+					}
+
+					$activate = true;
+
+				} catch ( Exception $e ) {
+					WC_Admin_Notices::add_custom_notice(
+						$plugin_to_install_id . '_install_error',
+						sprintf(
+							// translators: 1: plugin name, 2: error message, 3: URL to install plugin manually.
+							__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually by clicking here.</a>', 'woocommerce' ),
+							$plugin_to_install['name'],
+							$e->getMessage(),
+							esc_url( admin_url( 'index.php?wc-install-plugin-redirect=' . $plugin_slug ) )
+						)
+					);
+				}
+
+				// Discard feedback.
+				ob_end_clean();
+			}
+
+			wp_clean_plugins_cache();
+
+			// Activate this thing.
+			if ( $activate ) {
+				try {
+					add_action( 'add_option_mailchimp_woocommerce_plugin_do_activation_redirect', array( __CLASS__, 'remove_mailchimps_redirect' ), 10, 2 );
+					$result = activate_plugin( $installed ? $installed_plugins[ $plugin_file ] : $plugin_slug . '/' . $plugin_file );
+
+					if ( is_wp_error( $result ) ) {
+						throw new Exception( $result->get_error_message() );
+					}
+				} catch ( Exception $e ) {
+					WC_Admin_Notices::add_custom_notice(
+						$plugin_to_install_id . '_install_error',
+						sprintf(
+							// translators: 1: plugin name, 2: URL to WP plugin page.
+							__( '%1$s was installed but could not be activated. <a href="%2$s">Please activate it manually by clicking here.</a>', 'woocommerce' ),
+							$plugin_to_install['name'],
+							admin_url( 'plugins.php' )
+						)
+					);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Removes redirect added during MailChimp plugin's activation.
 	 *
 	 * @param string $option Option name.
@@ -1232,6 +1382,72 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		// Update redirect back to false.
 		update_option( 'mailchimp_woocommerce_plugin_do_activation_redirect', false );
+	}
+
+	/**
+	 * Install a theme from .org in the background via a cron job (used by installer - opt in).
+	 *
+	 * @param string $theme_slug Theme slug.
+	 *
+	 * @throws Exception If unable to proceed with theme installation.
+	 * @since  3.1.0
+	 */
+	public static function theme_background_installer( $theme_slug ) {
+		// Explicitly clear the event.
+		$args = func_get_args();
+		wp_clear_scheduled_hook( 'woocommerce_theme_background_installer', $args );
+
+		if ( ! empty( $theme_slug ) ) {
+			// Suppress feedback.
+			ob_start();
+
+			try {
+				$theme = wp_get_theme( $theme_slug );
+
+				if ( ! $theme->exists() ) {
+					require_once ABSPATH . 'wp-admin/includes/file.php';
+					include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+					include_once ABSPATH . 'wp-admin/includes/theme.php';
+
+					WP_Filesystem();
+
+					$skin     = new Automatic_Upgrader_Skin();
+					$upgrader = new Theme_Upgrader( $skin );
+					$api      = themes_api(
+						'theme_information',
+						array(
+							'slug'   => $theme_slug,
+							'fields' => array( 'sections' => false ),
+						)
+					);
+					$result   = $upgrader->install( $api->download_link );
+
+					if ( is_wp_error( $result ) ) {
+						throw new Exception( $result->get_error_message() );
+					} elseif ( is_wp_error( $skin->result ) ) {
+						throw new Exception( $skin->result->get_error_message() );
+					} elseif ( is_null( $result ) ) {
+						throw new Exception( 'Unable to connect to the filesystem. Please confirm your credentials.' );
+					}
+				}
+
+				switch_theme( $theme_slug );
+			} catch ( Exception $e ) {
+				WC_Admin_Notices::add_custom_notice(
+					$theme_slug . '_install_error',
+					sprintf(
+						// translators: 1: theme slug, 2: error message, 3: URL to install theme manually.
+						__( '%1$s could not be installed (%2$s). <a href="%3$s">Please install it manually by clicking here.</a>', 'woocommerce' ),
+						$theme_slug,
+						$e->getMessage(),
+						esc_url( admin_url( 'update.php?action=install-theme&theme=' . $theme_slug . '&_wpnonce=' . wp_create_nonce( 'install-theme_' . $theme_slug ) ) )
+					)
+				);
+			}
+
+			// Discard feedback.
+			ob_end_clean();
+		}
 	}
 }
 
