@@ -87,7 +87,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		/**
-		 * If a variation has no excerpt, update here. Used when searching for variations by attribute names.
+		 * If a variation has no excerpt, update here. Used when searching for variations by attribute values.
 		 */
 		if ( '' === $post_object->post_excerpt ) {
 			$new_excerpt = wc_get_formatted_variation( $product, true, false );
