@@ -1233,7 +1233,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
 		// Explicitly clear the event.
 		$args = func_get_args();
-		wp_clear_scheduled_hook( 'woocommerce_plugin_background_installer', $args );
 
 		if ( ! empty( $plugin_to_install['repo-slug'] ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -1393,7 +1392,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	public static function theme_background_installer( $theme_slug ) {
 		// Explicitly clear the event.
 		$args = func_get_args();
-		wp_clear_scheduled_hook( 'woocommerce_theme_background_installer', $args );
 
 		if ( ! empty( $theme_slug ) ) {
 			// Suppress feedback.
