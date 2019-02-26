@@ -40,6 +40,7 @@ a.suggestion-dismiss::before {
 
 		img.marketplace-suggestion-icon {
 			height: 40px;
+			margin: 0;
 			margin-right: 1.5em;
 			flex: 0 0 40px;
 		}
@@ -61,6 +62,7 @@ a.suggestion-dismiss::before {
 
 		.marketplace-suggestion-container-cta {
 			flex: 1 1 30%;
+			min-width: 160px;
 			text-align: right;
 
 			.suggestion-dismiss {
@@ -121,6 +123,24 @@ a.suggestion-dismiss::before {
 	}
 }
 
+
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-header"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-footer"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-body"] {
+
+	.marketplace-suggestion-container {
+		padding: 1em 1.5em;
+
+		.marketplace-suggestion-container-content {
+
+			p {
+				margin: 0;
+				padding: 0;
+			}
+		}
+	}
+}
+
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-inline"] {
 
 	// hide by default (mobile first)
@@ -143,6 +163,10 @@ a.suggestion-dismiss::before {
 				margin: 0;
 				font-size: 1.2em;
 			}
+
+			p:last-child {
+				margin-bottom: 0;
+			}
 		}
 
 		.marketplace-suggestion-container-cta {
@@ -164,23 +188,6 @@ a.suggestion-dismiss::before {
 		display: table-row;
 	}
 
-}
-
-.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-header"],
-.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-footer"],
-.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-body"] {
-
-	.marketplace-suggestion-container {
-		padding: 1em 1.5em;
-
-		.marketplace-suggestion-container-content {
-
-			p {
-				margin: 0;
-				padding: 0;
-			}
-		}
-	}
 }
 
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
@@ -219,6 +226,9 @@ a.suggestion-dismiss::before {
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"],
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-body"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="orders-list-empty-header"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="orders-list-empty-footer"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="orders-list-empty-body"],
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-header"],
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-footer"],
 .marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-body"] {
