@@ -1014,11 +1014,6 @@ class WC_Helper {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 
-		$woo_plugins = get_transient( 'wc_helper_installed_woo_plugins' );
-		if ( false !== $woo_plugins ) {
-			return $woo_plugins;
-		}
-
 		$plugins     = get_plugins();
 		$woo_plugins = array();
 
@@ -1055,17 +1050,7 @@ class WC_Helper {
 			$woo_plugins[ $filename ] = $data;
 		}
 
-		set_transient( 'wc_helper_installed_woo_plugins', $woo_plugins, DAY_IN_SECONDS );
 		return $woo_plugins;
-	}
-
-	/**
-	 * Obtain a list of slugs of locally installed Woo extensions.
-	 * (Cached for 1 day.)
-	 */
-	public static function get_local_woo_plugin_slugs() {
-		$slugs = wp_list_pluck( self::get_local_woo_plugins(), 'slug' );
-		return array_values( $slugs );
 	}
 
 	/**
