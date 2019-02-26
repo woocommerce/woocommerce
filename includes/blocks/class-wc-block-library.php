@@ -41,7 +41,7 @@ class WC_Block_Library {
 	 */
 	protected static function register_script( $handle, $src, $deps = array(), $has_i18n = true ) {
 		$filename = str_replace( plugins_url( '/', WC_PLUGIN_FILE ), '', $src );
-		$ver = self::get_file_version( $filename );
+		$ver      = self::get_file_version( $filename );
 		wp_register_script( $handle, $src, $deps, $ver, true );
 		if ( $has_i18n && function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $handle, 'woocommerce', WC_ABSPATH . 'languages' );
@@ -61,7 +61,7 @@ class WC_Block_Library {
 	 */
 	protected static function register_style( $handle, $src, $deps = array(), $media = 'all' ) {
 		$filename = str_replace( plugins_url( '/', WC_PLUGIN_FILE ), '', $src );
-		$ver = self::get_file_version( $filename );
+		$ver      = self::get_file_version( $filename );
 		wp_register_style( $handle, $src, $deps, $ver, $media );
 	}
 
