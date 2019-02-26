@@ -99,6 +99,7 @@
 		border-width: 0 1px;
 		border-color: $button-border;
 		border-style: solid;
+		flex: 1 1;
 	}
 
 	@include breakpoint( '<782px' ) {
@@ -106,7 +107,6 @@
 		margin-bottom: 14px;
 
 		.woocommerce-store-alerts__pagination-label {
-			flex: 1 1 auto;
 			text-align: center;
 		}
 	}
