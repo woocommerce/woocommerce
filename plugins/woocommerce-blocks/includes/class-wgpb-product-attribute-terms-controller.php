@@ -114,8 +114,11 @@ class WGPB_Product_Attribute_Terms_Controller extends WC_REST_Product_Attribute_
 			'name'      => $item->name,
 			'slug'      => $item->slug,
 			'count'     => (int) $item->count,
-			'attr_name' => $attribute->name,
-			'attr_slug' => $attribute->slug,
+			'attribute' => array(
+				'id'   => $attribute->id,
+				'name' => $attribute->name,
+				'slug' => $attribute->slug,
+			),
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -147,20 +150,30 @@ class WGPB_Product_Attribute_Terms_Controller extends WC_REST_Product_Attribute_
 		$schema['properties']['name']      = $raw_schema['properties']['name'];
 		$schema['properties']['slug']      = $raw_schema['properties']['slug'];
 		$schema['properties']['count']     = $raw_schema['properties']['count'];
-		$schema['properties']['attr_name'] = array(
-			'description' => __( 'Attribute group name.', 'woo-gutenberg-products-block' ),
-			'type'        => 'string',
+		$schema['properties']['attribute'] = array(
+			'description' => __( 'Attribute.', 'woo-gutenberg-products-block' ),
+			'type'        => 'object',
 			'context'     => array( 'view', 'edit' ),
-			'arg_options' => array(
-				'sanitize_callback' => 'sanitize_text_field',
-			),
-		);
-		$schema['properties']['attr_slug'] = array(
-			'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woo-gutenberg-products-block' ),
-			'type'        => 'string',
-			'context'     => array( 'view', 'edit' ),
-			'arg_options' => array(
-				'sanitize_callback' => 'sanitize_title',
+			'readonly'    => true,
+			'properties'  => array(
+				'id'   => array(
+					'description' => __( 'Attribute ID.', 'woo-gutenberg-products-block' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'name' => array(
+					'description' => __( 'Attribute name.', 'woo-gutenberg-products-block' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'slug' => array(
+					'description' => __( 'Attribute slug.', 'woo-gutenberg-products-block' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 			),
 		);
 

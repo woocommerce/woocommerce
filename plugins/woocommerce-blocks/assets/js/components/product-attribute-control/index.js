@@ -72,7 +72,7 @@ class ProductAttributeControl extends Component {
 			} ),
 		} )
 			.then( ( terms ) => {
-				terms = terms.map( ( term ) => ( { ...term, parent: attribute } ) );
+				terms = terms.map( ( term ) => ( { ...term, parent: attribute, attr_slug: term.attribute.slug } ) );
 				this.setState( ( prevState ) => ( {
 					termsList: { ...prevState.termsList, [ attribute ]: terms },
 					termsLoading: false,
