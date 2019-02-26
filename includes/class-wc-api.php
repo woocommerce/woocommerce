@@ -240,6 +240,7 @@ class WC_API extends WC_Legacy_API {
 		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-product-attributes-controller.php';
 		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-product-attribute-terms-controller.php';
 		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-product-categories-controller.php';
+		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-products-controller.php';
 	}
 
 	/**
@@ -352,6 +353,7 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Blocks_Product_Attributes_Controller',
 			'WC_REST_Blocks_Product_Attribute_Terms_Controller',
 			'WC_REST_Blocks_Product_Categories_Controller',
+			'WC_REST_Blocks_Products_Controller',
 		);
 
 		foreach ( $controllers as $controller ) {
