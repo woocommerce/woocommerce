@@ -3,6 +3,7 @@
 		"activity-panels": false,
 		"analytics": false,
 		"dashboard": false,
-		"devdocs": false
+		"devdocs": false,
+		"store-alerts": false
 	}
 }
