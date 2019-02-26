@@ -61,6 +61,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				'menu_order'      => $post_object->menu_order,
 				'reviews_allowed' => 'open' === $post_object->comment_status,
 				'parent_id'       => $post_object->post_parent,
+				'post_excerpt'    => $post_object->post_excerpt,
 			)
 		);
 
@@ -82,6 +83,20 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		if ( $post_object->post_title !== $new_title ) {
 			$product->set_name( $new_title );
 			$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_title' => $new_title ), array( 'ID' => $product->get_id() ) );
+			clean_post_cache( $product->get_id() );
+		}
+
+		/**
+		 * If a variation has no excerpt, update here. Used when searching for variations by attribute names.
+		 */
+		if ( '' === $post_object->post_excerpt ) {
+			$new_excerpt = wc_get_formatted_variation( $product, true, false );
+			$product->set_props(
+				array(
+					'post_excerpt' => $new_excerpt,
+				)
+			);
+			$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_excerpt' => $new_excerpt ), array( 'ID' => $product->get_id() ) );
 			clean_post_cache( $product->get_id() );
 		}
 
