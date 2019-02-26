@@ -266,7 +266,7 @@
 		}
 
 		// Show and hide page elements dependent on suggestion state.
-		function hidePageElementsForEmptyState( usedSuggestionsContexts ) {
+		function hidePageElementsForSuggestionState( usedSuggestionsContexts ) {
 			var showingEmptyStateSuggestions = _.intersection(
 				usedSuggestionsContexts,
 				[ 'products-list-empty-body', 'orders-list-empty-body' ]
@@ -284,6 +284,12 @@
 				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="products-list-empty-footer"]' ).hide();
 				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="orders-list-empty-header"]' ).hide();
 				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="orders-list-empty-footer"]' ).hide();
+			}
+
+			var showingProductMetaboxSuggestions = _.contains( usedSuggestionsContexts, 'product-edit-meta-tab-body' );
+			if ( ! showingProductMetaboxSuggestions ) {
+				$( '.marketplace-suggestions_options.marketplace-suggestions_tab' ).hide();
+				$( '#marketplace_suggestions.panel.woocommerce_options_panel' ).hide();
 			}
 		}
 
@@ -392,7 +398,7 @@
 				} );
 			}
 
-			hidePageElementsForEmptyState( usedSuggestionsContexts );
+			hidePageElementsForSuggestionState( usedSuggestionsContexts );
 		}
 
 		if ( marketplace_suggestions.suggestions_data ) {

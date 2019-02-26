@@ -4352,6 +4352,10 @@ img.help_tip {
 				content: "\f111";
 			}
 
+			&.marketplace-suggestions_options a::before {
+				content: none;
+			}
+
 			&.variations_options a::before {
 				content: "\f509";
 			}
