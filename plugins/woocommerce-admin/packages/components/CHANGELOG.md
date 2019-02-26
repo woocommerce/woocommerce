@@ -3,6 +3,7 @@
 - Chart component: remove d3-array dependency.
 - Chart component: fix display when there is no data.
 - Chart component: change chart type query parameter to `chartType`.
+- Chart component: add `screenReaderFormat` prop that will be used to format dates for screen reader labels.
 - Bug fix for `<StockReportTable />` returning N/A instead of zero.
 - Add new component: SearchListControl for displaying and filtering a selectable list of items.
 

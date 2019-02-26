@@ -120,6 +120,7 @@ export class ReportChart extends Component {
 				mode={ mode }
 				path={ path }
 				query={ query }
+				screenReaderFormat={ formats.screenReaderFormat }
 				showHeaderControls={ showHeaderControls }
 				title={ selectedChart.label }
 				tooltipLabelFormat={ formats.tooltipLabelFormat }

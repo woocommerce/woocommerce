@@ -44,9 +44,10 @@ class D3Chart extends Component {
 	}
 
 	getFormatParams() {
-		const { xFormat, x2Format, yFormat } = this.props;
+		const { screenReaderFormat, xFormat, x2Format, yFormat } = this.props;
 
 		return {
+			screenReaderFormat: getFormatter( screenReaderFormat, d3TimeFormat ),
 			xFormat: getFormatter( xFormat, d3TimeFormat ),
 			x2Format: getFormatter( x2Format, d3TimeFormat ),
 			yFormat: getFormatter( yFormat ),
@@ -238,6 +239,10 @@ D3Chart.propTypes = {
 	 */
 	mode: PropTypes.oneOf( [ 'item-comparison', 'time-comparison' ] ),
 	/**
+	 * A datetime formatting string or overriding function to format the screen reader labels.
+	 */
+	screenReaderFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
+	/**
 	 * The list of labels for this chart.
 	 */
 	orderedKeys: PropTypes.array,
@@ -291,8 +296,9 @@ D3Chart.defaultProps = {
 		top: 20,
 	},
 	mode: 'time-comparison',
+	screenReaderFormat: '%B %-d, %Y',
 	tooltipPosition: 'over',
-	tooltipLabelFormat: '%B %d, %Y',
+	tooltipLabelFormat: '%B %-d, %Y',
 	tooltipValueFormat: ',',
 	chartType: 'line',
 	width: 600,

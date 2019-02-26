@@ -140,7 +140,7 @@ export const drawLines = ( node, data, params, scales, formats, tooltip ) => {
 			.attr( 'aria-label', d => {
 				const label = d.label
 					? d.label
-					: tooltip.labelFormat( d.date instanceof Date ? d.date : moment( d.date ).toDate() );
+					: formats.screenReaderFormat( d.date instanceof Date ? d.date : moment( d.date ).toDate() );
 				return `${ label } ${ tooltip.valueFormat( d.value ) }`;
 			} )
 			.on( 'focus', ( d, i, nodes ) => {
