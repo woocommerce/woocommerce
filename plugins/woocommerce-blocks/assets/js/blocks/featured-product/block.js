@@ -278,9 +278,12 @@ class FeaturedProduct extends Component {
 								style={ style }
 							>
 								<div className="wc-block-featured-product__wrapper">
-									<h2 className="wc-block-featured-product__title">
-										{ product.name }
-									</h2>
+									<h2
+										className="wc-block-featured-product__title"
+										dangerouslySetInnerHTML={ {
+											__html: product.name,
+										} }
+									/>
 									{ showDesc && (
 										<div
 											className="wc-block-featured-product__description"
