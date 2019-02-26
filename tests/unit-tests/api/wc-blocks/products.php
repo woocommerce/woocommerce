@@ -40,12 +40,44 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 				'role' => 'subscriber',
 			)
 		);
+
+		// Create 3 product categories.
+		$parent           = wp_insert_term( 'Parent Category', 'product_cat' );
+		$child            = wp_insert_term(
+			'Child Category',
+			'product_cat',
+			array( 'parent' => $parent['term_id'] )
+		);
+		$single           = wp_insert_term( 'Standalone Category', 'product_cat' );
+		$this->categories = array(
+			'parent' => $parent,
+			'child'  => $child,
+			'single' => $single,
+		);
+
+		// Create two products, one with 'parent', and one with 'single'.
+		$this->products    = array();
+		$this->products[0] = WC_Helper_Product::create_simple_product( false );
+		$this->products[0]->set_category_ids( array( $parent['term_id'] ) );
+		$this->products[0]->save();
+
+		$this->products[1] = WC_Helper_Product::create_simple_product( false );
+		$this->products[1]->set_category_ids( array( $single['term_id'] ) );
+		$this->products[1]->save();
+
+		$this->products[2] = WC_Helper_Product::create_simple_product( false );
+		$this->products[2]->set_category_ids( array( $child['term_id'], $single['term_id'] ) );
+		$this->products[2]->save();
+
+		$this->products[3] = WC_Helper_Product::create_simple_product( false );
+		$this->products[3]->set_category_ids( array( $parent['term_id'], $single['term_id'] ) );
+		$this->products[3]->save();
 	}
 
 	/**
 	 * Test route registration.
 	 *
-	 * @since 1.2.0
+	 * @since 3.6.0
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
@@ -57,7 +89,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting products.
 	 *
-	 * @since 1.2.0
+	 * @since 3.6.0
 	 */
 	public function test_get_products() {
 		wp_set_current_user( $this->user );
@@ -69,17 +101,13 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 
-		$this->assertEquals( 2, count( $products ) );
-		$this->assertEquals( 'Dummy Product', $products[0]['name'] );
-		$this->assertEquals( 'DUMMY SKU', $products[0]['sku'] );
-		$this->assertEquals( 'Dummy External Product', $products[1]['name'] );
-		$this->assertEquals( 'DUMMY EXTERNAL SKU', $products[1]['sku'] );
+		$this->assertEquals( 6, count( $products ) );
 	}
 
 	/**
 	 * Test getting products as an contributor.
 	 *
-	 * @since 1.2.0
+	 * @since 3.6.0
 	 */
 	public function test_get_products_as_contributor() {
 		wp_set_current_user( $this->contributor );
@@ -91,7 +119,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting products as an subscriber.
 	 *
-	 * @since 1.2.0
+	 * @since 3.6.0
 	 */
 	public function test_get_products_as_subscriber() {
 		wp_set_current_user( $this->subscriber );
@@ -103,7 +131,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test getting products with custom ordering.
 	 *
-	 * @since 1.2.0
+	 * @since 3.6.0
 	 */
 	public function test_get_products_order_by_price() {
 		wp_set_current_user( $this->user );
@@ -126,19 +154,16 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 		$products = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $products ) );
+		$this->assertEquals( 6, count( $products ) );
 
-		// The external product should be first, then the simple product.
-		$this->assertEquals( 'Dummy External Product', $products[0]['name'] );
 		$this->assertEquals( 'Dummy Product', $products[1]['name'] );
-		$this->assertEquals( '10', $products[0]['price'] );
-		$this->assertEquals( '15', $products[1]['price'] );
+		$this->assertEquals( '10', $products[1]['price'] );
 	}
 
 	/**
 	 * Test product_visibility queries.
 	 *
-	 * @since 1.3.1
+	 * @since 3.6.0
 	 */
 	public function test_product_visibility() {
 		wp_set_current_user( $this->user );
@@ -171,7 +196,7 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 		$products = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 1, count( $products ) );
+		$this->assertEquals( 5, count( $products ) );
 		$this->assertEquals( 'Visible Product', $products[0]['name'] );
 
 		$query_params = array(
@@ -185,9 +210,8 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 		$products = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $products ) );
-		$this->assertEquals( 'Visible Product', $products[0]['name'] );
-		$this->assertEquals( 'Catalog Product', $products[1]['name'] );
+		$this->assertEquals( 6, count( $products ) );
+		$this->assertEquals( 'Dummy Product', $products[0]['name'] );
 
 		$query_params = array(
 			'catalog_visibility' => 'search',
@@ -200,9 +224,8 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 		$products = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $products ) );
-		$this->assertEquals( 'Visible Product', $products[0]['name'] );
-		$this->assertEquals( 'Search Product', $products[1]['name'] );
+		$this->assertEquals( 6, count( $products ) );
+		$this->assertEquals( 'Dummy Product', $products[0]['name'] );
 
 		$query_params = array(
 			'catalog_visibility' => 'hidden',
@@ -215,5 +238,68 @@ class WC_Tests_API_Products_Controller extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 1, count( $products ) );
 		$this->assertEquals( 'Hidden Product', $products[0]['name'] );
+	}
+
+	/**
+	 * Test product category intersection: Any product in either Single or Child (3).
+	 *
+	 * @since 3.6.0
+	 */
+	public function test_get_products_in_any_categories_child() {
+		wp_set_current_user( $this->user );
+
+		$cats = $this->categories['child']['term_id'] . ',' . $this->categories['single']['term_id'];
+
+		$request = new WP_REST_Request( 'GET', '/wc-blocks/v1/products' );
+		$request->set_param( 'category', $cats );
+		$request->set_param( 'category_operator', 'in' );
+
+		$response          = $this->server->dispatch( $request );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 3, count( $response_products ) );
+	}
+
+	/**
+	 * Test product category intersection: Any product in both Single and Child (1).
+	 *
+	 * @since 3.6.0
+	 */
+	public function test_get_products_in_all_categories_child() {
+		wp_set_current_user( $this->user );
+
+		$cats = $this->categories['child']['term_id'] . ',' . $this->categories['single']['term_id'];
+
+		$request = new WP_REST_Request( 'GET', '/wc-blocks/v1/products' );
+		$request->set_param( 'category', $cats );
+		$request->set_param( 'category_operator', 'and' );
+
+		$response          = $this->server->dispatch( $request );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $response_products ) );
+	}
+
+	/**
+	 * Test product category intersection: Any product in both Single and Parent (1).
+	 *
+	 * @since 3.6.0
+	 */
+	public function test_get_products_in_all_categories_parent() {
+		wp_set_current_user( $this->user );
+
+		$cats = $this->categories['parent']['term_id'] . ',' . $this->categories['single']['term_id'];
+
+		$request = new WP_REST_Request( 'GET', '/wc-blocks/v1/products' );
+		$request->set_param( 'category', $cats );
+		$request->set_param( 'category_operator', 'and' );
+
+		$response          = $this->server->dispatch( $request );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $response_products ) );
 	}
 }
