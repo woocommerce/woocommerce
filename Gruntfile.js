@@ -368,19 +368,21 @@ module.exports = function( grunt ) {
 				src: '*.php',
 				dest: '<%= dirs.php %>/blocks/',
 				options: {
-					process: ( content ) => content.replace( /'woo-gutenberg-products-block'/g, "'woocommerce'" )
+					process: ( content ) => content
+						// Replace textdomain.
+						.replace( /'woo-gutenberg-products-block'/g, "'woocommerce'" )
+						// Replace source for JS files.
 						.replace(
 							/plugins_url\( 'build\/([\w-]*)\.js', WGPB_PLUGIN_FILE \)/g,
 							"WC()->plugin_url() . '/assets/js/blocks/$1.js'"
 						)
+						// Replace source for CSS files.
 						.replace(
 							/plugins_url\( 'build\/([\w-]*)\.css', WGPB_PLUGIN_FILE \)/g,
 							"WC()->plugin_url() . '/assets/css/blocks/$1.css'"
 						)
-						.replace( /WGPB_ABSPATH/g, 'WC_ABSPATH' )
-						.replace( /WGPB_PLUGIN_FILE/g, 'WC_PLUGIN_FILE' )
-						.replace( /WGPB_VERSION/g, 'WC_VERSION' )
-						.replace( /WGPB_Block_Library/g, 'WC_Block_Library' )
+						// Replace class & constant prefixes.
+						.replace( /WGPB_/g, 'WC_' )
 				}
 			}
 		}
