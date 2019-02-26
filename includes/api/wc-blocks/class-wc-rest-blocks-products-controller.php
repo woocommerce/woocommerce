@@ -228,7 +228,7 @@ class WC_REST_Blocks_Products_Controller extends WC_REST_Products_Controller {
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
-		$args = parent::prepare_objects_query( $request );
+		$args             = parent::prepare_objects_query( $request );
 		$operator_mapping = array(
 			'in'     => 'IN',
 			'not_in' => 'NOT IN',
@@ -315,27 +315,27 @@ class WC_REST_Blocks_Products_Controller extends WC_REST_Products_Controller {
 	public function get_collection_params() {
 		$params                       = parent::get_collection_params();
 		$params['orderby']['enum']    = array_merge( $params['orderby']['enum'], array( 'price', 'popularity', 'rating', 'menu_order' ) );
-		$params['category_operator']       = array(
+		$params['category_operator']  = array(
 			'description'       => __( 'Operator to compare product category terms.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array( 'in', 'not_in', 'and' ),
 			'default'           => 'in',
-			'sanitize_callback' => 'sanitize_text_field',
+			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['attribute_operator']      = array(
+		$params['attribute_operator'] = array(
 			'description'       => __( 'Operator to compare product attribute terms.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array( 'in', 'not_in', 'and' ),
 			'default'           => 'in',
-			'sanitize_callback' => 'sanitize_text_field',
+			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['catalog_visibility'] = array(
 			'description'       => __( 'Determines if hidden or visible catalog products are shown.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array( 'visible', 'catalog', 'search', 'hidden' ),
-			'sanitize_callback' => 'sanitize_text_field',
+			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
