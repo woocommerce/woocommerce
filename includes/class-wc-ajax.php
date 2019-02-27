@@ -632,7 +632,7 @@ class WC_AJAX {
 			ob_start();
 			$attributes = $product->get_attributes( 'edit' );
 			$i          = -1;
-			if( ! empty( $data['attribute_names'] ) ) {
+			if ( ! empty( $data['attribute_names'] ) ) {
 				foreach ( $data['attribute_names'] as $attribute_name ) {
 					$attribute = isset( $attributes[ sanitize_title( $attribute_name ) ] ) ? $attributes[ sanitize_title( $attribute_name ) ] : false;
 					if ( ! $attribute ) {
