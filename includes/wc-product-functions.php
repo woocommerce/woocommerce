@@ -1286,7 +1286,7 @@ function wc_update_product_lookup_tables() {
 			posts.post_type IN ('product', 'product_variation')
 			AND meta1.meta_value <> ''
 		GROUP BY
-			posts.ID
+			posts.ID, meta2.meta_value, meta3.meta_value
 		"
 	);
 
