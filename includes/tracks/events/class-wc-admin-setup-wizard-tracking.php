@@ -45,6 +45,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 		}
 
 		add_filter( 'woocommerce_setup_wizard_steps', array( __CLASS__, 'set_obw_steps' ) );
+		add_action( 'admin_init', array( __CLASS__, 'track_start' ), 1 );
 		add_action( 'shutdown', array( __CLASS__, 'track_skip_step' ), 1 );
 		self::add_step_save_events();
 	}
@@ -78,6 +79,18 @@ class WC_Admin_Setup_Wizard_Tracking {
 				add_action( 'admin_init', array( __CLASS__, 'track_activate' ), 1 );
 				break;
 		}
+	}
+
+	/** Track when the OBW has started.
+	 *
+	 * @return void
+	 */
+	public static function track_start() {
+		if ( isset( $_GET['step'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			return;
+		}
+
+		WC_Tracks::record_event( 'obw_start' );
 	}
 
 	/**
