@@ -109,6 +109,11 @@ ReportSummary.propTypes = {
 	 */
 	endpoint: PropTypes.string.isRequired,
 	/**
+	 * Allows specifying a property different from the `endpoint` that will be used
+	 * to limit the items when there is an active search.
+	 */
+	limitProperty: PropTypes.string,
+	/**
 	 * The query string represented in object form.
 	 */
 	query: PropTypes.object.isRequired,
@@ -144,19 +149,20 @@ ReportSummary.defaultProps = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { endpoint, isRequesting, query } = props;
+		const { endpoint, isRequesting, limitProperty, query } = props;
+		const limitBy = limitProperty || endpoint;
 
 		if ( isRequesting ) {
 			return {};
 		}
 
-		if ( query.search && ! ( query[ endpoint ] && query[ endpoint ].length ) ) {
+		if ( query.search && ! ( query[ limitBy ] && query[ limitBy ].length ) ) {
 			return {
 				emptySearchResults: true,
 			};
 		}
 
-		const summaryData = getSummaryNumbers( endpoint, query, select );
+		const summaryData = getSummaryNumbers( endpoint, query, select, limitBy );
 
 		return {
 			summaryData,

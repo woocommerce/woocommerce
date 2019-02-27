@@ -36,10 +36,11 @@ const reportConfigs = {
 	taxes: taxesConfig,
 };
 
-export function getFilterQuery( endpoint, query ) {
+export function getFilterQuery( endpoint, query, limitBy ) {
 	if ( query.search ) {
+		const limitProperty = limitBy || endpoint;
 		return {
-			[ endpoint ]: query[ endpoint ],
+			[ limitProperty ]: query[ limitProperty ],
 		};
 	}
 
@@ -164,15 +165,16 @@ export function isReportDataEmpty( report, endpoint ) {
 /**
  * Constructs and returns a query associated with a Report data request.
  *
- * @param  {String} endpoint Report API Endpoint
- * @param  {String} dataType 'primary' or 'secondary'.
- * @param  {Object} query  query parameters in the url.
+ * @param  {String} endpoint  Report API Endpoint
+ * @param  {String} dataType  'primary' or 'secondary'.
+ * @param  {Object} query     Query parameters in the url.
+ * @param  {String} [limitBy] Property used to limit the results. It will be used in the API call to send the IDs.
  * @returns {Object} data request query parameters.
  */
-function getRequestQuery( endpoint, dataType, query ) {
+function getRequestQuery( endpoint, dataType, query, limitBy ) {
 	const datesFromQuery = getCurrentDates( query );
 	const interval = getIntervalForQuery( query );
-	const filterQuery = getFilterQuery( endpoint, query );
+	const filterQuery = getFilterQuery( endpoint, query, limitBy );
 	const end = datesFromQuery[ dataType ].before;
 
 	const noIntervals = includes( noIntervalEndpoints, endpoint );
@@ -192,12 +194,13 @@ function getRequestQuery( endpoint, dataType, query ) {
 /**
  * Returns summary number totals needed to render a report page.
  *
- * @param  {String} endpoint Report  API Endpoint
- * @param  {Object} query  query parameters in the url
- * @param  {Object} select Instance of @wordpress/select
- * @return {Object}  Object containing summary number responses.
+ * @param  {String} endpoint  Report API Endpoint
+ * @param  {Object} query     Query parameters in the url
+ * @param  {Object} select    Instance of @wordpress/select
+ * @param  {String} [limitBy] Property used to limit the results. It will be used in the API call to send the IDs.
+ * @return {Object} Object containing summary number responses.
  */
-export function getSummaryNumbers( endpoint, query, select ) {
+export function getSummaryNumbers( endpoint, query, select, limitBy ) {
 	const { getReportStats, getReportStatsError, isReportStatsRequesting } = select( 'wc-api' );
 	const response = {
 		isRequesting: false,
@@ -208,7 +211,7 @@ export function getSummaryNumbers( endpoint, query, select ) {
 		},
 	};
 
-	const primaryQuery = getRequestQuery( endpoint, 'primary', query );
+	const primaryQuery = getRequestQuery( endpoint, 'primary', query, limitBy );
 	const primary = getReportStats( endpoint, primaryQuery );
 	if ( isReportStatsRequesting( endpoint, primaryQuery ) ) {
 		return { ...response, isRequesting: true };
@@ -234,13 +237,14 @@ export function getSummaryNumbers( endpoint, query, select ) {
 /**
  * Returns all of the data needed to render a chart with summary numbers on a report page.
  *
- * @param  {String} endpoint Report  API Endpoint
- * @param  {String} dataType 'primary' or 'secondary'
- * @param  {Object} query  query parameters in the url
- * @param  {Object} select Instance of @wordpress/select
+ * @param  {String} endpoint  Report API Endpoint
+ * @param  {String} dataType  'primary' or 'secondary'
+ * @param  {Object} query     Query parameters in the url
+ * @param  {Object} select    Instance of @wordpress/select
+ * @param  {String} [limitBy] Property used to limit the results. It will be used in the API call to send the IDs.
  * @return {Object}  Object containing API request information (response, fetching, and error details)
  */
-export function getReportChartData( endpoint, dataType, query, select ) {
+export function getReportChartData( endpoint, dataType, query, select, limitBy ) {
 	const { getReportStats, getReportStatsError, isReportStatsRequesting } = select( 'wc-api' );
 
 	const response = {
@@ -253,7 +257,7 @@ export function getReportChartData( endpoint, dataType, query, select ) {
 		},
 	};
 
-	const requestQuery = getRequestQuery( endpoint, dataType, query );
+	const requestQuery = getRequestQuery( endpoint, dataType, query, limitBy );
 	const stats = getReportStats( endpoint, requestQuery );
 
 	if ( isReportStatsRequesting( endpoint, requestQuery ) ) {

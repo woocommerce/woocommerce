@@ -184,6 +184,11 @@ ReportChart.propTypes = {
 	 */
 	itemsLabel: PropTypes.string,
 	/**
+	 * Allows specifying a property different from the `endpoint` that will be used
+	 * to limit the items when there is an active search.
+	 */
+	limitProperty: PropTypes.string,
+	/**
 	 * `items-comparison` (default) or `time-comparison`, this is used to generate correct
 	 * ARIA properties.
 	 */
@@ -230,7 +235,8 @@ ReportChart.defaultProps = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { endpoint, filters, isRequesting, query } = props;
+		const { endpoint, filters, isRequesting, limitProperty, query } = props;
+		const limitBy = limitProperty || endpoint;
 		const chartMode = props.mode || getChartMode( filters, query ) || 'time-comparison';
 
 		if ( isRequesting ) {
@@ -239,7 +245,7 @@ export default compose(
 			};
 		}
 
-		if ( query.search && ! ( query[ endpoint ] && query[ endpoint ].length ) ) {
+		if ( query.search && ! ( query[ limitBy ] && query[ limitBy ].length ) ) {
 			return {
 				emptySearchResults: true,
 				mode: chartMode,
@@ -247,15 +253,15 @@ export default compose(
 		}
 
 		if ( 'item-comparison' === chartMode ) {
-			const primaryData = getReportChartData( endpoint, 'primary', query, select );
+			const primaryData = getReportChartData( endpoint, 'primary', query, select, limitBy );
 			return {
 				mode: chartMode,
 				primaryData,
 			};
 		}
 
-		const primaryData = getReportChartData( endpoint, 'primary', query, select );
-		const secondaryData = getReportChartData( endpoint, 'secondary', query, select );
+		const primaryData = getReportChartData( endpoint, 'primary', query, select, limitBy );
+		const secondaryData = getReportChartData( endpoint, 'secondary', query, select, limitBy );
 		return {
 			mode: chartMode,
 			primaryData,
