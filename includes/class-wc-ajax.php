@@ -635,21 +635,22 @@ class WC_AJAX {
 			ob_start();
 			$attributes = $product->get_attributes( 'edit' );
 			$i          = -1;
+			if ( ! empty( $data['attribute_names'] ) ) {
+				foreach ( $data['attribute_names'] as $attribute_name ) {
+					$attribute = isset( $attributes[ sanitize_title( $attribute_name ) ] ) ? $attributes[ sanitize_title( $attribute_name ) ] : false;
+					if ( ! $attribute ) {
+						continue;
+					}
+					$i++;
+					$metabox_class = array();
 
-			foreach ( $data['attribute_names'] as $attribute_name ) {
-				$attribute = isset( $attributes[ sanitize_title( $attribute_name ) ] ) ? $attributes[ sanitize_title( $attribute_name ) ] : false;
-				if ( ! $attribute ) {
-					continue;
+					if ( $attribute->is_taxonomy() ) {
+						$metabox_class[] = 'taxonomy';
+						$metabox_class[] = $attribute->get_name();
+					}
+
+					include( 'admin/meta-boxes/views/html-product-attribute.php' );
 				}
-				$i++;
-				$metabox_class = array();
-
-				if ( $attribute->is_taxonomy() ) {
-					$metabox_class[] = 'taxonomy';
-					$metabox_class[] = $attribute->get_name();
-				}
-
-				include( 'admin/meta-boxes/views/html-product-attribute.php' );
 			}
 
 			$response['html'] = ob_get_clean();
