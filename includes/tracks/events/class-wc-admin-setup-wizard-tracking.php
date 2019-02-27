@@ -45,6 +45,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 		}
 
 		add_filter( 'woocommerce_setup_wizard_steps', array( __CLASS__, 'set_obw_steps' ) );
+		add_action( 'shutdown', array( __CLASS__, 'track_skip_step' ), 1 );
 		self::add_step_save_events();
 	}
 
@@ -181,6 +182,32 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 */
 	public static function track_activate() {
 		WC_Tracks::record_event( 'obw_activate' );
+	}
+
+	/**
+	 * Track skipped steps.
+	 *
+	 * @return void
+	 */
+	public static function track_skip_step() {
+		$previous_step = get_option( 'woocommerce_obw_last_completed_step' );
+		$current_step  = isset( $_GET['step'] ) ? sanitize_text_field( $_GET['step'] ) : false; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput
+		if ( ! $previous_step || ! $current_step ) {
+			return;
+		}
+
+		$wc_admin_setup_wizard_tracking = self::get_instance();
+		$steps                          = array_keys( $wc_admin_setup_wizard_tracking->steps );
+		$current_step_index             = array_search( $current_step, $steps, true );
+		$previous_step_index            = array_search( $previous_step, $steps, true );
+
+		// If we're going forward more than 1 completed step.
+		if ( $current_step_index > $previous_step_index + 1 ) {
+			$properties = array(
+				'step' => $steps[ $previous_step_index + 1 ],
+			);
+			WC_Tracks::record_event( 'obw_skip_step', $properties );
+		}
 	}
 
 	/**
