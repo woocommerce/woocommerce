@@ -28,7 +28,7 @@ a.suggestion-dismiss::before {
 	font-size: 1.5em;
 }
 
-#woocommerce-product-data ul.product-data-tabs li.marketplace-suggestions_tab {
+#woocommerce-product-data ul.wc-tabs li.marketplace-suggestions_tab {
 
 	a span {
 		margin: 0;
@@ -58,7 +58,6 @@ a.suggestion-dismiss::before {
 			flex: 1 1 60%;
 
 			h4 {
-				margin-top: 4px;
 				margin: 0;
 			}
 
