@@ -130,6 +130,19 @@
 			return image;
 		}
 
+		// Render DOM element for suggestion icon image.
+		function renderSuggestionSvgIcon( slug, svgContent ) {
+			if ( ! svgContent ) {
+				return null;
+			}
+
+			var image = document.createElement( 'div' );
+			image.innerHTML = svgContent; /// eek!
+			image.classList.add( 'marketplace-suggestion-icon' );
+
+			return image;
+		}
+
 		// Render DOM elements for suggestion content.
 		function renderSuggestionContent( slug, title, copy ) {
 			var left = document.createElement( 'div' );
@@ -193,7 +206,7 @@
 			container.classList.add( 'marketplace-suggestion-container' );
 			container.dataset.suggestionSlug = slug;
 
-			var icon = renderSuggestionIcon( slug, iconUrl );
+			var icon = renderSuggestionSvgIcon( slug, iconUrl );
 			if ( icon ) {
 				container.appendChild( icon );
 			}
@@ -217,7 +230,7 @@
 			container.classList.add( 'marketplace-suggestion-container' );
 			container.dataset.suggestionSlug = slug;
 
-			var icon = renderSuggestionIcon( slug, iconUrl );
+			var icon = renderSuggestionSvgIcon( slug, iconUrl );
 			if ( icon ) {
 				container.appendChild( icon );
 			}
