@@ -30,7 +30,7 @@ export default {
 		let payload = '';
 		if ( search ) {
 			const query = {
-				search,
+				product_name: search,
 				per_page: 10,
 				orderby: 'popularity',
 			};
