@@ -960,12 +960,21 @@ class WC_Countries {
 						),
 					),
 					'JP' => array(
+						'postcode' => array(
+							'priority' => 65,
+						),
 						'state'    => array(
 							'label'    => __( 'Prefecture', 'woocommerce' ),
 							'priority' => 66,
 						),
-						'postcode' => array(
-							'priority' => 65,
+						'city' => array(
+							'priority' => 67,
+						),
+						'address_1' => array(
+							'priority' => 68,
+						),
+						'address_2' => array(
+							'priority' => 69,
 						),
 					),
 					'KR' => array(
