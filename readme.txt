@@ -273,6 +273,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Localization - Added Danish locale. #22495
 * Localization - Update Peruvian currency. #22602
 * Localization - Update CA address format. #22692
+* Localization - Updated JP field order. #22774
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
