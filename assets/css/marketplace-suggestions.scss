@@ -26,6 +26,13 @@ a.suggestion-dismiss::before {
 	font-size: 1.5em;
 }
 
+#woocommerce-product-data ul.product-data-tabs li.marketplace-suggestions_tab {
+
+	a span {
+		margin: 0;
+	}
+}
+
 .marketplace-suggestions-container.showing-suggestion {
 	text-align: left;
 
