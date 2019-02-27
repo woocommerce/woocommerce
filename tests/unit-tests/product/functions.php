@@ -790,7 +790,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_update_product_stock_should_return_stock_quantity_if_no_stock_quantity_given() {
 		$stock_quantity = 5;
-		$product = WC_Helper_Product::create_simple_product();
+		$product        = WC_Helper_Product::create_simple_product();
 		$product->set_stock_quantity( $stock_quantity );
 		$product->set_manage_stock( true );
 		$product->save();
@@ -1022,7 +1022,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		// Test blank src image attr, this is used in lazy loading.
 		$this->assertEquals( $image_attr, wc_get_attachment_image_attributes( $image_attr ) );
 
-		$image_attr = array(
+		$image_attr    = array(
 			'src'    => 'https://wc.local/wp-content/woocommerce_uploads/my-image.jpg',
 			'class'  => 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail',
 			'alt'    => '',
