@@ -58,13 +58,13 @@ a.suggestion-dismiss::before {
 			flex: 1 1 60%;
 
 			h4 {
+				margin-top: 4px;
 				margin: 0;
-				margin-bottom: 0.5em;
 			}
 
 			p {
 				margin: 0;
-				margin-bottom: 0.5em;
+				margin-top: 4px;
 				color: $suggestions-copy-text;
 			}
 		}
@@ -170,11 +170,7 @@ a.suggestion-dismiss::before {
 
 			h4 {
 				margin: 0;
-				font-size: 1.2em;
-			}
-
-			p:last-child {
-				margin-bottom: 0;
+				font-size: 14px;
 			}
 		}
 
