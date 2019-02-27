@@ -788,9 +788,6 @@ class WC_Helper {
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
 
-		// Disable tracking when disconnected.
-		update_option( 'woocommerce_allow_tracking', 'no' );
-
 		wp_safe_redirect( $redirect_uri );
 		die();
 	}
