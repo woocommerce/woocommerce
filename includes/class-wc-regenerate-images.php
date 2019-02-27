@@ -219,7 +219,9 @@ class WC_Regenerate_Images {
 				$imagedata['width']  = $imagedata['sizes']['full']['width'];
 			}
 
-			$ratio_match = wp_image_matches_ratio( $image[1], $image[2], $imagedata['width'], $imagedata['height'] );
+			if ( $image_size['width'] && $image_size['height'] ) {
+                $ratio_match = wp_image_matches_ratio($image[1], $image[2], $imagedata['width'], $imagedata['height']);
+            }
 		} else {
 			$ratio_match = wp_image_matches_ratio( $image[1], $image[2], $image_size['width'], $image_size['height'] );
 		}
