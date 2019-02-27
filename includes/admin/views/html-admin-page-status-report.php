@@ -27,7 +27,7 @@ $dropins_mu_plugins = $system_status->get_dropins_mu_plugins();
 $theme              = $system_status->get_theme_info();
 $security           = $system_status->get_security_info();
 $settings           = $system_status->get_settings();
-$pages              = $system_status->get_pages();
+$wp_pages           = $system_status->get_pages();
 $plugin_updates     = new WC_Plugin_Updates();
 $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'minor' );
 ?>
@@ -504,12 +504,12 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 	</thead>
 	<tbody>
 		<?php
-		foreach ( $post_type_counts as $post_type ) {
+		foreach ( $post_type_counts as $ptype ) {
 			?>
 			<tr>
-				<td><?php echo esc_html( $post_type->type ); ?></td>
+				<td><?php echo esc_html( $ptype->type ); ?></td>
 				<td class="help">&nbsp;</td>
-				<td><?php echo absint( $post_type->count ); ?></td>
+				<td><?php echo absint( $ptype->count ); ?></td>
 			</tr>
 			<?php
 		}
@@ -745,14 +745,14 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 	<tbody>
 		<?php
 		$alt = 1;
-		foreach ( $pages as $page ) {
-			$error = false;
+		foreach ( $wp_pages as $_page ) {
+			$found_error = false;
 
-			if ( $page['page_id'] ) {
+			if ( $_page['page_id'] ) {
 				/* Translators: %s: page name. */
-				$page_name = '<a href="' . get_edit_post_link( $page['page_id'] ) . '" aria-label="' . sprintf( esc_html__( 'Edit %s page', 'woocommerce' ), esc_html( $page['page_name'] ) ) . '">' . esc_html( $page['page_name'] ) . '</a>';
+				$page_name = '<a href="' . get_edit_post_link( $_page['page_id'] ) . '" aria-label="' . sprintf( esc_html__( 'Edit %s page', 'woocommerce' ), esc_html( $_page['page_name'] ) ) . '">' . esc_html( $_page['page_name'] ) . '</a>';
 			} else {
-				$page_name = esc_html( $page['page_name'] );
+				$page_name = esc_html( $_page['page_name'] );
 			}
 
 			echo '<tr><td data-export-label="' . esc_attr( $page_name ) . '">' . wp_kses_post( $page_name ) . ':</td>';
@@ -760,28 +760,28 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 			echo '<td class="help">' . wc_help_tip( sprintf( esc_html__( 'The URL of your %s page (along with the Page ID).', 'woocommerce' ), $page_name ) ) . '</td><td>';
 
 			// Page ID check.
-			if ( ! $page['page_set'] ) {
+			if ( ! $_page['page_set'] ) {
 				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Page not set', 'woocommerce' ) . '</mark>';
-				$error = true;
-			} elseif ( ! $page['page_exists'] ) {
+				$found_error = true;
+			} elseif ( ! $_page['page_exists'] ) {
 				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Page ID is set, but the page does not exist', 'woocommerce' ) . '</mark>';
-				$error = true;
-			} elseif ( ! $page['page_visible'] ) {
+				$found_error = true;
+			} elseif ( ! $_page['page_visible'] ) {
 				/* Translators: %s: docs link. */
 				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . wp_kses_post( sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://codex.wordpress.org/Content_Visibility' ) ) . '</mark>';
-				$error = true;
+				$found_error = true;
 			} else {
 				// Shortcode check.
-				if ( $page['shortcode_required'] ) {
-					if ( ! $page['shortcode_present'] ) {
-						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'Page does not contain the shortcode.', 'woocommerce' ), esc_html( $page['shortcode'] ) ) . '</mark>';
-						$error = true;
+				if ( $_page['shortcode_required'] ) {
+					if ( ! $_page['shortcode_present'] ) {
+						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( 'Page does not contain the shortcode.', 'woocommerce' ), esc_html( $_page['shortcode'] ) ) . '</mark>';
+						$found_error = true;
 					}
 				}
 			}
 
-			if ( ! $error ) {
-				echo '<mark class="yes">#' . absint( $page['page_id'] ) . ' - ' . esc_html( str_replace( home_url(), '', get_permalink( $page['page_id'] ) ) ) . '</mark>';
+			if ( ! $found_error ) {
+				echo '<mark class="yes">#' . absint( $_page['page_id'] ) . ' - ' . esc_html( str_replace( home_url(), '', get_permalink( $_page['page_id'] ) ) ) . '</mark>';
 			}
 
 			echo '</td></tr>';
