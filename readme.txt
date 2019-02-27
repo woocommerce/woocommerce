@@ -178,6 +178,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Make sure account and checkout endpoints only work under account and checkout pages. #22631
 * Tweak - Show loading graphic when order form is submitted. #22664
 * Tweak - Add alt text to gallery images #22863
+* Tweak - Improved `display_name` generation during checkout. #22786
 * Template - Moved the order of rememberme checkboxes for accessibility so they tab in order. #21454
 * Template - New structure for attributes template, including new `woocommerce_display_product_attributes` filter. #22480
 * Dev - Introduce `woocommerce_reviews_title` filter. #22216
