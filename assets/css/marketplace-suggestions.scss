@@ -7,6 +7,8 @@
 @import "variables";
 
 $suggestions-pale-gray: #ddd;
+$suggestions-metabox-pale-gray: #eee;
+
 $suggestions-copy-text: #444;
 
 a.suggestion-dismiss {
@@ -243,13 +245,6 @@ a.suggestion-dismiss::before {
 	// hide by default (mobile first)
 	display: none;
 
-	border: 1px solid $suggestions-pale-gray;
-	border-bottom: none;
-
-	&:last-child {
-		border-bottom: 1px solid $suggestions-pale-gray;
-	}
-
 	.marketplace-suggestion-container .marketplace-suggestion-container-cta {
 
 		a.button {
@@ -284,5 +279,34 @@ a.suggestion-dismiss::before {
 		// There's limited room on mobile, and there are edge-case
 		// styling issues in some browsers.
 		display: block;
+	}
+}
+
+
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-header"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-footer"] {
+
+	border: none;
+}
+
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="product-edit-meta-tab-body"] {
+
+	border: none;
+	border-top: 1px solid $suggestions-metabox-pale-gray;
+	border-bottom: 1px solid $suggestions-metabox-pale-gray;
+}
+
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-header"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-footer"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="products-list-empty-body"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="orders-list-empty-header"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="orders-list-empty-footer"],
+.marketplace-suggestions-container.showing-suggestion[data-marketplace-suggestions-context="orders-list-empty-body"] {
+
+	border: 1px solid $suggestions-pale-gray;
+	border-bottom: none;
+
+	&:last-child {
+		border-bottom: 1px solid $suggestions-pale-gray;
 	}
 }
