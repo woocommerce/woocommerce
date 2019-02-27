@@ -341,6 +341,15 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						'type' => 'string',
 					),
 				),
+				'dropins_mu_plugins' => array(
+					'description' => __( 'Dropins & MU plugins.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+					'items'       => array(
+						'type' => 'string',
+					),
+				),
 				'theme'          => array(
 					'description' => __( 'Theme.', 'woocommerce' ),
 					'type'        => 'object',
@@ -548,13 +557,14 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 */
 	public function get_item_mappings() {
 		return array(
-			'environment'    => $this->get_environment_info(),
-			'database'       => $this->get_database_info(),
-			'active_plugins' => $this->get_active_plugins(),
-			'theme'          => $this->get_theme_info(),
-			'settings'       => $this->get_settings(),
-			'security'       => $this->get_security_info(),
-			'pages'          => $this->get_pages(),
+			'environment'        => $this->get_environment_info(),
+			'database'           => $this->get_database_info(),
+			'active_plugins'     => $this->get_active_plugins(),
+			'dropins_mu_plugins' => $this->get_dropins_mu_plugins(),
+			'theme'              => $this->get_theme_info(),
+			'settings'           => $this->get_settings(),
+			'security'           => $this->get_security_info(),
+			'pages'              => $this->get_pages(),
 		);
 	}
 
@@ -861,6 +871,35 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		return $active_plugins_data;
+	}
+
+	/**
+	 * Get a list of Dropins and MU plugins.
+	 *
+	 * @since 3.6.0
+	 * @return array
+	 */
+	public function get_dropins_mu_plugins() {
+		$dropins = get_dropins();
+		$plugins = array(
+			'dropins'    => array(),
+			'mu_plugins' => array(),
+		);
+		foreach ( $dropins as $key => $dropin ) {
+			$plugins['dropins'][] = array(
+				'plugin' => $key,
+				'name'   => $dropin['Name'],
+			);
+		}
+
+		$mu_plugins = get_mu_plugins();
+		foreach ( $mu_plugins as $key => $mu_plugin ) {
+			$plugins['mu_plugins'][] = array(
+				'plugin' => $key,
+				'name'   => $mu_plugin['Name'],
+			);
+		}
+		return $plugins;
 	}
 
 	/**

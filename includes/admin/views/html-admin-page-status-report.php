@@ -18,17 +18,18 @@ if ( ! class_exists( 'WC_REST_System_Status_Controller', false ) ) {
 	wp_die( 'Cannot load the REST API to access WC_REST_System_Status_Controller.' );
 }
 
-$system_status    = new WC_REST_System_Status_Controller();
-$environment      = $system_status->get_environment_info();
-$database         = $system_status->get_database_info();
-$post_type_counts = $system_status->get_post_type_counts();
-$active_plugins   = $system_status->get_active_plugins();
-$theme            = $system_status->get_theme_info();
-$security         = $system_status->get_security_info();
-$settings         = $system_status->get_settings();
-$pages            = $system_status->get_pages();
-$plugin_updates   = new WC_Plugin_Updates();
-$untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor' );
+$system_status      = new WC_REST_System_Status_Controller();
+$environment        = $system_status->get_environment_info();
+$database           = $system_status->get_database_info();
+$post_type_counts   = $system_status->get_post_type_counts();
+$active_plugins     = $system_status->get_active_plugins();
+$dropins_mu_plugins = $system_status->get_dropins_mu_plugins();
+$theme              = $system_status->get_theme_info();
+$security           = $system_status->get_security_info();
+$settings           = $system_status->get_settings();
+$pages              = $system_status->get_pages();
+$plugin_updates     = new WC_Plugin_Updates();
+$untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'minor' );
 ?>
 <div class="updated woocommerce-message inline">
 	<p>
@@ -603,6 +604,54 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 		?>
 	</tbody>
 </table>
+<?php
+if ( 0 < count( $dropins_mu_plugins['dropins'] ) ) :
+	?>
+	<table class="wc_status_table widefat" cellspacing="0">
+		<thead>
+			<tr>
+				<th colspan="3" data-export-label="Dropin Plugins (<?php echo count( $dropins_mu_plugins['dropins'] ); ?>)"><h2><?php esc_html_e( 'Dropin Plugins', 'woocommerce' ); ?> (<?php echo count( $dropins_mu_plugins['dropins'] ); ?>)</h2></th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php
+			foreach ( $dropins_mu_plugins['dropins'] as $dropin ) {
+				?>
+				<tr>
+					<td><?php echo wp_kses_post( $dropin['plugin'] ); ?></td>
+					<td class="help">&nbsp;</td>
+					<td><?php echo wp_kses_post( $dropin['name'] ); ?>
+				</tr>
+				<?php
+			}
+			?>
+		</tbody>
+	</table>
+	<?php
+endif;
+if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
+	?>
+	<table class="wc_status_table widefat" cellspacing="0">
+		<thead>
+			<tr>
+				<th colspan="3" data-export-label="Must Use Plugins (<?php echo count( $dropins_mu_plugins['mu_plugins'] ); ?>)"><h2><?php esc_html_e( 'Must Use Plugins', 'woocommerce' ); ?> (<?php echo count( $dropins_mu_plugins['mu_plugins'] ); ?>)</h2></th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php
+			foreach ( $dropins_mu_plugins['mu_plugins'] as $dropin ) {
+				?>
+				<tr>
+					<td><?php echo wp_kses_post( $dropin['plugin'] ); ?></td>
+					<td class="help">&nbsp;</td>
+					<td><?php echo wp_kses_post( $dropin['name'] ); ?>
+				</tr>
+				<?php
+			}
+			?>
+		</tbody>
+	</table>
+<?php endif; ?>
 <table class="wc_status_table widefat" cellspacing="0">
 	<thead>
 		<tr>
