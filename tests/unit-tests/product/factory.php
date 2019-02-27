@@ -65,4 +65,41 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 		$this->assertFalse( $product );
 	}
 
+	/**
+	 * Tests to ensure that cached product instances created by the factory do not contain persistent props/objects.
+	 *
+	 * @since 3.6.0
+	 */
+	function test_get_cached_product() {
+
+		add_filter( 'woocommerce_variation_prices', array( $this, 'apply_discount' ) );
+
+		$test_product = WC_Helper_Product::create_variation_product();
+		$product      = WC()->product_factory->get_product( $test_product->get_id() );
+		$prices       = $product->get_variation_prices();
+
+		remove_filter( 'woocommerce_variation_prices', array( $this, 'apply_discount' ) );
+
+		$fresh_product     = WC()->product_factory->get_product( $test_product->get_id() );
+		$unfiltered_prices = $fresh_product->get_variation_prices();
+
+		$this->assertNotEquals( $prices, $unfiltered_prices );
+	}
+
+	/**
+	 * Applies a 50% discount to variation prices.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @param  array  $prices
+	 * @return array
+	 */
+	function apply_discount( $prices ) {
+
+		foreach ( $prices[ 'price' ] as $variation_id => $price ) {
+			$prices[ 'price' ][ $variation_id ] = $price * 0.5;
+		}
+
+		return $prices;
+	}
 }
