@@ -39,6 +39,9 @@ class WC_Admin_Setup_Wizard_Tracking {
 			case 'payment':
 				add_action( 'admin_init', array( __CLASS__, 'track_payments' ), 1 );
 				break;
+			case 'shipping':
+				add_action( 'admin_init', array( __CLASS__, 'track_shipping' ), 1 );
+				break;
 		}
 	}
 
@@ -101,4 +104,24 @@ class WC_Admin_Setup_Wizard_Tracking {
 
 		WC_Tracks::record_event( 'obw_payments', $properties );
 	}
+
+	/**
+	 * Track shipping units and whether or not labels are set.
+	 *
+	 * @return void
+	 */
+	public static function track_shipping() {
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput
+		$properties = array(
+			'weight_unit'       => isset( $_POST['weight_unit'] ) ? sanitize_text_field( wp_unslash( $_POST['weight_unit'] ) ) : '',
+			'dimension_unit'    => isset( $_POST['dimension_unit'] ) ? sanitize_text_field( wp_unslash( $_POST['dimension_unit'] ) ) : '',
+			'setup_wcs_labels'  => isset( $_POST['setup_woocommerce_services'] ) && 'yes' === $_POST['setup_woocommerce_services'],
+			'setup_shipstation' => isset( $_POST['setup_shipstation'] ) && 'yes' === $_POST['setup_shipstation'],
+		);
+		// phpcs:enable
+
+		WC_Tracks::record_event( 'obw_shipping', $properties );
+	}
+
+
 }
