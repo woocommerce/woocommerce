@@ -168,6 +168,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Store notice is visible again if the notice text is changed. #22645
 * Enhancement - Add aria-label attribute to shop orderby selector to improve accessibility. #22683
 * Enhancement - When adding, editing, and deleting items manually from orders, the corresponding product stock will be updated to reflect the event and an order note will log the event. #22329
+* Enhancement - Add no-transform cache header for Google Weblight #22525
 * Tweak - Generalize shipping estimate text on cart page. #22467
 * Tweak - Include auto draft orders in order list filters. #22380
 * Tweak - Only include the network orders widget on the main site dashboard. #22318
@@ -176,6 +177,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Show full category hierarchy in product URLs when term IDs are not sequential. #22526
 * Tweak - Make sure account and checkout endpoints only work under account and checkout pages. #22631
 * Tweak - Show loading graphic when order form is submitted. #22664
+* Tweak - Add alt text to gallery images #22863
 * Template - Moved the order of rememberme checkboxes for accessibility so they tab in order. #21454
 * Template - New structure for attributes template, including new `woocommerce_display_product_attributes` filter. #22480
 * Dev - Introduce `woocommerce_reviews_title` filter. #22216
