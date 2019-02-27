@@ -52,33 +52,11 @@ class WC_Admin_Setup_Wizard_Tracking {
 	}
 
 	/**
-	 * Check if a step is being saved by step name.
-	 *
-	 * @param string $step_name Step name.
-	 * @return bool
-	 */
-	public static function is_saving_step( $step_name ) {
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
-		$current_step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : '';
-		if ( ! empty( $_POST['save_step'] ) && $current_step === $step_name ) {
-			return true;
-		}
-		// phpcs:enable
-
-		return false;
-	}
-
-	/**
 	 * Track store setup and store properties on save.
 	 *
 	 * @return void
 	 */
 	public static function track_store_setup() {
-		// First step name is blank.
-		if ( ! self::is_saving_step( '' ) ) {
-			return;
-		}
-
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput
 		$properties = array(
 			'country'        => isset( $_POST['store_country'] ) ? sanitize_text_field( $_POST['store_country'] ) : '',
