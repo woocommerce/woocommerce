@@ -118,7 +118,7 @@ class WC_Settings_Tracking {
 		}
 
 		$properties = array(
-			'settings' => $instance->updated_options,
+			'settings' => implode( $instance->updated_options, ',' ),
 		);
 
 		if ( isset( $current_tab ) ) {
