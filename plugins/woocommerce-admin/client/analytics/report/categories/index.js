@@ -54,6 +54,7 @@ export default class CategoriesReport extends Component {
 				<ReportSummary
 					charts={ charts }
 					endpoint="products"
+					isRequesting={ isRequesting }
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
@@ -64,6 +65,7 @@ export default class CategoriesReport extends Component {
 					endpoint="products"
 					path={ path }
 					query={ chartQuery }
+					isRequesting={ isRequesting }
 					itemsLabel={ itemsLabel }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>

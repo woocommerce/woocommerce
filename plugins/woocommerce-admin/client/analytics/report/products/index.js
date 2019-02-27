@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 /**
  * WooCommerce dependencies
  */
-import { ReportFilters, SummaryListPlaceholder, ChartPlaceholder } from '@woocommerce/components';
+import { ReportFilters } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -62,24 +62,6 @@ class ProductsReport extends Component {
 			return <ReportError isError />;
 		}
 
-		if ( isRequesting ) {
-			return (
-				<Fragment>
-					<ReportFilters query={ query } path={ path } filters={ filters } />
-					<SummaryListPlaceholder numberOfItems={ charts.length } />
-					<span className="screen-reader-text">
-						{ __( 'Your requested data is loading', 'wc-admin' ) }
-					</span>
-					<div className="woocommerce-chart">
-						<div className="woocommerce-chart__body">
-							<ChartPlaceholder height={ 220 } />
-						</div>
-					</div>
-					<ProductsReportTable isRequesting={ true } query={ query } />
-				</Fragment>
-			);
-		}
-
 		const chartQuery = {
 			...query,
 		};
@@ -95,6 +77,7 @@ class ProductsReport extends Component {
 					mode={ mode }
 					charts={ charts }
 					endpoint="products"
+					isRequesting={ isRequesting }
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
@@ -103,15 +86,16 @@ class ProductsReport extends Component {
 					filters={ filters }
 					charts={ charts }
 					endpoint="products"
+					isRequesting={ isRequesting }
 					itemsLabel={ itemsLabel }
 					path={ path }
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( chartQuery.chart, charts ) }
 				/>
 				{ isSingleProductVariable ? (
-					<VariationsReportTable query={ query } />
+					<VariationsReportTable isRequesting={ isRequesting } query={ query } />
 				) : (
-					<ProductsReportTable query={ query } />
+					<ProductsReportTable isRequesting={ isRequesting } query={ query } />
 				) }
 			</Fragment>
 		);

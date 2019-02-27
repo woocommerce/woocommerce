@@ -161,7 +161,7 @@ export default class VariationsReportTable extends Component {
 	}
 
 	render() {
-		const { query } = this.props;
+		const { isRequesting, query } = this.props;
 
 		const labels = {
 			helpText: __( 'Select at least two variations to compare', 'wc-admin' ),
@@ -175,6 +175,7 @@ export default class VariationsReportTable extends Component {
 				endpoint="variations"
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
+				isRequesting={ isRequesting }
 				itemIdField="variation_id"
 				labels={ labels }
 				query={ query }

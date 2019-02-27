@@ -50,6 +50,7 @@ export default class TaxesReport extends Component {
 				<ReportSummary
 					charts={ charts }
 					endpoint="taxes"
+					isRequesting={ isRequesting }
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
@@ -60,6 +61,7 @@ export default class TaxesReport extends Component {
 					endpoint="taxes"
 					query={ chartQuery }
 					path={ path }
+					isRequesting={ isRequesting }
 					itemsLabel={ itemsLabel }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>

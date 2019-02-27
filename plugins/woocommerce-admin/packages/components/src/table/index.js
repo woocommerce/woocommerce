@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import classnames from 'classnames';
-import { Component } from '@wordpress/element';
+import { Component, Fragment } from '@wordpress/element';
 import { find, first, isEqual, noop, partial, uniq, without } from 'lodash';
 import { IconButton } from '@wordpress/components';
 import PropTypes from 'prop-types';
@@ -332,14 +332,19 @@ class TableCard extends Component {
 				}
 			>
 				{ isLoading ? (
-					<TablePlaceholder
-						numberOfRows={ rowsPerPage }
-						headers={ headers }
-						rowHeader={ rowHeader }
-						caption={ title }
-						query={ query }
-						onSort={ onQueryChange( 'sort' ) }
-					/>
+					<Fragment>
+						<span className="screen-reader-text">
+							{ __( 'Your requested data is loading', 'wc-admin' ) }
+						</span>
+						<TablePlaceholder
+							numberOfRows={ rowsPerPage }
+							headers={ headers }
+							rowHeader={ rowHeader }
+							caption={ title }
+							query={ query }
+							onSort={ onQueryChange( 'sort' ) }
+						/>
+					</Fragment>
 				) : (
 					<Table
 						rows={ rows }

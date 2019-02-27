@@ -135,29 +135,30 @@ export class ReportChart extends Component {
 	}
 
 	renderItemComparison() {
-		const { primaryData } = this.props;
+		const { isRequesting, primaryData } = this.props;
 
 		if ( primaryData.isError ) {
 			return <ReportError isError />;
 		}
 
-		const isRequesting = primaryData.isRequesting;
+		const isChartRequesting = isRequesting || primaryData.isRequesting;
 		const chartData = this.getItemChartData();
 
-		return this.renderChart( 'item-comparison', isRequesting, chartData );
+		return this.renderChart( 'item-comparison', isChartRequesting, chartData );
 	}
 
 	renderTimeComparison() {
-		const { primaryData, secondaryData } = this.props;
+		const { isRequesting, primaryData, secondaryData } = this.props;
 
 		if ( ! primaryData || primaryData.isError || secondaryData.isError ) {
 			return <ReportError isError />;
 		}
 
-		const isRequesting = primaryData.isRequesting || secondaryData.isRequesting;
+		const isChartRequesting =
+			isRequesting || primaryData.isRequesting || secondaryData.isRequesting;
 		const chartData = this.getTimeChartData();
 
-		return this.renderChart( 'time-comparison', isRequesting, chartData );
+		return this.renderChart( 'time-comparison', isChartRequesting, chartData );
 	}
 
 	render() {
@@ -174,6 +175,10 @@ ReportChart.propTypes = {
 	 * Filters available for that report.
 	 */
 	filters: PropTypes.array,
+	/**
+	 * Whether there is an API call running.
+	 */
+	isRequesting: PropTypes.bool,
 	/**
 	 * Label describing the legend items.
 	 */
@@ -206,6 +211,7 @@ ReportChart.propTypes = {
 };
 
 ReportChart.defaultProps = {
+	isRequesting: false,
 	primaryData: {
 		data: {
 			intervals: [],
@@ -224,8 +230,14 @@ ReportChart.defaultProps = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { query, endpoint, filters } = props;
+		const { endpoint, filters, isRequesting, query } = props;
 		const chartMode = props.mode || getChartMode( filters, query ) || 'time-comparison';
+
+		if ( isRequesting ) {
+			return {
+				mode: chartMode,
+			};
+		}
 
 		if ( query.search && ! ( query[ endpoint ] && query[ endpoint ].length ) ) {
 			return {
