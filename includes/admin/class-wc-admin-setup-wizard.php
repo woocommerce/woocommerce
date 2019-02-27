@@ -576,12 +576,13 @@ class WC_Admin_Setup_Wizard {
 				update_option( 'woocommerce_price_thousand_sep', $locale_info[ $country ]['thousand_sep'] );
 			}
 		}
-
-		if ( $tracking ) {
-			update_option( 'woocommerce_allow_tracking', 'yes' );
-			wp_schedule_single_event( time() + 10, 'woocommerce_tracker_send_event', array( true ) );
-		} else {
-			update_option( 'woocommerce_allow_tracking', 'no' );
+		if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) {
+			if ( $tracking ) {
+				update_option( 'woocommerce_allow_tracking', 'yes' );
+				wp_schedule_single_event( time() + 10, 'woocommerce_tracker_send_event', array( true ) );
+			} else {
+				update_option( 'woocommerce_allow_tracking', 'no' );
+			}
 		}
 
 		WC_Install::create_pages();
