@@ -893,10 +893,14 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		$mu_plugins = get_mu_plugins();
-		foreach ( $mu_plugins as $key => $mu_plugin ) {
+		foreach ( $mu_plugins as $plugin => $mu_plugin ) {
 			$plugins['mu_plugins'][] = array(
-				'plugin' => $key,
-				'name'   => $mu_plugin['Name'],
+				'plugin'      => $plugin,
+				'name'        => $mu_plugin['Name'],
+				'version'     => $mu_plugin['Version'],
+				'url'         => $mu_plugin['PluginURI'],
+				'author_name' => $mu_plugin['AuthorName'],
+				'author_url'  => esc_url_raw( $mu_plugin['AuthorURI'] ),
 			);
 		}
 		return $plugins;
@@ -1006,19 +1010,27 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$product_visibility_terms[ $term->slug ] = strtolower( $term->name );
 		}
 
+		// Check if WooCommerce.com account is connected.
+		$woo_com_connected = 'no';
+		$helper_options    = get_option( 'woocommerce_helper_data', array() );
+		if ( array_key_exists( 'auth', $helper_options ) && ! empty( $helper_options['auth'] ) ) {
+			$woo_com_connected = 'yes';
+		}
+
 		// Return array of useful settings for debugging.
 		return array(
-			'api_enabled'              => 'yes' === get_option( 'woocommerce_api_enabled' ),
-			'force_ssl'                => 'yes' === get_option( 'woocommerce_force_ssl_checkout' ),
-			'currency'                 => get_woocommerce_currency(),
-			'currency_symbol'          => get_woocommerce_currency_symbol(),
-			'currency_position'        => get_option( 'woocommerce_currency_pos' ),
-			'thousand_separator'       => wc_get_price_thousand_separator(),
-			'decimal_separator'        => wc_get_price_decimal_separator(),
-			'number_of_decimals'       => wc_get_price_decimals(),
-			'geolocation_enabled'      => in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation_ajax', 'geolocation' ) ),
-			'taxonomies'               => $term_response,
-			'product_visibility_terms' => $product_visibility_terms,
+			'api_enabled'               => 'yes' === get_option( 'woocommerce_api_enabled' ),
+			'force_ssl'                 => 'yes' === get_option( 'woocommerce_force_ssl_checkout' ),
+			'currency'                  => get_woocommerce_currency(),
+			'currency_symbol'           => get_woocommerce_currency_symbol(),
+			'currency_position'         => get_option( 'woocommerce_currency_pos' ),
+			'thousand_separator'        => wc_get_price_thousand_separator(),
+			'decimal_separator'         => wc_get_price_decimal_separator(),
+			'number_of_decimals'        => wc_get_price_decimals(),
+			'geolocation_enabled'       => in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation_ajax', 'geolocation' ) ),
+			'taxonomies'                => $term_response,
+			'product_visibility_terms'  => $product_visibility_terms,
+			'woocommerce_com_connected' => $woo_com_connected,
 		);
 	}
 

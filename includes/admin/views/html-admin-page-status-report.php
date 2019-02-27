@@ -639,12 +639,21 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 		</thead>
 		<tbody>
 			<?php
-			foreach ( $dropins_mu_plugins['mu_plugins'] as $dropin ) {
+			foreach ( $dropins_mu_plugins['mu_plugins'] as $mu_plugin ) {
+				$plugin_name = esc_html( $mu_plugin['name'] );
+				if ( ! empty( $mu_plugin['url'] ) ) {
+					$plugin_name = '<a href="' . esc_url( $mu_plugin['url'] ) . '" aria-label="' . esc_attr__( 'Visit plugin homepage', 'woocommerce' ) . '" target="_blank">' . $plugin_name . '</a>';
+				}
 				?>
 				<tr>
-					<td><?php echo wp_kses_post( $dropin['plugin'] ); ?></td>
+					<td><?php echo wp_kses_post( $plugin_name ); ?></td>
 					<td class="help">&nbsp;</td>
-					<td><?php echo wp_kses_post( $dropin['name'] ); ?>
+					<td>
+					<?php
+						/* translators: %s: plugin author */
+						printf( esc_html__( 'by %s', 'woocommerce' ), esc_html( $mu_plugin['author_name'] ) );
+						echo ' &ndash; ' . esc_html( $mu_plugin['version'] );
+					?>
 				</tr>
 				<?php
 			}
@@ -719,6 +728,11 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 				echo implode( ', ', array_map( 'esc_html', $display_terms ) );
 				?>
 			</td>
+		</tr>
+		<tr>
+			<td data-export-label="Connected to WooCommerce.com"><?php esc_html_e( 'Connected to WooCommerce.com', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'Are your site connected to WooCommerce.com?', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td><?php echo $settings['woocommerce_com_connected'] ? '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>' : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 	</tbody>
 </table>
