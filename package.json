@@ -19,7 +19,6 @@
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
   "devDependencies": {
-    "@woocommerce/block-library": "file:../woocommerce-gutenberg-products-block",
     "autoprefixer": "9.4.8",
     "babel": "6.23.0",
     "babel-cli": "6.26.0",
@@ -67,6 +66,7 @@
     "npm": ">=6.4.1"
   },
   "dependencies": {
+    "@woocommerce/block-library": "https://ryelle.codes/woocommerce-block-library-2.0.0-dev.tgz",
     "github-contributors-list": "https://github.com/woocommerce/github-contributors-list/tarball/master"
   },
   "husky": {
