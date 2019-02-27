@@ -78,7 +78,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$query['orderby'] = 'ORDER BY qty DESC';
 			$query['limits']  = 'LIMIT 1';
 
-			return $wpdb->get_row( implode( ' ', apply_filters( 'woocommerce_dashboard_status_widget_top_seller_query', $query ) ) ); //phpcs:ignore
+			return $wpdb->get_row( implode( ' ', apply_filters( 'woocommerce_dashboard_status_widget_top_seller_query', $query ) ) ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		}
 
 		/**
@@ -276,7 +276,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			);
 
 			$comments = $wpdb->get_results(
-				"SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_ID, comments.comment_content {$query_from};" // phpcs:ignore
+				"SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_ID, comments.comment_content {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			);
 
 			if ( $comments ) {
