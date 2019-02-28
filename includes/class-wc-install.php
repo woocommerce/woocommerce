@@ -157,13 +157,13 @@ class WC_Install {
 	 * @since 3.6.0
 	 * @param string $callback Callback name.
 	 */
-	public function run_update_callback( $callback ) {
+	public static function run_update_callback( $callback ) {
 		include_once dirname( __FILE__ ) . '/wc-update-functions.php';
 
 		if ( is_callable( $callback ) ) {
-			$this->run_update_callback_start( $callback );
+			self::run_update_callback_start( $callback );
 			$result = (bool) call_user_func( $callback );
-			$this->run_update_callback_end( $callback, $result );
+			self::run_update_callback_end( $callback, $result );
 		}
 	}
 
@@ -173,19 +173,8 @@ class WC_Install {
 	 * @since 3.6.0
 	 * @param string $callback Callback name.
 	 */
-	protected function run_update_callback_start( $callback ) {
+	protected static function run_update_callback_start( $callback ) {
 		wc_maybe_define_constant( 'WC_UPDATING', true );
-
-		$logger = wc_get_logger();
-		$logger->info(
-			sprintf(
-				'Running %s callback',
-				$callback
-			),
-			array(
-				'source' => 'wc_db_updates',
-			)
-		);
 	}
 
 	/**
@@ -195,9 +184,7 @@ class WC_Install {
 	 * @param string $callback Callback name.
 	 * @param bool   $result Return value from callback. Non-false need to run again.
 	 */
-	protected function run_update_callback_end( $callback, $result ) {
-		$logger = wc_get_logger();
-
+	protected static function run_update_callback_end( $callback, $result ) {
 		if ( $result ) {
 			WC()->queue()->add(
 				'woocommerce_run_update_callback',
@@ -205,25 +192,6 @@ class WC_Install {
 					'update_callback' => $callback,
 				),
 				'woocommerce-db-updates'
-			);
-			$logger->info(
-				sprintf(
-					'%s callback needs to run again',
-					$callback
-				),
-				array(
-					'source' => 'wc_db_updates',
-				)
-			);
-		} else {
-			$logger->info(
-				sprintf(
-					'Finished running %s callback',
-					$callback
-				),
-				array(
-					'source' => 'wc_db_updates',
-				)
 			);
 		}
 	}
@@ -316,7 +284,7 @@ class WC_Install {
 	 * @since  3.2.0
 	 * @return boolean
 	 */
-	private static function needs_db_update() {
+	public static function needs_db_update() {
 		$current_db_version = get_option( 'woocommerce_db_version', null );
 		$updates            = self::get_db_update_callbacks();
 
@@ -375,28 +343,20 @@ class WC_Install {
 	 */
 	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
-		$logger             = wc_get_logger();
+		$loop               = 0;
 
 		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
 				foreach ( $update_callbacks as $update_callback ) {
-					$logger->info(
-						sprintf(
-							'Queuing %s - %s',
-							$version,
-							$update_callback
-						),
-						array(
-							'source' => 'wc_db_updates',
-						)
-					);
-					WC()->queue()->add(
+					WC()->queue()->schedule_single(
+						time() + $loop,
 						'woocommerce_run_update_callback',
 						array(
 							'update_callback' => $update_callback,
 						),
 						'woocommerce-db-updates'
 					);
+					$loop++;
 				}
 			}
 		}

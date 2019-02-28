@@ -210,7 +210,7 @@ class WC_Admin_Notices {
 	 * If we need to update, include a message with the update button.
 	 */
 	public static function update_notice() {
-		if ( version_compare( get_option( 'woocommerce_db_version' ), WC_VERSION, '<' ) ) {
+		if ( WC_Install::needs_db_update() ) {
 			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
 
 			if ( $next_scheduled_date || ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
@@ -219,6 +219,7 @@ class WC_Admin_Notices {
 				include dirname( __FILE__ ) . '/views/html-notice-update.php';
 			}
 		} else {
+			WC_Install::update_db_version();
 			include dirname( __FILE__ ) . '/views/html-notice-updated.php';
 		}
 	}
