@@ -153,7 +153,6 @@ EmptyContent.propTypes = {
 
 EmptyContent.defaultProps = {
 	illustration: '/empty-content.svg',
-	illustrationHeight: 400,
 	illustrationWidth: 400,
 };
 
