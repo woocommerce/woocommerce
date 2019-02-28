@@ -202,7 +202,7 @@ class WC_Structured_Data {
 			'name'  => $product->get_name(),
 		);
 
-    $markup['image']       = wp_get_attachment_url( $product->get_image_id() );
+		$markup['image']       = wp_get_attachment_url( $product->get_image_id() );
 		$markup['description'] = wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) );
 		$markup['sku']         = $product->get_sku();
 
