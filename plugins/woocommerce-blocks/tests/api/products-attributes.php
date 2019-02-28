@@ -136,7 +136,7 @@ class WC_Tests_API_Products_By_Attributes_Controller extends WC_REST_Unit_Test_C
 			// Terms list needs to be a string.
 			$this->attr_term_ids['medium'] . ',' . $this->attr_term_ids['large']
 		);
-		$request->set_param( 'attr_operator', 'AND' );
+		$request->set_param( 'attribute_operator', 'and' );
 
 		$response          = $this->server->dispatch( $request );
 		$response_products = $response->get_data();

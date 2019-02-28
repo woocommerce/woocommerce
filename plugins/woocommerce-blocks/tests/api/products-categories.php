@@ -76,7 +76,7 @@ class WC_Tests_API_Products_By_Categories_Controller extends WC_REST_Unit_Test_C
 
 		$request = new WP_REST_Request( 'GET', '/wc-blocks/v1/products' );
 		$request->set_param( 'category', $cats );
-		$request->set_param( 'cat_operator', 'IN' );
+		$request->set_param( 'category_operator', 'in' );
 
 		$response          = $this->server->dispatch( $request );
 		$response_products = $response->get_data();
@@ -97,7 +97,7 @@ class WC_Tests_API_Products_By_Categories_Controller extends WC_REST_Unit_Test_C
 
 		$request = new WP_REST_Request( 'GET', '/wc-blocks/v1/products' );
 		$request->set_param( 'category', $cats );
-		$request->set_param( 'cat_operator', 'IN' );
+		$request->set_param( 'category_operator', 'in' );
 
 		$response          = $this->server->dispatch( $request );
 		$response_products = $response->get_data();
@@ -118,7 +118,7 @@ class WC_Tests_API_Products_By_Categories_Controller extends WC_REST_Unit_Test_C
 
 		$request = new WP_REST_Request( 'GET', '/wc-blocks/v1/products' );
 		$request->set_param( 'category', $cats );
-		$request->set_param( 'cat_operator', 'AND' );
+		$request->set_param( 'category_operator', 'and' );
 
 		$response          = $this->server->dispatch( $request );
 		$response_products = $response->get_data();
@@ -139,7 +139,7 @@ class WC_Tests_API_Products_By_Categories_Controller extends WC_REST_Unit_Test_C
 
 		$request = new WP_REST_Request( 'GET', '/wc-blocks/v1/products' );
 		$request->set_param( 'category', $cats );
-		$request->set_param( 'cat_operator', 'AND' );
+		$request->set_param( 'category_operator', 'and' );
 
 		$response          = $this->server->dispatch( $request );
 		$response_products = $response->get_data();
