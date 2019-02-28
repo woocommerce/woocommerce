@@ -833,9 +833,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `total_sales` bigint(20) NULL default 0,
   `stock` bigint(20) NULL default NULL,
   PRIMARY KEY  (`product_id`),
-  KEY product_id_price (`product_id`,`max_price`,`min_price`),
-  KEY product_id_average_rating (`product_id`,`average_rating`),
-  KEY product_id_total_sales (`product_id`,`total_sales`)
+  KEY min_max_price (`min_price`, `max_price`)
   ) $collate;
 		";
 
