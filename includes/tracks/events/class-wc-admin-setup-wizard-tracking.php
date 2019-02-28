@@ -48,6 +48,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 		add_filter( 'woocommerce_setup_wizard_steps', array( __CLASS__, 'set_obw_steps' ) );
 		add_action( 'shutdown', array( __CLASS__, 'track_skip_step' ), 1 );
 		add_action( 'add_option_woocommerce_allow_tracking', array( __CLASS__, 'track_start' ), 10, 2 );
+		add_action( 'admin_init', array( __CLASS__, 'track_marketing_signup' ), 1 );
 		self::add_step_save_events();
 	}
 
@@ -73,6 +74,20 @@ class WC_Admin_Setup_Wizard_Tracking {
 		}
 
 		WC_Tracks::record_event( 'obw_start' );
+	}
+
+	/**
+	 * Track the marketing form on submit.
+	 */
+	public static function track_marketing_signup() {
+		wc_enqueue_js(
+			"
+			var form = $( '.newsletter-form-email' ).closest( 'form' );
+			$( document ).on( 'submit', form, function() {
+				window.wcTracks.recordEvent( 'obw_marketing_signup' );
+			} );
+		"
+		);
 	}
 
 	/**
