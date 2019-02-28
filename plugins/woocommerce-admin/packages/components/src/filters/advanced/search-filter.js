@@ -4,6 +4,7 @@
  */
 import { Component, Fragment } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
+import { getIdsFromQuery } from '@woocommerce/navigation';
 import { find, isEqual, partial } from 'lodash';
 import PropTypes from 'prop-types';
 import interpolateComponents from 'interpolate-components';
@@ -35,7 +36,14 @@ class SearchFilter extends Component {
 		const { filter: prevFilter } = prevProps;
 
 		if ( filter.value.length && ! isEqual( prevFilter, filter ) ) {
-			config.input.getLabels( filter.value, query ).then( this.updateLabels );
+			const { selected } = this.state;
+			const ids = selected.map( item => item.id );
+			const filterIds = getIdsFromQuery( filter.value );
+			const hasNewIds = filterIds.every( ( id ) => ! ids.includes( id ) );
+
+			if ( hasNewIds ) {
+				config.input.getLabels( filter.value, query ).then( this.updateLabels );
+			}
 		}
 	}
 
