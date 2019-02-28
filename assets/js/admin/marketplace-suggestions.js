@@ -118,7 +118,7 @@
 		}
 
 		// Render DOM element for suggestion icon image.
-		function renderSuggestionIcon( slug, iconUrl ) {
+		function renderSuggestionIcon( iconUrl ) {
 			if ( ! iconUrl ) {
 				return null;
 			}
@@ -131,7 +131,7 @@
 		}
 
 		// Render DOM elements for suggestion content.
-		function renderSuggestionContent( slug, title, copy ) {
+		function renderSuggestionContent( title, copy ) {
 			var left = document.createElement( 'div' );
 
 			left.classList.add( 'marketplace-suggestion-container-content' );
@@ -193,12 +193,12 @@
 			container.classList.add( 'marketplace-suggestion-container' );
 			container.dataset.suggestionSlug = slug;
 
-			var icon = renderSuggestionIcon( slug, iconUrl );
+			var icon = renderSuggestionIcon( iconUrl );
 			if ( icon ) {
 				container.appendChild( icon );
 			}
 			container.appendChild(
-				renderSuggestionContent( slug, title, copy )
+				renderSuggestionContent( title, copy )
 			);
 			container.appendChild(
 				renderSuggestionCTA( context, slug, url, buttonText, true, allowDismiss )
@@ -217,12 +217,12 @@
 			container.classList.add( 'marketplace-suggestion-container' );
 			container.dataset.suggestionSlug = slug;
 
-			var icon = renderSuggestionIcon( slug, iconUrl );
+			var icon = renderSuggestionIcon( iconUrl );
 			if ( icon ) {
 				container.appendChild( icon );
 			}
 			container.appendChild(
-				renderSuggestionContent( slug, title, copy )
+				renderSuggestionContent( title, copy )
 			);
 			container.appendChild(
 				renderSuggestionCTA( context, slug, url, linkText, linkIsButton, allowDismiss )
