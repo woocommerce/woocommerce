@@ -28,7 +28,6 @@ class WC_Structured_Data {
 		// Generate structured data.
 		add_action( 'woocommerce_before_main_content', array( $this, 'generate_website_data' ), 30 );
 		add_action( 'woocommerce_breadcrumb', array( $this, 'generate_breadcrumblist_data' ), 10 );
-		add_action( 'woocommerce_shop_loop', array( $this, 'generate_product_data' ), 10 );
 		add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ), 60 );
 		add_action( 'woocommerce_review_meta', array( $this, 'generate_review_data' ), 20 );
 		add_action( 'woocommerce_email_order_details', array( $this, 'generate_order_data' ), 20, 3 );
@@ -153,7 +152,7 @@ class WC_Structured_Data {
 		$data  = $this->get_structured_data( $types );
 
 		if ( $data ) {
-			echo '<script type="application/ld+json">' . wc_esc_json( wp_json_encode( $data ), true ) . '</script>';
+			echo '<script type="application/ld+json">' . wc_esc_json( wp_json_encode( $data ), true ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 
@@ -208,7 +207,7 @@ class WC_Structured_Data {
 		$markup['sku']         = $product->get_sku();
 		$markup['brand']       = '';
 
-		if ( apply_filters( 'woocommerce_structured_data_product_limit', is_product_taxonomy() || is_shop() ) ) {
+		if ( apply_filters( 'woocommerce_structured_data_product_limit', false ) ) {
 			$markup['url'] = $permalink;
 
 			$this->set_data( apply_filters( 'woocommerce_structured_data_product_limited', $markup, $product ) );
