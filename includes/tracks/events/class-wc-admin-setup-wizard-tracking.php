@@ -76,7 +76,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 				add_action( 'admin_init', array( __CLASS__, 'track_recommended' ), 1 );
 				break;
 			case 'activate':
-				add_action( 'admin_init', array( __CLASS__, 'track_activate' ), 1 );
+				add_action( 'admin_init', array( __CLASS__, 'track_jetpack_activate' ), 1 );
 				break;
 		}
 	}
@@ -193,7 +193,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 *
 	 * @return void
 	 */
-	public static function track_activate() {
+	public static function track_jetpack_activate() {
 		WC_Tracks::record_event( 'obw_activate' );
 	}
 
