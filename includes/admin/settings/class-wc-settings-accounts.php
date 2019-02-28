@@ -36,6 +36,8 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			$erasure_text = sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'tools.php?page=remove_personal_data' ) ), $erasure_text );
 		}
 
+		$tracking_info_text = sprintf( '<a href="%s" target="_blank">%s</a>','https://woocommerce.com/usage-tracking', esc_html__( 'Read more about what we collect', 'woocommerce' ) );
+
 		$settings = apply_filters(
 			'woocommerce_' . $this->id . '_settings',
 			array(
@@ -231,6 +233,26 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				array(
 					'type' => 'sectionend',
 					'id'   => 'personal_data_retention',
+				),
+				array(
+					'title' => esc_html__( 'Usage Tracking', 'woocommerce' ),
+					'type'  => 'title',
+					'id'    => 'tracking_options',
+					'desc'  => __( 'Gathering usage data allows us to make WooCommerce better — your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense.', 'woocommerce' ),
+				),
+				array(
+					'title'         => __( 'Enable tracking', 'woocommerce' ),
+					'desc'          => __( 'Allow usage of WooCommerce to be tracked', 'woocommerce' ),
+					'desc_tip'      => sprintf( esc_html__( 'If you would rather opt-out, and do not check this box, we will not know this store exists and we will not collect any usage data. %s.', 'woocommerce' ), $tracking_info_text ),
+					'id'            => 'woocommerce_allow_tracking',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'start',
+					'default'       => 'no',
+					'autoload'      => false,
+				),
+				array(
+					'type' => 'sectionend',
+					'id'   => 'tracking_options',
 				),
 			)
 		);
