@@ -650,8 +650,6 @@ class WC_Install {
 			$collate = $wpdb->get_charset_collate();
 		}
 
-		$price_decimals = max( 2, absint( wc_get_price_decimals() ) );
-
 		$tables = "
 CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -827,9 +825,9 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `product_id` bigint(20) NOT NULL,
-  `min_price` decimal(10,{$price_decimals}) NULL default NULL,
-  `max_price` decimal(10,{$price_decimals}) NULL default NULL,
-  `average_rating` decimal(10,2) NULL default 0,
+  `min_price` decimal(10,2) NULL default NULL,
+  `max_price` decimal(10,2) NULL default NULL,
+  `average_rating` decimal(3,2) NULL default 0.00,
   `total_sales` bigint(20) NULL default 0,
   `stock` bigint(20) NULL default NULL,
   PRIMARY KEY  (`product_id`),
