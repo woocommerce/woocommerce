@@ -60,6 +60,7 @@ class WC_Site_Tracking {
 	 * Init tracking.
 	 */
 	public static function init() {
+		add_action( 'add_option_woocommerce_allow_tracking', array( __CLASS__, 'track_obw_start' ), 10, 2 );
 
 		if ( ! self::is_tracking_enabled() ) {
 
@@ -97,5 +98,20 @@ class WC_Site_Tracking {
 				call_user_func( $init_method );
 			}
 		}
+	}
+
+	/**
+	 * Track when tracking is opted into and OBW has started.
+	 *
+	 * @param string $option Option name.
+	 * @param string $value  Option value.
+	 * @return void
+	 */
+	public static function track_obw_start( $option, $value ) {
+		if ( 'yes' !== $value || empty( $_GET['page'] ) || 'wc-setup' !== $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			return;
+		}
+
+		WC_Tracks::record_event( 'obw_start' );
 	}
 }
