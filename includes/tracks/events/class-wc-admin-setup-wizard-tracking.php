@@ -45,6 +45,9 @@ class WC_Admin_Setup_Wizard_Tracking {
 			case 'recommended':
 				add_action( 'admin_init', array( __CLASS__, 'track_recommended' ), 1 );
 				break;
+			case 'activate':
+				add_action( 'admin_init', array( __CLASS__, 'track_activate' ), 1 );
+				break;
 		}
 	}
 
@@ -141,5 +144,14 @@ class WC_Admin_Setup_Wizard_Tracking {
 		// phpcs:enable
 
 		WC_Tracks::record_event( 'obw_recommended', $properties );
+	}
+
+	/**
+	 * Tracks when Jetpack is activated through the OBW.
+	 *
+	 * @return void
+	 */
+	public static function track_activate() {
+		WC_Tracks::record_event( 'obw_activate' );
 	}
 }
