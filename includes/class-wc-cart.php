@@ -634,7 +634,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param bool $clear_persistent_cart Should the persistant cart be cleared too. Defaults to true.
 	 */
 	public function empty_cart( $clear_persistent_cart = true ) {
-		do_action( 'woocommerce_empty_cart' );
+		
+		do_action( 'woocommerce_before_cart_emptied' );
+		
 		$this->cart_contents              = array();
 		$this->removed_cart_contents      = array();
 		$this->shipping_methods           = array();
