@@ -13,12 +13,27 @@ Props
 
 Filters available for that report.
 
+### `isRequesting`
+
+- Type: Boolean
+- Default: `false`
+
+Whether there is an API call running.
+
 ### `itemsLabel`
 
 - Type: String
 - Default: null
 
 Label describing the legend items.
+
+### `limitProperty`
+
+- Type: String
+- Default: null
+
+Allows specifying a property different from the `endpoint` that will be used
+to limit the items when there is an active search.
 
 ### `mode`
 

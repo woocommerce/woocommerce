@@ -31,12 +31,26 @@ the click event.
 Props
 -----
 
+### `checked`
+
+- Type: Boolean
+- Default: null
+
+Whether the menu item is checked or not. Only relevant for menu items with `isCheckbox`.
+
 ### `children`
 
 - Type: ReactNode
 - Default: null
 
 A renderable component (or string) which will be displayed as the content of this item. Generally a `ToggleControl`.
+
+### `isCheckbox`
+
+- Type: Boolean
+- Default: `false`
+
+Whether the menu item is a checkbox (will render a FormToggle and use the `menuitemcheckbox` role).
 
 ### `isClickable`
 

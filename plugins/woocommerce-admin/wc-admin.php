@@ -7,7 +7,7 @@
  * Author URI: https://woocommerce.com/
  * Text Domain: wc-admin
  * Domain Path: /languages
- * Version: 0.7.0
+ * Version: 0.8.0
  *
  * @package WC_Admin
  */

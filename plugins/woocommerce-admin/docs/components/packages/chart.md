@@ -115,6 +115,13 @@ Render a chart placeholder to signify an in-flight data request.
 Position the legend must be displayed in. If it's not defined, it's calculated
 depending on the viewport width and the mode.
 
+### `screenReaderFormat`
+
+- Type: One of type: string, func
+- Default: `'%B %-d, %Y'`
+
+A datetime formatting string or overriding function to format the screen reader labels.
+
 ### `showHeaderControls`
 
 - Type: Boolean
@@ -132,7 +139,7 @@ A title describing this chart.
 ### `tooltipLabelFormat`
 
 - Type: One of type: string, func
-- Default: `'%B %d, %Y'`
+- Default: `'%B %-d, %Y'`
 
 A datetime formatting string or overriding function to format the tooltip label.
 

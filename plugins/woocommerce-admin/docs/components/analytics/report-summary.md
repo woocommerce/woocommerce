@@ -25,6 +25,14 @@ For example, if `taxes` is provided, data will be fetched from the report
 `taxes` endpoint (ie: `/wc/v4/reports/taxes/stats`). If the provided endpoint
 doesn't exist, an error will be shown to the user with `ReportError`.
 
+### `limitProperty`
+
+- Type: String
+- Default: null
+
+Allows specifying a property different from the `endpoint` that will be used
+to limit the items when there is an active search.
+
 ### `query`
 
 - **Required**
@@ -32,6 +40,13 @@ doesn't exist, an error will be shown to the user with `ReportError`.
 - Default: null
 
 The query string represented in object form.
+
+### `isRequesting`
+
+- Type: Boolean
+- Default: null
+
+Whether there is an API call running.
 
 ### `selectedChart`
 
