@@ -14,7 +14,7 @@ class WC_Admin_Install {
 	/**
 	 * Plugin version.
 	 *
-	 * @TODO: get this dynamically?
+	 * @todo get this dynamically?
 	 */
 	const VERSION_NUMBER = '0.6.0';
 

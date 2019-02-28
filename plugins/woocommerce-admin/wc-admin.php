@@ -124,6 +124,7 @@ add_action( 'admin_init', 'possibly_deactivate_wc_admin_plugin' );
  */
 function deactivate_wc_admin_plugin() {
 	wp_clear_scheduled_hook( 'wc_admin_daily' );
+	WC_Admin_Reports_Sync::clear_queued_actions();
 }
 register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, 'deactivate_wc_admin_plugin' );
 

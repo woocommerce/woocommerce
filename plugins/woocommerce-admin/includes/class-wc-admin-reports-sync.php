@@ -42,7 +42,7 @@ class WC_Admin_Reports_Sync {
 	const SINGLE_ORDER_ACTION = 'wc-admin_process_order';
 
 	/**
-	 * Action hook for processing a batch of orders.
+	 * Action scheduler group.
 	 */
 	const QUEUE_GROUP = 'wc-admin-data';
 
@@ -103,6 +103,23 @@ class WC_Admin_Reports_Sync {
 		self::customer_lookup_batch_init();
 		// Queue orders lookup to occur after customers lookup generation is done.
 		self::queue_dependent_action( self::ORDERS_LOOKUP_BATCH_INIT, array(), self::CUSTOMERS_BATCH_ACTION );
+	}
+
+	/**
+	 * Clears all queued actions.
+	 */
+	public static function clear_queued_actions() {
+		$hooks = array(
+			self::QUEUE_BATCH_ACTION,
+			self::QUEUE_DEPEDENT_ACTION,
+			self::CUSTOMERS_BATCH_ACTION,
+			self::ORDERS_BATCH_ACTION,
+			self::ORDERS_LOOKUP_BATCH_INIT,
+			self::SINGLE_ORDER_ACTION,
+		);
+		foreach ( $hooks as $hook ) {
+			self::queue()->cancel_all( $hook, null, self::QUEUE_GROUP );
+		}
 	}
 
 	/**
