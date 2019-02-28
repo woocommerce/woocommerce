@@ -53,6 +53,15 @@ class WC_Admin_Setup_Wizard_Tracking {
 	}
 
 	/**
+	 * Get the name of the current step.
+	 *
+	 * @return string
+	 */
+	public static function get_current_step() {
+		return isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+	}
+
+	/**
 	 * Add footer scripts to OBW since it does not contain hooks for
 	 * wp_footer to allow the default methods of enqueuing scripts.
 	 */
@@ -80,6 +89,10 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 * Track the marketing form on submit.
 	 */
 	public static function track_marketing_signup() {
+		if ( 'next_steps' !== self::get_current_step() ) {
+			return;
+		}
+
 		wc_enqueue_js(
 			"
 			var form = $( '.newsletter-form-email' ).closest( 'form' );
@@ -98,10 +111,9 @@ class WC_Admin_Setup_Wizard_Tracking {
 			return;
 		}
 
-		$current_step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-		update_option( 'woocommerce_obw_last_completed_step', $current_step );
+		update_option( 'woocommerce_obw_last_completed_step', self::get_current_step() );
 
-		switch ( $current_step ) {
+		switch ( self::get_current_step() ) {
 			case '':
 			case 'store_setup':
 				add_action( 'admin_init', array( __CLASS__, 'track_store_setup' ), 1 );
