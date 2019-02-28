@@ -94,8 +94,8 @@ class WC_Admin_Setup_Wizard_Tracking {
 
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput
 		$properties = array(
-			'selected_gateways' => $selected_gateways,
-			'created_accounts'  => $created_accounts,
+			'selected_gateways' => implode( ', ', $selected_gateways ),
+			'created_accounts'  => implode( ', ', $created_accounts ),
 		);
 		// phpcs:enable
 
