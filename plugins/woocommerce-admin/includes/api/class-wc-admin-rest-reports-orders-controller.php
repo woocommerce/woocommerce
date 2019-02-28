@@ -70,8 +70,9 @@ class WC_Admin_REST_Reports_Orders_Controller extends WC_Admin_REST_Reports_Cont
 		$data = array();
 
 		foreach ( $report_data->data as $orders_data ) {
-			$item   = $this->prepare_item_for_response( $orders_data, $request );
-			$data[] = $this->prepare_response_for_collection( $item );
+			$orders_data['order_number'] = $this->get_order_number( $orders_data['order_id'] );
+			$item                        = $this->prepare_item_for_response( $orders_data, $request );
+			$data[]                      = $this->prepare_response_for_collection( $item );
 		}
 
 		$response = rest_ensure_response( $data );
@@ -158,6 +159,12 @@ class WC_Admin_REST_Reports_Orders_Controller extends WC_Admin_REST_Reports_Cont
 				'order_id'           => array(
 					'description' => __( 'Order ID.', 'wc-admin' ),
 					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'order_number'           => array(
+					'description' => __( 'Order Number.', 'wc-admin' ),
+					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),

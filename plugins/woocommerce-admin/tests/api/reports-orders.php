@@ -80,6 +80,7 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$order_report = reset( $reports );
 
 		$this->assertEquals( $order->get_id(), $order_report['order_id'] );
+		$this->assertEquals( $order->get_order_number(), $order_report['order_number'] );
 		$this->assertEquals( date( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ), $order_report['date_created'] );
 		$this->assertEquals( $expected_customer_id, $order_report['customer_id'] );
 		$this->assertEquals( 4, $order_report['num_items_sold'] );
@@ -113,8 +114,9 @@ class WC_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 8, count( $properties ) );
+		$this->assertEquals( 9, count( $properties ) );
 		$this->assertArrayHasKey( 'order_id', $properties );
+		$this->assertArrayHasKey( 'order_number', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
 		$this->assertArrayHasKey( 'status', $properties );
 		$this->assertArrayHasKey( 'customer_id', $properties );

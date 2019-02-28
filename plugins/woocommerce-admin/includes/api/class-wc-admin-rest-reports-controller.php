@@ -174,6 +174,20 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 	}
 
 	/**
+	 * Get the order number for an order. If no filter is present for `woocommerce_order_number`, we can just return the ID.
+	 *
+	 * @param  int $order_id Order ID.
+	 * @return string
+	 */
+	public function get_order_number( $order_id ) {
+		if ( ! has_filter( 'woocommerce_order_number' ) ) {
+			return $order_id;
+		}
+		$order = new WC_Order( $order_id );
+		return $order->get_order_number();
+	}
+
+	/**
 	 * Prepare a report object for serialization.
 	 *
 	 * @param stdClass        $report  Report data.

@@ -42,8 +42,8 @@ export default class OrdersReportTable extends Component {
 			},
 			{
 				label: __( 'Order #', 'wc-admin' ),
-				screenReaderLabel: __( 'Order ID', 'wc-admin' ),
-				key: 'id',
+				screenReaderLabel: __( 'Order Number', 'wc-admin' ),
+				key: 'order_number',
 				required: true,
 			},
 			{
@@ -102,6 +102,7 @@ export default class OrdersReportTable extends Component {
 				net_total,
 				num_items_sold,
 				order_id,
+				order_number,
 				status,
 			} = row;
 			const { coupons, products } = extended_info;
@@ -133,10 +134,10 @@ export default class OrdersReportTable extends Component {
 				{
 					display: (
 						<Link href={ 'post.php?post=' + order_id + '&action=edit' } type="wp-admin">
-							{ order_id }
+							{ order_number }
 						</Link>
 					),
-					value: order_id,
+					value: order_number,
 				},
 				{
 					display: (

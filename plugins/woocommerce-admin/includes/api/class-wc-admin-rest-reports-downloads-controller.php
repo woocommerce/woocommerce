@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * @package WooCommerce/API
  * @extends WC_REST_Reports_Controller
  */
-class WC_Admin_REST_Reports_Downloads_Controller extends WC_REST_Reports_Controller {
+class WC_Admin_REST_Reports_Downloads_Controller extends WC_Admin_REST_Reports_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -103,15 +103,15 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_REST_Reports_Control
 
 		// Figure out file name.
 		// Matches https://github.com/woocommerce/woocommerce/blob/4be0018c092e617c5d2b8c46b800eb71ece9ddef/includes/class-wc-download-handler.php#L197.
-		$product_id                  = intval( $data['product_id'] );
-		$_product                    = wc_get_product( $product_id );
-		$file_path                   = $_product->get_file_download_path( $data['download_id'] );
-
-		$filename                    = basename( $file_path );
-		$response->data['file_name'] = apply_filters( 'woocommerce_file_download_filename', $filename, $product_id );
-		$response->data['file_path'] = $file_path;
-		$customer                    = new WC_Customer( $data['user_id'] );
-		$response->data['username']  = $customer->get_username();
+		$product_id                     = intval( $data['product_id'] );
+		$_product                       = wc_get_product( $product_id );
+		$file_path                      = $_product->get_file_download_path( $data['download_id'] );
+		$filename                       = basename( $file_path );
+		$response->data['file_name']    = apply_filters( 'woocommerce_file_download_filename', $filename, $product_id );
+		$response->data['file_path']    = $file_path;
+		$customer                       = new WC_Customer( $data['user_id'] );
+		$response->data['username']     = $customer->get_username();
+		$response->data['order_number'] = $this->get_order_number( $data['order_id'] );
 
 		/**
 		 * Filter a report returned from the API.
@@ -206,6 +206,12 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_REST_Reports_Control
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
 					'description' => __( 'Order ID.', 'wc-admin' ),
+				),
+				'order_number' => array(
+					'type'        => 'string',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'Order Number.', 'wc-admin' ),
 				),
 				'user_id' => array(
 					'type'        => 'integer',

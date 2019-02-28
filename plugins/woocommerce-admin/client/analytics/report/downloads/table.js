@@ -51,8 +51,8 @@ export default class CouponsReportTable extends Component {
 			},
 			{
 				label: __( 'Order #', 'wc-admin' ),
-				screenReaderLabel: __( 'Order ID', 'wc-admin' ),
-				key: 'order_id',
+				screenReaderLabel: __( 'Order Number', 'wc-admin' ),
+				key: 'order_number',
 			},
 			{
 				label: __( 'User Name', 'wc-admin' ),
@@ -77,6 +77,7 @@ export default class CouponsReportTable extends Component {
 				file_path,
 				ip_address,
 				order_id,
+				order_number,
 				product_id,
 				username,
 			} = download;
@@ -111,10 +112,10 @@ export default class CouponsReportTable extends Component {
 				{
 					display: (
 						<Link href={ `post.php?post=${ order_id }&action=edit` } type="wp-admin">
-							{ order_id }
+							{ order_number }
 						</Link>
 					),
-					value: order_id,
+					value: order_number,
 				},
 				{
 					display: username,

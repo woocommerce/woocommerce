@@ -88,6 +88,7 @@ class WC_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 1, $download_report['download_id'] );
 		$this->assertEquals( $product->get_id(), $download_report['product_id'] );
 		$this->assertEquals( $order->get_id(), $download_report['order_id'] );
+		$this->assertEquals( $order->get_order_number(), $download_report['order_number'] );
 		$this->assertEquals( $this->user, $download_report['user_id'] );
 		$this->assertEquals( '1.2.3.4', $download_report['ip_address'] );
 		$this->assertEquals( 'help.png', $download_report['file_name'] );
@@ -396,7 +397,7 @@ class WC_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 11, count( $properties ) );
+		$this->assertEquals( 12, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'product_id', $properties );
 		$this->assertArrayHasKey( 'date', $properties );
@@ -405,6 +406,7 @@ class WC_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'file_name', $properties );
 		$this->assertArrayHasKey( 'file_path', $properties );
 		$this->assertArrayHasKey( 'order_id', $properties );
+		$this->assertArrayHasKey( 'order_number', $properties );
 		$this->assertArrayHasKey( 'user_id', $properties );
 		$this->assertArrayHasKey( 'username', $properties );
 		$this->assertArrayHasKey( 'ip_address', $properties );
