@@ -211,8 +211,9 @@ class WC_Admin_Notices {
 	 */
 	public static function update_notice() {
 		if ( version_compare( get_option( 'woocommerce_db_version' ), WC_VERSION, '<' ) ) {
-			$updater = new WC_Background_Updater();
-			if ( $updater->is_updating() || ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
+			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
+
+			if ( $next_scheduled_date || ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
 				include dirname( __FILE__ ) . '/views/html-notice-updating.php';
 			} else {
 				include dirname( __FILE__ ) . '/views/html-notice-update.php';

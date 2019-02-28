@@ -127,31 +127,16 @@ class WC_Install {
 	);
 
 	/**
-	 * Background update class.
-	 *
-	 * @var object
-	 */
-	private static $background_updater;
-
-	/**
 	 * Hook in tabs.
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
-		add_action( 'init', array( __CLASS__, 'init_background_updater' ), 5 );
+		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
-	}
-
-	/**
-	 * Init background updates
-	 */
-	public static function init_background_updater() {
-		include_once dirname( __FILE__ ) . '/class-wc-background-updater.php';
-		self::$background_updater = new WC_Background_Updater();
 	}
 
 	/**
@@ -163,6 +148,83 @@ class WC_Install {
 		if ( ! defined( 'IFRAME_REQUEST' ) && version_compare( get_option( 'woocommerce_version' ), WC()->version, '<' ) ) {
 			self::install();
 			do_action( 'woocommerce_updated' );
+		}
+	}
+
+	/**
+	 * Run an update callback when triggered by ActionScheduler.
+	 *
+	 * @since 3.6.0
+	 * @param string $callback Callback name.
+	 */
+	public function run_update_callback( $callback ) {
+		include_once dirname( __FILE__ ) . '/wc-update-functions.php';
+
+		if ( is_callable( $callback ) ) {
+			$this->run_update_callback_start( $callback );
+			$result = (bool) call_user_func( $callback );
+			$this->run_update_callback_end( $callback, $result );
+		}
+	}
+
+	/**
+	 * Triggered when a callback will run.
+	 *
+	 * @since 3.6.0
+	 * @param string $callback Callback name.
+	 */
+	protected function run_update_callback_start( $callback ) {
+		wc_maybe_define_constant( 'WC_UPDATING', true );
+
+		$logger = wc_get_logger();
+		$logger->info(
+			sprintf(
+				'Running %s callback',
+				$callback
+			),
+			array(
+				'source' => 'wc_db_updates',
+			)
+		);
+	}
+
+	/**
+	 * Triggered when a callback has ran.
+	 *
+	 * @since 3.6.0
+	 * @param string $callback Callback name.
+	 * @param bool   $result Return value from callback. Non-false need to run again.
+	 */
+	protected function run_update_callback_end( $callback, $result ) {
+		$logger = wc_get_logger();
+
+		if ( $result ) {
+			WC()->queue()->add(
+				'woocommerce_run_update_callback',
+				array(
+					'update_callback' => $callback,
+				),
+				'woocommerce-db-updates'
+			);
+			$logger->info(
+				sprintf(
+					'%s callback needs to run again',
+					$callback
+				),
+				array(
+					'source' => 'wc_db_updates',
+				)
+			);
+		} else {
+			$logger->info(
+				sprintf(
+					'Finished running %s callback',
+					$callback
+				),
+				array(
+					'source' => 'wc_db_updates',
+				)
+			);
 		}
 	}
 
@@ -292,7 +354,6 @@ class WC_Install {
 	private static function maybe_update_db_version() {
 		if ( self::needs_db_update() ) {
 			if ( apply_filters( 'woocommerce_enable_auto_update_db', false ) ) {
-				self::init_background_updater();
 				self::update();
 			} else {
 				WC_Admin_Notices::add_notice( 'update' );
@@ -326,23 +387,29 @@ class WC_Install {
 	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
 		$logger             = wc_get_logger();
-		$update_queued      = false;
 
 		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
 				foreach ( $update_callbacks as $update_callback ) {
 					$logger->info(
-						sprintf( 'Queuing %s - %s', $version, $update_callback ),
-						array( 'source' => 'wc_db_updates' )
+						sprintf(
+							'Queuing %s - %s',
+							$version,
+							$update_callback
+						),
+						array(
+							'source' => 'wc_db_updates',
+						)
 					);
-					self::$background_updater->push_to_queue( $update_callback );
-					$update_queued = true;
+					WC()->queue()->add(
+						'woocommerce_run_update_callback',
+						array(
+							'update_callback' => $update_callback,
+						),
+						'woocommerce-db-updates'
+					);
 				}
 			}
-		}
-
-		if ( $update_queued ) {
-			self::$background_updater->save()->dispatch();
 		}
 	}
 
