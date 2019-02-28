@@ -42,6 +42,9 @@ class WC_Admin_Setup_Wizard_Tracking {
 			case 'shipping':
 				add_action( 'admin_init', array( __CLASS__, 'track_shipping' ), 1 );
 				break;
+			case 'recommended':
+				add_action( 'admin_init', array( __CLASS__, 'track_recommended' ), 1 );
+				break;
 		}
 	}
 
@@ -123,5 +126,20 @@ class WC_Admin_Setup_Wizard_Tracking {
 		WC_Tracks::record_event( 'obw_shipping', $properties );
 	}
 
+	/**
+	 * Track recommended plugins selected for install.
+	 *
+	 * @return void
+	 */
+	public static function track_recommended() {
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		$properties = array(
+			'setup_storefront'    => isset( $_POST['setup_storefront_theme'] ) && 'yes' === $_POST['setup_storefront_theme'],
+			'setup_automated_tax' => isset( $_POST['setup_automated_taxes'] ) && 'yes' === $_POST['setup_automated_taxes'],
+			'setup_mailchimp'     => isset( $_POST['setup_mailchimp'] ) && 'yes' === $_POST['setup_mailchimp'],
+		);
+		// phpcs:enable
 
+		WC_Tracks::record_event( 'obw_recommended', $properties );
+	}
 }
