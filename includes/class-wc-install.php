@@ -124,6 +124,10 @@ class WC_Install {
 			'wc_update_354_modify_shop_manager_caps',
 			'wc_update_354_db_version',
 		),
+		'3.6.0' => array(
+			'wc_update_360_downloadable_product_permissions_index',
+			'wc_update_360_db_version',
+		),
 	);
 
 	/**
