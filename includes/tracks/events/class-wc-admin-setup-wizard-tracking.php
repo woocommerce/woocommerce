@@ -45,9 +45,24 @@ class WC_Admin_Setup_Wizard_Tracking {
 		}
 
 		add_filter( 'woocommerce_setup_wizard_steps', array( __CLASS__, 'set_obw_steps' ) );
-		add_action( 'admin_init', array( __CLASS__, 'track_start' ), 1 );
 		add_action( 'shutdown', array( __CLASS__, 'track_skip_step' ), 1 );
+		add_action( 'add_option_woocommerce_allow_tracking', array( __CLASS__, 'track_start' ), 10, 2 );
 		self::add_step_save_events();
+	}
+
+	/**
+	 * Track when tracking is opted into and OBW has started.
+	 *
+	 * @param string $option Option name.
+	 * @param string $value  Option value.
+	 * @return void
+	 */
+	public static function track_start( $option, $value ) {
+		if ( 'yes' !== $value || empty( $_GET['page'] ) || 'wc-setup' !== $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			return;
+		}
+
+		WC_Tracks::record_event( 'obw_start' );
 	}
 
 	/**
@@ -79,18 +94,6 @@ class WC_Admin_Setup_Wizard_Tracking {
 				add_action( 'admin_init', array( __CLASS__, 'track_jetpack_activate' ), 1 );
 				break;
 		}
-	}
-
-	/** Track when the OBW has started.
-	 *
-	 * @return void
-	 */
-	public static function track_start() {
-		if ( isset( $_GET['step'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			return;
-		}
-
-		WC_Tracks::record_event( 'obw_start' );
 	}
 
 	/**
