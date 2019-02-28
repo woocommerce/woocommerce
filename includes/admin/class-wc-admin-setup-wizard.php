@@ -331,6 +331,7 @@ class WC_Admin_Setup_Wizard {
 			<?php elseif ( 'recommended' === $this->step || 'activate' === $this->step ) : ?>
 				<a class="wc-setup-footer-links" href="<?php echo esc_url( $this->get_next_step_link() ); ?>"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
 			<?php endif; ?>
+			<?php do_action( 'wc_setup_footer' ); ?>
 			</body>
 		</html>
 		<?php

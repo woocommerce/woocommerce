@@ -44,10 +44,20 @@ class WC_Admin_Setup_Wizard_Tracking {
 			return;
 		}
 
+		add_action( 'wc_setup_footer', array( __CLASS__, 'add_footer_scripts' ) );
 		add_filter( 'woocommerce_setup_wizard_steps', array( __CLASS__, 'set_obw_steps' ) );
 		add_action( 'shutdown', array( __CLASS__, 'track_skip_step' ), 1 );
 		add_action( 'add_option_woocommerce_allow_tracking', array( __CLASS__, 'track_start' ), 10, 2 );
 		self::add_step_save_events();
+	}
+
+	/**
+	 * Add footer scripts to OBW since it does not contain hooks for
+	 * wp_footer to allow the default methods of enqueuing scripts.
+	 */
+	public static function add_footer_scripts() {
+		echo '<script type="text/javascript" src="https://stats.wp.com/w.js?ver=' . gmdate( 'YW' ) . '"></script>'; // @codingStandardsIgnoreLine
+		wc_print_js();
 	}
 
 	/**
