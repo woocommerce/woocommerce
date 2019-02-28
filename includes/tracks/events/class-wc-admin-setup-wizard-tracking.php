@@ -36,6 +36,9 @@ class WC_Admin_Setup_Wizard_Tracking {
 			case 'store_setup':
 				add_action( 'admin_init', array( __CLASS__, 'track_store_setup' ), 1 );
 				break;
+			case 'payment':
+				add_action( 'admin_init', array( __CLASS__, 'track_payments' ), 1 );
+				break;
 		}
 	}
 
@@ -55,5 +58,47 @@ class WC_Admin_Setup_Wizard_Tracking {
 		// phpcs:enable
 
 		WC_Tracks::record_event( 'obw_store_setup', $properties );
+	}
+
+	/**
+	 * Track payment gateways selected.
+	 *
+	 * @return void
+	 */
+	public static function track_payments() {
+		$selected_gateways     = array();
+		$created_accounts      = array();
+		$wc_admin_setup_wizard = new WC_Admin_Setup_Wizard();
+		$gateways              = array_merge( $wc_admin_setup_wizard->get_wizard_in_cart_payment_gateways(), $wc_admin_setup_wizard->get_wizard_manual_payment_gateways() );
+
+		foreach ( $gateways as $gateway_id => $gateway ) {
+			if ( ! empty( $_POST[ 'wc-wizard-service-' . $gateway_id . '-enabled' ] ) ) { // WPCS: CSRF ok, input var ok.
+				$selected_gateways[] = $gateway_id;
+			}
+		}
+
+		// Stripe account being created.
+		if (
+			! empty( $_POST['wc-wizard-service-stripe-enabled'] ) && // WPCS: CSRF ok, input var ok.
+			! empty( $_POST['stripe_create_account'] ) // WPCS: CSRF ok, input var ok.
+		) {
+			$created_accounts[] = 'stripe';
+		}
+		// PayPal account being created.
+		if (
+			! empty( $_POST['wc-wizard-service-ppec_paypal-enabled'] ) && // WPCS: CSRF ok, input var ok.
+			! empty( $_POST['ppec_paypal_reroute_requests'] ) // WPCS: CSRF ok, input var ok.
+		) {
+			$created_accounts[] = 'ppec_paypal';
+		}
+
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput
+		$properties = array(
+			'selected_gateways' => implode( ', ', $selected_gateways ),
+			'created_accounts'  => implode( ', ', $created_accounts ),
+		);
+		// phpcs:enable
+
+		WC_Tracks::record_event( 'obw_payments', $properties );
 	}
 }

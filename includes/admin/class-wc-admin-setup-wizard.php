@@ -1544,7 +1544,7 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @return array
 	 */
-	protected function get_wizard_manual_payment_gateways() {
+	public function get_wizard_manual_payment_gateways() {
 		$gateways = array(
 			'cheque' => array(
 				'name'        => _x( 'Check payments', 'Check payment method', 'woocommerce' ),
