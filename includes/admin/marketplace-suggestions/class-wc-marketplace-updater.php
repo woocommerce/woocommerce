@@ -49,7 +49,7 @@ class WC_Marketplace_Updater {
 
 		$data['updated'] = time();
 
-		$url     = 'https://d3t0oesq8995hv.cloudfront.net/add-ons/marketplace-suggestions.json';
+		$url     = 'https://woocommerce.com/wp-json/wccom/marketplace-suggestions/1.0/suggestions.json';
 		$request = wp_safe_remote_get( $url );
 
 		if ( is_wp_error( $request ) ) {
