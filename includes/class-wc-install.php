@@ -692,7 +692,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   PRIMARY KEY  (permission_id),
   KEY download_order_key_product (product_id,order_id,order_key(16),download_id),
   KEY download_order_product (download_id,order_id,product_id),
-  KEY order_id (order_id)
+  KEY order_id (order_id),
+  KEY user_order_remaining_expires (user_id,order_id,downloads_remaining,access_expires)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
   order_item_id BIGINT UNSIGNED NOT NULL auto_increment,
