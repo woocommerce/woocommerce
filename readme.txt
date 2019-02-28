@@ -257,6 +257,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Make sure local_pickup taxes do not hang around when local_pickup is not available for the selected location during checkout. #22826
 * Fix - Remove Plugin and Theme background installer hooks, cannot run as there are no events scheduled for it. #22799
 * Fix - Trigger zoom if moving cursor over image quickly in product gallery. #22784
+* Fix - PayPal: Add meta data, before changing order status. #22892
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
 * Performance - Improved how versioned transients are set/cleanup to avoid cron. #22511
