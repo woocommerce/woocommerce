@@ -19,17 +19,24 @@ class WC_Admin_Setup_Wizard_Tracking {
 			return;
 		}
 
-		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
-		$current_step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : '';
-		if ( ! empty( $_POST['save_step'] ) ) {
-			switch ( $current_step ) {
-				case '':
-				case 'store_setup':
-					add_action( 'admin_init', array( __CLASS__, 'track_store_setup' ), 1 );
-					break;
-			}
+		self::add_step_save_events();
+	}
+
+	/**
+	 * Track various events when a step is saved.
+	 */
+	public static function add_step_save_events() {
+		if ( empty( $_POST['save_step'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			return;
 		}
-		// phpcs:enable
+
+		$current_step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		switch ( $current_step ) {
+			case '':
+			case 'store_setup':
+				add_action( 'admin_init', array( __CLASS__, 'track_store_setup' ), 1 );
+				break;
+		}
 	}
 
 	/**
