@@ -740,7 +740,7 @@ function wc_update_240_shipping_methods() {
 		if ( version_compare( $shipping_method->get_option( 'version', 0 ), '2.4.0', '<' ) ) {
 			$shipping_classes  = WC()->shipping()->get_shipping_classes();
 			$has_classes       = count( $shipping_classes ) > 0;
-			$cost_key          = $has_classes ? 'no_class_cost': 'cost';
+			$cost_key          = $has_classes ? 'no_class_cost' : 'cost';
 			$min_fee           = $shipping_method->get_option( 'minimum_fee' );
 			$math_cost_strings = array(
 				'cost'          => array(),
