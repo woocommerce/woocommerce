@@ -228,12 +228,17 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
-		$args = parent::prepare_objects_query( $request );
+		$args             = parent::prepare_objects_query( $request );
+		$operator_mapping = array(
+			'in'     => 'IN',
+			'not_in' => 'NOT IN',
+			'and'    => 'AND',
+		);
 
 		$orderby            = $request->get_param( 'orderby' );
 		$order              = $request->get_param( 'order' );
-		$cat_operator       = $request->get_param( 'cat_operator' );
-		$attr_operator      = $request->get_param( 'attr_operator' );
+		$category_operator  = $operator_mapping[ $request->get_param( 'category_operator' ) ];
+		$attribute_operator = $operator_mapping[ $request->get_param( 'attribute_operator' ) ];
 		$catalog_visibility = $request->get_param( 'catalog_visibility' );
 
 		$ordering_args   = WC()->query->get_catalog_ordering_args( $orderby, $order );
@@ -243,19 +248,19 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 			$args['meta_key'] = $ordering_args['meta_key']; // WPCS: slow query ok.
 		}
 
-		if ( $cat_operator && isset( $args['tax_query'] ) ) {
+		if ( $category_operator && isset( $args['tax_query'] ) ) {
 			foreach ( $args['tax_query'] as $i => $tax_query ) {
 				if ( 'product_cat' === $tax_query['taxonomy'] ) {
-					$args['tax_query'][ $i ]['operator']         = $cat_operator;
-					$args['tax_query'][ $i ]['include_children'] = 'AND' === $cat_operator ? false : true;
+					$args['tax_query'][ $i ]['operator']         = $category_operator;
+					$args['tax_query'][ $i ]['include_children'] = 'AND' === $category_operator ? false : true;
 				}
 			}
 		}
 
-		if ( $attr_operator && isset( $args['tax_query'] ) ) {
+		if ( $attribute_operator && isset( $args['tax_query'] ) ) {
 			foreach ( $args['tax_query'] as $i => $tax_query ) {
 				if ( in_array( $tax_query['taxonomy'], wc_get_attribute_taxonomy_names(), true ) ) {
-					$args['tax_query'][ $i ]['operator'] = $attr_operator;
+					$args['tax_query'][ $i ]['operator'] = $attribute_operator;
 				}
 			}
 		}
@@ -310,25 +315,27 @@ class WGPB_Products_Controller extends WC_REST_Products_Controller {
 	public function get_collection_params() {
 		$params                       = parent::get_collection_params();
 		$params['orderby']['enum']    = array_merge( $params['orderby']['enum'], array( 'price', 'popularity', 'rating', 'menu_order' ) );
-		$params['cat_operator']       = array(
+		$params['category_operator']  = array(
 			'description'       => __( 'Operator to compare product category terms.', 'woo-gutenberg-products-block' ),
 			'type'              => 'string',
-			'enum'              => array( 'IN', 'NOT IN', 'AND' ),
-			'sanitize_callback' => 'sanitize_text_field',
+			'enum'              => array( 'in', 'not_in', 'and' ),
+			'default'           => 'in',
+			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['attr_operator']      = array(
+		$params['attribute_operator'] = array(
 			'description'       => __( 'Operator to compare product attribute terms.', 'woo-gutenberg-products-block' ),
 			'type'              => 'string',
-			'enum'              => array( 'IN', 'NOT IN', 'AND' ),
-			'sanitize_callback' => 'sanitize_text_field',
+			'enum'              => array( 'in', 'not_in', 'and' ),
+			'default'           => 'in',
+			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['catalog_visibility'] = array(
 			'description'       => __( 'Determines if hidden or visible catalog products are shown.', 'woo-gutenberg-products-block' ),
 			'type'              => 'string',
 			'enum'              => array( 'visible', 'catalog', 'search', 'hidden' ),
-			'sanitize_callback' => 'sanitize_text_field',
+			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
