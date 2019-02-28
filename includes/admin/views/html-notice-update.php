@@ -18,7 +18,7 @@ $update_url = wp_nonce_url(
 ?>
 <div id="message" class="updated woocommerce-message wc-connect">
 	<p>
-		<strong><?php esc_html_e( 'Database Update Required', 'woocommerce' ); ?></strong>
+		<strong><?php esc_html_e( 'Database update required', 'woocommerce' ); ?></strong>
 	</p>
 	<p>
 		<?php
