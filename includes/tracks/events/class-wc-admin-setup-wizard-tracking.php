@@ -204,7 +204,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 		// If we're going forward more than 1 completed step.
 		if ( $current_step_index > $previous_step_index + 1 ) {
 			$properties = array(
-				'step' => $steps[ $previous_step_index + 1 ],
+				'step' => $steps[ $current_step_index - 1 ],
 			);
 			WC_Tracks::record_event( 'obw_skip_step', $properties );
 		}
@@ -221,5 +221,4 @@ class WC_Admin_Setup_Wizard_Tracking {
 
 		return $steps;
 	}
-
 }
