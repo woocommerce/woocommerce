@@ -64,6 +64,11 @@ class WC_Widget_Price_Filter extends WC_Widget {
 	public function widget( $args, $instance ) {
 		global $wp;
 
+		// Requires lookup table added in 3.6.
+		if ( version_compare( get_option( 'woocommerce_db_version', null ), '3.6', '<' ) ) {
+			return;
+		}
+
 		if ( ! is_shop() && ! is_product_taxonomy() ) {
 			return;
 		}

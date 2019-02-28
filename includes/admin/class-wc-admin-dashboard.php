@@ -201,6 +201,11 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		private function status_widget_stock_rows() {
 			global $wpdb;
 
+			// Requires lookup table added in 3.6.
+			if ( version_compare( get_option( 'woocommerce_db_version', null ), '3.6', '<' ) ) {
+				return;
+			}
+
 			$stock   = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 			$nostock = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
 
