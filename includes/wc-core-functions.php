@@ -750,7 +750,8 @@ function wc_get_theme_support( $prop = '', $default = null ) {
  * @return array Array of dimensions including width, height, and cropping mode. Cropping mode is 0 for no crop, and 1 for hard crop.
  */
 function wc_get_image_size( $image_size ) {
-	$size = wp_cache_get( 'size-' . $image_size, 'woocommerce' );
+	$cache_key = 'size-' . ( is_array( $image_size ) ? implode( '-', $image_size ) : $image_size );
+	$size      = wp_cache_get( $cache_key, 'woocommerce' );
 
 	if ( $size ) {
 		return $size;
@@ -815,7 +816,7 @@ function wc_get_image_size( $image_size ) {
 
 	$size = apply_filters( 'woocommerce_get_image_size_' . $image_size, $size );
 
-	wp_cache_set( 'size-' . $image_size, $size, 'woocommerce' );
+	wp_cache_set( $cache_key, $size, 'woocommerce' );
 
 	return $size;
 }
