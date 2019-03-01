@@ -22,19 +22,14 @@ class WC_Site_Tracking {
 		 * has been applied to turn it off.
 		 */
 
-		if (
-			! apply_filters( 'woocommerce_apply_user_tracking', true ) ||
-			(
-				'yes' !== get_option( 'woocommerce_allow_tracking' ) &&
-				// Check if tracking is actively being opted into.
-				// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput
-				(
-					! isset( $_POST['wc_tracker_checkbox'] ) ||
-					'yes' !== sanitize_text_field( $_POST['wc_tracker_checkbox'] )
-				)
-				// phpcs:enable
-			)
-		) {
+		if ( ! apply_filters( 'woocommerce_apply_user_tracking', true ) ) {
+			return false;
+		}
+
+		// Check if tracking is actively being opted into.
+		$is_obw_opting_in = isset( $_POST['wc_tracker_checkbox'] ) && 'yes' === sanitize_text_field( $_POST['wc_tracker_checkbox'] ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput
+
+		if ( 'yes' !== get_option( 'woocommerce_allow_tracking' ) && ! $is_obw_opting_in ) {
 			return false;
 		}
 
