@@ -218,7 +218,7 @@ class WC_Regenerate_Images {
 		if ( $uncropped ) {
 			$full_size = self::get_full_size_image_dimensions( $attachment_id );
 
-			if ( ! $full_size ) {
+			if ( ! $full_size || ! $full_size['width'] || ! $full_size['height'] ) {
 				return $image;
 			}
 
