@@ -1273,7 +1273,7 @@ function wc_deferred_product_sync( $product_id ) {
 function wc_update_product_lookup_tables() {
 	global $wpdb;
 
-	$result = $wpdb->query(
+	$wpdb->query(
 		"
 		INSERT IGNORE INTO {$wpdb->wc_product_meta_lookup} (`product_id`, `min_price`, `max_price`, `average_rating`, `total_sales`)
 		SELECT
@@ -1290,7 +1290,7 @@ function wc_update_product_lookup_tables() {
 		"
 	);
 
-	$result = $wpdb->query(
+	$wpdb->query(
 		"
 		UPDATE
 			{$wpdb->wc_product_meta_lookup} lookup_table
