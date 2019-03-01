@@ -260,7 +260,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 */
 	public static function track_skip_step() {
 		$previous_step = get_option( 'woocommerce_obw_last_completed_step' );
-		$current_step  = isset( $_GET['step'] ) ? sanitize_text_field( $_GET['step'] ) : false; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput
+		$current_step  = self::get_current_step();
 		if ( ! $previous_step || ! $current_step ) {
 			return;
 		}
