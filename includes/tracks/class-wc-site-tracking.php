@@ -49,18 +49,37 @@ class WC_Site_Tracking {
 		wp_enqueue_script( 'woo-tracks', 'https://stats.wp.com/w.js', array(), gmdate( 'YW' ), true );
 
 		// Expose tracking via a function in the wcTracks global namespace.
-		wc_enqueue_js(
-			"
+		add_filter( 'woocommerce_queued_js', array( __CLASS__, 'add_tracking_function' ), PHP_INT_MAX );
+		// Force wc_print_js to show.
+		wc_enqueue_js( '' );
+
+	}
+
+	/**
+	 * Adds the tracking function to the footer outside the jQuery scope
+	 * to make it readily available to other scripts.
+	 */
+	public static function add_tracking_function( $js ) {
+		global $wc_queued_js;
+		$js = empty( trim( $wc_queued_js ) ) ? '' : $js;
+
+		ob_start();
+		?>
+		<!-- WooCommerce Tracks -->
+		<script type="text/javascript">
 			window.wcTracks = window.wcTracks || {};
 			window.wcTracks.recordEvent = function( name, properties ) {
-				var eventName = '" . WC_Tracks::PREFIX . "' + name;
+				var eventName = '<?php echo WC_Tracks::PREFIX; ?>' + name;
 				var eventProperties = properties || {};
-				eventProperties.url = '" . home_url() . "'
+				eventProperties.url = '<?php echo home_url(); ?>'
 				window._tkq = window._tkq || [];
 				window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );
 			}
-		"
-		);
+		</script>
+		<?php
+		$tracking_js = ob_get_clean();
+
+		return $tracking_js . $js;
 	}
 
 	/**
