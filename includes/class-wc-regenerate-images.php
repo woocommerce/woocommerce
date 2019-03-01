@@ -243,6 +243,11 @@ class WC_Regenerate_Images {
 				return $image;
 			}
 
+			// If the full size image is smaller both ways, don't scale it up.
+			if ( $full_size['height'] < $target_size['height'] && $full_size['width'] < $target_size['width'] ) {
+				return $image;
+			}
+
 			return self::resize_and_return_image( $attachment_id, $image, $size, $icon );
 		}
 
