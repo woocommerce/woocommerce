@@ -1082,7 +1082,7 @@ if ( ! function_exists( 'woocommerce_template_loop_product_title' ) ) {
 	 * Show the product title in the product loop. By default this is an H2.
 	 */
 	function woocommerce_template_loop_product_title() {
-		echo '<h2 class="woocommerce-loop-product__title">' . get_the_title() . '</h2>'; // phpcs:ignore
+		echo '<h2 class="' . esc_attr( apply_filters( 'woocommerce_product_loop_title_classes', 'woocommerce-loop-product__title' ) ) . '">' . get_the_title() . '</h2>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 }
 if ( ! function_exists( 'woocommerce_template_loop_category_title' ) ) {
@@ -1426,6 +1426,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 	$full_size         = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
 	$thumbnail_src     = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
 	$full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
+	$alt_text          = trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
 	$image             = wp_get_attachment_image(
 		$attachment_id,
 		$image_size,
@@ -1433,13 +1434,13 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 		apply_filters(
 			'woocommerce_gallery_image_html_attachment_image_params',
 			array(
-				'title'                   => get_post_field( 'post_title', $attachment_id ),
-				'data-caption'            => get_post_field( 'post_excerpt', $attachment_id ),
-				'data-src'                => $full_src[0],
-				'data-large_image'        => $full_src[0],
-				'data-large_image_width'  => $full_src[1],
-				'data-large_image_height' => $full_src[2],
-				'class'                   => $main_image ? 'wp-post-image' : '',
+				'title'                   => _wp_specialchars( get_post_field( 'post_title', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
+				'data-caption'            => _wp_specialchars( get_post_field( 'post_excerpt', $attachment_id ), ENT_QUOTES, 'UTF-8', true ),
+				'data-src'                => esc_url( $full_src[0] ),
+				'data-large_image'        => esc_url( $full_src[0] ),
+				'data-large_image_width'  => esc_attr( $full_src[1] ),
+				'data-large_image_height' => esc_attr( $full_src[2] ),
+				'class'                   => esc_attr( $main_image ? 'wp-post-image' : '' ),
 			),
 			$attachment_id,
 			$image_size,
@@ -1447,7 +1448,7 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false ) {
 		)
 	);
 
-	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
+	return '<div data-thumb="' . esc_url( $thumbnail_src[0] ) . '" data-thumb-alt="' . esc_attr( $alt_text ) . '" class="woocommerce-product-gallery__image"><a href="' . esc_url( $full_src[0] ) . '">' . $image . '</a></div>';
 }
 
 if ( ! function_exists( 'woocommerce_output_product_data_tabs' ) ) {
@@ -2227,7 +2228,7 @@ if ( ! function_exists( 'woocommerce_get_loop_display_mode' ) ) {
 	 */
 	function woocommerce_get_loop_display_mode() {
 		// Only return products when filtering things.
-		if ( 1 < wc_get_loop_prop( 'current_page' ) || wc_get_loop_prop( 'is_search' ) || wc_get_loop_prop( 'is_filtered' ) ) {
+		if ( wc_get_loop_prop( 'is_search' ) || wc_get_loop_prop( 'is_filtered' ) ) {
 			return 'products';
 		}
 
@@ -2240,6 +2241,10 @@ if ( ! function_exists( 'woocommerce_get_loop_display_mode' ) ) {
 			$parent_id    = get_queried_object_id();
 			$display_type = get_woocommerce_term_meta( $parent_id, 'display_type', true );
 			$display_type = '' === $display_type ? get_option( 'woocommerce_category_archive_display', '' ) : $display_type;
+		}
+
+		if ( ( ! is_shop() || 'subcategories' !== $display_type ) && 1 < wc_get_loop_prop( 'current_page' ) ) {
+			return 'products';
 		}
 
 		// Ensure valid value.
@@ -2668,7 +2673,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				} elseif ( ! is_null( $for_country ) && is_array( $states ) ) {
 
-					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="state_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ) . '">
+					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" class="state_select ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" ' . implode( ' ', $custom_attributes ) . ' data-placeholder="' . esc_attr( $args['placeholder'] ? $args['placeholder'] : esc_html__( 'Select an option&hellip;', 'woocommerce' ) ) . '">
 						<option value="">' . esc_html__( 'Select an option&hellip;', 'woocommerce' ) . '</option>';
 
 					foreach ( $states as $ckey => $cvalue ) {
@@ -2731,7 +2736,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				break;
 			case 'radio':
-				$label_id = current( array_keys( $args['options'] ) );
+				$label_id .= '_' . current( array_keys( $args['options'] ) );
 
 				if ( ! empty( $args['options'] ) ) {
 					foreach ( $args['options'] as $option_key => $option_text ) {

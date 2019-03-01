@@ -23,6 +23,7 @@ class WC_Cache_Helper {
 	 * Hook in methods.
 	 */
 	public static function init() {
+		add_filter( 'nocache_headers', array( __CLASS__, 'additional_nocache_headers' ), 10 );
 		add_action( 'shutdown', array( __CLASS__, 'delete_transients_on_shutdown' ), 10 );
 		add_action( 'template_redirect', array( __CLASS__, 'geolocation_ajax_redirect' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'notices' ) );
@@ -30,6 +31,18 @@ class WC_Cache_Helper {
 		add_action( 'wp', array( __CLASS__, 'prevent_caching' ) );
 		add_action( 'clean_term_cache', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
 		add_action( 'edit_terms', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
+	}
+
+	/**
+	 * Set additonal nocache headers.
+	 *
+	 * @param array $headers Header names and field values.
+	 * @since 3.6.0
+	 */
+	public static function additional_nocache_headers( $headers ) {
+		// Opt-out of Google weblight if page is dynamic e.g. cart/checkout. https://support.google.com/webmasters/answer/6211428?hl=en.
+		$headers['Cache-Control'] = 'no-transform, no-cache, must-revalidate, max-age=0';
+		return $headers;
 	}
 
 	/**
