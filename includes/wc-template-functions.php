@@ -2415,7 +2415,8 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 	 */
 	function woocommerce_get_product_subcategories( $parent_id = 0 ) {
 		$parent_id          = absint( $parent_id );
-		$product_categories = wp_cache_get( 'product-category-hierarchy-' . $parent_id, 'product_cat' );
+		$cache_key          = apply_filters( 'woocommerce_get_product_subcategories_cache_key', 'product-category-hierarchy-' . $parent_id, $parent_id );
+		$product_categories = $cache_key ? wp_cache_get( $cache_key, 'product_cat' ) : false;
 
 		if ( false === $product_categories ) {
 			// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( https://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work.
@@ -2433,7 +2434,9 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 				)
 			);
 
-			wp_cache_set( 'product-category-hierarchy-' . $parent_id, $product_categories, 'product_cat' );
+			if ( $cache_key ) {
+				wp_cache_set( $cache_key, $product_categories, 'product_cat' );
+			}
 		}
 
 		if ( apply_filters( 'woocommerce_product_subcategories_hide_empty', true ) ) {
