@@ -53,10 +53,6 @@ do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, 
  */
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
-?>
-<p><?php esc_html_e( 'Thanks for reading.', 'woocommerce' ); ?></p>
-<?php
-
 /*
  * @hooked WC_Emails::email_footer() Output the email footer
  */

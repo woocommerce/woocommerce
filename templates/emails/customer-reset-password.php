@@ -12,7 +12,7 @@
  *
  * @see https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates/Emails
- * @version 3.5.0
+ * @version 3.6.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -35,6 +35,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php esc_html_e( 'Click here to reset your password', 'woocommerce' ); ?>
 	</a>
 </p>
-<p><?php esc_html_e( 'Thanks for reading.', 'woocommerce' ); ?></p>
 
 <?php do_action( 'woocommerce_email_footer', $email ); ?>
