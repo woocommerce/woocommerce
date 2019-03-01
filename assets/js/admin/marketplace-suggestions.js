@@ -106,8 +106,7 @@
 
 			if ( isButton ) {
 				linkoutButton.classList.add( 'button' );
-			}
-			else {
+			} else {
 				linkoutButton.classList.add( 'linkout' );
 				var linkoutIcon = document.createElement( 'span' );
 				linkoutIcon.classList.add( 'dashicons', 'dashicons-external' );
@@ -132,40 +131,44 @@
 
 		// Render DOM elements for suggestion content.
 		function renderSuggestionContent( title, copy ) {
-			var left = document.createElement( 'div' );
+			var container = document.createElement( 'div' );
 
-			left.classList.add( 'marketplace-suggestion-container-content' );
+			container.classList.add( 'marketplace-suggestion-container-content' );
 
 			if ( title ) {
 				var titleHeading = document.createElement( 'h4' );
 				titleHeading.textContent = title;
-				left.appendChild( titleHeading );
+				container.appendChild( titleHeading );
 			}
 
 			if ( copy ) {
 				var body = document.createElement( 'p' );
 				body.textContent = copy;
-				left.appendChild( body );
+				container.appendChild( body );
 			}
 
-			return left;
+			return container;
 		}
 
 		// Render DOM elements for suggestion call-to-action – button or link with dismiss 'x'.
 		function renderSuggestionCTA( context, slug, url, linkText, linkIsButton, allowDismiss ) {
-			var right = document.createElement( 'div' );
+			var container = document.createElement( 'div' );
 
-			right.classList.add( 'marketplace-suggestion-container-cta' );
+			if ( ! linkText ) {
+				linkText = marketplace_suggestions.i18n_marketplace_suggestions_default_cta;
+			}
+
+			container.classList.add( 'marketplace-suggestion-container-cta' );
 			if ( url && linkText ) {
 				var linkoutElement = renderLinkout( context, slug, url, linkText, linkIsButton );
-				right.appendChild( linkoutElement );
+				container.appendChild( linkoutElement );
 			}
 
 			if ( allowDismiss ) {
-				right.appendChild( renderDismissButton( slug ) )
+				container.appendChild( renderDismissButton( slug ) )
 			}
 
-			return right;
+			return container;
 		}
 
 		// Render a "table banner" style suggestion.
@@ -173,10 +176,6 @@
 		function renderTableBanner( context, slug, iconUrl, title, copy, url, buttonText, allowDismiss ) {
 			if ( ! title || ! url ) {
 				return;
-			}
-
-			if ( ! buttonText ) {
-				buttonText = 'Go';
 			}
 
 			var row = document.createElement( 'tr' );
@@ -312,10 +311,10 @@
 				for ( var i in suggestionsToDisplay ) {
 
 					var linkText = suggestionsToDisplay[ i ]['link-text'];
-					var linkoutIsButton = false;
-					if ( suggestionsToDisplay[ i ]['button-text'] ) {
-						linkText = suggestionsToDisplay[ i ]['button-text'];
-						linkoutIsButton = true;
+					var linkoutIsButton = true;
+					if ( suggestionsToDisplay[ i ]['link-text'] ) {
+						linkText = suggestionsToDisplay[ i ]['link-text'];
+						linkoutIsButton = false;
 					}
 
 					// dismiss is allowed by default
