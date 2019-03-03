@@ -41,7 +41,7 @@ class WC_Site_Tracking {
 	}
 
 	/**
-	 * Add scripts required to record events from javascript.
+	 * Add recordEvent function to the global namespace.
 	 */
 	public static function print_recordEvent() {
 		echo "<script type='text/javascript'>
@@ -59,9 +59,9 @@ class WC_Site_Tracking {
 	}
 
 	/**
-	 * Add scripts required to record events from javascript.
+	 * Define recordEvent as a function that does nothing in case its used when tracking is turned off.
 	 */
-	public static function print_recordEvent_no_tracking() {
+	public static function print_disabled_recordEvent() {
 		echo "<script type='text/javascript'>
 			window.wcTracks = window.wcTracks || {};
 			window.wcTracks.recordEvent = function() {};
@@ -76,7 +76,7 @@ class WC_Site_Tracking {
 		if ( ! self::is_tracking_enabled() ) {
 
 			// Define window.wcTracks.recordEvent in case there is an attempt to use it when tracking is turned off.
-			add_action( 'admin_head', array( __CLASS__, 'print_recordEvent_no_tracking' ) );
+			add_action( 'admin_head', array( __CLASS__, 'print_disabled_recordEvent' ) );
 
 			return;
 		}
