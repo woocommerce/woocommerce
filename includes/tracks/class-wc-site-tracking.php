@@ -43,14 +43,8 @@ class WC_Site_Tracking {
 	/**
 	 * Add scripts required to record events from javascript.
 	 */
-	public static function enqueue_scripts() {
-
-		// Add w.js to the page.
-		wp_enqueue_script( 'woo-tracks', 'https://stats.wp.com/w.js', array(), gmdate( 'YW' ), true );
-
-		// Expose tracking via a function in the wcTracks global namespace.
-		wc_enqueue_js(
-			"
+	public static function print_recordEvent() {
+		echo "<script type='text/javascript'>
 			window.wcTracks = window.wcTracks || {};
 			window.wcTracks.recordEvent = function( name, properties ) {
 				var eventName = '" . WC_Tracks::PREFIX . "' + name;
@@ -61,8 +55,17 @@ class WC_Site_Tracking {
 				window._tkq = window._tkq || [];
 				window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );
 			}
-		"
-		);
+		</script>";
+	}
+
+	/**
+	 * Add scripts required to record events from javascript.
+	 */
+	public static function print_recordEvent_no_tracking() {
+		echo "<script type='text/javascript'>
+			window.wcTracks = window.wcTracks || {};
+			window.wcTracks.recordEvent = function() {};
+		</script>";
 	}
 
 	/**
@@ -73,17 +76,16 @@ class WC_Site_Tracking {
 		if ( ! self::is_tracking_enabled() ) {
 
 			// Define window.wcTracks.recordEvent in case there is an attempt to use it when tracking is turned off.
-			wc_enqueue_js(
-				'
-				window.wcTracks = window.wcTracks || {};
-				window.wcTracks.recordEvent = function() {};
-			'
-			);
+			add_action( 'admin_head', array( __CLASS__, 'print_recordEvent_no_tracking' ) );
 
 			return;
 		}
 
-		self::enqueue_scripts();
+		// Add w.js to the page.
+		wp_enqueue_script( 'woo-tracks', 'https://stats.wp.com/w.js', array(), gmdate( 'YW' ), true );
+
+		// Expose tracking via a function in the wcTracks global namespace.
+		add_action( 'admin_head', array( __CLASS__, 'print_recordEvent' ) );
 
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-admin-setup-wizard-tracking.php';
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-extensions-tracking.php';
