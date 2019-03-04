@@ -140,6 +140,16 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		}
 
 		/**
+		 * Default content to show below main email content.
+		 *
+		 * @since 3.6.0
+		 * @return string
+		 */
+		public function get_default_additional_content() {
+			return __( 'Congratulations on the sale 🙌', 'woocommerce' );
+		}
+
+		/**
 		 * Initialise settings form fields.
 		 */
 		public function init_form_fields() {

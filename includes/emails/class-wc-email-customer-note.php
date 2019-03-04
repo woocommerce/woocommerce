@@ -149,6 +149,16 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 				)
 			);
 		}
+
+		/**
+		 * Default content to show below main email content.
+		 *
+		 * @since 3.6.0
+		 * @return string
+		 */
+		public function get_default_additional_content() {
+			return __( 'Thanks for reading.', 'woocommerce' );
+		}
 	}
 
 endif;

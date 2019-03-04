@@ -135,6 +135,16 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		}
 
 		/**
+		 * Default content to show below main email content.
+		 *
+		 * @since 3.6.0
+		 * @return string
+		 */
+		public function get_default_additional_content() {
+			return __( 'Thanks for reading.', 'woocommerce' );
+		}
+
+		/**
 		 * Initialise settings form fields.
 		 */
 		public function init_form_fields() {

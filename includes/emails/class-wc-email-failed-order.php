@@ -133,6 +133,16 @@ if ( ! class_exists( 'WC_Email_Failed_Order', false ) ) :
 		}
 
 		/**
+		 * Default content to show below main email content.
+		 *
+		 * @since 3.6.0
+		 * @return string
+		 */
+		public function get_default_additional_content() {
+			return __( 'Hopefully they’ll be back. Read more about <a href="https://docs.woocommerce.com/document/managing-orders/#section-10">troubleshooting failed payments</a>.', 'woocommerce' );
+		}
+
+		/**
 		 * Initialise settings form fields.
 		 */
 		public function init_form_fields() {
