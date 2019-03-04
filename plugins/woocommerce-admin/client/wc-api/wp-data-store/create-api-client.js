@@ -19,6 +19,9 @@ function createStore( name ) {
 function createDataHandlers( store ) {
 	return {
 		dataRequested: resourceNames => {
+			if ( document.hidden ) {
+				return;
+			}
 			store.dispatch( {
 				type: 'FRESH_DATA_REQUESTED',
 				resourceNames,
