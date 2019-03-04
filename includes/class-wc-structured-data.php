@@ -302,8 +302,6 @@ class WC_Structured_Data {
 						'reviewRating' => array(
 							'@type'       => 'Rating',
 							'ratingValue' => $rating,
-							'bestRating'  => 5,
-							'worstRating' => 1,
 						),
 						'author'       => array(
 							'@type' => 'Person',
@@ -342,8 +340,6 @@ class WC_Structured_Data {
 			$markup['reviewRating'] = array(
 				'@type'       => 'Rating',
 				'ratingValue' => $rating,
-				'bestRating'  => 5,
-				'worstRating' => 1,
 			);
 		} elseif ( $comment->comment_parent ) {
 			return;
