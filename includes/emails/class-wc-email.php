@@ -229,11 +229,14 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function __construct() {
 		// Find/replace.
-		if ( empty( $this->placeholders ) ) {
-			$this->placeholders = array(
-				'{site_title}' => $this->get_blogname(),
-			);
-		}
+		$this->placeholders = array_merge(
+			array(
+				'{site_title}'   => $this->get_blogname(),
+				'{site_address}' => wp_parse_url( home_url(), PHP_URL_HOST ),
+				'{WooCommerce}'  => '<a href="https://woocommerce.com">WooCommerce</a>',
+			),
+			$this->placeholders
+		);
 
 		// Init settings.
 		$this->init_form_fields();
@@ -822,7 +825,7 @@ class WC_Email extends WC_Settings_API {
 		if (
 			( ! empty( $this->template_html ) || ! empty( $this->template_plain ) )
 			&& ( ! empty( $_GET['move_template'] ) || ! empty( $_GET['delete_template'] ) )
-			&& 'GET' === $_SERVER['REQUEST_METHOD'] // phpcs:ignore WordPress.VIP.ValidatedSanitizedInput.InputNotValidated
+			&& 'GET' === $_SERVER['REQUEST_METHOD'] // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 		) {
 			if ( empty( $_GET['_wc_email_nonce'] ) || ! wp_verify_nonce( wc_clean( wp_unslash( $_GET['_wc_email_nonce'] ) ), 'woocommerce_email_template_nonce' ) ) {
 				wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );
