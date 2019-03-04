@@ -14,19 +14,19 @@ class WC_Products_Tracking {
 	/**
 	 * Init tracking.
 	 */
-	public static function init() {
-		add_action( 'edit_post', array( __CLASS__, 'track_product_updated' ), 10, 2 );
-		add_action( 'transition_post_status', array( __CLASS__, 'track_product_published' ), 10, 3 );
-		add_action( 'created_product_cat', array( __CLASS__, 'track_product_category_created' ) );
+	public function init() {
+		add_action( 'edit_post', array( $this, 'track_product_updated' ), 10, 2 );
+		add_action( 'transition_post_status', array( $this, 'track_product_published' ), 10, 3 );
+		add_action( 'created_product_cat', array( $this, 'track_product_category_created' ) );
 	}
 
 	/**
 	 * Send a Tracks event when a product is updated.
 	 *
-	 * @param int   $product_id Product id.
+	 * @param int    $product_id Product id.
 	 * @param object $post WordPress post.
 	 */
-	public static function track_product_updated( $product_id, $post ) {
+	public function track_product_updated( $product_id, $post ) {
 		if ( 'product' !== $post->post_type ) {
 			return;
 		}
@@ -45,7 +45,7 @@ class WC_Products_Tracking {
 	 * @param string $old_status Previous post_status.
 	 * @param object $post WordPress post.
 	 */
-	public static function track_product_published( $new_status, $old_status, $post ) {
+	public function track_product_published( $new_status, $old_status, $post ) {
 		if (
 			'product' !== $post->post_type ||
 			'publish' !== $new_status ||
@@ -66,7 +66,7 @@ class WC_Products_Tracking {
 	 *
 	 * @param int $category_id Category ID.
 	 */
-	public static function track_product_category_created( $category_id ) {
+	public function track_product_category_created( $category_id ) {
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
 		// Only track category creation from the edit product screen or the
 		// category management screen (which both occur via AJAX).

@@ -12,13 +12,6 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Settings_Tracking {
 	/**
-	 * Singleton instance.
-	 *
-	 * @var WC_Settings_Tracking
-	 */
-	protected static $instance = null;
-
-	/**
 	 * Whitelisted WooCommerce settings to potentially track updates for.
 	 *
 	 * @var array
@@ -33,27 +26,12 @@ class WC_Settings_Tracking {
 	protected $updated_options = array();
 
 	/**
-	 * Instantiate the singleton.
-	 *
-	 * @return WC_Settings_Tracking Singleton instance.
-	 */
-	public static function instance() {
-		if ( is_null( self::$instance ) ) {
-			self::$instance = new WC_Settings_Tracking();
-		}
-
-		return self::$instance;
-	}
-
-	/**
 	 * Init tracking.
 	 */
-	public static function init() {
-		self::instance();
-
-		add_action( 'woocommerce_settings_page_init', array( __CLASS__, 'track_settings_page_view' ) );
-		add_action( 'woocommerce_update_option', array( __CLASS__, 'add_option_to_whitelist' ) );
-		add_action( 'woocommerce_update_options', array( __CLASS__, 'send_settings_change_event' ) );
+	public function init() {
+		add_action( 'woocommerce_settings_page_init', array( $this, 'track_settings_page_view' ) );
+		add_action( 'woocommerce_update_option', array( $this, 'add_option_to_whitelist' ) );
+		add_action( 'woocommerce_update_options', array( $this, 'send_settings_change_event' ) );
 	}
 
 	/**
@@ -66,12 +44,12 @@ class WC_Settings_Tracking {
 	 *
 	 * @param array $option WooCommerce option (config) that might get updated.
 	 */
-	public static function add_option_to_whitelist( $option ) {
-		self::instance()->whitelist[] = $option['id'];
+	public function add_option_to_whitelist( $option ) {
+		$this->whitelist[] = $option['id'];
 
 		// Delay attaching this action since it could get fired a lot.
-		if ( false === has_action( 'update_option', array( __CLASS__, 'track_setting_change' ) ) ) {
-			add_action( 'update_option', array( __CLASS__, 'track_setting_change' ), 10, 3 );
+		if ( false === has_action( 'update_option', array( $this, 'track_setting_change' ) ) ) {
+			add_action( 'update_option', array( $this, 'track_setting_change' ), 10, 3 );
 		}
 	}
 
@@ -82,12 +60,9 @@ class WC_Settings_Tracking {
 	 * @param mixed  $old_value Old value of option.
 	 * @param mixed  $new_value New value of option.
 	 */
-	public static function track_setting_change( $option_name, $old_value, $new_value ) {
-
-		$instance = self::instance();
-
+	public function track_setting_change( $option_name, $old_value, $new_value ) {
 		// Make sure this is a WooCommerce option.
-		if ( ! in_array( $option_name, $instance->whitelist, true ) ) {
+		if ( ! in_array( $option_name, $this->whitelist, true ) ) {
 			return;
 		}
 
@@ -102,23 +77,21 @@ class WC_Settings_Tracking {
 			return;
 		}
 
-		$instance->updated_options[] = $option_name;
+		$this->updated_options[] = $option_name;
 	}
 
 	/**
 	 * Send a Tracks event for WooCommerce options that changed values.
 	 */
-	public static function send_settings_change_event() {
+	public function send_settings_change_event() {
 		global $current_tab;
 
-		$instance = self::instance();
-
-		if ( empty( $instance->updated_options ) ) {
+		if ( empty( $this->updated_options ) ) {
 			return;
 		}
 
 		$properties = array(
-			'settings' => implode( $instance->updated_options, ',' ),
+			'settings' => implode( $this->updated_options, ',' ),
 		);
 
 		if ( isset( $current_tab ) ) {
@@ -131,7 +104,7 @@ class WC_Settings_Tracking {
 	/**
 	 * Send a Tracks event for WooCommerce settings page views.
 	 */
-	public static function track_settings_page_view() {
+	public function track_settings_page_view() {
 		global $current_tab, $current_section;
 
 		$properties = array(

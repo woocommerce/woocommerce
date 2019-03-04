@@ -14,15 +14,15 @@ class WC_Orders_Tracking {
 	/**
 	 * Init tracking.
 	 */
-	public static function init() {
-		add_action( 'woocommerce_order_status_changed', array( __CLASS__, 'track_order_status_change' ), 10, 3 );
-		add_action( 'load-edit.php', array( __CLASS__, 'track_orders_view' ), 10 );
+	public function init() {
+		add_action( 'woocommerce_order_status_changed', array( $this, 'track_order_status_change' ), 10, 3 );
+		add_action( 'load-edit.php', array( $this, 'track_orders_view' ), 10 );
 	}
 
 	/**
 	 * Send a Tracks event when the Orders page is viewed.
 	 */
-	public static function track_orders_view() {
+	public function track_orders_view() {
 		if ( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			WC_Tracks::record_event( 'orders_view' );
 		}
@@ -35,7 +35,7 @@ class WC_Orders_Tracking {
 	 * @param string $previous_status the old WooCommerce order status.
 	 * @param string $next_status the new WooCommerce order status.
 	 */
-	public static function track_order_status_change( $id, $previous_status, $next_status ) {
+	public function track_order_status_change( $id, $previous_status, $next_status ) {
 		$order = wc_get_order( $id );
 		$date  = $order->get_date_created();
 
