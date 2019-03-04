@@ -120,7 +120,8 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 		 */
 		public function get_content_html() {
 			return wc_get_template_html(
-				$this->template_html, array(
+				$this->template_html,
+				array(
 					'email_heading'      => $this->get_heading(),
 					'user_login'         => $this->user_login,
 					'user_pass'          => $this->user_pass,
@@ -140,7 +141,8 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 		 */
 		public function get_content_plain() {
 			return wc_get_template_html(
-				$this->template_plain, array(
+				$this->template_plain,
+				array(
 					'email_heading'      => $this->get_heading(),
 					'user_login'         => $this->user_login,
 					'user_pass'          => $this->user_pass,

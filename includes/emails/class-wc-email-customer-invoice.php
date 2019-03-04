@@ -106,17 +106,13 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		}
 
 		/**
-		 * Return content from the additional_content field.
-		 *
-		 * Displayed above the footer.
+		 * Default content to show below main email content.
 		 *
 		 * @since 3.6.0
 		 * @return string
 		 */
-		public function get_additional_content() {
-			$content = $this->get_option( 'additional_content', '' );
-
-			return apply_filters( 'woocommerce_email_additional_content', $this->format_string( $content ), $this->object, $this );
+		public function get_default_additional_content() {
+			return __( 'Thanks for using {site_address}!', 'woocommerce' );
 		}
 
 		/**
@@ -189,7 +185,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 */
 		public function init_form_fields() {
 			/* translators: %s: list of placeholders */
-			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {site_address}, {order_date}, {order_number}</code>' );
+			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>' );
 			$this->form_fields = array(
 				'subject'      => array(
 					'title'       => __( 'Subject', 'woocommerce' ),
@@ -229,7 +225,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 					'css'         => 'width:400px; height: 75px;',
 					'placeholder' => __( 'N/A', 'woocommerce' ),
 					'type'        => 'textarea',
-					'default'     => 'Thanks for using {site_address}!',
+					'default'     => $this->get_default_additional_content(),
 					'desc_tip'    => true,
 				),
 				'email_type'   => array(

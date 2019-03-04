@@ -34,7 +34,6 @@ if ( ! class_exists( 'WC_Email_Customer_Completed_Order', false ) ) :
 			$this->template_html  = 'emails/customer-completed-order.php';
 			$this->template_plain = 'emails/plain/customer-completed-order.php';
 			$this->placeholders   = array(
-				'{site_title}'   => $this->get_blogname(),
 				'{order_date}'   => '',
 				'{order_number}' => '',
 			);
@@ -100,7 +99,8 @@ if ( ! class_exists( 'WC_Email_Customer_Completed_Order', false ) ) :
 		 */
 		public function get_content_html() {
 			return wc_get_template_html(
-				$this->template_html, array(
+				$this->template_html,
+				array(
 					'order'         => $this->object,
 					'email_heading' => $this->get_heading(),
 					'sent_to_admin' => false,
@@ -117,54 +117,14 @@ if ( ! class_exists( 'WC_Email_Customer_Completed_Order', false ) ) :
 		 */
 		public function get_content_plain() {
 			return wc_get_template_html(
-				$this->template_plain, array(
+				$this->template_plain,
+				array(
 					'order'         => $this->object,
 					'email_heading' => $this->get_heading(),
 					'sent_to_admin' => false,
 					'plain_text'    => true,
 					'email'         => $this,
 				)
-			);
-		}
-
-		/**
-		 * Initialise settings form fields.
-		 */
-		public function init_form_fields() {
-			$this->form_fields = array(
-				'enabled'    => array(
-					'title'   => __( 'Enable/Disable', 'woocommerce' ),
-					'type'    => 'checkbox',
-					'label'   => __( 'Enable this email notification', 'woocommerce' ),
-					'default' => 'yes',
-				),
-				'subject'    => array(
-					'title'       => __( 'Subject', 'woocommerce' ),
-					'type'        => 'text',
-					'desc_tip'    => true,
-					/* translators: %s: list of placeholders */
-					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
-					'placeholder' => $this->get_default_subject(),
-					'default'     => '',
-				),
-				'heading'    => array(
-					'title'       => __( 'Email heading', 'woocommerce' ),
-					'type'        => 'text',
-					'desc_tip'    => true,
-					/* translators: %s: list of placeholders */
-					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
-					'placeholder' => $this->get_default_heading(),
-					'default'     => '',
-				),
-				'email_type' => array(
-					'title'       => __( 'Email type', 'woocommerce' ),
-					'type'        => 'select',
-					'description' => __( 'Choose which format of email to send.', 'woocommerce' ),
-					'default'     => 'html',
-					'class'       => 'email_type wc-enhanced-select',
-					'options'     => $this->get_email_type_options(),
-					'desc_tip'    => true,
-				),
 			);
 		}
 	}
