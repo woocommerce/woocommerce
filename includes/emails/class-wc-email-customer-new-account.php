@@ -123,6 +123,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 				$this->template_html,
 				array(
 					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
 					'user_login'         => $this->user_login,
 					'user_pass'          => $this->user_pass,
 					'blogname'           => $this->get_blogname(),
@@ -144,6 +145,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) :
 				$this->template_plain,
 				array(
 					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
 					'user_login'         => $this->user_login,
 					'user_pass'          => $this->user_pass,
 					'blogname'           => $this->get_blogname(),

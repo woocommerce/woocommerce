@@ -101,11 +101,12 @@ if ( ! class_exists( 'WC_Email_Customer_Completed_Order', false ) ) :
 			return wc_get_template_html(
 				$this->template_html,
 				array(
-					'order'         => $this->object,
-					'email_heading' => $this->get_heading(),
-					'sent_to_admin' => false,
-					'plain_text'    => false,
-					'email'         => $this,
+					'order'              => $this->object,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
+					'sent_to_admin'      => false,
+					'plain_text'         => false,
+					'email'              => $this,
 				)
 			);
 		}
@@ -119,11 +120,12 @@ if ( ! class_exists( 'WC_Email_Customer_Completed_Order', false ) ) :
 			return wc_get_template_html(
 				$this->template_plain,
 				array(
-					'order'         => $this->object,
-					'email_heading' => $this->get_heading(),
-					'sent_to_admin' => false,
-					'plain_text'    => true,
-					'email'         => $this,
+					'order'              => $this->object,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
+					'sent_to_admin'      => false,
+					'plain_text'         => true,
+					'email'              => $this,
 				)
 			);
 		}
