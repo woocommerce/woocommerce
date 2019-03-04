@@ -540,28 +540,6 @@ class WC_Tracker {
 
 		return $min_max;
 	}
-
-	/**
-	 * Make a request when opting out of tracker usage.
-	 *
-	 * @return void
-	 */
-	public static function opt_out_request() {
-		$body = array(
-			'event' => 'opt-out',
-			'email' => apply_filters( 'woocommerce_tracker_admin_email', get_option( 'admin_email' ) ),
-			'url'   => home_url(),
-		);
-		wp_safe_remote_post( self::$api_url . 'event/', array(
-			'method'      => 'POST',
-			'redirection' => 5,
-			'httpversion' => '1.0',
-			'blocking'    => false,
-			'headers'     => array( 'user-agent' => 'WooCommerceTracker/' . md5( esc_url_raw( home_url( '/' ) ) ) . ';' ),
-			'body'        => wp_json_encode( $body ),
-			'cookies'     => array(),
-		) );
-	}
 }
 
 WC_Tracker::init();

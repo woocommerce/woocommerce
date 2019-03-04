@@ -181,11 +181,6 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					__( 'This option will delete ALL of your tax rates, use with caution. This action cannot be reversed.', 'woocommerce' )
 				),
 			),
-			'reset_tracking'                     => array(
-				'name'   => __( 'Reset usage tracking', 'woocommerce' ),
-				'button' => __( 'Reset', 'woocommerce' ),
-				'desc'   => __( 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.', 'woocommerce' ),
-			),
 			'regenerate_thumbnails'              => array(
 				'name'   => __( 'Regenerate shop thumbnails', 'woocommerce' ),
 				'button' => __( 'Regenerate', 'woocommerce' ),
@@ -528,16 +523,6 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations;" );
 				WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 				$message = __( 'Tax rates successfully deleted', 'woocommerce' );
-				break;
-
-			case 'reset_tracking':
-				if ( ! class_exists( 'WC_Tracker' ) ) {
-					include_once WC_ABSPATH . 'includes/class-wc-tracker.php';
-				}
-				WC_Tracker::opt_out_request();
-				delete_option( 'woocommerce_allow_tracking' );
-				WC_Admin_Notices::add_notice( 'tracking' );
-				$message = __( 'Usage tracking settings successfully reset.', 'woocommerce' );
 				break;
 
 			case 'regenerate_thumbnails':
