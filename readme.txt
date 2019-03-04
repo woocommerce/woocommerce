@@ -269,6 +269,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Performance - Improved speed of the `find_matching_product_variation` variation lookup function. #22423
 * Performance - Prevent frontend code from being loaded during REST API. #21090
 * Performance - Load only active webhooks on pages and allow limits to be set by developers. #22760
+* Performance - Index on downloadable_product_permissions to improve speed when fetching downloads for customers. #22906
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 * Localization - Added US Minor Outlying Islands as states to avoid confusion with US. #22468
 * Localization - Dutch postcode validation. #22316
