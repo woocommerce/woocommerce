@@ -207,13 +207,6 @@ class WC_Structured_Data {
 		$markup['sku']         = $product->get_sku();
 		$markup['brand']       = '';
 
-		if ( apply_filters( 'woocommerce_structured_data_product_limit', false ) ) {
-			$markup['url'] = $permalink;
-
-			$this->set_data( apply_filters( 'woocommerce_structured_data_product_limited', $markup, $product ) );
-			return;
-		}
-
 		if ( '' !== $product->get_price() ) {
 			if ( $product->is_type( 'variable' ) ) {
 				$lowest  = $product->get_variation_price( 'min', false );
