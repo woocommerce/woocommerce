@@ -34,7 +34,6 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 			$this->template_html  = 'emails/customer-invoice.php';
 			$this->template_plain = 'emails/plain/customer-invoice.php';
 			$this->placeholders   = array(
-				'{site_title}'   => $this->get_blogname(),
 				'{order_date}'   => '',
 				'{order_number}' => '',
 			);
@@ -107,6 +106,20 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		}
 
 		/**
+		 * Return content from the additional_content field.
+		 *
+		 * Displayed above the footer.
+		 *
+		 * @since 3.6.0
+		 * @return string
+		 */
+		public function get_additional_content() {
+			$content = $this->get_option( 'additional_content', '' );
+
+			return apply_filters( 'woocommerce_email_additional_content', $this->format_string( $content ), $this->object, $this );
+		}
+
+		/**
 		 * Trigger the sending of this email.
 		 *
 		 * @param int      $order_id The order ID.
@@ -140,12 +153,14 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 */
 		public function get_content_html() {
 			return wc_get_template_html(
-				$this->template_html, array(
-					'order'         => $this->object,
-					'email_heading' => $this->get_heading(),
-					'sent_to_admin' => false,
-					'plain_text'    => false,
-					'email'         => $this,
+				$this->template_html,
+				array(
+					'order'              => $this->object,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
+					'sent_to_admin'      => false,
+					'plain_text'         => false,
+					'email'              => $this,
 				)
 			);
 		}
@@ -157,12 +172,14 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 */
 		public function get_content_plain() {
 			return wc_get_template_html(
-				$this->template_plain, array(
-					'order'         => $this->object,
-					'email_heading' => $this->get_heading(),
-					'sent_to_admin' => false,
-					'plain_text'    => true,
-					'email'         => $this,
+				$this->template_plain,
+				array(
+					'order'              => $this->object,
+					'email_heading'      => $this->get_heading(),
+					'additional_content' => $this->get_additional_content(),
+					'sent_to_admin'      => false,
+					'plain_text'         => true,
+					'email'              => $this,
 				)
 			);
 		}
@@ -171,13 +188,14 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		 * Initialise settings form fields.
 		 */
 		public function init_form_fields() {
+			/* translators: %s: list of placeholders */
+			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {site_address}, {order_date}, {order_number}</code>' );
 			$this->form_fields = array(
 				'subject'      => array(
 					'title'       => __( 'Subject', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
-					/* translators: %s: list of placeholders */
-					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'description' => $placeholder_text,
 					'placeholder' => $this->get_default_subject(),
 					'default'     => '',
 				),
@@ -185,8 +203,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 					'title'       => __( 'Email heading', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
-					/* translators: %s: list of placeholders */
-					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'description' => $placeholder_text,
 					'placeholder' => $this->get_default_heading(),
 					'default'     => '',
 				),
@@ -194,8 +211,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 					'title'       => __( 'Subject (paid)', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
-					/* translators: %s: list of placeholders */
-					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'description' => $placeholder_text,
 					'placeholder' => $this->get_default_subject( true ),
 					'default'     => '',
 				),
@@ -203,10 +219,18 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 					'title'       => __( 'Email heading (paid)', 'woocommerce' ),
 					'type'        => 'text',
 					'desc_tip'    => true,
-					/* translators: %s: list of placeholders */
-					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'description' => $placeholder_text,
 					'placeholder' => $this->get_default_heading( true ),
 					'default'     => '',
+				),
+				'additional_content' => array(
+					'title'       => __( 'Additional content', 'woocommerce' ),
+					'description' => __( 'Text to appear to appear below the main email content.', 'woocommerce' ) . ' ' . $placeholder_text,
+					'css'         => 'width:400px; height: 75px;',
+					'placeholder' => __( 'N/A', 'woocommerce' ),
+					'type'        => 'textarea',
+					'default'     => 'Thanks for using {site_address}!',
+					'desc_tip'    => true,
 				),
 				'email_type'   => array(
 					'title'       => __( 'Email type', 'woocommerce' ),
