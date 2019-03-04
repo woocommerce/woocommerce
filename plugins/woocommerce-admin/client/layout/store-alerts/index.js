@@ -61,6 +61,11 @@ class StoreAlerts extends Component {
 
 	render() {
 		const { alerts } = this.props;
+
+		if ( ! alerts || alerts.length === 0 ) {
+			return null;
+		}
+
 		const { currentIndex } = this.state;
 		const numberOfAlerts = alerts.length;
 		const alert = alerts[ currentIndex ] ? alerts[ currentIndex ] : null;
@@ -78,52 +83,50 @@ class StoreAlerts extends Component {
 			) );
 
 		return (
-			numberOfAlerts > 0 && (
-				<Card
-					title={ [
-						alert.icon && <Dashicon key="icon" icon={ alert.icon } />,
-						<Fragment key="title">{ alert.title }</Fragment>,
-					] }
-					className={ className }
-					action={
-						numberOfAlerts > 1 && (
-							<div className="woocommerce-store-alerts__pagination">
-								<IconButton
-									icon="arrow-left-alt2"
-									onClick={ this.previousAlert }
-									disabled={ 0 === currentIndex }
-									label={ __( 'Previous Alert', 'wc-admin' ) }
-								/>
-								<span
-									className="woocommerce-store-alerts__pagination-label"
-									role="status"
-									aria-live="polite"
-								>
-									{ interpolateComponents( {
-										mixedString: __( '{{current /}} of {{total /}}', 'wc-admin' ),
-										components: {
-											current: <Fragment>{ currentIndex + 1 }</Fragment>,
-											total: <Fragment>{ numberOfAlerts }</Fragment>,
-										},
-									} ) }
-								</span>
-								<IconButton
-									icon="arrow-right-alt2"
-									onClick={ this.nextAlert }
-									disabled={ numberOfAlerts - 1 === currentIndex }
-									label={ __( 'Next Alert', 'wc-admin' ) }
-								/>
-							</div>
-						)
-					}
-				>
-					<div
-						className="woocommerce-store-alerts__message"
-						dangerouslySetInnerHTML={ sanitizeHTML( alert.content ) }
-					/>
-					{ actions && <div className="woocommerce-store-alerts__actions">{ actions }</div> }
-				</Card>
-			)
+			<Card
+				title={ [
+					alert.icon && <Dashicon key="icon" icon={ alert.icon } />,
+					<Fragment key="title">{ alert.title }</Fragment>,
+				] }
+				className={ className }
+				action={
+					numberOfAlerts > 1 && (
+						<div className="woocommerce-store-alerts__pagination">
+							<IconButton
+								icon="arrow-left-alt2"
+								onClick={ this.previousAlert }
+								disabled={ 0 === currentIndex }
+								label={ __( 'Previous Alert', 'wc-admin' ) }
+							/>
+							<span
+								className="woocommerce-store-alerts__pagination-label"
+								role="status"
+								aria-live="polite"
+							>
+								{ interpolateComponents( {
+									mixedString: __( '{{current /}} of {{total /}}', 'wc-admin' ),
+									components: {
+										current: <Fragment>{ currentIndex + 1 }</Fragment>,
+										total: <Fragment>{ numberOfAlerts }</Fragment>,
+									},
+								} ) }
+							</span>
+							<IconButton
+								icon="arrow-right-alt2"
+								onClick={ this.nextAlert }
+								disabled={ numberOfAlerts - 1 === currentIndex }
+								label={ __( 'Next Alert', 'wc-admin' ) }
+							/>
+						</div>
+					)
+				}
+			>
+				<div
+					className="woocommerce-store-alerts__message"
+					dangerouslySetInnerHTML={ sanitizeHTML( alert.content ) }
+				/>
+				{ actions && <div className="woocommerce-store-alerts__actions">{ actions }</div> }
+			</Card>
 		);
 	}
 }
