@@ -229,6 +229,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Added `woocommerce_product_price_class` filter to modify product price classes. #22748
 * Dev - `woocommerce_product_stock_status_options` filter added for stock status options. #22834
 * Dev - `woocommerce_before_cart_emptied` action before cart is emptied. #22846
+* Dev - Added filters for shipping options - `woocommerce_shipping_ID_option` and `woocommerce_shipping_ID_instance_option`. #22771
 * Fix - Hide ratings on the shop page when reviews are disabled. #22476
 * Fix - Fix W3C validation of single product page quantity input. #22333
 * Fix - Give product variations a unique guid after creation. #22324
