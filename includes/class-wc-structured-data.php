@@ -205,10 +205,12 @@ class WC_Structured_Data {
 			'description' => wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) ),
 		);
 
-		$markup['image']       = wp_get_attachment_url( $product->get_image_id() );
-		$markup['description'] = wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) );
-		$markup['sku']         = $product->get_sku();
-		$markup['brand']       = '';
+		// Declare SKU or fallback to ID.
+		if ( $product->get_sku() ) {
+			$markup['sku'] = $product->get_sku();
+		} else {
+			$markup['sku'] = $product->get_id();
+		}
 
 		if ( '' !== $product->get_price() ) {
 			if ( $product->is_type( 'variable' ) ) {
