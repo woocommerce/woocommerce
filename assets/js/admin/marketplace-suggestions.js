@@ -45,6 +45,7 @@
 			var dismissButton = document.createElement( 'a' );
 
 			dismissButton.classList.add( 'suggestion-dismiss' );
+			dismissButton.setAttribute( 'title', marketplace_suggestions.i18n_marketplace_suggestions_dismiss_tooltip );
 			dismissButton.setAttribute( 'href', '#' );
 			dismissButton.onclick = function( event ) {
 				event.preventDefault();
