@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WooCommerce Admin
- * Plugin URI: https://woocommerce.com/
+ * Plugin URI: https://github.com/woocommerce/wc-admin
  * Description: A feature plugin for a modern, javascript-driven WooCommerce admin experience.
  * Author: Automattic
  * Author URI: https://woocommerce.com/
