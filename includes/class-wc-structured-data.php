@@ -213,6 +213,9 @@ class WC_Structured_Data {
 		}
 
 		if ( '' !== $product->get_price() ) {
+			// Assume prices will be valid until the end of next year, unless on sale and there is an end date.
+			$price_valid_until = date( 'Y-12-31', current_time( 'timestamp', true ) + YEAR_IN_SECONDS );
+
 			if ( $product->is_type( 'variable' ) ) {
 				$lowest  = $product->get_variation_price( 'min', false );
 				$highest = $product->get_variation_price( 'max', false );
@@ -221,6 +224,7 @@ class WC_Structured_Data {
 					$markup_offer = array(
 						'@type'              => 'Offer',
 						'price'              => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+						'priceValidUntil'    => $price_valid_until,
 						'priceSpecification' => array(
 							'price'                 => wc_format_decimal( $lowest, wc_get_price_decimals() ),
 							'priceCurrency'         => $currency,
@@ -235,9 +239,13 @@ class WC_Structured_Data {
 					);
 				}
 			} else {
+				if ( $product->is_on_sale() && $product->get_date_on_sale_to() ) {
+					$price_valid_until = date( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
+				}
 				$markup_offer = array(
 					'@type'              => 'Offer',
 					'price'              => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+					'priceValidUntil'    => $price_valid_until,
 					'priceSpecification' => array(
 						'price'                 => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
 						'priceCurrency'         => $currency,
@@ -266,43 +274,43 @@ class WC_Structured_Data {
 				'ratingValue' => $product->get_average_rating(),
 				'reviewCount' => $product->get_review_count(),
 			);
-		}
 
-		// Markup most recent rating/review.
-		$comments = get_comments(
-			array(
-				'number'      => 1,
-				'post_id'     => $product->get_id(),
-				'status'      => 'approve',
-				'post_status' => 'publish',
-				'post_type'   => 'product',
-				'parent'      => 0,
-				'meta_key'    => 'rating',
-				'orderby'     => 'meta_value_num',
-			)
-		);
+			// Markup most recent rating/review.
+			$comments = get_comments(
+				array(
+					'number'      => 1,
+					'post_id'     => $product->get_id(),
+					'status'      => 'approve',
+					'post_status' => 'publish',
+					'post_type'   => 'product',
+					'parent'      => 0,
+					'meta_key'    => 'rating',
+					'orderby'     => 'meta_value_num',
+				)
+			);
 
-		if ( $comments ) {
-			foreach ( $comments as $comment ) {
-				$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
+			if ( $comments ) {
+				foreach ( $comments as $comment ) {
+					$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
 
-				if ( ! $rating ) {
-					continue;
+					if ( ! $rating ) {
+						continue;
+					}
+
+					$markup['review'] = array(
+						'@type'        => 'Review',
+						'reviewRating' => array(
+							'@type'       => 'Rating',
+							'ratingValue' => $rating,
+							'bestRating'  => 5,
+							'worstRating' => 1,
+						),
+						'author'       => array(
+							'@type' => 'Person',
+							'name'  => get_comment_author( $comment->comment_ID ),
+						),
+					);
 				}
-
-				$markup['review'] = array(
-					'@type'        => 'Review',
-					'reviewRating' => array(
-						'@type'       => 'Rating',
-						'ratingValue' => $rating,
-						'bestRating'  => 5,
-						'worstRating' => 1,
-					),
-					'author'       => array(
-						'@type' => 'Person',
-						'name'  => get_comment_author( $comment->comment_ID ),
-					),
-				);
 			}
 		}
 
