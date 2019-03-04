@@ -51,11 +51,11 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 <?php } else { ?>
 	<p>
 	<?php
-		/* translators: %s Order date */
-		printf( esc_html__( 'Here are the details of your order placed on %s:', 'woocommerce' ), esc_html( wc_format_datetime( $order->get_date_created() ) ) );
+	/* translators: %s Order date */
+	printf( esc_html__( 'Here are the details of your order placed on %s:', 'woocommerce' ), esc_html( wc_format_datetime( $order->get_date_created() ) ) );
 	?>
 	</p>
-<?php
+	<?php
 }
 
 /**
@@ -82,6 +82,13 @@ do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, 
  * @hooked WC_Emails::email_address() Shows email address
  */
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
+
+/**
+ * Show user-defined additonal content - this is set in each email's settings.
+ */
+if ( $additional_content ) {
+	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
+}
 
 /**
  * Executes the email footer.

@@ -36,4 +36,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</a>
 </p>
 
-<?php do_action( 'woocommerce_email_footer', $email ); ?>
+<?php
+/**
+ * Show user-defined additonal content - this is set in each email's settings.
+ */
+if ( $additional_content ) {
+	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
+}
+
+do_action( 'woocommerce_email_footer', $email );
