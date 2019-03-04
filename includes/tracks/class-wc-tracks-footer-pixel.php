@@ -19,11 +19,11 @@ class WC_Tracks_Footer_Pixel {
 	protected static $instance = null;
 
 	/**
-	 * Tracks pixels to add to footer.
+	 * Events to send to Tracks.
 	 *
 	 * @var array
 	 */
-	protected $pixels = array();
+	protected $events = array();
 
 	/**
 	 * Instantiate the singleton.
@@ -43,13 +43,14 @@ class WC_Tracks_Footer_Pixel {
 	 */
 	public function __construct() {
 		add_action( 'admin_footer', array( $this, 'render_tracking_pixels' ) );
+		add_action( 'shutdown', array( $this, 'send_tracks_requests' ) );
 	}
 
 	/**
 	 * Record a Tracks event
 	 *
 	 * @param  array $event Array of event properties.
-	 * @return bool|WP_Error         True on success, WP_Error on failure.
+	 * @return bool|WP_Error True on success, WP_Error on failure.
 	 */
 	public static function record_event( $event ) {
 		if ( ! $event instanceof WC_Tracks_Event ) {
@@ -60,46 +61,53 @@ class WC_Tracks_Footer_Pixel {
 			return $event;
 		}
 
-		$pixel = $event->build_pixel_url( $event );
-
-		if ( ! $pixel ) {
-			return new WP_Error( 'invalid_pixel', 'cannot generate tracks pixel for given input', 400 );
-		}
-
-		return self::record_pixel( $pixel );
-	}
-
-	/**
-	 * Add a pixel to the queue.
-	 *
-	 * @param string $pixel pixel url and query string.
-	 */
-	public function add_pixel( $pixel ) {
-		$this->pixels[] = $pixel;
-	}
-
-	/**
-	 * Queue a pixel for inclusion.
-	 *
-	 * @param string $pixel pixel url and query string.
-	 * @return bool Always returns true.
-	 */
-	public static function record_pixel( $pixel ) {
-		self::instance()->add_pixel( $pixel );
+		self::instance()->add_event( $event );
 
 		return true;
 	}
 
 	/**
-	 * Add tracking pixels to page footer.
+	 * Add a Tracks event to the queue.
+	 *
+	 * @param WC_Tracks_Event $event Event to track.
+	 */
+	public function add_event( $event ) {
+		$this->events[] = $event;
+	}
+
+	/**
+	 * Add events as tracking pixels to page footer.
 	 */
 	public function render_tracking_pixels() {
-		if ( empty( $this->pixels ) ) {
+		if ( empty( $this->events ) ) {
 			return;
 		}
 
-		foreach ( $this->pixels as $pixel ) {
+		foreach ( $this->events as $event ) {
+			$pixel = $event->build_pixel_url();
+
+			if ( ! $pixel ) {
+				continue;
+			}
+
 			echo '<img src="', esc_url( $pixel ), '" />';
+		}
+
+		$this->events = array();
+	}
+
+	/**
+	 * Fire off API calls for events that weren't converted to pixels.
+	 *
+	 * This handles wp_redirect().
+	 */
+	public function send_tracks_requests() {
+		if ( empty( $this->events ) ) {
+			return;
+		}
+
+		foreach ( $this->events as $event ) {
+			WC_Tracks_Client::record_event( $event );
 		}
 	}
 }
