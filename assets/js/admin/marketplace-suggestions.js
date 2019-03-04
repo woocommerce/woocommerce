@@ -22,6 +22,7 @@
 			var selector = '[data-suggestion-slug=' + suggestionSlug + ']';
 			$( selector ).fadeOut( function() {
 				$( this ).remove();
+				tidyProductEditMetabox();
 			} );
 
 			// save dismissal in user settings
@@ -284,11 +285,16 @@
 				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="orders-list-empty-header"]' ).hide();
 				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="orders-list-empty-footer"]' ).hide();
 			}
+		}
 
-			var showingProductMetaboxSuggestions = _.contains( usedSuggestionsContexts, 'product-edit-meta-tab-body' );
-			if ( ! showingProductMetaboxSuggestions ) {
-				$( '.marketplace-suggestions_options.marketplace-suggestions_tab' ).hide();
-				$( '#marketplace_suggestions.panel.woocommerce_options_panel' ).hide();
+		// Streamline the product edit suggestions tab dependent on what's visible.
+		function tidyProductEditMetabox() {
+			var productMetaboxSuggestions = $(
+				'.marketplace-suggestions-container[data-marketplace-suggestions-context="product-edit-meta-tab-body"]'
+			).children();
+			if ( 0 >= productMetaboxSuggestions.length ) {
+				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="product-edit-meta-tab-header"]' ).slideUp();
+				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="product-edit-meta-tab-body"]' ).fadeOut();
 			}
 		}
 
@@ -404,6 +410,7 @@
 			}
 
 			hidePageElementsForSuggestionState( usedSuggestionsContexts );
+			tidyProductEditMetabox();
 		}
 
 		if ( marketplace_suggestions.suggestions_data ) {
