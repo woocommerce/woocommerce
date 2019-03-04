@@ -197,9 +197,11 @@ class WC_Structured_Data {
 		$permalink = get_permalink( $product->get_id() );
 
 		$markup = array(
-			'@type' => 'Product',
-			'@id'   => $permalink . '#product', // Append '#product' to differentiate between this @id and the @id generated for the Breadcrumblist.
-			'name'  => $product->get_name(),
+			'@type'       => 'Product',
+			'@id'         => $permalink . '#product', // Append '#product' to differentiate between this @id and the @id generated for the Breadcrumblist.
+			'name'        => $product->get_name(),
+			'image'       => wp_get_attachment_url( $product->get_image_id() ),
+			'description' => wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) ),
 		);
 
 		$markup['image']       = wp_get_attachment_url( $product->get_image_id() );
