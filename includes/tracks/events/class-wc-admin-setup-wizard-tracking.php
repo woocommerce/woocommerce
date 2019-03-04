@@ -44,10 +44,46 @@ class WC_Admin_Setup_Wizard_Tracking {
 			return;
 		}
 
+		add_action( 'wc_setup_footer', array( __CLASS__, 'add_footer_scripts' ) );
 		add_filter( 'woocommerce_setup_wizard_steps', array( __CLASS__, 'set_obw_steps' ) );
 		add_action( 'shutdown', array( __CLASS__, 'track_skip_step' ), 1 );
 		add_action( 'add_option_woocommerce_allow_tracking', array( __CLASS__, 'track_start' ), 10, 2 );
+		add_action( 'admin_init', array( __CLASS__, 'track_marketing_signup' ), 1 );
+		add_action( 'wp_print_scripts', array( __CLASS__, 'dequeue_non_whitelisted_scripts' ) );
 		self::add_step_save_events();
+	}
+
+	/**
+	 * Get the name of the current step.
+	 *
+	 * @return string
+	 */
+	public static function get_current_step() {
+		return isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+	}
+
+	/**
+	 * Add footer scripts to OBW since it does not contain hooks for
+	 * wp_footer to allow the default methods of enqueuing scripts.
+	 */
+	public static function add_footer_scripts() {
+		wp_print_scripts();
+		WC_Site_Tracking::add_tracking_function();
+	}
+
+	/**
+	 * Dequeue unwanted scripts from OBW footer.
+	 */
+	public static function dequeue_non_whitelisted_scripts() {
+		global $wp_scripts;
+		$whitelist = array( 'woo-tracks' );
+
+		foreach ( $wp_scripts->queue as $script ) {
+			if ( in_array( $script, $whitelist, true ) ) {
+				continue;
+			}
+			wp_dequeue_script( $script );
+		}
 	}
 
 	/**
@@ -66,6 +102,24 @@ class WC_Admin_Setup_Wizard_Tracking {
 	}
 
 	/**
+	 * Track the marketing form on submit.
+	 */
+	public static function track_marketing_signup() {
+		if ( 'next_steps' !== self::get_current_step() ) {
+			return;
+		}
+
+		wc_enqueue_js(
+			"
+			var form = $( '.newsletter-form-email' ).closest( 'form' );
+			$( document ).on( 'submit', form, function() {
+				window.wcTracks.recordEvent( 'obw_marketing_signup' );
+			} );
+		"
+		);
+	}
+
+	/**
 	 * Track various events when a step is saved.
 	 */
 	public static function add_step_save_events() {
@@ -73,10 +127,9 @@ class WC_Admin_Setup_Wizard_Tracking {
 			return;
 		}
 
-		$current_step = isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-		update_option( 'woocommerce_obw_last_completed_step', $current_step );
+		update_option( 'woocommerce_obw_last_completed_step', self::get_current_step() );
 
-		switch ( $current_step ) {
+		switch ( self::get_current_step() ) {
 			case '':
 			case 'store_setup':
 				add_action( 'admin_init', array( __CLASS__, 'track_store_setup' ), 1 );
@@ -207,7 +260,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 */
 	public static function track_skip_step() {
 		$previous_step = get_option( 'woocommerce_obw_last_completed_step' );
-		$current_step  = isset( $_GET['step'] ) ? sanitize_text_field( $_GET['step'] ) : false; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput
+		$current_step  = self::get_current_step();
 		if ( ! $previous_step || ! $current_step ) {
 			return;
 		}
