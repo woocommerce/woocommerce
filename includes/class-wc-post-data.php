@@ -114,23 +114,7 @@ class WC_Post_Data {
 	 * Delete product view transients when needed e.g. when post status changes, or visibility/stock status is modified.
 	 */
 	public static function delete_product_query_transients() {
-		// Increments the transient version to invalidate cache.
 		WC_Cache_Helper::get_transient_version( 'product_query', true );
-
-		// If not using an external caching system, we can clear the transients out manually and avoid filling our DB.
-		if ( ! wp_using_ext_object_cache() ) {
-			global $wpdb;
-
-			$wpdb->query(
-				"
-				DELETE FROM `$wpdb->options`
-				WHERE `option_name` LIKE ('\_transient\_wc\_uf\_pid\_%')
-				OR `option_name` LIKE ('\_transient\_timeout\_wc\_uf\_pid\_%')
-				OR `option_name` LIKE ('\_transient\_wc\_products\_will\_display\_%')
-				OR `option_name` LIKE ('\_transient\_timeout\_wc\_products\_will\_display\_%')
-			"
-			);
-		}
 	}
 
 	/**
