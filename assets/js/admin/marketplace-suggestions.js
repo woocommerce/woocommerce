@@ -381,14 +381,18 @@
 						var rows = $( this ).children();
 						var minRow = 3;
 
+						$( content ).hide();
+
 						if ( rows.length <= minRow ) {
 							// if small number of rows, append at end
 							$( this ).append( content );
 						}
 						else {
-							// for more rows, append
+							// for more rows, insert
 							$( rows[ minRow - 1 ] ).after( content );
 						}
+
+						$( content ).fadeIn();
 
 						usedSuggestionsContexts.push( context );
 
