@@ -31,7 +31,12 @@ if ( 'yes' === get_option( 'woocommerce_registration_generate_password' ) && $pa
 	echo sprintf( esc_html__( 'Your password has been automatically generated: %s.', 'woocommerce' ), esc_html( $user_pass ) ) . "\n\n";
 }
 
-echo esc_html__( 'We look forward to seeing you soon.', 'woocommerce' ) . "\n\n";
+/**
+ * Show user-defined additonal content - this is set in each email's settings.
+ */
+if ( $additional_content ) {
+	echo "\n" . esc_html( wp_strip_all_tags( wptexturize( $additional_content ) ) );
+}
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 

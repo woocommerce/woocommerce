@@ -48,7 +48,12 @@ do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, 
  */
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
-_e( 'We look forward to fulfilling your order soon.', 'woocommerce' ); // phpcs:ignore WordPress.XSS.EscapeOutput
+/**
+ * Show user-defined additonal content - this is set in each email's settings.
+ */
+if ( $additional_content ) {
+	echo "\n" . esc_html( wp_strip_all_tags( wptexturize( $additional_content ) ) );
+}
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
