@@ -268,6 +268,44 @@ class WC_Structured_Data {
 			);
 		}
 
+		// Markup most recent rating/review.
+		$comments = get_comments(
+			array(
+				'number'      => 1,
+				'post_id'     => $product->get_id(),
+				'status'      => 'approve',
+				'post_status' => 'publish',
+				'post_type'   => 'product',
+				'parent'      => 0,
+				'meta_key'    => 'rating',
+				'orderby'     => 'meta_value_num',
+			)
+		);
+
+		if ( $comments ) {
+			foreach ( $comments as $comment ) {
+				$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
+
+				if ( ! $rating ) {
+					continue;
+				}
+
+				$markup['review'] = array(
+					'@type'        => 'Review',
+					'reviewRating' => array(
+						'@type'       => 'Rating',
+						'ratingValue' => $rating,
+						'bestRating'  => 5,
+						'worstRating' => 1,
+					),
+					'author'       => array(
+						'@type' => 'Person',
+						'name'  => get_comment_author( $comment->comment_ID ),
+					),
+				);
+			}
+		}
+
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
 	}
 
@@ -294,8 +332,10 @@ class WC_Structured_Data {
 
 		if ( $rating ) {
 			$markup['reviewRating'] = array(
-				'@type'       => 'rating',
+				'@type'       => 'Rating',
 				'ratingValue' => $rating,
+				'bestRating'  => 5,
+				'worstRating' => 1,
 			);
 		} elseif ( $comment->comment_parent ) {
 			return;
