@@ -48,21 +48,43 @@ class WC_Site_Tracking {
 		// Add w.js to the page.
 		wp_enqueue_script( 'woo-tracks', 'https://stats.wp.com/w.js', array(), gmdate( 'YW' ), true );
 
-		// Expose tracking via a function in the wcTracks global namespace.
-		wc_enqueue_js(
-			"
+		// Expose tracking via a function in the wcTracks global namespace directly before wc_print_js.
+		add_filter( 'admin_footer', array( __CLASS__, 'add_tracking_function' ), 24 );
+
+	}
+
+	/**
+	 * Adds the tracking function to the admin footer.
+	 */
+	public static function add_tracking_function() {
+		?>
+		<!-- WooCommerce Tracks -->
+		<script type="text/javascript">
 			window.wcTracks = window.wcTracks || {};
 			window.wcTracks.recordEvent = function( name, properties ) {
-				var eventName = '" . WC_Tracks::PREFIX . "' + name;
+				var eventName = '<?php echo esc_attr( WC_Tracks::PREFIX ); ?>' + name;
 				var eventProperties = properties || {};
-				eventProperties.url = '" . home_url() . "'
-				eventProperties.products_count = '" . WC_Tracks::get_products_count() . "'
-				eventProperties.orders_gross = '" . WC_Tracks::get_total_revenue() . "'
+				eventProperties.url = '<?php echo esc_html( home_url() ); ?>'
+				eventProperties.products_count = '<?php echo intval( WC_Tracks::get_products_count() ); ?>';
+				eventProperties.orders_gross = '<?php echo floatval( WC_Tracks::get_total_revenue() ); ?>';
 				window._tkq = window._tkq || [];
 				window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );
 			}
-		"
-		);
+		</script>
+		<?php
+	}
+
+	/**
+	 * Add empty tracking function to admin footer when tracking is disabled in case
+	 * it's called without checking if it's defined beforehand.
+	 */
+	public static function add_empty_tracking_function() {
+		?>
+		<script type="text/javascript">
+			window.wcTracks = window.wcTracks || {};
+			window.wcTracks.recordEvent = function() {};
+		</script>
+		<?php
 	}
 
 	/**
@@ -73,12 +95,7 @@ class WC_Site_Tracking {
 		if ( ! self::is_tracking_enabled() ) {
 
 			// Define window.wcTracks.recordEvent in case there is an attempt to use it when tracking is turned off.
-			wc_enqueue_js(
-				'
-				window.wcTracks = window.wcTracks || {};
-				window.wcTracks.recordEvent = function() {};
-			'
-			);
+			add_filter( 'admin_footer', array( __CLASS__, 'add_empty_tracking_function' ), 24 );
 
 			return;
 		}
