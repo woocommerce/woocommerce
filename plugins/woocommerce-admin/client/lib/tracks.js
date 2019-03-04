@@ -8,18 +8,15 @@
  */
 
 export function recordEvent( eventName, eventProperties ) {
-	if ( ! wcSettings.trackingEnabled || 'development' === process.env.NODE_ENV ) {
+	if (
+		! window.wcTracks ||
+		'function' !== typeof window.wcTracks.recordEvent ||
+		'development' === process.env.NODE_ENV
+	) {
 		return false;
 	}
 
-	// @todo Should we add validation/whitelist of tracks
-	// @todo Don't send tracks in dev envs maybe based off WP_DEBUG?
-	const event = `wca_${ eventName }`;
-
-	// Should already be initialized via inline ./lib/clicent-assets.php
-	// but just being extra safe
-	window._tkq = window._tkq || [];
-	window._tkq.push( [ 'recordEvent', event, eventProperties ] );
+	window.wcTracks.recordEvent( eventName, eventProperties );
 }
 
 /**

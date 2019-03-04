@@ -148,19 +148,6 @@ function format_order_statuses( $statuses ) {
 function wc_admin_print_script_settings() {
 	global $wp_locale;
 
-	// Add Tracks script to the DOM if tracking is opted in, and Jetpack is installed/activated.
-	$tracking_enabled = 'yes' === get_option( 'woocommerce_allow_tracking', 'no' );
-	$tracking_script  = '';
-	if ( $tracking_enabled && defined( 'JETPACK__VERSION' ) ) {
-		$tracking_script  = "var wc_tracking_script = document.createElement( 'script' );\n";
-		$tracking_script .= "wc_tracking_script.src = '//stats.wp.com/w.js';\n"; // @todo Version/cache buster.
-		$tracking_script .= "wc_tracking_script.type = 'text/javascript';\n";
-		$tracking_script .= "wc_tracking_script.async = true;\n";
-		$tracking_script .= "wc_tracking_script.defer = true;\n";
-		$tracking_script .= "window._tkq = window._tkq || [];\n";
-		$tracking_script .= "document.head.appendChild( wc_tracking_script );\n";
-	}
-
 	$preload_data_endpoints = array(
 		'countries'              => '/wc/v4/data/countries',
 		'performanceIndicators'  => '/wc/v4/reports/performance-indicators/allowed',
@@ -189,18 +176,17 @@ function wc_admin_print_script_settings() {
 	 * `wcAssetUrl` can be used in its place throughout the codebase.
 	 */
 	$settings = array(
-		'adminUrl'              => admin_url(),
-		'wcAssetUrl'            => plugins_url( 'assets/', WC_PLUGIN_FILE ),
-		'wcAdminAssetUrl'       => plugins_url( 'images/', wc_admin_dir_path( 'wc-admin.php' ) ), // Temporary for plugin. See above.
-		'embedBreadcrumbs'      => wc_admin_get_embed_breadcrumbs(),
-		'siteLocale'            => esc_attr( get_bloginfo( 'language' ) ),
-		'currency'              => wc_admin_currency_settings(),
-		'orderStatuses'         => format_order_statuses( wc_get_order_statuses() ),
-		'stockStatuses'         => wc_get_product_stock_status_options(),
-		'siteTitle'             => get_bloginfo( 'name' ),
-		'trackingEnabled'       => $tracking_enabled,
-		'dataEndpoints'         => array(),
-		'l10n'                  => array(
+		'adminUrl'         => admin_url(),
+		'wcAssetUrl'       => plugins_url( 'assets/', WC_PLUGIN_FILE ),
+		'wcAdminAssetUrl'  => plugins_url( 'images/', wc_admin_dir_path( 'wc-admin.php' ) ), // Temporary for plugin. See above.
+		'embedBreadcrumbs' => wc_admin_get_embed_breadcrumbs(),
+		'siteLocale'       => esc_attr( get_bloginfo( 'language' ) ),
+		'currency'         => wc_admin_currency_settings(),
+		'orderStatuses'    => format_order_statuses( wc_get_order_statuses() ),
+		'stockStatuses'    => wc_get_product_stock_status_options(),
+		'siteTitle'        => get_bloginfo( 'name' ),
+		'dataEndpoints'    => array(),
+		'l10n'             => array(
 			'userLocale'    => get_user_locale(),
 			'weekdaysShort' => array_values( $wp_locale->weekday_abbrev ),
 		),
@@ -215,9 +201,6 @@ function wc_admin_print_script_settings() {
 	$settings = apply_filters( 'wc_admin_wc_settings', $settings );
 	?>
 	<script type="text/javascript">
-		<?php
-		echo $tracking_script; // WPCS: XSS ok.
-		?>
 		var wcSettings = <?php echo wp_json_encode( $settings ); ?>;
 	</script>
 	<?php
