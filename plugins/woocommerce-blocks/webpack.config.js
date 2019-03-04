@@ -114,7 +114,7 @@ const GutenbergBlocksConfig = {
 		],
 	},
 	plugins: [
-		new CleanWebpackPlugin( 'build', {} ),
+		new CleanWebpackPlugin(),
 		new MiniCssExtractPlugin( {
 			filename: '[name].css',
 		} ),
