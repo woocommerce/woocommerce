@@ -77,7 +77,7 @@
   },
   "dependencies": {
     "@woocommerce/components": "1.6.0",
-    "gridicons": "^3.1.1"
+    "gridicons": "3.1.1"
   },
   "husky": {
     "hooks": {
