@@ -1,5 +1,5 @@
-/* global marketplace_suggestions ajaxurl */
-( function( $, marketplace_suggestions ) {
+/* global marketplace_suggestions, ajaxurl */
+( function( $, marketplace_suggestions, ajaxurl ) {
 	$( function() {
 		if ( 'undefined' === typeof marketplace_suggestions ) {
 			return;
@@ -31,7 +31,7 @@
 				{
 					'action': 'woocommerce_add_dismissed_marketplace_suggestion',
 					'_wpnonce': marketplace_suggestions.dismiss_suggestion_nonce,
-					'slug': suggestionSlug,
+					'slug': suggestionSlug
 				}
 			);
 
@@ -49,7 +49,7 @@
 			dismissButton.onclick = function( event ) {
 				event.preventDefault();
 				dismissSuggestion( suggestionSlug );
-			}
+			};
 
 			return dismissButton;
 		}
@@ -99,11 +99,11 @@
 			linkoutButton.setAttribute( 'target', 'blank' );
 			linkoutButton.textContent = text;
 
-			linkoutButton.onclick = function( event ) {
+			linkoutButton.onclick = function() {
 				window.wcTracks.recordEvent( 'marketplace_suggestion_clicked', {
 					suggestionSlug: slug
 				} );
-			}
+			};
 
 			if ( isButton ) {
 				linkoutButton.classList.add( 'button' );
@@ -166,7 +166,7 @@
 			}
 
 			if ( allowDismiss ) {
-				container.appendChild( renderDismissButton( slug ) )
+				container.appendChild( renderDismissButton( slug ) );
 			}
 
 			return container;
