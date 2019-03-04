@@ -53,7 +53,7 @@ class WC_Tracks_Event {
 	 */
 	public function record() {
 		if (
-			( defined( 'DOING_AJAX' ) && DOING_AJAX ) ||
+			wp_doing_ajax() ||
 			( defined( 'REST_REQUEST' ) && REST_REQUEST )
 		) {
 			return WC_Tracks_Client::record_event( $this );
