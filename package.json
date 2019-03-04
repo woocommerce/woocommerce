@@ -66,7 +66,7 @@
     "npm": ">=6.4.1"
   },
   "dependencies": {
-    "@woocommerce/block-library": "https://ryelle.codes/woocommerce-block-library-2.0.0-dev.tgz",
+    "@woocommerce/block-library": "2.0.0-alpha",
     "github-contributors-list": "https://github.com/woocommerce/github-contributors-list/tarball/master"
   },
   "husky": {
