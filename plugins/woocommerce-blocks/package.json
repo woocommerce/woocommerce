@@ -1,14 +1,20 @@
 {
-  "name": "woocommerce-product-blocks",
+  "name": "@woocommerce/block-library",
   "title": "WooCommerce Blocks",
-  "version": "2.0.0-dev",
-  "homepage": "https://woocommerce.com/",
+  "author": "Automattic",
+  "version": "2.0.0-alpha",
+  "description": "WooCommerce blocks for the Gutenberg editor.",
+  "homepage": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/",
+  "keywords": [
+    "woocommerce",
+    "wordpress",
+    "blocks"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com:woocommerce/woocommerce-gutenberg-products-block.git"
   },
   "license": "GPL-3.0+",
-  "main": "Gruntfile.js",
   "scripts": {
     "build": "cross-env BABEL_ENV=default NODE_ENV=production webpack",
     "start": "cross-env BABEL_ENV=default webpack --watch",
@@ -87,12 +93,11 @@
     }
   },
   "files": [
-    "assets/**",
-    "build/**",
-    "includes/**",
-    "languages/**",
+    "assets/**/*.{js,scss,php}",
+    "build/**/*.{js,css}",
+    "includes/**/*.php",
+    "languages/**/*.json",
     "license.txt",
-    "readme.txt",
     "woocommerce-gutenberg-products-block.php"
   ]
 }
