@@ -408,6 +408,14 @@ function wc_array_filter_default_attributes( $attribute ) {
  * @return stdClass|null
  */
 function wc_get_attribute( $id ) {
+	$prefix      = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
+	$cache_key   = $prefix . 'attribute-' . $id;
+	$cache_value = wp_cache_get( $cache_key, 'woocommerce-attributes' );
+
+	if ( $cache_value ) {
+		return $cache_value;
+	}
+
 	global $wpdb;
 
 	$data = $wpdb->get_row(
@@ -432,6 +440,8 @@ function wc_get_attribute( $id ) {
 	$attribute->type         = $data->attribute_type;
 	$attribute->order_by     = $data->attribute_orderby;
 	$attribute->has_archives = (bool) $data->attribute_public;
+
+	wp_cache_set( $cache_key, $attribute, 'woocommerce-attributes' );
 
 	return $attribute;
 }
