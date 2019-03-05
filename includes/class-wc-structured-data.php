@@ -312,6 +312,11 @@ class WC_Structured_Data {
 			}
 		}
 
+		// Check we have required data.
+		if ( empty( $markup['aggregateRating'] ) && empty( $markup['offers'] ) && empty( $markup['review'] ) ) {
+			return;
+		}
+
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
 	}
 
