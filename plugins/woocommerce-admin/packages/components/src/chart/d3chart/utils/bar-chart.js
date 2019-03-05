@@ -47,7 +47,7 @@ export const drawBars = ( node, data, params, scales, formats, tooltip ) => {
 				key: row.key,
 				focus: row.focus,
 				value: get( d, [ row.key, 'value' ], 0 ),
-				label: get( d, [ row.key, 'label' ], '' ),
+				label: row.label,
 				visible: row.visible,
 				date: d.date,
 			} ) )
@@ -63,14 +63,10 @@ export const drawBars = ( node, data, params, scales, formats, tooltip ) => {
 		.attr( 'pointer-events', 'none' )
 		.attr( 'tabindex', '0' )
 		.attr( 'aria-label', d => {
-			let label = d.key;
+			let label = d.label || d.key;
 			if ( params.mode === 'time-comparison' ) {
-				if ( d.label ) {
-					label = d.label;
-				} else {
-					const dayData = data.find( e => e.date === d.date );
-					label = formats.screenReaderFormat( moment( dayData[ d.key ].labelDate ).toDate() );
-				}
+				const dayData = data.find( e => e.date === d.date );
+				label = formats.screenReaderFormat( moment( dayData[ d.key ].labelDate ).toDate() );
 			}
 			return `${ label } ${ tooltip.valueFormat( d.value ) }`;
 		} )

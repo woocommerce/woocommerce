@@ -1,3 +1,6 @@
+# (unreleased)
+- Chart legend component now uses withInstanceId HOC so the ids used in several HTML elements are unique.
+
 # 1.6.0
 - Chart component: new props `emptyMessage` and `baseValue`. When an empty message is provided, it will be displayed on top of the chart if there are no values different than `baseValue`.
 - Chart component: remove d3-array dependency.

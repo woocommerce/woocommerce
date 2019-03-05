@@ -74,10 +74,10 @@ export const getLineData = ( data, orderedKeys ) =>
 		key: row.key,
 		focus: row.focus,
 		visible: row.visible,
+		label: row.label,
 		values: data.map( d => ( {
 			date: d.date,
 			focus: row.focus,
-			label: get( d, [ row.key, 'label' ], '' ),
 			value: get( d, [ row.key, 'value' ], 0 ),
 			visible: row.visible,
 		} ) ),
@@ -97,7 +97,7 @@ export const drawLines = ( node, data, params, scales, formats, tooltip ) => {
 		.append( 'g' )
 		.attr( 'class', 'line-g' )
 		.attr( 'role', 'region' )
-		.attr( 'aria-label', d => d.key );
+		.attr( 'aria-label', d => d.label || d.key );
 	const dateSpaces = getDateSpaces( data, params.uniqueDates, width, scales.xScale );
 
 	let lineStroke = width <= wideBreak || params.uniqueDates.length > 50 ? 2 : 3;
@@ -138,9 +138,7 @@ export const drawLines = ( node, data, params, scales, formats, tooltip ) => {
 			.attr( 'cy', d => scales.yScale( d.value ) )
 			.attr( 'tabindex', '0' )
 			.attr( 'aria-label', d => {
-				const label = d.label
-					? d.label
-					: formats.screenReaderFormat( d.date instanceof Date ? d.date : moment( d.date ).toDate() );
+				const label = formats.screenReaderFormat( d.date instanceof Date ? d.date : moment( d.date ).toDate() );
 				return `${ label } ${ tooltip.valueFormat( d.value ) }`;
 			} )
 			.on( 'focus', ( d, i, nodes ) => {

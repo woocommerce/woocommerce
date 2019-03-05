@@ -5,6 +5,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Component, createRef } from '@wordpress/element';
+import { withInstanceId } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 
 /**
@@ -57,6 +58,7 @@ class D3Legend extends Component {
 			interactive,
 			legendDirection,
 			legendValueFormat,
+			instanceId,
 			totalLabel,
 		} = this.props;
 		const { isScrollable } = this.state;
@@ -89,7 +91,7 @@ class D3Legend extends Component {
 								'woocommerce-legend__item-checked': row.visible,
 							} ) }
 							key={ row.key }
-							id={ row.key }
+							id={ `woocommerce-legend-${ instanceId }__item__${ row.key }` }
 							onMouseEnter={ handleLegendHover }
 							onMouseLeave={ handleLegendHover }
 							onBlur={ handleLegendHover }
@@ -97,7 +99,7 @@ class D3Legend extends Component {
 						>
 							<button
 								onClick={ handleLegendToggle }
-								id={ row.key }
+								id={ `woocommerce-legend-${ instanceId }__item-button__${ row.key }` }
 								disabled={
 									( row.visible && numberOfRowsVisible <= 1 ) ||
 									( ! row.visible && numberOfRowsVisible >= selectionLimit ) ||
@@ -108,18 +110,17 @@ class D3Legend extends Component {
 									: ''
 								}
 							>
-								<div className="woocommerce-legend__item-container" id={ row.key }>
+								<div className="woocommerce-legend__item-container">
 									<span
 										className={ classNames( 'woocommerce-legend__item-checkmark', {
 											'woocommerce-legend__item-checkmark-checked': row.visible,
 										} ) }
-										id={ row.key }
 										style={ row.visible ? { color: getColor( keys, colorScheme )( row.key ) } : null }
 									/>
-									<span className="woocommerce-legend__item-title" id={ row.key }>
-										{ row.key }
+									<span className="woocommerce-legend__item-title">
+										{ row.label }
 									</span>
-									<span className="woocommerce-legend__item-total" id={ row.key }>
+									<span className="woocommerce-legend__item-total">
 										{ getFormatter( legendValueFormat )( row.total ) }
 									</span>
 								</div>
@@ -173,6 +174,8 @@ D3Legend.propTypes = {
 	 * comparison charts when there are many.
 	 */
 	totalLabel: PropTypes.string,
+	// from withInstanceId
+	instanceId: PropTypes.number,
 };
 
 D3Legend.defaultProps = {
@@ -181,4 +184,4 @@ D3Legend.defaultProps = {
 	legendValueFormat: ',',
 };
 
-export default D3Legend;
+export default withInstanceId( D3Legend );

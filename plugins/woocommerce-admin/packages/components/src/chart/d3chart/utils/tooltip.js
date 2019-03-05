@@ -105,7 +105,7 @@ class ChartTooltip {
 		if ( d[ row.key ].labelDate ) {
 			return this.labelFormat( moment( d[ row.key ].labelDate ).toDate() );
 		}
-		return row.key;
+		return row.label || row.key;
 	}
 
 	show( d, triggerElement, parentNode, elementWidthRatio = 1 ) {

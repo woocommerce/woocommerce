@@ -51,18 +51,20 @@ d3FormatDefaultLocale( {
 } );
 
 function getOrderedKeys( props, previousOrderedKeys = [] ) {
-	const updatedKeys = [
-		...new Set(
-			props.data.reduce( ( accum, curr ) => {
-				Object.keys( curr ).forEach( key => key !== 'date' && accum.push( key ) );
-				return accum;
-			}, [] )
-		),
-	].map( ( key ) => {
+	const uniqueKeys = props.data.reduce( ( accum, curr ) => {
+		Object.entries( curr ).forEach( ( [ key, value ] ) => {
+			if ( key !== 'date' && ! accum[ key ] ) {
+				accum[ key ] = value.label;
+			}
+		} );
+		return accum;
+	}, {} );
+	const updatedKeys = Object.entries( uniqueKeys ).map( ( [ key, label ] ) => {
 		const previousKey = previousOrderedKeys.find( item => key === item.key );
 		const defaultVisibleStatus = 'item-comparison' === props.mode ? false : true;
 		return {
 			key,
+			label,
 			total: props.data.reduce( ( a, c ) => a + c[ key ].value, 0 ),
 			visible: previousKey ? previousKey.visible : defaultVisibleStatus,
 			focus: true,
@@ -155,9 +157,10 @@ class Chart extends Component {
 		if ( ! interactiveLegend ) {
 			return;
 		}
+		const key = event.currentTarget.id.split( '_' ).pop();
 		const orderedKeys = this.state.orderedKeys.map( d => ( {
 			...d,
-			visible: d.key === event.target.id ? ! d.visible : d.visible,
+			visible: d.key === key ? ! d.visible : d.visible,
 		} ) );
 		const copyEvent = { ...event }; // can't pass a synthetic event into the hover handler
 		this.setState(
@@ -172,10 +175,11 @@ class Chart extends Component {
 	}
 
 	handleLegendHover( event ) {
-		const hoverTarget = this.state.orderedKeys.filter( d => d.key === event.target.id )[ 0 ];
+		const key = event.currentTarget.id.split( '__' ).pop();
+		const hoverTarget = this.state.orderedKeys.filter( d => d.key === key )[ 0 ];
 		this.setState( {
 			orderedKeys: this.state.orderedKeys.map( d => {
-				let enterFocus = d.key === event.target.id ? true : false;
+				let enterFocus = d.key === key ? true : false;
 				enterFocus = ! hoverTarget.visible ? true : enterFocus;
 				return {
 					...d,
