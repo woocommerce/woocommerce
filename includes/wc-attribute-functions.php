@@ -47,22 +47,41 @@ function wc_implode_text_attributes( $attributes ) {
  * @return array of objects, @since 3.6.0 these are also indexed by ID.
  */
 function wc_get_attribute_taxonomies() {
-	$attribute_taxonomies = get_transient( 'wc_attribute_taxonomies' );
+	$prefix      = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
+	$cache_key   = $prefix . 'attributes';
+	$cache_value = wp_cache_get( $cache_key, 'woocommerce-attributes' );
 
-	if ( false === $attribute_taxonomies ) {
-		global $wpdb;
-
-		$attribute_taxonomies = array();
-		$results              = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name !='' ORDER BY attribute_name ASC;" );
-
-		foreach ( $results as $result ) {
-			$attribute_taxonomies[ $result->attribute_id ] = $result;
-		}
-
-		set_transient( 'wc_attribute_taxonomies', $attribute_taxonomies );
+	if ( $cache_value ) {
+		return $cache_value;
 	}
 
-	return (array) array_filter( apply_filters( 'woocommerce_attribute_taxonomies', $attribute_taxonomies ) );
+	$raw_attribute_taxonomies = get_transient( 'wc_attribute_taxonomies' );
+
+	if ( false === $raw_attribute_taxonomies ) {
+		global $wpdb;
+
+		$raw_attribute_taxonomies = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name !='' ORDER BY attribute_name ASC;" );
+
+		set_transient( 'wc_attribute_taxonomies', $raw_attribute_taxonomies );
+	}
+
+	/**
+	 * Filter attribute taxonomies.
+	 *
+	 * @param array $attribute_taxonomies Results of the DB query. Each taxonomy is an object.
+	 */
+	$raw_attribute_taxonomies = (array) array_filter( apply_filters( 'woocommerce_attribute_taxonomies', $raw_attribute_taxonomies ) );
+
+	// Index by ID.
+	$attribute_taxonomies = array();
+
+	foreach ( $raw_attribute_taxonomies as $result ) {
+		$attribute_taxonomies[ $result->attribute_id ] = $result;
+	}
+
+	wp_cache_set( $cache_key, $attribute_taxonomies, 'woocommerce-attributes' );
+
+	return $attribute_taxonomies;
 }
 
 /**
@@ -199,17 +218,11 @@ function wc_attribute_label( $name, $product = '' ) {
  * @return string
  */
 function wc_attribute_orderby( $name ) {
-	global $wc_product_attributes, $wpdb;
+	$name       = wc_attribute_taxonomy_slug( $name );
+	$id         = wc_attribute_taxonomy_id_by_name( $name );
+	$taxonomies = wc_get_attribute_taxonomies();
 
-	$name = wc_attribute_taxonomy_slug( $name );
-
-	if ( isset( $wc_product_attributes[ 'pa_' . $name ] ) ) {
-		$orderby = $wc_product_attributes[ 'pa_' . $name ]->attribute_orderby;
-	} else {
-		$orderby = $wpdb->get_var( $wpdb->prepare( "SELECT attribute_orderby FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name = %s;", $name ) );
-	}
-
-	return apply_filters( 'woocommerce_attribute_orderby', $orderby, $name );
+	return apply_filters( 'woocommerce_attribute_orderby', isset( $taxonomies[ $id ] ) ? $taxonomies[ $id ]->attribute_orderby : 'menu_order', $name );
 }
 
 /**
