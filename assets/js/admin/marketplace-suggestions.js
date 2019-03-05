@@ -1,4 +1,4 @@
-/* global marketplace_suggestions, ajaxurl */
+/* global marketplace_suggestions, ajaxurl, Cookies */
 ( function( $, marketplace_suggestions, ajaxurl ) {
 	$( function() {
 		if ( 'undefined' === typeof marketplace_suggestions ) {
@@ -17,7 +17,7 @@
 		// All have one property for `suggestionSlug`, to identify the specific suggestion message.
 
 		// Dismiss the specified suggestion from the UI, and save the dismissal in settings.
-		function dismissSuggestion( suggestionSlug ) {
+		function dismissSuggestion( context, suggestionSlug ) {
 			// hide the suggestion in the UI
 			var selector = '[data-suggestion-slug=' + suggestionSlug + ']';
 			$( selector ).fadeOut( function() {
@@ -35,13 +35,19 @@
 				}
 			);
 
+			// if this is a high-use area, delay new suggestion that area for a short while
+			const highUseSuggestionContexts = [ 'products-list-inline' ];
+			if ( _.contains( highUseSuggestionContexts, context ) ) {
+				Cookies.set( 'woocommerce_snooze_products_list_suggestions', '1', { expires: 1 } );
+			}
+
 			window.wcTracks.recordEvent( 'marketplace_suggestion_dismissed', {
 				suggestionSlug: suggestionSlug
 			} );
 		}
 
 		// Render DOM element for suggestion dismiss button.
-		function renderDismissButton( suggestionSlug ) {
+		function renderDismissButton( context, suggestionSlug ) {
 			var dismissButton = document.createElement( 'a' );
 
 			dismissButton.classList.add( 'suggestion-dismiss' );
@@ -49,7 +55,7 @@
 			dismissButton.setAttribute( 'href', '#' );
 			dismissButton.onclick = function( event ) {
 				event.preventDefault();
-				dismissSuggestion( suggestionSlug );
+				dismissSuggestion( context, suggestionSlug );
 			};
 
 			return dismissButton;
@@ -167,7 +173,7 @@
 			}
 
 			if ( allowDismiss ) {
-				container.appendChild( renderDismissButton( slug ) );
+				container.appendChild( renderDismissButton( context, slug ) );
 			}
 
 			return container;
@@ -355,6 +361,11 @@
 			if ( 0 === usedSuggestionsContexts.length ) {
 				$( '.wp-admin.admin-bar.edit-php.post-type-product table.wp-list-table.posts tbody').first().each( function() {
 					var context = 'products-list-inline';
+
+					// product list banner suggestion is temporarily suppressed after a recent dismissal
+					if ( Cookies.get( 'woocommerce_snooze_products_list_suggestions' ) ) {
+						return;
+					}
 
 					// find promotions that target this context
 					var promos = getRelevantPromotions( marketplaceSuggestionsApiData, context );

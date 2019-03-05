@@ -114,6 +114,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2.full' . $suffix . '.js', array( 'jquery' ), '4.0.3' );
 			wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.4' );
 			wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'selectWoo' ), WC_VERSION );
+			wp_register_script( 'js-cookie', WC()->plugin_url() . '/assets/js/js-cookie/js.cookie' . $suffix . '.js', array(), '2.1.4', true );
+
 			wp_localize_script(
 				'wc-enhanced-select',
 				'wc_enhanced_select_params',
@@ -428,7 +430,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_register_script(
 					'marketplace-suggestions',
 					WC()->plugin_url() . '/assets/js/admin/marketplace-suggestions' . $suffix . '.js',
-					array( 'jquery', 'underscore' ),
+					array( 'jquery', 'underscore', 'js-cookie' ),
 					WC_VERSION,
 					true
 				);
