@@ -119,7 +119,7 @@ class WC_Structured_Data {
 		$types[] = is_shop() || is_product_category() || is_product() ? 'product' : '';
 		$types[] = is_shop() && is_front_page() ? 'website' : '';
 		$types[] = is_product() ? 'review' : '';
-		$types[] = ! is_shop() ? 'breadcrumblist' : '';
+		$types[] = 'breadcrumblist';
 		$types[] = 'order';
 
 		return array_filter( apply_filters( 'woocommerce_structured_data_type_for_page', $types ) );
@@ -382,6 +382,10 @@ class WC_Structured_Data {
 
 			if ( ! empty( $crumb[1] ) ) {
 				$markup['itemListElement'][ $key ]['item'] += array( '@id' => $crumb[1] );
+			} elseif ( isset( $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'] ) ) {
+				$current_url = set_url_scheme( 'http://' . wp_unslash( $_SERVER['HTTP_HOST'] ) . wp_unslash( $_SERVER['REQUEST_URI'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+				$markup['itemListElement'][ $key ]['item'] += array( '@id' => $current_url );
 			}
 		}
 
