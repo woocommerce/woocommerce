@@ -509,7 +509,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * @return bool
 	 */
 	protected static function is_returning_customer( $order ) {
-		$customer_id = WC_Admin_Reports_Customers_Data_Store::get_customer_id_by_user_id( $order->get_user_id() );
+		$customer_id = WC_Admin_Reports_Customers_Data_Store::get_existing_customer_id_from_order( $order );
 
 		if ( ! $customer_id ) {
 			return false;
@@ -526,7 +526,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		$excluded_statuses = self::get_excluded_report_order_statuses();
 
 		// Order is older than previous first order.
-		if ( $order->get_date_created() < new WC_DateTime( $first_order->date_created ) &&
+		if ( $order->get_date_created() < wc_string_to_datetime( $first_order->date_created ) &&
 			! in_array( $order->get_status(), $excluded_statuses, true )
 		) {
 			self::set_customer_first_order( $customer_id, $order->get_id() );
@@ -537,8 +537,8 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		$is_first_order = (int) $order->get_id() === (int) $first_order->order_id;
 		// Order date has changed and next oldest is now the first order.
 		$date_change = $second_order &&
-			$order->get_date_created() > new WC_DateTime( $first_order->date_created ) &&
-			new WC_DateTime( $second_order->date_created ) < $order->get_date_created();
+			$order->get_date_created() > wc_string_to_datetime( $first_order->date_created ) &&
+			wc_string_to_datetime( $second_order->date_created ) < $order->get_date_created();
 		// Status has changed to an excluded status and next oldest order is now the first order.
 		$status_change = $second_order &&
 			in_array( $order->get_status(), $excluded_statuses, true );
