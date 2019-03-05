@@ -5,8 +5,17 @@
 	grid-template-columns: calc(50% - #{$gap-large/2}) calc(50% - #{$gap-large/2});
 	grid-column-gap: $gap-large;
 
+	// Auto-position fix for IE11.
+	> div {
+		@include set-grid-item-position( 2, 14 );
+	}
+
 	@include breakpoint( '<960px' ) {
 		grid-template-columns: 100%;
+
+		> div {
+			@include set-grid-item-position( 1, 14 );
+		}
 	}
 }
 
