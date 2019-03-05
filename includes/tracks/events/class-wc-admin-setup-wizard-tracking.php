@@ -30,7 +30,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 		add_filter( 'woocommerce_setup_wizard_steps', array( $this, 'set_obw_steps' ) );
 		add_action( 'shutdown', array( $this, 'track_skip_step' ), 1 );
 		add_action( 'add_option_woocommerce_allow_tracking', array( $this, 'track_start' ), 10, 2 );
-		add_action( 'admin_init', array( $this, 'track_marketing_signup' ), 1 );
+		add_action( 'admin_init', array( $this, 'track_ready_next_steps' ), 1 );
 		add_action( 'wp_print_scripts', array( $this, 'dequeue_non_whitelisted_scripts' ) );
 		$this->add_step_save_events();
 	}
@@ -86,7 +86,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 	/**
 	 * Track the marketing form on submit.
 	 */
-	public function track_marketing_signup() {
+	public function track_ready_next_steps() {
 		if ( 'next_steps' !== $this->get_current_step() ) {
 			return;
 		}
@@ -96,6 +96,13 @@ class WC_Admin_Setup_Wizard_Tracking {
 			var form = $( '.newsletter-form-email' ).closest( 'form' );
 			$( document ).on( 'submit', form, function() {
 				window.wcTracks.recordEvent( 'obw_marketing_signup' );
+			} );
+			$( '.wc-setup-content a' ).click( function trackNextScreen( e ) {
+				var properties = {
+					next_url: e.target.href,
+					button: e.target.textContent && e.target.textContent.trim()
+				};
+				window.wcTracks.recordEvent( 'obw_ready_next_step', properties );
 			} );
 		"
 		);
