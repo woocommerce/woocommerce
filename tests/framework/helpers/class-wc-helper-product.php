@@ -170,6 +170,7 @@ class WC_Helper_Product {
 		$label = $attribute_name;
 
 		delete_transient( 'wc_attribute_taxonomies' );
+		WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
 
 		register_taxonomy( 'pa_' . $attribute_name, array( 'product' ), array(
 			'labels' => array(
