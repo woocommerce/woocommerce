@@ -1878,7 +1878,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( 'wc_product_meta_lookup' === $table ) {
 			$price_meta   = (array) get_post_meta( $id, '_price', false );
 			$manage_stock = get_post_meta( $id, '_manage_stock', true );
-			$stock        = 'yes' === $manage_stock ? wc_stock_amount( get_post_meta( $id, '_manage_stock', true ) ) : null;
+			$stock        = 'yes' === $manage_stock ? wc_stock_amount( get_post_meta( $id, '_stock', true ) ) : null;
 			return array(
 				'product_id'     => absint( $id ),
 				'min_price'      => reset( $price_meta ),
