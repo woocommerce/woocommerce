@@ -1830,7 +1830,7 @@ class WC_AJAX {
 
 			// Prepare line items which we are refunding.
 			$line_items = array();
-			$item_ids   = array_unique( array_merge( array_keys( $line_item_qtys, $line_item_totals, true ) ) );
+			$item_ids   = array_unique( array_merge( array_keys( $line_item_qtys ), array_keys( $line_item_totals ) ) );
 
 			foreach ( $item_ids as $item_id ) {
 				$line_items[ $item_id ] = array(
