@@ -1049,7 +1049,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_product_stock_status_options() {
 		$status_options = (array) apply_filters(
-			'woocommerce_product_stock_status_options', array(
+			'woocommerce_product_stock_status_options',
+			array(
 				'instock'     => 'In stock',
 				'outofstock'  => 'Out of stock',
 				'onbackorder' => 'On backorder',
