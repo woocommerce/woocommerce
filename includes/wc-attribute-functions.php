@@ -44,7 +44,7 @@ function wc_implode_text_attributes( $attributes ) {
 /**
  * Get attribute taxonomies.
  *
- * @return array of objects
+ * @return array of objects, @since 3.6.0 these are also indexed by ID.
  */
 function wc_get_attribute_taxonomies() {
 	$attribute_taxonomies = get_transient( 'wc_attribute_taxonomies' );
@@ -52,7 +52,12 @@ function wc_get_attribute_taxonomies() {
 	if ( false === $attribute_taxonomies ) {
 		global $wpdb;
 
-		$attribute_taxonomies = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name != '' ORDER BY attribute_name ASC;" );
+		$attribute_taxonomies = array();
+		$results              = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name !='' ORDER BY attribute_name ASC;" );
+
+		foreach ( $results as $result ) {
+			$attribute_taxonomies[ $result->attribute_id ] = $result;
+		}
 
 		set_transient( 'wc_attribute_taxonomies', $attribute_taxonomies );
 	}
@@ -408,28 +413,9 @@ function wc_array_filter_default_attributes( $attribute ) {
  * @return stdClass|null
  */
 function wc_get_attribute( $id ) {
-	$prefix      = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
-	$cache_key   = $prefix . 'attribute-' . $id;
-	$cache_value = wp_cache_get( $cache_key, 'woocommerce-attributes' );
+	$attributes = wc_get_attribute_taxonomies();
 
-	if ( $cache_value ) {
-		return $cache_value;
-	}
-
-	global $wpdb;
-
-	$data = $wpdb->get_row(
-		$wpdb->prepare(
-			"
-			SELECT *
-			FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
-			WHERE attribute_id = %d
-			",
-			$id
-		)
-	);
-
-	if ( is_wp_error( $data ) || is_null( $data ) ) {
+	if ( ! isset( $attributes[ $id ] ) ) {
 		return null;
 	}
 
@@ -440,9 +426,6 @@ function wc_get_attribute( $id ) {
 	$attribute->type         = $data->attribute_type;
 	$attribute->order_by     = $data->attribute_orderby;
 	$attribute->has_archives = (bool) $data->attribute_public;
-
-	wp_cache_set( $cache_key, $attribute, 'woocommerce-attributes' );
-
 	return $attribute;
 }
 
