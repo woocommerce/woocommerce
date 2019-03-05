@@ -432,6 +432,7 @@ function wc_get_attribute( $id ) {
 		return null;
 	}
 
+	$data                    = $attributes[ $id ];
 	$attribute               = new stdClass();
 	$attribute->id           = (int) $data->attribute_id;
 	$attribute->name         = $data->attribute_label;
