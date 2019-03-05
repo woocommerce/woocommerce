@@ -103,6 +103,7 @@ class WC_Admin_Taxonomies {
 	/**
 	 * When a term is deleted, delete its meta.
 	 *
+	 * @deprecated 3.6.0 No longer needed.
 	 * @param mixed $term_id Term ID.
 	 */
 	public function delete_term( $term_id ) {
