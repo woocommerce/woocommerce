@@ -27,8 +27,14 @@
 		padding: 0;
 	}
 
-	a.components-button.is-button {
-		color: $core-grey-dark-500;
+	a.components-button {
+		+ .components-button {
+			margin-left: 10px;
+		}
+
+		&.is-button {
+			color: $core-grey-dark-500;
+		}
 	}
 
 	@include breakpoint( '<782px' ) {
@@ -43,7 +49,7 @@
 	}
 }
 
-.is-alert-emergency {
+.is-alert-error {
 	$alert-color: #dc3232;
 	@include store-alerts-box-shadow( $alert-color );
 
@@ -54,19 +60,8 @@
 	}
 }
 
-.is-alert-alert {
+.is-alert-update {
 	$alert-color: #11a0d2;
-	@include store-alerts-box-shadow( $alert-color );
-
-	.woocommerce-card__title {
-		svg {
-			color: $alert-color;
-		}
-	}
-}
-
-.is-alert-critical {
-	$alert-color: #ffb900;
 	@include store-alerts-box-shadow( $alert-color );
 
 	.woocommerce-card__title {
