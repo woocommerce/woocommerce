@@ -301,6 +301,7 @@ class WC_REST_Blocks_Products_Controller extends WC_REST_Products_Controller {
 		$data['price']             = $raw_data['price'];
 		$data['price_html']        = $raw_data['price_html'];
 		$data['images']            = $raw_data['images'];
+		$data['average_rating']    = $raw_data['average_rating'];
 
 		return $data;
 	}
@@ -364,6 +365,7 @@ class WC_REST_Blocks_Products_Controller extends WC_REST_Products_Controller {
 		$schema['properties']['short_description'] = $raw_schema['properties']['short_description'];
 		$schema['properties']['price']             = $raw_schema['properties']['price'];
 		$schema['properties']['price_html']        = $raw_schema['properties']['price_html'];
+		$schema['properties']['average_rating']    = $raw_schema['properties']['average_rating'];
 		$schema['properties']['images']            = array(
 			'description' => $raw_schema['properties']['images']['description'],
 			'type'        => 'object',
