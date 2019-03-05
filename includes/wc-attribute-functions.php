@@ -61,6 +61,27 @@ function wc_get_attribute_taxonomies() {
 }
 
 /**
+ * Get (cached) attribute taxonomy ID and name pairs.
+ *
+ * @since 3.6.0
+ * @return array
+ */
+function wc_get_attribute_taxonomy_ids() {
+	$cache_key   = 'attribute-ids';
+	$cache_value = wp_cache_get( $cache_key, 'woocommerce-attributes' );
+
+	if ( $cache_value ) {
+		return $cache_value;
+	}
+
+	$taxonomy_ids = array_map( 'absint', wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_id', 'attribute_name' ) );
+
+	wp_cache_set( $cache_key, $taxonomy_ids, 'woocommerce-attributes' );
+
+	return $taxonomy_ids;
+}
+
+/**
  * Get a product attribute name.
  *
  * @param string $attribute_name Attribute name.
@@ -89,24 +110,10 @@ function wc_variation_attribute_name( $attribute_name ) {
  * @return string Return an empty string if attribute doesn't exist.
  */
 function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
-	global $wpdb;
+	$taxonomy_names = array_flip( wc_get_attribute_taxonomy_ids() );
+	$attribute_name = isset( $taxonomy_names[ $attribute_id ] ) ? $taxonomy_names[ $attribute_id ] : '';
 
-	$attribute_name = $wpdb->get_var(
-		$wpdb->prepare(
-			"
-			SELECT attribute_name
-			FROM {$wpdb->prefix}woocommerce_attribute_taxonomies
-			WHERE attribute_id = %d
-			",
-			$attribute_id
-		)
-	);
-
-	if ( $attribute_name && ! is_wp_error( $attribute_name ) ) {
-		return wc_attribute_taxonomy_name( $attribute_name );
-	}
-
-	return '';
+	return wc_attribute_taxonomy_name( $attribute_name );
 }
 
 /**
@@ -117,10 +124,9 @@ function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
  * @return int
  */
 function wc_attribute_taxonomy_id_by_name( $name ) {
-	$name       = wc_attribute_taxonomy_slug( $name );
-	$taxonomies = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_id', 'attribute_name' );
+	$taxonomy_ids = wc_get_attribute_taxonomy_ids();
 
-	return isset( $taxonomies[ $name ] ) ? (int) $taxonomies[ $name ] : 0;
+	return isset( $taxonomies[ $name ] ) ? $taxonomies[ $name ] : 0;
 }
 
 /**
