@@ -103,23 +103,132 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_wc_load_webhooks() {
+		$webhook = $this->create_webhook();
+		$this->assertTrue( wc_load_webhooks() );
+		$webhook->delete( true );
+		$this->assertFalse( wc_load_webhooks() );
+	}
+
+	/**
+	 * Provide webhook statuses for tests.
+	 *
+	 * @since 3.5.0
+	 */
+	public function provider_webhook_statuses() {
+
+		$webhook_statuses = array();
+
+		foreach ( wc_get_webhook_statuses() as $status_key => $status_string ) {
+			$webhook_statuses[] = array( $status_key );
+		}
+
+		return $webhook_statuses;
+	}
+
+	/**
+	 * Test the $status param on wc_load_webhooks().
+	 *
+	 * @dataProvider provider_webhook_statuses
+	 * @param string $status The status of the webhook to test.
+	 * @since 3.5.0
+	 */
+	public function test_wc_load_webhooks_status( $status ) {
+
+		$webhook = $this->create_webhook( 'action.woocommerce_some_action', $status );
+
+		$this->assertTrue( wc_load_webhooks( '' ) );
+		$this->assertTrue( wc_load_webhooks( $status ) );
+
+		// Find a different, but still valid status.
+		$other_status = ( 'active' === $status ) ? 'disabled' : 'active';
+
+		$this->assertFalse( wc_load_webhooks( $other_status ) );
+
+		$webhook->delete( true );
+		$this->assertFalse( wc_load_webhooks( $status ) );
+	}
+
+	/**
+	 * @expectedException InvalidArgumentException
+	 */
+	public function test_wc_load_webhooks_status_invalid() {
+		wc_load_webhooks( 'invalid_status' );
+	}
+
+	/**
+	 * Test the $limit param on wc_load_webhooks().
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_wc_load_webhooks_limit() {
+		global $wp_filter;
+
+		$webhook_one = $this->create_webhook( 'action.woocommerce_one_test' );
+		$webhook_two = $this->create_webhook( 'action.woocommerce_two_test' );
+
+		$this->assertTrue( wc_load_webhooks( '', 1 ) );
+		$this->assertFalse( isset( $wp_filter['woocommerce_one_test'] ) );
+		$this->assertTrue( isset( $wp_filter['woocommerce_two_test'] ) );
+
+		$webhook_two->delete( true );
+
+		$this->assertTrue( wc_load_webhooks( '', 1 ) );
+		$this->assertTrue( isset( $wp_filter['woocommerce_one_test'] ) );
+
+		$webhook_one->delete( true );
+
+		$this->assertFalse( wc_load_webhooks( '', 1 ) );
+	}
+
+	/**
+	 * Test the $status and $limit param on wc_load_webhooks().
+	 *
+	 * @dataProvider provider_webhook_statuses
+	 * @param string $status The status of the webhook to test.
+	 */
+	public function test_wc_load_webhooks_status_and_limit( $status ) {
+		global $wp_filter;
+
+		$action_one  = 'woocommerce_one_test_status_' . $status;
+		$webhook_one = $this->create_webhook( 'action.' . $action_one, $status );
+		$action_two  = 'woocommerce_two_test_status_' . $status;
+		$webhook_two = $this->create_webhook( 'action.' . $action_two, $status );
+
+		$this->assertTrue( wc_load_webhooks( $status, 1 ) );
+		$this->assertFalse( isset( $wp_filter[ $action_one ] ) );
+		$this->assertTrue( isset( $wp_filter[ $action_two ] ) );
+
+		$webhook_two->delete( true );
+
+		$this->assertTrue( wc_load_webhooks( $status, 1 ) );
+		$this->assertTrue( isset( $wp_filter[ $action_one ] ) );
+
+		$webhook_one->delete( true );
+		$this->assertFalse( wc_load_webhooks( $status, 1 ) );
+	}
+
+	/**
+	 * Create and save a webhook for testing.
+	 *
+	 * @param string $topic The webhook topic for the test.
+	 * @param string $status The status of the webhook to be tested.
+	 */
+	protected function create_webhook( $topic = 'action.woocommerce_some_action', $status = 'active' ) {
+
 		$webhook = new WC_Webhook();
 		$webhook->set_props(
 			array(
-				'status'       => 'active',
+				'status'       => $status,
 				'name'         => 'Testing webhook',
 				'user_id'      => 0,
 				'delivery_url' => 'https://requestb.in/17jajv31',
 				'secret'       => 'secret',
-				'topic'        => 'action.woocommerce_some_action',
+				'topic'        => $topic,
 				'api_version'  => 2,
 			)
 		);
 		$webhook->save();
 
-		$this->assertTrue( wc_load_webhooks() );
-
-		$webhook->delete( true );
-		$this->assertFalse( wc_load_webhooks() );
+		return $webhook;
 	}
 }

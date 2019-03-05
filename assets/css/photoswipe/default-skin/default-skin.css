@@ -12,7 +12,7 @@
 
 */
 /*
-
+	
 	1. Buttons
 
  */
@@ -31,13 +31,11 @@
   margin: 0;
   float: right;
   opacity: 0.75;
-  z-index: 1600;
   -webkit-transition: opacity 0.2s;
           transition: opacity 0.2s;
   -webkit-box-shadow: none;
           box-shadow: none; }
-  .pswp__button:focus,
-  .pswp__button:hover {
+  .pswp__button:focus, .pswp__button:hover {
     opacity: 1; }
   .pswp__button:active {
     outline: none;
@@ -258,7 +256,7 @@ a.pswp__share--download:hover {
   padding: 0 10px; }
 
 /*
-
+	
 	4. Caption
 
  */
@@ -339,8 +337,8 @@ a.pswp__share--download:hover {
   margin: 0; }
 
 .pswp--css_animation .pswp__preloader__cut {
-  /*
-			The idea of animating inner circle is based on Polymer ("material") loading indicator
+  /* 
+			The idea of animating inner circle is based on Polymer ("material") loading indicator 
 			 by Keanu Lee https://blog.keanulee.com/2014/10/20/the-tale-of-three-spinners.html
 		*/
   position: relative;
@@ -410,12 +408,13 @@ a.pswp__share--download:hover {
             transform: rotate(0); } }
 
 /*
-
+	
 	6. Additional styles
 
  */
 /* root element of UI */
 .pswp__ui {
+  -webkit-font-smoothing: auto;
   visibility: visible;
   opacity: 1;
   z-index: 1550; }

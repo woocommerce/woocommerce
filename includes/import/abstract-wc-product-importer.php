@@ -236,6 +236,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				unset( $data['manage_stock'], $data['stock_status'], $data['backorders'], $data['low_stock_amount'] );
 			}
 
+			if ( 'variation' === $object->get_type() ) {
+				if ( isset( $data['status'] ) && -1 === $data['status'] ) {
+					$data['status'] = 0; // Variations cannot be drafts - set to private.
+				}
+			}
+
 			if ( 'importing' === $object->get_status() ) {
 				$object->set_status( 'publish' );
 				$object->set_slug( '' );
@@ -644,13 +650,15 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// If the attribute does not exist, create it.
-		$attribute_id = wc_create_attribute( array(
-			'name'         => $raw_name,
-			'slug'         => $attribute_name,
-			'type'         => 'select',
-			'order_by'     => 'menu_order',
-			'has_archives' => false,
-		) );
+		$attribute_id = wc_create_attribute(
+			array(
+				'name'         => $raw_name,
+				'slug'         => $attribute_name,
+				'type'         => 'select',
+				'order_by'     => 'menu_order',
+				'has_archives' => false,
+			)
+		);
 
 		if ( is_wp_error( $attribute_id ) ) {
 			throw new Exception( $attribute_id->get_error_message(), 400 );
@@ -661,15 +669,18 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		register_taxonomy(
 			$taxonomy_name,
 			apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
-			apply_filters( 'woocommerce_taxonomy_args_' . $taxonomy_name, array(
-				'labels'       => array(
-					'name' => $raw_name,
-				),
-				'hierarchical' => true,
-				'show_ui'      => false,
-				'query_var'    => true,
-				'rewrite'      => false,
-			) )
+			apply_filters(
+				'woocommerce_taxonomy_args_' . $taxonomy_name,
+				array(
+					'labels'       => array(
+						'name' => $raw_name,
+					),
+					'hierarchical' => true,
+					'show_ui'      => false,
+					'query_var'    => true,
+					'rewrite'      => false,
+				)
+			)
 		);
 
 		// Set product attributes global.

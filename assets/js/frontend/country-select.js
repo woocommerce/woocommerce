@@ -122,6 +122,10 @@ jQuery( function( $ ) {
 					}
 				}
 
+				if ( ! placeholder ) {
+					placeholder = wc_country_select_params.i18n_select_state_text;
+				}
+
 				$statebox.closest( 'p.form-row' ).show();
 
 				if ( $statebox.is( 'input' ) ) {

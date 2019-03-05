@@ -1,6 +1,6 @@
-/*! PhotoSwipe - v4.1.1 - 2015-12-24
+/*! PhotoSwipe - v4.1.3 - 2019-01-08
 * http://photoswipe.com
-* Copyright (c) 2015 Dmitry Semenov; */
+* Copyright (c) 2019 Dmitry Semenov; */
 (function (root, factory) { 
 	if (typeof define === 'function' && define.amd) {
 		define(factory);
@@ -157,7 +157,7 @@ var framework = {
 			features.caf = window.cancelAnimationFrame;
 		}
 
-		features.pointerEvent = navigator.pointerEnabled || navigator.msPointerEnabled;
+		features.pointerEvent = !!(window.PointerEvent) || navigator.msPointerEnabled;
 
 		// fix false-positive detection of old Android in new IE
 		// (IE11 ua string contains "Android 4.0")
@@ -397,6 +397,8 @@ var _isOpen,
 	_features,
 	_windowVisibleSize = {},
 	_renderMaxResolution = false,
+	_orientationChangeTimeout,
+
 
 	// Registers PhotoSWipe module (History, Controller ...)
 	_registerModule = function(name, module) {
@@ -544,13 +546,13 @@ var _isOpen,
 			framework.bind(document, 'mousemove', _onFirstMouseMove);
 		}
 
-		framework.bind(window, 'resize scroll', self);
+		framework.bind(window, 'resize scroll orientationchange', self);
 
 		_shout('bindEvents');
 	},
 
 	_unbindEvents = function() {
-		framework.unbind(window, 'resize', self);
+		framework.unbind(window, 'resize scroll orientationchange', self);
 		framework.unbind(window, 'scroll', _globalEventHandlers.scroll);
 		framework.unbind(document, 'keydown', self);
 		framework.unbind(document, 'mousemove', _onFirstMouseMove);
@@ -562,6 +564,8 @@ var _isOpen,
 		if(_isDragging) {
 			framework.unbind(window, _upMoveEvents, self);
 		}
+
+		clearTimeout(_orientationChangeTimeout);
 
 		_shout('unbindEvents');
 	},
@@ -841,6 +845,18 @@ var publicMethods = {
 		// Setup global events
 		_globalEventHandlers = {
 			resize: self.updateSize,
+
+			// Fixes: iOS 10.3 resize event
+			// does not update scrollWrap.clientWidth instantly after resize
+			// https://github.com/dimsemenov/PhotoSwipe/issues/1315
+			orientationchange: function() {
+				clearTimeout(_orientationChangeTimeout);
+				_orientationChangeTimeout = setTimeout(function() {
+					if(_viewportSize.x !== self.scrollWrap.clientWidth) {
+						self.updateSize();
+					}
+				}, 500);
+			},
 			scroll: _updatePageScrollOffset,
 			keydown: _onKeyDown,
 			click: _onGlobalClick
@@ -1971,9 +1987,7 @@ var _gestureStartTime,
 			if(pointerIndex > -1) {
 				releasePoint = _currPointers.splice(pointerIndex, 1)[0];
 
-				if(navigator.pointerEnabled) {
-					releasePoint.type = e.pointerType || 'mouse';
-				} else {
+				if(navigator.msPointerEnabled) {
 					var MSPOINTER_TYPES = {
 						4: 'mouse', // event.MSPOINTER_TYPE_MOUSE
 						2: 'touch', // event.MSPOINTER_TYPE_TOUCH 
@@ -1984,6 +1998,8 @@ var _gestureStartTime,
 					if(!releasePoint.type) {
 						releasePoint.type = e.pointerType || 'mouse';
 					}
+				} else {
+					releasePoint.type = e.pointerType || 'mouse';
 				}
 
 			}
@@ -2436,11 +2452,11 @@ _registerModule('Gestures', {
 			}
 
 			if(_pointerEventEnabled) {
-				if(navigator.pointerEnabled) {
-					addEventNames('pointer', 'down', 'move', 'up', 'cancel');
-				} else {
+				if(navigator.msPointerEnabled) {
 					// IE10 pointer events are case-sensitive
 					addEventNames('MSPointer', 'Down', 'Move', 'Up', 'Cancel');
+				} else {
+					addEventNames('pointer', 'down', 'move', 'up', 'cancel');
 				}
 			} else if(_features.touch) {
 				addEventNames('touch', 'start', 'move', 'end', 'cancel');

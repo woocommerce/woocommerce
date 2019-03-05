@@ -20,6 +20,7 @@ function wc_webhook_process_delivery( $webhook, $arg ) {
 	// so as to avoid delays or failures in delivery from affecting the
 	// user who triggered it.
 	if ( apply_filters( 'woocommerce_webhook_deliver_async', true, $webhook, $arg ) ) {
+
 		$queue_args = array(
 			'webhook_id' => $webhook->get_id(),
 			'arg'        => $arg,
@@ -64,7 +65,7 @@ add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10,
  * @return bool
  */
 function wc_is_webhook_valid_topic( $topic ) {
-	$invalid_topics  = array(
+	$invalid_topics = array(
 		'action.woocommerce_login_credentials',
 		'action.woocommerce_product_csv_importer_check_import_file_path',
 		'action.woocommerce_webhook_should_deliver',
@@ -128,20 +129,26 @@ function wc_get_webhook_statuses() {
  *
  * @since  3.3.0
  * @throws Exception If webhook cannot be read/found and $data parameter of WC_Webhook class constructor is set.
+ * @param  string   $status Optional - status to filter results by. Must be a key in return value of @see wc_get_webhook_statuses(). @since 3.5.0.
+ * @param  null|int $limit Limit number of webhooks loaded. @since 3.6.0.
  * @return bool
  */
-function wc_load_webhooks() {
+function wc_load_webhooks( $status = '', $limit = null ) {
 	$data_store = WC_Data_Store::load( 'webhook' );
-	$webhooks   = $data_store->get_webhooks_ids();
-	$loaded     = false;
+	$webhooks   = $data_store->get_webhooks_ids( $status );
+	$loaded     = 0;
 
 	foreach ( $webhooks as $webhook_id ) {
 		$webhook = new WC_Webhook( $webhook_id );
 		$webhook->enqueue();
-		$loaded = true;
+		$loaded ++;
+
+		if ( ! is_null( $limit ) && $loaded >= $limit ) {
+			break;
+		}
 	}
 
-	return $loaded;
+	return 0 < $loaded;
 }
 
 /**
