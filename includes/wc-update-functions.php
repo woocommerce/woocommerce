@@ -1941,6 +1941,21 @@ function wc_update_360_product_lookup_tables() {
 }
 
 /**
+ * Add new user_order_remaining_expires to speed up user download permission fetching.
+ *
+ * @return void
+ */
+function wc_update_360_downloadable_product_permissions_index() {
+	global $wpdb;
+
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE key_name = 'user_order_remaining_expires'" );
+
+	if ( is_null( $index_exists ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD INDEX user_order_remaining_expires (user_id,order_id,downloads_remaining,access_expires)" );
+	}
+}
+
+/**
  * Update DB Version.
  */
 function wc_update_360_db_version() {
