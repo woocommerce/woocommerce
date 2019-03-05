@@ -114,7 +114,7 @@ class D3Legend extends Component {
 											'woocommerce-legend__item-checkmark-checked': row.visible,
 										} ) }
 										id={ row.key }
-										style={ { color: getColor( keys, colorScheme )( row.key ) } }
+										style={ row.visible ? { color: getColor( keys, colorScheme )( row.key ) } : null }
 									/>
 									<span className="woocommerce-legend__item-title" id={ row.key }>
 										{ row.key }
