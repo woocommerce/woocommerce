@@ -1050,7 +1050,7 @@ class WC_AJAX {
 	/**
 	 * Add order tax column via ajax.
 	 *
-	 * @throws Exception If order is invalid.
+	 * @throws Exception If order or tax rate is invalid.
 	 */
 	public static function add_order_tax() {
 		check_ajax_referer( 'order-item', 'security' );
@@ -1097,7 +1097,7 @@ class WC_AJAX {
 	/**
 	 * Add order discount via ajax.
 	 *
-	 * @throws Exception If order is invalid.
+	 * @throws Exception If order or coupon is invalid.
 	 */
 	public static function add_coupon_discount() {
 		check_ajax_referer( 'order-item', 'security' );
@@ -1140,7 +1140,7 @@ class WC_AJAX {
 	/**
 	 * Remove coupon from an order via ajax.
 	 *
-	 * @throws Exception If order is invalid.
+	 * @throws Exception If order or coupon is invalid.
 	 */
 	public static function remove_order_coupon() {
 		check_ajax_referer( 'order-item', 'security' );
@@ -1237,7 +1237,7 @@ class WC_AJAX {
 	/**
 	 * Remove an order tax.
 	 *
-	 * @throws Exception If order is invalid.
+	 * @throws Exception If there is an error whilst deleting the rate.
 	 */
 	public static function remove_order_tax() {
 		check_ajax_referer( 'order-item', 'security' );
@@ -1827,7 +1827,7 @@ class WC_AJAX {
 	/**
 	 * Create/Update API key.
 	 *
-	 * @throws Exception On invalid API key.
+	 * @throws Exception On invalid or empty description, user, or permissions.
 	 */
 	public static function update_api_key() {
 		ob_start();
