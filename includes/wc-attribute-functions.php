@@ -72,11 +72,11 @@ function wc_get_attribute_taxonomies() {
 	 */
 	$raw_attribute_taxonomies = (array) array_filter( apply_filters( 'woocommerce_attribute_taxonomies', $raw_attribute_taxonomies ) );
 
-	// Index by ID.
+	// Index by ID for easer lookups.
 	$attribute_taxonomies = array();
 
 	foreach ( $raw_attribute_taxonomies as $result ) {
-		$attribute_taxonomies[ $result->attribute_id ] = $result;
+		$attribute_taxonomies[ 'id:' . $result->attribute_id ] = $result;
 	}
 
 	wp_cache_set( $cache_key, $attribute_taxonomies, 'woocommerce-attributes' );
@@ -92,7 +92,7 @@ function wc_get_attribute_taxonomies() {
  */
 function wc_get_attribute_taxonomy_ids() {
 	$prefix      = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
-	$cache_key   = $prefix . 'attribute-ids';
+	$cache_key   = $prefix . 'ids';
 	$cache_value = wp_cache_get( $cache_key, 'woocommerce-attributes' );
 
 	if ( $cache_value ) {
@@ -114,7 +114,7 @@ function wc_get_attribute_taxonomy_ids() {
  */
 function wc_get_attribute_taxonomy_labels() {
 	$prefix      = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
-	$cache_key   = $prefix . 'attribute-labels';
+	$cache_key   = $prefix . 'labels';
 	$cache_value = wp_cache_get( $cache_key, 'woocommerce-attributes' );
 
 	if ( $cache_value ) {
@@ -157,9 +157,8 @@ function wc_variation_attribute_name( $attribute_name ) {
  * @return string Return an empty string if attribute doesn't exist.
  */
 function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
-	$taxonomy_names = array_flip( wc_get_attribute_taxonomy_ids() );
-	$attribute_name = isset( $taxonomy_names[ $attribute_id ] ) ? $taxonomy_names[ $attribute_id ] : '';
-
+	$taxonomy_ids   = wc_get_attribute_taxonomy_ids();
+	$attribute_name = (string) array_search( $attribute_id, $taxonomy_ids, true );
 	return wc_attribute_taxonomy_name( $attribute_name );
 }
 
@@ -171,9 +170,10 @@ function wc_attribute_taxonomy_name_by_id( $attribute_id ) {
  * @return int
  */
 function wc_attribute_taxonomy_id_by_name( $name ) {
+	$name         = wc_attribute_taxonomy_slug( $name );
 	$taxonomy_ids = wc_get_attribute_taxonomy_ids();
 
-	return isset( $taxonomies[ $name ] ) ? $taxonomies[ $name ] : 0;
+	return isset( $taxonomy_ids[ $name ] ) ? $taxonomy_ids[ $name ] : 0;
 }
 
 /**
@@ -222,7 +222,7 @@ function wc_attribute_orderby( $name ) {
 	$id         = wc_attribute_taxonomy_id_by_name( $name );
 	$taxonomies = wc_get_attribute_taxonomies();
 
-	return apply_filters( 'woocommerce_attribute_orderby', isset( $taxonomies[ $id ] ) ? $taxonomies[ $id ]->attribute_orderby : 'menu_order', $name );
+	return apply_filters( 'woocommerce_attribute_orderby', isset( $taxonomies[ 'id:' . $id ] ) ? $taxonomies[ 'id:' . $id ]->attribute_orderby : 'menu_order', $name );
 }
 
 /**
@@ -428,11 +428,11 @@ function wc_array_filter_default_attributes( $attribute ) {
 function wc_get_attribute( $id ) {
 	$attributes = wc_get_attribute_taxonomies();
 
-	if ( ! isset( $attributes[ $id ] ) ) {
+	if ( ! isset( $attributes[ 'id:' . $id ] ) ) {
 		return null;
 	}
 
-	$data                    = $attributes[ $id ];
+	$data                    = $attributes[ 'id:' . $id ];
 	$attribute               = new stdClass();
 	$attribute->id           = (int) $data->attribute_id;
 	$attribute->name         = $data->attribute_label;
