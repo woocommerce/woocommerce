@@ -119,10 +119,11 @@ class WC_Site_Tracking {
 		);
 
 		foreach ( $tracking_classes as $tracking_class ) {
-			$init_method = array( $tracking_class, 'init' );
+			$tracker_instance    = new $tracking_class();
+			$tracker_init_method = array( $tracker_instance, 'init' );
 
-			if ( is_callable( $init_method ) ) {
-				call_user_func( $init_method );
+			if ( is_callable( $tracker_init_method ) ) {
+				call_user_func( $tracker_init_method );
 			}
 		}
 	}

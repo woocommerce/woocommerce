@@ -14,8 +14,8 @@ class WC_Importer_Tracking {
 	/**
 	 * Init tracking.
 	 */
-	public static function init() {
-		add_action( 'product_page_product_importer', array( __CLASS__, 'track_product_importer' ) );
+	public function init() {
+		add_action( 'product_page_product_importer', array( $this, 'track_product_importer' ) );
 	}
 
 	/**
@@ -23,18 +23,18 @@ class WC_Importer_Tracking {
 	 *
 	 * @return void
 	 */
-	public static function track_product_importer() {
+	public function track_product_importer() {
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
 		if ( ! isset( $_REQUEST['step'] ) ) {
 			return;
 		}
 
 		if ( 'import' === $_REQUEST['step'] ) {
-			return self::track_product_importer_start();
+			return $this->track_product_importer_start();
 		}
 
 		if ( 'done' === $_REQUEST['step'] ) {
-			return self::track_product_importer_complete();
+			return $this->track_product_importer_complete();
 		}
 		// phpcs:enable
 	}
@@ -44,7 +44,7 @@ class WC_Importer_Tracking {
 	 *
 	 * @return void
 	 */
-	public static function track_product_importer_start() {
+	public function track_product_importer_start() {
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
 		if ( ! isset( $_REQUEST['file'] ) || ! isset( $_REQUEST['_wpnonce'] ) ) {
 			return;
@@ -64,7 +64,7 @@ class WC_Importer_Tracking {
 	 *
 	 * @return void
 	 */
-	public static function track_product_importer_complete() {
+	public function track_product_importer_complete() {
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
 		if ( ! isset( $_REQUEST['nonce'] ) ) {
 			return;

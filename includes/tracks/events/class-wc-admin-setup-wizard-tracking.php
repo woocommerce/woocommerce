@@ -11,14 +11,6 @@ defined( 'ABSPATH' ) || exit;
  * This class adds actions to track usage of the WooCommerce Onboarding Wizard.
  */
 class WC_Admin_Setup_Wizard_Tracking {
-
-	/**
-	 * Class instance.
-	 *
-	 * @var WC_Admin_Setup_Wizard_Tracking instance
-	 */
-	protected static $instance = false;
-
 	/**
 	 * Steps for the setup wizard
 	 *
@@ -27,30 +19,20 @@ class WC_Admin_Setup_Wizard_Tracking {
 	private $steps = array();
 
 	/**
-	 * Get class instance
-	 */
-	public static function get_instance() {
-		if ( ! self::$instance ) {
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
-
-	/**
 	 * Init tracking.
 	 */
-	public static function init() {
+	public function init() {
 		if ( empty( $_GET['page'] ) || 'wc-setup' !== $_GET['page'] ) { // WPCS: CSRF ok, input var ok.
 			return;
 		}
 
-		add_action( 'wc_setup_footer', array( __CLASS__, 'add_footer_scripts' ) );
-		add_filter( 'woocommerce_setup_wizard_steps', array( __CLASS__, 'set_obw_steps' ) );
-		add_action( 'shutdown', array( __CLASS__, 'track_skip_step' ), 1 );
-		add_action( 'add_option_woocommerce_allow_tracking', array( __CLASS__, 'track_start' ), 10, 2 );
-		add_action( 'admin_init', array( __CLASS__, 'track_marketing_signup' ), 1 );
-		add_action( 'wp_print_scripts', array( __CLASS__, 'dequeue_non_whitelisted_scripts' ) );
-		self::add_step_save_events();
+		add_action( 'wc_setup_footer', array( $this, 'add_footer_scripts' ) );
+		add_filter( 'woocommerce_setup_wizard_steps', array( $this, 'set_obw_steps' ) );
+		add_action( 'shutdown', array( $this, 'track_skip_step' ), 1 );
+		add_action( 'add_option_woocommerce_allow_tracking', array( $this, 'track_start' ), 10, 2 );
+		add_action( 'admin_init', array( $this, 'track_marketing_signup' ), 1 );
+		add_action( 'wp_print_scripts', array( $this, 'dequeue_non_whitelisted_scripts' ) );
+		$this->add_step_save_events();
 	}
 
 	/**
@@ -58,7 +40,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 *
 	 * @return string
 	 */
-	public static function get_current_step() {
+	public function get_current_step() {
 		return isset( $_GET['step'] ) ? sanitize_key( $_GET['step'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 	}
 
@@ -66,7 +48,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 * Add footer scripts to OBW since it does not contain hooks for
 	 * wp_footer to allow the default methods of enqueuing scripts.
 	 */
-	public static function add_footer_scripts() {
+	public function add_footer_scripts() {
 		wp_print_scripts();
 		WC_Site_Tracking::add_tracking_function();
 	}
@@ -74,7 +56,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 	/**
 	 * Dequeue unwanted scripts from OBW footer.
 	 */
-	public static function dequeue_non_whitelisted_scripts() {
+	public function dequeue_non_whitelisted_scripts() {
 		global $wp_scripts;
 		$whitelist = array( 'woo-tracks' );
 
@@ -93,7 +75,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 * @param string $value  Option value.
 	 * @return void
 	 */
-	public static function track_start( $option, $value ) {
+	public function track_start( $option, $value ) {
 		if ( 'yes' !== $value || empty( $_GET['page'] ) || 'wc-setup' !== $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			return;
 		}
@@ -104,8 +86,8 @@ class WC_Admin_Setup_Wizard_Tracking {
 	/**
 	 * Track the marketing form on submit.
 	 */
-	public static function track_marketing_signup() {
-		if ( 'next_steps' !== self::get_current_step() ) {
+	public function track_marketing_signup() {
+		if ( 'next_steps' !== $this->get_current_step() ) {
 			return;
 		}
 
@@ -122,29 +104,29 @@ class WC_Admin_Setup_Wizard_Tracking {
 	/**
 	 * Track various events when a step is saved.
 	 */
-	public static function add_step_save_events() {
+	public function add_step_save_events() {
 		if ( empty( $_POST['save_step'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			return;
 		}
 
-		update_option( 'woocommerce_obw_last_completed_step', self::get_current_step() );
+		update_option( 'woocommerce_obw_last_completed_step', $this->get_current_step() );
 
-		switch ( self::get_current_step() ) {
+		switch ( $this->get_current_step() ) {
 			case '':
 			case 'store_setup':
-				add_action( 'admin_init', array( __CLASS__, 'track_store_setup' ), 1 );
+				add_action( 'admin_init', array( $this, 'track_store_setup' ), 1 );
 				break;
 			case 'payment':
-				add_action( 'admin_init', array( __CLASS__, 'track_payments' ), 1 );
+				add_action( 'admin_init', array( $this, 'track_payments' ), 1 );
 				break;
 			case 'shipping':
-				add_action( 'admin_init', array( __CLASS__, 'track_shipping' ), 1 );
+				add_action( 'admin_init', array( $this, 'track_shipping' ), 1 );
 				break;
 			case 'recommended':
-				add_action( 'admin_init', array( __CLASS__, 'track_recommended' ), 1 );
+				add_action( 'admin_init', array( $this, 'track_recommended' ), 1 );
 				break;
 			case 'activate':
-				add_action( 'admin_init', array( __CLASS__, 'track_jetpack_activate' ), 1 );
+				add_action( 'admin_init', array( $this, 'track_jetpack_activate' ), 1 );
 				break;
 		}
 	}
@@ -154,7 +136,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 *
 	 * @return void
 	 */
-	public static function track_store_setup() {
+	public function track_store_setup() {
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput
 		$properties = array(
 			'country'        => isset( $_POST['store_country'] ) ? sanitize_text_field( $_POST['store_country'] ) : '',
@@ -172,7 +154,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 *
 	 * @return void
 	 */
-	public static function track_payments() {
+	public function track_payments() {
 		$selected_gateways     = array();
 		$created_accounts      = array();
 		$wc_admin_setup_wizard = new WC_Admin_Setup_Wizard();
@@ -214,7 +196,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 *
 	 * @return void
 	 */
-	public static function track_shipping() {
+	public function track_shipping() {
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput
 		$properties = array(
 			'weight_unit'       => isset( $_POST['weight_unit'] ) ? sanitize_text_field( wp_unslash( $_POST['weight_unit'] ) ) : '',
@@ -232,7 +214,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 *
 	 * @return void
 	 */
-	public static function track_recommended() {
+	public function track_recommended() {
 		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
 		$properties = array(
 			'setup_storefront'    => isset( $_POST['setup_storefront_theme'] ) && 'yes' === $_POST['setup_storefront_theme'],
@@ -249,7 +231,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 *
 	 * @return void
 	 */
-	public static function track_jetpack_activate() {
+	public function track_jetpack_activate() {
 		WC_Tracks::record_event( 'obw_activate' );
 	}
 
@@ -258,17 +240,16 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 *
 	 * @return void
 	 */
-	public static function track_skip_step() {
+	public function track_skip_step() {
 		$previous_step = get_option( 'woocommerce_obw_last_completed_step' );
-		$current_step  = self::get_current_step();
+		$current_step  = $this->get_current_step();
 		if ( ! $previous_step || ! $current_step ) {
 			return;
 		}
 
-		$wc_admin_setup_wizard_tracking = self::get_instance();
-		$steps                          = array_keys( $wc_admin_setup_wizard_tracking->steps );
-		$current_step_index             = array_search( $current_step, $steps, true );
-		$previous_step_index            = array_search( $previous_step, $steps, true );
+		$steps               = array_keys( $this->steps );
+		$current_step_index  = array_search( $current_step, $steps, true );
+		$previous_step_index = array_search( $previous_step, $steps, true );
 
 		// If we're going forward more than 1 completed step.
 		if ( $current_step_index > $previous_step_index + 1 ) {
@@ -284,9 +265,8 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 *
 	 * @param array $steps Array of OBW steps.
 	 */
-	public static function set_obw_steps( $steps ) {
-		$wc_admin_setup_wizard_tracking        = self::get_instance();
-		$wc_admin_setup_wizard_tracking->steps = $steps;
+	public function set_obw_steps( $steps ) {
+		$this->steps = $steps;
 
 		return $steps;
 	}
