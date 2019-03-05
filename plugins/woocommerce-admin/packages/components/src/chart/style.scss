@@ -100,6 +100,10 @@
 		@include font-size( 13 );
 		border: 0;
 		box-shadow: none;
+
+		&:not(:disabled):not([aria-disabled='true']):focus {
+			@include button-style__focus-active();
+		}
 	}
 }
 
