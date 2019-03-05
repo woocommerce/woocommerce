@@ -57,7 +57,8 @@ export class TopSellingProducts extends Component {
 		const { query } = this.props;
 		const persistedQuery = getPersistedQuery( query );
 		return map( data, row => {
-			const { product_id, items_sold, net_revenue, extended_info } = row;
+			const { product_id, items_sold, net_revenue } = row;
+			const extended_info = row.extended_info || {};
 			const name = get( extended_info, [ 'name' ] );
 
 			const productUrl = getNewPath( persistedQuery, 'analytics/products', {

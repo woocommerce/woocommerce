@@ -98,13 +98,13 @@ export default class OrdersReportTable extends Component {
 				currency,
 				customer_type,
 				date_created,
-				extended_info,
 				net_total,
 				num_items_sold,
 				order_id,
 				order_number,
 				status,
 			} = row;
+			const extended_info = row.extended_info || {};
 			const { coupons, products } = extended_info;
 
 			const formattedProducts = products

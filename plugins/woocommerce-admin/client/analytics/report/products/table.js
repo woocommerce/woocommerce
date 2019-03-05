@@ -96,7 +96,8 @@ class ProductsReportTable extends Component {
 		const persistedQuery = getPersistedQuery( query );
 
 		return map( data, row => {
-			const { product_id, extended_info, items_sold, net_revenue, orders_count } = row;
+			const { product_id, items_sold, net_revenue, orders_count } = row;
+			const extended_info = row.extended_info || {};
 			const {
 				category_ids,
 				low_stock_amount,

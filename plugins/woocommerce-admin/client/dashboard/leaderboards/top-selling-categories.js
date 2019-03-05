@@ -57,7 +57,8 @@ export class TopSellingCategories extends Component {
 		const { query } = this.props;
 		const persistedQuery = getPersistedQuery( query );
 		return map( data, row => {
-			const { category_id, items_sold, net_revenue, extended_info } = row;
+			const { category_id, items_sold, net_revenue } = row;
+			const extended_info = row.extended_info || {};
 			const name = get( extended_info, [ 'name' ] );
 			const categoryUrl = getNewPath( persistedQuery, 'analytics/categories', {
 				filter: 'single_category',

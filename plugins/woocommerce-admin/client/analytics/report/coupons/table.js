@@ -72,7 +72,8 @@ export default class CouponsReportTable extends Component {
 		const persistedQuery = getPersistedQuery( query );
 
 		return map( coupons, coupon => {
-			const { amount, coupon_id, extended_info, orders_count } = coupon;
+			const { amount, coupon_id, orders_count } = coupon;
+			const extended_info = coupon.extended_info || {};
 			const { code, date_created, date_expires, discount_type } = extended_info;
 
 			const couponUrl = getNewPath( persistedQuery, '/analytics/coupons', {
