@@ -2,23 +2,23 @@
   General table styling
 ------------------------------------------------------------------------------*/
 
-$white: #ffffff;
+$white: #fff;
 
 // Grays
 $gray:                   #87a6bc;
-$gray-light:             lighten( $gray, 33% ); //#f3f6f8
-$gray-dark:              darken( $gray, 38% ); //#2e4453
+$gray-light:             lighten($gray, 33%); //#f3f6f8
+$gray-dark:              darken($gray, 38%); //#2e4453
 
 // $gray-text: ideal for standard, non placeholder text
 // $gray-text-min: minimum contrast needed for WCAG 2.0 AA on white background
 $gray-text:              $gray-dark;
-$gray-text-min:          darken( $gray, 18% ); //#537994
+$gray-text-min:          darken($gray, 18%); //#537994
 
 $woo_pink1: #955a89;
 $woo_pink2: #bb77ae;
 
 
-$color_text_blue: #0073AA;
+$color_text_blue: #0073aa;
 $color_button_primary: $woo_pink1;
 $color_button_secondary: $woo_pink2;
 
@@ -26,11 +26,13 @@ $color_button_secondary: $woo_pink2;
   Tab navigation
 ------------------------------------------------------------------------------*/
 .wc-helper {
+
 	.nav-tab-wrapper {
 		margin-bottom: 22px;
 	}
 
-	@media only screen and (max-width : 784px) {
+	@media only screen and (max-width: 784px) {
+
 		.nav-tab {
 			max-width: 40%;
 			overflow: hidden;
@@ -45,7 +47,11 @@ $color_button_secondary: $woo_pink2;
 ------------------------------------------------------------------------------*/
 
 .wc-helper {
-	.button, .button:hover, .button:focus, .button:active{
+
+	.button,
+	.button:hover,
+	.button:focus,
+	.button:active {
 		background-color: $color_button_primary;
 		border-width: 0;
 		box-shadow: none;
@@ -56,7 +62,7 @@ $color_button_secondary: $woo_pink2;
 		text-align: center;
 		white-space: normal !important;
 
-		@media only screen and (max-width : 782px) {
+		@media only screen and (max-width: 782px) {
 			line-height: 2;
 		}
 
@@ -73,7 +79,7 @@ $color_button_secondary: $woo_pink2;
 }
 
 .wc-helper .subscription-filter {
-	color: #2E4453;
+	color: #2e4453;
 	font-size: 13px;
 	line-height: 13px;
 	margin: 22px 0;
@@ -83,17 +89,18 @@ $color_button_secondary: $woo_pink2;
 		position: relative;
 
 		.chevron {
-			color: #E1E1E1;
+			color: #e1e1e1;
 			border-bottom-width: 0;
 			line-height: 1;
 			padding: 0;
 			position: absolute;
-				top: 10px;
-				right: 14px;
+			top: 10px;
+			right: 14px;
 		}
 	}
+
 	li {
-		color: #0073AA;
+		color: #0073aa;
 		display: inline-block;
 		padding: 0 4px 0 8px;
 		position: relative;
@@ -102,37 +109,38 @@ $color_button_secondary: $woo_pink2;
 			background-color: #979797;
 			content: " ";
 			position: absolute;
-				top: 0;
-				left: 0;
-				bottom: 0;
+			top: 0;
+			left: 0;
+			bottom: 0;
 			width: 1px;
 		}
 
 		&:first-of-type {
+
 			&::before {
 				display: none;
 			}
 		}
 	}
 
-	a{
-		color: #0073AA;
+	a {
+		color: #0073aa;
 		text-decoration: none;
 
-		&.current{
+		&.current {
 			color: #000;
 			font-weight: 600;
 		}
 	}
 
-	.count{
+	.count {
 		color: #555d66;
 		font-weight: 400;
 	}
 
-	@media only screen and (max-width : 600px) {
+	@media only screen and (max-width: 600px) {
 		background-color: #fff;
-		border: 1px solid #E1E1E1;
+		border: 1px solid #e1e1e1;
 		border-radius: 4px;
 		font-size: 14px;
 
@@ -148,7 +156,7 @@ $color_button_secondary: $woo_pink2;
 		}
 
 		li {
-			border-bottom: 1px solid #E1E1E1;
+			border-bottom: 1px solid #e1e1e1;
 		}
 
 		label,
@@ -165,6 +173,7 @@ $color_button_secondary: $woo_pink2;
 		}
 
 		li {
+
 			&::before {
 				display: none;
 			}
@@ -175,7 +184,7 @@ $color_button_secondary: $woo_pink2;
 		}
 
 		span.chevron {
-			color: #555555;
+			color: #555;
 			opacity: 0.5;
 			transform: rotateX(180deg);
 		}
@@ -185,7 +194,7 @@ $color_button_secondary: $woo_pink2;
 			box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
 
 			label {
-				border-bottom: 1px solid #E1E1E1;
+				border-bottom: 1px solid #e1e1e1;
 			}
 
 			li {
@@ -205,6 +214,7 @@ $color_button_secondary: $woo_pink2;
 ------------------------------------------------------------------------------*/
 
 .wc-helper {
+
 	.subscriptions-header {
 		margin: 3em 0 0;
 		position: relative;
@@ -217,8 +227,10 @@ $color_button_secondary: $woo_pink2;
 		}
 
 	}
-	.button-update, .button-update:hover {
-		background-color: #E6E6E6;
+
+	.button-update,
+	.button-update:hover {
+		background-color: #e6e6e6;
 		border-radius: 4px;
 		color: #333;
 		font-weight: 800;
@@ -243,16 +255,16 @@ $color_button_secondary: $woo_pink2;
 
 	.user-info {
 		background-color: #fff;
-		border: 1px solid #E1E1E1;
+		border: 1px solid #e1e1e1;
 		border-radius: 4px;
 		font-size: 12px;
 		line-height: 26px;
 		position: absolute;
-			top: -10px;
-			right: 0;
-		transition: all .1s ease-in;
+		top: -10px;
+		right: 0;
+		transition: all 0.1s ease-in;
 
-		@media only screen and (max-width : 600px) {
+		@media only screen and (max-width: 600px) {
 			position: relative;
 			width: 100%;
 		}
@@ -263,11 +275,11 @@ $color_button_secondary: $woo_pink2;
 		}
 
 		&:hover {
-			box-shadow: 0 3px 5px rgba(0,0,0,.2);
+			box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
 		}
 
 		header {
-			color: #555555;
+			color: #555;
 			font-weight: 600;
 			padding: 6px 14px;
 			position: relative;
@@ -279,8 +291,8 @@ $color_button_secondary: $woo_pink2;
 			.dashicons {
 				opacity: 0.5;
 				position: absolute;
-					top: 9px;
-					right: 14px;
+				top: 9px;
+				right: 14px;
 			}
 
 			&:hover {
@@ -292,18 +304,18 @@ $color_button_secondary: $woo_pink2;
 			display: none;
 
 			p {
-				border-top: 1px solid #E1E1E1;
+				border-top: 1px solid #e1e1e1;
 				padding: 6px 14px;
 				text-align: center;
 			}
 
 			.actions {
-				border-top: 1px solid #E1E1E1;
+				border-top: 1px solid #e1e1e1;
 				display: flex;
 			}
 
 			a {
-				color: #A26897;
+				color: #a26897;
 				cursor: pointer;
 				font-weight: 600;
 				line-height: 38px;
@@ -319,17 +331,17 @@ $color_button_secondary: $woo_pink2;
 				}
 
 				&:first-child {
-					border-right: 1px solid #E1E1E1;
+					border-right: 1px solid #e1e1e1;
 				}
 
 				&:hover {
-					background-color: #A26897;
+					background-color: #a26897;
 					color: #fff;
 				}
 			}
 
 			.avatar {
-				border: 1px solid #ECE1EA;
+				border: 1px solid #ece1ea;
 				border-radius: 50%;
 				height: auto;
 				margin-right: 6px;
@@ -342,11 +354,13 @@ $color_button_secondary: $woo_pink2;
 	.user-info:hover,
 	.user-info:focus,
 	.user-info:active {
+
 		header .dashicons {
 			transform: rotateX(180deg);
 		}
+
 		section {
-			display: block
+			display: block;
 		}
 	}
 }
@@ -356,10 +370,11 @@ $color_button_secondary: $woo_pink2;
 ------------------------------------------------------------------------------*/
 
 .wc-helper {
+
 	.striped > tbody > :nth-child(odd),
 	ul.striped > :nth-child(odd),
 	.alternate {
-		background-color: #ffffff;
+		background-color: #fff;
 	}
 
 	table.widefat,
@@ -396,23 +411,24 @@ $color_button_secondary: $woo_pink2;
 	}
 
 	.button {
-		@media only screen and (max-width : 782px) {
+
+		@media only screen and (max-width: 782px) {
 			font-size: 11px;
 		}
 	}
 
 	.wp-list-table__row {
-		background-color: rgba(0,0,0,0);
+		background-color: rgba(0, 0, 0, 0);
 
 		td {
 			align-items: center;
 			background-color: #fff;
-			border: 0px;
+			border: 0;
 			//border-top: 1px solid #e5e5e5;
 			padding: 16px 22px;
 			vertical-align: middle;
 
-			@media only screen and (max-width : 782px) {
+			@media only screen and (max-width: 782px) {
 				padding: 16px;
 			}
 		}
@@ -424,10 +440,10 @@ $color_button_secondary: $woo_pink2;
 		&.is-ext-header {
 
 			td {
-				border-top: 1px solid #E1E1E1;
+				border-top: 1px solid #e1e1e1;
 			}
 
-			@media only screen and (max-width : 782px) {
+			@media only screen and (max-width: 782px) {
 				display: inline-flex;
 				flex-flow: row wrap;
 				width: 100%;
@@ -436,6 +452,7 @@ $color_button_secondary: $woo_pink2;
 					display: block;
 					flex: 2;
 				}
+
 				.wp-list-table__ext-actions {
 					display: block;
 					flex: 1;
@@ -445,8 +462,8 @@ $color_button_secondary: $woo_pink2;
 		}
 
 		&:last-child td {
-			border-bottom: 24px solid #F1F1F1;
-			box-shadow: inset 0 -1px 0 #E1E1E1;
+			border-bottom: 24px solid #f1f1f1;
+			box-shadow: inset 0 -1px 0 #e1e1e1;
 		}
 	}
 
@@ -458,82 +475,84 @@ $color_button_secondary: $woo_pink2;
 		width: 100%;
 
 		&::before {
-			background-color: #E1E1E1;
+			background-color: #e1e1e1;
 			content: " ";
 			position: absolute;
-				top: 0;
-				bottom: 0;
-				left: 0 !important;
+			top: 0;
+			bottom: 0;
+			left: 0 !important;
 			width: 1px !important;
 		}
 	}
 
 	.wp-list-table__ext-details {
-			display: flex;
+		display: flex;
 
-			@media only screen and (max-width : 782px) {
-				display: table;
-			}
+		@media only screen and (max-width: 782px) {
+			display: table;
+		}
 	}
 
 	.wp-list-table__ext-title {
 		color: $color_text_blue;
 		font-size: 18px;
 		font-weight: 600;
-			width: 60%;
+		width: 60%;
 
-		@media only screen and (max-width : 782px) {
+		@media only screen and (max-width: 782px) {
 			margin-bottom: 12px;
 			width: 100%;
 		}
 
-		@media only screen and (max-width : 320px) {
+		@media only screen and (max-width: 320px) {
 			max-width: 120px;
 		}
 	}
+
 	.wp-list-table__ext-description {
 		color: #333;
 		padding-left: 12px;
 		width: 40%;
 
-		@media only screen and (max-width : 782px) {
+		@media only screen and (max-width: 782px) {
 			padding-left: 0;
 			width: 100%;
 		}
 	}
+
 	.wp-list-table__ext-status {
 		position: relative;
 
 		&.update-available::after {
-			background-color: #FFC322;
+			background-color: #ffc322;
 			content: " ";
 			position: absolute;
-				top: 0;
-				left: 0;
-				bottom: 0;
+			top: 0;
+			left: 0;
+			bottom: 0;
 			width: 5px;
 		}
 
 		&.expired::after {
-			background-color: #B81C23;
+			background-color: #b81c23;
 			content: " ";
 			position: absolute;
-				top: 0;
-				left: 0;
-				bottom: 0;
+			top: 0;
+			left: 0;
+			bottom: 0;
 			width: 5px;
 		}
 
 		.dashicons-update {
-			color: #FFC322;
+			color: #ffc322;
 		}
 
 		.dashicons-info {
-			color: #B81C23;
+			color: #b81c23;
 		}
 
 		p {
-			color: #333333;
+			color: #333;
 			margin: 0;
 		}
 
@@ -549,34 +568,36 @@ $color_button_secondary: $woo_pink2;
 		text-align: right;
 
 		&::after {
-			background-color: #E1E1E1;
+			background-color: #e1e1e1;
 			content: " ";
 			position: absolute;
-				top: 0;
-				bottom: 0;
-				right: 0;
+			top: 0;
+			bottom: 0;
+			right: 0;
 			width: 1px;
 		}
 	}
 
 	.wp-list-table__ext-updates,
 	.wp-list-table__ext-licence {
+
 		td {
 			position: relative;
 
 			&::before {
-				background-color: #E1E1E1;
+				background-color: #e1e1e1;
 				content: " ";
 				height: 1px;
 				position: absolute;
-					top: 0;
-					left: 0;
-					right: 0;
+				top: 0;
+				left: 0;
+				right: 0;
 			}
 		}
 
 		td.wp-list-table__ext-status,
 		td.wp-list-table__licence-container {
+
 			&::before {
 				left: 22px !important;
 				width: auto !important;
@@ -587,7 +608,7 @@ $color_button_secondary: $woo_pink2;
 			right: 22px;
 		}
 
-		@media only screen and (max-width : 782px) {
+		@media only screen and (max-width: 782px) {
 			display: flex;
 
 			.wp-list-table__ext-status {
@@ -604,9 +625,9 @@ $color_button_secondary: $woo_pink2;
 				min-width: 0;
 
 				&::before {
-					left: 0  !important;
-					right: 0  !important;
-					width: 100%  !important;
+					left: 0 !important;
+					right: 0 !important;
+					width: 100% !important;
 				}
 			}
 		}
@@ -616,13 +637,13 @@ $color_button_secondary: $woo_pink2;
 		padding: 0 !important;
 
 		&::after {
-			background-color: #E1E1E1;
-	    content: " ";
-	    position: absolute;
-		    top: 0;
-		    bottom: 0;
-		    right: 0;
-	    width: 1px;
+			background-color: #e1e1e1;
+			content: " ";
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			right: 0;
+			width: 1px;
 		}
 	}
 
@@ -630,20 +651,20 @@ $color_button_secondary: $woo_pink2;
 		display: flex;
 		padding: 16px 22px;
 
-		@media only screen and (max-width : 782px) {
+		@media only screen and (max-width: 782px) {
 			display: block;
 		}
 
 		&::before {
-			background-color: #E1E1E1;
-	    content: " ";
+			background-color: #e1e1e1;
+			content: " ";
 			height: 1px;
-	    position: absolute;
-		    top: 0;
-		    right: 22px;
-				left: 22px;
+			position: absolute;
+			top: 0;
+			right: 22px;
+			left: 22px;
 
-			@media only screen and (max-width : 782px) {
+			@media only screen and (max-width: 782px) {
 				right: 0;
 				left: 0;
 			}
@@ -653,7 +674,7 @@ $color_button_secondary: $woo_pink2;
 			padding-right: 16px;
 			vertical-align: middle;
 
-			@media only screen and (max-width : 782px) {
+			@media only screen and (max-width: 782px) {
 				padding: 0;
 			}
 		}
@@ -664,6 +685,7 @@ $color_button_secondary: $woo_pink2;
 	}
 
 	.wp-list-table__licence-label {
+
 		label {
 			color: #23282d;
 			font-weight: 600;
@@ -672,15 +694,16 @@ $color_button_secondary: $woo_pink2;
 	}
 
 	.wp-list-table__licence-field {
+
 		input {
 			height: 32px;
 
-			@media only screen and (max-width : 480px) {
+			@media only screen and (max-width: 480px) {
 				width: 100%;
 			}
 		}
 
-		@media only screen and (max-width : 782px) {
+		@media only screen and (max-width: 782px) {
 			padding: 8px 0 16px !important;
 		}
 	}
@@ -692,12 +715,13 @@ $color_button_secondary: $woo_pink2;
 		.button {
 			margin-right: 8px;
 		}
+
 		.button-secondary {
 			float: right;
 			margin: 0 0 0 8px;
 		}
 
-		@media only screen and (max-width : 480px) {
+		@media only screen and (max-width: 480px) {
 			text-align: right;
 		}
 	}
@@ -708,12 +732,13 @@ $color_button_secondary: $woo_pink2;
 ------------------------------------------------------------------------------*/
 
 .wc-helper {
+
 	td.color-bar {
 		border-left: solid 4px transparent;
 	}
 
 	td.color-bar.expired {
-		border-left-color: #B81C23;
+		border-left-color: #b81c23;
 	}
 
 	td.color-bar.expiring {
@@ -721,11 +746,11 @@ $color_button_secondary: $woo_pink2;
 	}
 
 	td.color-bar.update-available {
-		border-left-color: #8FAE1B;
+		border-left-color: #8fae1b;
 	}
 
 	td.color-bar.expiring.update-available {
-		border-left-color: #8FAE1B;
+		border-left-color: #8fae1b;
 	}
 }
 
@@ -734,6 +759,7 @@ $color_button_secondary: $woo_pink2;
 ------------------------------------------------------------------------------*/
 
 .wc-helper {
+
 	.connect-wrapper {
 		background-color: #fff;
 		border: 1px solid #e5e5e5;
@@ -776,7 +802,7 @@ $color_button_secondary: $woo_pink2;
 			}
 		}
 
-		@media only screen and (max-width : 784px) {
+		@media only screen and (max-width: 784px) {
 			display: block;
 
 			strong {
@@ -802,7 +828,7 @@ $color_button_secondary: $woo_pink2;
 			}
 
 			.chevron {
-				color: #E1E1E1;
+				color: #e1e1e1;
 				display: block;
 				margin: 10px;
 				transform: rotateX(0deg);
@@ -810,7 +836,7 @@ $color_button_secondary: $woo_pink2;
 
 			.buttons {
 				display: none;
-				border-top: 1px solid #E1E1E1;
+				border-top: 1px solid #e1e1e1;
 				padding: 10px 20px;
 
 				&.active {
@@ -827,8 +853,9 @@ $color_button_secondary: $woo_pink2;
 ------------------------------------------------------------------------------*/
 
 .wc-helper {
+
 	.start-container {
-		background-color: #ffffff;
+		background-color: #fff;
 		border-left: 4px solid #cc99c2;
 		padding: 45px 20px 20px 30px;
 		position: relative;
@@ -848,8 +875,8 @@ $color_button_secondary: $woo_pink2;
 		font-size: 192px;
 		line-height: 1;
 		position: absolute;
-			top: 65%;
-			right: -3%;
+		top: 65%;
+		right: -3%;
 		text-align: center;
 		width: 1em;
 	}
@@ -898,10 +925,10 @@ $color_button_secondary: $woo_pink2;
 	cursor: pointer;
 	display: block;
 	position: absolute;
-		top: 0;
-		bottom: -1px;
-		left: 0;
-		right: 0;
+	top: 0;
+	bottom: -1px;
+	left: 0;
+	right: 0;
 	text-align: left;
 	text-indent: -100000px;
 	z-index: 2;
@@ -917,7 +944,7 @@ $color_button_secondary: $woo_pink2;
 
 .form-toggle__switch {
 	align-self: flex-start;
-	background: lighten( $gray, 20% );
+	background: lighten($gray, 20%);
 	border-radius: 12px;
 	box-sizing: border-box;
 	display: inline-block;
@@ -926,7 +953,7 @@ $color_button_secondary: $woo_pink2;
 	position: relative;
 	width: 40px;
 	height: 24px;
-	transition: all .4s ease, box-shadow 0s;
+	transition: all 0.4s ease, box-shadow 0s;
 	vertical-align: middle;
 
 	&::before,
@@ -942,7 +969,7 @@ $color_button_secondary: $woo_pink2;
 		border-radius: 50%;
 		background: $white;
 		left: 0;
-		transition: all .2s ease;
+		transition: all 0.2s ease;
 	}
 
 	&::before {
@@ -961,42 +988,47 @@ $color_button_secondary: $woo_pink2;
 	z-index: 1;
 
 	.form-toggle__label-content {
-    color: #87a6bc;
+		color: #87a6bc;
 		flex: 0 1 100%;
-    font-size: 13px;
-    line-height: 16px;
+		font-size: 13px;
+		line-height: 16px;
 		margin-left: 12px;
-    margin-right: 8px;
-    vertical-align: top;
-    text-transform: uppercase;
+		margin-right: 8px;
+		vertical-align: top;
+		text-transform: uppercase;
 
-		@media only screen and (max-width : 480px) {
+		@media only screen and (max-width: 480px) {
 			display: none;
 		}
 	}
 }
 
 .form-toggle {
+
 	.accessible-focus &:focus {
+
 		+ .form-toggle__label .form-toggle__switch {
 			box-shadow: 0 0 0 2px $woo_pink1;
 		}
+
 		&:checked + .form-toggle__label .form-toggle__switch {
 			box-shadow: 0 0 0 2px $woo_pink2;
 		}
 	}
 
 	& + .form-toggle__label .form-toggle__switch {
-		background: lighten( $gray, 10% );
+		background: lighten($gray, 10%);
 	}
 
-	&:not( :disabled ) {
+	&:not(:disabled) {
+
 		+ .form-toggle__label:hover .form-toggle__switch {
-			background: lighten( $gray, 20% );
+			background: lighten($gray, 20%);
 		}
 	}
 
 	&.active {
+
 		+ .form-toggle__label .form-toggle__switch {
 			background: $woo_pink1;
 
@@ -1011,6 +1043,7 @@ $color_button_secondary: $woo_pink2;
 	}
 
 	&.disabled {
+
 		+ label.form-toggle__label span.form-toggle__switch {
 			opacity: 0.25;
 		}
@@ -1019,17 +1052,21 @@ $color_button_secondary: $woo_pink2;
 
 // Classes for toggle state before action is complete (updating plugin or something)
 .form-toggle.is-toggling {
+
 	+ .form-toggle__label .form-toggle__switch {
 		background: $woo_pink1;
 	}
+
 	&:checked {
+
 		+ .form-toggle__label .form-toggle__switch {
-			background: lighten( $gray, 20% );
+			background: lighten($gray, 20%);
 		}
 	}
 }
 
 .form-toggle.is-compact {
+
 	+ .form-toggle__label .form-toggle__switch {
 		border-radius: 8px;
 		width: 24px;
@@ -1041,8 +1078,11 @@ $color_button_secondary: $woo_pink2;
 			width: 12px;
 		}
 	}
+
 	&:checked {
+
 		+ .form-toggle__label .form-toggle__switch {
+
 			&::after {
 				left: 8px;
 			}

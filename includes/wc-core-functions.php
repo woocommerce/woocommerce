@@ -157,21 +157,35 @@ function wc_update_order( $args ) {
  * @param string $name Template name (default: '').
  */
 function wc_get_template_part( $slug, $name = '' ) {
-	$template = '';
+	$cache_key = sanitize_key( implode( '-', array( 'template-part', $slug, $name ) ) );
+	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
 
-	// Look in yourtheme/slug-name.php and yourtheme/woocommerce/slug-name.php.
-	if ( $name && ! WC_TEMPLATE_DEBUG_MODE ) {
-		$template = locate_template( array( "{$slug}-{$name}.php", WC()->template_path() . "{$slug}-{$name}.php" ) );
-	}
+	if ( ! $template ) {
+		if ( $name ) {
+			$template = WC_TEMPLATE_DEBUG_MODE ? '' : locate_template(
+				array(
+					"{$slug}-{$name}.php",
+					WC()->template_path() . "{$slug}-{$name}.php",
+				)
+			);
 
-	// Get default slug-name.php.
-	if ( ! $template && $name && file_exists( WC()->plugin_path() . "/templates/{$slug}-{$name}.php" ) ) {
-		$template = WC()->plugin_path() . "/templates/{$slug}-{$name}.php";
-	}
+			if ( ! $template ) {
+				$fallback = WC()->plugin_path() . "/templates/{$slug}-{$name}.php";
+				$template = file_exists( $fallback ) ? $fallback : '';
+			}
+		}
 
-	// If template file doesn't exist, look in yourtheme/slug.php and yourtheme/woocommerce/slug.php.
-	if ( ! $template && ! WC_TEMPLATE_DEBUG_MODE ) {
-		$template = locate_template( array( "{$slug}.php", WC()->template_path() . "{$slug}.php" ) );
+		if ( ! $template ) {
+			// If template file doesn't exist, look in yourtheme/slug.php and yourtheme/woocommerce/slug.php.
+			$template = WC_TEMPLATE_DEBUG_MODE ? '' : locate_template(
+				array(
+					"{$slug}.php",
+					WC()->template_path() . "{$slug}.php",
+				)
+			);
+		}
+
+		wp_cache_set( $cache_key, $template, 'woocommerce' );
 	}
 
 	// Allow 3rd party plugins to filter template file from their plugin.
@@ -191,21 +205,30 @@ function wc_get_template_part( $slug, $name = '' ) {
  * @param string $default_path  Default path. (default: '').
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
-	$located = wc_locate_template( $template_name, $template_path, $default_path );
+	$cache_key = sanitize_key( implode( '-', array( 'template', $template_name, $template_path, $default_path ) ) );
+	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
+
+	if ( ! $template ) {
+		$template = wc_locate_template( $template_name, $template_path, $default_path );
+		wp_cache_set( $cache_key, $template, 'woocommerce' );
+	}
 
 	// Allow 3rd party plugin filter template file from their plugin.
-	$located = apply_filters( 'wc_get_template', $located, $template_name, $args, $template_path, $default_path );
+	$filter_template = apply_filters( 'wc_get_template', $template, $template_name, $args, $template_path, $default_path );
 
-	if ( ! file_exists( $located ) ) {
-		/* translators: %s template */
-		wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $located . '</code>' ), '2.1' );
-		return;
+	if ( $filter_template !== $template ) {
+		if ( ! file_exists( $filter_template ) ) {
+			/* translators: %s template */
+			wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $template . '</code>' ), '2.1' );
+			return;
+		}
+		$template = $filter_template;
 	}
 
 	$action_args = array(
 		'template_name' => $template_name,
 		'template_path' => $template_path,
-		'located'       => $located,
+		'located'       => $template,
 		'args'          => $args,
 	);
 
@@ -215,7 +238,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 
 	do_action( 'woocommerce_before_template_part', $action_args['template_name'], $action_args['template_path'], $action_args['located'], $action_args['args'] );
 
-	include $located;
+	include $template;
 
 	do_action( 'woocommerce_after_template_part', $action_args['template_name'], $action_args['template_path'], $action_args['located'], $action_args['args'] );
 }
@@ -1070,30 +1093,30 @@ function wc_get_base_location() {
  * @return array
  */
 function wc_get_customer_default_location() {
-	$location = array();
+	$set_default_location_to = get_option( 'woocommerce_default_customer_address', 'geolocation' );
+	$default_location        = '' === $set_default_location_to ? '' : get_option( 'woocommerce_default_country', '' );
+	$location                = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', $default_location ) );
 
-	switch ( get_option( 'woocommerce_default_customer_address' ) ) {
-		case 'geolocation_ajax':
-		case 'geolocation':
-			// Exclude common bots from geolocation by user agent.
-			$ua = strtolower( wc_get_user_agent() );
+	// Geolocation takes priority if used and if geolocation is possible.
+	if ( 'geolocation' === $set_default_location_to || 'geolocation_ajax' === $set_default_location_to ) {
+		$ua = wc_get_user_agent();
 
-			if ( ! strstr( $ua, 'bot' ) && ! strstr( $ua, 'spider' ) && ! strstr( $ua, 'crawl' ) ) {
-				$location = WC_Geolocation::geolocate_ip( '', true, false );
+		// Exclude common bots from geolocation by user agent.
+		if ( ! stristr( $ua, 'bot' ) && ! stristr( $ua, 'spider' ) && ! stristr( $ua, 'crawl' ) ) {
+			$geolocation = WC_Geolocation::geolocate_ip( '', true, false );
+
+			if ( ! empty( $geolocation['country'] ) ) {
+				$location = $geolocation;
 			}
+		}
+	}
 
-			// Base fallback.
-			if ( empty( $location['country'] ) ) {
-				$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
-			}
-			break;
-		case 'base':
-			$location = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', get_option( 'woocommerce_default_country' ) ) );
-			break;
-		default:
-			$countries = WC()->countries->get_allowed_countries();
-			$location  = wc_format_country_state_string( apply_filters( 'woocommerce_customer_default_location', 1 === count( $countries ) ? key( $countries ) : '' ) );
-			break;
+	// Once we have a location, ensure it's valid, otherwise fallback to a valid location.
+	$allowed_country_codes = WC()->countries->get_allowed_countries();
+
+	if ( ! empty( $location['country'] ) && ! array_key_exists( $location['country'], $allowed_country_codes ) ) {
+		$location['country'] = current( $allowed_country_codes );
+		$location['state']   = '';
 	}
 
 	return apply_filters( 'woocommerce_customer_default_location_array', $location );

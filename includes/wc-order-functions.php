@@ -689,17 +689,32 @@ function wc_restock_refunded_items( $order, $refunded_line_items ) {
 		if ( ! isset( $refunded_line_items[ $item_id ], $refunded_line_items[ $item_id ]['qty'] ) ) {
 			continue;
 		}
-		$product = $item->get_product();
+		$product            = $item->get_product();
+		$item_stock_reduced = $item->get_meta( '_reduced_stock', true );
+		$qty_to_refund      = $refunded_line_items[ $item_id ]['qty'];
 
-		if ( $product && $product->managing_stock() ) {
-			$old_stock = $product->get_stock_quantity();
-			$new_stock = wc_update_product_stock( $product, $refunded_line_items[ $item_id ]['qty'], 'increase' );
-
-			/* translators: 1: product ID 2: old stock level 3: new stock level */
-			$order->add_order_note( sprintf( __( 'Item #%1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $product->get_id(), $old_stock, $new_stock ) );
-
-			do_action( 'woocommerce_restock_refunded_item', $product->get_id(), $old_stock, $new_stock, $order, $product );
+		if ( ! $item_stock_reduced || ! $qty_to_refund || ! $product || ! $product->managing_stock() ) {
+			continue;
 		}
+
+		$old_stock = $product->get_stock_quantity();
+		$new_stock = wc_update_product_stock( $product, $qty_to_refund, 'increase' );
+
+		// Update _reduced_stock meta to track changes.
+		$item_stock_reduced = $item_stock_reduced - $qty_to_refund;
+
+		if ( 0 < $item_stock_reduced ) {
+			$item->update_meta_data( '_reduced_stock', $item_stock_reduced );
+		} else {
+			$item->delete_meta_data( '_reduced_stock' );
+		}
+
+		/* translators: 1: product ID 2: old stock level 3: new stock level */
+		$order->add_order_note( sprintf( __( 'Item #%1$s stock increased from %2$s to %3$s.', 'woocommerce' ), $product->get_id(), $old_stock, $new_stock ) );
+
+		$item->save();
+
+		do_action( 'woocommerce_restock_refunded_item', $product->get_id(), $old_stock, $new_stock, $order, $product );
 	}
 }
 

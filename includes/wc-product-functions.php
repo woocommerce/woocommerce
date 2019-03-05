@@ -420,6 +420,7 @@ function wc_scheduled_sales() {
 		}
 		do_action( 'wc_after_products_starting_sales', $product_ids );
 
+		WC_Cache_Helper::get_transient_version( 'product', true );
 		delete_transient( 'wc_products_onsale' );
 	}
 
@@ -848,11 +849,11 @@ function wc_get_product_tax_class_options() {
  * @return array
  */
 function wc_get_product_stock_status_options() {
-	return array(
+	return apply_filters( 'woocommerce_product_stock_status_options', array(
 		'instock'     => __( 'In stock', 'woocommerce' ),
 		'outofstock'  => __( 'Out of stock', 'woocommerce' ),
 		'onbackorder' => __( 'On backorder', 'woocommerce' ),
-	);
+	) );
 }
 
 /**
