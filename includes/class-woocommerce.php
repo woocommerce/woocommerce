@@ -410,6 +410,13 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
 
 		/**
+		 * Blocks.
+		 */
+		if ( file_exists( WC_ABSPATH . 'includes/blocks/class-wc-block-library.php' ) ) {
+			include_once WC_ABSPATH . 'includes/blocks/class-wc-block-library.php';
+		}
+
+		/**
 		 * Libraries
 		 */
 		include_once WC_ABSPATH . 'includes/libraries/action-scheduler/action-scheduler.php';
