@@ -58,8 +58,8 @@ class TableCard extends Component {
 		this.selectAllRows = this.selectAllRows.bind( this );
 	}
 
-	componentDidUpdate( { query: prevQuery } ) {
-		const { compareBy, onColumnsChange, query } = this.props;
+	componentDidUpdate( { headers: prevHeaders, isLoading: prevIsLoading, query: prevQuery } ) {
+		const { compareBy, headers, isLoading, onColumnsChange, query } = this.props;
 		const { showCols } = this.state;
 
 		if ( query.filter || prevQuery.filter ) {
@@ -72,6 +72,13 @@ class TableCard extends Component {
 				} );
 				/* eslint-enable react/no-did-update-set-state */
 			}
+		}
+		if ( ! isLoading && prevIsLoading && ! isEqual( headers, prevHeaders ) ) {
+			/* eslint-disable react/no-did-update-set-state */
+			this.setState( {
+				showCols: headers.map( ( { key, hiddenByDefault } ) => ! hiddenByDefault && key ).filter( Boolean ),
+			} );
+			/* eslint-enable react/no-did-update-set-state */
 		}
 		if ( query.orderby !== prevQuery.orderby && ! showCols.includes( query.orderby ) ) {
 			const newShowCols = showCols.concat( query.orderby );
