@@ -67,7 +67,8 @@ function wc_get_attribute_taxonomies() {
  * @return array
  */
 function wc_get_attribute_taxonomy_ids() {
-	$cache_key   = 'attribute-ids';
+	$prefix      = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
+	$cache_key   = $prefix . 'attribute-ids';
 	$cache_value = wp_cache_get( $cache_key, 'woocommerce-attributes' );
 
 	if ( $cache_value ) {
@@ -579,6 +580,7 @@ function wc_create_attribute( $args ) {
 	// Clear cache and flush rewrite rules.
 	wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 	delete_transient( 'wc_attribute_taxonomies' );
+	WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
 
 	return $id;
 }
@@ -668,6 +670,7 @@ function wc_delete_attribute( $id ) {
 		do_action( 'woocommerce_attribute_deleted', $id, $name, $taxonomy );
 		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 		delete_transient( 'wc_attribute_taxonomies' );
+		WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
 
 		return true;
 	}
@@ -684,7 +687,8 @@ function wc_delete_attribute( $id ) {
  * @return string
  */
 function wc_attribute_taxonomy_slug( $attribute_name ) {
-	$cache_key   = 'slug-' . $attribute_name;
+	$prefix      = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
+	$cache_key   = $prefix . 'slug-' . $attribute_name;
 	$cache_value = wp_cache_get( $cache_key, 'woocommerce-attributes' );
 
 	if ( $cache_value ) {
