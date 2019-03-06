@@ -74,7 +74,6 @@ class WC_Admin_Install {
 		wc_maybe_define_constant( 'WC_ADMIN_INSTALLING', true );
 
 		self::create_tables();
-		WC_Admin_Reports_Sync::regenerate_report_data();
 		self::update_wc_admin_version();
 
 		delete_transient( 'wc_admin_installing' );
