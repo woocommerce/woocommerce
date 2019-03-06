@@ -16,7 +16,7 @@ class WC_Beta_Tester_Admin_Menus {
 	 * Constructor
 	 */
 	public function __construct() {
-		if ( class_exists( 'WC_Admin_Status' ) ) {
+		if ( class_exists( 'WC_Admin_Status' ) && class_exists( 'WC_REST_System_Status_Controller' ) ) {
 			add_action( 'admin_bar_menu', array( $this, 'admin_bar_menus' ), 50 );
 		}
 		add_action( 'admin_footer', array( $this, 'version_information_template' ) );
