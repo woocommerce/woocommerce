@@ -83,6 +83,26 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.0.0 - TBD =
+
+- **BREAKING:** Requires WordPress 5.0+, WooCommerce 3.5+
+- **BREAKING:** Remove the legacy block entirely
+- **BREAKING:** Remove the `wc-pb/v3/*` endpoints in favor of new core `wc-blocks/v1/*` endpoints
+- Feature: Add content visibility settings to show/hide title, price, rating, button
+- Feature: Add transforms between basic product grid blocks
+- Fix: Add product rating display to preview, to better match front end
+- Fix: Product titles render HTML correctly in preview
+- Fix: Icons are now aligned correctly in placeholders
+- API: Change namespace, endpoints now accessed at `/wc-blocks/v1/*`
+- API: Add `catalog_visibility` parameter for fetching products
+- API: Update structure of attribute term endpoint to return `attribute.slug`, `attribute.name` etc
+- API: Update parameters to use full names, `category_operator`, `attribute_operator`
+- Components: Move SearchListControl to `@woocommerce/components` library
+- Components: Added new control component GridContentControl to manage content visibility
+- Build: Reorganize CSS into one file for editor preview, and one file for front-end styles
+- Build: Move registration code to a new class
+- Build: Update packages
+
 = 1.4.0 - 2019-02-12 =
 
 - Feature: Added new block: "Products by Attribute"
