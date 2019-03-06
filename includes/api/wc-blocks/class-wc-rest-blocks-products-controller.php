@@ -81,6 +81,15 @@ class WC_REST_Blocks_Products_Controller extends WC_REST_Products_Controller {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
+		// Only allow requests to this endpoint to originate from local requests.
+		// This could obviously be spoofed, but will discourage usage outside of the editor.
+		$admin_url = admin_url();
+		$referrer = wp_get_referer();
+
+		if ( ! stristr( $referrer, $admin_url ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'This endpoint is for editor usage only. ' . $admin_url . '  ' . $referrer, 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
 		return true;
 	}
 
