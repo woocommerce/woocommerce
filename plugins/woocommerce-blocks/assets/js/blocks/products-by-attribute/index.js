@@ -67,6 +67,7 @@ registerBlockType( 'woocommerce/products-by-attribute', {
 			default: {
 				title: true,
 				price: true,
+				rating: true,
 				button: true,
 			},
 		},
@@ -110,6 +111,7 @@ registerBlockType( 'woocommerce/products-by-attribute', {
 			{
 				'is-hidden-title': ! contentVisibility.title,
 				'is-hidden-price': ! contentVisibility.price,
+				'is-hidden-rating': ! contentVisibility.rating,
 				'is-hidden-button': ! contentVisibility.button,
 			}
 		);

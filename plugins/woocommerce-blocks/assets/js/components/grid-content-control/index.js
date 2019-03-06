@@ -10,7 +10,7 @@ import { ToggleControl } from '@wordpress/components';
  * A combination of range controls for product grid layout settings.
  */
 const GridContentControl = ( { onChange, settings } ) => {
-	const { button, price, title } = settings;
+	const { button, price, rating, title } = settings;
 	return (
 		<Fragment>
 			<ToggleControl
@@ -32,6 +32,16 @@ const GridContentControl = ( { onChange, settings } ) => {
 				}
 				checked={ price }
 				onChange={ () => onChange( { ...settings, price: ! price } ) }
+			/>
+			<ToggleControl
+				label={ __( 'Product rating', 'woo-gutenberg-products-block' ) }
+				help={
+					rating ?
+						__( 'Product rating is visible.', 'woo-gutenberg-products-block' ) :
+						__( 'Product rating is hidden.', 'woo-gutenberg-products-block' )
+				}
+				checked={ rating }
+				onChange={ () => onChange( { ...settings, rating: ! rating } ) }
 			/>
 			<ToggleControl
 				label={ __( 'Add to Cart button', 'woo-gutenberg-products-block' ) }

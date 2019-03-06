@@ -65,6 +65,7 @@ registerBlockType( 'woocommerce/product-new', {
 			{
 				'is-hidden-title': ! contentVisibility.title,
 				'is-hidden-price': ! contentVisibility.price,
+				'is-hidden-rating': ! contentVisibility.rating,
 				'is-hidden-button': ! contentVisibility.button,
 			}
 		);
