@@ -32,12 +32,13 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 	/**
 	 * Create a new customer.
 	 *
-	 * @param  string $email Customer email.
+	 * @param  string $email    Customer email.
 	 * @param  string $username Customer username.
 	 * @param  string $password Customer password.
+	 * @param  array  $args     List of arguments to pass to `wp_insert_user()`.
 	 * @return int|WP_Error Returns WP_Error on failure, Int (user ID) on success.
 	 */
-	function wc_create_new_customer( $email, $username = '', $password = '' ) {
+	function wc_create_new_customer( $email, $username = '', $password = '', $args = array() ) {
 
 		// Check the email address.
 		if ( empty( $email ) || ! is_email( $email ) ) {
@@ -95,11 +96,15 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 		}
 
 		$new_customer_data = apply_filters(
-			'woocommerce_new_customer_data', array(
-				'user_login' => $username,
-				'user_pass'  => $password,
-				'user_email' => $email,
-				'role'       => 'customer',
+			'woocommerce_new_customer_data',
+			array_merge(
+				$args,
+				array(
+					'user_login' => $username,
+					'user_pass'  => $password,
+					'user_email' => $email,
+					'role'       => 'customer',
+				)
 			)
 		);
 
@@ -121,11 +126,11 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
  * @param int $customer_id Customer ID.
  */
 function wc_set_customer_auth_cookie( $customer_id ) {
-	global $current_user;
-
-	$current_user = get_user_by( 'id', $customer_id ); // WPCS: override ok.
-
+	wp_set_current_user( $customer_id );
 	wp_set_auth_cookie( $customer_id, true );
+
+	// Update session.
+	WC()->session->init_session_cookie();
 }
 
 /**
@@ -215,10 +220,13 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		return $result;
 	}
 
-	$transient_name = 'wc_cbp_' . md5( $customer_email . $user_id . WC_Cache_Helper::get_transient_version( 'orders' ) );
-	$result         = get_transient( $transient_name );
+	$transient_name    = 'wc_customer_bought_product_' . md5( $customer_email . $user_id );
+	$transient_version = WC_Cache_Helper::get_transient_version( 'orders' );
+	$transient_value   = get_transient( $transient_name );
 
-	if ( false === $result ) {
+	if ( isset( $transient_value['value'], $transient_value['version'] ) && $transient_value['version'] === $transient_version ) {
+		$result = $transient_value['value'];
+	} else {
 		$customer_data = array( $user_id );
 
 		if ( $user_id ) {
@@ -255,7 +263,12 @@ function wc_customer_bought_product( $customer_email, $user_id, $product_id ) {
 		); // WPCS: unprepared SQL ok.
 		$result = array_map( 'absint', $result );
 
-		set_transient( $transient_name, $result, DAY_IN_SECONDS * 30 );
+		$transient_value = array(
+			'version' => $transient_version,
+			'value'   => $result,
+		);
+
+		set_transient( $transient_name, $transient_value, DAY_IN_SECONDS * 30 );
 	}
 	return in_array( absint( $product_id ), $result, true );
 }
@@ -371,9 +384,7 @@ add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
 function wc_shop_manager_has_capability( $allcaps, $caps, $args, $user ) {
 
 	if ( wc_user_has_role( $user, 'shop_manager' ) ) {
-		/**
-		 * @see wc_modify_map_meta_cap, which limits editing to customers.
-		 */
+		// @see wc_modify_map_meta_cap, which limits editing to customers.
 		$allcaps['edit_users'] = true;
 	}
 
@@ -579,7 +590,11 @@ function wc_reset_order_customer_id_on_deleted_user( $user_id ) {
 	global $wpdb;
 
 	$wpdb->update(
-		$wpdb->postmeta, array( 'meta_value' => 0 ), array(
+		$wpdb->postmeta,
+		array(
+			'meta_value' => 0,
+		),
+		array(
 			'meta_key'   => '_customer_user',
 			'meta_value' => $user_id,
 		)

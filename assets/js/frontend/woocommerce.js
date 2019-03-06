@@ -14,18 +14,21 @@ jQuery( function( $ ) {
 		}
 	});
 
-	// Set a cookie and hide the store notice when the dismiss button is clicked
-	$( '.woocommerce-store-notice__dismiss-link' ).click( function() {
-		Cookies.set( 'store_notice', 'hidden', { path: '/' } );
-		$( '.woocommerce-store-notice' ).hide();
-	});
+	var noticeID   = $( '.woocommerce-store-notice' ).data( 'notice-id' ) || '',
+		cookieName = 'store_notice' + noticeID;
 
 	// Check the value of that cookie and show/hide the notice accordingly
-	if ( 'hidden' === Cookies.get( 'store_notice' ) ) {
+	if ( 'hidden' === Cookies.get( cookieName ) ) {
 		$( '.woocommerce-store-notice' ).hide();
 	} else {
 		$( '.woocommerce-store-notice' ).show();
 	}
+
+	// Set a cookie and hide the store notice when the dismiss button is clicked
+	$( '.woocommerce-store-notice__dismiss-link' ).click( function() {
+		Cookies.set( cookieName, 'hidden', { path: '/' } );
+		$( '.woocommerce-store-notice' ).hide();
+	});
 
 	// Make form field descriptions toggle on focus.
 	$( document.body ).on( 'click', function() {

@@ -256,7 +256,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'wc-admin-order-meta-boxes',
 					'woocommerce_admin_meta_boxes_order',
 					array(
-						'countries'              => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
+						'countries'              => wp_json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
 						'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
 						'default_country'        => isset( $default_location['country'] ) ? $default_location['country'] : '',
 						'default_state'          => isset( $default_location['state'] ) ? $default_location['state'] : '',
@@ -336,7 +336,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_permission_revoke'        => __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ),
 					'i18n_tax_rate_already_exists'  => __( 'You cannot add the same tax rate twice!', 'woocommerce' ),
 					'i18n_delete_note'              => __( 'Are you sure you wish to delete this note? This action cannot be undone.', 'woocommerce' ),
-					'i18n_apply_coupon'             => __( 'Enter a coupon code to apply to this order.', 'woocommerce' ),
+					'i18n_apply_coupon'             => __( 'Enter a coupon code to apply. Discounts are applied to line totals, before taxes.', 'woocommerce' ),
 					'i18n_add_fee'                  => __( 'Enter a fixed amount or percentage to apply as a fee.', 'woocommerce' ),
 				);
 
@@ -411,7 +411,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'wc-users',
 					'wc_users_params',
 					array(
-						'countries'              => json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
+						'countries'              => wp_json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
 						'i18n_select_state_text' => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
 					)
 				);

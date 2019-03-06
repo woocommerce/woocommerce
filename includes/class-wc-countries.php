@@ -113,60 +113,13 @@ class WC_Countries {
 
 	/**
 	 * Load the states.
+	 *
+	 * @deprecated 3.6.0 This method was used to load state files, but is no longer needed. @see get_states().
 	 */
 	public function load_country_states() {
 		global $states;
 
-		// States set to array() are blank i.e. the country has no use for the state field.
-		$states = array(
-			'AF' => array(),
-			'AT' => array(),
-			'AX' => array(),
-			'BE' => array(),
-			'BH' => array(),
-			'BI' => array(),
-			'CZ' => array(),
-			'DE' => array(),
-			'DK' => array(),
-			'EE' => array(),
-			'FI' => array(),
-			'FR' => array(),
-			'GP' => array(),
-			'GF' => array(),
-			'IS' => array(),
-			'IL' => array(),
-			'IM' => array(),
-			'KR' => array(),
-			'KW' => array(),
-			'LB' => array(),
-			'LU' => array(),
-			'MQ' => array(),
-			'MT' => array(),
-			'NL' => array(),
-			'NO' => array(),
-			'PL' => array(),
-			'PT' => array(),
-			'RE' => array(),
-			'SG' => array(),
-			'SK' => array(),
-			'SI' => array(),
-			'LK' => array(),
-			'SE' => array(),
-			'VN' => array(),
-			'YT' => array(),
-		);
-
-		// Load only the state files the shop owner wants/needs.
-		$allowed = array_merge( $this->get_allowed_countries(), $this->get_shipping_countries() );
-
-		if ( ! empty( $allowed ) ) {
-			foreach ( $allowed as $code => $country ) {
-				if ( ! isset( $states[ $code ] ) && file_exists( WC()->plugin_path() . '/i18n/states/' . $code . '.php' ) ) {
-					include WC()->plugin_path() . '/i18n/states/' . $code . '.php';
-				}
-			}
-		}
-
+		$states       = include WC()->plugin_path() . '/i18n/states.php';
 		$this->states = apply_filters( 'woocommerce_states', $states );
 	}
 
@@ -177,8 +130,8 @@ class WC_Countries {
 	 * @return false|array of states
 	 */
 	public function get_states( $cc = null ) {
-		if ( empty( $this->states ) ) {
-			$this->load_country_states();
+		if ( ! isset( $this->states ) ) {
+			$this->states = apply_filters( 'woocommerce_states', include WC()->plugin_path() . '/i18n/states.php' );
 		}
 
 		if ( ! is_null( $cc ) ) {
@@ -455,7 +408,7 @@ class WC_Countries {
 	 *
 	 * @param string $selected_country Selected country.
 	 * @param string $selected_state   Selected state.
-	 * @param bool   $escape           If should escape HTML.
+	 * @param bool   $escape           If we should escape HTML.
 	 */
 	public function country_dropdown_options( $selected_country = '', $selected_state = '', $escape = false ) {
 		if ( $this->countries ) {
@@ -500,7 +453,7 @@ class WC_Countries {
 					'AU'      => "{name}\n{company}\n{address_1}\n{address_2}\n{city} {state} {postcode}\n{country}",
 					'AT'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'BE'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
-					'CA'      => "{company}\n{name}\n{address_1}\n{address_2}\n{city} {state} {postcode}\n{country}",
+					'CA'      => "{company}\n{name}\n{address_1}\n{address_2}\n{city} {state_code}&nbsp;&nbsp;{postcode}\n{country}",
 					'CH'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'CL'      => "{company}\n{name}\n{address_1}\n{address_2}\n{state}\n{postcode} {city}\n{country}",
 					'CN'      => "{country} {postcode}\n{state}, {city}, {address_2}, {address_1}\n{company}\n{name}",
@@ -783,7 +736,7 @@ class WC_Countries {
 							'required' => false,
 							'hidden'   => true,
 						),
-						'state' => array(
+						'state'    => array(
 							'label' => __( 'Province', 'woocommerce' ),
 						),
 					),
@@ -1007,12 +960,21 @@ class WC_Countries {
 						),
 					),
 					'JP' => array(
+						'postcode' => array(
+							'priority' => 65,
+						),
 						'state'    => array(
 							'label'    => __( 'Prefecture', 'woocommerce' ),
 							'priority' => 66,
 						),
-						'postcode' => array(
-							'priority' => 65,
+						'city' => array(
+							'priority' => 67,
+						),
+						'address_1' => array(
+							'priority' => 68,
+						),
+						'address_2' => array(
+							'priority' => 69,
 						),
 					),
 					'KR' => array(
@@ -1300,6 +1262,7 @@ class WC_Countries {
 		foreach ( $fields as $key => $value ) {
 			if ( 'state' === $key ) {
 				$value['country_field'] = $type . 'country';
+				$value['country']       = $country;
 			}
 			$address_fields[ $type . $key ] = $value;
 		}

@@ -1,7 +1,12 @@
 <?php
+/**
+ * Class WC_Report_Customer_List file.
+ *
+ * @package WooCommerce\Reports
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 if ( ! class_exists( 'WP_List_Table' ) ) {
@@ -11,8 +16,6 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 /**
  * WC_Report_Customer_List.
  *
- * @author      WooThemes
- * @category    Admin
  * @package     WooCommerce/Admin/Reports
  * @version     2.1.0
  */
@@ -36,7 +39,7 @@ class WC_Report_Customer_List extends WP_List_Table {
 	 * No items found text.
 	 */
 	public function no_items() {
-		_e( 'No customers found.', 'woocommerce' );
+		esc_html_e( 'No customers found.', 'woocommerce' );
 	}
 
 	/**
@@ -47,20 +50,20 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 		echo '<div id="poststuff" class="woocommerce-reports-wide">';
 
-		if ( ! empty( $_GET['link_orders'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'link_orders' ) ) {
+		if ( ! empty( $_GET['link_orders'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'link_orders' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			$linked = wc_update_new_customer_past_orders( absint( $_GET['link_orders'] ) );
-
-			echo '<div class="updated"><p>' . sprintf( _n( '%s previous order linked', '%s previous orders linked', $linked, 'woocommerce' ), $linked ) . '</p></div>';
+			/* translators: single or plural number of orders */
+			echo '<div class="updated"><p>' . sprintf( esc_html( _n( '%s previous order linked', '%s previous orders linked', $linked, 'woocommerce' ), $linked ) ) . '</p></div>';
 		}
 
-		if ( ! empty( $_GET['refresh'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'refresh' ) ) {
+		if ( ! empty( $_GET['refresh'] ) && wp_verify_nonce( $_REQUEST['_wpnonce'], 'refresh' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 			$user_id = absint( $_GET['refresh'] );
 			$user    = get_user_by( 'id', $user_id );
 
 			delete_user_meta( $user_id, '_money_spent' );
 			delete_user_meta( $user_id, '_order_count' );
-
-			echo '<div class="updated"><p>' . sprintf( __( 'Refreshed stats for %s', 'woocommerce' ), $user->display_name ) . '</p></div>';
+			/* translators: User display name */
+			echo '<div class="updated"><p>' . sprintf( esc_html__( 'Refreshed stats for %s', 'woocommerce' ), esc_html( $user->display_name ) ) . '</p></div>';
 		}
 
 		echo '<form method="post" id="woocommerce_customers">';
@@ -75,8 +78,8 @@ class WC_Report_Customer_List extends WP_List_Table {
 	/**
 	 * Get column value.
 	 *
-	 * @param WP_User $user
-	 * @param string  $column_name
+	 * @param WP_User $user WP User object.
+	 * @param string  $column_name Column name.
 	 * @return string
 	 */
 	public function column_default( $user, $column_name ) {
@@ -224,14 +227,13 @@ class WC_Report_Customer_List extends WP_List_Table {
 	/**
 	 * Order users by name.
 	 *
-	 * @param WP_User_Query $query
-	 *
+	 * @param WP_User_Query $query Query that gets passed through.
 	 * @return WP_User_Query
 	 */
 	public function order_by_last_name( $query ) {
 		global $wpdb;
 
-		$s = ! empty( $_REQUEST['s'] ) ? stripslashes( $_REQUEST['s'] ) : '';
+		$s = ! empty( $_REQUEST['s'] ) ? wp_unslash( $_REQUEST['s'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$query->query_from   .= " LEFT JOIN {$wpdb->usermeta} as meta2 ON ({$wpdb->users}.ID = meta2.user_id) ";
 		$query->query_where  .= " AND meta2.meta_key = 'last_name' ";
@@ -278,10 +280,13 @@ class WC_Report_Customer_List extends WP_List_Table {
 		);
 
 		$query = new WP_User_Query(
-			array(
-				'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
-				'number'  => $per_page,
-				'offset'  => ( $current_page - 1 ) * $per_page,
+			apply_filters(
+				'woocommerce_admin_report_customer_list_user_query_args',
+				array(
+					'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
+					'number'  => $per_page,
+					'offset'  => ( $current_page - 1 ) * $per_page,
+				)
 			)
 		);
 

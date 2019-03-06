@@ -693,7 +693,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 			var main_chart;
 
 			jQuery(function(){
-				var order_data = jQuery.parseJSON( '<?php echo $chart_data;  // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>' );
+				var order_data = JSON.parse( decodeURIComponent( '<?php echo rawurlencode( $chart_data ); ?>' ) );
 				var drawGraph = function( highlight ) {
 					var series = [
 						{
@@ -817,7 +817,7 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 								tickColor: 'transparent',
 								mode: "time",
 								timeformat: "<?php echo ( 'day' === $this->chart_groupby ) ? '%d %b' : '%b'; ?>",
-								monthNames: <?php echo wp_json_encode( array_values( $wp_locale->month_abbrev ) ); ?>,
+								monthNames: JSON.parse( decodeURIComponent( '<?php echo rawurlencode( wp_json_encode( array_values( $wp_locale->month_abbrev ) ) ); ?>' ) ),
 								tickLength: 1,
 								minTickSize: [1, "<?php echo esc_js( $this->chart_groupby ); ?>"],
 								font: {

@@ -58,6 +58,9 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$order->set_date_created( current_time( 'timestamp', true ) );
 		$order->set_currency( $order->get_currency() ? $order->get_currency() : get_woocommerce_currency() );
 
+		$raw_status = $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' );
+		$status     = wc_is_order_status( 'wc-' . $raw_status ) ? 'wc-' . $raw_status : $raw_status;
+
 		$id = wp_insert_post(
 			apply_filters(
 				'woocommerce_new_order_data',
@@ -65,7 +68,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 					'post_date'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
 					'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 					'post_type'     => $order->get_type( 'edit' ),
-					'post_status'   => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
+					'post_status'   => $status,
 					'ping_status'   => 'closed',
 					'post_author'   => 1,
 					'post_title'    => $this->get_post_title(),
@@ -73,7 +76,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 					'post_parent'   => $order->get_parent_id( 'edit' ),
 					'post_excerpt'  => $this->get_post_excerpt( $order ),
 				)
-			), true
+			),
+			true
 		);
 
 		if ( $id && ! is_wp_error( $id ) ) {
@@ -119,7 +123,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		 * stored. @todo When meta is flattened, handle this during migration.
 		 */
 		if ( version_compare( $order->get_version( 'edit' ), '2.3.7', '<' ) && $order->get_prices_include_tax( 'edit' ) ) {
-			$order->set_discount_total( (double) get_post_meta( $order->get_id(), '_cart_discount', true ) - (double) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
+			$order->set_discount_total( (float) get_post_meta( $order->get_id(), '_cart_discount', true ) - (float) get_post_meta( $order->get_id(), '_cart_discount_tax', true ) );
 		}
 	}
 
@@ -140,10 +144,12 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		// Only update the post when the post data changes.
 		if ( array_intersect( array( 'date_created', 'date_modified', 'status', 'parent_id', 'post_excerpt' ), array_keys( $changes ) ) ) {
+			$raw_status = $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' );
+			$status     = wc_is_order_status( 'wc-' . $raw_status ) ? 'wc-' . $raw_status : $raw_status;
 			$post_data = array(
 				'post_date'         => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
 				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
-				'post_status'       => 'wc-' . ( $order->get_status( 'edit' ) ? $order->get_status( 'edit' ) : apply_filters( 'woocommerce_default_order_status', 'pending' ) ),
+				'post_status'       => $status,
 				'post_parent'       => $order->get_parent_id(),
 				'post_excerpt'      => $this->get_post_excerpt( $order ),
 				'post_modified'     => isset( $changes['date_modified'] ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ) : current_time( 'mysql' ),

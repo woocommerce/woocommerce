@@ -515,7 +515,7 @@ class WC_Query {
 		global $wpdb, $wp_query;
 
 		if ( isset( $wp_query->queried_object, $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy ) && is_a( $wp_query->queried_object, 'WP_Term' ) ) {
-			$search_within_terms = get_terms(
+			$search_within_terms   = get_terms(
 				array(
 					'taxonomy' => $wp_query->queried_object->taxonomy,
 					'child_of' => $wp_query->queried_object->term_id,
@@ -550,7 +550,7 @@ class WC_Query {
 		global $wpdb, $wp_query;
 
 		if ( isset( $wp_query->queried_object, $wp_query->queried_object->term_taxonomy_id, $wp_query->queried_object->taxonomy ) && is_a( $wp_query->queried_object, 'WP_Term' ) ) {
-			$search_within_terms = get_terms(
+			$search_within_terms   = get_terms(
 				array(
 					'taxonomy' => $wp_query->queried_object->taxonomy,
 					'child_of' => $wp_query->queried_object->term_id,
@@ -601,7 +601,9 @@ class WC_Query {
 		if ( ! is_array( $meta_query ) ) {
 			$meta_query = array();
 		}
-		$meta_query['price_filter'] = $this->price_filter_meta_query();
+		if ( $main_query ) {
+			$meta_query['price_filter'] = $this->price_filter_meta_query();
+		}
 		return array_filter( apply_filters( 'woocommerce_product_query_meta_query', $meta_query, $this ) );
 	}
 

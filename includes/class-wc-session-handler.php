@@ -66,6 +66,24 @@ class WC_Session_Handler extends WC_Session {
 	 * @since 3.3.0
 	 */
 	public function init() {
+		$this->init_session_cookie();
+		$this->_data = $this->get_session_data();
+
+		add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
+		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
+		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
+
+		if ( ! is_user_logged_in() ) {
+			add_filter( 'nonce_user_logged_out', array( $this, 'nonce_user_logged_out' ) );
+		}
+	}
+
+	/**
+	 * Setup cookie and customer ID.
+	 *
+	 * @since 3.6.0
+	 */
+	public function init_session_cookie() {
 		$cookie = $this->get_session_cookie();
 
 		if ( $cookie ) {
@@ -82,16 +100,6 @@ class WC_Session_Handler extends WC_Session {
 		} else {
 			$this->set_session_expiration();
 			$this->_customer_id = $this->generate_customer_id();
-		}
-
-		$this->_data = $this->get_session_data();
-
-		add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
-		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
-		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
-
-		if ( ! is_user_logged_in() ) {
-			add_filter( 'nonce_user_logged_out', array( $this, 'nonce_user_logged_out' ) );
 		}
 	}
 
@@ -111,7 +119,9 @@ class WC_Session_Handler extends WC_Session {
 			$cookie_value      = $this->_customer_id . '||' . $this->_session_expiration . '||' . $this->_session_expiring . '||' . $cookie_hash;
 			$this->_has_cookie = true;
 
-			wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, apply_filters( 'wc_session_use_secure_cookie', false ) );
+			if ( ! isset( $_COOKIE[ $this->_cookie ] ) || $_COOKIE[ $this->_cookie ] !== $cookie_value ) {
+				wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, apply_filters( 'wc_session_use_secure_cookie', false ) );
+			}
 		}
 	}
 
