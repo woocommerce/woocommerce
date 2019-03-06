@@ -287,8 +287,18 @@ class WC_Order extends WC_Abstract_Order {
 	 * @since 3.0.0
 	 */
 	public function maybe_set_date_paid() {
-		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) ) ) {
-			$this->set_date_paid( current_time( 'timestamp', true ) );
+		// This logic only runs if the date_paid prop has not been set yet.
+		if ( ! $this->get_date_paid( 'edit' ) ) {
+			$payment_completed_status = apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this );
+
+			if ( $this->has_status( $payment_completed_status ) ) {
+				// If payment complete status is reached, set paid now.
+				$this->set_date_paid( current_time( 'timestamp', true ) );
+
+			} elseif ( 'processing' === $payment_completed_status && $this->has_status( 'completed' ) ) {
+				// If payment complete status was processing, but we've passed that and still have no date, set it now.
+				$this->set_date_paid( current_time( 'timestamp', true ) );
+			}
 		}
 	}
 

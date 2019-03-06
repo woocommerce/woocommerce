@@ -134,6 +134,21 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Should we show the Facebook install option?
+	 * True only if the user can install plugins,
+	 * and up until the end date of the recommendation.
+	 *
+	 * @return boolean
+	 */
+	protected function should_show_facebook() {
+		$end_date_facebook_recommendation = new DateTime( '8 October 2019' );
+		$current_user_date = new DateTime( current_time( 'Y-m-d' ) );
+
+		return current_user_can( 'install_plugins' ) &&
+			$end_date_facebook_recommendation >= $current_user_date;
+	}
+
+	/**
 	 * Should we display the 'Recommended' step?
 	 * True if at least one of the recommendations will be displayed.
 	 *
@@ -142,7 +157,8 @@ class WC_Admin_Setup_Wizard {
 	protected function should_show_recommended_step() {
 		return $this->should_show_theme()
 			|| $this->should_show_automated_tax()
-			|| $this->should_show_mailchimp();
+			|| $this->should_show_mailchimp()
+			|| $this->should_show_facebook();
 	}
 
 	/**
@@ -478,7 +494,7 @@ class WC_Admin_Setup_Wizard {
 				<?php endforeach; ?>
 			</select>
 			<script type="text/javascript">
-				var wc_setup_currencies = <?php echo wp_json_encode( $currency_by_country ); ?>;
+				var wc_setup_currencies = JSON.parse( decodeURIComponent( '<?php echo rawurlencode( wp_json_encode( $currency_by_country ) ); ?>' ) );
 				var wc_base_state       = "<?php echo esc_js( $state ); ?>";
 			</script>
 			</div>
@@ -576,12 +592,13 @@ class WC_Admin_Setup_Wizard {
 				update_option( 'woocommerce_price_thousand_sep', $locale_info[ $country ]['thousand_sep'] );
 			}
 		}
-
-		if ( $tracking ) {
-			update_option( 'woocommerce_allow_tracking', 'yes' );
-			wp_schedule_single_event( time() + 10, 'woocommerce_tracker_send_event', array( true ) );
-		} else {
-			update_option( 'woocommerce_allow_tracking', 'no' );
+		if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) {
+			if ( $tracking ) {
+				update_option( 'woocommerce_allow_tracking', 'yes' );
+				wp_schedule_single_event( time() + 10, 'woocommerce_tracker_send_event', array( true ) );
+			} else {
+				update_option( 'woocommerce_allow_tracking', 'no' );
+			}
 		}
 
 		WC_Install::create_pages();
@@ -799,7 +816,7 @@ class WC_Admin_Setup_Wizard {
 					id="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>"
 					name="<?php echo esc_attr( "{$input_prefix}[method]" ); ?>"
 					class="method wc-enhanced-select"
-					data-plugins="<?php echo esc_attr( wp_json_encode( $this->get_wcs_requisite_plugins() ) ); ?>"
+					data-plugins="<?php echo wc_esc_json( wp_json_encode( $this->get_wcs_requisite_plugins() ) ); ?>"
 				>
 				<?php foreach ( $shipping_methods as $method_id => $method ) : ?>
 					<option value="<?php echo esc_attr( $method_id ); ?>" <?php selected( $selected, $method_id ); ?>><?php echo esc_html( $method['name'] ); ?></option>
@@ -1653,7 +1670,7 @@ class WC_Admin_Setup_Wizard {
 									placeholder="<?php echo esc_attr( $setting['placeholder'] ); ?>"
 									<?php echo ( $setting['required'] ) ? 'required' : ''; ?>
 									<?php echo $is_checkbox ? checked( isset( $checked ) && $checked, true, false ) : ''; ?>
-									data-plugins="<?php echo esc_attr( wp_json_encode( isset( $setting['plugins'] ) ? $setting['plugins'] : null ) ); ?>"
+									data-plugins="<?php echo wc_esc_json( wp_json_encode( isset( $setting['plugins'] ) ? $setting['plugins'] : null ) ); ?>"
 								/>
 								<?php if ( ! empty( $setting['description'] ) ) : ?>
 									<span class="wc-wizard-service-settings-description"><?php echo esc_html( $setting['description'] ); ?></span>
@@ -1670,7 +1687,7 @@ class WC_Admin_Setup_Wizard {
 						type="checkbox"
 						name="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>-enabled"
 						value="yes" <?php checked( $should_enable_toggle ); ?>
-						data-plugins="<?php echo esc_attr( wp_json_encode( $plugins ) ); ?>"
+						data-plugins="<?php echo wc_esc_json( wp_json_encode( $plugins ) ); ?>"
 					/>
 					<label for="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>">
 				</span>
@@ -1839,7 +1856,7 @@ class WC_Admin_Setup_Wizard {
 				name="<?php echo esc_attr( 'setup_' . $type ); ?>"
 				value="yes"
 				checked
-				data-plugins="<?php echo esc_attr( wp_json_encode( isset( $item_info['plugins'] ) ? $item_info['plugins'] : null ) ); ?>"
+				data-plugins="<?php echo wc_esc_json( wp_json_encode( isset( $item_info['plugins'] ) ? $item_info['plugins'] : null ) ); ?>"
 			/>
 			<label for="<?php echo esc_attr( 'wc_recommended_' . $type ); ?>">
 				<img
@@ -1868,20 +1885,9 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_recommended() {
 		?>
 		<h1><?php esc_html_e( 'Recommended for All WooCommerce Stores', 'woocommerce' ); ?></h1>
-		<p><?php
-			// If we're displaying all of the recommended features, show the full description. Otherwise, display a placeholder.
-			// We're not translating all of the different permutations to save on translations,
-			// and the default is the most common.
-			if (
-					$this->should_show_theme()
-					&& $this->should_show_automated_tax()
-					&& $this->should_show_mailchimp()
-					) :
-				esc_html_e( 'Select from the list below to enable automated taxes and MailChimp’s best-in-class email services — and design your store with our official, free WooCommerce theme.', 'woocommerce' );
-			else :
-				esc_html_e( 'Enhance your store with these recommended features.', 'woocommerce' );
-			endif;
-		?></p>
+		<p>
+			<?php esc_html_e( 'Enhance your store with these recommended features.', 'woocommerce' ); ?>
+		</p>
 		<form method="post">
 			<ul class="recommended-step">
 				<?php
@@ -1921,6 +1927,17 @@ class WC_Admin_Setup_Wizard {
 						'plugins'     => array( array( 'name' => __( 'Mailchimp for WooCommerce', 'woocommerce' ), 'slug' => 'mailchimp-for-woocommerce' ) ),
 					) );
 				endif;
+
+				if ( $this->should_show_facebook() ) :
+					$this->display_recommended_item( array(
+						'type'        => 'facebook',
+						'title'       => __( 'Facebook', 'woocommerce' ),
+						'description' => __( 'Enjoy all Facebook products combined in one extension: pixel tracking, catalog sync, messenger chat, shop functionality and Instagram shopping (coming soon)!', 'woocommerce' ),
+						'img_url'     => WC()->plugin_url() . '/assets/images/obw-facebook-icon.svg',
+						'img_alt'     => __( 'Facebook icon', 'woocommerce' ),
+						'plugins'     => array( array( 'name' => __( 'Facebook for WooCommerce', 'woocommerce' ), 'slug' => 'facebook-for-woocommerce' ) ),
+					) );
+				endif;
 			?>
 		</ul>
 			<p class="wc-setup-actions step">
@@ -1941,6 +1958,7 @@ class WC_Admin_Setup_Wizard {
 		$setup_storefront       = isset( $_POST['setup_storefront_theme'] ) && 'yes' === $_POST['setup_storefront_theme'];
 		$setup_automated_tax    = isset( $_POST['setup_automated_taxes'] ) && 'yes' === $_POST['setup_automated_taxes'];
 		$setup_mailchimp        = isset( $_POST['setup_mailchimp'] ) && 'yes' === $_POST['setup_mailchimp'];
+		$setup_facebook         = isset( $_POST['setup_facebook'] ) && 'yes' === $_POST['setup_facebook'];
 
 		update_option( 'woocommerce_calc_taxes', $setup_automated_tax ? 'yes' : 'no' );
 		update_option( 'woocommerce_setup_automated_taxes', $setup_automated_tax );
@@ -1963,6 +1981,16 @@ class WC_Admin_Setup_Wizard {
 					'name'      => __( 'MailChimp for WooCommerce', 'woocommerce' ),
 					'repo-slug' => 'mailchimp-for-woocommerce',
 					'file'      => 'mailchimp-woocommerce.php',
+				)
+			);
+		}
+
+		if ( $setup_facebook ) {
+			$this->install_plugin(
+				'facebook-for-woocommerce',
+				array(
+					'name'      => __( 'Facebook for WooCommerce', 'woocommerce' ),
+					'repo-slug' => 'facebook-for-woocommerce',
 				)
 			);
 		}

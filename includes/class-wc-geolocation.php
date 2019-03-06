@@ -148,7 +148,7 @@ class WC_Geolocation {
 
 	/**
 	 * Get user IP Address using an external service.
-	 * This is used mainly as a fallback for users on localhost where
+	 * This can be used as a fallback for users on localhost where
 	 * get_ip_address() will be a local IP and non-geolocatable.
 	 *
 	 * @return string
@@ -191,7 +191,7 @@ class WC_Geolocation {
 	 * @param  bool   $api_fallback If true, uses geolocation APIs if the database file doesn't exist (can be slower).
 	 * @return array
 	 */
-	public static function geolocate_ip( $ip_address = '', $fallback = true, $api_fallback = true ) {
+	public static function geolocate_ip( $ip_address = '', $fallback = false, $api_fallback = true ) {
 		// Filter to allow custom geolocation of the IP address.
 		$country_code = apply_filters( 'woocommerce_geolocate_ip', false, $ip_address, $fallback, $api_fallback );
 

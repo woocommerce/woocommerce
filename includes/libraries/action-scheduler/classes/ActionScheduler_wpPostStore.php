@@ -32,7 +32,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 		$post = array(
 			'post_type' => self::POST_TYPE,
 			'post_title' => $action->get_hook(),
-			'post_content' => json_encode($action->get_args()),
+			'post_content' => wp_json_encode($action->get_args()),
 			'post_status' => ( $action->is_finished() ? 'publish' : 'pending' ),
 			'post_date_gmt' => $this->get_scheduled_date_string( $action, $scheduled_date ),
 			'post_date'     => $this->get_scheduled_date_string_local( $action, $scheduled_date ),
@@ -190,7 +190,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 		$args[] = self::POST_TYPE;
 		if ( !is_null($params['args']) ) {
 			$query .= " AND p.post_content=%s";
-			$args[] = json_encode($params['args']);
+			$args[] = wp_json_encode($params['args']);
 		}
 
 		if ( ! empty( $params['status'] ) ) {
@@ -271,7 +271,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 		}
 		if ( !is_null($query['args']) ) {
 			$sql .= " AND p.post_content=%s";
-			$sql_params[] = json_encode($query['args']);
+			$sql_params[] = wp_json_encode($query['args']);
 		}
 
 		if ( ! empty( $query['status'] ) ) {
@@ -736,7 +736,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 * @param ActionScheduler_Action $action
 	 */
 	protected function validate_action( ActionScheduler_Action $action ) {
-		if ( strlen( json_encode( $action->get_args() ) ) > self::$max_index_length ) {
+		if ( strlen( wp_json_encode( $action->get_args() ) ) > self::$max_index_length ) {
 			_doing_it_wrong( 'ActionScheduler_Action::$args', sprintf( 'To ensure the action args column can be indexed, action args should not be more than %d characters when encoded as JSON. Support for strings longer than this will be removed in a future version.', self::$max_index_length ), '2.1.0' );
 		}
 	}
