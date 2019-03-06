@@ -85,13 +85,13 @@ class ProductByCategoryBlock extends Component {
 
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
-		const { columns, catOperator, contentVisibility, orderby, rows } = attributes;
+		const { columns, catOperator, contentVisibility, editMode, orderby, rows } = attributes;
 
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody
 					title={ __( 'Product Category', 'woo-gutenberg-products-block' ) }
-					initialOpen={ false }
+					initialOpen={ ! attributes.categories.length && ! editMode }
 				>
 					<ProductCategoryControl
 						selected={ attributes.categories }
