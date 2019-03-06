@@ -12,6 +12,9 @@
  */
 class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
+	/**
+	 * Setup class.
+	 */
 	public function setUp() {
 		parent::setUp();
 
@@ -48,10 +51,13 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_string_to_array() {
-		$this->assertEquals( array(
-			'foo',
-			'bar',
-		), wc_string_to_array( 'foo|bar', '|' ) );
+		$this->assertEquals(
+			array(
+				'foo',
+				'bar',
+			),
+			wc_string_to_array( 'foo|bar', '|' )
+		);
 	}
 
 	/**
@@ -97,64 +103,82 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$default_unit = get_option( 'woocommerce_dimension_unit' );
 
 		// cm (default unit).
-		$this->assertEquals( array( 10, 3.937, 0.10936133, 100, 0.1 ), array(
-			wc_get_dimension( 10, 'cm' ),
-			wc_get_dimension( 10, 'in' ),
-			wc_get_dimension( 10, 'yd' ),
-			wc_get_dimension( 10, 'mm' ),
-			wc_get_dimension( 10, 'm' ),
-		) );
+		$this->assertEquals(
+			array( 10, 3.937, 0.10936133, 100, 0.1 ),
+			array(
+				wc_get_dimension( 10, 'cm' ),
+				wc_get_dimension( 10, 'in' ),
+				wc_get_dimension( 10, 'yd' ),
+				wc_get_dimension( 10, 'mm' ),
+				wc_get_dimension( 10, 'm' ),
+			)
+		);
 
 		// in.
 		update_option( 'woocommerce_dimension_unit', 'in' );
-		$this->assertEquals( array( 25.4, 10, 0.2777777782, 254, 0.254 ), array(
-			wc_get_dimension( 10, 'cm' ),
-			wc_get_dimension( 10, 'in' ),
-			wc_get_dimension( 10, 'yd' ),
-			wc_get_dimension( 10, 'mm' ),
-			wc_get_dimension( 10, 'm' ),
-		) );
+		$this->assertEquals(
+			array( 25.4, 10, 0.2777777782, 254, 0.254 ),
+			array(
+				wc_get_dimension( 10, 'cm' ),
+				wc_get_dimension( 10, 'in' ),
+				wc_get_dimension( 10, 'yd' ),
+				wc_get_dimension( 10, 'mm' ),
+				wc_get_dimension( 10, 'm' ),
+			)
+		);
 
 		// m.
 		update_option( 'woocommerce_dimension_unit', 'm' );
-		$this->assertEquals( array( 1000, 393.7, 10.936133, 10000, 10 ), array(
-			wc_get_dimension( 10, 'cm' ),
-			wc_get_dimension( 10, 'in' ),
-			wc_get_dimension( 10, 'yd' ),
-			wc_get_dimension( 10, 'mm' ),
-			wc_get_dimension( 10, 'm' ),
-		) );
+		$this->assertEquals(
+			array( 1000, 393.7, 10.936133, 10000, 10 ),
+			array(
+				wc_get_dimension( 10, 'cm' ),
+				wc_get_dimension( 10, 'in' ),
+				wc_get_dimension( 10, 'yd' ),
+				wc_get_dimension( 10, 'mm' ),
+				wc_get_dimension( 10, 'm' ),
+			)
+		);
 
 		// mm.
 		update_option( 'woocommerce_dimension_unit', 'mm' );
-		$this->assertEquals( array( 1, 0.3937, 0.010936133, 10, 0.01 ), array(
-			wc_get_dimension( 10, 'cm' ),
-			wc_get_dimension( 10, 'in' ),
-			wc_get_dimension( 10, 'yd' ),
-			wc_get_dimension( 10, 'mm' ),
-			wc_get_dimension( 10, 'm' ),
-		) );
+		$this->assertEquals(
+			array( 1, 0.3937, 0.010936133, 10, 0.01 ),
+			array(
+				wc_get_dimension( 10, 'cm' ),
+				wc_get_dimension( 10, 'in' ),
+				wc_get_dimension( 10, 'yd' ),
+				wc_get_dimension( 10, 'mm' ),
+				wc_get_dimension( 10, 'm' ),
+			)
+		);
 
 		// yd.
 		update_option( 'woocommerce_dimension_unit', 'yd' );
-		$this->assertEquals( array( 914.4, 359.99928, 10, 9144, 9.144 ), array(
-			wc_get_dimension( 10, 'cm' ),
-			wc_get_dimension( 10, 'in' ),
-			wc_get_dimension( 10, 'yd' ),
-			wc_get_dimension( 10, 'mm' ),
-			wc_get_dimension( 10, 'm' ),
-		) );
+		$this->assertEquals(
+			array( 914.4, 359.99928, 10, 9144, 9.144 ),
+			array(
+				wc_get_dimension( 10, 'cm' ),
+				wc_get_dimension( 10, 'in' ),
+				wc_get_dimension( 10, 'yd' ),
+				wc_get_dimension( 10, 'mm' ),
+				wc_get_dimension( 10, 'm' ),
+			)
+		);
 
 		// Negative.
 		$this->assertEquals( 0, wc_get_dimension( -10, 'mm' ) );
 
 		// Custom.
-		$this->assertEquals( array( 25.4, 914.4, 393.7, 0.010936133 ), array(
-			wc_get_dimension( 10, 'cm', 'in' ),
-			wc_get_dimension( 10, 'cm', 'yd' ),
-			wc_get_dimension( 10, 'in', 'm' ),
-			wc_get_dimension( 10, 'yd', 'mm' ),
-		) );
+		$this->assertEquals(
+			array( 25.4, 914.4, 393.7, 0.010936133 ),
+			array(
+				wc_get_dimension( 10, 'cm', 'in' ),
+				wc_get_dimension( 10, 'cm', 'yd' ),
+				wc_get_dimension( 10, 'in', 'm' ),
+				wc_get_dimension( 10, 'yd', 'mm' ),
+			)
+		);
 
 		// Restore default.
 		update_option( 'woocommerce_dimension_unit', $default_unit );
@@ -368,7 +392,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_coupon_code() {
-		$this->assertEquals( 'foo#bar', wc_format_coupon_code( 'FOO#bar<script>alert();</script>' ) );
+		$this->assertEquals( 'foo#baralert();', wc_format_coupon_code( 'FOO#bar<script>alert();</script>' ) );
 	}
 
 	/**
@@ -578,13 +602,16 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_let_to_num() {
-		$this->assertEquals( array( 10240, 10485760, 10737418240, 10995116277760, 11258999068426240 ), array(
-			wc_let_to_num( '10K' ),
-			wc_let_to_num( '10M' ),
-			wc_let_to_num( '10G' ),
-			wc_let_to_num( '10T' ),
-			wc_let_to_num( '10P' ),
-		) );
+		$this->assertEquals(
+			array( 10240, 10485760, 10737418240, 10995116277760, 11258999068426240 ),
+			array(
+				wc_let_to_num( '10K' ),
+				wc_let_to_num( '10M' ),
+				wc_let_to_num( '10G' ),
+				wc_let_to_num( '10T' ),
+				wc_let_to_num( '10P' ),
+			)
+		);
 	}
 
 	/**
@@ -911,7 +938,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 *
 	 * This function is called by WP_HTTP_TestCase::http_request_listner().
 	 *
-	 * @param array $request Request arguments.
+	 * @param array  $request Request arguments.
 	 * @param string $url URL of the request.
 	 *
 	 * @return array|false mocked response or false to let WP perform a regular request.
@@ -975,16 +1002,19 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 			),
 		);
 
-		$this->assertEquals( array(
-			'A'   => 'tom',
-			'sum' => 30,
-			'C'   => array(
-				'x',
-				'y',
-				'z' => 145,
-				'w' => 1,
+		$this->assertEquals(
+			array(
+				'A'   => 'tom',
+				'sum' => 30,
+				'C'   => array(
+					'x',
+					'y',
+					'z' => 145,
+					'w' => 1,
+				),
 			),
-		), wc_array_merge_recursive_numeric( $a, $b, $c ) );
+			wc_array_merge_recursive_numeric( $a, $b, $c )
+		);
 	}
 
 	/**
