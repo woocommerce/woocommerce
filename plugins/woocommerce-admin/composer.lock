@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "213bfacd8193edc4d2d86e3b4a3ebff9",
+    "content-hash": "2edd7e95562aa393d7defbe349b8a46d",
     "packages": [
         {
             "name": "composer/installers",
@@ -1161,6 +1161,7 @@
                 "mock",
                 "xunit"
             ],
+            "abandoned": true,
             "time": "2018-08-09T05:50:03+00:00"
         },
         {
