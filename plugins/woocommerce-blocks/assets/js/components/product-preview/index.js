@@ -22,6 +22,12 @@ const ProductPreview = ( { product } ) => {
 		image = <img src={ placeholderImgSrc } alt="" />;
 	}
 
+	const rating = Number( product.average_rating );
+	let displayRating = false;
+	if ( rating > 0 ) {
+		displayRating = ( rating / 5 ) * 100;
+	}
+
 	return (
 		<div className="wc-product-preview">
 			{ image }
@@ -33,6 +39,13 @@ const ProductPreview = ( { product } ) => {
 				className="wc-product-preview__price"
 				dangerouslySetInnerHTML={ { __html: product.price_html } }
 			/>
+
+			{ displayRating && (
+				<div className="wc-product-preview__rating star-rating" role="img">
+					<span style={ { width: `${ displayRating }%` } } />
+				</div>
+			) }
+
 			<span className="wp-block-button">
 				<span className="wc-product-preview__add-to-cart wp-block-button__link">
 					{ __( 'Add to cart', 'woo-gutenberg-products-block' ) }

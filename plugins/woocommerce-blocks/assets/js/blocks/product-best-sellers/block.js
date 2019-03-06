@@ -131,6 +131,7 @@ class ProductBestSellersBlock extends Component {
 			'is-not-found': loaded && ! products.length,
 			'is-hidden-title': ! contentVisibility.title,
 			'is-hidden-price': ! contentVisibility.price,
+			'is-hidden-rating': ! contentVisibility.rating,
 			'is-hidden-button': ! contentVisibility.button,
 		} );
 

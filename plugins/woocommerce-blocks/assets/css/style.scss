@@ -17,6 +17,12 @@
 		}
 	}
 
+	&.is-hidden-rating {
+		.star-rating {
+			display: none;
+		}
+	}
+
 	&.is-hidden-button {
 		.button[data-product_sku] {
 			display: none !important;

@@ -58,6 +58,7 @@ registerBlockType( 'woocommerce/handpicked-products', {
 			default: {
 				title: true,
 				price: true,
+				rating: true,
 				button: true,
 			},
 		},
@@ -101,6 +102,7 @@ registerBlockType( 'woocommerce/handpicked-products', {
 			{
 				'is-hidden-title': ! contentVisibility.title,
 				'is-hidden-price': ! contentVisibility.price,
+				'is-hidden-rating': ! contentVisibility.rating,
 				'is-hidden-button': ! contentVisibility.button,
 			}
 		);

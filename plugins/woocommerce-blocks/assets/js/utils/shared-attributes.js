@@ -48,6 +48,7 @@ export default {
 		default: {
 			title: true,
 			price: true,
+			rating: true,
 			button: true,
 		},
 	},
