@@ -681,7 +681,33 @@ class WC_Query {
 	 */
 	private function price_filter_meta_query() {
 		if ( isset( $_GET['max_price'] ) || isset( $_GET['min_price'] ) ) { // WPCS: input var ok, CSRF ok.
-			$meta_query                 = wc_get_min_max_price_meta_query( $_GET ); // WPCS: input var ok, CSRF ok.
+			$current_min_price = isset( $_GET['min_price'] ) ? floatval( wp_unslash( $_GET['min_price'] ) ) : 0; // WPCS: input var ok, CSRF ok.
+			$current_max_price = isset( $_GET['max_price'] ) ? floatval( wp_unslash( $_GET['max_price'] ) ) : 9999999999; // WPCS: input var ok, CSRF ok.
+
+			/**
+			 * Adjust if the store taxes are not displayed how they are stored.
+			 * Kicks in when prices excluding tax are displayed including tax.
+			 */
+			if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
+				$tax_class = apply_filters( 'woocommerce_price_filter_widget_tax_class', '' ); // Uses standard tax class.
+				$tax_rates = WC_Tax::get_rates( $tax_class );
+
+				if ( $tax_rates ) {
+					$current_min_price -= WC_Tax::get_tax_total( WC_Tax::calc_inclusive_tax( $current_min_price, $tax_rates ) );
+					$current_max_price -= WC_Tax::get_tax_total( WC_Tax::calc_inclusive_tax( $current_max_price, $tax_rates ) );
+				}
+			}
+
+			$step              = max( apply_filters( 'woocommerce_price_filter_widget_step', 10 ), 1 );
+			$current_min_price = floor( $current_min_price / $step ) * $step;
+			$current_max_price = ceil( $current_max_price / $step ) * $step;
+
+			$meta_query = wc_get_min_max_price_meta_query(
+				array(
+					'min_price' => $current_min_price,
+					'max_price' => $current_max_price,
+				)
+			); // WPCS: input var ok, CSRF ok.
 			$meta_query['price_filter'] = true;
 
 			return $meta_query;
