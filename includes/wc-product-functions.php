@@ -1271,7 +1271,9 @@ function wc_deferred_product_sync( $product_id ) {
 }
 
 /**
- * Add sorting index data for products.
+ * Populate lookup table data for products.
+ *
+ * @since 3.6.0
  */
 function wc_update_product_lookup_tables() {
 	global $wpdb;
@@ -1305,4 +1307,56 @@ function wc_update_product_lookup_tables() {
 			meta1.meta_value = 'yes'
 		"
 	);
+
+	// Rating counts are serialised.
+	$rating_count_rows = $wpdb->get_results(
+		"
+		SELECT post_id, meta_value FROM {$wpdb->postmeta}
+		WHERE meta_key = '_wc_rating_count'
+		AND meta_value != ''
+		AND meta_value != 'a:0:{}'
+		",
+		ARRAY_A
+	);
+
+	if ( $rating_count_rows ) {
+		$rating_count_rows = array_chunk( $rating_count_rows, 50 );
+
+		foreach ( $rating_count_rows as $rows ) {
+			WC()->queue()->add(
+				'wc_update_product_lookup_tables_rating_count',
+				array(
+					'rows' => $rows,
+				),
+				'wc_update_product_lookup_tables'
+			);
+		}
+	}
 }
+
+/**
+ * Populate rating count lookup table data for products.
+ *
+ * @since 3.6.0
+ * @param array $rows Rows of rating counts to update in lookup table.
+ */
+function wc_update_product_lookup_tables_rating_count( $rows ) {
+	if ( ! $rows || ! is_array( $rows ) ) {
+		return;
+	}
+	global $wpdb;
+
+	foreach ( $rows as $row ) {
+		$count = array_sum( (array) maybe_unserialize( $row['meta_value'] ) );
+		$wpdb->update(
+			$wpdb->wc_product_meta_lookup,
+			array(
+				'rating_count' => absint( $count ),
+			),
+			array(
+				'product_id' => absint( $row['post_id'] ),
+			)
+		);
+	}
+}
+add_action( 'wc_update_product_lookup_tables_rating_count', 'wc_update_product_lookup_tables_rating_count' );
