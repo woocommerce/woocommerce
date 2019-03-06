@@ -95,7 +95,7 @@ class WC_Countries {
 	 *
 	 * @since 3.6.0
 	 * @param string $cc Country code.
-	 * @return string
+	 * @return string|array Some countries have multiple. The code will be stripped of - and spaces and always be prefixed with +.
 	 */
 	public function get_country_calling_code( $cc ) {
 		$codes = wp_cache_get( 'calling-codes', 'countries' );
