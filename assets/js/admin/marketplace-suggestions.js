@@ -179,6 +179,10 @@
 			return container;
 		}
 
+		function getTableBannerColspan() {
+			return $( 'table.wp-list-table.posts thead th:not(.hidden)' ).length + 1;
+		}
+
 		// Render a "table banner" style suggestion.
 		// These are used in admin lists, e.g. products list.
 		function renderTableBanner( context, slug, iconUrl, title, copy, url, buttonText, allowDismiss ) {
@@ -194,7 +198,7 @@
 			row.dataset.suggestionSlug = slug;
 
 			var cell = document.createElement( 'td' );
-			cell.setAttribute( 'colspan', 10 );
+			cell.setAttribute( 'colspan', getTableBannerColspan() );
 
 			var container = document.createElement( 'div' );
 			container.classList.add( 'marketplace-suggestion-container' );
