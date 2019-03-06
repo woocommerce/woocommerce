@@ -77,11 +77,15 @@ jQuery( function( $ ) {
 
 	/* State/Country select boxes */
 	var states_json = wc_country_select_params.countries.replace( /&quot;/g, '"' ),
-		states = $.parseJSON( states_json );
+		states = $.parseJSON( states_json ),
+		wrapper_selectors = '.woocommerce-billing-fields,' +
+			'.woocommerce-shipping-fields,' +
+			'.woocommerce-address-fields,' +
+			'.woocommerce-shipping-calculator';
 
-	$( document.body ).on( 'change', 'select.country_to_state, input.country_to_state', function() {
+	$( document.body ).on( 'change refresh', 'select.country_to_state, input.country_to_state', function() {
 		// Grab wrapping element to target only stateboxes in same 'group'
-		var $wrapper    = $( this ).closest('.woocommerce-billing-fields, .woocommerce-shipping-fields, .woocommerce-shipping-calculator');
+		var $wrapper = $( this ).closest( wrapper_selectors );
 
 		if ( ! $wrapper.length ) {
 			$wrapper = $( this ).closest('.form-row').parent();
@@ -98,7 +102,7 @@ jQuery( function( $ ) {
 		if ( states[ country ] ) {
 			if ( $.isEmptyObject( states[ country ] ) ) {
 
-				$statebox.closest( 'p.form-row' ).hide().find( '.select2-container' ).remove();
+				$parent.hide().find( '.select2-container' ).remove();
 				$statebox.replaceWith(
 					'<input type="hidden" class="hidden" name="' +
 					input_name +
@@ -126,7 +130,7 @@ jQuery( function( $ ) {
 					placeholder = wc_country_select_params.i18n_select_state_text;
 				}
 
-				$statebox.closest( 'p.form-row' ).show();
+				$parent.show();
 
 				if ( $statebox.is( 'input' ) ) {
 					// Change for select
@@ -149,8 +153,8 @@ jQuery( function( $ ) {
 
 			}
 		} else {
-			if ( $statebox.is( 'select' ) ) {
 
+			if ( $statebox.is( 'select, input[type="hidden"]' ) ) {
 				$parent.show().find( '.select2-container' ).remove();
 				$statebox.replaceWith(
 					'<input type="text" class="input-text" name="' +
@@ -161,24 +165,7 @@ jQuery( function( $ ) {
 					placeholder +
 					'" />'
 				);
-
 				$( document.body ).trigger( 'country_to_state_changed', [country, $wrapper ] );
-
-			} else if ( $statebox.is( 'input[type="hidden"]' ) ) {
-
-				$parent.show().find( '.select2-container' ).remove();
-				$statebox.replaceWith(
-					'<input type="text" class="input-text" name="' +
-					input_name +
-					'" id="' +
-					input_id +
-					'" placeholder="' +
-					placeholder +
-					'" />'
-				);
-
-				$( document.body ).trigger( 'country_to_state_changed', [country, $wrapper ] );
-
 			}
 		}
 
@@ -188,7 +175,7 @@ jQuery( function( $ ) {
 
 	$( document.body ).on( 'wc_address_i18n_ready', function() {
 		// Init country selects with their default value once the page loads.
-		$('.woocommerce-billing-fields, .woocommerce-shipping-fields, .woocommerce-shipping-calculator').each( function() {
+		$( wrapper_selectors ).each( function() {
 			var $wrapper       = $( this ),
 				$country_input = $wrapper.find( '#billing_country, #shipping_country, #calc_shipping_country' );
 
@@ -202,7 +189,7 @@ jQuery( function( $ ) {
 				return;
 			}
 
-			$( document.body ).trigger( 'country_to_state_changing', [country, $wrapper ] );
+			$country_input.trigger( 'refresh' ); // Custom event to init the state field.
 		});
 	});
 
