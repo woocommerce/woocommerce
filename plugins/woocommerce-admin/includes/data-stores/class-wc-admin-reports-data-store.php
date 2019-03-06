@@ -607,6 +607,53 @@ class WC_Admin_Reports_Data_Store {
 	}
 
 	/**
+	 * Generates a virtual table given a list of IDs.
+	 *
+	 * @param array $ids Array of IDs.
+	 * @return array
+	 */
+	protected function get_ids_table( $ids ) {
+		$selects = array();
+		foreach ( $ids as $id ) {
+			array_push( $selects, "SELECT {$id} AS id" );
+		}
+		return join( ' UNION ', $selects );
+	}
+
+	/**
+	 * Returns a comma separated list of the fields in the `query_args`, if there aren't, returns `report_columns` keys.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return array
+	 */
+	protected function get_fields( $query_args ) {
+		if ( isset( $query_args['fields'] ) && is_array( $query_args['fields'] ) ) {
+			return $query_args['fields'];
+		}
+		return array_keys( $this->report_columns );
+	}
+
+	/**
+	 * Returns a comma separated list of the field names prepared to be used for a selection after a join with `default_results`.
+	 *
+	 * @param array  $fields           Array of fields name.
+	 * @param string $id_field         Name of the column used as an identifier.
+	 * @param array  $outer_selections Array of fields that are not selected in the inner query.
+	 * @return string
+	 */
+	protected function format_join_selections( $fields, $id_field, $outer_selections = array() ) {
+		foreach ( $fields as $i => $field ) {
+			if ( $field === $id_field ) {
+				$fields[ $i ] = "default_results.id AS {$field}";
+			}
+			if ( in_array( $field, $outer_selections, true ) && array_key_exists( $field, $this->report_columns ) ) {
+				$fields[ $i ] = $this->report_columns[ $field ];
+			}
+		}
+		return implode( ', ', $fields );
+	}
+
+	/**
 	 * Fills ORDER BY clause of SQL request based on user supplied parameters.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
@@ -683,12 +730,12 @@ class WC_Admin_Reports_Data_Store {
 	}
 
 	/**
-	 * Returns comma separated ids of allowed products, based on query arguments from the user.
+	 * Returns an array of ids of allowed products, based on query arguments from the user.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
-	 * @return string
+	 * @return array
 	 */
-	protected function get_included_products( $query_args ) {
+	protected function get_included_products_array( $query_args ) {
 		$included_products = array();
 		$operator          = $this->get_match_operator( $query_args );
 
@@ -710,8 +757,18 @@ class WC_Admin_Reports_Data_Store {
 			}
 		}
 
-		$included_products_str = implode( ',', $included_products );
-		return $included_products_str;
+		return $included_products;
+	}
+
+	/**
+	 * Returns comma separated ids of allowed products, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_included_products( $query_args ) {
+		$included_products = $this->get_included_products_array( $query_args );
+		return implode( ',', $included_products );
 	}
 
 	/**

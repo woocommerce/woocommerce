@@ -106,23 +106,37 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		if ( isset( $query_args['orderby'] ) ) {
 			$sql_query['order_by_clause'] = $this->normalize_order_by( $query_args['orderby'] );
 		}
-		// Order by product name requires extra JOIN.
-		if ( false !== strpos( $sql_query['order_by_clause'], '_products' ) ) {
-			$sql_query['from_clause'] .= " JOIN {$wpdb->prefix}posts AS _products ON {$order_product_lookup_table}.product_id = _products.ID";
-		}
-
-		if ( 'postmeta.meta_value' === $sql_query['order_by_clause'] ) {
-			$sql_query['from_clause'] .= " JOIN {$wpdb->prefix}postmeta AS postmeta ON {$order_product_lookup_table}.product_id = postmeta.post_id AND postmeta.meta_key = '_sku'";
-		}
-
-		if ( 'variations' === $sql_query['order_by_clause'] ) {
-			$sql_query['from_clause'] .= " LEFT JOIN ( SELECT post_parent, COUNT(*) AS variations FROM {$wpdb->prefix}posts WHERE post_type = 'product_variation' GROUP BY post_parent ) AS _variations ON {$order_product_lookup_table}.product_id = _variations.post_parent";
-		}
 
 		if ( isset( $query_args['order'] ) ) {
 			$sql_query['order_by_clause'] .= ' ' . $query_args['order'];
 		} else {
 			$sql_query['order_by_clause'] .= ' DESC';
+		}
+
+		return $sql_query;
+	}
+
+	/**
+	 * Fills FROM clause of SQL request based on user supplied parameters.
+	 *
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $arg_name   Name of the FROM sql param.
+	 * @param string $id_cell    ID cell identifier, like `table_name.id_column_name`.
+	 * @return array
+	 */
+	protected function get_from_sql_params( $query_args, $arg_name, $id_cell ) {
+		global $wpdb;
+		$sql_query['outer_from_clause'] = '';
+
+		// Order by product name requires extra JOIN.
+		if ( 'product_name' === $query_args['orderby'] ) {
+			$sql_query[ $arg_name ] .= " JOIN {$wpdb->prefix}posts AS _products ON {$id_cell} = _products.ID";
+		}
+		if ( 'sku' === $query_args['orderby'] ) {
+			$sql_query[ $arg_name ] .= " JOIN {$wpdb->prefix}postmeta AS postmeta ON {$id_cell} = postmeta.post_id AND postmeta.meta_key = '_sku'";
+		}
+		if ( 'variations' === $query_args['orderby'] ) {
+			$sql_query[ $arg_name ] .= " LEFT JOIN ( SELECT post_parent, COUNT(*) AS variations FROM {$wpdb->prefix}posts WHERE post_type = 'product_variation' GROUP BY post_parent ) AS _variations ON {$id_cell} = _variations.post_parent";
 		}
 
 		return $sql_query;
@@ -144,7 +158,10 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 
 		$included_products = $this->get_included_products( $query_args );
 		if ( $included_products ) {
+			$sql_query_params                  = array_merge( $sql_query_params, $this->get_from_sql_params( $query_args, 'outer_from_clause', 'default_results.id' ) );
 			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";
+		} else {
+			$sql_query_params = array_merge( $sql_query_params, $this->get_from_sql_params( $query_args, 'from_clause', "{$order_product_lookup_table}.product_id" ) );
 		}
 
 		$included_variations = $this->get_included_variations( $query_args );
@@ -175,10 +192,10 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			return $order_product_lookup_table . '.date_created';
 		}
 		if ( 'product_name' === $order_by ) {
-			return '_products.post_title';
+			return 'post_title';
 		}
 		if ( 'sku' === $order_by ) {
-			return 'postmeta.meta_value';
+			return 'meta_value';
 		}
 		return $order_by;
 	}
@@ -257,32 +274,57 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 				'page_no' => 0,
 			);
 
-			$selections       = $this->selected_columns( $query_args );
-			$sql_query_params = $this->get_sql_query_params( $query_args );
+			$selections        = $this->selected_columns( $query_args );
+			$sql_query_params  = $this->get_sql_query_params( $query_args );
+			$included_products = $this->get_included_products_array( $query_args );
 
-			$db_records_count = (int) $wpdb->get_var(
-				"SELECT COUNT(*) FROM (
-							SELECT
-								product_id
-							FROM
-								{$table_name}
-								{$sql_query_params['from_clause']}
-							WHERE
-								1=1
-								{$sql_query_params['where_time_clause']}
-								{$sql_query_params['where_clause']}
-							GROUP BY
-								product_id
-					  		) AS tt"
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			if ( count( $included_products ) > 0 ) {
+				$total_results = count( $included_products );
+				$total_pages   = (int) ceil( $total_results / $sql_query_params['per_page'] );
 
-			$total_pages = (int) ceil( $db_records_count / $sql_query_params['per_page'] );
-			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-				return $data;
+				if ( 'date' === $query_args['orderby'] ) {
+					$selections .= ", {$table_name}.date_created";
+				}
+
+				$fields          = $this->get_fields( $query_args );
+				$join_selections = $this->format_join_selections( $fields, 'product_id' );
+				$ids_table       = $this->get_ids_table( $included_products, 'product_id' );
+				$prefix = "SELECT {$join_selections} FROM (";
+				$suffix = ") AS {$table_name}";
+				$right_join = "RIGHT JOIN ( {$ids_table} ) AS default_results
+					ON default_results.id = {$table_name}.product_id";
+			} else {
+				$db_records_count = (int) $wpdb->get_var(
+					"SELECT COUNT(*) FROM (
+								SELECT
+									product_id
+								FROM
+									{$table_name}
+									{$sql_query_params['from_clause']}
+								WHERE
+									1=1
+									{$sql_query_params['where_time_clause']}
+									{$sql_query_params['where_clause']}
+								GROUP BY
+									product_id
+									) AS tt"
+				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+
+				$total_results = $db_records_count;
+				$total_pages   = (int) ceil( $db_records_count / $sql_query_params['per_page'] );
+
+				if ( ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) ) {
+					return $data;
+				}
+
+				$prefix     = '';
+				$suffix     = '';
+				$right_join = '';
 			}
 
 			$product_data = $wpdb->get_results(
-				"SELECT
+				"${prefix}
+					SELECT
 						{$selections}
 					FROM
 						{$table_name}
@@ -293,6 +335,9 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 						{$sql_query_params['where_clause']}
 					GROUP BY
 						product_id
+				{$suffix}
+					{$right_join}
+					{$sql_query_params['outer_from_clause']}
 					ORDER BY
 						{$sql_query_params['order_by_clause']}
 					{$sql_query_params['limit']}
@@ -309,7 +354,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			$product_data = array_map( array( $this, 'cast_numbers' ), $product_data );
 			$data         = (object) array(
 				'data'    => $product_data,
-				'total'   => $db_records_count,
+				'total'   => $total_results,
 				'pages'   => $total_pages,
 				'page_no' => (int) $query_args['page'],
 			);
