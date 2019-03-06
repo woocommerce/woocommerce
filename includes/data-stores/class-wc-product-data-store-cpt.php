@@ -340,7 +340,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$set_props = array();
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
-			$meta_value         = isset( $post_meta_values[ $meta_key ][0] ) ? $post_meta_values[ $meta_key ][0] : '';
+			$meta_value         = isset( $post_meta_values[ $meta_key ][0] ) ? $post_meta_values[ $meta_key ][0] : null;
 			$set_props[ $prop ] = maybe_unserialize( $meta_value ); // get_post_meta only unserializes single values.
 		}
 
@@ -349,28 +349,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$set_props['shipping_class_id'] = current( $this->get_term_ids( $product, 'product_shipping_class' ) );
 		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ) );
 
-		if ( '' === $set_props['review_count'] ) {
-			unset( $set_props['review_count'] );
-			WC_Comments::get_review_count_for_product( $product );
-		}
-
-		if ( '' === $set_props['rating_counts'] ) {
-			unset( $set_props['rating_counts'] );
-			WC_Comments::get_rating_counts_for_product( $product );
-		}
-
-		if ( '' === $set_props['average_rating'] ) {
-			unset( $set_props['average_rating'] );
-			WC_Comments::get_average_rating_for_product( $product );
-		}
-
 		$product->set_props( $set_props );
-
-		// Handle sale dates on the fly in case of missed cron schedule.
-		if ( $product->is_type( 'simple' ) && $product->is_on_sale( 'edit' ) && $product->get_sale_price( 'edit' ) !== $product->get_price( 'edit' ) ) {
-			update_post_meta( $product->get_id(), '_price', $product->get_sale_price( 'edit' ) );
-			$product->set_price( $product->get_sale_price( 'edit' ) );
-		}
 	}
 
 	/**
