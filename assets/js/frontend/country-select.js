@@ -6,53 +6,53 @@ jQuery( function( $ ) {
 		return false;
 	}
 
-	function getEnhancedSelectFormatString() {
-		return {
-			'language': {
-				errorLoading: function() {
-					// Workaround for https://github.com/select2/select2/issues/4355 instead of i18n_ajax_error.
-					return wc_country_select_params.i18n_searching;
-				},
-				inputTooLong: function( args ) {
-					var overChars = args.input.length - args.maximum;
-
-					if ( 1 === overChars ) {
-						return wc_country_select_params.i18n_input_too_long_1;
-					}
-
-					return wc_country_select_params.i18n_input_too_long_n.replace( '%qty%', overChars );
-				},
-				inputTooShort: function( args ) {
-					var remainingChars = args.minimum - args.input.length;
-
-					if ( 1 === remainingChars ) {
-						return wc_country_select_params.i18n_input_too_short_1;
-					}
-
-					return wc_country_select_params.i18n_input_too_short_n.replace( '%qty%', remainingChars );
-				},
-				loadingMore: function() {
-					return wc_country_select_params.i18n_load_more;
-				},
-				maximumSelected: function( args ) {
-					if ( args.maximum === 1 ) {
-						return wc_country_select_params.i18n_selection_too_long_1;
-					}
-
-					return wc_country_select_params.i18n_selection_too_long_n.replace( '%qty%', args.maximum );
-				},
-				noResults: function() {
-					return wc_country_select_params.i18n_no_matches;
-				},
-				searching: function() {
-					return wc_country_select_params.i18n_searching;
-				}
-			}
-		};
-	}
-
 	// Select2 Enhancement if it exists
 	if ( $().selectWoo ) {
+		var getEnhancedSelectFormatString = function() {
+			return {
+				'language': {
+					errorLoading: function() {
+						// Workaround for https://github.com/select2/select2/issues/4355 instead of i18n_ajax_error.
+						return wc_country_select_params.i18n_searching;
+					},
+					inputTooLong: function( args ) {
+						var overChars = args.input.length - args.maximum;
+
+						if ( 1 === overChars ) {
+							return wc_country_select_params.i18n_input_too_long_1;
+						}
+
+						return wc_country_select_params.i18n_input_too_long_n.replace( '%qty%', overChars );
+					},
+					inputTooShort: function( args ) {
+						var remainingChars = args.minimum - args.input.length;
+
+						if ( 1 === remainingChars ) {
+							return wc_country_select_params.i18n_input_too_short_1;
+						}
+
+						return wc_country_select_params.i18n_input_too_short_n.replace( '%qty%', remainingChars );
+					},
+					loadingMore: function() {
+						return wc_country_select_params.i18n_load_more;
+					},
+					maximumSelected: function( args ) {
+						if ( args.maximum === 1 ) {
+							return wc_country_select_params.i18n_selection_too_long_1;
+						}
+
+						return wc_country_select_params.i18n_selection_too_long_n.replace( '%qty%', args.maximum );
+					},
+					noResults: function() {
+						return wc_country_select_params.i18n_no_matches;
+					},
+					searching: function() {
+						return wc_country_select_params.i18n_searching;
+					}
+				}
+			};
+		}
+
 		var wc_country_select_select2 = function() {
 			$( 'select.country_select:visible, select.state_select:visible' ).each( function() {
 				var select2_args = $.extend({
@@ -60,11 +60,11 @@ jQuery( function( $ ) {
 					width: '100%'
 				}, getEnhancedSelectFormatString() );
 
-				$( this ).selectWoo( select2_args );
-				// Maintain focus after select https://github.com/select2/select2/issues/4384
-				$( this ).on( 'select2:select', function() {
-					$( this ).focus();
-				} );
+				$( this )
+					.on( 'select2:select', function() {
+						$( this ).focus(); // Maintain focus after select https://github.com/select2/select2/issues/4384
+					} )
+					.selectWoo( select2_args );
 			});
 		};
 
@@ -76,8 +76,8 @@ jQuery( function( $ ) {
 	}
 
 	/* State/Country select boxes */
-	var states_json = wc_country_select_params.countries.replace( /&quot;/g, '"' ),
-		states = $.parseJSON( states_json ),
+	var states_json       = wc_country_select_params.countries.replace( /&quot;/g, '"' ),
+		states            = $.parseJSON( states_json ),
 		wrapper_selectors = '.woocommerce-billing-fields,' +
 			'.woocommerce-shipping-fields,' +
 			'.woocommerce-address-fields,' +
@@ -101,7 +101,6 @@ jQuery( function( $ ) {
 
 		if ( states[ country ] ) {
 			if ( $.isEmptyObject( states[ country ] ) ) {
-
 				$parent.hide().find( '.select2-container' ).remove();
 				$statebox.replaceWith(
 					'<input type="hidden" class="hidden" name="' +
@@ -112,15 +111,13 @@ jQuery( function( $ ) {
 					placeholder +
 					'" />'
 				);
-
 				$( document.body ).trigger( 'country_to_state_changed', [ country, $wrapper ] );
-
 			} else {
 
 				var options = '',
-					state = states[ country ];
+					state   = states[ country ];
 
-				for( var index in state ) {
+				for ( var index in state ) {
 					if ( state.hasOwnProperty( index ) ) {
 						options = options + '<option value="' + index + '">' + state[ index ] + '</option>';
 					}
@@ -150,7 +147,6 @@ jQuery( function( $ ) {
 				$statebox.val( value ).change();
 
 				$( document.body ).trigger( 'country_to_state_changed', [country, $wrapper ] );
-
 			}
 		} else {
 
@@ -170,27 +166,18 @@ jQuery( function( $ ) {
 		}
 
 		$( document.body ).trigger( 'country_to_state_changing', [country, $wrapper ] );
-
 	});
 
 	$( document.body ).on( 'wc_address_i18n_ready', function() {
 		// Init country selects with their default value once the page loads.
 		$( wrapper_selectors ).each( function() {
-			var $wrapper       = $( this ),
-				$country_input = $wrapper.find( '#billing_country, #shipping_country, #calc_shipping_country' );
+			var $country_input = $( this ).find( '#billing_country, #shipping_country, #calc_shipping_country' );
 
-			if ( 0 === $country_input.length ) {
+			if ( 0 === $country_input.length || 0 === $country_input.val().length ) {
 				return;
 			}
 
-			var country = $country_input.val();
-
-			if ( 0 === country.length ) {
-				return;
-			}
-
-			$country_input.trigger( 'refresh' ); // Custom event to init the state field.
+			$country_input.trigger( 'refresh' );
 		});
 	});
-
 });
