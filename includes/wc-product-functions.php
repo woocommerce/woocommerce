@@ -787,7 +787,7 @@ function wc_get_product_visibility_options() {
  */
 function wc_get_min_max_price_meta_query( $args ) {
 	$current_min_price = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
-	$current_max_price = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : 9999999999;
+	$current_max_price = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : PHP_INT_MAX;
 
 	return apply_filters(
 		'woocommerce_get_min_max_price_meta_query',
