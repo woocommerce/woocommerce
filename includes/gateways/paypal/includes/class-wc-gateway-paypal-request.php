@@ -210,7 +210,7 @@ class WC_Gateway_Paypal_Request {
 				'night_phone_c' => substr( $phone_number, 6, 4 ),
 			);
 		} else {
-			$calling_code = WC()->countries->get_calling_code_for_country( $order->get_billing_country() );
+			$calling_code = WC()->countries->get_country_calling_code( $order->get_billing_country() );
 			$phone_number = $calling_code ? preg_replace( '/^0/', '', $order->get_billing_phone() ) : $order->get_billing_phone();
 			$phone_args = array(
 				'night_phone_a' => $calling_code,

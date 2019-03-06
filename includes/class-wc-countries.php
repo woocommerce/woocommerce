@@ -97,15 +97,21 @@ class WC_Countries {
 	 * @param string $cc Country code.
 	 * @return string
 	 */
-	public function get_calling_code_for_country( $cc ) {
+	public function get_country_calling_code( $cc ) {
 		$codes = wp_cache_get( 'calling-codes', 'countries' );
 
 		if ( ! $codes ) {
-			$codes = json_decode( file_get_contents( WC()->plugin_path() . '/i18n/phone.json' ), true ); // Data from http://country.io/phone.json.
+			$codes = include WC()->plugin_path() . '/i18n/phone.php';
 			wp_cache_set( 'calling-codes', $codes, 'countries' );
 		}
 
-		return isset( $codes[ $cc ] ) ? $codes[ $cc ] : '';
+		$calling_code = isset( $codes[ $cc ] ) ? $codes[ $cc ] : '';
+
+		if ( is_array( $calling_code ) ) {
+			$calling_code = $calling_code[0];
+		}
+
+		return $calling_code;
 	}
 
 	/**
