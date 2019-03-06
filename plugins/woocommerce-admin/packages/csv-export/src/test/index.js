@@ -35,13 +35,13 @@ describe( 'generateCSVFileName', () => {
 
 	it( 'should generate a file name with the `name` and the date', () => {
 		const fileName = generateCSVFileName( 'Revenue table' );
-		expect( fileName ).toBe( 'revenue-table-' + moment().format( 'YYYY-MM-DD' ) + '.csv' );
+		expect( fileName ).toBe( 'revenue-table_' + moment().format( 'YYYY-MM-DD' ) + '.csv' );
 	} );
 
 	it( 'should generate a file name with the `name` and `params`', () => {
 		const fileName = generateCSVFileName( 'Revenue table', { orderby: 'revenue', order: 'desc' } );
 		expect( fileName ).toBe(
-			'revenue-table-' + moment().format( 'YYYY-MM-DD' ) + '-orderby-revenue-order-desc.csv'
+			'revenue-table_' + moment().format( 'YYYY-MM-DD' ) + '_orderby-revenue_order-desc.csv'
 		);
 	} );
 } );

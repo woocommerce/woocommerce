@@ -44,14 +44,16 @@ export function generateCSVDataFromTable( headers, rows ) {
  */
 export function generateCSVFileName( name = '', params = {} ) {
 	const fileNameSections = [
-		name.toLowerCase().replace( ' ', '-' ),
+		name.toLowerCase().replace( /[^a-z0-9]/g, '-' ),
 		moment().format( 'YYYY-MM-DD' ),
 		Object.keys( params )
-			.map( key => key + '-' + params[ key ] )
-			.join( '-' ),
+			.map( key =>
+				key.toLowerCase().replace( /[^a-z0-9]/g, '-' ) +
+				'-' + decodeURIComponent( params[ key ] ).toLowerCase().replace( /[^a-z0-9]/g, '-' )
+			).join( '_' ),
 	].filter( text => text.length );
 
-	return fileNameSections.join( '-' ) + '.csv';
+	return fileNameSections.join( '_' ) + '.csv';
 }
 
 /**

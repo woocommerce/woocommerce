@@ -135,12 +135,19 @@ class TableCard extends Component {
 	}
 
 	onClickDownload() {
-		const { query, onClickDownload, title } = this.props;
+		const { query, onClickDownload, searchBy, title } = this.props;
+		const params = Object.assign( {}, query );
+
+		// Delete unnecessary items from filename.
+		delete params.extended_info;
+		if ( params.search ) {
+			delete params[ searchBy ];
+		}
 
 		// @todo The current implementation only downloads the contents displayed in the table.
 		// Another solution is required when the data set is larger (see #311).
 		downloadCSVFile(
-			generateCSVFileName( title, query ),
+			generateCSVFileName( title, params ),
 			generateCSVDataFromTable( this.getVisibleHeaders(), this.getVisibleRows() )
 		);
 
