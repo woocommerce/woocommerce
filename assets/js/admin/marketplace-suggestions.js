@@ -38,7 +38,7 @@
 			// if this is a high-use area, delay new suggestion that area for a short while
 			var highUseSuggestionContexts = [ 'products-list-inline' ];
 			if ( _.contains( highUseSuggestionContexts, context ) ) {
-				Cookies.set( 'woocommerce_snooze_products_list_suggestions', '1', { expires: 1 } );
+				Cookies.set( 'woocommerce_snooze_products_list_suggestions', '1', { expires: 2 } );
 			}
 
 			window.wcTracks.recordEvent( 'marketplace_suggestion_dismissed', {
