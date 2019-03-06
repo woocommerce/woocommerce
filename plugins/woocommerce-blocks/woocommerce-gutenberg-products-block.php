@@ -35,8 +35,6 @@ function wgpb_initialize() {
 	if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG && ! $files_exist ) {
 		add_action( 'admin_notices', 'wgpb_plugins_notice' );
 	}
-
-	add_action( 'rest_api_init', 'wgpb_register_api_routes' );
 }
 add_action( 'woocommerce_loaded', 'wgpb_initialize' );
 
@@ -53,26 +51,4 @@ function wgpb_plugins_notice() {
 		'<code>npm start</code>'
 	);
 	echo '</p></div>';
-}
-
-/**
- * Register extra API routes with functionality specific for product blocks.
- */
-function wgpb_register_api_routes() {
-	include_once dirname( __FILE__ ) . '/includes/class-wgpb-products-controller.php';
-	include_once dirname( __FILE__ ) . '/includes/class-wgpb-product-categories-controller.php';
-	include_once dirname( __FILE__ ) . '/includes/class-wgpb-product-attributes-controller.php';
-	include_once dirname( __FILE__ ) . '/includes/class-wgpb-product-attribute-terms-controller.php';
-
-	$products = new WGPB_Products_Controller();
-	$products->register_routes();
-
-	$categories = new WGPB_Product_Categories_Controller();
-	$categories->register_routes();
-
-	$attributes = new WGPB_Product_Attributes_Controller();
-	$attributes->register_routes();
-
-	$attribute_terms = new WGPB_Product_Attribute_Terms_Controller();
-	$attribute_terms->register_routes();
 }
