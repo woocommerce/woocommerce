@@ -193,7 +193,13 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		foreach ( $products_data as $key => $product_data ) {
 			$extended_info = new ArrayObject();
 			if ( $query_args['extended_info'] ) {
-				$product             = wc_get_product( $product_data['product_id'] );
+				$product = wc_get_product( $product_data['product_id'] );
+				// Product was deleted.
+				if ( ! $product ) {
+					$products_data[ $key ]['extended_info']['name'] = __( '(Deleted)', 'wc-admin' );
+					continue;
+				}
+
 				$extended_attributes = apply_filters( 'woocommerce_rest_reports_products_extended_attributes', $this->extended_attributes, $product_data );
 				foreach ( $extended_attributes as $extended_attribute ) {
 					if ( 'variations' === $extended_attribute ) {
