@@ -210,22 +210,23 @@ export function getSummaryNumbers( endpoint, query, select, limitBy ) {
 			secondary: null,
 		},
 	};
+	const mappedEndpoint = 'categories' === endpoint ? 'products' : endpoint;
 
 	const primaryQuery = getRequestQuery( endpoint, 'primary', query, limitBy );
-	const primary = getReportStats( endpoint, primaryQuery );
-	if ( isReportStatsRequesting( endpoint, primaryQuery ) ) {
+	const primary = getReportStats( mappedEndpoint, primaryQuery );
+	if ( isReportStatsRequesting( mappedEndpoint, primaryQuery ) ) {
 		return { ...response, isRequesting: true };
-	} else if ( getReportStatsError( endpoint, primaryQuery ) ) {
+	} else if ( getReportStatsError( mappedEndpoint, primaryQuery ) ) {
 		return { ...response, isError: true };
 	}
 
 	const primaryTotals = ( primary && primary.data && primary.data.totals ) || null;
 
-	const secondaryQuery = getRequestQuery( endpoint, 'secondary', query );
-	const secondary = getReportStats( endpoint, secondaryQuery );
-	if ( isReportStatsRequesting( endpoint, secondaryQuery ) ) {
+	const secondaryQuery = getRequestQuery( mappedEndpoint, 'secondary', query );
+	const secondary = getReportStats( mappedEndpoint, secondaryQuery );
+	if ( isReportStatsRequesting( mappedEndpoint, secondaryQuery ) ) {
 		return { ...response, isRequesting: true };
-	} else if ( getReportStatsError( endpoint, secondaryQuery ) ) {
+	} else if ( getReportStatsError( mappedEndpoint, secondaryQuery ) ) {
 		return { ...response, isError: true };
 	}
 
@@ -246,6 +247,7 @@ export function getSummaryNumbers( endpoint, query, select, limitBy ) {
  */
 export function getReportChartData( endpoint, dataType, query, select, limitBy ) {
 	const { getReportStats, getReportStatsError, isReportStatsRequesting } = select( 'wc-api' );
+	const mappedEndpoint = 'categories' === endpoint ? 'products' : endpoint;
 
 	const response = {
 		isEmpty: false,
@@ -258,13 +260,13 @@ export function getReportChartData( endpoint, dataType, query, select, limitBy )
 	};
 
 	const requestQuery = getRequestQuery( endpoint, dataType, query, limitBy );
-	const stats = getReportStats( endpoint, requestQuery );
+	const stats = getReportStats( mappedEndpoint, requestQuery );
 
-	if ( isReportStatsRequesting( endpoint, requestQuery ) ) {
+	if ( isReportStatsRequesting( mappedEndpoint, requestQuery ) ) {
 		return { ...response, isRequesting: true };
-	} else if ( getReportStatsError( endpoint, requestQuery ) ) {
+	} else if ( getReportStatsError( mappedEndpoint, requestQuery ) ) {
 		return { ...response, isError: true };
-	} else if ( isReportDataEmpty( stats, endpoint ) ) {
+	} else if ( isReportDataEmpty( stats, mappedEndpoint ) ) {
 		return { ...response, isEmpty: true };
 	}
 
@@ -281,11 +283,11 @@ export function getReportChartData( endpoint, dataType, query, select, limitBy )
 
 		for ( let i = 2; i <= totalPages; i++ ) {
 			const nextQuery = { ...requestQuery, page: i };
-			const _data = getReportStats( endpoint, nextQuery );
-			if ( isReportStatsRequesting( endpoint, nextQuery ) ) {
+			const _data = getReportStats( mappedEndpoint, nextQuery );
+			if ( isReportStatsRequesting( mappedEndpoint, nextQuery ) ) {
 				continue;
 			}
-			if ( getReportStatsError( endpoint, nextQuery ) ) {
+			if ( getReportStatsError( mappedEndpoint, nextQuery ) ) {
 				isError = true;
 				isFetching = false;
 				break;

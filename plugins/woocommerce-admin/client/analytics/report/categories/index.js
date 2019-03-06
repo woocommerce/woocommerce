@@ -53,7 +53,7 @@ export default class CategoriesReport extends Component {
 				<ReportFilters query={ query } path={ path } filters={ filters } />
 				<ReportSummary
 					charts={ charts }
-					endpoint="products"
+					endpoint="categories"
 					isRequesting={ isRequesting }
 					limitProperty="categories"
 					query={ chartQuery }
@@ -63,7 +63,7 @@ export default class CategoriesReport extends Component {
 					filters={ filters }
 					charts={ charts }
 					mode={ mode }
-					endpoint="products"
+					endpoint="categories"
 					limitProperty="categories"
 					path={ path }
 					query={ chartQuery }

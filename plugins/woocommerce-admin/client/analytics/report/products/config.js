@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { getProductLabels, getCategoryLabels, getVariationLabels } from 'lib/async-requests';
+import { getProductLabels, getVariationLabels } from 'lib/async-requests';
 
 export const charts = [
 	{
@@ -63,29 +63,7 @@ const filterConfig = {
 			],
 		},
 		{
-			label: __( 'Single Product Category', 'wc-admin' ),
-			value: 'select_category',
-			chartMode: 'item-comparison',
-			subFilters: [
-				{
-					component: 'Search',
-					value: 'single_category',
-					chartMode: 'item-comparison',
-					path: [ 'select_category' ],
-					settings: {
-						type: 'categories',
-						param: 'categories',
-						getLabels: getCategoryLabels,
-						labels: {
-							placeholder: __( 'Type to search for a product category', 'wc-admin' ),
-							button: __( 'Single Product Category', 'wc-admin' ),
-						},
-					},
-				},
-			],
-		},
-		{
-			label: __( 'Product Comparison', 'wc-admin' ),
+			label: __( 'Comparison', 'wc-admin' ),
 			value: 'compare-products',
 			chartMode: 'item-comparison',
 			settings: {
@@ -99,34 +77,6 @@ const filterConfig = {
 					update: __( 'Compare', 'wc-admin' ),
 				},
 			},
-		},
-		{
-			label: __( 'Product Category Comparison', 'wc-admin' ),
-			value: 'compare-categories',
-			chartMode: 'item-comparison',
-			settings: {
-				type: 'categories',
-				param: 'categories',
-				getLabels: getCategoryLabels,
-				labels: {
-					helpText: __( 'Select at least two product categories to compare', 'wc-admin' ),
-					placeholder: __( 'Search for product categories to compare', 'wc-admin' ),
-					title: __( 'Compare Product Categories', 'wc-admin' ),
-					update: __( 'Compare', 'wc-admin' ),
-				},
-			},
-		},
-		{
-			label: __( 'Top Products by Items Sold', 'wc-admin' ),
-			value: 'top_items',
-			chartMode: 'item-comparison',
-			query: { orderby: 'items_sold', order: 'desc', chart: 'items_sold' },
-		},
-		{
-			label: __( 'Top Products by Net Revenue', 'wc-admin' ),
-			value: 'top_sales',
-			chartMode: 'item-comparison',
-			query: { orderby: 'net_revenue', order: 'desc', chart: 'net_revenue' },
 		},
 	],
 };
@@ -153,18 +103,6 @@ const variationsConfig = {
 					update: __( 'Compare', 'wc-admin' ),
 				},
 			},
-		},
-		{
-			label: __( 'Top Variations by Items Sold', 'wc-admin' ),
-			chartMode: 'item-comparison',
-			value: 'top_items',
-			query: { orderby: 'items_sold', order: 'desc', chart: 'item_sold' },
-		},
-		{
-			label: __( 'Top Variations by Net Revenue', 'wc-admin' ),
-			chartMode: 'item-comparison',
-			value: 'top_sales',
-			query: { orderby: 'net_revenue', order: 'desc', chart: 'net_revenue' },
 		},
 	],
 };
