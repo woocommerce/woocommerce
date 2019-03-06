@@ -20,6 +20,7 @@ import { Card } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 import { QUERY_DEFAULTS } from 'wc-api/constants';
 import sanitizeHTML from 'lib/sanitize-html';
+import StoreAlertsPlaceholder from './placeholder';
 
 import './style.scss';
 
@@ -60,12 +61,13 @@ class StoreAlerts extends Component {
 	}
 
 	render() {
-		const { alerts } = this.props;
+		const hasAlerts = Boolean( wcSettings.alertCount ) || null;
 
-		if ( ! alerts || alerts.length === 0 ) {
+		if ( ! hasAlerts ) {
 			return null;
 		}
 
+		const { alerts } = this.props;
 		const { currentIndex } = this.state;
 		const numberOfAlerts = alerts.length;
 		const alert = alerts[ currentIndex ] ? alerts[ currentIndex ] : null;
@@ -82,7 +84,7 @@ class StoreAlerts extends Component {
 				</Button>
 			) );
 
-		return (
+		return alert ? (
 			<Card
 				title={ [
 					alert.icon && <Dashicon key="icon" icon={ alert.icon } />,
@@ -127,6 +129,8 @@ class StoreAlerts extends Component {
 				/>
 				{ actions && <div className="woocommerce-store-alerts__actions">{ actions }</div> }
 			</Card>
+		) : (
+			<StoreAlertsPlaceholder hasMultipleAlerts={ wcSettings.alertCount > 1 } />
 		);
 	}
 }
