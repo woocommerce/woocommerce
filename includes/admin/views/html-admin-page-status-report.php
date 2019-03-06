@@ -23,6 +23,7 @@ $environment      = $system_status->get_environment_info();
 $database         = $system_status->get_database_info();
 $post_type_counts = $system_status->get_post_type_counts();
 $active_plugins   = $system_status->get_active_plugins();
+$inactive_plugins = $system_status->get_inactive_plugins();
 $theme            = $system_status->get_theme_info();
 $security         = $system_status->get_security_info();
 $settings         = $system_status->get_settings();
@@ -560,6 +561,58 @@ $untested_plugins = $plugin_updates->get_untested_plugins( WC()->version, 'minor
 	<tbody>
 		<?php
 		foreach ( $active_plugins as $plugin ) {
+			if ( ! empty( $plugin['name'] ) ) {
+				$dirname = dirname( $plugin['plugin'] );
+
+				// Link the plugin name to the plugin url if available.
+				$plugin_name = esc_html( $plugin['name'] );
+				if ( ! empty( $plugin['url'] ) ) {
+					$plugin_name = '<a href="' . esc_url( $plugin['url'] ) . '" aria-label="' . esc_attr__( 'Visit plugin homepage', 'woocommerce' ) . '" target="_blank">' . $plugin_name . '</a>';
+				}
+
+				$version_string = '';
+				$network_string = '';
+				if ( strstr( $plugin['url'], 'woothemes.com' ) || strstr( $plugin['url'], 'woocommerce.com' ) ) {
+					if ( ! empty( $plugin['version_latest'] ) && version_compare( $plugin['version_latest'], $plugin['version'], '>' ) ) {
+						/* translators: %s: plugin latest version */
+						$version_string = ' &ndash; <strong style="color:red;">' . sprintf( esc_html__( '%s is available', 'woocommerce' ), $plugin['version_latest'] ) . '</strong>';
+					}
+
+					if ( false !== $plugin['network_activated'] ) {
+						$network_string = ' &ndash; <strong style="color:black;">' . esc_html__( 'Network enabled', 'woocommerce' ) . '</strong>';
+					}
+				}
+				$untested_string = '';
+				if ( array_key_exists( $plugin['plugin'], $untested_plugins ) ) {
+					$untested_string = ' &ndash; <strong style="color:red;">' . esc_html__( 'Not tested with the active version of WooCommerce', 'woocommerce' ) . '</strong>';
+				}
+				?>
+				<tr>
+					<td><?php echo wp_kses_post( $plugin_name ); ?></td>
+					<td class="help">&nbsp;</td>
+					<td>
+					<?php
+						/* translators: %s: plugin author */
+						printf( esc_html__( 'by %s', 'woocommerce' ), esc_html( $plugin['author_name'] ) );
+						echo ' &ndash; ' . esc_html( $plugin['version'] ) . $version_string . $untested_string . $network_string; // WPCS: XSS ok.
+					?>
+					</td>
+				</tr>
+				<?php
+			}
+		}
+		?>
+	</tbody>
+</table>
+<table class="wc_status_table widefat" cellspacing="0">
+	<thead>
+		<tr>
+			<th colspan="3" data-export-label="Inactive Plugins (<?php echo count( $inactive_plugins ); ?>)"><h2><?php esc_html_e( 'Inactive plugins', 'woocommerce' ); ?> (<?php echo count( $inactive_plugins ); ?>)</h2></th>
+		</tr>
+	</thead>
+	<tbody>
+		<?php
+		foreach ( $inactive_plugins as $plugin ) {
 			if ( ! empty( $plugin['name'] ) ) {
 				$dirname = dirname( $plugin['plugin'] );
 
