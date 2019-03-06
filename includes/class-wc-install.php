@@ -827,6 +827,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `product_id` bigint(20) NOT NULL,
   `min_price` decimal(10,2) NULL default NULL,
   `max_price` decimal(10,2) NULL default NULL,
+  `rating_count` bigint(20) NULL default 0,
   `average_rating` decimal(3,2) NULL default 0.00,
   `total_sales` bigint(20) NULL default 0,
   `stock` bigint(20) NULL default NULL,
