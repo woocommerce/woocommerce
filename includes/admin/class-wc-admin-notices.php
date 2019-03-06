@@ -351,7 +351,7 @@ class WC_Admin_Notices {
 	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
 	 */
 	public static function add_wootenberg_feature_plugin_notice() {
-		if ( ( is_plugin_active( 'gutenberg/gutenberg.php' ) || version_compare( get_bloginfo( 'version' ), '5.0', '>=' ) ) && ! is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) {
+		if ( ( self::is_plugin_active( 'gutenberg/gutenberg.php' ) || version_compare( get_bloginfo( 'version' ), '5.0', '>=' ) ) && ! self::is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) {
 			self::add_notice( 'wootenberg' );
 		}
 	}
@@ -363,7 +363,7 @@ class WC_Admin_Notices {
 	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
 	 */
 	public static function add_wootenberg_feature_plugin_notice_on_gutenberg_activate() {
-		if ( ! is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) && version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
+		if ( ! self::is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) && version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			self::add_notice( 'wootenberg' );
 		}
 	}
@@ -372,7 +372,7 @@ class WC_Admin_Notices {
 	 * Notice about trying the Products block.
 	 */
 	public static function wootenberg_feature_plugin_notice() {
-		if ( get_user_meta( get_current_user_id(), 'dismissed_wootenberg_notice', true ) || is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) {
+		if ( get_user_meta( get_current_user_id(), 'dismissed_wootenberg_notice', true ) || self::is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) {
 			self::remove_notice( 'wootenberg' );
 			return;
 		}
@@ -392,6 +392,18 @@ class WC_Admin_Notices {
 		return ( is_ssl() && 'https' === substr( $shop_page, 0, 5 ) );
 	}
 
+	/**
+	 * Wrapper for is_plugin_active.
+	 *
+	 * @param string $plugin Plugin to check.
+	 * @return boolean
+	 */
+	protected static function is_plugin_active( $plugin ) {
+		if ( ! function_exists( 'is_plugin_active' ) ) {
+			include_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+		return is_plugin_active( $plugin );
+	}
 }
 
 WC_Admin_Notices::init();
