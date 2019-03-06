@@ -198,6 +198,7 @@
 			row.dataset.suggestionSlug = slug;
 
 			var cell = document.createElement( 'td' );
+			cell.classList.add( 'marketplace-table-banner-td' );
 			cell.setAttribute( 'colspan', getTableBannerColspan() );
 
 			var container = document.createElement( 'div' );
@@ -309,6 +310,12 @@
 			}
 		}
 
+		function refreshBannerColspanForScreenOptions( content ) {
+			$( '#show-settings-link' ).on( 'focus.scroll-into-view', function() {
+				$( '.marketplace-table-banner-td' ).attr( 'colspan', getTableBannerColspan() );
+			});
+		}
+
 		// Render suggestion data in appropriate places in UI.
 		function displaySuggestions( marketplaceSuggestionsApiData ) {
 			var usedSuggestionsContexts = [];
@@ -417,6 +424,8 @@
 						$( content ).fadeIn();
 
 						usedSuggestionsContexts.push( context );
+
+						refreshBannerColspanForScreenOptions( content );
 
 						window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
 							suggestionSlug: suggestionToDisplay.slug
