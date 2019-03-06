@@ -518,7 +518,16 @@ function wc_admin_add_settings( $settings ) {
 		'option_key'  => 'woocommerce_excluded_report_order_statuses',
 		'label'       => __( 'Excluded report order statuses', 'wc-admin' ),
 		'description' => __( 'Statuses that should not be included when calculating report totals.', 'wc-admin' ),
-		'default'     => '',
+		'default'     => array( 'pending', 'cancelled', 'failed' ),
+		'type'        => 'multiselect',
+		'options'     => format_order_statuses( wc_get_order_statuses() ),
+	);
+	$settings[] = array(
+		'id'          => 'woocommerce_actionable_order_statuses',
+		'option_key'  => 'woocommerce_actionable_order_statuses',
+		'label'       => __( 'Actionable order statuses', 'wc-admin' ),
+		'description' => __( 'Statuses that require extra action on behalf of the store admin.', 'wc-admin' ),
+		'default'     => array( 'processing', 'on-hold' ),
 		'type'        => 'multiselect',
 		'options'     => format_order_statuses( wc_get_order_statuses() ),
 	);

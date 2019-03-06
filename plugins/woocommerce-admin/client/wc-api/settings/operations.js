@@ -36,7 +36,10 @@ function readSettings( resourceNames, fetch ) {
 
 function updateSettings( resourceNames, data, fetch ) {
 	const resourceName = 'settings';
-	const settingsFields = [ 'woocommerce_excluded_report_order_statuses' ];
+	const settingsFields = [
+		'woocommerce_excluded_report_order_statuses',
+		'woocommerce_actionable_order_statuses',
+	];
 
 	if ( resourceNames.includes( resourceName ) ) {
 		const url = NAMESPACE + '/settings/wc_admin/';

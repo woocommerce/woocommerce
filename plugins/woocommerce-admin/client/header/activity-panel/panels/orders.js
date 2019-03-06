@@ -202,12 +202,20 @@ OrdersPanel.defaultProps = {
 export default compose(
 	withSelect( select => {
 		const { getReportItems, getReportItemsError, isReportItemsRequesting } = select( 'wc-api' );
+		const orderStatuses = wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses || [
+			'processing',
+			'on-hold',
+		];
 		const ordersQuery = {
 			page: 1,
 			per_page: QUERY_DEFAULTS.pageSize,
-			status_is: [ 'processing', 'on-hold' ],
+			status_is: orderStatuses,
 			extended_info: true,
 		};
+
+		if ( ! orderStatuses.length ) {
+			return { orders: [], isError: false, isRequesting: false };
+		}
 
 		const orders = getReportItems( 'orders', ordersQuery ).data;
 		const isError = Boolean( getReportItemsError( 'orders', ordersQuery ) );

@@ -65,4 +65,27 @@ export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 		initialValue: wcSettings.wcAdminSettings.woocommerce_excluded_report_order_statuses || [],
 		defaultValue: [ 'pending', 'cancelled', 'failed' ],
 	},
+	{
+		name: 'woocommerce_actionable_order_statuses',
+		label: __( 'Actionable Statuses:', 'wc-admin' ),
+		inputType: 'checkboxGroup',
+		options: [
+			{
+				key: 'defaultStatuses',
+				options: orderStatuses.filter( status => defaultOrderStatuses.includes( status.value ) ),
+			},
+			{
+				key: 'customStatuses',
+				label: __( 'Custom Statuses', 'wc-admin' ),
+				options: orderStatuses.filter( status => ! defaultOrderStatuses.includes( status.value ) ),
+			},
+		],
+		helpText: __(
+			'Orders with these statuses require action on behalf of the store admin.' +
+				'These orders will show up in the Orders tab under the activity panel.',
+			'wc-admin'
+		),
+		initialValue: wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses || [],
+		defaultValue: [ 'processing', 'on-hold' ],
+	},
 ] );
