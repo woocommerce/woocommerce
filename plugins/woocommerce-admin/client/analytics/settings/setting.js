@@ -2,9 +2,12 @@
 /**
  * External dependencies
  */
+import { Button } from '@wordpress/components';
 import { Component } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 import { uniqueId } from 'lodash';
+import { withDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -12,8 +15,16 @@ import { uniqueId } from 'lodash';
 import './setting.scss';
 
 class Setting extends Component {
+	constructor( props ) {
+		super( props );
+		this.state = {
+			disabled: false,
+		};
+	}
+
 	renderInput = () => {
-		const { handleChange, name, inputType, options, value } = this.props;
+		const { handleChange, name, inputText, inputType, options, value } = this.props;
+		const { disabled } = this.state;
 		const id = uniqueId( name );
 
 		switch ( inputType ) {
@@ -37,16 +48,50 @@ class Setting extends Component {
 				);
 			case 'checkbox':
 				return this.renderCheckboxOptions( options );
+			case 'button':
+				return (
+					<Button isDefault onClick={ this.handleInputCallback } disabled={ disabled }>
+						{ inputText }
+					</Button>
+				);
 			case 'text':
 			default:
 				return (
-					<input id={ id } type="text" name={ name } onChange={ handleChange } value={ value } />
+					<input
+						id={ id }
+						type="text"
+						name={ name }
+						onChange={ handleChange }
+						value={ value }
+						placeholder={ inputText }
+						disabled={ disabled }
+					/>
 				);
 		}
 	};
 
+	handleInputCallback = () => {
+		const { addNotice, callback } = this.props;
+
+		if ( 'function' !== typeof callback ) {
+			return;
+		}
+
+		return new Promise( ( resolve, reject ) => {
+			this.setState( { disabled: true } );
+			callback( resolve, reject, addNotice );
+		} )
+			.then( () => {
+				this.setState( { disabled: false } );
+			} )
+			.catch( () => {
+				this.setState( { disabled: false } );
+			} );
+	};
+
 	renderCheckboxOptions( options ) {
 		const { handleChange, name, value } = this.props;
+		const { disabled } = this.state;
 
 		return options.map( option => {
 			const id = uniqueId( name + '-' + option.value );
@@ -60,6 +105,7 @@ class Setting extends Component {
 						aria-label={ option.description }
 						checked={ value && value.includes( option.value ) }
 						value={ option.value }
+						disabled={ disabled }
 					/>
 					{ option.label }
 				</label>
@@ -75,7 +121,7 @@ class Setting extends Component {
 				<div className="woocommerce-setting__label" id={ name + '-label' }>
 					{ label }
 				</div>
-				<div className="woocommerce-setting__options">
+				<div className="woocommerce-setting__input">
 					{ this.renderInput() }
 					{ helpText && <span className="woocommerce-setting__help">{ helpText }</span> }
 				</div>
@@ -86,6 +132,10 @@ class Setting extends Component {
 
 Setting.propTypes = {
 	/**
+	 * A callback that is fired after actionable items, such as buttons.
+	 */
+	callback: PropTypes.func,
+	/**
 	 * Function assigned to the onChange of all inputs.
 	 */
 	handleChange: PropTypes.func.isRequired,
@@ -94,9 +144,13 @@ Setting.propTypes = {
 	 */
 	helpText: PropTypes.oneOfType( [ PropTypes.string, PropTypes.array ] ),
 	/**
+	 * Text used as placeholder or button text in the input area.
+	 */
+	inputText: PropTypes.string,
+	/**
 	 * Type of input to use; defaults to a text input.
 	 */
-	inputType: PropTypes.oneOf( [ 'checkbox', 'checkboxGroup', 'text' ] ),
+	inputType: PropTypes.oneOf( [ 'button', 'checkbox', 'checkboxGroup', 'text' ] ),
 	/**
 	 * Label used for describing the setting.
 	 */
@@ -138,4 +192,9 @@ Setting.propTypes = {
 	value: PropTypes.oneOfType( [ PropTypes.string, PropTypes.array ] ),
 };
 
-export default Setting;
+export default compose(
+	withDispatch( dispatch => {
+		const { addNotice } = dispatch( 'wc-admin' );
+		return { addNotice };
+	} )
+)( Setting );

@@ -18,7 +18,7 @@
 	}
 }
 
-.woocommerce-setting__options {
+.woocommerce-setting__input {
 	display: flex;
 	flex-direction: column;
 	@include breakpoint( '>1280px' ) {
@@ -34,6 +34,11 @@
 
 	input[type='checkbox'] {
 		margin-right: $gap-small;
+	}
+
+	button {
+		margin-bottom: $gap-small;
+		align-self: flex-start;
 	}
 }
 

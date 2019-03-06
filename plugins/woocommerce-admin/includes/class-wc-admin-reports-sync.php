@@ -79,7 +79,7 @@ class WC_Admin_Reports_Sync {
 	 * Hook in sync methods.
 	 */
 	public static function init() {
-		// Add report regeneration to tools menu.
+		// Add report regeneration to tools REST API.
 		add_filter( 'woocommerce_debug_tools', array( __CLASS__, 'add_regenerate_tool' ) );
 
 		// Initialize syncing hooks.
@@ -103,6 +103,8 @@ class WC_Admin_Reports_Sync {
 		self::customer_lookup_batch_init();
 		// Queue orders lookup to occur after customers lookup generation is done.
 		self::queue_dependent_action( self::ORDERS_LOOKUP_BATCH_INIT, array(), self::CUSTOMERS_BATCH_ACTION );
+
+		return __( 'Report table data is being rebuilt.  Please allow some time for data to fully populate.', 'wc-admin' );
 	}
 
 	/**
@@ -123,12 +125,16 @@ class WC_Admin_Reports_Sync {
 	}
 
 	/**
-	 * Adds regenerate tool.
+	 * Adds regenerate tool to WC system status tools API.
 	 *
 	 * @param array $tools List of tools.
 	 * @return array
 	 */
 	public static function add_regenerate_tool( $tools ) {
+		if ( isset( $_GET['page'] ) && 'wc-status' === $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification
+			return $tools;
+		}
+
 		return array_merge(
 			$tools,
 			array(
