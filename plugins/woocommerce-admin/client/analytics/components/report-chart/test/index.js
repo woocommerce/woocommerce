@@ -8,7 +8,7 @@ import { shallow } from 'enzyme';
  * Internal dependencies
  */
 import { ReportChart } from '../';
-import { getChartMode } from '../utils';
+import { getChartMode, getSelectedFilter } from '../utils';
 
 jest.mock( '@woocommerce/components', () => ( {
 	...require.requireActual( '@woocommerce/components' ),
@@ -63,7 +63,8 @@ describe( 'ReportChart', () => {
 			},
 		];
 		const query = { filter: 'lorem-ipsum', filter2: 'ipsum-lorem' };
-		const mode = getChartMode( filters, query );
+		const selectedFilter = getSelectedFilter( filters, query );
+		const mode = getChartMode( selectedFilter, query );
 		expect( mode ).toEqual( 'item-comparison' );
 	} );
 } );

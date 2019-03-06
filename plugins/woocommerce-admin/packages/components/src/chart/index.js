@@ -16,7 +16,7 @@ import { withViewportMatch } from '@wordpress/viewport';
 /**
  * WooCommerce dependencies
  */
-import { updateQueryString } from '@woocommerce/navigation';
+import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -74,7 +74,9 @@ function getOrderedKeys( props, previousOrderedKeys = [] ) {
 	if ( 'item-comparison' === props.mode ) {
 		updatedKeys.sort( ( a, b ) => b.total - a.total );
 		if ( isEmpty( previousOrderedKeys ) ) {
-			return updatedKeys.filter( key => key.total > 0 ).map( ( key, index ) => {
+			const selectedIds = props.filterParam ? getIdsFromQuery( props.query[ props.filterParam ] ) : [];
+			const filteredKeys = updatedKeys.filter( key => key.total > 0 || selectedIds.includes( parseInt( key.key, 10 ) ) );
+			return filteredKeys.map( ( key, index ) => {
 				return {
 					...key,
 					visible: index < selectionLimit || key.visible,
@@ -443,6 +445,12 @@ Chart.propTypes = {
 	 * nothing will be displayed.
 	 */
 	emptyMessage: PropTypes.string,
+	/**
+	 * Name of the param used to filter items. If specified, it will be used, in combination
+	 * with query, to detect which elements are being used by the current filter and must be
+	 * displayed even if their value is 0.
+	 */
+	filterParam: PropTypes.string,
 	/**
 	 * Label describing the legend items.
 	 */
