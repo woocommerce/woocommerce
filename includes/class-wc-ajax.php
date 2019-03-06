@@ -997,10 +997,10 @@ class WC_AJAX {
 			$amount = isset( $_POST['amount'] ) ? wc_clean( wp_unslash( $_POST['amount'] ) ) : 0;
 
 			$calculate_tax_args = array(
-				'country'  => isset( $_POST['country'] ) ? strtoupper( wc_clean( wp_unslash( $_POST['country'] ) ) ) : '',
-				'state'    => isset( $_POST['state'] ) ? strtoupper( wc_clean( wp_unslash( $_POST['state'] ) ) ) : '',
-				'postcode' => isset( $_POST['postcode'] ) ? strtoupper( wc_clean( wp_unslash( $_POST['postcode'] ) ) ) : '',
-				'city'     => isset( $_POST['city'] ) ? strtoupper( wc_clean( wp_unslash( $_POST['city'] ) ) ) : '',
+				'country'  => isset( $_POST['country'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['country'] ) ) ) : '',
+				'state'    => isset( $_POST['state'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['state'] ) ) ) : '',
+				'postcode' => isset( $_POST['postcode'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['postcode'] ) ) ) : '',
+				'city'     => isset( $_POST['city'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['city'] ) ) ) : '',
 			);
 
 			if ( strstr( $amount, '%' ) ) {
@@ -1138,8 +1138,14 @@ class WC_AJAX {
 		$response = array();
 
 		try {
-			$order_id = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
-			$order    = wc_get_order( $order_id );
+			$order_id           = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
+			$order              = wc_get_order( $order_id );
+			$calculate_tax_args = array(
+				'country'  => isset( $_POST['country'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['country'] ) ) ) : '',
+				'state'    => isset( $_POST['state'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['state'] ) ) ) : '',
+				'postcode' => isset( $_POST['postcode'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['postcode'] ) ) ) : '',
+				'city'     => isset( $_POST['city'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['city'] ) ) ) : '',
+			);
 
 			if ( ! $order ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
@@ -1154,6 +1160,9 @@ class WC_AJAX {
 			if ( is_wp_error( $result ) ) {
 				throw new Exception( html_entity_decode( wp_strip_all_tags( $result->get_error_message() ) ) );
 			}
+
+			$order->calculate_taxes( $calculate_tax_args );
+			$order->calculate_totals( false );
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
@@ -1181,8 +1190,14 @@ class WC_AJAX {
 		$response = array();
 
 		try {
-			$order_id = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
-			$order    = wc_get_order( $order_id );
+			$order_id           = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
+			$order              = wc_get_order( $order_id );
+			$calculate_tax_args = array(
+				'country'  => isset( $_POST['country'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['country'] ) ) ) : '',
+				'state'    => isset( $_POST['state'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['state'] ) ) ) : '',
+				'postcode' => isset( $_POST['postcode'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['postcode'] ) ) ) : '',
+				'city'     => isset( $_POST['city'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['city'] ) ) ) : '',
+			);
 
 			if ( ! $order ) {
 				throw new Exception( __( 'Invalid order', 'woocommerce' ) );
@@ -1193,6 +1208,8 @@ class WC_AJAX {
 			}
 
 			$order->remove_coupon( wc_clean( wp_unslash( $_POST['coupon'] ) ) );
+			$order->calculate_taxes( $calculate_tax_args );
+			$order->calculate_totals( false );
 
 			ob_start();
 			include 'admin/meta-boxes/views/html-order-items.php';
@@ -1234,10 +1251,10 @@ class WC_AJAX {
 			$order_item_ids     = wp_unslash( $_POST['order_item_ids'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$items              = ( ! empty( $_POST['items'] ) ) ? wp_unslash( $_POST['items'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$calculate_tax_args = array(
-				'country'  => isset( $_POST['country'] ) ? strtoupper( wc_clean( wp_unslash( $_POST['country'] ) ) ) : '',
-				'state'    => isset( $_POST['state'] ) ? strtoupper( wc_clean( wp_unslash( $_POST['state'] ) ) ) : '',
-				'postcode' => isset( $_POST['postcode'] ) ? strtoupper( wc_clean( wp_unslash( $_POST['postcode'] ) ) ) : '',
-				'city'     => isset( $_POST['city'] ) ? strtoupper( wc_clean( wp_unslash( $_POST['city'] ) ) ) : '',
+				'country'  => isset( $_POST['country'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['country'] ) ) ) : '',
+				'state'    => isset( $_POST['state'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['state'] ) ) ) : '',
+				'postcode' => isset( $_POST['postcode'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['postcode'] ) ) ) : '',
+				'city'     => isset( $_POST['city'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['city'] ) ) ) : '',
 			);
 
 			if ( ! is_array( $order_item_ids ) && is_numeric( $order_item_ids ) ) {
@@ -1349,10 +1366,10 @@ class WC_AJAX {
 
 		$order_id           = absint( $_POST['order_id'] );
 		$calculate_tax_args = array(
-			'country'  => isset( $_POST['country'] ) ? strtoupper( wc_clean( wp_unslash( $_POST['country'] ) ) ) : '',
-			'state'    => isset( $_POST['state'] ) ? strtoupper( wc_clean( wp_unslash( $_POST['state'] ) ) ) : '',
-			'postcode' => isset( $_POST['postcode'] ) ? strtoupper( wc_clean( wp_unslash( $_POST['postcode'] ) ) ) : '',
-			'city'     => isset( $_POST['city'] ) ? strtoupper( wc_clean( wp_unslash( $_POST['city'] ) ) ) : '',
+			'country'  => isset( $_POST['country'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['country'] ) ) ) : '',
+			'state'    => isset( $_POST['state'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['state'] ) ) ) : '',
+			'postcode' => isset( $_POST['postcode'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['postcode'] ) ) ) : '',
+			'city'     => isset( $_POST['city'] ) ? wc_strtoupper( wc_clean( wp_unslash( $_POST['city'] ) ) ) : '',
 		);
 
 		// Parse the jQuery serialized items.
