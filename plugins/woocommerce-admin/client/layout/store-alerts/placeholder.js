@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { Component } from '@wordpress/element';
+import PropTypes from 'prop-types';
 
 class StoreAlertsPlaceholder extends Component {
 	render() {
@@ -35,3 +36,14 @@ class StoreAlertsPlaceholder extends Component {
 }
 
 export default StoreAlertsPlaceholder;
+
+StoreAlertsPlaceholder.propTypes = {
+	/**
+	 * Whether multiple alerts exists.
+	 */
+	hasMultipleAlerts: PropTypes.bool,
+};
+
+StoreAlertsPlaceholder.defaultProps = {
+	hasMultipleAlerts: false,
+};
