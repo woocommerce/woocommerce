@@ -90,7 +90,6 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 	 */
 	public static function init() {
 		add_action( 'woocommerce_reports_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 10 );
-		add_action( 'delete_post', array( __CLASS__, 'delete_product_id' ) );
 	}
 
 	/**
@@ -403,8 +402,8 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 					array(
 						'order_item_id'         => $order_item_id,
 						'order_id'              => $order->get_id(),
-						'product_id'            => $order_item->get_product_id( 'edit' ),
-						'variation_id'          => $order_item->get_variation_id( 'edit' ),
+						'product_id'            => wc_get_order_item_meta( $order_item_id, '_product_id' ),
+						'variation_id'          => wc_get_order_item_meta( $order_item_id, '_variation_id' ),
 						'customer_id'           => ( 0 < $order->get_customer_id( 'edit' ) ) ? $order->get_customer_id( 'edit' ) : null,
 						'product_qty'           => $product_qty,
 						'product_net_revenue'   => $net_revenue,
@@ -474,25 +473,5 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		 * @param int $order_id   Order ID.
 		 */
 		do_action( 'woocommerce_reports_delete_product', 0, $order_id );
-	}
-
-	/**
-	 * Deletes the product ID when a product is deleted.
-	 * This keeps data consistent if it gets resynced at any point.
-	 *
-	 * @param int $post_id Post ID.
-	 */
-	public static function delete_product_id( $post_id ) {
-		global $wpdb;
-
-		if ( 'product' !== get_post_type( $post_id ) ) {
-			return;
-		}
-
-		$wpdb->update(
-			$wpdb->prefix . self::TABLE_NAME,
-			array( 'product_id' => 0 ),
-			array( 'product_id' => $post_id )
-		);
 	}
 }
