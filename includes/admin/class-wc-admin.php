@@ -63,6 +63,7 @@ class WC_Admin {
 		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
 		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
 		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
 		include_once WC_ABSPATH . 'includes/tracks/class-wc-site-tracking.php';
 
 		// Help Tabs
