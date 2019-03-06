@@ -190,7 +190,8 @@ function wc_admin_print_script_settings() {
 			'userLocale'    => get_user_locale(),
 			'weekdaysShort' => array_values( $wp_locale->weekday_abbrev ),
 		),
-		'currentUserData'       => $current_user_data,
+		'currentUserData'  => $current_user_data,
+		'alertCount'       => WC_Admin_Notes::get_notes_count(),
 	);
 	$settings = wc_admin_add_custom_settings( $settings );
 
