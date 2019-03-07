@@ -1278,6 +1278,7 @@ function wc_deferred_product_sync( $product_id ) {
 function wc_update_product_lookup_tables() {
 	global $wpdb;
 
+	// Move meta data into the lookup table.
 	$wpdb->query(
 		"
 		INSERT IGNORE INTO {$wpdb->wc_product_meta_lookup} (`product_id`, `min_price`, `max_price`, `average_rating`, `total_sales`, `sku`)
@@ -1296,6 +1297,7 @@ function wc_update_product_lookup_tables() {
 		"
 	);
 
+	// Move stock data into the lookup table.
 	$wpdb->query(
 		"
 		UPDATE
@@ -1309,7 +1311,31 @@ function wc_update_product_lookup_tables() {
 		"
 	);
 
-	// Rating counts are serialised.
+	// Move type data into table.
+	$wpdb->query(
+		"
+		UPDATE
+			{$wpdb->wc_product_meta_lookup} lookup_table
+			LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_downloadable'
+		SET
+			lookup_table.downloadable = 1
+		WHERE
+			meta1.meta_value = 'yes'
+		"
+	);
+	$wpdb->query(
+		"
+		UPDATE
+			{$wpdb->wc_product_meta_lookup} lookup_table
+			LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_virtual'
+		SET
+			lookup_table.virtual = 1
+		WHERE
+			meta1.meta_value = 'yes'
+		"
+	);
+
+	// Rating counts are serialised so add them gradually using queue.
 	$rating_count_rows = $wpdb->get_results(
 		"
 		SELECT post_id, meta_value FROM {$wpdb->postmeta}

@@ -442,6 +442,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	protected function query_filters( $query_vars ) {
+		// Custom order by arguments.
 		if ( isset( $query_vars['orderby'] ) ) {
 			$orderby = strtolower( $query_vars['orderby'] );
 			$order   = isset( $query_vars['order'] ) ? strtoupper( $query_vars['order'] ) : 'DESC';
@@ -457,15 +458,14 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			}
 		}
 
+		// Type filtering.
 		if ( isset( $query_vars['product_type'] ) ) {
 			if ( 'downloadable' === $query_vars['product_type'] ) {
 				$query_vars['product_type'] = '';
-				$query_vars['meta_value']   = 'yes'; // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value
-				$query_vars['meta_key']     = '_downloadable'; // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
+				add_filter( 'posts_clauses', array( $this, 'filter_downloadable_post_clauses' ) );
 			} elseif ( 'virtual' === $query_vars['product_type'] ) {
 				$query_vars['product_type'] = '';
-				$query_vars['meta_value']   = 'yes'; // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value
-				$query_vars['meta_key']     = '_virtual'; // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
+				add_filter( 'posts_clauses', array( $this, 'filter_virtual_post_clauses' ) );
 			}
 		}
 
@@ -524,6 +524,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		remove_filter( 'posts_clauses', array( $this, 'order_by_price_desc_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'order_by_sku_asc_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'order_by_sku_desc_post_clauses' ) );
+		remove_filter( 'posts_clauses', array( $this, 'filter_downloadable_post_clauses' ) );
+		remove_filter( 'posts_clauses', array( $this, 'filter_virtual_post_clauses' ) );
 		return $posts;
 	}
 
@@ -572,6 +574,30 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	public function order_by_sku_desc_post_clauses( $args ) {
 		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
 		$args['orderby'] = ' wc_product_meta_lookup.sku DESC, wc_product_meta_lookup.product_id DESC ';
+		return $args;
+	}
+
+	/**
+	 * Filter by type.
+	 *
+	 * @param array $args Query args.
+	 * @return array
+	 */
+	public function filter_downloadable_post_clauses( $args ) {
+		$args['join']  = $this->append_product_sorting_table_join( $args['join'] );
+		$args['where'] = ' AND wc_product_meta_lookup.downloadable=1 ';
+		return $args;
+	}
+
+	/**
+	 * Filter by type.
+	 *
+	 * @param array $args Query args.
+	 * @return array
+	 */
+	public function filter_virtual_post_clauses( $args ) {
+		$args['join']  = $this->append_product_sorting_table_join( $args['join'] );
+		$args['where'] = ' AND wc_product_meta_lookup.virtual=1 ';
 		return $args;
 	}
 
