@@ -190,8 +190,8 @@ class WC_Admin_Setup_Wizard {
 				'i18n'                    => array(
 					'extra_plugins' => array(
 						'payment' => array(
-							'stripe_create_account'                              => __( 'Stripe setup is powered by Jetpack and WooCommerce Services.', 'woocommerce' ),
-							'ppec_paypal_reroute_requests'                       => __( 'PayPal setup is powered by Jetpack and WooCommerce Services.', 'woocommerce' ),
+							'stripe_create_account'        => __( 'Stripe setup is powered by Jetpack and WooCommerce Services.', 'woocommerce' ),
+							'ppec_paypal_reroute_requests' => __( 'PayPal setup is powered by Jetpack and WooCommerce Services.', 'woocommerce' ),
 							'stripe_create_account,ppec_paypal_reroute_requests' => __( 'Stripe and PayPal setup are powered by Jetpack and WooCommerce Services.', 'woocommerce' ),
 						),
 					),
@@ -790,8 +790,8 @@ class WC_Admin_Setup_Wizard {
 	 * @param string $input_prefix Input prefix.
 	 */
 	protected function shipping_method_selection_form( $country_code, $currency_code, $input_prefix ) {
-		$selected          = 'flat_rate';
-		$shipping_methods  = $this->get_wizard_shipping_methods( $country_code, $currency_code );
+		$selected         = 'flat_rate';
+		$shipping_methods = $this->get_wizard_shipping_methods( $country_code, $currency_code );
 		?>
 		<div class="wc-wizard-shipping-method-select">
 			<div class="wc-wizard-shipping-method-dropdown">
@@ -966,7 +966,7 @@ class WC_Admin_Setup_Wizard {
 										'class'    => array(),
 										'data-tip' => array(),
 									),
-									'a' => array(
+									'a'    => array(
 										'href'   => array(),
 										'target' => array(),
 									),
@@ -985,28 +985,32 @@ class WC_Admin_Setup_Wizard {
 			<ul class="wc-setup-shipping-recommended">
 			<?php
 			if ( $is_wcs_labels_supported ) :
-				$this->display_recommended_item( array(
-					'type'        => 'woocommerce_services',
-					'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
-					'description' => __( 'We recommend WooCommerce Services & Jetpack. These plugins will save you time at the Post Office by enabling you to print your shipping labels at home.', 'woocommerce' ),
-					'img_url'     => WC()->plugin_url() . '/assets/images/obw-woocommerce-services-icon.png',
-					'img_alt'     => __( 'WooCommerce Services icon', 'woocommerce' ),
-					'plugins'     => $this->get_wcs_requisite_plugins(),
-				) );
+				$this->display_recommended_item(
+					array(
+						'type'        => 'woocommerce_services',
+						'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
+						'description' => __( 'We recommend WooCommerce Services & Jetpack. These plugins will save you time at the Post Office by enabling you to print your shipping labels at home.', 'woocommerce' ),
+						'img_url'     => WC()->plugin_url() . '/assets/images/obw-woocommerce-services-icon.png',
+						'img_alt'     => __( 'WooCommerce Services icon', 'woocommerce' ),
+						'plugins'     => $this->get_wcs_requisite_plugins(),
+					)
+				);
 			elseif ( $is_shipstation_supported ) :
-				$this->display_recommended_item( array(
-					'type'        => 'shipstation',
-					'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
-					'description' => __( 'We recommend using ShipStation to save time at the Post Office by printing your shipping labels at home. Try ShipStation free for 30 days.', 'woocommerce' ),
-					'img_url'     => WC()->plugin_url() . '/assets/images/obw-shipstation-icon.png',
-					'img_alt'     => __( 'ShipStation icon', 'woocommerce' ),
-					'plugins'     => array(
-						array(
-							'name' => __( 'ShipStation', 'woocommerce' ),
-							'slug' => 'woocommerce-shipstation-integration',
+				$this->display_recommended_item(
+					array(
+						'type'        => 'shipstation',
+						'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
+						'description' => __( 'We recommend using ShipStation to save time at the Post Office by printing your shipping labels at home. Try ShipStation free for 30 days.', 'woocommerce' ),
+						'img_url'     => WC()->plugin_url() . '/assets/images/obw-shipstation-icon.png',
+						'img_alt'     => __( 'ShipStation icon', 'woocommerce' ),
+						'plugins'     => array(
+							array(
+								'name' => __( 'ShipStation', 'woocommerce' ),
+								'slug' => 'woocommerce-shipstation-integration',
+							),
 						),
-					),
-				) );
+					)
+				);
 			endif;
 		endif;
 		?>
@@ -1023,7 +1027,7 @@ class WC_Admin_Setup_Wizard {
 								$this->get_product_dimension_selection()
 							),
 							array(
-								'span' => array(
+								'span'   => array(
 									'class' => array(),
 								),
 								'select' => array(
@@ -1873,7 +1877,7 @@ class WC_Admin_Setup_Wizard {
 					&& $this->should_show_automated_tax()
 					&& $this->should_show_mailchimp()
 					) :
-				esc_html_e( 'Select from the list below to enable automated taxes and MailChimp’s best-in-class email services — and design your store with our official, free WooCommerce theme.', 'woocommerce' );
+			esc_html_e( 'Select from the list below to enable automated taxes and MailChimp’s best-in-class email services — and design your store with our official, free WooCommerce theme.', 'woocommerce' );
 			else :
 				esc_html_e( 'Enhance your store with these recommended features.', 'woocommerce' );
 			endif;
