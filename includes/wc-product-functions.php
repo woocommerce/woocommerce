@@ -1290,77 +1290,29 @@ function wc_update_product_lookup_tables() {
 		"
 	);
 
-	WC()->queue()->add(
-		'wc_update_product_lookup_tables_column',
-		array(
-			'column' => 'min_price',
-		),
-		'wc_update_product_lookup_tables'
+	// Queue update events.
+	$columns = array(
+		'min_price',
+		'max_price',
+		'stock_quantity',
+		'sku',
+		'stock_status',
+		'average_rating',
+		'total_sales',
+		'downloadable',
+		'virtual',
 	);
 
-	WC()->queue()->add(
-		'wc_update_product_lookup_tables_column',
-		array(
-			'column' => 'max_price',
-		),
-		'wc_update_product_lookup_tables'
-	);
-
-	WC()->queue()->add(
-		'wc_update_product_lookup_tables_column',
-		array(
-			'column' => 'stock_quantity',
-		),
-		'wc_update_product_lookup_tables'
-	);
-
-	WC()->queue()->add(
-		'wc_update_product_lookup_tables_column',
-		array(
-			'column' => 'sku',
-		),
-		'wc_update_product_lookup_tables'
-	);
-
-	WC()->queue()->add(
-		'wc_update_product_lookup_tables_column',
-		array(
-			'column' => 'stock_status',
-		),
-		'wc_update_product_lookup_tables'
-	);
-
-	WC()->queue()->add(
-		'wc_update_product_lookup_tables_column',
-		array(
-			'column' => 'average_rating',
-		),
-		'wc_update_product_lookup_tables'
-	);
-
-	WC()->queue()->add(
-		'wc_update_product_lookup_tables_column',
-		array(
-			'column' => 'total_sales',
-		),
-		'wc_update_product_lookup_tables'
-	);
-
-	WC()->queue()->add(
-		'wc_update_product_lookup_tables_column',
-		array(
-			'column' => 'downloadable',
-		),
-		'wc_update_product_lookup_tables'
-	);
-
-	WC()->queue()->add(
-		'wc_update_product_lookup_tables_column',
-		array(
-			'column' => 'virtual',
-		),
-		'wc_update_product_lookup_tables'
-	);
+	foreach ( $columns as $index => $column ) {
+		WC()->queue()->schedule_single(
+			time() + $index,
+			'wc_update_product_lookup_tables_column',
+			array(
+				'column' => $column,
+			),
+			'wc_update_product_lookup_tables'
+		);
+	}
 
 	// Rating counts are serialised so add them gradually using queue.
 	$rating_count_rows = $wpdb->get_results(
@@ -1375,9 +1327,11 @@ function wc_update_product_lookup_tables() {
 
 	if ( $rating_count_rows ) {
 		$rating_count_rows = array_chunk( $rating_count_rows, 50 );
+		$index             = 10;
 
 		foreach ( $rating_count_rows as $rows ) {
-			WC()->queue()->add(
+			WC()->queue()->schedule_single(
+				time() + $index,
 				'wc_update_product_lookup_tables_rating_count',
 				array(
 					'rows' => $rows,
