@@ -513,6 +513,29 @@ class WC_Data_Store_WP {
 	}
 
 	/**
+	 * Get data to save to a lookup table.
+	 *
+	 * @since 3.6.0
+	 * @param int    $id ID of object to update.
+	 * @param string $table Lookup table name.
+	 * @return array
+	 */
+	protected function get_data_for_lookup_table( $id, $table ) {
+		return array();
+	}
+
+	/**
+	 * Get primary key name for lookup table.
+	 *
+	 * @since 3.6.0
+	 * @param string $table Lookup table name.
+	 * @return string
+	 */
+	protected function get_primary_key_for_lookup_table( $table ) {
+		return '';
+	}
+
+	/**
 	 * Update a lookup table for an object.
 	 *
 	 * @since 3.6.0
@@ -539,5 +562,33 @@ class WC_Data_Store_WP {
 			);
 			wp_cache_set( 'lookup_table', $update_data, 'object_' . $id );
 		}
+	}
+
+	/**
+	 * Delete lookup table data for an ID.
+	 *
+	 * @since 3.6.0
+	 * @param int    $id ID of object to update.
+	 * @param string $table Lookup table name.
+	 */
+	public function delete_from_lookup_table( $id, $table ) {
+		global $wpdb;
+
+		$id    = absint( $id );
+		$table = sanitize_key( $table );
+
+		if ( empty( $id ) || empty( $table ) ) {
+			return false;
+		}
+
+		$pk = $this->get_primary_key_for_lookup_table( $table );
+
+		$wpdb->delete(
+			$wpdb->$table,
+			array(
+				$pk => $id,
+			)
+		);
+		wp_cache_delete( 'lookup_table', 'object_' . $id );
 	}
 }
