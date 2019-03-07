@@ -603,27 +603,37 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		// Test POST requests.
-		$post_response            = wp_safe_remote_post(
-			'https://www.paypal.com/cgi-bin/webscr',
-			array(
-				'timeout'     => 10,
-				'user-agent'  => 'WooCommerce/' . WC()->version,
-				'httpversion' => '1.1',
-				'body'        => array(
-					'cmd' => '_notify-validate',
-				),
-			)
-		);
-		$post_response_successful = false;
-		if ( ! is_wp_error( $post_response ) && $post_response['response']['code'] >= 200 && $post_response['response']['code'] < 300 ) {
-			$post_response_successful = true;
+		$post_success = get_transient( 'woocommerce_remote_post_test_success' );
+
+		if ( false === $post_success ) {
+			$post_response = wp_safe_remote_post(
+				'https://www.paypal.com/cgi-bin/webscr',
+				array(
+					'timeout'     => 10,
+					'user-agent'  => 'WooCommerce/' . WC()->version,
+					'httpversion' => '1.1',
+					'body'        => array(
+						'cmd' => '_notify-validate',
+					),
+				)
+			);
+			$post_response_successful = false;
+			if ( ! is_wp_error( $post_response ) && $post_response['response']['code'] >= 200 && $post_response['response']['code'] < 300 ) {
+				$post_response_successful = true;
+			}
+			set_transient( 'woocommerce_remote_post_test_success', $post_response_successful, HOUR_IN_SECONDS );
 		}
 
 		// Test GET requests.
-		$get_response            = wp_safe_remote_get( 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
-		$get_response_successful = false;
-		if ( ! is_wp_error( $get_response ) && $get_response['response']['code'] >= 200 && $get_response['response']['code'] < 300 ) {
-			$get_response_successful = true;
+		$get_success = get_transient( 'woocommerce_remote_get_test_success' );
+
+		if ( false === $get_success ) {
+			$get_response            = wp_safe_remote_get( 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
+			$get_response_successful = false;
+			if ( ! is_wp_error( $get_response ) && $get_response['response']['code'] >= 200 && $get_response['response']['code'] < 300 ) {
+				$get_response_successful = true;
+			}
+			set_transient( 'woocommerce_remote_get_test_success', $get_response_successful, HOUR_IN_SECONDS );
 		}
 
 		$database_version = wc_get_server_database_version();
