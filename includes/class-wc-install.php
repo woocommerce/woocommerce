@@ -125,6 +125,7 @@ class WC_Install {
 			'wc_update_354_db_version',
 		),
 		'3.6.0' => array(
+			'wc_update_360_term_meta',
 			'wc_update_360_downloadable_product_permissions_index',
 			'wc_update_360_db_version',
 		),
@@ -538,7 +539,6 @@ class WC_Install {
 	 *
 	 * Tables:
 	 *      woocommerce_attribute_taxonomies - Table for storing attribute taxonomies - these are user defined
-	 *      woocommerce_termmeta - Term meta table - sadly WordPress does not have termmeta so we need our own
 	 *      woocommerce_downloadable_product_permissions - Table for storing user and guest download permissions.
 	 *          KEY(order_id, product_id, download_id) used for organizing downloads on the My Account page
 	 *      woocommerce_order_items - Order line items are stored in a table to make them easily queryable for reports
@@ -824,23 +824,6 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
 ) $collate;
 		";
 
-		/**
-		 * Term meta is only needed for old installs and is now @deprecated by WordPress term meta.
-		 */
-		if ( ! function_exists( 'get_term_meta' ) ) {
-			$tables .= "
-CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
-  meta_id BIGINT UNSIGNED NOT NULL auto_increment,
-  woocommerce_term_id BIGINT UNSIGNED NOT NULL,
-  meta_key varchar(255) default NULL,
-  meta_value longtext NULL,
-  PRIMARY KEY  (meta_id),
-  KEY woocommerce_term_id (woocommerce_term_id),
-  KEY meta_key (meta_key(32))
-) $collate;
-			";
-		}
-
 		return $tables;
 	}
 
@@ -871,11 +854,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			"{$wpdb->prefix}woocommerce_tax_rate_locations",
 			"{$wpdb->prefix}woocommerce_tax_rates",
 		);
-
-		if ( ! function_exists( 'get_term_meta' ) ) {
-			// This table is only needed for old installs and is now @deprecated by WordPress term meta.
-			$tables[] = "{$wpdb->prefix}woocommerce_termmeta";
-		}
 
 		/**
 		 * Filter the list of known WooCommerce tables.

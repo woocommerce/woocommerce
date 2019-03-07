@@ -2239,7 +2239,7 @@ if ( ! function_exists( 'woocommerce_get_loop_display_mode' ) ) {
 			$display_type = get_option( 'woocommerce_shop_page_display', '' );
 		} elseif ( is_product_category() ) {
 			$parent_id    = get_queried_object_id();
-			$display_type = get_woocommerce_term_meta( $parent_id, 'display_type', true );
+			$display_type = get_term_meta( $parent_id, 'display_type', true );
 			$display_type = '' === $display_type ? get_option( 'woocommerce_category_archive_display', '' ) : $display_type;
 		}
 
@@ -2424,7 +2424,6 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 					'woocommerce_product_subcategories_args',
 					array(
 						'parent'       => $parent_id,
-						'menu_order'   => 'ASC',
 						'hide_empty'   => 0,
 						'hierarchical' => 1,
 						'taxonomy'     => 'product_cat',
@@ -2454,7 +2453,7 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 	function woocommerce_subcategory_thumbnail( $category ) {
 		$small_thumbnail_size = apply_filters( 'subcategory_archive_thumbnail_size', 'woocommerce_thumbnail' );
 		$dimensions           = wc_get_image_size( $small_thumbnail_size );
-		$thumbnail_id         = get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true );
+		$thumbnail_id         = get_term_meta( $category->term_id, 'thumbnail_id', true );
 
 		if ( $thumbnail_id ) {
 			$image        = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );

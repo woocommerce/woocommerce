@@ -6,6 +6,9 @@
  * @since 3.5.0
  */
 
+ /**
+  * WC_Tests_API_Product class.
+  */
 class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 
 	/**
@@ -87,7 +90,8 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 				'status'        => 'publish',
 				'sku'           => 'DUMMY EXTERNAL SKU',
 				'regular_price' => 10,
-			), $product
+			),
+			$product
 		);
 	}
 
@@ -157,7 +161,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	public function test_update_product() {
 		wp_set_current_user( $this->user );
 
-		// test simple products
+		// test simple products.
 		$product      = WC_Helper_Product::create_simple_product();
 		$response     = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
 		$data         = $response->get_data();
@@ -196,7 +200,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$this->assertContains( 'test upload image', $data['images'][0]['alt'] );
 		$product->delete( true );
 
-		// test variable product (variations are tested in product-variations.php)
+		// test variable product (variations are tested in product-variations.php).
 		$product  = WC_Helper_Product::create_variation_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
 		$data     = $response->get_data();
@@ -235,10 +239,14 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertEquals( array( 'small' ), $data['attributes'][0]['options'] );
-		$this->assertEquals( array( 'red', 'yellow' ), $data['attributes'][1]['options'] );
+
+		foreach ( array( 'red', 'yellow' ) as $term_name ) {
+			$this->assertContains( $term_name, $data['attributes'][1]['options'] );
+		}
+
 		$product->delete( true );
 
-		// test external product
+		// test external product.
 		$product  = WC_Helper_Product::create_external_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
 		$data     = $response->get_data();
@@ -313,7 +321,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$data              = $response->get_data();
 		$shipping_class_id = $data['id'];
 
-		// Create simple
+		// Create simple.
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
 		$request->set_body_params(
 			array(
@@ -335,7 +343,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'simple', $data['type'] );
 		$this->assertEquals( $shipping_class_id, $data['shipping_class_id'] );
 
-		// Create external
+		// Create external.
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
 		$request->set_body_params(
 			array(
@@ -359,7 +367,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'Test Button', $data['button_text'] );
 		$this->assertEquals( 'https://wordpress.org', $data['external_url'] );
 
-		// Create variable
+		// Create variable.
 		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
 		$request->set_body_params(
 			array(
@@ -468,7 +476,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 3, count( $data ) );
 	}
 
-	/*
+	/**
 	 * Tests to make sure you can filter products post statuses by both
 	 * the status query arg and WP_Query.
 	 *
@@ -488,7 +496,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 			}
 		}
 
-		// Test filtering with status=publish
+		// Test filtering with status=publish.
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_param( 'status', 'publish' );
 		$response = $this->server->dispatch( $request );
@@ -499,7 +507,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 			$this->assertEquals( 'publish', $product['status'] );
 		}
 
-		// Test filtering with status=draft
+		// Test filtering with status=draft.
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$request->set_param( 'status', 'draft' );
 		$response = $this->server->dispatch( $request );
@@ -510,7 +518,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 			$this->assertEquals( 'draft', $product['status'] );
 		}
 
-		// Test filtering with no filters - which should return 'any' (all 8)
+		// Test filtering with no filters - which should return 'any' (all 8).
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/products' );
 		$response = $this->server->dispatch( $request );
 		$products = $response->get_data();
@@ -573,7 +581,7 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$response_product = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 1, $response_product['categories'] );
+		$this->assertCount( 1, $response_product['categories'], print_r( $response_product, true ) );
 		$this->assertEquals( 'uncategorized', $response_product['categories'][0]['slug'] );
 
 	}
@@ -749,7 +757,8 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 
 		// Link the product to the term.
 		$wpdb->insert(
-			$wpdb->prefix . 'term_relationships', array(
+			$wpdb->prefix . 'term_relationships',
+			array(
 				'object_id'        => $product_2->get_id(),
 				'term_taxonomy_id' => $term_large->term_id,
 				'term_order'       => 0,

@@ -708,11 +708,6 @@ final class WooCommerce {
 		$wpdb->order_itemmeta    = $wpdb->prefix . 'woocommerce_order_itemmeta';
 		$wpdb->tables[]          = 'woocommerce_payment_tokenmeta';
 		$wpdb->tables[]          = 'woocommerce_order_itemmeta';
-
-		if ( get_option( 'db_version' ) < 34370 ) {
-			$wpdb->woocommerce_termmeta = $wpdb->prefix . 'woocommerce_termmeta';
-			$wpdb->tables[]             = 'woocommerce_termmeta';
-		}
 	}
 
 	/**

@@ -26,9 +26,9 @@ class WC_Admin_Attributes {
 		$action = '';
 
 		// Action to perform: add, edit, delete or none.
-		if ( ! empty( $_POST['add_new_attribute'] ) ) {
+		if ( ! empty( $_POST['add_new_attribute'] ) ) { // WPCS: CSRF ok.
 			$action = 'add';
-		} elseif ( ! empty( $_POST['save_attribute'] ) && ! empty( $_GET['edit'] ) ) {
+		} elseif ( ! empty( $_POST['save_attribute'] ) && ! empty( $_GET['edit'] ) ) { // WPCS: CSRF ok.
 			$action = 'edit';
 		} elseif ( ! empty( $_GET['delete'] ) ) {
 			$action = 'delete';
@@ -65,11 +65,11 @@ class WC_Admin_Attributes {
 	 */
 	private static function get_posted_attribute() {
 		$attribute = array(
-			'attribute_label'   => isset( $_POST['attribute_label'] ) ? wc_clean( stripslashes( $_POST['attribute_label'] ) ) : '',
-			'attribute_name'    => isset( $_POST['attribute_name'] ) ? wc_sanitize_taxonomy_name( stripslashes( $_POST['attribute_name'] ) ) : '',
-			'attribute_type'    => isset( $_POST['attribute_type'] ) ? wc_clean( $_POST['attribute_type'] ) : 'select',
-			'attribute_orderby' => isset( $_POST['attribute_orderby'] ) ? wc_clean( $_POST['attribute_orderby'] ) : '',
-			'attribute_public'  => isset( $_POST['attribute_public'] ) ? 1 : 0,
+			'attribute_label'   => isset( $_POST['attribute_label'] ) ? wc_clean( wp_unslash( $_POST['attribute_label'] ) ) : '', // WPCS: input var ok, CSRF ok.
+			'attribute_name'    => isset( $_POST['attribute_name'] ) ? wc_sanitize_taxonomy_name( wp_unslash( $_POST['attribute_name'] ) ) : '', // WPCS: input var ok, CSRF ok, sanitization ok.
+			'attribute_type'    => isset( $_POST['attribute_type'] ) ? wc_clean( wp_unslash( $_POST['attribute_type'] ) ) : 'select', // WPCS: input var ok, CSRF ok.
+			'attribute_orderby' => isset( $_POST['attribute_orderby'] ) ? wc_clean( wp_unslash( $_POST['attribute_orderby'] ) ) : '', // WPCS: input var ok, CSRF ok.
+			'attribute_public'  => isset( $_POST['attribute_public'] ) ? 1 : 0, // WPCS: input var ok, CSRF ok.
 		);
 
 		if ( empty( $attribute['attribute_type'] ) ) {
@@ -117,7 +117,7 @@ class WC_Admin_Attributes {
 	 * @return bool|WP_Error
 	 */
 	private static function process_edit_attribute() {
-		$attribute_id = absint( $_GET['edit'] );
+		$attribute_id = isset( $_GET['edit'] ) ? absint( $_GET['edit'] ) : 0;
 		check_admin_referer( 'woocommerce-save-attribute_' . $attribute_id );
 
 		$attribute = self::get_posted_attribute();
@@ -135,7 +135,7 @@ class WC_Admin_Attributes {
 			return $id;
 		}
 
-		echo '<div class="updated"><p>' . __( 'Attribute updated successfully', 'woocommerce' ) . '</p><p><a href="' . esc_url( admin_url( 'edit.php?post_type=product&amp;page=product_attributes' ) ) . '">' . __( 'Back to Attributes', 'woocommerce' ) . '</a></p></div>';
+		echo '<div class="updated"><p>' . esc_html__( 'Attribute updated successfully', 'woocommerce' ) . '</p><p><a href="' . esc_url( admin_url( 'edit.php?post_type=product&amp;page=product_attributes' ) ) . '">' . esc_html__( 'Back to Attributes', 'woocommerce' ) . '</a></p></div>';
 
 		return true;
 	}
@@ -146,7 +146,7 @@ class WC_Admin_Attributes {
 	 * @return bool
 	 */
 	private static function process_delete_attribute() {
-		$attribute_id = absint( $_GET['delete'] );
+		$attribute_id = isset( $_GET['delete'] ) ? absint( $_GET['delete'] ) : 0;
 		check_admin_referer( 'woocommerce-delete-attribute_' . $attribute_id );
 
 		return wc_delete_attribute( $attribute_id );
@@ -160,9 +160,17 @@ class WC_Admin_Attributes {
 	public static function edit_attribute() {
 		global $wpdb;
 
-		$edit = absint( $_GET['edit'] );
+		$edit = isset( $_GET['edit'] ) ? absint( $_GET['edit'] ) : 0;
 
-		$attribute_to_edit = $wpdb->get_row( 'SELECT attribute_type, attribute_label, attribute_name, attribute_orderby, attribute_public FROM ' . $wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_id = '$edit'" );
+		$attribute_to_edit = $wpdb->get_row(
+			$wpdb->prepare(
+				"
+				SELECT attribute_type, attribute_label, attribute_name, attribute_orderby, attribute_public
+				FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_id = %d
+				",
+				$edit
+			)
+		);
 
 		?>
 		<div class="wrap woocommerce">
@@ -297,7 +305,8 @@ class WC_Admin_Attributes {
 							</thead>
 							<tbody>
 								<?php
-								if ( $attribute_taxonomies = wc_get_attribute_taxonomies() ) :
+								$attribute_taxonomies = wc_get_attribute_taxonomies();
+								if ( $attribute_taxonomies ) :
 									foreach ( $attribute_taxonomies as $tax ) :
 										?>
 										<tr>
@@ -333,21 +342,7 @@ class WC_Admin_Attributes {
 													$taxonomy = wc_attribute_taxonomy_name( $tax->attribute_name );
 
 													if ( taxonomy_exists( $taxonomy ) ) {
-														if ( 'menu_order' === wc_attribute_orderby( $taxonomy ) ) {
-															$terms = get_terms( $taxonomy, 'hide_empty=0&menu_order=ASC' );
-														} else {
-															$terms = get_terms( $taxonomy, 'hide_empty=0&menu_order=false' );
-														}
-
-														switch ( $tax->attribute_orderby ) {
-															case 'name_num':
-																usort( $terms, '_wc_get_product_terms_name_num_usort_callback' );
-																break;
-															case 'parent':
-																usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
-																break;
-														}
-
+														$terms        = get_terms( $taxonomy, 'hide_empty=0' );
 														$terms_string = implode( ', ', wp_list_pluck( $terms, 'name' ) );
 														if ( $terms_string ) {
 															echo esc_html( $terms_string );
@@ -370,7 +365,7 @@ class WC_Admin_Attributes {
 										</tr>
 										<?php
 									endif;
-								?>
+									?>
 							</tbody>
 						</table>
 					</div>
