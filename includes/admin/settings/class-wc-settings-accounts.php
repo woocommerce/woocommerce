@@ -36,7 +36,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			$erasure_text = sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'tools.php?page=remove_personal_data' ) ), $erasure_text );
 		}
 
-		$tracking_info_text = sprintf( '<a href="%s" target="_blank">%s</a>','https://woocommerce.com/usage-tracking', esc_html__( 'Read more about what we collect', 'woocommerce' ) );
+		$tracking_info_text = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://woocommerce.com/usage-tracking', esc_html__( 'Read more about what we collect', 'woocommerce' ) );
 
 		$settings = apply_filters(
 			'woocommerce_' . $this->id . '_settings',
@@ -243,6 +243,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				array(
 					'title'         => __( 'Enable tracking', 'woocommerce' ),
 					'desc'          => __( 'Allow usage of WooCommerce to be tracked', 'woocommerce' ),
+					/* Translators: %s URL to tracking info screen. */
 					'desc_tip'      => sprintf( esc_html__( 'If you would rather opt-out, and do not check this box, we will not know this store exists and we will not collect any usage data. %s.', 'woocommerce' ), $tracking_info_text ),
 					'id'            => 'woocommerce_allow_tracking',
 					'type'          => 'checkbox',
