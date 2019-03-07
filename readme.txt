@@ -233,6 +233,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - `woocommerce_before_cart_emptied` action before cart is emptied. #22846
 * Dev - Added filters for shipping options - `woocommerce_shipping_ID_option` and `woocommerce_shipping_ID_instance_option`. #22771
 * Dev - Refactor comment/rating update functions. #22909
+* Dev - Added `woocommerce_get_product_subcategories_cache_key` filter to allow the cache to be renamed if for instance the site runs in multiple languages and needs a unique cache per language. #22915
 * Fix - Use correct address for taxes when applying/removing coupons. #22802
 * Fix - Hide ratings on the shop page when reviews are disabled. #22476
 * Fix - Fix W3C validation of single product page quantity input. #22333
