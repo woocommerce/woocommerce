@@ -826,14 +826,15 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
 CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `product_id` bigint(20) NOT NULL,
   `sku` varchar(100) NULL default '',
+  `virtual` tinyint(1) NULL default 0,
+  `downloadable` tinyint(1) NULL default 0,
   `min_price` decimal(10,2) NULL default NULL,
   `max_price` decimal(10,2) NULL default NULL,
+  `stock_quantity` double NULL default NULL,
+  `stock_status` varchar(100) NULL default 'instock',
   `rating_count` bigint(20) NULL default 0,
   `average_rating` decimal(3,2) NULL default 0.00,
   `total_sales` bigint(20) NULL default 0,
-  `stock` bigint(20) NULL default NULL,
-  `virtual` tinyint(1) NULL default 0,
-  `downloadable` tinyint(1) NULL default 0,
   PRIMARY KEY  (`product_id`),
   KEY min_max_price (`min_price`, `max_price`)
   ) $collate;

@@ -1882,14 +1882,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return array(
 				'product_id'     => absint( $id ),
 				'sku'            => get_post_meta( $id, '_sku', true ),
+				'virtual'        => 'yes' === get_post_meta( $id, '_virtual', true ) ? 1 : 0,
+				'downloadable'   => 'yes' === get_post_meta( $id, '_downloadable', true ) ? 1 : 0,
 				'min_price'      => reset( $price_meta ),
 				'max_price'      => end( $price_meta ),
+				'stock_quantity' => $stock,
+				'stock_status'   => get_post_meta( $id, '_stock_status', true ),
 				'rating_count'   => array_sum( (array) get_post_meta( $id, '_wc_rating_count', true ) ),
 				'average_rating' => get_post_meta( $id, '_wc_average_rating', true ),
 				'total_sales'    => get_post_meta( $id, 'total_sales', true ),
-				'stock'          => $stock,
-				'virtual'        => 'yes' === get_post_meta( $id, '_virtual', true ) ? 1 : 0,
-				'downloadable'   => 'yes' === get_post_meta( $id, '_downloadable', true ) ? 1 : 0,
 			);
 		}
 		return array();

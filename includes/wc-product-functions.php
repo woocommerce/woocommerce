@@ -1281,19 +1281,20 @@ function wc_update_product_lookup_tables() {
 	// Move meta data into the lookup table.
 	$wpdb->query(
 		"
-		INSERT IGNORE INTO {$wpdb->wc_product_meta_lookup} (`product_id`, `min_price`, `max_price`, `average_rating`, `total_sales`, `sku`)
+		INSERT IGNORE INTO {$wpdb->wc_product_meta_lookup} (`product_id`, `min_price`, `max_price`, `average_rating`, `total_sales`, `sku`, `stock_status`)
 		SELECT
-			posts.ID, MIN(meta1.meta_value), MAX(meta1.meta_value), meta2.meta_value, meta3.meta_value, meta4.meta_value
+			posts.ID, MIN(meta1.meta_value), MAX(meta1.meta_value), meta2.meta_value, meta3.meta_value, meta4.meta_value, meta5.meta_value
 		FROM {$wpdb->posts} posts
 			LEFT JOIN {$wpdb->postmeta} meta1 ON posts.ID = meta1.post_id AND meta1.meta_key = '_price'
 			LEFT JOIN {$wpdb->postmeta} meta2 ON posts.ID = meta2.post_id AND meta2.meta_key = '_wc_average_rating'
 			LEFT JOIN {$wpdb->postmeta} meta3 ON posts.ID = meta3.post_id AND meta3.meta_key = 'total_sales'
 			LEFT JOIN {$wpdb->postmeta} meta4 ON posts.ID = meta4.post_id AND meta4.meta_key = '_sku'
+			LEFT JOIN {$wpdb->postmeta} meta5 ON posts.ID = meta5.post_id AND meta5.meta_key = '_stock_status'
 		WHERE
 			posts.post_type IN ('product', 'product_variation')
 			AND meta1.meta_value <> ''
 		GROUP BY
-			posts.ID, meta2.meta_value, meta3.meta_value, meta4.meta_value
+			posts.ID, meta2.meta_value, meta3.meta_value, meta4.meta_value, meta5.meta_value
 		"
 	);
 
@@ -1305,7 +1306,7 @@ function wc_update_product_lookup_tables() {
 			LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_manage_stock'
 			LEFT JOIN {$wpdb->postmeta} meta2 ON lookup_table.product_id = meta2.post_id AND meta2.meta_key = '_stock'
 		SET
-			lookup_table.stock = meta2.meta_value
+			lookup_table.stock_quantity = meta2.meta_value
 		WHERE
 			meta1.meta_value = 'yes'
 		"

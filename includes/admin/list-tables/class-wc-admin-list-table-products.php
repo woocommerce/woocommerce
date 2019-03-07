@@ -469,23 +469,18 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			}
 		}
 
-		if ( isset( $_GET['product_shipping_class'] ) && '0' === $_GET['product_shipping_class'] ) { // WPCS: input var ok.
+		// Stock status filter.
+		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			add_filter( 'posts_clauses', array( $this, 'filter_stock_status_post_clauses' ) );
+		}
+
+		// Shipping class taxonomy.
+		if ( ! empty( $_GET['product_shipping_class'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			$query_vars['tax_query'][] = array(
 				'taxonomy' => 'product_shipping_class',
 				'field'    => 'id',
 				'terms'    => get_terms( 'product_shipping_class', array( 'fields' => 'ids' ) ),
 				'operator' => 'NOT IN',
-			);
-		}
-
-		if ( ! empty( $_GET['stock_status'] ) ) {
-			if ( ! isset( $query_vars['meta_query'] ) ) {
-				$query_vars['meta_query'] = array(); // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_query
-			}
-
-			$query_vars['meta_query'][] = array(
-				'key'   => '_stock_status',
-				'value' => wc_clean( wp_unslash( $_GET['stock_status'] ) ),
 			);
 		}
 
@@ -526,6 +521,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		remove_filter( 'posts_clauses', array( $this, 'order_by_sku_desc_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_downloadable_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_virtual_post_clauses' ) );
+		remove_filter( 'posts_clauses', array( $this, 'filter_stock_status_post_clauses' ) );
 		return $posts;
 	}
 
@@ -584,8 +580,8 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function filter_downloadable_post_clauses( $args ) {
-		$args['join']  = $this->append_product_sorting_table_join( $args['join'] );
-		$args['where'] = ' AND wc_product_meta_lookup.downloadable=1 ';
+		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+		$args['where'] .= ' AND wc_product_meta_lookup.downloadable=1 ';
 		return $args;
 	}
 
@@ -596,8 +592,23 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 * @return array
 	 */
 	public function filter_virtual_post_clauses( $args ) {
-		$args['join']  = $this->append_product_sorting_table_join( $args['join'] );
-		$args['where'] = ' AND wc_product_meta_lookup.virtual=1 ';
+		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+		$args['where'] .= ' AND wc_product_meta_lookup.virtual=1 ';
+		return $args;
+	}
+
+	/**
+	 * Filter by stock status.
+	 *
+	 * @param array $args Query args.
+	 * @return array
+	 */
+	public function filter_stock_status_post_clauses( $args ) {
+		global $wpdb;
+		if ( ! empty( $_GET['stock_status'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', wc_clean( wp_unslash( $_GET['stock_status'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		}
 		return $args;
 	}
 
