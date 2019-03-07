@@ -969,7 +969,7 @@ function wc_format_phone_number( $phone ) {
 
 /**
  * Sanitize phone number.
- * Remove all characters allowing just numbers and "+" (plus sign).
+ * Allows only numbers and "+" (plus sign).
  *
  * @since 3.6.0
  * @param string $phone Phone number.
