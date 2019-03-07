@@ -179,6 +179,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Show loading graphic when order form is submitted. #22664
 * Tweak - Add alt text to gallery images #22863
 * Tweak - Improved `display_name` generation during checkout. #22786
+* Tweak - Send correct calling code and phone number to PayPal standard when using non-US addresses. #22693
 * Tweak - Added tooltip to refund-amount input box and made it readonly when taxes are enabled. #22820
 * Template - Moved the order of rememberme checkboxes for accessibility so they tab in order. #21454
 * Template - New structure for attributes template, including new `woocommerce_display_product_attributes` filter. #22480
@@ -275,6 +276,12 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Performance - Load only active webhooks on pages and allow limits to be set by developers. #22760
 * Performance - Index on downloadable_product_permissions to improve speed when fetching downloads for customers. #22906
 * Performance - Improved term ordering queries, making the sorting apply by default via the DB query rather than sorting all terms with PHP. Removed legacy term meta table usage. #22570
+* Performance - Use day, not time, in status widget for caching. #22950
+* Performance - Improve slow term ordering by using queries instead of php. #22570
+* Performance - Removes legacy woocomerce_termmeta table and swap out all calls to legacy term meta functions to the new WP ones. #22570
+* Performance - Apply term  sorting using get_terms_defaults hook instead of custom parameters. #22570
+* Performance - Use pre_get_terms hook to detect menu_order sorting param and apply to the term query. Meta sorting is now possible through WP. #22570
+* Performance - Use terms_clauses hook to support numeric name sorting and to improve the menu order sorting so it works if meta is missing. #22570
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 * Localization - Added US Minor Outlying Islands as states to avoid confusion with US. #22468
 * Localization - Dutch postcode validation. #22316
