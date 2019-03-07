@@ -1,5 +1,20 @@
 == Changelog ==
 
+= 3.5.6 - 2019-03-07 =
+* Fix - Removes invalid product structured data from archives, and include more data on single product pages. #22925
+		Product structured data should only be generated for visible data, and not on archives when there are single
+		product pages available, as per the documentation.
+		Since this change removes structured data from archives, the filters `woocommerce_structured_data_product_limit`
+		and `woocommerce_structured_data_product_limited` have also been removed.
+		To customize product structured data, for example adding custom fields or include on archives, see this article:
+		https://github.com/woocommerce/woocommerce/wiki/Structured-data-for-products.
+* Fix - Fix last item in breadcrumb structured data, and include on shop page. #22925
+* Fix - Get insert ID before running actions in `_insert_tax_rate`. #22868
+* Fix - Add precision to tax in the discount class so min spend checks work correctly. #22888
+* Fix - Update troubleshooting link in failed order email. #22943
+* Fix - Update Flexslider to 2.7.2.
+* Fix - Fill user's account first name and last name only when those fields are empty. #22783
+
 = 3.5.5 - 2019-02-20 =
 * Fix - Fix allow product low stock threshold be the WC settings default. #22777
 * Fix - Fix error on product category when sorting by multiple fields. #22066
