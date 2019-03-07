@@ -1,4 +1,11 @@
 <?php
+/**
+ * WooCommerce Admin
+ *
+ * @class    WC_Helper
+ * @package  WooCommerce/Admin
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -11,6 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Helper {
 	/**
 	 * A log object returned by wc_get_logger().
+	 *
+	 * @var $log
 	 */
 	public static $log;
 
@@ -33,11 +42,11 @@ class WC_Helper {
 		add_action( 'woocommerce_helper_output', array( __CLASS__, 'render_helper_output' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'admin_enqueue_scripts' ) );
 
-		// Attempt to toggle subscription state upon plugin activation/deactivation
+		// Attempt to toggle subscription state upon plugin activation/deactivation.
 		add_action( 'activated_plugin', array( __CLASS__, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( __CLASS__, 'deactivated_plugin' ) );
 
-		// Add some nags about extension updates
+		// Add some nags about extension updates.
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 
 		do_action( 'woocommerce_helper_loaded' );
@@ -289,6 +298,7 @@ class WC_Helper {
 
 			if ( $data['_has_update'] ) {
 				$action = array(
+					/* translators: %s: version number */
 					'message'      => sprintf( __( 'Version %s is <strong>available</strong>. To enable this update you need to <strong>purchase</strong> a new subscription.', 'woocommerce' ), esc_html( $updates[ $data['_product_id'] ]['version'] ) ),
 					'button_label' => __( 'Purchase', 'woocommerce' ),
 					'button_url'   => $data['_product_url'],
@@ -319,11 +329,11 @@ class WC_Helper {
 			WC_Helper_Options::update( 'auth', $auth );
 		}
 
-		// Sort alphabetically
+		// Sort alphabetically.
 		uasort( $subscriptions, array( __CLASS__, '_sort_by_product_name' ) );
 		uasort( $no_subscriptions, array( __CLASS__, '_sort_by_name' ) );
 
-		// Filters
+		// Filters.
 		self::get_filters_counts( $subscriptions ); // Warm it up.
 		self::_filter( $subscriptions, self::get_current_filter() );
 
@@ -357,7 +367,7 @@ class WC_Helper {
 	 *
 	 * @param array $subscriptions The array of all available subscriptions.
 	 *
-	 * @return array Filter counts (filter => count)
+	 * @return array Filter counts (filter => count).
 	 */
 	public static function get_filters_counts( $subscriptions = null ) {
 		static $filters;
@@ -389,8 +399,8 @@ class WC_Helper {
 		$current_filter = 'all';
 		$valid_filters  = array_keys( self::get_filters() );
 
-		if ( ! empty( $_GET['filter'] ) && in_array( $_GET['filter'], $valid_filters ) ) {
-			$current_filter = $_GET['filter'];
+		if ( ! empty( $_GET['filter'] ) && in_array( wp_unslash( $_GET['filter'] ), $valid_filters ) ) {
+			$current_filter = wp_unslash( $_GET['filter'] );
 		}
 
 		return $current_filter;
@@ -463,7 +473,7 @@ class WC_Helper {
 	 * @return array Array pairs of message/type strings with notices.
 	 */
 	private static function _get_return_notices() {
-		$return_status = isset( $_GET['wc-helper-status'] ) ? $_GET['wc-helper-status'] : null;
+		$return_status = isset( $_GET['wc-helper-status'] ) ? wp_unslash( $_GET['wc-helper-status'] ) : null;
 		$notices       = array();
 
 		switch ( $return_status ) {
