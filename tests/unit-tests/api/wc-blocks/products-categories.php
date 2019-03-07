@@ -37,29 +37,29 @@ class WC_Tests_API_Products_Categories_Controller extends WC_REST_Unit_Test_Case
 			)
 		);
 
-        // Create 3 product categories.
-        $parent           = wp_insert_term( 'Parent Category', 'product_cat' );
-        $child            = wp_insert_term(
-            'Child Category',
-            'product_cat',
-            array( 'parent' => $parent['term_id'] )
-        );
-        $single           = wp_insert_term( 'Standalone Category', 'product_cat' );
-        $this->categories = array(
-            'parent' => $parent,
-            'child'  => $child,
-            'single' => $single,
-        );
+		// Create 3 product categories.
+		$parent           = wp_insert_term( 'Parent Category', 'product_cat' );
+		$child            = wp_insert_term(
+			'Child Category',
+			'product_cat',
+			array( 'parent' => $parent['term_id'] )
+		);
+		$single           = wp_insert_term( 'Standalone Category', 'product_cat' );
+		$this->categories = array(
+			'parent' => $parent,
+			'child'  => $child,
+			'single' => $single,
+		);
 
-        // Create two products for the parent category.
-        $this->products    = array();
-        $this->products[0] = WC_Helper_Product::create_simple_product( false );
-        $this->products[0]->set_category_ids( array( $parent['term_id'] ) );
-        $this->products[0]->save();
+		// Create two products for the parent category.
+		$this->products    = array();
+		$this->products[0] = WC_Helper_Product::create_simple_product( false );
+		$this->products[0]->set_category_ids( array( $parent['term_id'] ) );
+		$this->products[0]->save();
 
-        $this->products[3] = WC_Helper_Product::create_simple_product( false );
-        $this->products[3]->set_category_ids( array( $parent['term_id'], $single['term_id'] ) );
-        $this->products[3]->save();
+		$this->products[3] = WC_Helper_Product::create_simple_product( false );
+		$this->products[3]->set_category_ids( array( $parent['term_id'], $single['term_id'] ) );
+		$this->products[3]->save();
 	}
 
 	/**
@@ -73,7 +73,7 @@ class WC_Tests_API_Products_Categories_Controller extends WC_REST_Unit_Test_Case
 
 		$response   = $this->server->dispatch( $request );
 		$categories = $response->get_data();
-        $this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 4, count( $categories ) ); // Three created and `uncategorized`.
 	}
 
@@ -113,9 +113,9 @@ class WC_Tests_API_Products_Categories_Controller extends WC_REST_Unit_Test_Case
 
 		$response = $this->server->dispatch( $request );
 		$category = $response->get_data();
-        $this->assertEquals( 200, $response->get_status() );
-        $this->assertEquals( $category['name'], 'Parent Category' );
-        $this->assertEquals( $category['parent'], 0 );
-        $this->assertEquals( $category['count'], 2 );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $category['name'], 'Parent Category' );
+		$this->assertEquals( $category['parent'], 0 );
+		$this->assertEquals( $category['count'], 2 );
 	}
 }
