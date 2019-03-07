@@ -27,17 +27,13 @@ import withSelect from 'wc-api/with-select';
 class ProductsReport extends Component {
 	getChartMeta() {
 		const { query, isSingleProductView, isSingleProductVariable } = this.props;
-
-		const isProductDetailsView = [
-			'top_items',
-			'top_sales',
-			'compare-products',
-			'single_category',
-			'compare-categories',
-		].includes( query.filter );
+		const isCompareView =
+			'compare-products' === query.filter &&
+			query.products &&
+			query.products.split( ',' ).length > 1;
 
 		const mode =
-			isProductDetailsView || ( isSingleProductView && isSingleProductVariable )
+			isCompareView || ( isSingleProductView && isSingleProductVariable )
 				? 'item-comparison'
 				: 'time-comparison';
 		const compareObject =

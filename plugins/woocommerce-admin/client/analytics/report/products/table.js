@@ -225,7 +225,7 @@ class ProductsReportTable extends Component {
 	}
 
 	render() {
-		const { query, isRequesting } = this.props;
+		const { query, isRequesting, baseSearchQuery, hideCompare } = this.props;
 
 		const labels = {
 			helpText: __( 'Select at least two products to compare', 'wc-admin' ),
@@ -234,7 +234,7 @@ class ProductsReportTable extends Component {
 
 		return (
 			<ReportTable
-				compareBy="products"
+				compareBy={ hideCompare ? undefined : 'products' }
 				endpoint="products"
 				getHeadersContent={ this.getHeadersContent }
 				getRowsContent={ this.getRowsContent }
@@ -244,10 +244,17 @@ class ProductsReportTable extends Component {
 				labels={ labels }
 				query={ query }
 				searchBy="products"
+				baseSearchQuery={ baseSearchQuery }
 				tableQuery={ {
 					orderby: query.orderby || 'items_sold',
 					order: query.order || 'desc',
 					extended_info: true,
+					/**
+					 * @TODO: Add this parameter because the filterQuery will be derived from the wrong config
+					 * because it will always look for products config, not categories. The solution is to pass
+					 * down the configs explicitly.
+					 */
+					categories: query.categories,
 				} }
 				title={ __( 'Products', 'wc-admin' ) }
 				columnPrefsKey="products_report_columns"

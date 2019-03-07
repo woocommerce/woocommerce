@@ -109,10 +109,10 @@ ReportSummary.propTypes = {
 	 */
 	endpoint: PropTypes.string.isRequired,
 	/**
-	 * Allows specifying a property different from the `endpoint` that will be used
+	 * Allows specifying properties different from the `endpoint` that will be used
 	 * to limit the items when there is an active search.
 	 */
-	limitProperty: PropTypes.string,
+	limitProperties: PropTypes.array,
 	/**
 	 * The query string represented in object form.
 	 */
@@ -149,14 +149,16 @@ ReportSummary.defaultProps = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { endpoint, isRequesting, limitProperty, query } = props;
-		const limitBy = limitProperty || endpoint;
+		const { endpoint, isRequesting, limitProperties, query } = props;
+		const limitBy = limitProperties || [ endpoint ];
 
 		if ( isRequesting ) {
 			return {};
 		}
 
-		if ( query.search && ! ( query[ limitBy ] && query[ limitBy ].length ) ) {
+		const hasLimitByParam = limitBy.some( item => query[ item ] && query[ item ].length );
+
+		if ( query.search && ! hasLimitByParam ) {
 			return {
 				emptySearchResults: true,
 			};
