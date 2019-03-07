@@ -384,13 +384,13 @@ jQuery( function ( $ ) {
 			if ( value != null ) {
 				wc_meta_boxes_order_items.block();
 
-				var data = {
+				var data = $.extend( {}, wc_meta_boxes_order_items.get_taxable_address(), {
 					action   : 'woocommerce_add_coupon_discount',
 					dataType : 'json',
 					order_id : woocommerce_admin_meta_boxes.post_id,
 					security : woocommerce_admin_meta_boxes.order_item_nonce,
 					coupon   : value
-				};
+				} );
 
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 					if ( response.success ) {
@@ -411,13 +411,13 @@ jQuery( function ( $ ) {
 			var $this = $( this );
 			wc_meta_boxes_order_items.block();
 
-			var data = {
+			var data = $.extend( {}, wc_meta_boxes_order_items.get_taxable_address(), {
 				action : 'woocommerce_remove_order_coupon',
 				dataType : 'json',
 				order_id : woocommerce_admin_meta_boxes.post_id,
 				security : woocommerce_admin_meta_boxes.order_item_nonce,
 				coupon : $this.data( 'code' )
-			};
+			} );
 
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 				if ( response.success ) {
