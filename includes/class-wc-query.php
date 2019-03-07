@@ -533,12 +533,8 @@ class WC_Query {
 			}
 		}
 
-		$step              = max( apply_filters( 'woocommerce_price_filter_widget_step', 10 ), 1 );
-		$current_min_price = floor( $current_min_price / $step ) * $step;
-		$current_max_price = ceil( $current_max_price / $step ) * $step;
-
-		$args['join']    = $this->append_product_sorting_table_join( $args['join'] );
-		$args['where']  .= $wpdb->prepare(
+		$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+		$args['where'] .= $wpdb->prepare(
 			' AND wc_product_meta_lookup.min_price >= %f AND wc_product_meta_lookup.max_price <= %f ',
 			$current_min_price,
 			$current_max_price
