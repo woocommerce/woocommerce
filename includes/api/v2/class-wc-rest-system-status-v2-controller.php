@@ -603,9 +603,10 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		// Test POST requests.
-		$post_success = get_transient( 'woocommerce_remote_post_test_success' );
+		$post_response            = get_transient( 'woocommerce_test_remote_post' );
+		$post_response_successful = ! is_wp_error( $post_response );
 
-		if ( false === $post_success ) {
+		if ( false === $post_response || is_wp_error( $post_response ) ) {
 			$post_response = wp_safe_remote_post(
 				'https://www.paypal.com/cgi-bin/webscr',
 				array(
@@ -621,19 +622,20 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			if ( ! is_wp_error( $post_response ) && $post_response['response']['code'] >= 200 && $post_response['response']['code'] < 300 ) {
 				$post_response_successful = true;
 			}
-			set_transient( 'woocommerce_remote_post_test_success', $post_response_successful, HOUR_IN_SECONDS );
+			set_transient( 'woocommerce_test_remote_post', $post_response, HOUR_IN_SECONDS );
 		}
 
 		// Test GET requests.
-		$get_success = get_transient( 'woocommerce_remote_get_test_success' );
+		$get_response            = get_transient( 'woocommerce_test_remote_get' );
+		$get_response_successful = ! is_wp_error( $get_response );
 
-		if ( false === $get_success ) {
+		if ( false === $get_response || is_wp_error( $get_response ) ) {
 			$get_response            = wp_safe_remote_get( 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
 			$get_response_successful = false;
 			if ( ! is_wp_error( $get_response ) && $get_response['response']['code'] >= 200 && $get_response['response']['code'] < 300 ) {
 				$get_response_successful = true;
 			}
-			set_transient( 'woocommerce_remote_get_test_success', $get_response_successful, HOUR_IN_SECONDS );
+			set_transient( 'woocommerce_test_remote_get', $get_response, HOUR_IN_SECONDS );
 		}
 
 		$database_version = wc_get_server_database_version();
@@ -864,64 +866,15 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			return array();
 		}
 
+		// Use WP API to lookup latest updates for plugins. WC_Helper injects updates for premium plugins.
 		if ( empty( $this->available_updates ) ) {
 			$this->available_updates = get_plugin_updates();
 		}
 
-		$dirname        = dirname( $plugin );
-		$version_latest = '';
-		$slug           = explode( '/', $plugin );
-		$slug           = explode( '.', end( $slug ) );
-		$slug           = $slug[0];
+		$version_latest = $data['Version'];
 
-		if ( 'woocommerce' !== $slug && ( strstr( $data['PluginURI'], 'woothemes.com' ) || strstr( $data['PluginURI'], 'woocommerce.com' ) ) ) {
-			$version_data = get_transient( md5( $plugin ) . '_version_data' );
-			if ( false === $version_data ) {
-				$changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
-				if ( 200 === wp_remote_retrieve_response_code( $changelog ) ) {
-					$cl_lines = explode( "\n", wp_remote_retrieve_body( $changelog ) );
-					if ( ! empty( $cl_lines ) ) {
-						foreach ( $cl_lines as $line_num => $cl_line ) {
-							if ( preg_match( '/^[0-9]/', $cl_line ) ) {
-								$date         = str_replace( '.', '-', trim( substr( $cl_line, 0, strpos( $cl_line, '-' ) ) ) );
-								$version      = preg_replace( '~[^0-9,.]~', '', stristr( $cl_line, 'version' ) );
-								$update       = trim( str_replace( '*', '', $cl_lines[ $line_num + 1 ] ) );
-								$version_data = array(
-									'date'      => $date,
-									'version'   => $version,
-									'update'    => $update,
-									'changelog' => $changelog,
-								);
-								set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
-								break;
-							}
-						}
-					}
-				} else {
-					$args    = (object) array(
-						'slug' => $dirname,
-					);
-					$request = array(
-						'action'  => 'plugin_information',
-						'request' => serialize( $args ),
-					);
-					$plugin_info = wp_safe_remote_post( 'http://api.wordpress.org/plugins/info/1.0/', array( 'body' => $request ) );
-					if ( 200 === wp_remote_retrieve_response_code( $plugin_info ) ) {
-						$body = maybe_unserialize( wp_remote_retrieve_body( $plugin_info ) );
-						if ( is_object( $body ) && isset( $body->sections['changelog'] ) ) {
-							$version_data = array(
-								'date'      => $body->last_updated,
-								'version'   => $body->version,
-								'update'    => $body->sections['changelog'],
-								'changelog' => $body->sections['changelog'],
-							);
-							set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
-						}
-					}
-				}
-			}
-			$version_latest = $version_data['version'];
-		} elseif ( isset( $available_updates[ $plugin ]->update->new_version ) ) {
+		// Find latest version.
+		if ( isset( $available_updates[ $plugin ]->update->new_version ) ) {
 			$version_latest = $available_updates[ $plugin ]->update->new_version;
 		}
 
