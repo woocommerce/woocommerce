@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, claudiulodro,
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, paypal, storefront, woo commerce
 Requires at least: 4.7
 Tested up to: 5.0
-Stable tag: 3.5.5
+Stable tag: 3.5.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
-= 3.5.6 - 2019-02-xx =
+= 3.5.6 - 2019-03-07 =
 * Fix - Removes invalid product structured data from archives, and include more data on single product pages. #22925
 		Product structured data should only be generated for visible data, and not on archives when there are single
 		product pages available, as per the documentation.
@@ -169,7 +169,9 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Fix last item in breadcrumb structured data, and include on shop page. #22925
 * Fix - Get insert ID before running actions in `_insert_tax_rate`. #22868
 * Fix - Add precision to tax in the discount class so min spend checks work correctly. #22888
-* Tweak - Fill user's account first name and last name only when those fields are empty. #22783
+* Fix - Update troubleshooting link in failed order email. #22943
+* Fix - Update Flexslider to 2.7.2.
+* Fix - Fill user's account first name and last name only when those fields are empty. #22783
 
 = 3.5.5 - 2019-02-20 =
 * Fix - Fix allow product low stock threshold be the WC settings default. #22777
