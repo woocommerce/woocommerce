@@ -804,7 +804,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		// This number contains non-visible unicode chars at the beginning and end of string.
 		$this->assertEquals( '+47000000003', wc_sanitize_phone_number( '‭+47 0000 00003‬' ) );
 		$this->assertEquals( '2700000000', wc_sanitize_phone_number( '27 00 00 0000' ) );
-		// Check with a invalid number too.
+		// Check with an invalid number too.
 		$this->assertEquals( '1800', wc_sanitize_phone_number( '1-800-not a phone number' ) );
 	}
 
