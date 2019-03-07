@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "67b8066152baf2f08393562b576da266",
+    "content-hash": "e7a81f490b054c067759791d696be7bd",
     "packages": [
         {
             "name": "composer/installers",
@@ -247,7 +247,7 @@
                     "homepage": "https://github.com/kukulich"
                 },
                 {
-                    "name": "Tomas Votruba",
+                    "name": "Tomáš Votruba",
                     "email": "tomas.vot@gmail.com"
                 },
                 {
@@ -2805,6 +2805,7 @@
                 "mock",
                 "xunit"
             ],
+            "abandoned": true,
             "time": "2018-08-09T05:50:03+00:00"
         },
         {
@@ -3731,7 +3732,7 @@
                 },
                 {
                     "name": "Gert de Pagter",
-                    "email": "backendtea@gmail.com"
+                    "email": "BackEndTea@gmail.com"
                 }
             ],
             "description": "Symfony polyfill for ctype functions",

@@ -965,7 +965,15 @@ class WC_Checkout {
 		if ( ! is_user_logged_in() && ( $this->is_registration_required() || ! empty( $data['createaccount'] ) ) ) {
 			$username    = ! empty( $data['account_username'] ) ? $data['account_username'] : '';
 			$password    = ! empty( $data['account_password'] ) ? $data['account_password'] : '';
-			$customer_id = wc_create_new_customer( $data['billing_email'], $username, $password );
+			$customer_id = wc_create_new_customer(
+				$data['billing_email'],
+				$username,
+				$password,
+				array(
+					'first_name' => ! empty( $data['billing_first_name'] ) ? $data['billing_first_name'] : '',
+					'last_name'  => ! empty( $data['billing_last_name'] ) ? $data['billing_last_name'] : '',
+				)
+			);
 
 			if ( is_wp_error( $customer_id ) ) {
 				throw new Exception( $customer_id->get_error_message() );
@@ -989,17 +997,17 @@ class WC_Checkout {
 		if ( $customer_id && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
 			$customer = new WC_Customer( $customer_id );
 
-			if ( ! empty( $data['billing_first_name'] ) ) {
+			if ( ! empty( $data['billing_first_name'] ) && '' === $customer->get_first_name() ) {
 				$customer->set_first_name( $data['billing_first_name'] );
 			}
 
-			if ( ! empty( $data['billing_last_name'] ) ) {
+			if ( ! empty( $data['billing_last_name'] ) && '' === $customer->get_last_name() ) {
 				$customer->set_last_name( $data['billing_last_name'] );
 			}
 
 			// If the display name is an email, update to the user's full name.
 			if ( is_email( $customer->get_display_name() ) ) {
-				$customer->set_display_name( $data['billing_first_name'] . ' ' . $data['billing_last_name'] );
+				$customer->set_display_name( $customer->get_first_name() . ' ' . $customer->get_last_name() );
 			}
 
 			foreach ( $data as $key => $value ) {

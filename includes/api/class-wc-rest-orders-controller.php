@@ -257,7 +257,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		$params['status'] = array(
 			'default'           => 'any',
-			'description'       => __( 'Limit result set to orders assigned a specific status.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to orders which have specific statuses.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'string',

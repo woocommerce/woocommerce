@@ -32,12 +32,13 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 	/**
 	 * Create a new customer.
 	 *
-	 * @param  string $email Customer email.
+	 * @param  string $email    Customer email.
 	 * @param  string $username Customer username.
 	 * @param  string $password Customer password.
+	 * @param  array  $args     List of arguments to pass to `wp_insert_user()`.
 	 * @return int|WP_Error Returns WP_Error on failure, Int (user ID) on success.
 	 */
-	function wc_create_new_customer( $email, $username = '', $password = '' ) {
+	function wc_create_new_customer( $email, $username = '', $password = '', $args = array() ) {
 
 		// Check the email address.
 		if ( empty( $email ) || ! is_email( $email ) ) {
@@ -96,11 +97,14 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 
 		$new_customer_data = apply_filters(
 			'woocommerce_new_customer_data',
-			array(
-				'user_login' => $username,
-				'user_pass'  => $password,
-				'user_email' => $email,
-				'role'       => 'customer',
+			array_merge(
+				$args,
+				array(
+					'user_login' => $username,
+					'user_pass'  => $password,
+					'user_email' => $email,
+					'role'       => 'customer',
+				)
 			)
 		);
 
@@ -380,9 +384,7 @@ add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
 function wc_shop_manager_has_capability( $allcaps, $caps, $args, $user ) {
 
 	if ( wc_user_has_role( $user, 'shop_manager' ) ) {
-		/**
-		 * @see wc_modify_map_meta_cap, which limits editing to customers.
-		 */
+		// @see wc_modify_map_meta_cap, which limits editing to customers.
 		$allcaps['edit_users'] = true;
 	}
 

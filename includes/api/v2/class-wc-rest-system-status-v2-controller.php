@@ -341,6 +341,15 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						'type' => 'string',
 					),
 				),
+				'inactive_plugins' => array(
+					'description' => __( 'Inactive plugins.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+					'items'       => array(
+						'type' => 'string',
+					),
+				),
 				'dropins_mu_plugins' => array(
 					'description' => __( 'Dropins & MU plugins.', 'woocommerce' ),
 					'type'        => 'array',
@@ -560,6 +569,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'environment'        => $this->get_environment_info(),
 			'database'           => $this->get_database_info(),
 			'active_plugins'     => $this->get_active_plugins(),
+			'inactive_plugins'   => $this->get_inactive_plugins(),
 			'dropins_mu_plugins' => $this->get_dropins_mu_plugins(),
 			'theme'              => $this->get_theme_info(),
 			'settings'           => $this->get_settings(),
@@ -781,14 +791,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_active_plugins() {
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		require_once ABSPATH . 'wp-admin/includes/update.php';
-
-		if ( ! function_exists( 'get_plugin_updates' ) ) {
-			return array();
-		}
-
-		// Get both site plugins and network plugins.
 		$active_plugins = (array) get_option( 'active_plugins', array() );
 		if ( is_multisite() ) {
 			$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
@@ -796,81 +798,133 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		$active_plugins_data = array();
-		$available_updates   = get_plugin_updates();
 
 		foreach ( $active_plugins as $plugin ) {
-			$data           = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
-			$dirname        = dirname( $plugin );
-			$version_latest = '';
-			$slug           = explode( '/', $plugin );
-			$slug           = explode( '.', end( $slug ) );
-			$slug           = $slug[0];
-
-			if ( 'woocommerce' !== $slug && ( strstr( $data['PluginURI'], 'woothemes.com' ) || strstr( $data['PluginURI'], 'woocommerce.com' ) ) ) {
-				$version_data = get_transient( md5( $plugin ) . '_version_data' );
-				if ( false === $version_data ) {
-					$changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
-					if ( 200 === wp_remote_retrieve_response_code( $changelog ) ) {
-						$cl_lines = explode( "\n", wp_remote_retrieve_body( $changelog ) );
-						if ( ! empty( $cl_lines ) ) {
-							foreach ( $cl_lines as $line_num => $cl_line ) {
-								if ( preg_match( '/^[0-9]/', $cl_line ) ) {
-									$date         = str_replace( '.', '-', trim( substr( $cl_line, 0, strpos( $cl_line, '-' ) ) ) );
-									$version      = preg_replace( '~[^0-9,.]~', '', stristr( $cl_line, 'version' ) );
-									$update       = trim( str_replace( '*', '', $cl_lines[ $line_num + 1 ] ) );
-									$version_data = array(
-										'date'      => $date,
-										'version'   => $version,
-										'update'    => $update,
-										'changelog' => $changelog,
-									);
-									set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
-									break;
-								}
-							}
-						}
-					} else {
-						$args    = (object) array(
-							'slug' => $dirname,
-						);
-						$request = array(
-							'action'  => 'plugin_information',
-							'request' => serialize( $args ),
-						);
-						$plugin_info = wp_safe_remote_post( 'http://api.wordpress.org/plugins/info/1.0/', array( 'body' => $request ) );
-						if ( 200 === wp_remote_retrieve_response_code( $plugin_info ) ) {
-							$body = maybe_unserialize( wp_remote_retrieve_body( $plugin_info ) );
-							if ( is_object( $body ) && isset( $body->sections['changelog'] ) ) {
-								$version_data = array(
-									'date'      => $body->last_updated,
-									'version'   => $body->version,
-									'update'    => $body->sections['changelog'],
-									'changelog' => $body->sections['changelog'],
-								);
-								set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
-							}
-						}
-					}
-				}
-				$version_latest = $version_data['version'];
-			} elseif ( isset( $available_updates[ $plugin ]->update->new_version ) ) {
-				$version_latest = $available_updates[ $plugin ]->update->new_version;
-			}
-
-			// convert plugin data to json response format.
-			$active_plugins_data[] = array(
-				'plugin'            => $plugin,
-				'name'              => $data['Name'],
-				'version'           => $data['Version'],
-				'version_latest'    => $version_latest,
-				'url'               => $data['PluginURI'],
-				'author_name'       => $data['AuthorName'],
-				'author_url'        => esc_url_raw( $data['AuthorURI'] ),
-				'network_activated' => $data['Network'],
-			);
+			$data                  = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
+			$active_plugins_data[] = $this->format_plugin_data( $plugin, $data );
 		}
 
 		return $active_plugins_data;
+	}
+
+	/**
+	 * Get a list of inplugins active on the site.
+	 *
+	 * @return array
+	 */
+	public function get_inactive_plugins() {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+		if ( ! function_exists( 'get_plugins' ) ) {
+			return array();
+		}
+
+		$plugins        = get_plugins();
+		$active_plugins = (array) get_option( 'active_plugins', array() );
+
+		if ( is_multisite() ) {
+			$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
+			$active_plugins            = array_merge( $active_plugins, $network_activated_plugins );
+		}
+
+		$plugins_data = array();
+
+		foreach ( $plugins as $plugin => $data ) {
+			if ( in_array( $plugin, $active_plugins, true ) ) {
+				continue;
+			}
+			$plugins_data[] = $this->format_plugin_data( $plugin, $data );
+		}
+
+		return $plugins_data;
+	}
+
+	/**
+	 * Format plugin data, including data on updates, into a standard format.
+	 *
+	 * @since 3.6.0
+	 * @param string $plugin Plugin directory/file.
+	 * @param array  $data Plugin data from WP.
+	 * @return array Formatted data.
+	 */
+	protected function format_plugin_data( $plugin, $data ) {
+		require_once ABSPATH . 'wp-admin/includes/update.php';
+
+		if ( ! function_exists( 'get_plugin_updates' ) ) {
+			return array();
+		}
+
+		if ( empty( $this->available_updates ) ) {
+			$this->available_updates = get_plugin_updates();
+		}
+
+		$dirname        = dirname( $plugin );
+		$version_latest = '';
+		$slug           = explode( '/', $plugin );
+		$slug           = explode( '.', end( $slug ) );
+		$slug           = $slug[0];
+
+		if ( 'woocommerce' !== $slug && ( strstr( $data['PluginURI'], 'woothemes.com' ) || strstr( $data['PluginURI'], 'woocommerce.com' ) ) ) {
+			$version_data = get_transient( md5( $plugin ) . '_version_data' );
+			if ( false === $version_data ) {
+				$changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
+				if ( 200 === wp_remote_retrieve_response_code( $changelog ) ) {
+					$cl_lines = explode( "\n", wp_remote_retrieve_body( $changelog ) );
+					if ( ! empty( $cl_lines ) ) {
+						foreach ( $cl_lines as $line_num => $cl_line ) {
+							if ( preg_match( '/^[0-9]/', $cl_line ) ) {
+								$date         = str_replace( '.', '-', trim( substr( $cl_line, 0, strpos( $cl_line, '-' ) ) ) );
+								$version      = preg_replace( '~[^0-9,.]~', '', stristr( $cl_line, 'version' ) );
+								$update       = trim( str_replace( '*', '', $cl_lines[ $line_num + 1 ] ) );
+								$version_data = array(
+									'date'      => $date,
+									'version'   => $version,
+									'update'    => $update,
+									'changelog' => $changelog,
+								);
+								set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
+								break;
+							}
+						}
+					}
+				} else {
+					$args    = (object) array(
+						'slug' => $dirname,
+					);
+					$request = array(
+						'action'  => 'plugin_information',
+						'request' => serialize( $args ),
+					);
+					$plugin_info = wp_safe_remote_post( 'http://api.wordpress.org/plugins/info/1.0/', array( 'body' => $request ) );
+					if ( 200 === wp_remote_retrieve_response_code( $plugin_info ) ) {
+						$body = maybe_unserialize( wp_remote_retrieve_body( $plugin_info ) );
+						if ( is_object( $body ) && isset( $body->sections['changelog'] ) ) {
+							$version_data = array(
+								'date'      => $body->last_updated,
+								'version'   => $body->version,
+								'update'    => $body->sections['changelog'],
+								'changelog' => $body->sections['changelog'],
+							);
+							set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
+						}
+					}
+				}
+			}
+			$version_latest = $version_data['version'];
+		} elseif ( isset( $available_updates[ $plugin ]->update->new_version ) ) {
+			$version_latest = $available_updates[ $plugin ]->update->new_version;
+		}
+
+		return array(
+			'plugin'            => $plugin,
+			'name'              => $data['Name'],
+			'version'           => $data['Version'],
+			'version_latest'    => $version_latest,
+			'url'               => $data['PluginURI'],
+			'author_name'       => $data['AuthorName'],
+			'author_url'        => esc_url_raw( $data['AuthorURI'] ),
+			'network_activated' => $data['Network'],
+		);
 	}
 
 	/**
