@@ -768,6 +768,20 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_sanitize_phone_number().
+	 *
+	 * @since 3.6.0
+	 */
+	public function test_wc_sanitize_phone_number() {
+		$this->assertEquals( '+16103850000', wc_sanitize_phone_number( '+1.610.385.0000' ) );
+		// This number contains non-visible unicode chars at the beginning and end of string.
+		$this->assertEquals( '+47000000003', wc_sanitize_phone_number( '‭+47 0000 00003‬' ) );
+		$this->assertEquals( '2700000000', wc_sanitize_phone_number( '27 00 00 0000' ) );
+		// Check with a invalid number too.
+		$this->assertEquals( '1800', wc_sanitize_phone_number( '1-800-not a phone number' ) );
+	}
+
+	/**
 	 * Test wc_trim_string().
 	 *
 	 * @since 2.2
