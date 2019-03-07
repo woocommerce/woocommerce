@@ -216,7 +216,7 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	protected function get_phone_number_args( $order ) {
-		$phone_number = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->get_billing_phone() );
+		$phone_number = wc_sanitize_phone_number( $order->get_billing_phone() );
 
 		if ( in_array( $order->get_billing_country(), array( 'US', 'CA' ), true ) ) {
 			$phone_number = ltrim( $phone_number, '+1' );
