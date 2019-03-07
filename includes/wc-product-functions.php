@@ -1278,62 +1278,88 @@ function wc_deferred_product_sync( $product_id ) {
 function wc_update_product_lookup_tables() {
 	global $wpdb;
 
-	// Move meta data into the lookup table.
+	// Make a row per product in lookup table.
 	$wpdb->query(
 		"
-		INSERT IGNORE INTO {$wpdb->wc_product_meta_lookup} (`product_id`, `min_price`, `max_price`, `average_rating`, `total_sales`, `sku`, `stock_status`)
+		INSERT IGNORE INTO {$wpdb->wc_product_meta_lookup} (`product_id`)
 		SELECT
-			posts.ID, MIN(meta1.meta_value), MAX(meta1.meta_value), meta2.meta_value, meta3.meta_value, meta4.meta_value, meta5.meta_value
+			posts.ID
 		FROM {$wpdb->posts} posts
-			LEFT JOIN {$wpdb->postmeta} meta1 ON posts.ID = meta1.post_id AND meta1.meta_key = '_price'
-			LEFT JOIN {$wpdb->postmeta} meta2 ON posts.ID = meta2.post_id AND meta2.meta_key = '_wc_average_rating'
-			LEFT JOIN {$wpdb->postmeta} meta3 ON posts.ID = meta3.post_id AND meta3.meta_key = 'total_sales'
-			LEFT JOIN {$wpdb->postmeta} meta4 ON posts.ID = meta4.post_id AND meta4.meta_key = '_sku'
-			LEFT JOIN {$wpdb->postmeta} meta5 ON posts.ID = meta5.post_id AND meta5.meta_key = '_stock_status'
 		WHERE
 			posts.post_type IN ('product', 'product_variation')
-			AND meta1.meta_value <> ''
-		GROUP BY
-			posts.ID, meta2.meta_value, meta3.meta_value, meta4.meta_value, meta5.meta_value
 		"
 	);
 
-	// Move stock data into the lookup table.
-	$wpdb->query(
-		"
-		UPDATE
-			{$wpdb->wc_product_meta_lookup} lookup_table
-			LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_manage_stock'
-			LEFT JOIN {$wpdb->postmeta} meta2 ON lookup_table.product_id = meta2.post_id AND meta2.meta_key = '_stock'
-		SET
-			lookup_table.stock_quantity = meta2.meta_value
-		WHERE
-			meta1.meta_value = 'yes'
-		"
+	WC()->queue()->add(
+		'wc_update_product_lookup_tables_column',
+		array(
+			'column' => 'min_price',
+		),
+		'wc_update_product_lookup_tables'
 	);
 
-	// Move type data into table.
-	$wpdb->query(
-		"
-		UPDATE
-			{$wpdb->wc_product_meta_lookup} lookup_table
-			LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_downloadable'
-		SET
-			lookup_table.downloadable = 1
-		WHERE
-			meta1.meta_value = 'yes'
-		"
+	WC()->queue()->add(
+		'wc_update_product_lookup_tables_column',
+		array(
+			'column' => 'max_price',
+		),
+		'wc_update_product_lookup_tables'
 	);
-	$wpdb->query(
-		"
-		UPDATE
-			{$wpdb->wc_product_meta_lookup} lookup_table
-			LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_virtual'
-		SET
-			lookup_table.virtual = 1
-		WHERE
-			meta1.meta_value = 'yes'
-		"
+
+	WC()->queue()->add(
+		'wc_update_product_lookup_tables_column',
+		array(
+			'column' => 'stock_quantity',
+		),
+		'wc_update_product_lookup_tables'
+	);
+
+	WC()->queue()->add(
+		'wc_update_product_lookup_tables_column',
+		array(
+			'column' => 'sku',
+		),
+		'wc_update_product_lookup_tables'
+	);
+
+	WC()->queue()->add(
+		'wc_update_product_lookup_tables_column',
+		array(
+			'column' => 'stock_status',
+		),
+		'wc_update_product_lookup_tables'
+	);
+
+	WC()->queue()->add(
+		'wc_update_product_lookup_tables_column',
+		array(
+			'column' => 'average_rating',
+		),
+		'wc_update_product_lookup_tables'
+	);
+
+	WC()->queue()->add(
+		'wc_update_product_lookup_tables_column',
+		array(
+			'column' => 'total_sales',
+		),
+		'wc_update_product_lookup_tables'
+	);
+
+	WC()->queue()->add(
+		'wc_update_product_lookup_tables_column',
+		array(
+			'column' => 'downloadable',
+		),
+		'wc_update_product_lookup_tables'
+	);
+
+	WC()->queue()->add(
+		'wc_update_product_lookup_tables_column',
+		array(
+			'column' => 'virtual',
+		),
+		'wc_update_product_lookup_tables'
 	);
 
 	// Rating counts are serialised so add them gradually using queue.
@@ -1361,6 +1387,102 @@ function wc_update_product_lookup_tables() {
 		}
 	}
 }
+
+/**
+ * Populate lookup table column data.
+ *
+ * @since 3.6.0
+ * @param string $column Column name to set.
+ */
+function wc_update_product_lookup_tables_column( $column ) {
+	if ( empty( $column ) ) {
+		return;
+	}
+	global $wpdb;
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+	switch ( $column ) {
+		case 'min_price':
+			$wpdb->query(
+				"
+				UPDATE
+					{$wpdb->wc_product_meta_lookup} lookup_table
+					LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_price'
+				SET
+					lookup_table.min_price = meta1.meta_value
+				WHERE
+					meta1.meta_value <> ''
+				ORDER BY
+					meta1.meta_value+0 ASC
+				"
+			);
+			break;
+		case 'max_price':
+			$wpdb->query(
+				"
+				UPDATE
+					{$wpdb->wc_product_meta_lookup} lookup_table
+					LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_price'
+				SET
+					lookup_table.max_price = meta1.meta_value
+				WHERE
+					meta1.meta_value <> ''
+				ORDER BY
+					meta1.meta_value+0 DESC
+				"
+			);
+			break;
+		case 'stock_quantity':
+			$wpdb->query(
+				"
+				UPDATE
+					{$wpdb->wc_product_meta_lookup} lookup_table
+					LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_manage_stock'
+					LEFT JOIN {$wpdb->postmeta} meta2 ON lookup_table.product_id = meta2.post_id AND meta2.meta_key = '_stock'
+				SET
+					lookup_table.stock_quantity = meta2.meta_value
+				WHERE
+					meta1.meta_value = 'yes'
+				"
+			);
+			break;
+		case 'sku':
+		case 'stock_status':
+		case 'average_rating':
+		case 'total_sales':
+			$meta_key = 'total_sales' === $column ? $column : '_' . $column;
+			$column   = esc_sql( $column );
+			$wpdb->query(
+				$wpdb->prepare(
+					"
+					UPDATE
+						{$wpdb->wc_product_meta_lookup} lookup_table
+						LEFT JOIN {$wpdb->postmeta} meta ON lookup_table.product_id = meta.post_id AND meta.meta_key = %s
+					SET
+						lookup_table.`{$column}` = meta.meta_value
+					",
+					$meta_key
+				)
+			);
+			break;
+		case 'downloadable':
+		case 'virtual':
+			$column = esc_sql( $column );
+			$wpdb->query(
+				"
+				UPDATE
+					{$wpdb->wc_product_meta_lookup} lookup_table
+					LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_virtual'
+				SET
+					lookup_table.`{$column}` = 1
+				WHERE
+					meta1.meta_value = 'yes'
+				"
+			);
+			break;
+	}
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+}
+add_action( 'wc_update_product_lookup_tables_column', 'wc_update_product_lookup_tables_column' );
 
 /**
  * Populate rating count lookup table data for products.
