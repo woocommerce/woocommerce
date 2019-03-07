@@ -968,6 +968,18 @@ function wc_format_phone_number( $phone ) {
 }
 
 /**
+ * Sanitize phone number.
+ * Remove all characters allowing just numbers and "+" (plus sign).
+ *
+ * @since 3.6.0
+ * @param string $phone Phone number.
+ * @return string
+ */
+function wc_sanitize_phone_number( $phone ) {
+	return preg_replace( '/[^\d+]/', '', $phone );
+}
+
+/**
  * Wrapper for mb_strtoupper which see's if supported first.
  *
  * @since  3.1.0
