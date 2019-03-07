@@ -1280,18 +1280,19 @@ function wc_update_product_lookup_tables() {
 
 	$wpdb->query(
 		"
-		INSERT IGNORE INTO {$wpdb->wc_product_meta_lookup} (`product_id`, `min_price`, `max_price`, `average_rating`, `total_sales`)
+		INSERT IGNORE INTO {$wpdb->wc_product_meta_lookup} (`product_id`, `min_price`, `max_price`, `average_rating`, `total_sales`, `sku`)
 		SELECT
-			posts.ID, MIN(meta1.meta_value), MAX(meta1.meta_value), meta2.meta_value, meta3.meta_value
+			posts.ID, MIN(meta1.meta_value), MAX(meta1.meta_value), meta2.meta_value, meta3.meta_value, meta4.meta_value
 		FROM {$wpdb->posts} posts
 			LEFT JOIN {$wpdb->postmeta} meta1 ON posts.ID = meta1.post_id AND meta1.meta_key = '_price'
 			LEFT JOIN {$wpdb->postmeta} meta2 ON posts.ID = meta2.post_id AND meta2.meta_key = '_wc_average_rating'
 			LEFT JOIN {$wpdb->postmeta} meta3 ON posts.ID = meta3.post_id AND meta3.meta_key = 'total_sales'
+			LEFT JOIN {$wpdb->postmeta} meta4 ON posts.ID = meta4.post_id AND meta4.meta_key = '_sku'
 		WHERE
 			posts.post_type IN ('product', 'product_variation')
 			AND meta1.meta_value <> ''
 		GROUP BY
-			posts.ID, meta2.meta_value, meta3.meta_value
+			posts.ID, meta2.meta_value, meta3.meta_value, meta4.meta_value
 		"
 	);
 
