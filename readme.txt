@@ -235,6 +235,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Refactor comment/rating update functions. #22909
 * Dev - Introduced wc_sanitize_phone_number() function. #22962
 * Dev - Added `woocommerce_get_product_subcategories_cache_key` filter to allow the cache to be renamed if for instance the site runs in multiple languages and needs a unique cache per language. #22915
+* Dev - Inactive, MU, Dropin plugins and WooCommerce.com account connection status added to System Status Report. #22887
 * Fix - Use correct address for taxes when applying/removing coupons. #22802
 * Fix - Hide ratings on the shop page when reviews are disabled. #22476
 * Fix - Fix W3C validation of single product page quantity input. #22333
@@ -284,6 +285,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Performance - Apply term  sorting using get_terms_defaults hook instead of custom parameters. #22570
 * Performance - Use pre_get_terms hook to detect menu_order sorting param and apply to the term query. Meta sorting is now possible through WP. #22570
 * Performance - Use terms_clauses hook to support numeric name sorting and to improve the menu order sorting so it works if meta is missing. #22570
+* Performance - Added caching to System Status Report. #22887
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 * Localization - Added US Minor Outlying Islands as states to avoid confusion with US. #22468
 * Localization - Dutch postcode validation. #22316
