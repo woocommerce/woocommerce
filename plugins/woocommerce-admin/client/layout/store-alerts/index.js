@@ -20,6 +20,7 @@ import { Card } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 import { QUERY_DEFAULTS } from 'wc-api/constants';
 import sanitizeHTML from 'lib/sanitize-html';
+import StoreAlertsPlaceholder from './placeholder';
 
 import './style.scss';
 
@@ -60,27 +61,28 @@ class StoreAlerts extends Component {
 	}
 
 	render() {
-		const { alerts } = this.props;
+		const alerts = this.props.alerts || [];
+		const preloadAlertCount = wcSettings.alertCount && parseInt( wcSettings.alertCount );
 
-		if ( ! alerts || alerts.length === 0 ) {
+		if ( preloadAlertCount > 0 && 0 === alerts.length ) {
+			return <StoreAlertsPlaceholder hasMultipleAlerts={ preloadAlertCount > 1 } />;
+		} else if ( 0 === alerts.length ) {
 			return null;
 		}
 
 		const { currentIndex } = this.state;
 		const numberOfAlerts = alerts.length;
-		const alert = alerts[ currentIndex ] ? alerts[ currentIndex ] : null;
-		const type = alert && alert.type ? alert.type : null;
+		const alert = alerts[ currentIndex ];
+		const type = alert.type;
 		const className = classnames( 'woocommerce-store-alerts', {
 			'is-alert-error': 'error' === type,
 			'is-alert-update': 'update' === type,
 		} );
-		const actions =
-			alert &&
-			alert.actions.map( action => (
-				<Button key={ action.name } isDefault href={ action.url }>
-					{ action.label }
-				</Button>
-			) );
+		const actions = alert.actions.map( action => (
+			<Button key={ action.name } isDefault href={ action.url }>
+				{ action.label }
+			</Button>
+		) );
 
 		return (
 			<Card

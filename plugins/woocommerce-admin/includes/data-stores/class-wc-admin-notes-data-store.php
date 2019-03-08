@@ -292,10 +292,30 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Return a count of notes.
 	 *
+	 * @param string $type Comma separated list of note types.
 	 * @return array An array of objects containing a note id.
 	 */
-	public function get_notes_count() {
+	public function get_notes_count( $type = '' ) {
 		global $wpdb;
+
+		$allowed_types    = WC_Admin_Note::get_allowed_types();
+		$where_type_array = array();
+		if ( ! empty( $type ) ) {
+			$args_types = explode( ',', $type );
+			foreach ( (array) $args_types as $args_type ) {
+				$args_type = trim( $args_type );
+				if ( in_array( $args_type, $allowed_types, true ) ) {
+					$where_type_array[] = "'" . esc_sql( $args_type ) . "'";
+				}
+			}
+		}
+		$escaped_where_types = implode( ',', $where_type_array );
+
+		if ( ! empty( $escaped_where_types ) ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			return $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_admin_notes WHERE type IN ($escaped_where_types)" );
+		}
+
 		return $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_admin_notes" );
 	}
 
