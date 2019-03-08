@@ -33,7 +33,6 @@ class WC_Admin_Notices {
 		'no_shipping_methods'     => 'no_shipping_methods_notice',
 		'regenerating_thumbnails' => 'regenerating_thumbnails_notice',
 		'no_secure_connection'    => 'secure_connection_notice',
-		'wootenberg'              => 'wootenberg_feature_plugin_notice',
 	);
 
 	/**
@@ -49,7 +48,6 @@ class WC_Admin_Notices {
 
 		if ( current_user_can( 'manage_woocommerce' ) ) {
 			add_action( 'admin_print_styles', array( __CLASS__, 'add_notices' ) );
-			add_action( 'activate_gutenberg/gutenberg.php', array( __CLASS__, 'add_wootenberg_feature_plugin_notice_on_gutenberg_activate' ) );
 		}
 	}
 
@@ -83,7 +81,6 @@ class WC_Admin_Notices {
 		if ( ! self::is_ssl() ) {
 			self::add_notice( 'no_secure_connection' );
 		}
-		self::add_wootenberg_feature_plugin_notice();
 		self::add_notice( 'template_files' );
 	}
 
@@ -342,42 +339,6 @@ class WC_Admin_Notices {
 		}
 
 		include dirname( __FILE__ ) . '/views/html-notice-secure-connection.php';
-	}
-
-	/**
-	 * If Gutenberg is active, tell people about the Products block feature plugin.
-	 *
-	 * @since 3.4.3
-	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
-	 */
-	public static function add_wootenberg_feature_plugin_notice() {
-		if ( ( self::is_plugin_active( 'gutenberg/gutenberg.php' ) || version_compare( get_bloginfo( 'version' ), '5.0', '>=' ) ) && ! self::is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) {
-			self::add_notice( 'wootenberg' );
-		}
-	}
-
-	/**
-	 * Tell people about the Products block feature plugin when they activate Gutenberg.
-	 *
-	 * @since 3.4.3
-	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
-	 */
-	public static function add_wootenberg_feature_plugin_notice_on_gutenberg_activate() {
-		if ( ! self::is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) && version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-			self::add_notice( 'wootenberg' );
-		}
-	}
-
-	/**
-	 * Notice about trying the Products block.
-	 */
-	public static function wootenberg_feature_plugin_notice() {
-		if ( get_user_meta( get_current_user_id(), 'dismissed_wootenberg_notice', true ) || self::is_plugin_active( 'woo-gutenberg-products-block/woocommerce-gutenberg-products-block.php' ) ) {
-			self::remove_notice( 'wootenberg' );
-			return;
-		}
-
-		include dirname( __FILE__ ) . '/views/html-notice-wootenberg.php';
 	}
 
 	/**
