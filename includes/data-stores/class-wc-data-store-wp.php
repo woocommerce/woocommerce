@@ -38,9 +38,19 @@ class WC_Data_Store_WP {
 	 * Data stored in meta keys, but not considered "meta" for an object.
 	 *
 	 * @since 3.0.0
+	 *
 	 * @var array
 	 */
 	protected $internal_meta_keys = array();
+
+	/**
+	 * Meta data which should exist in the DB, even if empty.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @var array
+	 */
+	protected $must_exist_meta_keys = array();
 
 	/**
 	 * Get and store terms from a taxonomy.
@@ -208,6 +218,33 @@ class WC_Data_Store_WP {
 	}
 
 	/**
+	 * Update meta data in, or delete it from, the database.
+	 *
+	 * Avoids storing meta when it's either an empty string or empty array.
+	 * Other empty values such as numeric 0 and null should still be stored.
+	 * Data-stores can force meta to exist using `must_exist_meta_keys`.
+	 *
+	 * Note: WordPress `get_metadata` function returns an empty string when meta data does not exist.
+	 *
+	 * @param WC_Data $object The WP_Data object (WC_Coupon for coupons, etc).
+	 * @param string  $meta_key Meta key to update.
+	 * @param mixed   $meta_value Value to save.
+	 *
+	 * @since 3.6.0 Added to prevent empty meta being stored unless required.
+	 *
+	 * @return bool True if updated/deleted.
+	 */
+	protected function update_or_delete_post_meta( $object, $meta_key, $meta_value ) {
+		if ( in_array( $meta_value, array( array(), '' ), true ) && ! in_array( $meta_key, $this->must_exist_meta_keys, true ) ) {
+			$updated = delete_post_meta( $object->get_id(), $meta_key );
+		} else {
+			$updated = update_post_meta( $object->get_id(), $meta_key, $meta_value );
+		}
+
+		return (bool) $updated;
+	}
+
+	/**
 	 * Get valid WP_Query args from a WC_Object_Query's query variables.
 	 *
 	 * @since 3.1.0
@@ -219,7 +256,7 @@ class WC_Data_Store_WP {
 		$skipped_values = array( '', array(), null );
 		$wp_query_args  = array(
 			'errors'     => array(),
-			'meta_query' => array(), // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_query
+			'meta_query' => array(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		);
 
 		foreach ( $query_vars as $key => $value ) {
@@ -377,7 +414,7 @@ class WC_Data_Store_WP {
 
 		// Build meta query for unrecognized keys.
 		if ( ! isset( $wp_query_args['meta_query'] ) ) {
-			$wp_query_args['meta_query'] = array(); // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_query
+			$wp_query_args['meta_query'] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		}
 
 		// Meta dates are stored as timestamps in the db.

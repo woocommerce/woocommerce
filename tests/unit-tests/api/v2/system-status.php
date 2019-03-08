@@ -362,7 +362,14 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 
 		$order1 = WC_Helper_Order::create_order();
 		$order2 = WC_Helper_Order::create_order();
+
+		// Make sure order has shipping name set.
+		$order2->set_shipping_first_name( 'Firstname' );
+		$order2->set_shipping_last_name( 'Surname' );
+		$order2->save();
+
 		delete_post_meta( $order1->get_id(), '_billing_address_index' );
+		delete_post_meta( $order1->get_id(), '_shipping_address_index' );
 		delete_post_meta( $order2->get_id(), '_billing_address_index' );
 		delete_post_meta( $order2->get_id(), '_shipping_address_index' );
 
@@ -373,7 +380,8 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertTrue( $data['success'] );
 		$this->assertNotEmpty( get_post_meta( $order1->get_id(), '_billing_address_index', true ) );
 		$this->assertNotEmpty( get_post_meta( $order2->get_id(), '_billing_address_index', true ) );
-		$this->assertNotEmpty( get_post_meta( $order2->get_id(), '_shipping_address_index', true ) );
 
+		$this->assertEmpty( get_post_meta( $order1->get_id(), '_shipping_address_index', true ) );
+		$this->assertNotEmpty( get_post_meta( $order2->get_id(), '_shipping_address_index', true ) );
 	}
 }
