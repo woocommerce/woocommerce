@@ -135,12 +135,6 @@ class StoreAlerts extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { alertCount } = wcSettings;
-
-		if ( ! alertCount || 0 === alertCount ) {
-			return { alerts: null };
-		}
-
 		const { getNotes } = select( 'wc-api' );
 		const alertsQuery = {
 			page: 1,
