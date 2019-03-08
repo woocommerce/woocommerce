@@ -149,8 +149,8 @@ function wc_admin_print_script_settings() {
 	global $wp_locale;
 
 	$preload_data_endpoints = array(
-		'countries'              => '/wc/v4/data/countries',
-		'performanceIndicators'  => '/wc/v4/reports/performance-indicators/allowed',
+		'countries'             => '/wc/v4/data/countries',
+		'performanceIndicators' => '/wc/v4/reports/performance-indicators/allowed',
 	);
 
 	if ( function_exists( 'gutenberg_preload_api_request' ) ) {
@@ -191,7 +191,7 @@ function wc_admin_print_script_settings() {
 			'weekdaysShort' => array_values( $wp_locale->weekday_abbrev ),
 		),
 		'currentUserData'  => $current_user_data,
-		'alertCount'       => WC_Admin_Notes::get_notes_count(),
+		'alertCount'       => WC_Admin_Notes::get_notes_count( 'error,update' ),
 	);
 	$settings = wc_admin_add_custom_settings( $settings );
 
