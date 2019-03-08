@@ -29,6 +29,8 @@ class WC_Helper {
 	 * Loads the helper class, runs on init.
 	 */
 	public static function load() {
+		self::includes();
+
 		add_action( 'current_screen', array( __CLASS__, 'current_screen' ) );
 		add_action( 'woocommerce_helper_output', array( __CLASS__, 'render_helper_output' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'admin_enqueue_scripts' ) );
@@ -41,6 +43,17 @@ class WC_Helper {
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 
 		do_action( 'woocommerce_helper_loaded' );
+	}
+
+	/**
+	 * Include supporting helper classes.
+	 */
+	protected static function includes() {
+		include_once dirname( __FILE__ ) . '/class-wc-helper-options.php';
+		include_once dirname( __FILE__ ) . '/class-wc-helper-api.php';
+		include_once dirname( __FILE__ ) . '/class-wc-helper-updater.php';
+		include_once dirname( __FILE__ ) . '/class-wc-helper-plugin-info.php';
+		include_once dirname( __FILE__ ) . '/class-wc-helper-compat.php';
 	}
 
 	/**
