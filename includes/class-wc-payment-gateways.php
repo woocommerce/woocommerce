@@ -90,14 +90,21 @@ class WC_Payment_Gateways {
 
 		// Load gateways in order.
 		foreach ( $load_gateways as $gateway ) {
-			$load_gateway = is_string( $gateway ) ? new $gateway() : $gateway;
+			if ( is_string( $gateway ) && class_exists( $gateway ) ) {
+				$gateway = new $gateway();
+			}
 
-			if ( isset( $ordering[ $load_gateway->id ] ) && is_numeric( $ordering[ $load_gateway->id ] ) ) {
+			// Gateways need to be valid and extend WC_Payment_Gateway.
+			if ( ! is_a( $gateway, 'WC_Payment_Gateway' ) ) {
+				continue;
+			}
+
+			if ( isset( $ordering[ $gateway->id ] ) && is_numeric( $ordering[ $gateway->id ] ) ) {
 				// Add in position.
-				$this->payment_gateways[ $ordering[ $load_gateway->id ] ] = $load_gateway;
+				$this->payment_gateways[ $ordering[ $gateway->id ] ] = $gateway;
 			} else {
 				// Add to end of the array.
-				$this->payment_gateways[ $order_end ] = $load_gateway;
+				$this->payment_gateways[ $order_end ] = $gateway;
 				$order_end++;
 			}
 		}
