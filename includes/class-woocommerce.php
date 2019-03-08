@@ -372,6 +372,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-logger.php';
 		include_once WC_ABSPATH . 'includes/queue/class-wc-action-queue.php';
 		include_once WC_ABSPATH . 'includes/queue/class-wc-queue.php';
+		include_once WC_ABSPATH . 'includes/admin/marketplace-suggestions/class-wc-marketplace-updater.php';
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.
@@ -712,12 +713,7 @@ final class WooCommerce {
 		$wpdb->tables[]       = 'woocommerce_order_itemmeta';
 
 		$wpdb->wc_product_meta_lookup = $wpdb->prefix . 'wc_product_meta_lookup';
-		$wpdb->tables[]           = 'wc_product_meta_lookup';
-
-		if ( get_option( 'db_version' ) < 34370 ) {
-			$wpdb->woocommerce_termmeta = $wpdb->prefix . 'woocommerce_termmeta';
-			$wpdb->tables[]             = 'woocommerce_termmeta';
-		}
+		$wpdb->tables[]               = 'wc_product_meta_lookup';
 	}
 
 	/**

@@ -91,7 +91,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			$sales_by_date                 = new WC_Report_Sales_By_Date();
 			$sales_by_date->start_date     = strtotime( date( 'Y-m-01', current_time( 'timestamp' ) ) );
-			$sales_by_date->end_date       = current_time( 'timestamp' );
+			$sales_by_date->end_date       = strtotime( date( 'Y-m-d', current_time( 'timestamp' ) ) );
 			$sales_by_date->chart_groupby  = 'day';
 			$sales_by_date->group_by_query = 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)';
 

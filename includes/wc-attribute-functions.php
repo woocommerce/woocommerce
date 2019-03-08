@@ -531,9 +531,8 @@ function wc_create_attribute( $args ) {
 			);
 
 			// Update taxonomy ordering term meta.
-			$table_name = get_option( 'db_version' ) < 34370 ? $wpdb->prefix . 'woocommerce_termmeta' : $wpdb->termmeta;
 			$wpdb->update(
-				$table_name,
+				$wpdb->termmeta,
 				array( 'meta_key' => 'order_pa_' . sanitize_title( $data['attribute_name'] ) ), // WPCS: slow query ok.
 				array( 'meta_key' => 'order_pa_' . sanitize_title( $old_slug ) ) // WPCS: slow query ok.
 			);

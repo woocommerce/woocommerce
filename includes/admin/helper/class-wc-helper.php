@@ -1007,7 +1007,7 @@ class WC_Helper {
 	}
 
 	/**
-	 * Obtain a list of locally installed Woo extensions.
+	 * Obtain a list of data about locally installed Woo extensions.
 	 */
 	public static function get_local_woo_plugins() {
 		if ( ! function_exists( 'get_plugins' ) ) {
@@ -1046,6 +1046,7 @@ class WC_Helper {
 			$data['_product_id']      = absint( $product_id );
 			$data['_file_id']         = $file_id;
 			$data['_type']            = 'plugin';
+			$data['slug']             = dirname( $filename );
 			$woo_plugins[ $filename ] = $data;
 		}
 

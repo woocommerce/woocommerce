@@ -1941,6 +1941,15 @@ function wc_update_360_product_lookup_tables() {
 }
 
 /**
+ * Renames ordering meta to be consistent across taxonomies.
+ */
+function wc_update_360_term_meta() {
+	global $wpdb;
+
+	$wpdb->query( "UPDATE {$wpdb->termmeta} SET meta_key = 'order' WHERE meta_key LIKE 'order_pa_%';" );
+}
+
+/**
  * Add new user_order_remaining_expires to speed up user download permission fetching.
  *
  * @return void

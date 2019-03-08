@@ -167,38 +167,10 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			return;
 		}
 
-		$get_terms_args = array( 'hide_empty' => '1' );
-
-		$orderby = wc_attribute_orderby( $taxonomy );
-
-		switch ( $orderby ) {
-			case 'name':
-				$get_terms_args['orderby']    = 'name';
-				$get_terms_args['menu_order'] = false;
-				break;
-			case 'id':
-				$get_terms_args['orderby']    = 'id';
-				$get_terms_args['order']      = 'ASC';
-				$get_terms_args['menu_order'] = false;
-				break;
-			case 'menu_order':
-				$get_terms_args['menu_order'] = 'ASC';
-				break;
-		}
-
-		$terms = get_terms( $taxonomy, $get_terms_args );
+		$terms = get_terms( $taxonomy, array( 'hide_empty' => '1' ) );
 
 		if ( 0 === count( $terms ) ) {
 			return;
-		}
-
-		switch ( $orderby ) {
-			case 'name_num':
-				usort( $terms, '_wc_get_product_terms_name_num_usort_callback' );
-				break;
-			case 'parent':
-				usort( $terms, '_wc_get_product_terms_parent_usort_callback' );
-				break;
 		}
 
 		ob_start();
