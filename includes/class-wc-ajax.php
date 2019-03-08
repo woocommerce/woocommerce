@@ -1155,6 +1155,13 @@ class WC_AJAX {
 				throw new Exception( __( 'Invalid coupon', 'woocommerce' ) );
 			}
 
+			// Add user ID so validation for coupon limits works.
+			$user_id_arg = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
+
+			if ( $user_id_arg ) {
+				$order->set_customer_id( $user_id_arg );
+			}
+
 			$result = $order->apply_coupon( wc_clean( wp_unslash( $_POST['coupon'] ) ) );
 
 			if ( is_wp_error( $result ) ) {
