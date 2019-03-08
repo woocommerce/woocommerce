@@ -164,7 +164,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 		$settings = (array) $data['settings'];
 
-		$this->assertEquals( 11, count( $settings ) );
+		$this->assertEquals( 12, count( $settings ) );
 		$this->assertEquals( ( 'yes' === get_option( 'woocommerce_api_enabled' ) ), $settings['api_enabled'] );
 		$this->assertEquals( get_woocommerce_currency(), $settings['currency'] );
 		$this->assertEquals( $term_response, $settings['taxonomies'] );
@@ -210,7 +210,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 7, count( $properties ) );
+		$this->assertEquals( 9, count( $properties ) );
 		$this->assertArrayHasKey( 'environment', $properties );
 		$this->assertArrayHasKey( 'database', $properties );
 		$this->assertArrayHasKey( 'active_plugins', $properties );
