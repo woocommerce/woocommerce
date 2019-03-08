@@ -89,11 +89,11 @@ class WC_Tests_API_Products_Attributes_Terms_Controller extends WC_REST_Unit_Tes
 	}
 
 	/**
-	 * Test getting attribute terms as editor.
+	 * Test getting attribute terms as contributor.
 	 *
 	 * @since 3.6.0
 	 */
-	public function test_get_attribute_terms_editor() {
+	public function test_get_attribute_terms_contributor() {
 		wp_set_current_user( $this->contributor );
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/products/attributes/' . $this->attr_size['attribute_id'] . '/terms' );
 

@@ -103,7 +103,7 @@ class WC_Tests_API_Products_Categories_Controller extends WC_REST_Unit_Test_Case
 	}
 
 	/**
-	 * Test getting category as editor.
+	 * Test getting category as contributor.
 	 *
 	 * @since 3.6.0
 	 */
