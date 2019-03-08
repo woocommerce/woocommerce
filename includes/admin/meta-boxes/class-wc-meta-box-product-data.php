@@ -322,6 +322,7 @@ class WC_Meta_Box_Product_Data {
 	 * @param WP_Post $post Post object.
 	 */
 	public static function save( $post_id, $post ) {
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
 		// Process product type first so we have the correct class to run setters.
 		$product_type = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( wp_unslash( $_POST['product-type'] ) );
 		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : 'simple' );
@@ -336,6 +337,28 @@ class WC_Meta_Box_Product_Data {
 				WC_Admin_Meta_Boxes::add_error( sprintf( __( 'The stock has not been updated because the value has changed since editing. Product %1$d has %2$d units in stock.', 'woocommerce' ), $product->get_id(), $product->get_stock_quantity( 'edit' ) ) );
 			} else {
 				$stock = wc_stock_amount( wp_unslash( $_POST['_stock'] ) );
+			}
+		}
+
+		// Handle dates.
+		$date_on_sale_from = '';
+		$date_on_sale_to   = '';
+
+		// Force date from to beginning of day.
+		if ( isset( $_POST['_sale_price_dates_from'] ) ) {
+			$date_on_sale_from = wc_clean( wp_unslash( $_POST['_sale_price_dates_from'] ) );
+
+			if ( ! empty( $date_on_sale_from ) ) {
+				$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( $date_on_sale_from ) );
+			}
+		}
+
+		// Force date to to the end of the day.
+		if ( isset( $_POST['_sale_price_dates_to'] ) ) {
+			$date_on_sale_to = wc_clean( wp_unslash( $_POST['_sale_price_dates_to'] ) );
+
+			if ( ! empty( $date_on_sale_to ) ) {
+				$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( $date_on_sale_to ) );
 			}
 		}
 
@@ -359,8 +382,8 @@ class WC_Meta_Box_Product_Data {
 				'cross_sell_ids'     => isset( $_POST['crosssell_ids'] ) ? array_map( 'intval', (array) wp_unslash( $_POST['crosssell_ids'] ) ) : array(),
 				'regular_price'      => wc_clean( wp_unslash( $_POST['_regular_price'] ) ),
 				'sale_price'         => wc_clean( wp_unslash( $_POST['_sale_price'] ) ),
-				'date_on_sale_from'  => wc_clean( wp_unslash( $_POST['_sale_price_dates_from'] ) ),
-				'date_on_sale_to'    => wc_clean( wp_unslash( $_POST['_sale_price_dates_to'] ) ),
+				'date_on_sale_from'  => $date_on_sale_from,
+				'date_on_sale_to'    => $date_on_sale_to,
 				'manage_stock'       => ! empty( $_POST['_manage_stock'] ),
 				'backorders'         => isset( $_POST['_backorders'] ) ? wc_clean( wp_unslash( $_POST['_backorders'] ) ) : null,
 				'stock_status'       => wc_clean( wp_unslash( $_POST['_stock_status'] ) ),
@@ -400,6 +423,7 @@ class WC_Meta_Box_Product_Data {
 		}
 
 		do_action( 'woocommerce_process_product_meta_' . $product_type, $post_id );
+		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification
 	}
 
 	/**
@@ -437,6 +461,28 @@ class WC_Meta_Box_Product_Data {
 					}
 				}
 
+				// Handle dates.
+				$date_on_sale_from = '';
+				$date_on_sale_to   = '';
+
+				// Force date from to beginning of day.
+				if ( isset( $_POST['variable_sale_price_dates_from'][ $i ] ) ) {
+					$date_on_sale_from = wc_clean( wp_unslash( $_POST['variable_sale_price_dates_from'][ $i ] ) );
+
+					if ( ! empty( $date_on_sale_from ) ) {
+						$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( $date_on_sale_from ) );
+					}
+				}
+
+				// Force date to to the end of the day.
+				if ( isset( $_POST['variable_sale_price_dates_to'][ $i ] ) ) {
+					$date_on_sale_to = wc_clean( wp_unslash( $_POST['variable_sale_price_dates_to'][ $i ] ) );
+
+					if ( ! empty( $date_on_sale_to ) ) {
+						$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( $date_on_sale_to ) );
+					}
+				}
+
 				$errors = $variation->set_props(
 					array(
 						'status'            => isset( $_POST['variable_enabled'][ $i ] ) ? 'publish' : 'private',
@@ -445,8 +491,8 @@ class WC_Meta_Box_Product_Data {
 						'sale_price'        => wc_clean( wp_unslash( $_POST['variable_sale_price'][ $i ] ) ),
 						'virtual'           => isset( $_POST['variable_is_virtual'][ $i ] ),
 						'downloadable'      => isset( $_POST['variable_is_downloadable'][ $i ] ),
-						'date_on_sale_from' => wc_clean( wp_unslash( $_POST['variable_sale_price_dates_from'][ $i ] ) ),
-						'date_on_sale_to'   => wc_clean( wp_unslash( $_POST['variable_sale_price_dates_to'][ $i ] ) ),
+						'date_on_sale_from' => $date_on_sale_from,
+						'date_on_sale_to'   => $date_on_sale_to,
 						'description'       => wp_kses_post( wp_unslash( $_POST['variable_description'][ $i ] ) ),
 						'download_limit'    => wc_clean( wp_unslash( $_POST['variable_download_limit'][ $i ] ) ),
 						'download_expiry'   => wc_clean( wp_unslash( $_POST['variable_download_expiry'][ $i ] ) ),
