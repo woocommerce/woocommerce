@@ -257,11 +257,15 @@ class WC_Install {
 	/**
 	 * Is this a brand new WC install?
 	 *
+	 * A brand new install has no version yet. Also treat empty installs as 'new'.
+	 *
 	 * @since  3.2.0
 	 * @return boolean
 	 */
 	private static function is_new_install() {
-		return is_null( get_option( 'woocommerce_version', null ) ) && is_null( get_option( 'woocommerce_db_version', null ) );
+		$product_count = array_sum( (array) wp_count_posts( 'product' ) );
+
+		return is_null( get_option( 'woocommerce_version', null ) ) || ( 0 === $product_count && -1 === wc_get_page_id( 'shop' ) );
 	}
 
 	/**
@@ -283,7 +287,7 @@ class WC_Install {
 	 * @since 3.2.0
 	 */
 	private static function maybe_enable_setup_wizard() {
-		if ( apply_filters( 'woocommerce_enable_setup_wizard', self::is_new_install() ) ) {
+		if ( apply_filters( 'woocommerce_enable_setup_wizard', true ) && self::is_new_install() ) {
 			WC_Admin_Notices::add_notice( 'install' );
 			set_transient( '_wc_activation_redirect', 1, 30 );
 		}
