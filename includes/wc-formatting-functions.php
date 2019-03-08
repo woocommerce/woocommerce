@@ -968,6 +968,18 @@ function wc_format_phone_number( $phone ) {
 }
 
 /**
+ * Sanitize phone number.
+ * Allows only numbers and "+" (plus sign).
+ *
+ * @since 3.6.0
+ * @param string $phone Phone number.
+ * @return string
+ */
+function wc_sanitize_phone_number( $phone ) {
+	return preg_replace( '/[^\d+]/', '', $phone );
+}
+
+/**
  * Wrapper for mb_strtoupper which see's if supported first.
  *
  * @since  3.1.0
@@ -1108,7 +1120,7 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_hold_stock_m
  * @return string
  */
 function wc_sanitize_term_text_based( $term ) {
-	return trim( wp_unslash( strip_tags( $term ) ) );
+	return trim( wp_unslash( wp_strip_all_tags( $term ) ) );
 }
 
 if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
@@ -1383,9 +1395,9 @@ function wc_implode_html_attributes( $raw_attributes ) {
 function wc_esc_json( $json, $html = false ) {
 	return _wp_specialchars(
 		$json,
-		$html ? ENT_NOQUOTES : ENT_QUOTES, // Escape quotes in attribute nodes only,
+		$html ? ENT_NOQUOTES : ENT_QUOTES, // Escape quotes in attribute nodes only.
 		'UTF-8',                           // json_encode() outputs UTF-8 (really just ASCII), not the blog's charset.
-		true                               // Double escape entities: `&amp;` -> `&amp;amp;`
+		true                               // Double escape entities: `&amp;` -> `&amp;amp;`.
 	);
 }
 
