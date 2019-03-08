@@ -2015,10 +2015,18 @@ function wc_enable_wc_plugin_headers( $headers ) {
 		include_once dirname( __FILE__ ) . '/admin/plugin-updates/class-wc-plugin-updates.php';
 	}
 
-	$headers['WCRequires'] = WC_Plugin_Updates::VERSION_REQUIRED_HEADER;
-	$headers['WCTested']   = WC_Plugin_Updates::VERSION_TESTED_HEADER;
+	// WC requires at least - allows developers to define which version of WooCommerce the plugin requires to run.
+	$headers[] = WC_Plugin_Updates::VERSION_REQUIRED_HEADER;
+
+	// WC tested up to - allows developers  to define which version of WooCommerce they have tested up to.
+	$headers[] = WC_Plugin_Updates::VERSION_TESTED_HEADER;
+
+	// Woo - This is used in WooCommerce extensions and is picked up by the helper.
+	$headers[] = 'Woo';
+
 	return $headers;
 }
+add_filter( 'extra_theme_headers', 'wc_enable_wc_plugin_headers' );
 add_filter( 'extra_plugin_headers', 'wc_enable_wc_plugin_headers' );
 
 /**
