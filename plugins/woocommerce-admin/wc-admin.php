@@ -181,3 +181,26 @@ add_action( 'woocommerce_updated', 'wc_admin_woocommerce_updated' );
  * Gutenberg has also disabled emojis. More on that here -> https://github.com/WordPress/gutenberg/pull/6151
  */
 remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
+
+/**
+ * Filter in our ActionScheduler Store class.
+ *
+ * @param string $store_class ActionScheduler Store class name.
+ * @return string ActionScheduler Store class name.
+ */
+function wc_admin_set_actionscheduler_store_class( $store_class ) {
+	// Don't override any other overrides.
+	if ( 'ActionScheduler_wpPostStore' !== $store_class ) {
+		return $store_class;
+	}
+
+	// Include our store class here instead of wc_admin_plugins_loaded()
+	// because ActionScheduler is hooked into `plugins_loaded` at a
+	// much higher priority.
+	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-actionscheduler-wppoststore.php';
+
+	return 'WC_Admin_ActionScheduler_WPPostStore';
+}
+
+// Hook up our modified ActionScheduler Store.
+add_filter( 'action_scheduler_store_class', 'wc_admin_set_actionscheduler_store_class' );
