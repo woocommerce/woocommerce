@@ -2,8 +2,8 @@
 /**
  * Plugin Name: WooCommerce Admin
  * Plugin URI: https://github.com/woocommerce/wc-admin
- * Description: A feature plugin for a modern, javascript-driven WooCommerce admin experience.
- * Author: Automattic
+ * Description: A new JavaScript-driven interface for managing your store. The plugin includes new and improved reports, and a dashboard to monitor all the important key metrics of your site.
+ * Author: WooCommerce
  * Author URI: https://woocommerce.com/
  * Text Domain: wc-admin
  * Domain Path: /languages
