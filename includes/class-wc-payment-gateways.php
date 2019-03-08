@@ -157,7 +157,18 @@ class WC_Payment_Gateways {
 			}
 		}
 
-		return apply_filters( 'woocommerce_available_payment_gateways', $_available_gateways );
+		return array_filter( (array) apply_filters( 'woocommerce_available_payment_gateways', $_available_gateways ), array( $this, 'filter_valid_gateway_class' ) );
+	}
+
+	/**
+	 * Callback for array filter. Returns true if gateway is of correct type.
+	 *
+	 * @since 3.6.0
+	 * @param object $gateway Gateway to check.
+	 * @return bool
+	 */
+	protected function filter_valid_gateway_class( $gateway ) {
+		return $gateway && is_a( $gateway, 'WC_Payment_Gateway' );
 	}
 
 	/**
