@@ -61,30 +61,30 @@ class StoreAlerts extends Component {
 	}
 
 	render() {
-		const hasAlerts = Boolean( wcSettings.alertCount ) || null;
+		const alerts = this.props.alerts || [];
+		const preloadAlertCount = wcSettings.alertCount && parseInt( wcSettings.alertCount );
 
-		if ( ! hasAlerts ) {
+		if ( preloadAlertCount > 0 && 0 === alerts.length ) {
+			return <StoreAlertsPlaceholder hasMultipleAlerts={ preloadAlertCount > 1 } />;
+		} else if ( 0 === alerts.length ) {
 			return null;
 		}
 
-		const { alerts } = this.props;
 		const { currentIndex } = this.state;
 		const numberOfAlerts = alerts.length;
-		const alert = alerts[ currentIndex ] ? alerts[ currentIndex ] : null;
-		const type = alert && alert.type ? alert.type : null;
+		const alert = alerts[ currentIndex ];
+		const type = alert.type;
 		const className = classnames( 'woocommerce-store-alerts', {
 			'is-alert-error': 'error' === type,
 			'is-alert-update': 'update' === type,
 		} );
-		const actions =
-			alert &&
-			alert.actions.map( action => (
-				<Button key={ action.name } isDefault href={ action.url }>
-					{ action.label }
-				</Button>
-			) );
+		const actions = alert.actions.map( action => (
+			<Button key={ action.name } isDefault href={ action.url }>
+				{ action.label }
+			</Button>
+		) );
 
-		return alert ? (
+		return (
 			<Card
 				title={ [
 					alert.icon && <Dashicon key="icon" icon={ alert.icon } />,
@@ -129,8 +129,6 @@ class StoreAlerts extends Component {
 				/>
 				{ actions && <div className="woocommerce-store-alerts__actions">{ actions }</div> }
 			</Card>
-		) : (
-			<StoreAlertsPlaceholder hasMultipleAlerts={ wcSettings.alertCount > 1 } />
 		);
 	}
 }
