@@ -34,11 +34,6 @@ class WC_Helper {
 		add_action( 'current_screen', array( __CLASS__, 'current_screen' ) );
 		add_action( 'woocommerce_helper_output', array( __CLASS__, 'render_helper_output' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'admin_enqueue_scripts' ) );
-
-		// Attempt to toggle subscription state upon plugin activation/deactivation
-		add_action( 'activated_plugin', array( __CLASS__, 'activated_plugin' ) );
-		add_action( 'deactivated_plugin', array( __CLASS__, 'deactivated_plugin' ) );
-
 		// Add some nags about extension updates
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 

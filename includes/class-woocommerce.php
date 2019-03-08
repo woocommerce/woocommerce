@@ -187,6 +187,8 @@ final class WooCommerce {
 		add_action( 'init', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
+		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
+		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
 	}
 
 	/**
@@ -709,6 +711,30 @@ final class WooCommerce {
 		$wpdb->order_itemmeta    = $wpdb->prefix . 'woocommerce_order_itemmeta';
 		$wpdb->tables[]          = 'woocommerce_payment_tokenmeta';
 		$wpdb->tables[]          = 'woocommerce_order_itemmeta';
+	}
+
+	/**
+	 * Ran when any plugin is activated.
+	 *
+	 * @since 3.6.0
+	 * @param string $filename The filename of the activated plugin.
+	 */
+	public function activated_plugin( $filename ) {
+		include_once dirname( __FILE__ ) . '/helper/class-wc-helper.php';
+
+		WC_Helper::activated_plugin( $filename );
+	}
+
+	/**
+	 * Ran when any plugin is deactivated.
+	 *
+	 * @since 3.6.0
+	 * @param string $filename The filename of the deactivated plugin.
+	 */
+	public function deactivated_plugin( $filename ) {
+		include_once dirname( __FILE__ ) . '/helper/class-wc-helper.php';
+
+		WC_Helper::deactivated_plugin( $filename );
 	}
 
 	/**
