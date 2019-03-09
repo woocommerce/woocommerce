@@ -187,11 +187,13 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 */
 	public function add_to_cart_url() {
 		$url = $this->is_purchasable() ? remove_query_arg(
-			'added-to-cart', add_query_arg(
+			'added-to-cart',
+			add_query_arg(
 				array(
 					'variation_id' => $this->get_id(),
 					'add-to-cart'  => $this->get_parent_id(),
-				), $this->get_permalink()
+				),
+				$this->get_permalink()
 			)
 		) : $this->get_permalink();
 		return apply_filters( 'woocommerce_product_add_to_cart_url', $url, $this );
@@ -426,23 +428,26 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @param array $parent_data parent data array for this variation.
 	 */
 	public function set_parent_data( $parent_data ) {
-		$parent_data = wp_parse_args( $parent_data, array(
-			'title'              => '',
-			'status'             => '',
-			'sku'                => '',
-			'manage_stock'       => 'no',
-			'backorders'         => 'no',
-			'stock_quantity'     => '',
-			'weight'             => '',
-			'length'             => '',
-			'width'              => '',
-			'height'             => '',
-			'tax_class'          => '',
-			'shipping_class_id'  => 0,
-			'image_id'           => 0,
-			'purchase_note'      => '',
-			'catalog_visibility' => 'visible',
-		) );
+		$parent_data = wp_parse_args(
+			$parent_data,
+			array(
+				'title'              => '',
+				'status'             => '',
+				'sku'                => '',
+				'manage_stock'       => 'no',
+				'backorders'         => 'no',
+				'stock_quantity'     => '',
+				'weight'             => '',
+				'length'             => '',
+				'width'              => '',
+				'height'             => '',
+				'tax_class'          => '',
+				'shipping_class_id'  => 0,
+				'image_id'           => 0,
+				'purchase_note'      => '',
+				'catalog_visibility' => 'visible',
+			)
+		);
 
 		// Normalize tax class.
 		$parent_data['tax_class'] = sanitize_title( $parent_data['tax_class'] );
