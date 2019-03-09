@@ -53,15 +53,15 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$product->set_props(
 			array(
-				'name'            => $post_object->post_title,
-				'slug'            => $post_object->post_name,
-				'date_created'    => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
-				'date_modified'   => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
-				'status'          => $post_object->post_status,
-				'menu_order'      => $post_object->menu_order,
-				'reviews_allowed' => 'open' === $post_object->comment_status,
-				'parent_id'       => $post_object->post_parent,
-				'post_excerpt'    => $post_object->post_excerpt,
+				'name'              => $post_object->post_title,
+				'slug'              => $post_object->post_name,
+				'date_created'      => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
+				'date_modified'     => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
+				'status'            => $post_object->post_status,
+				'menu_order'        => $post_object->menu_order,
+				'reviews_allowed'   => 'open' === $post_object->comment_status,
+				'parent_id'         => $post_object->post_parent,
+				'attribute_summary' => $post_object->post_excerpt,
 			)
 		);
 
@@ -87,16 +87,15 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		/**
-		 * If a variation has no excerpt, update here. Used when searching for variations by attribute values.
+		 * If the attribute summary is not in sync, update here. Used when searching for variations by attribute values.
+		 * This is meant to also cover the case when global attribute name or value is updated, then the attribute summary is updated
+		 * for respective products when they're read.
 		 */
-		if ( '' === $post_object->post_excerpt ) {
-			$new_excerpt = wc_get_formatted_variation( $product, true, false );
-			$product->set_props(
-				array(
-					'post_excerpt' => $new_excerpt,
-				)
-			);
-			$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_excerpt' => $new_excerpt ), array( 'ID' => $product->get_id() ) );
+		$new_attribute_summary = $this->generate_attribute_summary( $product );
+
+		if ( $new_attribute_summary !== $post_object->post_excerpt ) {
+			$product->set_attribute_summary( $new_attribute_summary );
+			$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_excerpt' => $new_attribute_summary ), array( 'ID' => $product->get_id() ) );
 			clean_post_cache( $product->get_id() );
 		}
 
@@ -121,6 +120,9 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$product->set_name( $new_title );
 		}
 
+		$attribute_summary = $this->generate_attribute_summary( $product );
+		$product->set_attribute_summary( $attribute_summary );
+
 		// The post parent is not a valid variable product so we should prevent this.
 		if ( $product->get_parent_id( 'edit' ) && 'product' !== get_post_type( $product->get_parent_id( 'edit' ) ) ) {
 			$product->set_parent_id( 0 );
@@ -134,7 +136,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 					'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
 					'post_author'    => get_current_user_id(),
 					'post_title'     => $product->get_name( 'edit' ),
-					'post_excerpt'   => wc_get_formatted_variation( $product, true, false ),
+					'post_excerpt'   => $product->get_attribute_summary( 'edit' ),
 					'post_content'   => '',
 					'post_parent'    => $product->get_parent_id(),
 					'comment_status' => 'closed',
@@ -195,11 +197,15 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		$changes = $product->get_changes();
 
+		if ( array_intersect( array( 'attributes' ), array_keys( $changes ) ) ) {
+			$product->set_attribute_summary( $this->generate_attribute_summary( $product ) );
+		}
+
 		// Only update the post when the post data changes.
 		if ( array_intersect( array( 'name', 'parent_id', 'status', 'menu_order', 'date_created', 'date_modified', 'attributes' ), array_keys( $changes ) ) ) {
 			$post_data = array(
 				'post_title'        => $product->get_name( 'edit' ),
-				'post_excerpt'      => wc_get_formatted_variation( $product, true, false ),
+				'post_excerpt'      => $product->get_attribute_summary( 'edit' ),
 				'post_parent'       => $product->get_parent_id( 'edit' ),
 				'comment_status'    => 'closed',
 				'post_status'       => $product->get_status( 'edit' ) ? $product->get_status( 'edit' ) : 'publish',
@@ -294,6 +300,20 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$title_suffix              = $should_include_attributes ? wc_get_formatted_variation( $product, true, false ) : '';
 
 		return apply_filters( 'woocommerce_product_variation_title', $title_suffix ? $title_base . $separator . $title_suffix : $title_base, $product, $title_base, $title_suffix );
+	}
+
+	/**
+	 * Generates attribute summary for the variation.
+	 *
+	 * Attribute summary contains comma-delimited 'attribute_name: attribute_value' pairs for all attributes.
+	 *
+	 * @since 3.6.0
+	 * @param WC_Product_Variation $product Product variation to generate the attribute summary for.
+	 *
+	 * @return string
+	 */
+	protected function generate_attribute_summary( $product ) {
+		return wc_get_formatted_variation( $product, true, true );
 	}
 
 	/**

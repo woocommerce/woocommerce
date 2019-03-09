@@ -49,7 +49,8 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @param int|WC_Product|object $product Product to init.
 	 */
 	public function __construct( $product = 0 ) {
-		$this->data['tax_class'] = 'parent';
+		$this->data['tax_class']         = 'parent';
+		$this->data['attribute_summary'] = '';
 		parent::__construct( $product );
 	}
 
@@ -413,6 +414,34 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 */
 	public function get_catalog_visibility( $context = 'view' ) {
 		return apply_filters( $this->get_hook_prefix() . 'catalog_visibility', $this->parent_data['catalog_visibility'], $this );
+	}
+
+	/**
+	 * Get attribute summary.
+	 *
+	 * By default, attribute summary contains comma-delimited 'attribute_name: attribute_value' pairs for all attributes.
+	 *
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 *
+	 * @since 3.6.0
+	 * @return string
+	 */
+	public function get_attribute_summary( $context = 'view' ) {
+		$attribute_summary = $this->get_prop( 'attribute_summary', $context );
+		return apply_filters( $this->get_hook_prefix() . 'attribute_summary', $attribute_summary, $this );
+	}
+
+
+	/**
+	 * Set attribute summary.
+	 *
+	 * By default, attribute summary contains comma-delimited 'attribute_name: attribute_value' pairs for all attributes.
+	 *
+	 * @since 3.6.0
+	 * @param string $attribute_summary Summary of attribute names and values assigned to the variation.
+	 */
+	public function set_attribute_summary( $attribute_summary ) {
+		$this->set_prop( 'attribute_summary', $attribute_summary );
 	}
 
 	/*
