@@ -36,7 +36,8 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Reads a product from the database and sets its data to the class.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product $product Product object. $product Product object.
+	 * @param WC_Product_Variation $product Product object.
+	 * @throws WC_Data_Exception If WC_Product::set_tax_status() is called with an invalid tax status (via read_product_data).
 	 */
 	public function read( &$product ) {
 		$product->set_defaults();
@@ -107,7 +108,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Create a new product.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product $product Product object.
+	 * @param WC_Product_Variation $product Product object.
 	 */
 	public function create( &$product ) {
 		if ( ! $product->get_date_created() ) {
@@ -175,7 +176,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Updates an existing product.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product $product Product object.
+	 * @param WC_Product_Variation $product Product object.
 	 */
 	public function update( &$product ) {
 		$product->save_meta_data();
@@ -331,7 +332,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	 * Read post data.
 	 *
 	 * @since 3.0.0
-	 * @param WC_Product $product Product object.
+	 * @param WC_Product_Variation $product Product object.
 	 * @throws WC_Data_Exception If WC_Product::set_tax_status() is called with an invalid tax status.
 	 */
 	protected function read_product_data( &$product ) {
