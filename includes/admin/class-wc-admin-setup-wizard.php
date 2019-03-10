@@ -536,22 +536,16 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_store_setup_save() {
 		check_admin_referer( 'wc-setup' );
 
-		// phpcs:disable WordPress.VIP.SuperGlobalInputUsage.AccessDetected, WordPress.VIP.ValidatedSanitizedInput.InputNotValidated, WordPress.VIP.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput
-		$address        = sanitize_text_field( $_POST['store_address'] );
-		$address_2      = sanitize_text_field( $_POST['store_address_2'] );
-		$city           = sanitize_text_field( $_POST['store_city'] );
-		$country        = sanitize_text_field( $_POST['store_country'] );
-		$state          = isset( $_POST['store_state'] ) ? sanitize_text_field( $_POST['store_state'] ) : false;
-		$postcode       = sanitize_text_field( $_POST['store_postcode'] );
-		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
-		$product_type   = sanitize_text_field( $_POST['product_type'] );
-		$sell_in_person = isset( $_POST['sell_in_person'] ) && ( 'yes' === sanitize_text_field( $_POST['sell_in_person'] ) );
-		$tracking       = isset( $_POST['wc_tracker_checkbox'] ) && ( 'yes' === sanitize_text_field( $_POST['wc_tracker_checkbox'] ) );
-		// phpcs:enable
-
-		if ( ! $state ) {
-			$state = '*';
-		}
+		$address        = isset( $_POST['store_address'] ) ? wc_clean( wp_unslash( $_POST['store_address'] ) ) : '';
+		$address_2      = isset( $_POST['store_address_2'] ) ? wc_clean( wp_unslash( $_POST['store_address_2'] ) ) : '';
+		$city           = isset( $_POST['store_city'] ) ? wc_clean( wp_unslash( $_POST['store_city'] ) ) : '';
+		$country        = isset( $_POST['store_country'] ) ? wc_clean( wp_unslash( $_POST['store_country'] ) ) : '';
+		$state          = isset( $_POST['store_state'] ) ? wc_clean( wp_unslash( $_POST['store_state'] ) ) : '*';
+		$postcode       = isset( $_POST['store_postcode'] ) ? wc_clean( wp_unslash( $_POST['store_postcode'] ) ) : '';
+		$currency_code  = isset( $_POST['currency_code'] ) ? wc_clean( wp_unslash( $_POST['currency_code'] ) ) : '';
+		$product_type   = isset( $_POST['product_type'] ) ? wc_clean( wp_unslash( $_POST['product_type'] ) ) : '';
+		$sell_in_person = isset( $_POST['sell_in_person'] ) && ( 'yes' === wc_clean( wp_unslash( $_POST['sell_in_person'] ) ) );
+		$tracking       = isset( $_POST['wc_tracker_checkbox'] ) && ( 'yes' === wc_clean( wp_unslash( $_POST['wc_tracker_checkbox'] ) ) );
 
 		update_option( 'woocommerce_store_address', $address );
 		update_option( 'woocommerce_store_address_2', $address_2 );
