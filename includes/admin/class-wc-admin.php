@@ -229,7 +229,9 @@ class WC_Admin {
 			$message = apply_filters( 'woocommerce_mail_content', $email->style_inline( $mailer->wrap_message( $email_heading, $message ) ) );
 
 			// print the preview email.
-			echo esc_html( $message );
+			// phpcs:ignore WordPress.Security.EscapeOutput
+			echo $message;
+			// phpcs:enable
 			exit;
 		}
 	}
