@@ -181,6 +181,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Improved `display_name` generation during checkout. #22786
 * Tweak - Send correct calling code and phone number to PayPal standard when using non-US addresses. #22693
 * Tweak - Added tooltip to refund-amount input box and made it readonly when taxes are enabled. #22820
+* Tweak - Remove admin alert for the WooCommerce Gutenberg Products Block feature plugin. #22982
 * Template - Moved the order of rememberme checkboxes for accessibility so they tab in order. #21454
 * Template - New structure for attributes template, including new `woocommerce_display_product_attributes` filter. #22480
 * Dev - Introduce `woocommerce_reviews_title` filter. #22216
@@ -236,6 +237,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Introduced wc_sanitize_phone_number() function. #22962
 * Dev - Added `woocommerce_get_product_subcategories_cache_key` filter to allow the cache to be renamed if for instance the site runs in multiple languages and needs a unique cache per language. #22915
 * Dev - Inactive, MU, Dropin plugins and WooCommerce.com account connection status added to System Status Report. #22887
+* Dev - Make error handling consistent in payment processing for pay page and checkout. #22916
 * Fix - Use correct address for taxes when applying/removing coupons. #22802
 * Fix - Hide ratings on the shop page when reviews are disabled. #22476
 * Fix - Fix W3C validation of single product page quantity input. #22333
@@ -268,6 +270,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Trigger zoom if moving cursor over image quickly in product gallery. #22784
 * Fix - PayPal: Add meta data, before changing order status. #22892
 * Fix - Make price filter widget tax aware when you have excl prices entered but show prices incl of tax. #22540
+* Fix - Loop attribute panels to disable options rather than look at values to prevent notices. #22891
+* Performance - Product meta data lookup table used for sorting and slow queries. #22718
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
 * Performance - Improved how versioned transients are set/cleanup to avoid cron. #22511
@@ -288,6 +292,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Performance - Added caching to System Status Report. #22887
 * Performance - Delete empty meta on update in data-stores. #22773
 * Performance - Image regeneration edge cases. #22818
+* Performance - Don’t query for an order count unnecessarily. #22984
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 * Localization - Added US Minor Outlying Islands as states to avoid confusion with US. #22468
 * Localization - Dutch postcode validation. #22316
