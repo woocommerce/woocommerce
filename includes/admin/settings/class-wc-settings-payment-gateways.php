@@ -212,10 +212,16 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 		global $current_section;
 
 		$wc_payment_gateways = WC_Payment_Gateways::instance();
-		$wc_payment_gateways->process_admin_options();
-		$wc_payment_gateways->init();
 
-		if ( $current_section ) {
+		// Save settings fields based on section.
+		WC_Admin_Settings::save_fields( $this->get_settings( $current_section ) );
+
+		if ( ! $current_section ) {
+			// If section is empty, we're on the main settings page. This makes sure 'gateway ordering' is saved.
+			$wc_payment_gateways->process_admin_options();
+			$wc_payment_gateways->init();
+		} else {
+			// There is a section - this may be a gateway or custom section.
 			foreach ( $wc_payment_gateways->payment_gateways() as $gateway ) {
 				if ( in_array( $current_section, array( $gateway->id, sanitize_title( get_class( $gateway ) ) ), true ) ) {
 					do_action( 'woocommerce_update_options_payment_gateways_' . $gateway->id );
@@ -225,8 +231,6 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 
 			do_action( 'woocommerce_update_options_' . $this->id . '_' . $current_section );
 		}
-
-		WC_Admin_Settings::save_fields( $this->get_settings( $current_section ) );
 	}
 }
 
