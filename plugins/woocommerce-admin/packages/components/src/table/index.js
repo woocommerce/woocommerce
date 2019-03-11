@@ -165,7 +165,7 @@ class TableCard extends Component {
 	}
 
 	onSearch( values ) {
-		const { compareParam, searchBy } = this.props;
+		const { compareParam, searchBy, baseSearchQuery } = this.props;
 		// A comma is used as a separator between search terms, so we want to escape
 		// any comma they contain.
 		const labels = values.map( v => v.label.replace( ',', '%2C' ) );
@@ -174,6 +174,7 @@ class TableCard extends Component {
 				filter: undefined,
 				[ compareParam ]: undefined,
 				[ searchBy ]: undefined,
+				...baseSearchQuery,
 				search: uniq( labels ).join( ',' ),
 			} );
 		} else {
@@ -489,6 +490,10 @@ TableCard.propTypes = {
 	 * The total number of rows (across all pages).
 	 */
 	totalRows: PropTypes.number.isRequired,
+	/**
+	 * Pass in query parameters to be included in the path when onSearch creates a new url.
+	 */
+	baseSearchQuery: PropTypes.object,
 };
 
 TableCard.defaultProps = {
@@ -501,6 +506,7 @@ TableCard.defaultProps = {
 	rowHeader: 0,
 	rows: [],
 	showMenu: true,
+	baseSearchQuery: {},
 };
 
 export default TableCard;

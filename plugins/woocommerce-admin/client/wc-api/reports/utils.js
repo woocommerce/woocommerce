@@ -38,10 +38,11 @@ const reportConfigs = {
 
 export function getFilterQuery( endpoint, query, limitBy ) {
 	if ( query.search ) {
-		const limitProperty = limitBy || endpoint;
-		return {
-			[ limitProperty ]: query[ limitProperty ],
-		};
+		const limitProperties = limitBy || [ endpoint ];
+		return limitProperties.reduce( ( result, limitProperty ) => {
+			result[ limitProperty ] = query[ limitProperty ];
+			return result;
+		}, {} );
 	}
 
 	if ( reportConfigs[ endpoint ] ) {
@@ -168,7 +169,7 @@ export function isReportDataEmpty( report, endpoint ) {
  * @param  {String} endpoint  Report API Endpoint
  * @param  {String} dataType  'primary' or 'secondary'.
  * @param  {Object} query     Query parameters in the url.
- * @param  {String} [limitBy] Property used to limit the results. It will be used in the API call to send the IDs.
+ * @param  {Array}  [limitBy] Properties used to limit the results. It will be used in the API call to send the IDs.
  * @returns {Object} data request query parameters.
  */
 function getRequestQuery( endpoint, dataType, query, limitBy ) {
@@ -197,7 +198,7 @@ function getRequestQuery( endpoint, dataType, query, limitBy ) {
  * @param  {String} endpoint  Report API Endpoint
  * @param  {Object} query     Query parameters in the url
  * @param  {Object} select    Instance of @wordpress/select
- * @param  {String} [limitBy] Property used to limit the results. It will be used in the API call to send the IDs.
+ * @param  {Array}  [limitBy] Properties used to limit the results. It will be used in the API call to send the IDs.
  * @return {Object} Object containing summary number responses.
  */
 export function getSummaryNumbers( endpoint, query, select, limitBy ) {
@@ -242,7 +243,7 @@ export function getSummaryNumbers( endpoint, query, select, limitBy ) {
  * @param  {String} dataType  'primary' or 'secondary'
  * @param  {Object} query     Query parameters in the url
  * @param  {Object} select    Instance of @wordpress/select
- * @param  {String} [limitBy] Property used to limit the results. It will be used in the API call to send the IDs.
+ * @param  {Array}  [limitBy] Properties used to limit the results. It will be used in the API call to send the IDs.
  * @return {Object}  Object containing API request information (response, fetching, and error details)
  */
 export function getReportChartData( endpoint, dataType, query, select, limitBy ) {

@@ -153,7 +153,10 @@ export default compose(
 
 		const { report } = props.params;
 		const searchWords = getSearchWords( query );
-		const itemsResult = searchItemsByString( select, report, searchWords );
+		// Single Category view in Categories Report uses the products endpoint, so search must also.
+		const mappedReport =
+			'categories' === report && 'single_category' === query.filter ? 'products' : report;
+		const itemsResult = searchItemsByString( select, mappedReport, searchWords );
 		const { isError, isRequesting, items } = itemsResult;
 		const ids = Object.keys( items );
 		if ( ! ids.length ) {
@@ -168,7 +171,7 @@ export default compose(
 			isRequesting,
 			query: {
 				...props.query,
-				[ report ]: ids.join( ',' ),
+				[ mappedReport ]: ids.join( ',' ),
 			},
 		};
 	} )

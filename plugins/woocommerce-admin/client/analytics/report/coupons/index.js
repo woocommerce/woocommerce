@@ -23,9 +23,8 @@ import ReportSummary from 'analytics/components/report-summary';
 export default class CouponsReport extends Component {
 	getChartMeta() {
 		const { query } = this.props;
-		const isCompareView = [ 'top_orders', 'top_discount', 'compare-coupons' ].includes(
-			query.filter
-		);
+		const isCompareView =
+			'compare-coupons' === query.filter && query.coupons && query.coupons.split( ',' ).length > 1;
 
 		const mode = isCompareView ? 'item-comparison' : 'time-comparison';
 		const itemsLabel = __( '%d coupons', 'wc-admin' );

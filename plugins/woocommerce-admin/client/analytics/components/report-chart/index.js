@@ -188,10 +188,10 @@ ReportChart.propTypes = {
 	 */
 	itemsLabel: PropTypes.string,
 	/**
-	 * Allows specifying a property different from the `endpoint` that will be used
+	 * Allows specifying properties different from the `endpoint` that will be used
 	 * to limit the items when there is an active search.
 	 */
-	limitProperty: PropTypes.string,
+	limitProperties: PropTypes.array,
 	/**
 	 * `items-comparison` (default) or `time-comparison`, this is used to generate correct
 	 * ARIA properties.
@@ -239,8 +239,8 @@ ReportChart.defaultProps = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { endpoint, filters, isRequesting, limitProperty, query } = props;
-		const limitBy = limitProperty || endpoint;
+		const { endpoint, filters, isRequesting, limitProperties, query } = props;
+		const limitBy = limitProperties || [ endpoint ];
 		const selectedFilter = getSelectedFilter( filters, query );
 		const filterParam = get( selectedFilter, [ 'settings', 'param' ] );
 		const chartMode = props.mode || getChartMode( selectedFilter, query ) || 'time-comparison';
@@ -254,7 +254,9 @@ export default compose(
 			return newProps;
 		}
 
-		if ( query.search && ! ( query[ limitBy ] && query[ limitBy ].length ) ) {
+		const hasLimitByParam = limitBy.some( item => query[ item ] && query[ item ].length );
+
+		if ( query.search && ! hasLimitByParam ) {
 			return {
 				...newProps,
 				emptySearchResults: true,
