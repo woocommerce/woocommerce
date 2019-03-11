@@ -13,7 +13,7 @@
     "apigen/apigen": "4.1.2",
     "nette/utils": "2.5.3",
     "phpunit/phpunit": "6.5.14",
-    "woocommerce/woocommerce-sniffs": "0.0.5"
+    "woocommerce/woocommerce-sniffs": "0.0.6"
   },
   "scripts": {
     "test": [
