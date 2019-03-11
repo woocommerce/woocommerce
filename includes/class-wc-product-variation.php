@@ -427,8 +427,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @return string
 	 */
 	public function get_attribute_summary( $context = 'view' ) {
-		$attribute_summary = $this->get_prop( 'attribute_summary', $context );
-		return apply_filters( $this->get_hook_prefix() . 'attribute_summary', $attribute_summary, $this );
+		return $this->get_prop( 'attribute_summary', $context );
 	}
 
 
