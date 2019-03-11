@@ -279,6 +279,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - PayPal: Add meta data, before changing order status. #22892
 * Fix - Make price filter widget tax aware when you have excl prices entered but show prices incl of tax. #22540
 * Fix - Loop attribute panels to disable options rather than look at values to prevent notices. #22891
+* Fix - When deleting zone methods, also remove setting options. #22867
 * Performance - Product meta data lookup table used for sorting and slow queries. #22718
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
