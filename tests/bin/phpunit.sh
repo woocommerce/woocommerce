@@ -5,7 +5,11 @@ if [[ ${RUN_PHPCS} == 1 ]] || [[ ${RUN_E2E} == 1 ]]; then
 fi
 
 if [[ ${RUN_CODE_COVERAGE} == 1 ]]; then
-	phpdbg -qrr -d memory_limit=-1 $COMPOSER_BIN_DIR/phpunit -c phpunit.xml --coverage-clover=coverage.clover --exclude-group=timeout
+	if [[ -n $COMPOSER_BIN_DIR && -x $COMPOSER_BIN_DIR/phpunit ]]; then
+    	phpdbg -qrr -d memory_limit=-1 $COMPOSER_BIN_DIR/phpunit -c phpunit.xml --coverage-clover=coverage.clover --exclude-group=timeout
+    else
+		phpdbg -qrr -d memory_limit=-1 phpunit -c phpunit.xml --coverage-clover=coverage.clover --exclude-group=timeout
+    fi
 else
 	phpunit -c phpunit.xml
 fi

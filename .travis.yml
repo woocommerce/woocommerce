@@ -52,7 +52,14 @@ before_script:
     else
       echo "xdebug.ini does not exist"
     fi
-  - export PATH="$HOME/.config/composer/vendor/bin:$PATH"
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - |
+    # PHPUnit version:
+    if [[ -n $COMPOSER_BIN_DIR && -x $COMPOSER_BIN_DIR/phpunit ]]; then
+      $COMPOSER_BIN_DIR/phpunit --version
+    else
+      phpunit --version
+    fi
   - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - bash tests/bin/travis.sh before
 
