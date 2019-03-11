@@ -196,7 +196,7 @@ class WC_Admin_Notices {
 					$notice_html = get_option( 'woocommerce_admin_notice_' . $notice );
 
 					if ( $notice_html ) {
-						include dirname( __FILE__ ) . '/views/html-notice-custom.php';
+						include __DIR__ . '/views/html-notice-custom.php';
 					}
 				}
 			}
@@ -210,12 +210,12 @@ class WC_Admin_Notices {
 		if ( version_compare( get_option( 'woocommerce_db_version' ), WC_VERSION, '<' ) ) {
 			$updater = new WC_Background_Updater();
 			if ( $updater->is_updating() || ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
-				include dirname( __FILE__ ) . '/views/html-notice-updating.php';
+				include __DIR__ . '/views/html-notice-updating.php';
 			} else {
-				include dirname( __FILE__ ) . '/views/html-notice-update.php';
+				include __DIR__ . '/views/html-notice-update.php';
 			}
 		} else {
-			include dirname( __FILE__ ) . '/views/html-notice-updated.php';
+			include __DIR__ . '/views/html-notice-updated.php';
 		}
 	}
 
@@ -223,7 +223,7 @@ class WC_Admin_Notices {
 	 * If we have just installed, show a message with the install pages button.
 	 */
 	public static function install_notice() {
-		include dirname( __FILE__ ) . '/views/html-notice-install.php';
+		include __DIR__ . '/views/html-notice-install.php';
 	}
 
 	/**
@@ -235,7 +235,7 @@ class WC_Admin_Notices {
 		wc_deprecated_function( 'WC_Admin_Notices::theme_check_notice', '3.3.0' );
 
 		if ( ! current_theme_supports( 'woocommerce' ) ) {
-			include dirname( __FILE__ ) . '/views/html-notice-theme-support.php';
+			include __DIR__ . '/views/html-notice-theme-support.php';
 		}
 	}
 
@@ -271,7 +271,7 @@ class WC_Admin_Notices {
 		}
 
 		if ( $outdated ) {
-			include dirname( __FILE__ ) . '/views/html-notice-template-check.php';
+			include __DIR__ . '/views/html-notice-template-check.php';
 		} else {
 			self::remove_notice( 'template_files' );
 		}
@@ -292,7 +292,7 @@ class WC_Admin_Notices {
 		}
 
 		if ( $enabled ) {
-			include dirname( __FILE__ ) . '/views/html-notice-legacy-shipping.php';
+			include __DIR__ . '/views/html-notice-legacy-shipping.php';
 		} else {
 			self::remove_notice( 'template_files' );
 		}
@@ -307,7 +307,7 @@ class WC_Admin_Notices {
 			$method_count  = wc_get_shipping_method_count();
 
 			if ( $product_count->publish > 0 && 0 === $method_count ) {
-				include dirname( __FILE__ ) . '/views/html-notice-no-shipping-methods.php';
+				include __DIR__ . '/views/html-notice-no-shipping-methods.php';
 			}
 
 			if ( $method_count > 0 ) {
@@ -327,7 +327,7 @@ class WC_Admin_Notices {
 	 * Notice shown when regenerating thumbnails background process is running.
 	 */
 	public static function regenerating_thumbnails_notice() {
-		include dirname( __FILE__ ) . '/views/html-notice-regenerating-thumbnails.php';
+		include __DIR__ . '/views/html-notice-regenerating-thumbnails.php';
 	}
 
 	/**
@@ -338,7 +338,7 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		include dirname( __FILE__ ) . '/views/html-notice-secure-connection.php';
+		include __DIR__ . '/views/html-notice-secure-connection.php';
 	}
 
 	/**

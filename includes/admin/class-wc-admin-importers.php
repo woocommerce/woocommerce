@@ -129,7 +129,7 @@ class WC_Admin_Importers {
 			}
 		}
 
-		require dirname( __FILE__ ) . '/importers/class-wc-tax-rate-importer.php';
+		require __DIR__ . '/importers/class-wc-tax-rate-importer.php';
 
 		$importer = new WC_Tax_Rate_Importer();
 		$importer->dispatch();

@@ -2012,7 +2012,7 @@ function wc_get_var( &$var, $default = null ) {
  */
 function wc_enable_wc_plugin_headers( $headers ) {
 	if ( ! class_exists( 'WC_Plugin_Updates' ) ) {
-		include_once dirname( __FILE__ ) . '/admin/plugin-updates/class-wc-plugin-updates.php';
+		include_once __DIR__ . '/admin/plugin-updates/class-wc-plugin-updates.php';
 	}
 
 	$headers['WCRequires'] = WC_Plugin_Updates::VERSION_REQUIRED_HEADER;
@@ -2039,7 +2039,7 @@ function wc_prevent_dangerous_auto_updates( $should_update, $plugin ) {
 	}
 
 	if ( ! class_exists( 'WC_Plugin_Updates' ) ) {
-		include_once dirname( __FILE__ ) . '/admin/plugin-updates/class-wc-plugin-updates.php';
+		include_once __DIR__ . '/admin/plugin-updates/class-wc-plugin-updates.php';
 	}
 
 	$new_version      = wc_clean( $plugin->new_version );

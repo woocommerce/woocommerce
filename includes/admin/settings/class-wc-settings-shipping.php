@@ -277,7 +277,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		);
 		wp_enqueue_script( 'wc-shipping-zone-methods' );
 
-		include_once dirname( __FILE__ ) . '/views/html-admin-page-shipping-zone-methods.php';
+		include_once __DIR__ . '/views/html-admin-page-shipping-zone-methods.php';
 	}
 
 	/**
@@ -307,7 +307,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		);
 		wp_enqueue_script( 'wc-shipping-zones' );
 
-		include_once dirname( __FILE__ ) . '/views/html-admin-page-shipping-zones.php';
+		include_once __DIR__ . '/views/html-admin-page-shipping-zones.php';
 	}
 
 	/**
@@ -339,7 +339,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			$shipping_method->display_errors();
 		}
 
-		include_once dirname( __FILE__ ) . '/views/html-admin-page-shipping-zones-instance.php';
+		include_once __DIR__ . '/views/html-admin-page-shipping-zones-instance.php';
 	}
 
 	/**
@@ -377,7 +377,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			)
 		);
 
-		include_once dirname( __FILE__ ) . '/views/html-admin-page-shipping-classes.php';
+		include_once __DIR__ . '/views/html-admin-page-shipping-classes.php';
 	}
 }
 

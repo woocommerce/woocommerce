@@ -76,11 +76,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
 		} else {
-			include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-ipn-handler.php';
+			include_once __DIR__ . '/includes/class-wc-gateway-paypal-ipn-handler.php';
 			new WC_Gateway_Paypal_IPN_Handler( $this->testmode, $this->receiver_email );
 
 			if ( $this->identity_token ) {
-				include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-pdt-handler.php';
+				include_once __DIR__ . '/includes/class-wc-gateway-paypal-pdt-handler.php';
 				new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
 			}
 		}
@@ -313,7 +313,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function process_payment( $order_id ) {
-		include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-request.php';
+		include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
 
 		$order          = wc_get_order( $order_id );
 		$paypal_request = new WC_Gateway_Paypal_Request( $this );
@@ -346,7 +346,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Init the API class and set the username/password etc.
 	 */
 	protected function init_api() {
-		include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-api-handler.php';
+		include_once __DIR__ . '/includes/class-wc-gateway-paypal-api-handler.php';
 
 		WC_Gateway_Paypal_API_Handler::$api_username  = $this->testmode ? $this->get_option( 'sandbox_api_username' ) : $this->get_option( 'api_username' );
 		WC_Gateway_Paypal_API_Handler::$api_password  = $this->testmode ? $this->get_option( 'sandbox_api_password' ) : $this->get_option( 'api_password' );

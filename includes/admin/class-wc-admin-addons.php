@@ -531,7 +531,7 @@ class WC_Admin_Addons {
 		 * @uses $theme
 		 * @uses $current_section
 		 */
-		include_once dirname( __FILE__ ) . '/views/html-admin-page-addons.php';
+		include_once __DIR__ . '/views/html-admin-page-addons.php';
 	}
 
 	/**

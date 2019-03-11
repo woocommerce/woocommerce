@@ -100,7 +100,7 @@ class WC_Admin_Exporters {
 	 */
 	public function product_exporter() {
 		include_once WC_ABSPATH . 'includes/export/class-wc-product-csv-exporter.php';
-		include_once dirname( __FILE__ ) . '/views/html-admin-page-product-export.php';
+		include_once __DIR__ . '/views/html-admin-page-product-export.php';
 	}
 
 	/**

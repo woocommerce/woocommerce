@@ -59,7 +59,7 @@ class WC_Marketplace_Suggestions {
 	 * Render additional panels in the proudct data metabox.
 	 */
 	public static function product_data_panels() {
-		include dirname( __FILE__ ) . '/templates/html-product-data-extensions.php';
+		include __DIR__ . '/templates/html-product-data-extensions.php';
 	}
 
 	/**
@@ -133,7 +133,7 @@ class WC_Marketplace_Suggestions {
 	 * @param string $context Suggestion context name (rendered as a css class).
 	 */
 	public static function render_suggestions_container( $context ) {
-		include dirname( __FILE__ ) . '/views/container.php';
+		include __DIR__ . '/views/container.php';
 	}
 
 	/**

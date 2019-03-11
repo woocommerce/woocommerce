@@ -9,7 +9,7 @@
 defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WC_Background_Process', false ) ) {
-	include_once dirname( __FILE__ ) . '/abstracts/class-wc-background-process.php';
+	include_once __DIR__ . '/abstracts/class-wc-background-process.php';
 }
 
 /**
@@ -100,7 +100,7 @@ class WC_Background_Updater extends WC_Background_Process {
 
 		$logger = wc_get_logger();
 
-		include_once dirname( __FILE__ ) . '/wc-update-functions.php';
+		include_once __DIR__ . '/wc-update-functions.php';
 
 		$result = false;
 

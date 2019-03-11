@@ -37,7 +37,7 @@ class WC_Unit_Tests_Bootstrap {
 		}
 		// phpcs:enable WordPress.VIP.SuperGlobalInputUsage.AccessDetected
 
-		$this->tests_dir    = dirname( __FILE__ );
+		$this->tests_dir    = __DIR__;
 		$this->plugin_dir   = dirname( $this->tests_dir );
 		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : '/tmp/wordpress-tests-lib';
 

@@ -156,7 +156,7 @@ class WC_Install {
 	 * Init background updates
 	 */
 	public static function init_background_updater() {
-		include_once dirname( __FILE__ ) . '/class-wc-background-updater.php';
+		include_once __DIR__ . '/class-wc-background-updater.php';
 		self::$background_updater = new WC_Background_Updater();
 	}
 
@@ -237,7 +237,7 @@ class WC_Install {
 	 * @since 3.2.0
 	 */
 	private static function remove_admin_notices() {
-		include_once dirname( __FILE__ ) . '/admin/class-wc-admin-notices.php';
+		include_once __DIR__ . '/admin/class-wc-admin-notices.php';
 		WC_Admin_Notices::remove_all_notices();
 	}
 
@@ -413,7 +413,7 @@ class WC_Install {
 	 * Create pages that the plugin relies on, storing page IDs in variables.
 	 */
 	public static function create_pages() {
-		include_once dirname( __FILE__ ) . '/admin/wc-admin-functions.php';
+		include_once __DIR__ . '/admin/wc-admin-functions.php';
 
 		$pages = apply_filters(
 			'woocommerce_create_pages',
@@ -453,7 +453,7 @@ class WC_Install {
 	 */
 	private static function create_options() {
 		// Include settings so that we can run through defaults.
-		include_once dirname( __FILE__ ) . '/admin/class-wc-admin-settings.php';
+		include_once __DIR__ . '/admin/class-wc-admin-settings.php';
 
 		$settings = WC_Admin_Settings::get_settings_pages();
 

@@ -64,7 +64,7 @@ class WC_Admin_API_Keys {
 				}
 			}
 
-			include dirname( __FILE__ ) . '/settings/views/html-keys-edit.php';
+			include __DIR__ . '/settings/views/html-keys-edit.php';
 		} else {
 			self::table_list_output();
 		}

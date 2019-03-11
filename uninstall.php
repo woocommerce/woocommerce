@@ -26,7 +26,7 @@ wp_clear_scheduled_hook( 'woocommerce_tracker_send_event' );
  * and to ensure only the site owner can perform this action.
  */
 if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
-	include_once dirname( __FILE__ ) . '/includes/class-wc-install.php';
+	include_once __DIR__ . '/includes/class-wc-install.php';
 
 	// Roles + caps.
 	WC_Install::remove_roles();

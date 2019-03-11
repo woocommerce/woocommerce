@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-require_once dirname( __FILE__ ) . '/legacy/class-wc-legacy-coupon.php';
+require_once __DIR__ . '/legacy/class-wc-legacy-coupon.php';
 
 /**
  * Coupon class.

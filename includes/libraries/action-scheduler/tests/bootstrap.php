@@ -21,7 +21,7 @@ foreach ( array('WP_CONTENT_DIR', 'WP_CONTENT_URL', 'WP_PLUGIN_DIR', 'WP_PLUGIN_
 if( false !== getenv( 'WP_TESTS_DIR' ) ) {
 	require getenv( 'WP_TESTS_DIR' ) . '/includes/bootstrap.php';
 } else {
-	require dirname( dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ) ) . '/tests/phpunit/includes/bootstrap.php';
+	require dirname( dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) ) . '/tests/phpunit/includes/bootstrap.php';
 }
 
 if ( class_exists( 'PHPUnit\Framework\TestResult' ) ) { // PHPUnit 6.0 or newer

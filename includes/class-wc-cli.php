@@ -24,10 +24,10 @@ class WC_CLI {
 	 * Load command files.
 	 */
 	private function includes() {
-		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-runner.php';
-		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-rest-command.php';
-		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-tool-command.php';
-		require_once dirname( __FILE__ ) . '/cli/class-wc-cli-update-command.php';
+		require_once __DIR__ . '/cli/class-wc-cli-runner.php';
+		require_once __DIR__ . '/cli/class-wc-cli-rest-command.php';
+		require_once __DIR__ . '/cli/class-wc-cli-tool-command.php';
+		require_once __DIR__ . '/cli/class-wc-cli-update-command.php';
 	}
 
 	/**

@@ -21,7 +21,7 @@ if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
 
 // Include the main WooCommerce class.
 if ( ! class_exists( 'WooCommerce' ) ) {
-	include_once dirname( __FILE__ ) . '/includes/class-woocommerce.php';
+	include_once __DIR__ . '/includes/class-woocommerce.php';
 }
 
 /**

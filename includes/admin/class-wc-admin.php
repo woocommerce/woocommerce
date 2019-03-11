@@ -45,57 +45,57 @@ class WC_Admin {
 	 * Include any classes we need within admin.
 	 */
 	public function includes() {
-		include_once dirname( __FILE__ ) . '/wc-admin-functions.php';
-		include_once dirname( __FILE__ ) . '/wc-meta-box-functions.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-post-types.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-taxonomies.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-menus.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-customize.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-notices.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-assets.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-api-keys.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-webhooks.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-pointers.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-importers.php';
-		include_once dirname( __FILE__ ) . '/class-wc-admin-exporters.php';
+		include_once __DIR__ . '/wc-admin-functions.php';
+		include_once __DIR__ . '/wc-meta-box-functions.php';
+		include_once __DIR__ . '/class-wc-admin-post-types.php';
+		include_once __DIR__ . '/class-wc-admin-taxonomies.php';
+		include_once __DIR__ . '/class-wc-admin-menus.php';
+		include_once __DIR__ . '/class-wc-admin-customize.php';
+		include_once __DIR__ . '/class-wc-admin-notices.php';
+		include_once __DIR__ . '/class-wc-admin-assets.php';
+		include_once __DIR__ . '/class-wc-admin-api-keys.php';
+		include_once __DIR__ . '/class-wc-admin-webhooks.php';
+		include_once __DIR__ . '/class-wc-admin-pointers.php';
+		include_once __DIR__ . '/class-wc-admin-importers.php';
+		include_once __DIR__ . '/class-wc-admin-exporters.php';
 
 		// Help Tabs
 		if ( apply_filters( 'woocommerce_enable_admin_help_tab', true ) ) {
-			include_once dirname( __FILE__ ) . '/class-wc-admin-help.php';
+			include_once __DIR__ . '/class-wc-admin-help.php';
 		}
 
 		// Setup/welcome
 		if ( ! empty( $_GET['page'] ) ) {
 			switch ( $_GET['page'] ) {
 				case 'wc-setup':
-					include_once dirname( __FILE__ ) . '/class-wc-admin-setup-wizard.php';
+					include_once __DIR__ . '/class-wc-admin-setup-wizard.php';
 					break;
 			}
 		}
 
 		// Importers
 		if ( defined( 'WP_LOAD_IMPORTERS' ) ) {
-			include_once dirname( __FILE__ ) . '/class-wc-admin-importers.php';
+			include_once __DIR__ . '/class-wc-admin-importers.php';
 		}
 
 		// Helper
-		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-options.php';
-		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-api.php';
-		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-updater.php';
-		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-plugin-info.php';
-		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-compat.php';
-		include_once dirname( __FILE__ ) . '/helper/class-wc-helper.php';
+		include_once __DIR__ . '/helper/class-wc-helper-options.php';
+		include_once __DIR__ . '/helper/class-wc-helper-api.php';
+		include_once __DIR__ . '/helper/class-wc-helper-updater.php';
+		include_once __DIR__ . '/helper/class-wc-helper-plugin-info.php';
+		include_once __DIR__ . '/helper/class-wc-helper-compat.php';
+		include_once __DIR__ . '/helper/class-wc-helper.php';
 
 		// Marketplace suggestions & related REST API.
-		include_once dirname( __FILE__ ) . '/marketplace-suggestions/class-wc-marketplace-suggestions.php';
-		include_once dirname( __FILE__ ) . '/marketplace-suggestions/class-wc-marketplace-updater.php';
+		include_once __DIR__ . '/marketplace-suggestions/class-wc-marketplace-suggestions.php';
+		include_once __DIR__ . '/marketplace-suggestions/class-wc-marketplace-updater.php';
 	}
 
 	/**
 	 * Preloads some functionality of the Helper to be loaded on the `plugins_loaded` hook
 	 */
 	public function preload_helper() {
-		include_once dirname( __FILE__ ) . '/helper/class-wc-helper-file-headers.php';
+		include_once __DIR__ . '/helper/class-wc-helper-file-headers.php';
 	}
 
 	/**

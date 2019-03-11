@@ -523,7 +523,7 @@ class WC_Email extends WC_Settings_API {
 
 			if ( $this->supports_emogrifier() ) {
 				if ( ! class_exists( 'Emogrifier' ) ) {
-					include_once dirname( dirname( __FILE__ ) ) . '/libraries/class-emogrifier.php';
+					include_once dirname( __DIR__ ) . '/libraries/class-emogrifier.php';
 				}
 				try {
 					$emogrifier = new Emogrifier( $content, $css );

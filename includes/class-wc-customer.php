@@ -8,7 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-require_once dirname( __FILE__ ) . '/legacy/class-wc-legacy-customer.php';
+require_once __DIR__ . '/legacy/class-wc-legacy-customer.php';
 
 /**
  * Customer class.

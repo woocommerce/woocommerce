@@ -19,7 +19,7 @@ class WC_Tests_Tax_CSV_Importer extends WC_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 
-		$this->csv_file = dirname( __FILE__ ) . '/sample_tax_rates.csv';
+		$this->csv_file = __DIR__ . '/sample_tax_rates.csv';
 
 		$bootstrap = WC_Unit_Tests_Bootstrap::instance();
 		require_once ABSPATH . '/wp-admin/includes/class-wp-importer.php';

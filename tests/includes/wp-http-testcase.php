@@ -402,7 +402,7 @@ abstract class WP_HTTP_TestCase extends WP_UnitTestCase {
 
 		self::load_env( 'CACHE_GROUP' );
 
-		self::$cache_dir = self::get_env( 'CACHE_DIR', dirname( __FILE__ ) );
+		self::$cache_dir = self::get_env( 'CACHE_DIR', __DIR__ );
 
 		$cache_file = self::$cache_dir . '/' . self::$cache_group;
 

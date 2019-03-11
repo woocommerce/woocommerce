@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Include dependencies.
  */
 if ( ! class_exists( 'WC_Product_Importer', false ) ) {
-	include_once dirname( __FILE__ ) . '/abstract-wc-product-importer.php';
+	include_once __DIR__ . '/abstract-wc-product-importer.php';
 }
 
 if ( ! class_exists( 'WC_Product_CSV_Importer_Controller', false ) ) {

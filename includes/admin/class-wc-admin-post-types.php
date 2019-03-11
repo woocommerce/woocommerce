@@ -26,7 +26,7 @@ class WC_Admin_Post_Types {
 	 * Constructor.
 	 */
 	public function __construct() {
-		include_once dirname( __FILE__ ) . '/class-wc-admin-meta-boxes.php';
+		include_once __DIR__ . '/class-wc-admin-meta-boxes.php';
 
 		if ( ! function_exists( 'duplicate_post_plugin_activation' ) ) {
 			include_once 'class-wc-admin-duplicate-product.php';

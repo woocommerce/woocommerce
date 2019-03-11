@@ -45,7 +45,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			if ( empty( self::$settings ) ) {
 				$settings = array();
 
-				include_once dirname( __FILE__ ) . '/settings/class-wc-settings-page.php';
+				include_once __DIR__ . '/settings/class-wc-settings-page.php';
 
 				$settings[] = include 'settings/class-wc-settings-general.php';
 				$settings[] = include 'settings/class-wc-settings-products.php';
@@ -145,7 +145,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			// Get tabs for the settings page.
 			$tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
 
-			include dirname( __FILE__ ) . '/views/html-admin-settings.php';
+			include __DIR__ . '/views/html-admin-settings.php';
 		}
 
 		/**
