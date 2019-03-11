@@ -235,14 +235,14 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( count( $raw_tools ), count( $data ) );
 		$this->assertContains(
 			array(
-				'id'          => 'reset_tracking',
-				'name'        => 'Reset usage tracking',
-				'action'      => 'Reset',
-				'description' => 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.',
+				'id'          => 'regenerate_thumbnails',
+				'name'        => 'Regenerate shop thumbnails',
+				'action'      => 'Regenerate',
+				'description' => 'This will regenerate all shop thumbnails to match your theme and/or image settings.',
 				'_links'      => array(
 					'item' => array(
 						array(
-							'href'       => rest_url( '/wc/v2/system_status/tools/reset_tracking' ),
+							'href'       => rest_url( '/wc/v2/system_status/tools/regenerate_thumbnails' ),
 							'embeddable' => true,
 						),
 					),

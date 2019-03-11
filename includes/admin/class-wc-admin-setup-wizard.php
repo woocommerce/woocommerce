@@ -207,8 +207,8 @@ class WC_Admin_Setup_Wizard {
 				'i18n'                    => array(
 					'extra_plugins' => array(
 						'payment' => array(
-							'stripe_create_account'                              => __( 'Stripe setup is powered by Jetpack and WooCommerce Services.', 'woocommerce' ),
-							'ppec_paypal_reroute_requests'                       => __( 'PayPal setup is powered by Jetpack and WooCommerce Services.', 'woocommerce' ),
+							'stripe_create_account'        => __( 'Stripe setup is powered by Jetpack and WooCommerce Services.', 'woocommerce' ),
+							'ppec_paypal_reroute_requests' => __( 'PayPal setup is powered by Jetpack and WooCommerce Services.', 'woocommerce' ),
 							'stripe_create_account,ppec_paypal_reroute_requests' => __( 'Stripe and PayPal setup are powered by Jetpack and WooCommerce Services.', 'woocommerce' ),
 						),
 					),
@@ -348,6 +348,7 @@ class WC_Admin_Setup_Wizard {
 			<?php elseif ( 'recommended' === $this->step || 'activate' === $this->step ) : ?>
 				<a class="wc-setup-footer-links" href="<?php echo esc_url( $this->get_next_step_link() ); ?>"><?php esc_html_e( 'Skip this step', 'woocommerce' ); ?></a>
 			<?php endif; ?>
+			<?php do_action( 'woocommerce_setup_footer' ); ?>
 			</body>
 		</html>
 		<?php
@@ -552,22 +553,16 @@ class WC_Admin_Setup_Wizard {
 	public function wc_setup_store_setup_save() {
 		check_admin_referer( 'wc-setup' );
 
-		// phpcs:disable WordPress.VIP.SuperGlobalInputUsage.AccessDetected, WordPress.VIP.ValidatedSanitizedInput.InputNotValidated, WordPress.VIP.ValidatedSanitizedInput.MissingUnslash
-		$address        = sanitize_text_field( $_POST['store_address'] );
-		$address_2      = sanitize_text_field( $_POST['store_address_2'] );
-		$city           = sanitize_text_field( $_POST['store_city'] );
-		$country        = sanitize_text_field( $_POST['store_country'] );
-		$state          = isset( $_POST['store_state'] ) ? sanitize_text_field( $_POST['store_state'] ) : false;
-		$postcode       = sanitize_text_field( $_POST['store_postcode'] );
-		$currency_code  = sanitize_text_field( $_POST['currency_code'] );
-		$product_type   = sanitize_text_field( $_POST['product_type'] );
-		$sell_in_person = isset( $_POST['sell_in_person'] ) && ( 'yes' === sanitize_text_field( $_POST['sell_in_person'] ) );
-		$tracking       = isset( $_POST['wc_tracker_checkbox'] ) && ( 'yes' === sanitize_text_field( $_POST['wc_tracker_checkbox'] ) );
-		// phpcs:enable
-
-		if ( ! $state ) {
-			$state = '*';
-		}
+		$address        = isset( $_POST['store_address'] ) ? wc_clean( wp_unslash( $_POST['store_address'] ) ) : '';
+		$address_2      = isset( $_POST['store_address_2'] ) ? wc_clean( wp_unslash( $_POST['store_address_2'] ) ) : '';
+		$city           = isset( $_POST['store_city'] ) ? wc_clean( wp_unslash( $_POST['store_city'] ) ) : '';
+		$country        = isset( $_POST['store_country'] ) ? wc_clean( wp_unslash( $_POST['store_country'] ) ) : '';
+		$state          = isset( $_POST['store_state'] ) ? wc_clean( wp_unslash( $_POST['store_state'] ) ) : '*';
+		$postcode       = isset( $_POST['store_postcode'] ) ? wc_clean( wp_unslash( $_POST['store_postcode'] ) ) : '';
+		$currency_code  = isset( $_POST['currency_code'] ) ? wc_clean( wp_unslash( $_POST['currency_code'] ) ) : '';
+		$product_type   = isset( $_POST['product_type'] ) ? wc_clean( wp_unslash( $_POST['product_type'] ) ) : '';
+		$sell_in_person = isset( $_POST['sell_in_person'] ) && ( 'yes' === wc_clean( wp_unslash( $_POST['sell_in_person'] ) ) );
+		$tracking       = isset( $_POST['wc_tracker_checkbox'] ) && ( 'yes' === wc_clean( wp_unslash( $_POST['wc_tracker_checkbox'] ) ) );
 
 		update_option( 'woocommerce_store_address', $address );
 		update_option( 'woocommerce_store_address_2', $address_2 );
@@ -807,8 +802,8 @@ class WC_Admin_Setup_Wizard {
 	 * @param string $input_prefix Input prefix.
 	 */
 	protected function shipping_method_selection_form( $country_code, $currency_code, $input_prefix ) {
-		$selected          = 'flat_rate';
-		$shipping_methods  = $this->get_wizard_shipping_methods( $country_code, $currency_code );
+		$selected         = 'flat_rate';
+		$shipping_methods = $this->get_wizard_shipping_methods( $country_code, $currency_code );
 		?>
 		<div class="wc-wizard-shipping-method-select">
 			<div class="wc-wizard-shipping-method-dropdown">
@@ -983,7 +978,7 @@ class WC_Admin_Setup_Wizard {
 										'class'    => array(),
 										'data-tip' => array(),
 									),
-									'a' => array(
+									'a'    => array(
 										'href'   => array(),
 										'target' => array(),
 									),
@@ -1002,28 +997,32 @@ class WC_Admin_Setup_Wizard {
 			<ul class="wc-setup-shipping-recommended">
 			<?php
 			if ( $is_wcs_labels_supported ) :
-				$this->display_recommended_item( array(
-					'type'        => 'woocommerce_services',
-					'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
-					'description' => __( 'We recommend WooCommerce Services & Jetpack. These plugins will save you time at the Post Office by enabling you to print your shipping labels at home.', 'woocommerce' ),
-					'img_url'     => WC()->plugin_url() . '/assets/images/obw-woocommerce-services-icon.png',
-					'img_alt'     => __( 'WooCommerce Services icon', 'woocommerce' ),
-					'plugins'     => $this->get_wcs_requisite_plugins(),
-				) );
+				$this->display_recommended_item(
+					array(
+						'type'        => 'woocommerce_services',
+						'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
+						'description' => __( 'We recommend WooCommerce Services & Jetpack. These plugins will save you time at the Post Office by enabling you to print your shipping labels at home.', 'woocommerce' ),
+						'img_url'     => WC()->plugin_url() . '/assets/images/obw-woocommerce-services-icon.png',
+						'img_alt'     => __( 'WooCommerce Services icon', 'woocommerce' ),
+						'plugins'     => $this->get_wcs_requisite_plugins(),
+					)
+				);
 			elseif ( $is_shipstation_supported ) :
-				$this->display_recommended_item( array(
-					'type'        => 'shipstation',
-					'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
-					'description' => __( 'We recommend using ShipStation to save time at the Post Office by printing your shipping labels at home. Try ShipStation free for 30 days.', 'woocommerce' ),
-					'img_url'     => WC()->plugin_url() . '/assets/images/obw-shipstation-icon.png',
-					'img_alt'     => __( 'ShipStation icon', 'woocommerce' ),
-					'plugins'     => array(
-						array(
-							'name' => __( 'ShipStation', 'woocommerce' ),
-							'slug' => 'woocommerce-shipstation-integration',
+				$this->display_recommended_item(
+					array(
+						'type'        => 'shipstation',
+						'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
+						'description' => __( 'We recommend using ShipStation to save time at the Post Office by printing your shipping labels at home. Try ShipStation free for 30 days.', 'woocommerce' ),
+						'img_url'     => WC()->plugin_url() . '/assets/images/obw-shipstation-icon.png',
+						'img_alt'     => __( 'ShipStation icon', 'woocommerce' ),
+						'plugins'     => array(
+							array(
+								'name' => __( 'ShipStation', 'woocommerce' ),
+								'slug' => 'woocommerce-shipstation-integration',
+							),
 						),
-					),
-				) );
+					)
+				);
 			endif;
 		endif;
 		?>
@@ -1040,7 +1039,7 @@ class WC_Admin_Setup_Wizard {
 								$this->get_product_dimension_selection()
 							),
 							array(
-								'span' => array(
+								'span'   => array(
 									'class' => array(),
 								),
 								'select' => array(
@@ -1566,7 +1565,7 @@ class WC_Admin_Setup_Wizard {
 	 *
 	 * @return array
 	 */
-	protected function get_wizard_manual_payment_gateways() {
+	public function get_wizard_manual_payment_gateways() {
 		$gateways = array(
 			'cheque' => array(
 				'name'        => _x( 'Check payments', 'Check payment method', 'woocommerce' ),
