@@ -1,3 +1,7 @@
+# 1.0.6
+
+- Removed timezone from `appendTimestamp()` output.
+
 # 1.0.5
 
 - Fixed bug in getAllowedIntervalsForQuery() to not return `hour` for default intervals

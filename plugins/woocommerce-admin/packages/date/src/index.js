@@ -63,15 +63,15 @@ export const periods = [
 export const appendTimestamp = ( date, timeOfDay ) => {
 	date = date.format( isoDateFormat );
 	if ( timeOfDay === 'start' ) {
-		return date + 'T00:00:00+00:00';
+		return date + 'T00:00:00';
 	}
 	if ( timeOfDay === 'now' ) {
 		// Set seconds to 00 to avoid consecutives calls happening before the previous
 		// one finished.
-		return date + 'T' + moment().format( 'HH:mm:00' ) + '+00:00';
+		return date + 'T' + moment().format( 'HH:mm:00' );
 	}
 	if ( timeOfDay === 'end' ) {
-		return date + 'T23:59:59+00:00';
+		return date + 'T23:59:59';
 	}
 	throw new Error( 'appendTimestamp requires second parameter to be either `start`, `now` or `end`' );
 };
