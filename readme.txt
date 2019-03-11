@@ -159,7 +159,9 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 == Changelog ==
 
 = 3.6.0 - 2019-xx-xx =
-
+* Enhancement - Merged WooCommerce Gutenberg Products Block feature plugin. Adds blocks for the new editor, including
+                hand picked products, featured products, products by category/attribute, sale products, new products, top rated
+                products, and best selling products. #22954
 * Enhancement - Only include order erasure bulk action if erasure is enabled in settings. #22354
 * Enhancement - Customer notes containing URLs now automatically converts to clickable links. #21927
 * Enhancement - Add increase and decrease stock options to bulk edit form. #22475
@@ -167,8 +169,9 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Added registration success notices to account pages. #22650
 * Enhancement - Store notice is visible again if the notice text is changed. #22645
 * Enhancement - Add aria-label attribute to shop orderby selector to improve accessibility. #22683
-* Enhancement - When adding, editing, and deleting items manually from orders, the corresponding product stock will be updated to reflect the event and an order note will log the event. #22329
-* Enhancement - Add no-transform cache header for Google Weblight #22525
+* Enhancement - When adding, editing, and deleting items manually from orders, the corresponding product stock will be
+                updated to reflect the event and an order note will log the event. #22329
+* Tweak - Add no-transform cache header to bypass Google Weblight. #22525
 * Tweak - Generalize shipping estimate text on cart page. #22467
 * Tweak - Include auto draft orders in order list filters. #22380
 * Tweak - Only include the network orders widget on the main site dashboard. #22318
@@ -198,7 +201,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Add new pre query filter to WC_Product_Data_Store_CPT::search_products(). #22165
 * Dev - Added additional parameters to the `woocommerce_variation_option_name` filter. #21153
 * Dev - Added new filter `woocommerce_get_min_max_price_meta_query`. #22255
-* Dev - Added a filter to WC_REST_CRUD_Controller::get_collection_params method to allow developers to change params in the same way as WP_Rest_Posts_controller::get_collection_params. #21562
+* Dev - Added a filter to WC_REST_CRUD_Controller::get_collection_params method to allow developers to change params in
+        the same way as WP_Rest_Posts_controller::get_collection_params. #21562
 * Dev - Add $zone param to woocommerce_shipping_zone_before_methods_table and woocommerce_shipping_zone_after_methods_table actions. #21961
 * Dev - Added `woocommerce_geolocation_ajax_get_location_hash` filter. #22350
 * Dev - Added `woocommerce_variation_prices_array` filter. #21003
@@ -207,7 +211,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - `woocommerce_checkout_before_order_review_heading` action added in checkout form template. #22481
 * Dev - Added `woocommerce_variation_header` hook in variations list. #21341
 * Dev - Add a filter, woocommerce_current_user_can_edit_customer_meta_fields, to bypass manage_woocommerce when editing customer meta fields. #22277
-* Dev - Adds filter on the return value of function 'get_item_tax_rates'. This gives developers the possibility to prevent the mandatory caching of tax rates. #22488
+* Dev - Adds filter on the return value of function 'get_item_tax_rates'. This gives developers the possibility to
+        prevent the mandatory caching of tax rates. #22488
 * Dev - Add filters for mail callback in WC_Email::send method. #22394
 * Dev - Add an instance method to WC_Admin_Taxonomies. #21884
 * Dev - Added `woocommerce_order_is_pending_statuses` filter and `wc_get_is_pending_statuses` function. #22409
@@ -235,9 +240,11 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Added filters for shipping options - `woocommerce_shipping_ID_option` and `woocommerce_shipping_ID_instance_option`. #22771
 * Dev - Refactor comment/rating update functions. #22909
 * Dev - Introduced wc_sanitize_phone_number() function. #22962
-* Dev - Added `woocommerce_get_product_subcategories_cache_key` filter to allow the cache to be renamed if for instance the site runs in multiple languages and needs a unique cache per language. #22915
+* Dev - Added `woocommerce_get_product_subcategories_cache_key` filter to allow the cache to be renamed if for instance
+        the site runs in multiple languages and needs a unique cache per language. #22915
 * Dev - Inactive, MU, Dropin plugins and WooCommerce.com account connection status added to System Status Report. #22887
 * Dev - Make error handling consistent in payment processing for pay page and checkout. #22916
+* Dev - Improved usage and event tracking (if opted in). #22955
 * Fix - Use correct address for taxes when applying/removing coupons. #22802
 * Fix - Hide ratings on the shop page when reviews are disabled. #22476
 * Fix - Fix W3C validation of single product page quantity input. #22333
@@ -251,7 +258,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Fix customer creation dates in API. #22269
 * Fix - Get widget instance setting defaults so it shows in customiser before save. #22345
 * Fix - PR state codes. #22339
-* Fix - Allow selecting states from the Country / State drop-down for your store address when you have the option enabled to sell to specific countries. #22339
+* Fix - Allow selecting states from the Country / State drop-down for your store address when you have the option
+        enabled to sell to specific countries. #22339
 * Fix - Restrict the price filter widget to filtering the main product query. #22621
 * Fix - Default placeholder image resizing. #22443
 * Fix - HTML tags should be stripped from description in Structured Data of Product. #22596
@@ -282,7 +290,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Performance - Prevent frontend code from being loaded during REST API. #21090
 * Performance - Load only active webhooks on pages and allow limits to be set by developers. #22760
 * Performance - Index on downloadable_product_permissions to improve speed when fetching downloads for customers. #22906
-* Performance - Improved term ordering queries, making the sorting apply by default via the DB query rather than sorting all terms with PHP. Removed legacy term meta table usage. #22570
+* Performance - Improved term ordering queries, making the sorting apply by default via the DB query rather than sorting
+                all terms with PHP. Removed legacy term meta table usage. #22570
 * Performance - Use day, not time, in status widget for caching. #22950
 * Performance - Improve slow term ordering by using queries instead of php. #22570
 * Performance - Removes legacy woocomerce_termmeta table and swap out all calls to legacy term meta functions to the new WP ones. #22570
