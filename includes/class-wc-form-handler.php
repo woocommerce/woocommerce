@@ -350,6 +350,8 @@ class WC_Form_Handler {
 
 	/**
 	 * Process the pay form.
+	 *
+	 * @throws Exception On payment error.
 	 */
 	public static function pay_action() {
 		global $wp;
@@ -391,35 +393,39 @@ class WC_Form_Handler {
 
 				// Update payment method.
 				if ( $order->needs_payment() ) {
-					$payment_method     = isset( $_POST['payment_method'] ) ? wc_clean( wp_unslash( $_POST['payment_method'] ) ) : false;
-					$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+					try {
+						$payment_method_id = isset( $_POST['payment_method'] ) ? wc_clean( wp_unslash( $_POST['payment_method'] ) ) : false;
 
-					if ( ! $payment_method ) {
-						wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
-						return;
-					}
-
-					update_post_meta( $order_id, '_payment_method', $payment_method );
-
-					if ( isset( $available_gateways[ $payment_method ] ) ) {
-						$payment_method_title = $available_gateways[ $payment_method ]->get_title();
-					} else {
-						$payment_method_title = '';
-					}
-
-					update_post_meta( $order_id, '_payment_method_title', $payment_method_title );
-
-					$available_gateways[ $payment_method ]->validate_fields();
-
-					if ( 0 === wc_notice_count( 'error' ) ) {
-
-						$result = $available_gateways[ $payment_method ]->process_payment( $order_id );
-
-						// Redirect to success/confirmation/payment page.
-						if ( 'success' === $result['result'] ) {
-							wp_redirect( $result['redirect'] ); //phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
-							exit;
+						if ( ! $payment_method_id ) {
+							throw new Exception( __( 'Invalid payment method.', 'woocommerce' ) );
 						}
+
+						$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+						$payment_method     = isset( $available_gateways[ $payment_method_id ] ) ? $available_gateways[ $payment_method_id ] : false;
+
+						if ( ! $payment_method ) {
+							throw new Exception( __( 'Invalid payment method.', 'woocommerce' ) );
+						}
+
+						$order->set_payment_method( $payment_method );
+						$order->save();
+
+						$payment_method->validate_fields();
+
+						if ( 0 === wc_notice_count( 'error' ) ) {
+
+							$result = $payment_method->process_payment( $order_id );
+
+							// Redirect to success/confirmation/payment page.
+							if ( isset( $result['result'] ) && 'success' === $result['result'] ) {
+								$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
+
+								wp_redirect( $result['redirect'] ); //phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
+								exit;
+							}
+						}
+					} catch ( Exception $e ) {
+						wc_add_notice( $e->getMessage(), 'error' );
 					}
 				} else {
 					// No payment was required for order.
