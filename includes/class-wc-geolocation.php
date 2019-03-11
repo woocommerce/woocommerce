@@ -260,11 +260,11 @@ class WC_Geolocation {
 		$tmp_database_path    = download_url( self::GEOLITE2_DB );
 
 		if ( ! is_wp_error( $tmp_database_path ) ) {
+			WP_Filesystem();
+
+			global $wp_filesystem;
+
 			try {
-				WP_Filesystem();
-
-				global $wp_filesystem;
-
 				// Make sure target dir exists.
 				$wp_filesystem->mkdir( dirname( $target_database_path ) );
 
@@ -275,8 +275,7 @@ class WC_Geolocation {
 
 				// Move file and delete temp.
 				$wp_filesystem->move( trailingslashit( dirname( $tmp_database_path ) ) . $file_path, $target_database_path, true );
-				$wp_filesystem->unlink( trailingslashit( dirname( $tmp_database_path ) ) . $file->current()->getFileName() );
-				$wp_filesystem->unlink( $tmp_database_path );
+				$wp_filesystem->delete( trailingslashit( dirname( $tmp_database_path ) ) . $file->current()->getFileName() );
 			} catch ( Exception $e ) {
 				$logger->notice( $e->getMessage(), array( 'source' => 'geolocation' ) );
 
@@ -284,6 +283,8 @@ class WC_Geolocation {
 				wp_clear_scheduled_hook( 'woocommerce_geoip_updater' );
 				wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
 			}
+			// Delete temp file regardless of success.
+			$wp_filesystem->delete( $tmp_database_path );
 		} else {
 			$logger->notice(
 				'Unable to download GeoIP Database: ' . $tmp_database_path->get_error_message(),
