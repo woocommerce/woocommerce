@@ -136,7 +136,7 @@ add_action( 'admin_enqueue_scripts', 'wc_admin_register_script' );
  * @param array $statuses Order statuses.
  * @return array formatted statuses.
  */
-function format_order_statuses( $statuses ) {
+function wc_admin_format_order_statuses( $statuses ) {
 	$formatted_statuses = array();
 	foreach ( $statuses as $key => $value ) {
 		$formatted_key                        = preg_replace( '/^wc-/', '', $key );
@@ -185,7 +185,7 @@ function wc_admin_print_script_settings() {
 		'embedBreadcrumbs' => wc_admin_get_embed_breadcrumbs(),
 		'siteLocale'       => esc_attr( get_bloginfo( 'language' ) ),
 		'currency'         => wc_admin_currency_settings(),
-		'orderStatuses'    => format_order_statuses( wc_get_order_statuses() ),
+		'orderStatuses'    => wc_admin_format_order_statuses( wc_get_order_statuses() ),
 		'stockStatuses'    => wc_get_product_stock_status_options(),
 		'siteTitle'        => get_bloginfo( 'name' ),
 		'dataEndpoints'    => array(),

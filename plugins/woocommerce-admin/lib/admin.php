@@ -381,7 +381,7 @@ function wc_admin_output_breadcrumb( $section ) {
  *
  * @todo Icon Placeholders for the ActivityPanel, when we implement the new designs.
  */
-function woocommerce_embed_page_header() {
+function wc_admin_woocommerce_embed_page_header() {
 	if ( ! wc_admin_is_embed_enabled_wc_page() ) {
 		return;
 	}
@@ -406,7 +406,7 @@ function woocommerce_embed_page_header() {
 	</div>
 	<?php
 }
-add_action( 'in_admin_header', 'woocommerce_embed_page_header' );
+add_action( 'in_admin_header', 'wc_admin_woocommerce_embed_page_header' );
 
 /**
  * Registers WooCommerce specific user data to the WordPress user API.
