@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e7a81f490b054c067759791d696be7bd",
+    "content-hash": "a53448ce5c216a63300886fc01e71246",
     "packages": [
         {
             "name": "composer/installers",
@@ -2802,7 +2802,6 @@
                 "mock",
                 "xunit"
             ],
-            "abandoned": true,
             "time": "2018-08-09T05:50:03+00:00"
         },
         {
@@ -4011,16 +4010,16 @@
         },
         {
             "name": "woocommerce/woocommerce-sniffs",
-            "version": "0.0.5",
+            "version": "0.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-sniffs.git",
-                "reference": "f91f940ea0dca2b67be7a8a35c1ded41257b372f"
+                "reference": "a3032bdddd60c71d1330f591e1a9128e115f81ee"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-sniffs/zipball/f91f940ea0dca2b67be7a8a35c1ded41257b372f",
-                "reference": "f91f940ea0dca2b67be7a8a35c1ded41257b372f",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-sniffs/zipball/a3032bdddd60c71d1330f591e1a9128e115f81ee",
+                "reference": "a3032bdddd60c71d1330f591e1a9128e115f81ee",
                 "shasum": ""
             },
             "require": {
@@ -4047,7 +4046,7 @@
                 "woocommerce",
                 "wordpress"
             ],
-            "time": "2018-11-20T21:33:22+00:00"
+            "time": "2019-03-11T15:30:23+00:00"
         },
         {
             "name": "wp-coding-standards/wpcs",
