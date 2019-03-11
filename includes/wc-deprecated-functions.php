@@ -1014,6 +1014,32 @@ function wc_get_core_supported_themes() {
 }
 
 /**
+ * Get min/max price meta query args.
+ *
+ * @deprecated 3.6.0
+ * @since 3.0.0
+ * @param array $args Min price and max price arguments.
+ * @return array
+ */
+function wc_get_min_max_price_meta_query( $args ) {
+	wc_deprecated_function( 'wc_get_min_max_price_meta_query()', '3.6' );
+
+	$current_min_price = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
+	$current_max_price = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : PHP_INT_MAX;
+
+	return apply_filters(
+		'woocommerce_get_min_max_price_meta_query',
+		array(
+			'key'     => '_price',
+			'value'   => array( $current_min_price, $current_max_price ),
+			'compare' => 'BETWEEN',
+			'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
+		),
+		$args
+	);
+}
+
+/**
  * When a term is split, ensure meta data maintained.
  *
  * @deprecated 3.6.0

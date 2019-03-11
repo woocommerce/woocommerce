@@ -148,6 +148,11 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				'button' => __( 'Index orders', 'woocommerce' ),
 				'desc'   => __( 'This tool will add address indexes to orders that do not have them yet. This improves order search results.', 'woocommerce' ),
 			),
+			'regenerate_product_lookup_tables' => array(
+				'name'   => __( 'Product lookup tables', 'woocommerce' ),
+				'button' => __( 'Regenerate', 'woocommerce' ),
+				'desc'   => __( 'This tool will regenerate product lookup table data. This process may take a while.', 'woocommerce' ),
+			),
 			'recount_terms'                      => array(
 				'name'   => __( 'Term counts', 'woocommerce' ),
 				'button' => __( 'Recount terms', 'woocommerce' ),
@@ -492,6 +497,13 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				$message = sprintf( __( '%d indexes added', 'woocommerce' ), $rows );
 				break;
 
+			case 'regenerate_product_lookup_tables':
+				// Clear existing data.
+				$wpdb->query( "TRUNCATE TABLE {$wpdb->wc_product_meta_lookup};" );
+				// Run generation.
+				wc_update_product_lookup_tables();
+				$message = __( 'Lookup tables are regenerating', 'woocommerce' );
+				break;
 			case 'reset_roles':
 				// Remove then re-add caps and roles.
 				WC_Install::remove_roles();

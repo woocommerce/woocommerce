@@ -252,19 +252,16 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 				'expected' => array(
 					'orderby'  => 'popularity',
 					'order'    => 'DESC',
-					'meta_key' => 'total_sales',
+					'meta_key' => '',
 				),
 			),
 			array(
 				'orderby'  => 'rating',
 				'order'    => 'ASC',
 				'expected' => array(
-					'orderby'  => array(
-						'meta_value_num' => 'DESC',
-						'ID'             => 'ASC',
-					),
+					'orderby'  => 'rating',
 					'order'    => 'ASC',
-					'meta_key' => '_wc_average_rating',
+					'meta_key' => '',
 				),
 			),
 			array(

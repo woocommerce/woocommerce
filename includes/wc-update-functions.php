@@ -1550,7 +1550,7 @@ function wc_update_330_set_default_product_cat() {
 	$default_category = get_option( 'default_product_cat', 0 );
 
 	if ( $default_category ) {
-		$result = $wpdb->query(
+		$wpdb->query(
 			$wpdb->prepare(
 				"INSERT INTO {$wpdb->term_relationships} (object_id, term_taxonomy_id)
 				SELECT DISTINCT posts.ID, %s FROM {$wpdb->posts} posts
@@ -1931,6 +1931,13 @@ function wc_update_354_modify_shop_manager_caps() {
  */
 function wc_update_354_db_version() {
 	WC_Install::update_db_version( '3.5.4' );
+}
+
+/**
+ * Update product lookup tables in bulk.
+ */
+function wc_update_360_product_lookup_tables() {
+	wc_update_product_lookup_tables();
 }
 
 /**

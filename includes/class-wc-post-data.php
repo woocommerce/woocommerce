@@ -290,6 +290,7 @@ class WC_Post_Data {
 			case 'product':
 				$data_store = WC_Data_Store::load( 'product-variable' );
 				$data_store->delete_variations( $id, true );
+				$data_store->delete_from_lookup_table( $id, 'wc_product_meta_lookup' );
 				$parent_id = wp_get_post_parent_id( $id );
 
 				if ( $parent_id ) {
@@ -297,6 +298,8 @@ class WC_Post_Data {
 				}
 				break;
 			case 'product_variation':
+				$data_store = WC_Data_Store::load( 'product' );
+				$data_store->delete_from_lookup_table( $id, 'wc_product_meta_lookup' );
 				wc_delete_product_transients( wp_get_post_parent_id( $id ) );
 				break;
 			case 'shop_order':

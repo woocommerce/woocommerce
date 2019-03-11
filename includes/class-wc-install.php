@@ -125,6 +125,7 @@ class WC_Install {
 			'wc_update_354_db_version',
 		),
 		'3.6.0' => array(
+			'wc_update_360_product_lookup_tables',
 			'wc_update_360_term_meta',
 			'wc_update_360_downloadable_product_permissions_index',
 			'wc_update_360_db_version',
@@ -818,10 +819,29 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
   permission_id BIGINT UNSIGNED NOT NULL,
   user_id BIGINT UNSIGNED NULL,
   user_ip_address VARCHAR(100) NULL DEFAULT '',
-  PRIMARY KEY (download_log_id),
+  PRIMARY KEY  (download_log_id),
   KEY permission_id (permission_id),
   KEY timestamp (timestamp)
 ) $collate;
+CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
+  `product_id` bigint(20) NOT NULL,
+  `sku` varchar(100) NULL default '',
+  `virtual` tinyint(1) NULL default 0,
+  `downloadable` tinyint(1) NULL default 0,
+  `min_price` decimal(10,2) NULL default NULL,
+  `max_price` decimal(10,2) NULL default NULL,
+  `stock_quantity` double NULL default NULL,
+  `stock_status` varchar(100) NULL default 'instock',
+  `rating_count` bigint(20) NULL default 0,
+  `average_rating` decimal(3,2) NULL default 0.00,
+  `total_sales` bigint(20) NULL default 0,
+  PRIMARY KEY  (`product_id`),
+  KEY `virtual` (`virtual`),
+  KEY `downloadable` (`downloadable`),
+  KEY `stock_status` (`stock_status`),
+  KEY `stock_quantity` (`stock_quantity`),
+  KEY min_max_price (`min_price`, `max_price`)
+  ) $collate;
 		";
 
 		return $tables;
@@ -838,6 +858,7 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
 
 		$tables = array(
 			"{$wpdb->prefix}wc_download_log",
+			"{$wpdb->prefix}wc_product_meta_lookup",
 			"{$wpdb->prefix}wc_webhooks",
 			"{$wpdb->prefix}woocommerce_api_keys",
 			"{$wpdb->prefix}woocommerce_attribute_taxonomies",

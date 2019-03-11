@@ -629,6 +629,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
+		if ( array_intersect( $this->updated_props, array( 'sku', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual' ) ) ) {
+			$this->update_lookup_table( $product->get_id(), 'wc_product_meta_lookup' );
+		}
+
 		// Trigger action so 3rd parties can deal with updated props.
 		do_action( 'woocommerce_product_object_updated_props', $product, $this->updated_props );
 
@@ -1280,6 +1284,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$wpdb->query( $sql );
 
 		wp_cache_delete( $product_id_with_stock, 'post_meta' );
+
+		/**
+		 * Fire an action for this direct update so it can be detected by other code.
+		 *
+		 * @since 3.6
+		 * @param int $product_id_with_stock Product ID that was updated directly.
+		 */
+		do_action( 'woocommerce_updated_product_stock', $product_id_with_stock );
 	}
 
 	/**
@@ -1331,12 +1343,23 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		wp_cache_delete( $product_id, 'post_meta' );
+
+		$this->update_lookup_table( $product_id, 'wc_product_meta_lookup' );
+
+		/**
+		 * Fire an action for this direct update so it can be detected by other code.
+		 *
+		 * @since 3.6
+		 * @param int $product_id Product ID that was updated directly.
+		 */
+		do_action( 'woocommerce_updated_product_sales', $product_id );
 	}
 
 	/**
 	 * Update a products average rating meta.
 	 *
 	 * @since 3.0.0
+	 * @todo Deprecate unused function?
 	 * @param WC_Product $product Product object.
 	 */
 	public function update_average_rating( $product ) {
@@ -1348,6 +1371,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Update a products review count meta.
 	 *
 	 * @since 3.0.0
+	 * @todo Deprecate unused function?
 	 * @param WC_Product $product Product object.
 	 */
 	public function update_review_count( $product ) {
@@ -1358,6 +1382,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Update a products rating counts.
 	 *
 	 * @since 3.0.0
+	 * @todo Deprecate unused function?
 	 * @param WC_Product $product Product object.
 	 */
 	public function update_rating_counts( $product ) {
@@ -1413,7 +1438,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$post_types    = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
 		$post_statuses = current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' );
-		$type_join     = '';
 		$type_where    = '';
 		$status_where  = '';
 		$limit_query   = '';
@@ -1448,7 +1472,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			foreach ( $search_terms as $search_term ) {
 				$like              = '%' . $wpdb->esc_like( $search_term ) . '%';
-				$term_group_query .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_excerpt LIKE %s) OR ( posts.post_content LIKE %s ) OR ( postmeta.meta_key = '_sku' AND postmeta.meta_value LIKE %s ) )", $like, $like, $like, $like ); // @codingStandardsIgnoreLine.
+				$term_group_query .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_excerpt LIKE %s) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s ) )", $like, $like, $like, $like ); // @codingStandardsIgnoreLine.
 				$searchand         = ' AND ';
 			}
 
@@ -1461,9 +1485,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$search_where = 'AND (' . implode( ') OR (', $search_queries ) . ')';
 		}
 
-		if ( $type && in_array( $type, array( 'virtual', 'downloadable' ), true ) ) {
-			$type_join  = " LEFT JOIN {$wpdb->postmeta} postmeta_type ON posts.ID = postmeta_type.post_id ";
-			$type_where = " AND ( postmeta_type.meta_key = '_{$type}' AND postmeta_type.meta_value = 'yes' ) ";
+		if ( 'virtual' === $type ) {
+			$type_where = ' AND ( wc_product_meta_lookup.virtual = 1 ) ';
+		} elseif ( 'downloadable' === $type ) {
+			$type_where = ' AND ( wc_product_meta_lookup.downloadable = 1 ) ';
 		}
 
 		if ( ! $all_statuses ) {
@@ -1478,8 +1503,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$search_results = $wpdb->get_results(
 			// phpcs:disable
 			"SELECT DISTINCT posts.ID as product_id, posts.post_parent as parent_id FROM {$wpdb->posts} posts
-			LEFT JOIN {$wpdb->postmeta} postmeta ON posts.ID = postmeta.post_id
-			$type_join
+			 LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
 			WHERE posts.post_type IN ('" . implode( "','", $post_types ) . "')
 			$search_where
 			$status_where
@@ -1844,5 +1868,49 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		return $products;
+	}
+
+	/**
+	 * Get data to save to a lookup table.
+	 *
+	 * @since 3.6.0
+	 * @param int    $id ID of object to update.
+	 * @param string $table Lookup table name.
+	 * @return array
+	 */
+	protected function get_data_for_lookup_table( $id, $table ) {
+		if ( 'wc_product_meta_lookup' === $table ) {
+			$price_meta   = (array) get_post_meta( $id, '_price', false );
+			$manage_stock = get_post_meta( $id, '_manage_stock', true );
+			$stock        = 'yes' === $manage_stock ? wc_stock_amount( get_post_meta( $id, '_stock', true ) ) : null;
+			return array(
+				'product_id'     => absint( $id ),
+				'sku'            => get_post_meta( $id, '_sku', true ),
+				'virtual'        => 'yes' === get_post_meta( $id, '_virtual', true ) ? 1 : 0,
+				'downloadable'   => 'yes' === get_post_meta( $id, '_downloadable', true ) ? 1 : 0,
+				'min_price'      => reset( $price_meta ),
+				'max_price'      => end( $price_meta ),
+				'stock_quantity' => $stock,
+				'stock_status'   => get_post_meta( $id, '_stock_status', true ),
+				'rating_count'   => array_sum( (array) get_post_meta( $id, '_wc_rating_count', true ) ),
+				'average_rating' => get_post_meta( $id, '_wc_average_rating', true ),
+				'total_sales'    => get_post_meta( $id, 'total_sales', true ),
+			);
+		}
+		return array();
+	}
+
+	/**
+	 * Get primary key name for lookup table.
+	 *
+	 * @since 3.6.0
+	 * @param string $table Lookup table name.
+	 * @return string
+	 */
+	protected function get_primary_key_for_lookup_table( $table ) {
+		if ( 'wc_product_meta_lookup' === $table ) {
+			return 'product_id';
+		}
+		return '';
 	}
 }

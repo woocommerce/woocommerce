@@ -64,6 +64,11 @@ class WC_Widget_Price_Filter extends WC_Widget {
 	public function widget( $args, $instance ) {
 		global $wp;
 
+		// Requires lookup table added in 3.6.
+		if ( version_compare( get_option( 'woocommerce_db_version', null ), '3.6', '<' ) ) {
+			return;
+		}
+
 		if ( ! is_shop() && ! is_product_taxonomy() ) {
 			return;
 		}
@@ -162,22 +167,22 @@ class WC_Widget_Price_Filter extends WC_Widget {
 
 		$meta_query = new WP_Meta_Query( $meta_query );
 		$tax_query  = new WP_Tax_Query( $tax_query );
+		$search     = WC_Query::get_main_search_query_sql();
 
-		$meta_query_sql = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
-		$tax_query_sql  = $tax_query->get_sql( $wpdb->posts, 'ID' );
+		$meta_query_sql   = $meta_query->get_sql( 'post', $wpdb->posts, 'ID' );
+		$tax_query_sql    = $tax_query->get_sql( $wpdb->posts, 'ID' );
+		$search_query_sql = $search ? ' AND ' . $search : '';
 
-		$sql  = "SELECT min( FLOOR( price_meta.meta_value ) ) as min_price, max( CEILING( price_meta.meta_value ) ) as max_price FROM {$wpdb->posts} ";
-		$sql .= " LEFT JOIN {$wpdb->postmeta} as price_meta ON {$wpdb->posts}.ID = price_meta.post_id " . $tax_query_sql['join'] . $meta_query_sql['join'];
-		$sql .= " 	WHERE {$wpdb->posts}.post_type IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_post_type', array( 'product' ) ) ) ) . "')
-			AND {$wpdb->posts}.post_status = 'publish'
-			AND price_meta.meta_key IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_meta_keys', array( '_price' ) ) ) ) . "')
-			AND price_meta.meta_value > '' ";
-		$sql .= $tax_query_sql['where'] . $meta_query_sql['where'];
-
-		$search = WC_Query::get_main_search_query_sql();
-		if ( $search ) {
-			$sql .= ' AND ' . $search;
-		}
+		$sql = "
+			SELECT min( min_price ) as min_price, MAX( max_price ) as max_price
+			FROM {$wpdb->wc_product_meta_lookup}
+			WHERE product_id IN (
+				SELECT ID FROM {$wpdb->posts}
+				" . $tax_query_sql['join'] . $meta_query_sql['join'] . "
+				WHERE {$wpdb->posts}.post_type IN ('" . implode( "','", array_map( 'esc_sql', apply_filters( 'woocommerce_price_filter_post_type', array( 'product' ) ) ) ) . "')
+				AND {$wpdb->posts}.post_status = 'publish'
+				" . $tax_query_sql['where'] . $meta_query_sql['where'] . $search_query_sql . '
+			)';
 
 		$sql = apply_filters( 'woocommerce_price_filter_sql', $sql, $meta_query_sql, $tax_query_sql );
 
