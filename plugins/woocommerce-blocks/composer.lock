@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "32f96e0dc4ef77c4a779863732179568",
+    "content-hash": "52f240d548651f20cbb1a9f4ffe5e663",
     "packages": [
         {
             "name": "composer/installers",
@@ -405,16 +405,16 @@
         },
         {
             "name": "woocommerce/woocommerce-sniffs",
-            "version": "0.0.5",
+            "version": "0.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-sniffs.git",
-                "reference": "f91f940ea0dca2b67be7a8a35c1ded41257b372f"
+                "reference": "a3032bdddd60c71d1330f591e1a9128e115f81ee"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-sniffs/zipball/f91f940ea0dca2b67be7a8a35c1ded41257b372f",
-                "reference": "f91f940ea0dca2b67be7a8a35c1ded41257b372f",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-sniffs/zipball/a3032bdddd60c71d1330f591e1a9128e115f81ee",
+                "reference": "a3032bdddd60c71d1330f591e1a9128e115f81ee",
                 "shasum": ""
             },
             "require": {
@@ -441,7 +441,7 @@
                 "woocommerce",
                 "wordpress"
             ],
-            "time": "2018-11-20T21:33:22+00:00"
+            "time": "2019-03-11T15:30:23+00:00"
         },
         {
             "name": "wp-coding-standards/wpcs",
