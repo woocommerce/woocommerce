@@ -186,6 +186,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Send correct calling code and phone number to PayPal standard when using non-US addresses. #22693
 * Tweak - Added tooltip to refund-amount input box and made it readonly when taxes are enabled. #22820
 * Tweak - Remove admin alert for the WooCommerce Gutenberg Products Block feature plugin. #22982
+* Tweak - Setup Wizard: support keyboard navigation to toggle on/off features. #22936
 * Template - Moved the order of rememberme checkboxes for accessibility so they tab in order. #21454
 * Template - New structure for attributes template, including new `woocommerce_display_product_attributes` filter. #22480
 * Dev - Introduce `woocommerce_reviews_title` filter. #22216
