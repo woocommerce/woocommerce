@@ -381,7 +381,7 @@ function wc_admin_output_breadcrumb( $section ) {
  *
  * @todo Icon Placeholders for the ActivityPanel, when we implement the new designs.
  */
-function wc_admin_woocommerce_embed_page_header() {
+function wc_admin_embed_page_header() {
 	if ( ! wc_admin_is_embed_enabled_wc_page() ) {
 		return;
 	}
@@ -406,7 +406,7 @@ function wc_admin_woocommerce_embed_page_header() {
 	</div>
 	<?php
 }
-add_action( 'in_admin_header', 'wc_admin_woocommerce_embed_page_header' );
+add_action( 'in_admin_header', 'wc_admin_embed_page_header' );
 
 /**
  * Registers WooCommerce specific user data to the WordPress user API.
@@ -520,7 +520,7 @@ function wc_admin_add_settings( $settings ) {
 		'description' => __( 'Statuses that should not be included when calculating report totals.', 'woocommerce-admin' ),
 		'default'     => array( 'pending', 'cancelled', 'failed' ),
 		'type'        => 'multiselect',
-		'options'     => format_order_statuses( wc_get_order_statuses() ),
+		'options'     => wc_admin_format_order_statuses( wc_get_order_statuses() ),
 	);
 	$settings[] = array(
 		'id'          => 'woocommerce_actionable_order_statuses',
@@ -529,7 +529,7 @@ function wc_admin_add_settings( $settings ) {
 		'description' => __( 'Statuses that require extra action on behalf of the store admin.', 'woocommerce-admin' ),
 		'default'     => array( 'processing', 'on-hold' ),
 		'type'        => 'multiselect',
-		'options'     => format_order_statuses( wc_get_order_statuses() ),
+		'options'     => wc_admin_format_order_statuses( wc_get_order_statuses() ),
 	);
 	return $settings;
 };
