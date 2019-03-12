@@ -210,7 +210,13 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		foreach ( $products_data as $key => $product_data ) {
 			$extended_info = new ArrayObject();
 			if ( $query_args['extended_info'] ) {
-				$product             = wc_get_product( $product_data['product_id'] );
+				$product = wc_get_product( $product_data['product_id'] );
+				// Product was deleted.
+				if ( ! $product ) {
+					$products_data[ $key ]['extended_info']['name'] = __( '(Deleted)', 'wc-admin' );
+					continue;
+				}
+
 				$extended_attributes = apply_filters( 'woocommerce_rest_reports_products_extended_attributes', $this->extended_attributes, $product_data );
 				foreach ( $extended_attributes as $extended_attribute ) {
 					if ( 'variations' === $extended_attribute ) {
@@ -441,8 +447,8 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 					array(
 						'order_item_id'         => $order_item_id,
 						'order_id'              => $order->get_id(),
-						'product_id'            => $order_item->get_product_id( 'edit' ),
-						'variation_id'          => $order_item->get_variation_id( 'edit' ),
+						'product_id'            => wc_get_order_item_meta( $order_item_id, '_product_id' ),
+						'variation_id'          => wc_get_order_item_meta( $order_item_id, '_variation_id' ),
 						'customer_id'           => ( 0 < $order->get_customer_id( 'edit' ) ) ? $order->get_customer_id( 'edit' ) : null,
 						'product_qty'           => $product_qty,
 						'product_net_revenue'   => $net_revenue,
