@@ -189,6 +189,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Setup Wizard: support keyboard navigation to toggle on/off features. #22936
 * Template - Moved the order of rememberme checkboxes for accessibility so they tab in order. #21454
 * Template - New structure for attributes template, including new `woocommerce_display_product_attributes` filter. #22480
+* Dev - Use ActionScheduler for database updates. Improved update notice. #22904
 * Dev - Introduce `woocommerce_reviews_title` filter. #22216
 * Dev - Added `woocommerce_cheque_process_payment_order_status` filter allowing plugins to change the order status to the Cheque gateway. #21402
 * Dev - Add the current coupon object to the `woocommerce_get_shop_coupon_data` filter. #21442
@@ -282,6 +283,9 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Make price filter widget tax aware when you have excl prices entered but show prices incl of tax. #22540
 * Fix - Loop attribute panels to disable options rather than look at values to prevent notices. #22891
 * Fix - When deleting zone methods, also remove setting options. #22867
+* Fix - Correctly show state fields after posting the edit address form. #22948
+* Fix - Validate coupon usage limit for manual orders correctly before order is saved. #22980
+* Fix - Make coupon code sanitization match post_title sanitization. #22945
 * Performance - Product meta data lookup table used for sorting and slow queries. #22718
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
