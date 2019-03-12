@@ -53,22 +53,34 @@ jQuery( function ( $ ) {
 			$parent.show().find( '.select2-container' ).remove();
 
 			if ( ! $.isEmptyObject( wc_meta_boxes_order.states[ country ] ) ) {
-				var $states_select = $( '<select name="' + input_name + '" id="' + input_id + '" class="js_field-state select short" placeholder="' + placeholder + '"></select>' ),
-					state = wc_meta_boxes_order.states[ country ];
+				var state = wc_meta_boxes_order.states[ country ],
+					$newstate = $( '<select></select>' )
+						.prop( 'id', input_id )
+						.prop( 'name', input_name )
+						.prop( 'placeholder', placeholder )
+						.addClass( 'js_field-state select short' )
+						.append( $( '<option value="">' + woocommerce_admin_meta_boxes_order.i18n_select_state_text + '</option>' ) );
 
-				$states_select.append( $( '<option value="">' + woocommerce_admin_meta_boxes_order.i18n_select_state_text + '</option>' ) );
+					$.each( state, function( index ) {
+						var $option = $( '<option></option>' )
+							.prop( 'value', index )
+							.text( state[ index ] );
+						$newstate.append( $option );
+					} );
 
-				$.each( state, function( index ) {
-					$states_select.append( $( '<option value="' + index + '">' + state[ index ] + '</option>' ) );
-				} );
+				$newstate.val( value );
 
-				$states_select.val( value );
+				$state.replaceWith( $newstate );
 
-				$state.replaceWith( $states_select );
-
-				$states_select.show().selectWoo().hide().change();
+				$newstate.show().selectWoo().hide().change();
 			} else {
-				$state.replaceWith( '<input type="text" class="js_field-state" name="' + input_name + '" id="' + input_id + '" value="' + value + '" placeholder="' + placeholder + '" />' );
+				var $newstate = $( '<input type="text" />' )
+					.prop( 'id', input_id )
+					.prop( 'name', input_name )
+					.prop( 'placeholder', placeholder )
+					.addClass( 'js_field-state' )
+					.val( value );
+				$state.replaceWith( $newstate );
 			}
 
 			// This event has a typo - deprecated in 2.5.0
