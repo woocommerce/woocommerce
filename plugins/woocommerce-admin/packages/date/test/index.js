@@ -26,16 +26,16 @@ import {
 
 describe( 'appendTimestamp', () => {
 	it( 'should append `start` timestamp', () => {
-		expect( appendTimestamp( moment( '2018-01-01' ), 'start' ) ).toEqual( '2018-01-01T00:00:00+00:00' );
+		expect( appendTimestamp( moment( '2018-01-01' ), 'start' ) ).toEqual( '2018-01-01T00:00:00' );
 	} );
 
 	it( 'should append `now` timestamp', () => {
 		const nowTimestamp = moment().format( 'HH:mm:00' );
-		expect( appendTimestamp( moment( '2018-01-01' ), 'now' ) ).toEqual( '2018-01-01T' + nowTimestamp + '+00:00' );
+		expect( appendTimestamp( moment( '2018-01-01' ), 'now' ) ).toEqual( '2018-01-01T' + nowTimestamp );
 	} );
 
 	it( 'should append `end` timestamp', () => {
-		expect( appendTimestamp( moment( '2018-01-01' ), 'end' ) ).toEqual( '2018-01-01T23:59:59+00:00' );
+		expect( appendTimestamp( moment( '2018-01-01' ), 'end' ) ).toEqual( '2018-01-01T23:59:59' );
 	} );
 
 	it( 'should throw and error if `timeOfDay` is not valid', () => {
