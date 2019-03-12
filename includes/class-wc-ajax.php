@@ -1562,7 +1562,9 @@ class WC_AJAX {
 			$managing_stock = $product_object->managing_stock();
 
 			if ( $managing_stock && ! empty( $_GET['display_stock'] ) ) {
-				$formatted_name .= ' &ndash; ' . wc_format_stock_for_display( $product_object );
+				$stock_amount    = $product_object->get_stock_quantity();
+				/* Translators: %d stock amount */
+				$formatted_name .= ' &ndash; ' . sprintf( __( 'Stock: %d', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product_object ) );
 			}
 
 			$products[ $product_object->get_id() ] = rawurldecode( $formatted_name );
