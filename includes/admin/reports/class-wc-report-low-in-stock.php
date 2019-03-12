@@ -1,20 +1,18 @@
 <?php
+/**
+ * WC_Report_Low_In_Stock.
+ *
+ * @package WooCommerce/Admin/Reports
+ */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
+defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WC_Report_Stock' ) ) {
 	require_once dirname( __FILE__ ) . '/class-wc-report-stock.php';
 }
 
 /**
- * WC_Report_Low_In_Stock.
- *
- * @author      WooThemes
- * @category    Admin
- * @package     WooCommerce/Admin/Reports
- * @version     2.1.0
+ * Low stock report class.
  */
 class WC_Report_Low_In_Stock extends WC_Report_Stock {
 
@@ -22,14 +20,14 @@ class WC_Report_Low_In_Stock extends WC_Report_Stock {
 	 * No items found text.
 	 */
 	public function no_items() {
-		_e( 'No low in stock products found.', 'woocommerce' );
+		esc_html_e( 'No low in stock products found.', 'woocommerce' );
 	}
 
 	/**
 	 * Get Products matching stock criteria.
 	 *
-	 * @param int $current_page
-	 * @param int $per_page
+	 * @param int $current_page Current page number.
+	 * @param int $per_page How many results to show per page.
 	 */
 	public function get_items( $current_page, $per_page ) {
 		global $wpdb;
@@ -37,7 +35,6 @@ class WC_Report_Low_In_Stock extends WC_Report_Stock {
 		$this->max_items = 0;
 		$this->items     = array();
 
-		// Get products using a query - this is too advanced for get_posts :(
 		$stock   = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 		$nostock = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
 
@@ -58,7 +55,7 @@ class WC_Report_Low_In_Stock extends WC_Report_Stock {
 			)
 		);
 
-		$this->items     = $wpdb->get_results( $wpdb->prepare( "SELECT posts.ID as id, posts.post_parent as parent {$query_from} GROUP BY posts.ID ORDER BY posts.post_title DESC LIMIT %d, %d;", ( $current_page - 1 ) * $per_page, $per_page ) );
-		$this->max_items = $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" );
+		$this->items     = $wpdb->get_results( $wpdb->prepare( "SELECT posts.ID as id, posts.post_parent as parent {$query_from} GROUP BY posts.ID ORDER BY posts.post_title DESC LIMIT %d, %d;", ( $current_page - 1 ) * $per_page, $per_page ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$this->max_items = $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 }
