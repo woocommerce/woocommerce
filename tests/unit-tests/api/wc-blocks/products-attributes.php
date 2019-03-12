@@ -60,6 +60,7 @@ class WC_Tests_API_Products_Attributes_Controller extends WC_REST_Unit_Test_Case
 		$this->assertArrayHasKey( 'name', $attribute );
 		$this->assertArrayHasKey( 'slug', $attribute );
 		$this->assertArrayHasKey( 'count', $attribute );
+		$this->assertEquals( 3, $attribute['count'] );
 	}
 
 	/**

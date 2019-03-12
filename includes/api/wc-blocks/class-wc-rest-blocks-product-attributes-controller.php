@@ -139,12 +139,15 @@ class WC_REST_Blocks_Product_Attributes_Controller extends WC_REST_Product_Attri
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$taxonomy = wc_attribute_taxonomy_name( $item->attribute_name );
+		// wc_change_get_terms_defaults adds a meta key 'order', which is not set.
+		remove_filter( 'get_terms_defaults', 'wc_change_get_terms_defaults', 10, 2 );
 		$data     = array(
 			'id'    => (int) $item->attribute_id,
 			'name'  => $item->attribute_label,
 			'slug'  => $taxonomy,
 			'count' => wp_count_terms( $taxonomy ),
 		);
+		add_filter( 'get_terms_defaults', 'wc_change_get_terms_defaults', 10, 2 );
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
