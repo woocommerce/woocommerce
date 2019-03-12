@@ -266,12 +266,13 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		// Legacy date handling. @todo remove in 4.0.
-		if ( 'date_paid' === $prop ) {
+		if ( in_array( 'date_paid', $updated_props, true ) ) {
 			$value = $order->get_date_paid( 'edit' );
 			// In 2.6.x date_paid was stored as _paid_date in local mysql format.
 			update_post_meta( $id, '_paid_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
 		}
-		if ( 'date_completed' === $prop ) {
+
+		if ( in_array( 'date_completed', $updated_props, true ) ) {
 			$value = $order->get_date_completed( 'edit' );
 			// In 2.6.x date_paid was stored as _paid_date in local mysql format.
 			update_post_meta( $id, '_completed_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
