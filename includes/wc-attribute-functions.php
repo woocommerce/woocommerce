@@ -60,7 +60,7 @@ function wc_get_attribute_taxonomies() {
 	if ( false === $raw_attribute_taxonomies ) {
 		global $wpdb;
 
-		$raw_attribute_taxonomies = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name !='' ORDER BY attribute_name ASC;" );
+		$raw_attribute_taxonomies = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_attribute_taxonomies WHERE attribute_name != '' ORDER BY attribute_name ASC;" );
 
 		set_transient( 'wc_attribute_taxonomies', $raw_attribute_taxonomies );
 	}
