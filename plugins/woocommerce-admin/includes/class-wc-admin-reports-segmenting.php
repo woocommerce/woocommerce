@@ -311,9 +311,17 @@ class WC_Admin_Reports_Segmenting {
 				'limit'  => -1,
 			);
 
-			// @todo: filter by categories if $this->query_args['categories'] is set.
 			if ( isset( $this->query_args['product_includes'] ) ) {
 				$args['include'] = $this->query_args['product_includes'];
+			}
+
+			if ( isset( $this->query_args['categories'] ) ) {
+				$categories       = $this->query_args['categories'];
+				$args['category'] = array();
+				foreach ( $categories as $category_id ) {
+					$terms            = get_term_by( 'id', $category_id, 'product_cat' );
+					$args['category'] = $terms->slug;
+				}
 			}
 
 			$segment_objects = wc_get_products( $args );
