@@ -142,11 +142,12 @@ class WC_Admin {
 	 * For setup wizard, transient must be present, the user must have access rights, and we must ignore the network/bulk plugin updaters.
 	 */
 	public function admin_redirects() {
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
 		// Nonced plugin install redirects (whitelisted).
 		if ( ! empty( $_GET['wc-install-plugin-redirect'] ) ) {
 			$plugin_slug = wc_clean( wp_unslash( $_GET['wc-install-plugin-redirect'] ) );
 
-			if ( current_user_can( 'install_plugins' ) && in_array( $plugin_slug, array( 'woocommerce-gateway-stripe' ) ) ) {
+			if ( current_user_can( 'install_plugins' ) && in_array( $plugin_slug, array( 'woocommerce-gateway-stripe' ), true ) ) {
 				$nonce = wp_create_nonce( 'install-plugin_' . $plugin_slug );
 				$url   = self_admin_url( 'update.php?action=install-plugin&plugin=' . $plugin_slug . '&_wpnonce=' . $nonce );
 			} else {
@@ -158,23 +159,28 @@ class WC_Admin {
 		}
 
 		// Setup wizard redirect.
-		if ( get_transient( '_wc_activation_redirect' ) ) {
-			delete_transient( '_wc_activation_redirect' );
+		if ( get_transient( '_wc_activation_redirect' ) && apply_filters( 'woocommerce_enable_setup_wizard', true ) ) {
+			$do_redirect  = true;
+			$current_page = isset( $_GET['page'] ) ? wc_clean( wp_unslash( $_GET['page'] ) ) : false;
 
-			if ( ( ! empty( $_GET['page'] ) &&
-					in_array( wp_unslash( $_GET['page'] ), array( 'wc-setup' ) ) ) ||
-					is_network_admin() || isset( $_GET['activate-multi'] ) ||
-					! current_user_can( 'manage_woocommerce' ) ||
-					apply_filters( 'woocommerce_prevent_automatic_wizard_redirect', false ) ) {
-				return;
+			// On these pages, or during these events, postpone the redirect.
+			if ( wp_doing_ajax() || is_network_admin() || ! current_user_can( 'manage_woocommerce' ) ) {
+				$do_redirect = false;
 			}
 
-			// If the user needs to install, send them to the setup wizard.
-			if ( WC_Admin_Notices::has_notice( 'install' ) ) {
+			// On these pages, or during these events, disable the redirect.
+			if ( 'wc-setup' === $current_page || ! WC_Admin_Notices::has_notice( 'install' ) || apply_filters( 'woocommerce_prevent_automatic_wizard_redirect', false ) || isset( $_GET['activate-multi'] ) ) {
+				delete_transient( '_wc_activation_redirect' );
+				$do_redirect = false;
+			}
+
+			if ( $do_redirect ) {
+				delete_transient( '_wc_activation_redirect' );
 				wp_safe_redirect( admin_url( 'index.php?page=wc-setup' ) );
 				exit;
 			}
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.NoNonceVerification
 	}
 
 	/**
