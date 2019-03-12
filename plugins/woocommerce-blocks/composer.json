@@ -10,7 +10,7 @@
     "composer/installers": "1.6.0"
   },
   "require-dev": {
-    "woocommerce/woocommerce-sniffs": "0.0.5"
+    "woocommerce/woocommerce-sniffs": "0.0.6"
   },
   "scripts": {
     "phpcs": [
