@@ -384,12 +384,15 @@ jQuery( function ( $ ) {
 			if ( value != null ) {
 				wc_meta_boxes_order_items.block();
 
+				var user_id = $( '#customer_user' ).val();
+
 				var data = $.extend( {}, wc_meta_boxes_order_items.get_taxable_address(), {
 					action   : 'woocommerce_add_coupon_discount',
 					dataType : 'json',
 					order_id : woocommerce_admin_meta_boxes.post_id,
 					security : woocommerce_admin_meta_boxes.order_item_nonce,
-					coupon   : value
+					coupon   : value,
+					user_id  : user_id
 				} );
 
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
