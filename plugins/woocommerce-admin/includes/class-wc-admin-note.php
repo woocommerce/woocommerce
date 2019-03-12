@@ -365,6 +365,7 @@ class WC_Admin_Note extends WC_Data {
 	/**
 	 * Set note data for potential re-localization.
 	 *
+	 * @todo Set a default empty array? https://github.com/woocommerce/wc-admin/pull/1763#pullrequestreview-212442921.
 	 * @param object $content_data Note data.
 	 */
 	public function set_content_data( $content_data ) {
@@ -450,11 +451,13 @@ class WC_Admin_Note extends WC_Data {
 	 * @param string $name Label name (not presented to user).
 	 * @param string $label Note label (e.g. presented as button label).
 	 * @param string $query Note query (for redirect).
+	 * @param string $status The status to set for the action should on click.
 	 */
-	public function add_action( $name, $label, $query ) {
-		$name  = wc_clean( $name );
-		$label = wc_clean( $label );
-		$query = wc_clean( $query );
+	public function add_action( $name, $label, $query, $status = '' ) {
+		$name   = wc_clean( $name );
+		$label  = wc_clean( $label );
+		$query  = wc_clean( $query );
+		$status = wc_clean( $status );
 
 		if ( empty( $name ) ) {
 			$this->error( 'admin_note_invalid_data', __( 'The admin note action name prop cannot be empty.', 'wc-admin' ) );
@@ -469,9 +472,10 @@ class WC_Admin_Note extends WC_Data {
 		}
 
 		$action = array(
-			'name'  => $name,
-			'label' => $label,
-			'query' => $query,
+			'name'       => $name,
+			'label'      => $label,
+			'query'      => $query,
+			'status'     => $status,
 		);
 
 		$note_actions   = $this->get_prop( 'actions', 'edit' );

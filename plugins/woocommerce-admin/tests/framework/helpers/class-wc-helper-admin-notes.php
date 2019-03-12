@@ -55,6 +55,7 @@ class WC_Helper_Admin_Notes {
 		$note_2->set_icon( 'info' );
 		$note_2->set_name( 'PHPUNIT_TEST_NOTE_NAME' );
 		$note_2->set_source( 'PHPUNIT_TEST' );
+		$note_2->set_status( WC_Admin_Note::E_WC_ADMIN_NOTE_ACTIONED );
 		// This note has no actions.
 		$note_2->save();
 

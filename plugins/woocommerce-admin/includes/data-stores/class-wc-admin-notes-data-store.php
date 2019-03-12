@@ -197,13 +197,13 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 
 		$actions = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT name, label, query FROM {$wpdb->prefix}wc_admin_note_actions WHERE note_id = %d",
+				"SELECT name, label, query, status FROM {$wpdb->prefix}wc_admin_note_actions WHERE note_id = %d",
 				$note->get_id()
 			)
 		);
 		if ( $actions ) {
 			foreach ( $actions as $action ) {
-				$note->add_action( $action->name, $action->label, $action->query );
+				$note->add_action( $action->name, $action->label, $action->query, $action->status );
 			}
 		}
 	}
@@ -232,6 +232,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 					'name'    => $action->name,
 					'label'   => $action->label,
 					'query'   => $action->query,
+					'status'  => $action->status,
 				)
 			);
 		}
@@ -258,6 +259,49 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 
 		$offset = $per_page * ( $page - 1 );
 
+		$where_clauses = $this->get_notes_where_clauses( $args );
+
+		$query = $wpdb->prepare(
+			"SELECT note_id, title, content FROM {$wpdb->prefix}wc_admin_notes WHERE 1=1{$where_clauses} ORDER BY note_id DESC LIMIT %d, %d",
+			$offset,
+			$per_page
+		); // WPCS: unprepared SQL ok.
+
+		return $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
+	 * Return a count of notes.
+	 *
+	 * @param string $type Comma separated list of note types.
+	 * @param string $status Comma separated list of statuses.
+	 * @return array An array of objects containing a note id.
+	 */
+	public function get_notes_count( $type = '', $status = '' ) {
+		global $wpdb;
+
+		$where_clauses = $this->get_notes_where_clauses(
+			array(
+				'type'   => $type,
+				'status' => $status,
+			)
+		);
+
+		if ( ! empty( $where_clauses ) ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			return $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_admin_notes WHERE 1=1{$where_clauses}" );
+		}
+
+		return $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_admin_notes" );
+	}
+
+	/**
+	 * Return where clauses for getting notes by status and type. For use in both the count and listing queries.
+	 *
+	 *  @param array $args Array of args to pass.
+	 * @return string Where clauses for the query.
+	 */
+	public function get_notes_where_clauses( $args = array() ) {
 		$allowed_types    = WC_Admin_Note::get_allowed_types();
 		$where_type_array = array();
 		if ( isset( $args['type'] ) ) {
@@ -269,54 +313,32 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 				}
 			}
 		}
-		$escaped_where_types = implode( ',', $where_type_array );
 
-		if ( empty( $escaped_where_types ) ) {
-			$query = $wpdb->prepare(
-				"SELECT note_id, title, content FROM {$wpdb->prefix}wc_admin_notes ORDER BY note_id DESC LIMIT %d, %d",
-				$offset,
-				$per_page
-			);
-		} else {
-			$query = $wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-				"SELECT note_id, title, content FROM {$wpdb->prefix}wc_admin_notes WHERE type IN ($escaped_where_types) ORDER BY note_id DESC LIMIT %d, %d",
-				$offset,
-				$per_page
-			);
-		}
-
-		return $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-	}
-
-	/**
-	 * Return a count of notes.
-	 *
-	 * @param string $type Comma separated list of note types.
-	 * @return array An array of objects containing a note id.
-	 */
-	public function get_notes_count( $type = '' ) {
-		global $wpdb;
-
-		$allowed_types    = WC_Admin_Note::get_allowed_types();
-		$where_type_array = array();
-		if ( ! empty( $type ) ) {
-			$args_types = explode( ',', $type );
-			foreach ( (array) $args_types as $args_type ) {
-				$args_type = trim( $args_type );
-				if ( in_array( $args_type, $allowed_types, true ) ) {
-					$where_type_array[] = "'" . esc_sql( $args_type ) . "'";
+		$allowed_statuses   = WC_Admin_Note::get_allowed_statuses();
+		$where_status_array = array();
+		if ( isset( $args['status'] ) ) {
+			$args_statuses = explode( ',', $args['status'] );
+			foreach ( (array) $args_statuses as $args_status ) {
+				$args_status = trim( $args_status );
+				if ( in_array( $args_status, $allowed_statuses, true ) ) {
+					$where_status_array[] = "'" . esc_sql( $args_status ) . "'";
 				}
 			}
 		}
-		$escaped_where_types = implode( ',', $where_type_array );
+
+		$escaped_where_types  = implode( ',', $where_type_array );
+		$escaped_status_types = implode( ',', $where_status_array );
+		$where_clauses        = '';
 
 		if ( ! empty( $escaped_where_types ) ) {
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			return $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_admin_notes WHERE type IN ($escaped_where_types)" );
+			$where_clauses .= " AND type IN ($escaped_where_types)";
 		}
 
-		return $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_admin_notes" );
+		if ( ! empty( $escaped_status_types ) ) {
+			$where_clauses .= " AND status IN ($escaped_status_types)";
+		}
+
+		return $where_clauses;
 	}
 
 	/**

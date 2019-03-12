@@ -19,6 +19,10 @@ function read( resourceNames, fetch = apiFetch ) {
 	return [ ...readNotes( resourceNames, fetch ), ...readNoteQueries( resourceNames, fetch ) ];
 }
 
+function update( resourceNames, data, fetch = apiFetch ) {
+	return [ ...updateNote( resourceNames, data, fetch ) ];
+}
+
 function readNoteQueries( resourceNames, fetch ) {
 	const filteredNames = resourceNames.filter( name => isResourcePrefix( name, 'note-query' ) );
 
@@ -71,6 +75,25 @@ function readNote( resourceName, fetch ) {
 		} );
 }
 
+function updateNote( resourceNames, data, fetch ) {
+	const resourceName = 'note';
+	if ( resourceNames.includes( resourceName ) ) {
+		const { noteId, ...noteFields } = data[ resourceName ];
+		const url = `${ NAMESPACE }/admin/notes/${ noteId }`;
+		return [
+			fetch( { path: url, method: 'PUT', data: noteFields } )
+				.then( note => {
+					return { [ resourceName + ':' + noteId ]: { data: note } };
+				} )
+				.catch( error => {
+					return { [ resourceName + ':' + noteId ]: { error } };
+				} ),
+		];
+	}
+	return [];
+}
+
 export default {
 	read,
+	update,
 };

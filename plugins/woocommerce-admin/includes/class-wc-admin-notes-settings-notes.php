@@ -42,7 +42,7 @@ class WC_Admin_Notes_Settings_Notes {
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_icon( 'info' );
 		$note->set_name( $name );
-		$note->set_source( 'wc-admin' );
+		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'open-customizer',
 			__( 'Open Customizer', 'wc-admin' ),

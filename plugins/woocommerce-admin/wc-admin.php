@@ -153,6 +153,7 @@ function wc_admin_plugins_loaded() {
 	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-notes-new-sales-record.php';
 	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-notes-settings-notes.php';
 	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-notes-woo-subscriptions-notes.php';
+	require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-notes-historical-data.php';
 
 	// Verify we have a proper build.
 	if ( ! wc_admin_build_file_exists() ) {

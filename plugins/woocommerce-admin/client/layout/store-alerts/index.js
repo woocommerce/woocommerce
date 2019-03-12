@@ -8,6 +8,8 @@ import { IconButton, Button, Dashicon } from '@wordpress/components';
 import classnames from 'classnames';
 import interpolateComponents from 'interpolate-components';
 import { compose } from '@wordpress/compose';
+import { noop } from 'lodash';
+import { withDispatch } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
@@ -64,7 +66,7 @@ class StoreAlerts extends Component {
 		const alerts = this.props.alerts || [];
 		const preloadAlertCount = wcSettings.alertCount && parseInt( wcSettings.alertCount );
 
-		if ( preloadAlertCount > 0 && 0 === alerts.length ) {
+		if ( preloadAlertCount > 0 && this.props.isLoading ) {
 			return <StoreAlertsPlaceholder hasMultipleAlerts={ preloadAlertCount > 1 } />;
 		} else if ( 0 === alerts.length ) {
 			return null;
@@ -78,11 +80,22 @@ class StoreAlerts extends Component {
 			'is-alert-error': 'error' === type,
 			'is-alert-update': 'update' === type,
 		} );
-		const actions = alert.actions.map( action => (
-			<Button key={ action.name } isDefault href={ action.url }>
-				{ action.label }
-			</Button>
-		) );
+
+		const actions = alert.actions.map( action => {
+			const markStatus = () => {
+				this.props.updateNote( alert.id, { status: action.status } );
+			};
+			return (
+				<Button
+					key={ action.name }
+					isDefault
+					href={ action.url }
+					onClick={ '' === action.status ? noop : markStatus }
+				>
+					{ action.label }
+				</Button>
+			);
+		} );
 
 		return (
 			<Card
@@ -135,15 +148,29 @@ class StoreAlerts extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getNotes } = select( 'wc-api' );
+		const { getNotes, isGetNotesRequesting } = select( 'wc-api' );
 		const alertsQuery = {
 			page: 1,
 			per_page: QUERY_DEFAULTS.pageSize,
 			type: 'error,update',
+			status: 'unactioned',
 		};
 
-		const alerts = getNotes( alertsQuery );
+		// Filter out notes that may have been marked actioned or not delayed after the initial request
+		const filterNotes = note => 'unactioned' === note.status;
+		const alerts = getNotes( alertsQuery ).filter( filterNotes );
 
-		return { alerts };
+		const isLoading = isGetNotesRequesting( alertsQuery );
+
+		return {
+			alerts,
+			isLoading,
+		};
+	} ),
+	withDispatch( dispatch => {
+		const { updateNote } = dispatch( 'wc-api' );
+		return {
+			updateNote,
+		};
 	} )
 )( StoreAlerts );

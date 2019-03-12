@@ -64,11 +64,12 @@ class WC_Admin_Notes {
 	 * Get the total number of notes
 	 *
 	 * @param string $type Comma separated list of note types.
+	 * @param string $status Comma separated list of statuses.
 	 * @return int
 	 */
-	public static function get_notes_count( $type = '' ) {
+	public static function get_notes_count( $type = '', $status = '' ) {
 		$data_store = WC_Data_Store::load( 'admin-note' );
-		return $data_store->get_notes_count( $type );
+		return $data_store->get_notes_count( $type, $status );
 	}
 
 	/**

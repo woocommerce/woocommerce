@@ -185,7 +185,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_icon( 'info' );
 		$note->set_name( self::CONNECTION_NOTE_NAME );
-		$note->set_source( 'wc-admin' );
+		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'connect',
 			__( 'Connect', 'wc-admin' ),
@@ -334,7 +334,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_WARNING );
 		$note->set_icon( 'notice' );
 		$note->set_name( self::SUBSCRIPTION_NOTE_NAME );
-		$note->set_source( 'wc-admin' );
+		$note->set_source( 'woocommerce-admin' );
 		$note->clear_actions();
 		$note->add_action(
 			'enable-autorenew',
@@ -398,7 +398,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_WARNING );
 		$note->set_icon( 'notice' );
 		$note->set_name( self::SUBSCRIPTION_NOTE_NAME );
-		$note->set_source( 'wc-admin' );
+		$note->set_source( 'woocommerce-admin' );
 		$note->clear_actions();
 		$note->add_action(
 			'renew-subscription',

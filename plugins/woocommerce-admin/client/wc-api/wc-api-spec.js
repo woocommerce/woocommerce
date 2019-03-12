@@ -16,6 +16,7 @@ function createWcApiSpec() {
 		mutations: {
 			...settings.mutations,
 			...user.mutations,
+			...notes.mutations,
 		},
 		selectors: {
 			...items.selectors,
@@ -42,6 +43,7 @@ function createWcApiSpec() {
 				return [
 					...settings.operations.update( resourceNames, data ),
 					...user.operations.update( resourceNames, data ),
+					...notes.operations.update( resourceNames, data ),
 				];
 			},
 		},

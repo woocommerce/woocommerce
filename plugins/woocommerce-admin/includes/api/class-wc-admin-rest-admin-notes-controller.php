@@ -63,6 +63,11 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'update_items_permissions_check' ),
+				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
@@ -124,6 +129,12 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 			$args['type'] = $type;
 		}
 
+		$status = isset( $request['status'] ) ? $request['status'] : '';
+		$status = sanitize_text_field( $status );
+		if ( ! empty( $status ) ) {
+			$args['status'] = $status;
+		}
+
 		$notes = WC_Admin_Notes::get_notes( 'edit', $args );
 
 		$data = array();
@@ -134,7 +145,7 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		$response = rest_ensure_response( $data );
-		$response->header( 'X-WP-Total', WC_Admin_Notes::get_notes_count() );
+		$response->header( 'X-WP-Total', WC_Admin_Notes::get_notes_count( $type, $status ) );
 
 		return $response;
 	}
@@ -164,6 +175,49 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'wc-admin' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
+		return true;
+	}
+
+	/**
+	 * Update a single note.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Request|WP_Error
+	 */
+	public function update_item( $request ) {
+		$note = WC_Admin_Notes::get_note( $request->get_param( 'id' ) );
+
+		if ( ! $note ) {
+			return new WP_Error(
+				'woocommerce_admin_notes_invalid_id',
+				__( 'Sorry, there is no resouce with that ID.', 'wc-admin' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		// @todo Status is the only field that can be updated at the moment. We should also implement the "date reminder" setting.
+		$note_changed = false;
+		if ( ! is_null( $request->get_param( 'status' ) ) ) {
+			$note->set_status( $request->get_param( 'status' ) );
+			$note_changed = true;
+		}
+
+		if ( $note_changed ) {
+			$note->save();
+		}
+		return $this->get_item( $request );
+	}
+
+	/**
+	 * Makes sure the current user has access to WRITE the settings APIs.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function update_items_permissions_check( $request ) {
+		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'wc-admin' ), array( 'status' => rest_authorization_required_code() ) );
+		}
 		return true;
 	}
 
@@ -204,8 +258,9 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 		$data['title']             = stripslashes( $data['title'] );
 		$data['content']           = stripslashes( $data['content'] );
 		foreach ( (array) $data['actions'] as $key => $value ) {
-			$data['actions'][ $key ]->label = stripslashes( $data['actions'][ $key ]->label );
-			$data['actions'][ $key ]->url   = $this->prepare_query_for_response( $data['actions'][ $key ]->query );
+			$data['actions'][ $key ]->label  = stripslashes( $data['actions'][ $key ]->label );
+			$data['actions'][ $key ]->url    = $this->prepare_query_for_response( $data['actions'][ $key ]->query );
+			$data['actions'][ $key ]->status = stripslashes( $data['actions'][ $key ]->status );
 		}
 		$data = $this->filter_response_by_context( $data, $context );
 
@@ -231,6 +286,29 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_admin_note', $response, $data, $request );
+	}
+
+	/**
+	 * Get the query params for collections.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params                     = array();
+		$params['context']          = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['type']             = array(
+			'description'       => __( 'Type of note.', 'wc-admin' ),
+			'type'              => 'string',
+			'enum'              => WC_Admin_Note::get_allowed_types(),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['status']             = array(
+			'description'       => __( 'Status of note.', 'wc-admin' ),
+			'type'              => 'string',
+			'enum'              => WC_Admin_Note::get_allowed_statuses(),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		return $params;
 	}
 
 	/**
@@ -296,7 +374,6 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 					'description' => __( 'The status of the note (e.g. unactioned, actioned).', 'wc-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
 				),
 				'source'            => array(
 					'description' => __( 'Source of the note.', 'wc-admin' ),
@@ -320,7 +397,7 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 					'description' => __( 'Date after which the user should be reminded of the note, if any.', 'wc-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
+					'readonly'    => true, // @todo Allow date_reminder to be updated.
 				),
 				'date_reminder_gmt' => array(
 					'description' => __( 'Date after which the user should be reminded of the note, if any (GMT).', 'wc-admin' ),

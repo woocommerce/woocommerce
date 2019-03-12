@@ -148,7 +148,6 @@ class WC_Admin_Reports_Sync {
 		);
 	}
 
-
 	/**
 	 * Schedule an action to process a single Order.
 	 *

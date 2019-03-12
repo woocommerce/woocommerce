@@ -107,6 +107,45 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test updating a single note.
+	 */
+	public function test_update_note() {
+		wp_set_current_user( $this->user );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/1' ) );
+		$note     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'unactioned', $note['status'] );
+
+		$request = new WP_REST_Request( 'PUT', $this->endpoint . '/1' );
+		$request->set_body_params(
+			array(
+				'status' => 'actioned',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$note     = $response->get_data();
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'actioned', $note['status'] );
+	}
+
+	/**
+	 * Test updating a single note without permission. It should fail.
+	 */
+	public function test_update_note_without_permission() {
+		$request = new WP_REST_Request( 'PUT', $this->endpoint . '/1' );
+		$request->set_body_params(
+			array(
+				'status' => 'actioned',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
 	 * Test getting lots of notes.
 	 *
 	 * @since 3.5.0
@@ -137,6 +176,31 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 1, count( $notes ) );
 		$this->assertEquals( $notes[0]['title'], 'PHPUNIT_TEST_NOTE_2_TITLE' );
+	}
+
+
+	/**
+	 * Test getting notes of a certain status.
+	 */
+	public function test_get_actioned_notes() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params( array( 'status' => 'actioned' ) );
+		$response = $this->server->dispatch( $request );
+		$notes    = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $notes ) );
+		$this->assertEquals( $notes[0]['title'], 'PHPUNIT_TEST_NOTE_2_TITLE' );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params( array( 'status' => 'invalid' ) );
+		$response = $this->server->dispatch( $request );
+		$notes    = $response->get_data();
+
+		// get_notes returns all results since 'status' is not one of actioned or unactioned.
+		$this->assertEquals( 2, count( $notes ) );
 	}
 
 	/**
