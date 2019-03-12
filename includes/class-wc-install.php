@@ -642,6 +642,9 @@ class WC_Install {
 				); // WPCS: unprepared SQL ok.
 			}
 		}
+
+		// Clear table caches.
+		delete_transient( 'wc_attribute_taxonomies' );
 	}
 
 	/**
