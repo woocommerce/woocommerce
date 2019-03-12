@@ -34,7 +34,7 @@ require WC_ABSPATH . 'includes/wc-webhook-functions.php';
  * Filters on data used in admin and frontend.
  */
 add_filter( 'woocommerce_coupon_code', 'html_entity_decode' );
-add_filter( 'woocommerce_coupon_code', 'sanitize_text_field' );
+add_filter( 'woocommerce_coupon_code', 'wc_sanitize_coupon_code' );
 add_filter( 'woocommerce_coupon_code', 'wc_strtolower' );
 add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integers by default.
 add_filter( 'woocommerce_shipping_rate_label', 'sanitize_text_field' ); // Shipping rate label.

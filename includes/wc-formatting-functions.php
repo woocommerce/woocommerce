@@ -363,6 +363,20 @@ function wc_format_coupon_code( $value ) {
 }
 
 /**
+ * Sanitize a coupon code.
+ *
+ * Uses sanitize_post_field since coupon codes are stored as
+ * post_titles - the sanitization and escaping must match.
+ *
+ * @since  3.6.0
+ * @param  string $value Coupon code to format.
+ * @return string
+ */
+function wc_sanitize_coupon_code( $value ) {
+	return sanitize_post_field( 'post_title', $value, 0, 'db' );
+}
+
+/**
  * Clean variables using sanitize_text_field. Arrays are cleaned recursively.
  * Non-scalar values are ignored.
  *
@@ -1120,7 +1134,7 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_hold_stock_m
  * @return string
  */
 function wc_sanitize_term_text_based( $term ) {
-	return trim( wp_unslash( wp_strip_all_tags( $term ) ) );
+	return trim( wp_strip_all_tags( wp_unslash( $term ) ) );
 }
 
 if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
