@@ -76,6 +76,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$this->read_extra_data( $product );
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
 
+		$updates = array();
 		/**
 		 * If a variation title is not in sync with the parent e.g. saved prior to 3.0, or if the parent title has changed, detect here and update.
 		 */
@@ -83,8 +84,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		if ( $post_object->post_title !== $new_title ) {
 			$product->set_name( $new_title );
-			$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_title' => $new_title ), array( 'ID' => $product->get_id() ) );
-			clean_post_cache( $product->get_id() );
+			$updates = array_merge( $updates, array( 'post_title' => $new_title ) );
 		}
 
 		/**
@@ -96,7 +96,11 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 
 		if ( $new_attribute_summary !== $post_object->post_excerpt ) {
 			$product->set_attribute_summary( $new_attribute_summary );
-			$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_excerpt' => $new_attribute_summary ), array( 'ID' => $product->get_id() ) );
+			$updates = array_merge( $updates, array( 'post_excerpt' => $new_attribute_summary ) );
+		}
+
+		if ( ! empty( $updates ) ) {
+			$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $updates, array( 'ID' => $product->get_id() ) );
 			clean_post_cache( $product->get_id() );
 		}
 
