@@ -289,6 +289,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Correctly show state fields after posting the edit address form. #22948
 * Fix - Validate coupon usage limit for manual orders correctly before order is saved. #22980
 * Fix - Make coupon code sanitization match post_title sanitization. #22945
+* Fix - Ensure WC_Helper sees plugin activation events via CLI. #22972
+* Fix - Setup wizard redirection improvements. #22977
 * Performance - Product meta data lookup table used for sorting and slow queries. #22718
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
@@ -312,6 +314,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Performance - Delete empty meta on update in data-stores. #22773
 * Performance - Image regeneration edge cases. #22818
 * Performance - Don’t query for an order count unnecessarily. #22984
+* Performance - Add caching to attribute functions. #22938
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 * Localization - Added US Minor Outlying Islands as states to avoid confusion with US. #22468
 * Localization - Dutch postcode validation. #22316
