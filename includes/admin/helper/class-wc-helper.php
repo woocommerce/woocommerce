@@ -31,25 +31,32 @@ class WC_Helper {
 	 * @return string The absolute path to the view file.
 	 */
 	public static function get_view_filename( $view ) {
-		return __DIR__ . "/views/$view";
+		return dirname( __FILE__ ) . "/views/$view";
 	}
 
 	/**
 	 * Loads the helper class, runs on init.
 	 */
 	public static function load() {
+		self::includes();
+
 		add_action( 'current_screen', array( __CLASS__, 'current_screen' ) );
 		add_action( 'woocommerce_helper_output', array( __CLASS__, 'render_helper_output' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'admin_enqueue_scripts' ) );
-
-		// Attempt to toggle subscription state upon plugin activation/deactivation.
-		add_action( 'activated_plugin', array( __CLASS__, 'activated_plugin' ) );
-		add_action( 'deactivated_plugin', array( __CLASS__, 'deactivated_plugin' ) );
-
-		// Add some nags about extension updates.
 		add_action( 'admin_notices', array( __CLASS__, 'admin_notices' ) );
 
 		do_action( 'woocommerce_helper_loaded' );
+	}
+
+	/**
+	 * Include supporting helper classes.
+	 */
+	protected static function includes() {
+		include_once dirname( __FILE__ ) . '/class-wc-helper-options.php';
+		include_once dirname( __FILE__ ) . '/class-wc-helper-api.php';
+		include_once dirname( __FILE__ ) . '/class-wc-helper-updater.php';
+		include_once dirname( __FILE__ ) . '/class-wc-helper-plugin-info.php';
+		include_once dirname( __FILE__ ) . '/class-wc-helper-compat.php';
 	}
 
 	/**
