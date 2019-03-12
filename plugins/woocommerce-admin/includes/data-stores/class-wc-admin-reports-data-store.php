@@ -609,13 +609,19 @@ class WC_Admin_Reports_Data_Store {
 	/**
 	 * Generates a virtual table given a list of IDs.
 	 *
-	 * @param array $ids Array of IDs.
+	 * @param array $ids          Array of IDs.
+	 * @param array $id_field     Name of the ID field.
+	 * @param array $other_values Other values that must be contained in the virtual table.
 	 * @return array
 	 */
-	protected function get_ids_table( $ids ) {
+	protected function get_ids_table( $ids, $id_field, $other_values = array() ) {
 		$selects = array();
 		foreach ( $ids as $id ) {
-			array_push( $selects, "SELECT {$id} AS id" );
+			$new_select = "SELECT {$id} AS {$id_field}";
+			foreach ( $other_values as $key => $value ) {
+				$new_select .= ", {$value} AS {$key}";
+			}
+			array_push( $selects, $new_select );
 		}
 		return join( ' UNION ', $selects );
 	}
@@ -636,15 +642,17 @@ class WC_Admin_Reports_Data_Store {
 	/**
 	 * Returns a comma separated list of the field names prepared to be used for a selection after a join with `default_results`.
 	 *
-	 * @param array  $fields           Array of fields name.
-	 * @param string $id_field         Name of the column used as an identifier.
-	 * @param array  $outer_selections Array of fields that are not selected in the inner query.
+	 * @param array $fields                 Array of fields name.
+	 * @param array $default_results_fields Fields to load from `default_results` table.
+	 * @param array $outer_selections       Array of fields that are not selected in the inner query.
 	 * @return string
 	 */
-	protected function format_join_selections( $fields, $id_field, $outer_selections = array() ) {
+	protected function format_join_selections( $fields, $default_results_fields, $outer_selections = array() ) {
 		foreach ( $fields as $i => $field ) {
-			if ( $field === $id_field ) {
-				$fields[ $i ] = "default_results.id AS {$field}";
+			foreach ( $default_results_fields as $default_results_field ) {
+				if ( $field === $default_results_field ) {
+					$fields[ $i ] = "default_results.{$field} AS {$field}";
+				}
 			}
 			if ( in_array( $field, $outer_selections, true ) && array_key_exists( $field, $this->report_columns ) ) {
 				$fields[ $i ] = $this->report_columns[ $field ];

@@ -81,10 +81,11 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 	/**
 	 * Updates the database query with parameters used for Products report: categories and order status.
 	 *
-	 * @param array $query_args Query arguments supplied by the user.
-	 * @return array            Array of parameters used for SQL query.
+	 * @param array  $query_args Query arguments supplied by the user.
+	 * @param string $from_arg   Name of the FROM sql param.
+	 * @return array             Array of parameters used for SQL query.
 	 */
-	protected function get_sql_query_params( $query_args ) {
+	protected function get_sql_query_params( $query_args, $from_arg ) {
 		global $wpdb;
 		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
 
@@ -103,8 +104,9 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 		}
 
 		$order_status_filter = $this->get_status_subquery( $query_args );
+		$sql_query_params['outer_from_clause'] = '';
 		if ( $order_status_filter ) {
-			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
+			$sql_query_params[ $from_arg ]    .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 			$sql_query_params['where_clause'] .= " AND ( {$order_status_filter} )";
 			$sql_query_params['where_clause'] .= ' AND variation_id > 0';
 		}
@@ -217,31 +219,60 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 			);
 
 			$selections       = $this->selected_columns( $query_args );
-			$sql_query_params = $this->get_sql_query_params( $query_args );
+			$included_products = $this->get_included_products_array( $query_args );
 
-			$db_records_count = (int) $wpdb->get_var(
-				"SELECT COUNT(*) FROM (
-							SELECT
-								product_id
-							FROM
-								{$table_name}
-								{$sql_query_params['from_clause']}
-							WHERE
-								1=1
-								{$sql_query_params['where_time_clause']}
-								{$sql_query_params['where_clause']}
-							GROUP BY
-								variation_id
-					  		) AS tt"
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			if ( count( $included_products ) > 0 && count( $query_args['variations'] ) > 0 ) {
+				$sql_query_params = $this->get_sql_query_params( $query_args, 'from_clause' );
 
-			$total_pages = (int) ceil( $db_records_count / $sql_query_params['per_page'] );
-			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-				return $data;
+				if ( 'date' === $query_args['orderby'] ) {
+					$selections .= ", {$table_name}.date_created";
+				}
+
+				$total_results = count( $query_args['variations'] );
+				$total_pages   = (int) ceil( $total_results / $sql_query_params['per_page'] );
+
+				$fields          = $this->get_fields( $query_args );
+				$join_selections = $this->format_join_selections( $fields, array( 'product_id', 'variation_id' ) );
+				$ids_table       = $this->get_ids_table( $query_args['variations'], 'variation_id', array( 'product_id' => $included_products[0] ) );
+
+				$prefix = "SELECT {$join_selections} FROM (";
+				$suffix = ") AS {$table_name}";
+				$right_join = "RIGHT JOIN ( {$ids_table} ) AS default_results
+					ON default_results.variation_id = {$table_name}.variation_id";
+			} else {
+				$sql_query_params = $this->get_sql_query_params( $query_args, 'from_clause' );
+
+				$db_records_count = (int) $wpdb->get_var(
+					"SELECT COUNT(*) FROM (
+								SELECT
+									product_id
+								FROM
+									{$table_name}
+									{$sql_query_params['from_clause']}
+								WHERE
+									1=1
+									{$sql_query_params['where_time_clause']}
+									{$sql_query_params['where_clause']}
+								GROUP BY
+									variation_id
+								) AS tt"
+				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+
+				$total_results = $db_records_count;
+				$total_pages = (int) ceil( $db_records_count / $sql_query_params['per_page'] );
+
+				if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
+					return $data;
+				}
+
+				$prefix     = '';
+				$suffix     = '';
+				$right_join = '';
 			}
 
 			$product_data = $wpdb->get_results(
-				"SELECT
+				"{$prefix}
+					SELECT
 						{$selections}
 					FROM
 						{$table_name}
@@ -252,6 +283,9 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 						{$sql_query_params['where_clause']}
 					GROUP BY
 						variation_id
+				{$suffix}
+					{$right_join}
+					{$sql_query_params['outer_from_clause']}
 					ORDER BY
 						{$sql_query_params['order_by_clause']}
 					{$sql_query_params['limit']}
@@ -268,7 +302,7 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 			$product_data = array_map( array( $this, 'cast_numbers' ), $product_data );
 			$data         = (object) array(
 				'data'    => $product_data,
-				'total'   => $db_records_count,
+				'total'   => $total_results,
 				'pages'   => $total_pages,
 				'page_no' => (int) $query_args['page'],
 			);

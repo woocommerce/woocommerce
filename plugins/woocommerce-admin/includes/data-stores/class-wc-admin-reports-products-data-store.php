@@ -158,7 +158,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 
 		$included_products = $this->get_included_products( $query_args );
 		if ( $included_products ) {
-			$sql_query_params                  = array_merge( $sql_query_params, $this->get_from_sql_params( $query_args, 'outer_from_clause', 'default_results.id' ) );
+			$sql_query_params                  = array_merge( $sql_query_params, $this->get_from_sql_params( $query_args, 'outer_from_clause', 'default_results.product_id' ) );
 			$sql_query_params['where_clause'] .= " AND {$order_product_lookup_table}.product_id IN ({$included_products})";
 		} else {
 			$sql_query_params = array_merge( $sql_query_params, $this->get_from_sql_params( $query_args, 'from_clause', "{$order_product_lookup_table}.product_id" ) );
@@ -287,12 +287,12 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 				}
 
 				$fields          = $this->get_fields( $query_args );
-				$join_selections = $this->format_join_selections( $fields, 'product_id' );
+				$join_selections = $this->format_join_selections( $fields, array( 'product_id' ) );
 				$ids_table       = $this->get_ids_table( $included_products, 'product_id' );
 				$prefix = "SELECT {$join_selections} FROM (";
 				$suffix = ") AS {$table_name}";
 				$right_join = "RIGHT JOIN ( {$ids_table} ) AS default_results
-					ON default_results.id = {$table_name}.product_id";
+					ON default_results.product_id = {$table_name}.product_id";
 			} else {
 				$db_records_count = (int) $wpdb->get_var(
 					"SELECT COUNT(*) FROM (

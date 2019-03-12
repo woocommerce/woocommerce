@@ -92,7 +92,7 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 
 			// Limit is left out here so that the grouping in code by PHP can be applied correctly.
 			// This also needs to be put after the term_taxonomy JOIN so that we can match the correct term name.
-			$sql_query_params = $this->get_order_by_params( $query_args, $sql_query_params, 'outer_from_clause', 'default_results.id' );
+			$sql_query_params = $this->get_order_by_params( $query_args, $sql_query_params, 'outer_from_clause', 'default_results.category_id' );
 		} else {
 			$sql_query_params = $this->get_order_by_params( $query_args, $sql_query_params, 'from_clause', "{$wpdb->prefix}term_taxonomy.term_id" );
 		}
@@ -258,13 +258,13 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 
 			if ( count( $included_categories ) > 0 ) {
 				$fields          = $this->get_fields( $query_args );
-				$join_selections = $this->format_join_selections( array_merge( array( 'category_id' ), $fields ), 'category_id' );
-				$ids_table       = $this->get_ids_table( $included_categories );
+				$join_selections = $this->format_join_selections( array_merge( array( 'category_id' ), $fields ), array( 'category_id' ) );
+				$ids_table       = $this->get_ids_table( $included_categories, 'category_id' );
 
 				$prefix     = "SELECT {$join_selections} FROM (";
 				$suffix     = ") AS {$table_name}";
 				$right_join = "RIGHT JOIN ( {$ids_table} ) AS default_results
-					ON default_results.id = {$table_name}.category_id";
+					ON default_results.category_id = {$table_name}.category_id";
 			} else {
 				$prefix     = '';
 				$suffix     = '';

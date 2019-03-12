@@ -59,18 +59,27 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 	}
 
 	/**
+	 * Returns an array of ids of included coupons, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return array
+	 */
+	protected function get_included_coupons_array( $query_args ) {
+		if ( isset( $query_args['coupons'] ) && is_array( $query_args['coupons'] ) && count( $query_args['coupons'] ) > 0 ) {
+			return $query_args['coupons'];
+		}
+		return array();
+	}
+
+	/**
 	 * Returns comma separated ids of included coupons, based on query arguments from the user.
 	 *
 	 * @param array $query_args Parameters supplied by the user.
 	 * @return string
 	 */
 	protected function get_included_coupons( $query_args ) {
-		$included_coupons_str = '';
-
-		if ( isset( $query_args['coupons'] ) && is_array( $query_args['coupons'] ) && count( $query_args['coupons'] ) > 0 ) {
-			$included_coupons_str = implode( ',', $query_args['coupons'] );
-		}
-		return $included_coupons_str;
+		$included_coupons = $this->get_included_coupons_array( $query_args );
+		return implode( ',', $included_coupons );
 	}
 
 	/**
@@ -85,11 +94,14 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 
 		$sql_query_params = $this->get_time_period_sql_params( $query_args, $order_coupon_lookup_table );
 		$sql_query_params = array_merge( $sql_query_params, $this->get_limit_sql_params( $query_args ) );
-		$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_sql_params( $query_args ) );
 
 		$included_coupons = $this->get_included_coupons( $query_args );
 		if ( $included_coupons ) {
 			$sql_query_params['where_clause'] .= " AND {$order_coupon_lookup_table}.coupon_id IN ({$included_coupons})";
+
+			$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_params( $query_args, 'outer_from_clause', 'default_results.coupon_id' ) );
+		} else {
+			$sql_query_params = array_merge( $sql_query_params, $this->get_order_by_params( $query_args, 'from_clause', "{$order_coupon_lookup_table}.coupon_id" ) );
 		}
 
 		$order_status_filter = $this->get_status_subquery( $query_args );
@@ -101,25 +113,27 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 		return $sql_query_params;
 	}
 
-
 	/**
 	 * Fills ORDER BY clause of SQL request based on user supplied parameters.
 	 *
-	 * @param array $query_args Parameters supplied by the user.
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $from_arg   Name of the FROM sql param.
+	 * @param string $id_cell    ID cell identifier, like `table_name.id_column_name`.
 	 * @return array
 	 */
-	protected function get_order_by_sql_params( $query_args ) {
+	protected function get_order_by_params( $query_args, $from_arg, $id_cell ) {
 		global $wpdb;
-		$lookup_table                 = $wpdb->prefix . self::TABLE_NAME;
-		$sql_query                    = array();
-		$sql_query['from_clause']     = '';
-		$sql_query['order_by_clause'] = '';
+		$lookup_table                   = $wpdb->prefix . self::TABLE_NAME;
+		$sql_query                      = array();
+		$sql_query['from_clause']       = '';
+		$sql_query['outer_from_clause'] = '';
+		$sql_query['order_by_clause']   = '';
 		if ( isset( $query_args['orderby'] ) ) {
 			$sql_query['order_by_clause'] = $this->normalize_order_by( $query_args['orderby'] );
 		}
 
 		if ( false !== strpos( $sql_query['order_by_clause'], '_coupons' ) ) {
-			$sql_query['from_clause'] .= " JOIN {$wpdb->prefix}posts AS _coupons ON {$lookup_table}.coupon_id = _coupons.ID";
+			$sql_query[ $from_arg ] .= " JOIN {$wpdb->prefix}posts AS _coupons ON {$id_cell} = _coupons.ID";
 		}
 
 		if ( isset( $query_args['order'] ) ) {
@@ -236,30 +250,51 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 
 			$selections       = $this->selected_columns( $query_args );
 			$sql_query_params = $this->get_sql_query_params( $query_args );
+			$included_coupons = $this->get_included_coupons_array( $query_args );
 
-			$db_records_count = (int) $wpdb->get_var(
-				"SELECT COUNT(*) FROM (
-							SELECT
-								coupon_id
-							FROM
-								{$table_name}
-								{$sql_query_params['from_clause']}
-							WHERE
-								1=1
-								{$sql_query_params['where_time_clause']}
-								{$sql_query_params['where_clause']}
-							GROUP BY
-								coupon_id
-					  		) AS tt"
-			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+			if ( count( $included_coupons ) > 0 ) {
+				$total_results = count( $included_coupons );
+				$total_pages   = (int) ceil( $total_results / $sql_query_params['per_page'] );
 
-			$total_pages = (int) ceil( $db_records_count / $sql_query_params['per_page'] );
-			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
-				return $data;
+				$fields          = $this->get_fields( $query_args );
+				$join_selections = $this->format_join_selections( $fields, array( 'coupon_id' ) );
+				$ids_table       = $this->get_ids_table( $included_coupons, 'coupon_id' );
+
+				$prefix     = "SELECT {$join_selections} FROM (";
+				$suffix     = ") AS {$table_name}";
+				$right_join = "RIGHT JOIN ( {$ids_table} ) AS default_results
+					ON default_results.coupon_id = {$table_name}.coupon_id";
+			} else {
+				$db_records_count = (int) $wpdb->get_var(
+					"SELECT COUNT(*) FROM (
+								SELECT
+									coupon_id
+								FROM
+									{$table_name}
+									{$sql_query_params['from_clause']}
+								WHERE
+									1=1
+									{$sql_query_params['where_time_clause']}
+									{$sql_query_params['where_clause']}
+								GROUP BY
+									coupon_id
+									) AS tt"
+				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+
+				$total_results = $db_records_count;
+				$total_pages = (int) ceil( $db_records_count / $sql_query_params['per_page'] );
+				if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
+					return $data;
+				}
+
+				$prefix     = '';
+				$suffix     = '';
+				$right_join = '';
 			}
 
 			$coupon_data = $wpdb->get_results(
-				"SELECT
+				"${prefix}
+					SELECT
 						{$selections}
 					FROM
 						{$table_name}
@@ -270,6 +305,9 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 						{$sql_query_params['where_clause']}
 					GROUP BY
 						coupon_id
+				{$suffix}
+					{$right_join}
+					{$sql_query_params['outer_from_clause']}
 					ORDER BY
 						{$sql_query_params['order_by_clause']}
 					{$sql_query_params['limit']}
@@ -286,7 +324,7 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 			$coupon_data = array_map( array( $this, 'cast_numbers' ), $coupon_data );
 			$data        = (object) array(
 				'data'    => $coupon_data,
-				'total'   => $db_records_count,
+				'total'   => $total_results,
 				'pages'   => $total_pages,
 				'page_no' => (int) $query_args['page'],
 			);

@@ -93,7 +93,7 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 		}
 
 		if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
-			$sql_query['outer_from_clause'] .= " JOIN {$wpdb->prefix}woocommerce_tax_rates ON default_results.id = {$wpdb->prefix}woocommerce_tax_rates.tax_rate_id";
+			$sql_query['outer_from_clause'] .= " JOIN {$wpdb->prefix}woocommerce_tax_rates ON default_results.tax_rate_id = {$wpdb->prefix}woocommerce_tax_rates.tax_rate_id";
 		} else {
 			$sql_query['from_clause'] .= " JOIN {$wpdb->prefix}woocommerce_tax_rates ON {$table_name}.tax_rate_id = {$wpdb->prefix}woocommerce_tax_rates.tax_rate_id";
 		}
@@ -198,12 +198,12 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 
 				$selections      = $this->selected_columns( array( 'fields' => $inner_selections ) );
 				$fields          = $this->get_fields( $query_args );
-				$join_selections = $this->format_join_selections( $fields, 'tax_rate_id', $outer_selections );
+				$join_selections = $this->format_join_selections( $fields, array( 'tax_rate_id' ), $outer_selections );
 				$ids_table       = $this->get_ids_table( $query_args['taxes'], 'tax_rate_id' );
 				$prefix = "SELECT {$join_selections} FROM (";
 				$suffix = ") AS {$table_name}";
 				$right_join = "RIGHT JOIN ( {$ids_table} ) AS default_results
-					ON default_results.id = {$table_name}.tax_rate_id";
+					ON default_results.tax_rate_id = {$table_name}.tax_rate_id";
 			} else {
 				$db_records_count = (int) $wpdb->get_var(
 					"SELECT COUNT(*) FROM (
