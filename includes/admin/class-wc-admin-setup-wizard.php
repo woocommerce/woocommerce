@@ -1630,6 +1630,18 @@ class WC_Admin_Setup_Wizard {
 					<p><?php echo esc_html( $item_info['name'] ); ?></p>
 				<?php endif; ?>
 			</div>
+			<div class="wc-wizard-service-enable">
+				<span class="wc-wizard-service-toggle <?php echo esc_attr( $should_enable_toggle ? '' : 'disabled' ); ?>" tabindex="0">
+					<input
+						id="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>"
+						type="checkbox"
+						name="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>-enabled"
+						value="yes" <?php checked( $should_enable_toggle ); ?>
+						data-plugins="<?php echo wc_esc_json( wp_json_encode( $plugins ) ); ?>"
+					/>
+					<label for="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>">
+				</span>
+			</div>
 			<div class="wc-wizard-service-description">
 				<?php echo wp_kses_post( wpautop( $item_info['description'] ) ); ?>
 				<?php if ( ! empty( $item_info['settings'] ) ) : ?>
@@ -1678,18 +1690,6 @@ class WC_Admin_Setup_Wizard {
 						<?php endforeach; ?>
 					</div>
 				<?php endif; ?>
-			</div>
-			<div class="wc-wizard-service-enable">
-				<span class="wc-wizard-service-toggle <?php echo esc_attr( $should_enable_toggle ? '' : 'disabled' ); ?>">
-					<input
-						id="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>"
-						type="checkbox"
-						name="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>-enabled"
-						value="yes" <?php checked( $should_enable_toggle ); ?>
-						data-plugins="<?php echo wc_esc_json( wp_json_encode( $plugins ) ); ?>"
-					/>
-					<label for="wc-wizard-service-<?php echo esc_attr( $item_id ); ?>">
-				</span>
 			</div>
 		</li>
 		<?php
@@ -1768,7 +1768,7 @@ class WC_Admin_Setup_Wizard {
 					<div class="wc-wizard-service-description">
 						<?php esc_html_e( 'Collect payments from customers offline.', 'woocommerce' ); ?>
 					</div>
-					<div class="wc-wizard-service-enable">
+					<div class="wc-wizard-service-enable" tabindex="0">
 						<input class="wc-wizard-service-list-toggle" id="wc-wizard-service-list-toggle" type="checkbox">
 						<label for="wc-wizard-service-list-toggle"></label>
 					</div>
