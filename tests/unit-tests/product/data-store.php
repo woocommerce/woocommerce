@@ -581,6 +581,93 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test Product variation attribute_summary prop and its update on data store read.
+	 *
+	 * @since 3.6.0
+	 * @return void
+	 */
+	public function test_generate_variation_attribute_summary() {
+		$product = new WC_Product();
+		$product->set_name( 'Test Product' );
+
+		$product->save();
+
+		$one_attribute_variation = new WC_Product_Variation();
+		$one_attribute_variation->set_parent_id( $product->get_id() );
+		$one_attribute_variation->set_attributes( array( 'color' => 'Green' ) );
+		$one_attribute_variation->save();
+
+		$two_attribute_variation = new WC_Product_Variation();
+		$two_attribute_variation->set_parent_id( $product->get_id() );
+		$two_attribute_variation->set_attributes(
+			array(
+				'color' => 'Green',
+				'size'  => 'Large',
+			)
+		);
+		$two_attribute_variation->save();
+
+		$multiword_attribute_variation = new WC_Product_Variation();
+		$multiword_attribute_variation->set_parent_id( $product->get_id() );
+		$multiword_attribute_variation->set_attributes(
+			array(
+				'color'          => 'Green',
+				'mounting-plate' => 'galaxy-s6',
+				'support'        => 'one-year',
+			)
+		);
+		$multiword_attribute_variation->save();
+
+		// Check the one attribute variation title.
+		$this->assertEquals( 'color: Green', $one_attribute_variation->get_attribute_summary() );
+
+		// Check the two attribute variation title.
+		$this->assertEquals( 'color: Green, size: Large', $two_attribute_variation->get_attribute_summary() );
+
+		// Check the variation with a multiword attribute name.
+		$this->assertEquals( 'color: Green, mounting-plate: galaxy-s6, support: one-year', $multiword_attribute_variation->get_attribute_summary() );
+
+		// Add atributes to parent so that they are loaded correctly for variation.
+		$attribute_1 = new WC_Product_Attribute();
+		$attribute_1->set_name( 'color' );
+		$attribute_1->set_options( array( 'Green', 'Blue' ) );
+		$attribute_1->set_position( '0' );
+		$attribute_1->set_visible( 1 );
+		$attribute_1->set_variation( 1 );
+
+		$attribute_2 = new WC_Product_Attribute();
+		$attribute_2->set_name( 'size' );
+		$attribute_2->set_options( array( 'Large', 'Not so Large' ) );
+		$attribute_2->set_position( '0' );
+		$attribute_2->set_visible( 1 );
+		$attribute_2->set_variation( 1 );
+
+		$attributes = array(
+			$attribute_1,
+			$attribute_2,
+		);
+
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		$two_attribute_variation->set_attributes(
+			array(
+				'color' => 'Blue',
+				'size'  => 'Not so Large',
+			)
+		);
+		$two_attribute_variation->save();
+
+		// Remove the record from the db to simulate existing variation with invalid excerpt set.
+		$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, array( 'post_excerpt' => '_EMPTY_' ), array( 'ID' => $two_attribute_variation->get_id() ) );
+
+		// Read on new instance should get correct value.
+		$two_attribute_variation_2 = new WC_Product_Variation( $two_attribute_variation->get_id() );
+		$this->assertEquals( 'color: Blue, size: Not so Large', $two_attribute_variation_2->get_attribute_summary() );
+
+	}
+
+	/**
 	 * Test to make sure meta can still be set while hooked using save_post.
 	 * https://github.com/woocommerce/woocommerce/issues/13960
 	 * @since 3.0.1
