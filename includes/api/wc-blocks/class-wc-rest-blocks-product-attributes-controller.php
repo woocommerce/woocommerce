@@ -1,6 +1,7 @@
 <?php
 /**
  * REST API Product Attributes controller customized for Products Block.
+ * Private API: This endpoint is designed to only be used `internally` by the block post editor.
  *
  * Handles requests to the /products/attributes endpoint.
  *
@@ -152,6 +153,7 @@ class WC_REST_Blocks_Product_Attributes_Controller extends WC_REST_Product_Attri
 
 		$response = rest_ensure_response( $data );
 
+		$response->header( 'X-Woo-Notice', __( 'Private REST API for use by block editor only.', 'woocommerce' ) );
 		$response->add_links( $this->prepare_links( $item ) );
 
 		return $response;

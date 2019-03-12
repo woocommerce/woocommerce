@@ -1,7 +1,7 @@
 <?php
 /**
  * REST API Product Attribute Terms controller customized for Products Block.
- *
+ * Private API: This endpoint is designed to only
  * Handles requests to the /products/attributes/<attribute_id/terms endpoint.
  *
  * @package WooCommerce\Blocks\Products\Rest\Controller
@@ -127,6 +127,7 @@ class WC_REST_Blocks_Product_Attribute_Terms_Controller extends WC_REST_Product_
 
 		$response = rest_ensure_response( $data );
 
+		$response->header( 'X-Woo-Notice', __( 'Private REST API for use by block editor only.', 'woocommerce' ) );	
 		$response->add_links( $this->prepare_links( $item, $request ) );
 
 		return $response;

@@ -1,6 +1,7 @@
 <?php
 /**
  * REST API Products controller customized for Products Block.
+ * Private API: This endpoint is designed to only be used `internally` by the block post editor.
  *
  * Handles requests to the /products endpoint.
  *
@@ -120,6 +121,7 @@ class WC_REST_Blocks_Products_Controller extends WC_REST_Products_Controller {
 		$response = rest_ensure_response( $objects );
 		$response->header( 'X-WP-Total', $query_results['total'] );
 		$response->header( 'X-WP-TotalPages', (int) $max_pages );
+		$response->header( 'X-Woo-Notice', __( 'Private REST API for use by block editor only.', 'woocommerce' ) );
 
 		$base          = $this->rest_base;
 		$attrib_prefix = '(?P<';
@@ -214,7 +216,7 @@ class WC_REST_Blocks_Products_Controller extends WC_REST_Products_Controller {
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
-
+		$response->header( 'X-Woo-Notice', __( 'Private REST API for use by block editor only.', 'woocommerce' ) );
 		$response->add_links( $this->prepare_links( $product, $request ) );
 
 		return $response;

@@ -1,6 +1,7 @@
 <?php
 /**
  * REST API Product Categories controller customized for Products Block.
+ * Private API: This endpoint is designed to only be used `internally` by the block post editor.
  *
  * Handles requests to the /products/categories endpoint.
  *
@@ -119,6 +120,7 @@ class WC_REST_Blocks_Product_Categories_Controller extends WC_REST_Product_Categ
 
 		$response = rest_ensure_response( $data );
 
+		$response->header( 'X-Woo-Notice', __( 'Private REST API for use by block editor only.', 'woocommerce' ) );	
 		$response->add_links( $this->prepare_links( $item, $request ) );
 
 		return $response;
