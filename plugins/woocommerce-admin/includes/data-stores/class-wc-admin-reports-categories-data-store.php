@@ -86,13 +86,15 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 		$sql_query_params['from_clause'] .= " LEFT JOIN {$wpdb->prefix}term_relationships ON {$order_product_lookup_table}.product_id = {$wpdb->prefix}term_relationships.object_id";
 		$sql_query_params['from_clause'] .= " LEFT JOIN {$wpdb->prefix}term_taxonomy ON {$wpdb->prefix}term_relationships.term_taxonomy_id = {$wpdb->prefix}term_taxonomy.term_taxonomy_id";
 
-		// Limit is left out here so that the grouping in code by PHP can be applied correctly.
-		// This also needs to be put after the term_taxonomy JOIN so that we can match the correct term name.
-		$sql_query_params = $this->get_order_by_params( $query_args, $sql_query_params );
-
 		$included_categories = $this->get_included_categories( $query_args );
 		if ( $included_categories ) {
 			$sql_query_params['where_clause'] .= " AND {$wpdb->prefix}term_taxonomy.term_id IN ({$included_categories})";
+
+			// Limit is left out here so that the grouping in code by PHP can be applied correctly.
+			// This also needs to be put after the term_taxonomy JOIN so that we can match the correct term name.
+			$sql_query_params = $this->get_order_by_params( $query_args, $sql_query_params, 'outer_from_clause', 'default_results.id' );
+		} else {
+			$sql_query_params = $this->get_order_by_params( $query_args, $sql_query_params, 'from_clause', "{$wpdb->prefix}term_taxonomy.term_id" );
 		}
 
 		// @todo Only products in the category C or orders with products from category C (and, possibly others?).
@@ -115,11 +117,13 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 	/**
 	 * Fills ORDER BY clause of SQL request based on user supplied parameters.
 	 *
-	 * @param array $query_args Parameters supplied by the user.
-	 * @param array $sql_query Current SQL query array.
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param array  $sql_query  Current SQL query array.
+	 * @param string $from_arg   Name of the FROM sql param.
+	 * @param string $id_cell    ID cell identifier, like `table_name.id_column_name`.
 	 * @return array
 	 */
-	protected function get_order_by_params( $query_args, $sql_query ) {
+	protected function get_order_by_params( $query_args, $sql_query, $from_arg, $id_cell ) {
 		global $wpdb;
 		$lookup_table = $wpdb->prefix . self::TABLE_NAME;
 
@@ -128,8 +132,9 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 			$sql_query['order_by_clause'] = $this->normalize_order_by( $query_args['orderby'] );
 		}
 
+		$sql_query['outer_from_clause'] = '';
 		if ( false !== strpos( $sql_query['order_by_clause'], '_terms' ) ) {
-			$sql_query['from_clause'] .= " JOIN {$wpdb->prefix}terms AS _terms ON {$wpdb->prefix}term_taxonomy.term_id = _terms.term_id";
+			$sql_query[ $from_arg ] .= " JOIN {$wpdb->prefix}terms AS _terms ON {$id_cell} = _terms.term_id";
 		}
 
 		if ( isset( $query_args['order'] ) ) {
@@ -157,6 +162,18 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 		return $order_by;
 	}
 
+	/**
+	 * Returns an array of ids of included categories, based on query arguments from the user.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_included_categories_array( $query_args ) {
+		if ( isset( $query_args['categories'] ) && is_array( $query_args['categories'] ) && count( $query_args['categories'] ) > 0 ) {
+			return $query_args['categories'];
+		}
+		return array();
+	}
 
 	/**
 	 * Returns comma separated ids of included categories, based on query arguments from the user.
@@ -165,12 +182,8 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 	 * @return string
 	 */
 	protected function get_included_categories( $query_args ) {
-		$included_categories_str = '';
-
-		if ( isset( $query_args['categories'] ) && is_array( $query_args['categories'] ) && count( $query_args['categories'] ) > 0 ) {
-			$included_categories_str = implode( ',', $query_args['categories'] );
-		}
-		return $included_categories_str;
+		$included_categories = $this->get_included_categories_array( $query_args );
+		return implode( ',', $included_categories );
 	}
 
 	/**
@@ -239,11 +252,28 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 				'page_no' => 0,
 			);
 
-			$selections       = $this->selected_columns( $query_args );
-			$sql_query_params = $this->get_sql_query_params( $query_args );
+			$selections          = $this->selected_columns( $query_args );
+			$sql_query_params    = $this->get_sql_query_params( $query_args );
+			$included_categories = $this->get_included_categories_array( $query_args );
+
+			if ( count( $included_categories ) > 0 ) {
+				$fields          = $this->get_fields( $query_args );
+				$join_selections = $this->format_join_selections( array_merge( array( 'category_id' ), $fields ), 'category_id' );
+				$ids_table       = $this->get_ids_table( $included_categories );
+
+				$prefix     = "SELECT {$join_selections} FROM (";
+				$suffix     = ") AS {$table_name}";
+				$right_join = "RIGHT JOIN ( {$ids_table} ) AS default_results
+					ON default_results.id = {$table_name}.category_id";
+			} else {
+				$prefix     = '';
+				$suffix     = '';
+				$right_join = '';
+			}
 
 			$categories_data = $wpdb->get_results(
-				"SELECT
+				"${prefix}
+					SELECT
 						{$wpdb->prefix}term_taxonomy.term_id as category_id,
 						{$selections}
 					FROM
@@ -255,6 +285,9 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 						{$sql_query_params['where_clause']}
 					GROUP BY
 						category_id
+				{$suffix}
+					{$right_join}
+					{$sql_query_params['outer_from_clause']}
 					ORDER BY
 						{$sql_query_params['order_by_clause']}
 					",

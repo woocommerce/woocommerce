@@ -85,6 +85,69 @@ class WC_Tests_API_Reports_Categories extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test getting reports with the `categories` param.
+	 *
+	 * @since 3.5.0
+	 */
+	public function test_get_reports_categories_param() {
+		WC_Helper_Reports::reset_stats_dbs();
+		wp_set_current_user( $this->user );
+
+		// Populate all of the data.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( 'completed' );
+		$order->set_total( 100 ); // $25 x 4.
+		$order->save();
+
+		// Populate all of the data.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product 2' );
+		$product->set_regular_price( 100 );
+		$second_category_id = wp_create_category( 'Second Category' );
+		$product->set_category_ids( array( $second_category_id ) );
+		$product->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		$uncategorized_term = get_term_by( 'slug', 'uncategorized', 'product_cat' );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'categories'   => $uncategorized_term->term_id . ',' . $second_category_id,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, count( $reports ) );
+
+		$category_report = reset( $reports );
+
+		$this->assertEquals( $second_category_id, $category_report['category_id'] );
+		$this->assertEquals( 0, $category_report['items_sold'] );
+		$this->assertEquals( 0, $category_report['orders_count'] );
+		$this->assertEquals( 0, $category_report['products_count'] );
+		$this->assertArrayHasKey( '_links', $category_report );
+		$this->assertArrayHasKey( 'category', $category_report['_links'] );
+
+		$category_report = next( $reports );
+
+		$this->assertEquals( $uncategorized_term->term_id, $category_report['category_id'] );
+		$this->assertEquals( 4, $category_report['items_sold'] );
+		$this->assertEquals( 1, $category_report['orders_count'] );
+		$this->assertEquals( 1, $category_report['products_count'] );
+		$this->assertArrayHasKey( '_links', $category_report );
+		$this->assertArrayHasKey( 'category', $category_report['_links'] );
+	}
+
+	/**
 	 * Test getting reports without valid permissions.
 	 *
 	 * @since 3.5.0
