@@ -291,6 +291,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Make coupon code sanitization match post_title sanitization. #22945
 * Fix - Ensure WC_Helper sees plugin activation events via CLI. #22972
 * Fix - Setup wizard redirection improvements. #22977
+* Fix - Correctly show stock status for products when manually creating an order in the admin. #22997
 * Performance - Product meta data lookup table used for sorting and slow queries. #22718
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
