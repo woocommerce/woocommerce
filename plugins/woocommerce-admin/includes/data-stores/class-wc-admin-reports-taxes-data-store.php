@@ -296,7 +296,7 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 		global $wpdb;
 
 		if ( 'rate' === $order_by ) {
-			return $wpdb->prefix . 'woocommerce_tax_rates.tax_rate';
+			return "CAST({$wpdb->prefix}woocommerce_tax_rates.tax_rate as DECIMAL(7,4))";
 		}
 
 		return $order_by;
