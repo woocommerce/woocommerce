@@ -156,7 +156,8 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 		$ssr            = get_transient( $transient_name );
 
 		if ( false === $ssr ) {
-			if( ! did_action( 'rest_api_init' ) ) {
+			// When running WC 3.6 or greater it is necessary to manually load the REST API classes.
+			if ( version_compare( WC()->version, '3.6', '>=' ) && ! did_action( 'rest_api_init' ) ) {
 				WC()->api->rest_api_includes();
 			}
 
