@@ -171,8 +171,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Add aria-label attribute to shop orderby selector to improve accessibility. #22683
 * Enhancement - When adding, editing, and deleting items manually from orders, the corresponding product stock will be
                 updated to reflect the event and an order note will log the event. #22329
-* Enhancement - Added suggestions for official extensions to Products, Edit Product and Orders screens. 
-* Tweak - Add no-transform cache header to bypass Google Weblight. #22525
+* Enhancement - Added suggestions for official extensions to Products, Edit Product and Orders screens.
+* Enhancement - Store attribute values as post_excerpt for variations to support easier searching for variations. #22083
 * Tweak - Generalize shipping estimate text on cart page. #22467
 * Tweak - Include auto draft orders in order list filters. #22380
 * Tweak - Only include the network orders widget on the main site dashboard. #22318
