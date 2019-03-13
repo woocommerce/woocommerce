@@ -957,7 +957,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				posts.post_type IN ( 'product', 'product_variation' )
 				AND posts.post_status != 'trash'
 				AND lookup.sku = %s
-				AND posts.ID <> %d
+				AND lookup.product_id <> %d
 				LIMIT 1
 				",
 				wp_slash( $sku ),
