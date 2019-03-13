@@ -1885,6 +1885,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$price_meta   = (array) get_post_meta( $id, '_price', false );
 			$manage_stock = get_post_meta( $id, '_manage_stock', true );
 			$stock        = 'yes' === $manage_stock ? wc_stock_amount( get_post_meta( $id, '_stock', true ) ) : null;
+			$price        = wc_format_decimal( get_post_meta( $id, '_price', true ) );
+			$sale_price   = wc_format_decimal( get_post_meta( $id, '_sale_price', true ) );
 			return array(
 				'product_id'     => absint( $id ),
 				'sku'            => get_post_meta( $id, '_sku', true ),
@@ -1892,6 +1894,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'downloadable'   => 'yes' === get_post_meta( $id, '_downloadable', true ) ? 1 : 0,
 				'min_price'      => reset( $price_meta ),
 				'max_price'      => end( $price_meta ),
+				'onsale'         => $sale_price && $price === $sale_price ? 1 : 0,
 				'stock_quantity' => $stock,
 				'stock_status'   => get_post_meta( $id, '_stock_status', true ),
 				'rating_count'   => array_sum( (array) get_post_meta( $id, '_wc_rating_count', true ) ),
