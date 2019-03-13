@@ -23,6 +23,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<h4><?php esc_html_e( 'Enhance your products', 'woocommerce' ); ?></h4>
 			<p><?php esc_html_e( 'Extensions can add new functionality to your product pages that make your store stand out', 'woocommerce' ); ?></p>
 		</div>
-		<a href="https://woocommerce.com/product-category/woocommerce-extensions/?utm_source=editproduct&amp;utm_campaign=marketplacesuggestions&amp;utm_medium=product" target="blank" class="button">Browse the Marketplace</a>
+		<a href="https://woocommerce.com/product-category/woocommerce-extensions/?utm_source=editproduct&amp;utm_campaign=marketplacesuggestions&amp;utm_medium=product" target="blank" class="button"><?php esc_html_e( 'Browse the Marketplace', 'woocommerce' ); ?></a>
 	</div>
 </div>
