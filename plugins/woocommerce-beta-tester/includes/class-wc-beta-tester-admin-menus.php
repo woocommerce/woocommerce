@@ -156,6 +156,14 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 		$ssr            = get_transient( $transient_name );
 
 		if ( false === $ssr ) {
+			if( ! did_action( 'rest_api_init' ) ) {
+				WC()->api->rest_api_includes();
+			}
+
+			if ( ! class_exists( 'WC_REST_System_Status_Controller', false ) ) {
+				return '';
+			}
+
 			// Get SSR.
 			$api      = new WC_REST_System_Status_Controller();
 			$schema   = $api->get_item_schema();
