@@ -17,10 +17,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Report {
 
 	/**
-	 * WC_Admin_Report constructor.
+	 * Init the static hooks of the class.
 	 */
-	public function __construct() {
-		add_action( 'shutdown', array( $this, '_maybe_update_transients' ) );
+	public static function init_class() {
+		add_action( 'shutdown', array( 'WC_Admin_Report', '_maybe_update_transients' ) );
 	}
 
 	/**
@@ -349,7 +349,7 @@ class WC_Admin_Report {
 				$big_selects = true;
 			}
 
-			$this->transients_to_update[ $class ]          = $class;
+			self::$transients_to_update[ $class ]          = $class;
 			self::$cached_results[ $class ][ $query_hash ] = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 		}
 
@@ -361,7 +361,7 @@ class WC_Admin_Report {
 	/**
 	 * @var array List of transients name that have been updated and need persisting.
 	 */
-	protected $transients_to_update = array();
+	protected static $transients_to_update = array();
 	
 	/**
 	 * @var array The list of transients.
@@ -369,12 +369,14 @@ class WC_Admin_Report {
 	protected static $cached_results = array();
 
 	/**
-	 * Hook to update the updated transients at the end of the request.
+	 * Function to update the modified transients at the end of the request.
 	 */
-	public function _maybe_update_transients() {
-		foreach ( $this->transients_to_update as $transient_name ) {
+	public static function _maybe_update_transients() {
+		foreach ( self::$transients_to_update as $key => $transient_name ) {
 			set_transient( $transient_name, self::$cached_results[ $transient_name ], DAY_IN_SECONDS );
 		}
+		//Reset the transients
+		self::$transients_to_update = array();
 	}
 
 	/**
@@ -705,3 +707,5 @@ class WC_Admin_Report {
 		}
 	}
 }
+
+WC_Admin_Report::init_class();
