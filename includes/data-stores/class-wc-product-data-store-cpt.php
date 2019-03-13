@@ -949,13 +949,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		return $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT $wpdb->posts.ID
-				FROM $wpdb->posts
-				LEFT JOIN $wpdb->postmeta ON ( $wpdb->posts.ID = $wpdb->postmeta.post_id )
-				WHERE $wpdb->posts.post_type IN ( 'product', 'product_variation' )
-					AND $wpdb->posts.post_status != 'trash'
-					AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = %s
-					AND $wpdb->postmeta.post_id <> %d
+				"
+				SELECT posts.ID
+				FROM {$wpdb->posts} as posts
+				INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
+				WHERE
+					posts.post_type IN ( 'product', 'product_variation' )
+					AND posts.post_status != 'trash'
+					AND lookup.sku = %s
+					AND posts.ID <> %d
 				LIMIT 1",
 				wp_slash( $sku ),
 				$product_id
