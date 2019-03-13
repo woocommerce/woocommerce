@@ -95,7 +95,9 @@ jQuery( function( $ ) {
 			$statebox   = $wrapper.find( '#billing_state, #shipping_state, #calc_shipping_state' ),
 			$parent     = $statebox.closest( 'p.form-row' ),
 			input_name  = $statebox.attr( 'name' ),
-			input_id    = $statebox.attr( 'id' ),
+			input_id = $statebox.attr(' id '),
+			input_classes = $statebox.attr(' class '),
+
 			value       = $statebox.val(),
 			placeholder = $statebox.attr( 'placeholder' ) || $statebox.attr( 'data-placeholder' ) || '';
 
@@ -136,7 +138,9 @@ jQuery( function( $ ) {
 						input_name +
 						'" id="' +
 						input_id +
-						'" class="state_select" data-placeholder="' +
+						'" class="state_select ' +
+						input_classes +
+						'" data-placeholder="' +
 						placeholder +
 						'"></select>'
 					);
@@ -153,7 +157,9 @@ jQuery( function( $ ) {
 			if ( $statebox.is( 'select, input[type="hidden"]' ) ) {
 				$parent.show().find( '.select2-container' ).remove();
 				$statebox.replaceWith(
-					'<input type="text" class="input-text" name="' +
+					'<input type="text" class="input-text ' +
+					input_classes +
+					'" data-placeholder="' + name="' +
 					input_name +
 					'" id="' +
 					input_id +
