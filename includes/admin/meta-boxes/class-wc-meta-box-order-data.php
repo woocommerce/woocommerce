@@ -186,7 +186,7 @@ class WC_Meta_Box_Order_Data {
 
 					$meta_list = array();
 
-					if ( $payment_method ) {
+					if ( $payment_method && 'other' !== $payment_method ) {
 						/* translators: %s: payment method */
 						$payment_method_string = sprintf(
 							__( 'Payment via %s', 'woocommerce' ),

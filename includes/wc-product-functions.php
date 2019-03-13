@@ -1271,6 +1271,24 @@ function wc_deferred_product_sync( $product_id ) {
 }
 
 /**
+ * See if the lookup table is being generated already.
+ *
+ * @since 3.6.0
+ * @return bool
+ */
+function wc_update_product_lookup_tables_is_running() {
+	$table_updates_pending = WC()->queue()->search(
+		array(
+			'status'   => 'pending',
+			'group'    => 'wc_update_product_lookup_tables',
+			'per_page' => 1,
+		)
+	);
+
+	return (bool) count( $table_updates_pending );
+}
+
+/**
  * Populate lookup table data for products.
  *
  * @since 3.6.0
@@ -1340,6 +1358,9 @@ function wc_update_product_lookup_tables() {
 			);
 		}
 	}
+
+	// Add notice.
+	WC_Admin_Notices::add_notice( 'regenerating_lookup_table' );
 }
 
 /**

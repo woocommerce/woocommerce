@@ -38,7 +38,14 @@
 			// if this is a high-use area, delay new suggestion that area for a short while
 			var highUseSuggestionContexts = [ 'products-list-inline' ];
 			if ( _.contains( highUseSuggestionContexts, context ) ) {
-				Cookies.set( 'woocommerce_snooze_products_list_suggestions', '1', { expires: 2 } );
+				// snooze suggestions in that area for 2 days
+				var contextSnoozeCookie = 'woocommerce_snooze_suggestions__' + context;
+				Cookies.set( contextSnoozeCookie, 'true', { expires: 2 } );
+
+				// keep track of how often this area gets dismissed in a cookie
+				var contextDismissalCountCookie = 'woocommerce_dismissed_suggestions__' + context;
+				var previousDismissalsInThisContext = parseInt( Cookies.get( contextDismissalCountCookie ) ) || 0;
+				Cookies.set( contextDismissalCountCookie, previousDismissalsInThisContext + 1, { expires: 31 } );
 			}
 
 			window.wcTracks.recordEvent( 'marketplace_suggestion_dismissed', {
@@ -374,9 +381,19 @@
 					var context = 'products-list-inline';
 
 					// product list banner suggestion is temporarily suppressed after a recent dismissal
-					if ( Cookies.get( 'woocommerce_snooze_products_list_suggestions' ) ) {
+					var contextSnoozeCookie = 'woocommerce_snooze_suggestions__' + context;
+					if ( Cookies.get( contextSnoozeCookie ) ) {
 						return;
 					}
+
+					// product list banner suggestion has been dismissed repeatedly – give user a break
+					// note that this is longer term but still temporary, based on the expiry of the cookie
+					var hideSuggestionsDismissalThreshold = 5;
+					var contextDismissalCountCookie = 'woocommerce_dismissed_suggestions__' + context;
+					if ( parseInt( Cookies.get( 'contextDismissalCountCookie' ) ) > hideSuggestionsDismissalThreshold ) {
+						return;
+					}
+
 
 					// find promotions that target this context
 					var promos = getRelevantPromotions( marketplaceSuggestionsApiData, context );
