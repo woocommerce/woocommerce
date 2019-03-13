@@ -19,8 +19,14 @@ class WC_Admin_Report {
 	/**
 	 * Init the static hooks of the class.
 	 */
-	public static function init_class() {
-		add_action( 'shutdown', array( 'WC_Admin_Report', '_maybe_update_transients' ) );
+	protected static function add_update_transients_hook() {
+		static $done = false;
+		
+		if ( $done ) {
+			return;
+		}
+		$done = true;
+		add_action( 'shutdown', array( 'WC_Admin_Report', 'maybe_update_transients' ) );
 	}
 
 	/**
@@ -330,32 +336,61 @@ class WC_Admin_Report {
 		$query          = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
 		$query          = implode( ' ', $query );
 		$query_hash     = md5( $query_type . $query );
-		$class = strtolower( get_class( $this ) );
-		if ( ! isset( self::$cached_results[ $class ] ) ) {
-			self::$cached_results[ $class ] = get_transient( strtolower( get_class( $this ) ) );
-		}
-
+		
 		if ( $debug ) {
 			echo '<pre>';
 			wc_print_r( $query );
 			echo '</pre>';
 		}
+		
+		$result = $this->get_cached_query();
+		
+		if ( $debug || $nocache || is_null( $result ) ) {
+			self::enable_big_selects();
 
-		if ( $debug || $nocache || false === self::$cached_results[ $class ] || ! isset( self::$cached_results[ $class ][ $query_hash ] ) ) {
-			static $big_selects = false;
-			// Enable big selects for reports, just once for this session
-			if ( ! $big_selects ) {
-				$wpdb->query( 'SET SESSION SQL_BIG_SELECTS=1' );
-				$big_selects = true;
-			}
-
-			self::$transients_to_update[ $class ]          = $class;
-			self::$cached_results[ $class ][ $query_hash ] = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
+			$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 		}
 
-		$result = self::$cached_results[ $class ][ $query_hash ];
-
 		return $result;
+	}
+	
+	
+	/**
+	 * Enables big mysql selects for reports, just once for this session
+	 */
+	protected static function enable_big_selects() {
+		static $big_selects = false;
+
+		global $wpdb;
+
+		if ( ! $big_selects ) {
+			$wpdb->query( 'SET SESSION SQL_BIG_SELECTS=1' );
+			$big_selects = true;
+		}
+	}
+
+	/**
+	 * Get the cached query result or null if it's not in the cache
+	 * 
+	 * @param $query_hash
+	 *
+	 * @return mixed
+	 */
+	protected function get_cached_query( $query_hash ) {
+		$class = strtolower( get_class( $this ) );
+		if ( ! isset( self::$cached_results[ $class ] ) ) {
+			self::$cached_results[ $class ] = get_transient( strtolower( get_class( $this ) ) );
+		}
+		if ( false === self::$cached_results[ $class ] || ! isset( self::$cached_results[ $class ][ $query_hash ] ) ) {
+			self::enable_big_selects();
+			self::add_update_transients_hook();
+			self::$transients_to_update[ $class ]          = $class;
+			self::$cached_results[ $class ][ $query_hash ] = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
+
+			return self::$cached_results[ $class ][ $query_hash ];
+		}
+
+		return null;
 	}
 
 	/**
@@ -371,11 +406,11 @@ class WC_Admin_Report {
 	/**
 	 * Function to update the modified transients at the end of the request.
 	 */
-	public static function _maybe_update_transients() {
+	public static function maybe_update_transients() {
 		foreach ( self::$transients_to_update as $key => $transient_name ) {
 			set_transient( $transient_name, self::$cached_results[ $transient_name ], DAY_IN_SECONDS );
 		}
-		//Reset the transients
+		// Transients have been updated reset the list.
 		self::$transients_to_update = array();
 	}
 
@@ -707,5 +742,3 @@ class WC_Admin_Report {
 		}
 	}
 }
-
-WC_Admin_Report::init_class();
