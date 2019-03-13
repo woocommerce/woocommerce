@@ -375,8 +375,7 @@ class WC_Admin_Report {
 	/**
 	 * Get the cached query result or null if it's not in the cache
 	 *
-	 * @param string $query_type
-	 * @param string $query
+	 * @param string $query_hash
 	 *
 	 * @return mixed
 	 */
@@ -393,10 +392,14 @@ class WC_Admin_Report {
 
 		return null;
 	}
-	
+
+	/**
+	 * Set the cached query result
+	 *
+	 * @param string $query_hash
+	 * @param mixed  $data
+	 */
 	protected function set_cached_query( $query_hash, $data ) {
-		global $wpdb;
-		
 		$class = strtolower( get_class( $this ) );
 		
 		if ( ! isset( self::$cached_results[ $class ] ) ) {
