@@ -17,6 +17,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Report {
 
 	/**
+	 * WC_Admin_Report constructor.
+	 */
+	public function __construct() {
+		add_action( 'shutdown', [ $this, '_maybe_update_transients' ] );
+	}
+
+	/**
 	 * The chart interval.
 	 *
 	 * @var int
@@ -129,7 +136,7 @@ class WC_Admin_Report {
 					$get_key = "order_items.{$key}";
 					break;
 				default:
-					break;
+					continue 2; // Skip to the next foreach iteration else the query will be invalid.
 			}
 
 			if ( $value['function'] ) {
@@ -323,7 +330,10 @@ class WC_Admin_Report {
 		$query          = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
 		$query          = implode( ' ', $query );
 		$query_hash     = md5( $query_type . $query );
-		$cached_results = get_transient( strtolower( get_class( $this ) ) );
+		$class = strtolower( get_class( $this ) );
+		if ( ! isset( self::$cached_results[ $class ] ) ) {
+			self::$cached_results[ $class ] = get_transient( strtolower( get_class( $this ) ) );
+		}
 
 		if ( $debug ) {
 			echo '<pre>';
@@ -331,7 +341,7 @@ class WC_Admin_Report {
 			echo '</pre>';
 		}
 
-		if ( $debug || $nocache || false === $cached_results || ! isset( $cached_results[ $query_hash ] ) ) {
+		if ( $debug || $nocache || false === self::$cached_results[ $class ] || ! isset( self::$cached_results[ $class ][ $query_hash ] ) ) {
 			static $big_selects = false;
 			// Enable big selects for reports, just once for this session
 			if ( ! $big_selects ) {
@@ -339,13 +349,29 @@ class WC_Admin_Report {
 				$big_selects = true;
 			}
 
-			$cached_results[ $query_hash ] = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
-			set_transient( strtolower( get_class( $this ) ), $cached_results, DAY_IN_SECONDS );
+			$this->transients_to_update[ $class ]          = $class;
+			self::$cached_results[ $class ][ $query_hash ] = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 		}
 
-		$result = $cached_results[ $query_hash ];
+		$result = self::$cached_results[ $query_hash ];
 
 		return $result;
+	}
+
+	/**
+	 * @var array List of transients name that have been updated and need persisting.
+	 */
+	protected $transients_to_update = array();
+	
+	/**
+	 * @var array The list of transients.
+	 */
+	protected static $cached_results = array();
+
+	public function _update_transients() {
+		foreach ( $this->transients_to_update as $transient_name ) {
+			set_transient( $transient_name, self::$cached_results[ $transient_name ], DAY_IN_SECONDS );
+		}
 	}
 
 	/**
