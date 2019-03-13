@@ -344,13 +344,14 @@ class WC_Admin_Report {
 			wc_print_r( $query );
 			echo '</pre>';
 		}
+		
+		$query_hash = md5( $query_type . $query );
 
-		$result = $this->get_cached_query( $query_type, $query );
-
-		if ( $debug || $nocache || is_null( $result ) ) {
+		if ( $debug || $nocache || is_null( $result = $this->get_cached_query( $query_hash ) ) ) {
 			self::enable_big_selects();
 
 			$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
+			$this->set_cached_query( $query_hash, $result );	
 		}
 
 		return $result;
@@ -379,24 +380,33 @@ class WC_Admin_Report {
 	 *
 	 * @return mixed
 	 */
-	protected function get_cached_query( $query_type, $query ) {
-		global $wpdb;
-		
-		$query_hash = md5( $query_type . $query );
+	protected function get_cached_query( $query_hash ) {
 		$class = strtolower( get_class( $this ) );
+		
 		if ( ! isset( self::$cached_results[ $class ] ) ) {
 			self::$cached_results[ $class ] = get_transient( strtolower( get_class( $this ) ) );
 		}
-		if ( false === self::$cached_results[ $class ] || ! isset( self::$cached_results[ $class ][ $query_hash ] ) ) {
-			self::enable_big_selects();
-			self::add_update_transients_hook();
-			self::$transients_to_update[ $class ]          = $class;
-			self::$cached_results[ $class ][ $query_hash ] = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
-
+		
+		if ( isset( self::$cached_results[ $class ][ $query_hash ] ) ) {
 			return self::$cached_results[ $class ][ $query_hash ];
 		}
 
 		return null;
+	}
+	
+	protected function set_cached_query( $query_hash, $data ) {
+		global $wpdb;
+		
+		$class = strtolower( get_class( $this ) );
+		
+		if ( ! isset( self::$cached_results[ $class ] ) ) {
+			self::$cached_results[ $class ] = get_transient( strtolower( get_class( $this ) ) );
+		}
+		
+		self::add_update_transients_hook();
+		
+		self::$transients_to_update[ $class ]          = $class;
+		self::$cached_results[ $class ][ $query_hash ] = $data;
 	}
 
 	/**
