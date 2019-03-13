@@ -11,3 +11,8 @@ before_script:
 
 script:
   - ./vendor/bin/phpcs -s -n -p *
+
+# Specifies that Travis should create branch builds only for master.
+branches:
+  only:
+    - master
