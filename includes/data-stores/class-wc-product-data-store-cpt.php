@@ -1287,6 +1287,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		wp_cache_delete( $product_id_with_stock, 'post_meta' );
 
+		$this->update_lookup_table( $product_id_with_stock, 'wc_product_meta_lookup' );
+
 		/**
 		 * Fire an action for this direct update so it can be detected by other code.
 		 *
