@@ -333,7 +333,7 @@ jQuery( function( $ ) {
 				success:	function( data ) {
 
 					// Reload the page if requested
-					if ( true === data.reload ) {
+					if ( data && true === data.reload ) {
 						window.location.reload();
 						return;
 					}
