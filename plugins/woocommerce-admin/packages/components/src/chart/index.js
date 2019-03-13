@@ -6,10 +6,11 @@ import { __, sprintf } from '@wordpress/i18n';
 import classNames from 'classnames';
 import { Component, createRef, Fragment } from '@wordpress/element';
 import { formatDefaultLocale as d3FormatDefaultLocale } from 'd3-format';
-import { get, isEqual, partial, isEmpty } from 'lodash';
+import { get, isEqual, partial, without } from 'lodash';
 import Gridicon from 'gridicons';
 import { IconButton, NavigableMenu, SelectControl } from '@wordpress/components';
 import { interpolateViridis as d3InterpolateViridis } from 'd3-scale-chromatic';
+import memoize from 'memoize-one';
 import PropTypes from 'prop-types';
 import { withViewportMatch } from '@wordpress/viewport';
 
@@ -24,6 +25,7 @@ import { getIdsFromQuery, updateQueryString } from '@woocommerce/navigation';
 import ChartPlaceholder from './placeholder';
 import { H, Section } from '../section';
 import { D3Chart, D3Legend } from './d3chart';
+import { getUniqueKeys } from './d3chart/utils/index';
 import { selectionLimit } from './constants';
 
 function getD3CurrencyFormat( symbol, position ) {
@@ -50,44 +52,6 @@ d3FormatDefaultLocale( {
 	currency: getD3CurrencyFormat( currencySymbol, symbolPosition ),
 } );
 
-function getOrderedKeys( props, previousOrderedKeys = [] ) {
-	const uniqueKeys = props.data.reduce( ( accum, curr ) => {
-		Object.entries( curr ).forEach( ( [ key, value ] ) => {
-			if ( key !== 'date' && ! accum[ key ] ) {
-				accum[ key ] = value.label;
-			}
-		} );
-		return accum;
-	}, {} );
-	const updatedKeys = Object.entries( uniqueKeys ).map( ( [ key, label ] ) => {
-		const previousKey = previousOrderedKeys.find( item => key === item.key );
-		const defaultVisibleStatus = 'item-comparison' === props.mode ? false : true;
-		return {
-			key,
-			label,
-			total: props.data.reduce( ( a, c ) => a + c[ key ].value, 0 ),
-			visible: previousKey ? previousKey.visible : defaultVisibleStatus,
-			focus: true,
-		};
-	} );
-
-	if ( 'item-comparison' === props.mode ) {
-		updatedKeys.sort( ( a, b ) => b.total - a.total );
-		if ( isEmpty( previousOrderedKeys ) ) {
-			const selectedIds = props.filterParam ? getIdsFromQuery( props.query[ props.filterParam ] ) : [];
-			const filteredKeys = updatedKeys.filter( key => key.total > 0 || selectedIds.includes( parseInt( key.key, 10 ) ) );
-			return filteredKeys.map( ( key, index ) => {
-				return {
-					...key,
-					visible: index < selectionLimit || key.visible,
-				};
-			} );
-		}
-	}
-
-	return updatedKeys;
-}
-
 /**
  * A chart container using d3, to display timeseries data with an interactive legend.
  */
@@ -95,44 +59,44 @@ class Chart extends Component {
 	constructor( props ) {
 		super( props );
 		this.chartBodyRef = createRef();
+		const dataKeys = this.getDataKeys();
 		this.state = {
-			data: props.data,
-			orderedKeys: getOrderedKeys( props ),
-			visibleData: [ ...props.data ],
+			focusedKeys: [],
+			visibleKeys: dataKeys.slice( 0, selectionLimit ),
 			width: 0,
 		};
+		this.prevDataKeys = dataKeys.sort();
 		this.handleTypeToggle = this.handleTypeToggle.bind( this );
 		this.handleLegendToggle = this.handleLegendToggle.bind( this );
 		this.handleLegendHover = this.handleLegendHover.bind( this );
 		this.updateDimensions = this.updateDimensions.bind( this );
-		this.getVisibleData = this.getVisibleData.bind( this );
+		this.getVisibleData = memoize( this.getVisibleData );
+		this.getOrderedKeys = memoize( this.getOrderedKeys );
 		this.setInterval = this.setInterval.bind( this );
 	}
 
-	componentDidUpdate( prevProps ) {
-		const { data, query, isRequesting, mode } = this.props;
-		if ( ! isEqual( [ ...data ].sort(), [ ...prevProps.data ].sort() ) ) {
-			/**
-			 * Only update the orderedKeys when data is present so that
-			 * selection may persist while requesting new data.
-			 */
-			const orderedKeys = isRequesting && ! data.length
-				? this.state.orderedKeys
-				: getOrderedKeys( this.props, this.state.orderedKeys );
-			/* eslint-disable react/no-did-update-set-state */
-			this.setState( {
-				orderedKeys,
-				visibleData: this.getVisibleData( data, orderedKeys ),
-			} );
-			/* eslint-enable react/no-did-update-set-state */
+	getDataKeys() {
+		const { data, filterParam, mode, query } = this.props;
+		if ( 'item-comparison' === mode ) {
+			const selectedIds = filterParam ? getIdsFromQuery( query[ filterParam ] ) : [];
+			return this.getOrderedKeys( data, mode, [], [], selectedIds ).map( orderedItem => orderedItem.key );
 		}
+		return getUniqueKeys( data );
+	}
 
-		if ( 'item-comparison' === mode && ! isEqual( query, prevProps.query ) ) {
-			const orderedKeys = getOrderedKeys( this.props );
+	componentDidUpdate() {
+		const { data } = this.props;
+		if ( ! data || ! data.length ) {
+			return;
+		}
+		const uniqueKeys = getUniqueKeys( data ).sort();
+
+		if ( ! isEqual( uniqueKeys, this.prevDataKeys ) ) {
+			const dataKeys = this.getDataKeys();
+			this.prevDataKeys = uniqueKeys;
 			/* eslint-disable react/no-did-update-set-state */
 			this.setState( {
-				orderedKeys,
-				visibleData: this.getVisibleData( data, orderedKeys ),
+				visibleKeys: dataKeys.slice( 0, selectionLimit ),
 			} );
 			/* eslint-enable react/no-did-update-set-state */
 		}
@@ -147,6 +111,38 @@ class Chart extends Component {
 		window.removeEventListener( 'resize', this.updateDimensions );
 	}
 
+	getOrderedKeys( data, mode, focusedKeys, visibleKeys, selectedIds = [] ) {
+		if ( ! data || data.length === 0 ) {
+			return [];
+		}
+
+		const uniqueKeys = data.reduce( ( accum, curr ) => {
+			Object.entries( curr ).forEach( ( [ key, value ] ) => {
+				if ( key !== 'date' && ! accum[ key ] ) {
+					accum[ key ] = value.label;
+				}
+			} );
+			return accum;
+		}, {} );
+
+		const updatedKeys = Object.entries( uniqueKeys ).map( ( [ key, label ] ) => {
+			return {
+				focus: focusedKeys.length === 0 || focusedKeys.includes( key ),
+				key,
+				label,
+				total: data.reduce( ( a, c ) => a + c[ key ].value, 0 ),
+				visible: visibleKeys.includes( key ),
+			};
+		} );
+
+		if ( 'item-comparison' === mode ) {
+			return updatedKeys.sort( ( a, b ) => b.total - a.total )
+				.filter( key => key.total > 0 || selectedIds.includes( parseInt( key.key, 10 ) ) );
+		}
+
+		return updatedKeys;
+	}
+
 	handleTypeToggle( chartType ) {
 		if ( this.props.chartType !== chartType ) {
 			const { path, query } = this.props;
@@ -155,40 +151,36 @@ class Chart extends Component {
 	}
 
 	handleLegendToggle( event ) {
-		const { data, interactiveLegend } = this.props;
+		const { interactiveLegend } = this.props;
 		if ( ! interactiveLegend ) {
 			return;
 		}
 		const key = event.currentTarget.id.split( '_' ).pop();
-		const orderedKeys = this.state.orderedKeys.map( d => ( {
-			...d,
-			visible: d.key === key ? ! d.visible : d.visible,
-		} ) );
-		const copyEvent = { ...event }; // can't pass a synthetic event into the hover handler
-		this.setState(
-			{
-				orderedKeys,
-				visibleData: this.getVisibleData( data, orderedKeys ),
-			},
-			() => {
-				this.handleLegendHover( copyEvent );
-			}
-		);
+		const { focusedKeys, visibleKeys } = this.state;
+		if ( visibleKeys.includes( key ) ) {
+			this.setState( {
+				focusedKeys: without( focusedKeys, key ),
+				visibleKeys: without( visibleKeys, key ),
+			} );
+		} else {
+			this.setState( {
+				focusedKeys: focusedKeys.concat( [ key ] ),
+				visibleKeys: visibleKeys.concat( [ key ] ),
+			} );
+		}
 	}
 
 	handleLegendHover( event ) {
-		const key = event.currentTarget.id.split( '__' ).pop();
-		const hoverTarget = this.state.orderedKeys.filter( d => d.key === key )[ 0 ];
-		this.setState( {
-			orderedKeys: this.state.orderedKeys.map( d => {
-				let enterFocus = d.key === key ? true : false;
-				enterFocus = ! hoverTarget.visible ? true : enterFocus;
-				return {
-					...d,
-					focus: event.type === 'mouseleave' || event.type === 'blur' ? true : enterFocus,
-				};
-			} ),
-		} );
+		if ( event.type === 'mouseleave' || event.type === 'blur' ) {
+			this.setState( {
+				focusedKeys: [],
+			} );
+		} else if ( event.type === 'mouseenter' || event.type === 'focus' ) {
+			const key = event.currentTarget.id.split( '__' ).pop();
+			this.setState( {
+				focusedKeys: [ key ],
+			} );
+		}
 	}
 
 	updateDimensions() {
@@ -270,17 +262,21 @@ class Chart extends Component {
 	}
 
 	render() {
-		const { interactiveLegend, orderedKeys, visibleData, width } = this.state;
+		const { focusedKeys, visibleKeys, width } = this.state;
 		const {
 			baseValue,
 			chartType,
+			data,
 			dateParser,
 			emptyMessage,
+			filterParam,
+			interactiveLegend,
 			interval,
 			isRequesting,
 			isViewportLarge,
 			itemsLabel,
 			mode,
+			query,
 			screenReaderFormat,
 			showHeaderControls,
 			title,
@@ -290,8 +286,11 @@ class Chart extends Component {
 			valueType,
 			xFormat,
 			x2Format,
+			yFormat,
 		} = this.props;
-		let { yFormat } = this.props;
+		const selectedIds = filterParam ? getIdsFromQuery( query[ filterParam ] ) : [];
+		const orderedKeys = this.getOrderedKeys( data, mode, focusedKeys, visibleKeys, selectedIds );
+		const visibleData = isRequesting ? null : this.getVisibleData( data, orderedKeys );
 
 		const legendPosition = this.getLegendPosition();
 		const legendDirection = legendPosition === 'top' ? 'row' : 'column';
@@ -317,16 +316,19 @@ class Chart extends Component {
 			top: 0,
 		};
 
-		switch ( valueType ) {
-			case 'average':
-				yFormat = ',.0f';
-				break;
-			case 'currency':
-				yFormat = '$.3~s';
-				break;
-			case 'number':
-				yFormat = ',.0f';
-				break;
+		let d3chartYFormat = yFormat;
+		if ( ! yFormat ) {
+			switch ( valueType ) {
+				case 'average':
+					d3chartYFormat = ',.0f';
+					break;
+				case 'currency':
+					d3chartYFormat = '$.3~s';
+					break;
+				case 'number':
+					d3chartYFormat = ',.0f';
+					break;
+			}
 		}
 		return (
 			<div className="woocommerce-chart">
@@ -401,11 +403,11 @@ class Chart extends Component {
 									tooltipValueFormat={ tooltipValueFormat }
 									tooltipPosition={ isViewportLarge ? 'over' : 'below' }
 									tooltipTitle={ tooltipTitle }
+									valueType={ valueType }
 									width={ chartDirection === 'row' ? width - 320 : width }
 									xFormat={ xFormat }
 									x2Format={ x2Format }
-									yFormat={ yFormat }
-									valueType={ valueType }
+									yFormat={ d3chartYFormat }
 								/>
 							) }
 					</div>
@@ -546,7 +548,6 @@ Chart.defaultProps = {
 	tooltipValueFormat: ',',
 	xFormat: '%d',
 	x2Format: '%b %Y',
-	yFormat: '$.3s',
 };
 
 export default withViewportMatch( {

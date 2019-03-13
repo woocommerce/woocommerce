@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { format as formatDate } from '@wordpress/date';
-import { get } from 'lodash';
+import { get, isEqual } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -34,6 +34,19 @@ import { getChartMode, getSelectedFilter } from './utils';
  * Component that renders the chart in reports.
  */
 export class ReportChart extends Component {
+	shouldComponentUpdate( nextProps ) {
+		if (
+			nextProps.isRequesting !== this.props.isRequesting ||
+			nextProps.primaryData.isRequesting !== this.props.primaryData.isRequesting ||
+			nextProps.secondaryData.isRequesting !== this.props.secondaryData.isRequesting ||
+			! isEqual( nextProps.query, this.props.query )
+		) {
+			return true;
+		}
+
+		return false;
+	}
+
 	getItemChartData() {
 		const { primaryData, selectedChart } = this.props;
 		const chartData = primaryData.data.intervals.map( function( interval ) {

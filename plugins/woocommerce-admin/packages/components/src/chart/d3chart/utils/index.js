@@ -17,17 +17,27 @@ export const getFormatter = ( format, formatter = d3Format ) =>
 	typeof format === 'function' ? format : formatter( format );
 
 /**
- * Describes `getOrderedKeys`
+ * Returns an array of unique keys contained in the data.
  * @param {array} data - The chart component's `data` prop.
- * @returns {array} of unique category keys ordered by cumulative total value
+ * @returns {array} Array of unique keys.
  */
-export const getOrderedKeys = ( data ) => {
+export const getUniqueKeys = ( data ) => {
 	const keys = new Set(
 		data.reduce( ( acc, curr ) => acc.concat( Object.keys( curr ) ), [] )
 	);
 
-	return [ ...keys ]
-		.filter( key => key !== 'date' )
+	return [ ...keys ].filter( key => key !== 'date' );
+};
+
+/**
+ * Describes `getOrderedKeys`
+ * @param {array} data - The chart component's `data` prop.
+ * @returns {array} Array of unique category keys ordered by cumulative total value
+ */
+export const getOrderedKeys = ( data ) => {
+	const keys = getUniqueKeys( data );
+
+	return keys
 		.map( key => ( {
 			key,
 			focus: true,
