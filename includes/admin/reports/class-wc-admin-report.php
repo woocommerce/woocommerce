@@ -368,6 +368,9 @@ class WC_Admin_Report {
 	 */
 	protected static $cached_results = array();
 
+	/**
+	 * Hook to update the updated transients at the end of the request
+	 */
 	public function _update_transients() {
 		foreach ( $this->transients_to_update as $transient_name ) {
 			set_transient( $transient_name, self::$cached_results[ $transient_name ], DAY_IN_SECONDS );
