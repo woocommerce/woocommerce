@@ -380,6 +380,8 @@ class WC_Admin_Report {
 	 * @return mixed
 	 */
 	protected function get_cached_query( $query_type, $query ) {
+		global $wpdb;
+		
 		$query_hash = md5( $query_type . $query );
 		$class = strtolower( get_class( $this ) );
 		if ( ! isset( self::$cached_results[ $class ] ) ) {
