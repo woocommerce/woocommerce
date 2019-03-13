@@ -263,7 +263,7 @@
 				return ! _.contains( marketplace_suggestions.active_plugins, promo['hide-if-active'] );
 			} );
 
-			// hide promos that are not applicable based on user's active extensions
+			// hide promos that are not applicable based on user's installed extensions
 			promos = _.filter( promos, function( promo ) {
 				if ( ! promo['show-if-active'] ) {
 					// this promotion is relevant to all
@@ -272,11 +272,6 @@
 
 				// if the user has any of the prerequisites, show the promo
 				return ( _.intersection( marketplace_suggestions.active_plugins, promo['show-if-active'] ).length > 0 );
-			} );
-
-			// sort the promos so extension-dependent ones are at the start of the list
-			promos = _.sortBy( promos, function( promo ) {
-				return _.isEmpty( promo['show-if-active'] ) ? 1 : 0;
 			} );
 
 			return promos;
@@ -389,8 +384,8 @@
 						return;
 					}
 
-					// show the first suggestion from the list
-					var suggestionToDisplay = promos[0];
+					// shuffle/randomly select the suggestion to display
+					var suggestionToDisplay = _.sample( promos );
 
 					// dismiss is allowed by default
 					var allowDismiss = true;
