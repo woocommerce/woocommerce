@@ -20,8 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="marketplace-suggestions-metabox-nosuggestions-placeholder hidden">
 		<img src="https://woocommerce.com/wp-content/plugins/wccom-plugins/marketplace-suggestions/icons/get_more_options.svg" class="marketplace-suggestion-icon">
 		<div class="marketplace-suggestion-placeholder-content">
-			<h4>Enhance your products</h4>
-			<p>Extensions can add new functionality to your product pages that make your store stand out</p>
+			<h4><?php esc_html_e( 'Enhance your products', 'woocommerce' ); ?></h4>
+			<p><?php esc_html_e( 'Extensions can add new functionality to your product pages that make your store stand out', 'woocommerce' ); ?></p>
 		</div>
 		<a href="https://woocommerce.com/product-category/woocommerce-extensions/?utm_source=editproduct&amp;utm_campaign=marketplacesuggestions&amp;utm_medium=product" target="blank" class="button">Browse the Marketplace</a>
 	</div>
