@@ -853,6 +853,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `downloadable` tinyint(1) NULL default 0,
   `min_price` decimal(10,2) NULL default NULL,
   `max_price` decimal(10,2) NULL default NULL,
+  `onsale` tinyint(1) NULL default 0,
   `stock_quantity` double NULL default NULL,
   `stock_status` varchar(100) NULL default 'instock',
   `rating_count` bigint(20) NULL default 0,
@@ -863,6 +864,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   KEY `downloadable` (`downloadable`),
   KEY `stock_status` (`stock_status`),
   KEY `stock_quantity` (`stock_quantity`),
+  KEY `onsale` (`onsale`),
   KEY min_max_price (`min_price`, `max_price`)
   ) $collate;
 		";
