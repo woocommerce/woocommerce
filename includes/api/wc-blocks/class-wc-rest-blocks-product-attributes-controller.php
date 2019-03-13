@@ -4,6 +4,7 @@
  *
  * Handles requests to the /products/attributes endpoint.
  *
+ * @internal This API is used internally by the block post editor--it is still in flux. It should not be used outside of wc-blocks.
  * @package WooCommerce\Blocks\Products\Rest\Controller
  */
 
@@ -152,6 +153,7 @@ class WC_REST_Blocks_Product_Attributes_Controller extends WC_REST_Product_Attri
 
 		$response = rest_ensure_response( $data );
 
+		$response->header( 'X-Woo-Notice', __( 'Private REST API for use by block editor only.', 'woocommerce' ) );
 		$response->add_links( $this->prepare_links( $item ) );
 
 		return $response;
