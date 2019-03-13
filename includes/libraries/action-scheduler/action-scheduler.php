@@ -5,7 +5,7 @@
  * Description: A robust scheduling library for use in WordPress plugins.
  * Author: Prospress
  * Author URI: http://prospress.com/
- * Version: 2.2.0
+ * Version: 2.2.1
  * License: GPLv3
  *
  * Copyright 2018 Prospress, Inc.  (email : freedoms@prospress.com)
