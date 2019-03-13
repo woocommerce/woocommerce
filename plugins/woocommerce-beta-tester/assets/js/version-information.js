@@ -1,3 +1,9 @@
+/**
+ * Handles version information modal.
+ *
+ * @package WooCommerceBetaTester\JS
+ */
+
 jQuery(function( $ ) {
 
 	/**
