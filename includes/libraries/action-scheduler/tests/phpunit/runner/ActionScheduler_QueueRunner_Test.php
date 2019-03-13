@@ -206,4 +206,57 @@ class ActionScheduler_QueueRunner_Test extends ActionScheduler_UnitTestCase {
 	public function return_6() {
 		return 6;
 	}
+
+	public function test_store_fetch_action_failure_schedule_next_instance() {
+		$random    = md5( rand() );
+		$schedule  = new ActionScheduler_IntervalSchedule( as_get_datetime_object( '12 hours ago' ), DAY_IN_SECONDS );
+		$action    = new ActionScheduler_Action( $random, array(), $schedule );
+		$action_id = ActionScheduler::store()->save_action( $action );
+
+		// Set up a mock store that will throw an exception when fetching actions.
+		$store = $this
+					->getMockBuilder( 'ActionScheduler_wpPostStore' )
+					->setMethods( array( 'fetch_action' ) )
+					->getMock();
+		$store
+			->method( 'fetch_action' )
+			->with( $action_id )
+			->will( $this->throwException( new Exception() ) );
+
+		// Set up a mock queue runner to verify that schedule_next_instance()
+		// isn't called for an undefined $action.
+		$runner = $this
+					->getMockBuilder( 'ActionScheduler_QueueRunner' )
+					->setConstructorArgs( array( $store ) )
+					->setMethods( array( 'schedule_next_instance' ) )
+					->getMock();
+		$runner
+			->expects( $this->never() )
+			->method( 'schedule_next_instance' );
+
+		$runner->run();
+
+		// Set up a mock store that will throw an exception when fetching actions.
+		$store2 = $this
+					->getMockBuilder( 'ActionScheduler_wpPostStore' )
+					->setMethods( array( 'fetch_action' ) )
+					->getMock();
+		$store2
+			->method( 'fetch_action' )
+			->with( $action_id )
+			->willReturn( null );
+
+		// Set up a mock queue runner to verify that schedule_next_instance()
+		// isn't called for an undefined $action.
+		$runner2 = $this
+					->getMockBuilder( 'ActionScheduler_QueueRunner' )
+					->setConstructorArgs( array( $store ) )
+					->setMethods( array( 'schedule_next_instance' ) )
+					->getMock();
+		$runner2
+			->expects( $this->never() )
+			->method( 'schedule_next_instance' );
+
+		$runner2->run();
+	}
 }

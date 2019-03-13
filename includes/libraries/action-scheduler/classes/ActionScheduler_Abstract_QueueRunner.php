@@ -3,7 +3,7 @@
 /**
  * Abstract class with common Queue Cleaner functionality.
  */
-abstract class ActionScheduler_Abstract_QueueRunner {
+abstract class ActionScheduler_Abstract_QueueRunner extends ActionScheduler_Abstract_QueueRunner_Deprecated {
 
 	/** @var ActionScheduler_QueueCleaner */
 	protected $cleaner;
@@ -57,13 +57,16 @@ abstract class ActionScheduler_Abstract_QueueRunner {
 			$action = $this->store->fetch_action( $action_id );
 			$this->store->log_execution( $action_id );
 			$action->execute();
-			do_action( 'action_scheduler_after_execute', $action_id );
+			do_action( 'action_scheduler_after_execute', $action_id, $action );
 			$this->store->mark_complete( $action_id );
 		} catch ( Exception $e ) {
 			$this->store->mark_failure( $action_id );
 			do_action( 'action_scheduler_failed_execution', $action_id, $e );
 		}
-		$this->schedule_next_instance( $action );
+
+		if ( isset( $action ) && is_a( $action, 'ActionScheduler_Action' ) ) {
+			$this->schedule_next_instance( $action );
+		}
 	}
 
 	/**
@@ -86,7 +89,7 @@ abstract class ActionScheduler_Abstract_QueueRunner {
 	 * @author Jeremy Pry
 	 */
 	protected function run_cleanup() {
-		$this->cleaner->clean();
+		$this->cleaner->clean( 10 * $this->get_time_limit() );
 	}
 
 	/**
@@ -103,22 +106,21 @@ abstract class ActionScheduler_Abstract_QueueRunner {
 	 *
 	 * @return int The number of seconds.
 	 */
-	protected function get_maximum_execution_time() {
+	protected function get_time_limit() {
 
-		// There are known hosts with a strict 60 second execution time.
-		if ( defined( 'WPENGINE_ACCOUNT' ) || defined( 'PANTHEON_ENVIRONMENT' ) ) {
-			$maximum_execution_time = 60;
-		} elseif ( false !== strpos( getenv( 'HOSTNAME' ), '.siteground.' ) ) {
-			$maximum_execution_time = 120;
-		} else {
-			$maximum_execution_time = ini_get( 'max_execution_time' );
+		$time_limit = 30;
+
+		// Apply deprecated filter from deprecated get_maximum_execution_time() method
+		if ( has_filter( 'action_scheduler_maximum_execution_time' ) ) {
+			_deprecated_function( 'action_scheduler_maximum_execution_time', '2.1.1', 'action_scheduler_queue_runner_time_limit' );
+			$time_limit = apply_filters( 'action_scheduler_maximum_execution_time', $time_limit );
 		}
 
-		return absint( apply_filters( 'action_scheduler_maximum_execution_time', $maximum_execution_time ) );
+		return absint( apply_filters( 'action_scheduler_queue_runner_time_limit', $time_limit ) );
 	}
 
 	/**
-	 * Get the number of seconds a batch has run for.
+	 * Get the number of seconds the process has been running.
 	 *
 	 * @return int The number of seconds.
 	 */
@@ -146,10 +148,10 @@ abstract class ActionScheduler_Abstract_QueueRunner {
 	protected function time_likely_to_be_exceeded( $processed_actions ) {
 
 		$execution_time        = $this->get_execution_time();
-		$max_execution_time    = $this->get_maximum_execution_time();
+		$max_execution_time    = $this->get_time_limit();
 		$time_per_action       = $execution_time / $processed_actions;
-		$estimated_time        = $execution_time + ( $time_per_action * 2 );
-		$likely_to_be_exceeded = $estimated_time > $this->get_maximum_execution_time();
+		$estimated_time        = $execution_time + ( $time_per_action * 3 );
+		$likely_to_be_exceeded = $estimated_time > $max_execution_time;
 
 		return apply_filters( 'action_scheduler_maximum_execution_time_likely_to_be_exceeded', $likely_to_be_exceeded, $this, $processed_actions, $execution_time, $max_execution_time );
 	}
