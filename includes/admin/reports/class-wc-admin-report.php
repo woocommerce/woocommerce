@@ -142,7 +142,7 @@ class WC_Admin_Report {
 					$get_key = "order_items.{$key}";
 					break;
 			}
-			
+
 			if ( empty( $get_key ) ) {
 				// Skip to the next foreach iteration else the query will be invalid.
 				continue;
