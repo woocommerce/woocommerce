@@ -638,7 +638,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$attribute_2 = new WC_Product_Attribute();
 		$attribute_2->set_name( 'size' );
 		$attribute_2->set_options( array( 'Large', 'Not so Large' ) );
-		$attribute_2->set_position( '0' );
+		$attribute_2->set_position( '1' );
 		$attribute_2->set_visible( 1 );
 		$attribute_2->set_variation( 1 );
 
