@@ -47,7 +47,7 @@ class WC_Beta_Tester_Admin_Assets {
 			'wc-beta-tester-version-picker',
 			'wc_beta_tester_version_picker_params',
 			array(
-				'i18n_pick_version'     => __( 'Please pick a WooCommerce version.', 'woocommerce-beta-tester' ),
+				'i18n_pick_version' => __( 'Please pick a WooCommerce version.', 'woocommerce-beta-tester' ),
 			)
 		);
 
