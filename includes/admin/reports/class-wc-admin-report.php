@@ -339,15 +339,15 @@ class WC_Admin_Report {
 		$query          = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
 		$query          = implode( ' ', $query );
 		$query_hash     = md5( $query_type . $query );
-		
+
 		if ( $debug ) {
 			echo '<pre>';
 			wc_print_r( $query );
 			echo '</pre>';
 		}
-		
+
 		$result = $this->get_cached_query();
-		
+
 		if ( $debug || $nocache || is_null( $result ) ) {
 			self::enable_big_selects();
 
@@ -356,8 +356,8 @@ class WC_Admin_Report {
 
 		return $result;
 	}
-	
-	
+
+
 	/**
 	 * Enables big mysql selects for reports, just once for this session
 	 */
