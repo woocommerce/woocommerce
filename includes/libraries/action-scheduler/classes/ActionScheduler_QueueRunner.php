@@ -51,7 +51,7 @@ class ActionScheduler_QueueRunner extends ActionScheduler_Abstract_QueueRunner {
 
 	public function run() {
 		ActionScheduler_Compatibility::raise_memory_limit();
-		@set_time_limit( apply_filters( 'action_scheduler_queue_runner_time_limit', 600 ) );
+		ActionScheduler_Compatibility::raise_time_limit( $this->get_time_limit() );
 		do_action( 'action_scheduler_before_process_queue' );
 		$this->run_cleanup();
 		$processed_actions = 0;
