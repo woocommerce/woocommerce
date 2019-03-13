@@ -141,8 +141,11 @@ class WC_Admin_Report {
 				case 'order_item':
 					$get_key = "order_items.{$key}";
 					break;
-				default:
-					continue 2; // Skip to the next foreach iteration else the query will be invalid.
+			}
+			
+			if ( empty( $get_key ) ) {
+				// Skip to the next foreach iteration else the query will be invalid.
+				continue;
 			}
 
 			if ( $value['function'] ) {
