@@ -1,10 +1,10 @@
 <?php
 /**
  * REST API Product Categories controller customized for Products Block.
- * Private API: This endpoint is designed to only be used `internally` by the block post editor.
  *
  * Handles requests to the /products/categories endpoint.
  *
+ * @internal This API is used internally by the block post editor--it is still in flux. It should not be used outside of wc-blocks.
  * @package WooCommerce\Blocks\Products\Rest\Controller
  */
 

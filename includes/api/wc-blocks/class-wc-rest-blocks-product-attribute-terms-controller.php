@@ -1,9 +1,10 @@
 <?php
 /**
  * REST API Product Attribute Terms controller customized for Products Block.
- * Private API: This endpoint is designed to only
+ *
  * Handles requests to the /products/attributes/<attribute_id/terms endpoint.
  *
+ * @internal This API is used internally by the block post editor--it is still in flux. It should not be used outside of wc-blocks.
  * @package WooCommerce\Blocks\Products\Rest\Controller
  */
 
