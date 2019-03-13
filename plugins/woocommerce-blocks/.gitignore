@@ -47,3 +47,4 @@ tests/cli/vendor
 
 # Built files
 /build/
+bin/languages
