@@ -338,7 +338,6 @@ class WC_Admin_Report {
 
 		$query          = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
 		$query          = implode( ' ', $query );
-		$query_hash     = md5( $query_type . $query );
 
 		if ( $debug ) {
 			echo '<pre>';
@@ -346,7 +345,7 @@ class WC_Admin_Report {
 			echo '</pre>';
 		}
 
-		$result = $this->get_cached_query( $query_hash );
+		$result = $this->get_cached_query( $query_type, $query );
 
 		if ( $debug || $nocache || is_null( $result ) ) {
 			self::enable_big_selects();
@@ -374,12 +373,14 @@ class WC_Admin_Report {
 
 	/**
 	 * Get the cached query result or null if it's not in the cache
-	 * 
-	 * @param $query_hash
+	 *
+	 * @param string $query_type
+	 * @param string $query
 	 *
 	 * @return mixed
 	 */
-	protected function get_cached_query( $query_hash ) {
+	protected function get_cached_query( $query_type, $query ) {
+		$query_hash = md5( $query_type . $query );
 		$class = strtolower( get_class( $this ) );
 		if ( ! isset( self::$cached_results[ $class ] ) ) {
 			self::$cached_results[ $class ] = get_transient( strtolower( get_class( $this ) ) );
