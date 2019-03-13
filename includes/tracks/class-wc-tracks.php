@@ -71,13 +71,18 @@ class WC_Tracks {
 	 * @return array Blog details.
 	 */
 	public static function get_blog_details( $user_id ) {
-		return array(
-			'url'            => home_url(),
-			'blog_lang'      => get_user_locale( $user_id ),
-			'blog_id'        => ( class_exists( 'Jetpack' ) && Jetpack_Options::get_option( 'id' ) ) || null,
-			'products_count' => self::get_products_count(),
-			'orders_gross'   => self::get_total_revenue(),
-		);
+		$blog_details = get_transient( 'wc_tracks_blog_details' );
+		if ( false === $blog_details ) {
+			$blog_details = array(
+				'url'            => home_url(),
+				'blog_lang'      => get_user_locale( $user_id ),
+				'blog_id'        => ( class_exists( 'Jetpack' ) && Jetpack_Options::get_option( 'id' ) ) || null,
+				'products_count' => self::get_products_count(),
+				'orders_gross'   => self::get_total_revenue(),
+			);
+			set_transient( 'wc_tracks_blog_details', $blog_details, DAY_IN_SECONDS );
+		}
+		return $blog_details;
 	}
 
 	/**
