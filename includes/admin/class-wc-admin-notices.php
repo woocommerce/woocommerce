@@ -26,13 +26,14 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private static $core_notices = array(
-		'install'                 => 'install_notice',
-		'update'                  => 'update_notice',
-		'template_files'          => 'template_file_check_notice',
-		'legacy_shipping'         => 'legacy_shipping_notice',
-		'no_shipping_methods'     => 'no_shipping_methods_notice',
-		'regenerating_thumbnails' => 'regenerating_thumbnails_notice',
-		'no_secure_connection'    => 'secure_connection_notice',
+		'install'                   => 'install_notice',
+		'update'                    => 'update_notice',
+		'template_files'            => 'template_file_check_notice',
+		'legacy_shipping'           => 'legacy_shipping_notice',
+		'no_shipping_methods'       => 'no_shipping_methods_notice',
+		'regenerating_thumbnails'   => 'regenerating_thumbnails_notice',
+		'regenerating_lookup_table' => 'regenerating_lookup_table_notice',
+		'no_secure_connection'      => 'secure_connection_notice',
 	);
 
 	/**
@@ -229,19 +230,6 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Show the Theme Check notice.
-	 *
-	 * @todo Remove this next major release.
-	 */
-	public static function theme_check_notice() {
-		wc_deprecated_function( 'WC_Admin_Notices::theme_check_notice', '3.3.0' );
-
-		if ( ! current_theme_supports( 'woocommerce' ) ) {
-			include dirname( __FILE__ ) . '/views/html-notice-theme-support.php';
-		}
-	}
-
-	/**
 	 * Show a notice highlighting bad template files.
 	 */
 	public static function template_file_check_notice() {
@@ -319,13 +307,6 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Simplify Commerce is no longer in core.
-	 */
-	public static function simplify_commerce_notice() {
-		wc_deprecated_function( 'WC_Admin_Notices::simplify_commerce_notice', '3.6.0' );
-	}
-
-	/**
 	 * Notice shown when regenerating thumbnails background process is running.
 	 */
 	public static function regenerating_thumbnails_notice() {
@@ -341,6 +322,21 @@ class WC_Admin_Notices {
 		}
 
 		include dirname( __FILE__ ) . '/views/html-notice-secure-connection.php';
+	}
+
+	/**
+	 * Notice shown when regenerating thumbnails background process is running.
+	 *
+	 * @since 3.6.0
+	 */
+	public static function regenerating_lookup_table_notice() {
+		// See if this is still relevent.
+		if ( ! wc_update_product_lookup_tables_is_running() ) {
+			self::remove_notice( 'regenerating_lookup_table' );
+			return;
+		}
+
+		include dirname( __FILE__ ) . '/views/html-notice-regenerating-lookup-table.php';
 	}
 
 	/**
@@ -366,6 +362,24 @@ class WC_Admin_Notices {
 			include_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
 		return is_plugin_active( $plugin );
+	}
+
+	/**
+	 * Simplify Commerce is no longer in core.
+	 *
+	 * @deprecated 3.6.0 No longer shown.
+	 */
+	public static function simplify_commerce_notice() {
+		wc_deprecated_function( 'WC_Admin_Notices::simplify_commerce_notice', '3.6.0' );
+	}
+
+	/**
+	 * Show the Theme Check notice.
+	 *
+	 * @deprecated 3.3.0 No longer shown.
+	 */
+	public static function theme_check_notice() {
+		wc_deprecated_function( 'WC_Admin_Notices::theme_check_notice', '3.3.0' );
 	}
 }
 

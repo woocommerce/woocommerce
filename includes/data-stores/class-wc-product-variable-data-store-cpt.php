@@ -485,12 +485,19 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			$format               = array_fill( 0, count( $children ), '%d' );
 			$query_in             = '(' . implode( ',', $format ) . ')';
 			$query_args           = array( 'stock_status' => $status ) + $children;
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 			$children_with_status = $wpdb->get_var(
-				$wpdb->prepare( // wpcs: PreparedSQLPlaceholders replacement count ok.
-					"SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = %s AND post_id IN {$query_in}", // @codingStandardsIgnoreLine.
+				$wpdb->prepare(
+					"
+					SELECT COUNT( product_id )
+					FROM {$wpdb->wc_product_meta_lookup}
+					WHERE stock_status = %s
+					AND product_id IN {$query_in}
+					",
 					$query_args
 				)
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 		} else {
 			$children_with_status = 0;
 		}
@@ -547,6 +554,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$managed_children = array_unique( $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN {$query_in}", $children ) ) ); // @codingStandardsIgnoreLine.
 				foreach ( $managed_children as $managed_child ) {
 					if ( update_post_meta( $managed_child, '_stock_status', $status ) ) {
+						$this->update_lookup_table( $managed_child, 'wc_product_meta_lookup' );
 						$changed = true;
 					}
 				}
