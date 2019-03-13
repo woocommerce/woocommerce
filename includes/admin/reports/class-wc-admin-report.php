@@ -346,7 +346,7 @@ class WC_Admin_Report {
 			echo '</pre>';
 		}
 
-		$result = $this->get_cached_query();
+		$result = $this->get_cached_query( $query_hash );
 
 		if ( $debug || $nocache || is_null( $result ) ) {
 			self::enable_big_selects();
