@@ -949,14 +949,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		return $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT $wpdb->posts.ID
-				FROM $wpdb->posts
-				LEFT JOIN $wpdb->postmeta ON ( $wpdb->posts.ID = $wpdb->postmeta.post_id )
-				WHERE $wpdb->posts.post_type IN ( 'product', 'product_variation' )
-					AND $wpdb->posts.post_status != 'trash'
-					AND $wpdb->postmeta.meta_key = '_sku' AND $wpdb->postmeta.meta_value = %s
-					AND $wpdb->postmeta.post_id <> %d
-				LIMIT 1",
+				"
+				SELECT posts.ID
+				FROM {$wpdb->posts} as posts
+				INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
+				WHERE
+				posts.post_type IN ( 'product', 'product_variation' )
+				AND posts.post_status != 'trash'
+				AND lookup.sku = %s
+				AND lookup.product_id <> %d
+				LIMIT 1
+				",
 				wp_slash( $sku ),
 				$product_id
 			)
@@ -976,14 +979,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		$id = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT posts.ID
-				FROM $wpdb->posts AS posts
-				LEFT JOIN $wpdb->postmeta AS postmeta ON ( posts.ID = postmeta.post_id )
-				WHERE posts.post_type IN ( 'product', 'product_variation' )
-					AND posts.post_status != 'trash'
-					AND postmeta.meta_key = '_sku'
-					AND postmeta.meta_value = %s
-				LIMIT 1",
+				"
+				SELECT posts.ID
+				FROM {$wpdb->posts} as posts
+				INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
+				WHERE
+				posts.post_type IN ( 'product', 'product_variation' )
+				AND posts.post_status != 'trash'
+				AND lookup.sku = %s
+				LIMIT 1
+				",
 				$sku
 			)
 		);
@@ -1284,6 +1289,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$wpdb->query( $sql );
 
 		wp_cache_delete( $product_id_with_stock, 'post_meta' );
+
+		$this->update_lookup_table( $product_id_with_stock, 'wc_product_meta_lookup' );
 
 		/**
 		 * Fire an action for this direct update so it can be detected by other code.
