@@ -8,6 +8,7 @@ before_script:
     else
       echo "xdebug.ini does not exist"
     fi
+  - composer install
 
 script:
   - ./vendor/bin/phpcs -s -n -p *
