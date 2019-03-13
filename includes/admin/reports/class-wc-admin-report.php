@@ -20,7 +20,7 @@ class WC_Admin_Report {
 	 * WC_Admin_Report constructor.
 	 */
 	public function __construct() {
-		add_action( 'shutdown', [ $this, '_maybe_update_transients' ] );
+		add_action( 'shutdown', array( $this, '_maybe_update_transients' ) );
 	}
 
 	/**
