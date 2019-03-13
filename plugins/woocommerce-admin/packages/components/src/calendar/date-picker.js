@@ -54,7 +54,7 @@ class DatePicker extends Component {
 		const value = event.target.value;
 		const { dateFormat } = this.props;
 		const date = toMoment( dateFormat, value );
-		const error = date ? null : __( 'Invalid date', 'wc-admin' );
+		const error = date ? null : __( 'Invalid date', 'woocommerce-admin' );
 
 		this.props.onUpdate( {
 			date,
@@ -76,10 +76,10 @@ class DatePicker extends Component {
 						value={ text }
 						onChange={ this.onInputChange }
 						dateFormat={ dateFormat }
-						label={ __( 'Choose a date', 'wc-admin' ) }
+						label={ __( 'Choose a date', 'woocommerce-admin' ) }
 						error={ error }
 						describedBy={ sprintf(
-							__( 'Date input describing a selected date in format %s', 'wc-admin' ),
+							__( 'Date input describing a selected date in format %s', 'woocommerce-admin' ),
 							dateFormat
 						) }
 						onFocus={ partial( this.handleFocus, isOpen, onToggle ) }
@@ -92,7 +92,7 @@ class DatePicker extends Component {
 				renderContent={ ( { onToggle } ) => (
 					<Section component={ false }>
 						<H className="woocommerce-calendar__date-picker-title">
-							{ __( 'select a date', 'wc-admin' ) }
+							{ __( 'select a date', 'woocommerce-admin' ) }
 						</H>
 						<div className="woocommerce-calendar__react-dates is-core-datepicker">
 							<WpDatePicker

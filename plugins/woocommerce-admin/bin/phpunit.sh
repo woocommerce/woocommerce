@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 WORKING_DIR="$PWD"
-cd "$WP_CORE_DIR/wp-content/plugins/wc-admin/"
+cd "$WP_CORE_DIR/wp-content/plugins/woocommerce-admin/"
 phpunit --version
 phpunit -c phpunit.xml.dist
 TEST_RESULT=$?

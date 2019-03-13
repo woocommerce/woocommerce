@@ -58,7 +58,7 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'reports', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'wc-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -76,63 +76,63 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 		$reports = array(
 			array(
 				'slug'        => 'performance-indicators',
-				'description' => __( 'Batch endpoint for getting specific performance indicators from `stats` endpoints.', 'wc-admin' ),
+				'description' => __( 'Batch endpoint for getting specific performance indicators from `stats` endpoints.', 'woocommerce-admin' ),
 			),
 			array(
 				'slug'        => 'revenue/stats',
-				'description' => __( 'Stats about revenue.', 'wc-admin' ),
+				'description' => __( 'Stats about revenue.', 'woocommerce-admin' ),
 			),
 			array(
 				'slug'        => 'orders/stats',
-				'description' => __( 'Stats about orders.', 'wc-admin' ),
+				'description' => __( 'Stats about orders.', 'woocommerce-admin' ),
 			),
 			array(
 				'slug'        => 'products',
-				'description' => __( 'Products detailed reports.', 'wc-admin' ),
+				'description' => __( 'Products detailed reports.', 'woocommerce-admin' ),
 			),
 			array(
 				'slug'        => 'products/stats',
-				'description' => __( 'Stats about products.', 'wc-admin' ),
+				'description' => __( 'Stats about products.', 'woocommerce-admin' ),
 			),
 			array(
 				'slug'        => 'categories',
-				'description' => __( 'Product categories detailed reports.', 'wc-admin' ),
+				'description' => __( 'Product categories detailed reports.', 'woocommerce-admin' ),
 			),
 			array(
 				'slug'        => 'categories/stats',
-				'description' => __( 'Stats about product categories.', 'wc-admin' ),
+				'description' => __( 'Stats about product categories.', 'woocommerce-admin' ),
 			),
 			array(
 				'slug'        => 'coupons',
-				'description' => __( 'Coupons detailed reports.', 'wc-admin' ),
+				'description' => __( 'Coupons detailed reports.', 'woocommerce-admin' ),
 			),
 			array(
 				'slug'        => 'coupons/stats',
-				'description' => __( 'Stats about coupons.', 'wc-admin' ),
+				'description' => __( 'Stats about coupons.', 'woocommerce-admin' ),
 			),
 			array(
 				'slug'        => 'taxes',
-				'description' => __( 'Taxes detailed reports.', 'wc-admin' ),
+				'description' => __( 'Taxes detailed reports.', 'woocommerce-admin' ),
 			),
 			array(
 				'slug'        => 'taxes/stats',
-				'description' => __( 'Stats about taxes.', 'wc-admin' ),
+				'description' => __( 'Stats about taxes.', 'woocommerce-admin' ),
 			),
 			array(
 				'slug'        => 'downloads',
-				'description' => __( 'Product downloads detailed reports.', 'wc-admin' ),
+				'description' => __( 'Product downloads detailed reports.', 'woocommerce-admin' ),
 			),
 			array(
 				'slug'        => 'downloads/files',
-				'description' => __( 'Product download files detailed reports.', 'wc-admin' ),
+				'description' => __( 'Product download files detailed reports.', 'woocommerce-admin' ),
 			),
 			array(
 				'slug'        => 'downloads/stats',
-				'description' => __( 'Stats about product downloads.', 'wc-admin' ),
+				'description' => __( 'Stats about product downloads.', 'woocommerce-admin' ),
 			),
 			array(
 				'slug'        => 'customers',
-				'description' => __( 'Customers detailed reports.', 'wc-admin' ),
+				'description' => __( 'Customers detailed reports.', 'woocommerce-admin' ),
 			),
 		);
 
@@ -212,7 +212,7 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 				'self'       => array(
 					'href' => rest_url( $report->path ),
 				),
-				'report'       => array(
+				'report'     => array(
 					'href' => $report->url,
 				),
 				'collection' => array(
@@ -245,19 +245,19 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'slug'        => array(
-					'description' => __( 'An alphanumeric identifier for the resource.', 'wc-admin' ),
+					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'description' => array(
-					'description' => __( 'A human-readable description of the resource.', 'wc-admin' ),
+					'description' => __( 'A human-readable description of the resource.', 'woocommerce-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'path'        => array(
-					'description' => __( 'API path.', 'wc-admin' ),
+					'description' => __( 'API path.', 'woocommerce-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,

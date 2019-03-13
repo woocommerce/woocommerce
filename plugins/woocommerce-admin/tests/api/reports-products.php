@@ -114,7 +114,7 @@ class WC_Tests_API_Reports_Products extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'products'   => $product->get_id() . ',' . $product_2->get_id(),
+				'products' => $product->get_id() . ',' . $product_2->get_id(),
 			)
 		);
 		$response = $this->server->dispatch( $request );

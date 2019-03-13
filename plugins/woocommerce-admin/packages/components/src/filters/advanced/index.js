@@ -32,8 +32,8 @@ import NumberFilter from './number-filter';
 import DateFilter from './date-filter';
 
 const matches = [
-	{ value: 'all', label: __( 'All', 'wc-admin' ) },
-	{ value: 'any', label: __( 'Any', 'wc-admin' ) },
+	{ value: 'all', label: __( 'All', 'woocommerce-admin' ) },
+	{ value: 'any', label: __( 'Any', 'woocommerce-admin' ) },
 ];
 
 /**
@@ -117,7 +117,7 @@ class AdvancedFilters extends Component {
 						options={ matches }
 						value={ match }
 						onChange={ this.onMatchChange }
-						aria-label={ __( 'Choose to apply any or all filters', 'wc-admin' ) }
+						aria-label={ __( 'Choose to apply any or all filters', 'woocommerce-admin' ) }
 					/>
 				),
 			},
@@ -264,7 +264,7 @@ class AdvancedFilters extends Component {
 									onClick={ onToggle }
 									aria-expanded={ isOpen }
 								>
-									{ __( 'Add a Filter', 'wc-admin' ) }
+									{ __( 'Add a Filter', 'woocommerce-admin' ) }
 								</IconButton>
 							) }
 							renderContent={ ( { onClose } ) => (
@@ -285,7 +285,7 @@ class AdvancedFilters extends Component {
 				<div className="woocommerce-filters-advanced__controls">
 					{ updateDisabled && (
 						<Button isPrimary disabled>
-							{ __( 'Filter', 'wc-admin' ) }
+							{ __( 'Filter', 'woocommerce-admin' ) }
 						</Button>
 					) }
 					{ ! updateDisabled && (
@@ -294,12 +294,12 @@ class AdvancedFilters extends Component {
 							type="wc-admin"
 							href={ updateHref }
 						>
-							{ __( 'Filter', 'wc-admin' ) }
+							{ __( 'Filter', 'woocommerce-admin' ) }
 						</Link>
 					) }
 					{ activeFilters.length > 0 && (
 						<Link type="wc-admin" href={ this.getUpdateHref( [] ) } onClick={ this.clearFilters }>
-							{ __( 'Clear all filters', 'wc-admin' ) }
+							{ __( 'Clear all filters', 'woocommerce-admin' ) }
 						</Link>
 					) }
 				</div>

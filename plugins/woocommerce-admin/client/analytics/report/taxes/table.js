@@ -31,7 +31,7 @@ export default class TaxesReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Tax Code', 'wc-admin' ),
+				label: __( 'Tax Code', 'woocommerce-admin' ),
 				// @todo It should be the tax code, not the ID
 				key: 'tax_rate_id',
 				required: true,
@@ -39,28 +39,28 @@ export default class TaxesReportTable extends Component {
 				isSortable: true,
 			},
 			{
-				label: __( 'Rate', 'wc-admin' ),
+				label: __( 'Rate', 'woocommerce-admin' ),
 				key: 'rate',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Total Tax', 'wc-admin' ),
+				label: __( 'Total Tax', 'woocommerce-admin' ),
 				key: 'total_tax',
 				isSortable: true,
 			},
 			{
-				label: __( 'Order Tax', 'wc-admin' ),
+				label: __( 'Order Tax', 'woocommerce-admin' ),
 				key: 'order_tax',
 				isSortable: true,
 			},
 			{
-				label: __( 'Shipping Tax', 'wc-admin' ),
+				label: __( 'Shipping Tax', 'woocommerce-admin' ),
 				key: 'shipping_tax',
 				isSortable: true,
 			},
 			{
-				label: __( 'Orders', 'wc-admin' ),
+				label: __( 'Orders', 'woocommerce-admin' ),
 				key: 'orders_count',
 				required: true,
 				defaultSort: true,
@@ -120,23 +120,23 @@ export default class TaxesReportTable extends Component {
 		} = totals;
 		return [
 			{
-				label: _n( 'tax code', 'tax codes', tax_codes, 'wc-admin' ),
+				label: _n( 'tax code', 'tax codes', tax_codes, 'woocommerce-admin' ),
 				value: numberFormat( tax_codes ),
 			},
 			{
-				label: __( 'total tax', 'wc-admin' ),
+				label: __( 'total tax', 'woocommerce-admin' ),
 				value: formatCurrency( total_tax ),
 			},
 			{
-				label: __( 'order tax', 'wc-admin' ),
+				label: __( 'order tax', 'woocommerce-admin' ),
 				value: formatCurrency( order_tax ),
 			},
 			{
-				label: __( 'shipping tax', 'wc-admin' ),
+				label: __( 'shipping tax', 'woocommerce-admin' ),
 				value: formatCurrency( shipping_tax ),
 			},
 			{
-				label: _n( 'order', 'orders', orders_count, 'wc-admin' ),
+				label: _n( 'order', 'orders', orders_count, 'woocommerce-admin' ),
 				value: numberFormat( orders_count ),
 			},
 		];
@@ -159,7 +159,7 @@ export default class TaxesReportTable extends Component {
 				tableQuery={ {
 					orderby: query.orderby || 'tax_rate_id',
 				} }
-				title={ __( 'Taxes', 'wc-admin' ) }
+				title={ __( 'Taxes', 'woocommerce-admin' ) }
 				columnPrefsKey="taxes_report_columns"
 			/>
 		);

@@ -295,7 +295,7 @@ class WC_Admin_Reports_Categories_Data_Store extends WC_Admin_Reports_Data_Store
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $categories_data ) {
-				return new WP_Error( 'woocommerce_reports_categories_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ), array( 'status' => 500 ) );
+				return new WP_Error( 'woocommerce_reports_categories_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ), array( 'status' => 500 ) );
 			}
 
 			$record_count = count( $categories_data );

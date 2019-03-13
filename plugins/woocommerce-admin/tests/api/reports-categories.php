@@ -119,7 +119,7 @@ class WC_Tests_API_Reports_Categories extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'categories'   => $uncategorized_term->term_id . ',' . $second_category_id,
+				'categories' => $uncategorized_term->term_id . ',' . $second_category_id,
 			)
 		);
 		$response = $this->server->dispatch( $request );

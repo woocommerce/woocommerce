@@ -26,7 +26,7 @@ export default class extends Component {
 	render() {
 		return (
 			<Fragment>
-				<Header sections={ [ __( 'Analytics', 'wc-admin' ) ] } />
+				<Header sections={ [ __( 'Analytics', 'woocommerce-admin' ) ] } />
 			</Fragment>
 		);
 	}

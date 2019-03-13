@@ -53,7 +53,7 @@ class ChartBlock extends Component {
 						) }
 					>
 						{ /* translators: %s is the chart type */
-						sprintf( __( '%s Report', 'wc-admin' ), charts[ 0 ].label ) }
+						sprintf( __( '%s Report', 'woocommerce-admin' ), charts[ 0 ].label ) }
 					</a>
 					<ReportChart
 						charts={ charts }

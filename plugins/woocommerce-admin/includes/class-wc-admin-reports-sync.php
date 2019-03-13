@@ -104,7 +104,7 @@ class WC_Admin_Reports_Sync {
 		// Queue orders lookup to occur after customers lookup generation is done.
 		self::queue_dependent_action( self::ORDERS_LOOKUP_BATCH_INIT, array(), self::CUSTOMERS_BATCH_ACTION );
 
-		return __( 'Report table data is being rebuilt.  Please allow some time for data to fully populate.', 'wc-admin' );
+		return __( 'Report table data is being rebuilt.  Please allow some time for data to fully populate.', 'woocommerce-admin' );
 	}
 
 	/**
@@ -139,9 +139,9 @@ class WC_Admin_Reports_Sync {
 			$tools,
 			array(
 				'rebuild_stats' => array(
-					'name'     => __( 'Rebuild reports data', 'wc-admin' ),
-					'button'   => __( 'Rebuild reports', 'wc-admin' ),
-					'desc'     => __( 'This tool will rebuild all of the information used by the reports.', 'wc-admin' ),
+					'name'     => __( 'Rebuild reports data', 'woocommerce-admin' ),
+					'button'   => __( 'Rebuild reports', 'woocommerce-admin' ),
+					'desc'     => __( 'This tool will rebuild all of the information used by the reports.', 'woocommerce-admin' ),
 					'callback' => array( __CLASS__, 'regenerate_report_data' ),
 				),
 			)
@@ -399,11 +399,11 @@ class WC_Admin_Reports_Sync {
 	 * Init customer lookup table update (in batches).
 	 */
 	public static function customer_lookup_batch_init() {
-		$batch_size     = self::get_batch_size( self::CUSTOMERS_BATCH_ACTION );
-		$customer_query = new WP_User_Query(
+		$batch_size      = self::get_batch_size( self::CUSTOMERS_BATCH_ACTION );
+		$customer_query  = new WP_User_Query(
 			array(
-				'fields'  => 'ID',
-				'number'  => 1,
+				'fields' => 'ID',
+				'number' => 1,
 			)
 		);
 		$total_customers = $customer_query->get_total();
@@ -412,7 +412,7 @@ class WC_Admin_Reports_Sync {
 			return;
 		}
 
-		$num_batches     = ceil( $total_customers / $batch_size );
+		$num_batches = ceil( $total_customers / $batch_size );
 
 		self::queue_batches( 1, $num_batches, self::CUSTOMERS_BATCH_ACTION );
 	}

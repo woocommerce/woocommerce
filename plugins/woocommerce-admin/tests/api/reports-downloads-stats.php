@@ -199,8 +199,8 @@ class WC_Tests_API_Reports_Downloads_Stats extends WC_REST_Unit_Test_Case {
 				'customer_includes' => $customer_id,
 			)
 		);
-		$response        = $this->server->dispatch( $request );
-		$reports         = $response->get_data();
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, $reports['totals']['download_count'] );

@@ -30,14 +30,14 @@ export class TopCoupons extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Coupon Code', 'wc-admin' ),
+				label: __( 'Coupon Code', 'woocommerce-admin' ),
 				key: 'code',
 				required: true,
 				isLeftAligned: true,
 				isSortable: false,
 			},
 			{
-				label: __( 'Orders', 'wc-admin' ),
+				label: __( 'Orders', 'woocommerce-admin' ),
 				key: 'orders_count',
 				required: true,
 				defaultSort: true,
@@ -45,7 +45,7 @@ export class TopCoupons extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Amount Discounted', 'wc-admin' ),
+				label: __( 'Amount Discounted', 'woocommerce-admin' ),
 				key: 'amount',
 				isSortable: false,
 				isNumeric: true,
@@ -113,7 +113,7 @@ export class TopCoupons extends Component {
 				getRowsContent={ this.getRowsContent }
 				query={ query }
 				tableQuery={ tableQuery }
-				title={ __( 'Top Coupons', 'wc-admin' ) }
+				title={ __( 'Top Coupons', 'woocommerce-admin' ) }
 			/>
 		);
 	}

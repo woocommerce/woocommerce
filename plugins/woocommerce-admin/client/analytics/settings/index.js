@@ -52,7 +52,7 @@ class Settings extends Component {
 	resetDefaults = () => {
 		if (
 			window.confirm(
-				__( 'Are you sure you want to reset all settings to default values?', 'wc-admin' )
+				__( 'Are you sure you want to reset all settings to default values?', 'woocommerce-admin' )
 			)
 		) {
 			const settings = {};
@@ -69,12 +69,15 @@ class Settings extends Component {
 			if ( ! isError ) {
 				addNotice( {
 					status: 'success',
-					message: __( 'Your settings have been successfully saved.', 'wc-admin' ),
+					message: __( 'Your settings have been successfully saved.', 'woocommerce-admin' ),
 				} );
 			} else {
 				addNotice( {
 					status: 'error',
-					message: __( 'There was an error saving your settings.  Please try again.', 'wc-admin' ),
+					message: __(
+						'There was an error saving your settings.  Please try again.',
+						'woocommerce-admin'
+					),
 				} );
 			}
 			/* eslint-disable react/no-did-update-set-state */
@@ -115,11 +118,11 @@ class Settings extends Component {
 			<Fragment>
 				<Header
 					sections={ [
-						[ '/analytics/revenue', __( 'Analytics', 'wc-admin' ) ],
-						__( 'Settings', 'wc-admin' ),
+						[ '/analytics/revenue', __( 'Analytics', 'woocommerce-admin' ) ],
+						__( 'Settings', 'woocommerce-admin' ),
 					] }
 				/>
-				<SectionHeader title={ __( 'Analytics Settings', 'wc-admin' ) } />
+				<SectionHeader title={ __( 'Analytics Settings', 'woocommerce-admin' ) } />
 				<div className="woocommerce-settings__wrapper">
 					{ analyticsSettings.map( setting => (
 						<Setting
@@ -131,10 +134,10 @@ class Settings extends Component {
 					) ) }
 					<div className="woocommerce-settings__actions">
 						<Button isDefault onClick={ this.resetDefaults }>
-							{ __( 'Reset Defaults', 'wc-admin' ) }
+							{ __( 'Reset Defaults', 'woocommerce-admin' ) }
 						</Button>
 						<Button isPrimary onClick={ this.saveChanges }>
-							{ __( 'Save Changes', 'wc-admin' ) }
+							{ __( 'Save Changes', 'woocommerce-admin' ) }
 						</Button>
 					</div>
 				</div>

@@ -30,7 +30,7 @@ const orderStatuses = Object.keys( wcSettings.orderStatuses )
 			value: key,
 			label: wcSettings.orderStatuses[ key ],
 			description: sprintf(
-				__( 'Exclude the %s status from reports', 'wc-admin' ),
+				__( 'Exclude the %s status from reports', 'woocommerce-admin' ),
 				wcSettings.orderStatuses[ key ]
 			),
 		};
@@ -39,16 +39,19 @@ const orderStatuses = Object.keys( wcSettings.orderStatuses )
 export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 	{
 		name: 'woocommerce_rebuild_reports_data',
-		label: __( 'Rebuild reports data:', 'wc-admin' ),
+		label: __( 'Rebuild reports data:', 'woocommerce-admin' ),
 		inputType: 'button',
-		inputText: __( 'Rebuild reports', 'wc-admin' ),
+		inputText: __( 'Rebuild reports', 'woocommerce-admin' ),
 		helpText: __(
 			'This tool will rebuild all of the information used by the reports. ' +
 				'Data will be processed in the background and may take some time depending on the size of your store.',
-			'wc-admin'
+			'woocommerce-admin'
 		),
 		callback: ( resolve, reject, addNotice ) => {
-			const errorMessage = __( 'There was a problem rebuilding your report data.', 'wc-admin' );
+			const errorMessage = __(
+				'There was a problem rebuilding your report data.',
+				'woocommerce-admin'
+			);
 
 			apiFetch( { path: '/wc/v3/system_status/tools/rebuild_stats', method: 'PUT' } )
 				.then( response => {
@@ -71,7 +74,7 @@ export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 	},
 	{
 		name: 'woocommerce_excluded_report_order_statuses',
-		label: __( 'Excluded Statuses:', 'wc-admin' ),
+		label: __( 'Excluded Statuses:', 'woocommerce-admin' ),
 		inputType: 'checkboxGroup',
 		options: [
 			{
@@ -80,7 +83,7 @@ export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 			},
 			{
 				key: 'customStatuses',
-				label: __( 'Custom Statuses', 'wc-admin' ),
+				label: __( 'Custom Statuses', 'woocommerce-admin' ),
 				options: orderStatuses.filter( status => ! defaultOrderStatuses.includes( status.value ) ),
 			},
 		],
@@ -88,7 +91,7 @@ export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 			mixedString: __(
 				'Orders with these statuses are excluded from the totals in your reports. ' +
 					'The {{strong}}Refunded{{/strong}} status can not be excluded.  {{moreLink}}Learn more{{/moreLink}}',
-				'wc-admin'
+				'woocommerce-admin'
 			),
 			components: {
 				strong: <strong />,
@@ -100,7 +103,7 @@ export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 	},
 	{
 		name: 'woocommerce_actionable_order_statuses',
-		label: __( 'Actionable Statuses:', 'wc-admin' ),
+		label: __( 'Actionable Statuses:', 'woocommerce-admin' ),
 		inputType: 'checkboxGroup',
 		options: [
 			{
@@ -109,14 +112,14 @@ export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 			},
 			{
 				key: 'customStatuses',
-				label: __( 'Custom Statuses', 'wc-admin' ),
+				label: __( 'Custom Statuses', 'woocommerce-admin' ),
 				options: orderStatuses.filter( status => ! defaultOrderStatuses.includes( status.value ) ),
 			},
 		],
 		helpText: __(
 			'Orders with these statuses require action on behalf of the store admin.' +
 				'These orders will show up in the Orders tab under the activity panel.',
-			'wc-admin'
+			'woocommerce-admin'
 		),
 		initialValue: wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses || [],
 		defaultValue: [ 'processing', 'on-hold' ],

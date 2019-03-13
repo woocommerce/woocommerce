@@ -12,21 +12,21 @@ import { getProductLabels, getVariationLabels } from 'lib/async-requests';
 export const charts = [
 	{
 		key: 'items_sold',
-		label: __( 'Items Sold', 'wc-admin' ),
+		label: __( 'Items Sold', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'items_sold',
 		type: 'number',
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Net Revenue', 'wc-admin' ),
+		label: __( 'Net Revenue', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'net_revenue',
 		type: 'currency',
 	},
 	{
 		key: 'orders_count',
-		label: __( 'Orders Count', 'wc-admin' ),
+		label: __( 'Orders Count', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'orders_count',
 		type: 'number',
@@ -34,14 +34,14 @@ export const charts = [
 ];
 
 const filterConfig = {
-	label: __( 'Show', 'wc-admin' ),
+	label: __( 'Show', 'woocommerce-admin' ),
 	staticParams: [],
 	param: 'filter',
 	showFilters: () => true,
 	filters: [
-		{ label: __( 'All Products', 'wc-admin' ), value: 'all' },
+		{ label: __( 'All Products', 'woocommerce-admin' ), value: 'all' },
 		{
-			label: __( 'Single Product', 'wc-admin' ),
+			label: __( 'Single Product', 'woocommerce-admin' ),
 			value: 'select_product',
 			chartMode: 'item-comparison',
 			subFilters: [
@@ -55,15 +55,15 @@ const filterConfig = {
 						param: 'products',
 						getLabels: getProductLabels,
 						labels: {
-							placeholder: __( 'Type to search for a product', 'wc-admin' ),
-							button: __( 'Single Product', 'wc-admin' ),
+							placeholder: __( 'Type to search for a product', 'woocommerce-admin' ),
+							button: __( 'Single Product', 'woocommerce-admin' ),
 						},
 					},
 				},
 			],
 		},
 		{
-			label: __( 'Comparison', 'wc-admin' ),
+			label: __( 'Comparison', 'woocommerce-admin' ),
 			value: 'compare-products',
 			chartMode: 'item-comparison',
 			settings: {
@@ -71,10 +71,10 @@ const filterConfig = {
 				param: 'products',
 				getLabels: getProductLabels,
 				labels: {
-					helpText: __( 'Select at least two products to compare', 'wc-admin' ),
-					placeholder: __( 'Search for products to compare', 'wc-admin' ),
-					title: __( 'Compare Products', 'wc-admin' ),
-					update: __( 'Compare', 'wc-admin' ),
+					helpText: __( 'Select at least two products to compare', 'woocommerce-admin' ),
+					placeholder: __( 'Search for products to compare', 'woocommerce-admin' ),
+					title: __( 'Compare Products', 'woocommerce-admin' ),
+					update: __( 'Compare', 'woocommerce-admin' ),
 				},
 			},
 		},
@@ -87,9 +87,13 @@ const variationsConfig = {
 	staticParams: [ 'filter', 'products' ],
 	param: 'filter-variations',
 	filters: [
-		{ label: __( 'All Variations', 'wc-admin' ), chartMode: 'item-comparison', value: 'all' },
 		{
-			label: __( 'Comparison', 'wc-admin' ),
+			label: __( 'All Variations', 'woocommerce-admin' ),
+			chartMode: 'item-comparison',
+			value: 'all',
+		},
+		{
+			label: __( 'Comparison', 'woocommerce-admin' ),
 			chartMode: 'item-comparison',
 			value: 'compare-variations',
 			settings: {
@@ -97,10 +101,10 @@ const variationsConfig = {
 				param: 'variations',
 				getLabels: getVariationLabels,
 				labels: {
-					helpText: __( 'Select at least two variations to compare', 'wc-admin' ),
-					placeholder: __( 'Search for variations to compare', 'wc-admin' ),
-					title: __( 'Compare Variations', 'wc-admin' ),
-					update: __( 'Compare', 'wc-admin' ),
+					helpText: __( 'Select at least two variations to compare', 'woocommerce-admin' ),
+					placeholder: __( 'Search for variations to compare', 'woocommerce-admin' ),
+					title: __( 'Compare Variations', 'woocommerce-admin' ),
+					update: __( 'Compare', 'woocommerce-admin' ),
 				},
 			},
 		},

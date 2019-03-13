@@ -31,7 +31,7 @@ class WC_Admin_REST_Customers_Controller extends WC_Admin_REST_Reports_Customers
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args = parent::prepare_reports_query( $request );
+		$args              = parent::prepare_reports_query( $request );
 		$args['customers'] = $request['include'];
 		return $args;
 	}
@@ -42,7 +42,7 @@ class WC_Admin_REST_Customers_Controller extends WC_Admin_REST_Reports_Customers
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params = parent::get_collection_params();
+		$params            = parent::get_collection_params();
 		$params['include'] = $params['customers'];
 		unset( $params['customers'] );
 		return $params;

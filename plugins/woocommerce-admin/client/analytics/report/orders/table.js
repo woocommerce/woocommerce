@@ -33,7 +33,7 @@ export default class OrdersReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Date', 'wc-admin' ),
+				label: __( 'Date', 'woocommerce-admin' ),
 				key: 'date',
 				required: true,
 				defaultSort: true,
@@ -41,47 +41,47 @@ export default class OrdersReportTable extends Component {
 				isSortable: true,
 			},
 			{
-				label: __( 'Order #', 'wc-admin' ),
-				screenReaderLabel: __( 'Order Number', 'wc-admin' ),
+				label: __( 'Order #', 'woocommerce-admin' ),
+				screenReaderLabel: __( 'Order Number', 'woocommerce-admin' ),
 				key: 'order_number',
 				required: true,
 			},
 			{
-				label: __( 'Status', 'wc-admin' ),
+				label: __( 'Status', 'woocommerce-admin' ),
 				key: 'status',
 				required: false,
 				isSortable: false,
 			},
 			{
-				label: __( 'Customer', 'wc-admin' ),
+				label: __( 'Customer', 'woocommerce-admin' ),
 				key: 'customer_id',
 				required: false,
 				isSortable: false,
 			},
 			{
-				label: __( 'Product(s)', 'wc-admin' ),
-				screenReaderLabel: __( 'Products', 'wc-admin' ),
+				label: __( 'Product(s)', 'woocommerce-admin' ),
+				screenReaderLabel: __( 'Products', 'woocommerce-admin' ),
 				key: 'products',
 				required: false,
 				isSortable: false,
 			},
 			{
-				label: __( 'Items Sold', 'wc-admin' ),
+				label: __( 'Items Sold', 'woocommerce-admin' ),
 				key: 'num_items_sold',
 				required: false,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Coupon(s)', 'wc-admin' ),
-				screenReaderLabel: __( 'Coupons', 'wc-admin' ),
+				label: __( 'Coupon(s)', 'woocommerce-admin' ),
+				screenReaderLabel: __( 'Coupons', 'woocommerce-admin' ),
 				key: 'coupons',
 				required: false,
 				isSortable: false,
 			},
 			{
-				label: __( 'N. Revenue', 'wc-admin' ),
-				screenReaderLabel: __( 'Net Revenue', 'wc-admin' ),
+				label: __( 'N. Revenue', 'woocommerce-admin' ),
+				screenReaderLabel: __( 'Net Revenue', 'woocommerce-admin' ),
 				key: 'net_total',
 				required: true,
 				isSortable: true,
@@ -148,15 +148,19 @@ export default class OrdersReportTable extends Component {
 				{
 					display:
 						customer_type === 'new'
-							? _x( 'New', 'customer type', 'wc-admin' )
-							: _x( 'Returning', 'customer type', 'wc-admin' ),
+							? _x( 'New', 'customer type', 'woocommerce-admin' )
+							: _x( 'Returning', 'customer type', 'woocommerce-admin' ),
 					value: customer_type,
 				},
 				{
 					display: this.renderList(
 						formattedProducts.length ? [ formattedProducts[ 0 ] ] : [],
 						formattedProducts.map( product => ( {
-							label: sprintf( __( '%s× %s', 'wc-admin' ), product.quantity, product.label ),
+							label: sprintf(
+								__( '%s× %s', 'woocommerce-admin' ),
+								product.quantity,
+								product.label
+							),
 							href: product.href,
 						} ) )
 					),
@@ -193,11 +197,11 @@ export default class OrdersReportTable extends Component {
 		} = totals;
 		return [
 			{
-				label: _n( 'order', 'orders', orders_count, 'wc-admin' ),
+				label: _n( 'order', 'orders', orders_count, 'woocommerce-admin' ),
 				value: numberFormat( orders_count ),
 			},
 			{
-				label: _n( 'new customer', 'new customers', num_new_customers, 'wc-admin' ),
+				label: _n( 'new customer', 'new customers', num_new_customers, 'woocommerce-admin' ),
 				value: numberFormat( num_new_customers ),
 			},
 			{
@@ -205,24 +209,24 @@ export default class OrdersReportTable extends Component {
 					'returning customer',
 					'returning customers',
 					num_returning_customers,
-					'wc-admin'
+					'woocommerce-admin'
 				),
 				value: numberFormat( num_returning_customers ),
 			},
 			{
-				label: _n( 'product', 'products', products, 'wc-admin' ),
+				label: _n( 'product', 'products', products, 'woocommerce-admin' ),
 				value: numberFormat( products ),
 			},
 			{
-				label: _n( 'item sold', 'items sold', num_items_sold, 'wc-admin' ),
+				label: _n( 'item sold', 'items sold', num_items_sold, 'woocommerce-admin' ),
 				value: numberFormat( num_items_sold ),
 			},
 			{
-				label: _n( 'coupon', 'coupons', coupons, 'wc-admin' ),
+				label: _n( 'coupon', 'coupons', coupons, 'woocommerce-admin' ),
 				value: numberFormat( coupons ),
 			},
 			{
-				label: __( 'net revenue', 'wc-admin' ),
+				label: __( 'net revenue', 'woocommerce-admin' ),
 				value: formatCurrency( net_revenue ),
 			},
 		];
@@ -258,7 +262,7 @@ export default class OrdersReportTable extends Component {
 				tableQuery={ {
 					extended_info: true,
 				} }
-				title={ __( 'Orders', 'wc-admin' ) }
+				title={ __( 'Orders', 'woocommerce-admin' ) }
 				columnPrefsKey="orders_report_columns"
 			/>
 		);

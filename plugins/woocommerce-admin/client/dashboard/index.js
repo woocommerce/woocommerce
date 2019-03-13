@@ -20,7 +20,7 @@ export default class Dashboard extends Component {
 		const { query, path } = this.props;
 		return (
 			<Fragment>
-				<Header sections={ [ __( 'Dashboard', 'wc-admin' ) ] } />
+				<Header sections={ [ __( 'Dashboard', 'woocommerce-admin' ) ] } />
 				<ReportFilters query={ query } path={ path } />
 				<StorePerformance query={ query } />
 				<Leaderboards query={ query } />

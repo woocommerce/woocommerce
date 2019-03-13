@@ -100,7 +100,7 @@ class CompareFilter extends Component {
 					</CompareButton>
 					{ selected.length > 0 && (
 						<Button isLink={ true } onClick={ this.clearQuery }>
-							{ __( 'Clear all', 'wc-admin' ) }
+							{ __( 'Clear all', 'woocommerce-admin' ) }
 						</Button>
 					) }
 				</div>

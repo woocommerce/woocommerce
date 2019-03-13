@@ -112,14 +112,14 @@ export class Autocomplete extends Component {
 						'%d result found, use up and down arrow keys to navigate.',
 						'%d results found, use up and down arrow keys to navigate.',
 						filteredOptions.length,
-						'wc-admin'
+						'woocommerce-admin'
 					),
 					filteredOptions.length
 				),
 				'assertive'
 			);
 		} else {
-			debouncedSpeak( __( 'No results.', 'wc-admin' ), 'assertive' );
+			debouncedSpeak( __( 'No results.', 'woocommerce-admin' ), 'assertive' );
 		}
 	}
 

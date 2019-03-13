@@ -70,7 +70,7 @@ class Header extends Component {
 
 		document.title = decodeEntities(
 			sprintf(
-				__( '%1$s &lsaquo; %2$s &#8212; WooCommerce', 'wc-admin' ),
+				__( '%1$s &lsaquo; %2$s &#8212; WooCommerce', 'woocommerce-admin' ),
 				documentTitle,
 				wcSettings.siteTitle
 			)

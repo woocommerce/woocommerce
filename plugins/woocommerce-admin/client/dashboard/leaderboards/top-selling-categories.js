@@ -30,21 +30,21 @@ export class TopSellingCategories extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Category', 'wc-admin' ),
+				label: __( 'Category', 'woocommerce-admin' ),
 				key: 'category',
 				required: true,
 				isLeftAligned: true,
 				isSortable: false,
 			},
 			{
-				label: __( 'Items Sold', 'wc-admin' ),
+				label: __( 'Items Sold', 'woocommerce-admin' ),
 				key: 'items_sold',
 				required: false,
 				isSortable: false,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Net Revenue', 'wc-admin' ),
+				label: __( 'Net Revenue', 'woocommerce-admin' ),
 				key: 'net_revenue',
 				required: true,
 				isSortable: false,
@@ -102,7 +102,7 @@ export class TopSellingCategories extends Component {
 				getRowsContent={ this.getRowsContent }
 				query={ query }
 				tableQuery={ tableQuery }
-				title={ __( 'Top Categories - Items Sold', 'wc-admin' ) }
+				title={ __( 'Top Categories - Items Sold', 'woocommerce-admin' ) }
 			/>
 		);
 	}

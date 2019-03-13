@@ -282,7 +282,7 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 				$total_results = $db_records_count;
-				$total_pages = (int) ceil( $db_records_count / $sql_query_params['per_page'] );
+				$total_pages   = (int) ceil( $db_records_count / $sql_query_params['per_page'] );
 				if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 					return $data;
 				}
@@ -436,7 +436,7 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 
 		if ( ! empty( $args['include'] ) ) {
 			$included_coupons = implode( ',', $args['include'] );
-			$query .= " AND ID IN ({$included_coupons})";
+			$query           .= " AND ID IN ({$included_coupons})";
 		}
 
 		return $wpdb->get_results( $query );  // WPCS: cache ok, DB call ok, unprepared SQL ok.

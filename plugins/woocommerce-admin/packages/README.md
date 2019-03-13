@@ -11,8 +11,8 @@ Currently we have a small set of public-facing packages that can be dowloaded fr
 ## Working with existing packages
 
 - You can make changes to packages files as normal, and running `npm start` will compile and watch both app files and packages.
-- :warning: Make sure any dependencies you add to a package are also added to that package's `package.json`, not just the wc-admin package.json
-- :warning: Make sure you're not importing from any wc-admin files outside of the package (you can import from other packages, just use the `import from @woocommerce/package` syntax).
+- :warning: Make sure any dependencies you add to a package are also added to that package's `package.json`, not just the woocommerce-admin package.json
+- :warning: Make sure you're not importing from any woocommerce-admin files outside of the package (you can import from other packages, just use the `import from @woocommerce/package` syntax).
 - Add your change to the CHANGELOG for that package under the next version number, creating one if necessary (we use semantic versioning for packages, [see these guidelines](https://github.com/WordPress/gutenberg/blob/master/CONTRIBUTING.md#maintaining-changelogs)).
 - Don't change the version in `package.json`.
 - Label your PR with the `Packages` label.
@@ -38,13 +38,13 @@ To create a new package, add a new folder to `/packages`, containing…
 			"wordpress",
 			"woocommerce"
 		],
-		"homepage": "https://github.com/WooCommerce/wc-admin/tree/master/packages/[_YOUR_PACKAGE_]/README.md",
+		"homepage": "https://github.com/woocommerce/woocommerce-admin/tree/master/packages/[_YOUR_PACKAGE_]/README.md",
 		"repository": {
 			"type": "git",
-			"url": "https://github.com/WooCommerce/wc-admin.git"
+			"url": "https://github.com/woocommerce/woocommerce-admin.git"
 		},
 		"bugs": {
-			"url": "https://github.com/WooCommerce/wc-admin/issues"
+			"url": "https://github.com/woocommerce/woocommerce-admin/issues"
 		},
 		"main": "build/index.js",
 		"module": "build-module/index.js",

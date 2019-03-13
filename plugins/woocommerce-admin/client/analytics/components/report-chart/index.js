@@ -120,8 +120,8 @@ export class ReportChart extends Component {
 		const allowedIntervals = getAllowedIntervalsForQuery( query );
 		const formats = getDateFormatsForInterval( currentInterval, primaryData.data.intervals.length );
 		const emptyMessage = emptySearchResults
-			? __( 'No data for the current search', 'wc-admin' )
-			: __( 'No data for the selected date range', 'wc-admin' );
+			? __( 'No data for the current search', 'woocommerce-admin' )
+			: __( 'No data for the selected date range', 'woocommerce-admin' );
 		return (
 			<Chart
 				allowedIntervals={ allowedIntervals }

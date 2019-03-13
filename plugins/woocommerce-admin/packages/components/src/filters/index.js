@@ -60,7 +60,7 @@ class ReportFilters extends Component {
 		const { filters, query, path, showDatePicker } = this.props;
 		return (
 			<Fragment>
-				<H className="screen-reader-text">{ __( 'Filters', 'wc-admin' ) }</H>
+				<H className="screen-reader-text">{ __( 'Filters', 'woocommerce-admin' ) }</H>
 				<Section component="div" className="woocommerce-filters">
 					<div className="woocommerce-filters__basic-filters">
 						{ showDatePicker && (

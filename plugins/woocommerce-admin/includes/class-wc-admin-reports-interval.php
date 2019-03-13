@@ -584,7 +584,7 @@ class WC_Admin_Reports_Interval {
 			return new WP_Error(
 				'rest_invalid_param',
 				/* translators: 1: parameter name */
-				sprintf( __( '%1$s is not a numerically indexed array.', 'wc-admin' ), $param )
+				sprintf( __( '%1$s is not a numerically indexed array.', 'woocommerce-admin' ), $param )
 			);
 		}
 
@@ -596,7 +596,7 @@ class WC_Admin_Reports_Interval {
 			return new WP_Error(
 				'rest_invalid_param',
 				/* translators: %s: parameter name */
-				sprintf( __( '%s must contain 2 numbers.', 'wc-admin' ), $param )
+				sprintf( __( '%s must contain 2 numbers.', 'woocommerce-admin' ), $param )
 			);
 		}
 
@@ -616,7 +616,7 @@ class WC_Admin_Reports_Interval {
 			return new WP_Error(
 				'rest_invalid_param',
 				/* translators: 1: parameter name */
-				sprintf( __( '%1$s is not a numerically indexed array.', 'wc-admin' ), $param )
+				sprintf( __( '%1$s is not a numerically indexed array.', 'woocommerce-admin' ), $param )
 			);
 		}
 
@@ -628,7 +628,7 @@ class WC_Admin_Reports_Interval {
 			return new WP_Error(
 				'rest_invalid_param',
 				/* translators: %s: parameter name */
-				sprintf( __( '%s must contain 2 valid dates.', 'wc-admin' ), $param )
+				sprintf( __( '%s must contain 2 valid dates.', 'woocommerce-admin' ), $param )
 			);
 		}
 

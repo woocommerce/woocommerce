@@ -10,8 +10,8 @@ module.exports = function( grunt ) {
 				options: {
 					domainPath: '/languages',
 					exclude: [ '\.git/*', 'bin/*', 'node_modules/*', 'tests/*' ],
-					mainFile: 'wc-admin.php',
-					potFilename: 'wc-admin.pot',
+					mainFile: 'woocommerce-admin.php',
+					potFilename: 'woocommerce-admin.pot',
 					potHeaders: {
 						poedit: true,
 						'x-poedit-keywordslist': true
@@ -24,7 +24,7 @@ module.exports = function( grunt ) {
 
 		checktextdomain: {
 			options:{
-				text_domain: 'wc-admin',
+				text_domain: 'woocommerce-admin',
 				keywords: [
 					'__:1,2d',
 					'_e:1,2d',

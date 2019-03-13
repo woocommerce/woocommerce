@@ -27,7 +27,7 @@ export default class CouponsReport extends Component {
 			'compare-coupons' === query.filter && query.coupons && query.coupons.split( ',' ).length > 1;
 
 		const mode = isCompareView ? 'item-comparison' : 'time-comparison';
-		const itemsLabel = __( '%d coupons', 'wc-admin' );
+		const itemsLabel = __( '%d coupons', 'woocommerce-admin' );
 
 		return {
 			itemsLabel,

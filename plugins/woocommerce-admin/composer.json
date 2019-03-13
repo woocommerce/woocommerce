@@ -1,7 +1,7 @@
 {
-  "name": "woocommerce/wc-admin",
+  "name": "woocommerce/woocommerce-admin",
   "description": "A modern, javascript-driven WooCommerce Admin experience.",
-  "homepage": "https://github.com/woocommerce/wc-admin",
+  "homepage": "https://github.com/woocommerce/woocommerce-admin",
   "type": "wordpress-plugin",
   "license": "GPL-3.0-or-later",
   "prefer-stable": true,

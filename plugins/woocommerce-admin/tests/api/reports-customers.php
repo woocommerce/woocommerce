@@ -192,8 +192,8 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 
 		// Create 10 test customers.
 		for ( $i = 1; $i <= 10; $i++ ) {
-			$name = $customer_names[ $i - 1 ];
-			$email = 'customer+' . strtolower( $name ) . '@example.com';
+			$name     = $customer_names[ $i - 1 ];
+			$email    = 'customer+' . strtolower( $name ) . '@example.com';
 			$customer = WC_Helper_Customer::create_customer( "customer{$i}", 'password', $email );
 			$customer->set_first_name( $name );
 			$customer->save();

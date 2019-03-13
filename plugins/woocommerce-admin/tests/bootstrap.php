@@ -49,7 +49,7 @@ function wc_admin_install() {
 	$GLOBALS['wp_roles'] = null; // WPCS: override ok.
 	wp_roles();
 
-	echo esc_html( 'Installing wc-admin...' . PHP_EOL );
+	echo esc_html( 'Installing woocommerce-admin...' . PHP_EOL );
 }
 
 /**
@@ -96,7 +96,7 @@ function _manually_load_plugin() {
 
 	wc_admin_install();
 
-	require dirname( dirname( __FILE__ ) ) . '/wc-admin.php';
+	require dirname( dirname( __FILE__ ) ) . '/woocommerce-admin.php';
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 

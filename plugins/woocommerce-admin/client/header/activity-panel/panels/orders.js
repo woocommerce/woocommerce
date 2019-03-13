@@ -37,8 +37,11 @@ import withSelect from 'wc-api/with-select';
 
 function OrdersPanel( { orders, isRequesting, isError } ) {
 	if ( isError ) {
-		const title = __( 'There was an error getting your orders. Please try again.', 'wc-admin' );
-		const actionLabel = __( 'Reload', 'wc-admin' );
+		const title = __(
+			'There was an error getting your orders. Please try again.',
+			'woocommerce-admin'
+		);
+		const actionLabel = __( 'Reload', 'woocommerce-admin' );
 		const actionCallback = () => {
 			// @todo Add tracking for how often an error is displayed, and the reload action is clicked.
 			window.location.reload();
@@ -76,7 +79,7 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 			__(
 				/* translators: describes who placed an order, e.g. Order #123 placed by John Doe */
 				'placed by {{customerLink}}%(customerName)s{{/customerLink}}',
-				'wc-admin'
+				'woocommerce-admin'
 			),
 			{
 				customerName: name,
@@ -100,7 +103,7 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 					mixedString: sprintf(
 						__(
 							'Order {{orderLink}}#%(orderNumber)s{{/orderLink}} %(customerString)s {{destinationFlag/}}',
-							'wc-admin'
+							'woocommerce-admin'
 						),
 						{
 							orderNumber: order_id,
@@ -139,7 +142,7 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 					<div>
 						<span>
 							{ sprintf(
-								_n( '%d product', '%d products', productsCount, 'wc-admin' ),
+								_n( '%d product', '%d products', productsCount, 'woocommerce-admin' ),
 								productsCount
 							) }
 						</span>
@@ -165,7 +168,7 @@ function OrdersPanel( { orders, isRequesting, isError } ) {
 
 	return (
 		<Fragment>
-			<ActivityHeader title={ __( 'Orders', 'wc-admin' ) } menu={ menu } />
+			<ActivityHeader title={ __( 'Orders', 'woocommerce-admin' ) } menu={ menu } />
 			<Section>
 				{ isRequesting ? (
 					<ActivityCardPlaceholder

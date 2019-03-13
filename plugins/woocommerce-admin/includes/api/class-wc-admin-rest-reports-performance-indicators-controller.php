@@ -122,7 +122,7 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 		$endpoints     = $response->get_data();
 		$allowed_stats = array();
 		if ( 200 !== $response->get_status() ) {
-			return new WP_Error( 'woocommerce_reports_performance_indicators_result_failed', __( 'Sorry, fetching performance indicators failed.', 'wc-admin' ) );
+			return new WP_Error( 'woocommerce_reports_performance_indicators_result_failed', __( 'Sorry, fetching performance indicators failed.', 'woocommerce-admin' ) );
 		}
 
 		foreach ( $endpoints as $endpoint ) {
@@ -131,7 +131,7 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 				$response = rest_do_request( $request );
 				$data     = $response->get_data();
 
-				$prefix   = substr( $endpoint['slug'], 0, -6 );
+				$prefix = substr( $endpoint['slug'], 0, -6 );
 
 				if ( empty( $data['schema']['properties']['totals']['properties'] ) ) {
 					continue;
@@ -149,8 +149,8 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 					$this->formats[ $stat ] = isset( $schema_info['format'] ) ? $schema_info['format'] : 'number';
 				}
 
-				$this->endpoints[ $prefix ]  = $endpoint['path'];
-				$this->urls[ $prefix ]       = $endpoint['_links']['report'][0]['href'];
+				$this->endpoints[ $prefix ] = $endpoint['path'];
+				$this->urls[ $prefix ]      = $endpoint['_links']['report'][0]['href'];
 			}
 		}
 
@@ -172,13 +172,13 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 
 		$data = array();
 		foreach ( $this->allowed_stats as $stat ) {
-			$pieces   = $this->get_stats_parts( $stat );
-			$report   = $pieces[0];
-			$chart    = $pieces[1];
+			$pieces = $this->get_stats_parts( $stat );
+			$report = $pieces[0];
+			$chart  = $pieces[1];
 			$data[] = (object) array(
-				'stat'   => $stat,
-				'chart'  => $chart,
-				'label'  => $this->labels[ $stat ],
+				'stat'  => $stat,
+				'chart' => $chart,
+				'label' => $this->labels[ $stat ],
 			);
 		}
 
@@ -202,7 +202,7 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 	/**
 	 * Sorts the list of stats. Sorted by custom arrangement.
 	 *
-	 * @see https://github.com/woocommerce/wc-admin/issues/1282
+	 * @see https://github.com/woocommerce/woocommerce-admin/issues/1282
 	 * @param object $a First item.
 	 * @param object $b Second item.
 	 * @return order
@@ -211,7 +211,7 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 		/**
 		 * Custom ordering for store performance indicators.
 		 *
-		 * @see https://github.com/woocommerce/wc-admin/issues/1282
+		 * @see https://github.com/woocommerce/woocommerce-admin/issues/1282
 		 * @param array $indicators A list of ordered indicators.
 		 */
 		$stat_order = apply_filters(
@@ -261,16 +261,16 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 
 		$query_args = $this->prepare_reports_query( $request );
 		if ( empty( $query_args['stats'] ) ) {
-			return new WP_Error( 'woocommerce_reports_performance_indicators_empty_query', __( 'A list of stats to query must be provided.', 'wc-admin' ), 400 );
+			return new WP_Error( 'woocommerce_reports_performance_indicators_empty_query', __( 'A list of stats to query must be provided.', 'woocommerce-admin' ), 400 );
 		}
 
 		$stats = array();
 		foreach ( $query_args['stats'] as $stat ) {
 			$is_error = false;
 
-			$pieces   = $this->get_stats_parts( $stat );
-			$report   = $pieces[0];
-			$chart    = $pieces[1];
+			$pieces = $this->get_stats_parts( $stat );
+			$report = $pieces[0];
+			$chart  = $pieces[1];
 
 			if ( ! in_array( $stat, $this->allowed_stats ) ) {
 				continue;
@@ -283,9 +283,9 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 
 			$response = rest_do_request( $request );
 
-			$data     = $response->get_data();
-			$format   = $this->formats[ $stat ];
-			$label    = $this->labels[ $stat ];
+			$data   = $response->get_data();
+			$format = $this->formats[ $stat ];
+			$label  = $this->labels[ $stat ];
 
 			if ( 200 !== $response->get_status() || ! isset( $data['totals'][ $chart ] ) ) {
 				$stats[] = (object) array(
@@ -366,7 +366,7 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 		$url      = $this->urls[ $endpoint ];
 
 		$links = array(
-			'api' => array(
+			'api'    => array(
 				'href' => rest_url( $this->endpoints[ $endpoint ] ),
 			),
 			'report' => array(
@@ -411,34 +411,34 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 			'title'      => 'report_performance_indicator',
 			'type'       => 'object',
 			'properties' => array(
-				'stat'             => array(
-					'description' => __( 'Unique identifier for the resource.', 'wc-admin' ),
+				'stat'   => array(
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'enum'        => $allowed_stats,
 				),
-				'chart'           => array(
-					'description' => __( 'The specific chart this stat referrers to.', 'wc-admin' ),
+				'chart'  => array(
+					'description' => __( 'The specific chart this stat referrers to.', 'woocommerce-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'label'           => array(
-					'description' => __( 'Human readable label for the stat.', 'wc-admin' ),
+				'label'  => array(
+					'description' => __( 'Human readable label for the stat.', 'woocommerce-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'format'      => array(
-					'description' => __( 'Format of the stat.', 'wc-admin' ),
+				'format' => array(
+					'description' => __( 'Format of the stat.', 'woocommerce-admin' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'enum'        => array( 'number', 'currency' ),
 				),
-				'value'      => array(
-					'description' => __( 'Value of the stat. Returns null if the stat does not exist or cannot be loaded.', 'wc-admin' ),
+				'value'  => array(
+					'description' => __( 'Value of the stat. Returns null if the stat does not exist or cannot be loaded.', 'woocommerce-admin' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -469,7 +469,7 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 	public function get_collection_params() {
 		$indicator_data = $this->get_indicator_data();
 		if ( is_wp_error( $indicator_data ) ) {
-			$allowed_stats = __( 'There was an issue loading the report endpoints', 'wc-admin' );
+			$allowed_stats = __( 'There was an issue loading the report endpoints', 'woocommerce-admin' );
 		} else {
 			$allowed_stats = implode( ', ', $this->allowed_stats );
 		}
@@ -479,23 +479,23 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 		$params['stats']   = array(
 			'description'       => sprintf(
 				/* translators: Allowed values is a list of stat endpoints. */
-				__( 'Limit response to specific report stats. Allowed values: %s.', 'wc-admin' ),
+				__( 'Limit response to specific report stats. Allowed values: %s.', 'woocommerce-admin' ),
 				$allowed_stats
 			),
 			'type'              => 'array',
 			'validate_callback' => 'rest_validate_request_arg',
 			'items'             => array(
-				'type'   => 'string',
+				'type' => 'string',
 			),
 		);
 		$params['after']   = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'wc-admin' ),
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before'] = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'wc-admin' ),
+		$params['before']  = array(
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',

@@ -26,7 +26,7 @@ export function computeSuggestionMatch( suggestion, query ) {
 }
 
 export function getTaxCode( tax ) {
-	return [ tax.country, tax.state, tax.name || __( 'TAX', 'wc-admin' ), tax.priority ]
+	return [ tax.country, tax.state, tax.name || __( 'TAX', 'woocommerce-admin' ), tax.priority ]
 		.filter( Boolean )
 		.map( item =>
 			item

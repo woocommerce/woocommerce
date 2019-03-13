@@ -121,7 +121,7 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 		";
 		if ( ! empty( $args['include'] ) ) {
 			$included_taxes = implode( ',', $args['include'] );
-			$query .= " WHERE tax_rate_id IN ({$included_taxes})";
+			$query         .= " WHERE tax_rate_id IN ({$included_taxes})";
 		}
 		return $wpdb->get_results( $query, ARRAY_A ); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 	}
@@ -204,7 +204,7 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $totals ) {
-				return new WP_Error( 'woocommerce_reports_taxes_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
+				return new WP_Error( 'woocommerce_reports_taxes_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
 			}
 			$segmenter             = new WC_Admin_Reports_Taxes_Stats_Segmenting( $query_args, $this->report_columns );
 			$totals[0]['segments'] = $segmenter->get_totals_segments( $totals_query, $table_name );
@@ -236,7 +236,7 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
-				return new WP_Error( 'woocommerce_reports_taxes_stats_result_failed', __( 'Sorry, fetching tax data failed.', 'wc-admin' ) );
+				return new WP_Error( 'woocommerce_reports_taxes_stats_result_failed', __( 'Sorry, fetching tax data failed.', 'woocommerce-admin' ) );
 			}
 
 			$totals = (object) $this->cast_numbers( $totals[0] );

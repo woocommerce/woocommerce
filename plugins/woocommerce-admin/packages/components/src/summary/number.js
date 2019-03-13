@@ -45,12 +45,12 @@ const SummaryNumber = ( {
 	let icon = delta > 0 ? 'arrow-up' : 'arrow-down';
 	let screenReaderLabel =
 		delta > 0
-			? sprintf( __( 'Up %d%% from %s', 'wc-admin' ), delta, prevLabel )
-			: sprintf( __( 'Down %d%% from %s', 'wc-admin' ), Math.abs( delta ), prevLabel );
+			? sprintf( __( 'Up %d%% from %s', 'woocommerce-admin' ), delta, prevLabel )
+			: sprintf( __( 'Down %d%% from %s', 'woocommerce-admin' ), Math.abs( delta ), prevLabel );
 	if ( ! delta ) {
 		// delta is zero or falsey
 		icon = 'arrow-right';
-		screenReaderLabel = sprintf( __( 'No change from %s', 'wc-admin' ), prevLabel );
+		screenReaderLabel = sprintf( __( 'No change from %s', 'woocommerce-admin' ), prevLabel );
 	}
 
 	let Container;
@@ -81,7 +81,7 @@ const SummaryNumber = ( {
 
 				<span className="woocommerce-summary__item-data">
 					<span className="woocommerce-summary__item-value">
-						{ ! isNil( value ) ? value : __( 'N/A', 'wc-admin' ) }
+						{ ! isNil( value ) ? value : __( 'N/A', 'woocommerce-admin' ) }
 					</span>
 					<div
 						className="woocommerce-summary__item-delta"
@@ -91,15 +91,15 @@ const SummaryNumber = ( {
 						<Gridicon className="woocommerce-summary__item-delta-icon" icon={ icon } size={ 18 } />
 						<span className="woocommerce-summary__item-delta-value">
 							{ ! isNil( delta )
-								? sprintf( __( '%d%%', 'wc-admin' ), delta )
-								: __( 'N/A', 'wc-admin' ) }
+								? sprintf( __( '%d%%', 'woocommerce-admin' ), delta )
+								: __( 'N/A', 'woocommerce-admin' ) }
 						</span>
 					</div>
 				</span>
 				<span className="woocommerce-summary__item-prev-label">{ prevLabel }</span>
 				{ ' ' /* Add a real space so the line breaks here, and not in the label text. */ }
 				<span className="woocommerce-summary__item-prev-value">
-					{ ! isNil( prevValue ) ? prevValue : __( 'N/A', 'wc-admin' ) }
+					{ ! isNil( prevValue ) ? prevValue : __( 'N/A', 'woocommerce-admin' ) }
 				</span>
 
 				{ onToggle ? (
@@ -164,7 +164,7 @@ SummaryNumber.propTypes = {
 SummaryNumber.defaultProps = {
 	href: '',
 	isOpen: false,
-	prevLabel: __( 'Previous Period:', 'wc-admin' ),
+	prevLabel: __( 'Previous Period:', 'woocommerce-admin' ),
 	reverseTrend: false,
 	selected: false,
 	onLinkClickCallback: noop,

@@ -141,9 +141,9 @@ class WC_Admin_Reports_Coupons_Stats_Data_Store extends WC_Admin_Reports_Coupons
 							time_interval"
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
-			$db_interval_count = count( $db_intervals );
+			$db_interval_count       = count( $db_intervals );
 			$expected_interval_count = WC_Admin_Reports_Interval::intervals_between( $query_args['after'], $query_args['before'], $query_args['interval'] );
-			$total_pages       = (int) ceil( $expected_interval_count / $intervals_query['per_page'] );
+			$total_pages             = (int) ceil( $expected_interval_count / $intervals_query['per_page'] );
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 				return $data;
 			}

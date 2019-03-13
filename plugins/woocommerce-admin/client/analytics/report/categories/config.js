@@ -12,21 +12,21 @@ import { getCategoryLabels } from 'lib/async-requests';
 export const charts = [
 	{
 		key: 'items_sold',
-		label: __( 'Items Sold', 'wc-admin' ),
+		label: __( 'Items Sold', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'items_sold',
 		type: 'number',
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Net Revenue', 'wc-admin' ),
+		label: __( 'Net Revenue', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'net_revenue',
 		type: 'currency',
 	},
 	{
 		key: 'orders_count',
-		label: __( 'Orders Count', 'wc-admin' ),
+		label: __( 'Orders Count', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'orders_count',
 		type: 'number',
@@ -35,14 +35,14 @@ export const charts = [
 
 export const filters = [
 	{
-		label: __( 'Show', 'wc-admin' ),
+		label: __( 'Show', 'woocommerce-admin' ),
 		staticParams: [],
 		param: 'filter',
 		showFilters: () => true,
 		filters: [
-			{ label: __( 'All Categories', 'wc-admin' ), value: 'all' },
+			{ label: __( 'All Categories', 'woocommerce-admin' ), value: 'all' },
 			{
-				label: __( 'Single Category', 'wc-admin' ),
+				label: __( 'Single Category', 'woocommerce-admin' ),
 				value: 'select_category',
 				chartMode: 'item-comparison',
 				subFilters: [
@@ -56,15 +56,15 @@ export const filters = [
 							param: 'categories',
 							getLabels: getCategoryLabels,
 							labels: {
-								placeholder: __( 'Type to search for a category', 'wc-admin' ),
-								button: __( 'Single Category', 'wc-admin' ),
+								placeholder: __( 'Type to search for a category', 'woocommerce-admin' ),
+								button: __( 'Single Category', 'woocommerce-admin' ),
 							},
 						},
 					},
 				],
 			},
 			{
-				label: __( 'Comparison', 'wc-admin' ),
+				label: __( 'Comparison', 'woocommerce-admin' ),
 				value: 'compare-categories',
 				chartMode: 'item-comparison',
 				settings: {
@@ -72,10 +72,10 @@ export const filters = [
 					param: 'categories',
 					getLabels: getCategoryLabels,
 					labels: {
-						helpText: __( 'Select at least two categories to compare', 'wc-admin' ),
-						placeholder: __( 'Search for categories to compare', 'wc-admin' ),
-						title: __( 'Compare Categories', 'wc-admin' ),
-						update: __( 'Compare', 'wc-admin' ),
+						helpText: __( 'Select at least two categories to compare', 'woocommerce-admin' ),
+						placeholder: __( 'Search for categories to compare', 'woocommerce-admin' ),
+						title: __( 'Compare Categories', 'woocommerce-admin' ),
+						update: __( 'Compare', 'woocommerce-admin' ),
 					},
 				},
 			},

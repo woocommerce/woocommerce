@@ -59,23 +59,26 @@ class Leaderboards extends Component {
 		const allLeaderboards = [
 			{
 				key: 'top-products',
-				label: __( 'Top Products - Items Sold', 'wc-admin' ),
+				label: __( 'Top Products - Items Sold', 'woocommerce-admin' ),
 			},
 			{
 				key: 'top-categories',
-				label: __( 'Top Categories - Items Sold', 'wc-admin' ),
+				label: __( 'Top Categories - Items Sold', 'woocommerce-admin' ),
 			},
 			{
 				key: 'top-coupons',
-				label: __( 'Top Coupons', 'wc-admin' ),
+				label: __( 'Top Coupons', 'woocommerce-admin' ),
 			},
 		];
 		return (
 			<EllipsisMenu
-				label={ __( 'Choose which leaderboards to display and the number of rows', 'wc-admin' ) }
+				label={ __(
+					'Choose which leaderboards to display and the number of rows',
+					'woocommerce-admin'
+				) }
 			>
 				<Fragment>
-					<MenuTitle>{ __( 'Leaderboards', 'wc-admin' ) }</MenuTitle>
+					<MenuTitle>{ __( 'Leaderboards', 'woocommerce-admin' ) }</MenuTitle>
 					{ allLeaderboards.map( leaderboard => {
 						return (
 							<MenuItem
@@ -91,7 +94,7 @@ class Leaderboards extends Component {
 					} ) }
 					<SelectControl
 						className="woocommerce-dashboard__dashboard-leaderboards__select"
-						label={ <MenuTitle>{ __( 'Rows Per Table', 'wc-admin' ) }</MenuTitle> }
+						label={ <MenuTitle>{ __( 'Rows Per Table', 'woocommerce-admin' ) }</MenuTitle> }
 						value={ rowsPerTable }
 						options={ Array.from( { length: 20 }, ( v, key ) => ( {
 							v: key + 1,
@@ -110,7 +113,10 @@ class Leaderboards extends Component {
 		return (
 			<Fragment>
 				<div className="woocommerce-dashboard__dashboard-leaderboards">
-					<SectionHeader title={ __( 'Leaderboards', 'wc-admin' ) } menu={ this.renderMenu() } />
+					<SectionHeader
+						title={ __( 'Leaderboards', 'woocommerce-admin' ) }
+						menu={ this.renderMenu() }
+					/>
 					<div className="woocommerce-dashboard__columns">
 						{ ! hiddenLeaderboardKeys.includes( 'top-products' ) && (
 							<TopSellingProducts query={ query } totalRows={ rowsPerTable } />

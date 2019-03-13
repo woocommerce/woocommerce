@@ -70,7 +70,7 @@ const Tag = ( {
 					className="woocommerce-tag__remove"
 					icon={ <Dashicon icon="dismiss" size={ 20 } /> }
 					onClick={ remove( id ) }
-					label={ sprintf( __( 'Remove %s', 'wc-admin' ), label ) }
+					label={ sprintf( __( 'Remove %s', 'woocommerce-admin' ), label ) }
 					aria-describedby={ labelId }
 				/>
 			) }

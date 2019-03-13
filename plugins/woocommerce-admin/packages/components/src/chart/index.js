@@ -212,12 +212,12 @@ class Chart extends Component {
 		}
 
 		const intervalLabels = {
-			hour: __( 'By hour', 'wc-admin' ),
-			day: __( 'By day', 'wc-admin' ),
-			week: __( 'By week', 'wc-admin' ),
-			month: __( 'By month', 'wc-admin' ),
-			quarter: __( 'By quarter', 'wc-admin' ),
-			year: __( 'By year', 'wc-admin' ),
+			hour: __( 'By hour', 'woocommerce-admin' ),
+			day: __( 'By day', 'woocommerce-admin' ),
+			week: __( 'By week', 'woocommerce-admin' ),
+			month: __( 'By month', 'woocommerce-admin' ),
+			quarter: __( 'By quarter', 'woocommerce-admin' ),
+			year: __( 'By year', 'woocommerce-admin' ),
 		};
 
 		return (
@@ -347,7 +347,7 @@ class Chart extends Component {
 									'woocommerce-chart__type-button-selected': chartType === 'line',
 								} ) }
 								icon={ <Gridicon icon="line-graph" /> }
-								title={ __( 'Line chart', 'wc-admin' ) }
+								title={ __( 'Line chart', 'woocommerce-admin' ) }
 								aria-checked={ chartType === 'line' }
 								role="menuitemradio"
 								tabIndex={ chartType === 'line' ? 0 : -1 }
@@ -358,7 +358,7 @@ class Chart extends Component {
 									'woocommerce-chart__type-button-selected': chartType === 'bar',
 								} ) }
 								icon={ <Gridicon icon="stats-alt" /> }
-								title={ __( 'Bar chart', 'wc-admin' ) }
+								title={ __( 'Bar chart', 'woocommerce-admin' ) }
 								aria-checked={ chartType === 'bar' }
 								role="menuitemradio"
 								tabIndex={ chartType === 'bar' ? 0 : -1 }
@@ -379,7 +379,7 @@ class Chart extends Component {
 						{ isRequesting && (
 							<Fragment>
 								<span className="screen-reader-text">
-									{ __( 'Your requested data is loading', 'wc-admin' ) }
+									{ __( 'Your requested data is loading', 'woocommerce-admin' ) }
 								</span>
 								<ChartPlaceholder height={ chartHeight } />
 							</Fragment>

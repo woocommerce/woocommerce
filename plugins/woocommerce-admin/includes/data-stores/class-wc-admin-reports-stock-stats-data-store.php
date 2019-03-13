@@ -109,9 +109,9 @@ class WC_Admin_Reports_Stock_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 	 * @return int Product count.
 	 */
 	private function get_product_count() {
-		$query_args               = array();
-		$query_args['post_type']  = array( 'product', 'product_variation' );
-		$query = new WP_Query();
+		$query_args              = array();
+		$query_args['post_type'] = array( 'product', 'product_variation' );
+		$query                   = new WP_Query();
 		$query->query( $query_args );
 		return intval( $query->found_posts );
 	}

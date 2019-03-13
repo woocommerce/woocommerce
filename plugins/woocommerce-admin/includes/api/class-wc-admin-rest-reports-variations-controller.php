@@ -158,80 +158,80 @@ class WC_Admin_REST_Reports_Variations_Controller extends WC_REST_Reports_Contro
 					'type'        => 'integer',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'Product ID.', 'wc-admin' ),
+					'description' => __( 'Product ID.', 'woocommerce-admin' ),
 				),
 				'variation_id'  => array(
 					'type'        => 'integer',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'Product ID.', 'wc-admin' ),
+					'description' => __( 'Product ID.', 'woocommerce-admin' ),
 				),
 				'items_sold'    => array(
 					'type'        => 'integer',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'Number of items sold.', 'wc-admin' ),
+					'description' => __( 'Number of items sold.', 'woocommerce-admin' ),
 				),
-				'net_revenue' => array(
+				'net_revenue'   => array(
 					'type'        => 'number',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'Total net revenue of all items sold.', 'wc-admin' ),
+					'description' => __( 'Total net revenue of all items sold.', 'woocommerce-admin' ),
 				),
 				'orders_count'  => array(
 					'type'        => 'integer',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'Number of orders product appeared in.', 'wc-admin' ),
+					'description' => __( 'Number of orders product appeared in.', 'woocommerce-admin' ),
 				),
 				'extended_info' => array(
-					'name'       => array(
+					'name'             => array(
 						'type'        => 'string',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Product name.', 'wc-admin' ),
+						'description' => __( 'Product name.', 'woocommerce-admin' ),
 					),
-					'price'      => array(
+					'price'            => array(
 						'type'        => 'number',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Product price.', 'wc-admin' ),
+						'description' => __( 'Product price.', 'woocommerce-admin' ),
 					),
-					'image'      => array(
+					'image'            => array(
 						'type'        => 'string',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Product image.', 'wc-admin' ),
+						'description' => __( 'Product image.', 'woocommerce-admin' ),
 					),
-					'permalink'  => array(
+					'permalink'        => array(
 						'type'        => 'string',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Product link.', 'wc-admin' ),
+						'description' => __( 'Product link.', 'woocommerce-admin' ),
 					),
-					'attributes' => array(
+					'attributes'       => array(
 						'type'        => 'array',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Product attributes.', 'wc-admin' ),
+						'description' => __( 'Product attributes.', 'woocommerce-admin' ),
 					),
-					'stock_status'  => array(
+					'stock_status'     => array(
 						'type'        => 'string',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Product inventory status.', 'wc-admin' ),
+						'description' => __( 'Product inventory status.', 'woocommerce-admin' ),
 					),
-					'stock_quantity'  => array(
+					'stock_quantity'   => array(
 						'type'        => 'integer',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Product inventory quantity.', 'wc-admin' ),
+						'description' => __( 'Product inventory quantity.', 'woocommerce-admin' ),
 					),
-					'low_stock_amount'  => array(
+					'low_stock_amount' => array(
 						'type'        => 'integer',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Product inventory threshold for low stock.', 'wc-admin' ),
+						'description' => __( 'Product inventory threshold for low stock.', 'woocommerce-admin' ),
 					),
 				),
 			),
@@ -249,7 +249,7 @@ class WC_Admin_REST_Reports_Variations_Controller extends WC_REST_Reports_Contro
 		$params                  = array();
 		$params['context']       = $this->get_context_param( array( 'default' => 'view' ) );
 		$params['page']          = array(
-			'description'       => __( 'Current page of the collection.', 'wc-admin' ),
+			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
@@ -257,7 +257,7 @@ class WC_Admin_REST_Reports_Variations_Controller extends WC_REST_Reports_Contro
 			'minimum'           => 1,
 		);
 		$params['per_page']      = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'wc-admin' ),
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 1,
@@ -266,26 +266,26 @@ class WC_Admin_REST_Reports_Variations_Controller extends WC_REST_Reports_Contro
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['after']         = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'wc-admin' ),
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['before']        = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'wc-admin' ),
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['order']         = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'wc-admin' ),
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby']       = array(
-			'description'       => __( 'Sort collection by object attribute.', 'wc-admin' ),
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'default'           => 'date',
 			'enum'              => array(
@@ -297,7 +297,7 @@ class WC_Admin_REST_Reports_Variations_Controller extends WC_REST_Reports_Contro
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['products']      = array(
-			'description'       => __( 'Limit result to items with specified product ids.', 'wc-admin' ),
+			'description'       => __( 'Limit result to items with specified product ids.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -306,7 +306,7 @@ class WC_Admin_REST_Reports_Variations_Controller extends WC_REST_Reports_Contro
 			),
 		);
 		$params['variations']    = array(
-			'description'       => __( 'Limit result to items with specified variation ids.', 'wc-admin' ),
+			'description'       => __( 'Limit result to items with specified variation ids.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -315,7 +315,7 @@ class WC_Admin_REST_Reports_Variations_Controller extends WC_REST_Reports_Contro
 			),
 		);
 		$params['extended_info'] = array(
-			'description'       => __( 'Add additional piece of info about each product to the report.', 'wc-admin' ),
+			'description'       => __( 'Add additional piece of info about each product to the report.', 'woocommerce-admin' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',

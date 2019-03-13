@@ -14,24 +14,24 @@ const { orderStatuses } = wcSettings;
 export const charts = [
 	{
 		key: 'orders_count',
-		label: __( 'Orders Count', 'wc-admin' ),
+		label: __( 'Orders Count', 'woocommerce-admin' ),
 		type: 'number',
 	},
 	{
 		key: 'net_revenue',
-		label: __( 'Net Revenue', 'wc-admin' ),
+		label: __( 'Net Revenue', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'net_total',
 		type: 'currency',
 	},
 	{
 		key: 'avg_order_value',
-		label: __( 'Average Order Value', 'wc-admin' ),
+		label: __( 'Average Order Value', 'woocommerce-admin' ),
 		type: 'currency',
 	},
 	{
 		key: 'avg_items_per_order',
-		label: __( 'Average Items Per Order', 'wc-admin' ),
+		label: __( 'Average Items Per Order', 'woocommerce-admin' ),
 		order: 'desc',
 		orderby: 'num_items_sold',
 		type: 'average',
@@ -40,13 +40,13 @@ export const charts = [
 
 export const filters = [
 	{
-		label: __( 'Show', 'wc-admin' ),
+		label: __( 'Show', 'woocommerce-admin' ),
 		staticParams: [ 'chart' ],
 		param: 'filter',
 		showFilters: () => true,
 		filters: [
-			{ label: __( 'All Orders', 'wc-admin' ), value: 'all' },
-			{ label: __( 'Advanced Filters', 'wc-admin' ), value: 'advanced' },
+			{ label: __( 'All Orders', 'woocommerce-admin' ), value: 'all' },
+			{ label: __( 'Advanced Filters', 'woocommerce-admin' ), value: 'advanced' },
 		],
 	},
 ];
@@ -56,28 +56,28 @@ export const advancedFilters = {
 	title: _x(
 		'Orders Match {{select /}} Filters',
 		'A sentence describing filters for Orders. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
-		'wc-admin'
+		'woocommerce-admin'
 	),
 	filters: {
 		status: {
 			labels: {
-				add: __( 'Order Status', 'wc-admin' ),
-				remove: __( 'Remove order status filter', 'wc-admin' ),
-				rule: __( 'Select an order status filter match', 'wc-admin' ),
+				add: __( 'Order Status', 'woocommerce-admin' ),
+				remove: __( 'Remove order status filter', 'woocommerce-admin' ),
+				rule: __( 'Select an order status filter match', 'woocommerce-admin' ),
 				/* translators: A sentence describing an Order Status filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
-				title: __( '{{title}}Order Status{{/title}} {{rule /}} {{filter /}}', 'wc-admin' ),
-				filter: __( 'Select an order status', 'wc-admin' ),
+				title: __( '{{title}}Order Status{{/title}} {{rule /}} {{filter /}}', 'woocommerce-admin' ),
+				filter: __( 'Select an order status', 'woocommerce-admin' ),
 			},
 			rules: [
 				{
 					value: 'is',
 					/* translators: Sentence fragment, logical, "Is" refers to searching for orders matching a chosen order status. Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-					label: _x( 'Is', 'order status', 'wc-admin' ),
+					label: _x( 'Is', 'order status', 'woocommerce-admin' ),
 				},
 				{
 					value: 'is_not',
 					/* translators: Sentence fragment, logical, "Is Not" refers to searching for orders that don\'t match a chosen order status. Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-					label: _x( 'Is Not', 'order status', 'wc-admin' ),
+					label: _x( 'Is Not', 'order status', 'woocommerce-admin' ),
 				},
 			],
 			input: {
@@ -90,24 +90,24 @@ export const advancedFilters = {
 		},
 		product: {
 			labels: {
-				add: __( 'Products', 'wc-admin' ),
-				placeholder: __( 'Search products', 'wc-admin' ),
-				remove: __( 'Remove products filter', 'wc-admin' ),
-				rule: __( 'Select a product filter match', 'wc-admin' ),
+				add: __( 'Products', 'woocommerce-admin' ),
+				placeholder: __( 'Search products', 'woocommerce-admin' ),
+				remove: __( 'Remove products filter', 'woocommerce-admin' ),
+				rule: __( 'Select a product filter match', 'woocommerce-admin' ),
 				/* translators: A sentence describing a Product filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
-				title: __( '{{title}}Product{{/title}} {{rule /}} {{filter /}}', 'wc-admin' ),
-				filter: __( 'Select products', 'wc-admin' ),
+				title: __( '{{title}}Product{{/title}} {{rule /}} {{filter /}}', 'woocommerce-admin' ),
+				filter: __( 'Select products', 'woocommerce-admin' ),
 			},
 			rules: [
 				{
 					value: 'includes',
 					/* translators: Sentence fragment, logical, "Includes" refers to orders including a given product(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-					label: _x( 'Includes', 'products', 'wc-admin' ),
+					label: _x( 'Includes', 'products', 'woocommerce-admin' ),
 				},
 				{
 					value: 'excludes',
 					/* translators: Sentence fragment, logical, "Excludes" refers to orders excluding a given product(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-					label: _x( 'Excludes', 'products', 'wc-admin' ),
+					label: _x( 'Excludes', 'products', 'woocommerce-admin' ),
 				},
 			],
 			input: {
@@ -118,24 +118,24 @@ export const advancedFilters = {
 		},
 		coupon: {
 			labels: {
-				add: __( 'Coupon Codes', 'wc-admin' ),
-				placeholder: __( 'Search coupons', 'wc-admin' ),
-				remove: __( 'Remove coupon filter', 'wc-admin' ),
-				rule: __( 'Select a coupon filter match', 'wc-admin' ),
+				add: __( 'Coupon Codes', 'woocommerce-admin' ),
+				placeholder: __( 'Search coupons', 'woocommerce-admin' ),
+				remove: __( 'Remove coupon filter', 'woocommerce-admin' ),
+				rule: __( 'Select a coupon filter match', 'woocommerce-admin' ),
 				/* translators: A sentence describing a Coupon filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
-				title: __( '{{title}}Coupon Code{{/title}} {{rule /}} {{filter /}}', 'wc-admin' ),
-				filter: __( 'Select coupon codes', 'wc-admin' ),
+				title: __( '{{title}}Coupon Code{{/title}} {{rule /}} {{filter /}}', 'woocommerce-admin' ),
+				filter: __( 'Select coupon codes', 'woocommerce-admin' ),
 			},
 			rules: [
 				{
 					value: 'includes',
 					/* translators: Sentence fragment, logical, "Includes" refers to orders including a given coupon code(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-					label: _x( 'Includes', 'coupon code', 'wc-admin' ),
+					label: _x( 'Includes', 'coupon code', 'woocommerce-admin' ),
 				},
 				{
 					value: 'excludes',
 					/* translators: Sentence fragment, logical, "Excludes" refers to orders excluding a given coupon code(s). Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-					label: _x( 'Excludes', 'coupon code', 'wc-admin' ),
+					label: _x( 'Excludes', 'coupon code', 'woocommerce-admin' ),
 				},
 			],
 			input: {
@@ -146,18 +146,18 @@ export const advancedFilters = {
 		},
 		customer: {
 			labels: {
-				add: __( 'Customer Type', 'wc-admin' ),
-				remove: __( 'Remove customer filter', 'wc-admin' ),
-				rule: __( 'Select a customer filter match', 'wc-admin' ),
+				add: __( 'Customer Type', 'woocommerce-admin' ),
+				remove: __( 'Remove customer filter', 'woocommerce-admin' ),
+				rule: __( 'Select a customer filter match', 'woocommerce-admin' ),
 				/* translators: A sentence describing a Customer filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
-				title: __( '{{title}}Customer is{{/title}} {{filter /}}', 'wc-admin' ),
-				filter: __( 'Select a customer type', 'wc-admin' ),
+				title: __( '{{title}}Customer is{{/title}} {{filter /}}', 'woocommerce-admin' ),
+				filter: __( 'Select a customer type', 'woocommerce-admin' ),
 			},
 			input: {
 				component: 'SelectControl',
 				options: [
-					{ value: 'new', label: __( 'New', 'wc-admin' ) },
-					{ value: 'returning', label: __( 'Returning', 'wc-admin' ) },
+					{ value: 'new', label: __( 'New', 'woocommerce-admin' ) },
+					{ value: 'returning', label: __( 'Returning', 'woocommerce-admin' ) },
 				],
 				defaultOption: 'new',
 			},

@@ -206,8 +206,8 @@ class WordPressNotices extends Component {
 				role="tab"
 				tabIndex={ showNotices ? null : -1 }
 			>
-				{ __( 'Notices', 'wc-admin' ) }{' '}
-				<span className="screen-reader-text">{ __( 'unread activity', 'wc-admin' ) }</span>
+				{ __( 'Notices', 'woocommerce-admin' ) }{' '}
+				<span className="screen-reader-text">{ __( 'unread activity', 'woocommerce-admin' ) }</span>
 			</IconButton>
 		);
 	}

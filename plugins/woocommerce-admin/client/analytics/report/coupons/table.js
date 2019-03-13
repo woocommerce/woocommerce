@@ -32,14 +32,14 @@ export default class CouponsReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Coupon Code', 'wc-admin' ),
+				label: __( 'Coupon Code', 'woocommerce-admin' ),
 				key: 'code',
 				required: true,
 				isLeftAligned: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'Orders', 'wc-admin' ),
+				label: __( 'Orders', 'woocommerce-admin' ),
 				key: 'orders_count',
 				required: true,
 				defaultSort: true,
@@ -47,21 +47,21 @@ export default class CouponsReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Amount Discounted', 'wc-admin' ),
+				label: __( 'Amount Discounted', 'woocommerce-admin' ),
 				key: 'amount',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Created', 'wc-admin' ),
+				label: __( 'Created', 'woocommerce-admin' ),
 				key: 'created',
 			},
 			{
-				label: __( 'Expires', 'wc-admin' ),
+				label: __( 'Expires', 'woocommerce-admin' ),
 				key: 'expires',
 			},
 			{
-				label: __( 'Type', 'wc-admin' ),
+				label: __( 'Type', 'woocommerce-admin' ),
 				key: 'type',
 			},
 		];
@@ -117,7 +117,7 @@ export default class CouponsReportTable extends Component {
 					display: date_expires ? (
 						<Date date={ date_expires } visibleFormat={ defaultTableDateFormat } />
 					) : (
-						__( 'N/A', 'wc-admin' )
+						__( 'N/A', 'woocommerce-admin' )
 					),
 					value: date_expires,
 				},
@@ -133,15 +133,15 @@ export default class CouponsReportTable extends Component {
 		const { coupons_count = 0, orders_count = 0, amount = 0 } = totals;
 		return [
 			{
-				label: _n( 'coupon', 'coupons', coupons_count, 'wc-admin' ),
+				label: _n( 'coupon', 'coupons', coupons_count, 'woocommerce-admin' ),
 				value: numberFormat( coupons_count ),
 			},
 			{
-				label: _n( 'order', 'orders', orders_count, 'wc-admin' ),
+				label: _n( 'order', 'orders', orders_count, 'woocommerce-admin' ),
 				value: numberFormat( orders_count ),
 			},
 			{
-				label: __( 'amount discounted', 'wc-admin' ),
+				label: __( 'amount discounted', 'woocommerce-admin' ),
 				value: formatCurrency( amount ),
 			},
 		];
@@ -149,9 +149,9 @@ export default class CouponsReportTable extends Component {
 
 	getCouponType( discount_type ) {
 		const couponTypes = {
-			percent: __( 'Percentage', 'wc-admin' ),
-			fixed_cart: __( 'Fixed cart', 'wc-admin' ),
-			fixed_product: __( 'Fixed product', 'wc-admin' ),
+			percent: __( 'Percentage', 'woocommerce-admin' ),
+			fixed_cart: __( 'Fixed cart', 'woocommerce-admin' ),
+			fixed_product: __( 'Fixed product', 'woocommerce-admin' ),
 		};
 		return couponTypes[ discount_type ];
 	}
@@ -175,7 +175,7 @@ export default class CouponsReportTable extends Component {
 					order: query.order || 'desc',
 					extended_info: true,
 				} }
-				title={ __( 'Coupons', 'wc-admin' ) }
+				title={ __( 'Coupons', 'woocommerce-admin' ) }
 				columnPrefsKey="coupons_report_columns"
 			/>
 		);

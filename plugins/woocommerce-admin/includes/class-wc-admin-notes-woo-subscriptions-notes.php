@@ -179,8 +179,8 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 	 */
 	public function add_no_connection_note() {
 		$note = new WC_Admin_Note();
-		$note->set_title( __( 'Connect to WooCommerce.com', 'wc-admin' ) );
-		$note->set_content( __( 'Connect to get important product notifications and updates.', 'wc-admin' ) );
+		$note->set_title( __( 'Connect to WooCommerce.com', 'woocommerce-admin' ) );
+		$note->set_content( __( 'Connect to get important product notifications and updates.', 'woocommerce-admin' ) );
 		$note->set_content_data( (object) array() );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_icon( 'info' );
@@ -188,7 +188,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'connect',
-			__( 'Connect', 'wc-admin' ),
+			__( 'Connect', 'woocommerce-admin' ),
 			'?page=wc-addons&section=helper'
 		);
 		$note->save();
@@ -308,13 +308,13 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 
 		$note_title = sprintf(
 			/* translators: name of the extension subscription expiring soon */
-			__( '%s subscription expiring soon', 'wc-admin' ),
+			__( '%s subscription expiring soon', 'woocommerce-admin' ),
 			$product_name
 		);
 
 		$note_content = sprintf(
 			/* translators: number of days until the subscription expires */
-			__( 'Your subscription expires in %d days. Enable autorenew to avoid losing updates and access to support.', 'wc-admin' ),
+			__( 'Your subscription expires in %d days. Enable autorenew to avoid losing updates and access to support.', 'woocommerce-admin' ),
 			$days_until_expiration
 		);
 
@@ -338,7 +338,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 		$note->clear_actions();
 		$note->add_action(
 			'enable-autorenew',
-			__( 'Enable Autorenew', 'wc-admin' ),
+			__( 'Enable Autorenew', 'woocommerce-admin' ),
 			'https://woocommerce.com/my-account/my-subscriptions/'
 		);
 		$note->set_content( $note_content );
@@ -370,13 +370,13 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 
 		$note_title = sprintf(
 			/* translators: name of the extension subscription that expired */
-			__( '%s subscription expired', 'wc-admin' ),
+			__( '%s subscription expired', 'woocommerce-admin' ),
 			$product_name
 		);
 
 		$note_content = sprintf(
 			/* translators: date the subscription expired, e.g. Jun 7th 2018 */
-			__( 'Your subscription expired on %s. Get a new subscription to continue receiving updates and access to support.', 'wc-admin' ),
+			__( 'Your subscription expired on %s. Get a new subscription to continue receiving updates and access to support.', 'woocommerce-admin' ),
 			$expires_date
 		);
 
@@ -402,7 +402,7 @@ class WC_Admin_Notes_Woo_Subscriptions_Notes {
 		$note->clear_actions();
 		$note->add_action(
 			'renew-subscription',
-			__( 'Renew Subscription', 'wc-admin' ),
+			__( 'Renew Subscription', 'woocommerce-admin' ),
 			$product_page
 		);
 		$note->save();

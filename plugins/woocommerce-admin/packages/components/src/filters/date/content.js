@@ -57,22 +57,22 @@ class DatePickerContent extends Component {
 		return (
 			<div>
 				<H className="screen-reader-text" tabIndex="0">
-					{ __( 'Select date range and comparison', 'wc-admin' ) }
+					{ __( 'Select date range and comparison', 'woocommerce-admin' ) }
 				</H>
 				<Section component={ false }>
 					<H className="woocommerce-filters-date__text">
-						{ __( 'select a date range', 'wc-admin' ) }
+						{ __( 'select a date range', 'woocommerce-admin' ) }
 					</H>
 					<TabPanel
 						tabs={ [
 							{
 								name: 'period',
-								title: __( 'Presets', 'wc-admin' ),
+								title: __( 'Presets', 'woocommerce-admin' ),
 								className: 'woocommerce-filters-date__tab',
 							},
 							{
 								name: 'custom',
-								title: __( 'Custom', 'wc-admin' ),
+								title: __( 'Custom', 'woocommerce-admin' ),
 								className: 'woocommerce-filters-date__tab',
 							},
 						] }
@@ -107,7 +107,7 @@ class DatePickerContent extends Component {
 									} ) }
 								>
 									<H className="woocommerce-filters-date__text">
-										{ __( 'compare to', 'wc-admin' ) }
+										{ __( 'compare to', 'woocommerce-admin' ) }
 									</H>
 									<ComparePeriods onSelect={ onUpdate } compare={ compare } />
 									<div className="woocommerce-filters-date__button-group">
@@ -118,7 +118,7 @@ class DatePickerContent extends Component {
 												onClick={ resetCustomValues }
 												disabled={ ! ( after || before ) }
 											>
-												{ __( 'Reset', 'wc-admin' ) }
+												{ __( 'Reset', 'woocommerce-admin' ) }
 											</Button>
 										) }
 										{ isValidSelection( selected.name ) ? (
@@ -127,11 +127,11 @@ class DatePickerContent extends Component {
 												onClick={ onSelect( selected.name, onClose ) }
 												isPrimary
 											>
-												{ __( 'Update', 'wc-admin' ) }
+												{ __( 'Update', 'woocommerce-admin' ) }
 											</Button>
 										) : (
 											<Button className="woocommerce-filters-date__button" isPrimary disabled>
-												{ __( 'Update', 'wc-admin' ) }
+												{ __( 'Update', 'woocommerce-admin' ) }
 											</Button>
 										) }
 									</div>

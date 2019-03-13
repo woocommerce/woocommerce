@@ -32,14 +32,14 @@ class CategoriesReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Category', 'wc-admin' ),
+				label: __( 'Category', 'woocommerce-admin' ),
 				key: 'category',
 				required: true,
 				isSortable: true,
 				isLeftAligned: true,
 			},
 			{
-				label: __( 'Items sold', 'wc-admin' ),
+				label: __( 'Items sold', 'woocommerce-admin' ),
 				key: 'items_sold',
 				required: true,
 				defaultSort: true,
@@ -47,19 +47,19 @@ class CategoriesReportTable extends Component {
 				isNumeric: true,
 			},
 			{
-				label: __( 'Net Revenue', 'wc-admin' ),
+				label: __( 'Net Revenue', 'woocommerce-admin' ),
 				key: 'net_revenue',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Products', 'wc-admin' ),
+				label: __( 'Products', 'woocommerce-admin' ),
 				key: 'products_count',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Orders', 'wc-admin' ),
+				label: __( 'Orders', 'woocommerce-admin' ),
 				key: 'orders_count',
 				isSortable: true,
 				isNumeric: true,
@@ -115,19 +115,19 @@ class CategoriesReportTable extends Component {
 		const { items_sold = 0, net_revenue = 0, orders_count = 0 } = totals;
 		return [
 			{
-				label: _n( 'category', 'categories', totalResults, 'wc-admin' ),
+				label: _n( 'category', 'categories', totalResults, 'woocommerce-admin' ),
 				value: numberFormat( totalResults ),
 			},
 			{
-				label: _n( 'item sold', 'items sold', items_sold, 'wc-admin' ),
+				label: _n( 'item sold', 'items sold', items_sold, 'woocommerce-admin' ),
 				value: numberFormat( items_sold ),
 			},
 			{
-				label: __( 'net revenue', 'wc-admin' ),
+				label: __( 'net revenue', 'woocommerce-admin' ),
 				value: formatCurrency( net_revenue ),
 			},
 			{
-				label: _n( 'order', 'orders', orders_count, 'wc-admin' ),
+				label: _n( 'order', 'orders', orders_count, 'woocommerce-admin' ),
 				value: numberFormat( orders_count ),
 			},
 		];
@@ -137,8 +137,8 @@ class CategoriesReportTable extends Component {
 		const { isRequesting, query } = this.props;
 
 		const labels = {
-			helpText: __( 'Select at least two categories to compare', 'wc-admin' ),
-			placeholder: __( 'Search by category name', 'wc-admin' ),
+			helpText: __( 'Select at least two categories to compare', 'woocommerce-admin' ),
+			placeholder: __( 'Search by category name', 'woocommerce-admin' ),
 		};
 
 		return (
@@ -158,7 +158,7 @@ class CategoriesReportTable extends Component {
 					order: query.order || 'desc',
 					extended_info: true,
 				} }
-				title={ __( 'Categories', 'wc-admin' ) }
+				title={ __( 'Categories', 'woocommerce-admin' ) }
 				columnPrefsKey="categories_report_columns"
 			/>
 		);

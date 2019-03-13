@@ -94,25 +94,25 @@ class ActivityPanel extends Component {
 		return [
 			{
 				name: 'inbox',
-				title: __( 'Inbox', 'wc-admin' ),
+				title: __( 'Inbox', 'woocommerce-admin' ),
 				icon: <Gridicon icon="mail" />,
 				unread: true,
 			},
 			{
 				name: 'orders',
-				title: __( 'Orders', 'wc-admin' ),
+				title: __( 'Orders', 'woocommerce-admin' ),
 				icon: <Gridicon icon="pages" />,
 				unread: true,
 			},
 			{
 				name: 'stock',
-				title: __( 'Stock', 'wc-admin' ),
+				title: __( 'Stock', 'woocommerce-admin' ),
 				icon: <Gridicon icon="clipboard" />,
 				unread: false,
 			},
 			{
 				name: 'reviews',
-				title: __( 'Reviews', 'wc-admin' ),
+				title: __( 'Reviews', 'woocommerce-admin' ),
 				icon: <Gridicon icon="star" />,
 				unread: false,
 			},
@@ -192,7 +192,9 @@ class ActivityPanel extends Component {
 			>
 				{ tab.title }{' '}
 				{ tab.unread && (
-					<span className="screen-reader-text">{ __( 'unread activity', 'wc-admin' ) }</span>
+					<span className="screen-reader-text">
+						{ __( 'unread activity', 'woocommerce-admin' ) }
+					</span>
 				) }
 			</IconButton>
 		);
@@ -208,13 +210,13 @@ class ActivityPanel extends Component {
 
 		const hasUnread = hasWordPressNotices || tabs.some( tab => tab.unread );
 		const viewLabel = hasUnread
-			? __( 'View Activity Panel, you have unread activity', 'wc-admin' )
-			: __( 'View Activity Panel', 'wc-admin' );
+			? __( 'View Activity Panel, you have unread activity', 'woocommerce-admin' )
+			: __( 'View Activity Panel', 'woocommerce-admin' );
 
 		return (
 			<div>
 				<H id={ headerId } className="screen-reader-text">
-					{ __( 'Store Activity', 'wc-admin' ) }
+					{ __( 'Store Activity', 'woocommerce-admin' ) }
 				</H>
 				<Section component="aside" id="woocommerce-activity-panel" aria-labelledby={ headerId }>
 					<IconButton
@@ -226,7 +228,7 @@ class ActivityPanel extends Component {
 								<ActivityPanelToggleBubble hasUnread={ hasUnread } />
 							)
 						}
-						label={ mobileOpen ? __( 'Close Activity Panel', 'wc-admin' ) : viewLabel }
+						label={ mobileOpen ? __( 'Close Activity Panel', 'woocommerce-admin' ) : viewLabel }
 						aria-expanded={ mobileOpen }
 						tooltip={ false }
 						className="woocommerce-layout__activity-panel-mobile-toggle"

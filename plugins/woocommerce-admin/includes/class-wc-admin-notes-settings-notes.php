@@ -36,8 +36,8 @@ class WC_Admin_Notes_Settings_Notes {
 
 		// Otherwise, create our new note.
 		$note = new WC_Admin_Note();
-		$note->set_title( __( 'Looking for the Store Notice setting?', 'wc-admin' ) );
-		$note->set_content( __( 'It can now be found in the Customizer.', 'wc-admin' ) );
+		$note->set_title( __( 'Looking for the Store Notice setting?', 'woocommerce-admin' ) );
+		$note->set_content( __( 'It can now be found in the Customizer.', 'woocommerce-admin' ) );
 		$note->set_content_data( (object) array() );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_icon( 'info' );
@@ -45,7 +45,7 @@ class WC_Admin_Notes_Settings_Notes {
 		$note->set_source( 'woocommerce-admin' );
 		$note->add_action(
 			'open-customizer',
-			__( 'Open Customizer', 'wc-admin' ),
+			__( 'Open Customizer', 'woocommerce-admin' ),
 			'customize.php'
 		);
 		$note->save();

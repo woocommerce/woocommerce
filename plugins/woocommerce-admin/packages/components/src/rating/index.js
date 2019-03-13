@@ -38,7 +38,7 @@ class Rating extends Component {
 			width: Math.round( perStar * rating ) + '%',
 		};
 
-		const label = sprintf( __( '%1$s out of %2$s stars.', 'wc-admin' ), rating, totalStars );
+		const label = sprintf( __( '%1$s out of %2$s stars.', 'woocommerce-admin' ), rating, totalStars );
 		return (
 			<div className={ classes } aria-label={ label }>
 				{ this.stars() }

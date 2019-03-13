@@ -44,7 +44,7 @@ export class Leaderboard extends Component {
 			return (
 				<Card title={ title } className="woocommerce-leaderboard">
 					<EmptyTable>
-						{ __( 'No data recorded for the selected time period.', 'wc-admin' ) }
+						{ __( 'No data recorded for the selected time period.', 'woocommerce-admin' ) }
 					</EmptyTable>
 				</Card>
 			);

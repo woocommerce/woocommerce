@@ -19,7 +19,7 @@ const ViewMoreList = ( { items } ) => {
 	return (
 		<Tag
 			className="woocommerce-view-more-list"
-			label={ sprintf( __( '+%d more', 'wc-admin' ), items.length - 1 ) }
+			label={ sprintf( __( '+%d more', 'woocommerce-admin' ), items.length - 1 ) }
 			popoverContents={
 				<ul className="woocommerce-view-more-list__popover">
 					{ items.map( ( item, i ) => (

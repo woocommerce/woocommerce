@@ -73,8 +73,8 @@ function wc_admin_register_pages() {
 	if ( wc_admin_is_feature_enabled( 'dashboard' ) ) {
 		add_submenu_page(
 			'woocommerce',
-			__( 'WooCommerce Dashboard', 'wc-admin' ),
-			__( 'Dashboard', 'wc-admin' ),
+			__( 'WooCommerce Dashboard', 'woocommerce-admin' ),
+			__( 'Dashboard', 'woocommerce-admin' ),
 			'manage_options',
 			'wc-admin',
 			'wc_admin_page'
@@ -83,8 +83,8 @@ function wc_admin_register_pages() {
 
 	if ( wc_admin_is_feature_enabled( 'analytics' ) ) {
 		add_menu_page(
-			__( 'WooCommerce Analytics', 'wc-admin' ),
-			__( 'Analytics', 'wc-admin' ),
+			__( 'WooCommerce Analytics', 'woocommerce-admin' ),
+			__( 'Analytics', 'woocommerce-admin' ),
 			'manage_options',
 			'wc-admin#/analytics/revenue',
 			'wc_admin_page',
@@ -94,7 +94,7 @@ function wc_admin_register_pages() {
 
 		wc_admin_register_page(
 			array(
-				'title'  => __( 'Revenue', 'wc-admin' ),
+				'title'  => __( 'Revenue', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/revenue',
 			)
@@ -102,7 +102,7 @@ function wc_admin_register_pages() {
 
 		wc_admin_register_page(
 			array(
-				'title'  => __( 'Orders', 'wc-admin' ),
+				'title'  => __( 'Orders', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/orders',
 			)
@@ -110,7 +110,7 @@ function wc_admin_register_pages() {
 
 		wc_admin_register_page(
 			array(
-				'title'  => __( 'Products', 'wc-admin' ),
+				'title'  => __( 'Products', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/products',
 			)
@@ -118,7 +118,7 @@ function wc_admin_register_pages() {
 
 		wc_admin_register_page(
 			array(
-				'title'  => __( 'Categories', 'wc-admin' ),
+				'title'  => __( 'Categories', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/categories',
 			)
@@ -126,7 +126,7 @@ function wc_admin_register_pages() {
 
 		wc_admin_register_page(
 			array(
-				'title'  => __( 'Coupons', 'wc-admin' ),
+				'title'  => __( 'Coupons', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/coupons',
 			)
@@ -134,7 +134,7 @@ function wc_admin_register_pages() {
 
 		wc_admin_register_page(
 			array(
-				'title'  => __( 'Taxes', 'wc-admin' ),
+				'title'  => __( 'Taxes', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/taxes',
 			)
@@ -142,7 +142,7 @@ function wc_admin_register_pages() {
 
 		wc_admin_register_page(
 			array(
-				'title'  => __( 'Downloads', 'wc-admin' ),
+				'title'  => __( 'Downloads', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/downloads',
 			)
@@ -150,7 +150,7 @@ function wc_admin_register_pages() {
 
 		wc_admin_register_page(
 			array(
-				'title'  => __( 'Stock', 'wc-admin' ),
+				'title'  => __( 'Stock', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/stock',
 			)
@@ -158,7 +158,7 @@ function wc_admin_register_pages() {
 
 		wc_admin_register_page(
 			array(
-				'title'  => __( 'Customers', 'wc-admin' ),
+				'title'  => __( 'Customers', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/customers',
 			)
@@ -166,7 +166,7 @@ function wc_admin_register_pages() {
 
 		wc_admin_register_page(
 			array(
-				'title'  => __( 'Settings', 'wc-admin' ),
+				'title'  => __( 'Settings', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/settings',
 			)
@@ -338,10 +338,10 @@ function wc_admin_admin_title( $admin_title ) {
 		$pieces = array_reverse( $pieces );
 		$title  = implode( ' &lsaquo; ', $pieces );
 	} else {
-		$title = __( 'Dashboard', 'wc-admin' );
+		$title = __( 'Dashboard', 'woocommerce-admin' );
 	}
 	/* translators: %1$s: updated title, %2$s: blog info name */
-	return sprintf( __( '%1$s &lsaquo; %2$s &#8212; WooCommerce', 'wc-admin' ), $title, get_bloginfo( 'name' ) );
+	return sprintf( __( '%1$s &lsaquo; %2$s &#8212; WooCommerce', 'woocommerce-admin' ), $title, get_bloginfo( 'name' ) );
 }
 add_filter( 'admin_title', 'wc_admin_admin_title' );
 
@@ -499,8 +499,8 @@ function wc_admin_update_user_data_values( $values, $user, $field_id ) {
 function wc_admin_add_settings_group( $groups ) {
 	$groups[] = array(
 		'id'          => 'wc_admin',
-		'label'       => __( 'WooCommerce Admin', 'wc-admin' ),
-		'description' => __( 'Settings for WooCommerce admin reporting.', 'wc-admin' ),
+		'label'       => __( 'WooCommerce Admin', 'woocommerce-admin' ),
+		'description' => __( 'Settings for WooCommerce admin reporting.', 'woocommerce-admin' ),
 	);
 	return $groups;
 }
@@ -516,8 +516,8 @@ function wc_admin_add_settings( $settings ) {
 	$settings[] = array(
 		'id'          => 'woocommerce_excluded_report_order_statuses',
 		'option_key'  => 'woocommerce_excluded_report_order_statuses',
-		'label'       => __( 'Excluded report order statuses', 'wc-admin' ),
-		'description' => __( 'Statuses that should not be included when calculating report totals.', 'wc-admin' ),
+		'label'       => __( 'Excluded report order statuses', 'woocommerce-admin' ),
+		'description' => __( 'Statuses that should not be included when calculating report totals.', 'woocommerce-admin' ),
 		'default'     => array( 'pending', 'cancelled', 'failed' ),
 		'type'        => 'multiselect',
 		'options'     => format_order_statuses( wc_get_order_statuses() ),
@@ -525,8 +525,8 @@ function wc_admin_add_settings( $settings ) {
 	$settings[] = array(
 		'id'          => 'woocommerce_actionable_order_statuses',
 		'option_key'  => 'woocommerce_actionable_order_statuses',
-		'label'       => __( 'Actionable order statuses', 'wc-admin' ),
-		'description' => __( 'Statuses that require extra action on behalf of the store admin.', 'wc-admin' ),
+		'label'       => __( 'Actionable order statuses', 'woocommerce-admin' ),
+		'description' => __( 'Statuses that require extra action on behalf of the store admin.', 'woocommerce-admin' ),
 		'default'     => array( 'processing', 'on-hold' ),
 		'type'        => 'multiselect',
 		'options'     => format_order_statuses( wc_get_order_statuses() ),

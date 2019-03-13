@@ -119,7 +119,7 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_One {
 		$note->add_action(
 			'settings',
 			__( 'Learn More', 'wapi-example-plugin-one' ),
-			'https://github.com/woocommerce/wc-admin/tree/master/docs'
+			'https://github.com/woocommerce/woocommerce-admin/tree/master/docs'
 		);
 		$note->save();
 	}
@@ -237,4 +237,4 @@ register_deactivation_hook( __FILE__, 'wapi_example_two_deactivate' );
 ## Questions?
 
 This is just the tip of the iceberg for possibilities for your own extensions to WooCommerce. Check
-out the new [sales record notes](https://github.com/woocommerce/wc-admin/blob/master/includes/class-wc-admin-notes-new-sales-record.php) and the [settings notes](https://github.com/woocommerce/wc-admin/blob/master/includes/class-wc-admin-notes-settings-notes.php) for in the wc-admin code itself for other examples of working with this fun new feature.
+out the new [sales record notes](https://github.com/woocommerce/woocommerce-admin/blob/master/includes/class-wc-admin-notes-new-sales-record.php) and the [settings notes](https://github.com/woocommerce/woocommerce-admin/blob/master/includes/class-wc-admin-notes-settings-notes.php) for in the woocommerce-admin code itself for other examples of working with this fun new feature.

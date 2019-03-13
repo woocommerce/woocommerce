@@ -251,7 +251,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		// Allow a list of customer IDs to be specified.
 		if ( ! empty( $query_args['customers'] ) ) {
 			$included_customers = implode( ',', $query_args['customers'] );
-			$where_clauses[] = "{$customer_lookup_table}.customer_id IN ({$included_customers})";
+			$where_clauses[]    = "{$customer_lookup_table}.customer_id IN ({$included_customers})";
 		}
 
 		$numeric_params = array(

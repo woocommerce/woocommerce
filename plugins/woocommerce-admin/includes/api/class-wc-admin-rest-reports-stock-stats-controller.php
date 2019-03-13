@@ -40,7 +40,7 @@ class WC_Admin_REST_Reports_Stock_Stats_Controller extends WC_REST_Reports_Contr
 	public function get_items( $request ) {
 		$stock_query = new WC_Admin_Reports_Stock_Stats_Query();
 		$report_data = $stock_query->get_data();
-		$out_data = array(
+		$out_data    = array(
 			'totals' => $report_data,
 		);
 		return rest_ensure_response( $out_data );
@@ -82,14 +82,14 @@ class WC_Admin_REST_Reports_Stock_Stats_Controller extends WC_REST_Reports_Contr
 	 */
 	public function get_item_schema() {
 		$totals = array(
-			'products'     => array(
-				'description' => __( 'Number of products.', 'wc-admin' ),
+			'products' => array(
+				'description' => __( 'Number of products.', 'woocommerce-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'lowstock'     => array(
-				'description' => __( 'Number of low stock products.', 'wc-admin' ),
+			'lowstock' => array(
+				'description' => __( 'Number of low stock products.', 'woocommerce-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -100,7 +100,7 @@ class WC_Admin_REST_Reports_Stock_Stats_Controller extends WC_REST_Reports_Contr
 		foreach ( $status_options as $status => $label ) {
 			$totals[ $status ] = array(
 				/* translators: Stock status. Example: "Number of low stock products */
-				'description' => sprintf( __( 'Number of %s products.', 'wc-admin' ), $label ),
+				'description' => sprintf( __( 'Number of %s products.', 'woocommerce-admin' ), $label ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -112,8 +112,8 @@ class WC_Admin_REST_Reports_Stock_Stats_Controller extends WC_REST_Reports_Contr
 			'title'      => 'report_customers_stats',
 			'type'       => 'object',
 			'properties' => array(
-				'totals'    => array(
-					'description' => __( 'Totals data.', 'wc-admin' ),
+				'totals' => array(
+					'description' => __( 'Totals data.', 'woocommerce-admin' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

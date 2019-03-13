@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: WooCommerce Admin
- * Plugin URI: https://github.com/woocommerce/wc-admin
+ * Plugin URI: https://github.com/woocommerce/woocommerce-admin
  * Description: A new JavaScript-driven interface for managing your store. The plugin includes new and improved reports, and a dashboard to monitor all the important key metrics of your site.
  * Author: WooCommerce
  * Author URI: https://woocommerce.com/
- * Text Domain: wc-admin
+ * Text Domain: woocommerce-admin
  * Domain Path: /languages
  * Version: 0.8.0
  *
@@ -35,13 +35,13 @@ function wc_admin_plugins_notice() {
 	if ( $wordpress_includes_gutenberg ) {
 		$message = sprintf(
 			/* translators: URL of WooCommerce plugin */
-			__( 'The WooCommerce Admin feature plugin requires <a href="%s">WooCommerce</a> 3.5 or greater to be installed and active.', 'wc-admin' ),
+			__( 'The WooCommerce Admin feature plugin requires <a href="%s">WooCommerce</a> 3.5 or greater to be installed and active.', 'woocommerce-admin' ),
 			'https://wordpress.org/plugins/woocommerce/'
 		);
 	} else {
 		$message = sprintf(
 			/* translators: 1: URL of WordPress.org, 2: URL of WooCommerce plugin */
-			__( 'The WooCommerce Admin feature plugin requires both <a href="%1$s">WordPress</a> 5.0 or greater and <a href="%2$s">WooCommerce</a> 3.5 or greater to be installed and active.', 'wc-admin' ),
+			__( 'The WooCommerce Admin feature plugin requires both <a href="%1$s">WordPress</a> 5.0 or greater and <a href="%2$s">WooCommerce</a> 3.5 or greater to be installed and active.', 'woocommerce-admin' ),
 			'https://wordpress.org/',
 			'https://wordpress.org/plugins/woocommerce/'
 		);
@@ -53,11 +53,11 @@ function wc_admin_plugins_notice() {
  * Notify users that the plugin needs to be built.
  */
 function wc_admin_build_notice() {
-	$message_one = __( 'You have installed a development version of WooCommerce Admin which requires files to be built. From the plugin directory, run <code>npm install</code> to install dependencies, <code>npm run build</code> to build the files.', 'wc-admin' );
+	$message_one = __( 'You have installed a development version of WooCommerce Admin which requires files to be built. From the plugin directory, run <code>npm install</code> to install dependencies, <code>npm run build</code> to build the files.', 'woocommerce-admin' );
 	$message_two = sprintf(
 		/* translators: 1: URL of GitHub Repository build page */
-		__( 'Or you can download a pre-built version of the plugin by visiting <a href="%1$s">the releases page in the repository</a>.', 'wc-admin' ),
-		'https://github.com/woocommerce/wc-admin/releases'
+		__( 'Or you can download a pre-built version of the plugin by visiting <a href="%1$s">the releases page in the repository</a>.', 'woocommerce-admin' ),
+		'https://github.com/woocommerce/woocommerce-admin/releases'
 	);
 	printf( '<div class="error"><p>%s %s</p></div>', $message_one, $message_two ); /* WPCS: xss ok. */
 }

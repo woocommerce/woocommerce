@@ -89,19 +89,19 @@ function wc_admin_register_script() {
 	// Set up the text domain and translations.
 	// The old way (pre WP5 RC1).
 	if ( function_exists( 'wp_get_jed_locale_data' ) ) {
-		$locale_data = wp_get_jed_locale_data( 'wc-admin' );
+		$locale_data = wp_get_jed_locale_data( 'woocommerce-admin' );
 	} elseif ( function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-		$locale_data = gutenberg_get_jed_locale_data( 'wc-admin' );
+		$locale_data = gutenberg_get_jed_locale_data( 'woocommerce-admin' );
 	} else {
 		$locale_data = '';
 	}
 	if ( ! empty( $locale_data ) ) {
-		$content = 'wp.i18n.setLocaleData( ' . wp_json_encode( $locale_data ) . ', "wc-admin" );';
+		$content = 'wp.i18n.setLocaleData( ' . wp_json_encode( $locale_data ) . ', "woocommerce-admin" );';
 		wp_add_inline_script( 'wp-i18n', $content, 'after' );
 	}
 	// The new way (WP5 RC1 and later).
 	if ( function_exists( 'wp_set_script_translations' ) ) {
-		wp_set_script_translations( WC_ADMIN_APP, 'wc-admin' );
+		wp_set_script_translations( WC_ADMIN_APP, 'woocommerce-admin' );
 	}
 
 	wp_register_style(
@@ -229,6 +229,6 @@ function wc_admin_add_custom_settings( $settings ) {
  * Load plugin text domain for translations.
  */
 function wc_admin_load_plugin_textdomain() {
-	load_plugin_textdomain( 'wc-admin', false, basename( dirname( __FILE__ ) ) . '/languages' );
+	load_plugin_textdomain( 'woocommerce-admin', false, basename( dirname( __FILE__ ) ) . '/languages' );
 }
 add_action( 'plugins_loaded', 'wc_admin_load_plugin_textdomain' );

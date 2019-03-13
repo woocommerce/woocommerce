@@ -90,7 +90,7 @@ class Pagination extends Component {
 					role="status"
 					aria-live="polite"
 				>
-					{ sprintf( __( 'Page %d of %d', 'wc-admin' ), page, this.pageCount ) }
+					{ sprintf( __( 'Page %d of %d', 'woocommerce-admin' ), page, this.pageCount ) }
 				</span>
 				<div className="woocommerce-pagination__page-arrows-buttons">
 					<IconButton
@@ -98,7 +98,7 @@ class Pagination extends Component {
 						disabled={ ! ( page > 1 ) }
 						onClick={ this.previousPage }
 						icon="arrow-left-alt2"
-						label={ __( 'Previous Page', 'wc-admin' ) }
+						label={ __( 'Previous Page', 'woocommerce-admin' ) }
 						size={ 18 }
 					/>
 					<IconButton
@@ -106,7 +106,7 @@ class Pagination extends Component {
 						disabled={ ! ( page < this.pageCount ) }
 						onClick={ this.nextPage }
 						icon="arrow-right-alt2"
-						label={ __( 'Next Page', 'wc-admin' ) }
+						label={ __( 'Next Page', 'woocommerce-admin' ) }
 						size={ 18 }
 					/>
 				</div>
@@ -125,7 +125,7 @@ class Pagination extends Component {
 		return (
 			<div className="woocommerce-pagination__page-picker">
 				<label htmlFor={ instanceId } className="woocommerce-pagination__page-picker-label">
-					{ __( 'Go to page', 'wc-admin' ) }
+					{ __( 'Go to page', 'woocommerce-admin' ) }
 					<input
 						id={ instanceId }
 						className={ inputClass }
@@ -151,7 +151,7 @@ class Pagination extends Component {
 		return (
 			<div className="woocommerce-pagination__per-page-picker">
 				<SelectControl
-					label={ __( 'Rows per page', 'wc-admin' ) }
+					label={ __( 'Rows per page', 'woocommerce-admin' ) }
 					value={ this.props.perPage }
 					onChange={ this.perPageChange }
 					options={ pickerOptions }

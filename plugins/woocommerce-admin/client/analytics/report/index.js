@@ -39,52 +39,52 @@ const getReports = () => {
 	const reports = [
 		{
 			report: 'revenue',
-			title: __( 'Revenue', 'wc-admin' ),
+			title: __( 'Revenue', 'woocommerce-admin' ),
 			component: RevenueReport,
 		},
 		{
 			report: 'products',
-			title: __( 'Products', 'wc-admin' ),
+			title: __( 'Products', 'woocommerce-admin' ),
 			component: ProductsReport,
 		},
 		{
 			report: 'orders',
-			title: __( 'Orders', 'wc-admin' ),
+			title: __( 'Orders', 'woocommerce-admin' ),
 			component: OrdersReport,
 		},
 		{
 			report: 'categories',
-			title: __( 'Categories', 'wc-admin' ),
+			title: __( 'Categories', 'woocommerce-admin' ),
 			component: CategoriesReport,
 		},
 		{
 			report: 'coupons',
-			title: __( 'Coupons', 'wc-admin' ),
+			title: __( 'Coupons', 'woocommerce-admin' ),
 			component: CouponsReport,
 		},
 		{
 			report: 'taxes',
-			title: __( 'Taxes', 'wc-admin' ),
+			title: __( 'Taxes', 'woocommerce-admin' ),
 			component: TaxesReport,
 		},
 		{
 			report: 'downloads',
-			title: __( 'Downloads', 'wc-admin' ),
+			title: __( 'Downloads', 'woocommerce-admin' ),
 			component: DownloadsReport,
 		},
 		{
 			report: 'stock',
-			title: __( 'Stock', 'wc-admin' ),
+			title: __( 'Stock', 'woocommerce-admin' ),
 			component: StockReport,
 		},
 		{
 			report: 'customers',
-			title: __( 'Customers', 'wc-admin' ),
+			title: __( 'Customers', 'woocommerce-admin' ),
 			component: CustomersReport,
 		},
 		{
 			report: 'downloads',
-			title: __( 'Downloads', 'wc-admin' ),
+			title: __( 'Downloads', 'woocommerce-admin' ),
 			component: DownloadsReport,
 		},
 	];
@@ -129,7 +129,10 @@ class Report extends Component {
 		return (
 			<Fragment>
 				<Header
-					sections={ [ [ '/analytics/revenue', __( 'Analytics', 'wc-admin' ) ], report.title ] }
+					sections={ [
+						[ '/analytics/revenue', __( 'Analytics', 'woocommerce-admin' ) ],
+						report.title,
+					] }
 				/>
 				<Container { ...this.props } />
 			</Fragment>

@@ -63,7 +63,7 @@ class DashboardCharts extends Component {
 		const { hiddenChartKeys } = this.state;
 
 		return (
-			<EllipsisMenu label={ __( 'Choose which charts to display', 'wc-admin' ) }>
+			<EllipsisMenu label={ __( 'Choose which charts to display', 'woocommerce-admin' ) }>
 				{ uniqCharts.map( chart => {
 					return (
 						<MenuItem
@@ -73,7 +73,7 @@ class DashboardCharts extends Component {
 							key={ chart.key }
 							onInvoke={ this.toggle( chart.key ) }
 						>
-							{ __( `${ chart.label }`, 'wc-admin' ) }
+							{ __( `${ chart.label }`, 'woocommerce-admin' ) }
 						</MenuItem>
 					);
 				} ) }
@@ -88,12 +88,12 @@ class DashboardCharts extends Component {
 		}
 
 		const intervalLabels = {
-			hour: __( 'By hour', 'wc-admin' ),
-			day: __( 'By day', 'wc-admin' ),
-			week: __( 'By week', 'wc-admin' ),
-			month: __( 'By month', 'wc-admin' ),
-			quarter: __( 'By quarter', 'wc-admin' ),
-			year: __( 'By year', 'wc-admin' ),
+			hour: __( 'By hour', 'woocommerce-admin' ),
+			day: __( 'By day', 'woocommerce-admin' ),
+			week: __( 'By week', 'woocommerce-admin' ),
+			month: __( 'By month', 'woocommerce-admin' ),
+			quarter: __( 'By quarter', 'woocommerce-admin' ),
+			year: __( 'By year', 'woocommerce-admin' ),
 		};
 
 		return (
@@ -126,7 +126,7 @@ class DashboardCharts extends Component {
 			<Fragment>
 				<div className="woocommerce-dashboard__dashboard-charts">
 					<SectionHeader
-						title={ __( 'Charts', 'wc-admin' ) }
+						title={ __( 'Charts', 'woocommerce-admin' ) }
 						menu={ this.renderMenu() }
 						className={ 'has-interval-select' }
 					>
@@ -142,7 +142,7 @@ class DashboardCharts extends Component {
 										! query.chartType || query.chartType === 'line',
 								} ) }
 								icon={ <Gridicon icon="line-graph" /> }
-								title={ __( 'Line chart', 'wc-admin' ) }
+								title={ __( 'Line chart', 'woocommerce-admin' ) }
 								aria-checked={ query.chartType === 'line' }
 								role="menuitemradio"
 								tabIndex={ query.chartType === 'line' ? 0 : -1 }
@@ -153,7 +153,7 @@ class DashboardCharts extends Component {
 									'woocommerce-chart__type-button-selected': query.chartType === 'bar',
 								} ) }
 								icon={ <Gridicon icon="stats-alt" /> }
-								title={ __( 'Bar chart', 'wc-admin' ) }
+								title={ __( 'Bar chart', 'woocommerce-admin' ) }
 								aria-checked={ query.chartType === 'bar' }
 								role="menuitemradio"
 								tabIndex={ query.chartType === 'bar' ? 0 : -1 }

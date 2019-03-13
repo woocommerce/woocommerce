@@ -5453,7 +5453,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 
 		// All empty in the beginning.
-		$query_args = array(
+		$query_args  = array(
 			'interval' => 'hour',
 		);
 		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
@@ -5473,9 +5473,9 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$start_time = date( 'Y-m-d H:00:00', $order_0->get_date_created()->getOffsetTimestamp() );
-		$end_time   = date( 'Y-m-d H:59:59', $order_0->get_date_created()->getOffsetTimestamp() );
-		$query_args = array(
+		$start_time  = date( 'Y-m-d H:00:00', $order_0->get_date_created()->getOffsetTimestamp() );
+		$end_time    = date( 'Y-m-d H:59:59', $order_0->get_date_created()->getOffsetTimestamp() );
+		$query_args  = array(
 			'interval' => 'hour',
 			'after'    => $start_time,
 			'before'   => $end_time,
@@ -5510,9 +5510,9 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$after_order_0 = new DateTime();
 		$after_order_0->setTimestamp( $order_0_time + 1 );
 
-		$start_time   = date( 'Y-m-d H:i:s', $order_0_time + 1 );
-		$end_time     = date( 'Y-m-d H:59:59', $order_1->get_date_created()->getOffsetTimestamp() );
-		$query_args   = array(
+		$start_time = date( 'Y-m-d H:i:s', $order_0_time + 1 );
+		$end_time   = date( 'Y-m-d H:59:59', $order_1->get_date_created()->getOffsetTimestamp() );
+		$query_args = array(
 			'interval' => 'hour',
 			'after'    => $start_time,
 			'before'   => $end_time,
@@ -5534,9 +5534,9 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		WC_Helper_Queue::run_all_pending();
 
 		// Time frame includes second and third order -> there is one returning customer.
-		$start_time   = date( 'Y-m-d H:i:s', $order_0_time + 1 );
-		$end_time   = date( 'Y-m-d H:59:59', $order_2->get_date_created()->getOffsetTimestamp() );
-		$query_args = array(
+		$start_time  = date( 'Y-m-d H:i:s', $order_0_time + 1 );
+		$end_time    = date( 'Y-m-d H:59:59', $order_2->get_date_created()->getOffsetTimestamp() );
+		$query_args  = array(
 			'interval' => 'day', // to skip cache.
 			'after'    => $start_time,
 			'before'   => $end_time,
@@ -5564,7 +5564,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$data_store = new WC_Admin_Reports_Orders_Stats_Data_Store();
 
 		// All empty in the beginning.
-		$query_args = array(
+		$query_args  = array(
 			'interval' => 'hour',
 		);
 		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
@@ -5584,9 +5584,9 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending();
 
-		$start_time = date( 'Y-m-d H:00:00', $order_0->get_date_created()->getOffsetTimestamp() );
-		$end_time   = date( 'Y-m-d H:59:59', $order_0->get_date_created()->getOffsetTimestamp() );
-		$query_args = array(
+		$start_time  = date( 'Y-m-d H:00:00', $order_0->get_date_created()->getOffsetTimestamp() );
+		$end_time    = date( 'Y-m-d H:59:59', $order_0->get_date_created()->getOffsetTimestamp() );
+		$query_args  = array(
 			'interval' => 'hour',
 			'after'    => $start_time,
 			'before'   => $end_time,
@@ -5621,9 +5621,9 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$after_order_0 = new DateTime();
 		$after_order_0->setTimestamp( $order_0_time + 1 );
 
-		$start_time   = date( 'Y-m-d H:i:s', $order_0_time + 1 );
-		$end_time     = date( 'Y-m-d H:59:59', $order_1->get_date_created()->getOffsetTimestamp() );
-		$query_args   = array(
+		$start_time = date( 'Y-m-d H:i:s', $order_0_time + 1 );
+		$end_time   = date( 'Y-m-d H:59:59', $order_1->get_date_created()->getOffsetTimestamp() );
+		$query_args = array(
 			'interval' => 'hour',
 			'after'    => $start_time,
 			'before'   => $end_time,
@@ -5645,9 +5645,9 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		WC_Helper_Queue::run_all_pending();
 
 		// Time frame includes second and third order -> there is one returning customer.
-		$start_time   = date( 'Y-m-d H:i:s', $order_0_time + 1 );
-		$end_time   = date( 'Y-m-d H:59:59', $order_2->get_date_created()->getOffsetTimestamp() );
-		$query_args = array(
+		$start_time  = date( 'Y-m-d H:i:s', $order_0_time + 1 );
+		$end_time    = date( 'Y-m-d H:59:59', $order_2->get_date_created()->getOffsetTimestamp() );
+		$query_args  = array(
 			'interval' => 'day', // to skip cache.
 			'after'    => $start_time,
 			'before'   => $end_time,

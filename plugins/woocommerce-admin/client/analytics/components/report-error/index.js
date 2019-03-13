@@ -22,15 +22,15 @@ class ReportError extends Component {
 		let title, actionLabel, actionURL, actionCallback;
 
 		if ( isError ) {
-			title = __( 'There was an error getting your stats. Please try again.', 'wc-admin' );
-			actionLabel = __( 'Reload', 'wc-admin' );
+			title = __( 'There was an error getting your stats. Please try again.', 'woocommerce-admin' );
+			actionLabel = __( 'Reload', 'woocommerce-admin' );
 			actionCallback = () => {
 				// @todo Add tracking for how often an error is displayed, and the reload action is clicked.
 				window.location.reload();
 			};
 		} else if ( isEmpty ) {
-			title = __( 'No results could be found for this date range.', 'wc-admin' );
-			actionLabel = __( 'View Orders', 'wc-admin' );
+			title = __( 'No results could be found for this date range.', 'woocommerce-admin' );
+			actionLabel = __( 'View Orders', 'woocommerce-admin' );
 			actionURL = getAdminLink( 'edit.php?post_type=shop_order' );
 		}
 		return (

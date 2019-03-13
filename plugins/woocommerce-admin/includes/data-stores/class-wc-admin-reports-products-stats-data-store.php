@@ -169,7 +169,7 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 			$totals[0]['segments'] = $segmenter->get_totals_segments( $totals_query, $table_name );
 
 			if ( null === $totals ) {
-				return new WP_Error( 'woocommerce_reports_products_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
+				return new WP_Error( 'woocommerce_reports_products_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
 			}
 
 			if ( '' !== $selections ) {
@@ -197,7 +197,7 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
-				return new WP_Error( 'woocommerce_reports_products_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'wc-admin' ) );
+				return new WP_Error( 'woocommerce_reports_products_stats_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
 			}
 
 			$totals = (object) $this->cast_numbers( $totals[0] );

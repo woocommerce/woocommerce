@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * WC_Admin_Notes_Historical_Data.
  */
 class WC_Admin_Notes_Historical_Data {
-	const NOTE_NAME  = 'wc-admin-historical-data';
+	const NOTE_NAME = 'wc-admin-historical-data';
 
 	/**
 	 * Creates a note for regenerating historical data.
@@ -28,17 +28,17 @@ class WC_Admin_Notes_Historical_Data {
 		}
 
 		$note = new WC_Admin_Note();
-		$note->set_title( __( 'WooCommerce Admin: Historical Analytics Data', 'wc-admin' ) );
-		$note->set_content( __( 'To view your historical analytics data, you must process your existing orders and customers.', 'wc-admin' ) );
+		$note->set_title( __( 'WooCommerce Admin: Historical Analytics Data', 'woocommerce-admin' ) );
+		$note->set_content( __( 'To view your historical analytics data, you must process your existing orders and customers.', 'woocommerce-admin' ) );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_UPDATE );
 		$note->set_icon( 'info' );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_content_data( (object) array() );
 		$note->set_source( 'woocommerce-admin' );
-		// @todo Add remind me later option. See https://github.com/woocommerce/wc-admin/issues/1756.
+		// @todo Add remind me later option. See https://github.com/woocommerce/woocommerce-admin/issues/1756.
 		$note->add_action(
 			'get-started',
-			__( 'Get Started', 'wc-admin' ),
+			__( 'Get Started', 'woocommerce-admin' ),
 			'?page=wc-admin#/analytics/settings',
 			'actioned'
 		);

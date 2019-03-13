@@ -272,7 +272,7 @@ class WC_Admin_Note extends WC_Data {
 	public function set_name( $name ) {
 		// Don't allow empty names.
 		if ( empty( $name ) ) {
-			$this->error( 'admin_note_invalid_data', __( 'The admin note name prop cannot be empty.', 'wc-admin' ) );
+			$this->error( 'admin_note_invalid_data', __( 'The admin note name prop cannot be empty.', 'woocommerce-admin' ) );
 		}
 
 		$this->set_prop( 'name', $name );
@@ -285,7 +285,7 @@ class WC_Admin_Note extends WC_Data {
 	 */
 	public function set_type( $type ) {
 		if ( empty( $type ) ) {
-			$this->error( 'admin_note_invalid_data', __( 'The admin note type prop cannot be empty.', 'wc-admin' ) );
+			$this->error( 'admin_note_invalid_data', __( 'The admin note type prop cannot be empty.', 'woocommerce-admin' ) );
 		}
 
 		if ( ! in_array( $type, self::get_allowed_types(), true ) ) {
@@ -293,7 +293,7 @@ class WC_Admin_Note extends WC_Data {
 				'admin_note_invalid_data',
 				sprintf(
 					/* translators: %s: admin note type. */
-					__( 'The admin note type prop (%s) is not one of the supported types.', 'wc-admin' ),
+					__( 'The admin note type prop (%s) is not one of the supported types.', 'woocommerce-admin' ),
 					$type
 				)
 			);
@@ -309,7 +309,7 @@ class WC_Admin_Note extends WC_Data {
 	 */
 	public function set_locale( $locale ) {
 		if ( empty( $locale ) ) {
-			$this->error( 'admin_note_invalid_data', __( 'The admin note locale prop cannot be empty.', 'wc-admin' ) );
+			$this->error( 'admin_note_invalid_data', __( 'The admin note locale prop cannot be empty.', 'woocommerce-admin' ) );
 		}
 
 		$this->set_prop( 'locale', $locale );
@@ -322,7 +322,7 @@ class WC_Admin_Note extends WC_Data {
 	 */
 	public function set_title( $title ) {
 		if ( empty( $title ) ) {
-			$this->error( 'admin_note_invalid_data', __( 'The admin note title prop cannot be empty.', 'wc-admin' ) );
+			$this->error( 'admin_note_invalid_data', __( 'The admin note title prop cannot be empty.', 'woocommerce-admin' ) );
 		}
 
 		$this->set_prop( 'title', $title );
@@ -343,7 +343,7 @@ class WC_Admin_Note extends WC_Data {
 		$content = wp_kses( $content, $allowed_html );
 
 		if ( empty( $content ) ) {
-			$this->error( 'admin_note_invalid_data', __( 'The admin note content prop cannot be empty.', 'wc-admin' ) );
+			$this->error( 'admin_note_invalid_data', __( 'The admin note content prop cannot be empty.', 'woocommerce-admin' ) );
 		}
 
 		$this->set_prop( 'content', $content );
@@ -356,7 +356,7 @@ class WC_Admin_Note extends WC_Data {
 	 */
 	public function set_icon( $icon ) {
 		if ( empty( $icon ) ) {
-			$this->error( 'admin_note_invalid_data', __( 'The admin note icon prop cannot be empty.', 'wc-admin' ) );
+			$this->error( 'admin_note_invalid_data', __( 'The admin note icon prop cannot be empty.', 'woocommerce-admin' ) );
 		}
 
 		$this->set_prop( 'icon', $icon );
@@ -365,7 +365,7 @@ class WC_Admin_Note extends WC_Data {
 	/**
 	 * Set note data for potential re-localization.
 	 *
-	 * @todo Set a default empty array? https://github.com/woocommerce/wc-admin/pull/1763#pullrequestreview-212442921.
+	 * @todo Set a default empty array? https://github.com/woocommerce/woocommerce-admin/pull/1763#pullrequestreview-212442921.
 	 * @param object $content_data Note data.
 	 */
 	public function set_content_data( $content_data ) {
@@ -373,7 +373,7 @@ class WC_Admin_Note extends WC_Data {
 
 		// Make sure $content_data is stdClass Object or an array.
 		if ( ! ( $content_data instanceof stdClass ) ) {
-			$this->error( 'admin_note_invalid_data', __( 'The admin note content_data prop must be an instance of stdClass.', 'wc-admin' ) );
+			$this->error( 'admin_note_invalid_data', __( 'The admin note content_data prop must be an instance of stdClass.', 'woocommerce-admin' ) );
 		}
 
 		$this->set_prop( 'content_data', $content_data );
@@ -386,7 +386,7 @@ class WC_Admin_Note extends WC_Data {
 	 */
 	public function set_status( $status ) {
 		if ( empty( $status ) ) {
-			$this->error( 'admin_note_invalid_data', __( 'The admin note status prop cannot be empty.', 'wc-admin' ) );
+			$this->error( 'admin_note_invalid_data', __( 'The admin note status prop cannot be empty.', 'woocommerce-admin' ) );
 		}
 
 		if ( ! in_array( $status, self::get_allowed_statuses(), true ) ) {
@@ -394,7 +394,7 @@ class WC_Admin_Note extends WC_Data {
 				'admin_note_invalid_data',
 				sprintf(
 					/* translators: %s: admin note status property. */
-					__( 'The admin note status prop (%s) is not one of the supported statuses.', 'wc-admin' ),
+					__( 'The admin note status prop (%s) is not one of the supported statuses.', 'woocommerce-admin' ),
 					$status
 				)
 			);
@@ -410,7 +410,7 @@ class WC_Admin_Note extends WC_Data {
 	 */
 	public function set_source( $source ) {
 		if ( empty( $source ) ) {
-			$this->error( 'admin_note_invalid_data', __( 'The admin note source prop cannot be empty.', 'wc-admin' ) );
+			$this->error( 'admin_note_invalid_data', __( 'The admin note source prop cannot be empty.', 'woocommerce-admin' ) );
 		}
 
 		$this->set_prop( 'source', $source );
@@ -423,7 +423,7 @@ class WC_Admin_Note extends WC_Data {
 	 */
 	public function set_date_created( $date ) {
 		if ( empty( $date ) ) {
-			$this->error( 'admin_note_invalid_data', __( 'The admin note date prop cannot be empty.', 'wc-admin' ) );
+			$this->error( 'admin_note_invalid_data', __( 'The admin note date prop cannot be empty.', 'woocommerce-admin' ) );
 		}
 
 		$this->set_date_prop( 'date_created', $date );
@@ -460,22 +460,22 @@ class WC_Admin_Note extends WC_Data {
 		$status = wc_clean( $status );
 
 		if ( empty( $name ) ) {
-			$this->error( 'admin_note_invalid_data', __( 'The admin note action name prop cannot be empty.', 'wc-admin' ) );
+			$this->error( 'admin_note_invalid_data', __( 'The admin note action name prop cannot be empty.', 'woocommerce-admin' ) );
 		}
 
 		if ( empty( $label ) ) {
-			$this->error( 'admin_note_invalid_data', __( 'The admin note action label prop cannot be empty.', 'wc-admin' ) );
+			$this->error( 'admin_note_invalid_data', __( 'The admin note action label prop cannot be empty.', 'woocommerce-admin' ) );
 		}
 
 		if ( empty( $query ) ) {
-			$this->error( 'admin_note_invalid_data', __( 'The admin note action query prop cannot be empty.', 'wc-admin' ) );
+			$this->error( 'admin_note_invalid_data', __( 'The admin note action query prop cannot be empty.', 'woocommerce-admin' ) );
 		}
 
 		$action = array(
-			'name'       => $name,
-			'label'      => $label,
-			'query'      => $query,
-			'status'     => $status,
+			'name'   => $name,
+			'label'  => $label,
+			'query'  => $query,
+			'status' => $status,
 		);
 
 		$note_actions   = $this->get_prop( 'actions', 'edit' );

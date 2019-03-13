@@ -20,7 +20,7 @@ A function returning a list of `<SummaryNumber />`s
 ### `label`
 
 - Type: String
-- Default: `__( 'Performance Indicators', 'wc-admin' )`
+- Default: `__( 'Performance Indicators', 'woocommerce-admin' )`
 
 An optional label of this group, read to screen reader users.
 
@@ -76,7 +76,7 @@ A function used to switch the given SummaryNumber to a button, and called on cli
 ### `prevLabel`
 
 - Type: String
-- Default: `__( 'Previous Period:', 'wc-admin' )`
+- Default: `__( 'Previous Period:', 'woocommerce-admin' )`
 
 A string description of the previous value's timeframe, ex "Previous Year:".
 

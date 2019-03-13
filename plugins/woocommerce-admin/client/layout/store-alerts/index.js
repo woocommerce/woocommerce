@@ -111,7 +111,7 @@ class StoreAlerts extends Component {
 								icon="arrow-left-alt2"
 								onClick={ this.previousAlert }
 								disabled={ 0 === currentIndex }
-								label={ __( 'Previous Alert', 'wc-admin' ) }
+								label={ __( 'Previous Alert', 'woocommerce-admin' ) }
 							/>
 							<span
 								className="woocommerce-store-alerts__pagination-label"
@@ -119,7 +119,7 @@ class StoreAlerts extends Component {
 								aria-live="polite"
 							>
 								{ interpolateComponents( {
-									mixedString: __( '{{current /}} of {{total /}}', 'wc-admin' ),
+									mixedString: __( '{{current /}} of {{total /}}', 'woocommerce-admin' ),
 									components: {
 										current: <Fragment>{ currentIndex + 1 }</Fragment>,
 										total: <Fragment>{ numberOfAlerts }</Fragment>,
@@ -130,7 +130,7 @@ class StoreAlerts extends Component {
 								icon="arrow-right-alt2"
 								onClick={ this.nextAlert }
 								disabled={ numberOfAlerts - 1 === currentIndex }
-								label={ __( 'Next Alert', 'wc-admin' ) }
+								label={ __( 'Next Alert', 'woocommerce-admin' ) }
 							/>
 						</div>
 					)

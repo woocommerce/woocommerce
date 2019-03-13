@@ -290,11 +290,11 @@ class TableCard extends Component {
 							className="woocommerce-table__compare"
 							count={ selectedRows.length }
 							helpText={
-								labels.helpText || __( 'Select at least two items to compare', 'wc-admin' )
+								labels.helpText || __( 'Select at least two items to compare', 'woocommerce-admin' )
 							}
 							onClick={ this.onCompare }
 						>
-							{ labels.compareButton || __( 'Compare', 'wc-admin' ) }
+							{ labels.compareButton || __( 'Compare', 'woocommerce-admin' ) }
 						</CompareButton>
 					),
 					searchBy && (
@@ -303,7 +303,7 @@ class TableCard extends Component {
 							inlineTags
 							key="search"
 							onChange={ this.onSearch }
-							placeholder={ labels.placeholder || __( 'Search by item name', 'wc-admin' ) }
+							placeholder={ labels.placeholder || __( 'Search by item name', 'woocommerce-admin' ) }
 							selected={ searchedLabels }
 							showClearButton={ true }
 							type={ searchBy }
@@ -319,14 +319,14 @@ class TableCard extends Component {
 						>
 							<DowloadIcon />
 							<span className="woocommerce-table__download-button__label">
-								{ labels.downloadButton || __( 'Download', 'wc-admin' ) }
+								{ labels.downloadButton || __( 'Download', 'woocommerce-admin' ) }
 							</span>
 						</IconButton>
 					),
 				] }
 				menu={
-					showMenu && <EllipsisMenu label={ __( 'Choose which values to display', 'wc-admin' ) }>
-						<MenuTitle>{ __( 'Columns:', 'wc-admin' ) }</MenuTitle>
+					showMenu && <EllipsisMenu label={ __( 'Choose which values to display', 'woocommerce-admin' ) }>
+						<MenuTitle>{ __( 'Columns:', 'woocommerce-admin' ) }</MenuTitle>
 						{ allHeaders.map( ( { key, label, required } ) => {
 							if ( required ) {
 								return null;
@@ -349,7 +349,7 @@ class TableCard extends Component {
 				{ isLoading ? (
 					<Fragment>
 						<span className="screen-reader-text">
-							{ __( 'Your requested data is loading', 'wc-admin' ) }
+							{ __( 'Your requested data is loading', 'woocommerce-admin' ) }
 						</span>
 						<TablePlaceholder
 							numberOfRows={ rowsPerPage }

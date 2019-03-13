@@ -32,7 +32,7 @@ export default class CouponsReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Date', 'wc-admin' ),
+				label: __( 'Date', 'woocommerce-admin' ),
 				key: 'date',
 				defaultSort: true,
 				required: true,
@@ -40,26 +40,26 @@ export default class CouponsReportTable extends Component {
 				isSortable: true,
 			},
 			{
-				label: __( 'Product Title', 'wc-admin' ),
+				label: __( 'Product Title', 'woocommerce-admin' ),
 				key: 'product',
 				isSortable: true,
 				required: true,
 			},
 			{
-				label: __( 'File Name', 'wc-admin' ),
+				label: __( 'File Name', 'woocommerce-admin' ),
 				key: 'file_name',
 			},
 			{
-				label: __( 'Order #', 'wc-admin' ),
-				screenReaderLabel: __( 'Order Number', 'wc-admin' ),
+				label: __( 'Order #', 'woocommerce-admin' ),
+				screenReaderLabel: __( 'Order Number', 'woocommerce-admin' ),
 				key: 'order_number',
 			},
 			{
-				label: __( 'User Name', 'wc-admin' ),
+				label: __( 'User Name', 'woocommerce-admin' ),
 				key: 'user_id',
 			},
 			{
-				label: __( 'IP', 'wc-admin' ),
+				label: __( 'IP', 'woocommerce-admin' ),
 				key: 'ip_address',
 			},
 		];
@@ -139,11 +139,11 @@ export default class CouponsReportTable extends Component {
 
 		return [
 			{
-				label: _n( 'day', 'days', days, 'wc-admin' ),
+				label: _n( 'day', 'days', days, 'woocommerce-admin' ),
 				value: numberFormat( days ),
 			},
 			{
-				label: _n( 'download', 'downloads', download_count, 'wc-admin' ),
+				label: _n( 'download', 'downloads', download_count, 'woocommerce-admin' ),
 				value: numberFormat( download_count ),
 			},
 		];
@@ -162,7 +162,7 @@ export default class CouponsReportTable extends Component {
 				tableQuery={ {
 					_embed: true,
 				} }
-				title={ __( 'Downloads', 'wc-admin' ) }
+				title={ __( 'Downloads', 'woocommerce-admin' ) }
 				columnPrefsKey="downloads_report_columns"
 			/>
 		);

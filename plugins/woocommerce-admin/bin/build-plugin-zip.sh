@@ -71,15 +71,15 @@ build_files=$(ls dist/*/*.{js,css})
 
 # Generate the plugin zip file.
 status "Creating archive... 🎁"
-zip -r wc-admin.zip \
-	wc-admin.php \
+zip -r woocommerce-admin.zip \
+	woocommerce-admin.php \
 	lib/*.php \
 	includes/*.php \
 	includes/**/*.php \
 	images/* \
 	$build_files \
-	languages/wc-admin.pot \
-	languages/wc-admin.php \
+	languages/woocommerce-admin.pot \
+	languages/woocommerce-admin.php \
 	readme.txt
 
 success "Done. You've built WooCommerce Admin! 🎉 "

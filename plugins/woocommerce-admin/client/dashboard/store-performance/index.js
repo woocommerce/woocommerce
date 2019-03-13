@@ -65,8 +65,8 @@ class StorePerformance extends Component {
 	renderMenu() {
 		const { indicators } = this.props;
 		return (
-			<EllipsisMenu label={ __( 'Choose which analytics to display', 'wc-admin' ) }>
-				<MenuTitle>{ __( 'Display Stats:', 'wc-admin' ) }</MenuTitle>
+			<EllipsisMenu label={ __( 'Choose which analytics to display', 'woocommerce-admin' ) }>
+				<MenuTitle>{ __( 'Display Stats:', 'woocommerce-admin' ) }</MenuTitle>
 				{ indicators.map( ( indicator, i ) => {
 					const checked = ! this.state.userPrefs.includes( indicator.stat );
 					return (
@@ -77,7 +77,7 @@ class StorePerformance extends Component {
 							key={ i }
 							onInvoke={ this.toggle( indicator.stat ) }
 						>
-							{ sprintf( __( 'Show %s', 'wc-admin' ), indicator.label ) }
+							{ sprintf( __( 'Show %s', 'woocommerce-admin' ), indicator.label ) }
 						</MenuItem>
 					);
 				} ) }
@@ -109,8 +109,8 @@ class StorePerformance extends Component {
 		const { compare } = getDateParamsFromQuery( query );
 		const prevLabel =
 			'previous_period' === compare
-				? __( 'Previous Period:', 'wc-admin' )
-				: __( 'Previous Year:', 'wc-admin' );
+				? __( 'Previous Period:', 'woocommerce-admin' )
+				: __( 'Previous Year:', 'woocommerce-admin' );
 		return (
 			<SummaryList>
 				{ () =>
@@ -159,7 +159,10 @@ class StorePerformance extends Component {
 	render() {
 		return (
 			<Fragment>
-				<SectionHeader title={ __( 'Store Performance', 'wc-admin' ) } menu={ this.renderMenu() } />
+				<SectionHeader
+					title={ __( 'Store Performance', 'woocommerce-admin' ) }
+					menu={ this.renderMenu() }
+				/>
 				<div className="woocommerce-dashboard__store-performance">{ this.renderList() }</div>
 			</Fragment>
 		);

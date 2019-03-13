@@ -25,7 +25,7 @@ class ComparePeriods extends Component {
 				selected={ compare }
 				onSelect={ onSelect }
 				name="compare"
-				legend={ __( 'compare to', 'wc-admin' ) }
+				legend={ __( 'compare to', 'woocommerce-admin' ) }
 			/>
 		);
 	}

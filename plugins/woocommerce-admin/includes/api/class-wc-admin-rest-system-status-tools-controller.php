@@ -35,9 +35,9 @@ class WC_Admin_REST_System_Status_Tools_Controller extends WC_REST_System_Status
 			parent::get_tools(),
 			array(
 				'rebuild_stats' => array(
-					'name'   => __( 'Rebuild reports data', 'wc-admin' ),
-					'button' => __( 'Rebuild reports', 'wc-admin' ),
-					'desc'   => __( 'This tool will rebuild all of the information used by the reports.', 'wc-admin' ),
+					'name'   => __( 'Rebuild reports data', 'woocommerce-admin' ),
+					'button' => __( 'Rebuild reports', 'woocommerce-admin' ),
+					'desc'   => __( 'This tool will rebuild all of the information used by the reports.', 'woocommerce-admin' ),
 				),
 			)
 		);
@@ -56,7 +56,7 @@ class WC_Admin_REST_System_Status_Tools_Controller extends WC_REST_System_Status
 		switch ( $tool ) {
 			case 'rebuild_stats':
 				WC_Admin_Api_Init::regenerate_report_data();
-				$message = __( 'Rebuilding reports data in the background . . .', 'wc-admin' );
+				$message = __( 'Rebuilding reports data in the background . . .', 'woocommerce-admin' );
 				break;
 			default:
 				return parent::execute_tool( $tool );

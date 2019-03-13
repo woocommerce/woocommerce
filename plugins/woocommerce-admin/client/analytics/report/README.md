@@ -5,7 +5,7 @@ The core reports offered by WooCommerce live in this folder. The Header is added
 
 ## Extending Reports
 
-New reports can be added by third-parties without altering `wc-admin`, by hooking into the reports filter, `woocommerce-reports-list`. For example:
+New reports can be added by third-parties without altering `woocommerce-admin`, by hooking into the reports filter, `woocommerce-reports-list`. For example:
 
 ```js
 addFilter( 'woocommerce-reports-list', 'wc-example/my-report', pages => {

@@ -4,7 +4,7 @@ This is a feature plugin for a modern, javascript-driven WooCommerce Admin exper
 
 ---
 
-:warning: This project is in active development, and is not ready for general use. You can follow the features in development by looking at the [project's issues](https://github.com/woocommerce/wc-admin/issues). **We do not recommend running this on production sites.**
+:warning: This project is in active development, and is not ready for general use. You can follow the features in development by looking at the [project's issues](https://github.com/woocommerce/woocommerce-admin/issues). **We do not recommend running this on production sites.**
 
 ---
 
@@ -20,7 +20,7 @@ After cloning the repo, install dependencies with `npm install`. Now you can bui
 
  - `npm run build` : Build a production version
  - `npm start` : Build a development version, watch files for changes
- - `npm run build:release` : Build a WordPress plugin ZIP file (`wc-admin.zip` will be created in the repository root)
+ - `npm run build:release` : Build a WordPress plugin ZIP file (`woocommerce-admin.zip` will be created in the repository root)
 
 There are also some helper scripts:
 

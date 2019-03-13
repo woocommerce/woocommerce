@@ -109,28 +109,28 @@ class DateRange extends Component {
 						value={ afterText }
 						onChange={ partial( this.onInputChange, 'after' ) }
 						dateFormat={ shortDateFormat }
-						label={ __( 'Start Date', 'wc-admin' ) }
+						label={ __( 'Start Date', 'woocommerce-admin' ) }
 						error={ afterError }
 						describedBy={ sprintf(
 							__(
 								"Date input describing a selected date range's start date in format %s",
-								'wc-admin'
+								'woocommerce-admin'
 							),
 							shortDateFormat
 						) }
 						onFocus={ () => this.onFocusChange( 'startDate' ) }
 					/>
-					<div className="woocommerce-calendar__inputs-to">{ __( 'to', 'wc-admin' ) }</div>
+					<div className="woocommerce-calendar__inputs-to">{ __( 'to', 'woocommerce-admin' ) }</div>
 					<DateInput
 						value={ beforeText }
 						onChange={ partial( this.onInputChange, 'before' ) }
 						dateFormat={ shortDateFormat }
-						label={ __( 'End Date', 'wc-admin' ) }
+						label={ __( 'End Date', 'woocommerce-admin' ) }
 						error={ beforeError }
 						describedBy={ sprintf(
 							__(
 								"Date input describing a selected date range's end date in format %s",
-								'wc-admin'
+								'woocommerce-admin'
 							),
 							shortDateFormat
 						) }

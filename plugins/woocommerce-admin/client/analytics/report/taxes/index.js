@@ -25,7 +25,7 @@ export default class TaxesReport extends Component {
 		const { query } = this.props;
 		const isCompareTaxView = 'compare-taxes' === query.filter;
 		const mode = isCompareTaxView ? 'item-comparison' : 'time-comparison';
-		const itemsLabel = __( '%d taxes', 'wc-admin' );
+		const itemsLabel = __( '%d taxes', 'woocommerce-admin' );
 
 		return {
 			itemsLabel,

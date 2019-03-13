@@ -19,7 +19,7 @@ import { updateQueryString } from '@woocommerce/navigation';
 import DatePickerContent from './content';
 import DropdownButton from '../../dropdown-button';
 
-const shortDateFormat = __( 'MM/DD/YYYY', 'wc-admin' );
+const shortDateFormat = __( 'MM/DD/YYYY', 'woocommerce-admin' );
 
 /**
  * Select a range of dates or single dates.
@@ -80,7 +80,7 @@ class DateRangeFilterPicker extends Component {
 		const { primary, secondary } = getCurrentDates( this.props.query );
 		return [
 			`${ primary.label } (${ primary.range })`,
-			`${ __( 'vs.', 'wc-admin' ) } ${ secondary.label } (${ secondary.range })`,
+			`${ __( 'vs.', 'woocommerce-admin' ) } ${ secondary.label } (${ secondary.range })`,
 		];
 	}
 
@@ -118,7 +118,7 @@ class DateRangeFilterPicker extends Component {
 		} = this.state;
 		return (
 			<div className="woocommerce-filters-filter">
-				<span className="woocommerce-filters-label">{ __( 'Date Range', 'wc-admin' ) }:</span>
+				<span className="woocommerce-filters-label">{ __( 'Date Range', 'woocommerce-admin' ) }:</span>
 				<Dropdown
 					ref={ this.dropdownRef }
 					contentClassName="woocommerce-filters-date__content"

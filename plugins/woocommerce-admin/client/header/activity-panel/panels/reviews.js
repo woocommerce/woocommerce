@@ -45,7 +45,7 @@ class ReviewsPanel extends Component {
 			mixedString: sprintf(
 				__(
 					'{{productLink}}%s{{/productLink}} reviewed by {{authorLink}}%s{{/authorLink}}',
-					'wc-admin'
+					'woocommerce-admin'
 				),
 				product.name,
 				review.reviewer
@@ -62,7 +62,7 @@ class ReviewsPanel extends Component {
 				{ review.verified && (
 					<span className="woocommerce-review-activity-card__verified">
 						<Gridicon icon="checkmark" size={ 18 } />
-						{ __( 'Verified customer', 'wc-admin' ) }
+						{ __( 'Verified customer', 'woocommerce-admin' ) }
 					</span>
 				) }
 			</Fragment>
@@ -77,23 +77,25 @@ class ReviewsPanel extends Component {
 
 		const cardActions = () => {
 			const mainLabel =
-				'approved' === review.status ? __( 'Unapprove', 'wc-admin' ) : __( 'Approve', 'wc-admin' );
+				'approved' === review.status
+					? __( 'Unapprove', 'woocommerce-admin' )
+					: __( 'Approve', 'woocommerce-admin' );
 			return (
 				<SplitButton
 					mainLabel={ mainLabel }
-					menuLabel={ __( 'Select an action', 'wc-admin' ) }
+					menuLabel={ __( 'Select an action', 'woocommerce-admin' ) }
 					onClick={ noop }
 					controls={ [
 						{
-							label: __( 'Reply', 'wc-admin' ),
+							label: __( 'Reply', 'woocommerce-admin' ),
 							onClick: noop,
 						},
 						{
-							label: __( 'Spam', 'wc-admin' ),
+							label: __( 'Spam', 'woocommerce-admin' ),
 							onClick: noop,
 						},
 						{
-							label: __( 'Trash', 'wc-admin' ),
+							label: __( 'Trash', 'woocommerce-admin' ),
 							onClick: noop,
 						},
 					] }
@@ -120,8 +122,11 @@ class ReviewsPanel extends Component {
 		const { isError, isRequesting, reviews } = this.props;
 
 		if ( isError ) {
-			const title = __( 'There was an error getting your reviews. Please try again.', 'wc-admin' );
-			const actionLabel = __( 'Reload', 'wc-admin' );
+			const title = __(
+				'There was an error getting your reviews. Please try again.',
+				'woocommerce-admin'
+			);
+			const actionLabel = __( 'Reload', 'woocommerce-admin' );
 			const actionCallback = () => {
 				window.location.reload();
 			};
@@ -140,7 +145,7 @@ class ReviewsPanel extends Component {
 
 		return (
 			<Fragment>
-				<ActivityHeader title={ __( 'Reviews', 'wc-admin' ) } />
+				<ActivityHeader title={ __( 'Reviews', 'woocommerce-admin' ) } />
 				<Section>
 					{ isRequesting ? (
 						<ActivityCardPlaceholder

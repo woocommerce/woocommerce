@@ -40,7 +40,7 @@ class WC_Admin_REST_Product_Reviews_Controller extends WC_REST_Product_Reviews_C
 		);
 		if ( 0 !== (int) $review->comment_post_ID ) {
 			$links['up'] = array(
-				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $review->comment_post_ID ) ),
+				'href'       => rest_url( sprintf( '/%s/products/%d', $this->namespace, $review->comment_post_ID ) ),
 				'embeddable' => true,
 			);
 		}

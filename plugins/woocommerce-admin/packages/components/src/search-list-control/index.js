@@ -23,14 +23,14 @@ import SearchListItem from './item';
 import Tag from '../tag';
 
 const defaultMessages = {
-	clear: __( 'Clear all selected items', 'wc-admin' ),
-	list: __( 'Results', 'wc-admin' ),
-	noItems: __( 'No items found.', 'wc-admin' ),
-	noResults: __( 'No results for %s', 'wc-admin' ),
-	search: __( 'Search for items', 'wc-admin' ),
+	clear: __( 'Clear all selected items', 'woocommerce-admin' ),
+	list: __( 'Results', 'woocommerce-admin' ),
+	noItems: __( 'No items found.', 'woocommerce-admin' ),
+	noResults: __( 'No results for %s', 'woocommerce-admin' ),
+	search: __( 'Search for items', 'woocommerce-admin' ),
 	selected: ( n ) =>
-		sprintf( _n( '%d item selected', '%d items selected', n, 'wc-admin' ), n ),
-	updated: __( 'Search results updated.', 'wc-admin' ),
+		sprintf( _n( '%d item selected', '%d items selected', n, 'woocommerce-admin' ), n ),
+	updated: __( 'Search results updated.', 'woocommerce-admin' ),
 };
 
 /**
@@ -182,7 +182,7 @@ export class SearchListControl extends Component {
 							onClick={ this.onClear }
 							aria-label={ messages.clear }
 						>
-							{ __( 'Clear all', 'wc-admin' ) }
+							{ __( 'Clear all', 'woocommerce-admin' ) }
 						</Button>
 					) : null }
 				</div>

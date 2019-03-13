@@ -45,7 +45,7 @@ export default {
 		const label = (
 			<span key="name" className="woocommerce-search__result-name">
 				{ interpolateComponents( {
-					mixedString: __( 'All customers with names that include {{query /}}', 'wc-admin' ),
+					mixedString: __( 'All customers with names that include {{query /}}', 'woocommerce-admin' ),
 					components: {
 						query: <strong className="components-form-token-field__suggestion-match">{ query }</strong>,
 					},

@@ -13,7 +13,7 @@ addFilter( 'woocommerce_admin_analytics_settings', 'wc-example/my-setting', sett
 		...settings,
 		{
             name: 'custom_setting',
-            label: __( 'Custom setting:', 'wc-admin' ),
+            label: __( 'Custom setting:', 'woocommerce-admin' ),
             inputType: 'text',
             helpText: __( 'Help text to describe what the setting does.' ),
             initialValue: 'Initial value used',

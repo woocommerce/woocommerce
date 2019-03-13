@@ -106,7 +106,7 @@ class D3Legend extends Component {
 									! interactive
 								}
 								title={ numberOfRowsVisible >= selectionLimit
-									? sprintf( __( 'You may select up to %d items.', 'wc-admin' ), selectionLimit )
+									? sprintf( __( 'You may select up to %d items.', 'woocommerce-admin' ), selectionLimit )
 									: ''
 								}
 							>

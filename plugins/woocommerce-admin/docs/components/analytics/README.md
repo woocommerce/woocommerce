@@ -1,7 +1,7 @@
 Analytics Components
 ====================
 
-This folder contains components internally used by `wc-admin`.
+This folder contains components internally used by `woocommmerce-admin`.
 
 ## How to use:
 

@@ -35,7 +35,7 @@ class RevenueReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Date', 'wc-admin' ),
+				label: __( 'Date', 'woocommerce-admin' ),
 				key: 'date',
 				required: true,
 				defaultSort: true,
@@ -43,49 +43,49 @@ class RevenueReportTable extends Component {
 				isSortable: true,
 			},
 			{
-				label: __( 'Orders', 'wc-admin' ),
+				label: __( 'Orders', 'woocommerce-admin' ),
 				key: 'orders_count',
 				required: false,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Gross Revenue', 'wc-admin' ),
+				label: __( 'Gross Revenue', 'woocommerce-admin' ),
 				key: 'gross_revenue',
 				required: true,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Refunds', 'wc-admin' ),
+				label: __( 'Refunds', 'woocommerce-admin' ),
 				key: 'refunds',
 				required: false,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Coupons', 'wc-admin' ),
+				label: __( 'Coupons', 'woocommerce-admin' ),
 				key: 'coupons',
 				required: false,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Taxes', 'wc-admin' ),
+				label: __( 'Taxes', 'woocommerce-admin' ),
 				key: 'taxes',
 				required: false,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Shipping', 'wc-admin' ),
+				label: __( 'Shipping', 'woocommerce-admin' ),
 				key: 'shipping',
 				required: false,
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Net Revenue', 'wc-admin' ),
+				label: __( 'Net Revenue', 'woocommerce-admin' ),
 				key: 'net_revenue',
 				required: false,
 				isSortable: true,
@@ -165,35 +165,35 @@ class RevenueReportTable extends Component {
 		} = totals;
 		return [
 			{
-				label: _n( 'day', 'days', totalResults, 'wc-admin' ),
+				label: _n( 'day', 'days', totalResults, 'woocommerce-admin' ),
 				value: numberFormat( totalResults ),
 			},
 			{
-				label: _n( 'order', 'orders', orders_count, 'wc-admin' ),
+				label: _n( 'order', 'orders', orders_count, 'woocommerce-admin' ),
 				value: numberFormat( orders_count ),
 			},
 			{
-				label: __( 'gross revenue', 'wc-admin' ),
+				label: __( 'gross revenue', 'woocommerce-admin' ),
 				value: formatCurrency( gross_revenue ),
 			},
 			{
-				label: __( 'refunds', 'wc-admin' ),
+				label: __( 'refunds', 'woocommerce-admin' ),
 				value: formatCurrency( refunds ),
 			},
 			{
-				label: __( 'coupons', 'wc-admin' ),
+				label: __( 'coupons', 'woocommerce-admin' ),
 				value: formatCurrency( coupons ),
 			},
 			{
-				label: __( 'taxes', 'wc-admin' ),
+				label: __( 'taxes', 'woocommerce-admin' ),
 				value: formatCurrency( taxes ),
 			},
 			{
-				label: __( 'shipping', 'wc-admin' ),
+				label: __( 'shipping', 'woocommerce-admin' ),
 				value: formatCurrency( shipping ),
 			},
 			{
-				label: __( 'net revenue', 'wc-admin' ),
+				label: __( 'net revenue', 'woocommerce-admin' ),
 				value: formatCurrency( net_revenue ),
 			},
 		];
@@ -210,7 +210,7 @@ class RevenueReportTable extends Component {
 				getSummary={ this.getSummary }
 				query={ query }
 				tableData={ tableData }
-				title={ __( 'Revenue', 'wc-admin' ) }
+				title={ __( 'Revenue', 'woocommerce-admin' ) }
 				columnPrefsKey="revenue_report_columns"
 			/>
 		);

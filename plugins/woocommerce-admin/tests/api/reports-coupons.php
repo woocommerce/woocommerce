@@ -137,11 +137,11 @@ class WC_Tests_API_Reports_Coupons extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'coupons'   => $coupon_1->get_id() . ',' . $coupon_2->get_id(),
+				'coupons' => $coupon_1->get_id() . ',' . $coupon_2->get_id(),
 			)
 		);
-		$response = $this->server->dispatch( $request );
-		$coupon_reports  = $response->get_data();
+		$response       = $this->server->dispatch( $request );
+		$coupon_reports = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $coupon_reports ) );

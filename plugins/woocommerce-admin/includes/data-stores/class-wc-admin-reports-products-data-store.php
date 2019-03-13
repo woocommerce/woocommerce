@@ -213,7 +213,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 				$product = wc_get_product( $product_data['product_id'] );
 				// Product was deleted.
 				if ( ! $product ) {
-					$products_data[ $key ]['extended_info']['name'] = __( '(Deleted)', 'wc-admin' );
+					$products_data[ $key ]['extended_info']['name'] = __( '(Deleted)', 'woocommerce-admin' );
 					continue;
 				}
 
@@ -295,9 +295,9 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 				$fields          = $this->get_fields( $query_args );
 				$join_selections = $this->format_join_selections( $fields, array( 'product_id' ) );
 				$ids_table       = $this->get_ids_table( $included_products, 'product_id' );
-				$prefix = "SELECT {$join_selections} FROM (";
-				$suffix = ") AS {$table_name}";
-				$right_join = "RIGHT JOIN ( {$ids_table} ) AS default_results
+				$prefix          = "SELECT {$join_selections} FROM (";
+				$suffix          = ") AS {$table_name}";
+				$right_join      = "RIGHT JOIN ( {$ids_table} ) AS default_results
 					ON default_results.product_id = {$table_name}.product_id";
 			} else {
 				$db_records_count = (int) $wpdb->get_var(

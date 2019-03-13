@@ -122,9 +122,9 @@ class WC_Admin_Reports_Downloads_Data_Store extends WC_Admin_Reports_Data_Store 
 			)";
 		}
 
-		$customer_lookup_table  = $wpdb->prefix . 'wc_customer_lookup';
-		$included_customers = $this->get_included_customers( $query_args );
-		$excluded_customers = $this->get_excluded_customers( $query_args );
+		$customer_lookup_table = $wpdb->prefix . 'wc_customer_lookup';
+		$included_customers    = $this->get_included_customers( $query_args );
+		$excluded_customers    = $this->get_excluded_customers( $query_args );
 		if ( $included_customers ) {
 			$where_filters[] = " {$lookup_table}.permission_id IN (
 			SELECT
@@ -163,11 +163,11 @@ class WC_Admin_Reports_Downloads_Data_Store extends WC_Admin_Reports_Data_Store 
 
 		$where_subclause = implode( " $operator ", $where_filters );
 		if ( $where_subclause ) {
-			$sql_query_params['where_clause']    .= " AND ( $where_subclause )";
+			$sql_query_params['where_clause'] .= " AND ( $where_subclause )";
 		}
 
 		$sql_query_params['from_clause'] .= " JOIN {$wpdb->prefix}woocommerce_downloadable_product_permissions as product_permissions ON {$lookup_table}.permission_id = product_permissions.permission_id";
-		$sql_query_params = $this->get_order_by( $query_args, $sql_query_params );
+		$sql_query_params                 = $this->get_order_by( $query_args, $sql_query_params );
 
 		return $sql_query_params;
 	}
@@ -378,7 +378,7 @@ class WC_Admin_Reports_Downloads_Data_Store extends WC_Admin_Reports_Data_Store 
 			}
 
 			$download_data = array_map( array( $this, 'cast_numbers' ), $download_data );
-			$data     = (object) array(
+			$data          = (object) array(
 				'data'    => $download_data,
 				'total'   => $db_records_count,
 				'pages'   => $total_pages,

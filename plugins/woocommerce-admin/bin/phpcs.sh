@@ -5,7 +5,7 @@ if [[ ${RUN_PHPCS} == 1 ]]; then
 
 	if [ "$CHANGED_FILES" != "" ]; then
 		echo "Running Code Sniffer."
-		cd "$WP_CORE_DIR/wp-content/plugins/wc-admin/"
+		cd "$WP_CORE_DIR/wp-content/plugins/woocommerce-admin/"
 		./vendor/bin/phpcs --encoding=utf-8 -n -p $CHANGED_FILES
 	fi
 fi

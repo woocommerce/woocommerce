@@ -29,25 +29,25 @@ export default class StockReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Product / Variation', 'wc-admin' ),
+				label: __( 'Product / Variation', 'woocommerce-admin' ),
 				key: 'title',
 				required: true,
 				isLeftAligned: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'SKU', 'wc-admin' ),
+				label: __( 'SKU', 'woocommerce-admin' ),
 				key: 'sku',
 				isSortable: true,
 			},
 			{
-				label: __( 'Status', 'wc-admin' ),
+				label: __( 'Status', 'woocommerce-admin' ),
 				key: 'stock_status',
 				isSortable: true,
 				defaultSort: true,
 			},
 			{
-				label: __( 'Stock', 'wc-admin' ),
+				label: __( 'Stock', 'woocommerce-admin' ),
 				key: 'stock_quantity',
 				isSortable: true,
 			},
@@ -93,7 +93,7 @@ export default class StockReportTable extends Component {
 					value: stock_status,
 				},
 				{
-					display: manage_stock ? numberFormat( stock_quantity ) : __( 'N/A', 'wc-admin' ),
+					display: manage_stock ? numberFormat( stock_quantity ) : __( 'N/A', 'woocommerce-admin' ),
 					value: stock_quantity,
 				},
 			];
@@ -104,23 +104,23 @@ export default class StockReportTable extends Component {
 		const { products = 0, outofstock = 0, lowstock = 0, instock = 0, onbackorder = 0 } = totals;
 		return [
 			{
-				label: _n( 'product', 'products', products, 'wc-admin' ),
+				label: _n( 'product', 'products', products, 'woocommerce-admin' ),
 				value: numberFormat( products ),
 			},
 			{
-				label: __( 'out of stock', outofstock, 'wc-admin' ),
+				label: __( 'out of stock', outofstock, 'woocommerce-admin' ),
 				value: numberFormat( outofstock ),
 			},
 			{
-				label: __( 'low stock', lowstock, 'wc-admin' ),
+				label: __( 'low stock', lowstock, 'woocommerce-admin' ),
 				value: numberFormat( lowstock ),
 			},
 			{
-				label: __( 'on backorder', onbackorder, 'wc-admin' ),
+				label: __( 'on backorder', onbackorder, 'woocommerce-admin' ),
 				value: numberFormat( onbackorder ),
 			},
 			{
-				label: __( 'in stock', instock, 'wc-admin' ),
+				label: __( 'in stock', instock, 'woocommerce-admin' ),
 				value: numberFormat( instock ),
 			},
 		];
@@ -141,7 +141,7 @@ export default class StockReportTable extends Component {
 					order: query.order || 'asc',
 					type: query.type || 'all',
 				} }
-				title={ __( 'Stock', 'wc-admin' ) }
+				title={ __( 'Stock', 'woocommerce-admin' ) }
 			/>
 		);
 	}

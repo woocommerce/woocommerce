@@ -128,7 +128,7 @@ class Search extends Component {
 						return null;
 					}
 					const screenReaderLabel = sprintf(
-						__( '%1$s (%2$s of %3$s)', 'wc-admin' ),
+						__( '%1$s (%2$s of %3$s)', 'woocommerce-admin' ),
 						item.label,
 						i + 1,
 						selected.length
@@ -238,7 +238,7 @@ class Search extends Component {
 										{ ...aria }
 									/>
 									<span id={ `search-inline-input-${ instanceId }` } className="screen-reader-text">
-										{ __( 'Move backward for selected items', 'wc-admin' ) }
+										{ __( 'Move backward for selected items', 'woocommerce-admin' ) }
 									</span>
 								</div>
 							</div>
@@ -267,7 +267,7 @@ class Search extends Component {
 						onClick={ this.removeAll }
 					>
 						<Icon icon="dismiss" />
-						<span className="screen-reader-text">{ __( 'Clear all', 'wc-admin' ) }</span>
+						<span className="screen-reader-text">{ __( 'Clear all', 'woocommerce-admin' ) }</span>
 					</Button>
 				) : null }
 			</div>

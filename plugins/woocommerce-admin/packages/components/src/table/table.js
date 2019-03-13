@@ -134,7 +134,7 @@ class Table extends Component {
 						className="woocommerce-table__caption screen-reader-text"
 					>
 						{ caption }
-						{ tabIndex === '0' && <small>{ __( '(scroll to see more)', 'wc-admin' ) }</small> }
+						{ tabIndex === '0' && <small>{ __( '(scroll to see more)', 'woocommerce-admin' ) }</small> }
 					</caption>
 					<tbody>
 						<tr>
@@ -158,8 +158,8 @@ class Table extends Component {
 								// We only sort by ascending if the col is already sorted descending
 								const iconLabel =
 									sortedBy === key && sortDir !== ASC
-										? sprintf( __( 'Sort by %s in ascending order', 'wc-admin' ), screenReaderLabel )
-										: sprintf( __( 'Sort by %s in descending order', 'wc-admin' ), screenReaderLabel );
+										? sprintf( __( 'Sort by %s in ascending order', 'woocommerce-admin' ), screenReaderLabel )
+										: sprintf( __( 'Sort by %s in descending order', 'woocommerce-admin' ), screenReaderLabel );
 
 								const textLabel = (
 									<Fragment>

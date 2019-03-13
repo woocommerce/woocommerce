@@ -12,7 +12,7 @@ import ActivityHeader from '../activity-header';
 
 class StockPanel extends Component {
 	render() {
-		return <ActivityHeader title={ __( 'Stock', 'wc-admin' ) } />;
+		return <ActivityHeader title={ __( 'Stock', 'woocommerce-admin' ) } />;
 	}
 }
 

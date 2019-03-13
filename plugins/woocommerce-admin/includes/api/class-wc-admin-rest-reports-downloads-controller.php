@@ -153,83 +153,83 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_Admin_REST_Reports_C
 			'title'      => 'report_downloads',
 			'type'       => 'object',
 			'properties' => array(
-				'id'    => array(
+				'id'           => array(
 					'type'        => 'integer',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'ID.', 'wc-admin' ),
+					'description' => __( 'ID.', 'woocommerce-admin' ),
 				),
-				'product_id' => array(
+				'product_id'   => array(
 					'type'        => 'integer',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'Product ID.', 'wc-admin' ),
+					'description' => __( 'Product ID.', 'woocommerce-admin' ),
 				),
-				'date' => array(
-					'description' => __( "The date of the download, in the site's timezone.", 'wc-admin' ),
+				'date'         => array(
+					'description' => __( "The date of the download, in the site's timezone.", 'woocommerce-admin' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'date_gmt' => array(
-					'description' => __( 'The date of the download, as GMT.', 'wc-admin' ),
+				'date_gmt'     => array(
+					'description' => __( 'The date of the download, as GMT.', 'woocommerce-admin' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'download_id' => array(
+				'download_id'  => array(
 					'type'        => 'string',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'Download ID.', 'wc-admin' ),
+					'description' => __( 'Download ID.', 'woocommerce-admin' ),
 				),
-				'file_name' => array(
+				'file_name'    => array(
 					'type'        => 'string',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'File name.', 'wc-admin' ),
+					'description' => __( 'File name.', 'woocommerce-admin' ),
 				),
-				'file_path' => array(
+				'file_path'    => array(
 					'type'        => 'string',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'File URL.', 'wc-admin' ),
+					'description' => __( 'File URL.', 'woocommerce-admin' ),
 				),
-				'product_id' => array(
+				'product_id'   => array(
 					'type'        => 'integer',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'Product ID.', 'wc-admin' ),
+					'description' => __( 'Product ID.', 'woocommerce-admin' ),
 				),
-				'order_id' => array(
+				'order_id'     => array(
 					'type'        => 'integer',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'Order ID.', 'wc-admin' ),
+					'description' => __( 'Order ID.', 'woocommerce-admin' ),
 				),
 				'order_number' => array(
 					'type'        => 'string',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'Order Number.', 'wc-admin' ),
+					'description' => __( 'Order Number.', 'woocommerce-admin' ),
 				),
-				'user_id' => array(
+				'user_id'      => array(
 					'type'        => 'integer',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'User ID for the downloader.', 'wc-admin' ),
+					'description' => __( 'User ID for the downloader.', 'woocommerce-admin' ),
 				),
-				'username' => array(
+				'username'     => array(
 					'type'        => 'string',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'User name of the downloader.', 'wc-admin' ),
+					'description' => __( 'User name of the downloader.', 'woocommerce-admin' ),
 				),
-				'ip_address' => array(
+				'ip_address'   => array(
 					'type'        => 'string',
 					'readonly'    => true,
 					'context'     => array( 'view', 'edit' ),
-					'description' => __( 'IP address for the downloader.', 'wc-admin' ),
+					'description' => __( 'IP address for the downloader.', 'woocommerce-admin' ),
 				),
 			),
 		);
@@ -243,18 +243,18 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_Admin_REST_Reports_C
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params            = array();
-		$params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']    = array(
-			'description'       => __( 'Current page of the collection.', 'wc-admin' ),
+		$params                        = array();
+		$params['context']             = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['page']                = array(
+			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 			'minimum'           => 1,
 		);
-		$params['per_page'] = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'wc-admin' ),
+		$params['per_page']            = array(
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 1,
@@ -262,27 +262,27 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_Admin_REST_Reports_C
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after'] = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'wc-admin' ),
+		$params['after']               = array(
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before'] = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'wc-admin' ),
+		$params['before']              = array(
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order']  = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'wc-admin' ),
+		$params['order']               = array(
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby'] = array(
-			'description'       => __( 'Sort collection by object attribute.', 'wc-admin' ),
+		$params['orderby']             = array(
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'default'           => 'date',
 			'enum'              => array(
@@ -291,8 +291,8 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_Admin_REST_Reports_C
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['match'] = array(
-			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: products, orders, username, ip_address.', 'wc-admin' ),
+		$params['match']               = array(
+			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: products, orders, username, ip_address.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'default'           => 'all',
 			'enum'              => array(
@@ -301,8 +301,8 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_Admin_REST_Reports_C
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['product_includes'] = array(
-			'description'       => __( 'Limit result set to items that have the specified product(s) assigned.', 'wc-admin' ),
+		$params['product_includes']    = array(
+			'description'       => __( 'Limit result set to items that have the specified product(s) assigned.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -311,8 +311,8 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_Admin_REST_Reports_C
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['product_excludes'] = array(
-			'description'       => __( 'Limit result set to items that don\'t have the specified product(s) assigned.', 'wc-admin' ),
+		$params['product_excludes']    = array(
+			'description'       => __( 'Limit result set to items that don\'t have the specified product(s) assigned.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -321,8 +321,8 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_Admin_REST_Reports_C
 			'validate_callback' => 'rest_validate_request_arg',
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['order_includes'] = array(
-			'description'       => __( 'Limit result set to items that have the specified order ids.', 'wc-admin' ),
+		$params['order_includes']      = array(
+			'description'       => __( 'Limit result set to items that have the specified order ids.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -330,8 +330,8 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_Admin_REST_Reports_C
 				'type' => 'integer',
 			),
 		);
-		$params['order_excludes'] = array(
-			'description'       => __( 'Limit result set to items that don\'t have the specified order ids.', 'wc-admin' ),
+		$params['order_excludes']      = array(
+			'description'       => __( 'Limit result set to items that don\'t have the specified order ids.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -339,8 +339,8 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_Admin_REST_Reports_C
 				'type' => 'integer',
 			),
 		);
-		$params['customer_includes'] = array(
-			'description'       => __( 'Limit response to objects that have the specified user ids.', 'wc-admin' ),
+		$params['customer_includes']   = array(
+			'description'       => __( 'Limit response to objects that have the specified user ids.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -348,8 +348,8 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_Admin_REST_Reports_C
 				'type' => 'integer',
 			),
 		);
-		$params['customer_excludes'] = array(
-			'description'       => __( 'Limit response to objects that don\'t have the specified user ids.', 'wc-admin' ),
+		$params['customer_excludes']   = array(
+			'description'       => __( 'Limit response to objects that don\'t have the specified user ids.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -358,7 +358,7 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_Admin_REST_Reports_C
 			),
 		);
 		$params['ip_address_includes'] = array(
-			'description'       => __( 'Limit response to objects that have a specified ip address.', 'wc-admin' ),
+			'description'       => __( 'Limit response to objects that have a specified ip address.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'validate_callback' => 'rest_validate_request_arg',
 			'items'             => array(
@@ -367,7 +367,7 @@ class WC_Admin_REST_Reports_Downloads_Controller extends WC_Admin_REST_Reports_C
 		);
 
 		$params['ip_address_excludes'] = array(
-			'description'       => __( 'Limit response to objects that don\'t have a specified ip address.', 'wc-admin' ),
+			'description'       => __( 'Limit response to objects that don\'t have a specified ip address.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'validate_callback' => 'rest_validate_request_arg',
 			'items'             => array(

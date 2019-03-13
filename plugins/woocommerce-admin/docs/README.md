@@ -4,7 +4,7 @@ This is a feature plugin for a modern, javascript-driven WooCommerce Admin exper
 
 ---
 
-:warning: This project is in active development, and is not ready for general use. You can follow the features in development by looking at the [project's issues](https://github.com/woocommerce/wc-admin/issues). **We do not recommend running this on production sites.**
+:warning: This project is in active development, and is not ready for general use. You can follow the features in development by looking at the [project's issues](https://github.com/woocommerce/woocommerce-admin/issues). **We do not recommend running this on production sites.**
 
 ---
 
@@ -30,4 +30,4 @@ There are also some helper scripts:
 
 There is a "devdocs" page which is useful for displaying components individually outside of the application. It can be viewed via a normal `npm start` build at `http://<your-wp-site>/wp-admin/admin.php?page=wc-admin#/devdocs`.
 
-This is useful for viewing of [WooCommerce components](https://woocommerce.github.io/wc-admin/#/components/) components and ad-hoc testing.
+This is useful for viewing of [WooCommerce components](https://woocommerce.github.io/woocommerce-admin/#/components/) components and ad-hoc testing.

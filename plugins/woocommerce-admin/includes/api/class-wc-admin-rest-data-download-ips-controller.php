@@ -70,15 +70,15 @@ class WC_Admin_REST_Data_Download_Ips_Controller extends WC_REST_Data_Controller
 				)
 			);
 		} else {
-			return new WP_Error( 'woocommerce_rest_data_download_ips_invalid_request', __( 'Invalid request. Please pass the match parameter.', 'wc-admin' ), array( 'status' => 400 ) );
+			return new WP_Error( 'woocommerce_rest_data_download_ips_invalid_request', __( 'Invalid request. Please pass the match parameter.', 'woocommerce-admin' ), array( 'status' => 400 ) );
 		}
 
 		$data = array();
 
 		if ( ! empty( $downloads ) ) {
 			foreach ( $downloads as $download ) {
-				$response  = $this->prepare_item_for_response( $download, $request );
-				$data[]    = $this->prepare_response_for_collection( $response );
+				$response = $this->prepare_item_for_response( $download, $request );
+				$data[]   = $this->prepare_response_for_collection( $response );
 			}
 		}
 
@@ -131,10 +131,10 @@ class WC_Admin_REST_Data_Download_Ips_Controller extends WC_REST_Data_Controller
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                     = array();
-		$params['context']          = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['match']            = array(
-			'description'       => __( 'A partial IP address can be passed and matching results will be returned.', 'wc-admin' ),
+		$params            = array();
+		$params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['match']   = array(
+			'description'       => __( 'A partial IP address can be passed and matching results will be returned.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
@@ -153,9 +153,9 @@ class WC_Admin_REST_Data_Download_Ips_Controller extends WC_REST_Data_Controller
 			'title'      => 'data_download_ips',
 			'type'       => 'object',
 			'properties' => array(
-				'user_ip_address'      => array(
+				'user_ip_address' => array(
 					'type'        => 'string',
-					'description' => __( 'IP address.', 'wc-admin' ),
+					'description' => __( 'IP address.', 'woocommerce-admin' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),

@@ -139,7 +139,7 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 	public function get_item_schema() {
 		$data_values = array(
 			'amount'        => array(
-				'description' => __( 'Net discount amount.', 'wc-admin' ),
+				'description' => __( 'Net discount amount.', 'woocommerce-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -147,13 +147,13 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 				'format'      => 'currency',
 			),
 			'coupons_count' => array(
-				'description' => __( 'Amount of coupons.', 'wc-admin' ),
+				'description' => __( 'Amount of coupons.', 'woocommerce-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'orders_count'  => array(
-				'description' => __( 'Amount of discounted orders.', 'wc-admin' ),
+				'description' => __( 'Amount of discounted orders.', 'woocommerce-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -163,7 +163,7 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 
 		$segments = array(
 			'segments' => array(
-				'description' => __( 'Reports data grouped by segment condition.', 'wc-admin' ),
+				'description' => __( 'Reports data grouped by segment condition.', 'woocommerce-admin' ),
 				'type'        => 'array',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -171,13 +171,13 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 					'type'       => 'object',
 					'properties' => array(
 						'segment_id' => array(
-							'description' => __( 'Segment identificator.', 'wc-admin' ),
+							'description' => __( 'Segment identificator.', 'woocommerce-admin' ),
 							'type'        => 'integer',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'subtotals'  => array(
-							'description' => __( 'Interval subtotals.', 'wc-admin' ),
+							'description' => __( 'Interval subtotals.', 'woocommerce-admin' ),
 							'type'        => 'object',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
@@ -196,14 +196,14 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 			'type'       => 'object',
 			'properties' => array(
 				'totals'    => array(
-					'description' => __( 'Totals data.', 'wc-admin' ),
+					'description' => __( 'Totals data.', 'woocommerce-admin' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'properties'  => $totals,
 				),
 				'intervals' => array(
-					'description' => __( 'Reports data grouped by intervals.', 'wc-admin' ),
+					'description' => __( 'Reports data grouped by intervals.', 'woocommerce-admin' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -211,38 +211,38 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 						'type'       => 'object',
 						'properties' => array(
 							'interval'       => array(
-								'description' => __( 'Type of interval.', 'wc-admin' ),
+								'description' => __( 'Type of interval.', 'woocommerce-admin' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 								'enum'        => array( 'day', 'week', 'month', 'year' ),
 							),
 							'date_start'     => array(
-								'description' => __( "The date the report start, in the site's timezone.", 'wc-admin' ),
+								'description' => __( "The date the report start, in the site's timezone.", 'woocommerce-admin' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_start_gmt' => array(
-								'description' => __( 'The date the report start, as GMT.', 'wc-admin' ),
+								'description' => __( 'The date the report start, as GMT.', 'woocommerce-admin' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_end'       => array(
-								'description' => __( "The date the report end, in the site's timezone.", 'wc-admin' ),
+								'description' => __( "The date the report end, in the site's timezone.", 'woocommerce-admin' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_end_gmt'   => array(
-								'description' => __( 'The date the report end, as GMT.', 'wc-admin' ),
+								'description' => __( 'The date the report end, as GMT.', 'woocommerce-admin' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'subtotals'      => array(
-								'description' => __( 'Interval subtotals.', 'wc-admin' ),
+								'description' => __( 'Interval subtotals.', 'woocommerce-admin' ),
 								'type'        => 'object',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -263,18 +263,18 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params             = array();
-		$params['context']  = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']     = array(
-			'description'       => __( 'Current page of the collection.', 'wc-admin' ),
+		$params              = array();
+		$params['context']   = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['page']      = array(
+			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 			'minimum'           => 1,
 		);
-		$params['per_page'] = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'wc-admin' ),
+		$params['per_page']  = array(
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 1,
@@ -282,27 +282,27 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after']    = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'wc-admin' ),
+		$params['after']     = array(
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before']   = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'wc-admin' ),
+		$params['before']    = array(
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order']    = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'wc-admin' ),
+		$params['order']     = array(
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby']  = array(
-			'description'       => __( 'Sort collection by object attribute.', 'wc-admin' ),
+		$params['orderby']   = array(
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'default'           => 'date',
 			'enum'              => array(
@@ -313,8 +313,8 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['interval'] = array(
-			'description'       => __( 'Time interval to use for buckets in the returned data.', 'wc-admin' ),
+		$params['interval']  = array(
+			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'default'           => 'week',
 			'enum'              => array(
@@ -327,8 +327,8 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['coupons']  = array(
-			'description'       => __( 'Limit result set to coupons assigned specific coupon IDs.', 'wc-admin' ),
+		$params['coupons']   = array(
+			'description'       => __( 'Limit result set to coupons assigned specific coupon IDs.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -336,8 +336,8 @@ class WC_Admin_REST_Reports_Coupons_Stats_Controller extends WC_REST_Reports_Con
 				'type' => 'integer',
 			),
 		);
-		$params['segmentby']  = array(
-			'description'       => __( 'Segment the response by additional constraint.', 'wc-admin' ),
+		$params['segmentby'] = array(
+			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'enum'              => array(
 				'product',

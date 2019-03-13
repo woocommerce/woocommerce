@@ -12,28 +12,28 @@ const config = {
 	title: _x(
 		'Orders Match {{select /}} Filters',
 		'A sentence describing filters for Orders. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ',
-		'wc-admin'
+		'woocommerce-admin'
 	),
 	filters: {
 		status: {
 			labels: {
-				add: __( 'Order Status', 'wc-admin' ),
-				remove: __( 'Remove order status filter', 'wc-admin' ),
-				rule: __( 'Select an order status filter match', 'wc-admin' ),
+				add: __( 'Order Status', 'woocommerce-admin' ),
+				remove: __( 'Remove order status filter', 'woocommerce-admin' ),
+				rule: __( 'Select an order status filter match', 'woocommerce-admin' ),
 				/* translators: A sentence describing an Order Status filter. See screen shot for context: https://cloudup.com/cSsUY9VeCVJ */
-				title: __( 'Order Status {{rule /}} {{filter /}}', 'wc-admin' ),
-				filter: __( 'Select an order status', 'wc-admin' ),
+				title: __( 'Order Status {{rule /}} {{filter /}}', 'woocommerce-admin' ),
+				filter: __( 'Select an order status', 'woocommerce-admin' ),
 			},
 			rules: [
 				{
 					value: 'is',
 					/* translators: Sentence fragment, logical, "Is" refers to searching for orders matching a chosen order status. Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-					label: _x( 'Is', 'order status', 'wc-admin' ),
+					label: _x( 'Is', 'order status', 'woocommerce-admin' ),
 				},
 				{
 					value: 'is_not',
 					/* translators: Sentence fragment, logical, "Is Not" refers to searching for orders that don\'t match a chosen order status. Screenshot for context: https://cloudup.com/cSsUY9VeCVJ */
-					label: _x( 'Is Not', 'order status', 'wc-admin' ),
+					label: _x( 'Is Not', 'order status', 'woocommerce-admin' ),
 				},
 			],
 			input: {
@@ -83,7 +83,7 @@ input: {
 }
 ```
 
-`type`: A string Autocompleter type used by the [Search Component](https://github.com/woocommerce/wc-admin/tree/master/packages/components/src/search).
+`type`: A string Autocompleter type used by the [Search Component](https://github.com/woocommerce/woocommerce-admin/tree/master/packages/components/src/search).
 `getLabels`: A function returning a Promise resolving to an array of objects with `id` and `label` properties.
 
 ### Date

@@ -6,7 +6,7 @@ There are many ways to contribute – reporting bugs, feature suggestions, and f
 
 ## Reporting Bugs, Asking Questions, Sending Suggestions
 
-Open [a GitHub issue](https://github.com/woocommerce/wc-admin/issues/new/choose), that's all. If you have write access, add any appropriate labels.
+Open [a GitHub issue](https://github.com/woocommerce/woocommerce-admin/issues/new/choose), that's all. If you have write access, add any appropriate labels.
 
 If you're filing a bug, specific steps to reproduce are always helpful. Please include what you expected to see and what happened instead.
 
@@ -21,7 +21,7 @@ If you're a first-time code contributor to the repository, here's a quick guide 
 1. Fork the repo to your own account.
 2. Clone your fork into the `wp-content/plugins` directory of your preferred WordPress development environment.
 3. Don't forget to create a branch to keep your changes. (`git checkout -b add/my-cool-thing`).
-4. From the `wc-admin` plugin directory, build with `npm install` and `npm start`.
+4. From the `woocommerce-admin` plugin directory, build with `npm install` and `npm start`.
 5. Visit your dev environment in the browser to enable the `WooCommerce Admin` plugin and try it out.
 
 Tips:

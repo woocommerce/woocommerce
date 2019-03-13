@@ -399,9 +399,9 @@ class WC_Admin_Api_Init {
 	 * @returns {WP_REST_Response}
 	 */
 	public static function add_currency_symbol_to_order_response( $response ) {
-		$response_data   = $response->get_data();
-		$currency_code   = $response_data['currency'];
-		$currency_symbol = get_woocommerce_currency_symbol( $currency_code );
+		$response_data                    = $response->get_data();
+		$currency_code                    = $response_data['currency'];
+		$currency_symbol                  = get_woocommerce_currency_symbol( $currency_code );
 		$response_data['currency_symbol'] = html_entity_decode( $currency_symbol );
 		$response->set_data( $response_data );
 

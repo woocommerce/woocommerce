@@ -148,61 +148,61 @@ class WC_Admin_REST_Reports_Taxes_Controller extends WC_REST_Reports_Controller 
 			'type'       => 'object',
 			'properties' => array(
 				'tax_rate_id'  => array(
-					'description' => __( 'Tax rate ID.', 'wc-admin' ),
+					'description' => __( 'Tax rate ID.', 'woocommerce-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'name'         => array(
-					'description' => __( 'Tax rate name.', 'wc-admin' ),
+					'description' => __( 'Tax rate name.', 'woocommerce-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'tax_rate'     => array(
-					'description' => __( 'Tax rate.', 'wc-admin' ),
+					'description' => __( 'Tax rate.', 'woocommerce-admin' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'country'      => array(
-					'description' => __( 'Country.', 'wc-admin' ),
+					'description' => __( 'Country.', 'woocommerce-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'state'        => array(
-					'description' => __( 'State.', 'wc-admin' ),
+					'description' => __( 'State.', 'woocommerce-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'priority'        => array(
-					'description' => __( 'Priority.', 'wc-admin' ),
+				'priority'     => array(
+					'description' => __( 'Priority.', 'woocommerce-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'total_tax'    => array(
-					'description' => __( 'Total tax.', 'wc-admin' ),
+					'description' => __( 'Total tax.', 'woocommerce-admin' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'order_tax'    => array(
-					'description' => __( 'Order tax.', 'wc-admin' ),
+					'description' => __( 'Order tax.', 'woocommerce-admin' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'shipping_tax' => array(
-					'description' => __( 'Shipping tax.', 'wc-admin' ),
+					'description' => __( 'Shipping tax.', 'woocommerce-admin' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'orders_count' => array(
-					'description' => __( 'Amount of orders.', 'wc-admin' ),
+					'description' => __( 'Amount of orders.', 'woocommerce-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -222,7 +222,7 @@ class WC_Admin_REST_Reports_Taxes_Controller extends WC_REST_Reports_Controller 
 		$params             = array();
 		$params['context']  = $this->get_context_param( array( 'default' => 'view' ) );
 		$params['page']     = array(
-			'description'       => __( 'Current page of the collection.', 'wc-admin' ),
+			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
@@ -230,7 +230,7 @@ class WC_Admin_REST_Reports_Taxes_Controller extends WC_REST_Reports_Controller 
 			'minimum'           => 1,
 		);
 		$params['per_page'] = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'wc-admin' ),
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 1,
@@ -239,26 +239,26 @@ class WC_Admin_REST_Reports_Taxes_Controller extends WC_REST_Reports_Controller 
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['after']    = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'wc-admin' ),
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['before']   = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'wc-admin' ),
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['order']    = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'wc-admin' ),
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby']  = array(
-			'description'       => __( 'Sort collection by object attribute.', 'wc-admin' ),
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'default'           => 'tax_rate_id',
 			'enum'              => array(
@@ -273,7 +273,7 @@ class WC_Admin_REST_Reports_Taxes_Controller extends WC_REST_Reports_Controller 
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['taxes']    = array(
-			'description'       => __( 'Limit result set to items assigned one or more tax rates.', 'wc-admin' ),
+			'description'       => __( 'Limit result set to items assigned one or more tax rates.', 'woocommerce-admin' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',

@@ -31,61 +31,61 @@ export default class CustomersReportTable extends Component {
 	getHeadersContent() {
 		return [
 			{
-				label: __( 'Name', 'wc-admin' ),
+				label: __( 'Name', 'woocommerce-admin' ),
 				key: 'name',
 				required: true,
 				isLeftAligned: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'Username', 'wc-admin' ),
+				label: __( 'Username', 'woocommerce-admin' ),
 				key: 'username',
 				hiddenByDefault: true,
 			},
 			{
-				label: __( 'Last Active', 'wc-admin' ),
+				label: __( 'Last Active', 'woocommerce-admin' ),
 				key: 'date_last_active',
 				defaultSort: true,
 				isSortable: true,
 			},
 			{
-				label: __( 'Sign Up', 'wc-admin' ),
+				label: __( 'Sign Up', 'woocommerce-admin' ),
 				key: 'date_registered',
 				isSortable: true,
 			},
 			{
-				label: __( 'Email', 'wc-admin' ),
+				label: __( 'Email', 'woocommerce-admin' ),
 				key: 'email',
 			},
 			{
-				label: __( 'Orders', 'wc-admin' ),
+				label: __( 'Orders', 'woocommerce-admin' ),
 				key: 'orders_count',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'Total Spend', 'wc-admin' ),
+				label: __( 'Total Spend', 'woocommerce-admin' ),
 				key: 'total_spend',
 				isSortable: true,
 				isNumeric: true,
 			},
 			{
-				label: __( 'AOV', 'wc-admin' ),
-				screenReaderLabel: __( 'Average Order Value', 'wc-admin' ),
+				label: __( 'AOV', 'woocommerce-admin' ),
+				screenReaderLabel: __( 'Average Order Value', 'woocommerce-admin' ),
 				key: 'avg_order_value',
 				isNumeric: true,
 			},
 			{
-				label: __( 'Country', 'wc-admin' ),
+				label: __( 'Country', 'woocommerce-admin' ),
 				key: 'country',
 			},
 			{
-				label: __( 'City', 'wc-admin' ),
+				label: __( 'City', 'woocommerce-admin' ),
 				key: 'city',
 				hiddenByDefault: true,
 			},
 			{
-				label: __( 'Postal Code', 'wc-admin' ),
+				label: __( 'Postal Code', 'woocommerce-admin' ),
 				key: 'postal_code',
 				hiddenByDefault: true,
 			},
@@ -199,19 +199,19 @@ export default class CustomersReportTable extends Component {
 		} = totals;
 		return [
 			{
-				label: _n( 'customer', 'customers', customers_count, 'wc-admin' ),
+				label: _n( 'customer', 'customers', customers_count, 'woocommerce-admin' ),
 				value: numberFormat( customers_count ),
 			},
 			{
-				label: _n( 'average order', 'average orders', avg_orders_count, 'wc-admin' ),
+				label: _n( 'average order', 'average orders', avg_orders_count, 'woocommerce-admin' ),
 				value: numberFormat( avg_orders_count ),
 			},
 			{
-				label: __( 'average lifetime spend', 'wc-admin' ),
+				label: __( 'average lifetime spend', 'woocommerce-admin' ),
 				value: formatCurrency( avg_total_spend ),
 			},
 			{
-				label: __( 'average order value', 'wc-admin' ),
+				label: __( 'average order value', 'woocommerce-admin' ),
 				value: formatCurrency( avg_avg_order_value ),
 			},
 		];
@@ -229,9 +229,9 @@ export default class CustomersReportTable extends Component {
 				isRequesting={ isRequesting }
 				itemIdField="id"
 				query={ query }
-				labels={ { placeholder: __( 'Search by customer name', 'wc-admin' ) } }
+				labels={ { placeholder: __( 'Search by customer name', 'woocommerce-admin' ) } }
 				searchBy="customers"
-				title={ __( 'Customers', 'wc-admin' ) }
+				title={ __( 'Customers', 'woocommerce-admin' ) }
 				columnPrefsKey="customers_report_columns"
 			/>
 		);

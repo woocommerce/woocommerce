@@ -67,4 +67,4 @@ global.wcSettings = {
 const config = require( '../../config/development.json' );
 window.wcAdminFeatures = config && config.features ? config.features : {};
 
-setLocaleData( { '': { domain: 'wc-admin', lang: 'en_US' } }, 'wc-admin' );
+setLocaleData( { '': { domain: 'woocommerce-admin', lang: 'en_US' } }, 'woocommerce-admin' );

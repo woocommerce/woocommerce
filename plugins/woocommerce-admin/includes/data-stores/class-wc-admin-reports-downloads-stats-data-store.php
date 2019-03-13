@@ -118,7 +118,7 @@ class WC_Admin_Reports_Downloads_Stats_Data_Store extends WC_Admin_Reports_Downl
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $totals ) {
-				return new WP_Error( 'woocommerce_reports_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'wc-admin' ) );
+				return new WP_Error( 'woocommerce_reports_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'woocommerce-admin' ) );
 			}
 
 			if ( '' !== $selections ) {
@@ -146,7 +146,7 @@ class WC_Admin_Reports_Downloads_Stats_Data_Store extends WC_Admin_Reports_Downl
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 			if ( null === $intervals ) {
-				return new WP_Error( 'woocommerce_reports_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'wc-admin' ) );
+				return new WP_Error( 'woocommerce_reports_downloads_stats_result_failed', __( 'Sorry, fetching downloads data failed.', 'woocommerce-admin' ) );
 			}
 
 			$totals = (object) $this->cast_numbers( $totals[0] );

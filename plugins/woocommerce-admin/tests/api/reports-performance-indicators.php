@@ -122,7 +122,7 @@ class WC_Tests_API_Reports_Performance_Indicators extends WC_REST_Unit_Test_Case
 		wp_set_current_user( $this->user );
 		WC_Helper_Reports::reset_stats_dbs();
 
-		$time = time();
+		$time    = time();
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(

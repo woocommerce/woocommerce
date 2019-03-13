@@ -57,7 +57,7 @@ class WC_Admin_REST_Products_Controller extends WC_REST_Products_Controller {
 	public function get_collection_params() {
 		$params                 = parent::get_collection_params();
 		$params['product_name'] = array(
-			'description'       => __( 'Search for a similar product name.', 'wc-admin' ),
+			'description'       => __( 'Search for a similar product name.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

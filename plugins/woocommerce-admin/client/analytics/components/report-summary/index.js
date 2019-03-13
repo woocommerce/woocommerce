@@ -81,8 +81,8 @@ export class ReportSummary extends Component {
 						label={ label }
 						prevLabel={
 							'previous_period' === compare
-								? __( 'Previous Period:', 'wc-admin' )
-								: __( 'Previous Year:', 'wc-admin' )
+								? __( 'Previous Period:', 'woocommerce-admin' )
+								: __( 'Previous Year:', 'woocommerce-admin' )
 						}
 						prevValue={ prevValue }
 						selected={ isSelected }
