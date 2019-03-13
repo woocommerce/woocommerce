@@ -92,8 +92,6 @@ class WC_AJAX {
 
 	/**
 	 * Hook in methods - uses WordPress ajax handlers (admin-ajax).
-	 *
-	 * Format: woocommerce_EVENT => value nopriv.
 	 */
 	public static function add_ajax_events() {
 		$ajax_events_nopriv = array(
