@@ -364,10 +364,6 @@ class WC_Admin_Notices {
 	 */
 	public static function theme_check_notice() {
 		wc_deprecated_function( 'WC_Admin_Notices::theme_check_notice', '3.3.0' );
-
-		if ( ! current_theme_supports( 'woocommerce' ) ) {
-			include dirname( __FILE__ ) . '/views/html-notice-theme-support.php';
-		}
 	}
 }
 
