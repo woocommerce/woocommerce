@@ -369,7 +369,7 @@ class WC_Admin_Report {
 	protected static $cached_results = array();
 
 	/**
-	 * Hook to update the updated transients at the end of the request
+	 * Hook to update the updated transients at the end of the request.
 	 */
 	public function _update_transients() {
 		foreach ( $this->transients_to_update as $transient_name ) {
