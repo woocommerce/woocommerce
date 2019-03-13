@@ -1531,7 +1531,9 @@ class WC_AJAX {
 	public static function json_search_products( $term = '', $include_variations = false ) {
 		check_ajax_referer( 'search-products', 'security' );
 
-		$term = isset( $_GET['term'] ) ? (string) wc_clean( wp_unslash( $_GET['term'] ) ) : '';
+		if ( empty( $term ) && isset( $_GET['term'] ) ) {
+			$term = (string) wc_clean( wp_unslash( $_GET['term'] ) );
+		}
 
 		if ( empty( $term ) ) {
 			wp_die();
