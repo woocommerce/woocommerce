@@ -493,10 +493,9 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				break;
 
 			case 'regenerate_product_lookup_tables':
-				// Clear existing data.
-				$wpdb->query( "TRUNCATE TABLE {$wpdb->wc_product_meta_lookup};" );
-				// Run generation.
-				wc_update_product_lookup_tables();
+				if ( ! wc_update_product_lookup_tables_is_running() ) {
+					wc_update_product_lookup_tables();
+				}
 				$message = __( 'Lookup tables are regenerating', 'woocommerce' );
 				break;
 			case 'reset_roles':

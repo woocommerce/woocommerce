@@ -26,13 +26,14 @@ class WC_Admin_Notices {
 	 * @var array
 	 */
 	private static $core_notices = array(
-		'install'                 => 'install_notice',
-		'update'                  => 'update_notice',
-		'template_files'          => 'template_file_check_notice',
-		'legacy_shipping'         => 'legacy_shipping_notice',
-		'no_shipping_methods'     => 'no_shipping_methods_notice',
-		'regenerating_thumbnails' => 'regenerating_thumbnails_notice',
-		'no_secure_connection'    => 'secure_connection_notice',
+		'install'                   => 'install_notice',
+		'update'                    => 'update_notice',
+		'template_files'            => 'template_file_check_notice',
+		'legacy_shipping'           => 'legacy_shipping_notice',
+		'no_shipping_methods'       => 'no_shipping_methods_notice',
+		'regenerating_thumbnails'   => 'regenerating_thumbnails_notice',
+		'regenerating_lookup_table' => 'regenerating_lookup_table_notice',
+		'no_secure_connection'      => 'secure_connection_notice',
 	);
 
 	/**
@@ -321,6 +322,21 @@ class WC_Admin_Notices {
 		}
 
 		include dirname( __FILE__ ) . '/views/html-notice-secure-connection.php';
+	}
+
+	/**
+	 * Notice shown when regenerating thumbnails background process is running.
+	 *
+	 * @since 3.6.0
+	 */
+	public static function regenerating_lookup_table_notice() {
+		// See if this is still relevent.
+		if ( ! wc_update_product_lookup_tables_is_running() ) {
+			self::remove_notice( 'regenerating_lookup_table' );
+			return;
+		}
+
+		include dirname( __FILE__ ) . '/views/html-notice-regenerating-lookup-table.php';
 	}
 
 	/**
