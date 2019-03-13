@@ -353,7 +353,7 @@ class WC_Admin_Report {
 			self::$cached_results[ $class ][ $query_hash ] = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 		}
 
-		$result = self::$cached_results[ $query_hash ];
+		$result = self::$cached_results[ $class ][ $query_hash ];
 
 		return $result;
 	}
