@@ -954,11 +954,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				FROM {$wpdb->posts} as posts
 				INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
 				WHERE
-					posts.post_type IN ( 'product', 'product_variation' )
-					AND posts.post_status != 'trash'
-					AND lookup.sku = %s
-					AND posts.ID <> %d
-				LIMIT 1",
+				posts.post_type IN ( 'product', 'product_variation' )
+				AND posts.post_status != 'trash'
+				AND lookup.sku = %s
+				AND posts.ID <> %d
+				LIMIT 1
+				",
 				wp_slash( $sku ),
 				$product_id
 			)
@@ -978,14 +979,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		$id = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT posts.ID
-				FROM $wpdb->posts AS posts
-				LEFT JOIN $wpdb->postmeta AS postmeta ON ( posts.ID = postmeta.post_id )
-				WHERE posts.post_type IN ( 'product', 'product_variation' )
-					AND posts.post_status != 'trash'
-					AND postmeta.meta_key = '_sku'
-					AND postmeta.meta_value = %s
-				LIMIT 1",
+				"
+				SELECT posts.ID
+				FROM {$wpdb->posts} as posts
+				INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
+				WHERE
+				posts.post_type IN ( 'product', 'product_variation' )
+				AND posts.post_status != 'trash'
+				AND lookup.sku = %s
+				LIMIT 1
+				",
 				$sku
 			)
 		);
