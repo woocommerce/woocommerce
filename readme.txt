@@ -252,6 +252,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Inactive, MU, Dropin plugins and WooCommerce.com account connection status added to System Status Report. #22887
 * Dev - Make error handling consistent in payment processing for pay page and checkout. #22916
 * Dev - Improved usage and event tracking (if opted in). #22955
+* Dev - Pass class context to woocommerce_email_styles filter. #23027
 * Fix - Use correct address for taxes when applying/removing coupons. #22802
 * Fix - Hide ratings on the shop page when reviews are disabled. #22476
 * Fix - Fix W3C validation of single product page quantity input. #22333
