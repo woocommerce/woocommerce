@@ -67,7 +67,6 @@ class WC_Session_Handler extends WC_Session {
 	 */
 	public function init() {
 		$this->init_session_cookie();
-		$this->_data = $this->get_session_data();
 
 		add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
@@ -91,6 +90,15 @@ class WC_Session_Handler extends WC_Session {
 			$this->_session_expiration = $cookie[1];
 			$this->_session_expiring   = $cookie[2];
 			$this->_has_cookie         = true;
+			$this->_data               = $this->get_session_data();
+
+			// If the user logs in, update session.
+			if ( is_user_logged_in() && get_current_user_id() !== $this->_customer_id ) {
+				$this->_customer_id = get_current_user_id();
+				$this->_dirty       = true;
+				$this->save_data();
+				$this->set_customer_session_cookie( true );
+			}
 
 			// Update session if its close to expiring.
 			if ( time() > $this->_session_expiring ) {
@@ -100,6 +108,7 @@ class WC_Session_Handler extends WC_Session {
 		} else {
 			$this->set_session_expiration();
 			$this->_customer_id = $this->generate_customer_id();
+			$this->_data        = $this->get_session_data();
 		}
 	}
 
