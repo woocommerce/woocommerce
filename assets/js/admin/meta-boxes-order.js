@@ -54,12 +54,14 @@ jQuery( function ( $ ) {
 
 			if ( ! $.isEmptyObject( wc_meta_boxes_order.states[ country ] ) ) {
 				var state = wc_meta_boxes_order.states[ country ],
+					$defaultOption = $( '<option value=""></option>' )
+						.text( woocommerce_admin_meta_boxes_order.i18n_select_state_text ),
 					$newstate = $( '<select></select>' )
 						.prop( 'id', input_id )
 						.prop( 'name', input_name )
 						.prop( 'placeholder', placeholder )
 						.addClass( 'js_field-state select short' )
-						.append( $( '<option value="">' + woocommerce_admin_meta_boxes_order.i18n_select_state_text + '</option>' ) );
+						.append( $defaultOption );
 
 					$.each( state, function( index ) {
 						var $option = $( '<option></option>' )
