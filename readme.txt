@@ -192,6 +192,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Simplify display of discount amounts within orders. #22949
 * Template - Moved the order of rememberme checkboxes for accessibility so they tab in order. #21454
 * Template - New structure for attributes template, including new `woocommerce_display_product_attributes` filter. #22480
+* Template - Admin cancelled order email reworded. #22971
 * Dev - Update action scheduler to version 2.2.1. #23016
 * Dev - Use ActionScheduler for database updates. Improved update notice. #22904
 * Dev - Introduce `woocommerce_reviews_title` filter. #22216
