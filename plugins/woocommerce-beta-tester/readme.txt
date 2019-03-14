@@ -1,5 +1,5 @@
 === WooCommerce Beta Tester ===
-Contributors: automattic, bor0, claudiosanches, claudiulodro, kloon, mikejolley, peterfabian1000
+Contributors: automattic, bor0, claudiosanches, claudiulodro, kloon, mikejolley, peterfabian1000, rodrigosprimo
 Tags: woocommerce, woo commerce, beta, beta tester, bleeding edge, testing
 Requires at least: 4.7
 Tested up to: 5.1
