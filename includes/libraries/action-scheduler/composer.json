@@ -6,6 +6,6 @@
   "minimum-stability": "dev",
   "require": {},
   "require-dev": {
-    "wp-cli/wp-cli": "^1.3"
+    "wp-cli/wp-cli": "1.5.1"
   }
 }
