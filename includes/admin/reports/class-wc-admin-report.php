@@ -364,7 +364,7 @@ class WC_Admin_Report {
 	 * Init the static hooks of the class.
 	 */
 	protected static function add_update_transients_hook() {
-		if ( ! has_action( 'shutdown', array( 'WC_Admin_Report', 'maybe_update_transients' ) ) {
+		if ( ! has_action( 'shutdown', array( 'WC_Admin_Report', 'maybe_update_transients' ) ) ) {
 			add_action( 'shutdown', array( 'WC_Admin_Report', 'maybe_update_transients' ) );
 		}
 	}
