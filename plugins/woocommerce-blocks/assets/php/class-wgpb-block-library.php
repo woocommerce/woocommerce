@@ -268,12 +268,12 @@ class WGPB_Block_Library {
 
 		// Global settings used in each block.
 		$block_settings = array(
-			'min_columns'       => wc_get_theme_support( 'product_grid::min_columns', 1 ),
-			'max_columns'       => wc_get_theme_support( 'product_grid::max_columns', 6 ),
-			'default_columns'   => wc_get_default_products_per_row(),
-			'min_rows'          => wc_get_theme_support( 'product_grid::min_rows', 1 ),
-			'max_rows'          => wc_get_theme_support( 'product_grid::max_rows', 6 ),
-			'default_rows'      => wc_get_default_product_rows_per_page(),
+			'min_columns'       => wc_get_theme_support( 'product_blocks::min_columns', 1 ),
+			'max_columns'       => wc_get_theme_support( 'product_blocks::max_columns', 6 ),
+			'default_columns'   => wc_get_theme_support( 'product_blocks::default_columns', 3 ),
+			'min_rows'          => wc_get_theme_support( 'product_blocks::min_rows', 1 ),
+			'max_rows'          => wc_get_theme_support( 'product_blocks::max_rows', 6 ),
+			'default_rows'      => wc_get_theme_support( 'product_blocks::default_rows', 1 ),
 			'placeholderImgSrc' => wc_placeholder_img_src(),
 			'min_height'        => wc_get_theme_support( 'featured_block::min_height', 500 ),
 			'default_height'    => wc_get_theme_support( 'featured_block::default_height', 500 ),
