@@ -523,7 +523,7 @@ class WC_Email extends WC_Settings_API {
 		if ( in_array( $this->get_content_type(), array( 'text/html', 'multipart/alternative' ), true ) ) {
 			ob_start();
 			wc_get_template( 'emails/email-styles.php' );
-			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean() );
+			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean(), $this );
 
 			if ( $this->supports_emogrifier() ) {
 				if ( ! class_exists( 'Emogrifier' ) ) {
