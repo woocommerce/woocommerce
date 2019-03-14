@@ -7,6 +7,7 @@ const { get } = require( 'lodash' );
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const { DefinePlugin } = require( 'webpack' );
+const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
 
 /**
  * WordPress dependencies
@@ -156,6 +157,9 @@ const webpackConfig = {
 				}
 				return outputPath;
 			},
+		} ),
+		new WebpackRTLPlugin( {
+			suffix: '-rtl',
 		} ),
 		new MiniCssExtractPlugin( {
 			filename: './dist/[name]/style.css',

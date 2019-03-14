@@ -4,10 +4,6 @@
 	padding-left: 4px;
 	margin: 0 0 0 $gap-smallest;
 	vertical-align: middle;
-
-	.rtl & {
-		margin: 0 $gap-smallest 0 0;
-	}
 }
 
 .woocommerce-view-more-list__popover {

@@ -1,6 +1,6 @@
 module.exports = {
 	plugins: [
-		require( './node_modules/@wordpress/postcss-themes' )( {
+		require( '@wordpress/postcss-themes' )( {
 			// @todo A default is required for now. Fix postcss-themes to allow no default
 			defaults: {
 				primary: '#0085ba',

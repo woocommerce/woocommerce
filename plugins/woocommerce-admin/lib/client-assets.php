@@ -110,6 +110,7 @@ function wc_admin_register_script() {
 		array( 'wp-edit-blocks' ),
 		filemtime( wc_admin_dir_path( 'dist/components/style.css' ) )
 	);
+	wp_style_add_data( 'wc-components', 'rtl', 'replace' );
 
 	wp_register_style(
 		'wc-components-ie',
@@ -117,6 +118,7 @@ function wc_admin_register_script() {
 		array( 'wp-edit-blocks' ),
 		filemtime( wc_admin_dir_path( 'dist/components/ie.css' ) )
 	);
+	wp_style_add_data( 'wc-components-ie', 'rtl', 'replace' );
 
 	wp_register_style(
 		WC_ADMIN_APP,
@@ -124,6 +126,7 @@ function wc_admin_register_script() {
 		array( 'wc-components' ),
 		filemtime( wc_admin_dir_path( "dist/{$entry}/style.css" ) )
 	);
+	wp_style_add_data( WC_ADMIN_APP, 'rtl', 'replace' );
 }
 add_action( 'admin_enqueue_scripts', 'wc_admin_register_script' );
 

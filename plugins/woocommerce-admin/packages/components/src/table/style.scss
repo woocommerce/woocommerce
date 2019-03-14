@@ -214,10 +214,6 @@
 	&:not(.is-left-aligned) {
 		text-align: right;
 
-		.rtl & {
-			text-align: left;
-		}
-
 		button {
 			justify-content: flex-end;
 		}
@@ -255,11 +251,6 @@ th.woocommerce-table__item {
 
 	& + .woocommerce-table__header {
 		border-left: 1px solid $core-grey-light-700;
-
-		.rtl & {
-			border-left: 0;
-			border-right: 1px solid $core-grey-light-700;
-		}
 	}
 
 	&.is-left-aligned.is-sortable {
@@ -280,10 +271,6 @@ th.woocommerce-table__item {
 		border: none;
 		background: transparent;
 		box-shadow: none !important;
-
-		.rtl & {
-			padding: $gap-smaller 0 $gap-smaller $gap-large;
-		}
 
 		// @todo Add interactive styles
 		&:hover {
