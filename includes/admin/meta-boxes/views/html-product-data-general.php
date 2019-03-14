@@ -1,7 +1,12 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+/**
+ * Product general data panel.
+ *
+ * @package WooCommerce/Admin
+ */
+
+defined( 'ABSPATH' ) || exit;
+
 ?>
 <div id="general_product_data" class="panel woocommerce_options_panel">
 
@@ -102,7 +107,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								ob_start();
 								require 'html-product-download.php';
 								echo esc_attr( ob_get_clean() );
-							?>
+								?>
 							"><?php esc_html_e( 'Add File', 'woocommerce' ); ?></a>
 						</th>
 					</tr>

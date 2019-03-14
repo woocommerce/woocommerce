@@ -2,14 +2,15 @@
 /**
  * Outputs a variation for editing.
  *
+ * @package WooCommerce\Admin
  * @var int $variation_id
  * @var WP_POST $variation
  * @var WC_Product_Variation $variation_object
  * @var array $variation_data array of variation data @deprecated.
  */
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+
+defined( 'ABSPATH' ) || exit;
+
 ?>
 <div class="woocommerce_variation wc-metabox closed">
 	<h3>
@@ -26,11 +27,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			}
 			$selected_value = isset( $attribute_values[ sanitize_title( $attribute->get_name() ) ] ) ? $attribute_values[ sanitize_title( $attribute->get_name() ) ] : '';
 			?>
-			<select name="attribute_<?php echo sanitize_title( $attribute->get_name() ) . "[{$loop}]"; ?>">
+			<select name="attribute_<?php echo esc_attr( sanitize_title( $attribute->get_name() ) . "[{$loop}]" ); ?>">
 				<option value="">
 					<?php
 					/* translators: %s: attribute label */
-					printf( esc_html__( 'Any %s&hellip;', 'woocommerce' ), wc_attribute_label( $attribute->get_name() ) );
+					printf( esc_html__( 'Any %s&hellip;', 'woocommerce' ), wc_attribute_label( $attribute->get_name() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					?>
 				</option>
 				<?php if ( $attribute->is_taxonomy() ) : ?>
@@ -51,11 +52,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<?php
 		/**
-		 * woocommerce_variation_header action.
+		 * Variations header action.
 		 *
 		 * @since 3.6.0
 		 *
-		 * @param WP_Post $variation .
+		 * @param WP_Post $variation Post data.
 		 */
 		do_action( 'woocommerce_variation_header', $variation );
 		?>
@@ -86,7 +87,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<p class="form-row form-row-full options">
 				<label>
 					<?php esc_html_e( 'Enabled', 'woocommerce' ); ?>:
-					<input type="checkbox" class="checkbox" name="variable_enabled[<?php echo $loop; ?>]" <?php checked( in_array( $variation_object->get_status( 'edit' ), array( 'publish', false ), true ), true ); ?> />
+					<input type="checkbox" class="checkbox" name="variable_enabled[<?php echo esc_attr( $loop ); ?>]" <?php checked( in_array( $variation_object->get_status( 'edit' ), array( 'publish', false ), true ), true ); ?> />
 				</label>
 				<label class="tips" data-tip="<?php esc_html_e( 'Enable this option if access is given to a downloadable file upon purchase of a product', 'woocommerce' ); ?>">
 					<?php esc_html_e( 'Downloadable', 'woocommerce' ); ?>:
@@ -152,23 +153,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 				echo '<div class="form-field sale_price_dates_fields hidden">
 					<p class="form-row form-row-first">
-						<label>' . __( 'Sale start date', 'woocommerce' ) . '</label>
-						<input type="text" class="sale_price_dates_from" name="variable_sale_price_dates_from[' . $loop . ']" value="' . esc_attr( $sale_price_dates_from ) . '" placeholder="' . _x( 'From&hellip;', 'placeholder', 'woocommerce' ) . ' YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ) . '" />
+						<label>' . esc_html__( 'Sale start date', 'woocommerce' ) . '</label>
+						<input type="text" class="sale_price_dates_from" name="variable_sale_price_dates_from[' . esc_attr( $loop ) . ']" value="' . esc_attr( $sale_price_dates_from ) . '" placeholder="' . esc_attr_x( 'From&hellip;', 'placeholder', 'woocommerce' ) . ' YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ) . '" />
 					</p>
 					<p class="form-row form-row-last">
-						<label>' . __( 'Sale end date', 'woocommerce' ) . '</label>
-						<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[' . esc_attr( $loop ) . ']" value="' . esc_attr( $sale_price_dates_to ) . '" placeholder="' . esc_html_x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '  YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ) . '" />
+						<label>' . esc_html__( 'Sale end date', 'woocommerce' ) . '</label>
+						<input type="text" class="sale_price_dates_to" name="variable_sale_price_dates_to[' . esc_attr( $loop ) . ']" value="' . esc_attr( $sale_price_dates_to ) . '" placeholder="' . esc_attr_x( 'To&hellip;', 'placeholder', 'woocommerce' ) . '  YYYY-MM-DD" maxlength="10" pattern="' . esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ) . '" />
 					</p>
 				</div>';
 
 				/**
-				 * woocommerce_variation_options_pricing action.
+				 * Variation options pricing action.
 				 *
 				 * @since 2.5.0
 				 *
-				 * @param int     $loop
-				 * @param array   $variation_data
-				 * @param WP_Post $variation
+				 * @param int     $loop           Position in the loop.
+				 * @param array   $variation_data Variation data.
+				 * @param WP_Post $variation      Post data.
 				 */
 				do_action( 'woocommerce_variation_options_pricing', $loop, $variation_data, $variation );
 				?>
@@ -210,13 +211,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 					);
 
 					/**
-					 * woocommerce_variation_options_inventory action.
+					 * Variation options inventory action.
 					 *
 					 * @since 2.5.0
 					 *
-					 * @param int     $loop
-					 * @param array   $variation_data
-					 * @param WP_Post $variation
+					 * @param int     $loop           Position in the loop.
+					 * @param array   $variation_data Variation data.
+					 * @param WP_Post $variation      Post data.
 					 */
 					do_action( 'woocommerce_variation_options_inventory', $loop, $variation_data, $variation );
 					?>
@@ -273,7 +274,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							printf(
 								/* translators: %s: dimension unit */
 								esc_html__( 'Dimensions (L&times;W&times;H) (%s)', 'woocommerce' ),
-								get_option( 'woocommerce_dimension_unit' )
+								esc_html( get_option( 'woocommerce_dimension_unit' ) )
 							);
 							?>
 						</label>
@@ -288,13 +289,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 				}
 
 				/**
-				 * woocommerce_variation_options_dimensions action.
+				 * Variation options dimensions action.
 				 *
 				 * @since 2.5.0
 				 *
-				 * @param int     $loop
-				 * @param array   $variation_data
-				 * @param WP_Post $variation
+				 * @param int     $loop           Position in the loop.
+				 * @param array   $variation_data Variation data.
+				 * @param WP_Post $variation      Post data.
 				 */
 				do_action( 'woocommerce_variation_options_dimensions', $loop, $variation_data, $variation );
 				?>
@@ -333,13 +334,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 					);
 
 					/**
-					 * woocommerce_variation_options_tax action.
+					 * Variation options tax action.
 					 *
 					 * @since 2.5.0
 					 *
-					 * @param int     $loop
-					 * @param array   $variation_data
-					 * @param WP_Post $variation
+					 * @param int     $loop           Position in the loop.
+					 * @param array   $variation_data Variation data.
+					 * @param WP_Post $variation      Post data.
 					 */
 					do_action( 'woocommerce_variation_options_tax', $loop, $variation_data, $variation );
 				}
@@ -373,7 +374,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 						</thead>
 						<tbody>
 							<?php
-							if ( $downloads = $variation_object->get_downloads( 'edit' ) ) {
+							$downloads = $variation_object->get_downloads( 'edit' );
+
+							if ( $downloads ) {
 								foreach ( $downloads as $key => $file ) {
 									include 'html-product-variation-download.php';
 								}
@@ -440,13 +443,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 				);
 
 				/**
-				 * woocommerce_variation_options_download action.
+				 * Variation options download action.
 				 *
 				 * @since 2.5.0
 				 *
-				 * @param int     $loop
-				 * @param array   $variation_data
-				 * @param WP_Post $variation
+				 * @param int     $loop           Position in the loop.
+				 * @param array   $variation_data Variation data.
+				 * @param WP_Post $variation      Post data.
 				 */
 				do_action( 'woocommerce_variation_options_download', $loop, $variation_data, $variation );
 				?>
