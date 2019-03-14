@@ -1,0 +1,13 @@
+{layout '@layout.latte'}
+{var $robots = false}
+
+{block title}Page not found{/block}
+
+{block content}
+<div id="content">
+	<h1>{include title}</h1>
+	<p>The requested page could not be found.</p>
+	<p>You have probably clicked on a link that is outdated and points to a page that does not exist any more or you have made an typing error in the address.</p>
+	<p>To continue please try to find requested page in the menu,{if $config->tree} take a look at <a href="tree.html">the tree view</a> of the whole project{/if} or use search field on the top.</p>
+</div>
+{/block}

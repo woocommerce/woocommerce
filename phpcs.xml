@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<ruleset name="WordPress Coding Standards">
+	<description>WooCommerce dev PHP_CodeSniffer ruleset.</description>
+
+	<!-- Exclude paths -->
+	<exclude-pattern>tests/cli/</exclude-pattern>
+	<exclude-pattern>apigen/</exclude-pattern>
+	<exclude-pattern>includes/libraries/</exclude-pattern>
+	<exclude-pattern>includes/legacy/</exclude-pattern>
+	<exclude-pattern>includes/api/legacy/</exclude-pattern>
+	<exclude-pattern>includes/api/v1/</exclude-pattern>
+	<exclude-pattern>includes/class-wc-geo-ip.php</exclude-pattern>
+	<exclude-pattern>includes/wc-deprecated-functions.php</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+
+	<!-- Configs -->
+	<config name="minimum_supported_wp_version" value="4.7" />
+	<config name="testVersion" value="5.2-" />
+
+	<!-- Rules -->
+	<rule ref="WooCommerce-Core" />
+
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array" value="woocommerce" />
+		</properties>
+	</rule>
+
+	<rule ref="PHPCompatibility">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
+		<exclude-pattern>includes/**/abstract-*.php</exclude-pattern>
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+
+	<rule ref="Generic.Commenting">
+		<exclude-pattern>tests/</exclude-pattern>
+	</rule>
+
+	<rule ref="PEAR.Functions.FunctionCallSignature.EmptyLine">
+		<exclude-pattern>tests/e2e-tests/</exclude-pattern>
+	</rule>
+
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>i18n/</exclude-pattern>
+	</rule>
+</ruleset>
