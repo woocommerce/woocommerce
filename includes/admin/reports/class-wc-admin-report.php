@@ -17,17 +17,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Report {
 
 	/**
-	 * Init the static hooks of the class.
+	 * @var array List of transients name that have been updated and need persisting.
 	 */
-	protected static function add_update_transients_hook() {
-		static $done = false;
-		
-		if ( $done ) {
-			return;
-		}
-		$done = true;
-		add_action( 'shutdown', array( 'WC_Admin_Report', 'maybe_update_transients' ) );
-	}
+	protected static $transients_to_update = array();
+	
+	/**
+	 * @var array The list of transients.
+	 */
+	protected static $cached_results = array();
 
 	/**
 	 * The chart interval.
@@ -357,7 +354,19 @@ class WC_Admin_Report {
 		return $result;
 	}
 
-
+	/**
+	 * Init the static hooks of the class.
+	 */
+	protected static function add_update_transients_hook() {
+		static $done = false;
+		
+		if ( $done ) {
+			return;
+		}
+		$done = true;
+		add_action( 'shutdown', array( 'WC_Admin_Report', 'maybe_update_transients' ) );
+	}
+	
 	/**
 	 * Enables big mysql selects for reports, just once for this session
 	 */
@@ -411,16 +420,6 @@ class WC_Admin_Report {
 		self::$transients_to_update[ $class ]          = $class;
 		self::$cached_results[ $class ][ $query_hash ] = $data;
 	}
-
-	/**
-	 * @var array List of transients name that have been updated and need persisting.
-	 */
-	protected static $transients_to_update = array();
-	
-	/**
-	 * @var array The list of transients.
-	 */
-	protected static $cached_results = array();
 
 	/**
 	 * Function to update the modified transients at the end of the request.
