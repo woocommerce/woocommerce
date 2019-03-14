@@ -300,7 +300,7 @@ class WC_Meta_Box_Order_Data {
 								);
 							}
 							?>
-							<select class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-allow_clear="true">
+							<select class="wc-customer-search" id="customer_user" name="customer_user" data-minimum_input_length="<?php wc_get_minimum_input_length_for_customer_search() ?>" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-allow_clear="true">
 								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo htmlspecialchars( $user_string ); ?></option>
 							</select>
 							<!--/email_off-->
