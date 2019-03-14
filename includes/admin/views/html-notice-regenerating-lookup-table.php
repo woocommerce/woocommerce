@@ -9,10 +9,8 @@ defined( 'ABSPATH' ) || exit;
 
 ?>
 <div id="message" class="updated woocommerce-message">
-	<a class="woocommerce-message-close notice-dismiss" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-status&tab=action-scheduler&s=wc_update_product_lookup_tables&status=pending' ) ); ?>"><?php esc_html_e( 'View progress', 'woocommerce' ); ?></a>
-
 	<p>
-		<string><?php esc_html_e( 'WooCommerce is updating product data in the background. ', 'woocommerce' ); ?></strong>
+		<string><?php esc_html_e( 'WooCommerce is updating product data in the background.', 'woocommerce' ); ?></strong>&nbsp;
 		<?php
 		echo wp_kses_post(
 			sprintf(
@@ -23,5 +21,6 @@ defined( 'ABSPATH' ) || exit;
 			)
 		);
 		?>
+		&nbsp;<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-status&tab=action-scheduler&s=wc_update_product_lookup_tables&status=pending' ) ); ?>"><?php esc_html_e( 'View progress &rarr;', 'woocommerce' ); ?></a>
 	</p>
 </div>

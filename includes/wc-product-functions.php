@@ -1319,6 +1319,7 @@ function wc_update_product_lookup_tables() {
 		'total_sales',
 		'downloadable',
 		'virtual',
+		'onsale',
 	);
 
 	foreach ( $columns as $index => $column ) {
@@ -1442,6 +1443,16 @@ function wc_update_product_lookup_tables_column( $column ) {
 		case 'downloadable':
 		case 'virtual':
 			$column = esc_sql( $column );
+
+			$wpdb->query(
+				"
+				UPDATE
+					{$wpdb->wc_product_meta_lookup} lookup_table
+				SET
+					lookup_table.`{$column}` = 0
+				"
+			);
+
 			$wpdb->query(
 				"
 				UPDATE
@@ -1452,6 +1463,38 @@ function wc_update_product_lookup_tables_column( $column ) {
 				WHERE
 					meta1.meta_value = 'yes'
 				"
+			);
+			break;
+		case 'onsale':
+			$column   = esc_sql( $column );
+			$decimals = absint( wc_get_price_decimals() );
+
+			$wpdb->query(
+				"
+				UPDATE
+					{$wpdb->wc_product_meta_lookup} lookup_table
+				SET
+					lookup_table.`{$column}` = 0
+				"
+			);
+
+			$wpdb->query(
+				$wpdb->prepare(
+					"
+					UPDATE
+						{$wpdb->wc_product_meta_lookup} lookup_table
+						LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_price'
+						LEFT JOIN {$wpdb->postmeta} meta2 ON lookup_table.product_id = meta2.post_id AND meta2.meta_key = '_sale_price'
+					SET
+						lookup_table.`{$column}` = 1
+					WHERE 1=1
+						AND CAST( meta1.meta_value AS DECIMAL ) >= 0
+						AND CAST( meta2.meta_value AS CHAR ) != ''
+						AND CAST( meta1.meta_value AS DECIMAL( 10, %d ) ) = CAST( meta2.meta_value AS DECIMAL( 10, %d ) )
+					",
+					$decimals,
+					$decimals
+				)
 			);
 			break;
 	}
