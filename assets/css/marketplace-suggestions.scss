@@ -35,6 +35,27 @@ a.suggestion-dismiss::before {
 	}
 }
 
+.marketplace-suggestions-metabox-nosuggestions-placeholder {
+	max-width: 325px;
+	margin: auto;
+	margin-top: 4em;
+	text-align: center;
+
+	.marketplace-suggestion-placeholder-content {
+		margin-bottom: 1em;
+	}
+
+	h4,
+	a,
+	p {
+		margin: auto;
+		text-align: center;
+		display: block;
+		margin-top: 0.75em;
+		line-height: 1.75;
+	}
+}
+
 .marketplace-suggestions-container.showing-suggestion {
 	text-align: left;
 

@@ -49,7 +49,7 @@
 			}
 
 			window.wcTracks.recordEvent( 'marketplace_suggestion_dismissed', {
-				suggestionSlug: suggestionSlug
+				suggestion_slug: suggestionSlug
 			} );
 		}
 
@@ -312,8 +312,18 @@
 				'.marketplace-suggestions-container[data-marketplace-suggestions-context="product-edit-meta-tab-body"]'
 			).children();
 			if ( 0 >= productMetaboxSuggestions.length ) {
-				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="product-edit-meta-tab-header"]' ).slideUp();
-				$( '.marketplace-suggestions-container[data-marketplace-suggestions-context="product-edit-meta-tab-body"]' ).fadeOut();
+				var metaboxSuggestionsUISelector =
+					'.marketplace-suggestions-container[data-marketplace-suggestions-context="product-edit-meta-tab-body"]';
+				metaboxSuggestionsUISelector +=
+					', .marketplace-suggestions-container[data-marketplace-suggestions-context="product-edit-meta-tab-header"]';
+				metaboxSuggestionsUISelector +=
+					', .marketplace-suggestions-container[data-marketplace-suggestions-context="product-edit-meta-tab-footer"]';
+				$( metaboxSuggestionsUISelector ).fadeOut( {
+					complete: function() {
+						$( '.marketplace-suggestions-metabox-nosuggestions-placeholder' ).fadeIn();
+					}
+				} );
+
 			}
 		}
 
