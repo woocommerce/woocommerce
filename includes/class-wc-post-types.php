@@ -295,7 +295,8 @@ class WC_Post_Types {
 		}
 
 		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
-		if ( update_option( 'current_theme_supports_woocommerce', current_theme_supports( 'woocommerce' ) ? 'yes' : 'no' ) ) {
+		$theme_support = current_theme_supports( 'woocommerce' ) ? 'yes' : 'no';
+		if ( $theme_support !== get_option('current_theme_supports_woocommerce') && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		}
 
