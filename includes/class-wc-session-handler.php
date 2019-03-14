@@ -129,9 +129,19 @@ class WC_Session_Handler extends WC_Session {
 			$this->_has_cookie = true;
 
 			if ( ! isset( $_COOKIE[ $this->_cookie ] ) || $_COOKIE[ $this->_cookie ] !== $cookie_value ) {
-				wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, apply_filters( 'wc_session_use_secure_cookie', false ) );
+				wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, $this->use_secure_cookie(), true );
 			}
 		}
+	}
+
+	/**
+	 * Should the session cookie be secure?
+	 *
+	 * @since 3.6.0
+	 * @return bool
+	 */
+	protected function use_secure_cookie() {
+		return apply_filters( 'wc_session_use_secure_cookie', wc_site_is_https() && is_ssl() );
 	}
 
 	/**
@@ -258,7 +268,7 @@ class WC_Session_Handler extends WC_Session {
 	 * Forget all session data without destroying it.
 	 */
 	public function forget_session() {
-		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, apply_filters( 'wc_session_use_secure_cookie', false ) );
+		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, $this->use_secure_cookie(), true );
 
 		wc_empty_cart();
 
