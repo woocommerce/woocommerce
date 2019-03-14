@@ -1,8 +1,9 @@
-# (unreleased)
+# 2.0.0 (unreleased)
 - Chart legend component now uses withInstanceId HOC so the ids used in several HTML elements are unique.
 - Chart component now accepts data with negative values.
 - Chart component: new prop `filterParam` used to detect selected items in the current query. If there are, they will be displayed in the chart even if their values are 0.
 - Expand search results and allow searching when input is refocused in autocompleter.
+- Animation Slider: Remove `focusOnChange` in favor of `onExited` so consumers can pass a function to be exectuted after a transition has finished.
 
 # 1.6.0
 - Chart component: new props `emptyMessage` and `baseValue`. When an empty message is provided, it will be displayed on top of the chart if there are no values different than `baseValue`.

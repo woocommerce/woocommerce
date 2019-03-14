@@ -22,17 +22,9 @@ class AnimationSlider extends Component {
 	}
 
 	onExited() {
-		const { onExited, focusOnChange } = this.props;
+		const { onExited } = this.props;
 		if ( onExited ) {
-			onExited();
-		}
-		if ( focusOnChange ) {
-			const focusable = this.container.current.querySelector(
-				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-			);
-			if ( focusable ) {
-				focusable.focus();
-			}
+			onExited( this.container.current );
 		}
 	}
 
@@ -74,9 +66,9 @@ AnimationSlider.propTypes = {
 	 */
 	animate: PropTypes.oneOf( [ null, 'left', 'right' ] ),
 	/**
-	 * When set to true, the first focusable element will be focused after an animation has finished.
+	 * A function to be executed after a transition is complete, passing the containing ref as the argument.
 	 */
-	focusOnChange: PropTypes.bool,
+	onExited: PropTypes.func,
 };
 
 export default AnimationSlider;
