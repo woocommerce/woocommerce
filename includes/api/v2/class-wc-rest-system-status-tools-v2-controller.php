@@ -143,11 +143,6 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				'button' => __( 'Clean up download permissions', 'woocommerce' ),
 				'desc'   => __( 'This tool will delete expired download permissions and permissions with 0 remaining downloads.', 'woocommerce' ),
 			),
-			'add_order_indexes'                  => array(
-				'name'   => __( 'Order address indexes', 'woocommerce' ),
-				'button' => __( 'Index orders', 'woocommerce' ),
-				'desc'   => __( 'This tool will add address indexes to orders that do not have them yet. This improves order search results.', 'woocommerce' ),
-			),
 			'regenerate_product_lookup_tables' => array(
 				'name'   => __( 'Product lookup tables', 'woocommerce' ),
 				'button' => __( 'Regenerate', 'woocommerce' ),
@@ -470,26 +465,6 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				);
 				/* translators: %d: amount of permissions */
 				$message = sprintf( __( '%d permissions deleted', 'woocommerce' ), $result );
-				break;
-
-			case 'add_order_indexes':
-				/*
-				 * Add billing and shipping address indexes containing the customer name for orders
-				 * that don't have address indexes yet.
-				 */
-				$sql   = "INSERT INTO {$wpdb->postmeta}( post_id, meta_key, meta_value )
-					SELECT post_id, %s, GROUP_CONCAT( meta_value SEPARATOR ' ' )
-					FROM {$wpdb->postmeta}
-					WHERE meta_key IN ( %s, %s )
-					AND post_id IN ( SELECT DISTINCT post_id FROM {$wpdb->postmeta}
-						WHERE post_id NOT IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key=%s )
-						AND post_id IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key=%s ) )
-					GROUP BY post_id";
-				$rows  = $wpdb->query( $wpdb->prepare( $sql, '_billing_address_index', '_billing_first_name', '_billing_last_name', '_billing_address_index', '_billing_last_name' ) ); // WPCS: unprepared SQL ok.
-				$rows += $wpdb->query( $wpdb->prepare( $sql, '_shipping_address_index', '_shipping_first_name', '_shipping_last_name', '_shipping_address_index', '_shipping_last_name' ) ); // WPCS: unprepared SQL ok.
-
-				/* translators: %d: amount of indexes */
-				$message = sprintf( __( '%d indexes added', 'woocommerce' ), $rows );
 				break;
 
 			case 'regenerate_product_lookup_tables':
