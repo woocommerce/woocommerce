@@ -3,7 +3,7 @@ Contributors: automattic, bor0, claudiosanches, claudiulodro, kloon, mikejolley,
 Tags: woocommerce, woo commerce, beta, beta tester, bleeding edge, testing
 Requires at least: 4.7
 Tested up to: 5.1
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -62,6 +62,9 @@ Join in on our [GitHub repository](https://github.com/woocommerce/woocommerce/).
 See our [contributing guidelines here](https://github.com/woocommerce/woocommerce/blob/master/.github/CONTRIBUTING.md).
 
 == Changelog ==
+
+= 2.0.1 =
+* Changes to make this plugin compatible with the upcoming WooCommerce 3.6
 
 = 2.0.0 =
 * Enhancement - Re-built to pull updates from the WordPress.org repository rather than GitHub.
