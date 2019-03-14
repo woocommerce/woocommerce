@@ -115,7 +115,7 @@
 
 			linkoutButton.onclick = function() {
 				window.wcTracks.recordEvent( 'marketplace_suggestion_clicked', {
-					suggestionSlug: slug
+					suggestion_slug: slug
 				} );
 			};
 
@@ -370,7 +370,7 @@
 					usedSuggestionsContexts.push( context );
 
 					window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
-						suggestionSlug: suggestionsToDisplay[ i ].slug
+						suggestion_slug: suggestionsToDisplay[ i ].slug
 					} );
 				}
 			} );
@@ -445,7 +445,7 @@
 						refreshBannerColspanForScreenOptions( content );
 
 						window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
-							suggestionSlug: suggestionToDisplay.slug
+							suggestion_slug: suggestionToDisplay.slug
 						} );
 					}
 				} );
