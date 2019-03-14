@@ -358,17 +358,13 @@ class WC_Admin_Report {
 	 * Init the static hooks of the class.
 	 */
 	protected static function add_update_transients_hook() {
-		static $done = false;
-		
-		if ( $done ) {
-			return;
+		if ( ! has_action( 'shutdown', array( 'WC_Admin_Report', 'maybe_update_transients' ) ) {
+			add_action( 'shutdown', array( 'WC_Admin_Report', 'maybe_update_transients' ) );
 		}
-		$done = true;
-		add_action( 'shutdown', array( 'WC_Admin_Report', 'maybe_update_transients' ) );
 	}
 	
 	/**
-	 * Enables big mysql selects for reports, just once for this session
+	 * Enables big mysql selects for reports, just once for this session.
 	 */
 	protected static function enable_big_selects() {
 		static $big_selects = false;
@@ -382,7 +378,7 @@ class WC_Admin_Report {
 	}
 
 	/**
-	 * Get the cached query result or null if it's not in the cache
+	 * Get the cached query result or null if it's not in the cache.
 	 *
 	 * @param string $query_hash
 	 *
