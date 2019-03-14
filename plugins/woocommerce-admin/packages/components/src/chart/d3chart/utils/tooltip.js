@@ -25,7 +25,7 @@ class ChartTooltip {
 		elementWidthRatio,
 	) {
 		const tooltipSize = this.ref.getBoundingClientRect();
-		const d3BaseCoords = d3Select( '.d3-base' ).node().getBoundingClientRect();
+		const d3BaseCoords = this.ref.parentNode.querySelector( '.d3-base' ).getBoundingClientRect();
 		const leftMargin = Math.max( d3BaseCoords.left, chartCoords.left );
 
 		if ( this.position === 'below' ) {

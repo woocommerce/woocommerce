@@ -55,7 +55,8 @@ class D3Chart extends Component {
 	}
 
 	getScaleParams( uniqueDates ) {
-		const { data, height, margin, orderedKeys, chartType } = this.props;
+		const { data, height, orderedKeys, chartType } = this.props;
+		const margin = this.getMargin();
 
 		const adjHeight = height - margin.top - margin.bottom;
 		const adjWidth = this.getWidth() - margin.left - margin.right;
@@ -113,7 +114,8 @@ class D3Chart extends Component {
 	}
 
 	drawChart( node ) {
-		const { data, dateParser, margin, chartType } = this.props;
+		const { data, dateParser, chartType } = this.props;
+		const margin = this.getMargin();
 		const uniqueDates = getUniqueDates( data, dateParser );
 		const formats = this.getFormatParams();
 		const params = this.getParams( uniqueDates );
@@ -132,7 +134,8 @@ class D3Chart extends Component {
 	}
 
 	shouldBeCompact() {
-		const {	data, margin, chartType, width } = this.props;
+		const {	data, chartType, width } = this.props;
+		const margin = this.getMargin();
 		if ( chartType !== 'bar' ) {
 			return false;
 		}
@@ -143,8 +146,24 @@ class D3Chart extends Component {
 		return widthWithoutMargins < minimumWideWidth;
 	}
 
+	getMargin() {
+		const { margin } = this.props;
+
+		if ( window.isRtl ) {
+			return {
+				bottom: margin.bottom,
+				left: margin.right,
+				right: margin.left,
+				top: margin.top,
+			};
+		}
+
+		return margin;
+	}
+
 	getWidth() {
-		const {	data, margin, chartType, width } = this.props;
+		const {	data, chartType, width } = this.props;
+		const margin = this.getMargin();
 		if ( chartType !== 'bar' ) {
 			return width;
 		}

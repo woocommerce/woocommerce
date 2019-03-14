@@ -241,6 +241,7 @@ const drawXAxis = ( node, params, scales, formats ) => {
 const drawYAxis = ( node, scales, formats, margin ) => {
 	const yGrids = getYGrids( scales.yScale.domain()[ 1 ] );
 	const width = scales.xScale.range()[ 1 ];
+	const xPosition = window.isRtl ? width + margin.left + margin.right / 2 - 15 : -margin.left / 2 - 15;
 
 	node
 		.append( 'g' )
@@ -257,7 +258,7 @@ const drawYAxis = ( node, scales, formats, margin ) => {
 		.append( 'g' )
 		.attr( 'class', 'axis y-axis' )
 		.attr( 'aria-hidden', 'true' )
-		.attr( 'transform', 'translate(-50, 12)' )
+		.attr( 'transform', 'translate(' + xPosition + ', 12)' )
 		.attr( 'text-anchor', 'start' )
 		.call(
 			d3AxisLeft( scales.yScale )
