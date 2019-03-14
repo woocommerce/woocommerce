@@ -341,14 +341,20 @@ class WC_Admin_Report {
 			wc_print_r( $query );
 			echo '</pre>';
 		}
-		
-		$query_hash = md5( $query_type . $query );
 
-		if ( $debug || $nocache || is_null( $result = $this->get_cached_query( $query_hash ) ) ) {
+		if ( $debug || $nocache ) {
 			self::enable_big_selects();
 
 			$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
-			$this->set_cached_query( $query_hash, $result );	
+		} else {
+			$query_hash = md5( $query_type . $query );
+			$result = $this->get_cached_query( $query_hash );
+			if ( $result === null ) {
+				self::enable_big_selects();
+
+				$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
+			}
+			$this->set_cached_query( $query_hash, $result );
 		}
 
 		return $result;
