@@ -49,7 +49,7 @@
 			}
 
 			window.wcTracks.recordEvent( 'marketplace_suggestion_dismissed', {
-				suggestionSlug: suggestionSlug
+				suggestion_slug: suggestionSlug
 			} );
 		}
 
