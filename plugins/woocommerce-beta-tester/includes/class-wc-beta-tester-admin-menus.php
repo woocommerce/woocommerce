@@ -256,11 +256,13 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 		}
 
 		// Add the beta tester root node.
-		$wp_admin_bar->add_node( array(
-			'parent' => 0,
-			'id'     => 'wc-beta-tester',
-			'title'  => __( 'WC Beta Tester', 'woocommerce-beta-tester' ),
-		) );
+		$wp_admin_bar->add_node(
+			array(
+				'parent' => 0,
+				'id'     => 'wc-beta-tester',
+				'title'  => __( 'WC Beta Tester', 'woocommerce-beta-tester' ),
+			)
+		);
 
 		$settings = WC_Beta_Tester::get_settings();
 		switch ( $settings->channel ) {

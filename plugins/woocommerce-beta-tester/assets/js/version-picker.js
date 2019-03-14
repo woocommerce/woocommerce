@@ -1,7 +1,13 @@
+/**
+ * Handles the version picker form.
+ *
+ * @package WooCommerceBetaTester\JS
+ */
+
 jQuery(function( $ ) {
 
 	/**
-	 * Version information
+	 * Version picker
 	 */
 	var wc_beta_tester_version_picker = {
 
@@ -48,7 +54,7 @@ jQuery(function( $ ) {
 		submitSwitchVersionForm: function( event ) {
 			event.preventDefault();
 
-			$( 'form[name=wcbt-select-version]' ).get(0).submit();
+			$( 'form[name=wcbt-select-version]' ).get( 0 ).submit();
 		},
 	};
 

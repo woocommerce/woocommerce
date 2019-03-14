@@ -102,7 +102,8 @@ class WC_Beta_Tester_Version_Picker {
 	 * @return void
 	 */
 	public function add_to_menus() {
-		add_submenu_page( 'plugins.php',
+		add_submenu_page(
+			'plugins.php',
 			__( 'WooCommerce Version Switch', 'woocommerce-beta-tester' ),
 			__( 'WooCommerce Version Switch', 'woocommerce-beta-tester' ),
 			'install_plugins',
