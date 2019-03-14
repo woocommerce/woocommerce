@@ -297,6 +297,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Correctly show stock status for products when manually creating an order in the admin. #22997
 * Fix - After logging in update customer session ID. #23001
 * Fix - Narrow viewport css in setup wizard. #23033
+* Fix - Allow entering of date only ( no time ) when placing a singular product on sale. #22973
 * Performance - Product meta data lookup table used for sorting and slow queries. #22718
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
