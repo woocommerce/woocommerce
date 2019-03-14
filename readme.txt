@@ -296,6 +296,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Setup wizard redirection improvements. #22977
 * Fix - Correctly show stock status for products when manually creating an order in the admin. #22997
 * Fix - After logging in update customer session ID. #23001
+* Fix - Narrow viewport css in setup wizard. #23033
 * Performance - Product meta data lookup table used for sorting and slow queries. #22718
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
@@ -320,6 +321,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Performance - Image regeneration edge cases. #22818
 * Performance - Don’t query for an order count unnecessarily. #22984
 * Performance - Add caching to attribute functions. #22938
+* Performance - Add ability to run product lookup table updates via WP CLI. #23031
 * Localization - Modify administrative regions of Greece to default to their english ISO 3166-2 names, instead of using the native GR names. #21945
 * Localization - Added US Minor Outlying Islands as states to avoid confusion with US. #22468
 * Localization - Dutch postcode validation. #22316
