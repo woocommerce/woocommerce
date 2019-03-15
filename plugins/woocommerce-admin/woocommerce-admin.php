@@ -123,8 +123,10 @@ add_action( 'admin_init', 'wc_admin_possibly_deactivate_wc_admin_plugin' );
  * On deactivating the wc-admin plugin.
  */
 function wc_admin_deactivate_wc_admin_plugin() {
-	wp_clear_scheduled_hook( 'wc_admin_daily' );
-	WC_Admin_Reports_Sync::clear_queued_actions();
+	if ( wc_admin_dependencies_satisfied() ) {
+		wp_clear_scheduled_hook( 'wc_admin_daily' );
+		WC_Admin_Reports_Sync::clear_queued_actions();
+	}
 }
 register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, 'wc_admin_deactivate_wc_admin_plugin' );
 
