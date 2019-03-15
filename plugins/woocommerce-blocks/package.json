@@ -2,7 +2,7 @@
   "name": "@woocommerce/block-library",
   "title": "WooCommerce Blocks",
   "author": "Automattic",
-  "version": "2.0.0-beta",
+  "version": "2.0.0-rc1",
   "description": "WooCommerce blocks for the Gutenberg editor.",
   "homepage": "https://github.com/woocommerce/woocommerce-gutenberg-products-block/",
   "keywords": [
@@ -16,9 +16,11 @@
   },
   "license": "GPL-3.0+",
   "scripts": {
+    "prepack": "npm install && npm run lint && npm run test && npm run build",
     "build": "cross-env BABEL_ENV=default NODE_ENV=production webpack",
     "start": "cross-env BABEL_ENV=default webpack --watch",
-    "lint": "npm run lint:css && npm run lint:js",
+    "lint": "npm run lint:php && npm run lint:css && npm run lint:js",
+    "lint:php": "composer run-script phpcs .",
     "lint:css": "stylelint assets/css",
     "lint:js": "eslint assets/js --ext=js,jsx",
     "test": "wp-scripts test-unit-js --config tests/js/jest.config.json",

@@ -22,7 +22,6 @@ jobs:
       php: 7.1
       script:
         - composer install
-        - composer run-script phpcs .
         - npm install
         - npm run lint
         - npm run build
