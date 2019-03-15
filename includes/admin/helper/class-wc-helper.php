@@ -888,12 +888,6 @@ class WC_Helper {
 			wp_die( 'Could not verify nonce' );
 		}
 
-		// Attempt to activate this plugin.
-		$local = self::_get_local_from_product_id( $product_id );
-		if ( $local && 'plugin' == $local['_type'] && current_user_can( 'activate_plugins' ) && ! is_plugin_active( $local['_filename'] ) ) {
-			activate_plugin( $local['_filename'] );
-		}
-
 		// Activate subscription.
 		$activation_response = WC_Helper_API::post(
 			'activate',
@@ -918,18 +912,26 @@ class WC_Helper {
 			/**
 			 * Fires when the Helper activates a product successfully.
 			 *
-			 * @param int   $product_id Product ID being activated.
-			 * @param array $activation_response The response object from wp_safe_remote_request().
+			 * @param int    $product_id Product ID being activated.
+			 * @param string $product_key Subscription product key.
+			 * @param array  $activation_response The response object from wp_safe_remote_request().
 			 */
-			do_action( 'woocommerce_helper_subscription_activate_success', $product_id, $activation_response );
+			do_action( 'woocommerce_helper_subscription_activate_success', $product_id, $product_key, $activation_response );
 		} else {
 			/**
 			 * Fires when the Helper fails to activate a product.
 			 *
-			 * @param int   $product_id Product ID being activated.
-			 * @param array $activation_response The response object from wp_safe_remote_request().
+			 * @param int    $product_id Product ID being activated.
+			 * @param string $product_key Subscription product key.
+			 * @param array  $activation_response The response object from wp_safe_remote_request().
 			 */
-			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $activation_response );
+			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $product_key, $activation_response );
+		}
+
+		// Attempt to activate this plugin.
+		$local = self::_get_local_from_product_id( $product_id );
+		if ( $local && 'plugin' == $local['_type'] && current_user_can( 'activate_plugins' ) && ! is_plugin_active( $local['_filename'] ) ) {
+			activate_plugin( $local['_filename'] );
 		}
 
 		self::_flush_subscriptions_cache();
@@ -981,20 +983,22 @@ class WC_Helper {
 			/**
 			 * Fires when the Helper activates a product successfully.
 			 *
-			 * @param int   $product_id Product ID being deactivated.
-			 * @param array $deactivation_response The response object from wp_safe_remote_request().
+			 * @param int    $product_id Product ID being deactivated.
+			 * @param string $product_key Subscription product key.
+			 * @param array  $deactivation_response The response object from wp_safe_remote_request().
 			 */
-			do_action( 'woocommerce_helper_subscription_deactivate_success', $product_id, $deactivation_response );
+			do_action( 'woocommerce_helper_subscription_deactivate_success', $product_id, $product_key, $deactivation_response );
 		} else {
 			self::log( sprintf( 'Deactivate API call returned a non-200 response code (%d)', $code ) );
 
 			/**
 			 * Fires when the Helper fails to activate a product.
 			 *
-			 * @param int   $product_id Product ID being deactivated.
-			 * @param array $deactivation_response The response object from wp_safe_remote_request().
+			 * @param int    $product_id Product ID being deactivated.
+			 * @param string $product_key Subscription product key.
+			 * @param array  $deactivation_response The response object from wp_safe_remote_request().
 			 */
-			do_action( 'woocommerce_helper_subscription_deactivate_error', $product_id, $deactivation_response );
+			do_action( 'woocommerce_helper_subscription_deactivate_error', $product_id, $product_key, $deactivation_response );
 		}
 
 		self::_flush_subscriptions_cache();
@@ -1259,7 +1263,8 @@ class WC_Helper {
 		}
 
 		$plugin        = $plugins[ $filename ];
-		$subscriptions = self::_get_subscriptions_from_product_id( $plugin['_product_id'], false );
+		$product_id    = $plugin['_product_id'];
+		$subscriptions = self::_get_subscriptions_from_product_id( $product_id, false );
 
 		// No valid subscriptions for this product
 		if ( empty( $subscriptions ) ) {
@@ -1289,30 +1294,49 @@ class WC_Helper {
 			return;
 		}
 
-		$request = WC_Helper_API::post(
+		$product_key         = $subscription['product_key'];
+		$activation_response = WC_Helper_API::post(
 			'activate',
 			array(
 				'authenticated' => true,
 				'body'          => wp_json_encode(
 					array(
-						'product_key' => $subscription['product_key'],
+						'product_key' => $product_key,
 					)
 				),
 			)
 		);
 
-		$activated = wp_remote_retrieve_response_code( $request ) === 200;
-		$body      = json_decode( wp_remote_retrieve_body( $request ), true );
-		if ( ! $activated && ! empty( $body['code'] ) && 'already_connected' == $body['code'] ) {
+		$activated = wp_remote_retrieve_response_code( $activation_response ) === 200;
+		$body      = json_decode( wp_remote_retrieve_body( $activation_response ), true );
+
+		if ( ! $activated && ! empty( $body['code'] ) && 'already_connected' === $body['code'] ) {
 			$activated = true;
 		}
 
-		if ( ! $activated ) {
+		if ( $activated ) {
+			self::log( 'Auto-activated a subscription for ' . $filename );
+			/**
+			 * Fires when the Helper activates a product successfully.
+			 *
+			 * @param int    $product_id Product ID being activated.
+			 * @param string $product_key Subscription product key.
+			 * @param array  $activation_response The response object from wp_safe_remote_request().
+			 */
+			do_action( 'woocommerce_helper_subscription_activate_success', $product_id, $product_key, $activation_response );
+		} else {
 			self::log( 'Could not activate a subscription upon plugin activation: ' . $filename );
-			return;
+
+			/**
+			 * Fires when the Helper fails to activate a product.
+			 *
+			 * @param int    $product_id Product ID being activated.
+			 * @param string $product_key Subscription product key.
+			 * @param array  $activation_response The response object from wp_safe_remote_request().
+			 */
+			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $product_key, $activation_response );
 		}
 
-		self::log( 'Auto-activated a subscription for ' . $filename );
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
 	}
@@ -1340,10 +1364,11 @@ class WC_Helper {
 		}
 
 		$plugin        = $plugins[ $filename ];
-		$subscriptions = self::_get_subscriptions_from_product_id( $plugin['_product_id'], false );
+		$product_id    = $plugin['_product_id'];
+		$subscriptions = self::_get_subscriptions_from_product_id( $product_id, false );
 		$site_id       = absint( $auth['site_id'] );
 
-		// No valid subscriptions for this product
+		// No valid subscriptions for this product.
 		if ( empty( $subscriptions ) ) {
 			return;
 		}
@@ -1352,24 +1377,43 @@ class WC_Helper {
 
 		foreach ( $subscriptions as $subscription ) {
 			// Don't touch subscriptions that aren't activated on this site.
-			if ( ! in_array( $site_id, $subscription['connections'] ) ) {
+			if ( ! in_array( $site_id, $subscription['connections'], true ) ) {
 				continue;
 			}
 
-			$request = WC_Helper_API::post(
+			$product_key           = $subscription['product_key'];
+			$deactivation_response = WC_Helper_API::post(
 				'deactivate',
 				array(
 					'authenticated' => true,
 					'body'          => wp_json_encode(
 						array(
-							'product_key' => $subscription['product_key'],
+							'product_key' => $product_key,
 						)
 					),
 				)
 			);
 
-			if ( wp_remote_retrieve_response_code( $request ) === 200 ) {
+			if ( wp_remote_retrieve_response_code( $deactivation_response ) === 200 ) {
 				$deactivated++;
+
+				/**
+				 * Fires when the Helper activates a product successfully.
+				 *
+				 * @param int    $product_id Product ID being deactivated.
+				 * @param string $product_key Subscription product key.
+				 * @param array  $deactivation_response The response object from wp_safe_remote_request().
+				 */
+				do_action( 'woocommerce_helper_subscription_deactivate_success', $product_id, $product_key, $deactivation_response );
+			} else {
+				/**
+				 * Fires when the Helper fails to activate a product.
+				 *
+				 * @param int    $product_id Product ID being deactivated.
+				 * @param string $product_key Subscription product key.
+				 * @param array  $deactivation_response The response object from wp_safe_remote_request().
+				 */
+				do_action( 'woocommerce_helper_subscription_deactivate_error', $product_id, $product_key, $deactivation_response );
 			}
 		}
 
