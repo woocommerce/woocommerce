@@ -918,20 +918,18 @@ class WC_Helper {
 			/**
 			 * Fires when the Helper activates a product successfully.
 			 *
-			 * @param int        $product_id Product ID being activated.
-			 * @param array|bool $local The array containing the local plugin/theme data or false.
-			 * @param array      $activation_response The response object from wp_safe_remote_request().
+			 * @param int   $product_id Product ID being activated.
+			 * @param array $activation_response The response object from wp_safe_remote_request().
 			 */
-			do_action( 'woocommerce_helper_subscription_activate_success', $product_id, $local, $activation_response );
+			do_action( 'woocommerce_helper_subscription_activate_success', $product_id, $activation_response );
 		} else {
 			/**
 			 * Fires when the Helper fails to activate a product.
 			 *
-			 * @param int        $product_id Product ID being activated.
-			 * @param array|bool $local The array containing the local plugin/theme data or false.
-			 * @param array      $activation_response The response object from wp_safe_remote_request().
+			 * @param int   $product_id Product ID being activated.
+			 * @param array $activation_response The response object from wp_safe_remote_request().
 			 */
-			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $local, $activation_response );
+			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $activation_response );
 		}
 
 		self::_flush_subscriptions_cache();
@@ -964,7 +962,7 @@ class WC_Helper {
 			wp_die( 'Could not verify nonce' );
 		}
 
-		$request = WC_Helper_API::post(
+		$deactivation_response = WC_Helper_API::post(
 			'deactivate',
 			array(
 				'authenticated' => true,
@@ -976,13 +974,31 @@ class WC_Helper {
 			)
 		);
 
-		$code        = wp_remote_retrieve_response_code( $request );
+		$code        = wp_remote_retrieve_response_code( $deactivation_response );
 		$deactivated = 200 === $code;
-		if ( ! $deactivated ) {
+
+		if ( $deactivated ) {
+			/**
+			 * Fires when the Helper activates a product successfully.
+			 *
+			 * @param int   $product_id Product ID being deactivated.
+			 * @param array $deactivation_response The response object from wp_safe_remote_request().
+			 */
+			do_action( 'woocommerce_helper_subscription_deactivate_success', $product_id, $deactivation_response );
+		} else {
 			self::log( sprintf( 'Deactivate API call returned a non-200 response code (%d)', $code ) );
+
+			/**
+			 * Fires when the Helper fails to activate a product.
+			 *
+			 * @param int   $product_id Product ID being deactivated.
+			 * @param array $deactivation_response The response object from wp_safe_remote_request().
+			 */
+			do_action( 'woocommerce_helper_subscription_deactivate_error', $product_id, $deactivation_response );
 		}
 
 		self::_flush_subscriptions_cache();
+
 		$redirect_uri = add_query_arg(
 			array(
 				'page'                 => 'wc-addons',
