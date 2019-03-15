@@ -66,7 +66,7 @@ export const filters = [
 					labels: {
 						title: __( 'Compare Coupon Codes', 'woocommerce-admin' ),
 						update: __( 'Compare', 'woocommerce-admin' ),
-						helpText: __( 'Select at least two coupon codes to compare', 'woocommerce-admin' ),
+						helpText: __( 'Check at least two coupon codes below to compare', 'woocommerce-admin' ),
 					},
 				},
 			},

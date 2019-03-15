@@ -72,7 +72,7 @@ export const filters = [
 					param: 'categories',
 					getLabels: getCategoryLabels,
 					labels: {
-						helpText: __( 'Select at least two categories to compare', 'woocommerce-admin' ),
+						helpText: __( 'Check at least two categories below to compare', 'woocommerce-admin' ),
 						placeholder: __( 'Search for categories to compare', 'woocommerce-admin' ),
 						title: __( 'Compare Categories', 'woocommerce-admin' ),
 						update: __( 'Compare', 'woocommerce-admin' ),

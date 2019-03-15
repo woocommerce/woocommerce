@@ -228,7 +228,7 @@ class ProductsReportTable extends Component {
 		const { query, isRequesting, baseSearchQuery, hideCompare } = this.props;
 
 		const labels = {
-			helpText: __( 'Select at least two products to compare', 'woocommerce-admin' ),
+			helpText: __( 'Check at least two products below to compare', 'woocommerce-admin' ),
 			placeholder: __( 'Search by product name or SKU', 'woocommerce-admin' ),
 		};
 

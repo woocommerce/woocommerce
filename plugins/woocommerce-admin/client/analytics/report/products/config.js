@@ -71,7 +71,7 @@ const filterConfig = {
 				param: 'products',
 				getLabels: getProductLabels,
 				labels: {
-					helpText: __( 'Select at least two products to compare', 'woocommerce-admin' ),
+					helpText: __( 'Check at least two products below to compare', 'woocommerce-admin' ),
 					placeholder: __( 'Search for products to compare', 'woocommerce-admin' ),
 					title: __( 'Compare Products', 'woocommerce-admin' ),
 					update: __( 'Compare', 'woocommerce-admin' ),
@@ -101,7 +101,7 @@ const variationsConfig = {
 				param: 'variations',
 				getLabels: getVariationLabels,
 				labels: {
-					helpText: __( 'Select at least two variations to compare', 'woocommerce-admin' ),
+					helpText: __( 'Check at least two variations below to compare', 'woocommerce-admin' ),
 					placeholder: __( 'Search for variations to compare', 'woocommerce-admin' ),
 					title: __( 'Compare Variations', 'woocommerce-admin' ),
 					update: __( 'Compare', 'woocommerce-admin' ),

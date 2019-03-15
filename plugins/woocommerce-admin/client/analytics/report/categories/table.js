@@ -137,7 +137,7 @@ class CategoriesReportTable extends Component {
 		const { isRequesting, query } = this.props;
 
 		const labels = {
-			helpText: __( 'Select at least two categories to compare', 'woocommerce-admin' ),
+			helpText: __( 'Check at least two categories below to compare', 'woocommerce-admin' ),
 			placeholder: __( 'Search by category name', 'woocommerce-admin' ),
 		};
 

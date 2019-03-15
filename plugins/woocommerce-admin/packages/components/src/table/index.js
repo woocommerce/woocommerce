@@ -290,7 +290,7 @@ class TableCard extends Component {
 							className="woocommerce-table__compare"
 							count={ selectedRows.length }
 							helpText={
-								labels.helpText || __( 'Select at least two items to compare', 'woocommerce-admin' )
+								labels.helpText || __( 'Check at least two items below to compare', 'woocommerce-admin' )
 							}
 							onClick={ this.onCompare }
 						>

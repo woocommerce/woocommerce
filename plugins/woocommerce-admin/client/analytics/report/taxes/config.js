@@ -62,7 +62,7 @@ export const filters = [
 						label: getTaxCode( tax ),
 					} ) ),
 					labels: {
-						helpText: __( 'Select at least two tax codes to compare', 'woocommerce-admin' ),
+						helpText: __( 'Check at least two tax codes below to compare', 'woocommerce-admin' ),
 						placeholder: __( 'Search for tax codes to compare', 'woocommerce-admin' ),
 						title: __( 'Compare Tax Codes', 'woocommerce-admin' ),
 						update: __( 'Compare', 'woocommerce-admin' ),
