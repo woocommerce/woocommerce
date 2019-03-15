@@ -35,8 +35,22 @@ import ActivityOutboundLink from '../activity-outbound-link';
 import { QUERY_DEFAULTS } from 'wc-api/constants';
 import withSelect from 'wc-api/with-select';
 
-function OrdersPanel( { orders, isRequesting, isError } ) {
+function OrdersPanel( { orders, isRequesting, isError, orderStatuses } ) {
 	if ( isError ) {
+		if ( ! orderStatuses.length ) {
+			return (
+				<EmptyContent
+					title={ __(
+						"You currently don't have any actionable statuses. " +
+							'To display orders here, select orders that require further review in settings.',
+						'woocommerce-admin'
+					) }
+					actionLabel={ __( 'Settings', 'woocommerce-admin' ) }
+					actionURL={ getAdminLink( 'admin.php?page=wc-admin#/analytics/settings' ) }
+				/>
+			);
+		}
+
 		const title = __(
 			'There was an error getting your orders. Please try again.',
 			'woocommerce-admin'
@@ -217,13 +231,13 @@ export default compose(
 		};
 
 		if ( ! orderStatuses.length ) {
-			return { orders: [], isError: false, isRequesting: false };
+			return { orders: [], isError: true, isRequesting: false, orderStatuses };
 		}
 
 		const orders = getReportItems( 'orders', ordersQuery ).data;
 		const isError = Boolean( getReportItemsError( 'orders', ordersQuery ) );
 		const isRequesting = isReportItemsRequesting( 'orders', ordersQuery );
 
-		return { orders, isError, isRequesting };
+		return { orders, isError, isRequesting, orderStatuses };
 	} )
 )( OrdersPanel );

@@ -237,6 +237,11 @@
 			animation: none;
 		}
 	}
+
+	.woocommerce-empty-content {
+		padding-left: $gap-large;
+		padding-right: $gap-large;
+	}
 }
 
 .woocommerce-layout__activity-panel-avatar-flag-overlay {
