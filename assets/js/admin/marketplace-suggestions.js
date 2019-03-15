@@ -44,7 +44,7 @@
 
 				// keep track of how often this area gets dismissed in a cookie
 				var contextDismissalCountCookie = 'woocommerce_dismissed_suggestions__' + context;
-				var previousDismissalsInThisContext = parseInt( Cookies.get( contextDismissalCountCookie ) ) || 0;
+				var previousDismissalsInThisContext = parseInt( Cookies.get( contextDismissalCountCookie ), 10 ) || 0;
 				Cookies.set( contextDismissalCountCookie, previousDismissalsInThisContext + 1, { expires: 31 } );
 			}
 
@@ -327,7 +327,7 @@
 			}
 		}
 
-		function refreshBannerColspanForScreenOptions( content ) {
+		function refreshBannerColspanForScreenOptions() {
 			$( '#show-settings-link' ).on( 'focus.scroll-into-view', function() {
 				$( '.marketplace-table-banner-td' ).attr( 'colspan', getTableBannerColspan() );
 			});
@@ -399,8 +399,7 @@
 					// product list banner suggestion has been dismissed repeatedly – give user a break
 					// note that this is longer term but still temporary, based on the expiry of the cookie
 					var hideSuggestionsDismissalThreshold = 5;
-					var contextDismissalCountCookie = 'woocommerce_dismissed_suggestions__' + context;
-					if ( parseInt( Cookies.get( 'contextDismissalCountCookie' ) ) > hideSuggestionsDismissalThreshold ) {
+					if ( parseInt( Cookies.get( 'contextDismissalCountCookie' ), 10 ) > hideSuggestionsDismissalThreshold ) {
 						return;
 					}
 

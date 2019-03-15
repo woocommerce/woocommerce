@@ -357,14 +357,18 @@
 
 									// Attach to matching options by value. This is done to compare
 									// TEXT values rather than any HTML entities.
-									new_attr_select.find( 'option' ).each( function( index, el ) {
-										var option_value = $( this ).val();
+									var $option_elements = new_attr_select.find( 'option' );
+									if ( $option_elements.length ) {
+										for (var i = 0, len = $option_elements.length; i < len; i++) {
+											var $option_element = $( $option_elements[i] ),
+												option_value = $option_element.val();
 
-										if ( attr_val === option_value ) {
-											$( this ).addClass( 'attached ' + variation_active );
-											return false; // break.
+											if ( attr_val === option_value ) {
+												$option_element.addClass( 'attached ' + variation_active );
+												break;
+											}
 										}
-									});
+									}
 								} else {
 									// Attach all apart from placeholder.
 									new_attr_select.find( 'option:gt(0)' ).addClass( 'attached ' + variation_active );
@@ -383,7 +387,7 @@
 				selected_attr_val_valid = false;
 
 				if ( 0 !== attached_options_count ) {
-					new_attr_select.find( 'option.attached.enabled' ).each( function( index, el ) {
+					new_attr_select.find( 'option.attached.enabled' ).each( function() {
 						var option_value = $( this ).val();
 
 						if ( selected_attr_val === option_value ) {

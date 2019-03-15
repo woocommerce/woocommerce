@@ -51,7 +51,7 @@ jQuery( function( $ ) {
 					}
 				}
 			};
-		}
+		};
 
 		var wc_country_select_select2 = function() {
 			$( 'select.country_select:visible, select.state_select:visible' ).each( function() {

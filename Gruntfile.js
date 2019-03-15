@@ -20,7 +20,6 @@ module.exports = function( grunt ) {
 				jshintrc: '.jshintrc'
 			},
 			all: [
-				'Gruntfile.js',
 				'<%= dirs.js %>/admin/*.js',
 				'!<%= dirs.js %>/admin/*.min.js',
 				'<%= dirs.js %>/frontend/*.js',

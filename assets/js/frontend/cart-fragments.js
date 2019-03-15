@@ -100,8 +100,7 @@ jQuery( function( $ ) {
 		// Refresh when storage changes in another tab
 		$( window ).on( 'storage onstorage', function ( e ) {
 			if (
-				cart_hash_key === e.originalEvent.key
-				&& localStorage.getItem( cart_hash_key ) !== sessionStorage.getItem( cart_hash_key )
+				cart_hash_key === e.originalEvent.key && localStorage.getItem( cart_hash_key ) !== sessionStorage.getItem( cart_hash_key )
 			) {
 				refresh_cart_fragment();
 			}
