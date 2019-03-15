@@ -111,16 +111,13 @@ class WC_Admin_Reports_Sync {
 	 * Clears all queued actions.
 	 */
 	public static function clear_queued_actions() {
-		$hooks = array(
-			self::QUEUE_BATCH_ACTION,
-			self::QUEUE_DEPEDENT_ACTION,
-			self::CUSTOMERS_BATCH_ACTION,
-			self::ORDERS_BATCH_ACTION,
-			self::ORDERS_LOOKUP_BATCH_INIT,
-			self::SINGLE_ORDER_ACTION,
-		);
-		foreach ( $hooks as $hook ) {
-			self::queue()->cancel_all( $hook, null, self::QUEUE_GROUP );
+		$store = ActionScheduler::store();
+
+		if ( is_a( $store, 'WC_Admin_ActionScheduler_WPPostStore' ) ) {
+			// If we're using our data store, call our bespoke deletion method.
+			$store->clear_pending_wcadmin_actions();
+		} else {
+			self::queue()->cancel_all( null, array(), self::QUEUE_GROUP );
 		}
 	}
 

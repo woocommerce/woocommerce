@@ -33,4 +33,38 @@ class WC_Admin_ActionScheduler_WPPostStore extends ActionScheduler_wpPostStore {
 
 		return $postdata;
 	}
+
+	/**
+	 * Forcefully delete all pending WC Admin scheduled actions.
+	 *
+	 * Directly trashes items from in database for performance.
+	 */
+	public function clear_pending_wcadmin_actions() {
+		global $wpdb;
+
+		// Cancel all pending actions by trashing the posts.
+		// Action Scheduler will handle the cleanup.
+		$action_types = array(
+			WC_Admin_Reports_Sync::QUEUE_BATCH_ACTION,
+			WC_Admin_Reports_Sync::QUEUE_DEPEDENT_ACTION,
+			WC_Admin_Reports_Sync::CUSTOMERS_BATCH_ACTION,
+			WC_Admin_Reports_Sync::ORDERS_BATCH_ACTION,
+			WC_Admin_Reports_Sync::ORDERS_LOOKUP_BATCH_INIT,
+			WC_Admin_Reports_Sync::SINGLE_ORDER_ACTION,
+		);
+
+		foreach ( $action_types as $action_type ) {
+			$wpdb->update(
+				$wpdb->posts,
+				array(
+					'post_status' => 'trash',
+				),
+				array(
+					'post_type'   => 'scheduled-action',
+					'post_status' => 'pending',
+					'post_title'  => $action_type,
+				)
+			);
+		}
+	}
 }
