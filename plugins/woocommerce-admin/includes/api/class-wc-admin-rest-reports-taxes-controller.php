@@ -264,6 +264,7 @@ class WC_Admin_REST_Reports_Taxes_Controller extends WC_REST_Reports_Controller 
 			'enum'              => array(
 				'name',
 				'tax_rate_id',
+				'tax_code',
 				'rate',
 				'order_tax',
 				'total_tax',

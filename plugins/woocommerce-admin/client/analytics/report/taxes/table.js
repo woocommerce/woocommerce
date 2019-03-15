@@ -32,8 +32,7 @@ export default class TaxesReportTable extends Component {
 		return [
 			{
 				label: __( 'Tax Code', 'woocommerce-admin' ),
-				// @todo It should be the tax code, not the ID
-				key: 'tax_rate_id',
+				key: 'tax_code',
 				required: true,
 				isLeftAligned: true,
 				isSortable: true,
@@ -72,19 +71,20 @@ export default class TaxesReportTable extends Component {
 
 	getRowsContent( taxes ) {
 		return map( taxes, tax => {
-			const { order_tax, orders_count, tax_rate, tax_rate_id, total_tax, shipping_tax } = tax;
+			const { order_tax, orders_count, tax_rate, total_tax, shipping_tax } = tax;
+			const taxCode = getTaxCode( tax );
 
 			// @todo Must link to the tax detail report
 			const taxLink = (
 				<Link href="" type="wc-admin">
-					{ getTaxCode( tax ) }
+					{ taxCode }
 				</Link>
 			);
 
 			return [
 				{
 					display: taxLink,
-					value: tax_rate_id,
+					value: taxCode,
 				},
 				{
 					display: tax_rate.toFixed( 2 ) + '%',
