@@ -3,10 +3,21 @@
 exports[`ProductPreview should render a single product preview with an image 1`] = `
 <div
   className="wc-product-preview"
+  style={
+    Object {
+      "maxWidth": "300px",
+    }
+  }
 >
   <img
     alt=""
+    className="wc-product-preview__image"
     src="https://example.local/product.jpg"
+    style={
+      Object {
+        "width": "300px",
+      }
+    }
   />
   <div
     className="wc-product-preview__title"
@@ -39,10 +50,21 @@ exports[`ProductPreview should render a single product preview with an image 1`]
 exports[`ProductPreview should render a single product preview without an image 1`] = `
 <div
   className="wc-product-preview"
+  style={
+    Object {
+      "maxWidth": "300px",
+    }
+  }
 >
   <img
     alt=""
+    className="wc-product-preview__image"
     src="placeholder.png"
+    style={
+      Object {
+        "width": "300px",
+      }
+    }
   />
   <div
     className="wc-product-preview__title"
