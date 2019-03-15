@@ -274,6 +274,7 @@ class WGPB_Block_Library {
 			'min_rows'          => wc_get_theme_support( 'product_blocks::min_rows', 1 ),
 			'max_rows'          => wc_get_theme_support( 'product_blocks::max_rows', 6 ),
 			'default_rows'      => wc_get_theme_support( 'product_blocks::default_rows', 1 ),
+			'thumbnail_size'    => wc_get_theme_support( 'thumbnail_image_width', 300 ),
 			'placeholderImgSrc' => wc_placeholder_img_src(),
 			'min_height'        => wc_get_theme_support( 'featured_block::min_height', 500 ),
 			'default_height'    => wc_get_theme_support( 'featured_block::default_height', 500 ),

@@ -1,11 +1,17 @@
 .wc-product-preview {
-	text-align: center;
 	margin-bottom: $gap;
+	padding: $gap/2;
+	text-align: center;
 
 	.wc-product-preview__title,
 	.wc-product-preview__price,
 	.wc-product-preview__rating {
 		margin-top: $gap-smallest;
+	}
+
+	.wc-product-preview__image {
+		margin-left: auto;
+		margin-right: auto;
 	}
 
 	.star-rating {

@@ -13,13 +13,29 @@ import './style.scss';
  * Display a preview for a given product.
  */
 const ProductPreview = ( { product } ) => {
-	const { placeholderImgSrc } = wc_product_block_data; /* eslint-disable-line camelcase */
+	const {
+		placeholderImgSrc,
+	} = wc_product_block_data; /* eslint-disable-line camelcase */
 
 	let image = null;
 	if ( product.images.length ) {
-		image = <img src={ product.images[ 0 ].src } alt="" />;
+		image = (
+			<img
+				className="wc-product-preview__image"
+				src={ product.images[ 0 ].src }
+				alt=""
+				style={ { width: `${ wc_product_block_data.thumbnail_size }px` } }
+			/>
+		);
 	} else {
-		image = <img src={ placeholderImgSrc } alt="" />;
+		image = (
+			<img
+				className="wc-product-preview__image"
+				src={ placeholderImgSrc }
+				alt=""
+				style={ { width: `${ wc_product_block_data.thumbnail_size }px` } }
+			/>
+		);
 	}
 
 	const rating = Number( product.average_rating );
@@ -29,7 +45,10 @@ const ProductPreview = ( { product } ) => {
 	}
 
 	return (
-		<div className="wc-product-preview">
+		<div
+			className="wc-product-preview"
+			style={ { maxWidth: `${ wc_product_block_data.thumbnail_size }px` } }
+		>
 			{ image }
 			<div
 				className="wc-product-preview__title"
