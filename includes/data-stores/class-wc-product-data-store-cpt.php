@@ -1061,14 +1061,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			if ( ! $attribute->get_variation() ) {
 				continue;
 			}
-
-			$attribute_field_name = 'attribute_' . sanitize_title( $attribute->get_name() );
-
-			if ( ! isset( $match_attributes[ $attribute_field_name ] ) ) {
-				return 0;
-			}
-
-			$meta_attribute_names[] = $attribute_field_name;
+			$meta_attribute_names[] = 'attribute_' . sanitize_title( $attribute->get_name() );
 		}
 
 		// Get the attributes of the variations.
@@ -1107,15 +1100,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		 */
 		foreach ( $sorted_meta as $variation_id => $variation ) {
 			$match = true;
-
-			foreach ( $match_attributes as $attribute_key => $attribute_value ) {
-				if ( array_key_exists( $attribute_key, $variation ) ) {
-					if ( $variation[ $attribute_key ] !== $attribute_value && ! empty( $variation[ $attribute_key ] ) ) {
+			foreach ( $variation as $attribute_key => $attribute_value ) {
+				if ( ! empty( $attribute_value ) && ! array_key_exists( $attribute_key, $match_attributes ) ) {
+					$match = false;
+				}
+				if ( array_key_exists( $attribute_key, $match_attributes ) ) {
+					if ( $match_attributes[ $attribute_key ] !== $attribute_value && ! empty( $match_attributes[ $attribute_key ] ) ) {
 						$match = false;
 					}
 				}
 			}
-
 			if ( true === $match ) {
 				return $variation_id;
 			}
@@ -1128,6 +1122,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			 */
 			return ( array_map( 'sanitize_title', $match_attributes ) === $match_attributes ) ? 0 : $this->find_matching_product_variation( $product, array_map( 'sanitize_title', $match_attributes ) );
 		}
+
+		return 0;
 	}
 
 	/**
