@@ -888,7 +888,14 @@ class WC_Helper {
 			wp_die( 'Could not verify nonce' );
 		}
 
-		$request = WC_Helper_API::post(
+		// Attempt to activate this plugin.
+		$local = self::_get_local_from_product_id( $product_id );
+		if ( $local && 'plugin' == $local['_type'] && current_user_can( 'activate_plugins' ) && ! is_plugin_active( $local['_filename'] ) ) {
+			activate_plugin( $local['_filename'] );
+		}
+
+		// Activate subscription.
+		$activation_response = WC_Helper_API::post(
 			'activate',
 			array(
 				'authenticated' => true,
@@ -900,16 +907,31 @@ class WC_Helper {
 			)
 		);
 
-		$activated = wp_remote_retrieve_response_code( $request ) === 200;
-		$body      = json_decode( wp_remote_retrieve_body( $request ), true );
-		if ( ! $activated && ! empty( $body['code'] ) && 'already_connected' == $body['code'] ) {
+		$activated = wp_remote_retrieve_response_code( $activation_response ) === 200;
+		$body      = json_decode( wp_remote_retrieve_body( $activation_response ), true );
+
+		if ( ! $activated && ! empty( $body['code'] ) && 'already_connected' === $body['code'] ) {
 			$activated = true;
 		}
 
-		// Attempt to activate this plugin.
-		$local = self::_get_local_from_product_id( $product_id );
-		if ( $local && 'plugin' == $local['_type'] && current_user_can( 'activate_plugins' ) && ! is_plugin_active( $local['_filename'] ) ) {
-			activate_plugin( $local['_filename'] );
+		if ( $activated ) {
+			/**
+			 * Fires when the Helper activates a product successfully.
+			 *
+			 * @param int        $product_id Product ID being activated.
+			 * @param array|bool $local The array containing the local plugin/theme data or false.
+			 * @param array      $activation_response The response object from wp_safe_remote_request().
+			 */
+			do_action( 'woocommerce_helper_subscription_activate_success', $product_id, $local, $activation_response );
+		} else {
+			/**
+			 * Fires when the Helper fails to activate a product.
+			 *
+			 * @param int        $product_id Product ID being activated.
+			 * @param array|bool $local The array containing the local plugin/theme data or false.
+			 * @param array      $activation_response The response object from wp_safe_remote_request().
+			 */
+			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $local, $activation_response );
 		}
 
 		self::_flush_subscriptions_cache();
