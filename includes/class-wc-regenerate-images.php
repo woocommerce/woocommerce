@@ -215,7 +215,7 @@ class WC_Regenerate_Images {
 		$uncropped    = '' === $target_size['width'] || '' === $target_size['height'];
 
 		// If '' is passed to either size, we test ratios against the original file. It's uncropped.
-		if ( $uncropped ) {
+		if ( $uncropped || ! $target_size['crop'] ) {
 			$full_size = self::get_full_size_image_dimensions( $attachment_id );
 
 			if ( ! $full_size || ! $full_size['width'] || ! $full_size['height'] ) {
