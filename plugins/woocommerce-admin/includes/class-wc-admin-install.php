@@ -168,6 +168,7 @@ class WC_Admin_Install {
 			source varchar(200) NOT NULL,
 			date_created datetime NOT NULL default '0000-00-00 00:00:00',
 			date_reminder datetime NULL default null,
+			is_snoozable boolean DEFAULT 0 NOT NULL,
 			PRIMARY KEY (note_id)
 		) $collate;
 		CREATE TABLE {$wpdb->prefix}wc_admin_note_actions (

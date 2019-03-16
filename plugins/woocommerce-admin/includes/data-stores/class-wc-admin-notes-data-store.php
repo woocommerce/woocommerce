@@ -23,14 +23,15 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 		global $wpdb;
 
 		$note_to_be_inserted = array(
-			'name'    => $note->get_name(),
-			'type'    => $note->get_type(),
-			'locale'  => $note->get_locale(),
-			'title'   => $note->get_title(),
-			'content' => $note->get_content(),
-			'icon'    => $note->get_icon(),
-			'status'  => $note->get_status(),
-			'source'  => $note->get_source(),
+			'name'         => $note->get_name(),
+			'type'         => $note->get_type(),
+			'locale'       => $note->get_locale(),
+			'title'        => $note->get_title(),
+			'content'      => $note->get_content(),
+			'icon'         => $note->get_icon(),
+			'status'       => $note->get_status(),
+			'source'       => $note->get_source(),
+			'is_snoozable' => $note->get_is_snoozable(),
 		);
 
 		$note_to_be_inserted['content_data']  = wp_json_encode( $note->get_content_data() );
@@ -68,7 +69,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 		if ( 0 !== $note_id || '0' !== $note_id ) {
 			$note_row = $wpdb->get_row(
 				$wpdb->prepare(
-					"SELECT name, type, locale, title, content, icon, content_data, status, source, date_created, date_reminder FROM {$wpdb->prefix}wc_admin_notes WHERE note_id = %d LIMIT 1",
+					"SELECT name, type, locale, title, content, icon, content_data, status, source, date_created, date_reminder, is_snoozable FROM {$wpdb->prefix}wc_admin_notes WHERE note_id = %d LIMIT 1",
 					$note->get_id()
 				)
 			);
@@ -97,6 +98,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 			$note->set_source( $note_row->source );
 			$note->set_date_created( $note_row->date_created );
 			$note->set_date_reminder( $note_row->date_reminder );
+			$note->set_is_snoozable( $note_row->is_snoozable );
 			$this->read_actions( $note );
 			$note->read_meta_data();
 			$note->set_object_read( true );
@@ -147,6 +149,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 					'source'        => $note->get_source(),
 					'date_created'  => $date_created_to_db,
 					'date_reminder' => $date_reminder_to_db,
+					'is_snoozable'  => $note->get_is_snoozable(),
 				),
 				array( 'note_id' => $note->get_id() )
 			);

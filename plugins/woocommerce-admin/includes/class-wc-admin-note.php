@@ -48,6 +48,7 @@ class WC_Admin_Note extends WC_Data {
 		'source'        => 'woocommerce',
 		'date_created'  => '0000-00-00 00:00:00',
 		'date_reminder' => '',
+		'is_snoozable'  => false,
 		'actions'       => array(),
 	);
 
@@ -244,6 +245,16 @@ class WC_Admin_Note extends WC_Data {
 	}
 
 	/**
+	 * Get note snoozability.
+	 *
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @return bool   Whether or not the note can be snoozed.
+	 */
+	public function get_is_snoozable( $context = 'view' ) {
+		return $this->get_prop( 'is_snoozable', $context );
+	}
+
+	/**
 	 * Get actions on the note (if any).
 	 *
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
@@ -436,6 +447,15 @@ class WC_Admin_Note extends WC_Data {
 	 */
 	public function set_date_reminder( $date ) {
 		$this->set_date_prop( 'date_reminder', $date );
+	}
+
+	/**
+	 * Set note snoozability.
+	 *
+	 * @param bool $is_snoozable Whether or not the note can be snoozed.
+	 */
+	public function set_is_snoozable( $is_snoozable ) {
+		return $this->set_prop( 'is_snoozable', $is_snoozable );
 	}
 
 	/**
