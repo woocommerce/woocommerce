@@ -34,7 +34,9 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -46,7 +48,8 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array_merge(
-						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+						array(
 							'name' => array(
 								'type'        => 'string',
 								'description' => __( 'Name for the resource.', 'woocommerce' ),
@@ -60,7 +63,9 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+			array(
 				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
@@ -98,7 +103,9 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/batch', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/batch',
+			array(
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
@@ -319,7 +326,7 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 
 			// Ensure we don't return results when offset is out of bounds.
 			// See https://core.trac.wordpress.org/ticket/35935.
-			if ( $prepared_args['offset'] >= $total_terms ) {
+			if ( $prepared_args['offset'] && $prepared_args['offset'] >= $total_terms ) {
 				$query_result = array();
 			}
 

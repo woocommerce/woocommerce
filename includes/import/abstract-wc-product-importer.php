@@ -236,6 +236,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				unset( $data['manage_stock'], $data['stock_status'], $data['backorders'], $data['low_stock_amount'] );
 			}
 
+			if ( 'variation' === $object->get_type() ) {
+				if ( isset( $data['status'] ) && -1 === $data['status'] ) {
+					$data['status'] = 0; // Variations cannot be drafts - set to private.
+				}
+			}
+
 			if ( 'importing' === $object->get_status() ) {
 				$object->set_status( 'publish' );
 				$object->set_slug( '' );
@@ -644,13 +650,15 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		// If the attribute does not exist, create it.
-		$attribute_id = wc_create_attribute( array(
-			'name'         => $raw_name,
-			'slug'         => $attribute_name,
-			'type'         => 'select',
-			'order_by'     => 'menu_order',
-			'has_archives' => false,
-		) );
+		$attribute_id = wc_create_attribute(
+			array(
+				'name'         => $raw_name,
+				'slug'         => $attribute_name,
+				'type'         => 'select',
+				'order_by'     => 'menu_order',
+				'has_archives' => false,
+			)
+		);
 
 		if ( is_wp_error( $attribute_id ) ) {
 			throw new Exception( $attribute_id->get_error_message(), 400 );
@@ -661,15 +669,18 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		register_taxonomy(
 			$taxonomy_name,
 			apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
-			apply_filters( 'woocommerce_taxonomy_args_' . $taxonomy_name, array(
-				'labels'       => array(
-					'name' => $raw_name,
-				),
-				'hierarchical' => true,
-				'show_ui'      => false,
-				'query_var'    => true,
-				'rewrite'      => false,
-			) )
+			apply_filters(
+				'woocommerce_taxonomy_args_' . $taxonomy_name,
+				array(
+					'labels'       => array(
+						'name' => $raw_name,
+					),
+					'hierarchical' => true,
+					'show_ui'      => false,
+					'query_var'    => true,
+					'rewrite'      => false,
+				)
+			)
 		);
 
 		// Set product attributes global.
@@ -765,21 +776,21 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
-	 * The exporter prepends a ' to fields that start with a - which causes
-	 * issues with negative numbers. This removes the ' if the input is still a valid
-	 * number after removal.
+	 * The exporter prepends a ' to escape fields that start with =, +, - or @.
+	 * Remove the prepended ' character preceding those characters.
 	 *
-	 * @since 3.3.0
-	 * @param string $value A numeric string that may or may not have ' prepended.
+	 * @since 3.5.2
+	 * @param  string $value A string that may or may not have been escaped with '.
 	 * @return string
 	 */
-	protected function unescape_negative_number( $value ) {
-		if ( 0 === strpos( $value, "'-" ) ) {
-			$unescaped = trim( $value, "'" );
-			if ( is_numeric( $unescaped ) ) {
-				return $unescaped;
-			}
+	protected function unescape_data( $value ) {
+		$active_content_triggers = array( "'=", "'+", "'-", "'@" );
+
+		if ( in_array( mb_substr( $value, 0, 2 ), $active_content_triggers, true ) ) {
+			$value = mb_substr( $value, 1 );
 		}
+
 		return $value;
 	}
+
 }

@@ -363,6 +363,20 @@ function wc_format_coupon_code( $value ) {
 }
 
 /**
+ * Sanitize a coupon code.
+ *
+ * Uses sanitize_post_field since coupon codes are stored as
+ * post_titles - the sanitization and escaping must match.
+ *
+ * @since  3.6.0
+ * @param  string $value Coupon code to format.
+ * @return string
+ */
+function wc_sanitize_coupon_code( $value ) {
+	return sanitize_post_field( 'post_title', $value, 0, 'db' );
+}
+
+/**
  * Clean variables using sanitize_text_field. Arrays are cleaned recursively.
  * Non-scalar values are ignored.
  *
@@ -933,6 +947,9 @@ function wc_format_postcode( $postcode, $country ) {
 		case 'US':
 			$postcode = rtrim( substr_replace( $postcode, '-', 5, 0 ), '-' );
 			break;
+		case 'NL':
+			$postcode = substr_replace( $postcode, ' ', 4, 0 );
+			break;
 	}
 
 	return apply_filters( 'woocommerce_format_postcode', $postcode, $country );
@@ -962,6 +979,18 @@ function wc_format_phone_number( $phone ) {
 		return '';
 	}
 	return preg_replace( '/[^0-9\+\-\s]/', '-', preg_replace( '/[\x00-\x1F\x7F-\xFF]/', '', $phone ) );
+}
+
+/**
+ * Sanitize phone number.
+ * Allows only numbers and "+" (plus sign).
+ *
+ * @since 3.6.0
+ * @param string $phone Phone number.
+ * @return string
+ */
+function wc_sanitize_phone_number( $phone ) {
+	return preg_replace( '/[^\d+]/', '', $phone );
 }
 
 /**
@@ -1105,7 +1134,7 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_hold_stock_m
  * @return string
  */
 function wc_sanitize_term_text_based( $term ) {
-	return trim( wp_unslash( strip_tags( $term ) ) );
+	return trim( wp_strip_all_tags( wp_unslash( $term ) ) );
 }
 
 if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
@@ -1367,6 +1396,23 @@ function wc_implode_html_attributes( $raw_attributes ) {
 		$attributes[] = esc_attr( $name ) . '="' . esc_attr( $value ) . '"';
 	}
 	return implode( ' ', $attributes );
+}
+
+/**
+ * Escape JSON for use on HTML or attribute text nodes.
+ *
+ * @since 3.5.5
+ * @param string $json JSON to escape.
+ * @param bool   $html True if escaping for HTML text node, false for attributes. Determines how quotes are handled.
+ * @return string Escaped JSON.
+ */
+function wc_esc_json( $json, $html = false ) {
+	return _wp_specialchars(
+		$json,
+		$html ? ENT_NOQUOTES : ENT_QUOTES, // Escape quotes in attribute nodes only.
+		'UTF-8',                           // json_encode() outputs UTF-8 (really just ASCII), not the blog's charset.
+		true                               // Double escape entities: `&amp;` -> `&amp;amp;`.
+	);
 }
 
 /**

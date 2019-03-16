@@ -78,7 +78,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$data        = $response->get_data();
 		$environment = (array) $data['environment'];
 
-		// Make sure all expected data is present
+		// Make sure all expected data is present.
 		$this->assertEquals( 32, count( $environment ) );
 
 		// Test some responses to make sure they match up.
@@ -161,7 +161,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 		$settings = (array) $data['settings'];
 
-		$this->assertEquals( 11, count( $settings ) );
+		$this->assertEquals( 12, count( $settings ) );
 		$this->assertEquals( ( 'yes' === get_option( 'woocommerce_api_enabled' ) ), $settings['api_enabled'] );
 		$this->assertEquals( get_woocommerce_currency(), $settings['currency'] );
 		$this->assertEquals( $term_response, $settings['taxonomies'] );
@@ -180,7 +180,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$settings = (array) $data['security'];
 
 		$this->assertEquals( 2, count( $settings ) );
-		$this->assertEquals( 'https' === substr( get_permalink( wc_get_page_id( 'shop' ) ), 0, 5 ), $settings['secure_connection'] );
+		$this->assertEquals( 'https' === substr( wc_get_page_permalink( 'shop' ), 0, 5 ), $settings['secure_connection'] );
 		$this->assertEquals( ! ( defined( 'WP_DEBUG' ) && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG && WP_DEBUG_DISPLAY ) || 0 === intval( ini_get( 'display_errors' ) ), $settings['hide_errors'] );
 	}
 
@@ -207,7 +207,7 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 7, count( $properties ) );
+		$this->assertEquals( 9, count( $properties ) );
 		$this->assertArrayHasKey( 'environment', $properties );
 		$this->assertArrayHasKey( 'database', $properties );
 		$this->assertArrayHasKey( 'active_plugins', $properties );
@@ -235,14 +235,14 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( count( $raw_tools ), count( $data ) );
 		$this->assertContains(
 			array(
-				'id'          => 'reset_tracking',
-				'name'        => 'Reset usage tracking',
-				'action'      => 'Reset',
-				'description' => 'This will reset your usage tracking settings, causing it to show the opt-in banner again and not sending any data.',
+				'id'          => 'regenerate_thumbnails',
+				'name'        => 'Regenerate shop thumbnails',
+				'action'      => 'Regenerate',
+				'description' => 'This will regenerate all shop thumbnails to match your theme and/or image settings.',
 				'_links'      => array(
 					'item' => array(
 						array(
-							'href'       => rest_url( '/wc/v2/system_status/tools/reset_tracking' ),
+							'href'       => rest_url( '/wc/v2/system_status/tools/regenerate_thumbnails' ),
 							'embeddable' => true,
 						),
 					),
@@ -352,28 +352,5 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'description', $properties );
 		$this->assertArrayHasKey( 'success', $properties );
 		$this->assertArrayHasKey( 'message', $properties );
-	}
-
-	/**
-	 * Test execute_tool() with the "add_order_indexes" tool.
-	 */
-	public function test_execute_system_tool_add_order_indexes() {
-		wp_set_current_user( $this->user );
-
-		$order1 = WC_Helper_Order::create_order();
-		$order2 = WC_Helper_Order::create_order();
-		delete_post_meta( $order1->get_id(), '_billing_address_index' );
-		delete_post_meta( $order2->get_id(), '_billing_address_index' );
-		delete_post_meta( $order2->get_id(), '_shipping_address_index' );
-
-		$controller = new WC_REST_System_Status_Tools_Controller();
-		$response   = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v2/system_status/tools/add_order_indexes' ) );
-		$data       = $response->get_data();
-
-		$this->assertTrue( $data['success'] );
-		$this->assertNotEmpty( get_post_meta( $order1->get_id(), '_billing_address_index', true ) );
-		$this->assertNotEmpty( get_post_meta( $order2->get_id(), '_billing_address_index', true ) );
-		$this->assertNotEmpty( get_post_meta( $order2->get_id(), '_shipping_address_index', true ) );
-
 	}
 }

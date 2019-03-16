@@ -73,7 +73,7 @@ abstract class ActionScheduler_Logger {
 		$this->log( $action_id, __( 'action complete', 'action-scheduler' ) );
 	}
 
-	public function log_failed_action( $action_id, \Exception $exception ) {
+	public function log_failed_action( $action_id, Exception $exception ) {
 		$this->log( $action_id, sprintf( __( 'action failed: %s', 'action-scheduler' ), $exception->getMessage() ) );
 	}
 

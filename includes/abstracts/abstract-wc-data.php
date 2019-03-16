@@ -220,7 +220,7 @@ abstract class WC_Data {
 	 * @return string Data in JSON format.
 	 */
 	public function __toString() {
-		return json_encode( $this->get_data() );
+		return wp_json_encode( $this->get_data() );
 	}
 
 	/**
@@ -283,7 +283,7 @@ abstract class WC_Data {
 	 * @return bool   true if it's an internal key, false otherwise
 	 */
 	protected function is_internal_meta_key( $key ) {
-		$internal_meta_key = ! empty( $key ) && $this->data_store && in_array( $key, $this->data_store->get_internal_meta_keys() );
+		$internal_meta_key = ! empty( $key ) && $this->data_store && in_array( $key, $this->data_store->get_internal_meta_keys(), true );
 
 		if ( ! $internal_meta_key ) {
 			return false;
@@ -320,7 +320,7 @@ abstract class WC_Data {
 
 		$this->maybe_read_meta_data();
 		$meta_data  = $this->get_meta_data();
-		$array_keys = array_keys( wp_list_pluck( $meta_data, 'key' ), $key );
+		$array_keys = array_keys( wp_list_pluck( $meta_data, 'key' ), $key, true );
 		$value      = $single ? '' : array();
 
 		if ( ! empty( $array_keys ) ) {
@@ -349,7 +349,7 @@ abstract class WC_Data {
 	public function meta_exists( $key = '' ) {
 		$this->maybe_read_meta_data();
 		$array_keys = wp_list_pluck( $this->get_meta_data(), 'key' );
-		return in_array( $key, $array_keys );
+		return in_array( $key, $array_keys, true );
 	}
 
 	/**
@@ -364,11 +364,13 @@ abstract class WC_Data {
 			foreach ( $data as $meta ) {
 				$meta = (array) $meta;
 				if ( isset( $meta['key'], $meta['value'], $meta['id'] ) ) {
-					$this->meta_data[] = new WC_Meta_Data( array(
-						'id'    => $meta['id'],
-						'key'   => $meta['key'],
-						'value' => $meta['value'],
-					) );
+					$this->meta_data[] = new WC_Meta_Data(
+						array(
+							'id'    => $meta['id'],
+							'key'   => $meta['key'],
+							'value' => $meta['value'],
+						)
+					);
 				}
 			}
 		}
@@ -379,9 +381,9 @@ abstract class WC_Data {
 	 *
 	 * @since 2.6.0
 	 *
-	 * @param string        $key Meta key.
-	 * @param string|array  $value Meta value.
-	 * @param bool          $unique Should this be a unique key?.
+	 * @param string       $key Meta key.
+	 * @param string|array $value Meta value.
+	 * @param bool         $unique Should this be a unique key?.
 	 */
 	public function add_meta_data( $key, $value, $unique = false ) {
 		if ( $this->is_internal_meta_key( $key ) ) {
@@ -396,10 +398,12 @@ abstract class WC_Data {
 		if ( $unique ) {
 			$this->delete_meta_data( $key );
 		}
-		$this->meta_data[] = new WC_Meta_Data( array(
-			'key'   => $key,
-			'value' => $value,
-		) );
+		$this->meta_data[] = new WC_Meta_Data(
+			array(
+				'key'   => $key,
+				'value' => $value,
+			)
+		);
 	}
 
 	/**
@@ -462,7 +466,7 @@ abstract class WC_Data {
 	 */
 	public function delete_meta_data( $key ) {
 		$this->maybe_read_meta_data();
-		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'key' ), $key );
+		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'key' ), $key, true );
 
 		if ( $array_keys ) {
 			foreach ( $array_keys as $array_key ) {
@@ -479,7 +483,7 @@ abstract class WC_Data {
 	 */
 	public function delete_meta_data_by_mid( $mid ) {
 		$this->maybe_read_meta_data();
-		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'id' ), $mid );
+		$array_keys = array_keys( wp_list_pluck( $this->meta_data, 'id' ), (int) $mid, true );
 
 		if ( $array_keys ) {
 			foreach ( $array_keys as $array_key ) {
@@ -507,8 +511,8 @@ abstract class WC_Data {
 	 * @param bool $force_read True to force a new DB read (and update cache).
 	 */
 	public function read_meta_data( $force_read = false ) {
-		$this->meta_data  = array();
-		$cache_loaded     = false;
+		$this->meta_data = array();
+		$cache_loaded    = false;
 
 		if ( ! $this->get_id() ) {
 			return;
@@ -533,11 +537,13 @@ abstract class WC_Data {
 		$raw_meta_data = $cache_loaded ? $cached_meta : $this->data_store->read_meta( $this );
 		if ( $raw_meta_data ) {
 			foreach ( $raw_meta_data as $meta ) {
-				$this->meta_data[] = new WC_Meta_Data( array(
-					'id'    => (int) $meta->meta_id,
-					'key'   => $meta->meta_key,
-					'value' => maybe_unserialize( $meta->meta_value ),
-				) );
+				$this->meta_data[] = new WC_Meta_Data(
+					array(
+						'id'    => (int) $meta->meta_id,
+						'key'   => $meta->meta_key,
+						'value' => maybe_unserialize( $meta->meta_value ),
+					)
+				);
 			}
 
 			if ( ! $cache_loaded && ! empty( $this->cache_group ) ) {
@@ -593,8 +599,8 @@ abstract class WC_Data {
 	 * @since 3.0.0
 	 */
 	public function set_defaults() {
-		$this->data        = $this->default_data;
-		$this->changes     = array();
+		$this->data    = $this->default_data;
+		$this->changes = array();
 		$this->set_object_read( false );
 	}
 
@@ -630,27 +636,30 @@ abstract class WC_Data {
 	 * @return bool|WP_Error
 	 */
 	public function set_props( $props, $context = 'set' ) {
-		$errors = new WP_Error();
+		$errors = false;
 
 		foreach ( $props as $prop => $value ) {
 			try {
-				if ( 'meta_data' === $prop ) {
+				/**
+				 * Checks if the prop being set is allowed, and the value is not null.
+				 */
+				if ( is_null( $value ) || in_array( $prop, array( 'prop', 'date_prop', 'meta_data' ), true ) ) {
 					continue;
 				}
 				$setter = "set_$prop";
-				if ( ! is_null( $value ) && is_callable( array( $this, $setter ) ) ) {
-					$reflection = new ReflectionMethod( $this, $setter );
 
-					if ( $reflection->isPublic() ) {
-						$this->{$setter}( $value );
-					}
+				if ( is_callable( array( $this, $setter ) ) ) {
+					$this->{$setter}( $value );
 				}
 			} catch ( WC_Data_Exception $e ) {
+				if ( ! $errors ) {
+					$errors = new WP_Error();
+				}
 				$errors->add( $e->getErrorCode(), $e->getMessage() );
 			}
 		}
 
-		return count( $errors->get_error_codes() ) ? $errors : true;
+		return $errors && count( $errors->get_error_codes() ) ? $errors : true;
 	}
 
 	/**
@@ -757,7 +766,7 @@ abstract class WC_Data {
 				} else {
 					$timestamp = wc_string_to_timestamp( get_gmt_from_date( gmdate( 'Y-m-d H:i:s', wc_string_to_timestamp( $value ) ) ) );
 				}
-				$datetime  = new WC_DateTime( "@{$timestamp}", new DateTimeZone( 'UTC' ) );
+				$datetime = new WC_DateTime( "@{$timestamp}", new DateTimeZone( 'UTC' ) );
 			}
 
 			// Set local timezone or offset.

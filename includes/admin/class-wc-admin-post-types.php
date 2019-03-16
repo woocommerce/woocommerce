@@ -132,7 +132,8 @@ class WC_Admin_Post_Types {
 			9  => sprintf(
 				/* translators: 1: date 2: product url */
 				__( 'Product scheduled for: %1$s. <a target="_blank" href="%2$s">Preview product</a>', 'woocommerce' ),
-				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post->ID ) ) . '</strong>'
+				'<strong>' . date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( $post->post_date ) ),
+				esc_url( get_permalink( $post->ID ) ) . '</strong>'
 			),
 			/* translators: %s: product url */
 			10 => sprintf( __( 'Product draft updated. <a target="_blank" href="%s">Preview product</a>', 'woocommerce' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post->ID ) ) ) ),
@@ -240,7 +241,8 @@ class WC_Admin_Post_Types {
 		}
 
 		$shipping_class = get_terms(
-			'product_shipping_class', array(
+			'product_shipping_class',
+			array(
 				'hide_empty' => false,
 			)
 		);
@@ -260,7 +262,8 @@ class WC_Admin_Post_Types {
 		}
 
 		$shipping_class = get_terms(
-			'product_shipping_class', array(
+			'product_shipping_class',
+			array(
 				'hide_empty' => false,
 			)
 		);
@@ -627,7 +630,18 @@ class WC_Admin_Post_Types {
 		$product->set_backorders( $backorders );
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
-			$product->set_stock_quantity( $stock_amount );
+			$change_stock = absint( $_REQUEST['change_stock'] );
+			switch ( $change_stock ) {
+				case 2:
+					wc_update_product_stock( $product, $stock_amount, 'increase' );
+					break;
+				case 3:
+					wc_update_product_stock( $product, $stock_amount, 'decrease' );
+					break;
+				default:
+					wc_update_product_stock( $product, $stock_amount, 'set' );
+					break;
+			}
 		}
 
 		// Apply product type constraints to stock status.

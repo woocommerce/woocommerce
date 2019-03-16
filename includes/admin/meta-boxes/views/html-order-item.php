@@ -2,12 +2,13 @@
 /**
  * Shows an order item
  *
+ * @package WooCommerce/Admin
  * @var object $item The item being displayed
  * @var int $item_id The id of the item being displayed
  */
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+
+defined( 'ABSPATH' ) || exit;
+
 $product      = $item->get_product();
 $product_link = $product ? admin_url( 'post.php?post=' . $item->get_product_id() . '&action=edit' ) : '';
 $thumbnail    = $product ? apply_filters( 'woocommerce_admin_order_item_thumbnail', $product->get_image( 'thumbnail', array( 'title' => '' ), false ), $item_id, $item ) : '';
@@ -31,7 +32,7 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 				echo esc_html( $item->get_variation_id() );
 			} else {
 				/* translators: %s: variation id */
-				printf( esc_html__( '%s (No longer exists)', 'woocommerce' ), $item->get_variation_id() );
+				printf( esc_html__( '%s (No longer exists)', 'woocommerce' ), esc_html( $item->get_variation_id() ) );
 			}
 			echo '</div>';
 		}
@@ -49,21 +50,19 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 	<td class="item_cost" width="1%" data-sort-value="<?php echo esc_attr( $order->get_item_subtotal( $item, false, true ) ); ?>">
 		<div class="view">
 			<?php
-				echo wc_price( $order->get_item_total( $item, false, true ), array( 'currency' => $order->get_currency() ) );
-
-			if ( $item->get_subtotal() !== $item->get_total() ) {
-				echo '<span class="wc-order-item-discount">-' . wc_price( wc_format_decimal( $order->get_item_subtotal( $item, false, false ) - $order->get_item_total( $item, false, false ), '' ), array( 'currency' => $order->get_currency() ) ) . '</span>';
-			}
+			echo wc_price( $order->get_item_total( $item, false, true ), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			?>
 		</div>
 	</td>
 	<td class="quantity" width="1%">
 		<div class="view">
 			<?php
-				echo '<small class="times">&times;</small> ' . esc_html( $item->get_quantity() );
+			echo '<small class="times">&times;</small> ' . esc_html( $item->get_quantity() );
 
-			if ( $refunded_qty = $order->get_qty_refunded_for_item( $item_id ) ) {
-				echo '<small class="refunded">-' . ( $refunded_qty * -1 ) . '</small>';
+			$refunded_qty = $order->get_qty_refunded_for_item( $item_id );
+
+			if ( $refunded_qty ) {
+				echo '<small class="refunded">-' . esc_html( $refunded_qty * -1 ) . '</small>';
 			}
 			?>
 		</div>
@@ -77,25 +76,28 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 	<td class="line_cost" width="1%" data-sort-value="<?php echo esc_attr( $item->get_total() ); ?>">
 		<div class="view">
 			<?php
-			echo wc_price( $item->get_total(), array( 'currency' => $order->get_currency() ) );
+			echo wc_price( $item->get_total(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 			if ( $item->get_subtotal() !== $item->get_total() ) {
-				echo '<span class="wc-order-item-discount">-' . wc_price( wc_format_decimal( $item->get_subtotal() - $item->get_total(), '' ), array( 'currency' => $order->get_currency() ) ) . '</span>';
+				/* translators: %s: discount amount */
+				echo '<span class="wc-order-item-discount">' . sprintf( esc_html__( '%s discount', 'woocommerce' ), wc_price( wc_format_decimal( $item->get_subtotal() - $item->get_total(), '' ), array( 'currency' => $order->get_currency() ) ) ) . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
 
-			if ( $refunded = $order->get_total_refunded_for_item( $item_id ) ) {
-				echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
+			$refunded = $order->get_total_refunded_for_item( $item_id );
+
+			if ( $refunded ) {
+				echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
 			?>
 		</div>
 		<div class="edit" style="display: none;">
 			<div class="split-input">
 				<div class="input">
-					<label><?php esc_attr_e( 'Pre-discount:', 'woocommerce' ); ?></label>
+					<label><?php esc_attr_e( 'Before discount', 'woocommerce' ); ?></label>
 					<input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo esc_attr( wc_format_localized_price( 0 ) ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $item->get_subtotal() ) ); ?>" class="line_subtotal wc_input_price" data-subtotal="<?php echo esc_attr( wc_format_localized_price( $item->get_subtotal() ) ); ?>" />
 				</div>
 				<div class="input">
-					<label><?php esc_attr_e( 'Total:', 'woocommerce' ); ?></label>
+					<label><?php esc_attr_e( 'Total', 'woocommerce' ); ?></label>
 					<input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo esc_attr( wc_format_localized_price( 0 ) ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $item->get_total() ) ); ?>" class="line_total wc_input_price" data-tip="<?php esc_attr_e( 'After pre-tax discounts.', 'woocommerce' ); ?>" data-total="<?php echo esc_attr( wc_format_localized_price( $item->get_total() ) ); ?>" />
 				</div>
 			</div>
@@ -106,7 +108,9 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 	</td>
 
 	<?php
-	if ( ( $tax_data = $item->get_taxes() ) && wc_tax_enabled() ) {
+	$tax_data = wc_tax_enabled() ? $item->get_taxes() : false;
+
+	if ( $tax_data ) {
 		foreach ( $order_taxes as $tax_item ) {
 			$tax_item_id       = $tax_item->get_rate_id();
 			$tax_item_total    = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : '';
@@ -116,32 +120,26 @@ $row_class    = apply_filters( 'woocommerce_admin_html_order_item_class', ! empt
 				<div class="view">
 					<?php
 					if ( '' !== $tax_item_total ) {
-						echo wc_price( wc_round_tax_total( $tax_item_total ), array( 'currency' => $order->get_currency() ) );
+						echo wc_price( wc_round_tax_total( $tax_item_total ), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					} else {
 						echo '&ndash;';
 					}
 
-					if ( $item->get_subtotal() !== $item->get_total() ) {
-						if ( '' === $tax_item_total ) {
-							echo '<span class="wc-order-item-discount">&ndash;</span>';
-						} else {
-							echo '<span class="wc-order-item-discount">-' . wc_price( wc_round_tax_total( $tax_item_subtotal - $tax_item_total ), array( 'currency' => $order->get_currency() ) ) . '</span>';
-						}
-					}
+					$refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id );
 
-					if ( $refunded = $order->get_tax_refunded_for_item( $item_id, $tax_item_id ) ) {
-						echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>';
+					if ( $refunded ) {
+						echo '<small class="refunded">-' . wc_price( $refunded, array( 'currency' => $order->get_currency() ) ) . '</small>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					}
 					?>
 				</div>
 				<div class="edit" style="display: none;">
 					<div class="split-input">
 						<div class="input">
-							<label><?php esc_attr_e( 'Pre-discount:', 'woocommerce' ); ?></label>
+							<label><?php esc_attr_e( 'Before discount', 'woocommerce' ); ?></label>
 							<input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo esc_attr( wc_format_localized_price( 0 ) ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $tax_item_subtotal ) ); ?>" class="line_subtotal_tax wc_input_price" data-subtotal_tax="<?php echo esc_attr( wc_format_localized_price( $tax_item_subtotal ) ); ?>" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
 						</div>
 						<div class="input">
-							<label><?php esc_attr_e( 'Total:', 'woocommerce' ); ?></label>
+							<label><?php esc_attr_e( 'Total', 'woocommerce' ); ?></label>
 							<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo esc_attr( wc_format_localized_price( 0 ) ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $tax_item_total ) ); ?>" class="line_tax wc_input_price" data-total_tax="<?php echo esc_attr( wc_format_localized_price( $tax_item_total ) ); ?>" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
 						</div>
 					</div>

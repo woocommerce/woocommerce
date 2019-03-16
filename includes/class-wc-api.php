@@ -1,8 +1,11 @@
 <?php
 /**
- * WooCommerce API
+ * WooCommerce API class loader.
  *
- * Handles WC-API endpoint requests.
+ * This handles APIs in WooCommerce. These include:
+ * - wc-api endpoint - Commonly used by Payment gateways for callbacks.
+ * - Legacy REST API - Deprecated in 2.6.0. @see class-wc-legacy-api.php
+ * - WP REST API - The main REST API in WooCommerce which is built on top of the WP REST API.
  *
  * @package WooCommerce/API
  * @since   2.0.0
@@ -11,7 +14,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * API class.
+ * WC_API class.
  */
 class WC_API extends WC_Legacy_API {
 
@@ -23,20 +26,30 @@ class WC_API extends WC_Legacy_API {
 	public function __construct() {
 		parent::__construct();
 
-		// Add query vars.
-		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
-
-		// Register API endpoints.
-		add_action( 'init', array( $this, 'add_endpoint' ), 0 );
-
-		// Handle wc-api endpoint requests.
-		add_action( 'parse_request', array( $this, 'handle_api_requests' ), 0 );
-
-		// Ensure payment gateways are initialized in time for API requests.
-		add_action( 'woocommerce_api_request', array( 'WC_Payment_Gateways', 'instance' ), 0 );
-
-		// WP REST API.
+		$this->wc_api_init();
 		$this->rest_api_init();
+	}
+
+	/**
+	 * Init the WC API by adding endpoints for those requests.
+	 */
+	private function wc_api_init() {
+		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
+		add_action( 'init', array( $this, 'add_endpoint' ), 0 );
+		add_action( 'parse_request', array( $this, 'handle_api_requests' ), 0 );
+	}
+
+	/**
+	 * Init WP REST API by hooking into `rest_api_init`.
+	 *
+	 * @since 2.6.0
+	 */
+	private function rest_api_init() {
+		// Authentication needs to run early to handle basic auth.
+		include_once dirname( __FILE__ ) . '/api/class-wc-rest-authentication.php';
+
+		add_action( 'rest_api_init', array( $this, 'rest_api_includes' ), 5 );
+		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
 	}
 
 	/**
@@ -87,6 +100,9 @@ class WC_API extends WC_Legacy_API {
 			// Clean the API request.
 			$api_request = strtolower( wc_clean( $wp->query_vars['wc-api'] ) );
 
+			// Make sure gateways are available for request.
+			WC()->payment_gateways();
+
 			// Trigger generic action before request hook.
 			do_action( 'woocommerce_api_request', $api_request );
 
@@ -103,33 +119,13 @@ class WC_API extends WC_Legacy_API {
 	}
 
 	/**
-	 * Init WP REST API.
-	 *
-	 * @since 2.6.0
-	 */
-	private function rest_api_init() {
-		// REST API was included starting WordPress 4.4.
-		if ( ! class_exists( 'WP_REST_Server' ) ) {
-			return;
-		}
-
-		$this->rest_api_includes();
-
-		// Init REST API routes.
-		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
-	}
-
-	/**
 	 * Include REST API classes.
 	 *
 	 * @since 2.6.0
 	 */
-	private function rest_api_includes() {
+	public function rest_api_includes() {
 		// Exception handler.
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-exception.php';
-
-		// Authentication.
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-authentication.php';
 
 		// Abstract controllers.
 		include_once dirname( __FILE__ ) . '/abstracts/abstract-wc-rest-controller.php';
@@ -239,6 +235,12 @@ class WC_API extends WC_Legacy_API {
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-data-continents-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-data-countries-controller.php';
 		include_once dirname( __FILE__ ) . '/api/class-wc-rest-data-currencies-controller.php';
+
+		// Blocks REST API V1 controllers.
+		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-product-attributes-controller.php';
+		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-product-attribute-terms-controller.php';
+		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-product-categories-controller.php';
+		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-products-controller.php';
 	}
 
 	/**
@@ -346,6 +348,12 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Data_Continents_Controller',
 			'WC_REST_Data_Countries_Controller',
 			'WC_REST_Data_Currencies_Controller',
+
+			// Blocks REST API v1 Controllers.
+			'WC_REST_Blocks_Product_Attributes_Controller',
+			'WC_REST_Blocks_Product_Attribute_Terms_Controller',
+			'WC_REST_Blocks_Product_Categories_Controller',
+			'WC_REST_Blocks_Products_Controller',
 		);
 
 		foreach ( $controllers as $controller ) {
@@ -370,5 +378,4 @@ class WC_API extends WC_Legacy_API {
 			new WC_Register_WP_Admin_Settings( $email, 'email' );
 		}
 	}
-
 }

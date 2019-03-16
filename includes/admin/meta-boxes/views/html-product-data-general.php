@@ -1,7 +1,12 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+/**
+ * Product general data panel.
+ *
+ * @package WooCommerce/Admin
+ */
+
+defined( 'ABSPATH' ) || exit;
+
 ?>
 <div id="general_product_data" class="panel woocommerce_options_panel">
 
@@ -12,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				'id'          => '_product_url',
 				'value'       => is_callable( array( $product_object, 'get_product_url' ) ) ? $product_object->get_product_url( 'edit' ) : '',
 				'label'       => __( 'Product URL', 'woocommerce' ),
-				'placeholder' => 'http://',
+				'placeholder' => 'https://',
 				'description' => __( 'Enter the external URL to the product.', 'woocommerce' ),
 			)
 		);
@@ -50,8 +55,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			)
 		);
 
-		$sale_price_dates_from = $product_object->get_date_on_sale_from( 'edit' ) && ( $date = $product_object->get_date_on_sale_from( 'edit' )->getOffsetTimestamp() ) ? date_i18n( 'Y-m-d', $date ) : '';
-		$sale_price_dates_to   = $product_object->get_date_on_sale_to( 'edit' ) && ( $date = $product_object->get_date_on_sale_to( 'edit' )->getOffsetTimestamp() ) ? date_i18n( 'Y-m-d', $date ) : '';
+		$sale_price_dates_from_timestamp = $product_object->get_date_on_sale_from( 'edit' ) ? $product_object->get_date_on_sale_from( 'edit' )->getOffsetTimestamp() : false;
+		$sale_price_dates_to_timestamp   = $product_object->get_date_on_sale_to( 'edit' ) ? $product_object->get_date_on_sale_to( 'edit' )->getOffsetTimestamp() : false;
+
+		$sale_price_dates_from = $sale_price_dates_from_timestamp ? date_i18n( 'Y-m-d', $sale_price_dates_from_timestamp ) : '';
+		$sale_price_dates_to   = $sale_price_dates_to_timestamp ? date_i18n( 'Y-m-d', $sale_price_dates_to_timestamp ) : '';
 
 		echo '<p class="form-field sale_price_dates_fields">
 				<label for="_sale_price_dates_from">' . esc_html__( 'Sale price dates', 'woocommerce' ) . '</label>
@@ -99,7 +107,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								ob_start();
 								require 'html-product-download.php';
 								echo esc_attr( ob_get_clean() );
-							?>
+								?>
 							"><?php esc_html_e( 'Add File', 'woocommerce' ); ?></a>
 						</th>
 					</tr>

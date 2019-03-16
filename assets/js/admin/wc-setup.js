@@ -67,6 +67,15 @@ jQuery( function( $ ) {
 		}
 	} );
 
+	$( '.wc-wizard-services' ).on( 'keyup', function( e ) {
+		var code = e.keyCode || e.which,
+			$focused = $( document.activeElement );
+
+		if ( $focused.is( '.wc-wizard-service-toggle, .wc-wizard-service-enable' ) && ( 13 === code || 32 === code ) ) {
+			$focused.find( ':input' ).click();
+		}
+	} );
+
 	$( '.wc-wizard-services' ).on( 'click', '.wc-wizard-service-enable', function( e ) {
 		var eventTarget = $( e.target );
 
@@ -95,6 +104,7 @@ jQuery( function( $ ) {
 		description.find( '.shipping-method-description' ).addClass( 'hide' );
 		description.find( '.' + selectedMethod ).removeClass( 'hide' );
 
+		var $checkbox = zone.parent().find( 'input[type="checkbox"]' );
 		var settings = zone.find( '.shipping-method-settings' );
 		settings
 			.find( '.shipping-method-setting' )
@@ -105,7 +115,7 @@ jQuery( function( $ ) {
 			.find( '.' + selectedMethod )
 			.removeClass( 'hide' )
 			.find( '.shipping-method-required-field' )
-			.prop( 'required', true );
+			.prop( 'required', $checkbox.prop( 'checked' ) );
 	} ).find( '.wc-wizard-shipping-method-select .method' ).change();
 
 	$( '.wc-wizard-services' ).on( 'change', '.wc-wizard-shipping-method-enable', function() {

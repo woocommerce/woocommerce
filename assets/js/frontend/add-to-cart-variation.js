@@ -111,8 +111,8 @@
 	VariationForm.prototype.onResetDisplayedVariation = function( event ) {
 		var form = event.data.variationForm;
 		form.$product.find( '.product_meta' ).find( '.sku' ).wc_reset_content();
-		form.$product.find( '.product_weight' ).wc_reset_content();
-		form.$product.find( '.product_dimensions' ).wc_reset_content();
+		form.$product.find( '.product_weight, .woocommerce-product-attributes-item--weight .woocommerce-product-attributes-item__value' ).wc_reset_content();
+		form.$product.find( '.product_dimensions, .woocommerce-product-attributes-item--dimensions .woocommerce-product-attributes-item__value' ).wc_reset_content();
 		form.$form.trigger( 'reset_image' );
 		form.$singleVariation.slideUp( 200 ).trigger( 'hide_variation' );
 	};
@@ -194,8 +194,8 @@
 	VariationForm.prototype.onFoundVariation = function( event, variation ) {
 		var form           = event.data.variationForm,
 			$sku           = form.$product.find( '.product_meta' ).find( '.sku' ),
-			$weight        = form.$product.find( '.product_weight' ),
-			$dimensions    = form.$product.find( '.product_dimensions' ),
+			$weight        = form.$product.find( '.product_weight, .woocommerce-product-attributes-item--weight .woocommerce-product-attributes-item__value' ),
+			$dimensions    = form.$product.find( '.product_dimensions, .woocommerce-product-attributes-item--dimensions .woocommerce-product-attributes-item__value' ),
 			$qty           = form.$singleVariationWrap.find( '.quantity' ),
 			purchasable    = true,
 			variation_id   = '',
@@ -352,11 +352,23 @@
 								}
 
 								if ( attr_val ) {
-									// Decode entities and add slashes.
+									// Decode entities.
 									attr_val = $( '<div/>' ).html( attr_val ).text();
 
-									// Attach.
-									new_attr_select.find( 'option[value="' + form.addSlashes( attr_val ) + '"]' ).addClass( 'attached ' + variation_active );
+									// Attach to matching options by value. This is done to compare
+									// TEXT values rather than any HTML entities.
+									var $option_elements = new_attr_select.find( 'option' );
+									if ( $option_elements.length ) {
+										for (var i = 0, len = $option_elements.length; i < len; i++) {
+											var $option_element = $( $option_elements[i] ),
+												option_value = $option_element.val();
+
+											if ( attr_val === option_value ) {
+												$option_element.addClass( 'attached ' + variation_active );
+												break;
+											}
+										}
+									}
 								} else {
 									// Attach all apart from placeholder.
 									new_attr_select.find( 'option:gt(0)' ).addClass( 'attached ' + variation_active );
@@ -371,8 +383,19 @@
 			attached_options_count = new_attr_select.find( 'option.attached' ).length;
 
 			// Check if current selection is in attached options.
-			if ( selected_attr_val && ( attached_options_count === 0 || new_attr_select.find( 'option.attached.enabled[value="' + form.addSlashes( selected_attr_val ) + '"]' ).length === 0 ) ) {
+			if ( selected_attr_val ) {
 				selected_attr_val_valid = false;
+
+				if ( 0 !== attached_options_count ) {
+					new_attr_select.find( 'option.attached.enabled' ).each( function() {
+						var option_value = $( this ).val();
+
+						if ( selected_attr_val === option_value ) {
+							selected_attr_val_valid = true;
+							return false; // break.
+						}
+					});
+				}
 			}
 
 			// Detach the placeholder if:

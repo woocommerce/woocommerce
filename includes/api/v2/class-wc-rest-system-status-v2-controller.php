@@ -341,6 +341,24 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						'type' => 'string',
 					),
 				),
+				'inactive_plugins' => array(
+					'description' => __( 'Inactive plugins.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+					'items'       => array(
+						'type' => 'string',
+					),
+				),
+				'dropins_mu_plugins' => array(
+					'description' => __( 'Dropins & MU plugins.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+					'items'       => array(
+						'type' => 'string',
+					),
+				),
 				'theme'          => array(
 					'description' => __( 'Theme.', 'woocommerce' ),
 					'type'        => 'object',
@@ -548,13 +566,15 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 */
 	public function get_item_mappings() {
 		return array(
-			'environment'    => $this->get_environment_info(),
-			'database'       => $this->get_database_info(),
-			'active_plugins' => $this->get_active_plugins(),
-			'theme'          => $this->get_theme_info(),
-			'settings'       => $this->get_settings(),
-			'security'       => $this->get_security_info(),
-			'pages'          => $this->get_pages(),
+			'environment'        => $this->get_environment_info(),
+			'database'           => $this->get_database_info(),
+			'active_plugins'     => $this->get_active_plugins(),
+			'inactive_plugins'   => $this->get_inactive_plugins(),
+			'dropins_mu_plugins' => $this->get_dropins_mu_plugins(),
+			'theme'              => $this->get_theme_info(),
+			'settings'           => $this->get_settings(),
+			'security'           => $this->get_security_info(),
+			'pages'              => $this->get_pages(),
 		);
 	}
 
@@ -572,6 +592,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		if ( function_exists( 'curl_version' ) ) {
 			$curl_version = curl_version();
 			$curl_version = $curl_version['version'] . ', ' . $curl_version['ssl_version'];
+		} elseif ( extension_loaded( 'curl' ) ) {
+			$curl_version = __( 'cURL installed but unable to retrieve version.', 'woocommerce' );
 		}
 
 		// WP memory limit.
@@ -581,28 +603,40 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		// Test POST requests.
-		$post_response            = wp_safe_remote_post(
-			'https://www.paypal.com/cgi-bin/webscr',
-			array(
-				'timeout'     => 10,
-				'user-agent'  => 'WooCommerce/' . WC()->version,
-				'httpversion' => '1.1',
-				'body'        => array(
-					'cmd' => '_notify-validate',
-				),
-			)
-		);
-		$post_response_successful = false;
-		if ( ! is_wp_error( $post_response ) && $post_response['response']['code'] >= 200 && $post_response['response']['code'] < 300 ) {
-			$post_response_successful = true;
+		$post_response_code = get_transient( 'woocommerce_test_remote_post' );
+
+		if ( false === $post_response_code || is_wp_error( $post_response_code ) ) {
+			$response = wp_safe_remote_post(
+				'https://www.paypal.com/cgi-bin/webscr',
+				array(
+					'timeout'     => 10,
+					'user-agent'  => 'WooCommerce/' . WC()->version,
+					'httpversion' => '1.1',
+					'body'        => array(
+						'cmd' => '_notify-validate',
+					),
+				)
+			);
+			if ( ! is_wp_error( $response ) ) {
+				$post_response_code = $response['response']['code'];
+			}
+			set_transient( 'woocommerce_test_remote_post', $post_response_code, HOUR_IN_SECONDS );
 		}
 
+		$post_response_successful = ! is_wp_error( $post_response_code ) && $post_response_code >= 200 && $post_response_code < 300;
+
 		// Test GET requests.
-		$get_response            = wp_safe_remote_get( 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
-		$get_response_successful = false;
-		if ( ! is_wp_error( $post_response ) && $post_response['response']['code'] >= 200 && $post_response['response']['code'] < 300 ) {
-			$get_response_successful = true;
+		$get_response_code = get_transient( 'woocommerce_test_remote_get' );
+
+		if ( false === $get_response_code || is_wp_error( $get_response_code ) ) {
+			$response = wp_safe_remote_get( 'https://woocommerce.com/wc-api/product-key-api?request=ping&network=' . ( is_multisite() ? '1' : '0' ) );
+			if ( ! is_wp_error( $response ) ) {
+				$get_response_code = $response['response']['code'];
+			}
+			set_transient( 'woocommerce_test_remote_get', $get_response_code, HOUR_IN_SECONDS );
 		}
+
+		$get_response_successful = ! is_wp_error( $get_response_code ) && $get_response_code >= 200 && $get_response_code < 300;
 
 		$database_version = wc_get_server_database_version();
 
@@ -637,9 +671,9 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'gzip_enabled'              => is_callable( 'gzopen' ),
 			'mbstring_enabled'          => extension_loaded( 'mbstring' ),
 			'remote_post_successful'    => $post_response_successful,
-			'remote_post_response'      => ( is_wp_error( $post_response ) ? $post_response->get_error_message() : $post_response['response']['code'] ),
+			'remote_post_response'      => is_wp_error( $post_response_code ) ? $post_response_code->get_error_message() : $post_response_code,
 			'remote_get_successful'     => $get_response_successful,
-			'remote_get_response'       => ( is_wp_error( $get_response ) ? $get_response->get_error_message() : $get_response['response']['code'] ),
+			'remote_get_response'       => is_wp_error( $get_response_code ) ? $get_response_code->get_error_message() : $get_response_code,
 		);
 	}
 
@@ -695,10 +729,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 				'woocommerce_log',
 			)
 		);
-
-		if ( get_option( 'db_version' ) < 34370 ) {
-			$core_tables[] = 'woocommerce_termmeta';
-		}
 
 		/**
 		 * Adding the prefix to the tables array, for backwards compatibility.
@@ -769,14 +799,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_active_plugins() {
-		require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		require_once ABSPATH . 'wp-admin/includes/update.php';
-
-		if ( ! function_exists( 'get_plugin_updates' ) ) {
-			return array();
-		}
-
-		// Get both site plugins and network plugins.
 		$active_plugins = (array) get_option( 'active_plugins', array() );
 		if ( is_multisite() ) {
 			$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
@@ -784,81 +806,117 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		$active_plugins_data = array();
-		$available_updates   = get_plugin_updates();
 
 		foreach ( $active_plugins as $plugin ) {
-			$data           = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
-			$dirname        = dirname( $plugin );
-			$version_latest = '';
-			$slug           = explode( '/', $plugin );
-			$slug           = explode( '.', end( $slug ) );
-			$slug           = $slug[0];
-
-			if ( 'woocommerce' !== $slug && ( strstr( $data['PluginURI'], 'woothemes.com' ) || strstr( $data['PluginURI'], 'woocommerce.com' ) ) ) {
-				$version_data = get_transient( md5( $plugin ) . '_version_data' );
-				if ( false === $version_data ) {
-					$changelog = wp_safe_remote_get( 'http://dzv365zjfbd8v.cloudfront.net/changelogs/' . $dirname . '/changelog.txt' );
-					if ( 200 === wp_remote_retrieve_response_code( $changelog ) ) {
-						$cl_lines = explode( "\n", wp_remote_retrieve_body( $changelog ) );
-						if ( ! empty( $cl_lines ) ) {
-							foreach ( $cl_lines as $line_num => $cl_line ) {
-								if ( preg_match( '/^[0-9]/', $cl_line ) ) {
-									$date         = str_replace( '.', '-', trim( substr( $cl_line, 0, strpos( $cl_line, '-' ) ) ) );
-									$version      = preg_replace( '~[^0-9,.]~', '', stristr( $cl_line, 'version' ) );
-									$update       = trim( str_replace( '*', '', $cl_lines[ $line_num + 1 ] ) );
-									$version_data = array(
-										'date'      => $date,
-										'version'   => $version,
-										'update'    => $update,
-										'changelog' => $changelog,
-									);
-									set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
-									break;
-								}
-							}
-						}
-					} else {
-						$args    = (object) array(
-							'slug' => $dirname,
-						);
-						$request = array(
-							'action'  => 'plugin_information',
-							'request' => serialize( $args ),
-						);
-						$plugin_info = wp_safe_remote_post( 'http://api.wordpress.org/plugins/info/1.0/', array( 'body' => $request ) );
-						if ( 200 === wp_remote_retrieve_response_code( $plugin_info ) ) {
-							$body = maybe_unserialize( wp_remote_retrieve_body( $plugin_info ) );
-							if ( is_object( $body ) && isset( $body->sections['changelog'] ) ) {
-								$version_data = array(
-									'date'      => $body->last_updated,
-									'version'   => $body->version,
-									'update'    => $body->sections['changelog'],
-									'changelog' => $body->sections['changelog'],
-								);
-								set_transient( md5( $plugin ) . '_version_data', $version_data, DAY_IN_SECONDS );
-							}
-						}
-					}
-				}
-				$version_latest = $version_data['version'];
-			} elseif ( isset( $available_updates[ $plugin ]->update->new_version ) ) {
-				$version_latest = $available_updates[ $plugin ]->update->new_version;
-			}
-
-			// convert plugin data to json response format.
-			$active_plugins_data[] = array(
-				'plugin'            => $plugin,
-				'name'              => $data['Name'],
-				'version'           => $data['Version'],
-				'version_latest'    => $version_latest,
-				'url'               => $data['PluginURI'],
-				'author_name'       => $data['AuthorName'],
-				'author_url'        => esc_url_raw( $data['AuthorURI'] ),
-				'network_activated' => $data['Network'],
-			);
+			$data                  = get_plugin_data( WP_PLUGIN_DIR . '/' . $plugin );
+			$active_plugins_data[] = $this->format_plugin_data( $plugin, $data );
 		}
 
 		return $active_plugins_data;
+	}
+
+	/**
+	 * Get a list of inplugins active on the site.
+	 *
+	 * @return array
+	 */
+	public function get_inactive_plugins() {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+		if ( ! function_exists( 'get_plugins' ) ) {
+			return array();
+		}
+
+		$plugins        = get_plugins();
+		$active_plugins = (array) get_option( 'active_plugins', array() );
+
+		if ( is_multisite() ) {
+			$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
+			$active_plugins            = array_merge( $active_plugins, $network_activated_plugins );
+		}
+
+		$plugins_data = array();
+
+		foreach ( $plugins as $plugin => $data ) {
+			if ( in_array( $plugin, $active_plugins, true ) ) {
+				continue;
+			}
+			$plugins_data[] = $this->format_plugin_data( $plugin, $data );
+		}
+
+		return $plugins_data;
+	}
+
+	/**
+	 * Format plugin data, including data on updates, into a standard format.
+	 *
+	 * @since 3.6.0
+	 * @param string $plugin Plugin directory/file.
+	 * @param array  $data Plugin data from WP.
+	 * @return array Formatted data.
+	 */
+	protected function format_plugin_data( $plugin, $data ) {
+		require_once ABSPATH . 'wp-admin/includes/update.php';
+
+		if ( ! function_exists( 'get_plugin_updates' ) ) {
+			return array();
+		}
+
+		// Use WP API to lookup latest updates for plugins. WC_Helper injects updates for premium plugins.
+		if ( empty( $this->available_updates ) ) {
+			$this->available_updates = get_plugin_updates();
+		}
+
+		$version_latest = $data['Version'];
+
+		// Find latest version.
+		if ( isset( $available_updates[ $plugin ]->update->new_version ) ) {
+			$version_latest = $available_updates[ $plugin ]->update->new_version;
+		}
+
+		return array(
+			'plugin'            => $plugin,
+			'name'              => $data['Name'],
+			'version'           => $data['Version'],
+			'version_latest'    => $version_latest,
+			'url'               => $data['PluginURI'],
+			'author_name'       => $data['AuthorName'],
+			'author_url'        => esc_url_raw( $data['AuthorURI'] ),
+			'network_activated' => $data['Network'],
+		);
+	}
+
+	/**
+	 * Get a list of Dropins and MU plugins.
+	 *
+	 * @since 3.6.0
+	 * @return array
+	 */
+	public function get_dropins_mu_plugins() {
+		$dropins = get_dropins();
+		$plugins = array(
+			'dropins'    => array(),
+			'mu_plugins' => array(),
+		);
+		foreach ( $dropins as $key => $dropin ) {
+			$plugins['dropins'][] = array(
+				'plugin' => $key,
+				'name'   => $dropin['Name'],
+			);
+		}
+
+		$mu_plugins = get_mu_plugins();
+		foreach ( $mu_plugins as $plugin => $mu_plugin ) {
+			$plugins['mu_plugins'][] = array(
+				'plugin'      => $plugin,
+				'name'        => $mu_plugin['Name'],
+				'version'     => $mu_plugin['Version'],
+				'url'         => $mu_plugin['PluginURI'],
+				'author_name' => $mu_plugin['AuthorName'],
+				'author_url'  => esc_url_raw( $mu_plugin['AuthorURI'] ),
+			);
+		}
+		return $plugins;
 	}
 
 	/**
@@ -965,19 +1023,27 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$product_visibility_terms[ $term->slug ] = strtolower( $term->name );
 		}
 
+		// Check if WooCommerce.com account is connected.
+		$woo_com_connected = 'no';
+		$helper_options    = get_option( 'woocommerce_helper_data', array() );
+		if ( array_key_exists( 'auth', $helper_options ) && ! empty( $helper_options['auth'] ) ) {
+			$woo_com_connected = 'yes';
+		}
+
 		// Return array of useful settings for debugging.
 		return array(
-			'api_enabled'              => 'yes' === get_option( 'woocommerce_api_enabled' ),
-			'force_ssl'                => 'yes' === get_option( 'woocommerce_force_ssl_checkout' ),
-			'currency'                 => get_woocommerce_currency(),
-			'currency_symbol'          => get_woocommerce_currency_symbol(),
-			'currency_position'        => get_option( 'woocommerce_currency_pos' ),
-			'thousand_separator'       => wc_get_price_thousand_separator(),
-			'decimal_separator'        => wc_get_price_decimal_separator(),
-			'number_of_decimals'       => wc_get_price_decimals(),
-			'geolocation_enabled'      => in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation_ajax', 'geolocation' ) ),
-			'taxonomies'               => $term_response,
-			'product_visibility_terms' => $product_visibility_terms,
+			'api_enabled'               => 'yes' === get_option( 'woocommerce_api_enabled' ),
+			'force_ssl'                 => 'yes' === get_option( 'woocommerce_force_ssl_checkout' ),
+			'currency'                  => get_woocommerce_currency(),
+			'currency_symbol'           => get_woocommerce_currency_symbol(),
+			'currency_position'         => get_option( 'woocommerce_currency_pos' ),
+			'thousand_separator'        => wc_get_price_thousand_separator(),
+			'decimal_separator'         => wc_get_price_decimal_separator(),
+			'number_of_decimals'        => wc_get_price_decimals(),
+			'geolocation_enabled'       => in_array( get_option( 'woocommerce_default_customer_address' ), array( 'geolocation_ajax', 'geolocation' ) ),
+			'taxonomies'                => $term_response,
+			'product_visibility_terms'  => $product_visibility_terms,
+			'woocommerce_com_connected' => $woo_com_connected,
 		);
 	}
 
@@ -987,7 +1053,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_security_info() {
-		$check_page = 0 < wc_get_page_id( 'shop' ) ? get_permalink( wc_get_page_id( 'shop' ) ) : get_home_url();
+		$check_page = wc_get_page_permalink( 'shop' );
 		return array(
 			'secure_connection' => 'https' === substr( $check_page, 0, 5 ),
 			'hide_errors'       => ! ( defined( 'WP_DEBUG' ) && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG && WP_DEBUG_DISPLAY ) || 0 === intval( ini_get( 'display_errors' ) ),

@@ -64,6 +64,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		'syntax_highlighting',
 		'_order_count',
 		'_money_spent',
+		'_woocommerce_tracks_anon_id',
 	);
 
 	/**
@@ -146,11 +147,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		// User object is required.
 		if ( ! $user_object || empty( $user_object->ID ) ) {
-			throw new Exception( __( 'Invalid customer.', 'woocommerce' ) );
-		}
-
-		// Only users on this site should be read.
-		if ( is_multisite() && ! is_user_member_of_blog( $customer->get_id() ) ) {
 			throw new Exception( __( 'Invalid customer.', 'woocommerce' ) );
 		}
 

@@ -47,8 +47,15 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 */
 	protected function render_blank_state() {
 		echo '<div class="woocommerce-BlankState">';
+
 		echo '<h2 class="woocommerce-BlankState-message">' . esc_html__( 'When you receive a new order, it will appear here.', 'woocommerce' ) . '</h2>';
+
+		echo '<div class="woocommerce-BlankState-buttons">';
 		echo '<a class="woocommerce-BlankState-cta button-primary button" target="_blank" href="https://docs.woocommerce.com/document/managing-orders/?utm_source=blankslate&utm_medium=product&utm_content=ordersdoc&utm_campaign=woocommerceplugin">' . esc_html__( 'Learn more about orders', 'woocommerce' ) . '</a>';
+		echo '</div>';
+
+		do_action( 'wc_marketplace_suggestions_orders_empty_state' );
+
 		echo '</div>';
 	}
 
@@ -135,10 +142,13 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			unset( $actions['edit'] );
 		}
 
-		$actions['mark_processing']      = __( 'Change status to processing', 'woocommerce' );
-		$actions['mark_on-hold']         = __( 'Change status to on-hold', 'woocommerce' );
-		$actions['mark_completed']       = __( 'Change status to completed', 'woocommerce' );
-		$actions['remove_personal_data'] = __( 'Remove personal data', 'woocommerce' );
+		$actions['mark_processing'] = __( 'Change status to processing', 'woocommerce' );
+		$actions['mark_on-hold']    = __( 'Change status to on-hold', 'woocommerce' );
+		$actions['mark_completed']  = __( 'Change status to completed', 'woocommerce' );
+
+		if ( wc_string_to_bool( get_option( 'woocommerce_allow_bulk_remove_personal_data', 'no' ) ) ) {
+			$actions['remove_personal_data'] = __( 'Remove personal data', 'woocommerce' );
+		}
 
 		return $actions;
 	}
@@ -656,7 +666,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			// Sanity check: bail out if this is actually not a status, or is not a registered status.
 			if ( isset( $order_statuses[ 'wc-' . $new_status ] ) ) {
 				// Initialize payment gateways in case order has hooked status transition actions.
-				wc()->payment_gateways();
+				WC()->payment_gateways();
 
 				foreach ( $ids as $id ) {
 					$order = wc_get_order( $id );
@@ -732,7 +742,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$user_string = '';
 		$user_id     = '';
 
-		if ( ! empty( $_GET['_customer_user'] ) ) { // WPCS: input var ok.
+		if ( ! empty( $_GET['_customer_user'] ) ) { // phpcs:disable  WordPress.Security.NonceVerification.NoNonceVerification
 			$user_id = absint( $_GET['_customer_user'] ); // WPCS: input var ok, sanitization ok.
 			$user    = get_user_by( 'id', $user_id );
 
@@ -778,11 +788,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 		// Filter the orders by the posted customer.
 		if ( ! empty( $_GET['_customer_user'] ) ) { // WPCS: input var ok.
-			// @codingStandardsIgnoreStart
+			// @codingStandardsIgnoreStart.
 			$query_vars['meta_query'] = array(
 				array(
-					'key'   => '_customer_user',
-					'value' => (int) $_GET['_customer_user'], // WPCS: input var ok, sanitization ok.
+					'key'     => '_customer_user',
+					'value'   => (int) $_GET['_customer_user'], // WPCS: input var ok, sanitization ok.
 					'compare' => '=',
 				),
 			);
@@ -825,7 +835,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	public function search_label( $query ) {
 		global $pagenow, $typenow;
 
-		if ( 'edit.php' !== $pagenow || 'shop_order' !== $typenow || ! get_query_var( 'shop_order_search' ) || ! isset( $_GET['s'] ) ) { // WPCS: input var ok.
+		if ( 'edit.php' !== $pagenow || 'shop_order' !== $typenow || ! get_query_var( 'shop_order_search' ) || ! isset( $_GET['s'] ) ) { // phpcs:disable  WordPress.Security.NonceVerification.NoNonceVerification
 			return $query;
 		}
 
@@ -851,7 +861,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	public function search_custom_fields( $wp ) {
 		global $pagenow;
 
-		if ( 'edit.php' !== $pagenow || empty( $wp->query_vars['s'] ) || 'shop_order' !== $wp->query_vars['post_type'] || ! isset( $_GET['s'] ) ) { // WPCS: input var ok.
+		if ( 'edit.php' !== $pagenow || empty( $wp->query_vars['s'] ) || 'shop_order' !== $wp->query_vars['post_type'] || ! isset( $_GET['s'] ) ) { // phpcs:disable  WordPress.Security.NonceVerification.NoNonceVerification
 			return;
 		}
 

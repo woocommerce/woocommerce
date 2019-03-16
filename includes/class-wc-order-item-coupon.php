@@ -47,7 +47,7 @@ class WC_Order_Item_Coupon extends WC_Order_Item {
 	 * @param string $value Coupon code.
 	 */
 	public function set_code( $value ) {
-		$this->set_prop( 'code', wc_clean( $value ) );
+		$this->set_prop( 'code', wc_format_coupon_code( $value ) );
 	}
 
 	/**

@@ -634,6 +634,9 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param bool $clear_persistent_cart Should the persistant cart be cleared too. Defaults to true.
 	 */
 	public function empty_cart( $clear_persistent_cart = true ) {
+		
+		do_action( 'woocommerce_before_cart_emptied' );
+		
 		$this->cart_contents              = array();
 		$this->removed_cart_contents      = array();
 		$this->shipping_methods           = array();
@@ -869,7 +872,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				$tax_totals[ $code ]->is_compound      = WC_Tax::is_compound( $key );
 				$tax_totals[ $code ]->label            = WC_Tax::get_rate_label( $key );
 				$tax_totals[ $code ]->amount          += wc_round_tax_total( $tax );
-				$tax_totals[ $code ]->formatted_amount = wc_price( wc_round_tax_total( $tax_totals[ $code ]->amount ) );
+				$tax_totals[ $code ]->formatted_amount = wc_price( $tax_totals[ $code ]->amount );
 			}
 		}
 
@@ -1079,8 +1082,10 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				// Add item after merging with $cart_item_data - hook to allow plugins to modify cart item.
 				$this->cart_contents[ $cart_item_key ] = apply_filters(
-					'woocommerce_add_cart_item', array_merge(
-						$cart_item_data, array(
+					'woocommerce_add_cart_item',
+					array_merge(
+						$cart_item_data,
+						array(
 							'key'          => $cart_item_key,
 							'product_id'   => $product_id,
 							'variation_id' => $variation_id,
@@ -1089,7 +1094,8 @@ class WC_Cart extends WC_Legacy_Cart {
 							'data'         => $product_data,
 							'data_hash'    => wc_get_cart_item_data_hash( $product_data ),
 						)
-					), $cart_item_key
+					),
+					$cart_item_key
 				);
 			}
 
@@ -1226,7 +1232,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Uses the shipping class to calculate shipping then gets the totals when its finished.
 	 */
 	public function calculate_shipping() {
-		$this->shipping_methods = $this->needs_shipping() ? $this->get_chosen_shipping_methods( WC()->shipping->calculate_shipping( $this->get_shipping_packages() ) ) : array();
+		$this->shipping_methods = $this->needs_shipping() ? $this->get_chosen_shipping_methods( WC()->shipping()->calculate_shipping( $this->get_shipping_packages() ) ) : array();
 
 		$shipping_taxes = wp_list_pluck( $this->shipping_methods, 'taxes' );
 		$merged_taxes   = array();
@@ -1422,13 +1428,15 @@ class WC_Cart extends WC_Legacy_Cart {
 			if ( $coupon->is_valid() ) {
 
 				// Get user and posted emails to compare.
-				$current_user = wp_get_current_user();
+				$current_user  = wp_get_current_user();
 				$billing_email = isset( $posted['billing_email'] ) ? $posted['billing_email'] : '';
 				$check_emails  = array_unique(
 					array_filter(
 						array_map(
-							'strtolower', array_map(
-								'sanitize_email', array(
+							'strtolower',
+							array_map(
+								'sanitize_email',
+								array(
 									$billing_email,
 									$current_user->user_email,
 								)
@@ -1507,7 +1515,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			// Go through the allowed emails and return true if the email matches a wildcard.
 			foreach ( $restrictions as $restriction ) {
 				// Convert to PHP-regex syntax.
-				$regex = '/' . str_replace( '*', '(.+)?', $restriction ) . '/';
+				$regex = '/^' . str_replace( '*', '(.+)?', $restriction ) . '$/';
 				preg_match( $regex, $check_email, $match );
 				if ( ! empty( $match ) ) {
 					return true;
@@ -1604,7 +1612,7 @@ class WC_Cart extends WC_Legacy_Cart {
 
 		// Choose free shipping.
 		if ( $the_coupon->get_free_shipping() ) {
-			$packages                = WC()->shipping->get_packages();
+			$packages                = WC()->shipping()->get_packages();
 			$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
 			foreach ( $packages as $i => $package ) {
@@ -1911,10 +1919,10 @@ class WC_Cart extends WC_Legacy_Cart {
 			if ( ! $compound && WC_Tax::is_compound( $key ) ) {
 				continue;
 			}
-			$total += $tax;
+			$total += wc_round_tax_total( $tax );
 		}
 		if ( $display ) {
-			$total = wc_round_tax_total( $total );
+			$total = wc_format_decimal( $total, wc_get_price_decimals() );
 		}
 		return apply_filters( 'woocommerce_cart_taxes_total', $total, $compound, $display, $this );
 	}
@@ -1948,5 +1956,19 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		return get_option( 'woocommerce_tax_display_cart' );
+	}
+
+	/**
+	 * Returns the hash based on cart contents.
+	 *
+	 * @since 3.6.0
+	 * @return string hash for cart content
+	 */
+	public function get_cart_hash() {
+		$cart_session = $this->session->get_cart_for_session();
+		$hash         = $cart_session ? md5( wp_json_encode( $cart_session ) . $this->get_total( 'edit' ) ) : '';
+		$hash         = apply_filters_deprecated( 'woocommerce_add_to_cart_hash', array( $hash, $cart_session ), '3.6.0', 'woocommerce_cart_hash' );
+
+		return apply_filters( 'woocommerce_cart_hash', $hash, $cart_session );
 	}
 }

@@ -36,8 +36,11 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			$erasure_text = sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'tools.php?page=remove_personal_data' ) ), $erasure_text );
 		}
 
+		$tracking_info_text = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://woocommerce.com/usage-tracking', esc_html__( 'Read more about what we collect', 'woocommerce' ) );
+
 		$settings = apply_filters(
-			'woocommerce_' . $this->id . '_settings', array(
+			'woocommerce_' . $this->id . '_settings',
+			array(
 				array(
 					'title' => '',
 					'type'  => 'title',
@@ -96,7 +99,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				),
 				array(
 					'title'         => __( 'Account erasure requests', 'woocommerce' ),
-					'desc'          => __( 'Remove personal data from orders', 'woocommerce' ),
+					'desc'          => __( 'Remove personal data from orders on request', 'woocommerce' ),
 					/* Translators: %s URL to erasure request screen. */
 					'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should personal data within orders be retained or removed?', 'woocommerce' ), $erasure_text ),
 					'id'            => 'woocommerce_erasure_request_removes_order_data',
@@ -106,13 +109,23 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'autoload'      => false,
 				),
 				array(
-					'desc'          => __( 'Remove access to downloads', 'woocommerce' ),
+					'desc'          => __( 'Remove access to downloads on request', 'woocommerce' ),
 					/* Translators: %s URL to erasure request screen. */
 					'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should access to downloadable files be revoked and download logs cleared?', 'woocommerce' ), $erasure_text ),
 					'id'            => 'woocommerce_erasure_request_removes_download_data',
 					'type'          => 'checkbox',
 					'default'       => 'no',
 					'checkboxgroup' => 'end',
+					'autoload'      => false,
+				),
+				array(
+					'title'         => __( 'Personal data removal', 'woocommerce' ),
+					'desc'          => __( 'Allow personal data to be removed in bulk from orders', 'woocommerce' ),
+					'desc_tip'      => __( 'Adds an option to the orders screen for removing personal in bulk. Note that removing personal data cannot be undone.', 'woocommerce' ),
+					'id'            => 'woocommerce_allow_bulk_remove_personal_data',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'start',
+					'default'       => 'no',
 					'autoload'      => false,
 				),
 				array(
@@ -220,6 +233,27 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				array(
 					'type' => 'sectionend',
 					'id'   => 'personal_data_retention',
+				),
+				array(
+					'title' => esc_html__( 'Usage Tracking', 'woocommerce' ),
+					'type'  => 'title',
+					'id'    => 'tracking_options',
+					'desc'  => __( 'Gathering usage data allows us to make WooCommerce better — your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense.', 'woocommerce' ),
+				),
+				array(
+					'title'         => __( 'Enable tracking', 'woocommerce' ),
+					'desc'          => __( 'Allow usage of WooCommerce to be tracked', 'woocommerce' ),
+					/* Translators: %s URL to tracking info screen. */
+					'desc_tip'      => sprintf( esc_html__( 'If you would rather opt-out, and do not check this box, we will not know this store exists and we will not collect any usage data. %s.', 'woocommerce' ), $tracking_info_text ),
+					'id'            => 'woocommerce_allow_tracking',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'start',
+					'default'       => 'no',
+					'autoload'      => false,
+				),
+				array(
+					'type' => 'sectionend',
+					'id'   => 'tracking_options',
 				),
 			)
 		);

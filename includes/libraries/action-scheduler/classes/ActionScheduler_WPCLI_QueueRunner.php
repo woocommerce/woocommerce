@@ -27,7 +27,8 @@ class ActionScheduler_WPCLI_QueueRunner extends ActionScheduler_Abstract_QueueRu
 	 */
 	public function __construct( ActionScheduler_Store $store = null, ActionScheduler_FatalErrorMonitor $monitor = null, ActionScheduler_QueueCleaner $cleaner = null ) {
 		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) ) {
-			throw new Exception( __( 'The ' . __CLASS__ . ' class can only be run within WP CLI.', 'action-scheduler' ) );
+			/* translators: %s php class name */
+			throw new Exception( sprintf( __( 'The %s class can only be run within WP CLI.', 'action-scheduler' ), __CLASS__ ) );
 		}
 
 		parent::__construct( $store, $monitor, $cleaner );
@@ -76,7 +77,7 @@ class ActionScheduler_WPCLI_QueueRunner extends ActionScheduler_Abstract_QueueRu
 	 */
 	protected function add_hooks() {
 		add_action( 'action_scheduler_before_execute', array( $this, 'before_execute' ) );
-		add_action( 'action_scheduler_after_execute', array( $this, 'after_execute' ) );
+		add_action( 'action_scheduler_after_execute', array( $this, 'after_execute' ), 10, 2 );
 		add_action( 'action_scheduler_failed_execution', array( $this, 'action_failed' ), 10, 2 );
 	}
 
@@ -143,11 +144,16 @@ class ActionScheduler_WPCLI_QueueRunner extends ActionScheduler_Abstract_QueueRu
 	 *
 	 * @author Jeremy Pry
 	 *
-	 * @param $action_id
+	 * @param int $action_id
+	 * @param null|ActionScheduler_Action $action The instance of the action. Default to null for backward compatibility.
 	 */
-	public function after_execute( $action_id ) {
+	public function after_execute( $action_id, $action = null ) {
+		// backward compatibility
+		if ( null === $action ) {
+			$action = $this->store->fetch_action( $action_id );
+		}
 		/* translators: %s refers to the action ID */
-		WP_CLI::log( sprintf( __( 'Completed processing action %s', 'action-scheduler' ), $action_id ) );
+		WP_CLI::log( sprintf( __( 'Completed processing action %s with hook: %s', 'action-scheduler' ), $action_id, $action->get_hook() ) );
 	}
 
 	/**

@@ -119,7 +119,7 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 
 		if ( $order->get_total() > 0 ) {
 			// Mark as on-hold (we're awaiting the cheque).
-			$order->update_status( 'on-hold', _x( 'Awaiting check payment', 'Check payment method', 'woocommerce' ) );
+			$order->update_status( apply_filters( 'woocommerce_cheque_process_payment_order_status', 'on-hold', $order ), _x( 'Awaiting check payment', 'Check payment method', 'woocommerce' ) );
 		} else {
 			$order->payment_complete();
 		}

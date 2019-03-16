@@ -18,16 +18,22 @@ $update_url = wp_nonce_url(
 ?>
 <div id="message" class="updated woocommerce-message wc-connect">
 	<p>
-		<strong><?php esc_html_e( 'WooCommerce data update', 'woocommerce' ); ?></strong> &#8211; <?php esc_html_e( 'We need to update your store database to the latest version.', 'woocommerce' ); ?>
+		<strong><?php esc_html_e( 'WooCommerce database update required', 'woocommerce' ); ?></strong>
+	</p>
+	<p>
+		<?php
+			esc_html_e( 'WooCommerce has been updated! To keep things running smoothly, we have to update your database to the newest version.', 'woocommerce' );
+
+			/* translators: 1: Link to docs 2: Close link. */
+			printf( ' ' . esc_html__( 'The database update process runs in the background and may take a little while, so please be patient. Advanced users can alternatively update via %1$sWP CLI%2$s.', 'woocommerce' ), '<a href="https://github.com/woocommerce/woocommerce/wiki/Upgrading-the-database-using-WP-CLI">', '</a>' );
+		?>
 	</p>
 	<p class="submit">
 		<a href="<?php echo esc_url( $update_url ); ?>" class="wc-update-now button-primary">
-			<?php esc_html_e( 'Run the updater', 'woocommerce' ); ?>
+			<?php esc_html_e( 'Update WooCommerce Database', 'woocommerce' ); ?>
+		</a>
+		<a href="https://docs.woocommerce.com/document/how-to-update-woocommerce/" class="button-secondary">
+			<?php esc_html_e( 'Learn more about updates', 'woocommerce' ); ?>
 		</a>
 	</p>
 </div>
-<script type="text/javascript">
-	jQuery( '.wc-update-now' ).click( 'click', function() {
-		return window.confirm( '<?php echo esc_js( __( 'It is strongly recommended that you backup your database before proceeding. Are you sure you wish to run the updater now?', 'woocommerce' ) ); ?>' ); // jshint ignore:line
-	});
-</script>

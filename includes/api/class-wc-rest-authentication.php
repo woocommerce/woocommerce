@@ -56,13 +56,10 @@ class WC_REST_Authentication {
 
 		$rest_prefix = trailingslashit( rest_get_url_prefix() );
 
-		// Check if our endpoint.
-		$woocommerce = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix . 'wc/' ) ); // @codingStandardsIgnoreLine
-
 		// Allow third party plugins use our authentication methods.
 		$third_party = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix . 'wc-' ) ); // @codingStandardsIgnoreLine
 
-		return apply_filters( 'woocommerce_rest_is_request_to_rest_api', $woocommerce || $third_party );
+		return apply_filters( 'woocommerce_rest_is_request_to_rest_api', WC()->is_rest_api_request() || $third_party );
 	}
 
 	/**

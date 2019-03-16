@@ -672,6 +672,9 @@ function wc_update_220_attributes() {
 			}
 		}
 	}
+
+	delete_transient( 'wc_attribute_taxonomies' );
+	WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
 }
 
 /**
@@ -738,7 +741,8 @@ function wc_update_240_shipping_methods() {
 	foreach ( $shipping_methods as $flat_rate_option_key => $shipping_method ) {
 		// Stop this running more than once if routine is repeated.
 		if ( version_compare( $shipping_method->get_option( 'version', 0 ), '2.4.0', '<' ) ) {
-			$has_classes       = count( WC()->shipping->get_shipping_classes() ) > 0;
+			$shipping_classes  = WC()->shipping()->get_shipping_classes();
+			$has_classes       = count( $shipping_classes ) > 0;
 			$cost_key          = $has_classes ? 'no_class_cost' : 'cost';
 			$min_fee           = $shipping_method->get_option( 'minimum_fee' );
 			$math_cost_strings = array(
@@ -753,7 +757,7 @@ function wc_update_240_shipping_methods() {
 				$math_cost_strings[ $cost_key ][] = strstr( $fee, '%' ) ? '[fee percent="' . str_replace( '%', '', $fee ) . '" min="' . esc_attr( $min_fee ) . '"]' : $fee;
 			}
 
-			foreach ( WC()->shipping->get_shipping_classes() as $shipping_class ) {
+			foreach ( $shipping_classes as $shipping_class ) {
 				$rate_key                       = 'class_cost_' . $shipping_class->slug;
 				$math_cost_strings[ $rate_key ] = $math_cost_strings['no_class_cost'];
 			}
@@ -1549,7 +1553,7 @@ function wc_update_330_set_default_product_cat() {
 	$default_category = get_option( 'default_product_cat', 0 );
 
 	if ( $default_category ) {
-		$result = $wpdb->query(
+		$wpdb->query(
 			$wpdb->prepare(
 				"INSERT INTO {$wpdb->term_relationships} (object_id, term_taxonomy_id)
 				SELECT DISTINCT posts.ID, %s FROM {$wpdb->posts} posts
@@ -1905,4 +1909,67 @@ function wc_update_352_drop_download_log_fk() {
 	if ( $results ) {
 		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY fk_wc_download_log_permission_id" ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
 	}
+}
+
+/**
+ * Remove edit_user capabilities from shop managers and use "translated" capabilities instead.
+ * See wc_shop_manager_has_capability function.
+ */
+function wc_update_354_modify_shop_manager_caps() {
+	global $wp_roles;
+
+	if ( ! class_exists( 'WP_Roles' ) ) {
+		return;
+	}
+
+	if ( ! isset( $wp_roles ) ) {
+		$wp_roles = new WP_Roles(); // @codingStandardsIgnoreLine
+	}
+
+	$wp_roles->remove_cap( 'shop_manager', 'edit_users' );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_354_db_version() {
+	WC_Install::update_db_version( '3.5.4' );
+}
+
+/**
+ * Update product lookup tables in bulk.
+ */
+function wc_update_360_product_lookup_tables() {
+	wc_update_product_lookup_tables();
+}
+
+/**
+ * Renames ordering meta to be consistent across taxonomies.
+ */
+function wc_update_360_term_meta() {
+	global $wpdb;
+
+	$wpdb->query( "UPDATE {$wpdb->termmeta} SET meta_key = 'order' WHERE meta_key LIKE 'order_pa_%';" );
+}
+
+/**
+ * Add new user_order_remaining_expires to speed up user download permission fetching.
+ *
+ * @return void
+ */
+function wc_update_360_downloadable_product_permissions_index() {
+	global $wpdb;
+
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE key_name = 'user_order_remaining_expires'" );
+
+	if ( is_null( $index_exists ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD INDEX user_order_remaining_expires (user_id,order_id,downloads_remaining,access_expires)" );
+	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_360_db_version() {
+	WC_Install::update_db_version( '3.6.0' );
 }
