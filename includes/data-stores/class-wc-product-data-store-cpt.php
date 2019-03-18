@@ -1100,13 +1100,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		 */
 		foreach ( $sorted_meta as $variation_id => $variation ) {
 			$match = true;
+
+			// Loop over the variation meta keys and values i.e. what is saved to the products. Note: $attribute_value is empty when 'any' is in use.
 			foreach ( $variation as $attribute_key => $attribute_value ) {
-				if ( ! empty( $attribute_value ) && ! array_key_exists( $attribute_key, $match_attributes ) ) {
-					$match = false;
+				$match_any_value = empty( $attribute_value );
+
+				if ( ! $match_any_value && ! array_key_exists( $attribute_key, $match_attributes ) ) {
+					$match = false; // Requires a selection but no value was provide.
 				}
-				if ( array_key_exists( $attribute_key, $match_attributes ) ) {
-					if ( $match_attributes[ $attribute_key ] !== $attribute_value && ! empty( $match_attributes[ $attribute_key ] ) ) {
-						$match = false;
+
+				if ( array_key_exists( $attribute_key, $match_attributes ) ) { // Value to match was provided.
+					if ( ! $match_any_value && $match_attributes[ $attribute_key ] !== $attribute_value ) {
+						$match = false; // Provided value does not match variation.
 					}
 				}
 			}
