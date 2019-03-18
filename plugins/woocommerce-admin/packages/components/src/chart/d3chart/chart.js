@@ -32,6 +32,8 @@ import { getColor } from './utils/color';
 import ChartTooltip from './utils/tooltip';
 import { selectionLimit } from '../constants';
 
+const isRTL = () => document.documentElement.dir === 'rtl';
+
 /**
  * A simple D3 line and bar chart component for timeseries data in React.
  */
@@ -128,7 +130,7 @@ class D3Chart extends Component {
 
 		this.createTooltip( g.node(), params.getColor, params.visibleKeys );
 
-		drawAxis( g, params, scales, formats, margin );
+		drawAxis( g, params, scales, formats, margin, isRTL() );
 		chartType === 'line' && drawLines( g, data, params, scales, formats, this.tooltip );
 		chartType === 'bar' && drawBars( g, data, params, scales, formats, this.tooltip );
 	}
@@ -149,7 +151,7 @@ class D3Chart extends Component {
 	getMargin() {
 		const { margin } = this.props;
 
-		if ( window.isRtl ) {
+		if ( isRTL() ) {
 			return {
 				bottom: margin.bottom,
 				left: margin.right,

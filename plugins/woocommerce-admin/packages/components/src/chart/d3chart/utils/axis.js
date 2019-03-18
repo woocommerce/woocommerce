@@ -238,10 +238,10 @@ const drawXAxis = ( node, params, scales, formats ) => {
 		);
 };
 
-const drawYAxis = ( node, scales, formats, margin ) => {
+const drawYAxis = ( node, scales, formats, margin, isRTL ) => {
 	const yGrids = getYGrids( scales.yScale.domain()[ 1 ] );
 	const width = scales.xScale.range()[ 1 ];
-	const xPosition = window.isRtl ? width + margin.left + margin.right / 2 - 15 : -margin.left / 2 - 15;
+	const xPosition = isRTL ? width + margin.left + margin.right / 2 - 15 : -margin.left / 2 - 15;
 
 	node
 		.append( 'g' )
@@ -267,9 +267,9 @@ const drawYAxis = ( node, scales, formats, margin ) => {
 		);
 };
 
-export const drawAxis = ( node, params, scales, formats, margin ) => {
+export const drawAxis = ( node, params, scales, formats, margin, isRTL ) => {
 	drawXAxis( node, params, scales, formats );
-	drawYAxis( node, scales, formats, margin );
+	drawYAxis( node, scales, formats, margin, isRTL );
 
 	node.selectAll( '.domain' ).remove();
 	node.selectAll( '.axis .tick line' ).remove();

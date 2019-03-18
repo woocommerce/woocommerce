@@ -25,6 +25,8 @@ import DateInput from './input';
 import phrases from './phrases';
 import { getOutsideRange } from './utils';
 
+const isRTL = () => document.documentElement.dir === 'rtl';
+
 /**
  * This is wrapper for a [react-dates](https://github.com/airbnb/react-dates) powered calendar.
  */
@@ -150,6 +152,7 @@ class DateRange extends Component {
 						minimumNights={ 0 }
 						hideKeyboardShortcutsPanel
 						noBorder
+						isRTL={ isRTL() }
 						initialVisibleMonth={ this.setTnitialVisibleMonth( isDoubleCalendar, before ) }
 						phrases={ phrases }
 					/>
