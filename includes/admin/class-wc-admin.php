@@ -30,6 +30,7 @@ class WC_Admin {
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
 		add_action( 'wp_ajax_setup_wizard_check_jetpack', array( $this, 'setup_wizard_check_jetpack' ) );
 		add_action( 'init', array( 'WC_Site_Tracking', 'init' ) );
+		add_action( 'admin_menu', array( $this, 'remove_action_scheduler_tools_menu' ), 9999 );
 	}
 
 	/**
@@ -287,6 +288,18 @@ class WC_Admin {
 				'is_active' => $jetpack_active ? 'yes' : 'no',
 			)
 		);
+	}
+
+	/**
+	 * Remove ActionScheduler Tools Menu, WC has it under WooCommerce -> Status
+	 *
+	 * @since 3.6.0
+	 * @return void
+	 */
+	public function remove_action_scheduler_tools_menu() {
+		if ( class_exists( 'ActionScheduler' ) ) {
+			remove_submenu_page( 'tools.php', 'action-scheduler' );
+		}
 	}
 }
 
