@@ -240,6 +240,8 @@ jQuery( function( $ ) {
 			$( 'div.stock_fields' ).hide();
 			$( 'p.stock_status_field:not( .hide_if_' + product_type + ' )' ).show();
 		}
+
+		$( 'input.variable_manage_stock' ).change();
 	}).change();
 
 	// Date picker fields.
