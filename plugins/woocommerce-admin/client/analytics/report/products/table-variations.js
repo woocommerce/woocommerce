@@ -161,15 +161,16 @@ export default class VariationsReportTable extends Component {
 	}
 
 	render() {
-		const { isRequesting, query } = this.props;
+		const { baseSearchQuery, isRequesting, query } = this.props;
 
 		const labels = {
 			helpText: __( 'Check at least two variations below to compare', 'woocommerce-admin' ),
-			placeholder: __( 'Search by variation name', 'woocommerce-admin' ),
+			placeholder: __( 'Search by variation name or SKU', 'woocommerce-admin' ),
 		};
 
 		return (
 			<ReportTable
+				baseSearchQuery={ baseSearchQuery }
 				compareBy={ 'variations' }
 				compareParam={ 'filter-variations' }
 				endpoint="variations"

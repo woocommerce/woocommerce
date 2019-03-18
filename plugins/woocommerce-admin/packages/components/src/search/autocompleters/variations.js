@@ -56,7 +56,7 @@ export default {
 	},
 	isDebounced: true,
 	getOptionKeywords( variation ) {
-		return [ getVariationName( variation ) ];
+		return [ getVariationName( variation ), variation.sku ];
 	},
 	getOptionLabel( variation, query ) {
 		const match = computeSuggestionMatch( getVariationName( variation ), query ) || {};

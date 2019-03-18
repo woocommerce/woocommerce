@@ -89,7 +89,11 @@ class ProductsReport extends Component {
 					selectedChart={ getSelectedChart( chartQuery.chart, charts ) }
 				/>
 				{ isSingleProductVariable ? (
-					<VariationsReportTable isRequesting={ isRequesting } query={ query } />
+					<VariationsReportTable
+						baseSearchQuery={ { filter: 'single_product' } }
+						isRequesting={ isRequesting }
+						query={ query }
+					/>
 				) : (
 					<ProductsReportTable isRequesting={ isRequesting } query={ query } />
 				) }
