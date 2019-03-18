@@ -107,7 +107,7 @@ function OrdersPanel( { orders, isRequesting, isError, orderStatuses } ) {
 		const customerUrl = customer.customer_id
 			? getNewPath( {}, '/analytics/customers', {
 					filter: 'single_customer',
-					customer_id: customer.customer_id,
+					customers: customer.customer_id,
 				} )
 			: null;
 

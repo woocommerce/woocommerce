@@ -19,6 +19,28 @@ export const filters = [
 		showFilters: () => true,
 		filters: [
 			{ label: __( 'All Customers', 'woocommerce-admin' ), value: 'all' },
+			{
+				label: __( 'Single Customer', 'woocommerce-admin' ),
+				value: 'select_customer',
+				chartMode: 'item-comparison',
+				subFilters: [
+					{
+						component: 'Search',
+						value: 'single_customer',
+						chartMode: 'item-comparison',
+						path: [ 'select_customer' ],
+						settings: {
+							type: 'customers',
+							param: 'customers',
+							getLabels: getCustomerLabels,
+							labels: {
+								placeholder: __( 'Type to search for a customer', 'woocommerce-admin' ),
+								button: __( 'Single Customer', 'woocommerce-admin' ),
+							},
+						},
+					},
+				],
+			},
 			{ label: __( 'Advanced Filters', 'woocommerce-admin' ), value: 'advanced' },
 		],
 	},

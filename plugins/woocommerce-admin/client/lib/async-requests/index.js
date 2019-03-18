@@ -53,7 +53,7 @@ export const getCouponLabels = getRequestByIdString( NAMESPACE + '/coupons', cou
 
 export const getCustomerLabels = getRequestByIdString( NAMESPACE + '/customers', customer => ( {
 	id: customer.id,
-	label: customer.username,
+	label: customer.name,
 } ) );
 
 export const getProductLabels = getRequestByIdString( NAMESPACE + '/products', product => ( {
