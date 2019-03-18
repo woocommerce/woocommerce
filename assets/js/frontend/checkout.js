@@ -386,7 +386,7 @@ jQuery( function( $ ) {
 					}
 
 					// Check for error
-					if ( 'failure' === data.result ) {
+					if ( data && 'failure' === data.result ) {
 
 						var $form = $( 'form.checkout' );
 
