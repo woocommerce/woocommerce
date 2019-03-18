@@ -151,10 +151,6 @@
 		&::placeholder {
 			color: $core-grey-dark-300;
 		}
-
-		&:focus + span .woocommerce-calendar__input-error {
-			display: block;
-		}
 	}
 }
 
@@ -166,6 +162,15 @@
 
 .woocommerce-calendar__input-error {
 	display: none;
+
+	.is-error .woocommerce-calendar__input-text:focus + span & {
+		/* rtl:begin:ignore */
+		display: block;
+		left: 50% !important;
+		position: absolute;
+		top: auto !important;
+		/* rtl:end:ignore */
+	}
 
 	.components-popover__content {
 		background-color: $core-grey-dark-400;
