@@ -147,8 +147,11 @@ class Search extends Component {
 		) : null;
 	}
 
-	onFocus() {
-		this.setState( { isActive: true } );
+	onFocus( onChange ) {
+		return event => {
+			this.setState( { isActive: true } );
+			onChange( event );
+		};
 	}
 
 	onBlur() {
@@ -229,7 +232,7 @@ class Search extends Component {
 										onChange={ this.updateSearch( onChange ) }
 										aria-owns={ listBoxId }
 										aria-activedescendant={ activeId }
-										onFocus={ this.onFocus }
+										onFocus={ this.onFocus( onChange ) }
 										onBlur={ this.onBlur }
 										onKeyDown={ this.onKeyDown }
 										aria-describedby={
