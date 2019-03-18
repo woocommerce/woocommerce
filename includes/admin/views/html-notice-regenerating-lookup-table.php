@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 <div id="message" class="updated woocommerce-message">
 	<p>
-		<string><?php esc_html_e( 'WooCommerce is updating product data in the background.', 'woocommerce' ); ?></strong>&nbsp;
+		<strong><?php esc_html_e( 'WooCommerce is updating product data in the background.', 'woocommerce' ); ?></strong>&nbsp;
 		<?php
 		echo wp_kses_post(
 			sprintf(
