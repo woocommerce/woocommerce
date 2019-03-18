@@ -30,7 +30,7 @@ export default {
 		let payload = '';
 		if ( search ) {
 			const query = {
-				product_name: search,
+				search: search,
 				per_page: 10,
 				orderby: 'popularity',
 			};
@@ -40,7 +40,7 @@ export default {
 	},
 	isDebounced: true,
 	getOptionKeywords( product ) {
-		return [ product.name ];
+		return [ product.name, product.sku ];
 	},
 	getFreeTextOptions( query ) {
 		const label = (
