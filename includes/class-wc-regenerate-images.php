@@ -208,14 +208,14 @@ class WC_Regenerate_Images {
 			return $image;
 		}
 
-		$target_size  = wc_get_image_size( $size );
-		$image_width  = $image[1];
-		$image_height = $image[2];
-		$ratio_match  = false;
-		$uncropped    = '' === $target_size['width'] || '' === $target_size['height'];
+		$target_size      = wc_get_image_size( $size );
+		$image_width      = $image[1];
+		$image_height     = $image[2];
+		$ratio_match      = false;
+		$target_uncropped = '' === $target_size['width'] || '' === $target_size['height'] || ! $target_size['crop'];
 
 		// If '' is passed to either size, we test ratios against the original file. It's uncropped.
-		if ( $uncropped ) {
+		if ( $target_uncropped ) {
 			$full_size = self::get_full_size_image_dimensions( $attachment_id );
 
 			if ( ! $full_size || ! $full_size['width'] || ! $full_size['height'] ) {
