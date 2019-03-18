@@ -1427,9 +1427,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param  bool     $include_variations Include variations in search or not.
 	 * @param  bool     $all_statuses Should we search all statuses or limit to published.
 	 * @param  null|int $limit Limit returned results. @since 3.5.0.
+	 * @param  bool     $include_variable_product_parents Include variable products in the result. @since 3.6.0.
 	 * @return array of ids
 	 */
-	public function search_products( $term, $type = '', $include_variations = false, $all_statuses = false, $limit = null ) {
+	public function search_products( $term, $type = '', $include_variations = false, $all_statuses = false, $limit = null, $include_variable_product_parents = true ) {
 		global $wpdb;
 
 		$custom_results = apply_filters( 'woocommerce_product_pre_search_products', false, $term, $type, $include_variations, $all_statuses, $limit );
@@ -1438,12 +1439,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return $custom_results;
 		}
 
-		$post_types    = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
-		$post_statuses = current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' );
-		$type_where    = '';
-		$status_where  = '';
-		$limit_query   = '';
-		$term          = wc_strtolower( $term );
+		$post_types          = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
+		$post_statuses       = current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' );
+		$type_where          = '';
+		$status_where        = '';
+		$limit_query         = '';
+		$exclude_terms_from  = '';
+		$exclude_terms_where = '';
+		$term                = wc_strtolower( $term );
 
 		// See if search term contains OR keywords.
 		if ( strstr( $term, ' or ' ) ) {
@@ -1501,22 +1504,50 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$limit_query = $wpdb->prepare( ' LIMIT %d ', $limit );
 		}
 
+		if ( ! $include_variable_product_parents ) {
+			$variable_product_term_id = '';
+			// Get term_id for variable product.
+			$product_types = get_terms(
+				array(
+					'taxonomy'   => 'product_type',
+					'hide_empty' => false,
+				)
+			);
+			foreach ( $product_types as $product_type ) {
+				if ( 'variable' === $product_type->name ) {
+					$variable_product_term_id = $product_type->term_id;
+					break;
+				}
+			}
+			// Add extra query parts to exclude variable products.
+			if ( $variable_product_term_id ) {
+				$exclude_terms_from  = "LEFT JOIN ( SELECT object_id FROM wp_term_relationships WHERE term_taxonomy_id IN ( $variable_product_term_id ) ) AS exclude_join ON exclude_join.object_id = posts.ID";
+				$exclude_terms_where = 'AND exclude_join.object_id IS NULL';
+			}
+		}
+
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		$search_results = $wpdb->get_results(
 			// phpcs:disable
 			"SELECT DISTINCT posts.ID as product_id, posts.post_parent as parent_id FROM {$wpdb->posts} posts
 			 LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
+			 $exclude_terms_from
 			WHERE posts.post_type IN ('" . implode( "','", $post_types ) . "')
 			$search_where
 			$status_where
 			$type_where
+			$exclude_terms_where
 			ORDER BY posts.post_parent ASC, posts.post_title ASC
 			$limit_query
 			"
 			// phpcs:enable
 		);
 
-		$product_ids = wp_parse_id_list( array_merge( wp_list_pluck( $search_results, 'product_id' ), wp_list_pluck( $search_results, 'parent_id' ) ) );
+		$parents = array();
+		if ( $include_variable_product_parents ) {
+			$parents = wp_list_pluck( $search_results, 'parent_id' );
+		}
+		$product_ids = wp_parse_id_list( array_merge( wp_list_pluck( $search_results, 'product_id' ), $parents ) );
 
 		if ( is_numeric( $term ) ) {
 			$post_id   = absint( $term );

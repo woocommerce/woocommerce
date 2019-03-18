@@ -1544,7 +1544,7 @@ class WC_AJAX {
 		}
 
 		$data_store = WC_Data_Store::load( 'product' );
-		$ids        = $data_store->search_products( $term, '', (bool) $include_variations, false, $limit );
+		$ids        = $data_store->search_products( $term, '', (bool) $include_variations, false, $limit, false );
 
 		if ( ! empty( $_GET['exclude'] ) ) {
 			$ids = array_diff( $ids, array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) );
