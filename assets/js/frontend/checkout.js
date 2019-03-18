@@ -333,7 +333,7 @@ jQuery( function( $ ) {
 				success:	function( data ) {
 
 					// Reload the page if requested
-					if ( true === data.reload ) {
+					if ( data && true === data.reload ) {
 						window.location.reload();
 						return;
 					}
@@ -386,7 +386,7 @@ jQuery( function( $ ) {
 					}
 
 					// Check for error
-					if ( 'failure' === data.result ) {
+					if ( data && 'failure' === data.result ) {
 
 						var $form = $( 'form.checkout' );
 
