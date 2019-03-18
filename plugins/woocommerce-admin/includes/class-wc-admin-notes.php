@@ -13,6 +13,25 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Admin_Notes {
 	/**
+	 * Hook used for recurring "unsnooze" action.
+	 */
+	const UNSNOOZE_HOOK = 'wc_admin_unsnooze_admin_notes';
+
+	/**
+	 * Schedule events and hook appropriate actions.
+	 */
+	public static function init() {
+		$queue = WC()->queue();
+		$next  = $queue->get_next( self::UNSNOOZE_HOOK );
+
+		if ( ! $next ) {
+			$queue->schedule_recurring( time(), HOUR_IN_SECONDS, self::UNSNOOZE_HOOK );
+		}
+
+		add_action( self::UNSNOOZE_HOOK, array( __CLASS__, 'unsnooze_notes' ) );
+	}
+
+	/**
 	 * Get notes from the database.
 	 *
 	 * @param string $context Getting notes for what context. Valid values: view, edit.
@@ -85,4 +104,30 @@ class WC_Admin_Notes {
 			$note->delete();
 		}
 	}
+
+	/**
+	 * Clear note snooze status if the reminder date has been reached.
+	 */
+	public static function unsnooze_notes() {
+		$data_store = WC_Data_Store::load( 'admin-note' );
+		$raw_notes  = $data_store->get_notes(
+			array(
+				'status' => WC_Admin_Note::E_WC_ADMIN_NOTE_SNOOZED,
+			)
+		);
+		$now        = new DateTime();
+
+		foreach ( $raw_notes as $raw_note ) {
+			$note          = new WC_Admin_Note( $raw_note );
+			$date_reminder = $note->get_date_reminder( 'edit' );
+
+			if ( $date_reminder < $now ) {
+				$note->set_status( WC_Admin_Note::E_WC_ADMIN_NOTE_UNACTIONED );
+				$note->set_date_reminder( null );
+				$note->save();
+			}
+		}
+	}
 }
+
+WC_Admin_Notes::init();
