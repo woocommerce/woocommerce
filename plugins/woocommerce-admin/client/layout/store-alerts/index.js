@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { IconButton, Button, Dashicon } from '@wordpress/components';
+import { IconButton, Button, Dashicon, Dropdown, NavigableMenu } from '@wordpress/components';
 import classnames from 'classnames';
 import interpolateComponents from 'interpolate-components';
 import { compose } from '@wordpress/compose';
@@ -14,7 +14,7 @@ import { withDispatch } from '@wordpress/data';
 /**
  * WooCommerce dependencies
  */
-import { Card } from '@woocommerce/components';
+import { Card, DropdownButton } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -62,6 +62,86 @@ class StoreAlerts extends Component {
 		}
 	}
 
+	renderActions( alert ) {
+		const actions = alert.actions.map( action => {
+			const markStatus = () => {
+				this.props.updateNote( alert.id, { status: action.status } );
+			};
+			return (
+				<Button
+					key={ action.name }
+					isDefault
+					href={ action.url }
+					onClick={ '' === action.status ? noop : markStatus }
+				>
+					{ action.label }
+				</Button>
+			);
+		} );
+
+		const snoozeOptions = [
+			{
+				value: 0,
+				label: __( 'Later Today', 'woocommerce-admin' ),
+			},
+			{
+				value: 1,
+				label: __( 'Tomorrow', 'woocommerce-admin' ),
+			},
+			{
+				value: 2,
+				label: __( 'Next Week', 'woocommerce-admin' ),
+			},
+			{
+				value: 3,
+				label: __( 'Next Month', 'woocommerce-admin' ),
+			},
+		];
+
+		const onNavigate = ( key, onClose ) => {
+			return () => {
+				onClose();
+				console.log( 'onNavigate', snoozeOptions[ key ] );
+			};
+		};
+
+		const snooze = alert.is_snoozable && (
+			<Dropdown
+				position="bottom"
+				expandOnMobile
+				renderToggle={ ( { isOpen, onToggle } ) => (
+					<DropdownButton
+						onClick={ onToggle }
+						isOpen={ isOpen }
+						labels={ [ __( 'Remind Me Later', 'woocommerce-admin' ) ] }
+					/>
+				) }
+				renderContent={ ( { onClose } ) => (
+					<NavigableMenu className="components-dropdown-menu__menu">
+						{ snoozeOptions.map( ( option, idx ) => (
+							<Button
+								className="components-dropdown-menu__menu-item"
+								key={ idx }
+								onClick={ onNavigate( idx, onClose ) }
+							>
+								{ option.label }
+							</Button>
+						) ) }
+					</NavigableMenu>
+				) }
+			/>
+		);
+
+		if ( actions || snooze ) {
+			return (
+				<div className="woocommerce-store-alerts__actions">
+					{ actions }
+					{ snooze }
+				</div>
+			);
+		}
+	}
+
 	render() {
 		const alerts = this.props.alerts || [];
 		const preloadAlertCount = wcSettings.alertCount && parseInt( wcSettings.alertCount );
@@ -79,22 +159,6 @@ class StoreAlerts extends Component {
 		const className = classnames( 'woocommerce-store-alerts', {
 			'is-alert-error': 'error' === type,
 			'is-alert-update': 'update' === type,
-		} );
-
-		const actions = alert.actions.map( action => {
-			const markStatus = () => {
-				this.props.updateNote( alert.id, { status: action.status } );
-			};
-			return (
-				<Button
-					key={ action.name }
-					isDefault
-					href={ action.url }
-					onClick={ '' === action.status ? noop : markStatus }
-				>
-					{ action.label }
-				</Button>
-			);
 		} );
 
 		return (
@@ -140,7 +204,7 @@ class StoreAlerts extends Component {
 					className="woocommerce-store-alerts__message"
 					dangerouslySetInnerHTML={ sanitizeHTML( alert.content ) }
 				/>
-				{ actions && <div className="woocommerce-store-alerts__actions">{ actions }</div> }
+				{ this.renderActions( alert ) }
 			</Card>
 		);
 	}
