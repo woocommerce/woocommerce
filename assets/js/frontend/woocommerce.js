@@ -28,6 +28,7 @@ jQuery( function( $ ) {
 	$( '.woocommerce-store-notice__dismiss-link' ).click( function() {
 		Cookies.set( cookieName, 'hidden', { path: '/' } );
 		$( '.woocommerce-store-notice' ).hide();
+		event.preventDefault();
 	});
 
 	// Make form field descriptions toggle on focus.
