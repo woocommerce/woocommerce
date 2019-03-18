@@ -23,6 +23,7 @@ class WC_Admin_Note extends WC_Data {
 	// Note status codes.
 	const E_WC_ADMIN_NOTE_UNACTIONED = 'unactioned'; // the note has not yet been actioned by a user.
 	const E_WC_ADMIN_NOTE_ACTIONED   = 'actioned';   // the note has had its action completed by a user.
+	const E_WC_ADMIN_NOTE_SNOOZED    = 'snoozed';    // the note has been snoozed by a user.
 
 	/**
 	 * This is the name of this object type.
@@ -119,6 +120,7 @@ class WC_Admin_Note extends WC_Data {
 		$allowed_statuses = array(
 			self::E_WC_ADMIN_NOTE_ACTIONED,
 			self::E_WC_ADMIN_NOTE_UNACTIONED,
+			self::E_WC_ADMIN_NOTE_SNOOZED,
 		);
 
 		return apply_filters( 'woocommerce_admin_note_statuses', $allowed_statuses );

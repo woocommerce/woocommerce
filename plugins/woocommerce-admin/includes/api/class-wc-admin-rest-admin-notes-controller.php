@@ -202,6 +202,11 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 			$note_changed = true;
 		}
 
+		if ( ! is_null( $request->get_param( 'date_reminder' ) ) ) {
+			$note->set_date_reminder( $request->get_param( 'date_reminder' ) );
+			$note_changed = true;
+		}
+
 		if ( $note_changed ) {
 			$note->save();
 		}

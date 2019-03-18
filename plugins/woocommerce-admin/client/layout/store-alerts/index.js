@@ -10,6 +10,7 @@ import interpolateComponents from 'interpolate-components';
 import { compose } from '@wordpress/compose';
 import { noop } from 'lodash';
 import { withDispatch } from '@wordpress/data';
+import moment from 'moment';
 
 /**
  * WooCommerce dependencies
@@ -63,9 +64,10 @@ class StoreAlerts extends Component {
 	}
 
 	renderActions( alert ) {
+		const { updateNote } = this.props;
 		const actions = alert.actions.map( action => {
 			const markStatus = () => {
-				this.props.updateNote( alert.id, { status: action.status } );
+				updateNote( alert.id, { status: action.status } );
 			};
 			return (
 				<Button
@@ -79,29 +81,50 @@ class StoreAlerts extends Component {
 			);
 		} );
 
+		// TODO: should "next X" be the start, or exactly 1X from the current date?
 		const snoozeOptions = [
 			{
-				value: 0,
+				newDate: moment()
+					.add( 4, 'hours' )
+					.unix(),
 				label: __( 'Later Today', 'woocommerce-admin' ),
 			},
 			{
-				value: 1,
+				newDate: moment()
+					.add( 1, 'day' )
+					.hour( 9 )
+					.minute( 0 )
+					.second( 0 )
+					.millisecond( 0 )
+					.unix(),
 				label: __( 'Tomorrow', 'woocommerce-admin' ),
 			},
 			{
-				value: 2,
+				newDate: moment()
+					.add( 1, 'week' )
+					.hour( 9 )
+					.minute( 0 )
+					.second( 0 )
+					.millisecond( 0 )
+					.unix(),
 				label: __( 'Next Week', 'woocommerce-admin' ),
 			},
 			{
-				value: 3,
+				newDate: moment()
+					.add( 1, 'month' )
+					.hour( 9 )
+					.minute( 0 )
+					.second( 0 )
+					.millisecond( 0 )
+					.unix(),
 				label: __( 'Next Month', 'woocommerce-admin' ),
 			},
 		];
 
-		const onNavigate = ( key, onClose ) => {
+		const setReminderDate = ( newDate, onClose ) => {
 			return () => {
 				onClose();
-				console.log( 'onNavigate', snoozeOptions[ key ] );
+				updateNote( alert.id, { status: 'snoozed', date_reminder: newDate } );
 			};
 		};
 
@@ -122,7 +145,7 @@ class StoreAlerts extends Component {
 							<Button
 								className="components-dropdown-menu__menu-item"
 								key={ idx }
-								onClick={ onNavigate( idx, onClose ) }
+								onClick={ setReminderDate( option.newDate, onClose ) }
 							>
 								{ option.label }
 							</Button>
