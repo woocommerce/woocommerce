@@ -17,12 +17,15 @@ import { smallBreak, wideBreak } from './breakpoints';
  * Describes getDateSpaces
  * @param {array} data - The chart component's `data` prop.
  * @param {array} uniqueDates - from `getUniqueDates`
+ * @param {array} visibleKeys - visible keys from the input data for the chart
  * @param {number} width - calculated width of the charting space
  * @param {function} xScale - from `getXLineScale`
  * @returns {array} that includes the date, start (x position) and width to mode the mouseover rectangles
  */
-export const getDateSpaces = ( data, uniqueDates, width, xScale ) =>
-	uniqueDates.map( ( d, i ) => {
+export const getDateSpaces = ( data, uniqueDates, visibleKeys, width, xScale ) => {
+	const reversedKeys = visibleKeys.slice().reverse();
+
+	return uniqueDates.map( ( d, i ) => {
 		const datapoints = first( data.filter( item => item.date === d ) );
 		const xNow = xScale( moment( d ).toDate() );
 		const xPrev =
@@ -40,17 +43,20 @@ export const getDateSpaces = ( data, uniqueDates, width, xScale ) =>
 			date: d,
 			start: uniqueDates.length > 1 ? xStart : 0,
 			width: uniqueDates.length > 1 ? xWidth : width,
-			values: Object.keys( datapoints )
-				.filter( key => key !== 'date' )
-				.map( key => {
-					return {
-						key,
-						value: datapoints[ key ].value,
-						date: d,
-					};
-				} ),
+			values: reversedKeys.map( ( { key } ) => {
+				const datapoint = datapoints[ key ];
+				if ( ! datapoint ) {
+					return null;
+				}
+				return {
+					key,
+					value: datapoint.value,
+					date: d,
+				};
+			} ).filter( Boolean ),
 		};
 	} );
+};
 
 /**
  * Describes getLine
@@ -98,7 +104,7 @@ export const drawLines = ( node, data, params, scales, formats, tooltip ) => {
 		.attr( 'class', 'line-g' )
 		.attr( 'role', 'region' )
 		.attr( 'aria-label', d => d.label || d.key );
-	const dateSpaces = getDateSpaces( data, params.uniqueDates, width, scales.xScale );
+	const dateSpaces = getDateSpaces( data, params.uniqueDates, params.visibleKeys, width, scales.xScale );
 
 	let lineStroke = width <= wideBreak || params.uniqueDates.length > 50 ? 2 : 3;
 	lineStroke = width <= smallBreak ? 1.25 : lineStroke;
@@ -169,7 +175,7 @@ export const drawLines = ( node, data, params, scales, formats, tooltip ) => {
 
 	focusGrid
 		.selectAll( 'circle' )
-		.data( d => d.values.reverse() )
+		.data( d => d.values )
 		.enter()
 		.append( 'circle' )
 		.attr( 'r', dotRadius + 2 )
