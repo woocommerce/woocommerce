@@ -83,7 +83,7 @@ export default class CouponsReportTable extends Component {
 			} = download;
 			const { name: productName } = _embedded.product[ 0 ];
 
-			const productLink = getNewPath( persistedQuery, 'products', {
+			const productLink = getNewPath( persistedQuery, '/analytics/products', {
 				filter: 'single_product',
 				products: product_id,
 			} );

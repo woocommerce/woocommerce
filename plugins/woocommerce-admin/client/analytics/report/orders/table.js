@@ -112,7 +112,7 @@ export default class OrdersReportTable extends Component {
 				.map( item => ( {
 					label: item.name,
 					quantity: item.quantity,
-					href: getNewPath( persistedQuery, 'products', {
+					href: getNewPath( persistedQuery, '/analytics/products', {
 						filter: 'single_product',
 						products: item.id,
 					} ),
@@ -120,7 +120,7 @@ export default class OrdersReportTable extends Component {
 
 			const formattedCoupons = coupons.map( coupon => ( {
 				label: coupon.code,
-				href: getNewPath( persistedQuery, 'coupons', {
+				href: getNewPath( persistedQuery, '/analytics/coupons', {
 					filter: 'single_coupon',
 					coupons: coupon.id,
 				} ),
