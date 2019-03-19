@@ -91,9 +91,11 @@ class WC_Admin_REST_Products_Controller extends WC_REST_Products_Controller {
 	public function get_items( $request ) {
 		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_product_search_filter' ), 10, 2 );
 		add_filter( 'posts_join', array( __CLASS__, 'add_wp_query_product_search_join' ), 10, 2 );
+		add_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_product_search_group_by' ), 10, 2 );
 		$response = parent::get_items( $request );
 		remove_filter( 'posts_where', array( __CLASS__, 'add_wp_query_product_search_filter' ), 10 );
 		remove_filter( 'posts_join', array( __CLASS__, 'add_wp_query_product_search_join' ), 10 );
+		remove_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_product_search_group_by' ), 10 );
 		return $response;
 	}
 
@@ -134,6 +136,23 @@ class WC_Admin_REST_Products_Controller extends WC_REST_Products_Controller {
 		}
 
 		return $join;
+	}
+
+	/**
+	 * Group by post ID to prevent duplicates.
+	 *
+	 * @param string $groupby Group by clause used to organize posts.
+	 * @param object $wp_query WP_Query object.
+	 * @return string
+	 */
+	public function add_wp_query_product_search_group_by( $groupby, $wp_query ) {
+		global $wpdb;
+
+		$search = trim( $wp_query->get( 'search' ) );
+		if ( $search && empty( $groupby ) ) {
+			$groupby = $wpdb->posts . '.ID';
+		}
+		return $groupby;
 	}
 
 }
