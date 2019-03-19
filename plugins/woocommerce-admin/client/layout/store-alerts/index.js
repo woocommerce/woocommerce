@@ -130,6 +130,7 @@ class StoreAlerts extends Component {
 
 		const snooze = alert.is_snoozable && (
 			<Dropdown
+				className="woocommerce-store-alerts__snooze"
 				position="bottom"
 				expandOnMobile
 				renderToggle={ ( { isOpen, onToggle } ) => (

@@ -36,6 +36,9 @@
 	}
 
 	a.components-button {
+		min-height: 36px;
+		padding: 4px 16px;
+
 		+ .components-button {
 			margin-left: 10px;
 		}
@@ -183,5 +186,15 @@
 		.woocommerce-card__action {
 			margin-bottom: 14px;
 		}
+	}
+}
+
+.woocommerce-store-alerts__snooze {
+	display: inline-flex;
+	margin-left: 10px;
+	min-height: 34px;
+
+	.woocommerce-dropdown-button__labels {
+		min-height: 34px;
 	}
 }
