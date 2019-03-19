@@ -92,7 +92,7 @@ class CategoriesReportTable extends Component {
 				{
 					display: category && (
 						<Link
-							href={ getNewPath( persistedQuery, 'categories', {
+							href={ getNewPath( persistedQuery, '/analytics/categories', {
 								filter: 'single_category',
 								categories: category.id,
 							} ) }

@@ -62,7 +62,7 @@ export default class StockReportTable extends Component {
 		return products.map( product => {
 			const { id, manage_stock, name, parent_id, sku, stock_quantity, stock_status } = product;
 
-			const productDetailLink = getNewPath( persistedQuery, 'products', {
+			const productDetailLink = getNewPath( persistedQuery, '/analytics/products', {
 				filter: 'single_product',
 				products: parent_id || id,
 			} );

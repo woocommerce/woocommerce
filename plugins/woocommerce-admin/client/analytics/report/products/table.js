@@ -108,11 +108,11 @@ class ProductsReportTable extends Component {
 				stock_quantity,
 				variations = [],
 			} = extended_info;
-			const ordersLink = getNewPath( persistedQuery, 'orders', {
+			const ordersLink = getNewPath( persistedQuery, '/analytics/orders', {
 				filter: 'advanced',
 				product_includes: product_id,
 			} );
-			const productDetailLink = getNewPath( persistedQuery, 'products', {
+			const productDetailLink = getNewPath( persistedQuery, '/analytics/products', {
 				filter: 'single_product',
 				products: product_id,
 			} );

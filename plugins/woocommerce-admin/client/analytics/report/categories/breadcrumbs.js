@@ -56,7 +56,7 @@ export default class CategoryBreadcrumbs extends Component {
 			<div className="woocommerce-table__breadcrumbs">
 				{ this.getCategoryAncestors( category, categories ) }
 				<Link
-					href={ getNewPath( persistedQuery, 'categories', {
+					href={ getNewPath( persistedQuery, '/analytics/categories', {
 						filter: 'single_category',
 						categories: category.id,
 					} ) }
