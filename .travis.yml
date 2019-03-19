@@ -31,9 +31,9 @@ matrix:
   fast_finish: true
   include:
   - php: 5.3
-    dist: xenial
+    dist: precise
   - php: 5.2
-    dist: xenial
+    dist: precise
   - name: "Coding standard check"
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
