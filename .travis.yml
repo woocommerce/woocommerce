@@ -16,7 +16,6 @@ cache:
 
 # Test main supported versions of PHP against latest WP.
 php:
-  - 5.3
   - 5.6
   - 7.0
   - 7.1
@@ -62,16 +61,16 @@ before_script:
     fi
   - |
     # Install WP Test suite, install PHPUnit globally if needed:
-    if [[ ! -z "$WP_VERSION" ]] ; then
+    if [[ ! -z "$WP_VERSION" ]]; then
       bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
-      # PHP 5.2 does not have composer, a trick to work around this.
-      if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.2" ]]; then `phpenv global 5.3`; fi
-      composer global require "phpunit/phpunit=4.8.*|6.5.*"
-      if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.2" ]]; then `phpenv global "$TRAVIS_PHP_VERSION"`; fi
+      # PHP 5.2 does not have composer, do not try to run it.
+      if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
+        composer global require "phpunit/phpunit=4.8.*|6.5.*"
+      fi
     fi
   - |
     # Install wpcs globally if needed:
-    if [[ ${RUN_PHPCS} == 1 ]]; then
+    if [[ ${RUN_PHPCS} == 1 ]] && [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
       composer global require wp-coding-standards/wpcs
       phpcs --config-set installed_paths $HOME/.composer/vendor/wp-coding-standards/wpcs
     fi

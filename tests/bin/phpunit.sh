@@ -7,5 +7,5 @@ fi
 if [[ ${RUN_CODE_COVERAGE} == 1 ]]; then
 	phpdbg -qrr $HOME/.composer/vendor/phpunit/phpunit/phpunit -d memory_limit=-1 -c phpunit.xml --coverage-clover=coverage.clover --exclude-group=timeout
 else
-	$HOME/.composer/vendor/phpunit/phpunit/phpunit -c phpunit.xml
+	phpunit -c phpunit.xml
 fi
