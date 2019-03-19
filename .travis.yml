@@ -16,6 +16,7 @@ cache:
 
 # Test main supported versions of PHP against latest WP.
 php:
+  - 5.3
   - 5.6
   - 7.0
   - 7.1
