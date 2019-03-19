@@ -204,6 +204,31 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test note "unsnoozing".
+	 */
+	public function test_note_unsnoozing() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params( array( 'status' => 'snoozed' ) );
+		$response = $this->server->dispatch( $request );
+		$notes    = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 1, count( $notes ) );
+		$this->assertEquals( $notes[0]['title'], 'PHPUNIT_TEST_NOTE_3_TITLE' );
+
+		// The test snoozed note's reminder date is an hour ago.
+		WC_Admin_Notes::unsnooze_notes();
+
+		$response = $this->server->dispatch( $request );
+		$notes    = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEmpty( $notes );
+	}
+
+	/**
 	 * Test getting lots of notes without permission. It should fail.
 	 *
 	 * @since 3.5.0
