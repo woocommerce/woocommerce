@@ -244,7 +244,7 @@ class WC_Admin_REST_Reports_Orders_Controller extends WC_Admin_REST_Reports_Cont
 			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
 			'type'              => 'integer',
 			'default'           => 10,
-			'minimum'           => 1,
+			'minimum'           => 0,
 			'maximum'           => 100,
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',

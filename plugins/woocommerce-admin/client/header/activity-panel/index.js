@@ -20,6 +20,7 @@ import InboxPanel from './panels/inbox';
 import OrdersPanel from './panels/orders';
 import StockPanel from './panels/stock';
 import ReviewsPanel from './panels/reviews';
+import withSelect from 'wc-api/with-select';
 import WordPressNotices from './wordpress-notices';
 
 class ActivityPanel extends Component {
@@ -91,6 +92,7 @@ class ActivityPanel extends Component {
 
 	// @todo Pull in dynamic unread status/count
 	getTabs() {
+		const { unreadOrders } = this.props;
 		return [
 			{
 				name: 'inbox',
@@ -102,7 +104,7 @@ class ActivityPanel extends Component {
 				name: 'orders',
 				title: __( 'Orders', 'woocommerce-admin' ),
 				icon: <Gridicon icon="pages" />,
-				unread: true,
+				unread: unreadOrders,
 			},
 			{
 				name: 'stock',
@@ -124,7 +126,8 @@ class ActivityPanel extends Component {
 			case 'inbox':
 				return <InboxPanel />;
 			case 'orders':
-				return <OrdersPanel />;
+				const { unreadOrders } = this.props;
+				return <OrdersPanel isEmpty={ unreadOrders === false } />;
 			case 'stock':
 				return <StockPanel />;
 			case 'reviews':
@@ -254,4 +257,36 @@ class ActivityPanel extends Component {
 	}
 }
 
-export default clickOutside( ActivityPanel );
+export default withSelect( select => {
+	const { getReportItems, getReportItemsError, isReportItemsRequesting } = select( 'wc-api' );
+	const orderStatuses = wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses || [
+		'processing',
+		'on-hold',
+	];
+
+	if ( ! orderStatuses.length ) {
+		return { unreadOrders: false };
+	}
+
+	const ordersQuery = {
+		page: 1,
+		per_page: 0,
+		status_is: orderStatuses,
+	};
+
+	const totalOrders = getReportItems( 'orders', ordersQuery ).totalResults;
+	const isError = Boolean( getReportItemsError( 'orders', ordersQuery ) );
+	const isRequesting = isReportItemsRequesting( 'orders', ordersQuery );
+
+	let unreadOrders = null;
+
+	if ( ! isError && ! isRequesting ) {
+		if ( totalOrders > 0 ) {
+			unreadOrders = true;
+		} else {
+			unreadOrders = false;
+		}
+	}
+
+	return { unreadOrders };
+} )( clickOutside( ActivityPanel ) );
