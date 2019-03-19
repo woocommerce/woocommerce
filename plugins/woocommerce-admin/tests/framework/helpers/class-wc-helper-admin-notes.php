@@ -59,5 +59,18 @@ class WC_Helper_Admin_Notes {
 		// This note has no actions.
 		$note_2->save();
 
+		$note_3 = new WC_Admin_Note();
+		$note_3->set_title( 'PHPUNIT_TEST_NOTE_3_TITLE' );
+		$note_3->set_content( 'PHPUNIT_TEST_NOTE_3_CONTENT' );
+		$note_3->set_content_data( (object) array( 'amount' => 7.89 ) );
+		$note_3->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+		$note_3->set_icon( 'info' );
+		$note_3->set_name( 'PHPUNIT_TEST_NOTE_NAME' );
+		$note_3->set_source( 'PHPUNIT_TEST' );
+		$note_3->set_status( WC_Admin_Note::E_WC_ADMIN_NOTE_SNOOZED );
+		$note_3->set_date_reminder( time() - HOUR_IN_SECONDS );
+		// This note has no actions.
+		$note_3->save();
+
 	}
 }

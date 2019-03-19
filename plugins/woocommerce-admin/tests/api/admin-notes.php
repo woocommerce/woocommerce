@@ -157,7 +157,7 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		$notes    = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( 2, count( $notes ) );
+		$this->assertEquals( 3, count( $notes ) );
 	}
 
 	/**
@@ -200,7 +200,7 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		$notes    = $response->get_data();
 
 		// get_notes returns all results since 'status' is not one of actioned or unactioned.
-		$this->assertEquals( 2, count( $notes ) );
+		$this->assertEquals( 3, count( $notes ) );
 	}
 
 	/**
@@ -226,7 +226,7 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 15, count( $properties ) );
+		$this->assertEquals( 16, count( $properties ) );
 
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'name', $properties );
@@ -245,5 +245,6 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'date_reminder', $properties );
 		$this->assertArrayHasKey( 'date_reminder_gmt', $properties );
 		$this->assertArrayHasKey( 'actions', $properties );
+		$this->assertArrayHasKey( 'is_snoozable', $properties );
 	}
 }
