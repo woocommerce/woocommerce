@@ -1,4 +1,5 @@
 language: php
+dist: trusty
 
 addons:
   chrome: stable
@@ -7,6 +8,11 @@ addons:
       - nginx
 
 sudo: false
+
+cache:
+  directories:
+    - vendor
+    - $HOME/.composer/cache
 
 # Test main supported versions of PHP against latest WP.
 php:
@@ -45,6 +51,7 @@ matrix:
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
 
 before_script:
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - |
     # Remove Xdebug for a huge performance increase:
     if [ -f ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini ]; then
@@ -52,9 +59,18 @@ before_script:
     else
       echo "xdebug.ini does not exist"
     fi
-  - export PATH="$HOME/.config/composer/vendor/bin:$PATH"
-  - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
-  - bash tests/bin/travis.sh before
+  - |
+    # Install WP Test suite, install PHPUnit globally if needed:
+    if [[ ! -z "$WP_VERSION" ]] ; then
+      bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
+      composer global require "phpunit/phpunit=4.8.*|5.7.*"
+    fi
+  - |
+    # Install wpcs globally if needed:
+    if [[ ${RUN_PHPCS} == 1 ]]; then
+      composer global require wp-coding-standards/wpcs
+      phpcs --config-set installed_paths $HOME/.composer/vendor/wp-coding-standards/wpcs
+    fi
 
 script:
   - bash tests/bin/phpunit.sh
