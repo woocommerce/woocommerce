@@ -184,6 +184,7 @@ install_deps() {
 	php wp-cli.phar plugin activate woocommerce
 
 	if [ "$TRAVIS_PULL_REQUEST_BRANCH" != "" ]; then
+		BRANCH="$(sed 's/#/%23/' <<<$BRANCH)"
 		# Install wc-admin, the correct branch, if running from Travis CI.
 		php wp-cli.phar plugin install https://github.com/$REPO/archive/$BRANCH.zip --activate
 	fi
