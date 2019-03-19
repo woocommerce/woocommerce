@@ -38,7 +38,7 @@
 	@include set-grid-item-position( 2, 2 );
 }
 
-.woocommerce-filters-date__tab.components-button {
+button.woocommerce-filters-date__tab {
 	outline: none;
 	border: 1px solid $woocommerce;
 	padding: $gap-smaller;
