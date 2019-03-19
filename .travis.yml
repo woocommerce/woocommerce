@@ -9,6 +9,11 @@ addons:
 
 sudo: false
 
+cache:
+  directories:
+    - vendor
+    - $HOME/.composer/cache
+
 # Test main supported versions of PHP against latest WP.
 php:
   - 5.6
