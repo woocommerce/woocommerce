@@ -19,6 +19,7 @@ import {
 	getDefaultOptionValue,
 	getNewPath,
 	getQueryFromActiveFilters,
+	getHistory,
 } from '@woocommerce/navigation';
 
 /**
@@ -103,6 +104,10 @@ class AdvancedFilters extends Component {
 		const index = findIndex( activeFilters, filter => filter.key === key );
 		activeFilters.splice( index, 1 );
 		this.setState( { activeFilters } );
+		if ( 0 === activeFilters.length ) {
+			const history = getHistory();
+			history.push( this.getUpdateHref( [] ) );
+		}
 	}
 
 	getTitle() {
