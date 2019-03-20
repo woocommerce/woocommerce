@@ -575,38 +575,19 @@ class WC_API_Taxes extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_missing_tax_class_name', sprintf( __( 'Missing parameter %s', 'woocommerce' ), 'name' ), 400 );
 			}
 
-			$name    = sanitize_text_field( $data['name'] );
-			$slug    = sanitize_title( $name );
-			$classes = WC_Tax::get_tax_classes();
-			$exists  = false;
+			$name      = sanitize_text_field( $data['name'] );
+			$tax_class = WC_Tax::create_tax_class( $name );
 
-			// Check if class exists.
-			foreach ( $classes as $key => $class ) {
-				if ( sanitize_title( $class ) === $slug ) {
-					$exists = true;
-					break;
-				}
+			if ( is_wp_error( $tax_class ) ) {
+				return new WP_Error( 'woocommerce_api_' . $tax_class->get_error_code(), $tax_class->get_error_message(), 401 );
 			}
 
-			// Return error if tax class already exists.
-			if ( $exists ) {
-				throw new WC_API_Exception( 'woocommerce_api_cannot_create_tax_class', __( 'Tax class already exists', 'woocommerce' ), 401 );
-			}
-
-			// Add the new class.
-			$classes[] = $name;
-
-			update_option( 'woocommerce_tax_classes', implode( "\n", $classes ) );
-
-			do_action( 'woocommerce_api_create_tax_class', $slug, $data );
+			do_action( 'woocommerce_api_create_tax_class', $tax_class['slug'], $data );
 
 			$this->server->send_status( 201 );
 
 			return array(
-				'tax_class' => array(
-					'slug' => $slug,
-					'name' => $name,
-				),
+				'tax_class' => $tax_class,
 			);
 		} catch ( WC_API_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
@@ -631,36 +612,13 @@ class WC_API_Taxes extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_user_cannot_delete_tax_class', __( 'You do not have permission to delete tax classes', 'woocommerce' ), 401 );
 			}
 
-			$slug    = sanitize_title( $slug );
-			$classes = WC_Tax::get_tax_classes();
-			$deleted = false;
+			$slug      = sanitize_title( $slug );
+			$tax_class = WC_Tax::get_tax_class_by( 'slug', $slug );
+			$deleted   = WC_Tax::delete_tax_class_by( 'slug', $slug );
 
-			foreach ( $classes as $key => $class ) {
-				if ( sanitize_title( $class ) === $slug ) {
-					unset( $classes[ $key ] );
-					$deleted = true;
-					break;
-				}
-			}
-
-			if ( ! $deleted ) {
+			if ( is_wp_error( $deleted ) || ! $deleted ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_tax_class', __( 'Could not delete the tax class', 'woocommerce' ), 401 );
 			}
-
-			update_option( 'woocommerce_tax_classes', implode( "\n", $classes ) );
-
-			// Delete tax rate locations locations from the selected class.
-			$wpdb->query( $wpdb->prepare( "
-				DELETE locations.*
-				FROM {$wpdb->prefix}woocommerce_tax_rate_locations AS locations
-				INNER JOIN
-					{$wpdb->prefix}woocommerce_tax_rates AS rates
-					ON rates.tax_rate_id = locations.tax_rate_id
-				WHERE rates.tax_rate_class = '%s'
-			", $slug ) );
-
-			// Delete tax rates in the selected class.
-			$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_class' => $slug ), array( '%s' ) );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'tax_class' ) );
 		} catch ( WC_API_Exception $e ) {
