@@ -25,6 +25,11 @@ jQuery(function( $ ) {
 		showModal: function( event ) {
 			event.preventDefault();
 
+			// Prevent multiple modals.
+			if ( 0 < $( '.wc-backbone-modal-beta-tester-version-info' ).length ) {
+				return;
+			}
+
 			$( this ).WCBackboneModal({
 				template: 'wc-beta-tester-version-info',
 				variable: {
