@@ -124,6 +124,9 @@ class WC_Install {
 			'wc_update_354_modify_shop_manager_caps',
 			'wc_update_354_db_version',
 		),
+		'3.5.10' => array(
+			'asd',
+		),
 		'3.6.0' => array(
 			'wc_update_360_product_lookup_tables',
 			'wc_update_360_term_meta',
@@ -297,9 +300,10 @@ class WC_Install {
 	public static function needs_db_update() {
 		$current_db_version = get_option( 'woocommerce_db_version', null );
 		$updates            = self::get_db_update_callbacks();
-		uasort( array_keys( $updates ), 'version_compare' );
+		$update_versions    = array_keys( $updates );
+		uasort( $update_versions, 'version_compare' );
 
-		return ! is_null( $current_db_version ) && version_compare( $current_db_version, end( $updates ), '<' );
+		return ! is_null( $current_db_version ) && version_compare( $current_db_version, end( $update_versions ), '<' );
 	}
 
 	/**
