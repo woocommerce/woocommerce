@@ -19,6 +19,11 @@ class WC_Admin_Notes_Order_Milestones {
 	const FIRST_ORDER_NOTE_NAME = 'wc-admin-first-order';
 
 	/**
+	 * Name of the "ten orders" note.
+	 */
+	const TEN_ORDERS_NOTE_NAME = 'wc-admin-ten-orders';
+
+	/**
 	 * Allowed order statuses for calculating milestones.
 	 *
 	 * @var array
@@ -30,10 +35,19 @@ class WC_Admin_Notes_Order_Milestones {
 	);
 
 	/**
+	 * Orders count cache.
+	 *
+	 * @var int
+	 */
+	protected $orders_count = null;
+
+	/**
 	 * Hook everything up.
 	 */
 	public function __construct() {
-		add_action( 'woocommerce_new_order', array( $this, 'add_first_order_note' ) );
+		if ( 10 <= $this->get_orders_count() ) {
+			add_action( 'woocommerce_new_order', array( $this, 'first_two_milestones' ) );
+		}
 	}
 
 	/**
@@ -42,18 +56,20 @@ class WC_Admin_Notes_Order_Milestones {
 	 * @return int Total orders count.
 	 */
 	public function get_orders_count() {
-		$status_counts = array_map( 'wc_orders_count', $this->allowed_statuses );
-		$orders_count  = array_sum( $status_counts );
+		if ( is_null( $this->orders_count ) ) {
+			$status_counts       = array_map( 'wc_orders_count', $this->allowed_statuses );
+			$this->orders_count  = array_sum( $status_counts );
+		}
 
-		return $orders_count;
+		return $this->orders_count;
 	}
 
 	/**
-	 * Add a milestone note for the store's first order.
+	 * Add a milestone notes for the store's first order and first 10 orders.
 	 *
 	 * @param int $order_id WC_Order ID.
 	 */
-	public function add_first_order_note( $order_id ) {
+	public function first_two_milestones( $order_id ) {
 		$order = wc_get_order( $order_id );
 
 		// Make sure this is the first pending/processing/completed order.
@@ -75,6 +91,21 @@ class WC_Admin_Notes_Order_Milestones {
 			$note->set_name( self::FIRST_ORDER_NOTE_NAME );
 			$note->set_source( 'woocommerce-admin' );
 			$note->add_action( 'learn-more', __( 'Learn more', 'woocommerce-admin' ), 'https://docs.woocommerce.com/document/managing-orders/' );
+			$note->save();
+		}
+
+		if ( 10 === $orders_count ) {
+			// Add the first ten orders note.
+			$note = new WC_Admin_Note();
+			$note->set_title( __( 'Congratulations on processing 10 orders!', 'woocommerce-admin' ) );
+			$note->set_content(
+				__( "You've hit the 10 orders milestone! Look at you go. Browse some WooCommerce success stories for inspiration.", 'woocommerce-admin' )
+			);
+			$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+			$note->set_icon( 'trophy' );
+			$note->set_name( self::TEN_ORDERS_NOTE_NAME );
+			$note->set_source( 'woocommerce-admin' );
+			$note->add_action( 'browse', __( 'Browse', 'woocommerce-admin' ), 'https://woocommerce.com/success-stories/' );
 			$note->save();
 		}
 	}
