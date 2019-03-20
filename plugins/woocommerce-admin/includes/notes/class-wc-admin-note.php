@@ -33,27 +33,6 @@ class WC_Admin_Note extends WC_Data {
 	protected $object_type = 'admin-note';
 
 	/**
-	 * Data array, with defaults.
-	 *
-	 * @var array
-	 */
-	protected $data = array(
-		'name'          => '-',
-		'type'          => self::E_WC_ADMIN_NOTE_INFORMATIONAL,
-		'locale'        => 'en_US',
-		'title'         => '-',
-		'content'       => '-',
-		'icon'          => 'info',
-		'content_data'  => array(),
-		'status'        => self::E_WC_ADMIN_NOTE_UNACTIONED,
-		'source'        => 'woocommerce',
-		'date_created'  => '0000-00-00 00:00:00',
-		'date_reminder' => '',
-		'is_snoozable'  => false,
-		'actions'       => array(),
-	);
-
-	/**
 	 * Cache group.
 	 *
 	 * @var string
@@ -66,6 +45,23 @@ class WC_Admin_Note extends WC_Data {
 	 * @param mixed $data Note data, object, or ID.
 	 */
 	public function __construct( $data = '' ) {
+		// Set default data here to allow `content_data` to be an object.
+		$this->data = array(
+			'name'          => '-',
+			'type'          => self::E_WC_ADMIN_NOTE_INFORMATIONAL,
+			'locale'        => 'en_US',
+			'title'         => '-',
+			'content'       => '-',
+			'icon'          => 'info',
+			'content_data'  => new stdClass(),
+			'status'        => self::E_WC_ADMIN_NOTE_UNACTIONED,
+			'source'        => 'woocommerce',
+			'date_created'  => '0000-00-00 00:00:00',
+			'date_reminder' => '',
+			'is_snoozable'  => false,
+			'actions'       => array(),
+		);
+
 		parent::__construct( $data );
 
 		if ( $data instanceof WC_Admin_Note ) {
