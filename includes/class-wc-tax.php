@@ -724,7 +724,7 @@ class WC_Tax {
 		if ( ! is_array( $tax_rate_classes ) ) {
 			$tax_rate_classes = $wpdb->get_results(
 				"
-				SELECT * FROM {$wpdb->wc_tax_rate_classes};
+				SELECT * FROM {$wpdb->wc_tax_rate_classes} ORDER BY name;
 				"
 			);
 			wp_cache_set( $cache_key, $tax_rate_classes, 'taxes' );
@@ -826,9 +826,11 @@ class WC_Tax {
 			return false;
 		}
 
+		$tax_class = current( $matches );
+
 		return array(
-			'name' => $matches[0]->name,
-			'slug' => $matches[0]->slug,
+			'name' => $tax_class->name,
+			'slug' => $tax_class->slug,
 		);
 	}
 
