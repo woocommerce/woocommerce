@@ -43,7 +43,8 @@ jQuery( function ( $ ) {
 				input_name = $state.attr( 'name' ),
 				input_id = $state.attr( 'id' ),
 				value = $this.data( 'woocommerce.stickState-' + country ) ? $this.data( 'woocommerce.stickState-' + country ) : $state.val(),
-				placeholder = $state.attr( 'placeholder' );
+				placeholder = $state.attr( 'placeholder' ),
+				$newstate;
 
 			if ( stickValue ){
 				$this.data( 'woocommerce.stickState-' + country, value );
@@ -55,7 +56,8 @@ jQuery( function ( $ ) {
 			if ( ! $.isEmptyObject( wc_meta_boxes_order.states[ country ] ) ) {
 				var state = wc_meta_boxes_order.states[ country ],
 					$defaultOption = $( '<option value=""></option>' )
-						.text( woocommerce_admin_meta_boxes_order.i18n_select_state_text ),
+						.text( woocommerce_admin_meta_boxes_order.i18n_select_state_text );
+
 					$newstate = $( '<select></select>' )
 						.prop( 'id', input_id )
 						.prop( 'name', input_name )
@@ -76,7 +78,7 @@ jQuery( function ( $ ) {
 
 				$newstate.show().selectWoo().hide().change();
 			} else {
-				var $newstate = $( '<input type="text" />' )
+				$newstate = $( '<input type="text" />' )
 					.prop( 'id', input_id )
 					.prop( 'name', input_name )
 					.prop( 'placeholder', placeholder )

@@ -97,11 +97,12 @@ jQuery( function( $ ) {
 			input_name  = $statebox.attr( 'name' ),
 			input_id    = $statebox.attr( 'id' ),
 			value       = $statebox.val(),
-			placeholder = $statebox.attr( 'placeholder' ) || $statebox.attr( 'data-placeholder' ) || '';
+			placeholder = $statebox.attr( 'placeholder' ) || $statebox.attr( 'data-placeholder' ) || '',
+			$newstate;
 
 		if ( states[ country ] ) {
 			if ( $.isEmptyObject( states[ country ] ) ) {
-				var $newstate = $( '<input type="hidden" />' )
+				$newstate = $( '<input type="hidden" />' )
 					.prop( 'id', input_id )
 					.prop( 'name', input_name )
 					.prop( 'placeholder', placeholder )
@@ -144,7 +145,7 @@ jQuery( function( $ ) {
 			}
 		} else {
 			if ( $statebox.is( 'select, input[type="hidden"]' ) ) {
-				var $newstate = $( '<input type="text" />' )
+				$newstate = $( '<input type="text" />' )
 					.prop( 'id', input_id )
 					.prop( 'name', input_name )
 					.prop( 'placeholder', placeholder )
