@@ -723,6 +723,9 @@ final class WooCommerce {
 
 		$wpdb->wc_product_meta_lookup = $wpdb->prefix . 'wc_product_meta_lookup';
 		$wpdb->tables[]               = 'wc_product_meta_lookup';
+
+		$wpdb->wc_tax_rate_classes = $wpdb->prefix . 'wc_tax_rate_classes';
+		$wpdb->tables[]            = 'wc_tax_rate_classes';
 	}
 
 	/**
