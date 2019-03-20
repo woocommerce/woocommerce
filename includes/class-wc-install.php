@@ -297,9 +297,9 @@ class WC_Install {
 	public static function needs_db_update() {
 		$current_db_version = get_option( 'woocommerce_db_version', null );
 		$updates            = self::get_db_update_callbacks();
-		$update_versions    = uasort( array_keys( $updates ), 'version_compare' );
+		uasort( array_keys( $updates ), 'version_compare' );
 
-		return ! is_null( $current_db_version ) && version_compare( $current_db_version, end( $update_versions ), '<' );
+		return ! is_null( $current_db_version ) && version_compare( $current_db_version, end( $updates ), '<' );
 	}
 
 	/**
