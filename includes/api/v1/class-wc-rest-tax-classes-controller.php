@@ -199,7 +199,7 @@ class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {
 	public function delete_item( $request ) {
 		global $wpdb;
 
-		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
+		$force = isset( $request['force'] ) ? (bool) $request['force'] : true;
 
 		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
