@@ -301,7 +301,7 @@ class WC_Install {
 		$current_db_version = get_option( 'woocommerce_db_version', null );
 		$updates            = self::get_db_update_callbacks();
 		$update_versions    = array_keys( $updates );
-		uasort( $update_versions, 'version_compare' );
+		usort( $update_versions, 'version_compare' );
 
 		return ! is_null( $current_db_version ) && version_compare( $current_db_version, end( $update_versions ), '<' );
 	}
