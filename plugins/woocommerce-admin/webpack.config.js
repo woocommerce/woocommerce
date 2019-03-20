@@ -160,6 +160,9 @@ const webpackConfig = {
 		} ),
 		new WebpackRTLPlugin( {
 			suffix: '-rtl',
+			minify: {
+				safe: true,
+			},
 		} ),
 		new MiniCssExtractPlugin( {
 			filename: './dist/[name]/style.css',
