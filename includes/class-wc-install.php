@@ -866,7 +866,14 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   KEY `stock_quantity` (`stock_quantity`),
   KEY `onsale` (`onsale`),
   KEY min_max_price (`min_price`, `max_price`)
-  ) $collate;
+) $collate;
+CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
+  tax_rate_class_id BIGINT UNSIGNED NOT NULL auto_increment,
+  name varchar(200) NOT NULL DEFAULT '',
+  slug varchar(200) NOT NULL DEFAULT '',
+  PRIMARY KEY  (tax_rate_class_id),
+  UNIQUE KEY slug (slug)
+) $collate;
 		";
 
 		return $tables;
