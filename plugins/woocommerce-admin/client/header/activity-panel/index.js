@@ -112,13 +112,15 @@ class ActivityPanel extends Component {
 				icon: <Gridicon icon="clipboard" />,
 				unread: false,
 			},
-			{
-				name: 'reviews',
-				title: __( 'Reviews', 'woocommerce-admin' ),
-				icon: <Gridicon icon="star" />,
-				unread: false,
-			},
-		];
+			'yes' === wcSettings.reviewsEnabled
+				? {
+						name: 'reviews',
+						title: __( 'Reviews', 'woocommerce-admin' ),
+						icon: <Gridicon icon="star" />,
+						unread: false,
+					}
+				: null,
+		].filter( Boolean );
 	}
 
 	getPanelContent( tab ) {
