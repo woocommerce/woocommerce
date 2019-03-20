@@ -124,9 +124,6 @@ class WC_Install {
 			'wc_update_354_modify_shop_manager_caps',
 			'wc_update_354_db_version',
 		),
-		'3.5.10' => array(
-			'asd',
-		),
 		'3.6.0' => array(
 			'wc_update_360_product_lookup_tables',
 			'wc_update_360_term_meta',
