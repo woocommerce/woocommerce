@@ -1973,3 +1973,30 @@ function wc_update_360_downloadable_product_permissions_index() {
 function wc_update_360_db_version() {
 	WC_Install::update_db_version( '3.6.0' );
 }
+
+/**
+ * Put tax classes into a DB table.
+ *
+ * @return void
+ */
+function wc_update_370_tax_rate_classes() {
+	global $wpdb;
+
+	$classes = array_map( 'trim', explode( "\n", get_option( 'woocommerce_tax_classes' ) ) );
+
+	if ( $classes ) {
+		foreach ( $classes as $class ) {
+			if ( empty( $class ) ) {
+				continue;
+			}
+			WC_Tax::create_tax_class( $class );
+		}
+	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_370_db_version() {
+	WC_Install::update_db_version( '3.7.0' );
+}

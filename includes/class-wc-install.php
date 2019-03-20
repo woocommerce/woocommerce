@@ -130,6 +130,10 @@ class WC_Install {
 			'wc_update_360_downloadable_product_permissions_index',
 			'wc_update_360_db_version',
 		),
+		'3.7.0' => array(
+			'wc_update_370_tax_rate_classes',
+			'wc_update_370_db_version',
+		),
 	);
 
 	/**
@@ -232,6 +236,7 @@ class WC_Install {
 		set_transient( 'wc_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 		wc_maybe_define_constant( 'WC_INSTALLING', true );
 
+		WC()->wpdb_table_fix();
 		self::remove_admin_notices();
 		self::create_options();
 		self::create_tables();
