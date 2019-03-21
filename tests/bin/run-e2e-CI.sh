@@ -7,7 +7,7 @@ if [[ ${RUN_E2E} == 1 ]]; then
 	export BASE_URL="$WP_SITE_URL"
 	export DISPLAY=:99.0
 	sh -e /etc/init.d/xvfb start
- 	sleep 3
+	sleep 3
 
 	# Run the tests
 	npm test
