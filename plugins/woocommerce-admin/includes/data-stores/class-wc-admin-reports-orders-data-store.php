@@ -177,11 +177,17 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 					  		) AS tt"
 			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
-			$total_pages = (int) ceil( $db_records_count / $sql_query_params['per_page'] );
+			if ( 0 === $sql_query_params['per_page'] ) {
+				$total_pages = 0;
+			} else {
+				$total_pages = (int) ceil( $db_records_count / $sql_query_params['per_page'] );
+			}
 			if ( $query_args['page'] < 1 || $query_args['page'] > $total_pages ) {
 				$data = (object) array(
 					'data'    => array(),
 					'total'   => $db_records_count,
+					'pages'   => 0,
+					'page_no' => 0,
 				);
 				return $data;
 			}
