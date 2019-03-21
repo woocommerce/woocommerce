@@ -23,8 +23,8 @@ export default class Dashboard extends Component {
 				<Header sections={ [ __( 'Dashboard', 'woocommerce-admin' ) ] } />
 				<ReportFilters query={ query } path={ path } />
 				<StorePerformance query={ query } />
-				<Leaderboards query={ query } />
 				<DashboardCharts query={ query } path={ path } />
+				<Leaderboards query={ query } />
 			</Fragment>
 		);
 	}
