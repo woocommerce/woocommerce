@@ -92,13 +92,13 @@ class ActivityPanel extends Component {
 
 	// @todo Pull in dynamic unread status/count
 	getTabs() {
-		const { unreadOrders } = this.props;
+		const { unreadNotes, unreadOrders } = this.props;
 		return [
 			{
 				name: 'inbox',
 				title: __( 'Inbox', 'woocommerce-admin' ),
 				icon: <Gridicon icon="mail" />,
-				unread: true,
+				unread: unreadNotes,
 			},
 			{
 				name: 'orders',
@@ -260,14 +260,36 @@ class ActivityPanel extends Component {
 }
 
 export default withSelect( select => {
-	const { getReportItems, getReportItemsError, isReportItemsRequesting } = select( 'wc-api' );
+	const {
+		getCurrentUserData,
+		getNotes,
+		getNotesError,
+		getReportItems,
+		getReportItemsError,
+		isGetNotesRequesting,
+		isReportItemsRequesting,
+	} = select( 'wc-api' );
 	const orderStatuses = wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses || [
 		'processing',
 		'on-hold',
 	];
+	const userData = getCurrentUserData();
+
+	const notesQuery = {
+		page: 1,
+		per_page: 1,
+	};
+
+	const latestNote = getNotes( notesQuery );
+	const unreadNotes =
+		! Boolean( getNotesError( notesQuery ) ) &&
+		! isGetNotesRequesting( notesQuery ) &&
+		latestNote[ 0 ] &&
+		new Date( latestNote[ 0 ].date_created_gmt ).getTime() >
+			userData.activity_panel_inbox_last_read;
 
 	if ( ! orderStatuses.length ) {
-		return { unreadOrders: false };
+		return { unreadNotes, unreadOrders: false };
 	}
 
 	const ordersQuery = {
@@ -290,5 +312,5 @@ export default withSelect( select => {
 		}
 	}
 
-	return { unreadOrders };
+	return { unreadNotes, unreadOrders };
 } )( clickOutside( ActivityPanel ) );

@@ -7,7 +7,7 @@ import { Button } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import Gridicon from 'gridicons';
-import withSelect from 'wc-api/with-select';
+import { withDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -17,10 +17,23 @@ import ActivityHeader from '../activity-header';
 import { EmptyContent, Section } from '@woocommerce/components';
 import sanitizeHTML from 'lib/sanitize-html';
 import { QUERY_DEFAULTS } from 'wc-api/constants';
+import withSelect from 'wc-api/with-select';
 
 class InboxPanel extends Component {
+	constructor( props ) {
+		super( props );
+		this.mountTime = Date.now();
+	}
+
+	componentWillUnmount() {
+		const userDataFields = {
+			[ 'activity_panel_inbox_last_read' ]: this.mountTime,
+		};
+		this.props.updateCurrentUserData( userDataFields );
+	}
+
 	render() {
-		const { isError, isRequesting, notes } = this.props;
+		const { isError, isRequesting, lastRead, notes } = this.props;
 
 		if ( isError ) {
 			const title = __(
@@ -77,7 +90,7 @@ class InboxPanel extends Component {
 								title={ note.title }
 								date={ note.date_created }
 								icon={ <Gridicon icon={ note.icon } size={ 48 } /> }
-								unread={ 'unread' === note.status }
+								unread={ ! lastRead || new Date( note.date_created_gmt ).getTime() > lastRead }
 								actions={ getButtonsFromActions( note.actions ) }
 							>
 								<span dangerouslySetInnerHTML={ sanitizeHTML( note.content ) } />
@@ -92,7 +105,10 @@ class InboxPanel extends Component {
 
 export default compose(
 	withSelect( select => {
-		const { getNotes, getNotesError, isGetNotesRequesting } = select( 'wc-api' );
+		const { getCurrentUserData, getNotes, getNotesError, isGetNotesRequesting } = select(
+			'wc-api'
+		);
+		const userData = getCurrentUserData();
 		const inboxQuery = {
 			page: 1,
 			per_page: QUERY_DEFAULTS.pageSize,
@@ -103,6 +119,13 @@ export default compose(
 		const isError = Boolean( getNotesError( inboxQuery ) );
 		const isRequesting = isGetNotesRequesting( inboxQuery );
 
-		return { notes, isError, isRequesting };
+		return { notes, isError, isRequesting, lastRead: userData.activity_panel_inbox_last_read };
+	} ),
+	withDispatch( dispatch => {
+		const { updateCurrentUserData } = dispatch( 'wc-api' );
+
+		return {
+			updateCurrentUserData,
+		};
 	} )
 )( InboxPanel );
