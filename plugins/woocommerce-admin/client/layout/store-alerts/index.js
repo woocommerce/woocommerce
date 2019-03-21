@@ -4,17 +4,18 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { IconButton, Button, Dashicon } from '@wordpress/components';
+import { IconButton, Button, Dashicon, Dropdown, NavigableMenu } from '@wordpress/components';
 import classnames from 'classnames';
 import interpolateComponents from 'interpolate-components';
 import { compose } from '@wordpress/compose';
 import { noop } from 'lodash';
 import { withDispatch } from '@wordpress/data';
+import moment from 'moment';
 
 /**
  * WooCommerce dependencies
  */
-import { Card } from '@woocommerce/components';
+import { Card, DropdownButton } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -62,6 +63,109 @@ class StoreAlerts extends Component {
 		}
 	}
 
+	renderActions( alert ) {
+		const { updateNote } = this.props;
+		const actions = alert.actions.map( action => {
+			const markStatus = () => {
+				updateNote( alert.id, { status: action.status } );
+			};
+			return (
+				<Button
+					key={ action.name }
+					isDefault
+					href={ action.url }
+					onClick={ '' === action.status ? noop : markStatus }
+				>
+					{ action.label }
+				</Button>
+			);
+		} );
+
+		// TODO: should "next X" be the start, or exactly 1X from the current date?
+		const snoozeOptions = [
+			{
+				newDate: moment()
+					.add( 4, 'hours' )
+					.unix(),
+				label: __( 'Later Today', 'woocommerce-admin' ),
+			},
+			{
+				newDate: moment()
+					.add( 1, 'day' )
+					.hour( 9 )
+					.minute( 0 )
+					.second( 0 )
+					.millisecond( 0 )
+					.unix(),
+				label: __( 'Tomorrow', 'woocommerce-admin' ),
+			},
+			{
+				newDate: moment()
+					.add( 1, 'week' )
+					.hour( 9 )
+					.minute( 0 )
+					.second( 0 )
+					.millisecond( 0 )
+					.unix(),
+				label: __( 'Next Week', 'woocommerce-admin' ),
+			},
+			{
+				newDate: moment()
+					.add( 1, 'month' )
+					.hour( 9 )
+					.minute( 0 )
+					.second( 0 )
+					.millisecond( 0 )
+					.unix(),
+				label: __( 'Next Month', 'woocommerce-admin' ),
+			},
+		];
+
+		const setReminderDate = ( newDate, onClose ) => {
+			return () => {
+				onClose();
+				updateNote( alert.id, { status: 'snoozed', date_reminder: newDate } );
+			};
+		};
+
+		const snooze = alert.is_snoozable && (
+			<Dropdown
+				className="woocommerce-store-alerts__snooze"
+				position="bottom"
+				expandOnMobile
+				renderToggle={ ( { isOpen, onToggle } ) => (
+					<DropdownButton
+						onClick={ onToggle }
+						isOpen={ isOpen }
+						labels={ [ __( 'Remind Me Later', 'woocommerce-admin' ) ] }
+					/>
+				) }
+				renderContent={ ( { onClose } ) => (
+					<NavigableMenu className="components-dropdown-menu__menu">
+						{ snoozeOptions.map( ( option, idx ) => (
+							<Button
+								className="components-dropdown-menu__menu-item"
+								key={ idx }
+								onClick={ setReminderDate( option.newDate, onClose ) }
+							>
+								{ option.label }
+							</Button>
+						) ) }
+					</NavigableMenu>
+				) }
+			/>
+		);
+
+		if ( actions || snooze ) {
+			return (
+				<div className="woocommerce-store-alerts__actions">
+					{ actions }
+					{ snooze }
+				</div>
+			);
+		}
+	}
+
 	render() {
 		const alerts = this.props.alerts || [];
 		const preloadAlertCount = wcSettings.alertCount && parseInt( wcSettings.alertCount );
@@ -79,22 +183,6 @@ class StoreAlerts extends Component {
 		const className = classnames( 'woocommerce-store-alerts', {
 			'is-alert-error': 'error' === type,
 			'is-alert-update': 'update' === type,
-		} );
-
-		const actions = alert.actions.map( action => {
-			const markStatus = () => {
-				this.props.updateNote( alert.id, { status: action.status } );
-			};
-			return (
-				<Button
-					key={ action.name }
-					isDefault
-					href={ action.url }
-					onClick={ '' === action.status ? noop : markStatus }
-				>
-					{ action.label }
-				</Button>
-			);
 		} );
 
 		return (
@@ -140,7 +228,7 @@ class StoreAlerts extends Component {
 					className="woocommerce-store-alerts__message"
 					dangerouslySetInnerHTML={ sanitizeHTML( alert.content ) }
 				/>
-				{ actions && <div className="woocommerce-store-alerts__actions">{ actions }</div> }
+				{ this.renderActions( alert ) }
 			</Card>
 		);
 	}

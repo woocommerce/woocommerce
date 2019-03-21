@@ -23,6 +23,7 @@ class WC_Admin_Note extends WC_Data {
 	// Note status codes.
 	const E_WC_ADMIN_NOTE_UNACTIONED = 'unactioned'; // the note has not yet been actioned by a user.
 	const E_WC_ADMIN_NOTE_ACTIONED   = 'actioned';   // the note has had its action completed by a user.
+	const E_WC_ADMIN_NOTE_SNOOZED    = 'snoozed';    // the note has been snoozed by a user.
 
 	/**
 	 * This is the name of this object type.
@@ -48,6 +49,7 @@ class WC_Admin_Note extends WC_Data {
 		'source'        => 'woocommerce',
 		'date_created'  => '0000-00-00 00:00:00',
 		'date_reminder' => '',
+		'is_snoozable'  => false,
 		'actions'       => array(),
 	);
 
@@ -118,6 +120,7 @@ class WC_Admin_Note extends WC_Data {
 		$allowed_statuses = array(
 			self::E_WC_ADMIN_NOTE_ACTIONED,
 			self::E_WC_ADMIN_NOTE_UNACTIONED,
+			self::E_WC_ADMIN_NOTE_SNOOZED,
 		);
 
 		return apply_filters( 'woocommerce_admin_note_statuses', $allowed_statuses );
@@ -241,6 +244,16 @@ class WC_Admin_Note extends WC_Data {
 	 */
 	public function get_date_reminder( $context = 'view' ) {
 		return $this->get_prop( 'date_reminder', $context );
+	}
+
+	/**
+	 * Get note snoozability.
+	 *
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @return bool   Whether or not the note can be snoozed.
+	 */
+	public function get_is_snoozable( $context = 'view' ) {
+		return $this->get_prop( 'is_snoozable', $context );
 	}
 
 	/**
@@ -436,6 +449,15 @@ class WC_Admin_Note extends WC_Data {
 	 */
 	public function set_date_reminder( $date ) {
 		$this->set_date_prop( 'date_reminder', $date );
+	}
+
+	/**
+	 * Set note snoozability.
+	 *
+	 * @param bool $is_snoozable Whether or not the note can be snoozed.
+	 */
+	public function set_is_snoozable( $is_snoozable ) {
+		return $this->set_prop( 'is_snoozable', $is_snoozable );
 	}
 
 	/**

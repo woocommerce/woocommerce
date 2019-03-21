@@ -202,6 +202,11 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 			$note_changed = true;
 		}
 
+		if ( ! is_null( $request->get_param( 'date_reminder' ) ) ) {
+			$note->set_date_reminder( $request->get_param( 'date_reminder' ) );
+			$note_changed = true;
+		}
+
 		if ( $note_changed ) {
 			$note->save();
 		}
@@ -257,6 +262,7 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 		$data['date_reminder']     = wc_rest_prepare_date_response( $data['date_reminder'], false );
 		$data['title']             = stripslashes( $data['title'] );
 		$data['content']           = stripslashes( $data['content'] );
+		$data['is_snoozable']      = (bool) $data['is_snoozable'];
 		foreach ( (array) $data['actions'] as $key => $value ) {
 			$data['actions'][ $key ]->label  = stripslashes( $data['actions'][ $key ]->label );
 			$data['actions'][ $key ]->url    = $this->prepare_query_for_response( $data['actions'][ $key ]->query );
@@ -402,6 +408,12 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 				'date_reminder_gmt' => array(
 					'description' => __( 'Date after which the user should be reminded of the note, if any (GMT).', 'woocommerce-admin' ),
 					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'is_snoozable'      => array(
+					'description' => __( 'Whether or a user can request to be reminded about the note.', 'woocommerce-admin' ),
+					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
