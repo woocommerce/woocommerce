@@ -34,6 +34,11 @@ class WC_Admin_Notes_Order_Milestones {
 	const LAST_ORDER_MILESTONE_OPTION_KEY = 'wc_admin_last_orders_milestone';
 
 	/**
+	 * Hook to process order milestones.
+	 */
+	const PROCESS_ORDERS_MILESTONE_HOOK = 'wc_admin_process_orders_milestone';
+
+	/**
 	 * Allowed order statuses for calculating milestones.
 	 *
 	 * @var array
@@ -80,13 +85,17 @@ class WC_Admin_Notes_Order_Milestones {
 	 * Hook everything up.
 	 */
 	public function init() {
+		if ( ! wp_next_scheduled( self::PROCESS_ORDERS_MILESTONE_HOOK ) ) {
+			wp_schedule_event( time(), 'hourly', self::PROCESS_ORDERS_MILESTONE_HOOK );
+		}
+
 		add_action( 'wc_admin_installed', array( $this, 'backfill_last_milestone' ) );
 
 		if ( 10 <= $this->get_orders_count() ) {
 			add_action( 'woocommerce_new_order', array( $this, 'first_two_milestones' ) );
 		}
 
-		add_action( 'wc_admin_daily', array( $this, 'other_milestones' ) );
+		add_action( self::PROCESS_ORDERS_MILESTONE_HOOK, array( $this, 'other_milestones' ) );
 	}
 
 	/**
@@ -214,6 +223,9 @@ class WC_Admin_Notes_Order_Milestones {
 		}
 
 		$this->set_last_milestone( $current_milestone );
+
+		// We only want one milestone note at any time.
+		WC_Admin_Notes::delete_notes_with_name( self::ORDERS_MILESTONE_NOTE_NAME );
 
 		// Add the milestone note.
 		$note = new WC_Admin_Note();
