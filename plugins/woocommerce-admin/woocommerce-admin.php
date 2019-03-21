@@ -95,6 +95,8 @@ function wc_admin_build_file_exists() {
 
 /**
  * Daily events to run.
+ *
+ * Note: WC_Admin_Notes_Order_Milestones::other_milestones is hooked to this as well.
  */
 function wc_admin_do_wc_admin_daily() {
 	WC_Admin_Notes_New_Sales_Record::possibly_add_sales_record_note();
