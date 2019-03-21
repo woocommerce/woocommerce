@@ -383,6 +383,7 @@ module.exports = function( grunt ) {
 						)
 						// Replace class & constant prefixes.
 						.replace( /WGPB_/g, 'WC_' )
+						.replace( /FP_VERSION/g, 'WGPB_VERSION' )
 						// Replace file imports
 						.replace( /-wgpb-/g, '-wc-' )
 				}
