@@ -450,6 +450,7 @@ function wc_admin_get_user_data_fields() {
 		'dashboard_leaderboards',
 		'dashboard_leaderboard_rows',
 		'activity_panel_inbox_last_read',
+		'activity_panel_reviews_last_read',
 	);
 
 	return apply_filters( 'wc_admin_get_user_data_fields', $user_data_fields );

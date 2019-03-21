@@ -92,7 +92,7 @@ class ActivityPanel extends Component {
 
 	// @todo Pull in dynamic unread status/count
 	getTabs() {
-		const { unreadNotes, unreadOrders } = this.props;
+		const { unreadNotes, unreadOrders, unreadReviews } = this.props;
 		return [
 			{
 				name: 'inbox',
@@ -119,7 +119,7 @@ class ActivityPanel extends Component {
 						name: 'reviews',
 						title: __( 'Reviews', 'woocommerce-admin' ),
 						icon: <Gridicon icon="star" />,
-						unread: false,
+						unread: unreadReviews,
 					}
 				: null,
 		].filter( Boolean );
@@ -135,7 +135,8 @@ class ActivityPanel extends Component {
 			case 'stock':
 				return <StockPanel />;
 			case 'reviews':
-				return <ReviewsPanel />;
+				const { numberOfReviews } = this.props;
+				return <ReviewsPanel numberOfReviews={ numberOfReviews } />;
 			default:
 				return null;
 		}
@@ -270,12 +271,16 @@ export default withSelect( select => {
 		getReportItemsError,
 		isGetNotesRequesting,
 		isReportItemsRequesting,
+		getReviews,
+		getReviewsTotalCount,
+		getReviewsError,
+		isGetReviewsRequesting,
 	} = select( 'wc-api' );
+	const userData = getCurrentUserData();
 	const orderStatuses = wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses || [
 		'processing',
 		'on-hold',
 	];
-	const userData = getCurrentUserData();
 
 	const notesQuery = {
 		page: 1,
@@ -290,29 +295,52 @@ export default withSelect( select => {
 		new Date( latestNote[ 0 ].date_created_gmt ).getTime() >
 			userData.activity_panel_inbox_last_read;
 
-	if ( ! orderStatuses.length ) {
-		return { unreadNotes, unreadOrders: false };
-	}
-
-	const ordersQuery = {
-		page: 1,
-		per_page: 0,
-		status_is: orderStatuses,
-	};
-
-	const totalOrders = getReportItems( 'orders', ordersQuery ).totalResults;
-	const isError = Boolean( getReportItemsError( 'orders', ordersQuery ) );
-	const isRequesting = isReportItemsRequesting( 'orders', ordersQuery );
-
 	let unreadOrders = null;
+	if ( ! orderStatuses.length ) {
+		unreadOrders = false;
+	} else {
+		const ordersQuery = {
+			page: 1,
+			per_page: 0,
+			status_is: orderStatuses,
+		};
 
-	if ( ! isError && ! isRequesting ) {
-		if ( totalOrders > 0 ) {
-			unreadOrders = true;
-		} else {
-			unreadOrders = false;
+		const totalOrders = getReportItems( 'orders', ordersQuery ).totalResults;
+		const isOrdersError = Boolean( getReportItemsError( 'orders', ordersQuery ) );
+		const isOrdersRequesting = isReportItemsRequesting( 'orders', ordersQuery );
+
+		if ( ! isOrdersError && ! isOrdersRequesting ) {
+			if ( totalOrders > 0 ) {
+				unreadOrders = true;
+			} else {
+				unreadOrders = false;
+			}
 		}
 	}
 
-	return { unreadNotes, unreadOrders };
+	let numberOfReviews = null;
+	let unreadReviews = false;
+	if ( 'yes' === wcSettings.reviewsEnabled ) {
+		const reviewsQuery = {
+			order: 'desc',
+			orderby: 'date_gmt',
+			page: 1,
+			per_page: 1,
+		};
+		const reviews = getReviews( reviewsQuery );
+		const totalReviews = getReviewsTotalCount( reviewsQuery );
+		const isReviewsError = Boolean( getReviewsError( reviewsQuery ) );
+		const isReviewsRequesting = isGetReviewsRequesting( reviewsQuery );
+
+		if ( ! isReviewsError && ! isReviewsRequesting ) {
+			numberOfReviews = totalReviews;
+			unreadReviews =
+				reviews.length &&
+				reviews[ 0 ].date_created_gmt &&
+				new Date( reviews[ 0 ].date_created_gmt + 'Z' ).getTime() >
+					userData.activity_panel_reviews_last_read;
+		}
+	}
+
+	return { unreadNotes, unreadOrders, unreadReviews, numberOfReviews };
 } )( clickOutside( ActivityPanel ) );
