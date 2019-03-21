@@ -50,7 +50,7 @@ class ReportTable extends Component {
 	}
 
 	filterShownHeaders( headers, hiddenKeys ) {
-		if ( ! hiddenKeys ) {
+		if ( ! hiddenKeys || ! hiddenKeys.length ) {
 			return headers;
 		}
 
@@ -200,8 +200,19 @@ export default compose(
 			tableQuery,
 			columnPrefsKey,
 		} = props;
+
+		let userPrefColumns = [];
+		if ( columnPrefsKey ) {
+			const { getCurrentUserData } = select( 'wc-api' );
+			const userData = getCurrentUserData();
+
+			userPrefColumns = userData[ columnPrefsKey ];
+		}
+
 		if ( isRequesting || ( query.search && ! ( query[ endpoint ] && query[ endpoint ].length ) ) ) {
-			return {};
+			return {
+				userPrefColumns,
+			};
 		}
 		const chartEndpoint = [ 'variations', 'categories' ].includes( endpoint )
 			? 'products'
@@ -212,20 +223,12 @@ export default compose(
 		const queriedTableData = tableData || getReportTableData( endpoint, query, select, tableQuery );
 		const extendedTableData = extendTableData( select, props, queriedTableData );
 
-		const selectProps = {
+		return {
 			primaryData,
 			tableData: extendedTableData,
 			query: { ...tableQuery, ...query },
+			userPrefColumns,
 		};
-
-		if ( columnPrefsKey ) {
-			const { getCurrentUserData } = select( 'wc-api' );
-			const userData = getCurrentUserData();
-
-			selectProps.userPrefColumns = userData[ columnPrefsKey ];
-		}
-
-		return selectProps;
 	} ),
 	withDispatch( dispatch => {
 		const { updateCurrentUserData } = dispatch( 'wc-api' );
