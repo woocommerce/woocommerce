@@ -99,7 +99,12 @@ Leaderboard.propTypes = {
 export default compose(
 	withSelect( ( select, props ) => {
 		const { endpoint, tableQuery, query } = props;
-		const tableData = getReportTableData( endpoint, query, select, tableQuery );
+		const tableData = getReportTableData( {
+			endpoint,
+			query,
+			select,
+			tableQuery,
+		} );
 
 		return { ...tableData };
 	} )

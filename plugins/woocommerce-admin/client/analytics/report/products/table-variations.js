@@ -169,7 +169,7 @@ export default class VariationsReportTable extends Component {
 	}
 
 	render() {
-		const { baseSearchQuery, isRequesting, query } = this.props;
+		const { baseSearchQuery, isRequesting, query, filters } = this.props;
 
 		const labels = {
 			helpText: __( 'Check at least two variations below to compare', 'woocommerce-admin' ),
@@ -199,6 +199,7 @@ export default class VariationsReportTable extends Component {
 				} }
 				title={ __( 'Variations', 'woocommerce-admin' ) }
 				columnPrefsKey="variations_report_columns"
+				filters={ filters }
 			/>
 		);
 	}

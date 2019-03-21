@@ -56,6 +56,7 @@ export default class CouponsReport extends Component {
 					isRequesting={ isRequesting }
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
+					filters={ filters }
 				/>
 				<ReportChart
 					filters={ filters }
@@ -68,7 +69,7 @@ export default class CouponsReport extends Component {
 					itemsLabel={ itemsLabel }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
-				<CouponsReportTable isRequesting={ isRequesting } query={ query } />
+				<CouponsReportTable isRequesting={ isRequesting } query={ query } filters={ filters } />
 			</Fragment>
 		);
 	}

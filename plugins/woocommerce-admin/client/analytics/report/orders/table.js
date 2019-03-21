@@ -250,7 +250,7 @@ export default class OrdersReportTable extends Component {
 	}
 
 	render() {
-		const { query } = this.props;
+		const { query, filters, advancedFilters } = this.props;
 
 		return (
 			<ReportTable
@@ -264,6 +264,8 @@ export default class OrdersReportTable extends Component {
 				} }
 				title={ __( 'Orders', 'woocommerce-admin' ) }
 				columnPrefsKey="orders_report_columns"
+				filters={ filters }
+				advancedFilters={ advancedFilters }
 			/>
 		);
 	}

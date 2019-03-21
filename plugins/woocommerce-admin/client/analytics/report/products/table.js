@@ -235,7 +235,7 @@ class ProductsReportTable extends Component {
 	}
 
 	render() {
-		const { query, isRequesting, baseSearchQuery, hideCompare } = this.props;
+		const { query, isRequesting, baseSearchQuery, hideCompare, filters } = this.props;
 
 		const labels = {
 			helpText: __( 'Check at least two products below to compare', 'woocommerce-admin' ),
@@ -259,15 +259,11 @@ class ProductsReportTable extends Component {
 					orderby: query.orderby || 'items_sold',
 					order: query.order || 'desc',
 					extended_info: true,
-					/**
-					 * @TODO: Add this parameter because the filterQuery will be derived from the wrong config
-					 * because it will always look for products config, not categories. The solution is to pass
-					 * down the configs explicitly.
-					 */
-					categories: query.categories,
+					segmentby: query.segmentby,
 				} }
 				title={ __( 'Products', 'woocommerce-admin' ) }
 				columnPrefsKey="products_report_columns"
+				filters={ filters }
 			/>
 		);
 	}

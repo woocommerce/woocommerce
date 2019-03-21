@@ -150,7 +150,7 @@ export default class CouponsReportTable extends Component {
 	}
 
 	render() {
-		const { query } = this.props;
+		const { query, filters, advancedFilters } = this.props;
 
 		return (
 			<ReportTable
@@ -164,6 +164,8 @@ export default class CouponsReportTable extends Component {
 				} }
 				title={ __( 'Downloads', 'woocommerce-admin' ) }
 				columnPrefsKey="downloads_report_columns"
+				filters={ filters }
+				advancedFilters={ advancedFilters }
 			/>
 		);
 	}

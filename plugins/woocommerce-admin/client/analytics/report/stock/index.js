@@ -28,7 +28,7 @@ export default class StockReport extends Component {
 					showDatePicker={ showDatePicker }
 					filters={ filters }
 				/>
-				<StockReportTable query={ query } />
+				<StockReportTable query={ query } filters={ filters } />
 			</Fragment>
 		);
 	}

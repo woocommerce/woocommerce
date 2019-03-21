@@ -149,7 +149,7 @@ ReportSummary.defaultProps = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { endpoint, isRequesting, limitProperties, query } = props;
+		const { endpoint, isRequesting, limitProperties, query, filters, advancedFilters } = props;
 		const limitBy = limitProperties || [ endpoint ];
 
 		if ( isRequesting ) {
@@ -164,7 +164,14 @@ export default compose(
 			};
 		}
 
-		const summaryData = getSummaryNumbers( endpoint, query, select, limitBy );
+		const summaryData = getSummaryNumbers( {
+			endpoint,
+			query,
+			select,
+			limitBy,
+			filters,
+			advancedFilters,
+		} );
 
 		return {
 			summaryData,

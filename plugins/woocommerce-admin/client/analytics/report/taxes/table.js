@@ -143,7 +143,7 @@ export default class TaxesReportTable extends Component {
 	}
 
 	render() {
-		const { isRequesting, query } = this.props;
+		const { isRequesting, query, filters } = this.props;
 
 		return (
 			<ReportTable
@@ -161,6 +161,7 @@ export default class TaxesReportTable extends Component {
 				} }
 				title={ __( 'Taxes', 'woocommerce-admin' ) }
 				columnPrefsKey="taxes_report_columns"
+				filters={ filters }
 			/>
 		);
 	}
