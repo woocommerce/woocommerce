@@ -78,16 +78,20 @@ class ProductsReportTable extends Component {
 				key: 'variations',
 				isSortable: true,
 			},
-			{
-				label: __( 'Status', 'woocommerce-admin' ),
-				key: 'stock_status',
-			},
-			{
-				label: __( 'Stock', 'woocommerce-admin' ),
-				key: 'stock',
-				isNumeric: true,
-			},
-		];
+			'yes' === wcSettings.manageStock
+				? {
+						label: __( 'Status', 'woocommerce-admin' ),
+						key: 'stock_status',
+					}
+				: null,
+			'yes' === wcSettings.manageStock
+				? {
+						label: __( 'Stock', 'woocommerce-admin' ),
+						key: 'stock',
+						isNumeric: true,
+					}
+				: null,
+		].filter( Boolean );
 	}
 
 	getRowsContent( data = [] ) {
@@ -190,15 +194,21 @@ class ProductsReportTable extends Component {
 					display: numberFormat( variations.length ),
 					value: variations.length,
 				},
-				{
-					display: manage_stock ? stockStatus : __( 'N/A', 'woocommerce-admin' ),
-					value: manage_stock ? stockStatuses[ stock_status ] : null,
-				},
-				{
-					display: manage_stock ? numberFormat( stock_quantity ) : __( 'N/A', 'woocommerce-admin' ),
-					value: stock_quantity,
-				},
-			];
+				'yes' === wcSettings.manageStock
+					? {
+							display: manage_stock ? stockStatus : __( 'N/A', 'woocommerce-admin' ),
+							value: manage_stock ? stockStatuses[ stock_status ] : null,
+						}
+					: null,
+				'yes' === wcSettings.manageStock
+					? {
+							display: manage_stock
+								? numberFormat( stock_quantity )
+								: __( 'N/A', 'woocommerce-admin' ),
+							value: stock_quantity,
+						}
+					: null,
+			].filter( Boolean );
 		} );
 	}
 

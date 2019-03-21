@@ -63,16 +63,20 @@ export default class VariationsReportTable extends Component {
 				isSortable: true,
 				isNumeric: true,
 			},
-			{
-				label: __( 'Status', 'woocommerce-admin' ),
-				key: 'stock_status',
-			},
-			{
-				label: __( 'Stock', 'woocommerce-admin' ),
-				key: 'stock',
-				isNumeric: true,
-			},
-		];
+			'yes' === wcSettings.manageStock
+				? {
+						label: __( 'Status', 'woocommerce-admin' ),
+						key: 'stock_status',
+					}
+				: null,
+			'yes' === wcSettings.manageStock
+				? {
+						label: __( 'Stock', 'woocommerce-admin' ),
+						key: 'stock',
+						isNumeric: true,
+					}
+				: null,
+		].filter( Boolean );
 	}
 
 	getRowsContent( data = [] ) {
@@ -120,21 +124,25 @@ export default class VariationsReportTable extends Component {
 					),
 					value: orders_count,
 				},
-				{
-					display: isLowStock( stock_status, stock_quantity, low_stock_amount ) ? (
-						<Link href={ editPostLink } type="wp-admin">
-							{ _x( 'Low', 'Indication of a low quantity', 'woocommerce-admin' ) }
-						</Link>
-					) : (
-						stockStatuses[ stock_status ]
-					),
-					value: stockStatuses[ stock_status ],
-				},
-				{
-					display: stock_quantity,
-					value: stock_quantity,
-				},
-			];
+				'yes' === wcSettings.manageStock
+					? {
+							display: isLowStock( stock_status, stock_quantity, low_stock_amount ) ? (
+								<Link href={ editPostLink } type="wp-admin">
+									{ _x( 'Low', 'Indication of a low quantity', 'woocommerce-admin' ) }
+								</Link>
+							) : (
+								stockStatuses[ stock_status ]
+							),
+							value: stockStatuses[ stock_status ],
+						}
+					: null,
+				'yes' === wcSettings.manageStock
+					? {
+							display: stock_quantity,
+							value: stock_quantity,
+						}
+					: null,
+			].filter( Boolean );
 		} );
 	}
 

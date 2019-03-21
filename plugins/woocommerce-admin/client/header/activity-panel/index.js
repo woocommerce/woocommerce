@@ -106,12 +106,14 @@ class ActivityPanel extends Component {
 				icon: <Gridicon icon="pages" />,
 				unread: unreadOrders,
 			},
-			{
-				name: 'stock',
-				title: __( 'Stock', 'woocommerce-admin' ),
-				icon: <Gridicon icon="clipboard" />,
-				unread: false,
-			},
+			'yes' === wcSettings.manageStock
+				? {
+						name: 'stock',
+						title: __( 'Stock', 'woocommerce-admin' ),
+						icon: <Gridicon icon="clipboard" />,
+						unread: false,
+					}
+				: null,
 			'yes' === wcSettings.reviewsEnabled
 				? {
 						name: 'reviews',

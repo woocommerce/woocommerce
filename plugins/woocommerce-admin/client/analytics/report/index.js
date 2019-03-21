@@ -72,11 +72,13 @@ const getReports = () => {
 			title: __( 'Downloads', 'woocommerce-admin' ),
 			component: DownloadsReport,
 		},
-		{
-			report: 'stock',
-			title: __( 'Stock', 'woocommerce-admin' ),
-			component: StockReport,
-		},
+		'yes' === wcSettings.manageStock
+			? {
+					report: 'stock',
+					title: __( 'Stock', 'woocommerce-admin' ),
+					component: StockReport,
+				}
+			: null,
 		{
 			report: 'customers',
 			title: __( 'Customers', 'woocommerce-admin' ),
@@ -87,7 +89,7 @@ const getReports = () => {
 			title: __( 'Downloads', 'woocommerce-admin' ),
 			component: DownloadsReport,
 		},
-	];
+	].filter( Boolean );
 
 	return applyFilters( REPORTS_FILTER, reports );
 };

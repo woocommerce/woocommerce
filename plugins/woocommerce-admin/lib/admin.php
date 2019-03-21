@@ -148,13 +148,15 @@ function wc_admin_register_pages() {
 			)
 		);
 
-		wc_admin_register_page(
-			array(
-				'title'  => __( 'Stock', 'woocommerce-admin' ),
-				'parent' => '/analytics/revenue',
-				'path'   => '/analytics/stock',
-			)
-		);
+		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
+			wc_admin_register_page(
+				array(
+					'title'  => __( 'Stock', 'woocommerce-admin' ),
+					'parent' => '/analytics/revenue',
+					'path'   => '/analytics/stock',
+				)
+			);
+		}
 
 		wc_admin_register_page(
 			array(
