@@ -776,7 +776,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 
 			// We only need to check products managing stock, with a limited stock qty.
-			if ( ! $product->managing_stock() || $product->backorders_allowed() ) {
+			if ( ! $product->managing_stock() || $product->backorders_allowed() || ! $product->get_manage_stock ) {
 				continue;
 			}
 
