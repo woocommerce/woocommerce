@@ -253,7 +253,7 @@ final class WC_Cart_Session {
 	 * Delete the persistent cart permanently.
 	 */
 	public function persistent_cart_destroy() {
-		if ( get_current_user_id() ) {
+		if ( get_current_user_id() && apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id() );
 		}
 	}
