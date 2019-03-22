@@ -37,6 +37,11 @@ class WGPB_Block_Library {
 	 * Constructor.
 	 */
 	public function __construct() {
+		// Shortcut out if we see the feature plugin, v1.4 or below.
+		// note: `FP_VERSION` is transformed to `WGPB_VERSION` in the grunt copy task.
+		if ( defined( 'FP_VERSION' ) && version_compare( FP_VERSION, '1.4.0', '<=' ) ) {
+			return;
+		}
 		if ( function_exists( 'register_block_type' ) ) {
 			add_action( 'init', array( 'WGPB_Block_Library', 'register_blocks' ) );
 			add_action( 'init', array( 'WGPB_Block_Library', 'register_assets' ) );
