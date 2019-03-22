@@ -12,6 +12,11 @@ import interpolateComponents from 'interpolate-components';
  */
 import { Link } from '@woocommerce/components';
 
+/**
+ * Internal dependencies
+ */
+import { DEFAULT_ACTIONABLE_STATUSES } from 'wc-api/constants';
+
 const SETTINGS_FILTER = 'woocommerce_admin_analytics_settings';
 
 const defaultOrderStatuses = [
@@ -122,6 +127,6 @@ export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 			'woocommerce-admin'
 		),
 		initialValue: wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses || [],
-		defaultValue: [ 'processing', 'on-hold' ],
+		defaultValue: DEFAULT_ACTIONABLE_STATUSES,
 	},
 ] );

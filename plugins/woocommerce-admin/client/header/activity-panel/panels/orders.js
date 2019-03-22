@@ -32,7 +32,7 @@ import { getAdminLink, getNewPath } from '@woocommerce/navigation';
 import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
 import ActivityHeader from '../activity-header';
 import ActivityOutboundLink from '../activity-outbound-link';
-import { QUERY_DEFAULTS } from 'wc-api/constants';
+import { DEFAULT_ACTIONABLE_STATUSES, QUERY_DEFAULTS } from 'wc-api/constants';
 import withSelect from 'wc-api/with-select';
 
 function OrdersPanel( { orders, isRequesting, isError, orderStatuses } ) {
@@ -220,10 +220,9 @@ export default compose(
 	withSelect( ( select, props ) => {
 		const { getReportItems, getReportItemsError, isReportItemsRequesting } = select( 'wc-api' );
 		const { isEmpty } = props;
-		const orderStatuses = wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses || [
-			'processing',
-			'on-hold',
-		];
+		const orderStatuses =
+			wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses ||
+			DEFAULT_ACTIONABLE_STATUSES;
 
 		if ( ! orderStatuses.length ) {
 			return { orders: [], isError: true, isRequesting: false, orderStatuses };
