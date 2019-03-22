@@ -384,12 +384,21 @@ class WC_Download_Handler {
 	 */
 	public static function download_file_force( $file_path, $filename ) {
 		$parsed_file_path = self::parse_file_path( $file_path );
-		$download_range   = self::get_download_range( self::get_filesize( $parsed_file_path ) ); // @codingStandardsIgnoreLine.
+
+		$headers = self::get_remote_file_headers( $parsed_file_path );
+
+		// If this is a HTML page it's likely we're unable to force download. e.g. dropbox link page instead of a raw download.
+		if ( isset( $headers['content-type'] ) && stristr( $headers['content-type'], 'text/html' ) ) {
+			self::download_file_redirect( $file_path );
+		}
+
+		$download_range = self::get_download_range( self::get_filesize( $parsed_file_path ) ); // @codingStandardsIgnoreLine.
 
 		self::download_headers( $parsed_file_path['file_path'], $filename, $download_range );
 
 		$start  = isset( $download_range['start'] ) ? $download_range['start'] : 0;
 		$length = isset( $download_range['length'] ) ? $download_range['length'] : 0;
+
 		if ( ! self::readfile_chunked( $parsed_file_path['file_path'], $start, $length ) ) {
 			if ( $parsed_file_path['remote_file'] ) {
 				self::download_file_redirect( $file_path );
@@ -586,6 +595,38 @@ class WC_Download_Handler {
 	}
 
 	/**
+	 * Get headers for a remote file.
+	 *
+	 * @param string|array $file_path Path or URL to try to get size of, or a parsed filepath array.
+	 * @return array Array of headers. Empty on failure.
+	 */
+	protected static function get_remote_file_headers( $file_path ) {
+		if ( is_string( $file_path ) ) {
+			$file_path = self::parse_file_path( $file_path );
+		}
+
+		if ( ! isset( $file_path['file_path'], $file_path['remote_file'] ) || ! $file_path['remote_file'] ) {
+			return array();
+		}
+
+		$headers = get_transient( 'file_headers_' . $file_path['file_path'] );
+
+		if ( false === $headers ) {
+			$response = wp_remote_head( $file_path['file_path'] );
+
+			if ( is_wp_error( $response ) ) {
+				$headers = array();
+			} else {
+				$headers = wp_remote_retrieve_headers( $response );
+			}
+
+			set_transient( 'file_headers_' . $file_path['file_path'], $headers, WEEK_IN_SEONDS );
+		}
+
+		return $headers;
+	}
+
+	/**
 	 * Get filesize of a path or URL.
 	 *
 	 * @param string|array $file_path Path or URL to try to get size of, or a parsed filepath array.
@@ -601,10 +642,10 @@ class WC_Download_Handler {
 		}
 
 		if ( $file_path['remote_file'] ) {
-			$head = wp_remote_head( $file_path['file_path'] );
+			$headers = self::get_remote_file_headers( $file_path );
 
-			if ( ! is_wp_error( $head ) && ! empty( $head['headers']['content-length'] ) ) {
-				return $head['headers']['content-length'];
+			if ( isset( $headers['content-length'] ) ) {
+				return $headers['content-length'];
 			}
 		} else {
 			return @filesize( $file_path['file_path'] ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
