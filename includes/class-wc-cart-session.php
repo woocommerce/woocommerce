@@ -50,7 +50,12 @@ final class WC_Cart_Session {
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'set_session' ) );
-		add_action( 'woocommerce_cart_updated', array( $this, 'persistent_cart_update' ) );
+
+		// Persistent cart stored to usermeta.
+		add_action( 'woocommerce_add_to_cart', array( $this, 'persistent_cart_update' ) );
+		add_action( 'woocommerce_cart_item_removed', array( $this, 'persistent_cart_update' ) );
+		add_action( 'woocommerce_cart_item_restored', array( $this, 'persistent_cart_update' ) );
+		add_action( 'woocommerce_cart_item_set_quantity', array( $this, 'persistent_cart_update' ) );
 
 		// Cookie events - cart cookies need to be set before headers are sent.
 		if ( function_exists( 'header_register_callback' ) ) {
