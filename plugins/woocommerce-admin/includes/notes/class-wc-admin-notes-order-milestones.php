@@ -237,13 +237,13 @@ class WC_Admin_Notes_Order_Milestones {
 			)
 		);
 		$note->set_content(
-			__( "Another order milestone! Have you shared news with your subscribers lately? Maybe it's time for an update.", 'woocommerce-admin' )
+			__( 'Another order milestone! Take a look at your Orders Report to review your orders to date.', 'woocommerce-admin' )
 		);
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_icon( 'trophy' );
 		$note->set_name( self::ORDERS_MILESTONE_NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
-		$note->add_action( 'review', __( 'Review processed orders', 'woocommerce-admin' ), '?page=wc-admin#/analytics/orders' );
+		$note->add_action( 'review-orders', __( 'Review your orders', 'woocommerce-admin' ), '?page=wc-admin#/analytics/orders' );
 		$note->save();
 	}
 }
