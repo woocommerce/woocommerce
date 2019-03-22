@@ -17,7 +17,7 @@
 		// All have one property for `suggestionSlug`, to identify the specific suggestion message.
 
 		// Dismiss the specified suggestion from the UI, and save the dismissal in settings.
-		function dismissSuggestion( context, suggestionSlug ) {
+		function dismissSuggestion( context, product, promoted, url, suggestionSlug ) {
 			// hide the suggestion in the UI
 			var selector = '[data-suggestion-slug=' + suggestionSlug + ']';
 			$( selector ).fadeOut( function() {
@@ -49,12 +49,16 @@
 			}
 
 			window.wcTracks.recordEvent( 'marketplace_suggestion_dismissed', {
-				suggestion_slug: suggestionSlug
+				suggestion_slug: suggestionSlug,
+				context: context,
+				product: product,
+				promoted: promoted,
+				target: url
 			} );
 		}
 
 		// Render DOM element for suggestion dismiss button.
-		function renderDismissButton( context, suggestionSlug ) {
+		function renderDismissButton( context, product, promoted, url, suggestionSlug ) {
 			var dismissButton = document.createElement( 'a' );
 
 			dismissButton.classList.add( 'suggestion-dismiss' );
@@ -62,7 +66,7 @@
 			dismissButton.setAttribute( 'href', '#' );
 			dismissButton.onclick = function( event ) {
 				event.preventDefault();
-				dismissSuggestion( context, suggestionSlug );
+				dismissSuggestion( context, product, promoted, url, suggestionSlug );
 			};
 
 			return dismissButton;
@@ -105,7 +109,7 @@
 		}
 
 		// Render DOM element for suggestion linkout, optionally with button style.
-		function renderLinkout( context, slug, url, text, isButton ) {
+		function renderLinkout( context, product, promoted, slug, url, text, isButton ) {
 			var linkoutButton = document.createElement( 'a' );
 
 			var utmUrl = addUTMParameters( context, url );
@@ -115,7 +119,11 @@
 
 			linkoutButton.onclick = function() {
 				window.wcTracks.recordEvent( 'marketplace_suggestion_clicked', {
-					suggestion_slug: slug
+					suggestion_slug: slug,
+					context: context,
+					product: product,
+					promoted: promoted,
+					target: url
 				} );
 			};
 
@@ -166,7 +174,7 @@
 		}
 
 		// Render DOM elements for suggestion call-to-action – button or link with dismiss 'x'.
-		function renderSuggestionCTA( context, slug, url, linkText, linkIsButton, allowDismiss ) {
+		function renderSuggestionCTA( context, product, promoted, slug, url, linkText, linkIsButton, allowDismiss ) {
 			var container = document.createElement( 'div' );
 
 			if ( ! linkText ) {
@@ -175,12 +183,12 @@
 
 			container.classList.add( 'marketplace-suggestion-container-cta' );
 			if ( url && linkText ) {
-				var linkoutElement = renderLinkout( context, slug, url, linkText, linkIsButton );
+				var linkoutElement = renderLinkout( context, product, promoted, slug, url, linkText, linkIsButton );
 				container.appendChild( linkoutElement );
 			}
 
 			if ( allowDismiss ) {
-				container.appendChild( renderDismissButton( context, slug ) );
+				container.appendChild( renderDismissButton( context, product, promoted, url, slug ) );
 			}
 
 			return container;
@@ -192,7 +200,7 @@
 
 		// Render a "table banner" style suggestion.
 		// These are used in admin lists, e.g. products list.
-		function renderTableBanner( context, slug, iconUrl, title, copy, url, buttonText, allowDismiss ) {
+		function renderTableBanner( context, product, promoted, slug, iconUrl, title, copy, url, buttonText, allowDismiss ) {
 			if ( ! title || ! url ) {
 				return;
 			}
@@ -220,7 +228,7 @@
 				renderSuggestionContent( title, copy )
 			);
 			container.appendChild(
-				renderSuggestionCTA( context, slug, url, buttonText, true, allowDismiss )
+				renderSuggestionCTA( context, product, promoted, slug, url, buttonText, true, allowDismiss )
 			);
 
 			cell.appendChild( container );
@@ -231,7 +239,7 @@
 
 		// Render a "list item" style suggestion.
 		// These are used in onboarding style contexts, e.g. products list empty state.
-		function renderListItem( context, slug, iconUrl, title, copy, url, linkText, linkIsButton, allowDismiss ) {
+		function renderListItem( context, product, promoted, slug, iconUrl, title, copy, url, linkText, linkIsButton, allowDismiss ) {
 			var container = document.createElement( 'div' );
 			container.classList.add( 'marketplace-suggestion-container' );
 			container.dataset.suggestionSlug = slug;
@@ -244,7 +252,7 @@
 				renderSuggestionContent( title, copy )
 			);
 			container.appendChild(
-				renderSuggestionCTA( context, slug, url, linkText, linkIsButton, allowDismiss )
+				renderSuggestionCTA( context, product, promoted, slug, url, linkText, linkIsButton, allowDismiss )
 			);
 
 			return container;
@@ -267,7 +275,7 @@
 
 			// hide promos for things the user already has installed
 			promos = _.filter( promos, function( promo ) {
-				return ! _.contains( marketplace_suggestions.active_plugins, promo['hide-if-active'] );
+				return ! _.contains( marketplace_suggestions.active_plugins, promo['product'] );
 			} );
 
 			// hide promos that are not applicable based on user's installed extensions
@@ -366,6 +374,8 @@
 
 					var content = renderListItem(
 						context,
+						suggestionsToDisplay[ i ].product,
+						suggestionsToDisplay[ i ].promoted,
 						suggestionsToDisplay[ i ].slug,
 						suggestionsToDisplay[ i ].icon,
 						suggestionsToDisplay[ i ].title,
@@ -380,7 +390,11 @@
 					usedSuggestionsContexts.push( context );
 
 					window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
-						suggestion_slug: suggestionsToDisplay[ i ].slug
+						suggestion_slug: suggestionsToDisplay[ i ].slug,
+						context: context,
+						product: suggestionsToDisplay[ i ].product,
+						promoted: suggestionsToDisplay[ i ].promoted,
+						target: suggestionsToDisplay[ i ].url
 					} );
 				}
 			} );
@@ -422,6 +436,8 @@
 					// render first promo
 					var content = renderTableBanner(
 						context,
+						suggestionToDisplay.product,
+						suggestionToDisplay.promoted,
 						suggestionToDisplay.slug,
 						suggestionToDisplay.icon,
 						suggestionToDisplay.title,
@@ -454,7 +470,11 @@
 						refreshBannerColspanForScreenOptions( content );
 
 						window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
-							suggestion_slug: suggestionToDisplay.slug
+							suggestion_slug: suggestionToDisplay.slug,
+							context: context,
+							product: suggestionToDisplay.product,
+							promoted: suggestionToDisplay.promoted,
+							target: suggestionToDisplay.url
 						} );
 					}
 				} );
