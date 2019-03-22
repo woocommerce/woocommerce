@@ -23,8 +23,8 @@ class WC_Download_Handler {
 			add_action( 'init', array( __CLASS__, 'download_product' ) );
 		}
 		add_action( 'woocommerce_download_file_redirect', array( __CLASS__, 'download_file_redirect' ), 10, 2 );
-		add_action( 'woocommerce_download_file_xsendfile', array( __CLASS__, 'download_file_xsendfile' ), 10, 2 );
-		add_action( 'woocommerce_download_file_force', array( __CLASS__, 'download_file_force' ), 10, 2 );
+		add_action( 'woocommerce_download_file_xsendfile', array( __CLASS__, 'download_file_xsendfile' ), 10, 3 );
+		add_action( 'woocommerce_download_file_force', array( __CLASS__, 'download_file_force' ), 10, 3 );
 	}
 
 	/**
@@ -81,7 +81,8 @@ class WC_Download_Handler {
 
 		$file_path        = $product->get_file_download_path( $download->get_download_id() );
 		$parsed_file_path = self::parse_file_path( $file_path );
-		$download_range   = self::get_download_range( self::get_filesize( $parsed_file_path ) );  // @codingStandardsIgnoreLine.
+		$file_size        = self::get_filesize( $parsed_file_path );
+		$download_range   = self::get_download_range( $file_size );
 
 		self::check_order_is_valid( $download );
 		if ( ! $download_range['is_range_request'] ) {
@@ -109,7 +110,7 @@ class WC_Download_Handler {
 			$download->track_download( $current_user_id > 0 ? $current_user_id : null, ! empty( $ip_address ) ? $ip_address : null );
 		}
 
-		self::download( $file_path, $download->get_product_id() );
+		self::download( $file_path, $download->get_product_id(), $parsed_file_path );
 	}
 
 	/**
@@ -182,10 +183,14 @@ class WC_Download_Handler {
 	 *
 	 * @param string  $file_path  URL to file.
 	 * @param integer $product_id Product ID of the product being downloaded.
+	 * @param array   $parsed_file_path File path details.
 	 */
-	public static function download( $file_path, $product_id ) {
+	public static function download( $file_path, $product_id, $parsed_file_path = '' ) {
 		if ( ! $file_path ) {
 			self::download_error( __( 'No file defined', 'woocommerce' ) );
+		}
+		if ( ! $parsed_file_path ) {
+			$parsed_file_path = self::parse_file_path( $file_path );
 		}
 
 		$filename = basename( $file_path );
@@ -201,7 +206,7 @@ class WC_Download_Handler {
 		add_action( 'nocache_headers', array( __CLASS__, 'ie_nocache_headers_fix' ) );
 
 		// Trigger download via one of the methods.
-		do_action( 'woocommerce_download_file_' . $file_download_method, $file_path, $filename );
+		do_action( 'woocommerce_download_file_' . $file_download_method, $file_path, $filename, $parsed_file_path );
 	}
 
 	/**
@@ -239,9 +244,10 @@ class WC_Download_Handler {
 			str_replace( 'https:', 'http:', site_url( '/', 'http' ) ) => ABSPATH,
 		);
 
-		$file_path        = str_replace( array_keys( $replacements ), array_values( $replacements ), $file_path );
-		$parsed_file_path = wp_parse_url( $file_path );
-		$remote_file      = true;
+		$file_path            = str_replace( array_keys( $replacements ), array_values( $replacements ), $file_path );
+		$file_path_parts      = wp_parse_url( $file_path );
+		$remote_file          = true;
+		$remote_file_location = false;
 
 		// Paths that begin with '//' are always remote URLs.
 		if ( '//' === substr( $file_path, 0, 2 ) ) {
@@ -260,14 +266,31 @@ class WC_Download_Handler {
 			$remote_file = false;
 			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, 11 ) );
 
-		} elseif ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ), true ) ) && isset( $parsed_file_path['path'] ) && file_exists( $parsed_file_path['path'] ) ) {
+		} elseif ( ( ! isset( $file_path_parts['scheme'] ) || ! in_array( $file_path_parts['scheme'], array( 'http', 'https', 'ftp' ), true ) ) && isset( $file_path_parts['path'] ) && file_exists( $file_path_parts['path'] ) ) {
 			$remote_file = false;
-			$file_path   = $parsed_file_path['path'];
+			$file_path   = $file_path_parts['path'];
+		}
+
+		// Expand short urls and redirects to remote files.
+		if ( $remote_file ) {
+			$remote_file_location = $file_path;
+			$location_header      = self::get_remote_file_header( $remote_file_location, 'location' );
+
+			while ( $location_header ) {
+				if ( stristr( $location_header, '://' ) ) {
+					$remote_file_location = esc_url_raw( $location_header );
+				} else {
+					$parts                = wp_parse_url( $remote_file_location );
+					$remote_file_location = esc_url_raw( $parts['scheme'] . '://' . $parts['host'] . $location_header );
+				}
+				$location_header = self::get_remote_file_header( $remote_file_location, 'location' );
+			}
 		}
 
 		return array(
-			'remote_file' => $remote_file,
-			'file_path'   => $file_path,
+			'remote_file'          => $remote_file,
+			'file_path'            => $file_path,
+			'remote_file_location' => $remote_file_location,
 		);
 	}
 
@@ -276,27 +299,26 @@ class WC_Download_Handler {
 	 *
 	 * @param string $file_path File path.
 	 * @param string $filename  File name.
+	 * @param array  $parsed_file_path File path details.
 	 */
-	public static function download_file_xsendfile( $file_path, $filename ) {
-		$parsed_file_path = self::parse_file_path( $file_path );
-
+	public static function download_file_xsendfile( $file_path, $filename, $parsed_file_path ) {
 		if ( function_exists( 'apache_get_modules' ) && in_array( 'mod_xsendfile', apache_get_modules(), true ) ) {
-			self::download_headers( $parsed_file_path['file_path'], $filename );
+			self::download_headers( $parsed_file_path, $filename );
 			header( 'X-Sendfile: ' . $parsed_file_path['file_path'] );
 			exit;
 		} elseif ( stristr( getenv( 'SERVER_SOFTWARE' ), 'lighttpd' ) ) {
-			self::download_headers( $parsed_file_path['file_path'], $filename );
+			self::download_headers( $parsed_file_path, $filename );
 			header( 'X-Lighttpd-Sendfile: ' . $parsed_file_path['file_path'] );
 			exit;
 		} elseif ( stristr( getenv( 'SERVER_SOFTWARE' ), 'nginx' ) || stristr( getenv( 'SERVER_SOFTWARE' ), 'cherokee' ) ) {
-			self::download_headers( $parsed_file_path['file_path'], $filename );
+			self::download_headers( $parsed_file_path, $filename );
 			$xsendfile_path = trim( preg_replace( '`^' . str_replace( '\\', '/', getcwd() ) . '`', '', $parsed_file_path['file_path'] ), '/' );
 			header( "X-Accel-Redirect: /$xsendfile_path" );
 			exit;
 		}
 
 		// Fallback.
-		self::download_file_force( $file_path, $filename );
+		self::download_file_force( $file_path, $filename, $parsed_file_path );
 	}
 
 	/**
@@ -381,20 +403,12 @@ class WC_Download_Handler {
 	 *
 	 * @param string $file_path File path.
 	 * @param string $filename  File name.
+	 * @param array  $parsed_file_path File path details.
 	 */
-	public static function download_file_force( $file_path, $filename ) {
-		$parsed_file_path = self::parse_file_path( $file_path );
-
-		$headers = self::get_remote_file_headers( $parsed_file_path );
-
-		// If this is a HTML page it's likely we're unable to force download. e.g. dropbox link page instead of a raw download.
-		if ( isset( $headers['content-type'] ) && stristr( $headers['content-type'], 'text/html' ) ) {
-			self::download_file_redirect( $file_path );
-		}
-
+	public static function download_file_force( $file_path, $filename, $parsed_file_path ) {
 		$download_range = self::get_download_range( self::get_filesize( $parsed_file_path ) ); // @codingStandardsIgnoreLine.
 
-		self::download_headers( $parsed_file_path['file_path'], $filename, $download_range );
+		self::download_headers( $parsed_file_path, $filename, $download_range );
 
 		$start  = isset( $download_range['start'] ) ? $download_range['start'] : 0;
 		$length = isset( $download_range['length'] ) ? $download_range['length'] : 0;
@@ -417,7 +431,7 @@ class WC_Download_Handler {
 	 * @return string
 	 */
 	protected static function get_download_content_type( $file_path ) {
-		$file_extension = strtolower( substr( strrchr( $file_path, '.' ), 1 ) );
+		$file_extension = current( explode( '?', strtolower( substr( strrchr( $file_path, '.' ), 1 ) ) ) );
 		$ctype          = 'application/force-download';
 
 		foreach ( get_allowed_mime_types() as $mime => $type ) {
@@ -434,22 +448,22 @@ class WC_Download_Handler {
 	/**
 	 * Set headers for the download.
 	 *
-	 * @param string $file_path      File path.
-	 * @param string $filename       File name.
-	 * @param array  $download_range Array containing info about range download request (see {@see get_download_range} for structure).
+	 * @param array  $parsed_file_path File path details.
+	 * @param string $filename         File name.
+	 * @param array  $download_range   Array containing info about range download request (see {@see get_download_range} for structure).
 	 */
-	protected static function download_headers( $file_path, $filename, $download_range = array() ) {
+	protected static function download_headers( $parsed_file_path, $filename, $download_range = array() ) {
 		self::check_server_config();
 		self::clean_buffers();
 		wc_nocache_headers();
 
 		header( 'X-Robots-Tag: noindex, nofollow', true );
-		header( 'Content-Type: ' . self::get_download_content_type( $file_path ) );
+		header( 'Content-Type: ' . self::get_download_content_type( $parsed_file_path['file_path'] ) );
 		header( 'Content-Description: File Transfer' );
 		header( 'Content-Disposition: attachment; filename="' . $filename . '";' );
 		header( 'Content-Transfer-Encoding: binary' );
 
-		$file_size = self::get_filesize( $file_path );
+		$file_size = self::get_filesize( $parsed_file_path );
 		if ( ! $file_size ) {
 			return;
 		}
@@ -513,7 +527,7 @@ class WC_Download_Handler {
 	 * @param  string $file   File.
 	 * @param  int    $start  Byte offset/position of the beginning from which to read from the file.
 	 * @param  int    $length Length of the chunk to be read from the file in bytes, 0 means full file.
-	 * @return bool Success or fail
+	 * @return bool   Success or fail
 	 */
 	public static function readfile_chunked( $file, $start = 0, $length = 0 ) {
 		if ( ! defined( 'WC_CHUNK_SIZE' ) ) {
@@ -526,14 +540,13 @@ class WC_Download_Handler {
 		}
 
 		if ( ! $length ) {
-			$length = self::get_filesize( $file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			$length = @filesize( $file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 		}
 
 		$read_length = (int) WC_CHUNK_SIZE;
 
 		if ( $length ) {
 			$end = $start + $length - 1;
-
 			@fseek( $handle, $start ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			$p = @ftell( $handle ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 
@@ -595,63 +608,48 @@ class WC_Download_Handler {
 	}
 
 	/**
+	 * Get file headers and store to transient.
+	 *
+	 * @param string $url Get headers from this URL.
+	 * @return array|WP_Error Response.
+	 */
+	protected function get_remote_file_head( $url ) {
+		$response = get_transient( 'file_head_' . $url );
+
+		if ( false === $response ) {
+			$response = wp_remote_head( $url );
+
+			set_transient( 'file_head_' . $url, $response, WEEK_IN_SEONDS );
+		}
+
+		return $response;
+	}
+
+	/**
 	 * Get headers for a remote file.
 	 *
-	 * @param string|array $file_path Path or URL to try to get size of, or a parsed filepath array.
+	 * @param string $url Get headers from this URL.
+	 * @param string $header Header name.
 	 * @return array Array of headers. Empty on failure.
 	 */
-	protected static function get_remote_file_headers( $file_path ) {
-		if ( is_string( $file_path ) ) {
-			$file_path = self::parse_file_path( $file_path );
-		}
+	protected static function get_remote_file_header( $url, $header ) {
+		$response = self::get_remote_file_head( $url );
 
-		if ( ! isset( $file_path['file_path'], $file_path['remote_file'] ) || ! $file_path['remote_file'] ) {
-			return array();
-		}
-
-		$headers = get_transient( 'file_headers_' . $file_path['file_path'] );
-
-		if ( false === $headers ) {
-			$response = wp_remote_head( $file_path['file_path'] );
-
-			if ( is_wp_error( $response ) ) {
-				$headers = array();
-			} else {
-				$headers = wp_remote_retrieve_headers( $response );
-			}
-
-			set_transient( 'file_headers_' . $file_path['file_path'], $headers, WEEK_IN_SEONDS );
-		}
-
-		return $headers;
+		return wp_remote_retrieve_header( $response, $header );
 	}
 
 	/**
 	 * Get filesize of a path or URL.
 	 *
-	 * @param string|array $file_path Path or URL to try to get size of, or a parsed filepath array.
+	 * @param array $file_path Parsed filepath array.
 	 * @return string Size on success or empty string on failure.
 	 */
 	protected static function get_filesize( $file_path ) {
-		if ( is_string( $file_path ) ) {
-			$file_path = self::parse_file_path( $file_path );
+		if ( ! empty( $file_path['remote_file_location'] ) ) {
+			return self::get_remote_file_header( $file_path['remote_file_location'], 'content-length' );
 		}
 
-		if ( ! isset( $file_path['file_path'], $file_path['remote_file'] ) ) {
-			return '';
-		}
-
-		if ( $file_path['remote_file'] ) {
-			$headers = self::get_remote_file_headers( $file_path );
-
-			if ( isset( $headers['content-length'] ) ) {
-				return $headers['content-length'];
-			}
-		} else {
-			return @filesize( $file_path['file_path'] ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-		}
-
-		return '';
+		return @filesize( $file_path['file_path'] ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 	}
 }
 
