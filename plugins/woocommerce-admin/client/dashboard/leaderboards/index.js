@@ -22,6 +22,7 @@ import withSelect from 'wc-api/with-select';
 import TopSellingCategories from './top-selling-categories';
 import TopSellingProducts from './top-selling-products';
 import TopCoupons from './top-coupons';
+import TopCustomers from "./top-customers";
 import './style.scss';
 
 class Leaderboards extends Component {
@@ -68,6 +69,10 @@ class Leaderboards extends Component {
 			{
 				key: 'top-coupons',
 				label: __( 'Top Coupons', 'woocommerce-admin' ),
+			},
+			{
+				key: 'top-customers',
+				label: __( 'Top Customers', 'woocommerce-admin' ),
 			},
 		];
 		return (
@@ -126,6 +131,9 @@ class Leaderboards extends Component {
 						) }
 						{ ! hiddenLeaderboardKeys.includes( 'top-coupons' ) && (
 							<TopCoupons query={ query } totalRows={ rowsPerTable } />
+						) }
+						{ ! hiddenLeaderboardKeys.includes( 'top-customers' ) && (
+							<TopCustomers query={ query } totalRows={ rowsPerTable } />
 						) }
 					</div>
 				</div>
