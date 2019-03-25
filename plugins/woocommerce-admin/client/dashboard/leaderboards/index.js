@@ -22,7 +22,7 @@ import withSelect from 'wc-api/with-select';
 import TopSellingCategories from './top-selling-categories';
 import TopSellingProducts from './top-selling-products';
 import TopCoupons from './top-coupons';
-import TopCustomers from "./top-customers";
+import TopCustomers from './top-customers';
 import './style.scss';
 
 class Leaderboards extends Component {
