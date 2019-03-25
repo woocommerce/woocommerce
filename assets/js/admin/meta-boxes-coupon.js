@@ -21,12 +21,16 @@ jQuery(function( $ ) {
 			// Get value
 			var select_val = $( this ).val();
 
-			if ( select_val !== 'fixed_cart' ) {
-				$( '.limit_usage_to_x_items_field' ).show();
+			if ( 'percent' === select_val ) {
 				$( '#coupon_amount' ).removeClass( 'wc_input_price' ).addClass( 'wc_input_decimal' );
 			} else {
-				$( '.limit_usage_to_x_items_field' ).hide();
 				$( '#coupon_amount' ).removeClass( 'wc_input_decimal' ).addClass( 'wc_input_price' );
+			}
+
+			if ( select_val !== 'fixed_cart' ) {
+				$( '.limit_usage_to_x_items_field' ).show();
+			} else {
+				$( '.limit_usage_to_x_items_field' ).hide();
 			}
 		}
 	};
