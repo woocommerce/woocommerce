@@ -1394,13 +1394,17 @@ function wc_update_product_lookup_tables_column( $column ) {
 				"
 				UPDATE
 					{$wpdb->wc_product_meta_lookup} lookup_table
-					LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_price'
+					INNER JOIN (
+						SELECT lookup_table.product_id, meta_value
+						FROM {$wpdb->wc_product_meta_lookup} lookup_table
+						LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_price'
+						WHERE
+							meta1.meta_value <> ''
+						ORDER BY
+							meta1.meta_value+0 ASC
+					) as source on source.product_id = lookup_table.product_id
 				SET
-					lookup_table.min_price = meta1.meta_value
-				WHERE
-					meta1.meta_value <> ''
-				ORDER BY
-					meta1.meta_value+0 ASC
+					lookup_table.min_price = source.meta_value
 				"
 			);
 			break;
@@ -1409,13 +1413,17 @@ function wc_update_product_lookup_tables_column( $column ) {
 				"
 				UPDATE
 					{$wpdb->wc_product_meta_lookup} lookup_table
-					LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_price'
+					INNER JOIN (
+						SELECT lookup_table.product_id, meta_value
+						FROM {$wpdb->wc_product_meta_lookup} lookup_table
+						LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_price'
+						WHERE
+							meta1.meta_value <> ''
+						ORDER BY
+							meta1.meta_value+0 DESC
+					) as source on source.product_id = lookup_table.product_id
 				SET
-					lookup_table.max_price = meta1.meta_value
-				WHERE
-					meta1.meta_value <> ''
-				ORDER BY
-					meta1.meta_value+0 DESC
+					lookup_table.max_price = source.meta_value
 				"
 			);
 			break;
