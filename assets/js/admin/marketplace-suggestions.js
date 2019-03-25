@@ -51,9 +51,9 @@
 			window.wcTracks.recordEvent( 'marketplace_suggestion_dismissed', {
 				suggestion_slug: suggestionSlug,
 				context: context,
-				product: product,
-				promoted: promoted,
-				target: url
+				product: product || '',
+				promoted: promoted || '',
+				target: url || ''
 			} );
 		}
 
@@ -121,9 +121,9 @@
 				window.wcTracks.recordEvent( 'marketplace_suggestion_clicked', {
 					suggestion_slug: slug,
 					context: context,
-					product: product,
-					promoted: promoted,
-					target: url
+					product: product || '',
+					promoted: promoted || '',
+					target: url || ''
 				} );
 			};
 
@@ -392,9 +392,9 @@
 					window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
 						suggestion_slug: suggestionsToDisplay[ i ].slug,
 						context: context,
-						product: suggestionsToDisplay[ i ].product,
-						promoted: suggestionsToDisplay[ i ].promoted,
-						target: suggestionsToDisplay[ i ].url
+						product: suggestionsToDisplay[ i ].product || '',
+						promoted: suggestionsToDisplay[ i ].promoted || '',
+						target: suggestionsToDisplay[ i ].url || ''
 					} );
 				}
 			} );
@@ -472,9 +472,9 @@
 						window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
 							suggestion_slug: suggestionToDisplay.slug,
 							context: context,
-							product: suggestionToDisplay.product,
-							promoted: suggestionToDisplay.promoted,
-							target: suggestionToDisplay.url
+							product: suggestionToDisplay.product || '',
+							promoted: suggestionToDisplay.promoted || '',
+							target: suggestionToDisplay.url || ''
 						} );
 					}
 				} );
