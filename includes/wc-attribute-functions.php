@@ -576,6 +576,8 @@ function wc_create_attribute( $args ) {
 			// Update product attributes which use this taxonomy.
 			$old_taxonomy_name = 'pa_' . $old_slug;
 			$new_taxonomy_name = 'pa_' . $data['attribute_name'];
+			$old_attribute_key = sanitize_title( $old_taxonomy_name ); // @see WC_Product::set_attributes().
+			$new_attribute_key = sanitize_title( $new_taxonomy_name ); // @see WC_Product::set_attributes().
 			$metadatas         = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_product_attributes' AND meta_value LIKE %s",
@@ -586,13 +588,14 @@ function wc_create_attribute( $args ) {
 			foreach ( $metadatas as $metadata ) {
 				$product_id        = $metadata['post_id'];
 				$unserialized_data = maybe_unserialize( $metadata['meta_value'] );
-				if ( ! $unserialized_data || ! is_array( $unserialized_data ) || ! isset( $unserialized_data[ $old_taxonomy_name ] ) ) {
+
+				if ( ! $unserialized_data || ! is_array( $unserialized_data ) || ! isset( $unserialized_data[ $old_attribute_key ] ) ) {
 					continue;
 				}
 
-				$unserialized_data[ $new_taxonomy_name ] = $unserialized_data[ $old_taxonomy_name ];
-				unset( $unserialized_data[ $old_taxonomy_name ] );
-				$unserialized_data[ $new_taxonomy_name ]['name'] = $new_taxonomy_name;
+				$unserialized_data[ $new_attribute_key ] = $unserialized_data[ $old_attribute_key ];
+				unset( $unserialized_data[ $old_attribute_key ] );
+				$unserialized_data[ $new_attribute_key ]['name'] = $new_taxonomy_name;
 				update_post_meta( $product_id, '_product_attributes', wp_slash( $unserialized_data ) );
 			}
 
