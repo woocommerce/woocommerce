@@ -24,6 +24,10 @@ if ( ! defined( 'WC_ADMIN_PLUGIN_FILE' ) ) {
 	define( 'WC_ADMIN_PLUGIN_FILE', __FILE__ );
 }
 
+if ( ! defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
+	define( 'WC_ADMIN_VERSION_NUMBER', '0.8.0' );
+}
+
 /**
  * Notify users of the plugin requirements.
  */
