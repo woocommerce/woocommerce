@@ -34,7 +34,12 @@ export default class CustomersReport extends Component {
 					showDatePicker={ false }
 					advancedFilters={ advancedFilters }
 				/>
-				<CustomersReportTable isRequesting={ isRequesting } query={ tableQuery } />
+				<CustomersReportTable
+					isRequesting={ isRequesting }
+					query={ tableQuery }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
+				/>
 			</Fragment>
 		);
 	}

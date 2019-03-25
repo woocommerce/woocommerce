@@ -36,6 +36,8 @@ export default class DownloadsReport extends Component {
 					endpoint="downloads"
 					query={ query }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
 				/>
 				<ReportChart
 					charts={ charts }
@@ -43,8 +45,14 @@ export default class DownloadsReport extends Component {
 					path={ path }
 					query={ query }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
 				/>
-				<DownloadsReportTable query={ query } />
+				<DownloadsReportTable
+					query={ query }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
+				/>
 			</Fragment>
 		);
 	}

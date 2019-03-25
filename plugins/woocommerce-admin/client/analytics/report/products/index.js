@@ -76,6 +76,7 @@ class ProductsReport extends Component {
 					isRequesting={ isRequesting }
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
+					filters={ filters }
 				/>
 				<ReportChart
 					mode={ mode }
@@ -93,9 +94,10 @@ class ProductsReport extends Component {
 						baseSearchQuery={ { filter: 'single_product' } }
 						isRequesting={ isRequesting }
 						query={ query }
+						filters={ filters }
 					/>
 				) : (
-					<ProductsReportTable isRequesting={ isRequesting } query={ query } />
+					<ProductsReportTable isRequesting={ isRequesting } query={ query } filters={ filters } />
 				) }
 			</Fragment>
 		);

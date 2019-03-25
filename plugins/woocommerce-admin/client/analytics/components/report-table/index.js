@@ -199,6 +199,8 @@ export default compose(
 			tableData,
 			tableQuery,
 			columnPrefsKey,
+			filters,
+			advancedFilters,
 		} = props;
 
 		let userPrefColumns = [];
@@ -214,13 +216,24 @@ export default compose(
 				userPrefColumns,
 			};
 		}
+		// Variations and Category charts are powered by the /reports/products/stats endpoint.
 		const chartEndpoint = [ 'variations', 'categories' ].includes( endpoint )
 			? 'products'
 			: endpoint;
 		const primaryData = getSummary
-			? getReportChartData( chartEndpoint, 'primary', query, select )
+			? getReportChartData( {
+					endpoint: chartEndpoint,
+					dataType: 'primary',
+					query,
+					select,
+					filters,
+					advancedFilters,
+					tableQuery,
+				} )
 			: {};
-		const queriedTableData = tableData || getReportTableData( endpoint, query, select, tableQuery );
+		const queriedTableData =
+			tableData ||
+			getReportTableData( { endpoint, query, select, tableQuery, filters, advancedFilters } );
 		const extendedTableData = extendTableData( select, props, queriedTableData );
 
 		return {

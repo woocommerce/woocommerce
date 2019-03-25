@@ -252,7 +252,7 @@ ReportChart.defaultProps = {
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { endpoint, filters, isRequesting, limitProperties, query } = props;
+		const { endpoint, filters, isRequesting, limitProperties, query, advancedFilters } = props;
 		const limitBy = limitProperties || [ endpoint ];
 		const selectedFilter = getSelectedFilter( filters, query );
 		const filterParam = get( selectedFilter, [ 'settings', 'param' ] );
@@ -276,16 +276,32 @@ export default compose(
 			};
 		}
 
+		const primaryData = getReportChartData( {
+			endpoint,
+			dataType: 'primary',
+			query,
+			select,
+			limitBy,
+			filters,
+			advancedFilters,
+		} );
+
 		if ( 'item-comparison' === chartMode ) {
-			const primaryData = getReportChartData( endpoint, 'primary', query, select, limitBy );
 			return {
 				...newProps,
 				primaryData,
 			};
 		}
 
-		const primaryData = getReportChartData( endpoint, 'primary', query, select, limitBy );
-		const secondaryData = getReportChartData( endpoint, 'secondary', query, select, limitBy );
+		const secondaryData = getReportChartData( {
+			endpoint,
+			dataType: 'secondary',
+			query,
+			select,
+			limitBy,
+			filters,
+			advancedFilters,
+		} );
 		return {
 			...newProps,
 			primaryData,

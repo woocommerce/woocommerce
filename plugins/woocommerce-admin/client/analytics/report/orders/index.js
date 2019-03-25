@@ -36,6 +36,8 @@ export default class OrdersReport extends Component {
 					endpoint="orders"
 					query={ query }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
 				/>
 				<ReportChart
 					charts={ charts }
@@ -43,8 +45,14 @@ export default class OrdersReport extends Component {
 					path={ path }
 					query={ query }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
 				/>
-				<OrdersReportTable query={ query } />
+				<OrdersReportTable
+					query={ query }
+					filters={ filters }
+					advancedFilters={ advancedFilters }
+				/>
 			</Fragment>
 		);
 	}

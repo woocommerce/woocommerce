@@ -53,6 +53,7 @@ export default class TaxesReport extends Component {
 					isRequesting={ isRequesting }
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
+					filters={ filters }
 				/>
 				<ReportChart
 					filters={ filters }
@@ -65,7 +66,7 @@ export default class TaxesReport extends Component {
 					itemsLabel={ itemsLabel }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
-				<TaxesReportTable isRequesting={ isRequesting } query={ query } />
+				<TaxesReportTable isRequesting={ isRequesting } query={ query } filters={ filters } />
 			</Fragment>
 		);
 	}

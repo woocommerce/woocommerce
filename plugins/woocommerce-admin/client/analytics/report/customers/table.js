@@ -218,7 +218,7 @@ export default class CustomersReportTable extends Component {
 	}
 
 	render() {
-		const { isRequesting, query } = this.props;
+		const { isRequesting, query, filters, advancedFilters } = this.props;
 
 		return (
 			<ReportTable
@@ -233,6 +233,8 @@ export default class CustomersReportTable extends Component {
 				searchBy="customers"
 				title={ __( 'Customers', 'woocommerce-admin' ) }
 				columnPrefsKey="customers_report_columns"
+				filters={ filters }
+				advancedFilters={ advancedFilters }
 			/>
 		);
 	}

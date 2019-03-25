@@ -59,17 +59,18 @@ export default class CategoriesReport extends Component {
 				<ReportFilters query={ query } path={ path } filters={ filters } />
 				<ReportSummary
 					charts={ charts }
-					endpoint="categories"
+					endpoint="products"
 					isRequesting={ isRequesting }
 					limitProperties={ isSingleCategoryView ? [ 'products', 'categories' ] : [ 'categories' ] }
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
+					filters={ filters }
 				/>
 				<ReportChart
 					filters={ filters }
 					charts={ charts }
 					mode={ mode }
-					endpoint="categories"
+					endpoint="products"
 					limitProperties={ isSingleCategoryView ? [ 'products', 'categories' ] : [ 'categories' ] }
 					path={ path }
 					query={ chartQuery }
@@ -80,12 +81,17 @@ export default class CategoriesReport extends Component {
 				{ isSingleCategoryView ? (
 					<ProductsReportTable
 						isRequesting={ isRequesting }
-						query={ query }
+						query={ chartQuery }
 						baseSearchQuery={ { filter: 'single_category' } }
 						hideCompare={ isSingleCategoryView }
+						filters={ filters }
 					/>
 				) : (
-					<CategoriesReportTable isRequesting={ isRequesting } query={ query } />
+					<CategoriesReportTable
+						isRequesting={ isRequesting }
+						query={ query }
+						filters={ filters }
+					/>
 				) }
 			</Fragment>
 		);
