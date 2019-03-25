@@ -3,12 +3,13 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import Gridicon from 'gridicons';
 import interpolateComponents from 'interpolate-components';
 import moment from 'moment';
-import { noop, isNull } from 'lodash';
+import { get, noop, isNull } from 'lodash';
 import PropTypes from 'prop-types';
 import { withDispatch } from '@wordpress/data';
 
@@ -84,10 +85,19 @@ class ReviewsPanel extends Component {
 			</Fragment>
 		);
 
+		const productImage = get( product, [ 'images', 0 ] ) || get( product, [ 'image' ] );
+		const productImageClasses = classnames(
+			'woocommerce-review-activity-card__image-overlay__product',
+			{
+				'is-placeholder': ! productImage || ! productImage.src,
+			}
+		);
 		const icon = (
 			<div className="woocommerce-review-activity-card__image-overlay">
 				<Gravatar user={ review.reviewer_email } size={ 24 } />
-				<ProductImage product={ product } />
+				<div className={ productImageClasses }>
+					<ProductImage product={ product } />
+				</div>
 			</div>
 		);
 

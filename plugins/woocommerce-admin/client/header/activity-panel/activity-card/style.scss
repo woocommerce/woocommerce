@@ -243,6 +243,26 @@
 			position: relative;
 			top: -42px;
 			border: 2px solid $white;
+			z-index: 2;
+		}
+
+		.woocommerce-review-activity-card__image-overlay__product {
+			display: inline-block;
+			height: 60px;
+			position: relative;
+			width: 60px;
+
+			&.is-placeholder::before {
+				background-color: $core-grey-dark-500;
+				border-radius: 50%;
+				content: '';
+				position: absolute;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				top: 0;
+				opacity: 0.1;
+			}
 		}
 	}
 
@@ -251,15 +271,17 @@
 			margin-top: $gap-smallest;
 		}
 
-		.woocommerce-activity-card__icon img.woocommerce-gravatar {
+		.woocommerce-review-activity-card__image-overlay__product .woocommerce-gravatar {
 			margin-left: 0;
 			width: 18px;
 			height: 18px;
 			left: 32px;
 			top: -28px;
+			z-index: 1;
 		}
 
-		.woocommerce-activity-card__icon img.woocommerce-product-image {
+		.woocommerce-review-activity-card__image-overlay__product,
+		.woocommerce-review-activity-card__image-overlay__product .woocommerce-product-image {
 			width: 38px;
 			height: 38px;
 		}
