@@ -78,6 +78,15 @@ class WC_Admin_Notes_Order_Milestones {
 	 * This is required for retrieving the order count.
 	 */
 	public function __construct() {
+		/**
+		 * Filter Order statuses that will count towards milestones.
+		 *
+		 * @since 3.5.0
+		 *
+		 * @param array $allowed_statuses Order statuses that will count towards milestones.
+		 */
+		$this->allowed_statuses = apply_filters( 'woocommerce_admin_order_milestone_statuses', $this->allowed_statuses );
+
 		add_action( 'woocommerce_after_register_post_type', array( $this, 'init' ) );
 	}
 
