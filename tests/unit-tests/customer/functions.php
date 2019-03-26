@@ -74,6 +74,45 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test username generation.
+	 */
+	public function test_wc_create_new_customer_username() {
+		// Test getting name from email.
+		$this->assertEquals( 'mike', wc_create_new_customer_username( 'mike@fakemail.com', array() ) );
+
+		// Test getting name if username exists.
+		wc_create_new_customer( 'mike@fakemail.com', '', 'testpassword' );
+		$this->assertEquals( 'mike1', wc_create_new_customer_username( 'mike@fakemail.com', array() ) );
+
+		// Test common email prefix avoidance.
+		$this->assertEquals( 'somecompany.com', wc_create_new_customer_username( 'info@somecompany.com', array() ) );
+
+		// Test first/last name generation.
+		$this->assertEquals(
+			'bobbobson',
+			wc_create_new_customer_username(
+				'bob@bobbobson.com',
+				array(
+					'first_name' => 'Bob',
+					'last_name' => 'Bobson',
+				)
+			)
+		);
+
+		// Test unicode fallbacks.
+		$this->assertEquals(
+			'unicode',
+			wc_create_new_customer_username(
+				'unicode@unicode.com',
+				array(
+					'first_name' => 'こんにちは',
+					'last_name' => 'こんにちは',
+				)
+			)
+		);
+	}
+
+	/**
 	 * Test wc_update_new_customer_past_orders.
 	 *
 	 * @since 3.1
