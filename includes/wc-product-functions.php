@@ -1316,8 +1316,7 @@ function wc_update_product_lookup_tables() {
 
 	// List of column names in the lookup table we need to populate.
 	$columns = array(
-		'min_price',
-		'max_price',
+		'min_max_price',
 		'stock_quantity',
 		'sku',
 		'stock_status',
@@ -1389,33 +1388,22 @@ function wc_update_product_lookup_tables_column( $column ) {
 	global $wpdb;
 	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 	switch ( $column ) {
-		case 'min_price':
+		case 'min_max_price':
 			$wpdb->query(
 				"
 				UPDATE
 					{$wpdb->wc_product_meta_lookup} lookup_table
-					LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_price'
+					INNER JOIN (
+						SELECT lookup_table.product_id, MIN( meta_value+0 ) as min_price, MAX( meta_value+0 ) as max_price
+						FROM {$wpdb->wc_product_meta_lookup} lookup_table
+						LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_price'
+						WHERE
+							meta1.meta_value <> ''
+						GROUP BY lookup_table.product_id
+					) as source on source.product_id = lookup_table.product_id
 				SET
-					lookup_table.min_price = meta1.meta_value
-				WHERE
-					meta1.meta_value <> ''
-				ORDER BY
-					meta1.meta_value+0 ASC
-				"
-			);
-			break;
-		case 'max_price':
-			$wpdb->query(
-				"
-				UPDATE
-					{$wpdb->wc_product_meta_lookup} lookup_table
-					LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_price'
-				SET
-					lookup_table.max_price = meta1.meta_value
-				WHERE
-					meta1.meta_value <> ''
-				ORDER BY
-					meta1.meta_value+0 DESC
+					lookup_table.min_price = source.min_price,
+					lookup_table.max_price = source.max_price
 				"
 			);
 			break;
