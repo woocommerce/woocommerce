@@ -19,7 +19,7 @@ import mockData from '../__mocks__/table-mock-data';
 import mockCSV from '../__mocks__/table-mock-csv';
 
 jest.mock( '@woocommerce/csv-export', () => ( {
-	...require.requireActual( '@woocommerce/csv-export' ),
+	...jest.requireActual( '../../../../csv-export' ),
 	generateCSVFileName: jest.fn().mockReturnValue( 'filename.csv' ),
 	downloadCSVFile: jest.fn(),
 } ) );

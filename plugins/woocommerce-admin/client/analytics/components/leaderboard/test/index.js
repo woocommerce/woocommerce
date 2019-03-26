@@ -24,7 +24,7 @@ import mockData from '../__mocks__/top-selling-products-mock-data';
 // Mock <Table> to avoid tests failing due to it using DOM properties that
 // are not available on TestRenderer.
 jest.mock( '@woocommerce/components', () => ( {
-	...require.requireActual( '@woocommerce/components' ),
+	...jest.requireActual( '../../../../../packages/components' ),
 	TableCard: () => null,
 } ) );
 

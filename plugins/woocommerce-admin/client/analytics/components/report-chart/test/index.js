@@ -2,18 +2,13 @@
 /**
  * External dependencies
  */
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 
 /**
  * Internal dependencies
  */
 import { ReportChart } from '../';
 import { getChartMode, getSelectedFilter } from '../utils';
-
-jest.mock( '@woocommerce/components', () => ( {
-	...require.requireActual( '@woocommerce/components' ),
-	Chart: () => null,
-} ) );
 
 const path = '/analytics/revenue';
 const data = {
@@ -32,7 +27,7 @@ const selectedChart = {
 
 describe( 'ReportChart', () => {
 	test( 'should set the time-comparison mode prop by default', () => {
-		const reportChart = shallow(
+		const reportChart = mount(
 			<ReportChart
 				path={ path }
 				primaryData={ data }
