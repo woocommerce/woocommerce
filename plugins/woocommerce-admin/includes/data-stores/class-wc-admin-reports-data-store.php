@@ -730,6 +730,11 @@ class WC_Admin_Reports_Data_Store {
 				$cat_slugs[] = $product_cat->slug;
 			}
 		}
+
+		if ( empty( $cat_slugs ) ) {
+			return array();
+		}
+
 		$args = array(
 			'category' => $cat_slugs,
 			'limit'    => -1,
@@ -749,7 +754,7 @@ class WC_Admin_Reports_Data_Store {
 
 		if ( isset( $query_args['categories'] ) && is_array( $query_args['categories'] ) && count( $query_args['categories'] ) > 0 ) {
 			$included_products = $this->get_products_by_cat_ids( $query_args['categories'] );
-			$included_products = wc_list_pluck( $included_products, 'get_id' );
+			$included_products = empty( $included_products ) ? array( '-1' ) : wc_list_pluck( $included_products, 'get_id' );
 		}
 
 		if ( isset( $query_args['product_includes'] ) && is_array( $query_args['product_includes'] ) && count( $query_args['product_includes'] ) > 0 ) {
