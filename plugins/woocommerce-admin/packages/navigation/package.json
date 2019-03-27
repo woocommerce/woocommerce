@@ -22,7 +22,7 @@
   "react-native": "src/index",
   "dependencies": {
     "@babel/runtime": "^7.0.0",
-    "history": "4.7.2",
+    "history": "4.9.0",
     "lodash": "^4.17.11",
     "qs": "^6.5.2"
   },
