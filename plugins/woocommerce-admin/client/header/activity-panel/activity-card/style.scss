@@ -287,3 +287,12 @@
 		}
 	}
 }
+
+.woocommerce-stock-activity-card {
+	.woocommerce-stock-activity-card__stock-quantity {
+		background: $core-grey-light-300;
+		color: $core-grey-dark-500;
+		padding: 3px $gap-smaller;
+		border-radius: 3px;
+	}
+}
