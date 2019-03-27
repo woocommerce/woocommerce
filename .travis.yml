@@ -1,12 +1,6 @@
 language: php
 dist: trusty
 
-addons:
-  chrome: stable
-  apt:
-    packages:
-      - nginx
-
 sudo: false
 
 cache:
@@ -40,6 +34,11 @@ matrix:
   - name: "e2e tests"
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
+    addons:
+      chrome: stable
+      apt:
+        packages:
+          - nginx
   - name: "Unit tests code coverage"
     php: 7.3
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
