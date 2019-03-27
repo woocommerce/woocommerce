@@ -3,8 +3,8 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
-import { Component } from '@wordpress/element';
+import { Button, TextControl } from '@wordpress/components';
+import { Component, Fragment } from '@wordpress/element';
 
 /**
  * WooCommerce dependencies
@@ -17,6 +17,74 @@ import { Link, ProductImage } from '@woocommerce/components';
 import { ActivityCard } from '../../activity-card';
 
 class ProductStockCard extends Component {
+	constructor( props ) {
+		super( props );
+		this.state = {
+			quantity: props.product.stock_quantity,
+			editing: false,
+		};
+
+		this.beginEdit = this.beginEdit.bind( this );
+		this.cancelEdit = this.cancelEdit.bind( this );
+		this.onQuantityChange = this.onQuantityChange.bind( this );
+	}
+
+	beginEdit() {
+		this.setState( { editing: true } );
+	}
+
+	cancelEdit() {
+		this.setState( {
+			editing: false,
+			quantity: this.props.product.stock_quantity,
+		} );
+	}
+
+	onQuantityChange( quantity ) {
+		this.setState( { quantity } );
+	}
+
+	getActions() {
+		const { editing } = this.state;
+
+		if ( editing ) {
+			return [
+				<Button isPrimary>{ __( 'Save', 'woocommerce-admin' ) }</Button>,
+				<Button onClick={ this.cancelEdit }>{ __( 'Cancel', 'woocommerce-admin' ) }</Button>,
+			];
+		}
+
+		return [
+			<Button isDefault onClick={ this.beginEdit }>
+				{ __( 'Update stock', 'woocommerce-admin' ) }
+			</Button>,
+		];
+	}
+
+	getBody() {
+		const { editing, quantity } = this.state;
+
+		if ( editing ) {
+			return (
+				<Fragment>
+					<TextControl
+						className="woocommerce-stock-activity-card__edit-quantity"
+						type="number"
+						value={ quantity }
+						onChange={ this.onQuantityChange }
+					/>
+					<span>{ __( 'in stock', 'woocommerce-admin' ) }</span>
+				</Fragment>
+			);
+		}
+
+		return (
+			<span className="woocommerce-stock-activity-card__stock-quantity">
+				{ sprintf( __( '%d in stock', 'woocommerce-admin' ), quantity ) }
+			</span>
+		);
+	}
+
 	render() {
 		const { product } = this.props;
 		const title = (
@@ -30,11 +98,9 @@ class ProductStockCard extends Component {
 				className="woocommerce-stock-activity-card"
 				title={ title }
 				icon={ <ProductImage product={ product } /> }
-				actions={ <Button isDefault>{ __( 'Update stock', 'woocommerce-admin' ) }</Button> }
+				actions={ this.getActions() }
 			>
-				<span className="woocommerce-stock-activity-card__stock-quantity">
-					{ sprintf( __( '%d in stock', 'woocommerce-admin' ), product.stock_quantity ) }
-				</span>
+				{ this.getBody() }
 			</ActivityCard>
 		);
 	}
