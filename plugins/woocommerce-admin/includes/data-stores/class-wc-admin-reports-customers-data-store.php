@@ -474,7 +474,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			$customer                = new WC_Customer( $user_id );
 			$data['user_id']         = $user_id;
 			$data['username']        = $customer->get_username( 'edit' );
-			$data['date_registered'] = $customer->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format );
+			$data['date_registered'] = $customer->get_date_created( 'edit' ) ? $customer->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format ) : null;
 			$format[]                = '%d';
 			$format[]                = '%s';
 			$format[]                = '%s';
