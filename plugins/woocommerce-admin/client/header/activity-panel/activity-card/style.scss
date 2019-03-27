@@ -295,4 +295,25 @@
 		padding: 3px $gap-smaller;
 		border-radius: 3px;
 	}
+
+	.woocommerce-stock-activity-card__edit-quantity {
+		display: inline-flex;
+		width: 50px;
+		margin-right: 10px;
+
+		input {
+			border-radius: 4px;
+			height: 36px;
+
+			&[type='number']::-webkit-outer-spin-button,
+			&[type='number']::-webkit-inner-spin-button {
+				-webkit-appearance: none;
+				margin: 0;
+			}
+		}
+	}
+
+	.is-button {
+		height: 34px;
+	}
 }
