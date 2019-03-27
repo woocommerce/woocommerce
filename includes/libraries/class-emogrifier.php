@@ -1,4 +1,7 @@
 <?php
+
+namespace Pelago;
+
 /**
  * This class provides functions for converting CSS styles into inline style attributes in your HTML code.
  *

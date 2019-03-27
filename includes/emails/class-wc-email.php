@@ -526,11 +526,12 @@ class WC_Email extends WC_Settings_API {
 			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean(), $this );
 
 			if ( $this->supports_emogrifier() ) {
-				if ( ! class_exists( 'Emogrifier' ) ) {
+				$emogrifier_class = '\\Pelago\\Emogrifier';
+				if ( ! class_exists( $emogrifier_class ) ) {
 					include_once dirname( dirname( __FILE__ ) ) . '/libraries/class-emogrifier.php';
 				}
 				try {
-					$emogrifier = new Emogrifier( $content, $css );
+					$emogrifier = new $emogrifier_class( $content, $css );
 					$content    = $emogrifier->emogrify();
 				} catch ( Exception $e ) {
 					$logger = wc_get_logger();
