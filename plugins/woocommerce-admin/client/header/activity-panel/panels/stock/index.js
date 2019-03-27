@@ -14,8 +14,8 @@ import { Link, ProductImage, Section } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { ActivityCard } from '../activity-card';
-import ActivityHeader from '../activity-header';
+import { ActivityCard } from '../../activity-card';
+import ActivityHeader from '../../activity-header';
 
 class StockPanel extends Component {
 	render() {
