@@ -275,7 +275,7 @@
 
 			// hide promos for things the user already has installed
 			promos = _.filter( promos, function( promo ) {
-				return ! _.contains( marketplace_suggestions.active_plugins, promo['product'] );
+				return ! _.contains( marketplace_suggestions.active_plugins, promo.product );
 			} );
 
 			// hide promos that are not applicable based on user's installed extensions
