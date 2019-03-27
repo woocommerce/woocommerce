@@ -114,10 +114,10 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
  * @since 3.6.0
  * @param string $email New customer email address.
  * @param array  $new_user_args Array of new user args, maybe including first and last names.
- * @param int    $suffix Append number to username to make it more unique.
+ * @param string $suffix Append string to username to make it unique.
  * @return string Generated username.
  */
-function wc_create_new_customer_username( $email, $new_user_args, $suffix = 0 ) {
+function wc_create_new_customer_username( $email, $new_user_args, $suffix = '' ) {
 	$username_parts = array();
 
 	if ( isset( $new_user_args['first_name'] ) ) {
@@ -162,7 +162,9 @@ function wc_create_new_customer_username( $email, $new_user_args, $suffix = 0 ) 
 	}
 
 	if ( username_exists( $username ) ) {
-		return wc_create_new_customer_username( $email, $new_user_args, ++$suffix );
+		// Generate something unique to append to the username in case of a conflict with another user.
+		$suffix = '-' . zeroise( wp_rand( 0, 9999 ), 4 );
+		return wc_create_new_customer_username( $email, $new_user_args, $suffix );
 	}
 
 	return $username;
