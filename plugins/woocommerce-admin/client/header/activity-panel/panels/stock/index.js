@@ -2,52 +2,49 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 
 /**
  * WooCommerce dependencies
  */
-import { Link, ProductImage, Section } from '@woocommerce/components';
+import { Section } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import { ActivityCard } from '../../activity-card';
+import { ActivityCardPlaceholder } from '../../activity-card';
 import ActivityHeader from '../../activity-header';
+import ProductStockCard from './card';
 
 class StockPanel extends Component {
 	render() {
-		const product = {
-			id: 913,
-			name: 'Octopus Tshirt',
-			permalink: '',
-			image: {
-				src: '/wp-content/uploads/2018/12/img-206939428-150x150.png',
+		const products = [
+			{
+				id: 913,
+				name: 'Octopus Tshirt',
+				permalink: '',
+				image: {
+					src: '/wp-content/uploads/2018/12/img-206939428-150x150.png',
+				},
+				stock_quantity: 2,
 			},
-			stock_quantity: 2,
-		};
-		const title = (
-			<Link href={ 'post.php?action=edit&post=' + product.id } type="wp-admin">
-				{ product.name }
-			</Link>
-		);
+		];
+		const isRequesting = false;
 
 		return (
 			<Fragment>
 				<ActivityHeader title={ __( 'Stock', 'woocommerce-admin' ) } />
 				<Section>
-					<ActivityCard
-						className="woocommerce-stock-activity-card"
-						title={ title }
-						icon={ <ProductImage product={ product } /> }
-						actions={ <Button isDefault>{ __( 'Update stock', 'woocommerce-admin' ) }</Button> }
-					>
-						<span className="woocommerce-stock-activity-card__stock-quantity">
-							{ sprintf( __( '%d in stock', 'woocommerce-admin' ), product.stock_quantity ) }
-						</span>
-					</ActivityCard>
+					{ isRequesting ? (
+						<ActivityCardPlaceholder
+							className="woocommerce-stock-activity-card"
+							hasAction
+							lines={ 1 }
+						/>
+					) : (
+						products.map( product => <ProductStockCard key={ product.id } product={ product } /> )
+					) }
 				</Section>
 			</Fragment>
 		);
