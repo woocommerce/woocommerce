@@ -64,6 +64,27 @@ function read( resourceNames, fetch = apiFetch ) {
 	} );
 }
 
+function update( resourceNames, data, fetch = apiFetch ) {
+	const updateableTypes = [ 'products' ];
+	const filteredNames = resourceNames.filter( name => {
+		return updateableTypes.includes( name );
+	} );
+
+	return filteredNames.map( async resourceName => {
+		const { id, ...itemData } = data[ resourceName ];
+		const url = NAMESPACE + `/${ resourceName }/${ id }`;
+
+		return fetch( { path: url, method: 'PUT', data: itemData } )
+			.then( item => {
+				return { [ resourceName + ':' + id ]: { data: item } };
+			} )
+			.catch( error => {
+				return { [ resourceName + ':' + id ]: { error } };
+			} );
+	} );
+}
+
 export default {
 	read,
+	update,
 };
