@@ -488,7 +488,8 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 				do_action( 'woocommerce_reports_update_product', $order_item_id, $order->get_id() );
 			}
 
-			$num_updated += intval( $result );
+			// Sum the rows affected. Using REPLACE can affect 2 rows if the row already exists.
+			$num_updated += 2 === intval( $result ) ? 1 : intval( $result );
 		}
 
 		return ( count( $order_items ) === $num_updated );

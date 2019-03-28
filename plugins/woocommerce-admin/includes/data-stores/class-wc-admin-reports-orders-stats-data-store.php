@@ -431,7 +431,8 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		 */
 		do_action( 'woocommerce_reports_update_order_stats', $order->get_id() );
 
-		return ( 1 === $result );
+		// Check the rows affected for success. Using REPLACE can affect 2 rows if the row already exists.
+		return ( 1 === $result || 2 === $result );
 	}
 
 	/**
