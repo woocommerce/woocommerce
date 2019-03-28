@@ -22,6 +22,8 @@ class StockPanel extends Component {
 		const products = [
 			{
 				id: 913,
+				parent_id: 911,
+				type: 'variation',
 				name: 'Octopus Tshirt',
 				permalink: '',
 				image: {

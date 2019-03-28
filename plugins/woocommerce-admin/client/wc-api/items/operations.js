@@ -65,14 +65,24 @@ function read( resourceNames, fetch = apiFetch ) {
 }
 
 function update( resourceNames, data, fetch = apiFetch ) {
-	const updateableTypes = [ 'products' ];
+	console.log( 'update', resourceNames, data );
+	const updateableTypes = [ 'product', 'variation' ];
 	const filteredNames = resourceNames.filter( name => {
 		return updateableTypes.includes( name );
 	} );
 
 	return filteredNames.map( async resourceName => {
-		const { id, ...itemData } = data[ resourceName ];
-		const url = NAMESPACE + `/${ resourceName }/${ id }`;
+		const { id, parent_id, ...itemData } = data[ resourceName ];
+		let url = NAMESPACE;
+
+		switch ( resourceName ) {
+			case 'variation':
+				url += `/products/${ parent_id }/variations/${ id }`;
+				break;
+			case 'product':
+			default:
+				url += `/products/${ id }`;
+		}
 
 		return fetch( { path: url, method: 'PUT', data: itemData } )
 			.then( item => {

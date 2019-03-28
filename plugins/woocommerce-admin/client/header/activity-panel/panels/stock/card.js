@@ -51,7 +51,17 @@ class ProductStockCard extends Component {
 		const { product, updateItem } = this.props;
 
 		this.setState( { editing: false }, () => {
-			updateItem( 'products', product.id, { stock_quantity: this.state.quantity } );
+			let itemType = 'product';
+			const data = {
+				stock_quantity: this.state.quantity,
+			};
+
+			if ( 'variation' === product.type ) {
+				itemType = 'variation';
+				data.parent_id = product.parent_id;
+			}
+
+			updateItem( itemType, product.id, data );
 		} );
 	}
 
