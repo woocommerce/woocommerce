@@ -25,12 +25,12 @@ For example, if `taxes` is provided, data will be fetched from the report
 `taxes` endpoint (ie: `/wc/v4/reports/taxes/stats`). If the provided endpoint
 doesn't exist, an error will be shown to the user with `ReportError`.
 
-### `limitProperty`
+### `limitProperties`
 
-- Type: String
+- Type: Array
 - Default: null
 
-Allows specifying a property different from the `endpoint` that will be used
+Allows specifying properties different from the `endpoint` that will be used
 to limit the items when there is an active search.
 
 ### `query`

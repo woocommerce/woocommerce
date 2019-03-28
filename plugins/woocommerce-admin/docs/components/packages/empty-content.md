@@ -32,7 +32,7 @@ The url string of an image path. Prefix with `/` to load an image relative to th
 ### `illustrationHeight`
 
 - Type: Number
-- Default: `400`
+- Default: null
 
 Height to use for the illustration.
 

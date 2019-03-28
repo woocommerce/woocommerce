@@ -50,6 +50,15 @@ Format to parse dates into d3 time format
 The message to be displayed if there is no data to render. If no message is provided,
 nothing will be displayed.
 
+### `filterParam`
+
+- Type: String
+- Default: null
+
+Name of the param used to filter items. If specified, it will be used, in combination
+with query, to detect which elements are being used by the current filter and must be
+displayed even if their value is 0.
+
 ### `itemsLabel`
 
 - Type: String
@@ -181,7 +190,7 @@ A datetime formatting string, passed to d3TimeFormat.
 ### `yFormat`
 
 - Type: String
-- Default: `'$.3s'`
+- Default: null
 
 A number formatting string, passed to d3Format.
 

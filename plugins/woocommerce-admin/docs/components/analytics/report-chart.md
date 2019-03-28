@@ -27,12 +27,12 @@ Whether there is an API call running.
 
 Label describing the legend items.
 
-### `limitProperty`
+### `limitProperties`
 
-- Type: String
+- Type: Array
 - Default: null
 
-Allows specifying a property different from the `endpoint` that will be used
+Allows specifying properties different from the `endpoint` that will be used
 to limit the items when there is an active search.
 
 ### `mode`
