@@ -173,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
                 updated to reflect the event and an order note will log the event. #22329
 * Enhancement - Added suggestions for official extensions to Products, Edit Product and Orders screens.
 * Enhancement - Store attribute values as post_excerpt for variations to support easier searching for variations. #22083
+* Enhancement - Improved username generation and introduced wc_create_new_customer_username function. #23145
 * Tweak - Generalize shipping estimate text on cart page. #22467
 * Tweak - Include auto draft orders in order list filters. #22380
 * Tweak - Only include the network orders widget on the main site dashboard. #22318
@@ -193,6 +194,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Template - Moved the order of rememberme checkboxes for accessibility so they tab in order. #21454
 * Template - New structure for attributes template, including new `woocommerce_display_product_attributes` filter. #22480
 * Template - Admin cancelled order email reworded. #22971
+* Dev - Update action scheduler to version 2.2.2. #23162
 * Dev - Update action scheduler to version 2.2.1. #23016
 * Dev - Use ActionScheduler for database updates. Improved update notice. #22904
 * Dev - Introduce `woocommerce_reviews_title` filter. #22216
@@ -298,6 +300,19 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - After logging in update customer session ID. #23001
 * Fix - Narrow viewport css in setup wizard. #23033
 * Fix - Allow entering of date only ( no time ) when placing a singular product on sale. #22973
+* Fix - Download link URL in helper. #23146
+* Fix - Completed email wording update. #23128
+* Fix - REST API: Allow filtering by future status #23138
+* Fix - Update refund reason to make it clear process is manual. #23149
+* Fix - Hide stock status for variations when the parent is managing stock. #23069
+* Fix - Force variation product type in WC_Ajax::add_variation. #23131
+* Fix - WooCommerce writes current_theme_supports_woocommerce option on every regular page view. #23035
+* Fix - Update the rating request text in the footer to be friendlier for screen reader users. #23039
+* Fix - Null check variable before accessing its properties on checkout page. #23047
+* Fix - Recognize all input fields with ID for checkout fields. #23050
+* Fix - Avoid regenerating thumbnails on every page load. #21800
+* Fix - Changed 'private' methods on WC_Breadcrumb class to 'protected'. #23057
+* Fix - Jumping to top of page when dismissing store notice. #23066
 * Performance - Product meta data lookup table used for sorting and slow queries. #22718
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
