@@ -216,17 +216,29 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		$having_clauses = array();
 
 		$exact_match_params = array(
+			'name',
 			'username',
 			'email',
 			'country',
 		);
 
 		foreach ( $exact_match_params as $exact_match_param ) {
-			if ( ! empty( $query_args[ $exact_match_param ] ) ) {
-				$where_clauses[] = $wpdb->prepare(
-					"{$customer_lookup_table}.{$exact_match_param} = %s",
-					$query_args[ $exact_match_param ]
-				); // WPCS: unprepared SQL ok.
+			if ( ! empty( $query_args[ $exact_match_param . '_includes' ] ) ) {
+				$exact_match_arguments         = $query_args[ $exact_match_param . '_includes' ];
+				$exact_match_arguments_escaped = array_map( 'esc_sql', explode( ',', $exact_match_arguments ) );
+				$included                      = implode( "','", $exact_match_arguments_escaped );
+				// 'country_includes' is a list of country codes, the others will be a list of customer ids.
+				$table_column    = 'country' === $exact_match_param ? $exact_match_param : 'customer_id';
+				$where_clauses[] = "{$customer_lookup_table}.{$table_column} IN ('{$included}')";
+			}
+
+			if ( ! empty( $query_args[ $exact_match_param . '_excludes' ] ) ) {
+				$exact_match_arguments         = $query_args[ $exact_match_param . '_excludes' ];
+				$exact_match_arguments_escaped = array_map( 'esc_sql', explode( ',', $exact_match_arguments ) );
+				$excluded                      = implode( "','", $exact_match_arguments_escaped );
+				// 'country_includes' is a list of country codes, the others will be a list of customer ids.
+				$table_column    = 'country' === $exact_match_param ? $exact_match_param : 'customer_id';
+				$where_clauses[] = "{$customer_lookup_table}.{$table_column} NOT IN ('{$excluded}')";
 			}
 		}
 
@@ -239,7 +251,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		if ( ! empty( $query_args['search'] ) ) {
 			$name_like = '%' . $wpdb->esc_like( $query_args['search'] ) . '%';
 
-			if ( empty( $query_args['searchby'] ) || 'name' === $query_args['searchby'] || ! in_array( $query_args['searchby'], $search_params ) ) {
+			if ( empty( $query_args['searchby'] ) || 'name' === $query_args['searchby'] || ! in_array( $query_args['searchby'], $search_params, true ) ) {
 				$searchby = "CONCAT_WS( ' ', first_name, last_name )";
 			} else {
 				$searchby = $query_args['searchby'];
@@ -250,7 +262,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 
 		// Allow a list of customer IDs to be specified.
 		if ( ! empty( $query_args['customers'] ) ) {
-			$included_customers = implode( ',', $query_args['customers'] );
+			$included_customers = implode( ',', array_map( 'intval', $query_args['customers'] ) );
 			$where_clauses[]    = "{$customer_lookup_table}.customer_id IN ({$included_customers})";
 		}
 
