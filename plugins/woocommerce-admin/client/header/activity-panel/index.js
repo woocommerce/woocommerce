@@ -333,11 +333,12 @@ export default withSelect( select => {
 
 		if ( ! isReviewsError && ! isReviewsRequesting ) {
 			numberOfReviews = totalReviews;
-			unreadReviews =
+			unreadReviews = Boolean(
 				reviews.length &&
-				reviews[ 0 ].date_created_gmt &&
-				new Date( reviews[ 0 ].date_created_gmt + 'Z' ).getTime() >
-					userData.activity_panel_reviews_last_read;
+					reviews[ 0 ].date_created_gmt &&
+					new Date( reviews[ 0 ].date_created_gmt + 'Z' ).getTime() >
+						userData.activity_panel_reviews_last_read
+			);
 		}
 	}
 
