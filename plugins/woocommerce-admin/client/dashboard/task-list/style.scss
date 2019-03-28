@@ -1,0 +1,14 @@
+/** @format */
+
+.woocommerce-task-list__header {
+	text-align: center;
+	padding-top: $gap-large;
+
+	h2 {
+		margin: $gap-small 0;
+	}
+
+	.woocommerce-task-list__header-subtitle {
+		font-weight: 400;
+	}
+}

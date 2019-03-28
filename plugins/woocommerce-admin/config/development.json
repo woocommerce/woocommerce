@@ -4,6 +4,7 @@
 		"analytics": true,
 		"dashboard": true,
 		"devdocs": true,
+		"onboarding": true,
 		"store-alerts": true
 	}
 }
