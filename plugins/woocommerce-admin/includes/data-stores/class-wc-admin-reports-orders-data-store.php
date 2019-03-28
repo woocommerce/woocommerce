@@ -252,31 +252,23 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	 * @param array $query_args  Query parameters.
 	 */
 	protected function include_extended_info( &$orders_data, $query_args ) {
-		$mapped_orders      = $this->map_array_by_key( $orders_data, 'order_id' );
-		$products           = $this->get_products_by_order_ids( array_keys( $mapped_orders ) );
-		$mapped_products    = $this->map_array_by_key( $products, 'product_id' );
-		$coupons            = $this->get_coupons_by_order_ids( array_keys( $mapped_orders ) );
-		$product_categories = $this->get_product_categories_by_product_ids( array_keys( $mapped_products ) );
-		$customers          = $this->get_customers_by_orders( $orders_data );
-		$mapped_customers   = $this->map_array_by_key( $customers, 'customer_id' );
+		$mapped_orders    = $this->map_array_by_key( $orders_data, 'order_id' );
+		$products         = $this->get_products_by_order_ids( array_keys( $mapped_orders ) );
+		$mapped_products  = $this->map_array_by_key( $products, 'product_id' );
+		$coupons          = $this->get_coupons_by_order_ids( array_keys( $mapped_orders ) );
+		$customers        = $this->get_customers_by_orders( $orders_data );
+		$mapped_customers = $this->map_array_by_key( $customers, 'customer_id' );
 
 		$mapped_data = array();
 		foreach ( $products as $product ) {
 			if ( ! isset( $mapped_data[ $product['order_id'] ] ) ) {
 				$mapped_data[ $product['order_id'] ]['products']   = array();
-				$mapped_data[ $product['order_id'] ]['categories'] = array();
 			}
 
 			$mapped_data[ $product['order_id'] ]['products'][] = array(
 				'id'       => $product['product_id'],
 				'name'     => $product['product_name'],
 				'quantity' => $product['product_quantity'],
-			);
-			$mapped_data[ $product['order_id'] ]['categories'] = array_unique(
-				array_merge(
-					$mapped_data[ $product['order_id'] ]['categories'],
-					$product_categories[ $product['product_id'] ]
-				)
 			);
 		}
 
@@ -294,7 +286,6 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		foreach ( $orders_data as $key => $order_data ) {
 			$defaults                             = array(
 				'products'   => array(),
-				'categories' => array(),
 				'coupons'    => array(),
 				'customer'   => array(),
 			);
@@ -392,36 +383,6 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
 		return $coupons;
-	}
-
-	/**
-	 * Get product categories by array of product IDs
-	 *
-	 * @param array $product_ids Product IDs.
-	 * @return array
-	 */
-	protected function get_product_categories_by_product_ids( $product_ids ) {
-		global $wpdb;
-		$order_product_lookup_table = $wpdb->prefix . 'wc_order_product_lookup';
-		$included_product_ids       = implode( ',', $product_ids );
-
-		$product_categories = $wpdb->get_results(
-			"SELECT term_id AS category_id, object_id AS product_id
-				FROM {$wpdb->prefix}term_relationships
-				JOIN {$wpdb->prefix}term_taxonomy ON {$wpdb->prefix}term_relationships.term_taxonomy_id = {$wpdb->prefix}term_taxonomy.term_taxonomy_id
-				WHERE
-					object_id IN (${included_product_ids})
-					AND taxonomy = 'product_cat'
-				",
-			ARRAY_A
-		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
-
-		$mapped_product_categories = array();
-		foreach ( $product_categories as $category ) {
-			$mapped_product_categories[ $category['product_id'] ][] = $category['category_id'];
-		}
-
-		return $mapped_product_categories;
 	}
 
 	/**
