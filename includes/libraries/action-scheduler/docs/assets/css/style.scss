@@ -1,0 +1,57 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+a {
+	text-shadow: none;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+header h1 a {
+	color: #b5e853;
+}
+
+.container {
+	max-width: 700px;
+}
+
+footer {
+	margin-top: 6em;
+	padding: 1.6em 0;
+	border-top: 1px dashed #b5e853;
+}
+
+.footer-image {
+	text-align: center;
+	padding-top: 1em;
+}
+
+.github-corner:hover .octo-arm {
+	animation:octocat-wave 560ms ease-in-out
+}
+
+@keyframes octocat-wave{
+	0%,100%{
+		transform:rotate(0)
+	}
+	20%,60%{
+		transform:rotate(-25deg)
+	}
+	40%,80%{
+		transform:rotate(10deg)
+	}
+}
+
+@media (max-width:500px){
+	.github-corner:hover .octo-arm {
+		animation:none
+	}
+	.github-corner .octo-arm{
+		animation:octocat-wave 560ms ease-in-out
+	}
+}

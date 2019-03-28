@@ -1,0 +1,15 @@
+template: |
+  ## next release &ndash; date
+
+  <!-- Move the individual changes below into the appropriate section -->
+
+  $CHANGES
+
+  **Added**
+  **Changed**
+  **Deprecated**
+  **Removed**
+  **Fixed**
+  **Security**
+
+change-template: '* $TITLE (PR #$NUMBER)'
