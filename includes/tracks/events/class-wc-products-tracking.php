@@ -18,6 +18,56 @@ class WC_Products_Tracking {
 		add_action( 'edit_post', array( $this, 'track_product_updated' ), 10, 2 );
 		add_action( 'transition_post_status', array( $this, 'track_product_published' ), 10, 3 );
 		add_action( 'created_product_cat', array( $this, 'track_product_category_created' ) );
+		add_action( 'load-post-new.php', array( $this, 'track_product_add_start' ), 10 );
+		add_action( 'load-post.php', array( $this, 'track_product_edit' ), 10 );
+		add_action( 'woocommerce_attribute_added', array( $this, 'track_add_attribute_product_management' ), 10 );
+	}
+
+	/**
+	 * Send a Tracks event when an attribute is added from the product management section.
+	 */
+	public function track_add_attribute_product_management() {
+		WC_Tracks::record_event(
+			'product_attribute_add',
+			array(
+				'source' => 'product-management',
+			)
+		);
+	}
+
+	/**
+	 * Enqueue js to send event when a new attribute is added.
+	 */
+	public function track_attributes_client() {
+		wc_enqueue_js(
+			"
+				$( 'button.add_attribute' ).on( 'click', function() {
+					window.wcTracks.recordEvent( 'product_attribute_add', { source: 'product-edit' } );
+				} );
+				$( 'button.save_attributes' ).on( 'click', function() {
+					window.wcTracks.recordEvent( 'product_attribute_edit', { source: 'product-edit' } );
+				} );
+			"
+		);
+	}
+
+	/**
+	 * Add functions when on the product edit screen.
+	 */
+	public function track_product_edit() {
+		if ( ! empty( $_GET['post'] ) && 'product' === get_post_type( $_GET['post'] ) ) {
+			$this->track_attributes_client();
+		}
+	}
+
+	/**
+	 * Send a tracks event when a new product is started.
+	 */
+	public function track_product_add_start() {
+		if ( isset( $_GET['post_type'] ) && 'product' === wc_clean( wp_unslash( $_GET['post_type'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			WC_Tracks::record_event( 'product_add_start' );
+			$this->track_attributes_client();
+		}
 	}
 
 	/**
