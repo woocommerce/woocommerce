@@ -179,24 +179,25 @@ function wc_admin_print_script_settings() {
 	 * `wcAssetUrl` can be used in its place throughout the codebase.
 	 */
 	$settings = array(
-		'adminUrl'         => admin_url(),
-		'wcAssetUrl'       => plugins_url( 'assets/', WC_PLUGIN_FILE ),
-		'wcAdminAssetUrl'  => plugins_url( 'images/', wc_admin_dir_path( 'wc-admin.php' ) ), // Temporary for plugin. See above.
-		'embedBreadcrumbs' => wc_admin_get_embed_breadcrumbs(),
-		'siteLocale'       => esc_attr( get_bloginfo( 'language' ) ),
-		'currency'         => wc_admin_currency_settings(),
-		'orderStatuses'    => wc_admin_format_order_statuses( wc_get_order_statuses() ),
-		'stockStatuses'    => wc_get_product_stock_status_options(),
-		'siteTitle'        => get_bloginfo( 'name' ),
-		'dataEndpoints'    => array(),
-		'l10n'             => array(
+		'adminUrl'          => admin_url(),
+		'wcAssetUrl'        => plugins_url( 'assets/', WC_PLUGIN_FILE ),
+		'wcAdminAssetUrl'   => plugins_url( 'images/', wc_admin_dir_path( 'wc-admin.php' ) ), // Temporary for plugin. See above.
+		'embedBreadcrumbs'  => wc_admin_get_embed_breadcrumbs(),
+		'siteLocale'        => esc_attr( get_bloginfo( 'language' ) ),
+		'currency'          => wc_admin_currency_settings(),
+		'orderStatuses'     => wc_admin_format_order_statuses( wc_get_order_statuses() ),
+		'stockStatuses'     => wc_get_product_stock_status_options(),
+		'siteTitle'         => get_bloginfo( 'name' ),
+		'dataEndpoints'     => array(),
+		'l10n'              => array(
 			'userLocale'    => get_user_locale(),
 			'weekdaysShort' => array_values( $wp_locale->weekday_abbrev ),
 		),
-		'currentUserData'  => $current_user_data,
-		'alertCount'       => WC_Admin_Notes::get_notes_count( 'error,update', 'unactioned' ),
-		'reviewsEnabled'   => get_option( 'woocommerce_enable_reviews' ),
-		'manageStock'      => get_option( 'woocommerce_manage_stock' ),
+		'currentUserData'   => $current_user_data,
+		'alertCount'        => WC_Admin_Notes::get_notes_count( 'error,update', 'unactioned' ),
+		'reviewsEnabled'    => get_option( 'woocommerce_enable_reviews' ),
+		'manageStock'       => get_option( 'woocommerce_manage_stock' ),
+		'commentModeration' => get_option( 'comment_moderation' ),
 	);
 	$settings = wc_admin_add_custom_settings( $settings );
 

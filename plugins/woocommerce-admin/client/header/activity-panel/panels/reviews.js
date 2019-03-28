@@ -31,7 +31,7 @@ import {
  */
 import { ActivityCard, ActivityCardPlaceholder } from '../activity-card';
 import ActivityHeader from '../activity-header';
-import { QUERY_DEFAULTS } from 'wc-api/constants';
+import { DEFAULT_REVIEW_STATUSES, QUERY_DEFAULTS } from 'wc-api/constants';
 import sanitizeHTML from 'lib/sanitize-html';
 import withSelect from 'wc-api/with-select';
 
@@ -143,6 +143,7 @@ class ReviewsPanel extends Component {
 				icon={ icon }
 				actions={ cardActions() }
 				unread={
+					review.status === 'hold' ||
 					! lastRead ||
 					! review.date_created_gmt ||
 					new Date( review.date_created_gmt + 'Z' ).getTime() > lastRead
@@ -238,6 +239,7 @@ export default compose(
 		const reviewsQuery = {
 			page: 1,
 			per_page: QUERY_DEFAULTS.pageSize,
+			status: DEFAULT_REVIEW_STATUSES,
 			_embed: 1,
 		};
 
