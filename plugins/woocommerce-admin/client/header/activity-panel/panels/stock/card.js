@@ -5,6 +5,8 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, TextControl } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
+import { withDispatch } from '@wordpress/data';
 
 /**
  * WooCommerce dependencies
@@ -27,6 +29,7 @@ class ProductStockCard extends Component {
 		this.beginEdit = this.beginEdit.bind( this );
 		this.cancelEdit = this.cancelEdit.bind( this );
 		this.onQuantityChange = this.onQuantityChange.bind( this );
+		this.updateStock = this.updateStock.bind( this );
 	}
 
 	beginEdit() {
@@ -44,12 +47,22 @@ class ProductStockCard extends Component {
 		this.setState( { quantity } );
 	}
 
+	updateStock() {
+		const { product, updateItem } = this.props;
+
+		this.setState( { editing: false }, () => {
+			updateItem( 'products', product.id, { stock_quantity: this.state.quantity } );
+		} );
+	}
+
 	getActions() {
 		const { editing } = this.state;
 
 		if ( editing ) {
 			return [
-				<Button isPrimary>{ __( 'Save', 'woocommerce-admin' ) }</Button>,
+				<Button onClick={ this.updateStock } isPrimary>
+					{ __( 'Save', 'woocommerce-admin' ) }
+				</Button>,
 				<Button onClick={ this.cancelEdit }>{ __( 'Cancel', 'woocommerce-admin' ) }</Button>,
 			];
 		}
@@ -106,4 +119,11 @@ class ProductStockCard extends Component {
 	}
 }
 
-export default ProductStockCard;
+export default compose(
+	withDispatch( dispatch => {
+		const { updateItem } = dispatch( 'wc-api' );
+		return {
+			updateItem,
+		};
+	} )
+)( ProductStockCard );
