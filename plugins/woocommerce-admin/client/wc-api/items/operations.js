@@ -38,11 +38,14 @@ function read( resourceNames, fetch = apiFetch ) {
 		const url = NAMESPACE + `/${ endpoint }${ stringifyQuery( query ) }`;
 
 		try {
-			const items = await fetch( {
+			const response = await fetch( {
+				parse: false,
 				path: url,
 			} );
 
+			const items = await response.json();
 			const ids = items.map( item => item.id );
+			const totalCount = parseInt( response.headers.get( 'x-wp-total' ) );
 			const itemResources = items.reduce( ( resources, item ) => {
 				resources[ getResourceName( `${ prefix }-item`, item.id ) ] = { data: item };
 				return resources;
@@ -51,7 +54,7 @@ function read( resourceNames, fetch = apiFetch ) {
 			return {
 				[ resourceName ]: {
 					data: ids,
-					totalCount: ids.length,
+					totalCount,
 				},
 				...itemResources,
 			};

@@ -15,8 +15,13 @@ import { partial, uniqueId, find } from 'lodash';
  */
 import './style.scss';
 import ActivityPanelToggleBubble from './toggle-bubble';
-import { DEFAULT_ACTIONABLE_STATUSES, DEFAULT_REVIEW_STATUSES } from 'wc-api/constants';
 import { H, Section } from '@woocommerce/components';
+import {
+	getUnreadNotes,
+	getUnreadOrders,
+	getUnreadReviews,
+	getUnreadStock,
+} from './unread-indicators';
 import InboxPanel from './panels/inbox';
 import OrdersPanel from './panels/orders';
 import StockPanel from './panels/stock';
@@ -93,26 +98,26 @@ class ActivityPanel extends Component {
 
 	// @todo Pull in dynamic unread status/count
 	getTabs() {
-		const { unreadNotes, unreadOrders, unreadReviews } = this.props;
+		const { hasUnreadNotes, hasUnreadOrders, hasUnreadReviews, hasUnreadStock } = this.props;
 		return [
 			{
 				name: 'inbox',
 				title: __( 'Inbox', 'woocommerce-admin' ),
 				icon: <Gridicon icon="mail" />,
-				unread: unreadNotes,
+				unread: hasUnreadNotes,
 			},
 			{
 				name: 'orders',
 				title: __( 'Orders', 'woocommerce-admin' ),
 				icon: <Gridicon icon="pages" />,
-				unread: unreadOrders,
+				unread: hasUnreadOrders,
 			},
 			'yes' === wcSettings.manageStock
 				? {
 						name: 'stock',
 						title: __( 'Stock', 'woocommerce-admin' ),
 						icon: <Gridicon icon="clipboard" />,
-						unread: false,
+						unread: hasUnreadStock,
 					}
 				: null,
 			'yes' === wcSettings.reviewsEnabled
@@ -120,7 +125,7 @@ class ActivityPanel extends Component {
 						name: 'reviews',
 						title: __( 'Reviews', 'woocommerce-admin' ),
 						icon: <Gridicon icon="star" />,
-						unread: unreadReviews,
+						unread: hasUnreadReviews,
 					}
 				: null,
 		].filter( Boolean );
@@ -131,8 +136,8 @@ class ActivityPanel extends Component {
 			case 'inbox':
 				return <InboxPanel />;
 			case 'orders':
-				const { unreadOrders } = this.props;
-				return <OrdersPanel isEmpty={ unreadOrders === false } />;
+				const { hasUnreadOrders } = this.props;
+				return <OrdersPanel isEmpty={ hasUnreadOrders === false } />;
 			case 'stock':
 				return <StockPanel />;
 			case 'reviews':
@@ -264,101 +269,10 @@ class ActivityPanel extends Component {
 }
 
 export default withSelect( select => {
-	const {
-		getCurrentUserData,
-		getNotes,
-		getNotesError,
-		getReportItems,
-		getReportItemsError,
-		isGetNotesRequesting,
-		isReportItemsRequesting,
-		getReviews,
-		getReviewsTotalCount,
-		getReviewsError,
-		isGetReviewsRequesting,
-	} = select( 'wc-api' );
-	const userData = getCurrentUserData();
-	const orderStatuses =
-		wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses || DEFAULT_ACTIONABLE_STATUSES;
+	const hasUnreadNotes = getUnreadNotes( select );
+	const hasUnreadOrders = getUnreadOrders( select );
+	const hasUnreadStock = getUnreadStock( select );
+	const { numberOfReviews, hasUnreadReviews } = getUnreadReviews( select );
 
-	const notesQuery = {
-		page: 1,
-		per_page: 1,
-	};
-
-	const latestNote = getNotes( notesQuery );
-	const unreadNotes =
-		! Boolean( getNotesError( notesQuery ) ) &&
-		! isGetNotesRequesting( notesQuery ) &&
-		latestNote[ 0 ] &&
-		new Date( latestNote[ 0 ].date_created_gmt ).getTime() >
-			userData.activity_panel_inbox_last_read;
-
-	let unreadOrders = null;
-	if ( ! orderStatuses.length ) {
-		unreadOrders = false;
-	} else {
-		const ordersQuery = {
-			page: 1,
-			per_page: 0,
-			status_is: orderStatuses,
-		};
-
-		const totalOrders = getReportItems( 'orders', ordersQuery ).totalResults;
-		const isOrdersError = Boolean( getReportItemsError( 'orders', ordersQuery ) );
-		const isOrdersRequesting = isReportItemsRequesting( 'orders', ordersQuery );
-
-		if ( ! isOrdersError && ! isOrdersRequesting ) {
-			if ( totalOrders > 0 ) {
-				unreadOrders = true;
-			} else {
-				unreadOrders = false;
-			}
-		}
-	}
-
-	let numberOfReviews = null;
-	let unreadReviews = false;
-	if ( 'yes' === wcSettings.reviewsEnabled ) {
-		const reviewsQuery = {
-			order: 'desc',
-			orderby: 'date_gmt',
-			page: 1,
-			per_page: 1,
-			status: DEFAULT_REVIEW_STATUSES,
-		};
-		const reviews = getReviews( reviewsQuery );
-		const totalReviews = getReviewsTotalCount( reviewsQuery );
-		const isReviewsError = Boolean( getReviewsError( reviewsQuery ) );
-		const isReviewsRequesting = isGetReviewsRequesting( reviewsQuery );
-
-		if ( ! isReviewsError && ! isReviewsRequesting ) {
-			numberOfReviews = totalReviews;
-			unreadReviews = Boolean(
-				reviews.length &&
-					reviews[ 0 ].date_created_gmt &&
-					new Date( reviews[ 0 ].date_created_gmt + 'Z' ).getTime() >
-						userData.activity_panel_reviews_last_read
-			);
-		}
-
-		if ( ! unreadReviews && '1' === wcSettings.commentModeration ) {
-			const actionableReviewsQuery = {
-				page: 1,
-				// @todo we are not using this review, so when the endpoint supports it,
-				// it could be replaced with `per_page: 0`
-				per_page: 1,
-				status: 'hold',
-			};
-			const totalActionableReviews = getReviewsTotalCount( actionableReviewsQuery );
-			const isActionableReviewsError = Boolean( getReviewsError( actionableReviewsQuery ) );
-			const isActionableReviewsRequesting = isGetReviewsRequesting( actionableReviewsQuery );
-
-			if ( ! isActionableReviewsError && ! isActionableReviewsRequesting ) {
-				unreadReviews = totalActionableReviews > 0;
-			}
-		}
-	}
-
-	return { unreadNotes, unreadOrders, unreadReviews, numberOfReviews };
+	return { hasUnreadNotes, hasUnreadOrders, hasUnreadReviews, hasUnreadStock, numberOfReviews };
 } )( clickOutside( ActivityPanel ) );
