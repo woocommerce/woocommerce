@@ -419,6 +419,7 @@ class WC_Countries {
 				'ES' => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{state}\n{country}",
 				'SE' => $postcode_before_city,
 				'TR' => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city} {state}\n{country}",
+				'UG' => "{name}\n{company}\n{address_1}\n{address_2}\n{city}\n{state}, {country}",
 				'US' => "{name}\n{company}\n{address_1}\n{address_2}\n{city}, {state_code} {postcode}\n{country}",
 				'VN' => "{name}\n{company}\n{address_1}\n{city}\n{country}",
 			));
