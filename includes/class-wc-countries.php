@@ -886,6 +886,20 @@ class WC_Countries {
 						'label'       => __( 'Province', 'woocommerce' ),
 					)
 				),
+				'UG' => array(
+					'postcode' => array(
+						'required' => false,
+						'hidden' => true
+					),
+					'city'     => array(
+						'label' => __( 'Town / Village', 'woocommerce' ),
+						'required' => true
+					),
+					'state'    => array(
+						'label' => __( 'District', 'woocommerce' ),
+						'required' => true
+					),
+				),		
 				'US' => array(
 					'postcode'  => array(
 						'label'       => __( 'ZIP', 'woocommerce' ),
