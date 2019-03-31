@@ -40,6 +40,7 @@ export default class VariationsReportTable extends Component {
 				label: __( 'SKU', 'woocommerce-admin' ),
 				key: 'sku',
 				hiddenByDefault: true,
+               isSortable: true,
 			},
 			{
 				label: __( 'Items Sold', 'woocommerce-admin' ),

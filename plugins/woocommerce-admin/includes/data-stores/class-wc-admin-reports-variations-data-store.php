@@ -79,10 +79,40 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 	}
 
 	/**
+	 * Fills ORDER BY clause of SQL request based on user supplied parameters.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 *
+	 * @return array
+	 */
+	protected function get_order_by_sql_params( $query_args ) {
+		global $wpdb;
+		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
+
+		$sql_query['order_by_clause'] = '';
+		if ( isset( $query_args['orderby'] ) ) {
+			$sql_query['order_by_clause'] = $this->normalize_order_by( $query_args['orderby'] );
+		}
+
+		if ( 'meta_value' === $sql_query['order_by_clause'] ) {
+			$sql_query['from_clause'] .= " JOIN {$wpdb->prefix}postmeta AS postmeta ON {$order_product_lookup_table}.variation_id = postmeta.post_id AND postmeta.meta_key = '_sku'";
+		}
+
+		if ( isset( $query_args['order'] ) ) {
+			$sql_query['order_by_clause'] .= ' ' . $query_args['order'];
+		} else {
+			$sql_query['order_by_clause'] .= ' DESC';
+		}
+
+		return $sql_query;
+	}
+
+	/**
 	 * Updates the database query with parameters used for Products report: categories and order status.
 	 *
 	 * @param array  $query_args Query arguments supplied by the user.
 	 * @param string $from_arg   Name of the FROM sql param.
+	 *
 	 * @return array             Array of parameters used for SQL query.
 	 */
 	protected function get_sql_query_params( $query_args, $from_arg ) {
@@ -118,6 +148,7 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
 	 *
 	 * @param string $order_by Sorting criterion.
+	 *
 	 * @return string
 	 */
 	protected function normalize_order_by( $order_by ) {
@@ -127,6 +158,9 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 		if ( 'date' === $order_by ) {
 			return $table_name . '.date_created';
 		}
+		if ( 'sku' === $order_by ) {
+			return 'meta_value';
+		}
 
 		return $order_by;
 	}
@@ -135,7 +169,7 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 	 * Enriches the product data with attributes specified by the extended_attributes.
 	 *
 	 * @param array $products_data Product data.
-	 * @param array $query_args  Query parameters.
+	 * @param array $query_args Query parameters.
 	 */
 	protected function include_extended_info( &$products_data, $query_args ) {
 		foreach ( $products_data as $key => $product_data ) {
@@ -183,7 +217,8 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 	/**
 	 * Returns the report data based on parameters supplied by the user.
 	 *
-	 * @param array $query_args  Query parameters.
+	 * @param array $query_args Query parameters.
+	 *
 	 * @return stdClass|WP_Error Data.
 	 */
 	public function get_data( $query_args ) {
@@ -317,6 +352,7 @@ class WC_Admin_Reports_Variations_Data_Store extends WC_Admin_Reports_Data_Store
 	 * Returns string to be used as cache key for the data.
 	 *
 	 * @param array $params Query parameters.
+	 *
 	 * @return string
 	 */
 	protected function get_cache_key( $params ) {
