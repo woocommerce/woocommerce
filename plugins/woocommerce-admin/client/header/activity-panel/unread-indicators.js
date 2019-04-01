@@ -27,7 +27,8 @@ export function getUnreadNotes( select ) {
 
 export function getUnreadOrders( select ) {
 	const { getReportItems, getReportItemsError, isReportItemsRequesting } = select( 'wc-api' );
-	const orderStatuses = wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses || DEFAULT_ACTIONABLE_STATUSES;
+	const orderStatuses =
+		wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses || DEFAULT_ACTIONABLE_STATUSES;
 
 	if ( ! orderStatuses.length ) {
 		return false;
@@ -79,11 +80,29 @@ export function getUnreadReviews( select ) {
 
 		if ( ! isReviewsError && ! isReviewsRequesting ) {
 			numberOfReviews = totalReviews;
-			hasUnreadReviews =
+			hasUnreadReviews = Boolean(
 				reviews.length &&
-				reviews[ 0 ].date_created_gmt &&
-				new Date( reviews[ 0 ].date_created_gmt + 'Z' ).getTime() >
-					userData.activity_panel_reviews_last_read;
+					reviews[ 0 ].date_created_gmt &&
+					new Date( reviews[ 0 ].date_created_gmt + 'Z' ).getTime() >
+						userData.activity_panel_reviews_last_read
+			);
+		}
+
+		if ( ! hasUnreadReviews && '1' === wcSettings.commentModeration ) {
+			const actionableReviewsQuery = {
+				page: 1,
+				// @todo we are not using this review, so when the endpoint supports it,
+				// it could be replaced with `per_page: 0`
+				per_page: 1,
+				status: 'hold',
+			};
+			const totalActionableReviews = getReviewsTotalCount( actionableReviewsQuery );
+			const isActionableReviewsError = Boolean( getReviewsError( actionableReviewsQuery ) );
+			const isActionableReviewsRequesting = isGetReviewsRequesting( actionableReviewsQuery );
+
+			if ( ! isActionableReviewsError && ! isActionableReviewsRequesting ) {
+				hasUnreadReviews = totalActionableReviews > 0;
+			}
 		}
 	}
 
