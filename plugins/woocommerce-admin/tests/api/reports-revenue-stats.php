@@ -97,10 +97,11 @@ class WC_Tests_API_Reports_Revenue_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'intervals', $properties );
 
 		$totals = $properties['totals']['properties'];
-		$this->assertEquals( 10, count( $totals ) );
+		$this->assertEquals( 11, count( $totals ) );
 		$this->assertArrayHasKey( 'gross_revenue', $totals );
 		$this->assertArrayHasKey( 'net_revenue', $totals );
 		$this->assertArrayHasKey( 'coupons', $totals );
+		$this->assertArrayHasKey( 'coupons_count', $totals );
 		$this->assertArrayHasKey( 'shipping', $totals );
 		$this->assertArrayHasKey( 'taxes', $totals );
 		$this->assertArrayHasKey( 'refunds', $totals );
@@ -119,10 +120,11 @@ class WC_Tests_API_Reports_Revenue_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'subtotals', $intervals );
 
 		$subtotals = $properties['intervals']['items']['properties']['subtotals']['properties'];
-		$this->assertEquals( 9, count( $subtotals ) );
+		$this->assertEquals( 10, count( $subtotals ) );
 		$this->assertArrayHasKey( 'gross_revenue', $subtotals );
 		$this->assertArrayHasKey( 'net_revenue', $subtotals );
 		$this->assertArrayHasKey( 'coupons', $subtotals );
+		$this->assertArrayHasKey( 'coupons_count', $subtotals );
 		$this->assertArrayHasKey( 'shipping', $subtotals );
 		$this->assertArrayHasKey( 'taxes', $subtotals );
 		$this->assertArrayHasKey( 'refunds', $subtotals );

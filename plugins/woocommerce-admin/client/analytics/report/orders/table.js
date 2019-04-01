@@ -192,7 +192,7 @@ export default class OrdersReportTable extends Component {
 			num_returning_customers = 0,
 			products = 0,
 			num_items_sold = 0,
-			coupons = 0,
+			coupons_count = 0,
 			net_revenue = 0,
 		} = totals;
 		return [
@@ -222,8 +222,8 @@ export default class OrdersReportTable extends Component {
 				value: numberFormat( num_items_sold ),
 			},
 			{
-				label: _n( 'coupon', 'coupons', coupons, 'woocommerce-admin' ),
-				value: numberFormat( coupons ),
+				label: _n( 'coupon', 'coupons', coupons_count, 'woocommerce-admin' ),
+				value: numberFormat( coupons_count ),
 			},
 			{
 				label: __( 'net revenue', 'woocommerce-admin' ),

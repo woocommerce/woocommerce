@@ -40,6 +40,7 @@ class WC_Admin_Reports_Revenue_Query extends WC_Admin_Reports_Query {
 				'num_items_sold',
 				'gross_revenue',
 				'coupons',
+				'coupons_count',
 				'refunds',
 				'taxes',
 				'shipping',

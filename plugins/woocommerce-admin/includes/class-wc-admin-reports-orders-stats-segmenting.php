@@ -24,6 +24,7 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 			'num_items_sold' => "SUM($products_table.product_qty) as num_items_sold",
 			'gross_revenue'  => "SUM($products_table.product_gross_revenue) AS gross_revenue",
 			'coupons'        => "SUM($products_table.coupon_amount) AS coupons",
+			'coupons_count'  => 'COUNT( DISTINCT( coupon_lookup_left_join.coupon_id ) ) AS coupons_count',
 			'refunds'        => "SUM($products_table.refund_amount) AS refunds",
 			'taxes'          => "SUM($products_table.tax_amount) AS taxes",
 			'shipping'       => "SUM($products_table.shipping_amount) AS shipping",
@@ -66,6 +67,7 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 			'num_items_sold'          => "SUM($order_stats_table.num_items_sold) as num_items_sold",
 			'gross_revenue'           => "SUM($order_stats_table.gross_total) AS gross_revenue",
 			'coupons'                 => "SUM($order_stats_table.coupon_total) AS coupons",
+			'coupons_count'           => 'COUNT( DISTINCT(coupon_lookup_left_join.coupon_id) ) AS coupons_count',
 			'refunds'                 => "SUM($order_stats_table.refund_total) AS refunds",
 			'taxes'                   => "SUM($order_stats_table.tax_total) AS taxes",
 			'shipping'                => "SUM($order_stats_table.shipping_total) AS shipping",
@@ -348,6 +350,7 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 
 		$product_segmenting_table = $wpdb->prefix . 'wc_order_product_lookup';
 		$unique_orders_table      = 'uniq_orders';
+		$segmenting_from          = "LEFT JOIN {$wpdb->prefix}wc_order_coupon_lookup AS coupon_lookup_left_join ON ($table_name.order_id = coupon_lookup_left_join.order_id) ";
 		$segmenting_where         = '';
 
 		// Product, variation, and category are bound to product, so here product segmenting table is required,
@@ -359,7 +362,7 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 				'product_level' => $this->get_segment_selections_product_level( $product_segmenting_table ),
 				'order_level'   => $this->get_segment_selections_order_level( $unique_orders_table ),
 			);
-			$segmenting_from           = "INNER JOIN $product_segmenting_table ON ($table_name.order_id = $product_segmenting_table.order_id)";
+			$segmenting_from          .= "INNER JOIN $product_segmenting_table ON ($table_name.order_id = $product_segmenting_table.order_id)";
 			$segmenting_groupby        = $product_segmenting_table . '.product_id';
 			$segmenting_dimension_name = 'product_id';
 
@@ -373,7 +376,7 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 				'product_level' => $this->get_segment_selections_product_level( $product_segmenting_table ),
 				'order_level'   => $this->get_segment_selections_order_level( $unique_orders_table ),
 			);
-			$segmenting_from           = "INNER JOIN $product_segmenting_table ON ($table_name.order_id = $product_segmenting_table.order_id)";
+			$segmenting_from          .= "INNER JOIN $product_segmenting_table ON ($table_name.order_id = $product_segmenting_table.order_id)";
 			$segmenting_where          = "AND $product_segmenting_table.product_id = {$this->query_args['product_includes'][0]}";
 			$segmenting_groupby        = $product_segmenting_table . '.variation_id';
 			$segmenting_dimension_name = 'variation_id';
@@ -384,7 +387,7 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 				'product_level' => $this->get_segment_selections_product_level( $product_segmenting_table ),
 				'order_level'   => $this->get_segment_selections_order_level( $unique_orders_table ),
 			);
-			$segmenting_from           = "
+			$segmenting_from          .= "
 			INNER JOIN $product_segmenting_table ON ($table_name.order_id = $product_segmenting_table.order_id)
 			LEFT JOIN {$wpdb->prefix}term_relationships ON {$product_segmenting_table}.product_id = {$wpdb->prefix}term_relationships.object_id
 			RIGHT JOIN {$wpdb->prefix}term_taxonomy ON {$wpdb->prefix}term_relationships.term_taxonomy_id = {$wpdb->prefix}term_taxonomy.term_taxonomy_id
@@ -400,7 +403,7 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 				'coupons' => 'SUM(coupon_lookup.discount_amount) AS coupons',
 			);
 			$segmenting_selections = $this->segment_selections_orders( $table_name, $coupon_override );
-			$segmenting_from       = "
+			$segmenting_from      .= "
 			INNER JOIN {$wpdb->prefix}wc_order_coupon_lookup AS coupon_lookup ON ($table_name.order_id = coupon_lookup.order_id)
             ";
 			$segmenting_groupby    = 'coupon_lookup.coupon_id';
@@ -408,7 +411,6 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 			$segments = $this->get_order_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $table_name, $query_params );
 		} elseif ( 'customer_type' === $this->query_args['segmentby'] ) {
 			$segmenting_selections = $this->segment_selections_orders( $table_name );
-			$segmenting_from       = '';
 			$segmenting_groupby    = "$table_name.returning_customer";
 
 			$segments = $this->get_order_related_segments( $type, $segmenting_selections, $segmenting_from, $segmenting_where, $segmenting_groupby, $table_name, $query_params );

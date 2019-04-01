@@ -152,8 +152,14 @@ class WC_Admin_REST_Reports_Revenue_Stats_Controller extends WC_REST_Reports_Con
 				'indicator'   => true,
 				'format'      => 'currency',
 			),
-			'coupons'        => array(
-				'description' => __( 'Total of coupons.', 'woocommerce-admin' ),
+			'coupons'           => array(
+				'description' => __( 'Amount discounted by coupons.', 'woocommerce-admin' ),
+				'type'        => 'number',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'coupons_count'  => array(
+				'description' => __( 'Unique coupons count.', 'woocommerce-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,

@@ -36,6 +36,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		'num_items_sold'          => 'intval',
 		'gross_revenue'           => 'floatval',
 		'coupons'                 => 'floatval',
+		'coupons_count'           => 'intval',
 		'refunds'                 => 'floatval',
 		'taxes'                   => 'floatval',
 		'shipping'                => 'floatval',
@@ -58,6 +59,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		'num_items_sold'          => 'SUM(num_items_sold) as num_items_sold',
 		'gross_revenue'           => 'SUM(gross_total) AS gross_revenue',
 		'coupons'                 => 'SUM(coupon_total) AS coupons',
+		'coupons_count'           => 'COUNT(DISTINCT coupon_id) as coupons_count',
 		'refunds'                 => 'SUM(refund_total) AS refunds',
 		'taxes'                   => 'SUM(tax_total) AS taxes',
 		'shipping'                => 'SUM(shipping_total) AS shipping',
@@ -231,6 +233,9 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 					FROM
 						{$table_name}
 						{$totals_query['from_clause']}
+					LEFT JOIN
+						{$wpdb->prefix}wc_order_coupon_lookup
+						ON {$wpdb->prefix}wc_order_coupon_lookup.order_id = {$wpdb->prefix}wc_order_stats.order_id
 					WHERE
 						1=1
 						{$totals_query['where_time_clause']}
@@ -253,6 +258,9 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 						FROM
 							{$table_name}
 							{$intervals_query['from_clause']}
+						LEFT JOIN
+							{$wpdb->prefix}wc_order_coupon_lookup
+							ON {$wpdb->prefix}wc_order_coupon_lookup.order_id = {$wpdb->prefix}wc_order_stats.order_id
 						WHERE
 							1=1
 							{$intervals_query['where_time_clause']}
@@ -277,12 +285,15 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 
 			$intervals = $wpdb->get_results(
 				"SELECT
-							MAX(date_created) AS datetime_anchor,
+							MAX({$table_name}.date_created) AS datetime_anchor,
 							{$intervals_query['select_clause']} AS time_interval
 							{$selections}
 						FROM
 							{$table_name}
 							{$intervals_query['from_clause']}
+						LEFT JOIN
+							{$wpdb->prefix}wc_order_coupon_lookup
+							ON {$wpdb->prefix}wc_order_coupon_lookup.order_id = {$wpdb->prefix}wc_order_stats.order_id
 						WHERE
 							1=1
 							{$intervals_query['where_time_clause']}
