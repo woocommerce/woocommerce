@@ -9,6 +9,9 @@
  * Domain Path: /languages
  * Version: 0.9.0
  *
+ * WC requires at least: 3.5.0
+ * WC tested up to: 3.5.7
+ *
  * @package WC_Admin
  */
 
