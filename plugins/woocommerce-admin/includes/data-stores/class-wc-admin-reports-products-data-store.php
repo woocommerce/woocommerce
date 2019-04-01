@@ -93,30 +93,6 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 	}
 
 	/**
-	 * Fills ORDER BY clause of SQL request based on user supplied parameters.
-	 *
-	 * @param array $query_args Parameters supplied by the user.
-	 * @return array
-	 */
-	protected function get_order_by_sql_params( $query_args ) {
-		global $wpdb;
-		$order_product_lookup_table = $wpdb->prefix . self::TABLE_NAME;
-
-		$sql_query['order_by_clause'] = '';
-		if ( isset( $query_args['orderby'] ) ) {
-			$sql_query['order_by_clause'] = $this->normalize_order_by( $query_args['orderby'] );
-		}
-
-		if ( isset( $query_args['order'] ) ) {
-			$sql_query['order_by_clause'] .= ' ' . $query_args['order'];
-		} else {
-			$sql_query['order_by_clause'] .= ' DESC';
-		}
-
-		return $sql_query;
-	}
-
-	/**
 	 * Fills FROM clause of SQL request based on user supplied parameters.
 	 *
 	 * @param array  $query_args Parameters supplied by the user.
