@@ -113,6 +113,8 @@ export default compose(
 			page: 1,
 			per_page: QUERY_DEFAULTS.pageSize,
 			type: 'info,warning',
+			orderby: 'date',
+			order: 'desc',
 		};
 
 		const notes = getNotes( inboxQuery );

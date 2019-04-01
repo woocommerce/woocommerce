@@ -43,6 +43,7 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -108,34 +109,9 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$per_page = isset( $request['per_page'] ) ? intval( $request['per_page'] ) : 10;
-		if ( $per_page <= 0 ) {
-			$per_page = 10;
-		}
+		$query_args = $this->prepare_objects_query( $request );
 
-		$page = isset( $request['page'] ) ? intval( $request['page'] ) : 1;
-		if ( $page <= 0 ) {
-			$page = 1;
-		}
-
-		$args = array(
-			'per_page' => $per_page,
-			'page'     => $page,
-		);
-
-		$type = isset( $request['type'] ) ? $request['type'] : '';
-		$type = sanitize_text_field( $type );
-		if ( ! empty( $type ) ) {
-			$args['type'] = $type;
-		}
-
-		$status = isset( $request['status'] ) ? $request['status'] : '';
-		$status = sanitize_text_field( $status );
-		if ( ! empty( $status ) ) {
-			$args['status'] = $status;
-		}
-
-		$notes = WC_Admin_Notes::get_notes( 'edit', $args );
+		$notes = WC_Admin_Notes::get_notes( 'edit', $query_args );
 
 		$data = array();
 		foreach ( (array) $notes as $note_obj ) {
@@ -145,9 +121,42 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		$response = rest_ensure_response( $data );
-		$response->header( 'X-WP-Total', WC_Admin_Notes::get_notes_count( $type, $status ) );
+		$response->header( 'X-WP-Total', WC_Admin_Notes::get_notes_count( $query_args['type'], $query_args['status'] ) );
 
 		return $response;
+	}
+
+	/**
+	 * Prepare objects query.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return array
+	 */
+	protected function prepare_objects_query( $request ) {
+		$args             = array();
+		$args['order']    = $request['order'];
+		$args['orderby']  = $request['orderby'];
+		$args['per_page'] = $request['per_page'];
+		$args['page']     = $request['page'];
+		$args['type']     = isset( $request['type'] ) ? $request['type'] : array();
+		$args['status']   = isset( $request['status'] ) ? $request['status'] : array();
+
+		if ( 'date' === $args['orderby'] ) {
+			$args['orderby'] = 'date_created';
+		}
+
+		/**
+		 * Filter the query arguments for a request.
+		 *
+		 * Enables adding extra arguments or setting defaults for a post
+		 * collection request.
+		 *
+		 * @param array           $args    Key value array of query var to query value.
+		 * @param WP_REST_Request $request The request used.
+		 */
+		$args = apply_filters( 'woocommerce_rest_admin_notes_object_query', $args, $request );
+
+		return $args;
 	}
 
 	/**
@@ -300,19 +309,64 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params            = array();
-		$params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['type']    = array(
-			'description'       => __( 'Type of note.', 'woocommerce-admin' ),
+		$params             = array();
+		$params['context']  = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['order']    = array(
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-admin' ),
 			'type'              => 'string',
-			'enum'              => WC_Admin_Note::get_allowed_types(),
+			'default'           => 'desc',
+			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['status']  = array(
-			'description'       => __( 'Status of note.', 'woocommerce-admin' ),
+		$params['orderby']  = array(
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce-admin' ),
 			'type'              => 'string',
-			'enum'              => WC_Admin_Note::get_allowed_statuses(),
+			'default'           => 'date',
+			'enum'              => array(
+				'note_id',
+				'date',
+				'type',
+				'title',
+				'status',
+			),
 			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['page']     = array(
+			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
+			'type'              => 'integer',
+			'default'           => 1,
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
+			'minimum'           => 1,
+		);
+		$params['per_page'] = array(
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
+			'type'              => 'integer',
+			'default'           => 10,
+			'minimum'           => 1,
+			'maximum'           => 100,
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['type']     = array(
+			'description'       => __( 'Type of note.', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_slug_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'enum' => WC_Admin_Note::get_allowed_types(),
+				'type' => 'string',
+			),
+		);
+		$params['status']   = array(
+			'description'       => __( 'Status of note.', 'woocommerce-admin' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_slug_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'enum' => WC_Admin_Note::get_allowed_statuses(),
+				'type' => 'string',
+			),
 		);
 		return $params;
 	}

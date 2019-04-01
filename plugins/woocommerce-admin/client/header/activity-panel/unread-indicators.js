@@ -11,6 +11,9 @@ export function getUnreadNotes( select ) {
 	const notesQuery = {
 		page: 1,
 		per_page: 1,
+		type: 'info,warning',
+		orderby: 'date',
+		order: 'desc',
 	};
 
 	const latestNote = getNotes( notesQuery );

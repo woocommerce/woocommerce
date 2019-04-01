@@ -250,24 +250,21 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	public function get_notes( $args = array() ) {
 		global $wpdb;
 
-		$per_page = isset( $args['per_page'] ) ? intval( $args['per_page'] ) : 10;
-		if ( $per_page <= 0 ) {
-			$per_page = 10;
-		}
+		$defaults = array(
+			'per_page' => get_option( 'posts_per_page' ),
+			'page'     => 1,
+			'order'    => 'DESC',
+			'orderby'  => 'date_created',
+		);
+		$args     = wp_parse_args( $args, $defaults );
 
-		$page = isset( $args['page'] ) ? intval( $args['page'] ) : 1;
-		if ( $page <= 0 ) {
-			$page = 1;
-		}
-
-		$offset = $per_page * ( $page - 1 );
-
+		$offset        = $args['per_page'] * ( $args['page'] - 1 );
 		$where_clauses = $this->get_notes_where_clauses( $args );
 
 		$query = $wpdb->prepare(
-			"SELECT note_id, title, content FROM {$wpdb->prefix}wc_admin_notes WHERE 1=1{$where_clauses} ORDER BY note_id DESC LIMIT %d, %d",
+			"SELECT note_id, title, content FROM {$wpdb->prefix}wc_admin_notes WHERE 1=1{$where_clauses} ORDER BY {$args['orderby']} {$args['order']} LIMIT %d, %d",
 			$offset,
-			$per_page
+			$args['per_page']
 		); // WPCS: unprepared SQL ok.
 
 		return $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
@@ -280,7 +277,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param string $status Comma separated list of statuses.
 	 * @return array An array of objects containing a note id.
 	 */
-	public function get_notes_count( $type = '', $status = '' ) {
+	public function get_notes_count( $type = array(), $status = array() ) {
 		global $wpdb;
 
 		$where_clauses = $this->get_notes_where_clauses(
@@ -308,8 +305,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 		$allowed_types    = WC_Admin_Note::get_allowed_types();
 		$where_type_array = array();
 		if ( isset( $args['type'] ) ) {
-			$args_types = explode( ',', $args['type'] );
-			foreach ( (array) $args_types as $args_type ) {
+			foreach ( $args['type'] as $args_type ) {
 				$args_type = trim( $args_type );
 				if ( in_array( $args_type, $allowed_types, true ) ) {
 					$where_type_array[] = "'" . esc_sql( $args_type ) . "'";
@@ -320,8 +316,7 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 		$allowed_statuses   = WC_Admin_Note::get_allowed_statuses();
 		$where_status_array = array();
 		if ( isset( $args['status'] ) ) {
-			$args_statuses = explode( ',', $args['status'] );
-			foreach ( (array) $args_statuses as $args_status ) {
+			foreach ( $args['status'] as $args_status ) {
 				$args_status = trim( $args_status );
 				if ( in_array( $args_status, $allowed_statuses, true ) ) {
 					$where_status_array[] = "'" . esc_sql( $args_status ) . "'";

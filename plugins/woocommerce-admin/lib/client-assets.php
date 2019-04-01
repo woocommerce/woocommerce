@@ -194,7 +194,7 @@ function wc_admin_print_script_settings() {
 			'weekdaysShort' => array_values( $wp_locale->weekday_abbrev ),
 		),
 		'currentUserData'   => $current_user_data,
-		'alertCount'        => WC_Admin_Notes::get_notes_count( 'error,update', 'unactioned' ),
+		'alertCount'        => WC_Admin_Notes::get_notes_count( array( 'error', 'update' ), array( 'unactioned' ) ),
 		'reviewsEnabled'    => get_option( 'woocommerce_enable_reviews' ),
 		'manageStock'       => get_option( 'woocommerce_manage_stock' ),
 		'commentModeration' => get_option( 'comment_moderation' ),

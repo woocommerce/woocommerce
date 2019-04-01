@@ -229,6 +229,44 @@ class WC_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test ordering of notes.
+	 */
+	public function test_order_notes() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'orderby' => 'title',
+				'order'   => 'asc',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$notes    = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 3, count( $notes ) );
+		$this->assertEquals( $notes[0]['title'], 'PHPUNIT_TEST_NOTE_1_TITLE' );
+		$this->assertEquals( $notes[1]['title'], 'PHPUNIT_TEST_NOTE_2_TITLE' );
+		$this->assertEquals( $notes[2]['title'], 'PHPUNIT_TEST_NOTE_3_TITLE' );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'orderby' => 'status',
+				'order'   => 'desc',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$notes    = $response->get_data();
+
+		$this->assertEquals( 3, count( $notes ) );
+		$this->assertEquals( $notes[0]['status'], WC_Admin_Note::E_WC_ADMIN_NOTE_UNACTIONED );
+		$this->assertEquals( $notes[1]['status'], WC_Admin_Note::E_WC_ADMIN_NOTE_SNOOZED );
+		$this->assertEquals( $notes[2]['status'], WC_Admin_Note::E_WC_ADMIN_NOTE_ACTIONED );
+	}
+
+	/**
 	 * Test getting lots of notes without permission. It should fail.
 	 *
 	 * @since 3.5.0
