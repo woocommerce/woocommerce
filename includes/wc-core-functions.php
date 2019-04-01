@@ -206,29 +206,29 @@ function wc_get_template_part( $slug, $name = '' ) {
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
 	$cache_key = sanitize_key( implode( '-', array( 'template', $template_name, $template_path, $default_path ) ) );
-	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
+	$located   = (string) wp_cache_get( $cache_key, 'woocommerce' );
 
-	if ( ! $template ) {
-		$template = wc_locate_template( $template_name, $template_path, $default_path );
-		wp_cache_set( $cache_key, $template, 'woocommerce' );
+	if ( ! $located ) {
+		$located = wc_locate_template( $template_name, $template_path, $default_path );
+		wp_cache_set( $cache_key, $located, 'woocommerce' );
 	}
 
 	// Allow 3rd party plugin filter template file from their plugin.
-	$filter_template = apply_filters( 'wc_get_template', $template, $template_name, $args, $template_path, $default_path );
+	$filter_template = apply_filters( 'wc_get_template', $located, $template_name, $args, $template_path, $default_path );
 
-	if ( $filter_template !== $template ) {
+	if ( $filter_template !== $located ) {
 		if ( ! file_exists( $filter_template ) ) {
 			/* translators: %s template */
-			wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $template . '</code>' ), '2.1' );
+			wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $located . '</code>' ), '2.1' );
 			return;
 		}
-		$template = $filter_template;
+		$located = $filter_template;
 	}
 
 	$action_args = array(
 		'template_name' => $template_name,
 		'template_path' => $template_path,
-		'located'       => $template,
+		'located'       => $located,
 		'args'          => $args,
 	);
 
@@ -238,7 +238,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 
 	do_action( 'woocommerce_before_template_part', $action_args['template_name'], $action_args['template_path'], $action_args['located'], $action_args['args'] );
 
-	include $template;
+	include $located;
 
 	do_action( 'woocommerce_after_template_part', $action_args['template_name'], $action_args['template_path'], $action_args['located'], $action_args['args'] );
 }
