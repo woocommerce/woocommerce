@@ -25,7 +25,7 @@ if ( $max_value && $min_value === $max_value ) {
 	<?php
 } else {
 	/* translators: %s: Quantity. */
-	$labelledby = ! empty( $args['product_name'] ) ? sprintf( __( '%s quantity', 'woocommerce' ), wp_strip_all_tags( $args['product_name'] ) ) : '';
+	$label = ! empty( $args['product_name'] ) ? sprintf( __( '%s quantity', 'woocommerce' ), wp_strip_all_tags( $args['product_name'] ) ) : '';
 	?>
 	<div class="quantity">
 		<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></label>
@@ -41,8 +41,8 @@ if ( $max_value && $min_value === $max_value ) {
 			title="<?php echo esc_attr_x( 'Qty', 'Product quantity input tooltip', 'woocommerce' ); ?>"
 			size="4"
 			inputmode="<?php echo esc_attr( $inputmode ); ?>"
-			<?php if ( ! empty( $labelledby ) ) { ?>
-			aria-labelledby="<?php echo esc_attr( $labelledby ); ?>" />
+			<?php if ( ! empty( $label ) ) { ?>
+			aria-label="<?php echo esc_attr( $label ); ?>" />
 			<?php } ?>
 	</div>
 	<?php
