@@ -942,7 +942,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Map one of the WC_Coupon error codes to a message string.
 	 *
 	 * @param int $err_code Message/error code.
-	 * @return string| Message/error string
+	 * @return string Message/error string
 	 */
 	public function get_coupon_error( $err_code ) {
 		switch ( $err_code ) {
