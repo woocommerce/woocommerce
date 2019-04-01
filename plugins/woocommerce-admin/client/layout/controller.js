@@ -104,6 +104,7 @@ class Controller extends Component {
 		const page = find( getPages(), { path } );
 		window.wpNavMenuUrlUpdate( page, query );
 		window.wpNavMenuClassChange( page );
+		window.document.documentElement.scrollTop = 0;
 		return createElement( page.container, { params, path: url, pathMatch: path, query } );
 	}
 }
