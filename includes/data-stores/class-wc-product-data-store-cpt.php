@@ -361,6 +361,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ) );
 
 		$product->set_props( $set_props );
+
+		do_action( 'woocommerce_read_product_data', $product, $set_props );
 	}
 
 	/**
