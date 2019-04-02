@@ -233,6 +233,14 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 	);
 
 	if ( ! empty( $args ) && is_array( $args ) ) {
+		if ( isset( $args['action_args'] ) ) {
+			wc_doing_it_wrong(
+				__FUNCTION__,
+				__( 'action_args should not be overwritten when calling wc_get_template.', 'woocommerce' ),
+				'3.6.0'
+			);
+			return;
+		}
 		extract( $args ); // @codingStandardsIgnoreLine
 	}
 
