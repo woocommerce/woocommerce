@@ -110,10 +110,11 @@ class WC_Admin_Notes_Order_Milestones {
 	/**
 	 * Get the total count of orders (in the allowed statuses).
 	 *
+	 * @param bool $no_cache Optional. Skip cache.
 	 * @return int Total orders count.
 	 */
-	public function get_orders_count() {
-		if ( is_null( $this->orders_count ) ) {
+	public function get_orders_count( $no_cache = false ) {
+		if ( $no_cache || is_null( $this->orders_count ) ) {
 			$status_counts       = array_map( 'wc_orders_count', $this->allowed_statuses );
 			$this->orders_count  = array_sum( $status_counts );
 		}
@@ -134,7 +135,8 @@ class WC_Admin_Notes_Order_Milestones {
 			return;
 		}
 
-		$orders_count = $this->get_orders_count();
+		// Retrieve the orders count, forcing a cache refresh.
+		$orders_count = $this->get_orders_count( true );
 
 		if ( 1 === $orders_count ) {
 			// Add the first order note.
