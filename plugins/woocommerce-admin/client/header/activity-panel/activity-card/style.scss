@@ -316,4 +316,13 @@
 	.is-button {
 		height: 34px;
 	}
+
+	.woocommerce-activity-card__title {
+		@include font-size( 15 );
+	}
+
+	.woocommerce-activity-card__subtitle {
+		color: $core-grey-dark-500;
+		@include font-size( 12 );
+	}
 }

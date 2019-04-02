@@ -111,11 +111,19 @@ class ProductStockCard extends Component {
 				{ product.name }
 			</Link>
 		);
+		let subtitle = null;
+
+		if ( 'variation' === product.type ) {
+			subtitle = Object.values( product.attributes )
+				.map( attr => attr.option )
+				.join( ', ' );
+		}
 
 		return (
 			<ActivityCard
 				className="woocommerce-stock-activity-card"
 				title={ title }
+				subtitle={ subtitle }
 				icon={ <ProductImage product={ product } /> }
 				actions={ this.getActions() }
 			>
