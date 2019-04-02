@@ -100,7 +100,7 @@ class WC_Admin_Notes_Order_Milestones {
 
 		add_action( 'wc_admin_installed', array( $this, 'backfill_last_milestone' ) );
 
-		if ( 10 <= $this->get_orders_count() ) {
+		if ( $this->get_orders_count() <= 10 ) {
 			add_action( 'woocommerce_new_order', array( $this, 'first_two_milestones' ) );
 		}
 
