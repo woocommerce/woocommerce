@@ -86,6 +86,7 @@ class WC_Admin_REST_Products_Controller extends WC_REST_Products_Controller {
 		}
 		if ( ! empty( $request['low_in_stock'] ) ) {
 			$args['low_in_stock'] = $request['low_in_stock'];
+			$args['post_type']    = array( 'product', 'product_variation' );
 		}
 
 		return $args;
