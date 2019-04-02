@@ -190,7 +190,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			$extended_info = new ArrayObject();
 			if ( $query_args['extended_info'] ) {
 				$product_id = $product_data['product_id'];
-				$product = wc_get_product( $product_id );
+				$product    = wc_get_product( $product_id );
 				// Product was deleted.
 				if ( ! $product ) {
 					if ( ! isset( $product_names[ $product_id ] ) ) {
