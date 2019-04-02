@@ -686,7 +686,16 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 		$values    = array();
 
 		if ( ! empty( $url_parts['query'] ) ) {
-			parse_str( $url_parts['query'], $values );
+			// This is to preserve full-stops in the query string when ran through parse_str.
+			$query_string = str_replace( '.', '{dot}', $url_parts['query'] );
+
+			// Parse the string.
+			parse_str( $query_string, $parsed_query_string );
+
+			// Convert the full-stops back and add to values array.
+			foreach ( $parsed_query_string as $key => $value ) {
+				$values[ str_replace( '{dot}', '.', $key ) ] = $value;
+			}
 		}
 	}
 	$html = '';
