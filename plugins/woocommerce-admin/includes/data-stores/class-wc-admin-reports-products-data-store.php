@@ -183,13 +183,33 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 	 * @param array $query_args  Query parameters.
 	 */
 	protected function include_extended_info( &$products_data, $query_args ) {
+		global $wpdb;
+		$product_names = array();
+
 		foreach ( $products_data as $key => $product_data ) {
 			$extended_info = new ArrayObject();
 			if ( $query_args['extended_info'] ) {
-				$product = wc_get_product( $product_data['product_id'] );
+				$product_id = $product_data['product_id'];
+				$product    = wc_get_product( $product_id );
 				// Product was deleted.
 				if ( ! $product ) {
-					$products_data[ $key ]['extended_info']['name'] = __( '(Deleted)', 'woocommerce-admin' );
+					if ( ! isset( $product_names[ $product_id ] ) ) {
+						$product_names[ $product_id ] = $wpdb->get_var(
+							$wpdb->prepare(
+								"SELECT i.order_item_name
+								FROM {$wpdb->prefix}woocommerce_order_items i, {$wpdb->prefix}woocommerce_order_itemmeta m
+								WHERE i.order_item_id = m.order_item_id
+								AND m.meta_key = '_product_id'
+								AND m.meta_value = %s
+								ORDER BY i.order_item_id DESC
+								LIMIT 1",
+								$product_id
+							)
+						);
+					}
+
+					/* translators: %s is product name */
+					$products_data[ $key ]['extended_info']['name'] = $product_names[ $product_id ] ? sprintf( __( '%s (Deleted)', 'woocommerce-admin' ), $product_names[ $product_id ] ) : __( '(Deleted)', 'woocommerce-admin' );
 					continue;
 				}
 
