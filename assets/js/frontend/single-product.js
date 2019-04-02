@@ -317,7 +317,7 @@ jQuery( function( $ ) {
 	 * Function to call wc_product_gallery on jquery selector.
 	 */
 	$.fn.wc_product_gallery = function( args ) {
-		new ProductGallery( this, args );
+		new ProductGallery( this, args || wc_single_product_params );
 		return this;
 	};
 
