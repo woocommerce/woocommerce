@@ -504,11 +504,11 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * @return float
 	 */
 	protected static function get_net_total( $order ) {
-		$net_total = $order->get_total() - $order->get_total_tax() - $order->get_shipping_total();
+		$net_total = floatval( $order->get_total() ) - floatval( $order->get_total_tax() ) - floatval( $order->get_shipping_total() );
 
 		$refunds = $order->get_refunds();
 		foreach ( $refunds as $refund ) {
-			$net_total += $refund->get_total() - $refund->get_total_tax() - $refund->get_shipping_total();
+			$net_total += floatval( $refund->get_total() ) - floatval( $refund->get_total_tax() ) - floatval( $refund->get_shipping_total() );
 		}
 
 		return $net_total > 0 ? (float) $net_total : 0;
