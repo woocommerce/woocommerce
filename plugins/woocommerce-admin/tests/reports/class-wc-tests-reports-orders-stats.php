@@ -3902,7 +3902,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'num_items_sold'          => 0,
 						'gross_revenue'           => 0,
 						'coupons'                 => 0,
-						'coupons_count'       => 0,
+						'coupons_count'           => 0,
 						'refunds'                 => 0,
 						'taxes'                   => 0,
 						'shipping'                => 0,
@@ -5609,7 +5609,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$query_args  = array(
 			'interval' => 'hour',
 		);
-		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
+		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		$this->assertEquals( 0, $actual_data->totals->num_returning_customers );
 		$this->assertEquals( 0, $actual_data->totals->num_new_customers );
 
@@ -5633,7 +5633,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'after'    => $start_time,
 			'before'   => $end_time,
 		);
-		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
+		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		$this->assertEquals( 0, $actual_data->totals->num_returning_customers );
 		$this->assertEquals( 1, $actual_data->totals->num_new_customers );
 
@@ -5655,7 +5655,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'before'   => $end_time,
 		);
 
-		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
+		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		$this->assertEquals( 0, $actual_data->totals->num_returning_customers );
 		$this->assertEquals( 1, $actual_data->totals->num_new_customers );
 
@@ -5671,7 +5671,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'before'   => $end_time,
 		);
 
-		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
+		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		$this->assertEquals( 1, $actual_data->totals->num_returning_customers );
 		$this->assertEquals( 0, $actual_data->totals->num_new_customers );
 
@@ -5694,7 +5694,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'after'    => $start_time,
 			'before'   => $end_time,
 		);
-		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
+		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		// It's still the same customer who ordered for the first time in this hour, they just placed 2 orders.
 		$this->assertEquals( 1, $actual_data->totals->num_returning_customers );
 		$this->assertEquals( 0, $actual_data->totals->num_new_customers );
@@ -5720,7 +5720,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$query_args  = array(
 			'interval' => 'hour',
 		);
-		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
+		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		$this->assertEquals( 0, $actual_data->totals->num_returning_customers );
 		$this->assertEquals( 0, $actual_data->totals->num_new_customers );
 
@@ -5744,7 +5744,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'after'    => $start_time,
 			'before'   => $end_time,
 		);
-		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
+		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		$this->assertEquals( 0, $actual_data->totals->num_returning_customers );
 		$this->assertEquals( 1, $actual_data->totals->num_new_customers );
 
@@ -5766,7 +5766,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'before'   => $end_time,
 		);
 
-		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
+		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		$this->assertEquals( 0, $actual_data->totals->num_returning_customers );
 		$this->assertEquals( 1, $actual_data->totals->num_new_customers );
 
@@ -5782,7 +5782,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'before'   => $end_time,
 		);
 
-		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
+		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		$this->assertEquals( 1, $actual_data->totals->num_returning_customers );
 		$this->assertEquals( 0, $actual_data->totals->num_new_customers );
 
@@ -5805,7 +5805,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'after'    => $start_time,
 			'before'   => $end_time,
 		);
-		$actual_data = json_decode( json_encode( $data_store->get_data( $query_args ) ) );
+		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		// It's still the same customer who ordered for the first time in this hour, they just placed 2 orders.
 		$this->assertEquals( 1, $actual_data->totals->num_returning_customers );
 		$this->assertEquals( 0, $actual_data->totals->num_new_customers );
