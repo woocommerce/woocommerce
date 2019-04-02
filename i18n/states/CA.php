@@ -2,12 +2,13 @@
 /**
  * Canadian states
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     2.0.0
+ * @package WooCommerce/i18n
+ * @version 2.0.0
  */
+
 global $states;
+
+defined( 'ABSPATH' ) || exit;
 
 $states['CA'] = array(
 	'AB' => __( 'Alberta', 'woocommerce' ),
@@ -22,5 +23,5 @@ $states['CA'] = array(
 	'PE' => __( 'Prince Edward Island', 'woocommerce' ),
 	'QC' => __( 'Quebec', 'woocommerce' ),
 	'SK' => __( 'Saskatchewan', 'woocommerce' ),
-	'YT' => __( 'Yukon Territory', 'woocommerce' )
+	'YT' => __( 'Yukon Territory', 'woocommerce' ),
 );

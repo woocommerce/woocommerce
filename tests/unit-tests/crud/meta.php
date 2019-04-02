@@ -1,216 +1,160 @@
 <?php
-
 /**
- * Meta
+ * Test meta for https://github.com/woocommerce/woocommerce/issues/13533.
+ *
  * @package WooCommerce\Tests\CRUD
  */
-class WC_Tests_CRUD_Meta extends WC_Unit_Test_Case {
+class WC_Tests_CRUD_Meta_Data extends WC_Unit_Test_Case {
+
+	private $item_id  = 0;
+	private $order_id = 0;
 
 	/**
-	 * Create a test post we can add/test meta against.
+	 * A callback for the hooks triggered by eg_disappearing_order_meta() and
+	 * eg_disappearing_item_meta() that saves additional meta data on the
+	 * object via by pre-CRUD and CRUD methods.
 	 */
-	public function create_test_post() {
-		$object = new WC_Mock_WC_Data();
-		$object->set_content( 'testing' );
-		$object->save();
-		return $object;
-	}
+	function add_different_object_meta( $object_id ) {
 
-	/**
-	 * Create a test user we can add/test meta against.
-	 */
-	public function create_test_user() {
-		$object = new WC_Mock_WC_Data();
-		$object->set_meta_type( 'user' );
-		$object->set_object_id_field( 'user_id' );
-		$object->set_content( 'testing@woo.dev' );
-		$object->save();
-		return $object;
-	}
+		// Get a new instance of the item or order object
+		$object = ( $this->item_id == $object_id ) ? WC_Order_Factory::get_order_item( $object_id ) : wc_get_order( $object_id );
+		$object->add_meta_data( 'random_other', 'This might disappear :cry:.' );
+		$object->save(); // 'random_other' will be saved correctly, 'random' will also be saved
 
-	/**
-	 * Tests reading and getting set metadata.
-	 */
-	function test_get_meta_data() {
-		$object    = $this->create_test_post();
-		$object_id = $object->get_id();
-		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
-		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val2'  );
-		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val3'  );
-		$object->read( $object_id );
-
-		$meta_data = $object->get_meta_data();
-		$i         = 1;
-
-		$this->assertNotEmpty( $meta_data );
-		foreach ( $meta_data as $mid => $data ) {
-			$this->assertEquals( "val{$i}", $data->value );
-			$i++;
+		// Now set some meta data for it using the pre-CRUD approach
+		if ( $this->item_id == $object_id ) {
+			wc_update_order_item_meta( $object_id, 'random_other_pre_crud', 'This might disappear too :sob:.' );
+		} else {
+			update_post_meta( $object_id, 'random_other_pre_crud', 'This might disappear too :sob:.' );
 		}
 	}
 
 	/**
-	 * Test getting meta by ID.
+	 * Instantiate an instance of an order line item, save meta on that item, then trigger a hook which only passes the
+	 * item's ID to callbacks. Afterwards, save the existing item without that other meta here and log the result to
+	 * show that data has been removed.
 	 */
-	function test_get_meta() {
-		$object = $this->create_test_post();
-		$object_id = $object->get_id();
-		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
-		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val2'  );
-		add_metadata( 'post', $object_id, 'test_multi_meta_key', 'val3'  );
-		$object->read( $object_id );
+	function test_disappearing_item_meta() {
+		// Setup for testing by making an item.
+		$item = new WC_Order_Item_Product();
+		$this->item_id = $item->save();
 
-		// test single meta key
-		$single_meta = $object->get_meta( 'test_meta_key' );
-		$this->assertEquals( 'val1', $single_meta );
+		$item = WC_Order_Factory::get_order_item( $this->item_id );
 
-		// test getting multiple
-		$meta = $object->get_meta( 'test_multi_meta_key', false );
-		$i    = 2;
-		foreach ( $meta as $data ) {
-			$this->assertEquals( 'test_multi_meta_key', $data->key );
-			$this->assertEquals( "val{$i}", $data->value );
-			$i++;
-		}
+		// First make sure we're starting from a clean slate
+		$item->delete_meta_data( 'random' );
+		$item->delete_meta_data( 'random_other' );
+		$item->delete_meta_data( 'random_other_pre_crud' );
+		$item->save();
+
+		// Now add one piece of meta
+		$item->add_meta_data( 'random', (string) rand( 0, 0xffffff ) );
+		$item->save(); // 'random' will be saved correctly
+
+		// Run callback that passes just the item's ID to mimic this kind of normal behaviour in WP/WC
+		$this->add_different_object_meta( $this->item_id );
+
+		// Resave our current item that has our meta data, but not the other piece of meta data
+		$item->save();
+
+		// Get a new instance that should have both 'random' and 'random_other' set on it
+		$new_item = WC_Order_Factory::get_order_item( $this->item_id );
+
+		// The original $item should have 1 item of meta - random.
+		$this->assertCount( 1, $item->get_meta_data() );
+		$this->assertTrue( in_array( 'random', wp_list_pluck( $item->get_meta_data(), 'key' ) ) );
+
+		// The new $item should have 3 items of meta since it's freshly loaded.
+		$this->assertCount( 3, $new_item->get_meta_data() );
+		$this->assertTrue( in_array( 'random', wp_list_pluck( $new_item->get_meta_data(), 'key' ) ) );
+		$this->assertTrue( in_array( 'random_other', wp_list_pluck( $new_item->get_meta_data(), 'key' ) ) );
+		$this->assertTrue( in_array( 'random_other_pre_crud', wp_list_pluck( $new_item->get_meta_data(), 'key' ) ) );
 	}
 
 	/**
-	 * Test setting meta.
+	 * Instantiate an instance of an order, save meta on that order, then trigger a hook which only passes the order's ID to
+	 * callbacks. Afterwards, save the existing order without that other meta here and log the result to show that data
+	 * has been removed.
 	 */
-	function test_set_meta_data() {
-		global $wpdb;
-		$object = $this->create_test_post();
-		$object_id = $object->get_id();
-		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
-		add_metadata( 'post', $object_id, 'test_meta_key_2', 'val2', true );
-		$object->read( $object_id );
+	function test_disappearing_order_meta() {
+		// Setup for testing by making an item.
+		$order = new WC_Order();
+		$this->order_id = $order->save();
 
-		$metadata     = array();
-		$raw_metadata = $wpdb->get_results( $wpdb->prepare( "
-			SELECT meta_id, meta_key, meta_value
-			FROM {$wpdb->prefix}postmeta
-			WHERE post_id = %d ORDER BY meta_id
-		", $object_id ) );
+		$order = wc_get_order( $this->order_id );
 
-		foreach ( $raw_metadata as $meta ) {
-			$metadata[] = (object) array(
-				'key'     => $meta->meta_key,
-				'value'   => $meta->meta_value,
-				'meta_id' =>  $meta->meta_id,
-			);
-		}
+		// First make sure we're starting from a clean slate
+		$order->delete_meta_data( 'random' );
+		$order->delete_meta_data( 'random_other' );
+		$order->delete_meta_data( 'random_other_pre_crud' );
+		$order->save();
 
-		$object = new WC_Mock_WC_Data();
-		$object->set_meta_data( $metadata );
+		// Now add one piece of meta
+		$order->add_meta_data( 'random', (string) rand( 0, 0xffffff ) );
+		$order->save(); // 'random' will be saved correctly
 
-		$this->assertEquals( $metadata, $object->get_meta_data() );
+		// Run callback that passes just the item's ID to mimic this kind of normal behaviour in WP/WC
+		$this->add_different_object_meta( $this->order_id );
+
+		// Resave our current item that has our meta data, but not the other piece of meta data
+		$order->save();
+
+		// Get a new instance of the same order. It should have both 'random' and 'random_other' set on it
+		$new_order = wc_get_order( $this->order_id );
+
+		// The original $order should have 1 item of meta - random.
+		$this->assertCount( 1, $order->get_meta_data() );
+		$this->assertTrue( in_array( 'random', wp_list_pluck( $order->get_meta_data(), 'key' ) ) );
+
+		// The new $order should have 3 items of meta since it's freshly loaded.
+		$this->assertCount( 3, $new_order->get_meta_data() );
+		$this->assertTrue( in_array( 'random', wp_list_pluck( $new_order->get_meta_data(), 'key' ) ) );
+		$this->assertTrue( in_array( 'random_other', wp_list_pluck( $new_order->get_meta_data(), 'key' ) ) );
+		$this->assertTrue( in_array( 'random_other_pre_crud', wp_list_pluck( $new_order->get_meta_data(), 'key' ) ) );
 	}
 
 	/**
-	 * Test adding meta data.
+	 * Tests that the meta data cache gets flushed when update_post_meta updates the object's meta.
+	 * @see https://github.com/woocommerce/woocommerce/issues/15274
 	 */
-	function test_add_meta_data() {
-		$object = $this->create_test_post();
-		$object_id = $object->get_id();
-		$data = 'add_meta_data_' . time();
-		$object->add_meta_data( 'test_new_field', $data );
-		$meta = $object->get_meta( 'test_new_field' );
-		$this->assertEquals( $data, $meta );
-	}
-
-	/**
-	 * Test updating meta data.
-	 */
-	function test_update_meta_data() {
-		global $wpdb;
-		$object = $this->create_test_post();
-		$object_id = $object->get_id();
-		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
-		$object->read( $object_id );
-
-		$this->assertEquals( 'val1', $object->get_meta( 'test_meta_key' ) );
-
-		$metadata     = array();
-		$meta_id = $wpdb->get_var( $wpdb->prepare( "
-			SELECT meta_id
-			FROM {$wpdb->prefix}postmeta
-			WHERE post_id = %d LIMIT 1
-		", $object_id ) );
-
-		$object->update_meta_data( 'test_meta_key', 'updated_value', $meta_id );
-		$this->assertEquals( 'updated_value', $object->get_meta( 'test_meta_key' ) );
-	}
-
-	/**
-	 * Test deleting meta.
-	 */
-	function test_delete_meta_data() {
-		$object = $this->create_test_post();
-		$object_id = $object->get_id();
-		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
-		$object->read( $object_id );
-
-		$this->assertEquals( 'val1', $object->get_meta( 'test_meta_key' ) );
-
-		$object->delete_meta_data( 'test_meta_key' );
-
-		$this->assertEmpty( $object->get_meta( 'test_meta_key' ) );
-	}
-
-
-	/**
-	 * Test saving metadata.. (Actually making sure changes are written to DB)
-	 */
-	function test_save_meta_data() {
-		global $wpdb;
-		$object = $this->create_test_post();
-		$object_id = $object->get_id();
-		add_metadata( 'post', $object_id, 'test_meta_key', 'val1', true );
-		add_metadata( 'post', $object_id, 'test_meta_key_2', 'val2', true );
-		$object->read( $object_id );
-
-		$raw_metadata = $wpdb->get_results( $wpdb->prepare( "
-			SELECT meta_id, meta_key, meta_value
-			FROM {$wpdb->prefix}postmeta
-			WHERE post_id = %d ORDER BY meta_id
-		", $object_id ) );
-
-
-		$object->delete_meta_data( 'test_meta_key' );
-		$object->update_meta_data( 'test_meta_key_2', 'updated_value', $raw_metadata[1]->meta_id );
-
+	function test_get_meta_data_after_update_post_meta() {
+		// Create an object.
+		$object  = new WC_Product;
 		$object->save();
-		$object->read( $object_id ); // rereads from the DB
 
-		$this->assertEmpty( $object->get_meta( 'test_meta_key' ) );
-		$this->assertEquals( 'updated_value', $object->get_meta( 'test_meta_key_2' ) );
+		// Update a meta value.
+		update_post_meta( $object->get_id(), '_some_meta_key', 'val1' );
+		$product = wc_get_product( $object->get_id() );
+		$this->assertEquals( 'val1', $product->get_meta( '_some_meta_key', true ) );
+
+		// Update meta to diff value.
+		update_post_meta( $object->get_id(), '_some_meta_key', 'val2' );
+		$product = wc_get_product( $object->get_id() );
+		$this->assertEquals( 'val2', $product->get_meta( '_some_meta_key', true ) );
 	}
 
 	/**
-	 * Test reading/getting user meta data too.
+	 * Tests setting objects and strings in meta to ensure slashing/unslashing works.
 	 */
-	function test_usermeta() {
-		$object = $this->create_test_user();
-		$object_id = $object->get_id();
-		add_metadata( 'user', $object_id, 'test_meta_key', 'val1', true );
-		add_metadata( 'user', $object_id, 'test_meta_key_2', 'val2', true );
-		$object->read( $object_id );
+	function test_strings_in_meta() {
+		// Create objects.
+		$object = new WC_Product;
+		$object_to_store = new stdClass();
+		$object_to_store->prop1 = 'prop_value';
+		$object_to_store->prop2 = 'prop_value_with_\\\"quotes"';
 
-		$this->assertEquals( 'val1', $object->get_meta( 'test_meta_key' ) );
-		$this->assertEquals( 'val2', $object->get_meta( 'test_meta_key_2' ) );
+		$object->add_meta_data( 'Test Object', $object_to_store );
+		$object->add_meta_data( 'Test meta with slash', 'Test\slashes' );
+		$object_id = $object->save();
+
+		// Get object and check it.
+		$object = wc_get_product( $object_id );
+		$value = $object->get_meta( 'Test Object', true );
+
+		$this->assertEquals( $object_to_store, $object->get_meta( 'Test Object', true ) );
+		$this->assertEquals( 'Test\slashes', $object->get_meta( 'Test meta with slash', true ) );
+
+		// clean
+		$object->delete();
 	}
-
-	/**
-	 * Test adding meta data/updating meta data just added without keys colliding when changing
-	 * data before a save.
-	 */
-	function test_add_meta_data_overwrite_before_save() {
-		$object = new WC_Mock_WC_Data;
-		$object->add_meta_data( 'test_field_0', 'another field', true );
-		$object->add_meta_data( 'test_field_1', 'another field', true );
-		$object->add_meta_data( 'test_field_2', 'val1', true );
-		$object->update_meta_data( 'test_field_0', 'another field 2' );
-		$this->assertEquals( 'val1', $object->get_meta( 'test_field_2' ) );
-	}
-
 }

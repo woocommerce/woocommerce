@@ -26,5 +26,4 @@ class WC_Payment_Token_Stub extends WC_Payment_Token {
 	public function set_extra( $extra ) {
 		$this->add_meta_data( 'extra', $extra, true );
 	}
-
 }

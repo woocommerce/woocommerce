@@ -1,0 +1,39 @@
+{
+  "name": "woocommerce/woocommerce",
+  "description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
+  "homepage": "https://woocommerce.com/",
+  "type": "wordpress-plugin",
+  "license": "GPL-3.0-or-later",
+  "prefer-stable": true,
+  "minimum-stability": "dev",
+  "require": {
+    "composer/installers": "1.6.0"
+  },
+  "require-dev": {
+    "apigen/apigen": "4.1.2",
+    "nette/utils": "2.5.3",
+    "phpunit/phpunit": "6.5.14",
+    "woocommerce/woocommerce-sniffs": "0.0.6"
+  },
+  "scripts": {
+    "test": [
+      "phpunit"
+    ],
+    "phpcs": [
+      "phpcs -s -p"
+    ],
+    "phpcs-pre-commit": [
+      "phpcs -s -p -n"
+    ],
+    "phpcbf": [
+      "phpcbf -p"
+    ]
+  },
+  "extra": {
+    "scripts-description": {
+      "test": "Run unit tests",
+      "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
+      "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+    }
+  }
+}

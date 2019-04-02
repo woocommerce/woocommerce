@@ -1,5 +1,6 @@
 /* global wp, woocommerce_admin_meta_boxes_variations, woocommerce_admin, accounting */
 jQuery( function( $ ) {
+    'use strict';
 
 	/**
 	 * Variations actions
@@ -31,6 +32,7 @@ jQuery( function( $ ) {
 		 */
 		reload: function() {
 			wc_meta_boxes_product_variations_ajax.load_variations( 1 );
+			wc_meta_boxes_product_variations_pagenav.set_paginav( 0 );
 		},
 
 		/**
@@ -60,9 +62,16 @@ jQuery( function( $ ) {
 		 */
 		variable_manage_stock: function() {
 			$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_manage_stock' ).hide();
+			$( this ).closest( '.woocommerce_variation' ).find( '.variable_stock_status' ).show();
 
 			if ( $( this ).is( ':checked' ) ) {
 				$( this ).closest( '.woocommerce_variation' ).find( '.show_if_variation_manage_stock' ).show();
+				$( this ).closest( '.woocommerce_variation' ).find( '.variable_stock_status' ).hide();
+			}
+
+			// Parent level.
+			if ( $( 'input#_manage_stock:checked' ).length ) {
+				$( this ).closest( '.woocommerce_variation' ).find( '.variable_stock_status' ).hide();
 			}
 		},
 
@@ -117,21 +126,19 @@ jQuery( function( $ ) {
 			});
 
 			// Datepicker fields
-			$( '.sale_price_dates_fields', wrapper ).each( function() {
-				var dates = $( this ).find( 'input' ).datepicker({
-					defaultDate:     '',
-					dateFormat:      'yy-mm-dd',
-					numberOfMonths:  1,
-					showButtonPanel: true,
-					onSelect:        function( selectedDate ) {
-						var option   = $( this ).is( '.sale_price_dates_from' ) ? 'minDate' : 'maxDate',
-							instance = $( this ).data( 'datepicker' ),
-							date     = $.datepicker.parseDate( instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings );
+			$( '.sale_price_dates_fields', wrapper ).find( 'input' ).datepicker({
+				defaultDate:     '',
+				dateFormat:      'yy-mm-dd',
+				numberOfMonths:  1,
+				showButtonPanel: true,
+				onSelect:        function() {
+					var option = $( this ).is( '.sale_price_dates_from' ) ? 'minDate' : 'maxDate',
+						dates  = $( this ).closest( '.sale_price_dates_fields' ).find( 'input' ),
+						date   = $( this ).datepicker( 'getDate' );
 
-						dates.not( this ).datepicker( 'option', option, date );
-						$( this ).change();
-					}
-				});
+					dates.not( this ).datepicker( 'option', option, date );
+					$( this ).change();
+				}
 			});
 
 			// Allow sorting
@@ -327,7 +334,13 @@ jQuery( function( $ ) {
 				.on( 'change', '#variable_product_options .woocommerce_variations :input', this.input_changed )
 				.on( 'change', '.variations-defaults select', this.defaults_changed );
 
-			$( 'form#post' ).on( 'submit', this.save_on_submit );
+			var postForm = $( 'form#post' );
+
+			postForm.on( 'submit', this.save_on_submit );
+
+			$( 'input:submit', postForm ).bind( 'click keypress', function() {
+				postForm.data( 'callerid', this.id );
+			});
 
 			$( '.wc-metaboxes-wrapper' ).on( 'click', 'a.do_variation_action', this.do_variation_action );
 		},
@@ -522,7 +535,14 @@ jQuery( function( $ ) {
 		 * After saved, continue with form submission
 		 */
 		save_on_submit_done: function() {
-			$( 'form#post' ).submit();
+			var postForm = $( 'form#post' ),
+				callerid = postForm.data( 'callerid' );
+
+			if ( 'publish' === callerid ) {
+				postForm.append('<input type="hidden" name="publish" value="1" />').submit();
+			} else {
+				postForm.append('<input type="hidden" name="save-post" value="1" />').submit();
+			}
 		},
 
 		/**
@@ -722,6 +742,8 @@ jQuery( function( $ ) {
 						} else {
 							data.value = accounting.unformat( value, woocommerce_admin.mon_decimal_point );
 						}
+					} else {
+						return;
 					}
 					break;
 				case 'variable_regular_price' :
@@ -737,6 +759,8 @@ jQuery( function( $ ) {
 
 					if ( value != null ) {
 						data.value = value;
+					} else {
+						return;
 					}
 					break;
 				case 'variable_sale_schedule' :
@@ -749,6 +773,10 @@ jQuery( function( $ ) {
 
 					if ( null === data.date_to ) {
 						data.date_to = false;
+					}
+
+					if ( false === data.date_to && false === data.date_from ) {
+						return;
 					}
 					break;
 				default :

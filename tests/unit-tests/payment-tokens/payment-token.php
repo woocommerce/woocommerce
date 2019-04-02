@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Class Payment_Token
  * @package WooCommerce\Tests\Payment_Tokens
@@ -60,7 +59,7 @@ class WC_Tests_Payment_Token extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_is_default() {
-		$token = new WC_Payment_Token_Stub( 1 );
+		$token = new WC_Payment_Token_Stub();
 		$token->set_default( true );
 		$this->assertTrue( $token->is_default() );
 		$token->set_default( false );
@@ -79,11 +78,11 @@ class WC_Tests_Payment_Token extends WC_Unit_Test_Case {
 		$token->set_gateway_id( 'paypal' );
 		$token->set_extra( 'woocommerce' );
 
-		$data = $token->get_data();
+		$this->assertEquals( $raw_token, $token->get_token() );
+		$this->assertEquals( 'paypal', $token->get_gateway_id() );
+		$this->assertEquals( 'stub', $token->get_type() );
 
-		$this->assertEquals( $raw_token, $data['token'] );
-		$this->assertEquals( 'paypal', $data['gateway_id'] );
-		$this->assertEquals( 'stub', $data['type'] );
+		$data = $token->get_data();
 		$this->assertEquals( 'extra', $data['meta_data'][0]->key );
 		$this->assertEquals( 'woocommerce', $data['meta_data'][0]->value );
 	}
@@ -109,8 +108,7 @@ class WC_Tests_Payment_Token extends WC_Unit_Test_Case {
 		$token = WC_Helper_Payment_Token::create_stub_token( __FUNCTION__ );
 		$token_id = $token->get_id();
 
-		$token_read = new WC_Payment_Token_Stub();
-		$token_read->read( $token_id );
+		$token_read = new WC_Payment_Token_Stub( $token_id );
 
 		$this->assertEquals( $token->get_token(), $token_read->get_token() );
 		$this->assertEquals( $token->get_extra(), $token_read->get_extra() );
@@ -124,8 +122,12 @@ class WC_Tests_Payment_Token extends WC_Unit_Test_Case {
 		$token = WC_Helper_Payment_Token::create_stub_token( __FUNCTION__ );
 		$this->assertEquals( __FUNCTION__, $token->get_extra() );
 		$token->set_extra( ':)' );
-		$token->update();
+		$token->set_user_id( 2 );
+		$token->save();
+
+		$token = new WC_Payment_Token_Stub( $token->get_id() );
 		$this->assertEquals( ':)', $token->get_extra() );
+		$this->assertEquals( 2, $token->get_user_id() );
 	}
 
 	/**
@@ -136,9 +138,10 @@ class WC_Tests_Payment_Token extends WC_Unit_Test_Case {
 		$token = new WC_Payment_Token_Stub();
 		$token->set_extra( __FUNCTION__ );
 		$token->set_token( time() );
-		$token->create();
-
+		$token->save();
 		$this->assertNotEmpty( $token->get_id() );
+
+		$token = new WC_Payment_Token_Stub( $token->get_id() );
 		$this->assertEquals( __FUNCTION__, $token->get_extra() );
 	}
 
@@ -160,7 +163,36 @@ class WC_Tests_Payment_Token extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_payment_token_last4_doesnt_work() {
 		$token = new WC_Payment_Token_Stub();
-		$this->assertFalse( is_callable( $token, 'get_last4' ) );
+		$this->assertFalse( is_callable( array( $token, 'get_last4' ) ) );
 	}
 
+	/**
+	 * Test legacy token functions.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @expectedDeprecated WC_Payment_Token::read
+	 * @expectedDeprecated WC_Payment_Token::create
+	 * @expectedDeprecated WC_Payment_Token::update
+	 */
+	public function test_wc_payment_token_legacy() {
+		$token = WC_Helper_Payment_Token::create_stub_token( __FUNCTION__ );
+		$token_id = $token->get_id();
+
+		$token_read = new WC_Payment_Token_Stub();
+		$token_read->read( $token_id );
+		$this->assertEquals( $token_id, $token_read->get_id() );
+
+		$token = new WC_Payment_Token_Stub();
+		$token->set_token( 'blah' );
+		$token->create();
+
+		$this->assertEquals( 'blah', $token->get_token() );
+		$this->assertNotEmpty( $token->get_id() );
+
+		$token->set_token( 'blah2' );
+		$token->update();
+
+		$this->assertEquals( 'blah2', $token->get_token() );
+	}
 }

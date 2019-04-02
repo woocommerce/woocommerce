@@ -2,12 +2,13 @@
 /**
  * Brazillian states
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     2.0.0
+ * @package WooCommerce/i18n
+ * @version 2.0.0
  */
+
 global $states;
+
+defined( 'ABSPATH' ) || exit;
 
 $states['BR'] = array(
 	'AC' => __( 'Acre', 'woocommerce' ),
@@ -36,5 +37,5 @@ $states['BR'] = array(
 	'SC' => __( 'Santa Catarina', 'woocommerce' ),
 	'SP' => __( 'S&atilde;o Paulo', 'woocommerce' ),
 	'SE' => __( 'Sergipe', 'woocommerce' ),
-	'TO' => __( 'Tocantins', 'woocommerce' )
+	'TO' => __( 'Tocantins', 'woocommerce' ),
 );

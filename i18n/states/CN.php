@@ -2,12 +2,13 @@
 /**
  * Chinese states
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     2.0.0
+ * @package WooCommerce/i18n
+ * @version 2.0.0
  */
+
 global $states;
+
+defined( 'ABSPATH' ) || exit;
 
 $states['CN'] = array(
 	'CN1'  => __( 'Yunnan / &#20113;&#21335;', 'woocommerce' ),
@@ -41,5 +42,5 @@ $states['CN'] = array(
 	'CN29' => __( 'Ningxia Hui / &#23425;&#22799;', 'woocommerce' ),
 	'CN30' => __( 'Macau / &#28595;&#38376;', 'woocommerce' ),
 	'CN31' => __( 'Tibet / &#35199;&#34255;', 'woocommerce' ),
-	'CN32' => __( 'Xinjiang / &#26032;&#30086;', 'woocommerce' )
+	'CN32' => __( 'Xinjiang / &#26032;&#30086;', 'woocommerce' ),
 );

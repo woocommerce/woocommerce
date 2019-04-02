@@ -12,6 +12,7 @@
 	"trailing": true,
 	"undef": true,
 	"unused": true,
+	"multistr": true,
 
 	"browser": true,
 

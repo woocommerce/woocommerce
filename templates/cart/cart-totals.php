@@ -10,8 +10,7 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see 	    http://docs.woothemes.com/document/template-structure/
- * @author 		WooThemes
+ * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @package 	WooCommerce/Templates
  * @version     2.3.6
  */
@@ -21,11 +20,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 ?>
-<div class="cart_totals <?php if ( WC()->customer->has_calculated_shipping() ) echo 'calculated_shipping'; ?>">
+<div class="cart_totals <?php echo ( WC()->customer->has_calculated_shipping() ) ? 'calculated_shipping' : ''; ?>">
 
 	<?php do_action( 'woocommerce_before_cart_totals' ); ?>
 
-	<h2><?php _e( 'Cart Totals', 'woocommerce' ); ?></h2>
+	<h2><?php _e( 'Cart totals', 'woocommerce' ); ?></h2>
 
 	<table cellspacing="0" class="shop_table shop_table_responsive">
 
@@ -65,10 +64,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</tr>
 		<?php endforeach; ?>
 
-		<?php if ( wc_tax_enabled() && 'excl' === WC()->cart->tax_display_cart ) :
+		<?php if ( wc_tax_enabled() && ! WC()->cart->display_prices_including_tax() ) :
 			$taxable_address = WC()->customer->get_taxable_address();
 			$estimated_text  = WC()->customer->is_customer_outside_base() && ! WC()->customer->has_calculated_shipping()
-					? sprintf( ' <small>(' . __( 'estimated for %s', 'woocommerce' ) . ')</small>', WC()->countries->estimated_for_prefix( $taxable_address[0] ) . WC()->countries->countries[ $taxable_address[0] ] )
+					? sprintf( ' <small>' . __( '(estimated for %s)', 'woocommerce' ) . '</small>', WC()->countries->estimated_for_prefix( $taxable_address[0] ) . WC()->countries->countries[ $taxable_address[0] ] )
 					: '';
 
 			if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) : ?>
