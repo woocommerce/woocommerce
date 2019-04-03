@@ -561,9 +561,9 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 *
 	 * @expectedIncorrectUsage wc_get_template
 	 */
-	public function test_wc_get_template_invalid() {
+	public function test_wc_get_template_invalid_action_args() {
 		wc_get_template(
-			'does_not_exist.php',
+			'global/wrapper-start.php',
 			array(
 				'action_args' => 'this is bad',
 			)
