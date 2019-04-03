@@ -29,7 +29,7 @@ class Leaderboards extends Component {
 	constructor( props ) {
 		super( ...arguments );
 		this.state = {
-			hiddenLeaderboardKeys: props.userPrefLeaderboards || [],
+			hiddenLeaderboardKeys: props.userPrefLeaderboards || [ 'top-coupons', 'top-customers' ],
 			rowsPerTable: parseInt( props.userPrefLeaderboardRows ) || 5,
 		};
 

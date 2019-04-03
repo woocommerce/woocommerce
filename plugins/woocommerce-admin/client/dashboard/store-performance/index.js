@@ -36,7 +36,7 @@ class StorePerformance extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
-			userPrefs: props.userPrefs || [],
+			hiddenIndicators: props.hiddenIndicators || [],
 		};
 		this.toggle = this.toggle.bind( this );
 	}
@@ -44,19 +44,19 @@ class StorePerformance extends Component {
 	toggle( statKey ) {
 		return () => {
 			this.setState( state => {
-				const prefs = [ ...state.userPrefs ];
-				let newPrefs = [];
-				if ( ! prefs.includes( statKey ) ) {
-					prefs.push( statKey );
-					newPrefs = prefs;
+				const indicators = [ ...state.hiddenIndicators ];
+				let newHiddenIndicators = [];
+				if ( ! indicators.includes( statKey ) ) {
+					indicators.push( statKey );
+					newHiddenIndicators = indicators;
 				} else {
-					newPrefs = prefs.filter( pref => pref !== statKey );
+					newHiddenIndicators = indicators.filter( indicator => indicator !== statKey );
 				}
 				this.props.updateCurrentUserData( {
-					dashboard_performance_indicators: newPrefs,
+					dashboard_performance_indicators: newHiddenIndicators,
 				} );
 				return {
-					userPrefs: newPrefs,
+					hiddenIndicators: newHiddenIndicators,
 				};
 			} );
 		};
@@ -68,7 +68,7 @@ class StorePerformance extends Component {
 			<EllipsisMenu label={ __( 'Choose which analytics to display', 'woocommerce-admin' ) }>
 				<MenuTitle>{ __( 'Display Stats:', 'woocommerce-admin' ) }</MenuTitle>
 				{ indicators.map( ( indicator, i ) => {
-					const checked = ! this.state.userPrefs.includes( indicator.stat );
+					const checked = ! this.state.hiddenIndicators.includes( indicator.stat );
 					return (
 						<MenuItem
 							checked={ checked }
@@ -178,12 +178,20 @@ export default compose(
 			isReportItemsRequesting,
 		} = select( 'wc-api' );
 		const userData = getCurrentUserData();
-		let userPrefs = userData.dashboard_performance_indicators;
+		let hiddenIndicators = userData.dashboard_performance_indicators;
 
 		// Set default values for user preferences if none is set.
 		// These columns are HIDDEN by default.
-		if ( ! userPrefs ) {
-			userPrefs = [ 'taxes/order_tax', 'taxes/shipping_tax', 'downloads/download_count' ];
+		if ( ! hiddenIndicators ) {
+			hiddenIndicators = [
+				'coupons/amount',
+				'coupons/orders_count',
+				'downloads/download_count',
+				'taxes/order_tax',
+				'taxes/total_tax',
+				'taxes/shipping_tax',
+				'revenue/shipping',
+			];
 		}
 
 		const datesFromQuery = getCurrentDates( query );
@@ -191,7 +199,9 @@ export default compose(
 		const endSecondary = datesFromQuery.secondary.before;
 
 		const indicators = wcSettings.dataEndpoints.performanceIndicators;
-		const userIndicators = indicators.filter( indicator => ! userPrefs.includes( indicator.stat ) );
+		const userIndicators = indicators.filter(
+			indicator => ! hiddenIndicators.includes( indicator.stat )
+		);
 		const statKeys = userIndicators.map( indicator => indicator.stat ).join( ',' );
 
 		const primaryQuery = {
@@ -218,7 +228,7 @@ export default compose(
 		const secondaryRequesting = isReportItemsRequesting( 'performance-indicators', secondaryQuery );
 
 		return {
-			userPrefs,
+			hiddenIndicators,
 			userIndicators,
 			indicators,
 			primaryData,

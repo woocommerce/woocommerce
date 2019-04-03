@@ -31,7 +31,20 @@ class DashboardCharts extends Component {
 		super( ...arguments );
 		this.state = {
 			chartType: props.userPrefChartType || 'line',
-			hiddenChartKeys: props.userPrefCharts || [],
+			hiddenChartKeys: props.userPrefCharts || [
+				'avg_order_value',
+				'avg_items_per_order',
+				'items_sold',
+				'gross_revenue',
+				'refunds',
+				'coupons',
+				'taxes',
+				'shipping',
+				'amount',
+				'total_tax',
+				'order_tax',
+				'shipping_tax',
+			],
 			interval: props.userPrefIntervals || 'day',
 		};
 
