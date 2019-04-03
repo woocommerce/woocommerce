@@ -71,4 +71,54 @@ class WC_Admin_REST_Product_Variations_Controller extends WC_REST_Product_Variat
 		remove_filter( 'posts_groupby', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_group_by' ), 10 );
 		return $response;
 	}
+
+	/**
+	 * Get the Product's schema, conforming to JSON Schema.
+	 *
+	 * @return array
+	 */
+	public function get_item_schema() {
+		$schema = parent::get_item_schema();
+
+		$schema['properties']['name']      = array(
+			'description' => __( 'Product parent name.', 'woocommerce-admin' ),
+			'type'        => 'string',
+			'context'     => array( 'view', 'edit' ),
+		);
+		$schema['properties']['type']      = array(
+			'description' => __( 'Product type.', 'woocommerce-admin' ),
+			'type'        => 'string',
+			'default'     => 'variation',
+			'enum'        => array( 'variation' ),
+			'context'     => array( 'view', 'edit' ),
+		);
+		$schema['properties']['parent_id'] = array(
+			'description' => __( 'Product parent ID.', 'woocommerce-admin' ),
+			'type'        => 'integer',
+			'context'     => array( 'view', 'edit' ),
+		);
+
+		return $schema;
+	}
+
+	/**
+	 * Prepare a single variation output for response.
+	 *
+	 * @param  WC_Data         $object  Object data.
+	 * @param  WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function prepare_object_for_response( $object, $request ) {
+		$context  = empty( $request['context'] ) ? 'view' : $request['context'];
+		$response = parent::prepare_object_for_response( $object, $request );
+		$data     = $response->get_data();
+
+		$data['name']      = $object->get_name( $context );
+		$data['type']      = $object->get_type();
+		$data['parent_id'] = $object->get_parent_id( $context );
+
+		$response->set_data( $data );
+
+		return $response;
+	}
 }
