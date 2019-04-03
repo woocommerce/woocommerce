@@ -239,7 +239,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 				__( 'action_args should not be overwritten when calling wc_get_template.', 'woocommerce' ),
 				'3.6.0'
 			);
-			return;
+			unset( $args['action_args'] );
 		}
 		extract( $args ); // @codingStandardsIgnoreLine
 	}
