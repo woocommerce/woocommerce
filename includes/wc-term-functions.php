@@ -34,8 +34,6 @@ function wc_change_get_terms_defaults( $defaults, $taxonomies ) {
 
 	switch ( $orderby ) {
 		case 'menu_order':
-			$defaults['orderby']               = 'meta_value_num';
-			$defaults['meta_key']              = 'order'; // phpcs:ignore
 			$defaults['force_menu_order_sort'] = true;
 			break;
 		case 'name_num':
@@ -60,14 +58,21 @@ add_filter( 'get_terms_defaults', 'wc_change_get_terms_defaults', 10, 2 );
 function wc_change_pre_get_terms( $terms_query ) {
 	$args = &$terms_query->query_vars;
 
-	if ( ! empty( $args['menu_order'] ) ) {
-		$args['order']                 = 'DESC' === strtoupper( $args['menu_order'] ) ? 'DESC' : 'ASC';
-		$args['orderby']               = 'meta_value_num';
-		$args['meta_key']              = 'order'; // phpcs:ignore
-		$args['force_menu_order_sort'] = true;
-		$terms_query->meta_query->parse_query_vars( $args );
+	// When COUNTING, disable custom sorting.
+	if ( 'count' === $args['fields'] ) {
+		return;
 	}
 
+	if ( ! empty( $args['menu_order'] ) ) {
+		$args['order']                 = 'DESC' === strtoupper( $args['menu_order'] ) ? 'DESC' : 'ASC';
+		$args['force_menu_order_sort'] = true;
+	}
+
+	if ( ! empty( $args['force_menu_order_sort'] ) ) {
+		$args['orderby']  = 'meta_value_num';
+		$args['meta_key'] = 'order'; // phpcs:ignore
+		$terms_query->meta_query->parse_query_vars( $args );
+	}
 }
 add_action( 'pre_get_terms', 'wc_change_pre_get_terms', 10, 1 );
 
@@ -83,7 +88,7 @@ function wc_terms_clauses( $clauses, $taxonomies, $args ) {
 	global $wpdb;
 
 	// No need to filter when counting.
-	if ( strpos( 'COUNT(*)', $clauses['fields'] ) !== false ) {
+	if ( strpos( $clauses['fields'], 'COUNT(*)' ) !== false ) {
 		return $clauses;
 	}
 

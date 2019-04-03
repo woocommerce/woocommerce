@@ -1,9 +1,13 @@
 <?php
-
 /**
- * Class Functions.
+ * Attribute function tests.
+ *
  * @package WooCommerce\Tests\Attributes
  * @since 3.2.0
+ */
+
+/**
+ * WC_Tests_Attributes_Functions class.
  */
 class WC_Tests_Attributes_Functions extends WC_Unit_Test_Case {
 
@@ -201,5 +205,20 @@ class WC_Tests_Attributes_Functions extends WC_Unit_Test_Case {
 		// Failure.
 		$result = wc_delete_attribute( 9999999 );
 		$this->assertFalse( $result );
+	}
+
+	/**
+	 * Test counts of attributes.
+	 */
+	public function test_count_attribute_terms() {
+		$global_attribute_data = WC_Helper_Product::create_attribute( 'test', array( 'Chicken', 'Nuggets' ) );
+		$count                 = wp_count_terms(
+			$global_attribute_data['attribute_taxonomy'],
+			array(
+				'hide_empty' => false,
+			)
+		);
+
+		$this->assertEquals( 2, $count );
 	}
 }
