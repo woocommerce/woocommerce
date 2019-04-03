@@ -117,3 +117,9 @@
 		}
 	}
 }
+
+.woocommerce-filters-advanced__list-item {
+	.components-base-control + .components-base-control {
+		margin-bottom: 0;
+	}
+}
