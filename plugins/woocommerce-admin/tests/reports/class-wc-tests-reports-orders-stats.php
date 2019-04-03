@@ -24,11 +24,14 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$product->set_regular_price( 25 );
 		$product->save();
 
+		$coupon = WC_Helper_Coupon::create_coupon( 'test-coupon' );
+		$coupon->set_amount( 20 );
+		$coupon->save();
+
 		$order = WC_Helper_Order::create_order( 1, $product );
 		$order->set_status( 'completed' );
 		$order->set_shipping_total( 10 );
-		$order->set_discount_total( 20 );
-		$order->set_discount_tax( 0 );
+		$order->apply_coupon( $coupon );
 		$order->set_cart_tax( 5 );
 		$order->set_shipping_tax( 2 );
 		$order->set_total( 97 ); // $25x4 products + $10 shipping - $20 discount + $7 tax.
@@ -61,7 +64,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'avg_order_value'         => 56,
 				'gross_revenue'           => 97,
 				'coupons'                 => 20,
-				'coupons_count'           => 0,
+				'coupons_count'           => 1,
 				'refunds'                 => 12,
 				'taxes'                   => 7,
 				'shipping'                => 10,
@@ -82,7 +85,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'gross_revenue'           => 97,
 						'net_revenue'             => 56,
 						'coupons'                 => 20,
-						'coupons_count'           => 0,
+						'coupons_count'           => 1,
 						'shipping'                => 10,
 						'taxes'                   => 7,
 						'refunds'                 => 12,
@@ -114,7 +117,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'avg_items_per_order'     => 4,
 				'num_items_sold'          => 4,
 				'coupons'                 => 20,
-				'coupons_count'           => 0,
+				'coupons_count'           => 1,
 				'num_returning_customers' => 0,
 				'num_new_customers'       => 1,
 				'products'                => '1',
@@ -134,7 +137,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'avg_items_per_order'     => 4,
 						'num_items_sold'          => 4,
 						'coupons'                 => 20,
-						'coupons_count'           => 0,
+						'coupons_count'           => 1,
 						'num_returning_customers' => 0,
 						'num_new_customers'       => 1,
 						'segments'                => array(),

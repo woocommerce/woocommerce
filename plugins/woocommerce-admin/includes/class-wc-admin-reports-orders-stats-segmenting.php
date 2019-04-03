@@ -23,7 +23,7 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 		$columns_mapping = array(
 			'num_items_sold' => "SUM($products_table.product_qty) as num_items_sold",
 			'gross_revenue'  => "SUM($products_table.product_gross_revenue) AS gross_revenue",
-			'coupons'        => "SUM($products_table.coupon_amount) AS coupons",
+			'coupons'        => 'SUM( coupon_lookup_left_join.discount_amount ) AS coupons',
 			'coupons_count'  => 'COUNT( DISTINCT( coupon_lookup_left_join.coupon_id ) ) AS coupons_count',
 			'refunds'        => "SUM($products_table.refund_amount) AS refunds",
 			'taxes'          => "SUM($products_table.tax_amount) AS taxes",
@@ -66,7 +66,7 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 		$columns_mapping = array(
 			'num_items_sold'          => "SUM($order_stats_table.num_items_sold) as num_items_sold",
 			'gross_revenue'           => "SUM($order_stats_table.gross_total) AS gross_revenue",
-			'coupons'                 => "SUM($order_stats_table.coupon_total) AS coupons",
+			'coupons'                 => "SUM($order_stats_table.discount_amount) AS coupons",
 			'coupons_count'           => 'COUNT( DISTINCT(coupon_lookup_left_join.coupon_id) ) AS coupons_count',
 			'refunds'                 => "SUM($order_stats_table.refund_total) AS refunds",
 			'taxes'                   => "SUM($order_stats_table.tax_total) AS taxes",
