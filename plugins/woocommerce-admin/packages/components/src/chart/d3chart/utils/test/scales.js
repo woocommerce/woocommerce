@@ -12,7 +12,7 @@ import {
 	getOrderedKeys,
 	getUniqueDates,
 } from '../index';
-import { getXGroupScale, getXScale, getXLineScale, getYMax, getYScale } from '../scales';
+import { getXGroupScale, getXScale, getXLineScale, getYScaleLimits, getYScale } from '../scales';
 
 jest.mock( 'd3-scale', () => ( {
 	...require.requireActual( 'd3-scale' ),
@@ -88,26 +88,33 @@ describe( 'X scales', () => {
 } );
 
 describe( 'Y scales', () => {
-	describe( 'getYMax', () => {
-		it( 'calculate the correct maximum y value', () => {
-			expect( getYMax( dummyOrders ) ).toEqual( 15000000 );
+	describe( 'getYScaleLimits', () => {
+		it( 'calculate the correct y value limits', () => {
+			expect( getYScaleLimits( dummyOrders ) ).toEqual( { lower: 0, upper: 15000000, step: 5000000 } );
 		} );
 
-		it( 'return 0 if there is no line data', () => {
-			expect( getYMax( [] ) ).toEqual( 0 );
+		it( 'return defaults if there is no line data', () => {
+			expect( getYScaleLimits( [] ) ).toEqual( { lower: 0, upper: 0, step: 1 } );
 		} );
 	} );
 
 	describe( 'getYScale', () => {
-		it( 'creates linear scale with correct parameters', () => {
-			getYScale( 100, 15000000 );
+		it( 'creates positive linear scale with correct parameters', () => {
+			getYScale( 100, 0, 15000000 );
 
 			expect( scaleLinear().domain ).toHaveBeenLastCalledWith( [ 0, 15000000 ] );
 			expect( scaleLinear().rangeRound ).toHaveBeenLastCalledWith( [ 100, 0 ] );
 		} );
 
-		it( 'avoids the domain starting and ending at the same point when yMax is 0', () => {
-			getYScale( 100, 0 );
+		it( 'creates negative linear scale with correct parameters', () => {
+			getYScale( 100, -15000000, 0 );
+
+			expect( scaleLinear().domain ).toHaveBeenLastCalledWith( [ -15000000, 0 ] );
+			expect( scaleLinear().rangeRound ).toHaveBeenLastCalledWith( [ 100, 0 ] );
+		} );
+
+		it( 'avoids the domain starting and ending at the same point when yMin, yMax are 0', () => {
+			getYScale( 100, 0, 0 );
 
 			const args = scaleLinear().domain.mock.calls;
 			const lastArgs = args[ args.length - 1 ][ 0 ];

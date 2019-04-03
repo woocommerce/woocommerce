@@ -1,5 +1,6 @@
 # (unreleased)
 - Chart legend component now uses withInstanceId HOC so the ids used in several HTML elements are unique.
+- Chart component now accepts data with negative values.
 - Chart component: new prop `filterParam` used to detect selected items in the current query. If there are, they will be displayed in the chart even if their values are 0.
 - Expand search results and allow searching when input is refocused in autocompleter.
 

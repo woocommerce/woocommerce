@@ -52,41 +52,70 @@ export const getXLineScale = ( uniqueDates, width ) =>
 		] )
 		.rangeRound( [ 0, width ] );
 
-const getMaxYValue = data => {
+const getYValueLimits = data => {
 	let maxYValue = Number.NEGATIVE_INFINITY;
+	let minYValue = Number.POSITIVE_INFINITY;
 	data.map( d => {
 		for ( const [ key, item ] of Object.entries( d ) ) {
 			if ( key !== 'date' && Number.isFinite( item.value ) && item.value > maxYValue ) {
 				maxYValue = item.value;
 			}
+			if ( key !== 'date' && Number.isFinite( item.value ) && item.value < minYValue ) {
+				minYValue = item.value;
+			}
 		}
 	} );
 
-	return maxYValue;
+	return { upper: maxYValue, lower: minYValue };
+};
+
+const calculateStep = ( minValue, maxValue ) => {
+	if ( ! Number.isFinite( minValue ) || ! Number.isFinite( maxValue ) ) {
+		return 1;
+	}
+
+	const maxAbsValue = Math.max( -minValue, maxValue );
+	const maxLimit = 4 / 3 * maxAbsValue;
+	const pow3Y = Math.pow( 10, ( ( Math.log( maxLimit ) * Math.LOG10E + 1 ) | 0 ) - 2 ) * 3;
+
+	return Math.max( Math.ceil( Math.ceil( maxLimit / pow3Y ) * pow3Y / 3 ), 1 / 3 );
 };
 
 /**
- * Describes and rounds the maximum y value to the nearest thousand, ten-thousand, million etc. In case it is a decimal number, ceils it.
+ * Returns the lower and upper limits of the Y scale and the calculated step to use in the axis, rounding
+ * them to the nearest thousand, ten-thousand, million etc. In case it is a decimal number, ceils it.
  * @param {array} data - The chart component's `data` prop.
- * @returns {number} the maximum value in the timeseries multiplied by 4/3
+ * @returns {object} Object containing the `lower` and `upper` limits and a `step` value.
  */
-export const getYMax = data => {
-	const maxValue = getMaxYValue( data );
-	if ( ! Number.isFinite( maxValue ) || maxValue <= 0 ) {
-		return 0;
+export const getYScaleLimits = data => {
+	const { lower: minValue, upper: maxValue } = getYValueLimits( data );
+	const step = calculateStep( minValue, maxValue );
+	const limits = { lower: 0, upper: 0, step };
+
+	if ( Number.isFinite( minValue ) || minValue < 0 ) {
+		limits.lower = Math.floor( minValue / step ) * step;
+		if ( limits.lower === minValue && minValue !== 0 ) {
+			limits.lower -= step;
+		}
 	}
-	const yMax = 4 / 3 * maxValue;
-	const pow3Y = Math.pow( 10, ( ( Math.log( yMax ) * Math.LOG10E + 1 ) | 0 ) - 2 ) * 3;
-	return Math.ceil( Math.ceil( yMax / pow3Y ) * pow3Y );
+	if ( Number.isFinite( maxValue ) || maxValue > 0 ) {
+		limits.upper = Math.ceil( maxValue / step ) * step;
+		if ( limits.upper === maxValue && maxValue !== 0 ) {
+			limits.upper += step;
+		}
+	}
+
+	return limits;
 };
 
 /**
  * Describes getYScale
  * @param {number} height - calculated height of the charting space
+ * @param {number} yMin - minimum y value
  * @param {number} yMax - maximum y value
  * @returns {function} the D3 linear scale from 0 to the value from `getYMax`
  */
-export const getYScale = ( height, yMax ) =>
+export const getYScale = ( height, yMin, yMax ) =>
 	d3ScaleLinear()
-		.domain( [ 0, yMax === 0 ? 1 : yMax ] )
+		.domain( [ Math.min( yMin, 0 ), yMax === 0 && yMin === 0 ? 1 : Math.max( yMax, 0 ) ] )
 		.rangeRound( [ height, 0 ] );

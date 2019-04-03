@@ -29,10 +29,12 @@
 		margin: 0 auto;
 		max-width: 50%;
 		padding-bottom: 48px;
+		pointer-events: none;
 		position: absolute;
 		right: 0;
 		top: 0;
 		text-align: center;
+		z-index: 1;
 
 		@include breakpoint( '<782px' ) {
 			@include font-size( 13 );
@@ -129,13 +131,10 @@
 					stroke: $core-grey-dark-500;
 				}
 			}
-
-			&:last-child {
-				line {
-					opacity: 0;
-				}
-			}
 		}
+	}
+	.grid.with-positive-ticks .tick:last-child line {
+		opacity: 0;
 	}
 	.tick {
 		padding-top: 10px;

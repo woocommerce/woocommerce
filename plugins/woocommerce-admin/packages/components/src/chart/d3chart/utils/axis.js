@@ -173,17 +173,44 @@ export const compareStrings = ( s1, s2, splitChar = new RegExp( [ ' |,' ], 'g' )
 	return diff;
 };
 
-export const getYGrids = ( yMax ) => {
-	const yGrids = [];
+const calculateYGridValues = ( numberOfTicks, limit, roundValues ) => {
+	const grids = [];
 
-	for ( let i = 0; i < 4; i++ ) {
-		const value = yMax > 1 ? Math.round( i / 3 * yMax ) : i / 3 * yMax;
-		if ( yGrids[ yGrids.length - 1 ] !== value ) {
-			yGrids.push( value );
+	for ( let i = 0; i < numberOfTicks; i++ ) {
+		const val = ( i + 1 ) / numberOfTicks * limit;
+		const rVal = roundValues ? Math.round( val ) : val;
+		if ( grids[ grids.length - 1 ] !== rVal ) {
+			grids.push( rVal );
 		}
 	}
 
-	return yGrids;
+	return grids;
+};
+
+const getNegativeYGrids = ( yMin, step ) => {
+	if ( yMin >= 0 ) {
+		return [];
+	}
+
+	const numberOfTicks = Math.ceil( -yMin / step );
+	return calculateYGridValues( numberOfTicks, yMin, yMin < -1 );
+};
+
+const getPositiveYGrids = ( yMax, step ) => {
+	if ( yMax <= 0 ) {
+		return [];
+	}
+
+	const numberOfTicks = Math.ceil( yMax / step );
+	return calculateYGridValues( numberOfTicks, yMax, yMax > 1 );
+};
+
+export const getYGrids = ( yMin, yMax, step ) => {
+	return [
+		0,
+		...getNegativeYGrids( yMin, step ),
+		...getPositiveYGrids( yMax, step ),
+	];
 };
 
 const removeDuplicateDates = ( d, i, ticks, formatter ) => {
@@ -239,13 +266,14 @@ const drawXAxis = ( node, params, scales, formats ) => {
 };
 
 const drawYAxis = ( node, scales, formats, margin, isRTL ) => {
-	const yGrids = getYGrids( scales.yScale.domain()[ 1 ] );
+	const yGrids = getYGrids( scales.yScale.domain()[ 0 ], scales.yScale.domain()[ 1 ], scales.step );
 	const width = scales.xScale.range()[ 1 ];
 	const xPosition = isRTL ? width + margin.left + margin.right / 2 - 15 : -margin.left / 2 - 15;
 
+	const withPositiveValuesClass = scales.yMin >= 0 || scales.yMax > 0 ? ' with-positive-ticks' : '';
 	node
 		.append( 'g' )
-		.attr( 'class', 'grid' )
+		.attr( 'class', 'grid' + withPositiveValuesClass )
 		.attr( 'transform', `translate(-${ margin.left }, 0)` )
 		.call(
 			d3AxisLeft( scales.yScale )
@@ -262,7 +290,7 @@ const drawYAxis = ( node, scales, formats, margin, isRTL ) => {
 		.attr( 'text-anchor', 'start' )
 		.call(
 			d3AxisLeft( scales.yScale )
-				.tickValues( scales.yMax === 0 ? [ yGrids[ 0 ] ] : yGrids )
+				.tickValues( scales.yMax === 0 && scales.yMin === 0 ? [ yGrids[ 0 ] ] : yGrids )
 				.tickFormat( d => formats.yFormat( d !== 0 ? d : 0 ) )
 		);
 };

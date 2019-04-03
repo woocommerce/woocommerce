@@ -22,8 +22,8 @@ import {
 	getXScale,
 	getXGroupScale,
 	getXLineScale,
-	getYMax,
 	getYScale,
+	getYScaleLimits,
 } from './utils/scales';
 import { drawAxis } from './utils/axis';
 import { drawBars } from './utils/bar-chart';
@@ -62,13 +62,15 @@ class D3Chart extends Component {
 
 		const adjHeight = height - margin.top - margin.bottom;
 		const adjWidth = this.getWidth() - margin.left - margin.right;
-		const yMax = getYMax( data );
-		const yScale = getYScale( adjHeight, yMax );
+		const { upper: yMax, lower: yMin, step } = getYScaleLimits( data );
+		const yScale = getYScale( adjHeight, yMin, yMax );
 
 		if ( chartType === 'line' ) {
 			return {
+				step,
 				xScale: getXLineScale( uniqueDates, adjWidth ),
 				yMax,
+				yMin,
 				yScale,
 			};
 		}
@@ -77,9 +79,11 @@ class D3Chart extends Component {
 		const xScale = getXScale( uniqueDates, adjWidth, compact );
 
 		return {
+			step,
 			xGroupScale: getXGroupScale( orderedKeys, xScale, compact ),
 			xScale,
 			yMax,
+			yMin,
 			yScale,
 		};
 	}

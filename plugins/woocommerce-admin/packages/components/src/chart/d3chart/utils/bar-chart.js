@@ -40,6 +40,7 @@ export const drawBars = ( node, data, params, scales, formats, tooltip ) => {
 		} )
 		.on( 'mouseout', () => tooltip.hide() );
 
+	const basePosition = scales.yScale( 0 );
 	barGroup
 		.selectAll( '.bar' )
 		.data( d =>
@@ -56,9 +57,9 @@ export const drawBars = ( node, data, params, scales, formats, tooltip ) => {
 		.append( 'rect' )
 		.attr( 'class', 'bar' )
 		.attr( 'x', d => scales.xGroupScale( d.key ) )
-		.attr( 'y', d => scales.yScale( d.value ) )
+		.attr( 'y', d => Math.min( basePosition, scales.yScale( d.value ) ) )
 		.attr( 'width', scales.xGroupScale.bandwidth() )
-		.attr( 'height', d => height - scales.yScale( d.value ) )
+		.attr( 'height', d => Math.abs( basePosition - scales.yScale( d.value ) ) )
 		.attr( 'fill', d => params.getColor( d.key ) )
 		.attr( 'pointer-events', 'none' )
 		.attr( 'tabindex', '0' )
