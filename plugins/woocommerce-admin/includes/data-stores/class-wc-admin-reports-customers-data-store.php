@@ -291,14 +291,14 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 				$subclauses[] = $wpdb->prepare(
 					"{$param_info['column']} >{$or_equal} {$param_info['format']}",
 					$query_args[ $min_param ]
-				); // WPCS: unprepared SQL ok.
+				); // WPCS: unprepared SQL ok, PreparedSQLPlaceholders replacement count ok.
 			}
 
 			if ( isset( $query_args[ $max_param ] ) ) {
 				$subclauses[] = $wpdb->prepare(
 					"{$param_info['column']} <{$or_equal} {$param_info['format']}",
 					$query_args[ $max_param ]
-				); // WPCS: unprepared SQL ok.
+				); // WPCS: unprepared SQL ok, PreparedSQLPlaceholders replacement count ok.
 			}
 
 			if ( $subclauses ) {
