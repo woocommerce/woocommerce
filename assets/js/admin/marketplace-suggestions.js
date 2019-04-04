@@ -449,19 +449,9 @@
 
 					if ( content ) {
 						// where should we put it in the list?
-						var rows = $( this ).children();
-						var minRow = 3;
-
 						$( content ).hide();
 
-						if ( rows.length <= minRow ) {
-							// if small number of rows, append at end
-							$( this ).append( content );
-						}
-						else {
-							// for more rows, insert
-							$( rows[ minRow - 1 ] ).after( content );
-						}
+						$( this ).append( content );
 
 						$( content ).fadeIn();
 
