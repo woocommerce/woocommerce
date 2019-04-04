@@ -297,7 +297,7 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 
 		if ( 'tax_code' === $order_by ) {
 			return 'CONCAT_WS( "-", NULLIF(tax_rate_country, ""), NULLIF(tax_rate_state, ""), NULLIF(tax_rate_name, ""), NULLIF(tax_rate_priority, "") )';
-		} else if ( 'rate' === $order_by ) {
+		} elseif ( 'rate' === $order_by ) {
 			return "CAST({$wpdb->prefix}woocommerce_tax_rates.tax_rate as DECIMAL(7,4))";
 		}
 

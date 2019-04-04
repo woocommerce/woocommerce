@@ -262,7 +262,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		$mapped_data = array();
 		foreach ( $products as $product ) {
 			if ( ! isset( $mapped_data[ $product['order_id'] ] ) ) {
-				$mapped_data[ $product['order_id'] ]['products']   = array();
+				$mapped_data[ $product['order_id'] ]['products'] = array();
 			}
 
 			$mapped_data[ $product['order_id'] ]['products'][] = array(
@@ -285,9 +285,9 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 
 		foreach ( $orders_data as $key => $order_data ) {
 			$defaults                             = array(
-				'products'   => array(),
-				'coupons'    => array(),
-				'customer'   => array(),
+				'products' => array(),
+				'coupons'  => array(),
+				'customer' => array(),
 			);
 			$orders_data[ $key ]['extended_info'] = isset( $mapped_data[ $order_data['order_id'] ] ) ? array_merge( $defaults, $mapped_data[ $order_data['order_id'] ] ) : $defaults;
 			if ( $order_data['customer_id'] && isset( $mapped_customers[ $order_data['customer_id'] ] ) ) {
