@@ -345,6 +345,10 @@
 		function displaySuggestions( marketplaceSuggestionsApiData ) {
 			var usedSuggestionsContexts = [];
 
+			// We mostly hide suggestions with css mediaqueries;
+			// however, some jQuery reveal animations override the css.
+			var windowTooSmallForSuggestions = ( window.innerWidth < 800 );
+
 			// iterate over all suggestions containers, rendering promos
 			$( '.marketplace-suggestions-container' ).each( function() {
 				// determine the context / placement we're populating
@@ -453,7 +457,9 @@
 
 						$( this ).append( content );
 
-						$( content ).fadeIn();
+						if ( ! windowTooSmallForSuggestions ) {
+							$( content ).fadeIn();
+						}
 
 						usedSuggestionsContexts.push( context );
 
