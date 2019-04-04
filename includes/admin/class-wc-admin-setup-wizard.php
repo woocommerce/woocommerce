@@ -141,11 +141,7 @@ class WC_Admin_Setup_Wizard {
 	 * @return boolean
 	 */
 	protected function should_show_facebook() {
-		$end_date_facebook_recommendation = new DateTime( '8 October 2019' );
-		$current_user_date = new DateTime( current_time( 'Y-m-d' ) );
-
-		return current_user_can( 'install_plugins' ) &&
-			$end_date_facebook_recommendation >= $current_user_date;
+		return current_user_can( 'install_plugins' );
 	}
 
 	/**
