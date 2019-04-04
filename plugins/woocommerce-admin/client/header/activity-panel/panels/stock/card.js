@@ -3,7 +3,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, TextControl } from '@wordpress/components';
+import { BaseControl, Button } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
@@ -30,6 +30,10 @@ class ProductStockCard extends Component {
 		this.cancelEdit = this.cancelEdit.bind( this );
 		this.onQuantityChange = this.onQuantityChange.bind( this );
 		this.updateStock = this.updateStock.bind( this );
+	}
+
+	componentDidUpdate() {
+		this.quantityInput && this.quantityInput.focus();
 	}
 
 	beginEdit() {
@@ -86,12 +90,17 @@ class ProductStockCard extends Component {
 		if ( editing ) {
 			return (
 				<Fragment>
-					<TextControl
-						className="woocommerce-stock-activity-card__edit-quantity"
-						type="number"
-						value={ quantity }
-						onChange={ this.onQuantityChange }
-					/>
+					<BaseControl className="woocommerce-stock-activity-card__edit-quantity">
+						<input
+							className="components-text-control__input"
+							type="number"
+							value={ quantity }
+							onChange={ this.onQuantityChange }
+							ref={ input => {
+								this.quantityInput = input;
+							} }
+						/>
+					</BaseControl>
 					<span>{ __( 'in stock', 'woocommerce-admin' ) }</span>
 				</Fragment>
 			);
