@@ -178,6 +178,11 @@ class WC_Marketplace_Suggestions {
 			return false;
 		}
 
+		// Suggestions may be disabled via a setting under Accounts & Privacy.
+		if ( 'no' === get_option( 'woocommerce_show_marketplace_suggestions', 'yes' ) ) {
+			return false;
+		}
+
 		// User can disabled all suggestions via filter.
 		return apply_filters( 'woocommerce_allow_marketplace_suggestions', true );
 	}
