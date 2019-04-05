@@ -244,7 +244,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'title'         => __( 'Enable tracking', 'woocommerce' ),
 					'desc'          => __( 'Allow usage of WooCommerce to be tracked', 'woocommerce' ),
 					/* Translators: %s URL to tracking info screen. */
-					'desc_tip'      => sprintf( esc_html__( 'Do not check this box, If you do not wish to opt-in for WooCommerce.com to track your usage data. We will not know you store exists or not provide you recommendations. %s.', 'woocommerce' ), $tracking_info_text ),
+					'desc_tip'      => sprintf( esc_html__( 'Do not check this box, If you do not wish to opt-in for WooCommerce.com to track your usage data and we will not know you store exists or not provide you recommendations. %s.', 'woocommerce' ), $tracking_info_text ),
 					'id'            => 'woocommerce_allow_tracking',
 					'type'          => 'checkbox',
 					'checkboxgroup' => 'start',
