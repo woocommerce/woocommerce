@@ -2,7 +2,6 @@
 /**
  * Action Queue Test Helper
  *
- * @version 3.5.0
  * @package WooCommerce/Tests
  */
 

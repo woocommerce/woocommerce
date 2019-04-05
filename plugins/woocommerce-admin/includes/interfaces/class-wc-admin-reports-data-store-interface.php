@@ -2,7 +2,6 @@
 /**
  * Reports Data Store Interface
  *
- * @version  3.5.0
  * @package  WooCommerce Admin/Interface
  */
 

@@ -9,8 +9,6 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * WC_Admin_Reports_Orders_Stats_Data_Store.
- *
- * @version  3.5.0
  */
 class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Store implements WC_Admin_Reports_Data_Store_Interface {
 

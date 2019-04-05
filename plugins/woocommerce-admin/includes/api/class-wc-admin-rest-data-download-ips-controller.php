@@ -101,7 +101,7 @@ class WC_Admin_REST_Data_Download_Ips_Controller extends WC_REST_Data_Controller
 		$response->add_links( $this->prepare_links( $item ) );
 
 		/**
-		 * Filter the ist returned from the API.
+		 * Filter the list returned from the API.
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $item     The original item.
