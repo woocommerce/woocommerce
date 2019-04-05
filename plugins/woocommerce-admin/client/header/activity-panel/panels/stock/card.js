@@ -47,8 +47,8 @@ class ProductStockCard extends Component {
 		} );
 	}
 
-	onQuantityChange( quantity ) {
-		this.setState( { quantity } );
+	onQuantityChange( event ) {
+		this.setState( { quantity: event.target.value } );
 	}
 
 	updateStock() {
