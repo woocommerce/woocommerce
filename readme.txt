@@ -191,6 +191,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Tweak - Set reply-to address for all emails. #22979
 * Tweak - Setup wizard redirection improvements. #22977
 * Tweak - Simplify display of discount amounts within orders. #22949
+* Tewak - Remove Marketplace Suggestions from product listing page. #23211
 * Template - Moved the order of rememberme checkboxes for accessibility so they tab in order. #21454
 * Template - New structure for attributes template, including new `woocommerce_display_product_attributes` filter. #22480
 * Template - Admin cancelled order email reworded. #22971
