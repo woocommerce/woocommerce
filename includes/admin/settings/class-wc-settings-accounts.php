@@ -255,6 +255,26 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'type' => 'sectionend',
 					'id'   => 'tracking_options',
 				),
+				array(
+					'title' => esc_html__( 'Marketplace suggestions', 'woocommerce' ),
+					'type'  => 'title',
+					'id'    => 'marketplace_suggestions',
+					'desc'  => __( 'We show contextual suggestions for official extensions that may be helpful to your store.', 'woocommerce' ),
+				),
+				array(
+					'title'         => __( 'Show Suggestions', 'woocommerce' ),
+					'desc'          => __( 'Display suggestions within WooCommerce', 'woocommerce' ),
+					'desc_tip'      => esc_html__( 'Leave this box unchecked if you do not want to see suggested extensions.', 'woocommerce' ),
+					'id'            => 'woocommerce_show_marketplace_suggestions',
+					'type'          => 'checkbox',
+					'checkboxgroup' => 'start',
+					'default'       => 'yes',
+					'autoload'      => false,
+				),
+				array(
+					'type' => 'sectionend',
+					'id'   => 'marketplace_suggestions',
+				),
 			)
 		);
 
