@@ -153,7 +153,7 @@
 		}
 
 		// Render DOM elements for suggestion content.
-		function renderSuggestionContent( title, copy ) {
+		function renderSuggestionContent( slug, title, copy ) {
 			var container = document.createElement( 'div' );
 
 			container.classList.add( 'marketplace-suggestion-container-content' );
@@ -168,6 +168,26 @@
 				var body = document.createElement( 'p' );
 				body.textContent = copy;
 				container.appendChild( body );
+			}
+
+			// Conditionally add in a Manage suggestions link to product edit
+			// metabox footer (based on suggestion slug).
+			var slugsWithManage = [
+				'product-edit-empty-footer-browse-all',
+				'product-edit-meta-tab-footer-browse-all'
+			];
+			if ( -1 !== slugsWithManage.indexOf( slug ) ) {
+				container.classList.add( 'has-manage-link' );
+
+				var manageSuggestionsLink = document.createElement( 'a' );
+				manageSuggestionsLink.classList.add( 'marketplace-suggestion-manage-link', 'linkout' );
+				manageSuggestionsLink.setAttribute(
+					'href',
+					'/wp-admin/admin.php?page=wc-settings&tab=account#marketplace_suggestions-description'
+				);
+				manageSuggestionsLink.textContent =  marketplace_suggestions.i18n_marketplace_suggestions_manage_suggestions;
+
+				container.appendChild( manageSuggestionsLink );
 			}
 
 			return container;
@@ -206,7 +226,7 @@
 				container.appendChild( icon );
 			}
 			container.appendChild(
-				renderSuggestionContent( title, copy )
+				renderSuggestionContent( slug, title, copy )
 			);
 			container.appendChild(
 				renderSuggestionCTA( context, product, promoted, slug, url, linkText, linkIsButton, allowDismiss )
