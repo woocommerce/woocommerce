@@ -16,8 +16,6 @@ import DateRange from '../../calendar/date-range';
 import { H, Section } from '../../section';
 import PresetPeriods from './preset-periods';
 
-const isMobileViewport = () => window.innerWidth < 782;
-
 class DatePickerContent extends Component {
 	constructor() {
 		super();
@@ -102,7 +100,6 @@ class DatePickerContent extends Component {
 								) }
 								<div
 									className={ classnames( 'woocommerce-filters-date__content-controls', {
-										'is-sticky-bottom': selected.name === 'custom' && isMobileViewport(),
 										'is-custom': selected.name === 'custom',
 									} ) }
 								>
