@@ -131,7 +131,7 @@ class WC_Admin_Notes {
 		$next  = $queue->get_next( self::UNSNOOZE_HOOK );
 
 		if ( ! $next ) {
-			$queue->schedule_recurring( time(), HOUR_IN_SECONDS, self::UNSNOOZE_HOOK );
+			$queue->schedule_recurring( time(), HOUR_IN_SECONDS, self::UNSNOOZE_HOOK, array(), WC_Admin_Reports_Sync::QUEUE_GROUP );
 		}
 	}
 }
