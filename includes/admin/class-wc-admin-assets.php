@@ -446,6 +446,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 							=> esc_html__( 'Learn More', 'woocommerce' ),
 						'i18n_marketplace_suggestions_dismiss_tooltip'
 							=> esc_attr__( 'Dismiss this suggestion', 'woocommerce' ),
+						'i18n_marketplace_suggestions_manage_suggestions'
+							=> esc_html__( 'Manage suggestions', 'woocommerce' ),
 					)
 				);
 				wp_enqueue_script( 'marketplace-suggestions' );
