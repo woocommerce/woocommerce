@@ -38,223 +38,226 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 
 		$tracking_info_text = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://woocommerce.com/usage-tracking', esc_html__( 'WooCommerce.com Usage Tracking Documentation', 'woocommerce' ) );
 
-		$settings = apply_filters(
-			'woocommerce_' . $this->id . '_settings',
+		$account_settings = array(
 			array(
-				array(
-					'title' => '',
-					'type'  => 'title',
-					'id'    => 'account_registration_options',
-				),
-				array(
-					'title'         => __( 'Guest checkout', 'woocommerce' ),
-					'desc'          => __( 'Allow customers to place orders without an account', 'woocommerce' ),
-					'id'            => 'woocommerce_enable_guest_checkout',
-					'default'       => 'yes',
-					'type'          => 'checkbox',
-					'checkboxgroup' => 'start',
-					'autoload'      => false,
-				),
-				array(
-					'title'         => __( 'Login', 'woocommerce' ),
-					'desc'          => __( 'Allow customers to log into an existing account during checkout', 'woocommerce' ),
-					'id'            => 'woocommerce_enable_checkout_login_reminder',
-					'default'       => 'no',
-					'type'          => 'checkbox',
-					'checkboxgroup' => 'end',
-					'autoload'      => false,
-				),
-				array(
-					'title'         => __( 'Account creation', 'woocommerce' ),
-					'desc'          => __( 'Allow customers to create an account during checkout', 'woocommerce' ),
-					'id'            => 'woocommerce_enable_signup_and_login_from_checkout',
-					'default'       => 'no',
-					'type'          => 'checkbox',
-					'checkboxgroup' => 'start',
-					'autoload'      => false,
-				),
-				array(
-					'desc'          => __( 'Allow customers to create an account on the "My account" page', 'woocommerce' ),
-					'id'            => 'woocommerce_enable_myaccount_registration',
-					'default'       => 'no',
-					'type'          => 'checkbox',
-					'checkboxgroup' => '',
-					'autoload'      => false,
-				),
-				array(
-					'desc'          => __( 'When creating an account, automatically generate a username from the customer\'s email address', 'woocommerce' ),
-					'id'            => 'woocommerce_registration_generate_username',
-					'default'       => 'yes',
-					'type'          => 'checkbox',
-					'checkboxgroup' => '',
-					'autoload'      => false,
-				),
-				array(
-					'desc'          => __( 'When creating an account, automatically generate an account password', 'woocommerce' ),
-					'id'            => 'woocommerce_registration_generate_password',
-					'default'       => 'yes',
-					'type'          => 'checkbox',
-					'checkboxgroup' => 'end',
-					'autoload'      => false,
-				),
-				array(
-					'title'         => __( 'Account erasure requests', 'woocommerce' ),
-					'desc'          => __( 'Remove personal data from orders on request', 'woocommerce' ),
-					/* Translators: %s URL to erasure request screen. */
-					'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should personal data within orders be retained or removed?', 'woocommerce' ), $erasure_text ),
-					'id'            => 'woocommerce_erasure_request_removes_order_data',
-					'type'          => 'checkbox',
-					'default'       => 'no',
-					'checkboxgroup' => 'start',
-					'autoload'      => false,
-				),
-				array(
-					'desc'          => __( 'Remove access to downloads on request', 'woocommerce' ),
-					/* Translators: %s URL to erasure request screen. */
-					'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should access to downloadable files be revoked and download logs cleared?', 'woocommerce' ), $erasure_text ),
-					'id'            => 'woocommerce_erasure_request_removes_download_data',
-					'type'          => 'checkbox',
-					'default'       => 'no',
-					'checkboxgroup' => 'end',
-					'autoload'      => false,
-				),
-				array(
-					'title'         => __( 'Personal data removal', 'woocommerce' ),
-					'desc'          => __( 'Allow personal data to be removed in bulk from orders', 'woocommerce' ),
-					'desc_tip'      => __( 'Adds an option to the orders screen for removing personal in bulk. Note that removing personal data cannot be undone.', 'woocommerce' ),
-					'id'            => 'woocommerce_allow_bulk_remove_personal_data',
-					'type'          => 'checkbox',
-					'checkboxgroup' => 'start',
-					'default'       => 'no',
-					'autoload'      => false,
-				),
-				array(
-					'type' => 'sectionend',
-					'id'   => 'account_registration_options',
-				),
-				array(
-					'title' => __( 'Privacy policy', 'woocommerce' ),
-					'type'  => 'title',
-					'id'    => 'privacy_policy_options',
-					'desc'  => __( 'This section controls the display of your website privacy policy. The privacy notices below will not show up unless a privacy page is first set.', 'woocommerce' ),
-				),
+				'title' => '',
+				'type'  => 'title',
+				'id'    => 'account_registration_options',
+			),
+			array(
+				'title'         => __( 'Guest checkout', 'woocommerce' ),
+				'desc'          => __( 'Allow customers to place orders without an account', 'woocommerce' ),
+				'id'            => 'woocommerce_enable_guest_checkout',
+				'default'       => 'yes',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'start',
+				'autoload'      => false,
+			),
+			array(
+				'title'         => __( 'Login', 'woocommerce' ),
+				'desc'          => __( 'Allow customers to log into an existing account during checkout', 'woocommerce' ),
+				'id'            => 'woocommerce_enable_checkout_login_reminder',
+				'default'       => 'no',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'end',
+				'autoload'      => false,
+			),
+			array(
+				'title'         => __( 'Account creation', 'woocommerce' ),
+				'desc'          => __( 'Allow customers to create an account during checkout', 'woocommerce' ),
+				'id'            => 'woocommerce_enable_signup_and_login_from_checkout',
+				'default'       => 'no',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'start',
+				'autoload'      => false,
+			),
+			array(
+				'desc'          => __( 'Allow customers to create an account on the "My account" page', 'woocommerce' ),
+				'id'            => 'woocommerce_enable_myaccount_registration',
+				'default'       => 'no',
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'autoload'      => false,
+			),
+			array(
+				'desc'          => __( 'When creating an account, automatically generate a username from the customer\'s email address', 'woocommerce' ),
+				'id'            => 'woocommerce_registration_generate_username',
+				'default'       => 'yes',
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'autoload'      => false,
+			),
+			array(
+				'desc'          => __( 'When creating an account, automatically generate an account password', 'woocommerce' ),
+				'id'            => 'woocommerce_registration_generate_password',
+				'default'       => 'yes',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'end',
+				'autoload'      => false,
+			),
+			array(
+				'title'         => __( 'Account erasure requests', 'woocommerce' ),
+				'desc'          => __( 'Remove personal data from orders on request', 'woocommerce' ),
+				/* Translators: %s URL to erasure request screen. */
+				'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should personal data within orders be retained or removed?', 'woocommerce' ), $erasure_text ),
+				'id'            => 'woocommerce_erasure_request_removes_order_data',
+				'type'          => 'checkbox',
+				'default'       => 'no',
+				'checkboxgroup' => 'start',
+				'autoload'      => false,
+			),
+			array(
+				'desc'          => __( 'Remove access to downloads on request', 'woocommerce' ),
+				/* Translators: %s URL to erasure request screen. */
+				'desc_tip'      => sprintf( esc_html__( 'When handling an %s, should access to downloadable files be revoked and download logs cleared?', 'woocommerce' ), $erasure_text ),
+				'id'            => 'woocommerce_erasure_request_removes_download_data',
+				'type'          => 'checkbox',
+				'default'       => 'no',
+				'checkboxgroup' => 'end',
+				'autoload'      => false,
+			),
+			array(
+				'title'         => __( 'Personal data removal', 'woocommerce' ),
+				'desc'          => __( 'Allow personal data to be removed in bulk from orders', 'woocommerce' ),
+				'desc_tip'      => __( 'Adds an option to the orders screen for removing personal in bulk. Note that removing personal data cannot be undone.', 'woocommerce' ),
+				'id'            => 'woocommerce_allow_bulk_remove_personal_data',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'start',
+				'default'       => 'no',
+				'autoload'      => false,
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'account_registration_options',
+			),
+			array(
+				'title' => __( 'Privacy policy', 'woocommerce' ),
+				'type'  => 'title',
+				'id'    => 'privacy_policy_options',
+				'desc'  => __( 'This section controls the display of your website privacy policy. The privacy notices below will not show up unless a privacy page is first set.', 'woocommerce' ),
+			),
 
-				array(
-					'title'    => __( 'Privacy page', 'woocommerce' ),
-					'desc'     => __( 'Choose a page to act as your privacy policy.', 'woocommerce' ),
-					'id'       => 'wp_page_for_privacy_policy',
-					'type'     => 'single_select_page',
-					'default'  => '',
-					'class'    => 'wc-enhanced-select-nostd',
-					'css'      => 'min-width:300px;',
-					'desc_tip' => true,
-				),
+			array(
+				'title'    => __( 'Privacy page', 'woocommerce' ),
+				'desc'     => __( 'Choose a page to act as your privacy policy.', 'woocommerce' ),
+				'id'       => 'wp_page_for_privacy_policy',
+				'type'     => 'single_select_page',
+				'default'  => '',
+				'class'    => 'wc-enhanced-select-nostd',
+				'css'      => 'min-width:300px;',
+				'desc_tip' => true,
+			),
 
-				array(
-					'title'    => __( 'Registration privacy policy', 'woocommerce' ),
-					'desc_tip' => __( 'Optionally add some text about your store privacy policy to show on account registration forms.', 'woocommerce' ),
-					'id'       => 'woocommerce_registration_privacy_policy_text',
-					/* translators: %s privacy policy page name and link */
-					'default'  => sprintf( __( 'Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ),
-					'type'     => 'textarea',
-					'css'      => 'min-width: 50%; height: 75px;',
-				),
+			array(
+				'title'    => __( 'Registration privacy policy', 'woocommerce' ),
+				'desc_tip' => __( 'Optionally add some text about your store privacy policy to show on account registration forms.', 'woocommerce' ),
+				'id'       => 'woocommerce_registration_privacy_policy_text',
+				/* translators: %s privacy policy page name and link */
+				'default'  => sprintf( __( 'Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ),
+				'type'     => 'textarea',
+				'css'      => 'min-width: 50%; height: 75px;',
+			),
 
-				array(
-					'title'    => __( 'Checkout privacy policy', 'woocommerce' ),
-					'desc_tip' => __( 'Optionally add some text about your store privacy policy to show during checkout.', 'woocommerce' ),
-					'id'       => 'woocommerce_checkout_privacy_policy_text',
-					/* translators: %s privacy policy page name and link */
-					'default'  => sprintf( __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ),
-					'type'     => 'textarea',
-					'css'      => 'min-width: 50%; height: 75px;',
+			array(
+				'title'    => __( 'Checkout privacy policy', 'woocommerce' ),
+				'desc_tip' => __( 'Optionally add some text about your store privacy policy to show during checkout.', 'woocommerce' ),
+				'id'       => 'woocommerce_checkout_privacy_policy_text',
+				/* translators: %s privacy policy page name and link */
+				'default'  => sprintf( __( 'Your personal data will be used to process your order, support your experience throughout this website, and for other purposes described in our %s.', 'woocommerce' ), '[privacy_policy]' ),
+				'type'     => 'textarea',
+				'css'      => 'min-width: 50%; height: 75px;',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'privacy_policy_options',
+			),
+			array(
+				'title' => __( 'Personal data retention', 'woocommerce' ),
+				'desc'  => __( 'Choose how long to retain personal data when it\'s no longer needed for processing. Leave the following options blank to retain this data indefinitely.', 'woocommerce' ),
+				'type'  => 'title',
+				'id'    => 'personal_data_retention',
+			),
+			array(
+				'title'       => __( 'Retain inactive accounts ', 'woocommerce' ),
+				'desc_tip'    => __( 'Inactive accounts are those which have not logged in, or placed an order, for the specified duration. They will be deleted. Any orders will be converted into guest orders.', 'woocommerce' ),
+				'id'          => 'woocommerce_delete_inactive_accounts',
+				'type'        => 'relative_date_selector',
+				'placeholder' => __( 'N/A', 'woocommerce' ),
+				'default'     => array(
+					'number' => '',
+					'unit'   => 'months',
 				),
-				array(
-					'type' => 'sectionend',
-					'id'   => 'privacy_policy_options',
+				'autoload'    => false,
+			),
+			array(
+				'title'       => __( 'Retain pending orders ', 'woocommerce' ),
+				'desc_tip'    => __( 'Pending orders are unpaid and may have been abandoned by the customer. They will be trashed after the specified duration.', 'woocommerce' ),
+				'id'          => 'woocommerce_trash_pending_orders',
+				'type'        => 'relative_date_selector',
+				'placeholder' => __( 'N/A', 'woocommerce' ),
+				'default'     => '',
+				'autoload'    => false,
+			),
+			array(
+				'title'       => __( 'Retain failed orders', 'woocommerce' ),
+				'desc_tip'    => __( 'Failed orders are unpaid and may have been abandoned by the customer. They will be trashed after the specified duration.', 'woocommerce' ),
+				'id'          => 'woocommerce_trash_failed_orders',
+				'type'        => 'relative_date_selector',
+				'placeholder' => __( 'N/A', 'woocommerce' ),
+				'default'     => '',
+				'autoload'    => false,
+			),
+			array(
+				'title'       => __( 'Retain cancelled orders', 'woocommerce' ),
+				'desc_tip'    => __( 'Cancelled orders are unpaid and may have been cancelled by the store owner or customer. They will be trashed after the specified duration.', 'woocommerce' ),
+				'id'          => 'woocommerce_trash_cancelled_orders',
+				'type'        => 'relative_date_selector',
+				'placeholder' => __( 'N/A', 'woocommerce' ),
+				'default'     => '',
+				'autoload'    => false,
+			),
+			array(
+				'title'       => __( 'Retain completed orders', 'woocommerce' ),
+				'desc_tip'    => __( 'Retain completed orders for a specified duration before anonymizing the personal data within them.', 'woocommerce' ),
+				'id'          => 'woocommerce_anonymize_completed_orders',
+				'type'        => 'relative_date_selector',
+				'placeholder' => __( 'N/A', 'woocommerce' ),
+				'default'     => array(
+					'number' => '',
+					'unit'   => 'months',
 				),
-				array(
-					'title' => __( 'Personal data retention', 'woocommerce' ),
-					'desc'  => __( 'Choose how long to retain personal data when it\'s no longer needed for processing. Leave the following options blank to retain this data indefinitely.', 'woocommerce' ),
-					'type'  => 'title',
-					'id'    => 'personal_data_retention',
-				),
-				array(
-					'title'       => __( 'Retain inactive accounts ', 'woocommerce' ),
-					'desc_tip'    => __( 'Inactive accounts are those which have not logged in, or placed an order, for the specified duration. They will be deleted. Any orders will be converted into guest orders.', 'woocommerce' ),
-					'id'          => 'woocommerce_delete_inactive_accounts',
-					'type'        => 'relative_date_selector',
-					'placeholder' => __( 'N/A', 'woocommerce' ),
-					'default'     => array(
-						'number' => '',
-						'unit'   => 'months',
-					),
-					'autoload'    => false,
-				),
-				array(
-					'title'       => __( 'Retain pending orders ', 'woocommerce' ),
-					'desc_tip'    => __( 'Pending orders are unpaid and may have been abandoned by the customer. They will be trashed after the specified duration.', 'woocommerce' ),
-					'id'          => 'woocommerce_trash_pending_orders',
-					'type'        => 'relative_date_selector',
-					'placeholder' => __( 'N/A', 'woocommerce' ),
-					'default'     => '',
-					'autoload'    => false,
-				),
-				array(
-					'title'       => __( 'Retain failed orders', 'woocommerce' ),
-					'desc_tip'    => __( 'Failed orders are unpaid and may have been abandoned by the customer. They will be trashed after the specified duration.', 'woocommerce' ),
-					'id'          => 'woocommerce_trash_failed_orders',
-					'type'        => 'relative_date_selector',
-					'placeholder' => __( 'N/A', 'woocommerce' ),
-					'default'     => '',
-					'autoload'    => false,
-				),
-				array(
-					'title'       => __( 'Retain cancelled orders', 'woocommerce' ),
-					'desc_tip'    => __( 'Cancelled orders are unpaid and may have been cancelled by the store owner or customer. They will be trashed after the specified duration.', 'woocommerce' ),
-					'id'          => 'woocommerce_trash_cancelled_orders',
-					'type'        => 'relative_date_selector',
-					'placeholder' => __( 'N/A', 'woocommerce' ),
-					'default'     => '',
-					'autoload'    => false,
-				),
-				array(
-					'title'       => __( 'Retain completed orders', 'woocommerce' ),
-					'desc_tip'    => __( 'Retain completed orders for a specified duration before anonymizing the personal data within them.', 'woocommerce' ),
-					'id'          => 'woocommerce_anonymize_completed_orders',
-					'type'        => 'relative_date_selector',
-					'placeholder' => __( 'N/A', 'woocommerce' ),
-					'default'     => array(
-						'number' => '',
-						'unit'   => 'months',
-					),
-					'autoload'    => false,
-				),
-				array(
-					'type' => 'sectionend',
-					'id'   => 'personal_data_retention',
-				),
-				array(
-					'title' => esc_html__( 'Usage Tracking', 'woocommerce' ),
-					'type'  => 'title',
-					'id'    => 'tracking_options',
-					'desc'  => __( 'Gathering usage data allows us to make WooCommerce better — your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense.', 'woocommerce' ),
-				),
-				array(
-					'title'         => __( 'Enable tracking', 'woocommerce' ),
-					'desc'          => __( 'Allow usage of WooCommerce to be tracked', 'woocommerce' ),
-					/* Translators: %s URL to tracking info screen. */
-					'desc_tip'      => sprintf( esc_html__( 'To opt-out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: %s.', 'woocommerce' ), $tracking_info_text ),
-					'id'            => 'woocommerce_allow_tracking',
-					'type'          => 'checkbox',
-					'checkboxgroup' => 'start',
-					'default'       => 'no',
-					'autoload'      => false,
-				),
-				array(
-					'type' => 'sectionend',
-					'id'   => 'tracking_options',
-				),
+				'autoload'    => false,
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'personal_data_retention',
+			),
+			array(
+				'title' => esc_html__( 'Usage Tracking', 'woocommerce' ),
+				'type'  => 'title',
+				'id'    => 'tracking_options',
+				'desc'  => __( 'Gathering usage data allows us to make WooCommerce better — your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense.', 'woocommerce' ),
+			),
+			array(
+				'title'         => __( 'Enable tracking', 'woocommerce' ),
+				'desc'          => __( 'Allow usage of WooCommerce to be tracked', 'woocommerce' ),
+				/* Translators: %s URL to tracking info screen. */
+				'desc_tip'      => sprintf( esc_html__( 'To opt-out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: %s.', 'woocommerce' ), $tracking_info_text ),
+				'id'            => 'woocommerce_allow_tracking',
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'start',
+				'default'       => 'no',
+				'autoload'      => false,
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'tracking_options',
+			),
+		);
+
+		// Only display Marketplace Suggestions opt-out if current user can actually see suggestions
+		if ( current_user_can( 'install_plugins' ) ) {
+			$marketplace_suggestion_settings = array(
 				array(
 					'title' => esc_html__( 'Marketplace suggestions', 'woocommerce' ),
 					'type'  => 'title',
@@ -275,7 +278,13 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					'type' => 'sectionend',
 					'id'   => 'marketplace_suggestions',
 				),
-			)
+			);
+			$account_settings = array_merge( $account_settings, $marketplace_suggestion_settings );
+		}
+
+		$settings = apply_filters(
+			'woocommerce_' . $this->id . '_settings',
+			$account_settings
 		);
 
 		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings );
