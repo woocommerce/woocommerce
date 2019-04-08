@@ -61,7 +61,8 @@ function wc_customer_edit_account_url() {
  */
 function wc_edit_address_i18n( $id, $flip = false ) {
 	$slugs = apply_filters(
-		'woocommerce_edit_address_slugs', array(
+		'woocommerce_edit_address_slugs',
+		array(
 			'billing'  => sanitize_title( _x( 'billing', 'edit-address-slug', 'woocommerce' ) ),
 			'shipping' => sanitize_title( _x( 'shipping', 'edit-address-slug', 'woocommerce' ) ),
 		)
@@ -186,7 +187,8 @@ function wc_get_account_endpoint_url( $endpoint ) {
  */
 function wc_get_account_orders_columns() {
 	$columns = apply_filters(
-		'woocommerce_account_orders_columns', array(
+		'woocommerce_account_orders_columns',
+		array(
 			'order-number'  => __( 'Order', 'woocommerce' ),
 			'order-date'    => __( 'Date', 'woocommerce' ),
 			'order-status'  => __( 'Status', 'woocommerce' ),
@@ -207,7 +209,8 @@ function wc_get_account_orders_columns() {
  */
 function wc_get_account_downloads_columns() {
 	$columns = apply_filters(
-		'woocommerce_account_downloads_columns', array(
+		'woocommerce_account_downloads_columns',
+		array(
 			'download-product'   => __( 'Product', 'woocommerce' ),
 			'download-remaining' => __( 'Downloads remaining', 'woocommerce' ),
 			'download-expires'   => __( 'Expires', 'woocommerce' ),
@@ -231,7 +234,8 @@ function wc_get_account_downloads_columns() {
  */
 function wc_get_account_payment_methods_columns() {
 	return apply_filters(
-		'woocommerce_account_payment_methods_columns', array(
+		'woocommerce_account_payment_methods_columns',
+		array(
 			'method'  => __( 'Method', 'woocommerce' ),
 			'expires' => __( 'Expires', 'woocommerce' ),
 			'actions' => '&nbsp;',
@@ -247,7 +251,8 @@ function wc_get_account_payment_methods_columns() {
  */
 function wc_get_account_payment_methods_types() {
 	return apply_filters(
-		'woocommerce_payment_methods_types', array(
+		'woocommerce_payment_methods_types',
+		array(
 			'cc'     => __( 'Credit card', 'woocommerce' ),
 			'echeck' => __( 'eCheck', 'woocommerce' ),
 		)
