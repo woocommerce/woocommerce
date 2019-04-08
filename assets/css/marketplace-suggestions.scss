@@ -30,8 +30,13 @@ a.suggestion-dismiss::before {
 
 #woocommerce-product-data ul.wc-tabs li.marketplace-suggestions_tab {
 
+
+	a::before {
+		@include iconbeforedashicons( "\f106" );
+	}
+
 	a span {
-		margin: 0;
+		margin: 0 0.618em;
 	}
 }
 
