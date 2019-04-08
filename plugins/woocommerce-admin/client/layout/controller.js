@@ -72,6 +72,10 @@ const getPages = () => {
 };
 
 class Controller extends Component {
+	componentDidMount() {
+		window.document.documentElement.scrollTop = 0;
+	}
+
 	componentDidUpdate( prevProps ) {
 		const prevQuery = this.getQuery( prevProps.location.search );
 		const prevBaseQuery = this.getBaseQuery( prevProps.location.search );
@@ -79,6 +83,10 @@ class Controller extends Component {
 
 		if ( prevQuery.page > 1 && ! isEqual( prevBaseQuery, baseQuery ) ) {
 			getHistory().replace( getNewPath( { page: 1 } ) );
+		}
+
+		if ( prevProps.match.url !== this.props.match.url ) {
+			window.document.documentElement.scrollTop = 0;
 		}
 	}
 
@@ -104,7 +112,6 @@ class Controller extends Component {
 		const page = find( getPages(), { path } );
 		window.wpNavMenuUrlUpdate( page, query );
 		window.wpNavMenuClassChange( page );
-		window.document.documentElement.scrollTop = 0;
 		return createElement( page.container, { params, path: url, pathMatch: path, query } );
 	}
 }
