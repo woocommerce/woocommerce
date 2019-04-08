@@ -312,6 +312,12 @@
 			}
 		}
 
+		function addManageSuggestionsTracksHandler() {
+			$( 'a.marketplace-suggestion-manage-link' ).on( 'click', function() {
+				window.wcTracks.recordEvent( 'marketplace_suggestions_manage_clicked' );
+			} );
+		}
+
 		// Render suggestion data in appropriate places in UI.
 		function displaySuggestions( marketplaceSuggestionsApiData ) {
 			var usedSuggestionsContexts = [];
@@ -377,6 +383,8 @@
 		if ( marketplace_suggestions.suggestions_data ) {
 			displaySuggestions( marketplace_suggestions.suggestions_data );
 		}
+
+		addManageSuggestionsTracksHandler();
 	});
 
 })( jQuery, marketplace_suggestions, ajaxurl );
