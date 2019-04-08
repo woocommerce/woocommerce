@@ -26,13 +26,13 @@ class WC_Admin_Setup_Wizard_Tracking {
 			return;
 		}
 
-		add_action( 'wc_setup_footer', array( $this, 'add_footer_scripts' ) );
 		add_filter( 'woocommerce_setup_wizard_steps', array( $this, 'set_obw_steps' ) );
 		add_action( 'shutdown', array( $this, 'track_skip_step' ), 1 );
 		add_action( 'add_option_woocommerce_allow_tracking', array( $this, 'track_start' ), 10, 2 );
 		add_action( 'admin_init', array( $this, 'track_ready_next_steps' ), 1 );
 		add_action( 'wp_print_scripts', array( $this, 'dequeue_non_whitelisted_scripts' ) );
 		$this->add_step_save_events();
+		$this->add_footer_scripts();
 	}
 
 	/**
