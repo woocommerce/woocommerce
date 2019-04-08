@@ -3,11 +3,11 @@
  * Plugin Name: WooCommerce Blocks
  * Plugin URI: https://github.com/woocommerce/woocommerce-gutenberg-products-block
  * Description: WooCommerce blocks for the Gutenberg editor.
- * Version: 2.0.0-rc2
+ * Version: 2.0.0-rc3
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Text Domain:  woo-gutenberg-products-block
- * WC requires at least: 3.5
+ * WC requires at least: 3.6
  * WC tested up to: 3.6
  *
  * @package WooCommerce\Blocks
@@ -15,7 +15,7 @@
 
 defined( 'ABSPATH' ) || die();
 
-define( 'WGPB_VERSION', '2.0.0-rc2' );
+define( 'WGPB_VERSION', '2.0.0-rc3' );
 define( 'WGPB_PLUGIN_FILE', __FILE__ );
 define( 'WGPB_ABSPATH', dirname( WGPB_PLUGIN_FILE ) . '/' );
 
