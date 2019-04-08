@@ -88,7 +88,7 @@ class InboxPanel extends Component {
 								key={ note.id }
 								className="woocommerce-inbox-activity-card"
 								title={ note.title }
-								date={ note.date_created }
+								date={ note.date_created_gmt }
 								icon={ <Gridicon icon={ note.icon } size={ 48 } /> }
 								unread={ ! lastRead || new Date( note.date_created_gmt ).getTime() > lastRead }
 								actions={ getButtonsFromActions( note.actions ) }

@@ -30,7 +30,9 @@ class ActivityCard extends Component {
 					<H className="woocommerce-activity-card__title">{ title }</H>
 					{ subtitle && <div className="woocommerce-activity-card__subtitle">{ subtitle }</div> }
 					{ date && (
-						<span className="woocommerce-activity-card__date">{ moment( date ).fromNow() }</span>
+						<span className="woocommerce-activity-card__date">
+							{ moment.utc( date ).fromNow() }
+						</span>
 					) }
 				</header>
 				<Section className="woocommerce-activity-card__body">{ children }</Section>

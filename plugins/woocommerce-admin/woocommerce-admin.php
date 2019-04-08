@@ -95,6 +95,8 @@ function wc_admin_build_file_exists() {
 
 /**
  * Daily events to run.
+ *
+ * Note: WC_Admin_Notes_Order_Milestones::other_milestones is hooked to this as well.
  */
 function wc_admin_do_wc_admin_daily() {
 	WC_Admin_Notes_New_Sales_Record::possibly_add_sales_record_note();
@@ -163,6 +165,7 @@ function wc_admin_plugins_loaded() {
 	require_once WC_ADMIN_ABSPATH . '/includes/notes/class-wc-admin-notes-settings-notes.php';
 	require_once WC_ADMIN_ABSPATH . '/includes/notes/class-wc-admin-notes-woo-subscriptions-notes.php';
 	require_once WC_ADMIN_ABSPATH . '/includes/notes/class-wc-admin-notes-historical-data.php';
+	require_once WC_ADMIN_ABSPATH . '/includes/notes/class-wc-admin-notes-order-milestones.php';
 
 	// Verify we have a proper build.
 	if ( ! wc_admin_build_file_exists() ) {
