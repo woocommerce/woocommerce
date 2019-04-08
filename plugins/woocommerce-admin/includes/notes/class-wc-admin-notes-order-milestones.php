@@ -88,6 +88,7 @@ class WC_Admin_Notes_Order_Milestones {
 		$this->allowed_statuses = apply_filters( 'woocommerce_admin_order_milestone_statuses', $this->allowed_statuses );
 
 		add_action( 'woocommerce_after_register_post_type', array( $this, 'init' ) );
+		register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, array( $this, 'clear_scheduled_event' ) );
 	}
 
 	/**
@@ -105,6 +106,13 @@ class WC_Admin_Notes_Order_Milestones {
 		}
 
 		add_action( self::PROCESS_ORDERS_MILESTONE_HOOK, array( $this, 'other_milestones' ) );
+	}
+
+	/**
+	 * Clear out our hourly milestone hook upon plugin deactivation.
+	 */
+	public function clear_scheduled_event() {
+		wp_clear_scheduled_hook( self::PROCESS_ORDERS_MILESTONE_HOOK );
 	}
 
 	/**
