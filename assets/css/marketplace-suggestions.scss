@@ -33,6 +33,10 @@ a.suggestion-dismiss::before {
 
 	a::before {
 		@include iconbeforedashicons( "\f106" );
+
+		@media only screen and (max-width: 900px) {
+			line-height: 40px;
+		}
 	}
 
 	a span {
