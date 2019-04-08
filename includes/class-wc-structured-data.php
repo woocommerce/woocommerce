@@ -29,7 +29,6 @@ class WC_Structured_Data {
 		add_action( 'woocommerce_before_main_content', array( $this, 'generate_website_data' ), 30 );
 		add_action( 'woocommerce_breadcrumb', array( $this, 'generate_breadcrumblist_data' ), 10 );
 		add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ), 60 );
-		add_action( 'woocommerce_review_meta', array( $this, 'generate_review_data' ), 20 );
 		add_action( 'woocommerce_email_order_details', array( $this, 'generate_order_data' ), 20, 3 );
 
 		// Output structured data.
@@ -290,6 +289,7 @@ class WC_Structured_Data {
 			);
 
 			if ( $comments ) {
+				$markup['review'] = array();
 				foreach ( $comments as $comment ) {
 					$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
 
@@ -297,7 +297,7 @@ class WC_Structured_Data {
 						continue;
 					}
 
-					$markup['review'] = array(
+					$markup['review'][] = array(
 						'@type'        => 'Review',
 						'reviewRating' => array(
 							'@type'       => 'Rating',
@@ -318,44 +318,6 @@ class WC_Structured_Data {
 		}
 
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
-	}
-
-	/**
-	 * Generates Review structured data.
-	 *
-	 * Hooked into `woocommerce_review_meta` action hook.
-	 *
-	 * @param WP_Comment $comment Comment data.
-	 */
-	public function generate_review_data( $comment ) {
-		$markup                  = array();
-		$markup['@type']         = 'Review';
-		$markup['@id']           = get_comment_link( $comment->comment_ID );
-		$markup['datePublished'] = get_comment_date( 'c', $comment->comment_ID );
-		$markup['description']   = get_comment_text( $comment->comment_ID );
-		$markup['itemReviewed']  = array(
-			'@type' => 'Product',
-			'name'  => get_the_title( $comment->comment_post_ID ),
-		);
-
-		// Skip replies unless they have a rating.
-		$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
-
-		if ( $rating ) {
-			$markup['reviewRating'] = array(
-				'@type'       => 'Rating',
-				'ratingValue' => $rating,
-			);
-		} elseif ( $comment->comment_parent ) {
-			return;
-		}
-
-		$markup['author'] = array(
-			'@type' => 'Person',
-			'name'  => get_comment_author( $comment->comment_ID ),
-		);
-
-		$this->set_data( apply_filters( 'woocommerce_structured_data_review', $markup, $comment ) );
 	}
 
 	/**
