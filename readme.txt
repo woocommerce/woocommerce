@@ -314,6 +314,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Avoid regenerating thumbnails on every page load. #21800
 * Fix - Changed 'private' methods on WC_Breadcrumb class to 'protected'. #23057
 * Fix - Jumping to top of page when dismissing store notice. #23066
+* Fix - Backwards compatibility issues with wc_get_template #23197
 * Performance - Product meta data lookup table used for sorting and slow queries. #22718
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
