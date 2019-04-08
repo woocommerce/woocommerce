@@ -81,11 +81,7 @@ class WC_Products_Tracking {
 			return;
 		}
 
-		$properties = array(
-			'product_id' => $product_id,
-		);
-
-		WC_Tracks::record_event( 'product_edit', $properties );
+		WC_Tracks::record_event( 'product_edit' );
 	}
 
 	/**
