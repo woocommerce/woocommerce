@@ -318,6 +318,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Remove date restriction of Facebook Plugin feature in OBW #23210
 * Fix - Updates to usage tracking logic #23231
 * Fix - Add get_post_status helper method and ensure prefix gets added for most statuses #23203
+* Fix - Add link to suggstions management #23229
 * Performance - Product meta data lookup table used for sorting and slow queries. #22718
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
