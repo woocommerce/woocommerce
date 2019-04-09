@@ -1543,16 +1543,11 @@ class WC_AJAX {
 			$limit = absint( apply_filters( 'woocommerce_json_search_limit', 30 ) );
 		}
 
+		$include_ids = ! empty( $_GET['include'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['include'] ) ) : array();
+		$exclude_ids = ! empty( $_GET['exclude'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) : array();
+
 		$data_store = WC_Data_Store::load( 'product' );
-		$ids        = $data_store->search_products( $term, '', (bool) $include_variations, false, $limit );
-
-		if ( ! empty( $_GET['exclude'] ) ) {
-			$ids = array_diff( $ids, array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) );
-		}
-
-		if ( ! empty( $_GET['include'] ) ) {
-			$ids = array_intersect( $ids, array_map( 'absint', (array) wp_unslash( $_GET['include'] ) ) );
-		}
+		$ids        = $data_store->search_products( $term, '', (bool) $include_variations, false, $limit, $include_ids, $exclude_ids );
 
 		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_readable' );
 		$products        = array();
