@@ -59,7 +59,6 @@ const withSelect = mapSelectToProps =>
 			getNextMergeProps( props ) {
 				const storeSelectors = {};
 				const onCompletes = [];
-				const onUnmounts = {};
 				const componentContext = { component: this };
 
 				const getStoreFromRegistry = ( key, registry, context ) => {
@@ -72,7 +71,7 @@ const withSelect = mapSelectToProps =>
 						// We give it a context, and we check for a "resolve"
 						const { selectors, onComplete, onUnmount } = selectorsForKey( context );
 						onComplete && onCompletes.push( onComplete );
-						onUnmount && ( onUnmounts[ key ] = onUnmount );
+						onUnmount && ( this.onUnmounts[ key ] = onUnmount );
 						storeSelectors[ key ] = selectors;
 					} else {
 						storeSelectors[ key ] = selectorsForKey;

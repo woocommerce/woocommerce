@@ -29,6 +29,9 @@ function createWcApiStore() {
 					apiClient.setComponentRequirements( component, componentRequirements );
 				}
 			},
+			onUnmount: () => {
+				apiClient.clearComponentRequirements( component );
+			},
 		};
 	}
 
