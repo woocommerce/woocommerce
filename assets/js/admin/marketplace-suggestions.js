@@ -318,6 +318,9 @@
 			} );
 		}
 
+		// track the current product data tab to avoid over-tracking suggestions
+		var currentTab = false;
+
 		// Render suggestion data in appropriate places in UI.
 		function displaySuggestions( marketplaceSuggestionsApiData ) {
 			var usedSuggestionsContexts = [];
@@ -365,15 +368,26 @@
 					$( this ).append( content );
 					$( this ).addClass( 'showing-suggestion' );
 					usedSuggestionsContexts.push( context );
-
-					window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
-						suggestion_slug: suggestionsToDisplay[ i ].slug,
-						context: context,
-						product: suggestionsToDisplay[ i ].product || '',
-						promoted: suggestionsToDisplay[ i ].promoted || '',
-						target: suggestionsToDisplay[ i ].url || ''
-					} );
 				}
+
+				// track when suggestions are displayed (and not already visible)
+				$( 'ul.product_data_tabs li.marketplace-suggestions_options a' ).click( function( e ) {
+					e.preventDefault();
+
+					if ( '#marketplace_suggestions' === currentTab ) {
+						return;
+					}
+
+					for ( var i in suggestionsToDisplay ) {
+						window.wcTracks.recordEvent( 'marketplace_suggestion_displayed', {
+							suggestion_slug: suggestionsToDisplay[ i ].slug,
+							context: context,
+							product: suggestionsToDisplay[ i ].product || '',
+							promoted: suggestionsToDisplay[ i ].promoted || '',
+							target: suggestionsToDisplay[ i ].url || ''
+						} );
+					}
+				} );
 			} );
 
 			hidePageElementsForSuggestionState( usedSuggestionsContexts );
@@ -382,6 +396,12 @@
 
 		if ( marketplace_suggestions.suggestions_data ) {
 			displaySuggestions( marketplace_suggestions.suggestions_data );
+
+			// track the current product data tab to avoid over-reporting suggestion views
+			$( 'ul.product_data_tabs' ).on( 'click', 'li a', function( e ) {
+				e.preventDefault();
+				currentTab = $( this ).attr( 'href' );
+			} );
 		}
 
 		addManageSuggestionsTracksHandler();
