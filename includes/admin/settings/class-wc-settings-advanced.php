@@ -304,7 +304,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			$tracking_info_text = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://woocommerce.com/usage-tracking', esc_html__( 'WooCommerce.com Usage Tracking Documentation', 'woocommerce' ) );
 
 			$settings = apply_filters(
-				'woocommerce_com_integration_settings', 
+				'woocommerce_com_integration_settings',
 				array(
 					array(
 						'title' => esc_html__( 'Usage Tracking', 'woocommerce' ),
