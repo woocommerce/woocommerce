@@ -174,6 +174,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Enhancement - Added suggestions for official extensions to Products, Edit Product and Orders screens.
 * Enhancement - Store attribute values as post_excerpt for variations to support easier searching for variations. #22083
 * Enhancement - Improved username generation and introduced wc_create_new_customer_username function. #23145
+* Enhancement - Allow opting out of Marketplace Suggestions 23218
 * Tweak - Generalize shipping estimate text on cart page. #22467
 * Tweak - Include auto draft orders in order list filters. #22380
 * Tweak - Only include the network orders widget on the main site dashboard. #22318
