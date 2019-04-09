@@ -67,7 +67,7 @@ Bugs should be reported in the [WooCommerce Admin GitHub repository](https://git
 
 Yes, you can! Join our [GitHub repository](https://github.com/woocommerce/woocommerce-admin/)
 
-Release and roadmap notes are available on the [WooCommerce Developers Blog](https://woocommerce.wordpress.com/2019/01/15/woocommerce-blocks-1-3-0-release-notes/)
+Release and roadmap notes are available on the [WooCommerce Developers Blog](https://woocommerce.wordpress.com/category/wc-admin/)
 
 == Screenshots ==
 
