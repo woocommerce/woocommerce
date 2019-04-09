@@ -58,7 +58,8 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 
 		if ( '' === $current_section ) {
 			$settings = apply_filters(
-				'woocommerce_settings_pages', array(
+				'woocommerce_settings_pages',
+				array(
 
 					array(
 						'title' => __( 'Page setup', 'woocommerce' ),
@@ -303,7 +304,8 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			$tracking_info_text = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://woocommerce.com/usage-tracking', esc_html__( 'WooCommerce.com Usage Tracking Documentation', 'woocommerce' ) );
 
 			$settings = apply_filters(
-				'woocommerce_com_integration_settings', array(
+				'woocommerce_com_integration_settings', 
+				array(
 					array(
 						'title' => esc_html__( 'Usage Tracking', 'woocommerce' ),
 						'type'  => 'title',
@@ -349,7 +351,8 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			);
 		} elseif ( 'legacy_api' === $current_section ) {
 			$settings = apply_filters(
-				'woocommerce_settings_rest_api', array(
+				'woocommerce_settings_rest_api',
+				array(
 					array(
 						'title' => '',
 						'type'  => 'title',
