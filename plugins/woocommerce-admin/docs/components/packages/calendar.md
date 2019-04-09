@@ -27,14 +27,6 @@ The date in human-readable format. Displayed in the text input.
 
 A string error message, shown to the user.
 
-### `invalidDays`
-
-- Type: One of type: enum, func
-- Default: null
-
-(Coming Soon) Optionally invalidate certain days. `past`, `future`, `none`, or function are accepted.
-A function will be passed to react-dates' `isOutsideRange` prop
-
 ### `onUpdate`
 
 - **Required**
@@ -50,6 +42,13 @@ A function called upon selection of a date or input change.
 - Default: null
 
 The date format in moment.js-style tokens.
+
+### `isInvalidDate`
+
+- Type: Function
+- Default: null
+
+A function to determine if a day on the calendar is not valid
 
 `DateRange` (component)
 =======================

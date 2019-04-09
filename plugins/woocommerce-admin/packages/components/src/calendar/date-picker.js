@@ -64,9 +64,8 @@ class DatePicker extends Component {
 	}
 
 	render() {
-		const { date, text, dateFormat, error } = this.props;
-		// @todo Make upstream Gutenberg change to invalidate certain days.
-		// const isOutsideRange = getOutsideRange( invalidDays );
+		const { date, text, dateFormat, error, isInvalidDate } = this.props;
+
 		return (
 			<Dropdown
 				position="bottom center"
@@ -98,6 +97,7 @@ class DatePicker extends Component {
 							<WpDatePicker
 								currentDate={ date }
 								onChange={ partial( this.onDateChange, onToggle ) }
+								isInvalidDate={ isInvalidDate }
 							/>
 						</div>
 					</Section>
@@ -121,14 +121,6 @@ DatePicker.propTypes = {
 	 */
 	error: PropTypes.string,
 	/**
-	 * (Coming Soon) Optionally invalidate certain days. `past`, `future`, `none`, or function are accepted.
-	 * A function will be passed to react-dates' `isOutsideRange` prop
-	 */
-	invalidDays: PropTypes.oneOfType( [
-		PropTypes.oneOf( [ 'past', 'future', 'none' ] ),
-		PropTypes.func,
-	] ),
-	/**
 	 * A function called upon selection of a date or input change.
 	 */
 	onUpdate: PropTypes.func.isRequired,
@@ -136,6 +128,10 @@ DatePicker.propTypes = {
 	 * The date format in moment.js-style tokens.
 	 */
 	dateFormat: PropTypes.string.isRequired,
+	/**
+	 * A function to determine if a day on the calendar is not valid
+	 */
+	isInvalidDate: PropTypes.func,
 };
 
 export default DatePicker;

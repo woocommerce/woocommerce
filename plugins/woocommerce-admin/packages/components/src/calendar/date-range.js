@@ -23,7 +23,6 @@ import { validateDateInputForRange } from '@woocommerce/date';
  */
 import DateInput from './input';
 import phrases from './phrases';
-import { getOutsideRange } from './utils';
 
 const isRTL = () => document.documentElement.dir === 'rtl';
 
@@ -96,9 +95,8 @@ class DateRange extends Component {
 			shortDateFormat,
 			isViewportMobile,
 			isViewportSmall,
-			invalidDays,
+			isInvalidDate,
 		} = this.props;
-		const isOutsideRange = getOutsideRange( invalidDays );
 		const isDoubleCalendar = isViewportMobile && ! isViewportSmall;
 		return (
 			<div
@@ -148,7 +146,9 @@ class DateRange extends Component {
 						endDate={ before }
 						orientation={ 'horizontal' }
 						numberOfMonths={ isDoubleCalendar ? 2 : 1 }
-						isOutsideRange={ isOutsideRange }
+						isOutsideRange={ ( date ) => {
+							return isInvalidDate && isInvalidDate( date.toDate() );
+						} }
 						minimumNights={ 0 }
 						hideKeyboardShortcutsPanel
 						noBorder
@@ -192,13 +192,9 @@ DateRange.propTypes = {
 	 */
 	focusedInput: PropTypes.string,
 	/**
-	 * Optionally invalidate certain days. `past`, `future`, `none`, or function are accepted.
-	 * A function will be passed to react-dates' `isOutsideRange` prop
+	 * A function to determine if a day on the calendar is not valid
 	 */
-	invalidDays: PropTypes.oneOfType( [
-		PropTypes.oneOf( [ 'past', 'future', 'none' ] ),
-		PropTypes.func,
-	] ),
+	isInvalidDate: PropTypes.func,
 	/**
 	 * A function called upon selection of a date.
 	 */
