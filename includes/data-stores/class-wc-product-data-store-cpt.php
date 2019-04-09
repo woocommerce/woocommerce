@@ -1494,7 +1494,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		if ( ! empty( $exclude ) && is_array( $exclude ) ) {
-			$search_where .= " AND posts.ID NOT IN('" . implode( "','", array_map( 'absint', $exclude ) ) . "') ";
+			$search_where .= ' AND posts.ID NOT IN(' . implode( ',', array_map( 'absint', $exclude ) ) . ') ';
 		}
 
 		if ( 'virtual' === $type ) {
