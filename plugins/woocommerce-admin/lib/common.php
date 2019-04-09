@@ -23,8 +23,26 @@ function wc_admin_dir_path( $file = '' ) {
  *
  * @return string       Fully qualified URL pointing to the desired file.
  */
-function wc_admin_url( $path ) {
+function wc_admin_plugin_url( $path ) {
 	return plugins_url( $path, dirname( __FILE__ ) );
+}
+
+/**
+ * Retrieves a URL to relative path inside WooCommerce admin with
+ * the provided query parameters.
+ *
+ * @param  string $path Relative path of the desired page.
+ * @param  array  $query Query parameters to append to the path.
+ *
+ * @return string       Fully qualified URL pointing to the desired path.
+ */
+function wc_admin_url( $path, $query = array() ) {
+	if ( ! empty( $query ) ) {
+		$query_string = http_build_query( $query );
+		$path         = $path . '?' . $query_string;
+	}
+
+	return admin_url( 'admin.php?page=wc-admin#' . $path, dirname( __FILE__ ) );
 }
 
 /**
@@ -294,4 +312,21 @@ function wc_admin_is_feature_enabled( $feature ) {
 	}
 	$features = wc_admin_get_feature_config();
 	return isset( $features[ $feature ] ) && true === $features[ $feature ];
+}
+
+/**
+ * Format a number using the decimal and thousands separator settings in WooCommerce.
+ *
+ * @param mixed $number Number to be formatted.
+ * @return string
+ */
+function wc_admin_number_format( $number ) {
+	$currency_settings = wc_admin_currency_settings();
+
+	return number_format(
+		$number,
+		0,
+		$currency_settings['decimal_separator'],
+		$currency_settings['thousand_separator']
+	);
 }

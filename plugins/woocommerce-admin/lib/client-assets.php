@@ -20,7 +20,7 @@ function wc_admin_register_script() {
 
 	wp_register_script(
 		'wc-csv',
-		wc_admin_url( 'dist/csv-export/index.js' ),
+		wc_admin_plugin_url( 'dist/csv-export/index.js' ),
 		array(),
 		filemtime( wc_admin_dir_path( 'dist/csv-export/index.js' ) ),
 		true
@@ -28,7 +28,7 @@ function wc_admin_register_script() {
 
 	wp_register_script(
 		'wc-currency',
-		wc_admin_url( 'dist/currency/index.js' ),
+		wc_admin_plugin_url( 'dist/currency/index.js' ),
 		array( 'wc-number' ),
 		filemtime( wc_admin_dir_path( 'dist/currency/index.js' ) ),
 		true
@@ -36,7 +36,7 @@ function wc_admin_register_script() {
 
 	wp_register_script(
 		'wc-navigation',
-		wc_admin_url( 'dist/navigation/index.js' ),
+		wc_admin_plugin_url( 'dist/navigation/index.js' ),
 		array(),
 		filemtime( wc_admin_dir_path( 'dist/navigation/index.js' ) ),
 		true
@@ -44,7 +44,7 @@ function wc_admin_register_script() {
 
 	wp_register_script(
 		'wc-number',
-		wc_admin_url( 'dist/number/index.js' ),
+		wc_admin_plugin_url( 'dist/number/index.js' ),
 		array(),
 		filemtime( wc_admin_dir_path( 'dist/number/index.js' ) ),
 		true
@@ -52,7 +52,7 @@ function wc_admin_register_script() {
 
 	wp_register_script(
 		'wc-date',
-		wc_admin_url( 'dist/date/index.js' ),
+		wc_admin_plugin_url( 'dist/date/index.js' ),
 		array( 'wp-date', 'wp-i18n' ),
 		filemtime( wc_admin_dir_path( 'dist/date/index.js' ) ),
 		true
@@ -60,7 +60,7 @@ function wc_admin_register_script() {
 
 	wp_register_script(
 		'wc-components',
-		wc_admin_url( 'dist/components/index.js' ),
+		wc_admin_plugin_url( 'dist/components/index.js' ),
 		array(
 			'wp-components',
 			'wp-data',
@@ -80,7 +80,7 @@ function wc_admin_register_script() {
 
 	wp_register_script(
 		WC_ADMIN_APP,
-		wc_admin_url( "dist/{$entry}/index.js" ),
+		wc_admin_plugin_url( "dist/{$entry}/index.js" ),
 		array( 'wc-components', 'wc-navigation', 'wp-date', 'wp-html-entities', 'wp-keycodes', 'wp-i18n' ),
 		filemtime( wc_admin_dir_path( "dist/{$entry}/index.js" ) ),
 		true
@@ -106,7 +106,7 @@ function wc_admin_register_script() {
 
 	wp_register_style(
 		'wc-components',
-		wc_admin_url( 'dist/components/style.css' ),
+		wc_admin_plugin_url( 'dist/components/style.css' ),
 		array( 'wp-edit-blocks' ),
 		filemtime( wc_admin_dir_path( 'dist/components/style.css' ) )
 	);
@@ -114,7 +114,7 @@ function wc_admin_register_script() {
 
 	wp_register_style(
 		'wc-components-ie',
-		wc_admin_url( 'dist/components/ie.css' ),
+		wc_admin_plugin_url( 'dist/components/ie.css' ),
 		array( 'wp-edit-blocks' ),
 		filemtime( wc_admin_dir_path( 'dist/components/ie.css' ) )
 	);
@@ -122,7 +122,7 @@ function wc_admin_register_script() {
 
 	wp_register_style(
 		WC_ADMIN_APP,
-		wc_admin_url( "dist/{$entry}/style.css" ),
+		wc_admin_plugin_url( "dist/{$entry}/style.css" ),
 		array( 'wc-components' ),
 		filemtime( wc_admin_dir_path( "dist/{$entry}/style.css" ) )
 	);
