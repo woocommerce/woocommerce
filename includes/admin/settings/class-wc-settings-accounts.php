@@ -36,8 +36,6 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			$erasure_text = sprintf( '<a href="%s">%s</a>', esc_url( admin_url( 'tools.php?page=remove_personal_data' ) ), $erasure_text );
 		}
 
-		$tracking_info_text = sprintf( '<a href="%s" target="_blank">%s</a>', 'https://woocommerce.com/usage-tracking', esc_html__( 'WooCommerce.com Usage Tracking Documentation', 'woocommerce' ) );
-
 		$account_settings = array(
 			array(
 				'title' => '',
@@ -232,55 +230,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 				'type' => 'sectionend',
 				'id'   => 'personal_data_retention',
 			),
-			array(
-				'title' => esc_html__( 'Usage Tracking', 'woocommerce' ),
-				'type'  => 'title',
-				'id'    => 'tracking_options',
-				'desc'  => __( 'Gathering usage data allows us to make WooCommerce better — your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense.', 'woocommerce' ),
-			),
-			array(
-				'title'         => __( 'Enable tracking', 'woocommerce' ),
-				'desc'          => __( 'Allow usage of WooCommerce to be tracked', 'woocommerce' ),
-				/* Translators: %s URL to tracking info screen. */
-				'desc_tip'      => sprintf( esc_html__( 'To opt-out, leave this box unticked. Your store remains untracked, and no data will be collected. Read about what usage data is tracked at: %s.', 'woocommerce' ), $tracking_info_text ),
-				'id'            => 'woocommerce_allow_tracking',
-				'type'          => 'checkbox',
-				'checkboxgroup' => 'start',
-				'default'       => 'no',
-				'autoload'      => false,
-			),
-			array(
-				'type' => 'sectionend',
-				'id'   => 'tracking_options',
-			),
 		);
-
-		// Only display Marketplace Suggestions opt-out if current user can actually see suggestions.
-		if ( current_user_can( 'install_plugins' ) ) {
-			$marketplace_suggestion_settings = array(
-				array(
-					'title' => esc_html__( 'Marketplace suggestions', 'woocommerce' ),
-					'type'  => 'title',
-					'id'    => 'marketplace_suggestions',
-					'desc'  => __( 'We show contextual suggestions for official extensions that may be helpful to your store.', 'woocommerce' ),
-				),
-				array(
-					'title'         => __( 'Show Suggestions', 'woocommerce' ),
-					'desc'          => __( 'Display suggestions within WooCommerce', 'woocommerce' ),
-					'desc_tip'      => esc_html__( 'Leave this box unchecked if you do not want to see suggested extensions.', 'woocommerce' ),
-					'id'            => 'woocommerce_show_marketplace_suggestions',
-					'type'          => 'checkbox',
-					'checkboxgroup' => 'start',
-					'default'       => 'yes',
-					'autoload'      => false,
-				),
-				array(
-					'type' => 'sectionend',
-					'id'   => 'marketplace_suggestions',
-				),
-			);
-			$account_settings = array_merge( $account_settings, $marketplace_suggestion_settings );
-		}
 
 		$settings = apply_filters(
 			'woocommerce_' . $this->id . '_settings',
