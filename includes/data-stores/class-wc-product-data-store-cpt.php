@@ -1422,14 +1422,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	/**
 	 * Search product data for a term and return ids.
 	 *
-	 * @param  string   $term Search term.
-	 * @param  string   $type Type of product.
-	 * @param  bool     $include_variations Include variations in search or not.
-	 * @param  bool     $all_statuses Should we search all statuses or limit to published.
-	 * @param  null|int $limit Limit returned results. @since 3.5.0.
+	 * @param  string     $term Search term.
+	 * @param  string     $type Type of product.
+	 * @param  bool       $include_variations Include variations in search or not.
+	 * @param  bool       $all_statuses Should we search all statuses or limit to published.
+	 * @param  null|int   $limit Limit returned results. @since 3.5.0.
+	 * @param  null|array $include Keep specific results. @since 3.6.0.
+	 * @param  null|array $exclude Discard specific results. @since 3.6.0.
 	 * @return array of ids
 	 */
-	public function search_products( $term, $type = '', $include_variations = false, $all_statuses = false, $limit = null ) {
+	public function search_products( $term, $type = '', $include_variations = false, $all_statuses = false, $limit = null, $include = null, $exclude = null ) {
 		global $wpdb;
 
 		$custom_results = apply_filters( 'woocommerce_product_pre_search_products', false, $term, $type, $include_variations, $all_statuses, $limit );
@@ -1484,7 +1486,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		if ( ! empty( $search_queries ) ) {
-			$search_where = 'AND (' . implode( ') OR (', $search_queries ) . ')';
+			$search_where = ' AND (' . implode( ') OR (', $search_queries ) . ') ';
+		}
+
+		if ( ! empty( $include ) && is_array( $include ) ) {
+			$search_where .= ' AND posts.ID IN(' . implode( ',', array_map( 'absint', $include ) ) . ') ';
+		}
+
+		if ( ! empty( $exclude ) && is_array( $exclude ) ) {
+			$search_where .= " AND posts.ID NOT IN('" . implode( "','", array_map( 'absint', $exclude ) ) . "') ";
 		}
 
 		if ( 'virtual' === $type ) {
