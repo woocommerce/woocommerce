@@ -644,7 +644,7 @@ class WC_Product_CSV_Importer_Controller {
 		// Get index for special column names.
 		$index = $item;
 
-		if ( preg_match( '/\d+$/', $item, $matches ) ) {
+		if ( preg_match( '/\d+/', $item, $matches ) ) {
 			$index = $matches[0];
 		}
 
