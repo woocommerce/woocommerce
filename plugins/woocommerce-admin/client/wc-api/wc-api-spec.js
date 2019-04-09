@@ -13,6 +13,7 @@ import user from './user';
 
 function createWcApiSpec() {
 	return {
+		name: 'wcApi',
 		mutations: {
 			...settings.mutations,
 			...user.mutations,

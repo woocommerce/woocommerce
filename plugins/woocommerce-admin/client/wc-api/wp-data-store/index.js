@@ -10,6 +10,10 @@ import { registerGenericStore } from '@wordpress/data';
 import createApiClient from './create-api-client';
 import wcApiSpec from '../wc-api-spec';
 
+if ( 'development' === process.env.NODE_ENV ) {
+	window.__FRESH_DATA_DEV_INFO__ = true;
+}
+
 function createWcApiStore() {
 	const apiClient = createApiClient( 'wc-api', wcApiSpec );
 

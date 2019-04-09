@@ -110,7 +110,7 @@
     "webpack-rtl-plugin": "github:yoavf/webpack-rtl-plugin#develop"
   },
   "dependencies": {
-    "@fresh-data/framework": "^0.5.1",
+    "@fresh-data/framework": "^0.6.0",
     "@wordpress/api-fetch": "2.2.6",
     "@wordpress/components": "7.0.5",
     "@wordpress/data": "4.2.0",
