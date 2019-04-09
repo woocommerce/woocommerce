@@ -1585,21 +1585,18 @@ class WC_AJAX {
 	public static function json_search_downloadable_products_and_variations() {
 		check_ajax_referer( 'search-products', 'security' );
 
+		if ( ! empty( $_GET['limit'] ) ) {
+			$limit = absint( $_GET['limit'] );
+		} else {
+			$limit = absint( apply_filters( 'woocommerce_json_search_limit', 30 ) );
+		}
+
+		$include_ids = ! empty( $_GET['include'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['include'] ) ) : array();
+		$exclude_ids = ! empty( $_GET['exclude'] ) ? array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) : array();
+
 		$term       = isset( $_GET['term'] ) ? (string) wc_clean( wp_unslash( $_GET['term'] ) ) : '';
 		$data_store = WC_Data_Store::load( 'product' );
-		$ids        = $data_store->search_products( $term, 'downloadable', true );
-
-		if ( ! empty( $_GET['exclude'] ) ) {
-			$ids = array_diff( $ids, array_map( 'absint', (array) wp_unslash( $_GET['exclude'] ) ) );
-		}
-
-		if ( ! empty( $_GET['include'] ) ) {
-			$ids = array_intersect( $ids, array_map( 'absint', (array) wp_unslash( $_GET['include'] ) ) );
-		}
-
-		if ( ! empty( $_GET['limit'] ) ) {
-			$ids = array_slice( $ids, 0, absint( $_GET['limit'] ) );
-		}
+		$ids        = $data_store->search_products( $term, 'downloadable', true, false, $limit );
 
 		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_readable' );
 		$products        = array();
