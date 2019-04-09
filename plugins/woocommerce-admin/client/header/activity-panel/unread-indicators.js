@@ -17,11 +17,17 @@ export function getUnreadNotes( select ) {
 	};
 
 	const latestNote = getNotes( notesQuery );
+	const isError = Boolean( getNotesError( notesQuery ) );
+	const isRequesting = isGetNotesRequesting( notesQuery );
+
+	if ( isError || isRequesting ) {
+		return null;
+	}
+
 	return (
-		! Boolean( getNotesError( notesQuery ) ) &&
-		! isGetNotesRequesting( notesQuery ) &&
 		latestNote[ 0 ] &&
-		new Date( latestNote[ 0 ].date_created_gmt ).getTime() > userData.activity_panel_inbox_last_read
+		new Date( latestNote[ 0 ].date_created_gmt + 'Z' ).getTime() >
+			userData.activity_panel_inbox_last_read
 	);
 }
 
@@ -44,13 +50,11 @@ export function getUnreadOrders( select ) {
 	const isError = Boolean( getReportItemsError( 'orders', ordersQuery ) );
 	const isRequesting = isReportItemsRequesting( 'orders', ordersQuery );
 
-	if ( ! isError && ! isRequesting ) {
-		if ( totalOrders > 0 ) {
-			return true;
-		}
-		return false;
+	if ( isError || isRequesting ) {
+		return null;
 	}
-	return null;
+
+	return totalOrders > 0;
 }
 
 export function getUnreadReviews( select ) {
@@ -119,9 +123,12 @@ export function getUnreadStock( select ) {
 	};
 	getItems( 'products', productsQuery );
 	const lowInStockCount = getItemsTotalCount( 'products', productsQuery );
+	const isError = Boolean( getItemsError( 'products', productsQuery ) );
+	const isRequesting = isGetItemsRequesting( 'products', productsQuery );
 
-	return ! getItemsError( 'products', productsQuery ) &&
-		! isGetItemsRequesting( 'products', productsQuery )
-		? lowInStockCount > 0
-		: false;
+	if ( isError || isRequesting ) {
+		return null;
+	}
+
+	return lowInStockCount > 0;
 }

@@ -151,7 +151,7 @@ function OrdersPanel( { orders, isRequesting, isError, orderStatuses } ) {
 				key={ order.order_id }
 				className="woocommerce-order-activity-card"
 				title={ orderCardTitle( order ) }
-				date={ order.date_created }
+				date={ order.date_created_gmt }
 				subtitle={
 					<div>
 						<span>

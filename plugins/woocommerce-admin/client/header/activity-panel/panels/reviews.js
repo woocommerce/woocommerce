@@ -8,7 +8,6 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import Gridicon from 'gridicons';
 import interpolateComponents from 'interpolate-components';
-import moment from 'moment';
 import { get, noop, isNull } from 'lodash';
 import PropTypes from 'prop-types';
 import { withDispatch } from '@wordpress/data';
@@ -135,11 +134,7 @@ class ReviewsPanel extends Component {
 				key={ review.id }
 				title={ title }
 				subtitle={ subtitle }
-				date={
-					review.date_created_gmt
-						? moment( review.date_created_gmt + 'Z' ).format( 'YYYY-MM-DDTH:mm:ss' )
-						: null
-				}
+				date={ review.date_created_gmt }
 				icon={ icon }
 				actions={ cardActions() }
 				unread={
