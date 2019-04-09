@@ -48,6 +48,13 @@ export class SearchListControl extends Component {
 		this.renderList = this.renderList.bind( this );
 	}
 
+	componentDidUpdate( prevProps ) {
+		const { onSearch, search } = this.props;
+		if ( search !== prevProps.search && 'function' === typeof onSearch ) {
+			onSearch( search );
+		}
+	}
+
 	onRemove( id ) {
 		const { isSingle, onChange, selected } = this.props;
 		return () => {
@@ -285,6 +292,10 @@ SearchListControl.propTypes = {
 	 * Passed an array of item objects (as passed in via props.list).
 	 */
 	onChange: PropTypes.func.isRequired,
+	/**
+	 * Callback fired when the search field is used.
+	 */
+	onSearch: PropTypes.func,
 	/**
 	 * Callback to render each item in the selection list, allows any custom object-type rendering.
 	 */

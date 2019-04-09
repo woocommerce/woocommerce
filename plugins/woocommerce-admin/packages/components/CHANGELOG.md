@@ -3,7 +3,8 @@
 - Chart component now accepts data with negative values.
 - Chart component: new prop `filterParam` used to detect selected items in the current query. If there are, they will be displayed in the chart even if their values are 0.
 - Expand search results and allow searching when input is refocused in autocompleter.
-- Animation Slider: Remove `focusOnChange` in favor of `onExited` so consumers can pass a function to be exectuted after a transition has finished.
+- Animation Slider: Remove `focusOnChange` in favor of `onExited` so consumers can pass a function to be executed after a transition has finished.
+- SearchListControl: Add `onSearch` callback prop to let the parent component know about search changes.
 
 # 1.6.0
 - Chart component: new props `emptyMessage` and `baseValue`. When an empty message is provided, it will be displayed on top of the chart if there are no values different than `baseValue`.
