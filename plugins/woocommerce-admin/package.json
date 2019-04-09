@@ -54,7 +54,8 @@
     "test": "wp-scripts test-unit-js --config tests/js/jest.config.json",
     "test:help": "wp-scripts test-unit-js --help",
     "test:update-snapshots": "jest --updateSnapshot --config tests/js/jest.config.json",
-    "test:watch": "npm run test -- --watch"
+    "test:watch": "npm run test -- --watch",
+    "example": "webpack --config docs/examples/extensions/examples.config.js --watch"
   },
   "husky": {
     "hooks": {
