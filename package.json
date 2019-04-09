@@ -54,7 +54,7 @@
     "husky": "1.3.1",
     "istanbul": "1.0.0-alpha.2",
     "lint-staged": "8.1.5",
-    "mocha": "6.0.2",
+    "mocha": "6.1.2",
     "node-sass": "4.11.0",
     "prettier": "github:automattic/calypso-prettier#c56b4251",
     "stylelint": "9.10.1",
