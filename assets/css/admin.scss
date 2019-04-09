@@ -3931,6 +3931,11 @@ img.help_tip {
 			margin-bottom: 3px;
 		}
 
+		.select2-container + span.description {
+			display: block;
+			margin-top: 8px;
+		}
+
 		table.widefat th {
 			padding-right: inherit;
 		}
