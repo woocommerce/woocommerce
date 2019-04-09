@@ -255,7 +255,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 			),
 		);
 
-		// Only display Marketplace Suggestions opt-out if current user can actually see suggestions
+		// Only display Marketplace Suggestions opt-out if current user can actually see suggestions.
 		if ( current_user_can( 'install_plugins' ) ) {
 			$marketplace_suggestion_settings = array(
 				array(
