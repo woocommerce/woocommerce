@@ -24,6 +24,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<p><?php esc_html_e( 'Extensions can add new functionality to your product pages that make your store stand out', 'woocommerce' ); ?></p>
 		</div>
 		<a href="https://woocommerce.com/product-category/woocommerce-extensions/?utm_source=editproduct&amp;utm_campaign=marketplacesuggestions&amp;utm_medium=product" target="blank" class="button"><?php esc_html_e( 'Browse the Marketplace', 'woocommerce' ); ?></a><br />
-		<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=account#marketplace_suggestions-description' ) ); ?>"><?php esc_html_e( 'Manage suggestions', 'woocommerce' ); ?></a>
+		<a class="marketplace-suggestion-manage-link" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=account#marketplace_suggestions-description' ) ); ?>"><?php esc_html_e( 'Manage suggestions', 'woocommerce' ); ?></a>
 	</div>
 </div>
