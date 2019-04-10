@@ -876,7 +876,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			AND lookup.onsale = 1
 			$outofstock_where
 			AND posts.post_parent NOT IN (
-				SELECT ID FROM `$wpdb->posts`
+				SELECT ID FROM `$wpdb->posts` as posts
 				WHERE posts.post_type = 'product'
 				AND posts.post_parent = 0
 				AND posts.post_status != 'publish'
