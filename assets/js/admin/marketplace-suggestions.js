@@ -183,7 +183,7 @@
 				manageSuggestionsLink.classList.add( 'marketplace-suggestion-manage-link', 'linkout' );
 				manageSuggestionsLink.setAttribute(
 					'href',
-					'/wp-admin/admin.php?page=wc-settings&tab=account#marketplace_suggestions-description'
+					'/wp-admin/admin.php?page=wc-settings&tab=advanced&section=woocommerce_com'
 				);
 				manageSuggestionsLink.textContent =  marketplace_suggestions.i18n_marketplace_suggestions_manage_suggestions;
 
