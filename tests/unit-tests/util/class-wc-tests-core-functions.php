@@ -562,12 +562,14 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @expectedIncorrectUsage wc_get_template
 	 */
 	public function test_wc_get_template_invalid_action_args() {
+		ob_start();
 		wc_get_template(
 			'global/wrapper-start.php',
 			array(
 				'action_args' => 'this is bad',
 			)
 		);
+		$template = ob_get_clean();
 	}
 
 	/**
