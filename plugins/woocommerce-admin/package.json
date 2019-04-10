@@ -60,7 +60,7 @@
     "@wordpress/jest-preset-default": "4.0.0",
     "@wordpress/postcss-themes": "1.0.4",
     "ast-types": "0.12.3",
-    "autoprefixer": "9.5.0",
+    "autoprefixer": "9.5.1",
     "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "10.0.1",
     "babel-loader": "8.0.5",
