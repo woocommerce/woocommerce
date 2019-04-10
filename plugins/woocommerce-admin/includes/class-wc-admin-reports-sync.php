@@ -79,9 +79,6 @@ class WC_Admin_Reports_Sync {
 	 * Hook in sync methods.
 	 */
 	public static function init() {
-		// Add report regeneration to tools REST API.
-		add_filter( 'woocommerce_debug_tools', array( __CLASS__, 'add_regenerate_tool' ) );
-
 		// Initialize syncing hooks.
 		add_action( 'wp_loaded', array( __CLASS__, 'orders_lookup_update_init' ) );
 
@@ -123,30 +120,6 @@ class WC_Admin_Reports_Sync {
 		} else {
 			self::queue()->cancel_all( null, array(), self::QUEUE_GROUP );
 		}
-	}
-
-	/**
-	 * Adds regenerate tool to WC system status tools API.
-	 *
-	 * @param array $tools List of tools.
-	 * @return array
-	 */
-	public static function add_regenerate_tool( $tools ) {
-		if ( isset( $_GET['page'] ) && 'wc-status' === $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification
-			return $tools;
-		}
-
-		return array_merge(
-			$tools,
-			array(
-				'rebuild_stats' => array(
-					'name'     => __( 'Rebuild reports data', 'woocommerce-admin' ),
-					'button'   => __( 'Rebuild reports', 'woocommerce-admin' ),
-					'desc'     => __( 'This tool will rebuild all of the information used by the reports.', 'woocommerce-admin' ),
-					'callback' => array( __CLASS__, 'regenerate_report_data' ),
-				),
-			)
-		);
 	}
 
 	/**
