@@ -72,6 +72,7 @@ class WC_Admin_Install {
 
 		delete_transient( 'wc_admin_installing' );
 
+		update_option( 'wc_admin_install_timestamp', time() );
 		do_action( 'wc_admin_installed' );
 	}
 
