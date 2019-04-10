@@ -269,6 +269,8 @@ class WC_Admin_Notices {
 
 	/**
 	 * Show a notice asking users to convert to shipping zones.
+	 *
+	 * @todo remove in 4.0.0
 	 */
 	public static function legacy_shipping_notice() {
 		$maybe_load_legacy_methods = array( 'flat_rate', 'free_shipping', 'international_delivery', 'local_delivery', 'local_pickup' );
