@@ -442,6 +442,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						'active_plugins'           => $active_plugin_slugs,
 						'dismissed_suggestions'    => WC_Marketplace_Suggestions::get_dismissed_suggestions(),
 						'suggestions_data'         => WC_Marketplace_Suggestions::get_suggestions_api_data(),
+						'manage_suggestions_url'   => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=woocommerce_com' ),
 						'i18n_marketplace_suggestions_default_cta'
 							=> esc_html__( 'Learn More', 'woocommerce' ),
 						'i18n_marketplace_suggestions_dismiss_tooltip'
