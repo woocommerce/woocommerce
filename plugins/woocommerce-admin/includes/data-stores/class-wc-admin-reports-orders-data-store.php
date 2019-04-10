@@ -337,24 +337,29 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	}
 
 	/**
-	 * Get customer data from order IDs.
+	 * Get customer data from Order data.
 	 *
-	 * @param array $orders Array of orders.
+	 * @param array $orders Array of orders data.
 	 * @return array
 	 */
 	protected function get_customers_by_orders( $orders ) {
 		global $wpdb;
-		$customer_lookup_table = $wpdb->prefix . 'wc_customer_lookup';
 
-		$customer_ids = array();
+		$customer_lookup_table = $wpdb->prefix . 'wc_customer_lookup';
+		$customer_ids          = array();
+
 		foreach ( $orders as $order ) {
 			if ( $order['customer_id'] ) {
 				$customer_ids[] = $order['customer_id'];
 			}
 		}
-		$customer_ids = implode( ',', $customer_ids );
 
-		$customers = $wpdb->get_results(
+		if ( empty( $customer_ids ) ) {
+			return array();
+		}
+
+		$customer_ids = implode( ',', $customer_ids );
+		$customers    = $wpdb->get_results(
 			"SELECT * FROM {$customer_lookup_table} WHERE customer_id IN ({$customer_ids})",
 			ARRAY_A
 		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
