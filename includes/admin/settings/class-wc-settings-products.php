@@ -76,17 +76,20 @@ class WC_Settings_Products extends WC_Settings_Page {
 				echo wp_kses(
 					sprintf(
 						/* translators: %s: URL to customizer. */
-						__( 'Looking for the product display options? They can now be found in the Customizer. <a href="%s">Go see them in action here.</a>', 'woocommerce' ), esc_url(
+						__( 'Looking for the product display options? They can now be found in the Customizer. <a href="%s">Go see them in action here.</a>', 'woocommerce' ),
+						esc_url(
 							add_query_arg(
 								array(
 									'autofocus' => array(
 										'panel' => 'woocommerce',
 									),
 									'url'       => wc_get_page_permalink( 'shop' ),
-								), admin_url( 'customize.php' )
+								),
+								admin_url( 'customize.php' )
 							)
 						)
-					), array(
+					),
+					array(
 						'a' => array(
 							'href'  => array(),
 							'title' => array(),
@@ -122,7 +125,8 @@ class WC_Settings_Products extends WC_Settings_Page {
 	public function get_settings( $current_section = '' ) {
 		if ( 'inventory' === $current_section ) {
 			$settings = apply_filters(
-				'woocommerce_inventory_settings', array(
+				'woocommerce_inventory_settings',
+				array(
 
 					array(
 						'title' => __( 'Inventory', 'woocommerce' ),
@@ -252,7 +256,8 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 		} elseif ( 'downloadable' === $current_section ) {
 			$settings = apply_filters(
-				'woocommerce_downloadable_products_settings', array(
+				'woocommerce_downloadable_products_settings',
+				array(
 					array(
 						'title' => __( 'Downloadable products', 'woocommerce' ),
 						'type'  => 'title',
@@ -313,8 +318,10 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 		} else {
 			$settings = apply_filters(
-				'woocommerce_product_settings', apply_filters(
-					'woocommerce_products_general_settings', array(
+				'woocommerce_product_settings',
+				apply_filters(
+					'woocommerce_products_general_settings',
+					array(
 						array(
 							'title' => __( 'Shop pages', 'woocommerce' ),
 							'type'  => 'title',
