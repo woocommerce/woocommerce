@@ -245,7 +245,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_Legacy_Orders_Controller {
 
 		return array(
 			'id'                   => $object->get_id(),
-			'parent_id'            => $data['parent_id'],
+			'parent'               => $data['parent_id'],
 			'number'               => $data['number'],
 			'order_key'            => $data['order_key'],
 			'created_via'          => $data['created_via'],
@@ -846,7 +846,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_Legacy_Orders_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'parent_id'            => array(
+				'parent'               => array(
 					'description' => __( 'Parent order ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
