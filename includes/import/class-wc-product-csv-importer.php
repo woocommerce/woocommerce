@@ -976,7 +976,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				continue;
 			}
 
-			if ( $update_existing && ( $id || $sku ) && ! $id_exists && ! $sku_exists ) {
+			if ( $update_existing && ( isset( $parsed_data['id'] ) || isset( $parsed_data['sku'] ) ) && ! $id_exists && ! $sku_exists ) {
 				$data['skipped'][] = new WP_Error(
 					'woocommerce_product_importer_error',
 					esc_html__( 'No matching product exists to update.', 'woocommerce' ),
