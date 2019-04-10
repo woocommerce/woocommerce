@@ -696,10 +696,11 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	public function get_database_info() {
 		global $wpdb;
 
-		$database_table_sizes = $wpdb->get_results(
+		$database_table_information = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT
 				    table_name AS 'name',
+					engine,
 				    round( ( data_length / 1024 / 1024 ), 2 ) 'data',
 				    round( ( index_length / 1024 / 1024 ), 2 ) 'index'
 				FROM information_schema.TABLES
@@ -754,7 +755,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 
 		$site_tables_prefix = $wpdb->get_blog_prefix( get_current_blog_id() );
 		$global_tables = $wpdb->tables( 'global', true );
-		foreach ( $database_table_sizes as $table ) {
+		foreach ( $database_table_information as $table ) {
 			// Only include tables matching the prefix of the current site, this is to prevent displaying all tables on a MS install not relating to the current.
 			if ( is_multisite() && 0 !== strpos( $table->name, $site_tables_prefix ) && ! in_array( $table->name, $global_tables, true ) ) {
 				continue;
@@ -762,8 +763,9 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$table_type = in_array( $table->name, $core_tables ) ? 'woocommerce' : 'other';
 
 			$tables[ $table_type ][ $table->name ] = array(
-				'data'  => $table->data,
-				'index' => $table->index,
+				'data'   => $table->data,
+				'index'  => $table->index,
+				'engine' => $table->engine,
 			);
 
 			$database_size['data']  += $table->data;
