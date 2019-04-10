@@ -39,8 +39,8 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 	/**
 	 * Test is_phone().
 	 *
-	 * @param mixed $assert
-	 * @param mixed $values
+	 * @param mixed $assert Expected value.
+	 * @param mixed $values Actual value.
 	 *
 	 * @dataProvider data_provider_test_is_phone
 	 * @since 2.3
@@ -104,8 +104,8 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 	/**
 	 * Test is_postcode().
 	 *
-	 * @param mixed $assert
-	 * @param mixed $values
+	 * @param mixed $assert Expected value.
+	 * @param mixed $values Actual value.
 	 *
 	 * @dataProvider data_provider_test_is_postcode
 	 * @since 2.4
@@ -138,8 +138,8 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 	/**
 	 * Test is_gb_postcode().
 	 *
-	 * @param mixed $assert
-	 * @param mixed $values
+	 * @param mixed $assert Expected value.
+	 * @param mixed $values Actual value.
 	 *
 	 * @dataProvider data_provider_test_is_gb_postcode
 	 * @since 2.4
@@ -167,8 +167,8 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 	/**
 	 * Test format_postcode().
 	 *
-	 * @param mixed $assert
-	 * @param mixed $values
+	 * @param mixed $assert Expected value.
+	 * @param mixed $values Actual value.
 	 *
 	 * @dataProvider data_provider_test_format_postcode
 	 * @since 2.4
