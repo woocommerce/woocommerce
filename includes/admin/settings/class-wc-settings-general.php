@@ -51,7 +51,8 @@ class WC_Settings_General extends WC_Settings_Page {
 		}
 
 		$settings = apply_filters(
-			'woocommerce_general_settings', array(
+			'woocommerce_general_settings',
+			array(
 
 				array(
 					'title' => __( 'Store Address', 'woocommerce' ),
