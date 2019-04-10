@@ -985,14 +985,14 @@ class WC_Countries {
 						),
 					),
 					'JP' => array(
-						'postcode' => array(
+						'postcode'  => array(
 							'priority' => 65,
 						),
-						'state'    => array(
+						'state'     => array(
 							'label'    => __( 'Prefecture', 'woocommerce' ),
 							'priority' => 66,
 						),
-						'city' => array(
+						'city'      => array(
 							'priority' => 67,
 						),
 						'address_1' => array(
@@ -1183,17 +1183,17 @@ class WC_Countries {
 					'UG' => array(
 						'postcode' => array(
 							'required' => false,
-							'hidden' => true
+							'hidden'   => true,
 						),
-						'city' => array(
-							'label' => __( 'Town / Village', 'woocommerce' ),
-							'required' => true
+						'city'     => array(
+							'label'    => __( 'Town / Village', 'woocommerce' ),
+							'required' => true,
 						),
-						'state' => array(
-							'label' => __( 'District', 'woocommerce' ),
-							'required' => true
+						'state'    => array(
+							'label'    => __( 'District', 'woocommerce' ),
+							'required' => true,
 						),
-					),	
+					),
 					'US' => array(
 						'postcode' => array(
 							'label' => __( 'ZIP', 'woocommerce' ),
