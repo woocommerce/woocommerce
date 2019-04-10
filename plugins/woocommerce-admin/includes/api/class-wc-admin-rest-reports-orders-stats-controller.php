@@ -180,7 +180,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'coupons'           => array(
+			'coupons'                 => array(
 				'description' => __( 'Amount discounted by coupons.', 'woocommerce-admin' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),

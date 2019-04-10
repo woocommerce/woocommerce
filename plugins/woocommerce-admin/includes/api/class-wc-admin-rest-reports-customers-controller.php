@@ -355,32 +355,32 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 				'email',
 			),
 		);
-		$params['name_includes']                = array(
+		$params['name_includes']           = array(
 			'description'       => __( 'Limit response to objects with specfic names.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['name_excludes']                = array(
+		$params['name_excludes']           = array(
 			'description'       => __( 'Limit response to objects excluding specfic names.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['username_includes']                = array(
+		$params['username_includes']       = array(
 			'description'       => __( 'Limit response to objects with specfic usernames.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['username_excludes']                = array(
+		$params['username_excludes']       = array(
 			'description'       => __( 'Limit response to objects excluding specfic usernames.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['email_includes']                   = array(
+		$params['email_includes']          = array(
 			'description'       => __( 'Limit response to objects including emails.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['email_excludes']                   = array(
+		$params['email_excludes']          = array(
 			'description'       => __( 'Limit response to objects excluding emails.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',

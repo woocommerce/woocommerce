@@ -123,8 +123,8 @@ class WC_Admin_Notes_Order_Milestones {
 	 */
 	public function get_orders_count( $no_cache = false ) {
 		if ( $no_cache || is_null( $this->orders_count ) ) {
-			$status_counts       = array_map( 'wc_orders_count', $this->allowed_statuses );
-			$this->orders_count  = array_sum( $status_counts );
+			$status_counts      = array_map( 'wc_orders_count', $this->allowed_statuses );
+			$this->orders_count = array_sum( $status_counts );
 		}
 
 		return $this->orders_count;

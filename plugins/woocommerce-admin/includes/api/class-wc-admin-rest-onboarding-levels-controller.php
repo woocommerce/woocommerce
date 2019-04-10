@@ -240,13 +240,13 @@ class WC_Admin_REST_Onboarding_Levels_Controller extends WC_REST_Data_Controller
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'illustration'  => array(
+							'illustration' => array(
 								'description' => __( 'URL for illustration used.', 'woocommerce-admin' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'status'  => array(
+							'status'       => array(
 								'description' => __( 'Task status.', 'woocommerce-admin' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),

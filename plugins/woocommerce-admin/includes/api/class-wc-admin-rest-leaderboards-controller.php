@@ -451,7 +451,7 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 						),
 					),
 				),
-				'rows' => array(
+				'rows'    => array(
 					'type'        => 'array',
 					'description' => __( 'Table rows.', 'woocommerce-admin' ),
 					'context'     => array( 'view' ),
