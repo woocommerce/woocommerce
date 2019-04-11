@@ -99,11 +99,7 @@ class WC_Admin_Reports_Sync {
 	 * @return string
 	 */
 	public static function regenerate_report_data( $days, $skip_existing ) {
-		// Add registered customers to the lookup table before updating order stats
-		// so that the orders can be associated with the `customer_id` column.
-		self::customer_lookup_batch_init();
-		// Queue orders lookup to occur after customers lookup generation is done.
-		self::queue_dependent_action( self::ORDERS_LOOKUP_BATCH_INIT, array( $days, $skip_existing ), self::CUSTOMERS_BATCH_ACTION );
+		self::queue()->schedule_single( time() + 5, self::ORDERS_LOOKUP_BATCH_INIT, array( $days, $skip_existing ), self::QUEUE_GROUP );
 
 		return __( 'Report table data is being rebuilt.  Please allow some time for data to fully populate.', 'woocommerce-admin' );
 	}
@@ -165,8 +161,7 @@ class WC_Admin_Reports_Sync {
 			}
 		}
 
-		// We want to ensure that customer lookup updates are scheduled before order updates.
-		self::queue_dependent_action( self::SINGLE_ORDER_ACTION, array( $order_id ), self::CUSTOMERS_BATCH_ACTION );
+		self::queue()->schedule_single( time() + 5, self::SINGLE_ORDER_ACTION, array( $order_id ), self::QUEUE_GROUP );
 	}
 
 	/**
