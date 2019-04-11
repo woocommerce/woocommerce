@@ -18,18 +18,15 @@ import { EllipsisMenu, MenuItem, MenuTitle, SectionHeader } from '@woocommerce/c
 /**
  * Internal dependencies
  */
+import Leaderboard from 'analytics/components/leaderboard';
 import withSelect from 'wc-api/with-select';
-import TopSellingCategories from './top-selling-categories';
-import TopSellingProducts from './top-selling-products';
-import TopCoupons from './top-coupons';
-import TopCustomers from './top-customers';
 import './style.scss';
 
 class Leaderboards extends Component {
 	constructor( props ) {
 		super( ...arguments );
 		this.state = {
-			hiddenLeaderboardKeys: props.userPrefLeaderboards || [ 'top-coupons', 'top-customers' ],
+			hiddenLeaderboardKeys: props.userPrefLeaderboards || [ 'coupons', 'customers' ],
 			rowsPerTable: parseInt( props.userPrefLeaderboardRows ) || 5,
 		};
 
@@ -57,24 +54,8 @@ class Leaderboards extends Component {
 
 	renderMenu() {
 		const { hiddenLeaderboardKeys, rowsPerTable } = this.state;
-		const allLeaderboards = [
-			{
-				key: 'top-products',
-				label: __( 'Top Products - Items Sold', 'woocommerce-admin' ),
-			},
-			{
-				key: 'top-categories',
-				label: __( 'Top Categories - Items Sold', 'woocommerce-admin' ),
-			},
-			{
-				key: 'top-coupons',
-				label: __( 'Top Coupons', 'woocommerce-admin' ),
-			},
-			{
-				key: 'top-customers',
-				label: __( 'Top Customers', 'woocommerce-admin' ),
-			},
-		];
+		const { allLeaderboards } = this.props;
+
 		return (
 			<EllipsisMenu
 				label={ __(
@@ -87,11 +68,11 @@ class Leaderboards extends Component {
 					{ allLeaderboards.map( leaderboard => {
 						return (
 							<MenuItem
-								checked={ ! hiddenLeaderboardKeys.includes( leaderboard.key ) }
+								checked={ ! hiddenLeaderboardKeys.includes( leaderboard.id ) }
 								isCheckbox
 								isClickable
-								key={ leaderboard.key }
-								onInvoke={ this.toggle( leaderboard.key ) }
+								key={ leaderboard.id }
+								onInvoke={ this.toggle( leaderboard.id ) }
 							>
 								{ leaderboard.label }
 							</MenuItem>
@@ -112,9 +93,29 @@ class Leaderboards extends Component {
 		);
 	}
 
-	render() {
+	renderLeaderboards() {
 		const { hiddenLeaderboardKeys, rowsPerTable } = this.state;
-		const { query } = this.props;
+		const { allLeaderboards, query } = this.props;
+
+		return allLeaderboards.map( leaderboard => {
+			if ( hiddenLeaderboardKeys.includes( leaderboard.id ) ) {
+				return;
+			}
+
+			return (
+				<Leaderboard
+					headers={ leaderboard.headers }
+					id={ leaderboard.id }
+					key={ leaderboard.id }
+					query={ query }
+					title={ leaderboard.label }
+					totalRows={ rowsPerTable }
+				/>
+			);
+		} );
+	}
+
+	render() {
 		return (
 			<Fragment>
 				<div className="woocommerce-dashboard__dashboard-leaderboards">
@@ -122,20 +123,7 @@ class Leaderboards extends Component {
 						title={ __( 'Leaderboards', 'woocommerce-admin' ) }
 						menu={ this.renderMenu() }
 					/>
-					<div className="woocommerce-dashboard__columns">
-						{ ! hiddenLeaderboardKeys.includes( 'top-products' ) && (
-							<TopSellingProducts query={ query } totalRows={ rowsPerTable } />
-						) }
-						{ ! hiddenLeaderboardKeys.includes( 'top-categories' ) && (
-							<TopSellingCategories query={ query } totalRows={ rowsPerTable } />
-						) }
-						{ ! hiddenLeaderboardKeys.includes( 'top-coupons' ) && (
-							<TopCoupons query={ query } totalRows={ rowsPerTable } />
-						) }
-						{ ! hiddenLeaderboardKeys.includes( 'top-customers' ) && (
-							<TopCustomers query={ query } totalRows={ rowsPerTable } />
-						) }
-					</div>
+					<div className="woocommerce-dashboard__columns">{ this.renderLeaderboards() }</div>
 				</div>
 			</Fragment>
 		);
@@ -148,10 +136,17 @@ Leaderboards.propTypes = {
 
 export default compose(
 	withSelect( select => {
-		const { getCurrentUserData } = select( 'wc-api' );
+		const { getCurrentUserData, getItems, getItemsError, isGetItemsRequesting } = select(
+			'wc-api'
+		);
 		const userData = getCurrentUserData();
+		const allLeaderboards = wcSettings.dataEndpoints.leaderboards;
 
 		return {
+			allLeaderboards,
+			getItems,
+			getItemsError,
+			isGetItemsRequesting,
 			userPrefLeaderboards: userData.dashboard_leaderboards,
 			userPrefLeaderboardRows: userData.dashboard_leaderboard_rows,
 		};

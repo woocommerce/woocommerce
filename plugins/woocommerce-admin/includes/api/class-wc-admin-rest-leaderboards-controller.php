@@ -47,6 +47,19 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/allowed',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_allowed_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_public_allowed_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -59,7 +72,7 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 	 */
 	public function get_coupons_leaderboard( $per_page, $after, $before, $persisted_query ) {
 		$coupons_data_store = new WC_Admin_Reports_Coupons_Data_Store();
-		$coupons_data       = $coupons_data_store->get_data(
+		$coupons_data       = $per_page > 0 ? $coupons_data_store->get_data(
 			array(
 				'orderby'       => 'orders_count',
 				'order'         => 'desc',
@@ -68,10 +81,10 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 				'per_page'      => $per_page,
 				'extended_info' => true,
 			)
-		);
+		)->data : array();
 
 		$rows = array();
-		foreach ( $coupons_data->data as $coupon ) {
+		foreach ( $coupons_data as $coupon ) {
 			$url_query   = wp_parse_args(
 				array(
 					'filter'  => 'single_coupon',
@@ -125,7 +138,7 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 	 */
 	public function get_categories_leaderboard( $per_page, $after, $before, $persisted_query ) {
 		$categories_data_store = new WC_Admin_Reports_Categories_Data_Store();
-		$categories_data       = $categories_data_store->get_data(
+		$categories_data       = $per_page > 0 ? $categories_data_store->get_data(
 			array(
 				'orderby'       => 'items_sold',
 				'order'         => 'desc',
@@ -134,10 +147,10 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 				'per_page'      => $per_page,
 				'extended_info' => true,
 			)
-		);
+		)->data : array();
 
 		$rows = array();
-		foreach ( $categories_data->data as $category ) {
+		foreach ( $categories_data as $category ) {
 			$url_query     = wp_parse_args(
 				array(
 					'filter'     => 'single_category',
@@ -191,16 +204,16 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 	 */
 	public function get_customers_leaderboard( $per_page, $after, $before, $persisted_query ) {
 		$customers_data_store = new WC_Admin_Reports_Customers_Data_Store();
-		$customers_data       = $customers_data_store->get_data(
+		$customers_data       = $per_page > 0 ? $customers_data_store->get_data(
 			array(
 				'orderby'  => 'total_spend',
 				'order'    => 'desc',
 				'per_page' => $per_page,
 			)
-		);
+		)->data : array();
 
 		$rows = array();
-		foreach ( $customers_data->data as $customer ) {
+		foreach ( $customers_data as $customer ) {
 			$url_query    = wp_parse_args(
 				array(
 					'filter'    => 'single_customer',
@@ -253,7 +266,7 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 	 */
 	public function get_products_leaderboard( $per_page, $after, $before, $persisted_query ) {
 		$products_data_store = new WC_Admin_Reports_Products_Data_Store();
-		$products_data       = $products_data_store->get_data(
+		$products_data       = $per_page > 0 ? $products_data_store->get_data(
 			array(
 				'orderby'       => 'items_sold',
 				'order'         => 'desc',
@@ -262,10 +275,10 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 				'per_page'      => $per_page,
 				'extended_info' => true,
 			)
-		);
+		)->data : array();
 
 		$rows = array();
-		foreach ( $products_data->data as $product ) {
+		foreach ( $products_data as $product ) {
 			$url_query    = wp_parse_args(
 				array(
 					'filter'   => 'single_product',
@@ -349,6 +362,39 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 		}
 
 		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Returns a list of allowed leaderboards.
+	 *
+	 * @param  WP_REST_Request $request Request data.
+	 * @return array|WP_Error
+	 */
+	public function get_allowed_items( $request ) {
+		$leaderboards = $this->get_leaderboards( 0, null, null, null );
+
+		$data = array();
+		foreach ( $leaderboards as $leaderboard ) {
+			$data[] = (object) array(
+				'id'      => $leaderboard['id'],
+				'label'   => $leaderboard['label'],
+				'headers' => $leaderboard['headers'],
+			);
+		}
+
+		$objects = array();
+		foreach ( $data as $item ) {
+			$prepared  = $this->prepare_item_for_response( $item, $request );
+			$objects[] = $this->prepare_response_for_collection( $prepared );
+		}
+
+		$response = rest_ensure_response( $objects );
+		$response->header( 'X-WP-Total', count( $data ) );
+		$response->header( 'X-WP-TotalPages', 1 );
+
+		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
+
+		return $response;
 	}
 
 	/**

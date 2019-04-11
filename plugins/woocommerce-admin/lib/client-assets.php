@@ -154,6 +154,7 @@ function wc_admin_print_script_settings() {
 	$preload_data_endpoints = array(
 		'countries'             => '/wc/v4/data/countries',
 		'performanceIndicators' => '/wc/v4/reports/performance-indicators/allowed',
+		'leaderboards'          => '/wc/v4/leaderboards/allowed',
 	);
 
 	if ( function_exists( 'gutenberg_preload_api_request' ) ) {

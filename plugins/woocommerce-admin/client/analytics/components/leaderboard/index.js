@@ -5,36 +5,50 @@
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
-import { get } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
  * WooCommerce dependencies
  */
 import { Card, EmptyTable, TableCard } from '@woocommerce/components';
+import { getPersistedQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
  */
+import { getLeaderboard } from 'wc-api/items/utils';
 import ReportError from 'analytics/components/report-error';
-import { getReportTableData } from 'wc-api/reports/utils';
+import sanitizeHTML from 'lib/sanitize-html';
 import withSelect from 'wc-api/with-select';
 import './style.scss';
 
 export class Leaderboard extends Component {
+	getFormattedHeaders() {
+		return this.props.headers.map( ( header, i ) => {
+			return {
+				isLeftAligned: 0 === i,
+				hiddenByDefault: false,
+				isSortable: false,
+				key: header.label,
+				label: header.label,
+			};
+		} );
+	}
+
+	getFormattedRows() {
+		return this.props.rows.map( row => {
+			return row.map( column => {
+				return {
+					display: <div dangerouslySetInnerHTML={ sanitizeHTML( column.display ) } />,
+					value: column.value,
+				};
+			} );
+		} );
+	}
+
 	render() {
-		const {
-			getHeadersContent,
-			getRowsContent,
-			isRequesting,
-			isError,
-			items,
-			tableQuery,
-			title,
-		} = this.props;
-		const data = get( items, [ 'data' ], [] );
-		const rows = getRowsContent( data );
-		const totalRows = tableQuery ? tableQuery.per_page : 5;
+		const { isRequesting, isError, totalRows, title } = this.props;
+		const rows = this.getFormattedRows();
 
 		if ( isError ) {
 			return <ReportError className="woocommerce-leaderboard" isError />;
@@ -53,7 +67,7 @@ export class Leaderboard extends Component {
 		return (
 			<TableCard
 				className="woocommerce-leaderboard"
-				headers={ getHeadersContent() }
+				headers={ this.getFormattedHeaders() }
 				isLoading={ isRequesting }
 				rows={ rows }
 				rowsPerPage={ totalRows }
@@ -67,45 +81,60 @@ export class Leaderboard extends Component {
 
 Leaderboard.propTypes = {
 	/**
-	 * The endpoint to use in API calls to populate the table rows and summary.
-	 * For example, if `taxes` is provided, data will be fetched from the report
-	 * `taxes` endpoint (ie: `/wc/v4/reports/taxes` and `/wc/v4/reports/taxes/stats`).
-	 * If the provided endpoint doesn't exist, an error will be shown to the user
-	 * with `ReportError`.
+	 * An array of column headers.
 	 */
-	endpoint: PropTypes.string,
+	headers: PropTypes.arrayOf(
+		PropTypes.shape( {
+			label: PropTypes.string,
+		} )
+	),
 	/**
-	 * A function that returns the headers object to build the table.
+	 * String of leaderboard ID to display.
 	 */
-	getHeadersContent: PropTypes.func.isRequired,
-	/**
-	 * A function that returns the rows array to build the table.
-	 */
-	getRowsContent: PropTypes.func.isRequired,
+	id: PropTypes.string.isRequired,
 	/**
 	 * Query args added to the report table endpoint request.
 	 */
 	query: PropTypes.object,
 	/**
-	 * Properties to be added to the query sent to the report table endpoint.
+	 * Which column should be the row header, defaults to the first item (`0`) (see `Table` props).
 	 */
-	tableQuery: PropTypes.object,
+	rows: PropTypes.arrayOf(
+		PropTypes.arrayOf(
+			PropTypes.shape( {
+				display: PropTypes.node,
+				value: PropTypes.oneOfType( [ PropTypes.string, PropTypes.number, PropTypes.bool ] ),
+			} )
+		)
+	).isRequired,
 	/**
 	 * String to display as the title of the table.
 	 */
 	title: PropTypes.string.isRequired,
+	/**
+	 * Number of table rows.
+	 */
+	totalRows: PropTypes.number.isRequired,
+};
+
+Leaderboard.defaultProps = {
+	rows: [],
+	isError: false,
+	isRequesting: false,
 };
 
 export default compose(
 	withSelect( ( select, props ) => {
-		const { endpoint, tableQuery, query } = props;
-		const tableData = getReportTableData( {
-			endpoint,
+		const { id, query, totalRows } = props;
+		const leaderboardQuery = {
+			id,
+			per_page: totalRows,
+			persisted_query: getPersistedQuery( query ),
 			query,
 			select,
-			tableQuery,
-		} );
+		};
+		const leaderboardData = getLeaderboard( leaderboardQuery );
 
-		return { ...tableData };
+		return leaderboardData;
 	} )
 )( Leaderboard );

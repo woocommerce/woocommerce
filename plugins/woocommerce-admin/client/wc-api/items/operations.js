@@ -20,6 +20,7 @@ const typeEndpointMap = {
 	'items-query-categories': 'products/categories',
 	'items-query-customers': 'customers',
 	'items-query-coupons': 'coupons',
+	'items-query-leaderboards': 'leaderboards',
 	'items-query-orders': 'orders',
 	'items-query-products': 'products',
 	'items-query-taxes': 'taxes',
