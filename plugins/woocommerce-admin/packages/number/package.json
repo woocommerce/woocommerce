@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/number",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Number formatting utilities for WooCommerce.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -21,8 +21,8 @@
 	"react-native": "src/index",
 	"dependencies": {
 		"@babel/runtime-corejs2": "7.4.3",
-		"locutus": "^2.0.10",
-		"lodash": "^4.17.11"
+		"locutus": "2.0.10",
+		"lodash": "4.17.11"
 	},
 	"publishConfig": {
 		"access": "public"

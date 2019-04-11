@@ -1,6 +1,6 @@
 {
   "name": "@woocommerce/navigation",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "WooCommerce navigation utilities.",
   "author": "Automattic",
   "license": "GPL-2.0-or-later",
@@ -21,10 +21,10 @@
   "module": "build-module/index.js",
   "react-native": "src/index",
   "dependencies": {
-    "@babel/runtime": "^7.0.0",
+    "@babel/runtime-corejs2": "7.4.3",
     "history": "4.9.0",
-    "lodash": "^4.17.11",
-    "qs": "^6.5.2"
+    "lodash": "4.17.11",
+    "qs": "6.7.0"
   },
   "publishConfig": {
     "access": "public"

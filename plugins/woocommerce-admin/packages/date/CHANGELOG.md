@@ -1,3 +1,8 @@
+# 1.0.7
+
+- Change text domain on i18n functions.
+- Bump dependency versions.
+
 # 1.0.6
 
 - Removed timezone from `appendTimestamp()` output.
