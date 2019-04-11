@@ -16,6 +16,7 @@ Thumbs.db
 wp-cli.local.yml
 *.sql
 *.tar.gz
+*.tgz
 *.zip
 .idea
 .vscode/

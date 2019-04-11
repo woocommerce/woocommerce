@@ -1,7 +1,6 @@
 {
-  "name": "woocommerce-admin",
+  "name": "@woocommerce/admin-library",
   "version": "0.10.0",
-  "main": "js/index.js",
   "author": "Automattic",
   "license": "GPL-2.0-or-later",
   "repository": "",
@@ -22,6 +21,7 @@
     "postbuild": "npm run -s i18n:php && npm run -s i18n:pot",
     "postshrinkwrap": "replace --silent 'http://' 'https://' ./package-lock.json",
     "prestart": "npm run -s install-if-deps-outdated && php ./bin/update-version.php",
+    "prepack": "npm install && npm run lint && npm run test && cross-env WC_ADMIN_PHASE=core npm run build",
     "dev:packages": "node ./bin/packages/watch.js",
     "start": "cross-env WC_ADMIN_PHASE=development npm run build:packages && cross-env WC_ADMIN_PHASE=development npm run build:feature-config && concurrently \"cross-env WC_ADMIN_PHASE=development webpack --watch\" \"npm run dev:packages\"",
     "i18n:js": "cross-env NODE_ENV=production babel client -o /dev/null",
@@ -42,9 +42,9 @@
     "test:update-snapshots": "jest --updateSnapshot --config tests/js/jest.config.json",
     "jest:update": "jest -u --config=tests/js/jest.config.json",
     "docs": "node ./bin/generate-docs",
-    "publish:check": "npm run build:packages && lerna updated",
-    "publish:dev": "npm run build:packages && lerna publish from-package --npm-tag next",
-    "publish:prod": "npm run build:packages && lerna publish from-package"
+    "publish-packages:check": "npm run build:packages && lerna updated",
+    "publish-packages:dev": "npm run build:packages && lerna publish from-package --npm-tag next",
+    "publish-packages:prod": "npm run build:packages && lerna publish from-package"
   },
   "devDependencies": {
     "@babel/cli": "7.4.3",
@@ -158,5 +158,14 @@
       "pre-commit": "npm run -s install-if-no-packages && node bin/pre-commit-hook.js",
       "pre-push": "npm run -s install-if-no-packages && node bin/pre-push-hook.js"
     }
-  }
+  },
+  "files": [
+    "dist/**/*.css",
+    "dist/**/*.js",
+    "dist/feature-config-core.php",
+    "includes/class-wc-admin-loader.php",
+    "includes/features/**/*.php",
+    "languages/**/*.json",
+    "LICENSE.MD"
+  ]
 }

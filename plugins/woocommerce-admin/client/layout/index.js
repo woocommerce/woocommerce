@@ -63,12 +63,11 @@ class Layout extends Component {
 		const { isEmbeded, ...restProps } = this.props;
 		return (
 			<div className="woocommerce-layout">
-				{ window.wcAdminFeatures[ 'activity-panels' ] && <Slot name="header" /> }
+				<Slot name="header" />
 				<TransientNotices />
 
 				<div className="woocommerce-layout__primary" id="woocommerce-layout__primary">
 					{ window.wcAdminFeatures[ 'store-alerts' ] && <StoreAlerts /> }
-
 					<Notices />
 					{ ! isEmbeded && (
 						<div className="woocommerce-layout__main">

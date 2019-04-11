@@ -33,110 +33,110 @@ class WC_Admin_Api_Init {
 	 */
 	public function init_classes() {
 		// Interfaces.
-		require_once WC_ADMIN_ABSPATH . '/includes/interfaces/class-wc-admin-reports-data-store-interface.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/interfaces/class-wc-admin-reports-data-store-interface.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-query.php';
 
 		// Common date time code.
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-interval.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-interval.php';
 
 		// Exceptions.
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-parameter-exception.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-parameter-exception.php';
 
 		// WC Class extensions.
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-order.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-order.php';
 
 		// Segmentation.
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-segmenting.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-orders-stats-segmenting.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-products-stats-segmenting.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-coupons-stats-segmenting.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-taxes-stats-segmenting.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-segmenting.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-orders-stats-segmenting.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-products-stats-segmenting.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-coupons-stats-segmenting.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-taxes-stats-segmenting.php';
 
 		// Query classes for reports.
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-revenue-query.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-orders-query.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-orders-stats-query.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-products-query.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-variations-query.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-products-stats-query.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-categories-query.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-taxes-query.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-taxes-stats-query.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-coupons-query.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-coupons-stats-query.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-downloads-query.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-downloads-stats-query.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-customers-query.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-customers-stats-query.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-reports-stock-stats-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-revenue-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-orders-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-orders-stats-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-products-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-variations-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-products-stats-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-categories-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-taxes-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-taxes-stats-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-coupons-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-coupons-stats-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-downloads-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-downloads-stats-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-customers-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-customers-stats-query.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-stock-stats-query.php';
 
 		// Data stores.
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-reports-data-store.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-reports-orders-data-store.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-reports-orders-stats-data-store.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-reports-products-data-store.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-reports-variations-data-store.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-reports-products-stats-data-store.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-reports-categories-data-store.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-reports-taxes-data-store.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-reports-taxes-stats-data-store.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-reports-coupons-data-store.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-reports-coupons-stats-data-store.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-reports-downloads-data-store.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-reports-downloads-stats-data-store.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-reports-customers-data-store.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-reports-customers-stats-data-store.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-reports-stock-stats-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-orders-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-orders-stats-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-products-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-variations-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-products-stats-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-categories-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-taxes-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-taxes-stats-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-coupons-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-coupons-stats-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-downloads-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-downloads-stats-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-customers-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-customers-stats-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-stock-stats-data-store.php';
 
 		// Data triggers.
-		require_once WC_ADMIN_ABSPATH . '/includes/data-stores/class-wc-admin-notes-data-store.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-notes-data-store.php';
 
 		// CRUD classes.
-		require_once WC_ADMIN_ABSPATH . '/includes/notes/class-wc-admin-note.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/notes/class-wc-admin-notes.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-note.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes.php';
 	}
 
 	/**
 	 * Init REST API.
 	 */
 	public function rest_api_init() {
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-admin-notes-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-coupons-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-data-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-data-countries-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-data-download-ips-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-leaderboards-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-onboarding-levels-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-orders-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-products-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-product-categories-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-product-variations-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-product-reviews-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-product-variations-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-setting-options-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-system-status-tools-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-categories-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-coupons-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-coupons-stats-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-customers-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-customers-stats-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-downloads-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-downloads-files-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-downloads-stats-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-orders-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-orders-stats-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-products-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-variations-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-products-stats-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-performance-indicators-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-revenue-stats-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-taxes-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-taxes-stats-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-stock-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-reports-stock-stats-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-taxes-controller.php';
-		require_once WC_ADMIN_ABSPATH . '/includes/api/class-wc-admin-rest-customers-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-admin-notes-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-coupons-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-data-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-data-countries-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-data-download-ips-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-leaderboards-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-onboarding-levels-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-orders-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-products-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-product-categories-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-product-variations-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-product-reviews-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-product-variations-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-setting-options-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-system-status-tools-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-categories-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-coupons-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-coupons-stats-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-customers-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-customers-stats-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-downloads-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-downloads-files-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-downloads-stats-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-orders-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-orders-stats-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-products-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-variations-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-products-stats-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-performance-indicators-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-revenue-stats-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-taxes-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-taxes-stats-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-stock-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-stock-stats-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-taxes-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-customers-controller.php';
 
 		$controllers = apply_filters(
 			'woocommerce_admin_rest_controllers',

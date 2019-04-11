@@ -100,7 +100,7 @@ class Header extends Component {
 						return <span key={ i }>{ sectionPiece }</span>;
 					} ) }
 				</h1>
-				<ActivityPanel />
+				{ window.wcAdminFeatures[ 'activity-panels' ] && <ActivityPanel /> }
 			</div>
 		);
 	}

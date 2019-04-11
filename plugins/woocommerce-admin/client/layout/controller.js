@@ -110,6 +110,11 @@ class Controller extends Component {
 		const { path, url, params } = this.props.match;
 		const query = this.getQuery( this.props.location.search );
 		const page = find( getPages(), { path } );
+
+		if ( ! page ) {
+			return null; // @todo What should we display or do when a route/page doesn't exist?
+		}
+
 		window.wpNavMenuUrlUpdate( page, query );
 		window.wpNavMenuClassChange( page );
 		return createElement( page.container, { params, path: url, pathMatch: path, query } );
@@ -166,17 +171,21 @@ window.wpNavMenuClassChange = function( page ) {
 		item.parentElement.classList.add( 'current' );
 	} );
 
-	const currentMenu = document.querySelector( '#' + page.wpOpenMenu );
-	currentMenu.classList.remove( 'wp-not-current-submenu' );
-	currentMenu.classList.add( 'wp-has-current-submenu' );
-	currentMenu.classList.add( 'wp-menu-open' );
-	currentMenu.classList.add( 'current' );
+	if ( page.wpOpenMenu ) {
+		const currentMenu = document.querySelector( '#' + page.wpOpenMenu );
+		currentMenu.classList.remove( 'wp-not-current-submenu' );
+		currentMenu.classList.add( 'wp-has-current-submenu' );
+		currentMenu.classList.add( 'wp-menu-open' );
+		currentMenu.classList.add( 'current' );
+	}
 
 	// Sometimes navigating from the subMenu to Dashboard does not close subMenu
-	const closedMenu = document.querySelector( '#' + page.wpClosedMenu );
-	closedMenu.classList.remove( 'wp-has-current-submenu' );
-	closedMenu.classList.remove( 'wp-menu-open' );
-	closedMenu.classList.add( 'wp-not-current-submenu' );
+	if ( page.wpClosedMenu ) {
+		const closedMenu = document.querySelector( '#' + page.wpClosedMenu );
+		closedMenu.classList.remove( 'wp-has-current-submenu' );
+		closedMenu.classList.remove( 'wp-menu-open' );
+		closedMenu.classList.add( 'wp-not-current-submenu' );
+	}
 
 	const wpWrap = document.querySelector( '#wpwrap' );
 	wpWrap.classList.remove( 'wp-responsive-open' );
