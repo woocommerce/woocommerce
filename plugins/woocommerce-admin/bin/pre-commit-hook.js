@@ -91,30 +91,55 @@ if ( lintResult.status ) {
 }
 
 // PHP Lint.
-let hasPhpLintErrors = false;
+let phpLintErrors = '';
 let phpFiles = '';
 
 files.forEach( file => {
+	let fileHasPhpLintErrors = false;
 	if ( ! file.endsWith( '.php' ) ) {
 		return;
 	}
 
 	try {
-		execSync( `php -l -d display_errors=0 ${ file }` );
-	} catch( err ) {
-		hasPhpLintErrors = true;
+		// Check if PHP_CodeSniffer is installed.
+		execSync( `./vendor/bin/phpcbf -h` );
+		execSync( `./vendor/bin/phpcs -h` );
+	} catch( e ) {
+		console.log(
+			'PHP_CodeSniffer is not installed. ' +
+			'Please, run `composer install` ' +
+			'and run the command again.' );
+		process.exit( 1 );
+	}
+
+	try {
+		// Apply auto-fix.
+		execSync( `./vendor/bin/phpcbf --standard=phpcs.xml.dist ${ file }` );
+	} catch( e ) {
+		try {
+			// Check if there are still errors.
+			execSync( `./vendor/bin/phpcs --standard=phpcs.xml.dist ${ file }` );
+		} catch( err ) {
+			fileHasPhpLintErrors = true;
+			phpLintErrors = err.stdout.toString( 'utf8' );
+		}
+	}
+
+	if ( ! fileHasPhpLintErrors ) {
+		execSync( `git add ${ file }` );
 	}
 
 	phpFiles += ' ' + file;
 } );
 
-if ( hasPhpLintErrors ) {
+if ( phpLintErrors ) {
 	console.log(
 		chalk.red( 'COMMIT ABORTED:' ),
 		'The PHP linter reported some errors. ' +
 			'Fix all PHP syntax errors found, ' +
 			'and repeat the commit command.'
 	);
+	console.log( phpLintErrors );
 	process.exit( 1 );
 }
 
