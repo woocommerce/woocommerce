@@ -514,8 +514,8 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 * @return array
 	 */
 	public static function get_customer_name( $user_id = 0, $order = null ) {
-		$first_name = null;
-		$last_name  = null;
+		$first_name = '';
+		$last_name  = '';
 
 		if (
 			$user_id &&
