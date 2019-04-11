@@ -82,6 +82,9 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 			if ( ! is_null( $value ) ) {
 				switch ( $key ) {
+					case 'parent':
+						$order->set_parent_id( $value );
+						break;
 					case 'coupon_lines':
 					case 'status':
 						// Change should be done later so transitions have new data.
