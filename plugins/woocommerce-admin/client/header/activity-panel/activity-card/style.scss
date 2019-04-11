@@ -305,16 +305,22 @@
 			border-radius: 4px;
 			height: 36px;
 
-			&[type='number']::-webkit-outer-spin-button,
-			&[type='number']::-webkit-inner-spin-button {
-				-webkit-appearance: none;
-				margin: 0;
+			&[type='number'] {
+				-moz-appearance: textfield;
+
+				&::-webkit-outer-spin-button,
+				&::-webkit-inner-spin-button {
+					-webkit-appearance: none;
+					margin: 0;
+				}
 			}
 		}
 	}
 
-	.is-button {
-		height: 34px;
+	.components-button {
+		min-height: 34px;
+		padding: 2px 10px;
+		line-height: 26px;
 	}
 
 	.woocommerce-activity-card__title {
