@@ -799,6 +799,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_active_plugins() {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+
+		if ( ! function_exists( 'get_plugin_data' ) ) {
+			return array();
+		}
+
 		$active_plugins = (array) get_option( 'active_plugins', array() );
 		if ( is_multisite() ) {
 			$network_activated_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
