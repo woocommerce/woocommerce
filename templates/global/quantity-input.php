@@ -42,10 +42,9 @@ if ( $max_value && $min_value === $max_value ) {
 			size="4"
 			inputmode="<?php echo esc_attr( $inputmode ); ?>"
 			<?php if ( ! empty( $labelledby ) ) { ?>
-			aria-labelledby="<?php echo esc_attr( $labelledby ); ?>" />
-			<?php } else { ?>
-			/>
+			aria-labelledby="<?php echo esc_attr( $labelledby ); ?>"
 			<?php } ?>
+			/>
 	</div>
 	<?php
 }
