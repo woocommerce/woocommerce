@@ -241,4 +241,4 @@ A limited set of note fields can be updated over the REST API: `status` and `dat
 ## Questions?
 
 This is just the tip of the iceberg for possibilities for your own extensions to WooCommerce. Check
-out the new [sales record notes](https://github.com/woocommerce/woocommerce-admin/blob/master/includes/notes/class-wc-admin-notes-new-sales-record.php) and the [settings notes](https://github.com/woocommerce/woocommerce-admin/blob/master/includes/notes/class-wc-admin-notes-settings-notes.php) for in the woocommerce-admin code itself for other examples of working with this fun new feature.
+out the new [sales record notes](https://github.com/woocommerce/woocommerce-admin/blob/master/includes/notes/class-wc-admin-notes-new-sales-record.php) and the [settings notes](https://github.com/woocommerce/woocommerce-admin/blob/master/includes/notes/class-wc-admin-notes-settings-notes.php) in the woocommerce-admin code itself for other examples of working with this fun new feature.
