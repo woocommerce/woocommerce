@@ -287,3 +287,48 @@
 		}
 	}
 }
+
+.woocommerce-stock-activity-card {
+	.woocommerce-stock-activity-card__stock-quantity {
+		background: $core-grey-light-300;
+		color: $core-grey-dark-500;
+		padding: 3px $gap-smaller;
+		border-radius: 3px;
+	}
+
+	.woocommerce-stock-activity-card__edit-quantity {
+		display: inline-flex;
+		width: 50px;
+		margin-right: 10px;
+
+		input {
+			border-radius: 4px;
+			height: 36px;
+
+			&[type='number'] {
+				-moz-appearance: textfield;
+
+				&::-webkit-outer-spin-button,
+				&::-webkit-inner-spin-button {
+					-webkit-appearance: none;
+					margin: 0;
+				}
+			}
+		}
+	}
+
+	.components-button {
+		min-height: 34px;
+		padding: 2px 10px;
+		line-height: 26px;
+	}
+
+	.woocommerce-activity-card__title {
+		@include font-size( 15 );
+	}
+
+	.woocommerce-activity-card__subtitle {
+		color: $core-grey-dark-500;
+		@include font-size( 12 );
+	}
+}

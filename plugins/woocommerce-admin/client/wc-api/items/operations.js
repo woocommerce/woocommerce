@@ -85,6 +85,37 @@ function read( resourceNames, fetch = apiFetch ) {
 	} );
 }
 
+function update( resourceNames, data, fetch = apiFetch ) {
+	const updateableTypes = [ 'items-query-products-item' ];
+	const filteredNames = resourceNames.filter( name => {
+		return updateableTypes.includes( getResourcePrefix( name ) );
+	} );
+
+	return filteredNames.map( async resourceName => {
+		const { id, parent_id, type, ...itemData } = data[ resourceName ];
+		let url = NAMESPACE;
+
+		switch ( type ) {
+			case 'variation':
+				url += `/products/${ parent_id }/variations/${ id }`;
+				break;
+			case 'variable':
+			case 'simple':
+			default:
+				url += `/products/${ id }`;
+		}
+
+		return fetch( { path: url, method: 'PUT', data: itemData } )
+			.then( item => {
+				return { [ resourceName ]: { data: item } };
+			} )
+			.catch( error => {
+				return { [ resourceName ]: { error } };
+			} );
+	} );
+}
+
 export default {
 	read,
+	update,
 };
