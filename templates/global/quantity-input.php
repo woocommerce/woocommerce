@@ -43,6 +43,8 @@ if ( $max_value && $min_value === $max_value ) {
 			inputmode="<?php echo esc_attr( $inputmode ); ?>"
 			<?php if ( ! empty( $labelledby ) ) { ?>
 			aria-labelledby="<?php echo esc_attr( $labelledby ); ?>" />
+			<?php } else { ?>
+			/>
 			<?php } ?>
 	</div>
 	<?php
