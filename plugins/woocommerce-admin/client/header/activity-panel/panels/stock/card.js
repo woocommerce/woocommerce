@@ -116,7 +116,7 @@ class ProductStockCard extends Component {
 	render() {
 		const { product } = this.props;
 		const title = (
-			<Link href={ 'post.php?action=edit&post=' + product.parent_id || product.id } type="wp-admin">
+			<Link href={ 'post.php?action=edit&post=' + ( product.parent_id || product.id ) } type="wp-admin">
 				{ product.name }
 			</Link>
 		);
