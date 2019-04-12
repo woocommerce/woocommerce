@@ -141,7 +141,8 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		WC_Helper_Queue::run_all_pending();
 		WC_Helper_Queue::run_all_pending();
 
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/reports/orders' );
+		$request = new WP_REST_Request( 'GET', '/wc/v4/reports/orders' );
+		$request->set_query_params( array( 'per_page' => 5 ) );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
 
