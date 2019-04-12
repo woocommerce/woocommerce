@@ -15,10 +15,10 @@ jQuery( function( $ ) {
 
 		$( document.body )
 			.on( 'click', '.add_to_cart_button', { addToCartHandler: this }, this.onAddToCart )
-			.on( 'click', '.remove_from_cart_button', this.onRemoveFromCart )
+			.on( 'click', '.remove_from_cart_button', { addToCartHandler: this }, this.onRemoveFromCart )
 			.on( 'added_to_cart', this.updateButton )
 			.on( 'added_to_cart', this.updateCartPage )
-			.on( 'added_to_cart removed_from_cart', this.updateFragments );
+			.on( 'added_to_cart removed_from_cart', { addToCartHandler: this }, this.updateFragments );
 	};
 
 	/**
@@ -123,15 +123,25 @@ jQuery( function( $ ) {
 			}
 		});
 
-		$.post( wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_from_cart' ), { cart_item_key : $thisbutton.data( 'cart_item_key' ) }, function( response ) {
-			if ( ! response || ! response.fragments ) {
+		e.data.addToCartHandler.addRequest({
+			type: 'POST',
+			url: wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'remove_from_cart' ),
+			data: {
+				cart_item_key : $thisbutton.data( 'cart_item_key' )
+			},
+			success: function( response ) {
+				if ( ! response || ! response.fragments ) {
+					window.location = $thisbutton.attr( 'href' );
+					return;
+				}
+
+				$( document.body ).trigger( 'removed_from_cart', [ response.fragments, response.cart_hash, $thisbutton ] );
+			},
+			error: function() {
 				window.location = $thisbutton.attr( 'href' );
 				return;
-			}
-			$( document.body ).trigger( 'removed_from_cart', [ response.fragments, response.cart_hash, $thisbutton ] );
-		}).fail( function() {
-			window.location = $thisbutton.attr( 'href' );
-			return;
+			},
+			dataType: 'json'
 		});
 	};
 
