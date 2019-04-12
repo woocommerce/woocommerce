@@ -19,7 +19,7 @@ But unlike today’s notices, this part of the UI will be reserved for “priori
 
 The second category is what we’re focusing on in this example - and what we expect the vast majority of extension developers will want to extend - we call it the “Activity Panel Inbox.” It will look something like this:
 
-![Activity Panel Inbox](images/activity-panel-inbox.png)
+<img src="images/activity-panel-inbox.png" width="400" title="Activity Panel Inbox" alt="Activity Panel Inbox" />
 
 This section is dedicated to informational content coming from multiple sources such as WooCommerce core, WooCommerce.com Subscription management, extensions activity and store achievements. This section was also envisioned to display more insightful content in the future, e.g. content that could help with the day to day tasks of managing and optimizing a store.
 
@@ -48,7 +48,7 @@ So, enough rules - let’s get into how to code this up. And surprise, no JavaSc
 
 Here’s a short example plugin that adds a new activity panel inbox note on plugin activation, and removes it on deactivation:
 
-```
+```php
 <?php
 /**
  * Plugin Name: WooCommerce Activity Panel Inbox Example Plugin One
@@ -151,7 +151,7 @@ register_deactivation_hook( __FILE__, 'wapi_example_one_deactivate' );
 
 Here’s a short example plugin that updates an activity panel inbox note:
 
-```
+```php
 <?php
 /**
  * Plugin Name: WooCommerce Activity Panel Inbox Example Plugin Two
@@ -234,7 +234,11 @@ function wapi_example_two_deactivate() {
 register_deactivation_hook( __FILE__, 'wapi_example_two_deactivate' );
 ```
 
+#### Using the REST API
+
+A limited set of note fields can be updated over the REST API: `status` and `date_reminder`.
+
 ## Questions?
 
 This is just the tip of the iceberg for possibilities for your own extensions to WooCommerce. Check
-out the new [sales record notes](https://github.com/woocommerce/woocommerce-admin/blob/master/includes/class-wc-admin-notes-new-sales-record.php) and the [settings notes](https://github.com/woocommerce/woocommerce-admin/blob/master/includes/class-wc-admin-notes-settings-notes.php) for in the woocommerce-admin code itself for other examples of working with this fun new feature.
+out the new [sales record notes](https://github.com/woocommerce/woocommerce-admin/blob/master/includes/notes/class-wc-admin-notes-new-sales-record.php) and the [settings notes](https://github.com/woocommerce/woocommerce-admin/blob/master/includes/notes/class-wc-admin-notes-settings-notes.php) in the woocommerce-admin code itself for other examples of working with this fun new feature.
