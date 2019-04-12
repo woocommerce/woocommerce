@@ -38,6 +38,7 @@ const externals = {
 	tinymce: 'tinymce',
 	moment: 'moment',
 	react: 'React',
+	lodash: 'lodash',
 	'react-dom': 'ReactDOM',
 };
 
