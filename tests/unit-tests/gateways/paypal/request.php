@@ -397,6 +397,7 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 			// Many items in order -> forced to use one line item -> shipping tax included.
             $this->check_large_order( true, $testmode );
             
+            // Test removing tags from line item name
             $this->check_product_title_containing_html( $testmode );
 
 			// Test amount < 0.
