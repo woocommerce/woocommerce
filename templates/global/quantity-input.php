@@ -44,7 +44,7 @@ if ( $max_value && $min_value === $max_value ) {
 			<?php if ( ! empty( $labelledby ) ) { ?>
 			aria-labelledby="<?php echo esc_attr( $labelledby ); ?>"
 			<?php } ?>
-			/>
+		/>
 	</div>
 	<?php
 }
