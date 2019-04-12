@@ -118,8 +118,11 @@ class WGPB_Block_Library {
 			'wp-components',
 			'wp-compose',
 			'wp-data',
+			'wp-date',
+			'wp-dom',
 			'wp-element',
 			'wp-editor',
+			'wp-hooks',
 			'wp-i18n',
 			'wp-url',
 			'lodash',
@@ -242,7 +245,9 @@ class WGPB_Block_Library {
 	 */
 	public static function print_script_settings() {
 		global $wp_locale;
-		$code = get_woocommerce_currency();
+		$code           = get_woocommerce_currency();
+		$product_counts = wp_count_posts( 'product' );
+
 		// NOTE: wcSettings is not used directly, it's only for @woocommerce/components
 		//
 		// Settings and variables can be passed here for access in the app.
@@ -283,6 +288,7 @@ class WGPB_Block_Library {
 			'placeholderImgSrc' => wc_placeholder_img_src(),
 			'min_height'        => wc_get_theme_support( 'featured_block::min_height', 500 ),
 			'default_height'    => wc_get_theme_support( 'featured_block::default_height', 500 ),
+			'isLargeCatalog'    => $product_counts->publish > 200,
 		);
 		?>
 		<script type="text/javascript">

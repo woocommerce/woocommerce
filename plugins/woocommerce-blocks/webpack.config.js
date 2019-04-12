@@ -15,11 +15,14 @@ const externals = {
 	'@wordpress/components': { this: [ 'wp', 'components' ] },
 	'@wordpress/compose': { this: [ 'wp', 'compose' ] },
 	'@wordpress/data': { this: [ 'wp', 'data' ] },
-	'@wordpress/element': { this: [ 'wp', 'element' ] },
+	'@wordpress/dom': { this: [ 'wp', 'dom' ] },
 	'@wordpress/editor': { this: [ 'wp', 'editor' ] },
+	'@wordpress/element': { this: [ 'wp', 'element' ] },
+	'@wordpress/hooks': { this: [ 'wp', 'hooks' ] },
 	'@wordpress/i18n': { this: [ 'wp', 'i18n' ] },
 	'@wordpress/url': { this: [ 'wp', 'url' ] },
 	lodash: 'lodash',
+	moment: 'moment',
 };
 
 function findModuleMatch( module, match ) {
