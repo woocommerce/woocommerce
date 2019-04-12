@@ -83,7 +83,7 @@ class WC_Admin_Reports_Sync {
 		add_action( 'wp_loaded', array( __CLASS__, 'orders_lookup_update_init' ) );
 
 		// Initialize scheduled action handlers.
-		add_action( self::QUEUE_BATCH_ACTION, array( __CLASS__, 'queue_batches' ), 10, 3 );
+		add_action( self::QUEUE_BATCH_ACTION, array( __CLASS__, 'queue_batches' ), 10, 4 );
 		add_action( self::QUEUE_DEPEDENT_ACTION, array( __CLASS__, 'queue_dependent_action' ), 10, 3 );
 		add_action( self::CUSTOMERS_BATCH_ACTION, array( __CLASS__, 'customer_lookup_process_batch' ) );
 		add_action( self::ORDERS_BATCH_ACTION, array( __CLASS__, 'orders_lookup_process_batch' ), 10, 3 );
@@ -352,8 +352,8 @@ class WC_Admin_Reports_Sync {
 		} else {
 			// Otherwise, queue the single batches.
 			for ( $i = $range_start; $i <= $range_end; $i++ ) {
-				array_unshift( $action_args, $i );
-				self::queue()->schedule_single( $action_timestamp, $single_batch_action, $action_args, self::QUEUE_GROUP );
+				$batch_action_args = array_merge( array( $i ), $action_args );
+				self::queue()->schedule_single( $action_timestamp, $single_batch_action, $batch_action_args, self::QUEUE_GROUP );
 			}
 		}
 	}
