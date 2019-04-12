@@ -33,9 +33,10 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 			$this->template_html  = 'emails/admin-cancelled-order.php';
 			$this->template_plain = 'emails/plain/admin-cancelled-order.php';
 			$this->placeholders   = array(
-				'{site_title}'   => $this->get_blogname(),
-				'{order_date}'   => '',
-				'{order_number}' => '',
+				'{site_title}'              => $this->get_blogname(),
+				'{order_date}'              => '',
+				'{order_number}'            => '',
+				'{order_billing_full_name}' => '',
 			);
 
 			// Triggers for this email.
@@ -56,7 +57,7 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( '[{site_title}] Cancelled order ({order_number})', 'woocommerce' );
+			return __( '[{site_title}]: Order #{order_number} has been cancelled', 'woocommerce' );
 		}
 
 		/**
@@ -66,7 +67,7 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
-			return __( 'Cancelled order', 'woocommerce' );
+			return __( 'Order Cancelled: #{order_number}', 'woocommerce' );
 		}
 
 		/**
@@ -83,9 +84,10 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 			}
 
 			if ( is_a( $order, 'WC_Order' ) ) {
-				$this->object                         = $order;
-				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
-				$this->placeholders['{order_number}'] = $this->object->get_order_number();
+				$this->object                                    = $order;
+				$this->placeholders['{order_date}']              = wc_format_datetime( $this->object->get_date_created() );
+				$this->placeholders['{order_number}']            = $this->object->get_order_number();
+				$this->placeholders['{order_billing_full_name}'] = $this->object->get_formatted_billing_full_name();
 			}
 
 			if ( $this->is_enabled() && $this->get_recipient() ) {
@@ -98,12 +100,12 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		/**
 		 * Get content html.
 		 *
-		 * @access public
 		 * @return string
 		 */
 		public function get_content_html() {
 			return wc_get_template_html(
-				$this->template_html, array(
+				$this->template_html,
+				array(
 					'order'         => $this->object,
 					'email_heading' => $this->get_heading(),
 					'sent_to_admin' => true,
@@ -120,7 +122,8 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		 */
 		public function get_content_plain() {
 			return wc_get_template_html(
-				$this->template_plain, array(
+				$this->template_plain,
+				array(
 					'order'         => $this->object,
 					'email_heading' => $this->get_heading(),
 					'sent_to_admin' => true,

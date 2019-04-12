@@ -2,8 +2,18 @@
 /**
  * REST Controller
  *
- * @class WC_REST_Controller
+ * This class extend `WP_REST_Controller` in order to include /batch endpoint
+ * for almost all endpoints in WooCommerce REST API.
+ *
+ * It's required to follow "Controller Classes" guide before extending this class:
+ * <https://developer.wordpress.org/rest-api/extending-the-rest-api/controller-classes/>
+ *
+ * NOTE THAT ONLY CODE RELEVANT FOR MOST ENDPOINTS SHOULD BE INCLUDED INTO THIS CLASS.
+ * If necessary extend this class and create new abstract classes like `WC_REST_CRUD_Controller` or `WC_REST_Terms_Controller`.
+ *
+ * @class   WC_REST_Controller
  * @package WooCommerce/Abstracts
+ * @see     https://developer.wordpress.org/rest-api/extending-the-rest-api/controller-classes/
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -193,10 +203,12 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 				}
 
 				$_item = new WP_REST_Request( 'DELETE' );
-				$_item->set_query_params( array(
-					'id'    => $id,
-					'force' => true,
-				) );
+				$_item->set_query_params(
+					array(
+						'id'    => $id,
+						'force' => true,
+					)
+				);
 				$_response = $this->delete_item( $_item );
 
 				if ( is_wp_error( $_response ) ) {
@@ -340,7 +352,8 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 */
 	public function validate_setting_textarea_field( $value, $setting ) {
 		$value = is_null( $value ) ? '' : $value;
-		return wp_kses( trim( stripslashes( $value ) ),
+		return wp_kses(
+			trim( stripslashes( $value ) ),
 			array_merge(
 				array(
 					'iframe' => array(
@@ -364,7 +377,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @return array
 	 */
 	protected function add_meta_query( $args, $meta_query ) {
-		if ( ! empty( $args['meta_query'] ) ) {
+		if ( empty( $args['meta_query'] ) ) {
 			$args['meta_query'] = array();
 		}
 
@@ -412,5 +425,43 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		);
 
 		return $schema;
+	}
+
+	/**
+	 * Gets an array of fields to be included on the response.
+	 * Included fields are based on item schema and `_fields=` request argument.
+	 * Introduced to support WordPress 4.9.6 changes.
+	 *
+	 * @since 3.5.0
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return array Fields to be included in the response.
+	 */
+	public function get_fields_for_response( $request ) {
+		$schema = $this->get_item_schema();
+		$fields = isset( $schema['properties'] ) ? array_keys( $schema['properties'] ) : array();
+
+		$additional_fields = $this->get_additional_fields();
+		foreach ( $additional_fields as $field_name => $field_options ) {
+			// For back-compat, include any field with an empty schema
+			// because it won't be present in $this->get_item_schema().
+			if ( is_null( $field_options['schema'] ) ) {
+				$fields[] = $field_name;
+			}
+		}
+
+		if ( ! isset( $request['_fields'] ) ) {
+			return $fields;
+		}
+		$requested_fields = is_array( $request['_fields'] ) ? $request['_fields'] : preg_split( '/[\s,]+/', $request['_fields'] );
+		if ( 0 === count( $requested_fields ) ) {
+			return $fields;
+		}
+		// Trim off outside whitespace from the comma delimited list.
+		$requested_fields = array_map( 'trim', $requested_fields );
+		// Always persist 'id', because it can be needed for add_additional_fields_to_object().
+		if ( in_array( 'id', $fields, true ) ) {
+			$requested_fields[] = 'id';
+		}
+		return array_intersect( $fields, $requested_fields );
 	}
 }

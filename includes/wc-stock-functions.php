@@ -144,7 +144,6 @@ function wc_reduce_stock_levels( $order_id ) {
 	} else {
 		$order = wc_get_order( $order_id );
 	}
-
 	// We need an order, and a store with stock management to continue.
 	if ( ! $order || 'yes' !== get_option( 'woocommerce_manage_stock' ) || ! apply_filters( 'woocommerce_can_reduce_order_stock', true, $order ) ) {
 		return;
@@ -205,11 +204,10 @@ function wc_trigger_stock_change_notifications( $order, $changes ) {
 
 	$order_notes      = array();
 	$no_stock_amount  = absint( get_option( 'woocommerce_notify_no_stock_amount', 0 ) );
-	$low_stock_amount = absint( get_option( 'woocommerce_notify_low_stock_amount', 2 ) );
 
 	foreach ( $changes as $change ) {
-		$order_notes[] = $change['product']->get_formatted_name() . ' ' . $change['from'] . '&rarr;' . $change['to'];
-
+		$order_notes[]    = $change['product']->get_formatted_name() . ' ' . $change['from'] . '&rarr;' . $change['to'];
+		$low_stock_amount = absint( wc_get_low_stock_amount( wc_get_product( $change['product']->get_id() ) ) );
 		if ( $change['to'] <= $no_stock_amount ) {
 			do_action( 'woocommerce_no_stock', wc_get_product( $change['product']->get_id() ) );
 		} elseif ( $change['to'] <= $low_stock_amount ) {
@@ -248,6 +246,8 @@ function wc_increase_stock_levels( $order_id ) {
 	if ( ! $order || 'yes' !== get_option( 'woocommerce_manage_stock' ) || ! apply_filters( 'woocommerce_can_restore_order_stock', true, $order ) ) {
 		return;
 	}
+
+	$changes = array();
 
 	// Loop over all items.
 	foreach ( $order->get_items() as $item ) {
@@ -310,9 +310,28 @@ function wc_get_held_stock_quantity( $product, $exclude_order_id = 0 ) {
 			AND 	posts.post_type             IN ( '" . implode( "','", wc_get_order_types() ) . "' )
 			AND 	posts.post_status           = 'wc-pending'
 			AND		posts.ID                    != %d;",
-			'variation' === get_post_type( $product->get_stock_managed_by_id() ) ? '_variation_id' : '_product_id',
+			'product_variation' === get_post_type( $product->get_stock_managed_by_id() ) ? '_variation_id' : '_product_id',
 			$product->get_stock_managed_by_id(),
 			$exclude_order_id
 		)
 	); // WPCS: unprepared SQL ok.
+}
+
+/**
+ * Return low stock amount to determine if notification needs to be sent
+ *
+ * @param  WC_Product $product
+ * @since  3.5.0
+ * @return int
+ */
+function wc_get_low_stock_amount( WC_Product $product ) {
+	if ( $product->is_type( 'variation' ) ) {
+		$product = wc_get_product( $product->get_parent_id() );
+	}
+	$low_stock_amount = $product->get_low_stock_amount();
+	if ( '' === $low_stock_amount ) {
+		$low_stock_amount = get_option( 'woocommerce_notify_low_stock_amount', 2 );
+	}
+
+	return $low_stock_amount;
 }

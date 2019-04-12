@@ -1,10 +1,13 @@
 <?php
-
 /**
  * Class Functions.
  * @package WooCommerce\Tests\Product
  * @since 2.3
  */
+
+ /**
+  * WC_Tests_Product_Functions class.
+  */
 class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 	/**
@@ -49,7 +52,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$draft->set_status( 'draft' );
 		$draft->save();
 
-		$this->assertEquals( 9, count( wc_get_products( array( 'return' => 'ids' ) ) ) );
+		$this->assertCount( 9, wc_get_products( array( 'return' => 'ids' ) ) );
 
 		// Test status.
 		$products = wc_get_products(
@@ -67,7 +70,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'type'   => 'variation',
 			)
 		);
-		$this->assertEquals( 2, count( $products ) );
+		$this->assertCount( 2, $products );
 
 		// Test parent.
 		$products = wc_get_products(
@@ -77,7 +80,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'parent' => $variation->get_id(),
 			)
 		);
-		$this->assertEquals( 2, count( $products ) );
+		$this->assertCount( 2, $products );
 
 		// Test parent_exclude.
 		$products = wc_get_products(
@@ -87,7 +90,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'parent_exclude' => array( $variation->get_id() ),
 			)
 		);
-		$this->assertEquals( 0, count( $products ) );
+		$this->assertCount( 0, $products );
 
 		// Test skus.
 		$products = wc_get_products(
@@ -96,7 +99,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'sku'    => 'GET TEST SKU',
 			)
 		);
-		$this->assertEquals( 2, count( $products ) );
+		$this->assertCount( 2, $products );
 		$this->assertContains( $product->get_id(), $products );
 		$this->assertContains( $external->get_id(), $products );
 
@@ -107,7 +110,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'category' => array( $term_cat_1->slug ),
 			)
 		);
-		$this->assertEquals( 3, count( $products ) );
+		$this->assertCount( 3, $products );
 
 		// Test tags.
 		$products = wc_get_products(
@@ -116,7 +119,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'tag'    => array( $term_tag_1->slug ),
 			)
 		);
-		$this->assertEquals( 2, count( $products ) );
+		$this->assertCount( 2, $products );
 
 		$products = wc_get_products(
 			array(
@@ -124,7 +127,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'tag'    => array( $term_tag_2->slug ),
 			)
 		);
-		$this->assertEquals( 1, count( $products ) );
+		$this->assertCount( 1, $products );
 
 		$products = wc_get_products(
 			array(
@@ -132,7 +135,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'tag'    => array( $term_tag_1->slug, $term_tag_2->slug ),
 			)
 		);
-		$this->assertEquals( 3, count( $products ) );
+		$this->assertCount( 3, $products );
 
 		// Test limit.
 		$products = wc_get_products(
@@ -141,7 +144,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'limit'  => 5,
 			)
 		);
-		$this->assertEquals( 5, count( $products ) );
+		$this->assertCount( 5, $products );
 
 		// Test offset.
 		$products        = wc_get_products(
@@ -157,8 +160,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'offset' => 2,
 			)
 		);
-		$this->assertEquals( 2, count( $products ) );
-		$this->assertEquals( 2, count( $products_offset ) );
+		$this->assertCount( 2, $products );
+		$this->assertCount( 2, $products_offset );
 		$this->assertNotEquals( $products, $products_offset );
 
 		// Test page.
@@ -175,8 +178,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'page'   => 2,
 			)
 		);
-		$this->assertEquals( 2, count( $products_page_1 ) );
-		$this->assertEquals( 2, count( $products_page_2 ) );
+		$this->assertCount( 2, $products_page_1 );
+		$this->assertCount( 2, $products_page_2 );
 		$this->assertNotEquals( $products_page_1, $products_page_2 );
 
 		// Test exclude.
@@ -214,6 +217,14 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertGreaterThan( 0, $products->total );
 		$this->assertGreaterThan( 0, $products->max_num_pages );
 		$this->assertNotEmpty( $products->products );
+
+		$product->delete( true );
+		$product_2->delete( true );
+		$external->delete( true );
+		$external_2->delete( true );
+		$grouped->delete( true );
+		$draft->delete( true );
+		$variation->delete( true );
 	}
 
 	/**
@@ -258,6 +269,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( array( $product_2->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
 	}
 
 	/**
@@ -301,6 +315,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		);
 		sort( $products );
 		$this->assertEquals( array( $product_1->get_id(), $product_2->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
 	}
 
 	/**
@@ -327,6 +344,10 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( array( $product_1->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
+		$product_3->delete( true );
 	}
 
 	/**
@@ -432,6 +453,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( array( $product_2->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
 	}
 
 	/**
@@ -474,6 +498,10 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		);
 		sort( $products );
 		$this->assertEquals( array( $product_1->get_id(), $product_3->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
+		$product_3->delete( true );
 	}
 
 	/**
@@ -516,6 +544,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( array( $product_2->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
 	}
 
 	/**
@@ -556,6 +587,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( array( $product_1->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
 	}
 
 	/**
@@ -589,6 +623,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( array( $product_2->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
 	}
 
 	/**
@@ -685,6 +722,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( array( $product_2->get_id() ), $products );
+
+		$product_1->delete( true );
+		$product_2->delete( true );
 	}
 
 	/**
@@ -693,8 +733,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_wc_get_product() {
-
-		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
 		$product_copy = wc_get_product( $product->get_id() );
@@ -708,20 +746,23 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_wc_update_product_stock() {
-		// Create product
 		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->save();
 
-		update_post_meta( $product->get_id(), '_manage_stock', 'yes' );
 		wc_update_product_stock( $product->get_id(), 5 );
 
 		$product = new WC_Product_Simple( $product->get_id() );
 		$this->assertEquals( 5, $product->get_stock_quantity() );
 	}
 
+	/**
+	 * Test: test_wc_update_product_stock_increase_decrease.
+	 */
 	public function test_wc_update_product_stock_increase_decrease() {
 		$product = WC_Helper_Product::create_simple_product();
-
-		update_post_meta( $product->get_id(), '_manage_stock', 'yes' );
+		$product->set_manage_stock( true );
+		$product->save();
 		wc_update_product_stock( $product->get_id(), 5 );
 
 		$new_value = wc_update_product_stock( $product->get_id(), 1, 'increase' );
@@ -737,13 +778,19 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 5, $new_value );
 	}
 
+	/**
+	 * Test: test_wc_update_product_stock_should_return_false_if_invalid_product.
+	 */
 	public function test_wc_update_product_stock_should_return_false_if_invalid_product() {
 		$this->assertFalse( wc_update_product_stock( 1 ) );
 	}
 
+	/**
+	 * Test: test_wc_update_product_stock_should_return_stock_quantity_if_no_stock_quantity_given.
+	 */
 	public function test_wc_update_product_stock_should_return_stock_quantity_if_no_stock_quantity_given() {
 		$stock_quantity = 5;
-		$product = WC_Helper_Product::create_simple_product();
+		$product        = WC_Helper_Product::create_simple_product();
 		$product->set_stock_quantity( $stock_quantity );
 		$product->set_manage_stock( true );
 		$product->save();
@@ -751,6 +798,9 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( $stock_quantity, wc_update_product_stock( $product ) );
 	}
 
+	/**
+	 * Test: test_wc_update_product_stock_should_return_null_if_not_managing_stock.
+	 */
 	public function test_wc_update_product_stock_should_return_null_if_not_managing_stock() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_stock_quantity( 5 );
@@ -779,15 +829,13 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @since 2.4
 	 */
 	public function test_wc_delete_product_transients() {
-		// Create product
 		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->set_sale_price( 5 );
+		$product->save();
 
-		update_post_meta( $product->get_id(), '_regular_price', wc_format_decimal( 10 ) );
-		update_post_meta( $product->get_id(), '_price', wc_format_decimal( 5 ) );
-		update_post_meta( $product->get_id(), '_sale_price', wc_format_decimal( 5 ) );
-
-		wc_get_product_ids_on_sale();  // Creates the transient for on sale products
-		wc_get_featured_product_ids(); // Creates the transient for featured products
+		wc_get_product_ids_on_sale();  // Creates the transient for on sale products.
+		wc_get_featured_product_ids(); // Creates the transient for featured products.
 
 		wc_delete_product_transients();
 
@@ -805,12 +853,10 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		delete_transient( 'wc_products_onsale' );
 
-		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-
-		update_post_meta( $product->get_id(), '_regular_price', wc_format_decimal( 10 ) );
-		update_post_meta( $product->get_id(), '_price', wc_format_decimal( 5 ) );
-		update_post_meta( $product->get_id(), '_sale_price', wc_format_decimal( 5 ) );
+		$product->set_regular_price( 10 );
+		$product->set_sale_price( 5 );
+		$product->save();
 
 		$this->assertEquals( array( $product->get_id() ), wc_get_product_ids_on_sale() );
 	}
@@ -825,7 +871,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 
 		delete_transient( 'wc_featured_products' );
 
-		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_featured( true );
 		$product->save();
@@ -849,7 +894,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_product_types() {
 		$product_types = (array) apply_filters(
-			'product_type_selector', array(
+			'product_type_selector',
+			array(
 				'simple'   => 'Simple product',
 				'grouped'  => 'Grouped product',
 				'external' => 'External/Affiliate product',
@@ -861,9 +907,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_product_has_unique_sku().
-	 *
-	 * @since 2.3
+	 * @expectedException WC_Data_Exception
 	 */
 	public function test_wc_product_has_unique_sku() {
 		$product_1 = WC_Helper_Product::create_simple_product();
@@ -871,15 +915,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertTrue( wc_product_has_unique_sku( $product_1->get_id(), $product_1->get_sku() ) );
 
 		$product_2 = WC_Helper_Product::create_simple_product();
-		// we need to manually set a sku, because WC_Product now uses wc_product_has_unique_sku before setting
-		// so we need to manually set it to test the functionality.
-		update_post_meta( $product_2->get_id(), '_sku', $product_1->get_sku() );
-
-		$this->assertFalse( wc_product_has_unique_sku( $product_2->get_id(), $product_1->get_sku() ) );
-
-		WC_Helper_Product::delete_product( $product_1->get_id() );
-
-		$this->assertTrue( wc_product_has_unique_sku( $product_2->get_id(), $product_2->get_sku() ) );
+		$product_2->set_sku( $product_1->get_sku() );
 	}
 
 	/**
@@ -888,7 +924,6 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3
 	 */
 	public function test_wc_get_product_id_by_sku() {
-		// Create product
 		$product = WC_Helper_Product::create_simple_product();
 
 		$this->assertEquals( $product->get_id(), wc_get_product_id_by_sku( $product->get_sku() ) );
@@ -897,7 +932,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	/**
 	 * Test wc_get_min_max_price_meta_query()
 	 *
-	 * @since 3.0.0
+	 * @expectedDeprecated wc_get_min_max_price_meta_query()
 	 */
 	public function test_wc_get_min_max_price_meta_query() {
 		$meta_query = wc_get_min_max_price_meta_query(
@@ -913,7 +948,8 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 				'value'   => array( 10, 100 ),
 				'compare' => 'BETWEEN',
 				'type'    => 'DECIMAL(10,2)',
-			), $meta_query
+			),
+			$meta_query
 		);
 	}
 
@@ -931,7 +967,7 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$product_1->set_sku( 'some-custom-sku' );
 		$product_2->set_sku( 'another-custom-sku' );
 		$product_3->set_sku( 'another-custom-sku-1' );
-		$product_4->set_sku( '' );
+		$product_4->set_sku( 'some-custom-sku' );
 
 		$product_1_id = $product_1->save();
 		$product_2_id = $product_2->save();
@@ -939,15 +975,13 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$product_4_id = $product_4->save();
 
 		wc_product_force_unique_sku( $product_4_id );
-		$this->assertEquals( get_post_meta( $product_4_id, '_sku', true ), '' );
+		$product_4 = wc_get_product( $product_4_id );
+		$this->assertEquals( $product_4->get_sku( 'edit' ), 'some-custom-sku-1' );
 
-		update_post_meta( $product_4_id, '_sku', 'some-custom-sku' );
-		wc_product_force_unique_sku( $product_4_id );
-		$this->assertEquals( get_post_meta( $product_4_id, '_sku', true ), 'some-custom-sku-1' );
-
-		update_post_meta( $product_4_id, '_sku', 'another-custom-sku' );
-		wc_product_force_unique_sku( $product_4_id );
-		$this->assertEquals( get_post_meta( $product_4_id, '_sku', true ), 'another-custom-sku-2' );
+		$product_1->delete( true );
+		$product_2->delete( true );
+		$product_3->delete( true );
+		$product_4->delete( true );
 	}
 
 	/**
@@ -962,5 +996,67 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		$this->assertFalse( wc_is_attribute_in_product_name( 'L', 'Product' ) );
 		$this->assertFalse( wc_is_attribute_in_product_name( 'L', 'Product L Thing' ) );
 		$this->assertFalse( wc_is_attribute_in_product_name( 'Blue', 'Product &ndash; Large, Blueish' ) );
+	}
+
+	/**
+	 * Test: test_wc_get_attachment_image_attributes.
+	 */
+	public function test_wc_get_attachment_image_attributes() {
+		$image_attr = array(
+			'src'    => 'https://wc.local/wp-content/uploads/2018/02/single-1-250x250.jpg',
+			'class'  => 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail',
+			'alt'    => '',
+			'srcset' => 'https://wc.local/wp-content/uploads/2018/02/single-1-250x250.jpg 250w, https://wc.local/wp-content/uploads/2018/02/single-1-350x350.jpg 350w, https://wc.local/wp-content/uploads/2018/02/single-1-150x150.jpg 150w, https://wc.local/wp-content/uploads/2018/02/single-1-300x300.jpg 300w, https://wc.local/wp-content/uploads/2018/02/single-1-768x768.jpg 768w, https://wc.local/wp-content/uploads/2018/02/single-1-100x100.jpg 100w, https://wc.local/wp-content/uploads/2018/02/single-1.jpg 800w',
+			'sizes'  => '(max-width: 250px) 100vw, 250px',
+		);
+		// Test regular image attr.
+		$this->assertEquals( $image_attr, wc_get_attachment_image_attributes( $image_attr ) );
+
+		$image_attr = array(
+			'src'    => '',
+			'class'  => 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail',
+			'alt'    => '',
+			'srcset' => '',
+			'sizes'  => '(max-width: 250px) 100vw, 250px',
+		);
+		// Test blank src image attr, this is used in lazy loading.
+		$this->assertEquals( $image_attr, wc_get_attachment_image_attributes( $image_attr ) );
+
+		$image_attr    = array(
+			'src'    => 'https://wc.local/wp-content/woocommerce_uploads/my-image.jpg',
+			'class'  => 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail',
+			'alt'    => '',
+			'srcset' => 'https://wc.local/wp-content/woocommerce_uploads/my-image-250x250.jpg 250w, https://wc.local/wp-content/woocommerce_uploads/my-image-350x350 350w',
+			'sizes'  => '(max-width: 250px) 100vw, 250px',
+		);
+		$expected_attr = array(
+			'src'    => WC()->plugin_url() . '/assets/images/placeholder.png',
+			'class'  => 'attachment-woocommerce_thumbnail size-woocommerce_thumbnail',
+			'alt'    => '',
+			'srcset' => '',
+			'sizes'  => '(max-width: 250px) 100vw, 250px',
+		);
+		// Test image hosted in woocommerce_uploads which is not allowed, think shops selling photos.
+		$this->assertEquals( $expected_attr, wc_get_attachment_image_attributes( $image_attr ) );
+
+		unset( $image_attr, $expected_attr );
+	}
+
+	/**
+	 * Test wc_get_product_stock_status_options().
+	 *
+	 * @since 3.6.0
+	 */
+	public function test_wc_get_product_stock_status_options() {
+		$status_options = (array) apply_filters(
+			'woocommerce_product_stock_status_options',
+			array(
+				'instock'     => 'In stock',
+				'outofstock'  => 'Out of stock',
+				'onbackorder' => 'On backorder',
+			)
+		);
+
+		$this->assertEquals( $status_options, wc_get_product_stock_status_options() );
 	}
 }

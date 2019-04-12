@@ -418,3 +418,33 @@ function wc_post_content_has_shortcode( $tag = '' ) {
 
 	return is_singular() && is_a( $post, 'WP_Post' ) && has_shortcode( $post->post_content, $tag );
 }
+
+/**
+ * Check if reviews are enabled.
+ *
+ * @since 3.6.0
+ * @return bool
+ */
+function wc_reviews_enabled() {
+	return 'yes' === get_option( 'woocommerce_enable_reviews' );
+}
+
+/**
+ * Check if reviews ratings are enabled.
+ *
+ * @since 3.6.0
+ * @return bool
+ */
+function wc_review_ratings_enabled() {
+	return wc_reviews_enabled() && 'yes' === get_option( 'woocommerce_enable_review_rating' );
+}
+
+/**
+ * Check if review ratings are required.
+ *
+ * @since 3.6.0
+ * @return bool
+ */
+function wc_review_ratings_required() {
+	return 'yes' === get_option( 'woocommerce_review_rating_required' );
+}

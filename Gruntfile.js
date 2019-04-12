@@ -1,6 +1,7 @@
 /* jshint node:true */
 module.exports = function( grunt ) {
 	'use strict';
+	var sass = require( 'node-sass' );
 
 	grunt.initConfig({
 
@@ -9,7 +10,8 @@ module.exports = function( grunt ) {
 			css: 'assets/css',
 			fonts: 'assets/fonts',
 			images: 'assets/images',
-			js: 'assets/js'
+			js: 'assets/js',
+			php: 'includes'
 		},
 
 		// JavaScript linting with JSHint.
@@ -18,13 +20,10 @@ module.exports = function( grunt ) {
 				jshintrc: '.jshintrc'
 			},
 			all: [
-				'Gruntfile.js',
 				'<%= dirs.js %>/admin/*.js',
 				'!<%= dirs.js %>/admin/*.min.js',
 				'<%= dirs.js %>/frontend/*.js',
-				'!<%= dirs.js %>/frontend/*.min.js',
-				'includes/gateways/simplify-commerce/assets/js/*.js',
-				'!includes/gateways/simplify-commerce/assets/js/*.min.js'
+				'!<%= dirs.js %>/frontend/*.min.js'
 			]
 		},
 
@@ -75,9 +74,13 @@ module.exports = function( grunt ) {
 					'<%= dirs.js %>/jquery-flot/jquery.flot.time.min.js': ['<%= dirs.js %>/jquery-flot/jquery.flot.time.js'],
 					'<%= dirs.js %>/jquery-payment/jquery.payment.min.js': ['<%= dirs.js %>/jquery-payment/jquery.payment.js'],
 					'<%= dirs.js %>/jquery-qrcode/jquery.qrcode.min.js': ['<%= dirs.js %>/jquery-qrcode/jquery.qrcode.js'],
-					'<%= dirs.js %>/jquery-serializejson/jquery.serializejson.min.js': ['<%= dirs.js %>/jquery-serializejson/jquery.serializejson.js'],
+					'<%= dirs.js %>/jquery-serializejson/jquery.serializejson.min.js': [
+						'<%= dirs.js %>/jquery-serializejson/jquery.serializejson.js'
+					],
 					'<%= dirs.js %>/jquery-tiptip/jquery.tipTip.min.js': ['<%= dirs.js %>/jquery-tiptip/jquery.tipTip.js'],
-					'<%= dirs.js %>/jquery-ui-touch-punch/jquery-ui-touch-punch.min.js': ['<%= dirs.js %>/jquery-ui-touch-punch/jquery-ui-touch-punch.js'],
+					'<%= dirs.js %>/jquery-ui-touch-punch/jquery-ui-touch-punch.min.js': [
+						'<%= dirs.js %>/jquery-ui-touch-punch/jquery-ui-touch-punch.js'
+					],
 					'<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.init.min.js': ['<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.init.js'],
 					'<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.min.js': ['<%= dirs.js %>/prettyPhoto/jquery.prettyPhoto.js'],
 					'<%= dirs.js %>/flexslider/jquery.flexslider.min.js': ['<%= dirs.js %>/flexslider/jquery.flexslider.js'],
@@ -112,6 +115,7 @@ module.exports = function( grunt ) {
 		sass: {
 			compile: {
 				options: {
+					implementation: sass,
 					sourceMap: 'none'
 				},
 				files: [{
@@ -164,7 +168,7 @@ module.exports = function( grunt ) {
 		watch: {
 			css: {
 				files: ['<%= dirs.css %>/*.scss'],
-				tasks: ['sass', 'rtlcss', 'cssmin', 'concat']
+				tasks: ['sass', 'rtlcss', 'postcss', 'cssmin', 'concat']
 			},
 			js: {
 				files: [
@@ -260,7 +264,9 @@ module.exports = function( grunt ) {
 			contributors: {
 				command: [
 					'echo "Generating contributor list since <%= fromDate %>"',
-					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce --fromDate <%= fromDate %> --authToken <%= authToken %> --cols 6 --sortBy contributions --format md --sortOrder desc --showlogin true > contributors.md'
+					'./node_modules/.bin/githubcontrib --owner woocommerce --repo woocommerce --fromDate <%= fromDate %>' +
+					' --authToken <%= authToken %> --cols 6 --sortBy contributions --format md --sortOrder desc' +
+					' --showlogin true > contributors.md'
 				].join( '&&' )
 			}
 		},
@@ -277,7 +283,8 @@ module.exports = function( grunt ) {
 						{
 							config: 'authToken',
 							type: 'input',
-							message: '(optional) Provide a personal access token. This will allow 5000 requests per hour rather than 60 - use if nothing is generated.'
+							message: '(optional) Provide a personal access token.' +
+							' This will allow 5000 requests per hour rather than 60 - use if nothing is generated.'
 						}
 					]
 				}
@@ -288,6 +295,13 @@ module.exports = function( grunt ) {
 		clean: {
 			apidocs: {
 				src: [ 'wc-apidocs' ]
+			},
+			blocks: {
+				src: [
+					'<%= dirs.js %>/blocks',
+					'<%= dirs.css %>/blocks',
+					'<%= dirs.php %>/blocks'
+				]
 			}
 		},
 
@@ -298,15 +312,14 @@ module.exports = function( grunt ) {
 			},
 			dist: {
 				src:  [
-					'**/*.php',                                                  // Include all files
-					'!apigen/**',                                                // Exclude apigen/
-					'!includes/api/legacy/**',                                   // Exclude legacy REST API
-					'!includes/gateways/simplify-commerce/includes/Simplify/**', // Exclude simplify commerce SDK
-					'!includes/libraries/**',                                    // Exclude libraries/
-					'!node_modules/**',                                          // Exclude node_modules/
-					'!tests/cli/**',                                             // Exclude tests/cli/
-					'!tmp/**',                                                   // Exclude tmp/
-					'!vendor/**'                                                 // Exclude vendor/
+					'**/*.php', // Include all php files.
+					'!apigen/**',
+					'!includes/api/legacy/**',
+					'!includes/libraries/**',
+					'!node_modules/**',
+					'!tests/cli/**',
+					'!tmp/**',
+					'!vendor/**'
 				]
 			}
 		},
@@ -329,6 +342,52 @@ module.exports = function( grunt ) {
 					'<%= dirs.css %>/*.css'
 				]
 			}
+		},
+
+		// Copy block files from npm package.
+		copy: {
+			js: {
+				expand: true,
+				cwd: 'node_modules/@woocommerce/block-library/build',
+				src: '*.js',
+				dest: '<%= dirs.js %>/blocks/',
+				options: {
+					process: ( content ) => content.replace( /'woo-gutenberg-products-block'/g, "'woocommerce'" )
+				}
+			},
+			css: {
+				expand: true,
+				cwd: 'node_modules/@woocommerce/block-library/build',
+				src: '*.css',
+				dest: '<%= dirs.css %>/blocks/'
+			},
+			php: {
+				expand: true,
+				cwd: 'node_modules/@woocommerce/block-library/assets/php',
+				src: '*.php',
+				dest: '<%= dirs.php %>/blocks/',
+				rename: ( dest, src ) => dest + '/' + src.replace( '-wgpb-', '-wc-' ),
+				options: {
+					process: ( content ) => content
+						// Replace textdomain.
+						.replace( /'woo-gutenberg-products-block'/g, "'woocommerce'" )
+						// Replace source for JS files.
+						.replace(
+							/plugins_url\( 'build\/([\w-]*)\.js', WGPB_PLUGIN_FILE \)/g,
+							"WC()->plugin_url() . '/assets/js/blocks/$1.js'"
+						)
+						// Replace source for CSS files.
+						.replace(
+							/plugins_url\( 'build\/([\w-]*)\.css', WGPB_PLUGIN_FILE \)/g,
+							"WC()->plugin_url() . '/assets/css/blocks/$1.css'"
+						)
+						// Replace class & constant prefixes.
+						.replace( /WGPB_/g, 'WC_' )
+						.replace( /FP_VERSION/g, 'WGPB_VERSION' )
+						// Replace file imports
+						.replace( /-wgpb-/g, '-wc-' )
+				}
+			}
 		}
 	});
 
@@ -345,6 +404,7 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
 	grunt.loadNpmTasks( 'grunt-contrib-cssmin' );
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );
+	grunt.loadNpmTasks( 'grunt-contrib-copy' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 	grunt.loadNpmTasks( 'grunt-prompt' );
@@ -353,6 +413,7 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'default', [
 		'js',
 		'css',
+		'blocks',
 		'i18n'
 	]);
 
@@ -369,6 +430,11 @@ module.exports = function( grunt ) {
 		'postcss',
 		'cssmin',
 		'concat'
+	]);
+
+	grunt.registerTask( 'blocks', [
+		'clean:blocks',
+		'copy'
 	]);
 
 	grunt.registerTask( 'docs', [

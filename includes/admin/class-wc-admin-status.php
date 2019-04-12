@@ -31,6 +31,15 @@ class WC_Admin_Status {
 	 * Handles output of tools.
 	 */
 	public static function status_tools() {
+		// This screen requires classes from the REST API.
+		if ( ! did_action( 'rest_api_init' ) ) {
+			WC()->api->rest_api_includes();
+		}
+
+		if ( ! class_exists( 'WC_REST_System_Status_Tools_Controller', false ) ) {
+			wp_die( 'Cannot load the REST API to access WC_REST_System_Status_Tools_Controller.' );
+		}
+
 		$tools = self::get_tools();
 
 		if ( ! empty( $_GET['action'] ) && ! empty( $_REQUEST['_wpnonce'] ) && wp_verify_nonce( wp_unslash( $_REQUEST['_wpnonce'] ), 'debug_action' ) ) { // WPCS: input var ok, sanitization ok.
@@ -39,6 +48,22 @@ class WC_Admin_Status {
 
 			if ( array_key_exists( $action, $tools ) ) {
 				$response = $tools_controller->execute_tool( $action );
+
+				$tool = $tools[ $action ];
+				$tool = array(
+					'id'          => $action,
+					'name'        => $tool['name'],
+					'action'      => $tool['button'],
+					'description' => $tool['desc'],
+				);
+				$tool = array_merge( $tool, $response );
+
+				/**
+				 * Fires after a WooCommerce system status tool has been executed.
+				 *
+				 * @param array  $tool  Details about the tool that has been executed.
+				 */
+				do_action( 'woocommerce_system_status_tool_executed', $tool );
 			} else {
 				$response = array(
 					'success' => false,
@@ -162,7 +187,7 @@ class WC_Admin_Status {
 	 * @return string
 	 */
 	public static function get_log_file_handle( $filename ) {
-		return substr( $filename, 0, strlen( $filename ) > 37 ? strlen( $filename ) - 37 : strlen( $filename ) - 4 );
+		return substr( $filename, 0, strlen( $filename ) > 48 ? strlen( $filename ) - 48 : strlen( $filename ) - 4 );
 	}
 
 	/**

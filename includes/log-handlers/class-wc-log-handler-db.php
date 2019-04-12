@@ -124,11 +124,9 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 			$log_ids = array( $log_ids );
 		}
 
-		$format = array_fill( 0, count( $log_ids ), '%d' );
-
+		$format   = array_fill( 0, count( $log_ids ), '%d' );
 		$query_in = '(' . implode( ',', $format ) . ')';
-
-		return $wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_log WHERE log_id IN {$query_in}" ); // @codingStandardsIgnoreLine.
+		return $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}woocommerce_log WHERE log_id IN {$query_in}", $log_ids ) ); // @codingStandardsIgnoreLine.
 	}
 
 	/**
@@ -146,8 +144,8 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 
 		$wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}woocommerce_log WHERE timestamp < %d",
-				$timestamp
+				"DELETE FROM {$wpdb->prefix}woocommerce_log WHERE timestamp < %s",
+				date( 'Y-m-d H:i:s', $timestamp )
 			)
 		);
 	}
@@ -168,7 +166,7 @@ class WC_Log_Handler_DB extends WC_Log_Handler {
 		 * @see http://php.net/manual/en/function.debug-backtrace.php#refsect1-function.debug-backtrace-parameters
 		 */
 		if ( defined( 'DEBUG_BACKTRACE_IGNORE_ARGS' ) ) {
-			$debug_backtrace_arg = DEBUG_BACKTRACE_IGNORE_ARGS; // phpcs:ignore PHPCompatibility.PHP.NewConstants.debug_backtrace_ignore_argsFound
+			$debug_backtrace_arg = DEBUG_BACKTRACE_IGNORE_ARGS; // phpcs:ignore PHPCompatibility.Constants.NewConstants.debug_backtrace_ignore_argsFound
 		} else {
 			$debug_backtrace_arg = false;
 		}

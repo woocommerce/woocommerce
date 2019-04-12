@@ -334,7 +334,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	 * @return boolean
 	 */
 	public function is_valid_location_type( $type ) {
-		return in_array( $type, array( 'postcode', 'state', 'country', 'continent' ), true );
+		return in_array( $type, apply_filters( 'woocommerce_valid_location_types', array( 'postcode', 'state', 'country', 'continent' ) ), true );
 	}
 
 	/**

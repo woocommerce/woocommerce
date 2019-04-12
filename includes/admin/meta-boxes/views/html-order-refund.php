@@ -1,11 +1,15 @@
 <?php
+/**
+ * Show order refund
+ *
+ * @var object $refund The refund object.
+ * @package WooCommerce\Admin
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
-/**
- * @var object $refund The refund object.
- */
 $who_refunded = new WP_User( $refund->get_refunded_by() );
 ?>
 <tr class="refund <?php echo ( ! empty( $class ) ) ? esc_attr( $class ) : ''; ?>" data-order_refund_id="<?php echo esc_attr( $refund->get_id() ); ?>">
@@ -17,8 +21,8 @@ $who_refunded = new WP_User( $refund->get_refunded_by() );
 			printf(
 				/* translators: 1: refund id 2: refund date 3: username */
 				esc_html__( 'Refund #%1$s - %2$s by %3$s', 'woocommerce' ),
-				$refund->get_id(),
-				wc_format_datetime( $refund->get_date_created(), get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) ),
+				esc_html( $refund->get_id() ),
+				esc_html( wc_format_datetime( $refund->get_date_created(), get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) ) ),
 				sprintf(
 					'<abbr class="refund_by" title="%1$s">%2$s</abbr>',
 					/* translators: 1: ID who refunded */
@@ -30,8 +34,8 @@ $who_refunded = new WP_User( $refund->get_refunded_by() );
 			printf(
 				/* translators: 1: refund id 2: refund date */
 				esc_html__( 'Refund #%1$s - %2$s', 'woocommerce' ),
-				$refund->get_id(),
-				wc_format_datetime( $refund->get_date_created(), get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) )
+				esc_html( $refund->get_id() ),
+				esc_html( wc_format_datetime( $refund->get_date_created(), get_option( 'date_format' ) . ', ' . get_option( 'time_format' ) ) )
 			);
 		}
 		?>
@@ -48,7 +52,11 @@ $who_refunded = new WP_User( $refund->get_refunded_by() );
 
 	<td class="line_cost" width="1%">
 		<div class="view">
-			<?php echo wc_price( '-' . $refund->get_amount() ); ?>
+			<?php
+			echo wp_kses_post(
+				wc_price( '-' . $refund->get_amount(), array( 'currency' => $refund->get_currency() ) )
+			);
+			?>
 		</div>
 	</td>
 

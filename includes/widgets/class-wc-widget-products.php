@@ -83,8 +83,9 @@ class WC_Widget_Products extends WC_Widget {
 	/**
 	 * Query the products and return them.
 	 *
-	 * @param  array $args     Arguments.
-	 * @param  array $instance Widget instance.
+	 * @param array $args     Arguments.
+	 * @param array $instance Widget instance.
+	 *
 	 * @return WP_Query
 	 */
 	public function get_products( $args, $instance ) {
@@ -126,7 +127,7 @@ class WC_Widget_Products extends WC_Widget {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
-			$query_args['tax_query'] = array(
+			$query_args['tax_query'][] = array(
 				array(
 					'taxonomy' => 'product_visibility',
 					'field'    => 'term_taxonomy_id',
@@ -173,10 +174,10 @@ class WC_Widget_Products extends WC_Widget {
 	/**
 	 * Output widget.
 	 *
-	 * @see WP_Widget
-	 *
 	 * @param array $args     Arguments.
 	 * @param array $instance Widget instance.
+	 *
+	 * @see WP_Widget
 	 */
 	public function widget( $args, $instance ) {
 		if ( $this->get_cached_widget( $args ) ) {

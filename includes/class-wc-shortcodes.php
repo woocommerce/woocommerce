@@ -174,7 +174,10 @@ class WC_Shortcodes {
 			'child_of'   => $atts['parent'],
 		);
 
-		$product_categories = get_terms( 'product_cat', $args );
+		$product_categories = apply_filters(
+			'woocommerce_product_categories',
+			get_terms( 'product_cat', $args )
+		);
 
 		if ( '' !== $atts['parent'] ) {
 			$product_categories = wp_list_filter( $product_categories, array(
@@ -475,7 +478,7 @@ class WC_Shortcodes {
 		$args = array(
 			'posts_per_page'      => 1,
 			'post_type'           => 'product',
-			'post_status'         => 'publish',
+			'post_status'         => ( ! empty( $atts['status'] ) ) ? $atts['status'] : 'publish',
 			'ignore_sticky_posts' => 1,
 			'no_found_rows'       => 1,
 		);
@@ -585,6 +588,9 @@ class WC_Shortcodes {
 	 * @return string
 	 */
 	public static function shop_messages() {
+		if ( ! function_exists( 'wc_print_notices' ) ) {
+			return '';
+		}
 		return '<div class="woocommerce">' . wc_print_notices( true ) . '</div>';
 	}
 

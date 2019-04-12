@@ -12,12 +12,13 @@
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce/Templates/Emails
- * @version 3.4.0
+ * @version 3.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$text_align = is_rtl() ? 'right' : 'left';
+$text_align  = is_rtl() ? 'right' : 'left';
+$margin_side = is_rtl() ? 'left' : 'right';
 
 foreach ( $items as $item_id => $item ) :
 	$product       = $item->get_product();
@@ -56,7 +57,12 @@ foreach ( $items as $item_id => $item ) :
 		// allow other plugins to add additional product information here.
 		do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, $plain_text );
 
-		wc_display_item_meta( $item );
+		wc_display_item_meta(
+			$item,
+			array(
+				'label_before' => '<strong class="wc-item-meta-label" style="float: ' . esc_attr( $text_align ) . '; margin-' . esc_attr( $margin_side ) . ': .25em; clear: both">',
+			)
+		);
 
 		// allow other plugins to add additional product information here.
 		do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, $plain_text );

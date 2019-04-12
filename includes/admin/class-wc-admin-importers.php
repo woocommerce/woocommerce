@@ -82,7 +82,7 @@ class WC_Admin_Importers {
 	 */
 	public function admin_scripts() {
 		$suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-		wp_register_script( 'wc-product-import', WC()->plugin_url() . '/assets/js/admin/wc-product-import' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
+		wp_register_script( 'wc-product-import', WC()->plugin_url() . '/assets/js/admin/wc-product-import' . $suffix . '.js', array( 'jquery' ), WC_VERSION, true );
 	}
 
 	/**
@@ -159,7 +159,7 @@ class WC_Admin_Importers {
 					foreach ( $post['terms'] as $term ) {
 						if ( strstr( $term['domain'], 'pa_' ) ) {
 							if ( ! taxonomy_exists( $term['domain'] ) ) {
-								$attribute_name = wc_sanitize_taxonomy_name( str_replace( 'pa_', '', $term['domain'] ) );
+								$attribute_name = wc_attribute_taxonomy_slug( $term['domain'] );
 
 								// Create the taxonomy.
 								if ( ! in_array( $attribute_name, wc_get_attribute_taxonomies(), true ) ) {
@@ -179,7 +179,8 @@ class WC_Admin_Importers {
 									$term['domain'],
 									apply_filters( 'woocommerce_taxonomy_objects_' . $term['domain'], array( 'product' ) ),
 									apply_filters(
-										'woocommerce_taxonomy_args_' . $term['domain'], array(
+										'woocommerce_taxonomy_args_' . $term['domain'],
+										array(
 											'hierarchical' => true,
 											'show_ui'      => false,
 											'query_var'    => true,
@@ -248,16 +249,20 @@ class WC_Admin_Importers {
 			// @codingStandardsIgnoreEnd.
 
 			// Clean up orphaned data.
-			$wpdb->query( "
+			$wpdb->query(
+				"
 				DELETE {$wpdb->posts}.* FROM {$wpdb->posts}
 				LEFT JOIN {$wpdb->posts} wp ON wp.ID = {$wpdb->posts}.post_parent
 				WHERE wp.ID IS NULL AND {$wpdb->posts}.post_type = 'product_variation'
-			" );
-			$wpdb->query( "
+			"
+			);
+			$wpdb->query(
+				"
 				DELETE {$wpdb->postmeta}.* FROM {$wpdb->postmeta}
 				LEFT JOIN {$wpdb->posts} wp ON wp.ID = {$wpdb->postmeta}.post_id
 				WHERE wp.ID IS NULL
-			" );
+			"
+			);
 			// @codingStandardsIgnoreStart.
 			$wpdb->query( "
 				DELETE tr.* FROM {$wpdb->term_relationships} tr

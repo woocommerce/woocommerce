@@ -2,10 +2,8 @@
 /**
  * WooCommerce Product Settings
  *
- * @author   WooThemes
- * @category Admin
- * @package  WooCommerce/Admin
- * @version  2.4.0
+ * @package WooCommerce/Admin
+ * @version 2.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -75,9 +73,9 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 			<p>
 				<?php
-				/* translators: %s: URL to customizer. */
 				echo wp_kses(
 					sprintf(
+						/* translators: %s: URL to customizer. */
 						__( 'Looking for the product display options? They can now be found in the Customizer. <a href="%s">Go see them in action here.</a>', 'woocommerce' ), esc_url(
 							add_query_arg(
 								array(
@@ -325,6 +323,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						),
 						array(
 							'title'    => __( 'Shop page', 'woocommerce' ),
+							/* translators: %s: URL to settings. */
 							'desc'     => '<br/>' . sprintf( __( 'The base page can also be used in your <a href="%s">product permalinks</a>.', 'woocommerce' ), admin_url( 'options-permalink.php' ) ),
 							'id'       => 'woocommerce_shop_page_id',
 							'type'     => 'single_select_page',
@@ -347,6 +346,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 							'default'       => 'yes',
 							'type'          => 'checkbox',
 							'checkboxgroup' => 'end',
+						),
+						array(
+							'title'       => __( 'Placeholder image', 'woocommerce' ),
+							'id'          => 'woocommerce_placeholder_image',
+							'type'        => 'text',
+							'default'     => '',
+							'class'       => '',
+							'css'         => '',
+							'placeholder' => __( 'Enter attachment ID or URL to an image', 'woocommerce' ),
+							'desc_tip'    => __( 'This is the attachment ID, or image URL, used for placeholder images in the product catalog. Products with no image will use this.', 'woocommerce' ),
 						),
 						array(
 							'type' => 'sectionend',

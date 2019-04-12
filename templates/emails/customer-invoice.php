@@ -10,10 +10,9 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @see         https://docs.woocommerce.com/document/template-structure/
- * @author      WooThemes
- * @package     WooCommerce/Templates/Emails
- * @version     3.3.0
+ * @see https://docs.woocommerce.com/document/template-structure/
+ * @package WooCommerce/Templates/Emails
+ * @version 3.5.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,13 +26,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
-<?php if ( $order->has_status( 'pending' ) ) : ?>
+<?php /* translators: %s: Customer first name */ ?>
+<p><?php printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ); ?></p>
+
+<?php if ( $order->has_status( 'pending' ) ) { ?>
 	<p>
 	<?php
 	printf(
 		wp_kses(
-			/* translators: %1s item is the name of the site, %2s is a html link */
-			__( 'An order has been created for you on %1$s. %2$s', 'woocommerce' ),
+			/* translators: %1$s Site title, %2$s Order pay link */
+			__( 'An order has been created for you on %1$s. Your invoice is below, with a link to make payment when you’re ready: %2$s', 'woocommerce' ),
 			array(
 				'a' => array(
 					'href' => array(),
@@ -45,9 +47,16 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 	);
 	?>
 	</p>
-<?php endif; ?>
 
+<?php } else { ?>
+	<p>
+	<?php
+		/* translators: %s Order date */
+		printf( esc_html__( 'Here are the details of your order placed on %s:', 'woocommerce' ), esc_html( wc_format_datetime( $order->get_date_created() ) ) );
+	?>
+	</p>
 <?php
+}
 
 /**
  * Hook for the woocommerce_email_order_details.
@@ -73,6 +82,12 @@ do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, 
  * @hooked WC_Emails::email_address() Shows email address
  */
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
+
+?>
+<p>
+<?php esc_html_e( 'Thanks for reading.', 'woocommerce' ); ?>
+</p>
+<?php
 
 /**
  * Executes the email footer.

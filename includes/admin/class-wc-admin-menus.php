@@ -98,9 +98,9 @@ class WC_Admin_Menus {
 		$current_section = empty( $_REQUEST['section'] ) ? '' : sanitize_title( wp_unslash( $_REQUEST['section'] ) ); // WPCS: input var okay, CSRF ok.
 
 		// Save settings if data has been posted.
-		if ( '' !== $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}_{$current_section}", ! empty( $_POST ) ) ) { // WPCS: input var okay, CSRF ok.
+		if ( '' !== $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}_{$current_section}", ! empty( $_POST['save'] ) ) ) { // WPCS: input var okay, CSRF ok.
 			WC_Admin_Settings::save();
-		} elseif ( apply_filters( "woocommerce_save_settings_{$current_tab}", ! empty( $_POST ) ) ) { // WPCS: input var okay, CSRF ok.
+		} elseif ( '' === $current_section && apply_filters( "woocommerce_save_settings_{$current_tab}", ! empty( $_POST['save'] ) ) ) { // WPCS: input var okay, CSRF ok.
 			WC_Admin_Settings::save();
 		}
 
@@ -164,14 +164,16 @@ class WC_Admin_Menus {
 			// Remove 'WooCommerce' sub menu item.
 			unset( $submenu['woocommerce'][0] );
 
-			$order_count = wc_processing_order_count();
-
 			// Add count if user has access.
-			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'manage_woocommerce' ) && $order_count ) {
-				foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
-					if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
-						$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins count-' . esc_attr( $order_count ) . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>'; // WPCS: override ok.
-						break;
+			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'manage_woocommerce' ) ) {
+				$order_count = wc_processing_order_count();
+
+				if ( $order_count ) {
+					foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
+						if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
+							$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins count-' . esc_attr( $order_count ) . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>'; // WPCS: override ok.
+							break;
+						}
 					}
 				}
 			}
@@ -215,10 +217,11 @@ class WC_Admin_Menus {
 	/**
 	 * Custom menu order.
 	 *
+	 * @param bool $enabled Whether custom menu ordering is already enabled.
 	 * @return bool
 	 */
-	public function custom_menu_order() {
-		return current_user_can( 'manage_woocommerce' );
+	public function custom_menu_order( $enabled ) {
+		return $enabled || current_user_can( 'manage_woocommerce' );
 	}
 
 	/**

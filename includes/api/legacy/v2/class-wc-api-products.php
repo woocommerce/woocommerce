@@ -247,13 +247,13 @@ class WC_API_Products extends WC_API_Resource {
 			$post_content = isset( $data['description'] ) ? wc_clean( $data['description'] ) : '';
 			if ( $post_content && isset( $data['enable_html_description'] ) && true === $data['enable_html_description'] ) {
 
-				$post_content = $data['description'];
+				$post_content = wp_filter_post_kses( $data['description'] );
 			}
 
 			// Enable short description html tags.
 			$post_excerpt = isset( $data['short_description'] ) ? wc_clean( $data['short_description'] ) : '';
 			if ( $post_excerpt && isset( $data['enable_html_short_description'] ) && true === $data['enable_html_short_description'] ) {
-				$post_excerpt = $data['short_description'];
+				$post_excerpt = wp_filter_post_kses( $data['short_description'] );
 			}
 
 			$classname = WC_Product_Factory::get_classname_from_product_type( $data['type'] );
@@ -353,14 +353,14 @@ class WC_API_Products extends WC_API_Resource {
 			// Product short description.
 			if ( isset( $data['short_description'] ) ) {
 				// Enable short description html tags.
-				$post_excerpt = ( isset( $data['enable_html_short_description'] ) && true === $data['enable_html_short_description'] ) ? $data['short_description'] : wc_clean( $data['short_description'] );
+				$post_excerpt = ( isset( $data['enable_html_short_description'] ) && true === $data['enable_html_short_description'] ) ? wp_filter_post_kses( $data['short_description'] ) : wc_clean( $data['short_description'] );
 				$product->set_short_description( $post_excerpt );
 			}
 
 			// Product description.
 			if ( isset( $data['description'] ) ) {
 				// Enable description html tags.
-				$post_content = ( isset( $data['enable_html_description'] ) && true === $data['enable_html_description'] ) ? $data['description'] : wc_clean( $data['description'] );
+				$post_content = ( isset( $data['enable_html_description'] ) && true === $data['enable_html_description'] ) ? wp_filter_post_kses( $data['description'] ) : wc_clean( $data['description'] );
 				$product->set_description( $post_content );
 			}
 
@@ -429,13 +429,18 @@ class WC_API_Products extends WC_API_Resource {
 			if ( $product->is_type( 'variable' ) ) {
 				foreach ( $product->get_children() as $child_id ) {
 					$child = wc_get_product( $child_id );
-					$child->delete( true );
+					if ( ! empty( $child ) ) {
+						$child->delete( true );
+					}
 				}
-			} elseif ( $product->is_type( 'grouped' ) ) {
+			} else {
+				// For other product types, if the product has children, remove the relationship.
 				foreach ( $product->get_children() as $child_id ) {
 					$child = wc_get_product( $child_id );
-					$child->set_parent_id( 0 );
-					$child->save();
+					if ( ! empty( $child ) ) {
+						$child->set_parent_id( 0 );
+						$child->save();
+					}
 				}
 			}
 
@@ -602,11 +607,11 @@ class WC_API_Products extends WC_API_Resource {
 			$term_id = intval( $term->term_id );
 
 			// Get category display type
-			$display_type = get_woocommerce_term_meta( $term_id, 'display_type' );
+			$display_type = get_term_meta( $term_id, 'display_type' );
 
 			// Get category image
 			$image = '';
-			if ( $image_id = get_woocommerce_term_meta( $term_id, 'thumbnail_id' ) ) {
+			if ( $image_id = get_term_meta( $term_id, 'thumbnail_id' ) ) {
 				$image = wp_get_attachment_url( $image_id );
 			}
 
@@ -1527,7 +1532,7 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			$download = new WC_Product_Download();
-			$download->set_id( $file['id'] ? $file['id'] : wp_generate_uuid4() );
+			$download->set_id( ! empty( $file['id'] ) ? $file['id'] : wp_generate_uuid4() );
 			$download->set_name( $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['file'] ) );
 			$download->set_file( apply_filters( 'woocommerce_file_download_path', $file['file'], $product, $key ) );
 			$files[]  = $download;
@@ -1686,72 +1691,15 @@ class WC_API_Products extends WC_API_Resource {
 	 *
 	 * @param  string $image_url
 	 *
-	 * @return array|WP_Error
+	 * @return array
 	 *
 	 * @throws WC_API_Exception
 	 */
 	public function upload_product_image( $image_url ) {
-		$file_name  = basename( current( explode( '?', $image_url ) ) );
-		$parsed_url = @parse_url( $image_url );
-
-		// Check parsed URL
-		if ( ! $parsed_url || ! is_array( $parsed_url ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_product_image', sprintf( __( 'Invalid URL %s.', 'woocommerce' ), $image_url ), 400 );
+		$upload = wc_rest_upload_image_from_url( $image_url );
+		if ( is_wp_error( $upload ) ) {
+			throw new WC_API_Exception( 'woocommerce_api_product_image_upload_error', $upload->get_error_message(), 400 );
 		}
-
-		// Ensure url is valid
-		$image_url = str_replace( ' ', '%20', $image_url );
-
-		// Get the file
-		$response = wp_safe_remote_get( $image_url, array(
-			'timeout' => 10,
-		) );
-
-		if ( is_wp_error( $response ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ) . ' ' . sprintf( __( 'Error: %s.', 'woocommerce' ), $response->get_error_message() ), 400 );
-		} elseif ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			throw new WC_API_Exception( 'woocommerce_api_invalid_remote_product_image', sprintf( __( 'Error getting remote image %s.', 'woocommerce' ), $image_url ), 400 );
-		}
-
-		// Ensure we have a file name and type
-		$wp_filetype = wp_check_filetype( $file_name, wc_rest_allowed_image_mime_types() );
-
-		if ( ! $wp_filetype['type'] ) {
-			$headers = wp_remote_retrieve_headers( $response );
-			if ( isset( $headers['content-disposition'] ) && strstr( $headers['content-disposition'], 'filename=' ) ) {
-				$disposition = end( explode( 'filename=', $headers['content-disposition'] ) );
-				$disposition = sanitize_file_name( $disposition );
-				$file_name   = $disposition;
-			} elseif ( isset( $headers['content-type'] ) && strstr( $headers['content-type'], 'image/' ) ) {
-				$file_name = 'image.' . str_replace( 'image/', '', $headers['content-type'] );
-			}
-			unset( $headers );
-
-			// Recheck filetype
-			$wp_filetype = wp_check_filetype( $file_name, wc_rest_allowed_image_mime_types() );
-
-			if ( ! $wp_filetype['type'] ) {
-				throw new WC_API_Exception( 'woocommerce_api_invalid_product_image', __( 'Invalid image type.', 'woocommerce' ), 400 );
-			}
-		}
-
-		// Upload the file
-		$upload = wp_upload_bits( $file_name, '', wp_remote_retrieve_body( $response ) );
-
-		if ( $upload['error'] ) {
-			throw new WC_API_Exception( 'woocommerce_api_product_image_upload_error', $upload['error'], 400 );
-		}
-
-		// Get filesize
-		$filesize = filesize( $upload['file'] );
-
-		if ( 0 == $filesize ) {
-			@unlink( $upload['file'] );
-			unset( $upload );
-			throw new WC_API_Exception( 'woocommerce_api_product_image_upload_file_error', __( 'Zero size file downloaded.', 'woocommerce' ), 400 );
-		}
-
-		unset( $response );
 
 		return $upload;
 	}
@@ -1830,7 +1778,7 @@ class WC_API_Products extends WC_API_Resource {
 				// taxonomy-based attributes are prefixed with `pa_`, otherwise simply `attribute_`
 				$attributes[] = array(
 					'name'   => wc_attribute_label( str_replace( 'attribute_', '', $attribute_name ) ),
-					'slug'   => str_replace( 'attribute_', '', str_replace( 'pa_', '', $attribute_name ) ),
+					'slug'   => str_replace( 'attribute_', '', wc_attribute_taxonomy_slug( $attribute_name ) ),
 					'option' => $attribute,
 				);
 			}
@@ -1839,7 +1787,7 @@ class WC_API_Products extends WC_API_Resource {
 			foreach ( $product->get_attributes() as $attribute ) {
 				$attributes[] = array(
 					'name'      => wc_attribute_label( $attribute['name'] ),
-					'slug'      => str_replace( 'pa_', '', $attribute['name'] ),
+					'slug'      => wc_attribute_taxonomy_slug( $attribute['name'] ),
 					'position'  => (int) $attribute['position'],
 					'visible'   => (bool) $attribute['is_visible'],
 					'variation' => (bool) $attribute['is_variation'],
@@ -2075,6 +2023,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Clear transients
 			delete_transient( 'wc_attribute_taxonomies' );
+			WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
 
 			$this->server->send_status( 201 );
 
@@ -2160,6 +2109,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Clear transients
 			delete_transient( 'wc_attribute_taxonomies' );
+			WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
 
 			return $this->get_product_attribute( $id );
 		} catch ( WC_API_Exception $e ) {
@@ -2221,6 +2171,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Clear transients
 			delete_transient( 'wc_attribute_taxonomies' );
+			WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_attribute' ) );
 		} catch ( WC_API_Exception $e ) {

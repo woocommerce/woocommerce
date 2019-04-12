@@ -37,6 +37,13 @@ class WC_Checkout {
 	protected $legacy_posted_data = array();
 
 	/**
+	 * Caches customer object. @see get_value.
+	 *
+	 * @var WC_Customer
+	 */
+	private $logged_in_customer = null;
+
+	/**
 	 * Gets the main WC_Checkout Instance.
 	 *
 	 * @since 2.1
@@ -198,13 +205,30 @@ class WC_Checkout {
 			return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
 		}
 
+		// Fields are based on billing/shipping country. Grab those values but ensure they are valid for the store before using.
+		$billing_country   = $this->get_value( 'billing_country' );
+		$billing_country   = empty( $billing_country ) ? WC()->countries->get_base_country() : $billing_country;
+		$allowed_countries = WC()->countries->get_allowed_countries();
+
+		if ( ! array_key_exists( $billing_country, $allowed_countries ) ) {
+			$billing_country = current( array_keys( $allowed_countries ) );
+		}
+
+		$shipping_country  = $this->get_value( 'shipping_country' );
+		$shipping_country  = empty( $shipping_country ) ? WC()->countries->get_base_country() : $shipping_country;
+		$allowed_countries = WC()->countries->get_shipping_countries();
+
+		if ( ! array_key_exists( $shipping_country, $allowed_countries ) ) {
+			$shipping_country = current( array_keys( $allowed_countries ) );
+		}
+
 		$this->fields = array(
 			'billing'  => WC()->countries->get_address_fields(
-				$this->get_value( 'billing_country' ),
+				$billing_country,
 				'billing_'
 			),
 			'shipping' => WC()->countries->get_address_fields(
-				$this->get_value( 'shipping_country' ),
+				$shipping_country,
 				'shipping_'
 			),
 			'account'  => array(),
@@ -238,8 +262,12 @@ class WC_Checkout {
 				'placeholder' => esc_attr__( 'Password', 'woocommerce' ),
 			);
 		}
-
 		$this->fields = apply_filters( 'woocommerce_checkout_fields', $this->fields );
+
+		foreach ( $this->fields as $field_type => $fields ) {
+			// Sort each of the checkout field sections based on priority.
+			uasort( $this->fields[ $field_type ], 'wc_checkout_fields_uasort_comparison' );
+		}
 
 		return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
 	}
@@ -289,7 +317,7 @@ class WC_Checkout {
 
 		try {
 			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
-			$cart_hash          = md5( wp_json_encode( wc_clean( WC()->cart->get_cart_for_session() ) ) . WC()->cart->total );
+			$cart_hash          = WC()->cart->get_cart_hash();
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 			$order              = $order_id ? wc_get_order( $order_id ) : null;
 
@@ -309,21 +337,32 @@ class WC_Checkout {
 				$order = new WC_Order();
 			}
 
+			$fields_prefix = array(
+				'shipping' => true,
+				'billing'  => true,
+			);
+
+			$shipping_fields = array(
+				'shipping_method' => true,
+				'shipping_total'  => true,
+				'shipping_tax'    => true,
+			);
 			foreach ( $data as $key => $value ) {
 				if ( is_callable( array( $order, "set_{$key}" ) ) ) {
 					$order->{"set_{$key}"}( $value );
-
 					// Store custom fields prefixed with wither shipping_ or billing_. This is for backwards compatibility with 2.6.x.
-					// TODO: Fix conditional to only include shipping/billing address fields in a smarter way without str(i)pos.
-				} elseif ( ( 0 === stripos( $key, 'billing_' ) || 0 === stripos( $key, 'shipping_' ) )
-					&& ! in_array( $key, array( 'shipping_method', 'shipping_total', 'shipping_tax' ), true ) ) {
-					$order->update_meta_data( '_' . $key, $value );
+				} elseif ( isset( $fields_prefix[ current( explode( '_', $key ) ) ] ) ) {
+					if ( ! isset( $shipping_fields[ $key ] ) ) {
+						$order->update_meta_data( '_' . $key, $value );
+					}
 				}
 			}
 
 			$order->set_created_via( 'checkout' );
 			$order->set_cart_hash( $cart_hash );
 			$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() ) );
+			$order_vat_exempt = WC()->cart->get_customer()->get_is_vat_exempt() ? 'yes' : 'no';
+			$order->add_meta_data( 'is_vat_exempt', $order_vat_exempt );
 			$order->set_currency( get_woocommerce_currency() );
 			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
@@ -338,7 +377,7 @@ class WC_Checkout {
 			$order->set_total( WC()->cart->get_total( 'edit' ) );
 			$this->create_order_line_items( $order, WC()->cart );
 			$this->create_order_fee_lines( $order, WC()->cart );
-			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping->get_packages() );
+			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
 			$this->create_order_tax_lines( $order, WC()->cart );
 			$this->create_order_coupon_lines( $order, WC()->cart );
 
@@ -615,6 +654,9 @@ class WC_Checkout {
 					case 'textarea':
 						$value = isset( $_POST[ $key ] ) ? wc_sanitize_textarea( wp_unslash( $_POST[ $key ] ) ) : ''; // WPCS: input var ok, CSRF ok.
 						break;
+					case 'password':
+						$value = isset( $_POST[ $key ] ) ? wp_unslash( $_POST[ $key ] ) : ''; // WPCS: input var ok, CSRF ok, sanitization ok.
+						break;
 					default:
 						$value = isset( $_POST[ $key ] ) ? wc_clean( wp_unslash( $_POST[ $key ] ) ) : ''; // WPCS: input var ok, CSRF ok.
 						break;
@@ -688,8 +730,6 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'phone', $format, true ) ) {
-					$data[ $key ] = wc_format_phone_number( $data[ $key ] );
-
 					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_phone( $data[ $key ] ) ) {
 						/* translators: %s: phone number */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
@@ -697,9 +737,10 @@ class WC_Checkout {
 				}
 
 				if ( in_array( 'email', $format, true ) && '' !== $data[ $key ] ) {
-					$data[ $key ] = sanitize_email( $data[ $key ] );
+					$email_is_valid = is_email( $data[ $key ] );
+					$data[ $key ]   = sanitize_email( $data[ $key ] );
 
-					if ( $validate_fieldset && ! is_email( $data[ $key ] ) ) {
+					if ( $validate_fieldset && ! $email_is_valid ) {
 						/* translators: %s: email address */
 						$errors->add( 'validation', sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . esc_html( $field_label ) . '</strong>' ) );
 						continue;
@@ -760,7 +801,7 @@ class WC_Checkout {
 			} else {
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
-				foreach ( WC()->shipping->get_packages() as $i => $package ) {
+				foreach ( WC()->shipping()->get_packages() as $i => $package ) {
 					if ( ! isset( $chosen_shipping_methods[ $i ], $package['rates'][ $chosen_shipping_methods[ $i ] ] ) ) {
 						$errors->add( 'shipping', __( 'No shipping method has been selected. Please double check your address, or contact us if you need any help.', 'woocommerce' ) );
 					}
@@ -790,13 +831,24 @@ class WC_Checkout {
 	 * @param array  $data  Array of data to get the value from.
 	 */
 	protected function set_customer_address_fields( $field, $key, $data ) {
-		if ( isset( $data[ "billing_{$field}" ] ) ) {
-			WC()->customer->{"set_billing_{$field}"}( $data[ "billing_{$field}" ] );
-			WC()->customer->{"set_shipping_{$field}"}( $data[ "billing_{$field}" ] );
+		$billing_value  = null;
+		$shipping_value = null;
+
+		if ( isset( $data[ "billing_{$field}" ] ) && is_callable( array( WC()->customer, "set_billing_{$field}" ) ) ) {
+			$billing_value  = $data[ "billing_{$field}" ];
+			$shipping_value = $data[ "billing_{$field}" ];
 		}
 
-		if ( isset( $data[ "shipping_{$field}" ] ) ) {
-			WC()->customer->{"set_shipping_{$field}"}( $data[ "shipping_{$field}" ] );
+		if ( isset( $data[ "shipping_{$field}" ] ) && is_callable( array( WC()->customer, "set_shipping_{$field}" ) ) ) {
+			$shipping_value = $data[ "shipping_{$field}" ];
+		}
+
+		if ( ! is_null( $billing_value ) && is_callable( array( WC()->customer, "set_billing_{$field}" ) ) ) {
+			WC()->customer->{"set_billing_{$field}"}( $billing_value );
+		}
+
+		if ( ! is_null( $shipping_value ) && is_callable( array( WC()->customer, "set_shipping_{$field}" ) ) ) {
+			WC()->customer->{"set_shipping_{$field}"}( $shipping_value );
 		}
 	}
 
@@ -809,6 +861,11 @@ class WC_Checkout {
 	protected function update_session( $data ) {
 		// Update both shipping and billing to the passed billing address first if set.
 		$address_fields = array(
+			'first_name',
+			'last_name',
+			'company',
+			'email',
+			'phone',
 			'address_1',
 			'address_2',
 			'city',
@@ -908,13 +965,20 @@ class WC_Checkout {
 		if ( ! is_user_logged_in() && ( $this->is_registration_required() || ! empty( $data['createaccount'] ) ) ) {
 			$username    = ! empty( $data['account_username'] ) ? $data['account_username'] : '';
 			$password    = ! empty( $data['account_password'] ) ? $data['account_password'] : '';
-			$customer_id = wc_create_new_customer( $data['billing_email'], $username, $password );
+			$customer_id = wc_create_new_customer(
+				$data['billing_email'],
+				$username,
+				$password,
+				array(
+					'first_name' => ! empty( $data['billing_first_name'] ) ? $data['billing_first_name'] : '',
+					'last_name'  => ! empty( $data['billing_last_name'] ) ? $data['billing_last_name'] : '',
+				)
+			);
 
 			if ( is_wp_error( $customer_id ) ) {
 				throw new Exception( $customer_id->get_error_message() );
 			}
 
-			wp_set_current_user( $customer_id );
 			wc_set_customer_auth_cookie( $customer_id );
 
 			// As we are now logged in, checkout will need to refresh to show logged in data.
@@ -933,17 +997,17 @@ class WC_Checkout {
 		if ( $customer_id && apply_filters( 'woocommerce_checkout_update_customer_data', true, $this ) ) {
 			$customer = new WC_Customer( $customer_id );
 
-			if ( ! empty( $data['billing_first_name'] ) ) {
+			if ( ! empty( $data['billing_first_name'] ) && '' === $customer->get_first_name() ) {
 				$customer->set_first_name( $data['billing_first_name'] );
 			}
 
-			if ( ! empty( $data['billing_last_name'] ) ) {
+			if ( ! empty( $data['billing_last_name'] ) && '' === $customer->get_last_name() ) {
 				$customer->set_last_name( $data['billing_last_name'] );
 			}
 
 			// If the display name is an email, update to the user's full name.
 			if ( is_email( $customer->get_display_name() ) ) {
-				$customer->set_display_name( $data['billing_first_name'] . ' ' . $data['billing_last_name'] );
+				$customer->set_display_name( $customer->get_first_name() . ' ' . $customer->get_last_name() );
 			}
 
 			foreach ( $data as $key => $value ) {
@@ -1076,26 +1140,51 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Gets the value either from the posted data, or from the users meta data.
+	 * Gets the value either from POST, or from the customer object. Sets the default values in checkout fields.
 	 *
-	 * @param string $input Input key.
-	 * @return string
+	 * @param string $input Name of the input we want to grab data for. e.g. billing_country.
+	 * @return string The default value.
 	 */
 	public function get_value( $input ) {
+		// If the form was posted, get the posted value. This will only tend to happen when JavaScript is disabled client side.
 		if ( ! empty( $_POST[ $input ] ) ) { // WPCS: input var ok, CSRF OK.
 			return wc_clean( wp_unslash( $_POST[ $input ] ) ); // WPCS: input var ok, CSRF OK.
 		}
 
+		// Allow 3rd parties to short circuit the logic and return their own default value.
 		$value = apply_filters( 'woocommerce_checkout_get_value', null, $input );
 
-		if ( null !== $value ) {
+		if ( ! is_null( $value ) ) {
 			return $value;
 		}
 
-		if ( is_callable( array( WC()->customer, "get_$input" ) ) ) {
-			$value = WC()->customer->{"get_$input"}() ? WC()->customer->{"get_$input"}() : null;
-		} elseif ( WC()->customer->meta_exists( $input ) ) {
-			$value = WC()->customer->get_meta( $input, true );
+		/**
+		 * For logged in customers, pull data from their account rather than the session which may contain incomplete data.
+		 * Another reason is that WC sets shipping address to the billing address on the checkout updates unless the
+		 * "ship to another address" box is checked. @see issue #20975.
+		 */
+		$customer_object = false;
+
+		if ( is_user_logged_in() ) {
+			// Load customer object, but keep it cached to avoid reloading it multiple times.
+			if ( is_null( $this->logged_in_customer ) ) {
+				$this->logged_in_customer = new WC_Customer( get_current_user_id() );
+			}
+			$customer_object = $this->logged_in_customer;
+		}
+
+		if ( ! $customer_object ) {
+			$customer_object = WC()->customer;
+		}
+
+		if ( is_callable( array( $customer_object, "get_$input" ) ) ) {
+			$value = $customer_object->{"get_$input"}();
+		} elseif ( $customer_object->meta_exists( $input ) ) {
+			$value = $customer_object->get_meta( $input, true );
+		}
+
+		if ( '' === $value ) {
+			$value = null;
 		}
 
 		return apply_filters( 'default_checkout_' . $input, $value, $input );

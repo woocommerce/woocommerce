@@ -43,7 +43,7 @@ function wc_do_deprecated_action( $tag, $args, $version, $replacement = null, $m
  */
 function wc_deprecated_function( $function, $version, $replacement = null ) {
 	// @codingStandardsIgnoreStart
-	if ( is_ajax() ) {
+	if ( is_ajax() || WC()->is_rest_api_request() ) {
 		do_action( 'deprecated_function_run', $function, $replacement, $version );
 		$log_string  = "The {$function} function is deprecated since version {$version}.";
 		$log_string .= $replacement ? " Replace with {$replacement}." : '';
@@ -65,7 +65,7 @@ function wc_deprecated_function( $function, $version, $replacement = null ) {
  */
 function wc_deprecated_hook( $hook, $version, $replacement = null, $message = null ) {
 	// @codingStandardsIgnoreStart
-	if ( is_ajax() ) {
+	if ( is_ajax() || WC()->is_rest_api_request() ) {
 		do_action( 'deprecated_hook_run', $hook, $replacement, $version, $message );
 
 		$message    = empty( $message ) ? '' : ' ' . $message;
@@ -109,7 +109,7 @@ function wc_doing_it_wrong( $function, $message, $version ) {
 	// @codingStandardsIgnoreStart
 	$message .= ' Backtrace: ' . wp_debug_backtrace_summary();
 
-	if ( is_ajax() ) {
+	if ( is_ajax() || WC()->is_rest_api_request() ) {
 		do_action( 'doing_it_wrong_run', $function, $message, $version );
 		error_log( "{$function} was called incorrectly. {$message}. This message was added in version {$version}." );
 	} else {
@@ -127,7 +127,7 @@ function wc_doing_it_wrong( $function, $message, $version ) {
  * @param  string $replacement
  */
 function wc_deprecated_argument( $argument, $version, $message = null ) {
-	if ( is_ajax() ) {
+	if ( is_ajax() || WC()->is_rest_api_request() ) {
 		do_action( 'deprecated_argument_run', $argument, $message, $version );
 		error_log( "The {$argument} argument is deprecated since version {$version}. {$message}" );
 	} else {
@@ -1011,4 +1011,114 @@ function wc_get_customer_avatar_url( $email ) {
 function wc_get_core_supported_themes() {
 	wc_deprecated_function( 'wc_get_core_supported_themes()', '3.3' );
 	return array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' );
+}
+
+/**
+ * Get min/max price meta query args.
+ *
+ * @deprecated 3.6.0
+ * @since 3.0.0
+ * @param array $args Min price and max price arguments.
+ * @return array
+ */
+function wc_get_min_max_price_meta_query( $args ) {
+	wc_deprecated_function( 'wc_get_min_max_price_meta_query()', '3.6' );
+
+	$current_min_price = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
+	$current_max_price = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : PHP_INT_MAX;
+
+	return apply_filters(
+		'woocommerce_get_min_max_price_meta_query',
+		array(
+			'key'     => '_price',
+			'value'   => array( $current_min_price, $current_max_price ),
+			'compare' => 'BETWEEN',
+			'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
+		),
+		$args
+	);
+}
+
+/**
+ * When a term is split, ensure meta data maintained.
+ *
+ * @deprecated 3.6.0
+ * @param  int    $old_term_id      Old term ID.
+ * @param  int    $new_term_id      New term ID.
+ * @param  string $term_taxonomy_id Term taxonomy ID.
+ * @param  string $taxonomy         Taxonomy.
+ */
+function wc_taxonomy_metadata_update_content_for_split_terms( $old_term_id, $new_term_id, $term_taxonomy_id, $taxonomy ) {
+	wc_deprecated_function( 'wc_taxonomy_metadata_update_content_for_split_terms', '3.6' );
+}
+
+/**
+ * WooCommerce Term Meta API.
+ *
+ * WC tables for storing term meta are deprecated from WordPress 4.4 since 4.4 has its own table.
+ * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
+ *
+ * @deprecated 3.6.0
+ * @param int    $term_id    Term ID.
+ * @param string $meta_key   Meta key.
+ * @param mixed  $meta_value Meta value.
+ * @param string $prev_value Previous value. (default: '').
+ * @return bool
+ */
+function update_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $prev_value = '' ) {
+	wc_deprecated_function( 'update_woocommerce_term_meta', '3.6', 'update_term_meta' );
+	return function_exists( 'update_term_meta' ) ? update_term_meta( $term_id, $meta_key, $meta_value, $prev_value ) : update_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $prev_value );
+}
+
+/**
+ * WooCommerce Term Meta API.
+ *
+ * WC tables for storing term meta are deprecated from WordPress 4.4 since 4.4 has its own table.
+ * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
+ *
+ * @deprecated 3.6.0
+ * @param int    $term_id    Term ID.
+ * @param string $meta_key   Meta key.
+ * @param mixed  $meta_value Meta value.
+ * @param bool   $unique     Make meta key unique. (default: false).
+ * @return bool
+ */
+function add_woocommerce_term_meta( $term_id, $meta_key, $meta_value, $unique = false ) {
+	wc_deprecated_function( 'add_woocommerce_term_meta', '3.6', 'add_term_meta' );
+	return function_exists( 'add_term_meta' ) ? add_term_meta( $term_id, $meta_key, $meta_value, $unique ) : add_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value, $unique );
+}
+
+/**
+ * WooCommerce Term Meta API
+ *
+ * WC tables for storing term meta are deprecated from WordPress 4.4 since 4.4 has its own table.
+ * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
+ *
+ * @deprecated 3.6.0
+ * @param int    $term_id    Term ID.
+ * @param string $meta_key   Meta key.
+ * @param string $meta_value Meta value (default: '').
+ * @param bool   $deprecated Deprecated param (default: false).
+ * @return bool
+ */
+function delete_woocommerce_term_meta( $term_id, $meta_key, $meta_value = '', $deprecated = false ) {
+	wc_deprecated_function( 'delete_woocommerce_term_meta', '3.6', 'delete_term_meta' );
+	return function_exists( 'delete_term_meta' ) ? delete_term_meta( $term_id, $meta_key, $meta_value ) : delete_metadata( 'woocommerce_term', $term_id, $meta_key, $meta_value );
+}
+
+/**
+ * WooCommerce Term Meta API
+ *
+ * WC tables for storing term meta are deprecated from WordPress 4.4 since 4.4 has its own table.
+ * This function serves as a wrapper, using the new table if present, or falling back to the WC table.
+ *
+ * @deprecated 3.6.0
+ * @param int    $term_id Term ID.
+ * @param string $key     Meta key.
+ * @param bool   $single  Whether to return a single value. (default: true).
+ * @return mixed
+ */
+function get_woocommerce_term_meta( $term_id, $key, $single = true ) {
+	wc_deprecated_function( 'get_woocommerce_term_meta', '3.6', 'get_term_meta' );
+	return function_exists( 'get_term_meta' ) ? get_term_meta( $term_id, $key, $single ) : get_metadata( 'woocommerce_term', $term_id, $key, $single );
 }

@@ -1,35 +1,3 @@
-/**
- * WooCommerce Photoswipe styles.
- * 1. These styles are required to overwrite default theme button styles (Twenty Twelve adds gradients via background-image).
- * 2. For zooming on mobile.
- */
-.woocommerce img.pswp__img,
-.woocommerce-page img.pswp__img {
-	max-width: none; /* 2 */
-}
-button.pswp__button {
-	box-shadow: none !important;
-	background-image: url('default-skin/default-skin.png') !important;
-}
-button.pswp__button,
-button.pswp__button:hover,
-button.pswp__button--arrow--left::before,
-button.pswp__button--arrow--right::before {
-	background-color: transparent !important; /* 1 */
-}
-button.pswp__button--arrow--left,
-button.pswp__button--arrow--right,
-button.pswp__button--arrow--left:hover,
-button.pswp__button--arrow--right:hover {
-	background-image: none !important; /* 1 */
-}
-button.pswp__button--close:hover {
-	background-position: 0 -44px;
-}
-button.pswp__button--zoom:hover {
-	background-position: -88px 0;
-}
-
 /*! PhotoSwipe main CSS by Dmitry Semenov | photoswipe.com | MIT license */
 /*
 	Styles for basic PhotoSwipe functionality (sliding area, open/close transitions)
@@ -45,7 +13,7 @@ button.pswp__button--zoom:hover {
   overflow: hidden;
   -ms-touch-action: none;
   touch-action: none;
-  z-index: 999999;
+  z-index: 1500;
   -webkit-text-size-adjust: 100%;
   /* create separate layer, to avoid paint on window.onscroll in webkit/blink */
   -webkit-backface-visibility: hidden;
@@ -98,6 +66,8 @@ button.pswp__button--zoom:hover {
   height: 100%;
   background: #000;
   opacity: 0;
+  -webkit-transform: translateZ(0);
+          transform: translateZ(0);
   -webkit-backface-visibility: hidden;
   will-change: opacity; }
 

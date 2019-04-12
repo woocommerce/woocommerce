@@ -262,6 +262,10 @@ class WC_Order extends WC_Abstract_Order {
 				'manual' => (bool) $manual_update,
 			);
 
+			if ( $manual_update ) {
+				do_action( 'woocommerce_order_edit_status', $this->get_id(), $result['to'] );
+			}
+
 			$this->maybe_set_date_paid();
 			$this->maybe_set_date_completed();
 		}
@@ -283,8 +287,18 @@ class WC_Order extends WC_Abstract_Order {
 	 * @since 3.0.0
 	 */
 	public function maybe_set_date_paid() {
-		if ( ! $this->get_date_paid( 'edit' ) && $this->has_status( apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this ) ) ) {
-			$this->set_date_paid( current_time( 'timestamp', true ) );
+		// This logic only runs if the date_paid prop has not been set yet.
+		if ( ! $this->get_date_paid( 'edit' ) ) {
+			$payment_completed_status = apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? 'processing' : 'completed', $this->get_id(), $this );
+
+			if ( $this->has_status( $payment_completed_status ) ) {
+				// If payment complete status is reached, set paid now.
+				$this->set_date_paid( current_time( 'timestamp', true ) );
+
+			} elseif ( 'processing' === $payment_completed_status && $this->has_status( 'completed' ) ) {
+				// If payment complete status was processing, but we've passed that and still have no date, set it now.
+				$this->set_date_paid( current_time( 'timestamp', true ) );
+			}
 		}
 	}
 
@@ -1291,7 +1305,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool
 	 */
 	public function key_is_valid( $key ) {
-		return $key === $this->get_order_key();
+		return hash_equals( $this->get_order_key(), $key );
 	}
 
 	/**
@@ -1939,7 +1953,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @param string $tax_display Tax to display.
 	 */
 	protected function add_order_item_totals_payment_method_row( &$total_rows, $tax_display ) {
-		if ( $this->get_total() > 0 && $this->get_payment_method_title() ) {
+		if ( $this->get_total() > 0 && $this->get_payment_method_title() && 'other' !== $this->get_payment_method_title() ) {
 			$total_rows['payment_method'] = array(
 				'label' => __( 'Payment method:', 'woocommerce' ),
 				'value' => $this->get_payment_method_title(),

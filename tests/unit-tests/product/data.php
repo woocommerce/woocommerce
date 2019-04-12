@@ -64,13 +64,13 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 			'gallery_image_ids'  => array(),
 			'download_expiry'    => -1,
 			'download_limit'     => 5,
-			'attributes'         => $attributes,
 		);
 
 		$product = new WC_Product();
 		foreach ( $getters_and_setters as $function => $value ) {
 			$product->{"set_{$function}"}( $value );
 		}
+		$product->set_attributes( $attributes );
 		$product->set_date_on_sale_from( '1475798400' );
 		$product->set_date_on_sale_to( '1477267200' );
 		$product->save();
@@ -78,15 +78,29 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		foreach ( $getters_and_setters as $function => $value ) {
 			$this->assertEquals( $value, $product->{"get_{$function}"}(), $function );
 		}
+		$this->assertCount( 1, $product->get_attributes() );
+		$this->assertContains(
+			current( $product->get_attributes() )->get_data(),
+			array(
+				'attribute_id' => 0,
+				'name'         => 'Test Attribute',
+				'options'      => array( 'Fish', 'Fingers' ),
+				'position'     => 0,
+				'visible'      => true,
+				'variation'    => false,
+			)
+		);
 		$this->assertEquals( $product->get_date_on_sale_from()->getTimestamp(), 1475798400 );
 		$this->assertEquals( $product->get_date_on_sale_to()->getTimestamp(), 1477267200 );
 
-		$image_url = media_sideload_image( 'https://cldup.com/Dr1Bczxq4q.png', $product->get_id(), '', 'src' );
-		$image_id  = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid='%s';", $image_url ) );
+		$image_url = media_sideload_image( 'http://cldup.com/Dr1Bczxq4q.png', $product->get_id(), '', 'src' );
+
+		$this->assertNotWPError( $image_url );
+
+		$image_id = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $image_url ) );
 		$product->set_image_id( $image_id[0] );
 		$product->save();
 		$this->assertEquals( $image_id[0], $product->get_image_id() );
-		$product->delete( true );
 	}
 
 	/**
@@ -210,8 +224,6 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_external_product_getters_and_setters() {
-		$time = time();
-
 		$getters_and_setters = array(
 			'button_text' => 'Test Button Text',
 			'product_url' => 'https://wordpress.org',
@@ -255,10 +267,91 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 		$product = wc_get_product( $product3_id );
 		$this->assertEquals( $product3_id, $product->get_id() );
 		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">&pound;</span>50.00</span>', $product->get_price_html() );
+	}
 
-		// Clean up.
-		$product1->delete();
-		$product2->delete();
-		$product3->delete();
+	/**
+	 * Test: test_get_image_should_return_product_image.
+	 */
+	public function test_get_image_should_return_product_image() {
+		$product = new WC_Product();
+		$image_url = $this->set_product_image( $product );
+
+		$this->assertEquals(
+			'<img width="186" height="144" src="' . $image_url . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" />',
+			$product->get_image()
+		);
+
+		$this->assertEquals(
+			'<img width="186" height="144" src="' . $image_url . '" class="attachment-single size-single" alt="" />',
+			$product->get_image( 'single' )
+		);
+
+		$this->assertEquals(
+			'<img width="186" height="144" src="' . $image_url . '" class="custom-class" alt="" />',
+			$product->get_image( 'single', array( 'class' => 'custom-class' ) )
+		);
+	}
+
+	/**
+	 * Test: test_get_image_should_return_parent_product_image.
+	 */
+	public function test_get_image_should_return_parent_product_image() {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variations = $variable_product->get_children();
+		$variation_1 = wc_get_product( $variations[0] );
+		$image_url = $this->set_product_image( $variable_product );
+
+		$this->assertEquals(
+			'<img width="186" height="144" src="' . $image_url . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" />',
+			$variation_1->get_image()
+		);
+
+		$this->assertContains(
+			'<img width="186" height="144" src="' . $image_url . '" class="attachment-single size-single" alt="" />',
+			$variation_1->get_image( 'single' )
+		);
+
+		$this->assertEquals(
+			'<img width="186" height="144" src="' . $image_url . '" class="custom-class" alt="" />',
+			$variation_1->get_image( 'single', array( 'class' => 'custom-class' ) )
+		);
+	}
+
+	/**
+	 * Test: test_get_image_should_return_place_holder_image.
+	 */
+	public function test_get_image_should_return_place_holder_image() {
+		$product = new WC_Product();
+
+		$this->assertContains( wc_placeholder_img_src(), $product->get_image() );
+	}
+
+	/**
+	 * Test: test_get_image_should_return_empty_string.
+	 */
+	public function test_get_image_should_return_empty_string() {
+		$product = new WC_Product();
+		$this->assertEquals( '', $product->get_image( 'woocommerce_thumbnail', array(), false ) );
+	}
+
+	/**
+	 * Helper method to define a image for a product and return its URL.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @return string image URL.
+	 */
+	protected function set_product_image( $product ) {
+		global $wpdb;
+
+		// TODO: find a way to set the product image without performing a HTTP request to make the tests faster.
+		$image_url = media_sideload_image( 'http://cldup.com/Dr1Bczxq4q.png', $product->get_id(), '', 'src' );
+
+		$this->assertNotWPError( $image_url );
+
+		$image_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE guid = %s", $image_url ) );
+		$product->set_image_id( $image_id );
+		$product->save();
+
+		return $image_url;
 	}
 }

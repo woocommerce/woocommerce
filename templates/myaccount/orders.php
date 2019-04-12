@@ -13,7 +13,6 @@
  * the readme will list any important changes.
  *
  * @see 	https://docs.woocommerce.com/document/template-structure/
- * @author  WooThemes
  * @package WooCommerce/Templates
  * @version 3.2.0
  */
@@ -98,7 +97,7 @@ do_action( 'woocommerce_before_account_orders', $has_orders ); ?>
 <?php else : ?>
 	<div class="woocommerce-message woocommerce-message--info woocommerce-Message woocommerce-Message--info woocommerce-info">
 		<a class="woocommerce-Button button" href="<?php echo esc_url( apply_filters( 'woocommerce_return_to_shop_redirect', wc_get_page_permalink( 'shop' ) ) ); ?>">
-			<?php _e( 'Go shop', 'woocommerce' ) ?>
+			<?php _e( 'Go shop', 'woocommerce' ); ?>
 		</a>
 		<?php _e( 'No order has been made yet.', 'woocommerce' ); ?>
 	</div>

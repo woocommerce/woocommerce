@@ -370,7 +370,21 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 		$response->header( 'X-WP-Total', $query_results['total'] );
 		$response->header( 'X-WP-TotalPages', (int) $max_pages );
 
-		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
+		$base          = $this->rest_base;
+		$attrib_prefix = '(?P<';
+		if ( strpos( $base, $attrib_prefix ) !== false ) {
+			$attrib_names = array();
+			preg_match( '/\(\?P<[^>]+>.*\)/', $base, $attrib_names, PREG_OFFSET_CAPTURE );
+			foreach ( $attrib_names as $attrib_name_match ) {
+				$beginning_offset = strlen( $attrib_prefix );
+				$attrib_name_end  = strpos( $attrib_name_match[0], '>', $attrib_name_match[1] );
+				$attrib_name      = substr( $attrib_name_match[0], $beginning_offset, $attrib_name_end - $beginning_offset );
+				if ( isset( $request[ $attrib_name ] ) ) {
+					$base  = str_replace( "(?P<$attrib_name>[\d]+)", $request[ $attrib_name ], $base );
+				}
+			}
+		}
+		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ) );
 
 		if ( $page > 1 ) {
 			$prev_page = $page - 1;
@@ -595,6 +609,19 @@ abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
 			);
 		}
 
-		return $params;
+		/**
+		 * Filter collection parameters for the posts controller.
+		 *
+		 * The dynamic part of the filter `$this->post_type` refers to the post
+		 * type slug for the controller.
+		 *
+		 * This filter registers the collection parameter, but does not map the
+		 * collection parameter to an internal WP_Query parameter. Use the
+		 * `rest_{$this->post_type}_query` filter to set WP_Query parameters.
+		 *
+		 * @param array        $query_params JSON Schema-formatted collection parameters.
+		 * @param WP_Post_Type $post_type    Post type object.
+		 */
+		return apply_filters( "rest_{$this->post_type}_collection_params", $params, $this->post_type );
 	}
 }

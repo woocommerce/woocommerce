@@ -66,6 +66,23 @@ class WC_Session_Handler extends WC_Session {
 	 * @since 3.3.0
 	 */
 	public function init() {
+		$this->init_session_cookie();
+
+		add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
+		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
+		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
+
+		if ( ! is_user_logged_in() ) {
+			add_filter( 'nonce_user_logged_out', array( $this, 'nonce_user_logged_out' ) );
+		}
+	}
+
+	/**
+	 * Setup cookie and customer ID.
+	 *
+	 * @since 3.6.0
+	 */
+	public function init_session_cookie() {
 		$cookie = $this->get_session_cookie();
 
 		if ( $cookie ) {
@@ -73,6 +90,15 @@ class WC_Session_Handler extends WC_Session {
 			$this->_session_expiration = $cookie[1];
 			$this->_session_expiring   = $cookie[2];
 			$this->_has_cookie         = true;
+			$this->_data               = $this->get_session_data();
+
+			// If the user logs in, update session.
+			if ( is_user_logged_in() && get_current_user_id() !== $this->_customer_id ) {
+				$this->_customer_id = get_current_user_id();
+				$this->_dirty       = true;
+				$this->save_data();
+				$this->set_customer_session_cookie( true );
+			}
 
 			// Update session if its close to expiring.
 			if ( time() > $this->_session_expiring ) {
@@ -82,16 +108,7 @@ class WC_Session_Handler extends WC_Session {
 		} else {
 			$this->set_session_expiration();
 			$this->_customer_id = $this->generate_customer_id();
-		}
-
-		$this->_data = $this->get_session_data();
-
-		add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
-		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
-		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
-
-		if ( ! is_user_logged_in() ) {
-			add_filter( 'nonce_user_logged_out', array( $this, 'nonce_user_logged_out' ) );
+			$this->_data        = $this->get_session_data();
 		}
 	}
 
@@ -111,8 +128,20 @@ class WC_Session_Handler extends WC_Session {
 			$cookie_value      = $this->_customer_id . '||' . $this->_session_expiration . '||' . $this->_session_expiring . '||' . $cookie_hash;
 			$this->_has_cookie = true;
 
-			wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, apply_filters( 'wc_session_use_secure_cookie', false ) );
+			if ( ! isset( $_COOKIE[ $this->_cookie ] ) || $_COOKIE[ $this->_cookie ] !== $cookie_value ) {
+				wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, $this->use_secure_cookie(), true );
+			}
 		}
+	}
+
+	/**
+	 * Should the session cookie be secure?
+	 *
+	 * @since 3.6.0
+	 * @return bool
+	 */
+	protected function use_secure_cookie() {
+		return apply_filters( 'wc_session_use_secure_cookie', wc_site_is_https() && is_ssl() );
 	}
 
 	/**
@@ -212,17 +241,13 @@ class WC_Session_Handler extends WC_Session {
 		if ( $this->_dirty && $this->has_session() ) {
 			global $wpdb;
 
-			$wpdb->replace( // @codingStandardsIgnoreLine.
-				$this->_table,
-				array(
-					'session_key'    => $this->_customer_id,
-					'session_value'  => maybe_serialize( $this->_data ),
-					'session_expiry' => $this->_session_expiration,
-				),
-				array(
-					'%s',
-					'%s',
-					'%d',
+			$wpdb->query(
+				$wpdb->prepare(
+					"INSERT INTO {$wpdb->prefix}woocommerce_sessions (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d)
+ 					ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)",
+					$this->_customer_id,
+					maybe_serialize( $this->_data ),
+					$this->_session_expiration
 				)
 			);
 
@@ -235,9 +260,15 @@ class WC_Session_Handler extends WC_Session {
 	 * Destroy all session data.
 	 */
 	public function destroy_session() {
-		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, apply_filters( 'wc_session_use_secure_cookie', false ) );
-
 		$this->delete_session( $this->_customer_id );
+		$this->forget_session();
+	}
+
+	/**
+	 * Forget all session data without destroying it.
+	 */
+	public function forget_session() {
+		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, $this->use_secure_cookie(), true );
 
 		wc_empty_cart();
 
@@ -309,7 +340,7 @@ class WC_Session_Handler extends WC_Session {
 
 		wp_cache_delete( $this->get_cache_prefix() . $customer_id, WC_SESSION_CACHE_GROUP );
 
-		$wpdb->delete( // @codingStandardsIgnoreLine.
+		$wpdb->delete(
 			$this->_table,
 			array(
 				'session_key' => $customer_id,
@@ -326,7 +357,6 @@ class WC_Session_Handler extends WC_Session {
 	public function update_session_timestamp( $customer_id, $timestamp ) {
 		global $wpdb;
 
-		// @codingStandardsIgnoreStart.
 		$wpdb->update(
 			$this->_table,
 			array(
@@ -336,9 +366,8 @@ class WC_Session_Handler extends WC_Session {
 				'session_key' => $customer_id,
 			),
 			array(
-				'%d'
+				'%d',
 			)
 		);
-		// @codingStandardsIgnoreEnd.
 	}
 }

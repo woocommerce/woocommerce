@@ -154,7 +154,7 @@ if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 		 * @param WP_User $user
 		 */
 		public function add_customer_meta_fields( $user ) {
-			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			if ( ! apply_filters( 'woocommerce_current_user_can_edit_customer_meta_fields', current_user_can( 'manage_woocommerce' ), $user->ID ) ) {
 				return;
 			}
 
@@ -186,8 +186,7 @@ if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 								<?php else : ?>
 									<input type="text" name="<?php echo esc_attr( $key ); ?>" id="<?php echo esc_attr( $key ); ?>" value="<?php echo esc_attr( $this->get_user_meta( $user->ID, $key ) ); ?>" class="<?php echo ( ! empty( $field['class'] ) ? esc_attr( $field['class'] ) : 'regular-text' ); ?>" />
 								<?php endif; ?>
-								<br/>
-								<span class="description"><?php echo wp_kses_post( $field['description'] ); ?></span>
+								<p class="description"><?php echo wp_kses_post( $field['description'] ); ?></p>
 							</td>
 						</tr>
 					<?php endforeach; ?>
@@ -202,6 +201,10 @@ if ( ! class_exists( 'WC_Admin_Profile', false ) ) :
 		 * @param int $user_id User ID of the user being saved
 		 */
 		public function save_customer_meta_fields( $user_id ) {
+			if ( ! apply_filters( 'woocommerce_current_user_can_edit_customer_meta_fields', current_user_can( 'manage_woocommerce' ), $user_id ) ) {
+				return;
+			}
+
 			$save_fields = $this->get_customer_meta_fields();
 
 			foreach ( $save_fields as $fieldset ) {

@@ -107,7 +107,7 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 
 	foreach ( $products as $product_id => $qty ) {
 		/* translators: %s: product name */
-		$titles[] = ( $qty > 1 ? absint( $qty ) . ' &times; ' : '' ) . sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), strip_tags( get_the_title( $product_id ) ) );
+		$titles[] = apply_filters( 'woocommerce_add_to_cart_qty_html', ( $qty > 1 ? absint( $qty ) . ' &times; ' : '' ), $product_id ) . apply_filters( 'woocommerce_add_to_cart_item_name_in_quotes', sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), strip_tags( get_the_title( $product_id ) ) ), $product_id );
 		$count   += $qty;
 	}
 
@@ -118,9 +118,9 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 	// Output success messages.
 	if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
 		$return_to = apply_filters( 'woocommerce_continue_shopping_redirect', wc_get_raw_referer() ? wp_validate_redirect( wc_get_raw_referer(), false ) : wc_get_page_permalink( 'shop' ) );
-		$message   = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( $return_to ), esc_html__( 'Continue shopping', 'woocommerce' ), esc_html( $added_text ) );
+		$message   = sprintf( '<a href="%s" tabindex="1" class="button wc-forward">%s</a> %s', esc_url( $return_to ), esc_html__( 'Continue shopping', 'woocommerce' ), esc_html( $added_text ) );
 	} else {
-		$message = sprintf( '<a href="%s" class="button wc-forward">%s</a> %s', esc_url( wc_get_page_permalink( 'cart' ) ), esc_html__( 'View cart', 'woocommerce' ), esc_html( $added_text ) );
+		$message = sprintf( '<a href="%s" tabindex="1" class="button wc-forward">%s</a> %s', esc_url( wc_get_page_permalink( 'cart' ) ), esc_html__( 'View cart', 'woocommerce' ), esc_html( $added_text ) );
 	}
 
 	if ( has_filter( 'wc_add_to_cart_message' ) ) {
@@ -173,7 +173,7 @@ function wc_clear_cart_after_payment() {
 		if ( $order_id > 0 ) {
 			$order = wc_get_order( $order_id );
 
-			if ( $order && $order->get_order_key() === $order_key ) {
+			if ( $order && hash_equals( $order->get_order_key(), $order_key ) ) {
 				WC()->cart->empty_cart();
 			}
 		}
@@ -203,7 +203,7 @@ function wc_cart_totals_subtotal_html() {
  * Get shipping methods.
  */
 function wc_cart_totals_shipping_html() {
-	$packages           = WC()->shipping->get_packages();
+	$packages           = WC()->shipping()->get_packages();
 	$first              = true;
 
 	foreach ( $packages as $i => $package ) {
@@ -218,14 +218,15 @@ function wc_cart_totals_shipping_html() {
 		}
 
 		wc_get_template(
-			'cart/cart-shipping.php', array(
+			'cart/cart-shipping.php',
+			array(
 				'package'                  => $package,
 				'available_methods'        => $package['rates'],
 				'show_package_details'     => count( $packages ) > 1,
 				'show_shipping_calculator' => is_cart() && $first,
 				'package_details'          => implode( ', ', $product_names ),
 				/* translators: %d: shipping package number */
-				'package_name'             => apply_filters( 'woocommerce_shipping_package_name', ( ( $i + 1 ) > 1 ) ? sprintf( _x( 'Shipping %d', 'shipping packages', 'woocommerce' ), ( $i + 1 ) ) : _x( 'Shipping', 'shipping package', 'woocommerce' ), $i, $package ),
+				'package_name'             => apply_filters( 'woocommerce_shipping_package_name', ( ( $i + 1 ) > 1 ) ? sprintf( _x( 'Shipping %d', 'shipping packages', 'woocommerce' ), ( $i + 1 ) ) : _x( 'Shipping', 'shipping packages', 'woocommerce' ), $i, $package ),
 				'index'                    => $i,
 				'chosen_method'            => $chosen_method,
 				'formatted_destination'    => WC()->countries->get_formatted_address( $package['destination'], ', ' ),
@@ -341,9 +342,11 @@ function wc_cart_totals_fee_html( $fee ) {
  * @return string
  */
 function wc_cart_totals_shipping_method_label( $method ) {
-	$label = $method->get_label();
+	$label     = $method->get_label();
+	$has_cost  = 0 < $method->cost;
+	$hide_cost = ! $has_cost && in_array( $method->get_method_id(), array( 'free_shipping', 'local_pickup' ), true );
 
-	if ( $method->cost >= 0 && $method->get_method_id() !== 'free_shipping' ) {
+	if ( $has_cost && ! $hide_cost ) {
 		if ( WC()->cart->display_prices_including_tax() ) {
 			$label .= ': ' . wc_price( $method->cost + $method->get_shipping_tax() );
 			if ( $method->get_shipping_tax() > 0 && ! wc_prices_include_tax() ) {

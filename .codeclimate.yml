@@ -24,7 +24,6 @@ exclude_paths:
 - "includes/api/legacy/"
 - "includes/libraries/"
 - "includes/updates/"
-- "includes/gateways/simplify-commerce/"
 - "includes/shipping/legacy-*"
 - "includes/wc-deprecated-functions.php"
 - "assets/js/accounting/"

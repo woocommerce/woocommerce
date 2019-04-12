@@ -4,45 +4,47 @@
 	 * VariationForm class which handles variation forms and attributes.
 	 */
 	var VariationForm = function( $form ) {
-		this.$form                = $form;
-		this.$attributeFields     = $form.find( '.variations select' );
-		this.$singleVariation     = $form.find( '.single_variation' );
-		this.$singleVariationWrap = $form.find( '.single_variation_wrap' );
-		this.$resetVariations     = $form.find( '.reset_variations' );
-		this.$product             = $form.closest( '.product' );
-		this.variationData        = $form.data( 'product_variations' );
-		this.useAjax              = false === this.variationData;
-		this.xhr                  = false;
-		this.loading              = true;
+		var self = this;
+
+		self.$form                = $form;
+		self.$attributeFields     = $form.find( '.variations select' );
+		self.$singleVariation     = $form.find( '.single_variation' );
+		self.$singleVariationWrap = $form.find( '.single_variation_wrap' );
+		self.$resetVariations     = $form.find( '.reset_variations' );
+		self.$product             = $form.closest( '.product' );
+		self.variationData        = $form.data( 'product_variations' );
+		self.useAjax              = false === self.variationData;
+		self.xhr                  = false;
+		self.loading              = true;
 
 		// Initial state.
-		this.$singleVariationWrap.show();
-		this.$form.off( '.wc-variation-form' );
+		self.$singleVariationWrap.show();
+		self.$form.off( '.wc-variation-form' );
 
 		// Methods.
-		this.getChosenAttributes    = this.getChosenAttributes.bind( this );
-		this.findMatchingVariations = this.findMatchingVariations.bind( this );
-		this.isMatch                = this.isMatch.bind( this );
-		this.toggleResetLink        = this.toggleResetLink.bind( this );
+		self.getChosenAttributes    = self.getChosenAttributes.bind( self );
+		self.findMatchingVariations = self.findMatchingVariations.bind( self );
+		self.isMatch                = self.isMatch.bind( self );
+		self.toggleResetLink        = self.toggleResetLink.bind( self );
 
 		// Events.
-		$form.on( 'click.wc-variation-form', '.reset_variations', { variationForm: this }, this.onReset );
-		$form.on( 'reload_product_variations', { variationForm: this }, this.onReload );
-		$form.on( 'hide_variation', { variationForm: this }, this.onHide );
-		$form.on( 'show_variation', { variationForm: this }, this.onShow );
-		$form.on( 'click', '.single_add_to_cart_button', { variationForm: this }, this.onAddToCart );
-		$form.on( 'reset_data', { variationForm: this }, this.onResetDisplayedVariation );
-		$form.on( 'reset_image', { variationForm: this }, this.onResetImage );
-		$form.on( 'change.wc-variation-form', '.variations select', { variationForm: this }, this.onChange );
-		$form.on( 'found_variation.wc-variation-form', { variationForm: this }, this.onFoundVariation );
-		$form.on( 'check_variations.wc-variation-form', { variationForm: this }, this.onFindVariation );
-		$form.on( 'update_variation_values.wc-variation-form', { variationForm: this }, this.onUpdateAttributes );
+		$form.on( 'click.wc-variation-form', '.reset_variations', { variationForm: self }, self.onReset );
+		$form.on( 'reload_product_variations', { variationForm: self }, self.onReload );
+		$form.on( 'hide_variation', { variationForm: self }, self.onHide );
+		$form.on( 'show_variation', { variationForm: self }, self.onShow );
+		$form.on( 'click', '.single_add_to_cart_button', { variationForm: self }, self.onAddToCart );
+		$form.on( 'reset_data', { variationForm: self }, self.onResetDisplayedVariation );
+		$form.on( 'reset_image', { variationForm: self }, self.onResetImage );
+		$form.on( 'change.wc-variation-form', '.variations select', { variationForm: self }, self.onChange );
+		$form.on( 'found_variation.wc-variation-form', { variationForm: self }, self.onFoundVariation );
+		$form.on( 'check_variations.wc-variation-form', { variationForm: self }, self.onFindVariation );
+		$form.on( 'update_variation_values.wc-variation-form', { variationForm: self }, self.onUpdateAttributes );
 
 		// Init after gallery.
 		setTimeout( function() {
 			$form.trigger( 'check_variations' );
 			$form.trigger( 'wc_variation_form' );
-			$form.loading = false;
+			self.loading = false;
 		}, 100 );
 	};
 
@@ -109,8 +111,8 @@
 	VariationForm.prototype.onResetDisplayedVariation = function( event ) {
 		var form = event.data.variationForm;
 		form.$product.find( '.product_meta' ).find( '.sku' ).wc_reset_content();
-		form.$product.find( '.product_weight' ).wc_reset_content();
-		form.$product.find( '.product_dimensions' ).wc_reset_content();
+		form.$product.find( '.product_weight, .woocommerce-product-attributes-item--weight .woocommerce-product-attributes-item__value' ).wc_reset_content();
+		form.$product.find( '.product_dimensions, .woocommerce-product-attributes-item--dimensions .woocommerce-product-attributes-item__value' ).wc_reset_content();
 		form.$form.trigger( 'reset_image' );
 		form.$singleVariation.slideUp( 200 ).trigger( 'hide_variation' );
 	};
@@ -192,8 +194,8 @@
 	VariationForm.prototype.onFoundVariation = function( event, variation ) {
 		var form           = event.data.variationForm,
 			$sku           = form.$product.find( '.product_meta' ).find( '.sku' ),
-			$weight        = form.$product.find( '.product_weight' ),
-			$dimensions    = form.$product.find( '.product_dimensions' ),
+			$weight        = form.$product.find( '.product_weight, .woocommerce-product-attributes-item--weight .woocommerce-product-attributes-item__value' ),
+			$dimensions    = form.$product.find( '.product_dimensions, .woocommerce-product-attributes-item--dimensions .woocommerce-product-attributes-item__value' ),
 			$qty           = form.$singleVariationWrap.find( '.quantity' ),
 			purchasable    = true,
 			variation_id   = '',
@@ -213,7 +215,8 @@
 		}
 
 		if ( variation.dimensions ) {
-			$dimensions.wc_set_content( variation.dimensions_html );
+			// Decode HTML entities.
+			$dimensions.wc_set_content( $.parseHTML( variation.dimensions_html )[0].data );
 		} else {
 			$dimensions.wc_reset_content();
 		}
@@ -221,9 +224,9 @@
 		form.$form.wc_variations_image_update( variation );
 
 		if ( ! variation.variation_is_visible ) {
-			template = wp.template( 'unavailable-variation-template' );
+			template = wp_template( 'unavailable-variation-template' );
 		} else {
-			template     = wp.template( 'variation-template' );
+			template     = wp_template( 'variation-template' );
 			variation_id = variation.variation_id;
 		}
 
@@ -349,11 +352,23 @@
 								}
 
 								if ( attr_val ) {
-									// Decode entities and add slashes.
+									// Decode entities.
 									attr_val = $( '<div/>' ).html( attr_val ).text();
 
-									// Attach.
-									new_attr_select.find( 'option[value="' + form.addSlashes( attr_val ) + '"]' ).addClass( 'attached ' + variation_active );
+									// Attach to matching options by value. This is done to compare
+									// TEXT values rather than any HTML entities.
+									var $option_elements = new_attr_select.find( 'option' );
+									if ( $option_elements.length ) {
+										for (var i = 0, len = $option_elements.length; i < len; i++) {
+											var $option_element = $( $option_elements[i] ),
+												option_value = $option_element.val();
+
+											if ( attr_val === option_value ) {
+												$option_element.addClass( 'attached ' + variation_active );
+												break;
+											}
+										}
+									}
 								} else {
 									// Attach all apart from placeholder.
 									new_attr_select.find( 'option:gt(0)' ).addClass( 'attached ' + variation_active );
@@ -368,8 +383,19 @@
 			attached_options_count = new_attr_select.find( 'option.attached' ).length;
 
 			// Check if current selection is in attached options.
-			if ( selected_attr_val && ( attached_options_count === 0 || new_attr_select.find( 'option.attached.enabled[value="' + form.addSlashes( selected_attr_val ) + '"]' ).length === 0 ) ) {
+			if ( selected_attr_val ) {
 				selected_attr_val_valid = false;
+
+				if ( 0 !== attached_options_count ) {
+					new_attr_select.find( 'option.attached.enabled' ).each( function() {
+						var option_value = $( this ).val();
+
+						if ( selected_attr_val === option_value ) {
+							selected_attr_val_valid = true;
+							return false; // break.
+						}
+					});
+				}
 			}
 
 			// Detach the placeholder if:
@@ -592,6 +618,7 @@
 			$product_img.wc_set_variation_attr( 'srcset', variation.image.srcset );
 			$product_img.wc_set_variation_attr( 'sizes', variation.image.sizes );
 			$product_img.wc_set_variation_attr( 'title', variation.image.title );
+			$product_img.wc_set_variation_attr( 'data-caption', variation.image.caption );
 			$product_img.wc_set_variation_attr( 'alt', variation.image.alt );
 			$product_img.wc_set_variation_attr( 'data-src', variation.image.full_src );
 			$product_img.wc_set_variation_attr( 'data-large_image', variation.image.full_src );
@@ -630,6 +657,7 @@
 		$product_img.wc_reset_variation_attr( 'srcset' );
 		$product_img.wc_reset_variation_attr( 'sizes' );
 		$product_img.wc_reset_variation_attr( 'title' );
+		$product_img.wc_reset_variation_attr( 'data-caption' );
 		$product_img.wc_reset_variation_attr( 'alt' );
 		$product_img.wc_reset_variation_attr( 'data-src' );
 		$product_img.wc_reset_variation_attr( 'data-large_image' );
@@ -678,6 +706,46 @@
 			}
 			return match;
 		}
+	};
+
+	/**
+	 * Avoids using wp.template where possible in order to be CSP compliant.
+	 * wp.template uses internally eval().
+	 * @param {string} templateId
+	 * @return {Function}
+	 */
+	var wp_template = function( templateId ) {
+		var html = document.getElementById( 'tmpl-' + templateId ).textContent;
+		var hard = false;
+		// any <# #> interpolate (evaluate).
+		hard = hard || /<#\s?data\./.test( html );
+		// any data that is NOT data.variation.
+		hard = hard || /{{{?\s?data\.(?!variation\.).+}}}?/.test( html );
+		// any data access deeper than 1 level e.g.
+		// data.variation.object.item
+		// data.variation.object['item']
+		// data.variation.array[0]
+		hard = hard || /{{{?\s?data\.variation\.[\w-]*[^\s}]/.test ( html );
+		if ( hard ) {
+			return wp.template( templateId );
+		}
+		return function template ( data ) {
+			var variation = data.variation || {};
+			return html.replace( /({{{?)\s?data\.variation\.([\w-]*)\s?(}}}?)/g, function( _, open, key, close ) {
+				// Error in the format, ignore.
+				if ( open.length !== close.length ) {
+					return '';
+				}
+				var replacement = variation[ key ] || '';
+				// {{{ }}} => interpolate (unescaped).
+				// {{  }}  => interpolate (escaped).
+				// https://codex.wordpress.org/Javascript_Reference/wp.template
+				if ( open.length === 2 ) {
+					return window.escape( replacement );
+				}
+				return replacement;
+			});
+		};
 	};
 
 })( jQuery, window, document );

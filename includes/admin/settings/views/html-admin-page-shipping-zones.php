@@ -104,7 +104,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 							<select name="add_method_id">
 								<?php
-								foreach ( WC()->shipping->load_shipping_methods() as $method ) {
+								foreach ( WC()->shipping()->load_shipping_methods() as $method ) {
 									if ( ! $method->supports( 'shipping-zones' ) ) {
 										continue;
 									}

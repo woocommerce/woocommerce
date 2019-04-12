@@ -7,6 +7,13 @@
  */
 class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
+	public function tearDown() {
+		WC()->cart->empty_cart();
+		WC()->cart->remove_coupons();
+
+		parent::tearDown();
+	}
+
 	/**
 	 * Test the code/id differentiation of the coupon constructor.
 	 *
@@ -66,15 +73,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Test if total amount of coupons is 1
 		$this->assertEquals( 1, count( WC()->cart->get_applied_coupons() ) );
-
-		// Clean up the cart
-		WC()->cart->empty_cart();
-
-		// Remove coupons
-		WC()->cart->remove_coupons();
-
-		// Delete coupon
-		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 	}
 
 	/**
@@ -95,18 +93,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Test if total amount of coupons is 1
 		$this->assertEquals( 1, count( WC()->cart->get_applied_coupons() ) );
-
-		// Clearing WC notices
-		wc_clear_notices();
-
-		// Clean up the cart
-		WC()->cart->empty_cart();
-
-		// Remove coupons
-		WC()->cart->remove_coupons();
-
-		// Delete coupon
-		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 	}
 
 	/**
@@ -118,8 +104,8 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->get_id(), '_price', '10' );
-		update_post_meta( $product->get_id(), '_regular_price', '10' );
+		$product->set_regular_price( 10 );
+		$product->save();
 
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
@@ -128,11 +114,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create a flat rate method
 		WC_Helper_Shipping::create_simple_flat_rate();
-
-		// We need this to have the calculate_totals() method calculate totals
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
 
 		// Add product to cart
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
@@ -146,25 +127,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Test if the cart total amount is equal 15
 		$this->assertEquals( 15, WC()->cart->total );
-
-		// Clearing WC notices
-		wc_clear_notices();
-
-		// Clean up the cart
-		WC()->cart->empty_cart();
-
-		// Remove coupons
-		WC()->cart->remove_coupons();
-
-		// Delete the flat rate method
-		WC()->session->set( 'chosen_shipping_methods', array() );
-		WC_Helper_Shipping::delete_simple_flat_rate();
-
-		// Delete coupon
-		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -176,8 +138,8 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->get_id(), '_price', '10' );
-		update_post_meta( $product->get_id(), '_regular_price', '10' );
+		$product->set_regular_price( 10 );
+		$product->save();
 
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
@@ -186,11 +148,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create a flat rate method - $10
 		WC_Helper_Shipping::create_simple_flat_rate();
-
-		// We need this to have the calculate_totals() method calculate totals
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
 
 		// Add fee - $10
 		WC_Helper_Fee::add_cart_fee();
@@ -207,28 +164,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Test if the cart total amount is equal 25
 		$this->assertEquals( 25, WC()->cart->total );
-
-		// Clearing WC notices
-		wc_clear_notices();
-
-		// Clean up the cart
-		WC()->cart->empty_cart();
-
-		// Remove coupons
-		WC()->cart->remove_coupons();
-
-		// Remove fee
-		WC_Helper_Fee::remove_cart_fee();
-
-		// Delete the flat rate method
-		WC()->session->set( 'chosen_shipping_methods', array() );
-		WC_Helper_Shipping::delete_simple_flat_rate();
-
-		// Delete coupon
-		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -240,8 +175,8 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create product
 		$product = WC_Helper_Product::create_simple_product();
-		update_post_meta( $product->get_id(), '_price', '10' );
-		update_post_meta( $product->get_id(), '_regular_price', '10' );
+		$product->set_regular_price( 10 );
+		$product->save();
 
 		// Create coupon
 		$coupon = WC_Helper_Coupon::create_coupon();
@@ -250,11 +185,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Create a flat rate method
 		WC_Helper_Shipping::create_simple_flat_rate();
-
-		// We need this to have the calculate_totals() method calculate totals
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
 
 		// Add fee
 		WC_Helper_Fee::add_cart_fee();
@@ -271,28 +201,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Test if the cart total amount is equal 29.5
 		$this->assertEquals( 29.5, WC()->cart->total );
-
-		// Clearing WC notices
-		wc_clear_notices();
-
-		// Clean up the cart
-		WC()->cart->empty_cart();
-
-		// Remove coupons
-		WC()->cart->remove_coupons();
-
-		// Remove fee
-		WC_Helper_Fee::remove_cart_fee();
-
-		// Delete the flat rate method
-		WC()->session->set( 'chosen_shipping_methods', array() );
-		WC_Helper_Shipping::delete_simple_flat_rate();
-
-		// Delete coupon
-		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
-
-		// Delete product
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
@@ -345,13 +253,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Test if the cart total amount is equal 19.5 (coupon only applying to one item).
 		$this->assertEquals( 19.5, WC()->cart->total );
-
-		// Clean up
-		wc_clear_notices();
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
-		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	public function test_custom_discount_item_limit() {
@@ -370,11 +271,6 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 			'limit_usage_to_x_items' => 1,
 		) );
 
-		// We need this to have the calculate_totals() method calculate totals.
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
-
 		// Add 4 products and coupon to cart.
 		WC()->cart->add_to_cart( $product->get_id(), 4 );
 		WC()->cart->add_discount( $coupon->get_code() );
@@ -382,13 +278,5 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 
 		// Test if the cart total amount is equal 39.5 (coupon only applying to one item).
 		$this->assertEquals( 39.5, WC()->cart->total );
-
-		// Clean up
-		wc_clear_notices();
-		WC()->cart->empty_cart();
-		WC()->cart->remove_coupons();
-		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
-		WC_Helper_Product::delete_product( $product->get_id() );
-		WC_Helper_Coupon::unregister_custom_type( __FUNCTION__ );
 	}
 }

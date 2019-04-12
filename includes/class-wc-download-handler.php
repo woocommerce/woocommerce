@@ -243,6 +243,14 @@ class WC_Download_Handler {
 		$parsed_file_path = wp_parse_url( $file_path );
 		$remote_file      = true;
 
+		// Paths that begin with '//' are always remote URLs.
+		if ( '//' === substr( $file_path, 0, 2 ) ) {
+			return array(
+				'remote_file' => true,
+				'file_path'   => is_ssl() ? 'https:' . $file_path : 'http:' . $file_path,
+			);
+		}
+
 		// See if path needs an abspath prepended to work.
 		if ( file_exists( ABSPATH . $file_path ) ) {
 			$remote_file = false;

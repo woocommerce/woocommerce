@@ -18,7 +18,7 @@ class WC_Emails {
 	/**
 	 * Array of email notification classes
 	 *
-	 * @var array
+	 * @var WC_Email[]
 	 */
 	public $emails = array();
 
@@ -87,6 +87,9 @@ class WC_Emails {
 				'woocommerce_order_status_failed_to_processing',
 				'woocommerce_order_status_failed_to_completed',
 				'woocommerce_order_status_failed_to_on-hold',
+				'woocommerce_order_status_cancelled_to_processing',
+				'woocommerce_order_status_cancelled_to_completed',
+				'woocommerce_order_status_cancelled_to_on-hold',
 				'woocommerce_order_status_on-hold_to_processing',
 				'woocommerce_order_status_on-hold_to_cancelled',
 				'woocommerce_order_status_on-hold_to_failed',
@@ -223,17 +226,12 @@ class WC_Emails {
 		$this->emails['WC_Email_Customer_New_Account']      = include 'emails/class-wc-email-customer-new-account.php';
 
 		$this->emails = apply_filters( 'woocommerce_email_classes', $this->emails );
-
-		// include css inliner.
-		if ( ! class_exists( 'Emogrifier' ) && class_exists( 'DOMDocument' ) ) {
-			include_once dirname( __FILE__ ) . '/libraries/class-emogrifier.php';
-		}
 	}
 
 	/**
 	 * Return the email classes - used in admin to load settings.
 	 *
-	 * @return array
+	 * @return WC_Email[]
 	 */
 	public function get_emails() {
 		return $this->emails;

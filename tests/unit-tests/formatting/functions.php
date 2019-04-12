@@ -12,10 +12,14 @@
  */
 class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
-	public function tearDown() {
-		update_option( 'woocommerce_price_num_decimals', '2' );
-		update_option( 'woocommerce_price_decimal_sep', '.' );
-		update_option( 'woocommerce_price_thousand_sep', ',' );
+	/**
+	 * Set up.
+	 */
+	public function setUp() {
+		parent::setUp();
+
+		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
+		$this->http_responder = array( $this, 'mock_http_responses' );
 	}
 
 	/**
@@ -38,7 +42,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_bool_to_string() {
-		$this->assertEquals( array( 'yes', 'no' ), array( wc_bool_to_string( true ), wc_bool_to_string( false )	) );
+		$this->assertEquals( array( 'yes', 'no' ), array( wc_bool_to_string( true ), wc_bool_to_string( false ) ) );
 	}
 
 	/**
@@ -47,10 +51,13 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_string_to_array() {
-		$this->assertEquals( array(
-			'foo',
-			'bar',
-		), wc_string_to_array( 'foo|bar', '|' ) );
+		$this->assertEquals(
+			array(
+				'foo',
+				'bar',
+			),
+			wc_string_to_array( 'foo|bar', '|' )
+		);
 	}
 
 	/**
@@ -83,7 +90,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 'woocommerce.pdf', wc_get_filename_from_url( 'https://woocommerce.com/woocommerce.pdf' ) );
 		$this->assertEmpty( wc_get_filename_from_url( 'ftp://wc' ) );
 		$this->assertEmpty( wc_get_filename_from_url( 'http://www.skyverge.com' ) );
-		$this->assertEquals( 'woocommerce',  wc_get_filename_from_url( 'https://woocommerce.com/woocommerce' ) );
+		$this->assertEquals( 'woocommerce', wc_get_filename_from_url( 'https://woocommerce.com/woocommerce' ) );
 	}
 
 	/**
@@ -96,64 +103,82 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$default_unit = get_option( 'woocommerce_dimension_unit' );
 
 		// cm (default unit).
-		$this->assertEquals( array( 10, 3.937, 0.10936133, 100, 0.1 ), array(
-			wc_get_dimension( 10, 'cm' ),
-			wc_get_dimension( 10, 'in' ),
-			wc_get_dimension( 10, 'yd' ),
-			wc_get_dimension( 10, 'mm' ),
-			wc_get_dimension( 10, 'm' ),
-		) );
+		$this->assertEquals(
+			array( 10, 3.937, 0.10936133, 100, 0.1 ),
+			array(
+				wc_get_dimension( 10, 'cm' ),
+				wc_get_dimension( 10, 'in' ),
+				wc_get_dimension( 10, 'yd' ),
+				wc_get_dimension( 10, 'mm' ),
+				wc_get_dimension( 10, 'm' ),
+			)
+		);
 
 		// in.
 		update_option( 'woocommerce_dimension_unit', 'in' );
-		$this->assertEquals( array( 25.4, 10, 0.2777777782, 254, 0.254 ), array(
-			wc_get_dimension( 10, 'cm' ),
-			wc_get_dimension( 10, 'in' ),
-			wc_get_dimension( 10, 'yd' ),
-			wc_get_dimension( 10, 'mm' ),
-			wc_get_dimension( 10, 'm' ),
-		) );
+		$this->assertEquals(
+			array( 25.4, 10, 0.2777777782, 254, 0.254 ),
+			array(
+				wc_get_dimension( 10, 'cm' ),
+				wc_get_dimension( 10, 'in' ),
+				wc_get_dimension( 10, 'yd' ),
+				wc_get_dimension( 10, 'mm' ),
+				wc_get_dimension( 10, 'm' ),
+			)
+		);
 
 		// m.
 		update_option( 'woocommerce_dimension_unit', 'm' );
-		$this->assertEquals( array( 1000, 393.7, 10.936133, 10000, 10 ), array(
-			wc_get_dimension( 10, 'cm' ),
-			wc_get_dimension( 10, 'in' ),
-			wc_get_dimension( 10, 'yd' ),
-			wc_get_dimension( 10, 'mm' ),
-			wc_get_dimension( 10, 'm' ),
-		) );
+		$this->assertEquals(
+			array( 1000, 393.7, 10.936133, 10000, 10 ),
+			array(
+				wc_get_dimension( 10, 'cm' ),
+				wc_get_dimension( 10, 'in' ),
+				wc_get_dimension( 10, 'yd' ),
+				wc_get_dimension( 10, 'mm' ),
+				wc_get_dimension( 10, 'm' ),
+			)
+		);
 
 		// mm.
 		update_option( 'woocommerce_dimension_unit', 'mm' );
-		$this->assertEquals( array( 1, 0.3937, 0.010936133, 10, 0.01 ), array(
-			wc_get_dimension( 10, 'cm' ),
-			wc_get_dimension( 10, 'in' ),
-			wc_get_dimension( 10, 'yd' ),
-			wc_get_dimension( 10, 'mm' ),
-			wc_get_dimension( 10, 'm' ),
-		) );
+		$this->assertEquals(
+			array( 1, 0.3937, 0.010936133, 10, 0.01 ),
+			array(
+				wc_get_dimension( 10, 'cm' ),
+				wc_get_dimension( 10, 'in' ),
+				wc_get_dimension( 10, 'yd' ),
+				wc_get_dimension( 10, 'mm' ),
+				wc_get_dimension( 10, 'm' ),
+			)
+		);
 
 		// yd.
 		update_option( 'woocommerce_dimension_unit', 'yd' );
-		$this->assertEquals( array( 914.4, 359.99928, 10, 9144, 9.144 ), array(
-			wc_get_dimension( 10, 'cm' ),
-			wc_get_dimension( 10, 'in' ),
-			wc_get_dimension( 10, 'yd' ),
-			wc_get_dimension( 10, 'mm' ),
-			wc_get_dimension( 10, 'm' ),
-		) );
+		$this->assertEquals(
+			array( 914.4, 359.99928, 10, 9144, 9.144 ),
+			array(
+				wc_get_dimension( 10, 'cm' ),
+				wc_get_dimension( 10, 'in' ),
+				wc_get_dimension( 10, 'yd' ),
+				wc_get_dimension( 10, 'mm' ),
+				wc_get_dimension( 10, 'm' ),
+			)
+		);
 
 		// Negative.
 		$this->assertEquals( 0, wc_get_dimension( -10, 'mm' ) );
 
 		// Custom.
-		$this->assertEquals( array( 25.4, 914.4, 393.7, 0.010936133 ), array(
-			wc_get_dimension( 10, 'cm', 'in' ),
-			wc_get_dimension( 10, 'cm', 'yd' ),
-			wc_get_dimension( 10, 'in', 'm' ),
-			wc_get_dimension( 10, 'yd', 'mm' ),
-		) );
+		$this->assertEquals(
+			array( 25.4, 914.4, 393.7, 0.010936133 ),
+			array(
+				wc_get_dimension( 10, 'cm', 'in' ),
+				wc_get_dimension( 10, 'cm', 'yd' ),
+				wc_get_dimension( 10, 'in', 'm' ),
+				wc_get_dimension( 10, 'yd', 'mm' ),
+			)
+		);
 
 		// Restore default.
 		update_option( 'woocommerce_dimension_unit', $default_unit );
@@ -367,7 +392,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_coupon_code() {
-		$this->assertEquals( 'foo#bar', wc_format_coupon_code( 'FOO#bar<script>alert();</script>' ) );
+		$this->assertEquals( 'foo#baralert();', wc_format_coupon_code( 'FOO#bar<script>alert();</script>' ) );
 	}
 
 	/**
@@ -577,13 +602,16 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_let_to_num() {
-		$this->assertEquals( array( 10240, 10485760, 10737418240, 10995116277760, 11258999068426240 ), array(
-			wc_let_to_num( '10K' ),
-			wc_let_to_num( '10M' ),
-			wc_let_to_num( '10G' ),
-			wc_let_to_num( '10T' ),
-			wc_let_to_num( '10P' ),
-		) );
+		$this->assertEquals(
+			array( 10240, 10485760, 10737418240, 10995116277760, 11258999068426240 ),
+			array(
+				wc_let_to_num( '10K' ),
+				wc_let_to_num( '10M' ),
+				wc_let_to_num( '10G' ),
+				wc_let_to_num( '10T' ),
+				wc_let_to_num( '10P' ),
+			)
+		);
 	}
 
 	/**
@@ -760,6 +788,24 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_format_phone_number() {
 		$this->assertEquals( '1-610-385-0000', wc_format_phone_number( '1.610.385.0000' ) );
+		// This number contains non-visible unicode chars at the beginning and end of string, which makes it invalid phone number.
+		$this->assertEquals( '', wc_format_phone_number( '‭+47 0000 00003‬' ) );
+		$this->assertEquals( '27 00 00 0000', wc_format_phone_number( '27 00 00 0000' ) );
+		$this->assertEquals( '', wc_format_phone_number( '1-800-not a phone number' ) );
+	}
+
+	/**
+	 * Test wc_sanitize_phone_number().
+	 *
+	 * @since 3.6.0
+	 */
+	public function test_wc_sanitize_phone_number() {
+		$this->assertEquals( '+16103850000', wc_sanitize_phone_number( '+1.610.385.0000' ) );
+		// This number contains non-visible unicode chars at the beginning and end of string.
+		$this->assertEquals( '+47000000003', wc_sanitize_phone_number( '‭+47 0000 00003‬' ) );
+		$this->assertEquals( '2700000000', wc_sanitize_phone_number( '27 00 00 0000' ) );
+		// Check with an invalid number too.
+		$this->assertEquals( '1800', wc_sanitize_phone_number( '1-800-not a phone number' ) );
 	}
 
 	/**
@@ -769,8 +815,8 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_trim_string() {
 		$this->assertEquals( 'string', wc_trim_string( 'string' ) );
-		$this->assertEquals( 's...',   wc_trim_string( 'string', 4 ) );
-		$this->assertEquals( 'st.',    wc_trim_string( 'string', 3, '.' ) );
+		$this->assertEquals( 's...', wc_trim_string( 'string', 4 ) );
+		$this->assertEquals( 'st.', wc_trim_string( 'string', 3, '.' ) );
 		$this->assertEquals( 'string¥', wc_trim_string( 'string¥', 7, '' ) );
 	}
 
@@ -873,7 +919,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_dimensions() {
-		$this->assertEquals( '10 x 10 x 10 cm', wc_format_dimensions( array( 10, 10, 10 ) ) );
+		$this->assertEquals( '10 &times; 10 &times; 10 cm', wc_format_dimensions( array( 10, 10, 10 ) ) );
 	}
 
 	/**
@@ -894,7 +940,35 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_do_oembeds() {
 		// In this case should only return the URL back, since oEmbed will run other actions on frontend.
-		$this->assertEquals( "<iframe width='500' height='281' src='https://videopress.com/embed/9sRCUigm?hd=0' frameborder='0' allowfullscreen></iframe><script src='https://v0.wordpress.com/js/next/videopress-iframe.js?m=1435166243'></script>", wc_do_oembeds( 'https://wordpress.tv/2015/10/19/mike-jolley-user-onboarding-for-wordpress-plugins/' ) );
+		$this->assertEquals(
+			"<iframe width='500' height='281' src='https://videopress.com/embed/9sRCUigm?hd=0' frameborder='0' allowfullscreen></iframe><script src='https://v0.wordpress.com/js/next/videopress-iframe.js?m=1435166243'></script>", // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+			wc_do_oembeds( 'https://wordpress.tv/2015/10/19/mike-jolley-user-onboarding-for-wordpress-plugins/' )
+		);
+	}
+
+	/**
+	 * Provides a mocked response for the oembed test. This way it is not necessary to perform
+	 * a regular request to an external server which would significantly slow down the tests.
+	 *
+	 * This function is called by WP_HTTP_TestCase::http_request_listner().
+	 *
+	 * @param array  $request Request arguments.
+	 * @param string $url URL of the request.
+	 *
+	 * @return array|false mocked response or false to let WP perform a regular request.
+	 */
+	protected function mock_http_responses( $request, $url ) {
+		$mocked_response = false;
+
+		if ( false !== strpos( $url, 'https://wordpress.tv/oembed/' ) ) {
+			$mocked_response = array(
+				// phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				'body'     => '{"type":"video","version":"1.0","title":null,"width":500,"height":281,"html":"<iframe width=\'500\' height=\'281\' src=\'https:\/\/videopress.com\/embed\/9sRCUigm?hd=0\' frameborder=\'0\' allowfullscreen><\/iframe><script src=\'https:\/\/v0.wordpress.com\/js\/next\/videopress-iframe.js?m=1435166243\'><\/script>"}',
+				'response' => array( 'code' => 200 ),
+			);
+		}
+
+		return $mocked_response;
 	}
 
 	/**
@@ -942,15 +1016,29 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 			),
 		);
 
-		$this->assertEquals( array(
-			'A'   => 'tom',
-			'sum' => 30,
-			'C'   => array(
-				'x',
-				'y',
-				'z' => 145,
-				'w' => 1,
+		$this->assertEquals(
+			array(
+				'A'   => 'tom',
+				'sum' => 30,
+				'C'   => array(
+					'x',
+					'y',
+					'z' => 145,
+					'w' => 1,
+				),
 			),
-		), wc_array_merge_recursive_numeric( $a, $b, $c ) );
+			wc_array_merge_recursive_numeric( $a, $b, $c )
+		);
+	}
+
+	/**
+	 * Test the wc_sanitize_endpoint_slug function
+	 *
+	 * @return void
+	 */
+	public function test_wc_sanitize_endpoint_slug() {
+		$this->assertEquals( 'a-valid-slug', wc_sanitize_endpoint_slug( 'a-valid-slug' ) );
+		$this->assertEquals( 'an-invalid-slug', wc_sanitize_endpoint_slug( 'An invalid slug' ) );
+		$this->assertEquals( 'case-slug', wc_sanitize_endpoint_slug( 'case-SLUG' ) );
 	}
 }

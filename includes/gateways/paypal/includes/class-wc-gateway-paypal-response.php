@@ -47,7 +47,7 @@ abstract class WC_Gateway_Paypal_Response {
 			$order    = wc_get_order( $order_id );
 		}
 
-		if ( ! $order || $order->get_order_key() !== $order_key ) {
+		if ( ! $order || ! hash_equals( $order->get_order_key(), $order_key ) ) {
 			WC_Gateway_Paypal::log( 'Order Keys do not match.', 'error' );
 			return false;
 		}

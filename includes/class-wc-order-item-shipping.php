@@ -142,7 +142,12 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 			$tax_data['total'] = array_map( 'wc_format_decimal', $raw_tax_data );
 		}
 		$this->set_prop( 'taxes', $tax_data );
-		$this->set_total_tax( array_sum( $tax_data['total'] ) );
+
+		if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+			$this->set_total_tax( array_sum( $tax_data['total'] ) );
+		} else {
+			$this->set_total_tax( array_sum( array_map( 'wc_round_tax_total', $tax_data['total'] ) ) );
+		}
 	}
 
 	/**

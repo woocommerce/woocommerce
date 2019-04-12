@@ -221,12 +221,12 @@ class WC_Admin_Pointers {
 	 * @param array $pointers
 	 */
 	public function enqueue_pointers( $pointers ) {
-		$pointers = wp_json_encode( $pointers );
+		$pointers = rawurlencode( wp_json_encode( $pointers ) );
 		wp_enqueue_style( 'wp-pointer' );
 		wp_enqueue_script( 'wp-pointer' );
 		wc_enqueue_js(
 			"jQuery( function( $ ) {
-				var wc_pointers = {$pointers};
+				var wc_pointers = JSON.parse( decodeURIComponent( '{$pointers}' ) );
 
 				setTimeout( init_wc_pointers, 800 );
 

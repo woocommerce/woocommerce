@@ -106,7 +106,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 			$wpdb->update(
 				$wpdb->prefix . 'woocommerce_payment_tokens',
 				$payment_token_data,
-				array( 'token_id' => $token->get_id( 'edit' ) )
+				array( 'token_id' => $token->get_id() )
 			);
 		}
 
@@ -235,7 +235,8 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	public function get_tokens( $args ) {
 		global $wpdb;
 		$args = wp_parse_args(
-			$args, array(
+			$args,
+			array(
 				'token_id'   => '',
 				'user_id'    => '',
 				'gateway_id' => '',
@@ -275,7 +276,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 			$where[] = $wpdb->prepare( 'type = %s', $args['type'] );
 		}
 
-		// phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$token_results = $wpdb->get_results( $sql . ' WHERE ' . implode( ' AND ', $where ) . ' ' . $limits );
 
 		return $token_results;
@@ -286,7 +287,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Payment
 	 * Should contain the fields token_id, gateway_id, token, user_id, type, is_default.
 	 *
 	 * @since 3.0.0
-	 * @param id $user_id User ID.
+	 * @param int $user_id User ID.
 	 * @return object
 	 */
 	public function get_users_default_token( $user_id ) {

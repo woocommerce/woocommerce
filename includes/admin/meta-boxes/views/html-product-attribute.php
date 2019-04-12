@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="handlediv" title="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
 		<strong class="attribute_name"><?php echo wc_attribute_label( $attribute->get_name() ); ?></strong>
 	</h3>
-	<div class="woocommerce_attribute_data wc-metabox-content">
+	<div class="woocommerce_attribute_data wc-metabox-content hidden">
 		<table cellpadding="0" cellspacing="0">
 			<tbody>
 				<tr>
@@ -59,7 +59,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<?php
 							}
 
-							do_action( 'woocommerce_product_option_terms', $attribute_taxonomy, $i );
+							do_action( 'woocommerce_product_option_terms', $attribute_taxonomy, $i, $attribute );
 						} else {
 							/* translators: %s: WC_DELIMITER */
 							?>

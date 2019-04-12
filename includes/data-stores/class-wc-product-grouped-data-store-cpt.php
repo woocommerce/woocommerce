@@ -86,5 +86,15 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 			add_post_meta( $product->get_id(), '_price', min( $child_prices ) );
 			add_post_meta( $product->get_id(), '_price', max( $child_prices ) );
 		}
+
+		$this->update_lookup_table( $product->get_id(), 'wc_product_meta_lookup' );
+
+		/**
+		 * Fire an action for this direct update so it can be detected by other code.
+		 *
+		 * @since 3.6
+		 * @param int $product_id Product ID that was updated directly.
+		 */
+		do_action( 'woocommerce_updated_product_price', $product->get_id() );
 	}
 }

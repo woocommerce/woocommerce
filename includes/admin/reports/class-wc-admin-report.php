@@ -129,7 +129,7 @@ class WC_Admin_Report {
 					$get_key = "order_items.{$key}";
 					break;
 				default:
-					continue;
+					break;
 			}
 
 			if ( $value['function'] ) {
@@ -338,7 +338,7 @@ class WC_Admin_Report {
 				$wpdb->query( 'SET SESSION SQL_BIG_SELECTS=1' );
 				$big_selects = true;
 			}
-			
+
 			$cached_results[ $query_hash ] = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 			set_transient( strtolower( get_class( $this ) ), $cached_results, DAY_IN_SECONDS );
 		}
@@ -512,7 +512,7 @@ class WC_Admin_Report {
 
 		$sparkline_data = array_values( $this->prepare_chart_data( $data, 'post_date', 'sparkline_value', $days - 1, strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ), 'day' ) );
 
-		return '<span class="wc_sparkline ' . ( ( 'sales' === $type ) ? 'lines' : 'bars' ) . ' tips" data-color="#777" data-tip="' . esc_attr( $tooltip ) . '" data-barwidth="' . 60 * 60 * 16 * 1000 . '" data-sparkline="' . esc_attr( json_encode( $sparkline_data ) ) . '"></span>';
+		return '<span class="wc_sparkline ' . ( ( 'sales' === $type ) ? 'lines' : 'bars' ) . ' tips" data-color="#777" data-tip="' . esc_attr( $tooltip ) . '" data-barwidth="' . 60 * 60 * 16 * 1000 . '" data-sparkline="' . wc_esc_json( wp_json_encode( $sparkline_data ) ) . '"></span>';
 	}
 
 	/**

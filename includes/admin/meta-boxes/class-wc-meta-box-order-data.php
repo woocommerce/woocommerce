@@ -186,7 +186,7 @@ class WC_Meta_Box_Order_Data {
 
 					$meta_list = array();
 
-					if ( $payment_method ) {
+					if ( $payment_method && 'other' !== $payment_method ) {
 						/* translators: %s: payment method */
 						$payment_method_string = sprintf(
 							__( 'Payment via %s', 'woocommerce' ),
@@ -535,7 +535,7 @@ class WC_Meta_Box_Order_Data {
 
 		// Create order key.
 		if ( ! $order->get_order_key() ) {
-			$props['order_key'] = 'wc_' . apply_filters( 'woocommerce_generate_order_key', uniqid( 'order_' ) );
+			$props['order_key'] = wc_generate_order_key();
 		}
 
 		// Update customer.

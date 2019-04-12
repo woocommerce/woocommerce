@@ -317,7 +317,8 @@ function wc_update_200_line_items() {
 				}
 
 				$item_id = wc_add_order_item(
-					$order_tax_row->post_id, array(
+					$order_tax_row->post_id,
+					array(
 						'order_item_name' => $order_tax['label'],
 						'order_item_type' => 'tax',
 					)
@@ -671,6 +672,9 @@ function wc_update_220_attributes() {
 			}
 		}
 	}
+
+	delete_transient( 'wc_attribute_taxonomies' );
+	WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
 }
 
 /**
@@ -737,22 +741,23 @@ function wc_update_240_shipping_methods() {
 	foreach ( $shipping_methods as $flat_rate_option_key => $shipping_method ) {
 		// Stop this running more than once if routine is repeated.
 		if ( version_compare( $shipping_method->get_option( 'version', 0 ), '2.4.0', '<' ) ) {
-			$has_classes                      = count( WC()->shipping->get_shipping_classes() ) > 0;
-			$cost_key                         = $has_classes ? 'no_class_cost' : 'cost';
-			$min_fee                          = $shipping_method->get_option( 'minimum_fee' );
-			$math_cost_strings                = array(
+			$shipping_classes  = WC()->shipping()->get_shipping_classes();
+			$has_classes       = count( $shipping_classes ) > 0;
+			$cost_key          = $has_classes ? 'no_class_cost' : 'cost';
+			$min_fee           = $shipping_method->get_option( 'minimum_fee' );
+			$math_cost_strings = array(
 				'cost'          => array(),
 				'no_class_cost' => array(),
 			);
 
 			$math_cost_strings[ $cost_key ][] = $shipping_method->get_option( 'cost' );
-			$fee = $shipping_method->get_option( 'fee' );
+			$fee                              = $shipping_method->get_option( 'fee' );
 
 			if ( $fee ) {
 				$math_cost_strings[ $cost_key ][] = strstr( $fee, '%' ) ? '[fee percent="' . str_replace( '%', '', $fee ) . '" min="' . esc_attr( $min_fee ) . '"]' : $fee;
 			}
 
-			foreach ( WC()->shipping->get_shipping_classes() as $shipping_class ) {
+			foreach ( $shipping_classes as $shipping_class ) {
 				$rate_key                       = 'class_cost_' . $shipping_class->slug;
 				$math_cost_strings[ $rate_key ] = $math_cost_strings['no_class_cost'];
 			}
@@ -1087,7 +1092,8 @@ function wc_update_260_zone_methods() {
 			// Move data.
 			foreach ( $old_methods as $old_method ) {
 				$wpdb->insert(
-					$wpdb->prefix . 'woocommerce_shipping_zone_methods', array(
+					$wpdb->prefix . 'woocommerce_shipping_zone_methods',
+					array(
 						'zone_id'      => $old_method->zone_id,
 						'method_id'    => $old_method->shipping_method_type,
 						'method_order' => $old_method->shipping_method_order,
@@ -1422,7 +1428,8 @@ function wc_update_320_mexican_states() {
 				SET meta_value = %s
 				WHERE meta_key IN ( '_billing_state', '_shipping_state' )
 				AND meta_value = %s",
-				$new, $old
+				$new,
+				$old
 			)
 		);
 		$wpdb->update(
@@ -1511,11 +1518,13 @@ function wc_update_330_webhooks() {
 		'pending' => 'disabled',
 	);
 
-	$posts = get_posts( array(
-		'posts_per_page' => -1,
-		'post_type'      => 'shop_webhook',
-		'post_status'    => 'any',
-	) );
+	$posts = get_posts(
+		array(
+			'posts_per_page' => -1,
+			'post_type'      => 'shop_webhook',
+			'post_status'    => 'any',
+		)
+	);
 
 	foreach ( $posts as $post ) {
 		$webhook = new WC_Webhook();
@@ -1544,19 +1553,22 @@ function wc_update_330_set_default_product_cat() {
 	$default_category = get_option( 'default_product_cat', 0 );
 
 	if ( $default_category ) {
-		$result = $wpdb->query( $wpdb->prepare( "
-			INSERT INTO {$wpdb->term_relationships} (object_id, term_taxonomy_id)
-			SELECT DISTINCT posts.ID, %s FROM {$wpdb->posts} posts
-			LEFT JOIN
-				(
-					SELECT object_id FROM {$wpdb->term_relationships} term_relationships
-					LEFT JOIN {$wpdb->term_taxonomy} term_taxonomy ON term_relationships.term_taxonomy_id = term_taxonomy.term_taxonomy_id
-					WHERE term_taxonomy.taxonomy = 'product_cat'
-				) AS tax_query
-			ON posts.ID = tax_query.object_id
-			WHERE posts.post_type = 'product'
-			AND tax_query.object_id IS NULL
-		", $default_category ) );
+		$wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->term_relationships} (object_id, term_taxonomy_id)
+				SELECT DISTINCT posts.ID, %s FROM {$wpdb->posts} posts
+				LEFT JOIN
+					(
+						SELECT object_id FROM {$wpdb->term_relationships} term_relationships
+						LEFT JOIN {$wpdb->term_taxonomy} term_taxonomy ON term_relationships.term_taxonomy_id = term_taxonomy.term_taxonomy_id
+						WHERE term_taxonomy.taxonomy = 'product_cat'
+					) AS tax_query
+				ON posts.ID = tax_query.object_id
+				WHERE posts.post_type = 'product'
+				AND tax_query.object_id IS NULL",
+				$default_category
+			)
+		);
 		wp_cache_flush();
 		delete_transient( 'wc_term_counts' );
 		wp_update_term_count_now( array( $default_category ), 'product_cat' );
@@ -1576,16 +1588,19 @@ function wc_update_330_product_stock_status() {
 	$min_stock_amount = (int) get_option( 'woocommerce_notify_no_stock_amount', 0 );
 
 	// Get all products that have stock management enabled, stock less than or equal to min stock amount, and backorders enabled.
-	$post_ids = $wpdb->get_col( $wpdb->prepare( "
-		SELECT t1.post_id FROM $wpdb->postmeta t1
-		INNER JOIN $wpdb->postmeta t2
-			ON t1.post_id = t2.post_id
-			AND t1.meta_key = '_manage_stock' AND t1.meta_value = 'yes'
-			AND t2.meta_key = '_stock' AND t2.meta_value <= %d
-		INNER JOIN $wpdb->postmeta t3
-			ON t2.post_id = t3.post_id
-			AND t3.meta_key = '_backorders' AND ( t3.meta_value = 'yes' OR t3.meta_value = 'notify' )
-		", $min_stock_amount ) ); // WPCS: db call ok, unprepared SQL ok, cache ok.
+	$post_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT t1.post_id FROM $wpdb->postmeta t1
+			INNER JOIN $wpdb->postmeta t2
+				ON t1.post_id = t2.post_id
+				AND t1.meta_key = '_manage_stock' AND t1.meta_value = 'yes'
+				AND t2.meta_key = '_stock' AND t2.meta_value <= %d
+			INNER JOIN $wpdb->postmeta t3
+				ON t2.post_id = t3.post_id
+				AND t3.meta_key = '_backorders' AND ( t3.meta_value = 'yes' OR t3.meta_value = 'notify' )",
+			$min_stock_amount
+		)
+	); // WPCS: db call ok, unprepared SQL ok, cache ok.
 
 	if ( empty( $post_ids ) ) {
 		return;
@@ -1594,11 +1609,11 @@ function wc_update_330_product_stock_status() {
 	$post_ids = array_map( 'absint', $post_ids );
 
 	// Set the status to onbackorder for those products.
-	$wpdb->query( "
-		UPDATE $wpdb->postmeta
+	$wpdb->query(
+		"UPDATE $wpdb->postmeta
 		SET meta_value = 'onbackorder'
-		WHERE meta_key = '_stock_status' AND post_id IN ( " . implode( ',', $post_ids ) . ' )
-		' ); // WPCS: db call ok, unprepared SQL ok, cache ok.
+		WHERE meta_key = '_stock_status' AND post_id IN ( " . implode( ',', $post_ids ) . ' )'
+	); // WPCS: db call ok, unprepared SQL ok, cache ok.
 }
 
 /**
@@ -1737,7 +1752,8 @@ function wc_update_340_state() {
 					SET meta_value = %s
 					WHERE meta_key IN ( '_billing_state', '_shipping_state' )
 					AND meta_value = %s",
-					$new, $old
+					$new,
+					$old
 				)
 			);
 			$wpdb->update(
@@ -1811,18 +1827,18 @@ function wc_update_340_db_version() {
 function wc_update_343_cleanup_foreign_keys() {
 	global $wpdb;
 
-	$results = $wpdb->get_results( "
-		SELECT CONSTRAINT_NAME
+	$results = $wpdb->get_results(
+		"SELECT CONSTRAINT_NAME
 		FROM information_schema.TABLE_CONSTRAINTS
 		WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
 		AND CONSTRAINT_NAME LIKE '%wc_download_log_ib%'
 		AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-		AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'
-	" );
+		AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'"
+	);
 
 	if ( $results ) {
 		foreach ( $results as $fk ) {
-			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}" ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY {$fk->CONSTRAINT_NAME}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		}
 	}
 }
@@ -1834,4 +1850,126 @@ function wc_update_343_cleanup_foreign_keys() {
  */
 function wc_update_343_db_version() {
 	WC_Install::update_db_version( '3.4.3' );
+}
+
+/**
+ * Recreate user roles so existing users will get the new capabilities.
+ *
+ * @return void
+ */
+function wc_update_344_recreate_roles() {
+	WC_Install::remove_roles();
+	WC_Install::create_roles();
+}
+
+/**
+ * Update DB version.
+ *
+ * @return void
+ */
+function wc_update_344_db_version() {
+	WC_Install::update_db_version( '3.4.4' );
+}
+
+/**
+ * Set the comment type to 'review' for product reviews that don't have a comment type.
+ */
+function wc_update_350_reviews_comment_type() {
+	global $wpdb;
+
+	$wpdb->query(
+		"UPDATE {$wpdb->prefix}comments JOIN {$wpdb->prefix}posts ON {$wpdb->prefix}posts.ID = {$wpdb->prefix}comments.comment_post_ID AND ( {$wpdb->prefix}posts.post_type = 'product' OR {$wpdb->prefix}posts.post_type = 'product_variation' ) SET {$wpdb->prefix}comments.comment_type = 'review' WHERE {$wpdb->prefix}comments.comment_type = ''"
+	);
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_350_db_version() {
+	WC_Install::update_db_version( '3.5.0' );
+}
+
+/**
+ * Drop the fk_wc_download_log_permission_id FK as we use a new one with the table and blog prefix for MS compatability.
+ *
+ * @return void
+ */
+function wc_update_352_drop_download_log_fk() {
+	global $wpdb;
+	$results = $wpdb->get_results(
+		"SELECT CONSTRAINT_NAME
+		FROM information_schema.TABLE_CONSTRAINTS
+		WHERE CONSTRAINT_SCHEMA = '{$wpdb->dbname}'
+		AND CONSTRAINT_NAME = 'fk_wc_download_log_permission_id'
+		AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+		AND TABLE_NAME = '{$wpdb->prefix}wc_download_log'"
+	);
+
+	// We only need to drop the old key as WC_Install::create_tables() takes care of creating the new FK.
+	if ( $results ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_download_log DROP FOREIGN KEY fk_wc_download_log_permission_id" ); // phpcs:ignore WordPress.WP.PreparedSQL.NotPrepared
+	}
+}
+
+/**
+ * Remove edit_user capabilities from shop managers and use "translated" capabilities instead.
+ * See wc_shop_manager_has_capability function.
+ */
+function wc_update_354_modify_shop_manager_caps() {
+	global $wp_roles;
+
+	if ( ! class_exists( 'WP_Roles' ) ) {
+		return;
+	}
+
+	if ( ! isset( $wp_roles ) ) {
+		$wp_roles = new WP_Roles(); // @codingStandardsIgnoreLine
+	}
+
+	$wp_roles->remove_cap( 'shop_manager', 'edit_users' );
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_354_db_version() {
+	WC_Install::update_db_version( '3.5.4' );
+}
+
+/**
+ * Update product lookup tables in bulk.
+ */
+function wc_update_360_product_lookup_tables() {
+	wc_update_product_lookup_tables();
+}
+
+/**
+ * Renames ordering meta to be consistent across taxonomies.
+ */
+function wc_update_360_term_meta() {
+	global $wpdb;
+
+	$wpdb->query( "UPDATE {$wpdb->termmeta} SET meta_key = 'order' WHERE meta_key LIKE 'order_pa_%';" );
+}
+
+/**
+ * Add new user_order_remaining_expires to speed up user download permission fetching.
+ *
+ * @return void
+ */
+function wc_update_360_downloadable_product_permissions_index() {
+	global $wpdb;
+
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE key_name = 'user_order_remaining_expires'" );
+
+	if ( is_null( $index_exists ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD INDEX user_order_remaining_expires (user_id,order_id,downloads_remaining,access_expires)" );
+	}
+}
+
+/**
+ * Update DB Version.
+ */
+function wc_update_360_db_version() {
+	WC_Install::update_db_version( '3.6.0' );
 }

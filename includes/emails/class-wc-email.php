@@ -383,8 +383,12 @@ class WC_Email extends WC_Settings_API {
 	public function get_headers() {
 		$header = 'Content-Type: ' . $this->get_content_type() . "\r\n";
 
-		if ( 'new_order' === $this->id && $this->object && $this->object->get_billing_email() && ( $this->object->get_billing_first_name() || $this->object->get_billing_last_name() ) ) {
-			$header .= 'Reply-to: ' . $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() . ' <' . $this->object->get_billing_email() . ">\r\n";
+		if ( in_array( $this->id, array( 'new_order', 'cancelled_order', 'failed_order' ), true ) ) {
+			if ( $this->object && $this->object->get_billing_email() && ( $this->object->get_billing_first_name() || $this->object->get_billing_last_name() ) ) {
+				$header .= 'Reply-to: ' . $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() . ' <' . $this->object->get_billing_email() . ">\r\n";
+			}
+		} elseif ( $this->get_from_address() && $this->get_from_name() ) {
+			$header .= 'Reply-to: ' . $this->get_from_name() . ' <' . $this->get_from_address() . ">\r\n";
 		}
 
 		return apply_filters( 'woocommerce_email_headers', $header, $this->id, $this->object );
@@ -499,37 +503,55 @@ class WC_Email extends WC_Settings_API {
 		$this->sending = true;
 
 		if ( 'plain' === $this->get_email_type() ) {
-			$email_content = preg_replace( $this->plain_search, $this->plain_replace, strip_tags( $this->get_content_plain() ) );
+			$email_content = wordwrap( preg_replace( $this->plain_search, $this->plain_replace, strip_tags( $this->get_content_plain() ) ), 70 );
 		} else {
 			$email_content = $this->get_content_html();
 		}
 
-		return wordwrap( $email_content, 70 );
+		return $email_content;
 	}
 
 	/**
 	 * Apply inline styles to dynamic content.
 	 *
+	 * We only inline CSS for html emails, and to do so we use Emogrifier library (if supported).
+	 *
 	 * @param string|null $content Content that will receive inline styles.
 	 * @return string
 	 */
 	public function style_inline( $content ) {
-		// make sure we only inline CSS for html emails.
-		if ( in_array( $this->get_content_type(), array( 'text/html', 'multipart/alternative' ), true ) && class_exists( 'DOMDocument' ) ) {
+		if ( in_array( $this->get_content_type(), array( 'text/html', 'multipart/alternative' ), true ) ) {
 			ob_start();
 			wc_get_template( 'emails/email-styles.php' );
-			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean() );
+			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean(), $this );
 
-			// apply CSS styles inline for picky email clients.
-			try {
-				$emogrifier = new Emogrifier( $content, $css );
-				$content    = $emogrifier->emogrify();
-			} catch ( Exception $e ) {
-				$logger = wc_get_logger();
-				$logger->error( $e->getMessage(), array( 'source' => 'emogrifier' ) );
+			if ( $this->supports_emogrifier() ) {
+				$emogrifier_class = '\\Pelago\\Emogrifier';
+				if ( ! class_exists( $emogrifier_class ) ) {
+					include_once dirname( dirname( __FILE__ ) ) . '/libraries/class-emogrifier.php';
+				}
+				try {
+					$emogrifier = new $emogrifier_class( $content, $css );
+					$content    = $emogrifier->emogrify();
+				} catch ( Exception $e ) {
+					$logger = wc_get_logger();
+					$logger->error( $e->getMessage(), array( 'source' => 'emogrifier' ) );
+				}
+			} else {
+				$content = '<style type="text/css">' . $css . '</style>' . $content;
 			}
 		}
 		return $content;
+	}
+
+	/**
+	 * Return if emogrifier library is supported.
+	 *
+	 * @since 3.5.0
+	 * @return bool
+	 */
+	protected function supports_emogrifier() {
+		return class_exists( 'DOMDocument' ) && version_compare( PHP_VERSION, '5.5', '>=' );
 	}
 
 	/**
@@ -583,8 +605,10 @@ class WC_Email extends WC_Settings_API {
 		add_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
 		add_filter( 'wp_mail_content_type', array( $this, 'get_content_type' ) );
 
-		$message = apply_filters( 'woocommerce_mail_content', $this->style_inline( $message ) );
-		$return  = wp_mail( $to, $subject, $message, $headers, $attachments );
+		$message              = apply_filters( 'woocommerce_mail_content', $this->style_inline( $message ) );
+		$mail_callback        = apply_filters( 'woocommerce_mail_callback', 'wp_mail', $this );
+		$mail_callback_params = apply_filters( 'woocommerce_mail_callback_params', array( $to, $subject, $message, $headers, $attachments ), $this );
+		$return               = call_user_func_array( $mail_callback, $mail_callback_params );
 
 		remove_filter( 'wp_mail_from', array( $this, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( $this, 'get_from_name' ) );
@@ -803,7 +827,7 @@ class WC_Email extends WC_Settings_API {
 		if (
 			( ! empty( $this->template_html ) || ! empty( $this->template_plain ) )
 			&& ( ! empty( $_GET['move_template'] ) || ! empty( $_GET['delete_template'] ) )
-			&& 'GET' === $_SERVER['REQUEST_METHOD'] // phpcs:ignore WordPress.VIP.ValidatedSanitizedInput.InputNotValidated
+			&& 'GET' === $_SERVER['REQUEST_METHOD'] // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 		) {
 			if ( empty( $_GET['_wc_email_nonce'] ) || ! wp_verify_nonce( wc_clean( wp_unslash( $_GET['_wc_email_nonce'] ) ), 'woocommerce_email_template_nonce' ) ) {
 				wp_die( esc_html__( 'Action failed. Please refresh the page and retry.', 'woocommerce' ) );

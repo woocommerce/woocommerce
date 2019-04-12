@@ -80,7 +80,7 @@ if ( ! class_exists( 'WC_Email_Customer_Completed_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( 'Your {site_title} order from {order_date} is complete', 'woocommerce' );
+			return __( 'Your {site_title} order is now complete', 'woocommerce' );
 		}
 
 		/**
@@ -90,13 +90,12 @@ if ( ! class_exists( 'WC_Email_Customer_Completed_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
-			return __( 'Your order is complete', 'woocommerce' );
+			return __( 'Thanks for shopping with us', 'woocommerce' );
 		}
 
 		/**
 		 * Get content html.
 		 *
-		 * @access public
 		 * @return string
 		 */
 		public function get_content_html() {

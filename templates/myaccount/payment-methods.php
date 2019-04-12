@@ -13,7 +13,6 @@
  * the readme will list any important changes.
  *
  * @see 	https://docs.woocommerce.com/document/template-structure/
- * @author  WooThemes
  * @package WooCommerce/Templates
  * @version 2.6.0
  */
@@ -40,7 +39,7 @@ do_action( 'woocommerce_before_account_payment_methods', $has_methods ); ?>
 		</thead>
 		<?php foreach ( $saved_methods as $type => $methods ) : ?>
 			<?php foreach ( $methods as $method ) : ?>
-				<tr class="payment-method<?php echo ! empty( $method['is_default'] ) ? ' default-payment-method' : '' ?>">
+				<tr class="payment-method<?php echo ! empty( $method['is_default'] ) ? ' default-payment-method' : ''; ?>">
 					<?php foreach ( wc_get_account_payment_methods_columns() as $column_id => $column_name ) : ?>
 						<td class="woocommerce-PaymentMethod woocommerce-PaymentMethod--<?php echo esc_attr( $column_id ); ?> payment-method-<?php echo esc_attr( $column_id ); ?>" data-title="<?php echo esc_attr( $column_name ); ?>">
 							<?php

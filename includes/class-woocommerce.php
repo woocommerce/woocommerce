@@ -20,7 +20,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '3.4.0';
+	public $version = '3.6.0';
 
 	/**
 	 * The single instance of the class.
@@ -154,7 +154,18 @@ final class WooCommerce {
 		$this->define_constants();
 		$this->includes();
 		$this->init_hooks();
+	}
 
+	/**
+	 * When WP has loaded all plugins, trigger the `woocommerce_loaded` hook.
+	 *
+	 * This ensures `woocommerce_loaded` is called only after all other plugins
+	 * are loaded, to avoid issues caused by plugin directory naming changing
+	 * the load order. See #21524 for details.
+	 *
+	 * @since 3.6.0
+	 */
+	public function on_plugins_loaded() {
 		do_action( 'woocommerce_loaded' );
 	}
 
@@ -166,6 +177,8 @@ final class WooCommerce {
 	private function init_hooks() {
 		register_activation_hook( WC_PLUGIN_FILE, array( 'WC_Install', 'install' ) );
 		register_shutdown_function( array( $this, 'log_errors' ) );
+
+		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), -1 );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'init', array( $this, 'init' ), 0 );
@@ -174,6 +187,8 @@ final class WooCommerce {
 		add_action( 'init', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
+		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
+		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
 	}
 
 	/**
@@ -183,14 +198,16 @@ final class WooCommerce {
 	 */
 	public function log_errors() {
 		$error = error_get_last();
-		if ( E_ERROR === $error['type'] ) {
+		if ( in_array( $error['type'], array( E_ERROR, E_PARSE, E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR ), true ) ) {
 			$logger = wc_get_logger();
 			$logger->critical(
-				$error['message'] . PHP_EOL,
+				/* translators: 1: error message 2: file name and path 3: line number */
+				sprintf( __( '%1$s in %2$s on line %3$s', 'woocommerce' ), $error['message'], $error['file'], $error['line'] ) . PHP_EOL,
 				array(
 					'source' => 'fatal-errors',
 				)
 			);
+			do_action( 'woocommerce_shutdown_error', $error );
 		}
 	}
 
@@ -226,6 +243,26 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Returns true if the request is a non-legacy REST API request.
+	 *
+	 * Legacy REST requests should still run some extra code for backwards compatibility.
+	 *
+	 * @todo: replace this function once core WP function is available: https://core.trac.wordpress.org/ticket/42061.
+	 *
+	 * @return bool
+	 */
+	public function is_rest_api_request() {
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
+		}
+
+		$rest_prefix         = trailingslashit( rest_get_url_prefix() );
+		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		return apply_filters( 'woocommerce_is_rest_api_request', $is_rest_api_request );
+	}
+
+	/**
 	 * What type of request is this?
 	 *
 	 * @param  string $type admin, ajax, cron or frontend.
@@ -240,7 +277,7 @@ final class WooCommerce {
 			case 'cron':
 				return defined( 'DOING_CRON' );
 			case 'frontend':
-				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! defined( 'REST_REQUEST' );
+				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! $this->is_rest_api_request();
 		}
 	}
 
@@ -274,6 +311,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-logger-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-log-handler-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-webhooks-data-store-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-queue-interface.php';
 
 		/**
 		 * Abstract classes.
@@ -331,6 +369,9 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-structured-data.php';
 		include_once WC_ABSPATH . 'includes/class-wc-shortcodes.php';
 		include_once WC_ABSPATH . 'includes/class-wc-logger.php';
+		include_once WC_ABSPATH . 'includes/queue/class-wc-action-queue.php';
+		include_once WC_ABSPATH . 'includes/queue/class-wc-queue.php';
+		include_once WC_ABSPATH . 'includes/admin/marketplace-suggestions/class-wc-marketplace-updater.php';
 
 		/**
 		 * Data stores - used to store and retrieve CRUD object data from the database.
@@ -368,6 +409,18 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-auth.php';
 		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
 
+		/**
+		 * Blocks.
+		 */
+		if ( file_exists( WC_ABSPATH . 'includes/blocks/class-wc-block-library.php' ) ) {
+			include_once WC_ABSPATH . 'includes/blocks/class-wc-block-library.php';
+		}
+
+		/**
+		 * Libraries
+		 */
+		include_once WC_ABSPATH . 'includes/libraries/action-scheduler/action-scheduler.php';
+
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once WC_ABSPATH . 'includes/class-wc-cli.php';
 		}
@@ -395,7 +448,7 @@ final class WooCommerce {
 	 * @since 3.3.0
 	 */
 	private function theme_support_includes() {
-		if ( wc_is_active_theme( array( 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
+		if ( wc_is_active_theme( array( 'twentynineteen', 'twentyseventeen', 'twentysixteen', 'twentyfifteen', 'twentyfourteen', 'twentythirteen', 'twentyeleven', 'twentytwelve', 'twentyten' ) ) ) {
 			switch ( get_template() ) {
 				case 'twentyten':
 					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-ten.php';
@@ -420,6 +473,9 @@ final class WooCommerce {
 					break;
 				case 'twentyseventeen':
 					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-seventeen.php';
+					break;
+				case 'twentynineteen':
+					include_once WC_ABSPATH . 'includes/theme-support/class-wc-twenty-nineteen.php';
 					break;
 			}
 		}
@@ -476,8 +532,9 @@ final class WooCommerce {
 			$this->session = new $session_class();
 			$this->session->init();
 
-			$this->cart     = new WC_Cart();
 			$this->customer = new WC_Customer( get_current_user_id(), true );
+			// Cart needs the customer info.
+			$this->cart = new WC_Cart();
 
 			// Customer should be saved during shutdown.
 			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );
@@ -511,7 +568,11 @@ final class WooCommerce {
 	 * Ensure theme and server variable compatibility and setup image sizes.
 	 */
 	public function setup_environment() {
-		/* @deprecated 2.2 Use WC()->template_path() instead. */
+		/**
+		 * WC_TEMPLATE_PATH constant.
+		 *
+		 * @deprecated 2.2 Use WC()->template_path() instead.
+		 */
 		$this->define( 'WC_TEMPLATE_PATH', $this->template_path() );
 
 		$this->add_thumbnail_support();
@@ -550,7 +611,11 @@ final class WooCommerce {
 		add_image_size( 'woocommerce_single', $single['width'], $single['height'], $single['crop'] );
 		add_image_size( 'woocommerce_gallery_thumbnail', $gallery_thumbnail['width'], $gallery_thumbnail['height'], $gallery_thumbnail['crop'] );
 
-		// Registered for bw compat. @todo remove in 4.0.
+		/**
+		 * Legacy image sizes.
+		 *
+		 * @deprecated These sizes will be removed in 4.0.
+		 */
 		add_image_size( 'shop_catalog', $thumbnail['width'], $thumbnail['height'], $thumbnail['crop'] );
 		add_image_size( 'shop_single', $single['width'], $single['height'], $single['crop'] );
 		add_image_size( 'shop_thumbnail', $gallery_thumbnail['width'], $gallery_thumbnail['height'], $gallery_thumbnail['crop'] );
@@ -630,23 +695,64 @@ final class WooCommerce {
 			return;
 		}
 
-		wc_load_webhooks();
+		/**
+		 * Hook: woocommerce_load_webhooks_limit.
+		 *
+		 * @since 3.6.0
+		 * @param int $limit Used to limit how many webhooks are loaded. Default: no limit.
+		 */
+		$limit = apply_filters( 'woocommerce_load_webhooks_limit', null );
+
+		wc_load_webhooks( 'active', $limit );
 	}
 
 	/**
-	 * WooCommerce Payment Token Meta API and Term/Order item Meta - set table names.
+	 * Set tablenames inside WPDB object.
 	 */
 	public function wpdb_table_fix() {
 		global $wpdb;
-		$wpdb->payment_tokenmeta = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
-		$wpdb->order_itemmeta    = $wpdb->prefix . 'woocommerce_order_itemmeta';
-		$wpdb->tables[]          = 'woocommerce_payment_tokenmeta';
-		$wpdb->tables[]          = 'woocommerce_order_itemmeta';
 
-		if ( get_option( 'db_version' ) < 34370 ) {
-			$wpdb->woocommerce_termmeta = $wpdb->prefix . 'woocommerce_termmeta';
-			$wpdb->tables[]             = 'woocommerce_termmeta';
-		}
+		$wpdb->payment_tokenmeta = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
+		$wpdb->tables[]          = 'woocommerce_payment_tokenmeta';
+
+		$wpdb->order_itemmeta = $wpdb->prefix . 'woocommerce_order_itemmeta';
+		$wpdb->tables[]       = 'woocommerce_order_itemmeta';
+
+		$wpdb->wc_product_meta_lookup = $wpdb->prefix . 'wc_product_meta_lookup';
+		$wpdb->tables[]               = 'wc_product_meta_lookup';
+	}
+
+	/**
+	 * Ran when any plugin is activated.
+	 *
+	 * @since 3.6.0
+	 * @param string $filename The filename of the activated plugin.
+	 */
+	public function activated_plugin( $filename ) {
+		include_once dirname( __FILE__ ) . '/admin/helper/class-wc-helper.php';
+
+		WC_Helper::activated_plugin( $filename );
+	}
+
+	/**
+	 * Ran when any plugin is deactivated.
+	 *
+	 * @since 3.6.0
+	 * @param string $filename The filename of the deactivated plugin.
+	 */
+	public function deactivated_plugin( $filename ) {
+		include_once dirname( __FILE__ ) . '/admin/helper/class-wc-helper.php';
+
+		WC_Helper::deactivated_plugin( $filename );
+	}
+
+	/**
+	 * Get queue instance.
+	 *
+	 * @return WC_Queue_Interface
+	 */
+	public function queue() {
+		return WC_Queue::instance();
 	}
 
 	/**

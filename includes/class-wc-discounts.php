@@ -519,8 +519,9 @@ class WC_Discounts {
 			$apply_quantity = max( 0, apply_filters( 'woocommerce_coupon_get_apply_quantity', $apply_quantity, $item, $coupon, $this ) );
 
 			// Run coupon calculations.
-			$discount = wc_add_number_precision( $coupon->get_discount_amount( $price_to_discount / $item->quantity, $item->object, true ) ) * $apply_quantity;
-			$discount = wc_round_discount( min( $discounted_price, $discount ), 0 );
+			$discount      = wc_add_number_precision( $coupon->get_discount_amount( $price_to_discount / $item->quantity, $item->object, true ) ) * $apply_quantity;
+			$discount      = wc_round_discount( min( $discounted_price, $discount ), 0 );
+			$applied_count = $applied_count + $apply_quantity;
 
 			// Store code and discount amount per item.
 			$this->discounts[ $coupon->get_code() ][ $item->key ] += $discount;
@@ -627,7 +628,7 @@ class WC_Discounts {
 			}
 		}
 
-		if ( $coupon && $user_id && $coupon->get_usage_limit_per_user() > 0 && $coupon->get_id() && $coupon->get_data_store() ) {
+		if ( $coupon && $user_id && apply_filters( 'woocommerce_coupon_validate_user_usage_limit', $coupon->get_usage_limit_per_user() > 0, $user_id, $coupon, $this ) && $coupon->get_id() && $coupon->get_data_store() ) {
 			$date_store  = $coupon->get_data_store();
 			$usage_count = $date_store->get_usage_by_user_id( $coupon, $user_id );
 			if ( $usage_count >= $coupon->get_usage_limit_per_user() ) {
@@ -664,6 +665,7 @@ class WC_Discounts {
 	 */
 	protected function validate_coupon_minimum_amount( $coupon ) {
 		$subtotal = wc_remove_number_precision( $this->get_object_subtotal() );
+
 		if ( $coupon->get_minimum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_minimum_amount', $coupon->get_minimum_amount() > $subtotal, $coupon, $subtotal ) ) {
 			/* translators: %s: coupon minimum amount */
 			throw new Exception( sprintf( __( 'The minimum spend for this coupon is %s.', 'woocommerce' ), wc_price( $coupon->get_minimum_amount() ) ), 108 );
@@ -682,6 +684,7 @@ class WC_Discounts {
 	 */
 	protected function validate_coupon_maximum_amount( $coupon ) {
 		$subtotal = wc_remove_number_precision( $this->get_object_subtotal() );
+
 		if ( $coupon->get_maximum_amount() > 0 && apply_filters( 'woocommerce_coupon_validate_maximum_amount', $coupon->get_maximum_amount() < $subtotal, $coupon ) ) {
 			/* translators: %s: coupon maximum amount */
 			throw new Exception( sprintf( __( 'The maximum spend for this coupon is %s.', 'woocommerce' ), wc_price( $coupon->get_maximum_amount() ) ), 112 );
@@ -765,11 +768,11 @@ class WC_Discounts {
 	 */
 	protected function validate_coupon_sale_items( $coupon ) {
 		if ( $coupon->get_exclude_sale_items() ) {
-			$valid = false;
+			$valid = true;
 
 			foreach ( $this->get_items_to_validate() as $item ) {
-				if ( $item->product && ! $item->product->is_on_sale() ) {
-					$valid = true;
+				if ( $item->product && $item->product->is_on_sale() ) {
+					$valid = false;
 					break;
 				}
 			}
@@ -820,6 +823,7 @@ class WC_Discounts {
 	 */
 	protected function validate_coupon_eligible_items( $coupon ) {
 		if ( ! $coupon->is_type( wc_get_product_coupon_types() ) ) {
+			$this->validate_coupon_sale_items( $coupon );
 			$this->validate_coupon_excluded_product_ids( $coupon );
 			$this->validate_coupon_excluded_product_categories( $coupon );
 		}
@@ -905,7 +909,14 @@ class WC_Discounts {
 		if ( is_a( $this->object, 'WC_Cart' ) ) {
 			return wc_add_number_precision( $this->object->get_displayed_subtotal() );
 		} elseif ( is_a( $this->object, 'WC_Order' ) ) {
-			return wc_add_number_precision( $this->object->get_subtotal() );
+			$subtotal = wc_add_number_precision( $this->object->get_subtotal() );
+
+			if ( $this->object->get_prices_include_tax() ) {
+				// Add tax to tax-exclusive subtotal.
+				$subtotal = $subtotal + wc_add_number_precision( round( $this->object->get_total_tax(), wc_get_price_decimals() ) );
+			}
+
+			return $subtotal;
 		} else {
 			return array_sum( wp_list_pluck( $this->items, 'price' ) );
 		}
@@ -946,7 +957,6 @@ class WC_Discounts {
 			$this->validate_coupon_maximum_amount( $coupon );
 			$this->validate_coupon_product_ids( $coupon );
 			$this->validate_coupon_product_categories( $coupon );
-			$this->validate_coupon_sale_items( $coupon );
 			$this->validate_coupon_excluded_items( $coupon );
 			$this->validate_coupon_eligible_items( $coupon );
 
@@ -963,9 +973,13 @@ class WC_Discounts {
 			 */
 			$message = apply_filters( 'woocommerce_coupon_error', is_numeric( $e->getMessage() ) ? $coupon->get_coupon_error( $e->getMessage() ) : $e->getMessage(), $e->getCode(), $coupon );
 
-			return new WP_Error( 'invalid_coupon', $message, array(
-				'status' => 400,
-			) );
+			return new WP_Error(
+				'invalid_coupon',
+				$message,
+				array(
+					'status' => 400,
+				)
+			);
 		}
 		return true;
 	}

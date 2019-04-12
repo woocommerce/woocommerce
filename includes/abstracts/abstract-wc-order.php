@@ -403,7 +403,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$subtotal += $item->get_subtotal();
 		}
 
-		return apply_filters( 'woocommerce_order_get_subtotal', (double) $subtotal, $this );
+		return apply_filters( 'woocommerce_order_get_subtotal', (float) $subtotal, $this );
 	}
 
 	/**
@@ -692,13 +692,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return string
 	 */
 	protected function type_to_group( $type ) {
-		$type_to_group = apply_filters( 'woocommerce_order_type_to_group', array(
-			'line_item' => 'line_items',
-			'tax'       => 'tax_lines',
-			'shipping'  => 'shipping_lines',
-			'fee'       => 'fee_lines',
-			'coupon'    => 'coupon_lines',
-		) );
+		$type_to_group = apply_filters(
+			'woocommerce_order_type_to_group',
+			array(
+				'line_item' => 'line_items',
+				'tax'       => 'tax_lines',
+				'shipping'  => 'shipping_lines',
+				'fee'       => 'fee_lines',
+				'coupon'    => 'coupon_lines',
+			)
+		);
 		return isset( $type_to_group[ $type ] ) ? $type_to_group[ $type ] : '';
 	}
 
@@ -952,10 +955,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$this->set_coupon_discount_amounts( $discounts );
-		$this->set_item_discount_amounts( $discounts );
+		$this->save();
 
 		// Recalculate totals and taxes.
-		$this->calculate_totals( true );
+		$this->recalculate_coupons();
 
 		// Record usage so counts and validation is correct.
 		$used_by = $this->get_user_id();
@@ -1076,9 +1079,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 				// If the prices include tax, discounts should be taken off the tax inclusive prices like in the cart.
 				if ( $this->get_prices_include_tax() && wc_tax_enabled() ) {
-					$amount_tax = WC_Tax::get_tax_total( WC_Tax::calc_tax( $amount, WC_Tax::get_rates( $item->get_tax_class() ), true ) );
-					$amount    -= $amount_tax;
-					$item->set_total( max( 0, $item->get_total() - $amount ) );
+					$taxes = WC_Tax::calc_tax( $amount, WC_Tax::get_rates( $item->get_tax_class() ), true );
+
+					if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+						$taxes = array_map( 'wc_round_tax_total', $taxes );
+					}
+
+					$amount = $amount - array_sum( $taxes );
+					$item->set_total( max( 0, round( $item->get_total() - $amount, wc_get_price_decimals() ) ) );
 				} else {
 					$item->set_total( max( 0, $item->get_total() - $amount ) );
 				}
@@ -1116,11 +1124,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					$item = $this->get_item( $item_id, false );
 
 					if ( $this->get_prices_include_tax() && wc_tax_enabled() ) {
-						$amount_tax    = array_sum( WC_Tax::calc_tax( $item_discount_amount, WC_Tax::get_rates( $item->get_tax_class() ), true ) );
-						$discount_tax += $amount_tax;
-						$amount        = $amount - $amount_tax;
+						$taxes = WC_Tax::calc_tax( $item_discount_amount, WC_Tax::get_rates( $item->get_tax_class() ), true );
+
+						if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+							$taxes = array_map( 'wc_round_tax_total', $taxes );
+						}
+
+						$discount_tax += array_sum( $taxes );
+						$amount        = $amount - array_sum( $taxes );
 					} else {
-						$discount_tax += array_sum( WC_Tax::calc_tax( $item_discount_amount, WC_Tax::get_rates( $item->get_tax_class() ) ) );
+						$taxes = WC_Tax::calc_tax( $item_discount_amount, WC_Tax::get_rates( $item->get_tax_class() ) );
+
+						if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+							$taxes = array_map( 'wc_round_tax_total', $taxes );
+						}
+
+						$discount_tax += array_sum( $taxes );
 					}
 				}
 
@@ -1285,12 +1304,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax_based_on = 'billing';
 		}
 
-		$args = wp_parse_args( $args, array(
-			'country'  => 'billing' === $tax_based_on ? $this->get_billing_country() : $this->get_shipping_country(),
-			'state'    => 'billing' === $tax_based_on ? $this->get_billing_state() : $this->get_shipping_state(),
-			'postcode' => 'billing' === $tax_based_on ? $this->get_billing_postcode() : $this->get_shipping_postcode(),
-			'city'     => 'billing' === $tax_based_on ? $this->get_billing_city() : $this->get_shipping_city(),
-		) );
+		$args = wp_parse_args(
+			$args,
+			array(
+				'country'  => 'billing' === $tax_based_on ? $this->get_billing_country() : $this->get_shipping_country(),
+				'state'    => 'billing' === $tax_based_on ? $this->get_billing_state() : $this->get_shipping_state(),
+				'postcode' => 'billing' === $tax_based_on ? $this->get_billing_postcode() : $this->get_shipping_postcode(),
+				'city'     => 'billing' === $tax_based_on ? $this->get_billing_city() : $this->get_shipping_city(),
+			)
+		);
 
 		// Default to base.
 		if ( 'base' === $tax_based_on || empty( $args['country'] ) ) {
@@ -1405,14 +1427,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->add_item( $item );
 		}
 
-		if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
-			$this->set_shipping_tax( wc_round_tax_total( array_sum( array_map( 'wc_round_tax_total', $shipping_taxes ) ) ) );
-			$this->set_cart_tax( wc_round_tax_total( array_sum( array_map( 'wc_round_tax_total', $cart_taxes ) ) ) );
-		} else {
-			$this->set_shipping_tax( wc_round_tax_total( array_sum( $shipping_taxes ) ) );
-			$this->set_cart_tax( wc_round_tax_total( array_sum( $cart_taxes ) ) );
-		}
-
+		$this->set_shipping_tax( wc_round_tax_total( array_sum( $shipping_taxes ) ) );
+		$this->set_cart_tax( wc_round_tax_total( array_sum( $cart_taxes ) ) );
 		$this->save();
 	}
 
@@ -1428,7 +1444,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$cart_subtotal     = 0;
 		$cart_total        = 0;
-		$fee_total         = 0;
+		$fees_total         = 0;
 		$shipping_total    = 0;
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
@@ -1448,18 +1464,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Sum fee costs.
 		foreach ( $this->get_fees() as $item ) {
-			$amount = $item->get_amount();
+			$fee_total = $item->get_total();
 
-			if ( 0 > $amount ) {
-				$item->set_total( $amount );
-				$max_discount = round( $cart_total + $fee_total + $shipping_total, wc_get_price_decimals() ) * -1;
+			if ( 0 > $fee_total ) {
+				$max_discount = round( $cart_total + $fees_total + $shipping_total, wc_get_price_decimals() ) * -1;
 
-				if ( $item->get_total() < $max_discount ) {
+				if ( $fee_total < $max_discount ) {
 					$item->set_total( $max_discount );
 				}
 			}
 
-			$fee_total += $item->get_total();
+			$fees_total += $item->get_total();
 		}
 
 		// Calculate taxes for items, shipping, discounts. Note; this also triggers save().
@@ -1467,15 +1482,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->calculate_taxes();
 		}
 
-		// Sum taxes.
+		// Sum taxes again so we can work out how much tax was discounted. This uses original values, not those possibly rounded to 2dp.
 		foreach ( $this->get_items() as $item ) {
-			$cart_subtotal_tax += $item->get_subtotal_tax();
-			$cart_total_tax    += $item->get_total_tax();
+			$taxes = $item->get_taxes();
+
+			foreach ( $taxes['total'] as $tax_rate_id => $tax ) {
+				$cart_total_tax += (float) $tax;
+			}
+
+			foreach ( $taxes['subtotal'] as $tax_rate_id => $tax ) {
+				$cart_subtotal_tax += (float) $tax;
+			}
 		}
 
 		$this->set_discount_total( $cart_subtotal - $cart_total );
-		$this->set_discount_tax( $cart_subtotal_tax - $cart_total_tax );
-		$this->set_total( round( $cart_total + $fee_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() ) );
+		$this->set_discount_tax( wc_round_tax_total( $cart_subtotal_tax - $cart_total_tax ) );
+		$this->set_total( round( $cart_total + $fees_total + $this->get_shipping_total() + $this->get_cart_tax() + $this->get_shipping_tax(), wc_get_price_decimals() ) );
 
 		do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $this );
 
@@ -1619,10 +1641,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( 'excl' === $tax_display ) {
 			$ex_tax_label = $this->get_prices_include_tax() ? 1 : 0;
 
-			$subtotal = wc_price( $this->get_line_subtotal( $item ), array(
-				'ex_tax_label' => $ex_tax_label,
-				'currency'     => $this->get_currency(),
-			) );
+			$subtotal = wc_price(
+				$this->get_line_subtotal( $item ),
+				array(
+					'ex_tax_label' => $ex_tax_label,
+					'currency'     => $this->get_currency(),
+				)
+			);
 		} else {
 			$subtotal = wc_price( $this->get_line_subtotal( $item, true ), array( 'currency' => $this->get_currency() ) );
 		}
@@ -1702,7 +1727,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	public function get_shipping_to_display( $tax_display = '' ) {
 		$tax_display = $tax_display ? $tax_display : get_option( 'woocommerce_tax_display_cart' );
 
-		if ( $this->get_shipping_total() !== 0 ) {
+		if ( 0 < abs( (float) $this->get_shipping_total() ) ) {
 
 			if ( 'excl' === $tax_display ) {
 
@@ -1731,7 +1756,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$shipping = __( 'Free!', 'woocommerce' );
 		}
 
-		return apply_filters( 'woocommerce_order_shipping_to_display', $shipping, $this );
+		return apply_filters( 'woocommerce_order_shipping_to_display', $shipping, $this, $tax_display );
 	}
 
 	/**

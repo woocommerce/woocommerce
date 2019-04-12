@@ -50,7 +50,7 @@ $settings = array(
 		'default'  => 'inherit',
 		'type'     => 'select',
 		'class'    => 'wc-enhanced-select',
-		'options'  => array_merge( array( 'inherit' => __( 'Shipping tax class based on cart items', 'woocommerce' ) ), wc_get_product_tax_class_options() ),
+		'options'  => array( 'inherit' => __( 'Shipping tax class based on cart items', 'woocommerce' ) ) + wc_get_product_tax_class_options(),
 		'desc_tip' => true,
 	),
 

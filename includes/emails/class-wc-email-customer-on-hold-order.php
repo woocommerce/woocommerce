@@ -42,6 +42,7 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 			// Triggers for this email.
 			add_action( 'woocommerce_order_status_pending_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_status_failed_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
+			add_action( 'woocommerce_order_status_cancelled_to_on-hold_notification', array( $this, 'trigger' ), 10, 2 );
 
 			// Call parent constructor.
 			parent::__construct();
@@ -54,7 +55,7 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( 'Your {site_title} order receipt from {order_date}', 'woocommerce' );
+			return __( 'Your {site_title} order has been received!', 'woocommerce' );
 		}
 
 		/**
@@ -97,7 +98,6 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 		/**
 		 * Get content html.
 		 *
-		 * @access public
 		 * @return string
 		 */
 		public function get_content_html() {
@@ -115,7 +115,6 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 		/**
 		 * Get content plain.
 		 *
-		 * @access public
 		 * @return string
 		 */
 		public function get_content_plain() {

@@ -247,32 +247,29 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		 */
 		$prepared_args = apply_filters( 'woocommerce_rest_webhook_query', $args, $request );
 		unset( $prepared_args['page'] );
+		$prepared_args['paginate'] = true;
 
 		// Get the webhooks.
-		$data_store = WC_Data_Store::load( 'webhook' );
-		$results    = $data_store->search_webhooks( $prepared_args );
+		$webhooks       = array();
+		$data_store     = WC_Data_Store::load( 'webhook' );
+		$results        = $data_store->search_webhooks( $prepared_args );
+		$webhook_ids    = $results->webhooks;
 
-		$webhooks = array();
-		foreach ( $results as $webhook_id ) {
+		foreach ( $webhook_ids as $webhook_id ) {
 			$data = $this->prepare_item_for_response( $webhook_id, $request );
 			$webhooks[] = $this->prepare_response_for_collection( $data );
 		}
 
-		$response = rest_ensure_response( $webhooks );
+		$response       = rest_ensure_response( $webhooks );
+		$per_page       = (int) $prepared_args['limit'];
+		$page           = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
+		$total_webhooks = $results->total;
+		$max_pages      = $results->max_num_pages;
+		$base           = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
 
-		// Store pagination values for headers then unset for count query.
-		$per_page = (int) $prepared_args['limit'];
-		$page     = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
+		$response->header( 'X-WP-Total', $total_webhooks );
+		$response->header( 'X-WP-TotalPages', $max_pages );
 
-		// Calculate totals.
-		$prepared_args['limit']  = -1;
-		$prepared_args['offset'] = 0;
-		$total_webhooks = count( $data_store->search_webhooks( $prepared_args ) );
-		$response->header( 'X-WP-Total', (int) $total_webhooks );
-		$max_pages = ceil( $total_webhooks / $per_page );
-		$response->header( 'X-WP-TotalPages', (int) $max_pages );
-
-		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
 		if ( $page > 1 ) {
 			$prev_page = $page - 1;
 			if ( $prev_page > $max_pages ) {
@@ -408,7 +405,11 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 
 		// Update status.
 		if ( ! empty( $request['status'] ) ) {
-			$webhook->set_status( $request['status'] );
+			if ( wc_is_webhook_valid_status( strtolower( $request['status'] ) ) ) {
+				$webhook->set_status( $request['status'] );
+			} else {
+				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_status", __( 'Webhook status must be valid.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
 		}
 
 		$post = $this->prepare_item_for_database( $request );
@@ -503,8 +504,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			$data->post_author = get_current_user_id();
 
 			// Post password.
-			$password = strlen( uniqid( 'webhook_' ) );
-			$data->post_password = $password > 20 ? substr( $password, 0, 20 ) : $password;
+			$data->post_password = 'webhook_' . wp_generate_password();
 
 			// Post status.
 			$data->post_status = 'publish';
@@ -626,11 +626,8 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 					'description' => __( 'Webhook status.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'active',
-					'enum'        => array( 'active', 'paused', 'disabled' ),
+					'enum'        => array_keys( wc_get_webhook_statuses() ),
 					'context'     => array( 'view', 'edit' ),
-					'arg_options' => array(
-						'sanitize_callback' => 'wc_is_webhook_valid_topic',
-					),
 				),
 				'topic' => array(
 					'description' => __( 'Webhook topic.', 'woocommerce' ),
