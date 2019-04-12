@@ -9,13 +9,50 @@ jQuery( function( $ ) {
 	 * AddToCartHandler class.
 	 */
 	var AddToCartHandler = function() {
+		this.requests   = [];
+		this.addRequest = this.addRequest.bind( this );
+		this.run        = this.run.bind( this );
+
 		$( document.body )
-			.on( 'click', '.add_to_cart_button', this.onAddToCart )
+			.on( 'click', '.add_to_cart_button', { addToCartHandler: this }, this.onAddToCart )
 			.on( 'click', '.remove_from_cart_button', this.onRemoveFromCart )
 			.on( 'added_to_cart', this.updateButton )
 			.on( 'added_to_cart', this.updateCartPage )
 			.on( 'added_to_cart removed_from_cart', this.updateFragments );
 	};
+
+	/**
+	 * Add add to cart event.
+	 */
+	AddToCartHandler.prototype.addRequest = function( request ) {
+		this.requests.push( request );
+
+        if ( 1 === this.requests.length ) {
+			this.run();
+        }
+	}
+
+	/**
+	 * Run add to cart events.
+	 */
+	AddToCartHandler.prototype.run = function( e ) {
+		var requestManager = this,
+			originalCallback = requestManager.requests[0].complete;
+
+        requestManager.requests[0].complete = function() {
+			if ( typeof originalCallback === 'function' ) {
+				originalCallback();
+			}
+
+			requestManager.requests.shift();
+
+			if ( requestManager.requests.length > 0 ) {
+				requestManager.run();
+			}
+        };
+
+        $.ajax( this.requests[0] );
+	}
 
 	/**
 	 * Handle the add to cart event.
@@ -42,25 +79,30 @@ jQuery( function( $ ) {
 			// Trigger event.
 			$( document.body ).trigger( 'adding_to_cart', [ $thisbutton, data ] );
 
-			// Ajax action.
-			$.post( wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'add_to_cart' ), data, function( response ) {
-				if ( ! response ) {
-					return;
-				}
+			e.data.addToCartHandler.addRequest({
+				type: 'POST',
+				url: wc_add_to_cart_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'add_to_cart' ),
+				data: data,
+				success: function( response ) {
+					if ( ! response ) {
+						return;
+					}
 
-				if ( response.error && response.product_url ) {
-					window.location = response.product_url;
-					return;
-				}
+					if ( response.error && response.product_url ) {
+						window.location = response.product_url;
+						return;
+					}
 
-				// Redirect to cart option
-				if ( wc_add_to_cart_params.cart_redirect_after_add === 'yes' ) {
-					window.location = wc_add_to_cart_params.cart_url;
-					return;
-				}
+					// Redirect to cart option
+					if ( wc_add_to_cart_params.cart_redirect_after_add === 'yes' ) {
+						window.location = wc_add_to_cart_params.cart_url;
+						return;
+					}
 
-				// Trigger event so themes can refresh other areas.
-				$( document.body ).trigger( 'added_to_cart', [ response.fragments, response.cart_hash, $thisbutton ] );
+					// Trigger event so themes can refresh other areas.
+					$( document.body ).trigger( 'added_to_cart', [ response.fragments, response.cart_hash, $thisbutton ] );
+				},
+				dataType: 'json'
 			});
 		}
 	};
