@@ -165,6 +165,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Use version_compare for determining max version number. #23092
 * Dev - Add quantity input action hooks (`woocommerce_before_add_to_cart_quantity`, `woocommerce_after_add_to_cart_quantity`). #23166
 * Performance - Improve the speed of the admin dashboard by only updating transients once per class. #23011
+* Localization - Added validation for Italian postcodes. #23269
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
