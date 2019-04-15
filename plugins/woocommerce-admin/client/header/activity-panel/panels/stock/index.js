@@ -15,13 +15,36 @@ import { EmptyContent, Section } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { ActivityCardPlaceholder } from '../../activity-card';
+import { ActivityCard, ActivityCardPlaceholder } from '../../activity-card';
 import ActivityHeader from '../../activity-header';
+import Gridicon from 'gridicons';
 import ProductStockCard from './card';
 import { QUERY_DEFAULTS } from 'wc-api/constants';
 import withSelect from 'wc-api/with-select';
 
 class StockPanel extends Component {
+	renderEmptyCard() {
+		return (
+			<ActivityCard
+				className="woocommerce-empty-review-activity-card"
+				title={ __( 'Your stock is in good shape.', 'woocommerce-admin' ) }
+				icon={ <Gridicon icon="checkmark" size={ 48 } /> }
+			>
+				{ __( 'You currently have no products running low on stock.', 'woocommerce-admin' ) }
+			</ActivityCard>
+		);
+	}
+
+	renderProducts() {
+		const { products } = this.props;
+
+		if ( products.length === 0 ) {
+			return this.renderEmptyCard();
+		}
+
+		return products.map( product => <ProductStockCard key={ product.id } product={ product } /> );
+	}
+
 	render() {
 		const { isError, isRequesting, products } = this.props;
 
@@ -48,9 +71,13 @@ class StockPanel extends Component {
 			);
 		}
 
+		const title =
+			isRequesting || products.length > 0
+				? __( 'Stock', 'woocommerce-admin' )
+				: __( 'No products with low stock', 'woocommerce-admin' );
 		return (
 			<Fragment>
-				<ActivityHeader title={ __( 'Stock', 'woocommerce-admin' ) } />
+				<ActivityHeader title={ title } />
 				<Section>
 					{ isRequesting ? (
 						<ActivityCardPlaceholder
@@ -59,7 +86,7 @@ class StockPanel extends Component {
 							lines={ 1 }
 						/>
 					) : (
-						products.map( product => <ProductStockCard key={ product.id } product={ product } /> )
+						this.renderProducts()
 					) }
 				</Section>
 			</Fragment>
