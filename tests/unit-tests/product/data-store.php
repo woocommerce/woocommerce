@@ -820,4 +820,94 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertNotContains( $product3->get_id(), $results );
 		$this->assertContains( $product4->get_id(), $results );
 	}
+
+	/**
+	 * Test WC_Product_Data_Store_CPT::create_all_product_variations
+	 */
+	public function test_variable_create_all_product_variations() {
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Test Variable Product' );
+
+		$attribute_1 = new WC_Product_Attribute();
+		$attribute_1->set_name( 'color' );
+		$attribute_1->set_visible( true );
+		$attribute_1->set_variation( true );
+		$attribute_1->set_options( array( 'red', 'green', 'blue' ) );
+
+		$attribute_2 = new WC_Product_Attribute();
+		$attribute_2->set_name( 'size' );
+		$attribute_2->set_visible( true );
+		$attribute_2->set_variation( true );
+		$attribute_2->set_options( array( 'small', 'medium', 'large' ) );
+
+		$attribute_3 = new WC_Product_Attribute();
+		$attribute_3->set_name( 'pattern' );
+		$attribute_3->set_visible( true );
+		$attribute_3->set_variation( true );
+		$attribute_3->set_options( array( 'striped', 'polka-dot', 'plain' ) );
+
+		$attributes = array(
+			$attribute_1,
+			$attribute_2,
+			$attribute_3,
+		);
+
+		$product->set_attributes( $attributes );
+		$product_id = $product->save();
+
+		// Test all variations get linked.
+		$data_store = WC_Data_Store::load( 'product' );
+		$count      = $data_store->create_all_product_variations( wc_get_product( $product_id ) );
+		$this->assertEquals( 27, $count );
+
+		// Test duplicates are not created.
+		$count = $data_store->create_all_product_variations( wc_get_product( $product_id ) );
+		$this->assertEquals( 0, $count );
+	}
+
+	/**
+	 * Test WC_Product_Data_Store_CPT::create_all_product_variations
+	 */
+	public function test_variable_create_all_product_variations_limits() {
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Test Variable Product' );
+
+		$attribute_1 = new WC_Product_Attribute();
+		$attribute_1->set_name( 'color' );
+		$attribute_1->set_visible( true );
+		$attribute_1->set_variation( true );
+		$attribute_1->set_options( array( 'red', 'green', 'blue' ) );
+
+		$attribute_2 = new WC_Product_Attribute();
+		$attribute_2->set_name( 'size' );
+		$attribute_2->set_visible( true );
+		$attribute_2->set_variation( true );
+		$attribute_2->set_options( array( 'small', 'medium', 'large' ) );
+
+		$attribute_3 = new WC_Product_Attribute();
+		$attribute_3->set_name( 'pattern' );
+		$attribute_3->set_visible( true );
+		$attribute_3->set_variation( true );
+		$attribute_3->set_options( array( 'striped', 'polka-dot', 'plain' ) );
+
+		$attributes = array(
+			$attribute_1,
+			$attribute_2,
+			$attribute_3,
+		);
+
+		$product->set_attributes( $attributes );
+		$product_id = $product->save();
+
+		// Test creation with a limit of 10.
+		$data_store = WC_Data_Store::load( 'product' );
+		$count      = $data_store->create_all_product_variations( wc_get_product( $product_id ), 10 );
+		$this->assertEquals( 10, $count );
+
+		$count = $data_store->create_all_product_variations( wc_get_product( $product_id ), 10 );
+		$this->assertEquals( 10, $count );
+
+		$count = $data_store->create_all_product_variations( wc_get_product( $product_id ), 10 );
+		$this->assertEquals( 7, $count );
+	}
 }

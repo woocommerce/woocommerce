@@ -1131,6 +1131,58 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
+	 * Creates all possible combinations of variations from the attributes, without creating duplicates.
+	 *
+	 * @since  3.6.0
+	 * @param  WC_Product $product Variable product.
+	 * @param  int        $limit Limit the number of created variations.
+	 * @return int        Number of created variations.
+	 */
+	public function create_all_product_variations( $product, $limit = -1 ) {
+		$count = 0;
+
+		if ( ! $product ) {
+			return $count;
+		}
+
+		$attributes = wc_list_pluck( array_filter( $product->get_attributes(), 'wc_attributes_array_filter_variation' ), 'get_slugs' );
+
+		if ( empty( $attributes ) ) {
+			return $count;
+		}
+
+		// Get existing variations so we don't create duplicates.
+		$existing_variations = array_map( 'wc_get_product', $product->get_children() );
+		$existing_attributes = array();
+
+		foreach ( $existing_variations as $existing_variation ) {
+			$existing_attributes[] = $existing_variation->get_attributes();
+		}
+
+		$possible_attributes = array_reverse( wc_array_cartesian( $attributes ) );
+
+		foreach ( $possible_attributes as $possible_attribute ) {
+			if ( in_array( $possible_attribute, $existing_attributes, true ) ) {
+				continue;
+			}
+			$variation = new WC_Product_Variation();
+			$variation->set_parent_id( $product->get_id() );
+			$variation->set_attributes( $possible_attribute );
+			$variation_id = $variation->save();
+
+			do_action( 'product_variation_linked', $variation_id );
+
+			$count ++;
+
+			if ( $limit > 0 && $count >= $limit ) {
+				break;
+			}
+		}
+
+		return $count;
+	}
+
+	/**
 	 * Make sure all variations have a sort order set so they can be reordered correctly.
 	 *
 	 * @param int $parent_id Product ID.
