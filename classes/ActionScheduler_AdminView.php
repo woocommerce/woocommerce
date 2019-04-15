@@ -40,7 +40,7 @@ class ActionScheduler_AdminView extends ActionScheduler_AdminView_Deprecated {
 
 	public function system_status_report() {
 		$table = new ActionScheduler_wcSystemStatus( ActionScheduler::store() );
-		$table->print();
+		$table->render();
 	}
 
 	/**
