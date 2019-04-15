@@ -354,6 +354,28 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse the tax status field.
+	 *
+	 * @param string $value Field value.
+	 *
+	 * @return string
+	 */
+	public function parse_tax_status_field( $value ) {
+		if ( '' === $value ) {
+			return $value;
+		}
+
+		// Remove the ' prepended to fields that start with - if needed.
+		$value = $this->unescape_data( $value );
+
+		if ( 'true' === strtolower( $value ) || 'false' === strtolower( $value ) ) {
+			$value = wc_string_to_bool( $value ) ? 'taxable' : 'none';
+		}
+
+		return wc_clean( $value );
+	}
+
+	/**
 	 * Parse a category field from a CSV.
 	 * Categories are separated by commas and subcategories are "parent > subcategory".
 	 *
@@ -640,6 +662,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'download_expiry'   => array( $this, 'parse_int_field' ),
 			'product_url'       => 'esc_url_raw',
 			'menu_order'        => 'intval',
+			'tax_status'        => array( $this, 'parse_tax_status_field' ),
 		);
 
 		/**
