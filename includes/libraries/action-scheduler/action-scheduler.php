@@ -5,7 +5,7 @@
  * Description: A robust scheduling library for use in WordPress plugins.
  * Author: Prospress
  * Author URI: http://prospress.com/
- * Version: 2.2.3
+ * Version: 2.2.4
  * License: GPLv3
  *
  * Copyright 2019 Prospress, Inc.  (email : freedoms@prospress.com)
@@ -25,21 +25,21 @@
  *
  */
 
-if ( ! function_exists( 'action_scheduler_register_2_dot_2_dot_3' ) ) {
+if ( ! function_exists( 'action_scheduler_register_2_dot_2_dot_4' ) ) {
 
 	if ( ! class_exists( 'ActionScheduler_Versions' ) ) {
 		require_once( 'classes/ActionScheduler_Versions.php' );
 		add_action( 'plugins_loaded', array( 'ActionScheduler_Versions', 'initialize_latest_version' ), 1, 0 );
 	}
 
-	add_action( 'plugins_loaded', 'action_scheduler_register_2_dot_2_dot_3', 0, 0 );
+	add_action( 'plugins_loaded', 'action_scheduler_register_2_dot_2_dot_4', 0, 0 );
 
-	function action_scheduler_register_2_dot_2_dot_3() {
+	function action_scheduler_register_2_dot_2_dot_4() {
 		$versions = ActionScheduler_Versions::instance();
-		$versions->register( '2.2.3', 'action_scheduler_initialize_2_dot_2_dot_3' );
+		$versions->register( '2.2.4', 'action_scheduler_initialize_2_dot_2_dot_4' );
 	}
 
-	function action_scheduler_initialize_2_dot_2_dot_3() {
+	function action_scheduler_initialize_2_dot_2_dot_4() {
 		require_once( 'classes/ActionScheduler.php' );
 		ActionScheduler::init( __FILE__ );
 	}
