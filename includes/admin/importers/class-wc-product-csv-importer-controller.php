@@ -696,7 +696,8 @@ class WC_Product_CSV_Importer_Controller {
 				),
 			),
 			'category_ids'       => __( 'Categories', 'woocommerce' ),
-			'tag_ids'            => __( 'Tags', 'woocommerce' ),
+			'tag_ids'            => __( 'Tags (comma separated)', 'woocommerce' ),
+			'tag_ids_spaces'     => __( 'Tags (space separated)', 'woocommerce' ),
 			'shipping_class_id'  => __( 'Shipping class', 'woocommerce' ),
 			'images'             => __( 'Images', 'woocommerce' ),
 			'parent_id'          => __( 'Parent', 'woocommerce' ),
@@ -731,7 +732,7 @@ class WC_Product_CSV_Importer_Controller {
 			),
 			'reviews_allowed'    => __( 'Allow customer reviews?', 'woocommerce' ),
 			'purchase_note'      => __( 'Purchase note', 'woocommerce' ),
-			'meta:' . $meta      => __( 'Import as meta', 'woocommerce' ),
+			'meta:' . $meta      => __( 'Custom', 'woocommerce' ),
 			'menu_order'         => __( 'Position', 'woocommerce' ),
 		);
 
