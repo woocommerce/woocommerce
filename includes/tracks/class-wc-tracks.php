@@ -16,45 +16,6 @@ class WC_Tracks {
 	const PREFIX = 'wcadmin_';
 
 	/**
-	 * Option name for total store revenue.
-	 */
-	const REVENUE_CACHE_OPTION = 'woocommerce_tracker_orders_totals';
-
-	/**
-	 * Initialize necessary hooks.
-	 */
-	public static function init() {
-		add_action( 'woocommerce_new_order', array( __CLASS__, 'update_revenue_cache' ) );
-		add_action( 'woocommerce_update_order', array( __CLASS__, 'update_revenue_cache' ) );
-		add_action( 'woocommerce_delete_order', array( __CLASS__, 'update_revenue_cache' ) );
-		add_action( 'woocommerce_order_refunded', array( __CLASS__, 'update_revenue_cache' ) );
-	}
-
-	/**
-	 * Recalculate store gross revenue and update cache.
-	 */
-	public static function update_revenue_cache() {
-		update_option( self::REVENUE_CACHE_OPTION, WC_Tracker::get_order_totals() );
-	}
-
-	/**
-	 * Get the (cached) store gross revenue total.
-	 *
-	 * @return null|string Store gross revenue, or null if cache error.
-	 */
-	public static function get_total_revenue() {
-		$total_revenue = get_option( self::REVENUE_CACHE_OPTION, false );
-
-		if ( false === $total_revenue ) {
-			$total_revenue = WC_Tracker::get_order_totals();
-
-			update_option( self::REVENUE_CACHE_OPTION, $total_revenue );
-		}
-
-		return empty( $total_revenue['gross'] ) ? null : $total_revenue['gross'];
-	}
-
-	/**
 	 * Get total product counts.
 	 *
 	 * @return int Number of products.
@@ -78,7 +39,6 @@ class WC_Tracks {
 				'blog_lang'      => get_user_locale( $user_id ),
 				'blog_id'        => ( class_exists( 'Jetpack' ) && Jetpack_Options::get_option( 'id' ) ) || null,
 				'products_count' => self::get_products_count(),
-				'orders_gross'   => self::get_total_revenue(),
 			);
 			set_transient( 'wc_tracks_blog_details', $blog_details, DAY_IN_SECONDS );
 		}
@@ -149,5 +109,3 @@ class WC_Tracks {
 		return $event_obj->record();
 	}
 }
-
-WC_Tracks::init();
