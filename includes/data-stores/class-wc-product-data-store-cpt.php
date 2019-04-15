@@ -1134,6 +1134,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Creates all possible combinations of variations from the attributes, without creating duplicates.
 	 *
 	 * @since  3.6.0
+	 * @todo   Add to interface in 4.0.
 	 * @param  WC_Product $product Variable product.
 	 * @param  int        $limit Limit the number of created variations.
 	 * @return int        Number of created variations.
@@ -1162,7 +1163,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$possible_attributes = array_reverse( wc_array_cartesian( $attributes ) );
 
 		foreach ( $possible_attributes as $possible_attribute ) {
-			if ( in_array( $possible_attribute, $existing_attributes, true ) ) {
+			// Allow any order if key/values -- do not use strict mode.
+			if ( in_array( $possible_attribute, $existing_attributes ) ) { // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
 				continue;
 			}
 			$variation = new WC_Product_Variation();
