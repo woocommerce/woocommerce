@@ -539,7 +539,8 @@ class WC_Product_CSV_Importer_Controller {
 					__( 'External URL', 'woocommerce' )   => 'product_url',
 					__( 'Button text', 'woocommerce' )    => 'button_text',
 					__( 'Position', 'woocommerce' )       => 'menu_order',
-				)
+				),
+				$raw_headers
 			)
 		);
 
@@ -564,7 +565,8 @@ class WC_Product_CSV_Importer_Controller {
 						__( 'Download %d URL', 'woocommerce' ) => 'downloads:url',
 						/* translators: %d: Meta number */
 						__( 'Meta: %s', 'woocommerce' ) => 'meta:',
-					)
+					),
+					$raw_headers
 				)
 			)
 		);
