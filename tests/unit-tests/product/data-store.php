@@ -804,5 +804,20 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertContains( $product2->get_id(), $results );
 		$this->assertNotContains( $product3->get_id(), $results );
 		$this->assertNotContains( $product4->get_id(), $results );
+
+		$results = $data_store->search_products( 'green', '', true, true, 1 );
+		$this->assertEquals( 1, count( array_diff( $results, array( 0 ) ) ) );
+
+		$results = $data_store->search_products( 'green', '', true, true, null, array( $product3->get_id() ) );
+		$this->assertNotContains( $product->get_id(), $results );
+		$this->assertNotContains( $product2->get_id(), $results );
+		$this->assertContains( $product3->get_id(), $results );
+		$this->assertNotContains( $product4->get_id(), $results );
+
+		$results = $data_store->search_products( 'green', '', true, true, null, null, array( $product3->get_id() ) );
+		$this->assertNotContains( $product->get_id(), $results );
+		$this->assertNotContains( $product2->get_id(), $results );
+		$this->assertNotContains( $product3->get_id(), $results );
+		$this->assertContains( $product4->get_id(), $results );
 	}
 }
