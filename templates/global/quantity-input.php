@@ -28,6 +28,9 @@ if ( $max_value && $min_value === $max_value ) {
 	$labelledby = ! empty( $args['product_name'] ) ? sprintf( __( '%s quantity', 'woocommerce' ), wp_strip_all_tags( $args['product_name'] ) ) : '';
 	?>
 	<div class="quantity">
+
+		<?php do_action( 'woocommerce_before_quantity_input_field' ); ?>
+
 		<label class="screen-reader-text" for="<?php echo esc_attr( $input_id ); ?>"><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></label>
 		<input
 			type="number"
@@ -44,6 +47,9 @@ if ( $max_value && $min_value === $max_value ) {
 			<?php if ( ! empty( $labelledby ) ) { ?>
 			aria-labelledby="<?php echo esc_attr( $labelledby ); ?>" />
 			<?php } ?>
+
+		<?php do_action( 'woocommerce_after_quantity_input_field' ); ?>
+
 	</div>
 	<?php
 }
