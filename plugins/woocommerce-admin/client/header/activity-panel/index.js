@@ -137,7 +137,7 @@ class ActivityPanel extends Component {
 				return <InboxPanel />;
 			case 'orders':
 				const { hasUnreadOrders } = this.props;
-				return <OrdersPanel isEmpty={ hasUnreadOrders === false } />;
+				return <OrdersPanel hasActionableOrders={ hasUnreadOrders } />;
 			case 'stock':
 				return <StockPanel />;
 			case 'reviews':

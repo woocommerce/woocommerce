@@ -32,8 +32,63 @@ class InboxPanel extends Component {
 		this.props.updateCurrentUserData( userDataFields );
 	}
 
+	renderEmptyCard() {
+		return (
+			<ActivityCard
+				className="woocommerce-empty-review-activity-card"
+				title={ __( 'Your inbox is empty', 'woocommerce-admin' ) }
+				icon={ <Gridicon icon="checkmark" size={ 48 } /> }
+			>
+				{ __(
+					'As things begin to happen in your store your inbox will start to fill up. ' +
+						"You'll see things like achievements, new feature announcements, extension recommendations and more!",
+					'woocommerce-admin'
+				) }
+			</ActivityCard>
+		);
+	}
+
+	renderNotes() {
+		const { lastRead, notes } = this.props;
+
+		if ( 0 === Object.keys( notes ).length ) {
+			return this.renderEmptyCard();
+		}
+
+		const getButtonsFromActions = actions => {
+			if ( ! actions ) {
+				return [];
+			}
+			return actions.map( action => (
+				<Button isDefault href={ action.url }>
+					{ action.label }
+				</Button>
+			) );
+		};
+
+		const notesArray = Object.keys( notes ).map( key => notes[ key ] );
+
+		return notesArray.map( note => (
+			<ActivityCard
+				key={ note.id }
+				className="woocommerce-inbox-activity-card"
+				title={ note.title }
+				date={ note.date_created_gmt }
+				icon={ <Gridicon icon={ note.icon } size={ 48 } /> }
+				unread={
+					! lastRead ||
+					! note.date_created_gmt ||
+					new Date( note.date_created_gmt + 'Z' ).getTime() > lastRead
+				}
+				actions={ getButtonsFromActions( note.actions ) }
+			>
+				<span dangerouslySetInnerHTML={ sanitizeHTML( note.content ) } />
+			</ActivityCard>
+		) );
+	}
+
 	render() {
-		const { isError, isRequesting, lastRead, notes } = this.props;
+		const { isError, isRequesting } = this.props;
 
 		if ( isError ) {
 			const title = __(
@@ -58,19 +113,6 @@ class InboxPanel extends Component {
 			);
 		}
 
-		const getButtonsFromActions = actions => {
-			if ( ! actions ) {
-				return [];
-			}
-			return actions.map( action => (
-				<Button isDefault href={ action.url }>
-					{ action.label }
-				</Button>
-			) );
-		};
-
-		const notesArray = Object.keys( notes ).map( key => notes[ key ] );
-
 		return (
 			<Fragment>
 				<ActivityHeader title={ __( 'Inbox', 'woocommerce-admin' ) } />
@@ -83,23 +125,7 @@ class InboxPanel extends Component {
 							lines={ 2 }
 						/>
 					) : (
-						notesArray.map( note => (
-							<ActivityCard
-								key={ note.id }
-								className="woocommerce-inbox-activity-card"
-								title={ note.title }
-								date={ note.date_created_gmt }
-								icon={ <Gridicon icon={ note.icon } size={ 48 } /> }
-								unread={
-									! lastRead ||
-									! note.date_created_gmt ||
-									new Date( note.date_created_gmt + 'Z' ).getTime() > lastRead
-								}
-								actions={ getButtonsFromActions( note.actions ) }
-							>
-								<span dangerouslySetInnerHTML={ sanitizeHTML( note.content ) } />
-							</ActivityCard>
-						) )
+						this.renderNotes()
 					) }
 				</Section>
 			</Fragment>

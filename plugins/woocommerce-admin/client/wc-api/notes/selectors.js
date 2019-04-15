@@ -30,11 +30,7 @@ const isGetNotesRequesting = getResource => ( query = {} ) => {
 	const resourceName = getResourceName( 'note-query', query );
 	const { lastRequested, lastReceived } = getResource( resourceName );
 
-	if ( isNil( lastRequested ) ) {
-		return false;
-	}
-
-	if ( isNil( lastReceived ) ) {
+	if ( isNil( lastRequested ) || isNil( lastReceived ) ) {
 		return true;
 	}
 
