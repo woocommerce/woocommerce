@@ -47,10 +47,10 @@ class WC_Admin_ActionScheduler_WPPostStore extends ActionScheduler_wpPostStore {
 		$action_types = array(
 			WC_Admin_Reports_Sync::QUEUE_BATCH_ACTION,
 			WC_Admin_Reports_Sync::QUEUE_DEPEDENT_ACTION,
-			WC_Admin_Reports_Sync::CUSTOMERS_BATCH_ACTION,
-			WC_Admin_Reports_Sync::ORDERS_BATCH_ACTION,
-			WC_Admin_Reports_Sync::ORDERS_LOOKUP_BATCH_INIT,
-			WC_Admin_Reports_Sync::SINGLE_ORDER_ACTION,
+			WC_Admin_Reports_Sync::CUSTOMERS_IMPORT_BATCH_ACTION,
+			WC_Admin_Reports_Sync::ORDERS_IMPORT_BATCH_ACTION,
+			WC_Admin_Reports_Sync::ORDERS_IMPORT_BATCH_INIT,
+			WC_Admin_Reports_Sync::SINGLE_ORDER_IMPORT_ACTION,
 		);
 
 		foreach ( $action_types as $action_type ) {
