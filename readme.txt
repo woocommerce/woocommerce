@@ -322,6 +322,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Add link to suggstions management #23229
 * Fix - Make usage tracking opt-out text more clear #23216
 * Fix - CSS Issues with suggestions display #23241
+* Fix - Product search may fail to return valid results when using the 'include' flag to search within a limited set.
 * Performance - Product meta data lookup table used for sorting and slow queries. #22718
 * Performance - Prime caches when reading variations. #22587
 * Performance - Only include REST API classes and objects during `rest_api_init` hook. #22615
