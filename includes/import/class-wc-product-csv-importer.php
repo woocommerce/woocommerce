@@ -60,6 +60,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$this->params['mapping'] = array_combine( $this->params['mapping']['from'], $this->params['mapping']['to'] );
 		}
 
+		// Import mappings for CSV data.
+		include_once dirname( dirname( __FILE__ ) ) . '/admin/importers/mappings/mappings.php';
+
 		$this->read_file();
 	}
 
@@ -772,6 +775,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			// Convert type to string.
 			$data['type'] = current( array_diff( $data['type'], array( 'virtual', 'downloadable' ) ) );
+
+			if ( ! $data['type'] ) {
+				$data['type'] = 'simple';
+			}
 		}
 
 		// Status is mapped from a special published field.

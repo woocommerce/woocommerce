@@ -156,6 +156,9 @@ class WC_Product_CSV_Importer_Controller {
 		$this->map_preferences = isset( $_REQUEST['map_preferences'] ) ? (bool) $_REQUEST['map_preferences'] : false;
 		// phpcs:enable
 
+		// Import mappings for CSV data.
+		include_once dirname( __FILE__ ) . '/mappings/mappings.php';
+
 		if ( $this->map_preferences ) {
 			add_filter( 'woocommerce_csv_product_import_mapped_columns', array( $this, 'auto_map_user_preferences' ), 9999 );
 		}
@@ -484,8 +487,6 @@ class WC_Product_CSV_Importer_Controller {
 	protected function auto_map_columns( $raw_headers, $num_indexes = true ) {
 		$weight_unit    = get_option( 'woocommerce_weight_unit' );
 		$dimension_unit = get_option( 'woocommerce_dimension_unit' );
-
-		include dirname( __FILE__ ) . '/mappings/mappings.php';
 
 		/*
 		 * @hooked wc_importer_generic_mappings - 10
