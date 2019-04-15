@@ -45,7 +45,7 @@ class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
 		switch ( $action ) {
 			case WC_Admin_Reports_Sync::QUEUE_BATCH_ACTION:
 				return $this->queue_batch_size;
-			case WC_Admin_Reports_Sync::CUSTOMERS_BATCH_ACTION:
+			case WC_Admin_Reports_Sync::CUSTOMERS_IMPORT_BATCH_ACTION:
 				return $this->customers_batch_size;
 			case WC_Admin_Reports_Sync::ORDERS_BATCH_ACTION:
 				return $this->orders_batch_size;
@@ -81,20 +81,20 @@ class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
 		$num_customers = 1234; // 1234 / 5 = 247 batches
 		$num_batches   = ceil( $num_customers / $this->customers_batch_size );
 
-		WC_Admin_Reports_Sync::queue_batches( 1, $num_batches, WC_Admin_Reports_Sync::CUSTOMERS_BATCH_ACTION );
+		WC_Admin_Reports_Sync::queue_batches( 1, $num_batches, WC_Admin_Reports_Sync::CUSTOMERS_IMPORT_BATCH_ACTION );
 
 		$this->assertCount( $this->queue_batch_size, $this->queue->actions );
 		$this->assertArraySubset(
 			array(
 				'hook' => WC_Admin_Reports_Sync::QUEUE_BATCH_ACTION,
-				'args' => array( 1, 25, WC_Admin_Reports_Sync::CUSTOMERS_BATCH_ACTION ),
+				'args' => array( 1, 25, WC_Admin_Reports_Sync::CUSTOMERS_IMPORT_BATCH_ACTION ),
 			),
 			$this->queue->actions[0]
 		);
 		$this->assertArraySubset(
 			array(
 				'hook' => WC_Admin_Reports_Sync::QUEUE_BATCH_ACTION,
-				'args' => array( 226, 247, WC_Admin_Reports_Sync::CUSTOMERS_BATCH_ACTION ),
+				'args' => array( 226, 247, WC_Admin_Reports_Sync::CUSTOMERS_IMPORT_BATCH_ACTION ),
 			),
 			$this->queue->actions[ $this->queue_batch_size - 1 ]
 		);
@@ -107,19 +107,19 @@ class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
 		$num_customers = 45; // 45 / 5 = 9 batches (which is less than the batch queue size)
 		$num_batches   = ceil( $num_customers / $this->customers_batch_size );
 
-		WC_Admin_Reports_Sync::queue_batches( 1, $num_batches, WC_Admin_Reports_Sync::CUSTOMERS_BATCH_ACTION );
+		WC_Admin_Reports_Sync::queue_batches( 1, $num_batches, WC_Admin_Reports_Sync::CUSTOMERS_IMPORT_BATCH_ACTION );
 
 		$this->assertCount( 9, $this->queue->actions );
 		$this->assertArraySubset(
 			array(
-				'hook' => WC_Admin_Reports_Sync::CUSTOMERS_BATCH_ACTION,
+				'hook' => WC_Admin_Reports_Sync::CUSTOMERS_IMPORT_BATCH_ACTION,
 				'args' => array( 1 ),
 			),
 			$this->queue->actions[0]
 		);
 		$this->assertArraySubset(
 			array(
-				'hook' => WC_Admin_Reports_Sync::CUSTOMERS_BATCH_ACTION,
+				'hook' => WC_Admin_Reports_Sync::CUSTOMERS_IMPORT_BATCH_ACTION,
 				'args' => array( 9 ),
 			),
 			$this->queue->actions[8]
