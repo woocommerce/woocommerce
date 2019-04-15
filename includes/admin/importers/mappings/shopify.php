@@ -23,18 +23,18 @@ function wc_importer_shopify_mappings( $mappings, $raw_headers ) {
 		return $mappings;
 	}
 	$shopify_mappings = array(
-		__( 'Variant SKU', 'woocommerce' )   => 'sku',
-		__( 'Title', 'woocommerce' )         => 'name',
-		__( 'Body (HTML)', 'woocommerce' )   => 'description',
-		__( 'Quantity', 'woocommerce' )      => 'stock_quantity',
-		__( 'Variant Inventory Qty', 'woocommerce' ) => 'stock_quantity',
-		__( 'Image Src', 'woocommerce' )     => 'images',
-		__( 'Variant Image', 'woocommerce' ) => 'images',
-		__( 'Variant SKU', 'woocommerce' )   => 'sku',
-		__( 'Variant Price', 'woocommerce' ) => 'sale_price',
-		__( 'Variant Compare At Price', 'woocommerce' ) => 'regular_price',
-		__( 'Type', 'woocommerce' )          => 'category_ids',
-		__( 'Variant Grams', 'woocommerce' ) => 'weight',
+		'Variant SKU'              => 'sku',
+		'Title'                    => 'name',
+		'Body (HTML)'              => 'description',
+		'Quantity'                 => 'stock_quantity',
+		'Variant Inventory Qty'    => 'stock_quantity',
+		'Image Src'                => 'images',
+		'Variant Image'            => 'images',
+		'Variant SKU'              => 'sku',
+		'Variant Price'            => 'sale_price',
+		'Variant Compare At Price' => 'regular_price',
+		'Type'                     => 'category_ids',
+		'Variant Grams'            => 'weight',
 	);
 	return array_merge( $mappings, $shopify_mappings );
 }
