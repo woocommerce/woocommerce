@@ -267,14 +267,14 @@ class WC_Checkout {
 		foreach ( $this->fields as $field_type => $fields ) {
 			// Sort each of the checkout field sections based on priority.
 			uasort( $this->fields[ $field_type ], 'wc_checkout_fields_uasort_comparison' );
-            
-            //add accessibility labels to fields that have placeholders
-            foreach ( $fields as $single_field_type => $field) {
-                if ( empty( $field[ 'label' ] ) && !empty( $field[ 'placeholder' ] )) {
-                    $this->fields[ $field_type ][ $single_field_type ][ 'label' ]       = $field[ 'placeholder' ];
-                    $this->fields[ $field_type ][ $single_field_type ][ 'label_class' ] = 'screen-reader-text';
-                }
-            }
+
+			// Add accessibility labels to fields that have placeholders.
+			foreach ( $fields as $single_field_type => $field ) {
+				if ( empty( $field['label'] ) && ! empty( $field['placeholder'] ) ) {
+					$this->fields[ $field_type ][ $single_field_type ]['label']       = $field['placeholder'];
+					$this->fields[ $field_type ][ $single_field_type ]['label_class'] = 'screen-reader-text';
+				}
+			}
 		}
 
 		return $fieldset ? $this->fields[ $fieldset ] : $this->fields;
