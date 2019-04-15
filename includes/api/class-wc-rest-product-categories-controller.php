@@ -262,7 +262,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 					);
 				}
 			} else {
-				delete_woocommerce_term_meta( $id, 'thumbnail_id' );
+				delete_term_meta( $id, 'thumbnail_id' );
 			}
 		}
 
