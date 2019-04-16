@@ -288,7 +288,7 @@ jQuery( function( $ ) {
 
 		var options = $.extend( {
 			index: $( clicked ).index(),
-			addCaptionHTMLFn: function( item, captionEl, isFake ) {
+			addCaptionHTMLFn: function( item, captionEl ) {
 				if ( ! item.title ) {
 					captionEl.children[0].textContent = '';
 					return false;
