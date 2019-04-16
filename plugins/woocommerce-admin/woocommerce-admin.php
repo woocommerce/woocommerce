@@ -153,6 +153,7 @@ add_action( 'admin_menu', 'wc_admin_devdocs' );
  */
 function wc_admin_do_wc_admin_daily() {
 	WC_Admin_Notes_New_Sales_Record::possibly_add_sales_record_note();
+	WC_Admin_Notes_Giving_Feedback_Notes::add_notes_for_admin_giving_feedback();
 	WC_Admin_Notes_Mobile_App::possibly_add_mobile_app_note();
 }
 add_action( 'wc_admin_daily', 'wc_admin_do_wc_admin_daily' );
@@ -207,9 +208,11 @@ function wc_admin_plugins_loaded() {
 	require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-install.php';
 	require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-api-init.php';
 
+	// Admin note providers.
 	// @todo These should be bundled in the features/ folder, but loading them from there currently has a load order issue.
 	require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-new-sales-record.php';
 	require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-settings-notes.php';
+	require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-giving-feedback-notes.php';
 	require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-woo-subscriptions-notes.php';
 	require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-historical-data.php';
 	require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-order-milestones.php';
