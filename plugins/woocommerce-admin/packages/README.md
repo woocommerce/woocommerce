@@ -77,19 +77,6 @@ To create a new package, add a new folder to `/packages`, containing…
 - Run `npm run publish-packages:prod` to publish the package
 - _OR_ Run `npm run publish-packages:dev` to publish "next" releases (installed as `npm i @woocommerce/package@next`). Currently packages are published this way, but we should be using prod in the future. Only use `:dev` if you have a reason to.
 - Both commands will run `build:packages` before the lerna task, just to catch any last updates.
-- Lerna will ask you what version you want to release, for example:
-
-```
-Select a new version for @woocommerce/components (currently 1.0.1) (Use arrow keys)
-❯ Patch (1.0.2)
-  Minor (1.1.0)
-  Major (2.0.0)
-  Prepatch (1.0.2-alpha.0)
-  Preminor (1.1.0-alpha.0)
-  Premajor (2.0.0-alpha.0)
-  Custom Prerelease
-  Custom Version
-```
 
 It will confirm with you once more before publishing:
 
