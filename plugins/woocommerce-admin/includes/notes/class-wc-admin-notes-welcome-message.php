@@ -18,10 +18,16 @@ class WC_Admin_Notes_Welcome_Message {
 	 * Creates a note for welcome message.
 	 */
 	public static function add_welcome_note() {
-
 		// Check if plugin is upgrading if yes then don't create this note.
 		$is_upgrading = get_option( WC_Admin_Install::VERSION_OPTION );
 		if ( $is_upgrading ) {
+			return;
+		}
+
+		// See if we've already created this kind of note so we don't do it again.
+		$data_store = WC_Data_Store::load( 'admin-note' );
+		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
+		if ( ! empty( $note_ids ) ) {
 			return;
 		}
 
