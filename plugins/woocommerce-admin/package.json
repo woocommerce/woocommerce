@@ -140,7 +140,6 @@
     "history": "4.9.0",
     "html-to-react": "1.3.4",
     "interpolate-components": "1.1.1",
-    "lodash": "^4.17.11",
     "marked": "0.6.2",
     "memoize-one": "5.0.2",
     "prismjs": "^1.15.0",
