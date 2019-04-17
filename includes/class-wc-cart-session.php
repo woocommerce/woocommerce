@@ -53,13 +53,9 @@ final class WC_Cart_Session {
 		add_action( 'woocommerce_cart_updated', array( $this, 'persistent_cart_update' ) );
 
 		// Cookie events - cart cookies need to be set before headers are sent.
-		if ( function_exists( 'header_register_callback' ) ) {
-			header_register_callback( array( $this, 'maybe_set_cart_cookies' ) ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.header_register_callbackFound
-		} else {
-			add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
-			add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );
-			add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 );
-		}
+		add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
+		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );
+		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 );
 	}
 
 	/**
