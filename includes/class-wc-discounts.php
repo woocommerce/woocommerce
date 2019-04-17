@@ -359,7 +359,7 @@ class WC_Discounts {
 			$discounted_price = $this->get_discounted_price_in_cents( $item );
 
 			// Get the price we actually want to discount, based on settings.
-			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : $item->price;
+			$price_to_discount = ( 'yes' === get_option( 'woocommerce_calc_discounts_sequentially', 'no' ) ) ? $discounted_price : round( $item->price );
 
 			// See how many and what price to apply to.
 			$apply_quantity    = $limit_usage_qty && ( $limit_usage_qty - $applied_count ) < $item->quantity ? $limit_usage_qty - $applied_count : $item->quantity;
