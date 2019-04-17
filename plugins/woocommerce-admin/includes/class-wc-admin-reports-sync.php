@@ -225,7 +225,13 @@ class WC_Admin_Reports_Sync {
 			)";
 		}
 
-		$order_ids = $wpdb->get_col(
+		$count = $wpdb->get_var(
+			"SELECT COUNT(*) FROM {$wpdb->posts}
+			WHERE post_type = 'shop_order'
+			{$where_clause}"
+		); // WPCS: unprepared SQL ok.
+
+		$order_ids = absint( $count ) > 0 ? $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts}
 				WHERE post_type = 'shop_order'
@@ -236,13 +242,7 @@ class WC_Admin_Reports_Sync {
 				$limit,
 				$offset
 			)
-		); // WPCS: unprepared SQL ok.
-
-		$count = $wpdb->get_var(
-			"SELECT COUNT(*) FROM {$wpdb->posts}
-			WHERE post_type = 'shop_order'
-			{$where_clause}"
-		); // WPCS: unprepared SQL ok.
+		) : array(); // WPCS: unprepared SQL ok.
 
 		return (object) array(
 			'total'     => absint( $count ),
