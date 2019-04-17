@@ -7,7 +7,7 @@
  * Author URI: https://woocommerce.com/
  * Text Domain: woocommerce-admin
  * Domain Path: /languages
- * Version: 0.10.0
+ * Version: 0.11.0
  *
  * WC requires at least: 3.5.0
  * WC tested up to: 3.5.7
@@ -40,7 +40,7 @@ if ( ! defined( 'WC_ADMIN_PLUGIN_FILE' ) ) {
 }
 
 if ( ! defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
-	define( 'WC_ADMIN_VERSION_NUMBER', '0.10.0' );
+	define( 'WC_ADMIN_VERSION_NUMBER', '0.11.0' );
 }
 
 /**
@@ -112,7 +112,7 @@ function wc_admin_build_notice() {
  * @return bool
  */
 function wc_admin_dependencies_satisfied() {
-	$woocommerce_minimum_met = class_exists( 'WooCommerce' ) && version_compare( WC_VERSION, '3.5', '>' );
+	$woocommerce_minimum_met = class_exists( 'WooCommerce' ) && version_compare( WC_VERSION, '3.6', '>=' );
 	if ( ! $woocommerce_minimum_met ) {
 		return false;
 	}

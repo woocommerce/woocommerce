@@ -71,6 +71,13 @@ See `defaultMessages` above for examples.
 Callback fired when selected items change, whether added, cleared, or removed.
 Passed an array of item objects (as passed in via props.list).
 
+### `onSearch`
+
+- Type: Function
+- Default: null
+
+Callback fired when the search field is used.
+
 ### `renderItem`
 
 - Type: Function
