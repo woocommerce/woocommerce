@@ -48,6 +48,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 * Add footer scripts to OBW via woocommerce_setup_footer
 	 */
 	public function add_footer_scripts() {
+		wp_print_scripts();
 		WC_Site_Tracking::add_tracking_function();
 	}
 
