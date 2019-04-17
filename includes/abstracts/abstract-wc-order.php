@@ -195,19 +195,27 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
 
 		} catch ( Exception $e ) {
-			wc_get_logger()->error(
-				sprintf(
-					'Error saving order #%d',
-					$this->get_id()
-				),
-				array(
-					'order' => $this,
-					'error' => $e,
-				)
-			);
+			$this->handle_exception( $e, __( 'Error saving order.', 'woocommerce' ) );
 		}
 
 		return $this->get_id();
+	}
+
+	/**
+	 * Log an error about this order is exception is encountered.
+	 *
+	 * @param Exception $e Exception object.
+	 * @param string    $message Message regarding exception thrown.
+	 * @since 3.7.0
+	 */
+	protected function handle_exception( $e, $message = 'Error' ) {
+		wc_get_logger()->error(
+			$message,
+			array(
+				'order' => $this,
+				'error' => $e,
+			)
+		);
 	}
 
 	/**

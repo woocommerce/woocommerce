@@ -224,6 +224,24 @@ class WC_Order extends WC_Abstract_Order {
 	}
 
 	/**
+	 * Log an error about this order is exception is encountered.
+	 *
+	 * @param Exception $e Exception object.
+	 * @param string    $message Message regarding exception thrown.
+	 * @since 3.7.0
+	 */
+	protected function handle_exception( $e, $message = 'Error' ) {
+		wc_get_logger()->error(
+			$message,
+			array(
+				'order' => $this,
+				'error' => $e,
+			)
+		);
+		$this->add_order_note( $message . ' ' . $e->getMessage() );
+	}
+
+	/**
 	 * Set order status.
 	 *
 	 * @since 3.0.0
