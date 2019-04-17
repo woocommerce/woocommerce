@@ -97,6 +97,7 @@ const webpackConfig = {
 					},
 				},
 				include: new RegExp( '/node_modules\/(' +
+					'|acorn-jsx' +
 					'|d3-array' +
 					'|debug' +
 					'|regexpu-core' +
