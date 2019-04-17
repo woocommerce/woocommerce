@@ -66,7 +66,7 @@
     "npm": ">=6.4.1"
   },
   "dependencies": {
-    "@woocommerce/block-library": "2.0.0-rc3",
+    "@woocommerce/block-library": "2.0.0",
     "github-contributors-list": "https://github.com/woocommerce/github-contributors-list/tarball/master"
   },
   "husky": {
