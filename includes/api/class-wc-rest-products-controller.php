@@ -226,7 +226,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return WC_Product
 	 */
 	protected function set_product_images( $product, $images ) {
-		if ( is_array( $images ) ) {
+		$images = is_array( $images ) ? array_filter( $images ) : array();
+
+		if ( ! empty( $images ) ) {
 			$gallery = array();
 
 			foreach ( $images as $index => $image ) {
