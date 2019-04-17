@@ -62,7 +62,13 @@ class WC_Tracks_Client {
 			update_user_meta( $user_id, '_woocommerce_tracks_anon_id', $anon_id );
 		}
 
-		wc_setcookie( 'tk_ai', $anon_id );
+		// Don't set cookie on API requests.
+		if (
+			! ( defined( 'REST_REQUEST' ) && REST_REQUEST ) &&
+			! ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
+		) {
+			wc_setcookie( 'tk_ai', $anon_id );
+		}
 	}
 
 	/**
@@ -185,14 +191,6 @@ class WC_Tracks_Client {
 				}
 
 				$anon_id = 'woo:' . base64_encode( $binary );
-
-				// Don't set cookie on API requests.
-				if (
-					! ( defined( 'REST_REQUEST' ) && REST_REQUEST ) &&
-					! ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
-				) {
-					wc_setcookie( 'tk_ai', $anon_id );
-				}
 			}
 		}
 
