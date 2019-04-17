@@ -607,25 +607,27 @@ function wc_price( $price, $args = array() ) {
  */
 function wc_let_to_num( $size ) {
 	$l    = substr( $size, -1 );
-	$ret  = substr( $size, 0, -1 );
-	$byte = 1024;
-
-	switch ( strtoupper( $l ) ) {
-		case 'P':
-			$ret *= 1024;
-			// No break.
-		case 'T':
-			$ret *= 1024;
-			// No break.
-		case 'G':
-			$ret *= 1024;
-			// No break.
-		case 'M':
-			$ret *= 1024;
-			// No break.
-		case 'K':
-			$ret *= 1024;
-			// No break.
+	$ret  = (int) substr( $size, 0, -1 );
+	if ( is_int( $ret ) ) {
+		switch ( strtoupper( $l ) ) {
+			case 'P':
+				$ret *= 1024;
+				// No break.
+			case 'T':
+				$ret *= 1024;
+				// No break.
+			case 'G':
+				$ret *= 1024;
+				// No break.
+			case 'M':
+				$ret *= 1024;
+				// No break.
+			case 'K':
+				$ret *= 1024;
+				// No break.
+		}
+	} else {
+		$ret = 0;
 	}
 	return $ret;
 }
