@@ -61,7 +61,7 @@ class WC_Webhook_Data_Store implements WC_Webhook_Data_Store_Interface {
 
 		$this->delete_transients( $webhook->get_status( 'edit' ) );
 		WC_Cache_Helper::incr_cache_prefix( 'webhooks' );
-		do_action( 'woocommerce_new_webhook', $webhook_id );
+		do_action( 'woocommerce_new_webhook', $webhook_id, $webhook );
 	}
 
 	/**
