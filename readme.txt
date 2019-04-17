@@ -158,7 +158,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
-= 3.6.0 - 2019-xx-xx =
+= 3.6.0 - 2019-04-17 =
 * Enhancement - Merged WooCommerce Gutenberg Products Block feature plugin. Adds blocks for the new editor, including
                 hand picked products, featured products, products by category/attribute, sale products, new products, top rated
                 products, and best selling products. #22954
