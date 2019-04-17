@@ -54,6 +54,7 @@ class WC_Tracks_Client {
 		if ( $user instanceof WP_User && 'wptests_capabilities' === $user->cap_key ) {
 			return false;
 		}
+		$user_id = $user->ID;
 		$anon_id = get_user_meta( $user_id, '_woocommerce_tracks_anon_id', true );
 
 		// If an id is still not found, create one and save it.
