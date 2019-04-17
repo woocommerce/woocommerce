@@ -30,3 +30,20 @@ function add_report_register_script() {
 	wp_enqueue_script( 'add-report' );
 }
 add_action( 'admin_enqueue_scripts', 'add_report_register_script' );
+
+/**
+ * Add "Example" as a Analytics submenu item.
+ *
+ * @param array $report_pages Report page menu items.
+ * @return array Updated report page menu items.
+ */
+function add_report_add_report_menu_item( $report_pages ) {
+	$report_pages[] = array(
+		'title'  => __( 'Example', 'woocommerce-admin' ),
+		'parent' => '/analytics/revenue',
+		'path'   => '/analytics/example',
+	);
+
+	return $report_pages;
+}
+add_filter( 'woocommerce_admin_report_menu_items', 'add_report_add_report_menu_item' );
