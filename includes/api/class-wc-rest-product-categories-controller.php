@@ -223,11 +223,11 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 		$id = (int) $term->term_id;
 
 		if ( isset( $request['display'] ) ) {
-			update_woocommerce_term_meta( $id, 'display_type', 'default' === $request['display'] ? '' : $request['display'] );
+			update_term_meta( $id, 'display_type', 'default' === $request['display'] ? '' : $request['display'] );
 		}
 
 		if ( isset( $request['menu_order'] ) ) {
-			update_woocommerce_term_meta( $id, 'order', $request['menu_order'] );
+			update_term_meta( $id, 'order', $request['menu_order'] );
 		}
 
 		if ( isset( $request['image'] ) ) {
@@ -245,7 +245,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 
 			// Check if image_id is a valid image attachment before updating the term meta.
 			if ( $image_id && wp_attachment_is_image( $image_id ) ) {
-				update_woocommerce_term_meta( $id, 'thumbnail_id', $image_id );
+				update_term_meta( $id, 'thumbnail_id', $image_id );
 
 				// Set the image alt.
 				if ( ! empty( $request['image']['alt'] ) ) {
@@ -262,7 +262,7 @@ class WC_REST_Product_Categories_Controller extends WC_REST_Product_Categories_V
 					);
 				}
 			} else {
-				delete_woocommerce_term_meta( $id, 'thumbnail_id' );
+				delete_term_meta( $id, 'thumbnail_id' );
 			}
 		}
 

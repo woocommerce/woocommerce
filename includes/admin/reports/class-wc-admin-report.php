@@ -17,6 +17,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Report {
 
 	/**
+	 * @var array List of transients name that have been updated and need persisting.
+	 */
+	protected static $transients_to_update = array();
+	
+	/**
+	 * @var array The list of transients.
+	 */
+	protected static $cached_results = array();
+
+	/**
 	 * The chart interval.
 	 *
 	 * @var int
@@ -128,8 +138,11 @@ class WC_Admin_Report {
 				case 'order_item':
 					$get_key = "order_items.{$key}";
 					break;
-				default:
-					break;
+			}
+
+			if ( empty( $get_key ) ) {
+				// Skip to the next foreach iteration else the query will be invalid.
+				continue;
 			}
 
 			if ( $value['function'] ) {
@@ -322,8 +335,6 @@ class WC_Admin_Report {
 
 		$query          = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
 		$query          = implode( ' ', $query );
-		$query_hash     = md5( $query_type . $query );
-		$cached_results = get_transient( strtolower( get_class( $this ) ) );
 
 		if ( $debug ) {
 			echo '<pre>';
@@ -331,21 +342,96 @@ class WC_Admin_Report {
 			echo '</pre>';
 		}
 
-		if ( $debug || $nocache || false === $cached_results || ! isset( $cached_results[ $query_hash ] ) ) {
-			static $big_selects = false;
-			// Enable big selects for reports, just once for this session
-			if ( ! $big_selects ) {
-				$wpdb->query( 'SET SESSION SQL_BIG_SELECTS=1' );
-				$big_selects = true;
-			}
+		if ( $debug || $nocache ) {
+			self::enable_big_selects();
 
-			$cached_results[ $query_hash ] = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
-			set_transient( strtolower( get_class( $this ) ), $cached_results, DAY_IN_SECONDS );
+			$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
+		} else {
+			$query_hash = md5( $query_type . $query );
+			$result = $this->get_cached_query( $query_hash );
+			if ( $result === null ) {
+				self::enable_big_selects();
+
+				$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
+			}
+			$this->set_cached_query( $query_hash, $result );
 		}
 
-		$result = $cached_results[ $query_hash ];
-
 		return $result;
+	}
+
+	/**
+	 * Init the static hooks of the class.
+	 */
+	protected static function add_update_transients_hook() {
+		if ( ! has_action( 'shutdown', array( 'WC_Admin_Report', 'maybe_update_transients' ) ) ) {
+			add_action( 'shutdown', array( 'WC_Admin_Report', 'maybe_update_transients' ) );
+		}
+	}
+	
+	/**
+	 * Enables big mysql selects for reports, just once for this session.
+	 */
+	protected static function enable_big_selects() {
+		static $big_selects = false;
+
+		global $wpdb;
+
+		if ( ! $big_selects ) {
+			$wpdb->query( 'SET SESSION SQL_BIG_SELECTS=1' );
+			$big_selects = true;
+		}
+	}
+
+	/**
+	 * Get the cached query result or null if it's not in the cache.
+	 *
+	 * @param string $query_hash The query hash.
+	 *
+	 * @return mixed
+	 */
+	protected function get_cached_query( $query_hash ) {
+		$class = strtolower( get_class( $this ) );
+		
+		if ( ! isset( self::$cached_results[ $class ] ) ) {
+			self::$cached_results[ $class ] = get_transient( strtolower( get_class( $this ) ) );
+		}
+		
+		if ( isset( self::$cached_results[ $class ][ $query_hash ] ) ) {
+			return self::$cached_results[ $class ][ $query_hash ];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Set the cached query result.
+	 *
+	 * @param string $query_hash The query hash.
+	 * @param mixed  $data The data to cache.
+	 */
+	protected function set_cached_query( $query_hash, $data ) {
+		$class = strtolower( get_class( $this ) );
+		
+		if ( ! isset( self::$cached_results[ $class ] ) ) {
+			self::$cached_results[ $class ] = get_transient( strtolower( get_class( $this ) ) );
+		}
+		
+		self::add_update_transients_hook();
+		
+		self::$transients_to_update[ $class ]          = $class;
+		self::$cached_results[ $class ][ $query_hash ] = $data;
+	}
+
+	/**
+	 * Function to update the modified transients at the end of the request.
+	 */
+	public static function maybe_update_transients() {
+		foreach ( self::$transients_to_update as $key => $transient_name ) {
+			set_transient( $transient_name, self::$cached_results[ $transient_name ], DAY_IN_SECONDS );
+		}
+		// Transients have been updated reset the list.
+		self::$transients_to_update = array();
 	}
 
 	/**
