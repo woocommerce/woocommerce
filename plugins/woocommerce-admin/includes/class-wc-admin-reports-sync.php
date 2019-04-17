@@ -214,7 +214,7 @@ class WC_Admin_Reports_Sync {
 		$offset       = $page > 1 ? $page * $limit : 0;
 
 		if ( $days ) {
-			$days_ago      = date( 'Y-m-d H:i:s', time() - ( DAY_IN_SECONDS * $days ) );
+			$days_ago      = date( 'Y-m-d 00:00:00', time() - ( DAY_IN_SECONDS * $days ) );
 			$where_clause .= " AND post_date >= '{$days_ago}'";
 		}
 
