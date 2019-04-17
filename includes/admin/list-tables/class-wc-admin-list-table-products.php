@@ -338,7 +338,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			?>
 			<select class="wc-category-search" name="product_cat" data-placeholder="<?php esc_attr_e( 'Filter by category', 'woocommerce' ); ?>" data-allow_clear="true">
 				<?php if ( $current_category_slug && $current_category ) : ?>
-					<option value="<?php echo esc_attr( $current_category_slug ); ?>" selected="selected"><?php echo esc_html( $current_category->name ); ?><option>
+					<option value="<?php echo esc_attr( $current_category_slug ); ?>" selected="selected"><?php echo htmlspecialchars( wp_kses_post( $current_category->name ) ); ?><option>
 				<?php endif; ?>
 			</select>
 			<?php
