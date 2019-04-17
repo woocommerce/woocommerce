@@ -484,7 +484,7 @@ class WC_Admin_Setup_Wizard {
 							echo esc_html( sprintf( __( '%1$s (%2$s)', 'woocommerce' ), $name, $code ) );
 						} else {
 							/* translators: 1: currency name 2: currency symbol, 3: currency code */
-							echo esc_html( sprintf( __( '%1$s (%2$s / %3$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ), $code ) );
+							echo esc_html( sprintf( __( '%1$s (%2$s %3$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ), $code ) );
 						}
 						?>
 					</option>
