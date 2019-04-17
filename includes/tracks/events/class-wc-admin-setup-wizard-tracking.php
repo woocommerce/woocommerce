@@ -32,7 +32,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 		add_action( 'admin_init', array( $this, 'track_ready_next_steps' ), 1 );
 		add_action( 'wp_print_scripts', array( $this, 'dequeue_non_whitelisted_scripts' ) );
 		$this->add_step_save_events();
-		$this->add_footer_scripts();
+		add_action( 'woocommerce_setup_footer', array( $this, 'add_footer_scripts' ) );
 	}
 
 	/**
@@ -45,11 +45,9 @@ class WC_Admin_Setup_Wizard_Tracking {
 	}
 
 	/**
-	 * Add footer scripts to OBW since it does not contain hooks for
-	 * wp_footer to allow the default methods of enqueuing scripts.
+	 * Add footer scripts to OBW via woocommerce_setup_footer
 	 */
 	public function add_footer_scripts() {
-		wp_print_scripts();
 		WC_Site_Tracking::add_tracking_function();
 	}
 
