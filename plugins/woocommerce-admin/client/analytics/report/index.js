@@ -33,7 +33,7 @@ import ReportError from 'analytics/components/report-error';
 import { searchItemsByString } from 'wc-api/items/utils';
 import withSelect from 'wc-api/with-select';
 
-const REPORTS_FILTER = 'woocommerce-reports-list';
+const REPORTS_FILTER = 'woocommerce_admin_reports_list';
 
 const getReports = () => {
 	const reports = [
