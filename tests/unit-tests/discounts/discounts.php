@@ -1,9 +1,12 @@
 <?php
-
 /**
  * Test for the discounts class.
  * @package WooCommerce\Tests\Discounts
  */
+
+ /**
+  * WC_Tests_Discounts.
+  */
 class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 	/**
@@ -30,7 +33,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	 * Helper function to hold a reference to created coupon objects so they
 	 * can be cleaned up properly at the end of each test.
 	 *
-	 * @param $coupon WC_Coupon The coupon object to store.
+	 * @param WC_Coupon $coupon The coupon object to store.
 	 */
 	protected function store_coupon( $coupon ) {
 		$this->coupons[ $coupon->get_code() ] = $coupon;
@@ -40,7 +43,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	 * Helper function to hold a reference to created product objects so they
 	 * can be cleaned up properly at the end of each test.
 	 *
-	 * @param $product WC_Product The product object to store.
+	 * @param WC_Product $product The product object to store.
 	 */
 	protected function store_product( $product ) {
 		$this->products[] = $product;
@@ -50,18 +53,21 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	 * Helper function to hold a reference to created order objects so they
 	 * can be cleaned up properly at the end of each test.
 	 *
-	 * @param $order WC_Order The order object to store.
+	 * @param WC_Order $order The order object to store.
 	 */
 	protected function store_order( $order ) {
 		$this->orders[] = $order;
 	}
 
+	/**
+	 * Setup tests.
+	 */
 	public function setUp() {
 		parent::setUp();
 
-		$this->products = array();
-		$this->coupons = array();
-		$this->orders = array();
+		$this->products       = array();
+		$this->coupons        = array();
+		$this->orders         = array();
 		$this->last_test_data = null;
 	}
 
@@ -79,7 +85,7 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	 * Test get and set items.
 	 */
 	public function test_get_set_items_from_cart() {
-		// Create dummy product - price will be 10
+		// Create dummy product - price will be 10.
 		$product = WC_Helper_Product::create_simple_product();
 		$this->store_product( $product );
 
@@ -1336,14 +1342,19 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * test_free_shipping_coupon_no_products.
+	 */
 	public function test_free_shipping_coupon_no_products() {
 		$discounts = new WC_Discounts();
 		$coupon = WC_Helper_Coupon::create_coupon( 'freeshipping' );
-		$coupon->set_props( array(
-			'discount_type' => 'percent',
-			'amount' => '',
-			'free_shipping' => 'yes',
-		));
+		$coupon->set_props(
+			array(
+				'discount_type' => 'percent',
+				'amount' => '',
+				'free_shipping' => 'yes',
+			)
+		);
 
 		$discounts->apply_coupon( $coupon );
 
@@ -1351,10 +1362,18 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, count( $all_discounts['freeshipping'] ), 'Free shipping coupon should not have any discounts.' );
 	}
 
+	/**
+	 * filter_woocommerce_coupon_get_discount_amount.
+	 *
+	 * @param float $discount Discount amount.
+	 */
 	public function filter_woocommerce_coupon_get_discount_amount( $discount ) {
 		return $discount / 2;
 	}
 
+	/**
+	 * test_coupon_discount_amount_filter.
+	 */
 	public function test_coupon_discount_amount_filter() {
 		$discounts = new WC_Discounts();
 
@@ -1373,11 +1392,13 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product2->get_id(), 1 );
 
 		$coupon = WC_Helper_Coupon::create_coupon( 'test' );
-		$coupon->set_props( array(
-			'code'                   => 'test',
-			'discount_type'          => 'percent',
-			'amount'                 => '20',
-		) );
+		$coupon->set_props(
+			array(
+				'code'                   => 'test',
+				'discount_type'          => 'percent',
+				'amount'                 => '20',
+			)
+		);
 
 		$discounts->set_items_from_cart( WC()->cart );
 		$discounts->apply_coupon( $coupon );
@@ -1410,19 +1431,23 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$product_sale->save();
 
 		$coupon_percent = new WC_Coupon();
-		$coupon_percent->set_props( array(
-			'amount'             => 10,
-			'discount_type'      => 'percent',
-			'exclude_sale_items' => false,
-		) );
+		$coupon_percent->set_props(
+			array(
+				'amount'             => 10,
+				'discount_type'      => 'percent',
+				'exclude_sale_items' => false,
+			)
+		);
 		$coupon_percent->save();
 
 		$coupon_percent_no_sale = new WC_Coupon();
-		$coupon_percent_no_sale->set_props( array(
-			'amount'             => 10,
-			'discount_type'      => 'percent',
-			'exclude_sale_items' => true,
-		) );
+		$coupon_percent_no_sale->set_props(
+			array(
+				'amount'             => 10,
+				'discount_type'      => 'percent',
+				'exclude_sale_items' => true,
+			)
+		);
 		$coupon_percent_no_sale->save();
 
 		WC()->cart->empty_cart();
@@ -1467,19 +1492,23 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$product_sale->save();
 
 		$coupon_cart = new WC_Coupon();
-		$coupon_cart->set_props( array(
-			'amount'             => 5,
-			'discount_type'      => 'fixed_cart',
-			'exclude_sale_items' => false,
-		) );
+		$coupon_cart->set_props(
+			array(
+				'amount'             => 5,
+				'discount_type'      => 'fixed_cart',
+				'exclude_sale_items' => false,
+			)
+		);
 		$coupon_cart->save();
 
 		$coupon_cart_no_sale = new WC_Coupon();
-		$coupon_cart_no_sale->set_props( array(
-			'amount'             => 5,
-			'discount_type'      => 'fixed_cart',
-			'exclude_sale_items' => true,
-		) );
+		$coupon_cart_no_sale->set_props(
+			array(
+				'amount'             => 5,
+				'discount_type'      => 'fixed_cart',
+				'exclude_sale_items' => true,
+			)
+		);
 		$coupon_cart_no_sale->save();
 
 		WC()->cart->empty_cart();
@@ -1504,8 +1533,6 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 
 	/**
 	 * Test the per product coupon logic with and without sale items.
-	 *
-	 * @since 3.4.6
 	 */
 	public function test_is_coupon_valid_fixed_product_sale_items() {
 		$product_no_sale = new WC_Product_Simple();
@@ -1518,19 +1545,23 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$product_sale->save();
 
 		$coupon_product = new WC_Coupon();
-		$coupon_product->set_props( array(
-			'amount'             => 5,
-			'discount_type'      => 'fixed_product',
-			'exclude_sale_items' => false,
-		) );
+		$coupon_product->set_props(
+			array(
+				'amount'             => 5,
+				'discount_type'      => 'fixed_product',
+				'exclude_sale_items' => false,
+			)
+		);
 		$coupon_product->save();
 
 		$coupon_product_no_sale = new WC_Coupon();
-		$coupon_product_no_sale->set_props( array(
-			'amount'             => 5,
-			'discount_type'      => 'fixed_product',
-			'exclude_sale_items' => true,
-		) );
+		$coupon_product_no_sale->set_props(
+			array(
+				'amount'             => 5,
+				'discount_type'      => 'fixed_product',
+				'exclude_sale_items' => true,
+			)
+		);
 		$coupon_product_no_sale->save();
 
 		WC()->cart->empty_cart();
