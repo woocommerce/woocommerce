@@ -28,6 +28,44 @@ class WC_Tracks_Client {
 	const USER_AGENT_SLUG = 'tracks-client';
 
 	/**
+	 * Initialize tracks client class
+	 *
+	 * @return void
+	 */
+	public static function init() {
+		// Use wp hook for setting the identity cookie to avoid headers already sent warnings.
+		add_action( 'wp', array( self, 'maybe_set_identity_cookie' ) );
+	}
+
+	/**
+	 * Check if identiy cookie is set, if not set it.
+	 *
+	 * @return void
+	 */
+	public static function maybe_set_identity_cookie() {
+		// Bail if cookie already set.
+		if ( isset( $_COOKIE['tk_ai'] ) ) {
+			return;
+		}
+
+		$user = wp_get_current_user();
+
+		// We don't want to track user events during unit tests/CI runs.
+		if ( $user instanceof WP_User && 'wptests_capabilities' === $user->cap_key ) {
+			return false;
+		}
+		$anon_id = get_user_meta( $user_id, '_woocommerce_tracks_anon_id', true );
+
+		// If an id is still not found, create one and save it.
+		if ( ! $anon_id ) {
+			$anon_id = self::get_anon_id();
+			update_user_meta( $user_id, '_woocommerce_tracks_anon_id', $anon_id );
+		}
+
+		wc_setcookie( 'tk_ai', $anon_id );
+	}
+
+	/**
 	 * Record a Tracks event
 	 *
 	 * @param  array $event Array of event properties.
@@ -117,10 +155,6 @@ class WC_Tracks_Client {
 			update_user_meta( $user_id, '_woocommerce_tracks_anon_id', $anon_id );
 		}
 
-		if ( ! isset( $_COOKIE['tk_ai'] ) ) {
-			wc_setcookie( 'tk_ai', $anon_id );
-		}
-
 		return array(
 			'_ut' => 'anon',
 			'_ui' => $anon_id,
@@ -165,3 +199,5 @@ class WC_Tracks_Client {
 		return $anon_id;
 	}
 }
+
+WC_Tracks_Client::init();
