@@ -161,6 +161,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 = 3.6.2 - 2019-xx-xx =
 * Fix - [3.6.x] Fix security check on email template preview page. #23356
 * Fix - [3.6.x] wc_ascii_uasort_comparison throwing notices in some server configs. #23363
+* Fix - [3.6.x] `is_request_to_rest_api` should check for wc endpoints only. #23372
 * Fix - Revert selectWoo escaping change and instead escape user names. Avoids issues displaying slash characters. #23334
 * Fix - If an empty array is passed to the v3 API for images, images should be unset. #23339
 * Fix - Fix attribute renaming when dealing with unicode characters. #23132
@@ -176,7 +177,6 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Style span.description elements after select2 boxes. #23252
 * Fix - Switch to subquery for sale products to prevent large query errors on some hosting environments. #23266
 * Fix - Add offerCount to variable product structured data. #23349
-* Fix - `is_request_to_rest_api` should check for wc endpoints only. #23372
 * Fix - Cart widget - Allow title to be removed. #23370
 * Tweak - Removed 2 old admin notices for featured moved in past versions. #23263
 * Localization - Make the state/county field optional at checkout for Greece. #23365
