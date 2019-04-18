@@ -176,6 +176,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Style span.description elements after select2 boxes. #23252
 * Fix - Switch to subquery for sale products to prevent large query errors on some hosting environments. #23266
 * Fix - Add offerCount to variable product structured data. #23349
+* Fix - `is_request_to_rest_api` should check for wc endpoints only. #23372
+* Fix - Cart widget - Allow title to be removed. #23370
 * Tweak - Removed 2 old admin notices for featured moved in past versions. #23263
 * Localization - Make the state/county field optional at checkout for Greece. #23365
 
