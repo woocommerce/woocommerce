@@ -572,6 +572,7 @@ function wc_get_product_class( $class = '', $product = null ) {
 		$product = wc_get_product( $product );
 	}
 
+	// Make sure we have an array.
 	if ( ! is_array( $class ) ) {
 		$classes = preg_split( '#\s+#', $class );
 	} else {
@@ -644,20 +645,16 @@ function wc_get_product_class( $class = '', $product = null ) {
 		}
 	}
 
-	// If using `wc_get_product_class` instead of `get_post_class`, we don't need to hook `wc_product_post_class` function.
-	$filtered = has_filter( 'post_class', 'wc_product_post_class' );
+	/**
+	 * WooCommerce Post Class filter.
+	 *
+	 * @since 3.6.2
+	 * @param array      $class Array of CSS classes.
+	 * @param WC_Product $product Product object.
+	 */
+	$classes = apply_filters( 'woocommerce_post_class', $classes, $product );
 
-	if ( $filtered ) {
-		remove_filter( 'post_class', 'wc_product_post_class', 20, 3 );
-	}
-
-	$classes = apply_filters( 'post_class', $classes, $class, $product->get_id() );
-
-	if ( $filtered ) {
-		add_filter( 'post_class', 'wc_product_post_class', 20, 3 );
-	}
-
-	return array_filter( array_map( 'esc_attr', array_unique( $classes ) ) );
+	return array_map( 'esc_attr', array_filter( array_unique( $classes ) ) );
 }
 
 /**
