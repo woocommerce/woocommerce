@@ -921,6 +921,11 @@ class WC_Countries {
 							'required' => false,
 						),
 					),
+					'GR' => array(
+						'state' => array(
+							'required' => false,
+						),
+					),
 					'HK' => array(
 						'postcode' => array(
 							'required' => false,
