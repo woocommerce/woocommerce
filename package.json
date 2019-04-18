@@ -23,13 +23,13 @@
     "babel": "6.23.0",
     "babel-cli": "6.26.0",
     "babel-eslint": "10.0.1",
-    "babel-plugin-add-module-exports": "1.0.0",
+    "babel-plugin-add-module-exports": "1.0.2",
     "babel-preset-es2015": "6.24.1",
     "babel-preset-stage-2": "6.24.1",
     "chai": "4.2.0",
     "chai-as-promised": "7.1.1",
     "chromedriver": "2.46.0",
-    "config": "3.0.1",
+    "config": "3.1.0",
     "cross-env": "5.2.0",
     "eslint": "5.16.0",
     "eslint-config-wpcalypso": "4.0.1",
@@ -54,10 +54,10 @@
     "husky": "1.3.1",
     "istanbul": "1.0.0-alpha.2",
     "lint-staged": "8.1.5",
-    "mocha": "6.0.2",
+    "mocha": "6.1.3",
     "node-sass": "4.11.0",
     "prettier": "github:automattic/calypso-prettier#c56b4251",
-    "stylelint": "9.10.1",
+    "stylelint": "10.0.1",
     "stylelint-config-wordpress": "13.1.0",
     "wc-e2e-page-objects": "0.10.0"
   },
@@ -66,7 +66,7 @@
     "npm": ">=6.4.1"
   },
   "dependencies": {
-    "@woocommerce/block-library": "2.0.0-rc3",
+    "@woocommerce/block-library": "2.0.0",
     "github-contributors-list": "https://github.com/woocommerce/github-contributors-list/tarball/master"
   },
   "husky": {

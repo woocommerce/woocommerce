@@ -127,7 +127,6 @@ class WC_Settings_Products extends WC_Settings_Page {
 			$settings = apply_filters(
 				'woocommerce_inventory_settings',
 				array(
-
 					array(
 						'title' => __( 'Inventory', 'woocommerce' ),
 						'type'  => 'title',

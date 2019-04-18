@@ -119,8 +119,11 @@ class WC_REST_Network_Orders_V2_Controller extends WC_REST_Orders_V2_Controller 
 		$blog_id = $request->get_param( 'blog_id' );
 		$blog_id = ! empty( $blog_id ) ? $blog_id : get_current_blog_id();
 		$active_plugins = get_blog_option( $blog_id, 'active_plugins', array() );
+		$network_active_plugins = array_keys( get_site_option( 'active_sitewide_plugins', array() ) );
+
+		$plugins = array_merge( $active_plugins, $network_active_plugins );
 		$wc_active = false;
-		foreach ( $active_plugins as $plugin ) {
+		foreach ( $plugins as $plugin ) {
 			if ( substr_compare( $plugin, '/woocommerce.php', strlen( $plugin ) - strlen( '/woocommerce.php' ), strlen( '/woocommerce.php' ) ) === 0 ) {
 				$wc_active = true;
 			}

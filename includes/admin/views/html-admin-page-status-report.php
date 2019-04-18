@@ -475,8 +475,8 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 					if ( ! $table_data ) {
 						echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Table does not exist', 'woocommerce' ) . '</mark>';
 					} else {
-						/* Translators: %1$f: Table size, %2$f: Index size. */
-						printf( esc_html__( 'Data: %1$.2fMB + Index: %2$.2fMB', 'woocommerce' ), esc_html( wc_format_decimal( $table_data['data'], 2 ) ), esc_html( wc_format_decimal( $table_data['index'], 2 ) ) );
+						/* Translators: %1$f: Table size, %2$f: Index size, %3$s Engine. */
+						printf( esc_html__( 'Data: %1$.2fMB + Index: %2$.2fMB + Engine %3$s', 'woocommerce' ), esc_html( wc_format_decimal( $table_data['data'], 2 ) ), esc_html( wc_format_decimal( $table_data['index'], 2 ) ), esc_html( $table_data['engine'] ) );
 					}
 					?>
 				</td>
@@ -489,8 +489,8 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 				<td class="help">&nbsp;</td>
 				<td>
 					<?php
-					/* Translators: %1$f: Table size, %2$f: Index size. */
-					printf( esc_html__( 'Data: %1$.2fMB + Index: %2$.2fMB', 'woocommerce' ), esc_html( wc_format_decimal( $table_data['data'], 2 ) ), esc_html( wc_format_decimal( $table_data['index'], 2 ) ) );
+						/* Translators: %1$f: Table size, %2$f: Index size, %3$s Engine. */
+						printf( esc_html__( 'Data: %1$.2fMB + Index: %2$.2fMB + Engine %3$s', 'woocommerce' ), esc_html( wc_format_decimal( $table_data['data'], 2 ) ), esc_html( wc_format_decimal( $table_data['index'], 2 ) ), esc_html( $table_data['engine'] ) );
 					?>
 				</td>
 			</tr>
