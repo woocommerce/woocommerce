@@ -170,10 +170,11 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Network orders widget not showing orders when installed as a network plugin. #23270
 * Fix - Correctly map attributes in CSV when the number is not at the end of the cell. #23251
 * Fix - Fixed highlighting of Orders list item in My Account when looking at individual order. #23236
-* Fix - Applies wp_strip_all_tags() to the line item name when building PayPal request URL. #23297
+* Fix - Applies `wp_strip_all_tags` to the line item name when building PayPal request URL. #23297
 * Fix - Non int value handling in `wc_let_to_num`. #23329
 * Fix - Style span.description elements after select2 boxes. #23252
 * Tweak - Removed 2 old admin notices for featured moved in past versions. #23263
+* Localization - Make the state/county field optional at checkout for Greece. #23365
 
 = 3.6.1 - 2019-04-18 =
 * Fix - [3.6.x] Remove calls to 'header_register_callback' to prevent conflicts with some hosting providers and PHP versions.
