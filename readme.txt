@@ -158,8 +158,22 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 == Changelog ==
 
+= 3.6.2 - 2019-xx-xx =
+* Fix - [3.6.x] Fix security check on email template preview page. #23356
+* Fix - If an empty array is passed to the v3 API for images, images should be unset. #23339
+* Fix - Fix attribute renaming when dealing with unicode characters. #23132
+* Fix - Preserve full-stops in external product URLs. #23196
+* Fix - Add check for VAT exemption inside `display_prices_including_tax`. #23201
+* Fix - Avoid post update in `wc_update_product_stock` to prevent product titles being updated. #23249
+* Fix - Updated Back to Items link when editing attribute terms. #23238
+* Fix - Network orders widget not showing orders when installed as a network plugin. #23270
+* Fix - Correctly map attributes in CSV when the number is not at the end of the cell. #23251
+* Fix - Fixed highlighting of Orders list item in My Account when looking at individual order. #23236
+* Fix - Applies wp_strip_all_tags() to the line item name when building PayPal request URL. #23297
+* Fix - Non int value handling in `wc_let_to_num`. #23329
+
 = 3.6.1 - 2019-04-18 =
-* Fix - Remove calls to 'header_register_callback' to prevent conflicts with some hosting providers and PHP versions.
+* Fix - [3.6.x] Remove calls to 'header_register_callback' to prevent conflicts with some hosting providers and PHP versions.
 
 = 3.6.0 - 2019-04-17 =
 * Enhancement - Merged WooCommerce Gutenberg Products Block feature plugin. Adds blocks for the new editor, including
