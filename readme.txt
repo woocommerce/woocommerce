@@ -173,6 +173,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Applies wp_strip_all_tags() to the line item name when building PayPal request URL. #23297
 * Fix - Non int value handling in `wc_let_to_num`. #23329
 * Fix - Style span.description elements after select2 boxes. #23252
+* Tweak - Removed 2 old admin notices for featured moved in past versions. #23263
 
 = 3.6.1 - 2019-04-18 =
 * Fix - [3.6.x] Remove calls to 'header_register_callback' to prevent conflicts with some hosting providers and PHP versions.
