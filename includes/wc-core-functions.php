@@ -1624,8 +1624,8 @@ function wc_uasort_comparison( $a, $b ) {
  */
 function wc_ascii_uasort_comparison( $a, $b ) {
 	if ( function_exists( 'iconv' ) ) {
-		$a = iconv( 'UTF-8', 'ASCII//TRANSLIT', $a );
-		$b = iconv( 'UTF-8', 'ASCII//TRANSLIT', $b );
+		$a = iconv( 'UTF-8', 'ASCII//IGNORE', $a );
+		$b = iconv( 'UTF-8', 'ASCII//IGNORE', $b );
 	}
 	return strcmp( $a, $b );
 }
