@@ -47,6 +47,7 @@ class WC_Tests_Admin_Report extends WC_Unit_Test_Case {
 		) );
 
 		$this->assertEquals( 1, $data->total_orders, 'Expected to see one completed order in the report.' );
+		WC_Admin_Report::maybe_update_transients();
 		$this->assertNotEmpty( get_transient( 'wc_admin_report' ), 'Results should be cached in a transient.' );
 	}
 

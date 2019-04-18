@@ -492,7 +492,7 @@ class WC_Gateway_Paypal_Request {
 		$item = apply_filters(
 			'woocommerce_paypal_line_item',
 			array(
-				'item_name'   => html_entity_decode( wc_trim_string( $item_name ? $item_name : __( 'Item', 'woocommerce' ), 127 ), ENT_NOQUOTES, 'UTF-8' ),
+				'item_name'   => html_entity_decode( wc_trim_string( $item_name ? wp_strip_all_tags( $item_name ) : __( 'Item', 'woocommerce' ), 127 ), ENT_NOQUOTES, 'UTF-8' ),
 				'quantity'    => (int) $quantity,
 				'amount'      => wc_float_to_string( (float) $amount ),
 				'item_number' => $item_number,

@@ -66,7 +66,6 @@ class WC_Site_Tracking {
 				var eventProperties = properties || {};
 				eventProperties.url = '<?php echo esc_html( home_url() ); ?>'
 				eventProperties.products_count = '<?php echo intval( WC_Tracks::get_products_count() ); ?>';
-				eventProperties.orders_gross = '<?php echo floatval( WC_Tracks::get_total_revenue() ); ?>';
 				window._tkq = window._tkq || [];
 				window._tkq.push( [ 'recordEvent', eventName, eventProperties ] );
 			}
