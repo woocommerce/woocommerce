@@ -2263,7 +2263,9 @@ ul.wc_coupon_list_block {
 
 			&::before {
 				content: "";
-				background: url("../images/wpspin.gif") no-repeat center top;
+				background: url("../images/wpspin-2x.gif") no-repeat center top;
+				background-size: 71%;
+				top: 1px;
 			}
 		}
 	}
