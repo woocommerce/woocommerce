@@ -558,15 +558,18 @@ function wc_get_product_taxonomy_class( $term_ids, $taxonomy ) {
  *
  * @since 3.4.0
  * @param string|array           $class      One or more classes to add to the class list.
- * @param int|WP_Post|WC_Product $product_id Product ID or product object.
+ * @param int|WP_Post|WC_Product $product Product ID or product object.
  * @return array
  */
-function wc_get_product_class( $class = '', $product_id = null ) {
-	if ( is_a( $product_id, 'WC_Product' ) ) {
-		$product    = $product_id;
-		$product_id = $product_id->get_id();
-	} else {
-		$product = wc_get_product( $product_id );
+function wc_get_product_class( $class = '', $product = null ) {
+	if ( is_null( $product ) && ! empty( $GLOBALS['product'] ) ) {
+		// Product was null so pull from global.
+		$product = $GLOBALS['product'];
+	}
+
+	if ( $product && ! is_a( $product, 'WC_Product' ) ) {
+		// Make sure we have a valid product, or set to false.
+		$product = wc_get_product( $product );
 	}
 
 	if ( ! is_array( $class ) ) {
