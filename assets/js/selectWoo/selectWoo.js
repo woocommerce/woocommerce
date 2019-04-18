@@ -1,5 +1,5 @@
 /*!
- * SelectWoo 1.0.5
+ * SelectWoo 1.0.6
  * https://github.com/woocommerce/selectWoo
  *
  * Released under the MIT license
