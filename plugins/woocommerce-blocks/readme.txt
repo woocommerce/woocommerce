@@ -2,9 +2,9 @@
 Contributors: automattic, claudiulodro, tiagonoronha, jameskoster, ryelle, levinmedia
 Tags: gutenberg, woocommerce, woo commerce, products
 Requires at least: 5.0
-Tested up to: 5.1
+Tested up to: 5.2
 Requires PHP: 5.2
-Stable tag: 1.4.0
+Stable tag: 2.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -12,7 +12,7 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 WooCommerce Blocks are the easiest, most flexible way to display your products on posts and pages!
 
-**NEW: Products by Attribute Block**
+**Products by Attribute Block**
 Display a grid of products from your selected attributes.
 
 **Featured Product Block**
@@ -43,7 +43,7 @@ We've also improved the category selection filter. If you select two or more cat
 = Minimum Requirements =
 
 * WordPress 5.0
-* WooCommerce 3.5.1 or greater
+* WooCommerce 3.6 or greater
 * PHP version 5.2.4 or greater (PHP 7.2 or greater is recommended)
 * MySQL version 5.0 or greater (MySQL 5.6 or greater is recommended)
 
@@ -83,9 +83,9 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
-= 2.0.0 - TBD =
+= 2.0.0 - 2019-04-18 =
 
-- **BREAKING:** Requires WordPress 5.0+, WooCommerce 3.5+
+- **BREAKING:** Requires WordPress 5.0+, WooCommerce 3.6+
 - **BREAKING:** Remove the legacy block entirely
 - **BREAKING:** Remove the `wc-pb/v3/*` endpoints in favor of new core `wc-blocks/v1/*` endpoints
 - Feature: Add content visibility settings to show/hide title, price, rating, button
