@@ -160,6 +160,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 
 = 3.6.2 - 2019-xx-xx =
 * Fix - [3.6.x] Fix security check on email template preview page. #23356
+* Fix - Revert selectWoo escaping change and instead escape user names. Avoids issues displaying slash characters. #23334
 * Fix - If an empty array is passed to the v3 API for images, images should be unset. #23339
 * Fix - Fix attribute renaming when dealing with unicode characters. #23132
 * Fix - Preserve full-stops in external product URLs. #23196
