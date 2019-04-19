@@ -558,15 +558,12 @@ function wc_get_product_taxonomy_class( $term_ids, $taxonomy ) {
  *
  * @since 3.4.0
  * @param string|array           $class      One or more classes to add to the class list.
- * @param int|WP_Post|WC_Product $product_id Product ID or product object.
+ * @param int|WP_Post|WC_Product $product Product ID or product object.
  * @return array
  */
-function wc_get_product_class( $class = '', $product_id = null ) {
-	if ( is_a( $product_id, 'WC_Product' ) ) {
-		$product    = $product_id;
-		$product_id = $product_id->get_id();
-	} else {
-		$product = wc_get_product( $product_id );
+function wc_get_product_class( $class = '', $product = null ) {
+	if ( ! is_a( $product, 'WC_Product' ) ) {
+		$product = wc_get_product( $product );
 	}
 
 	if ( ! is_array( $class ) ) {
@@ -645,7 +642,7 @@ function wc_get_product_class( $class = '', $product_id = null ) {
 	$filtered = has_filter( 'post_class', 'wc_product_post_class' );
 
 	if ( $filtered ) {
-		remove_filter( 'post_class', 'wc_product_post_class', 20, 3 );
+		remove_filter( 'post_class', 'wc_product_post_class', 20 );
 	}
 
 	$classes = apply_filters( 'post_class', $classes, $class, $product->get_id() );
