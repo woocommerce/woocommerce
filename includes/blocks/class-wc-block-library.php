@@ -37,17 +37,24 @@ class WC_Block_Library {
 	 * Constructor.
 	 */
 	public function __construct() {
+		if ( function_exists( 'register_block_type' ) ) {
+			add_action( 'init', array( 'WC_Block_Library', 'init' ) );
+		}
+	}
+
+	/**
+	 * Initialize block library features.
+	 */
+	public static function init() {
 		// Shortcut out if we see the feature plugin, v1.4 or below.
 		// note: `WGPB_VERSION` is transformed to `WC_VERSION` in the grunt copy task.
 		if ( defined( 'WGPB_VERSION' ) && version_compare( WGPB_VERSION, '1.4.0', '<=' ) ) {
 			return;
 		}
-		if ( function_exists( 'register_block_type' ) ) {
-			add_action( 'init', array( 'WC_Block_Library', 'register_blocks' ) );
-			add_action( 'init', array( 'WC_Block_Library', 'register_assets' ) );
-			add_filter( 'block_categories', array( 'WC_Block_Library', 'add_block_category' ) );
-			add_action( 'admin_print_footer_scripts', array( 'WC_Block_Library', 'print_script_settings' ), 1 );
-		}
+		self::register_blocks();
+		self::register_assets();
+		add_filter( 'block_categories', array( 'WC_Block_Library', 'add_block_category' ) );
+		add_action( 'admin_print_footer_scripts', array( 'WC_Block_Library', 'print_script_settings' ), 1 );
 	}
 
 	/**
