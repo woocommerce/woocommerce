@@ -864,19 +864,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$outofstock_where = ' AND exclude_join.object_id IS NULL';
 		}
 
-		// Fetch a list of non-published parent products and exlude them, quicker than joining in the main query below.
-		$non_published_products = $wpdb->get_col(
-			"
-			SELECT posts.ID as id FROM `$wpdb->posts` AS posts
-			WHERE posts.post_type = 'product'
-			AND posts.post_parent = 0
-			AND posts.post_status != 'publish'
-			"
-		);
-		if ( 0 < count( $non_published_products ) ) {
-			$non_published_where = ' AND posts.post_parent NOT IN ( ' . implode( ',', $non_published_products ) . ')';
-		}
-
 		return $wpdb->get_results(
 			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 			"
@@ -888,7 +875,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			AND posts.post_status = 'publish'
 			AND lookup.onsale = 1
 			$outofstock_where
-			$non_published_where
+			AND posts.post_parent NOT IN (
+				SELECT ID FROM `$wpdb->posts` as posts
+				WHERE posts.post_type = 'product'
+				AND posts.post_parent = 0
+				AND posts.post_status != 'publish'
+			)
 			GROUP BY posts.ID
 			"
 			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
