@@ -53,7 +53,9 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 
 		$username = sanitize_user( $username );
 
-		if ( empty( $username ) || ! validate_username( $username ) ) {
+		// This filter is documented in wp-includes/user.php file.
+		$illegal_user_logins = array_map( 'strtolower', (array) apply_filters( 'illegal_user_logins', array() ) );
+		if ( empty( $username ) || ! validate_username( $username ) || in_array( strtolower( $username ), $illegal_user_logins ) ) {
 			return new WP_Error( 'registration-error-invalid-username', __( 'Please enter a valid account username.', 'woocommerce' ) );
 		}
 
