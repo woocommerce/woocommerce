@@ -237,7 +237,7 @@ function wc_update_new_customer_past_orders( $customer_id ) {
 }
 
 /**
- * Order Status completed - This is a paying customer.
+ * Order payment completed - This is a paying customer.
  *
  * @param int $order_id Order ID.
  */
@@ -251,7 +251,7 @@ function wc_paying_customer( $order_id ) {
 		$customer->save();
 	}
 }
-add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
+add_action( 'woocommerce_payment_complete', 'wc_paying_customer' );
 
 /**
  * Checks if a user (by email or ID or both) has bought an item.
