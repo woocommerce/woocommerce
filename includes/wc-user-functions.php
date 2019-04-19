@@ -137,17 +137,18 @@ function wc_create_new_customer_username( $email, $new_user_args, $suffix = '' )
 		$email_username = $email_parts[0];
 
 		// Exclude common prefixes.
-		if ( in_array(
-			$email_username,
-			array(
-				'sales',
-				'hello',
-				'mail',
-				'contact',
-				'info',
-			),
-			true
-		) ) {
+		$illegal_logins = array(
+			'sales',
+			'hello',
+			'mail',
+			'contact',
+			'info',
+		);
+
+		/** This filter is documented in wp-includes/user.php */
+		$illegal_logins = (array) apply_filters( 'illegal_user_logins', $illegal_logins );
+
+		if ( in_array( strtolower( $email_username ), array_map( 'strtolower', $illegal_logins ), true ) ) {
 			// Get the domain part.
 			$email_username = $email_parts[1];
 		}
