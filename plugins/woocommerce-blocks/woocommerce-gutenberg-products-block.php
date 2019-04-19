@@ -25,11 +25,8 @@ define( 'WGPB_ABSPATH', dirname( WGPB_PLUGIN_FILE ) . '/' );
 function wgpb_initialize() {
 	require_once plugin_dir_path( __FILE__ ) . 'assets/php/class-wgpb-block-library.php';
 
-	// Remove core hooks in favor of our local feature plugin handlers.
-	remove_action( 'init', array( 'WC_Block_Library', 'register_blocks' ) );
-	remove_action( 'init', array( 'WC_Block_Library', 'register_assets' ) );
-	remove_filter( 'block_categories', array( 'WC_Block_Library', 'add_block_category' ) );
-	remove_action( 'admin_print_footer_scripts', array( 'WC_Block_Library', 'print_script_settings' ), 1 );
+	// Remove core hook in favor of our local feature plugin handler.
+	remove_action( 'init', array( 'WC_Block_Library', 'init' ) );
 
 	$files_exist = file_exists( plugin_dir_path( __FILE__ ) . '/build/featured-product.js' );
 	if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG && ! $files_exist ) {
