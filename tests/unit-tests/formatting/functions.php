@@ -602,14 +602,18 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 2.2
 	 */
 	public function test_wc_let_to_num() {
-		$this->assertEquals(
-			array( 10240, 10485760, 10737418240, 10995116277760, 11258999068426240 ),
+		$this->assertSame(
+			array( 10240, 10485760, 10737418240, 10995116277760, 11258999068426240, 0, 0, 0, 0 ),
 			array(
 				wc_let_to_num( '10K' ),
 				wc_let_to_num( '10M' ),
 				wc_let_to_num( '10G' ),
 				wc_let_to_num( '10T' ),
 				wc_let_to_num( '10P' ),
+				wc_let_to_num( false ),
+				wc_let_to_num( true ),
+				wc_let_to_num( '' ),
+				wc_let_to_num( 'ABC' ),
 			)
 		);
 	}

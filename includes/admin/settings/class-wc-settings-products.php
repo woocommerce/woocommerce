@@ -52,54 +52,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 		$settings = $this->get_settings( $current_section );
 
-		$this->product_display_settings_moved_notice();
-
 		WC_Admin_Settings::output_fields( $settings );
-	}
-
-	/**
-	 * Show a notice showing where some options have moved.
-	 *
-	 * @since 3.3.0
-	 * @todo remove in next major release.
-	 */
-	private function product_display_settings_moved_notice() {
-		if ( get_user_meta( get_current_user_id(), 'dismissed_product_display_settings_moved_notice', true ) ) {
-			return;
-		}
-		?>
-		<div id="message" class="updated woocommerce-message inline">
-			<a class="woocommerce-message-close notice-dismiss" style="top:0;" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'product_display_settings_moved' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ); ?>"><?php esc_html_e( 'Dismiss', 'woocommerce' ); ?></a>
-
-			<p>
-				<?php
-				echo wp_kses(
-					sprintf(
-						/* translators: %s: URL to customizer. */
-						__( 'Looking for the product display options? They can now be found in the Customizer. <a href="%s">Go see them in action here.</a>', 'woocommerce' ),
-						esc_url(
-							add_query_arg(
-								array(
-									'autofocus' => array(
-										'panel' => 'woocommerce',
-									),
-									'url'       => wc_get_page_permalink( 'shop' ),
-								),
-								admin_url( 'customize.php' )
-							)
-						)
-					),
-					array(
-						'a' => array(
-							'href'  => array(),
-							'title' => array(),
-						),
-					)
-				);
-				?>
-			</p>
-		</div>
-		<?php
 	}
 
 	/**
@@ -330,7 +283,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 						array(
 							'title'    => __( 'Shop page', 'woocommerce' ),
 							/* translators: %s: URL to settings. */
-							'desc'     => '<br/>' . sprintf( __( 'The base page can also be used in your <a href="%s">product permalinks</a>.', 'woocommerce' ), admin_url( 'options-permalink.php' ) ),
+							'desc'     => sprintf( __( 'The base page can also be used in your <a href="%s">product permalinks</a>.', 'woocommerce' ), admin_url( 'options-permalink.php' ) ),
 							'id'       => 'woocommerce_shop_page_id',
 							'type'     => 'single_select_page',
 							'default'  => '',
