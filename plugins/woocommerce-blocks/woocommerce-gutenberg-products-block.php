@@ -27,6 +27,11 @@ function wgpb_initialize() {
 
 	// Remove core hook in favor of our local feature plugin handler.
 	remove_action( 'init', array( 'WC_Block_Library', 'init' ) );
+	// Remove core hooks from pre-3.6 (in 3.6.2 all functions were moved to one hook on init).
+	remove_action( 'init', array( 'WC_Block_Library', 'register_blocks' ) );
+	remove_action( 'init', array( 'WC_Block_Library', 'register_assets' ) );
+	remove_filter( 'block_categories', array( 'WC_Block_Library', 'add_block_category' ) );
+	remove_action( 'admin_print_footer_scripts', array( 'WC_Block_Library', 'print_script_settings' ), 1 );
 
 	$files_exist = file_exists( plugin_dir_path( __FILE__ ) . '/build/featured-product.js' );
 	if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG && ! $files_exist ) {
