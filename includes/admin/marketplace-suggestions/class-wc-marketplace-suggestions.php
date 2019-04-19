@@ -198,5 +198,5 @@ class WC_Marketplace_Suggestions {
 	}
 }
 
-WC_Marketplace_Suggestions::init();
+add_action( 'init', array( 'WC_Marketplace_Suggestions', 'init' ) );
 
