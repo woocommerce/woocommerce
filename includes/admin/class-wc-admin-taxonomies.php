@@ -49,7 +49,6 @@ class WC_Admin_Taxonomies {
 
 		// Category/term ordering.
 		add_action( 'create_term', array( $this, 'create_term' ), 5, 3 );
-		add_action( 'delete_term', array( $this, 'delete_term' ), 5 );
 
 		// Add form.
 		add_action( 'product_cat_add_form_fields', array( $this, 'add_category_fields' ) );
@@ -98,22 +97,17 @@ class WC_Admin_Taxonomies {
 
 		$meta_name = taxonomy_is_product_attribute( $taxonomy ) ? 'order_' . esc_attr( $taxonomy ) : 'order';
 
-		update_woocommerce_term_meta( $term_id, $meta_name, 0 );
+		update_term_meta( $term_id, $meta_name, 0 );
 	}
 
 	/**
 	 * When a term is deleted, delete its meta.
 	 *
+	 * @deprecated 3.6.0 No longer needed.
 	 * @param mixed $term_id Term ID.
 	 */
 	public function delete_term( $term_id ) {
-		global $wpdb;
-
-		$term_id = absint( $term_id );
-
-		if ( $term_id && get_option( 'db_version' ) < 34370 ) {
-			$wpdb->delete( $wpdb->woocommerce_termmeta, array( 'woocommerce_term_id' => $term_id ), array( '%d' ) );
-		}
+		wc_deprecated_function( 'delete_term', '3.6' );
 	}
 
 	/**
@@ -219,8 +213,8 @@ class WC_Admin_Taxonomies {
 	 */
 	public function edit_category_fields( $term ) {
 
-		$display_type = get_woocommerce_term_meta( $term->term_id, 'display_type', true );
-		$thumbnail_id = absint( get_woocommerce_term_meta( $term->term_id, 'thumbnail_id', true ) );
+		$display_type = get_term_meta( $term->term_id, 'display_type', true );
+		$thumbnail_id = absint( get_term_meta( $term->term_id, 'thumbnail_id', true ) );
 
 		if ( $thumbnail_id ) {
 			$image = wp_get_attachment_thumb_url( $thumbnail_id );
@@ -314,10 +308,10 @@ class WC_Admin_Taxonomies {
 	 */
 	public function save_category_fields( $term_id, $tt_id = '', $taxonomy = '' ) {
 		if ( isset( $_POST['display_type'] ) && 'product_cat' === $taxonomy ) { // WPCS: CSRF ok, input var ok.
-			update_woocommerce_term_meta( $term_id, 'display_type', esc_attr( $_POST['display_type'] ) ); // WPCS: CSRF ok, sanitization ok, input var ok.
+			update_term_meta( $term_id, 'display_type', esc_attr( $_POST['display_type'] ) ); // WPCS: CSRF ok, sanitization ok, input var ok.
 		}
 		if ( isset( $_POST['product_cat_thumbnail_id'] ) && 'product_cat' === $taxonomy ) { // WPCS: CSRF ok, input var ok.
-			update_woocommerce_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) ); // WPCS: CSRF ok, input var ok.
+			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) ); // WPCS: CSRF ok, input var ok.
 		}
 	}
 
@@ -440,7 +434,7 @@ class WC_Admin_Taxonomies {
 				$columns .= wc_help_tip( __( 'This is the default category and it cannot be deleted. It will be automatically assigned to products with no category.', 'woocommerce' ) );
 			}
 
-			$thumbnail_id = get_woocommerce_term_meta( $id, 'thumbnail_id', true );
+			$thumbnail_id = get_term_meta( $id, 'thumbnail_id', true );
 
 			if ( $thumbnail_id ) {
 				$image = wp_get_attachment_thumb_url( $thumbnail_id );
@@ -481,14 +475,14 @@ class WC_Admin_Taxonomies {
 			return;
 		}
 		// Ensure the tooltip is displayed when the image column is disabled on product categories.
-		wc_enqueue_js("
-			(function( $ ) {
+		wc_enqueue_js(
+			"(function( $ ) {
 				'use strict';
 				var product_cat = $( 'tr#tag-" . absint( $this->default_cat_id ) . "' );
 				product_cat.find( 'th' ).empty();
 				product_cat.find( 'td.thumb span' ).detach( 'span' ).appendTo( product_cat.find( 'th' ) );
-			})( jQuery );
-		");
+			})( jQuery );"
+		);
 	}
 }
 

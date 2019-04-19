@@ -240,6 +240,8 @@ jQuery( function( $ ) {
 			$( 'div.stock_fields' ).hide();
 			$( 'p.stock_status_field:not( .hide_if_' + product_type + ' )' ).show();
 		}
+
+		$( 'input.variable_manage_stock' ).change();
 	}).change();
 
 	// Date picker fields.
@@ -470,13 +472,13 @@ jQuery( function( $ ) {
 				show_and_hide_panels();
 
 				// Make sure the dropdown is not disabled for empty value attributes.
-				var nr_elements = original_data.length / 6;
-				for ( var i = 0; i < nr_elements; i++ ) {
-					if ( typeof( original_data ) !== 'undefined' && original_data[ i * 6 + 2 ].value === '' ) {
-						$( 'select.attribute_taxonomy' )
-							.find( 'option[value="' + original_data[ i * 6 ].value + '"]' ).removeAttr( 'disabled' );
+				$( 'select.attribute_taxonomy' ).find( 'option' ).prop( 'disabled', false );
+
+				$( '.product_attributes .woocommerce_attribute' ).each( function( index, el ) {
+					if ( $( el ).css( 'display' ) !== 'none' && $( el ).is( '.taxonomy' ) ) {
+						$( 'select.attribute_taxonomy' ).find( 'option[value="' + $( el ).data( 'taxonomy' ) + '"]' ).prop( 'disabled', true );
 					}
-				}
+				});
 
 				// Reload variations panel.
 				var this_page = window.location.toString();

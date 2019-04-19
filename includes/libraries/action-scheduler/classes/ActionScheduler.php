@@ -59,7 +59,9 @@ abstract class ActionScheduler {
 
 	public static function autoload( $class ) {
 		$d = DIRECTORY_SEPARATOR;
-		if ( strpos( $class, 'ActionScheduler' ) === 0 ) {
+		if ( 'Deprecated' === substr( $class, -10 ) ) {
+			$dir = self::plugin_path('deprecated'.$d);
+		} elseif ( strpos( $class, 'ActionScheduler' ) === 0 ) {
 			$dir = self::plugin_path('classes'.$d);
 		} elseif ( strpos( $class, 'CronExpression' ) === 0 ) {
 			$dir = self::plugin_path('lib'.$d.'cron-expression'.$d);
@@ -82,6 +84,11 @@ abstract class ActionScheduler {
 	public static function init( $plugin_file ) {
 		self::$plugin_file = $plugin_file;
 		spl_autoload_register( array( __CLASS__, 'autoload' ) );
+
+		/**
+		 * Fires in the early stages of Action Scheduler init hook.
+		 */
+		do_action( 'action_scheduler_pre_init' );
 
 		$store = self::store();
 		add_action( 'init', array( $store, 'init' ), 1, 0 );

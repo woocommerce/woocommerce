@@ -686,7 +686,22 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 		$values    = array();
 
 		if ( ! empty( $url_parts['query'] ) ) {
-			parse_str( $url_parts['query'], $values );
+			// This is to preserve full-stops and spaces in the query string when ran through parse_str.
+			$replace_chars = array(
+				'.'   => '{dot}',
+				'+'   => '{plus}',
+				'%20' => '{space}',
+			);
+
+			$query_string = str_replace( array_keys( $replace_chars ), array_values( $replace_chars ), $url_parts['query'] );
+
+			// Parse the string.
+			parse_str( $query_string, $parsed_query_string );
+
+			// Convert the full-stops back and add to values array.
+			foreach ( $parsed_query_string as $key => $value ) {
+				$values[ str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $key ) ] = $value;
+			}
 		}
 	}
 	$html = '';
@@ -2239,7 +2254,7 @@ if ( ! function_exists( 'woocommerce_get_loop_display_mode' ) ) {
 			$display_type = get_option( 'woocommerce_shop_page_display', '' );
 		} elseif ( is_product_category() ) {
 			$parent_id    = get_queried_object_id();
-			$display_type = get_woocommerce_term_meta( $parent_id, 'display_type', true );
+			$display_type = get_term_meta( $parent_id, 'display_type', true );
 			$display_type = '' === $display_type ? get_option( 'woocommerce_category_archive_display', '' ) : $display_type;
 		}
 
@@ -2415,7 +2430,8 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 	 */
 	function woocommerce_get_product_subcategories( $parent_id = 0 ) {
 		$parent_id          = absint( $parent_id );
-		$product_categories = wp_cache_get( 'product-category-hierarchy-' . $parent_id, 'product_cat' );
+		$cache_key          = apply_filters( 'woocommerce_get_product_subcategories_cache_key', 'product-category-hierarchy-' . $parent_id, $parent_id );
+		$product_categories = $cache_key ? wp_cache_get( $cache_key, 'product_cat' ) : false;
 
 		if ( false === $product_categories ) {
 			// NOTE: using child_of instead of parent - this is not ideal but due to a WP bug ( https://core.trac.wordpress.org/ticket/15626 ) pad_counts won't work.
@@ -2424,7 +2440,6 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 					'woocommerce_product_subcategories_args',
 					array(
 						'parent'       => $parent_id,
-						'menu_order'   => 'ASC',
 						'hide_empty'   => 0,
 						'hierarchical' => 1,
 						'taxonomy'     => 'product_cat',
@@ -2433,7 +2448,9 @@ if ( ! function_exists( 'woocommerce_get_product_subcategories' ) ) {
 				)
 			);
 
-			wp_cache_set( 'product-category-hierarchy-' . $parent_id, $product_categories, 'product_cat' );
+			if ( $cache_key ) {
+				wp_cache_set( $cache_key, $product_categories, 'product_cat' );
+			}
 		}
 
 		if ( apply_filters( 'woocommerce_product_subcategories_hide_empty', true ) ) {
@@ -2454,7 +2471,7 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 	function woocommerce_subcategory_thumbnail( $category ) {
 		$small_thumbnail_size = apply_filters( 'subcategory_archive_thumbnail_size', 'woocommerce_thumbnail' );
 		$dimensions           = wc_get_image_size( $small_thumbnail_size );
-		$thumbnail_id         = get_woocommerce_term_meta( $category->term_id, 'thumbnail_id', true );
+		$thumbnail_id         = get_term_meta( $category->term_id, 'thumbnail_id', true );
 
 		if ( $thumbnail_id ) {
 			$image        = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
@@ -3446,7 +3463,7 @@ function wc_logout_url( $redirect = '' ) {
  * @since 3.1.0
  */
 function wc_empty_cart_message() {
-	echo '<p class="cart-empty">' . wp_kses_post( apply_filters( 'wc_empty_cart_message', __( 'Your cart is currently empty.', 'woocommerce' ) ) ) . '</p>';
+	echo '<p class="cart-empty woocommerce-info">' . wp_kses_post( apply_filters( 'wc_empty_cart_message', __( 'Your cart is currently empty.', 'woocommerce' ) ) ) . '</p>';
 }
 
 /**

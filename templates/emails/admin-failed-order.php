@@ -49,7 +49,10 @@ do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, 
 do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 ?>
 <p>
-<?php echo wp_kses_post( __( 'Hopefully they’ll be back. Read more about <a href="https://docs.woocommerce.com/document/managing-orders/#section-10">troubleshooting failed payments</a>.', 'woocommerce' ) ); ?>
+<?php
+	/* translators: %s: documentation link */
+	echo wp_kses_post( sprintf( __( 'Hopefully they’ll be back. Read more about <a href="%s">troubleshooting failed payments</a>.', 'woocommerce' ), 'https://docs.woocommerce.com/document/managing-orders/' ) );
+?>
 </p>
 <?php
 

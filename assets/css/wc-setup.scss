@@ -18,6 +18,7 @@ body {
 
 	.select2-container {
 		text-align: left;
+		width: 100%;
 	}
 	.hidden {
 		display: none;
@@ -670,6 +671,7 @@ body {
 		position: relative;
 		max-height: 1.5em;
 		align-self: flex-start;
+		order: 3;
 	}
 
 	.wc-wizard-service-toggle {
@@ -1354,4 +1356,64 @@ p.jetpack-terms {
 	border-bottom: 1px solid #eee;
 	margin-top: 0;
 	padding: 30px 0;
+}
+
+@media only screen and (max-width: 400px) {
+	#wc-logo img {
+		max-width: 80%;
+	}
+	.wc-setup-steps {
+		display: none;
+	}
+	.store-address-container {
+		.city-and-postcode {
+			display: block;
+
+			div {
+				margin-right: 0;
+			}
+		}
+	}
+	.wc-wizard-service-item,
+	.wc-wizard-services-list-toggle {
+		flex-wrap: wrap;
+		.wc-wizard-service-enable {
+			order: 2;
+			padding: 20px 0 0;
+		}
+		.wc-wizard-service-description {
+			order: 3;
+		}
+		.wc-wizard-service-name {
+			padding: 20px 20px 0;
+			text-align: left;
+			justify-content: space-between !important;
+			img {
+				margin: 0;
+			}
+		}
+	}
+	.newsletter-form-container {
+		display: block;
+		.newsletter-form-email {
+			display: block;
+			box-sizing: border-box;
+			width: 100%;
+			margin-bottom: 10px;
+		}
+		.button.newsletter-form-button {
+			float: left;
+		}
+	}
+	.wc-wizard-next-steps .wc-wizard-next-step-item {
+		flex-wrap: wrap;
+		.wc-wizard-next-step-description {
+			margin-bottom: 0;
+		}
+		.wc-wizard-next-step-action {
+			p {
+				margin: 0;
+			}
+		}
+	}
 }

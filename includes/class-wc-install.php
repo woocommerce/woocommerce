@@ -124,36 +124,25 @@ class WC_Install {
 			'wc_update_354_modify_shop_manager_caps',
 			'wc_update_354_db_version',
 		),
+		'3.6.0' => array(
+			'wc_update_360_product_lookup_tables',
+			'wc_update_360_term_meta',
+			'wc_update_360_downloadable_product_permissions_index',
+			'wc_update_360_db_version',
+		),
 	);
-
-	/**
-	 * Background update class.
-	 *
-	 * @var object
-	 */
-	private static $background_updater;
 
 	/**
 	 * Hook in tabs.
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
-		add_action( 'init', array( __CLASS__, 'init_background_updater' ), 5 );
+		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
-		add_action( 'woocommerce_plugin_background_installer', array( __CLASS__, 'background_installer' ), 10, 2 );
-		add_action( 'woocommerce_theme_background_installer', array( __CLASS__, 'theme_background_installer' ), 10, 1 );
-	}
-
-	/**
-	 * Init background updates
-	 */
-	public static function init_background_updater() {
-		include_once dirname( __FILE__ ) . '/class-wc-background-updater.php';
-		self::$background_updater = new WC_Background_Updater();
 	}
 
 	/**
@@ -169,6 +158,51 @@ class WC_Install {
 	}
 
 	/**
+	 * Run an update callback when triggered by ActionScheduler.
+	 *
+	 * @since 3.6.0
+	 * @param string $callback Callback name.
+	 */
+	public static function run_update_callback( $callback ) {
+		include_once dirname( __FILE__ ) . '/wc-update-functions.php';
+
+		if ( is_callable( $callback ) ) {
+			self::run_update_callback_start( $callback );
+			$result = (bool) call_user_func( $callback );
+			self::run_update_callback_end( $callback, $result );
+		}
+	}
+
+	/**
+	 * Triggered when a callback will run.
+	 *
+	 * @since 3.6.0
+	 * @param string $callback Callback name.
+	 */
+	protected static function run_update_callback_start( $callback ) {
+		wc_maybe_define_constant( 'WC_UPDATING', true );
+	}
+
+	/**
+	 * Triggered when a callback has ran.
+	 *
+	 * @since 3.6.0
+	 * @param string $callback Callback name.
+	 * @param bool   $result Return value from callback. Non-false need to run again.
+	 */
+	protected static function run_update_callback_end( $callback, $result ) {
+		if ( $result ) {
+			WC()->queue()->add(
+				'woocommerce_run_update_callback',
+				array(
+					'update_callback' => $callback,
+				),
+				'woocommerce-db-updates'
+			);
+		}
+	}
+
+	/**
 	 * Install actions when a update button is clicked within the admin area.
 	 *
 	 * This function is hooked into admin_init to affect admin only.
@@ -178,17 +212,6 @@ class WC_Install {
 			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
 			self::update();
 			WC_Admin_Notices::add_notice( 'update' );
-		}
-		if ( ! empty( $_GET['force_update_woocommerce'] ) ) { // WPCS: input var ok.
-			check_admin_referer( 'wc_force_db_update', 'wc_force_db_update_nonce' );
-			$blog_id = get_current_blog_id();
-
-			// Used to fire an action added in WP_Background_Process::_construct() that calls WP_Background_Process::handle_cron_healthcheck().
-			// This method will make sure the database updates are executed even if cron is disabled. Nothing will happen if the updates are already running.
-			do_action( 'wp_' . $blog_id . '_wc_updater_cron' );
-
-			wp_safe_redirect( admin_url( 'admin.php?page=wc-settings' ) );
-			exit;
 		}
 	}
 
@@ -254,11 +277,15 @@ class WC_Install {
 	/**
 	 * Is this a brand new WC install?
 	 *
+	 * A brand new install has no version yet. Also treat empty installs as 'new'.
+	 *
 	 * @since  3.2.0
 	 * @return boolean
 	 */
 	private static function is_new_install() {
-		return is_null( get_option( 'woocommerce_version', null ) ) && is_null( get_option( 'woocommerce_db_version', null ) );
+		$product_count = array_sum( (array) wp_count_posts( 'product' ) );
+
+		return is_null( get_option( 'woocommerce_version', null ) ) || ( 0 === $product_count && -1 === wc_get_page_id( 'shop' ) );
 	}
 
 	/**
@@ -267,11 +294,13 @@ class WC_Install {
 	 * @since  3.2.0
 	 * @return boolean
 	 */
-	private static function needs_db_update() {
+	public static function needs_db_update() {
 		$current_db_version = get_option( 'woocommerce_db_version', null );
 		$updates            = self::get_db_update_callbacks();
+		$update_versions    = array_keys( $updates );
+		usort( $update_versions, 'version_compare' );
 
-		return ! is_null( $current_db_version ) && version_compare( $current_db_version, max( array_keys( $updates ) ), '<' );
+		return ! is_null( $current_db_version ) && version_compare( $current_db_version, end( $update_versions ), '<' );
 	}
 
 	/**
@@ -280,7 +309,7 @@ class WC_Install {
 	 * @since 3.2.0
 	 */
 	private static function maybe_enable_setup_wizard() {
-		if ( apply_filters( 'woocommerce_enable_setup_wizard', self::is_new_install() ) ) {
+		if ( apply_filters( 'woocommerce_enable_setup_wizard', true ) && self::is_new_install() ) {
 			WC_Admin_Notices::add_notice( 'install' );
 			set_transient( '_wc_activation_redirect', 1, 30 );
 		}
@@ -294,7 +323,6 @@ class WC_Install {
 	private static function maybe_update_db_version() {
 		if ( self::needs_db_update() ) {
 			if ( apply_filters( 'woocommerce_enable_auto_update_db', false ) ) {
-				self::init_background_updater();
 				self::update();
 			} else {
 				WC_Admin_Notices::add_notice( 'update' );
@@ -327,24 +355,22 @@ class WC_Install {
 	 */
 	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
-		$logger             = wc_get_logger();
-		$update_queued      = false;
+		$loop               = 0;
 
 		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
 				foreach ( $update_callbacks as $update_callback ) {
-					$logger->info(
-						sprintf( 'Queuing %s - %s', $version, $update_callback ),
-						array( 'source' => 'wc_db_updates' )
+					WC()->queue()->schedule_single(
+						time() + $loop,
+						'woocommerce_run_update_callback',
+						array(
+							'update_callback' => $update_callback,
+						),
+						'woocommerce-db-updates'
 					);
-					self::$background_updater->push_to_queue( $update_callback );
-					$update_queued = true;
+					$loop++;
 				}
 			}
-		}
-
-		if ( $update_queued ) {
-			self::$background_updater->save()->dispatch();
 		}
 	}
 
@@ -401,8 +427,8 @@ class WC_Install {
 		wp_schedule_event( strtotime( 'first tuesday of next month' ), 'monthly', 'woocommerce_geoip_updater' );
 		wp_schedule_event( time() + 10, apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' ), 'woocommerce_tracker_send_event' );
 
-		// Trigger GeoLite2 database download after 5 minutes.
-		wp_schedule_single_event( time() + ( MINUTE_IN_SECONDS * 5 ), 'woocommerce_geoip_updater' );
+		// Trigger GeoLite2 database download after 1 minute.
+		wp_schedule_single_event( time() + ( MINUTE_IN_SECONDS * 1 ), 'woocommerce_geoip_updater' );
 	}
 
 	/**
@@ -536,7 +562,6 @@ class WC_Install {
 	 *
 	 * Tables:
 	 *      woocommerce_attribute_taxonomies - Table for storing attribute taxonomies - these are user defined
-	 *      woocommerce_termmeta - Term meta table - sadly WordPress does not have termmeta so we need our own
 	 *      woocommerce_downloadable_product_permissions - Table for storing user and guest download permissions.
 	 *          KEY(order_id, product_id, download_id) used for organizing downloads on the My Account page
 	 *      woocommerce_order_items - Order line items are stored in a table to make them easily queryable for reports
@@ -619,6 +644,9 @@ class WC_Install {
 				); // WPCS: unprepared SQL ok.
 			}
 		}
+
+		// Clear table caches.
+		delete_transient( 'wc_attribute_taxonomies' );
 	}
 
 	/**
@@ -694,7 +722,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   PRIMARY KEY  (permission_id),
   KEY download_order_key_product (product_id,order_id,order_key(16),download_id),
   KEY download_order_product (download_id,order_id,product_id),
-  KEY order_id (order_id)
+  KEY order_id (order_id),
+  KEY user_order_remaining_expires (user_id,order_id,downloads_remaining,access_expires)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
   order_item_id BIGINT UNSIGNED NOT NULL auto_increment,
@@ -815,28 +844,32 @@ CREATE TABLE {$wpdb->prefix}wc_download_log (
   permission_id BIGINT UNSIGNED NOT NULL,
   user_id BIGINT UNSIGNED NULL,
   user_ip_address VARCHAR(100) NULL DEFAULT '',
-  PRIMARY KEY (download_log_id),
+  PRIMARY KEY  (download_log_id),
   KEY permission_id (permission_id),
   KEY timestamp (timestamp)
 ) $collate;
+CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
+  `product_id` bigint(20) NOT NULL,
+  `sku` varchar(100) NULL default '',
+  `virtual` tinyint(1) NULL default 0,
+  `downloadable` tinyint(1) NULL default 0,
+  `min_price` decimal(10,2) NULL default NULL,
+  `max_price` decimal(10,2) NULL default NULL,
+  `onsale` tinyint(1) NULL default 0,
+  `stock_quantity` double NULL default NULL,
+  `stock_status` varchar(100) NULL default 'instock',
+  `rating_count` bigint(20) NULL default 0,
+  `average_rating` decimal(3,2) NULL default 0.00,
+  `total_sales` bigint(20) NULL default 0,
+  PRIMARY KEY  (`product_id`),
+  KEY `virtual` (`virtual`),
+  KEY `downloadable` (`downloadable`),
+  KEY `stock_status` (`stock_status`),
+  KEY `stock_quantity` (`stock_quantity`),
+  KEY `onsale` (`onsale`),
+  KEY min_max_price (`min_price`, `max_price`)
+  ) $collate;
 		";
-
-		/**
-		 * Term meta is only needed for old installs and is now @deprecated by WordPress term meta.
-		 */
-		if ( ! function_exists( 'get_term_meta' ) ) {
-			$tables .= "
-CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
-  meta_id BIGINT UNSIGNED NOT NULL auto_increment,
-  woocommerce_term_id BIGINT UNSIGNED NOT NULL,
-  meta_key varchar(255) default NULL,
-  meta_value longtext NULL,
-  PRIMARY KEY  (meta_id),
-  KEY woocommerce_term_id (woocommerce_term_id),
-  KEY meta_key (meta_key(32))
-) $collate;
-			";
-		}
 
 		return $tables;
 	}
@@ -852,6 +885,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 
 		$tables = array(
 			"{$wpdb->prefix}wc_download_log",
+			"{$wpdb->prefix}wc_product_meta_lookup",
 			"{$wpdb->prefix}wc_webhooks",
 			"{$wpdb->prefix}woocommerce_api_keys",
 			"{$wpdb->prefix}woocommerce_attribute_taxonomies",
@@ -868,11 +902,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 			"{$wpdb->prefix}woocommerce_tax_rate_locations",
 			"{$wpdb->prefix}woocommerce_tax_rates",
 		);
-
-		if ( ! function_exists( 'get_term_meta' ) ) {
-			// This table is only needed for old installs and is now @deprecated by WordPress term meta.
-			$tables[] = "{$wpdb->prefix}woocommerce_termmeta";
-		}
 
 		/**
 		 * Filter the list of known WooCommerce tables.
@@ -1235,7 +1264,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
 		// Explicitly clear the event.
 		$args = func_get_args();
-		wp_clear_scheduled_hook( 'woocommerce_plugin_background_installer', $args );
 
 		if ( ! empty( $plugin_to_install['repo-slug'] ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
@@ -1395,7 +1423,6 @@ CREATE TABLE {$wpdb->prefix}woocommerce_termmeta (
 	public static function theme_background_installer( $theme_slug ) {
 		// Explicitly clear the event.
 		$args = func_get_args();
-		wp_clear_scheduled_hook( 'woocommerce_theme_background_installer', $args );
 
 		if ( ! empty( $theme_slug ) ) {
 			// Suppress feedback.

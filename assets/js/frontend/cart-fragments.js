@@ -38,6 +38,9 @@ jQuery( function( $ ) {
 	var $fragment_refresh = {
 		url: wc_cart_fragments_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_refreshed_fragments' ),
 		type: 'POST',
+		data: {
+			time: new Date().getTime()
+		},
 		timeout: wc_cart_fragments_params.request_timeout,
 		success: function( data ) {
 			if ( data && data.fragments ) {
@@ -96,7 +99,9 @@ jQuery( function( $ ) {
 
 		// Refresh when storage changes in another tab
 		$( window ).on( 'storage onstorage', function ( e ) {
-			if ( cart_hash_key === e.originalEvent.key && localStorage.getItem( cart_hash_key ) !== sessionStorage.getItem( cart_hash_key ) ) {
+			if (
+				cart_hash_key === e.originalEvent.key && localStorage.getItem( cart_hash_key ) !== sessionStorage.getItem( cart_hash_key )
+			) {
 				refresh_cart_fragment();
 			}
 		});

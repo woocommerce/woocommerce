@@ -10,7 +10,7 @@
 
 ### Changes proposed in this Pull Request:
 
-<!-- Describe the changes made to this Pull Request, and the reason for such changes. -->
+<!-- Describe the changes made to this Pull Request and the reason for such changes. -->
 
 Closes # .
 
@@ -24,10 +24,10 @@ Closes # .
 
 * [ ] Have you added an explanation of what your changes do and why you'd like us to include them?
 * [ ] Have you written new tests for your changes, as applicable?
-* [ ] Have you successfully ran tests with your changes locally?
+* [ ] Have you successfully run tests with your changes locally?
 
 <!-- Mark completed items with an [x] -->
 
 ### Changelog entry
 
-> Enter a short summary of all changes on this Pull Request. This will appear in the changelog if accepted.
+> Enter a summary of all changes on this Pull Request. This will appear in the changelog if accepted.

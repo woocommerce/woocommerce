@@ -28,7 +28,6 @@ class WC_Structured_Data {
 		// Generate structured data.
 		add_action( 'woocommerce_before_main_content', array( $this, 'generate_website_data' ), 30 );
 		add_action( 'woocommerce_breadcrumb', array( $this, 'generate_breadcrumblist_data' ), 10 );
-		add_action( 'woocommerce_shop_loop', array( $this, 'generate_product_data' ), 10 );
 		add_action( 'woocommerce_single_product_summary', array( $this, 'generate_product_data' ), 60 );
 		add_action( 'woocommerce_review_meta', array( $this, 'generate_review_data' ), 20 );
 		add_action( 'woocommerce_email_order_details', array( $this, 'generate_order_data' ), 20, 3 );
@@ -120,7 +119,7 @@ class WC_Structured_Data {
 		$types[] = is_shop() || is_product_category() || is_product() ? 'product' : '';
 		$types[] = is_shop() && is_front_page() ? 'website' : '';
 		$types[] = is_product() ? 'review' : '';
-		$types[] = ! is_shop() ? 'breadcrumblist' : '';
+		$types[] = 'breadcrumblist';
 		$types[] = 'order';
 
 		return array_filter( apply_filters( 'woocommerce_structured_data_type_for_page', $types ) );
@@ -153,7 +152,7 @@ class WC_Structured_Data {
 		$data  = $this->get_structured_data( $types );
 
 		if ( $data ) {
-			echo '<script type="application/ld+json">' . wc_esc_json( wp_json_encode( $data ), true ) . '</script>';
+			echo '<script type="application/ld+json">' . wc_esc_json( wp_json_encode( $data ), true ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 
@@ -198,23 +197,25 @@ class WC_Structured_Data {
 		$permalink = get_permalink( $product->get_id() );
 
 		$markup = array(
-			'@type' => 'Product',
-			'@id'   => $permalink . '#product', // Append '#product' to differentiate between this @id and the @id generated for the Breadcrumblist.
-			'name'  => $product->get_name(),
+			'@type'       => 'Product',
+			'@id'         => $permalink . '#product', // Append '#product' to differentiate between this @id and the @id generated for the Breadcrumblist.
+			'name'        => $product->get_name(),
+			'url'         => $permalink,
+			'image'       => wp_get_attachment_url( $product->get_image_id() ),
+			'description' => wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) ),
 		);
 
-		if ( apply_filters( 'woocommerce_structured_data_product_limit', is_product_taxonomy() || is_shop() ) ) {
-			$markup['url'] = $permalink;
-
-			$this->set_data( apply_filters( 'woocommerce_structured_data_product_limited', $markup, $product ) );
-			return;
+		// Declare SKU or fallback to ID.
+		if ( $product->get_sku() ) {
+			$markup['sku'] = $product->get_sku();
+		} else {
+			$markup['sku'] = $product->get_id();
 		}
 
-		$markup['image']       = wp_get_attachment_url( $product->get_image_id() );
-		$markup['description'] = wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) );
-		$markup['sku']         = $product->get_sku();
-
 		if ( '' !== $product->get_price() ) {
+			// Assume prices will be valid until the end of next year, unless on sale and there is an end date.
+			$price_valid_until = date( 'Y-12-31', current_time( 'timestamp', true ) + YEAR_IN_SECONDS );
+
 			if ( $product->is_type( 'variable' ) ) {
 				$lowest  = $product->get_variation_price( 'min', false );
 				$highest = $product->get_variation_price( 'max', false );
@@ -223,6 +224,7 @@ class WC_Structured_Data {
 					$markup_offer = array(
 						'@type'              => 'Offer',
 						'price'              => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+						'priceValidUntil'    => $price_valid_until,
 						'priceSpecification' => array(
 							'price'                 => wc_format_decimal( $lowest, wc_get_price_decimals() ),
 							'priceCurrency'         => $currency,
@@ -231,15 +233,20 @@ class WC_Structured_Data {
 					);
 				} else {
 					$markup_offer = array(
-						'@type'     => 'AggregateOffer',
-						'lowPrice'  => wc_format_decimal( $lowest, wc_get_price_decimals() ),
-						'highPrice' => wc_format_decimal( $highest, wc_get_price_decimals() ),
+						'@type'      => 'AggregateOffer',
+						'lowPrice'   => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+						'highPrice'  => wc_format_decimal( $highest, wc_get_price_decimals() ),
+						'offerCount' => count( $product->get_children() ),
 					);
 				}
 			} else {
+				if ( $product->is_on_sale() && $product->get_date_on_sale_to() ) {
+					$price_valid_until = date( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
+				}
 				$markup_offer = array(
 					'@type'              => 'Offer',
 					'price'              => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
+					'priceValidUntil'    => $price_valid_until,
 					'priceSpecification' => array(
 						'price'                 => wc_format_decimal( $product->get_price(), wc_get_price_decimals() ),
 						'priceCurrency'         => $currency,
@@ -268,6 +275,47 @@ class WC_Structured_Data {
 				'ratingValue' => $product->get_average_rating(),
 				'reviewCount' => $product->get_review_count(),
 			);
+
+			// Markup most recent rating/review.
+			$comments = get_comments(
+				array(
+					'number'      => 1,
+					'post_id'     => $product->get_id(),
+					'status'      => 'approve',
+					'post_status' => 'publish',
+					'post_type'   => 'product',
+					'parent'      => 0,
+					'meta_key'    => 'rating',
+					'orderby'     => 'meta_value_num',
+				)
+			);
+
+			if ( $comments ) {
+				foreach ( $comments as $comment ) {
+					$rating = get_comment_meta( $comment->comment_ID, 'rating', true );
+
+					if ( ! $rating ) {
+						continue;
+					}
+
+					$markup['review'] = array(
+						'@type'        => 'Review',
+						'reviewRating' => array(
+							'@type'       => 'Rating',
+							'ratingValue' => $rating,
+						),
+						'author'       => array(
+							'@type' => 'Person',
+							'name'  => get_comment_author( $comment->comment_ID ),
+						),
+					);
+				}
+			}
+		}
+
+		// Check we have required data.
+		if ( empty( $markup['aggregateRating'] ) && empty( $markup['offers'] ) && empty( $markup['review'] ) ) {
+			return;
 		}
 
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
@@ -296,7 +344,7 @@ class WC_Structured_Data {
 
 		if ( $rating ) {
 			$markup['reviewRating'] = array(
-				'@type'       => 'rating',
+				'@type'       => 'Rating',
 				'ratingValue' => $rating,
 			);
 		} elseif ( $comment->comment_parent ) {
@@ -340,6 +388,10 @@ class WC_Structured_Data {
 
 			if ( ! empty( $crumb[1] ) ) {
 				$markup['itemListElement'][ $key ]['item'] += array( '@id' => $crumb[1] );
+			} elseif ( isset( $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'] ) ) {
+				$current_url = set_url_scheme( 'http://' . wp_unslash( $_SERVER['HTTP_HOST'] ) . wp_unslash( $_SERVER['REQUEST_URI'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+				$markup['itemListElement'][ $key ]['item'] += array( '@id' => $current_url );
 			}
 		}
 

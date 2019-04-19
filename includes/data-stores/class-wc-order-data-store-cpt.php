@@ -199,26 +199,19 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $order->{"get_$prop"}( 'edit' );
-
-			if ( 'date_paid' === $prop ) {
-				// In 3.0.x we store this as a UTC timestamp.
-				update_post_meta( $id, $meta_key, ! is_null( $value ) ? $value->getTimestamp() : '' );
-
-				// In 2.6.x date_paid was stored as _paid_date in local mysql format.
-				update_post_meta( $id, '_paid_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
-
-			} elseif ( 'date_completed' === $prop ) {
-				// In 3.0.x we store this as a UTC timestamp.
-				update_post_meta( $id, $meta_key, ! is_null( $value ) ? $value->getTimestamp() : '' );
-
-				// In 2.6.x date_paid was stored as _paid_date in local mysql format.
-				update_post_meta( $id, '_completed_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
-
-			} else {
-				update_post_meta( $id, $meta_key, $value );
+			$value = is_string( $value ) ? wp_slash( $value ) : $value;
+			switch ( $prop ) {
+				case 'date_paid':
+				case 'date_completed':
+					$value = ! is_null( $value ) ? $value->getTimestamp() : '';
+					break;
 			}
 
-			$updated_props[] = $prop;
+			$updated = $this->update_or_delete_post_meta( $order, $meta_key, $value );
+
+			if ( $updated ) {
+				$updated_props[] = $prop;
+			}
 		}
 
 		$address_props = array(
@@ -251,10 +244,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		foreach ( $address_props as $props_key => $props ) {
 			$props_to_update = $this->get_props_to_update( $order, $props );
 			foreach ( $props_to_update as $meta_key => $prop ) {
-				$value = $order->{"get_$prop"}( 'edit' );
-				update_post_meta( $id, $meta_key, $value );
-				$updated_props[] = $prop;
-				$updated_props[] = $props_key;
+				$value   = $order->{"get_$prop"}( 'edit' );
+				$value   = is_string( $value ) ? wp_slash( $value ) : $value;
+				$updated = $this->update_or_delete_post_meta( $order, $meta_key, $value );
+
+				if ( $updated ) {
+					$updated_props[] = $prop;
+					$updated_props[] = $props_key;
+				}
 			}
 		}
 
@@ -266,6 +263,19 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 		if ( in_array( 'shipping', $updated_props, true ) || ! metadata_exists( 'post', $id, '_shipping_address_index' ) ) {
 			update_post_meta( $id, '_shipping_address_index', implode( ' ', $order->get_address( 'shipping' ) ) );
+		}
+
+		// Legacy date handling. @todo remove in 4.0.
+		if ( in_array( 'date_paid', $updated_props, true ) ) {
+			$value = $order->get_date_paid( 'edit' );
+			// In 2.6.x date_paid was stored as _paid_date in local mysql format.
+			update_post_meta( $id, '_paid_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
+		}
+
+		if ( in_array( 'date_completed', $updated_props, true ) ) {
+			$value = $order->get_date_completed( 'edit' );
+			// In 2.6.x date_paid was stored as _paid_date in local mysql format.
+			update_post_meta( $id, '_completed_date', ! is_null( $value ) ? $value->date( 'Y-m-d H:i:s' ) : '' );
 		}
 
 		// If customer changed, update any downloadable permissions.

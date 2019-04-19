@@ -607,11 +607,11 @@ class WC_API_Products extends WC_API_Resource {
 			$term_id = intval( $term->term_id );
 
 			// Get category display type
-			$display_type = get_woocommerce_term_meta( $term_id, 'display_type' );
+			$display_type = get_term_meta( $term_id, 'display_type' );
 
 			// Get category image
 			$image = '';
-			if ( $image_id = get_woocommerce_term_meta( $term_id, 'thumbnail_id' ) ) {
+			if ( $image_id = get_term_meta( $term_id, 'thumbnail_id' ) ) {
 				$image = wp_get_attachment_url( $image_id );
 			}
 
@@ -2023,6 +2023,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Clear transients
 			delete_transient( 'wc_attribute_taxonomies' );
+			WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
 
 			$this->server->send_status( 201 );
 
@@ -2108,6 +2109,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Clear transients
 			delete_transient( 'wc_attribute_taxonomies' );
+			WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
 
 			return $this->get_product_attribute( $id );
 		} catch ( WC_API_Exception $e ) {
@@ -2169,6 +2171,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			// Clear transients
 			delete_transient( 'wc_attribute_taxonomies' );
+			WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_attribute' ) );
 		} catch ( WC_API_Exception $e ) {

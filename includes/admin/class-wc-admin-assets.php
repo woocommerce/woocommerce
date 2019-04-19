@@ -40,12 +40,14 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_register_style( 'jquery-ui-style', WC()->plugin_url() . '/assets/css/jquery-ui/jquery-ui.min.css', array(), WC_VERSION );
 			wp_register_style( 'woocommerce_admin_dashboard_styles', WC()->plugin_url() . '/assets/css/dashboard.css', array(), WC_VERSION );
 			wp_register_style( 'woocommerce_admin_print_reports_styles', WC()->plugin_url() . '/assets/css/reports-print.css', array(), WC_VERSION, 'print' );
+			wp_register_style( 'woocommerce_admin_marketplace_styles', WC()->plugin_url() . '/assets/css/marketplace-suggestions.css', array(), WC_VERSION );
 
 			// Add RTL support for admin styles.
 			wp_style_add_data( 'woocommerce_admin_menu_styles', 'rtl', 'replace' );
 			wp_style_add_data( 'woocommerce_admin_styles', 'rtl', 'replace' );
 			wp_style_add_data( 'woocommerce_admin_dashboard_styles', 'rtl', 'replace' );
 			wp_style_add_data( 'woocommerce_admin_print_reports_styles', 'rtl', 'replace' );
+			wp_style_add_data( 'woocommerce_admin_marketplace_styles', 'rtl', 'replace' );
 
 			// Sitewide menu CSS.
 			wp_enqueue_style( 'woocommerce_admin_menu_styles' );
@@ -69,6 +71,10 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			if ( has_action( 'woocommerce_admin_css' ) ) {
 				do_action( 'woocommerce_admin_css' );
 				wc_deprecated_function( 'The woocommerce_admin_css action', '2.3', 'admin_enqueue_scripts' );
+			}
+
+			if ( WC_Marketplace_Suggestions::show_suggestions_for_screen( $screen_id ) ) {
+				wp_enqueue_style( 'woocommerce_admin_marketplace_styles' );
 			}
 		}
 
@@ -106,8 +112,10 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			wp_register_script( 'wc-shipping-classes', WC()->plugin_url() . '/assets/js/admin/wc-shipping-classes' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone' ), WC_VERSION );
 			wp_register_script( 'wc-clipboard', WC()->plugin_url() . '/assets/js/admin/wc-clipboard' . $suffix . '.js', array( 'jquery' ), WC_VERSION );
 			wp_register_script( 'select2', WC()->plugin_url() . '/assets/js/select2/select2.full' . $suffix . '.js', array( 'jquery' ), '4.0.3' );
-			wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.4' );
+			wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.6' );
 			wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'selectWoo' ), WC_VERSION );
+			wp_register_script( 'js-cookie', WC()->plugin_url() . '/assets/js/js-cookie/js.cookie' . $suffix . '.js', array(), '2.1.4', true );
+
 			wp_localize_script(
 				'wc-enhanced-select',
 				'wc_enhanced_select_params',
@@ -416,7 +424,38 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					)
 				);
 			}
+
+			if ( WC_Marketplace_Suggestions::show_suggestions_for_screen( $screen_id ) ) {
+				$active_plugin_slugs = array_map( 'dirname', get_option( 'active_plugins' ) );
+				wp_register_script(
+					'marketplace-suggestions',
+					WC()->plugin_url() . '/assets/js/admin/marketplace-suggestions' . $suffix . '.js',
+					array( 'jquery', 'underscore', 'js-cookie' ),
+					WC_VERSION,
+					true
+				);
+				wp_localize_script(
+					'marketplace-suggestions',
+					'marketplace_suggestions',
+					array(
+						'dismiss_suggestion_nonce' => wp_create_nonce( 'add_dismissed_marketplace_suggestion' ),
+						'active_plugins'           => $active_plugin_slugs,
+						'dismissed_suggestions'    => WC_Marketplace_Suggestions::get_dismissed_suggestions(),
+						'suggestions_data'         => WC_Marketplace_Suggestions::get_suggestions_api_data(),
+						'manage_suggestions_url'   => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=woocommerce_com' ),
+						'i18n_marketplace_suggestions_default_cta'
+							=> esc_html__( 'Learn More', 'woocommerce' ),
+						'i18n_marketplace_suggestions_dismiss_tooltip'
+							=> esc_attr__( 'Dismiss this suggestion', 'woocommerce' ),
+						'i18n_marketplace_suggestions_manage_suggestions'
+							=> esc_html__( 'Manage suggestions', 'woocommerce' ),
+					)
+				);
+				wp_enqueue_script( 'marketplace-suggestions' );
+			}
+
 		}
+
 	}
 
 endif;

@@ -3931,6 +3931,11 @@ img.help_tip {
 			margin-bottom: 3px;
 		}
 
+		.select2-container + span.description {
+			display: block;
+			margin-top: 8px;
+		}
+
 		table.widefat th {
 			padding-right: inherit;
 		}
@@ -4350,6 +4355,10 @@ img.help_tip {
 			&.advanced_options a::before {
 				font-family: "Dashicons";
 				content: "\f111";
+			}
+
+			&.marketplace-suggestions_options a::before {
+				content: none;
 			}
 
 			&.variations_options a::before {
@@ -5950,6 +5959,27 @@ table.bar_chart {
 	}
 }
 
+.post-type-product .woocommerce-BlankState,
+.post-type-shop_order .woocommerce-BlankState {
+	max-width: 764px;
+	text-align: center;
+	margin: auto;
+
+	.woocommerce-BlankState-message {
+		color: #444;
+		font-size: 1.5em;
+		margin: 0 auto 1em;
+	}
+
+	.woocommerce-BlankState-message::before {
+		font-size: 120px;
+	}
+
+	.woocommerce-BlankState-buttons {
+		margin-bottom: 4em;
+	}
+}
+
 /**
   * Small screen optimisation
   */
@@ -6759,7 +6789,7 @@ table.bar_chart {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
 			background: #a46497;
-			background: linear-gradient(top, #a46497, #66405f), #a46497;
+			background: linear-gradient(to bottom, #a46497, #66405f), #a46497;
 			transition: width 1s ease;
 		}
 
@@ -6767,7 +6797,7 @@ table.bar_chart {
 			border-radius: 3px;
 			box-shadow: inset 0 1px 1px 0 rgba(255, 255, 255, 0.4);
 			background: #a46497;
-			background: linear-gradient(top, #a46497, #66405f), #a46497;
+			background: linear-gradient(to bottom, #a46497, #66405f), #a46497;
 			transition: width 1s ease;
 		}
 

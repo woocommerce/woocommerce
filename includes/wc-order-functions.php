@@ -772,7 +772,7 @@ function wc_order_fully_refunded( $order_id ) {
 	wc_create_refund(
 		array(
 			'amount'     => $max_refund,
-			'reason'     => __( 'Order fully refunded', 'woocommerce' ),
+			'reason'     => __( 'Order status set to refunded. To return funds to the customer you will need to issue a refund through your payment gateway.', 'woocommerce' ),
 			'order_id'   => $order_id,
 			'line_items' => array(),
 		)

@@ -910,7 +910,13 @@ class WC_Discounts {
 			return wc_add_number_precision( $this->object->get_displayed_subtotal() );
 		} elseif ( is_a( $this->object, 'WC_Order' ) ) {
 			$subtotal = wc_add_number_precision( $this->object->get_subtotal() );
-			return $this->object->get_prices_include_tax() ? $subtotal + round( $this->object->get_total_tax(), wc_get_price_decimals() ) : $subtotal;
+
+			if ( $this->object->get_prices_include_tax() ) {
+				// Add tax to tax-exclusive subtotal.
+				$subtotal = $subtotal + wc_add_number_precision( round( $this->object->get_total_tax(), wc_get_price_decimals() ) );
+			}
+
+			return $subtotal;
 		} else {
 			return array_sum( wp_list_pluck( $this->items, 'price' ) );
 		}

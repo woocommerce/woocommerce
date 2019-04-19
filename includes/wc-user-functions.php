@@ -32,14 +32,13 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 	/**
 	 * Create a new customer.
 	 *
-	 * @param  string $email Customer email.
+	 * @param  string $email    Customer email.
 	 * @param  string $username Customer username.
 	 * @param  string $password Customer password.
+	 * @param  array  $args     List of arguments to pass to `wp_insert_user()`.
 	 * @return int|WP_Error Returns WP_Error on failure, Int (user ID) on success.
 	 */
-	function wc_create_new_customer( $email, $username = '', $password = '' ) {
-
-		// Check the email address.
+	function wc_create_new_customer( $email, $username = '', $password = '', $args = array() ) {
 		if ( empty( $email ) || ! is_email( $email ) ) {
 			return new WP_Error( 'registration-error-invalid-email', __( 'Please provide a valid email address.', 'woocommerce' ) );
 		}
@@ -48,28 +47,18 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 			return new WP_Error( 'registration-error-email-exists', apply_filters( 'woocommerce_registration_error_email_exists', __( 'An account is already registered with your email address. Please log in.', 'woocommerce' ), $email ) );
 		}
 
-		// Handle username creation.
-		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) || ! empty( $username ) ) {
-			$username = sanitize_user( $username );
+		if ( 'yes' === get_option( 'woocommerce_registration_generate_username', 'yes' ) && empty( $username ) ) {
+			$username = wc_create_new_customer_username( $email, $args );
+		}
 
-			if ( empty( $username ) || ! validate_username( $username ) ) {
-				return new WP_Error( 'registration-error-invalid-username', __( 'Please enter a valid account username.', 'woocommerce' ) );
-			}
+		$username = sanitize_user( $username );
 
-			if ( username_exists( $username ) ) {
-				return new WP_Error( 'registration-error-username-exists', __( 'An account is already registered with that username. Please choose another.', 'woocommerce' ) );
-			}
-		} else {
-			$username = sanitize_user( current( explode( '@', $email ) ), true );
+		if ( empty( $username ) || ! validate_username( $username ) ) {
+			return new WP_Error( 'registration-error-invalid-username', __( 'Please enter a valid account username.', 'woocommerce' ) );
+		}
 
-			// Ensure username is unique.
-			$append     = 1;
-			$o_username = $username;
-
-			while ( username_exists( $username ) ) {
-				$username = $o_username . $append;
-				$append++;
-			}
+		if ( username_exists( $username ) ) {
+			return new WP_Error( 'registration-error-username-exists', __( 'An account is already registered with that username. Please choose another.', 'woocommerce' ) );
 		}
 
 		// Handle password creation.
@@ -96,11 +85,14 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 
 		$new_customer_data = apply_filters(
 			'woocommerce_new_customer_data',
-			array(
-				'user_login' => $username,
-				'user_pass'  => $password,
-				'user_email' => $email,
-				'role'       => 'customer',
+			array_merge(
+				$args,
+				array(
+					'user_login' => $username,
+					'user_pass'  => $password,
+					'user_email' => $email,
+					'role'       => 'customer',
+				)
 			)
 		);
 
@@ -114,6 +106,68 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 
 		return $customer_id;
 	}
+}
+
+/**
+ * Create a unique username for a new customer.
+ *
+ * @since 3.6.0
+ * @param string $email New customer email address.
+ * @param array  $new_user_args Array of new user args, maybe including first and last names.
+ * @param string $suffix Append string to username to make it unique.
+ * @return string Generated username.
+ */
+function wc_create_new_customer_username( $email, $new_user_args, $suffix = '' ) {
+	$username_parts = array();
+
+	if ( isset( $new_user_args['first_name'] ) ) {
+		$username_parts[] = sanitize_user( $new_user_args['first_name'], true );
+	}
+
+	if ( isset( $new_user_args['last_name'] ) ) {
+		$username_parts[] = sanitize_user( $new_user_args['last_name'], true );
+	}
+
+	// Remove empty parts.
+	$username_parts = array_filter( $username_parts );
+
+	// If there are no parts, e.g. name had unicode chars, or was not provided, fallback to email.
+	if ( empty( $username_parts ) ) {
+		$email_parts    = explode( '@', $email );
+		$email_username = $email_parts[0];
+
+		// Exclude common prefixes.
+		if ( in_array(
+			$email_username,
+			array(
+				'sales',
+				'hello',
+				'mail',
+				'contact',
+				'info',
+			),
+			true
+		) ) {
+			// Get the domain part.
+			$email_username = $email_parts[1];
+		}
+
+		$username_parts[] = sanitize_user( $email_username, true );
+	}
+
+	$username = wc_strtolower( implode( '', $username_parts ) );
+
+	if ( $suffix ) {
+		$username .= $suffix;
+	}
+
+	if ( username_exists( $username ) ) {
+		// Generate something unique to append to the username in case of a conflict with another user.
+		$suffix = '-' . zeroise( wp_rand( 0, 9999 ), 4 );
+		return wc_create_new_customer_username( $email, $new_user_args, $suffix );
+	}
+
+	return $username;
 }
 
 /**
@@ -380,9 +434,7 @@ add_filter( 'user_has_cap', 'wc_customer_has_capability', 10, 3 );
 function wc_shop_manager_has_capability( $allcaps, $caps, $args, $user ) {
 
 	if ( wc_user_has_role( $user, 'shop_manager' ) ) {
-		/**
-		 * @see wc_modify_map_meta_cap, which limits editing to customers.
-		 */
+		// @see wc_modify_map_meta_cap, which limits editing to customers.
 		$allcaps['edit_users'] = true;
 	}
 

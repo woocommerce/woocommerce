@@ -1,8 +1,12 @@
 <?php
+/**
+ * Customer functions
+ *
+ * @package WooCommerce\Tests\Customer
+ */
 
 /**
- * Customer functions.
- * @package WooCommerce\Tests\Customer
+ * WC_Tests_Customer_Functions class.
  */
 class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 
@@ -40,10 +44,25 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 'fred', $userdata->user_login );
 		$id       = wc_create_new_customer( 'fred@mail.com', '', 'testpassword' );
 		$userdata = get_userdata( $id );
-		$this->assertEquals( 'fred1', $userdata->user_login );
+		$this->assertNotEquals( 'fred', $userdata->user_login );
+		$this->assertContains( 'fred', $userdata->user_login );
 		$id       = wc_create_new_customer( 'fred@test.com', '', 'testpassword' );
 		$userdata = get_userdata( $id );
-		$this->assertEquals( 'fred2', $userdata->user_login );
+		$this->assertNotEquals( 'fred', $userdata->user_login );
+		$this->assertContains( 'fred', $userdata->user_login );
+
+		// Test extra arguments to generate display_name.
+		$id       = wc_create_new_customer(
+			'john.doe@example.com',
+			'',
+			'testpassword',
+			array(
+				'first_name' => 'John',
+				'last_name'  => 'Doe',
+			)
+		);
+		$userdata = get_userdata( $id );
+		$this->assertEquals( 'John Doe', $userdata->display_name );
 
 		// No password.
 		update_option( 'woocommerce_registration_generate_password', 'no' );
@@ -54,6 +73,47 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_registration_generate_password', 'yes' );
 		$id = wc_create_new_customer( 'joe@example.com', 'joecustomer', '' );
 		$this->assertTrue( is_numeric( $id ) && $id > 0 );
+	}
+
+	/**
+	 * Test username generation.
+	 */
+	public function test_wc_create_new_customer_username() {
+		// Test getting name from email.
+		$this->assertEquals( 'mike', wc_create_new_customer_username( 'mike@fakemail.com', array() ) );
+
+		// Test getting name if username exists.
+		wc_create_new_customer( 'mike@fakemail.com', '', 'testpassword' );
+		$username = wc_create_new_customer_username( 'mike@fakemail.com', array() );
+		$this->assertNotEquals( 'mike', $username, $username );
+		$this->assertContains( 'mike', $username, $username );
+
+		// Test common email prefix avoidance.
+		$this->assertEquals( 'somecompany.com', wc_create_new_customer_username( 'info@somecompany.com', array() ) );
+
+		// Test first/last name generation.
+		$this->assertEquals(
+			'bobbobson',
+			wc_create_new_customer_username(
+				'bob@bobbobson.com',
+				array(
+					'first_name' => 'Bob',
+					'last_name' => 'Bobson',
+				)
+			)
+		);
+
+		// Test unicode fallbacks.
+		$this->assertEquals(
+			'unicode',
+			wc_create_new_customer_username(
+				'unicode@unicode.com',
+				array(
+					'first_name' => 'こんにちは',
+					'last_name' => 'こんにちは',
+				)
+			)
+		);
 	}
 
 	/**
@@ -70,7 +130,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 		$order2 = new WC_Order();
 		$order2->save();
 
-		// Test download permissions
+		// Test download permissions.
 		$prod_download = new WC_Product_Download();
 		$prod_download->set_file( plugin_dir_url( __FILE__ ) . '/assets/images/help.png' );
 		$prod_download->set_id( 'download' );

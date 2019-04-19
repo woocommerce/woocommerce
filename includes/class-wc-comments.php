@@ -195,12 +195,12 @@ class WC_Comments {
 	 * @param int $post_id Post ID.
 	 */
 	public static function clear_transients( $post_id ) {
-
 		if ( 'product' === get_post_type( $post_id ) ) {
 			$product = wc_get_product( $post_id );
-			self::get_rating_counts_for_product( $product );
-			self::get_average_rating_for_product( $product );
-			self::get_review_count_for_product( $product );
+			$product->set_rating_counts( self::get_rating_counts_for_product( $product ) );
+			$product->set_average_rating( self::get_average_rating_for_product( $product ) );
+			$product->set_review_count( self::get_review_count_for_product( $product ) );
+			$product->save();
 		}
 	}
 
@@ -337,11 +337,6 @@ class WC_Comments {
 			$average = 0;
 		}
 
-		$product->set_average_rating( $average );
-
-		$data_store = $product->get_data_store();
-		$data_store->update_average_rating( $product );
-
 		return $average;
 	}
 
@@ -366,11 +361,6 @@ class WC_Comments {
 				$product->get_id()
 			)
 		);
-
-		$product->set_review_count( $count );
-
-		$data_store = $product->get_data_store();
-		$data_store->update_review_count( $product );
 
 		return $count;
 	}
@@ -404,11 +394,6 @@ class WC_Comments {
 		foreach ( $raw_counts as $count ) {
 			$counts[ $count->meta_value ] = absint( $count->meta_value_count ); // WPCS: slow query ok.
 		}
-
-		$product->set_rating_counts( $counts );
-
-		$data_store = $product->get_data_store();
-		$data_store->update_rating_counts( $product );
 
 		return $counts;
 	}

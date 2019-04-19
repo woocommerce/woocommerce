@@ -112,17 +112,30 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 * @return void
 	 */
 	public function delete( &$zone, $args = array() ) {
-		if ( $zone->get_id() ) {
+		$zone_id = $zone->get_id();
+
+		if ( $zone_id ) {
 			global $wpdb;
-			$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_methods', array( 'zone_id' => $zone->get_id() ) );
-			$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_locations', array( 'zone_id' => $zone->get_id() ) );
-			$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zones', array( 'zone_id' => $zone->get_id() ) );
-			WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
-			$id = $zone->get_id();
+
+			// Delete methods and their settings.
+			$methods = $this->get_methods( $zone_id, false );
+
+			if ( $methods ) {
+				foreach ( $methods as $method ) {
+					$this->delete_method( $method->instance_id );
+				}
+			}
+
+			// Delete zone.
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_locations', array( 'zone_id' => $zone_id ) );
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zones', array( 'zone_id' => $zone_id ) );
+
 			$zone->set_id( null );
+
 			WC_Cache_Helper::incr_cache_prefix( 'shipping_zones' );
 			WC_Cache_Helper::get_transient_version( 'shipping', true );
-			do_action( 'woocommerce_delete_shipping_zone', $id );
+
+			do_action( 'woocommerce_delete_shipping_zone', $zone_id );
 		}
 	}
 
@@ -193,7 +206,17 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Shippin
 	 */
 	public function delete_method( $instance_id ) {
 		global $wpdb;
+
+		$method = $this->get_method( $instance_id );
+
+		if ( ! $method ) {
+			return;
+		}
+
+		delete_option( 'woocommerce_' . $method->method_id . '_' . $instance_id . '_settings' );
+
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_shipping_zone_methods', array( 'instance_id' => $instance_id ) );
+
 		do_action( 'woocommerce_delete_shipping_zone_method', $instance_id );
 	}
 

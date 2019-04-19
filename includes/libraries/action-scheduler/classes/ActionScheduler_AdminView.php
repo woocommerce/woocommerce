@@ -30,6 +30,7 @@ class ActionScheduler_AdminView extends ActionScheduler_AdminView_Deprecated {
 
 			if ( class_exists( 'WooCommerce' ) ) {
 				add_action( 'woocommerce_admin_status_content_action-scheduler', array( $this, 'render_admin_ui' ) );
+				add_action( 'woocommerce_system_status_report', array( $this, 'system_status_report' ) );
 				add_filter( 'woocommerce_admin_status_tabs', array( $this, 'register_system_status_tab' ) );
 			}
 
@@ -37,6 +38,10 @@ class ActionScheduler_AdminView extends ActionScheduler_AdminView_Deprecated {
 		}
 	}
 
+	public function system_status_report() {
+		$table = new ActionScheduler_wcSystemStatus( ActionScheduler::store() );
+		$table->render();
+	}
 
 	/**
 	 * Registers action-scheduler into WooCommerce > System status.

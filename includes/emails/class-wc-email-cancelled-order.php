@@ -57,7 +57,7 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( '[{site_title}]: {order_billing_full_name} has cancelled order #{order_number}', 'woocommerce' );
+			return __( '[{site_title}]: Order #{order_number} has been cancelled', 'woocommerce' );
 		}
 
 		/**
@@ -104,7 +104,8 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		 */
 		public function get_content_html() {
 			return wc_get_template_html(
-				$this->template_html, array(
+				$this->template_html,
+				array(
 					'order'         => $this->object,
 					'email_heading' => $this->get_heading(),
 					'sent_to_admin' => true,
@@ -121,7 +122,8 @@ if ( ! class_exists( 'WC_Email_Cancelled_Order', false ) ) :
 		 */
 		public function get_content_plain() {
 			return wc_get_template_html(
-				$this->template_plain, array(
+				$this->template_plain,
+				array(
 					'order'         => $this->object,
 					'email_heading' => $this->get_heading(),
 					'sent_to_admin' => true,
