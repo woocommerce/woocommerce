@@ -107,7 +107,7 @@ class WC_Block_Library {
 	 */
 	public static function register_assets() {
 		self::register_style( 'wc-block-editor', WC()->plugin_url() . '/assets/css/blocks/editor.css', array( 'wp-edit-blocks' ) );
-		self::register_style( 'wc-block-style', WC()->plugin_url() . '/assets/css/blocks/style.css', array() );
+		self::register_style( 'wc-block-style', WC()->plugin_url() . '/assets/css/blocks/blocks.css', array() );
 
 		// Shared libraries and components across all blocks.
 		self::register_script( 'wc-vendors', WC()->plugin_url() . '/assets/js/blocks/vendors.js', array(), false );
