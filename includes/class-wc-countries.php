@@ -1103,6 +1103,12 @@ class WC_Countries {
 							'required' => true,
 						),
 					),
+					'RS' => array(
+						'state' => array(
+							'required' => false,
+							'hidden'   => true,
+						),
+					),
 					'SG' => array(
 						'state' => array(
 							'required' => false,
