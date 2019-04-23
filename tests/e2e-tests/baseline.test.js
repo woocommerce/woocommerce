@@ -27,4 +27,23 @@ describe( 'Check for functional WordPress installation', () => {
 
 		await expect( page.title() ).resolves.toMatch( 'Dashboard' );
 	} );
+
+	it( 'Updates WordPress database', async () => {
+		await page.goto( baseUrl + 'wp-admin/upgrade.php?step=upgrade_db', {
+			waitUntil: 'networkidle0',
+		} );
+
+		await expect( page.content() ).resolves.toMatch( '0' );
+	} );
+
+	it( 'Has a working theme', async() => {
+		await page.goto( baseUrl + 'wp-admin/themes.php', {
+			waitUntil: 'networkidle0',
+		} );
+
+		await expect( page.title() ).resolves.toMatch( 'Manage Themes' );
+		await expect( page ).not.toMatchElement( 'div.notice, #message', { text: 'The active theme is broken.' } );
+		await expect( page ).not.toMatchElement( 'div.notice, #message', { text: 'No themes found.' } );
+		await expect( page ).not.toMatchElement( 'div.notice, #message', { text: 'ERROR:' } );
+	} );
 } );
