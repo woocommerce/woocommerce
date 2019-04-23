@@ -15,10 +15,11 @@ $cron_cta            = $cron_disabled ? __( 'You can manually run queued updates
 ?>
 <div id="message" class="updated woocommerce-message wc-connect">
 	<p>
-		<strong><?php esc_html_e( 'WooCommerce database update', 'woocommerce' ); ?></strong> &#8211; <?php esc_html_e( 'WooCommerce is updating the database in the background. The database update process may take a little while, so please be patient.', 'woocommerce' ); ?>
+		<strong><?php esc_html_e( 'WooCommerce database update', 'woocommerce' ); ?></strong><br>
+		<?php esc_html_e( 'WooCommerce is updating the database in the background. The database update process may take a little while, so please be patient.', 'woocommerce' ); ?>
 		<?php
 		if ( $cron_disabled ) {
-			echo '<br><span style="color:red;">' . esc_html__( 'Warning: WP CRON has been disabled on your install which may prevent this update from completing.', 'woocommerce' ) . '</span>';
+			echo '<br>' . esc_html__( 'Note: WP CRON has been disabled on your install which may prevent this update from completing.', 'woocommerce' );
 		}
 		?>
 		&nbsp;<a href="<?php echo esc_url( $pending_actions_url ); ?>"><?php echo esc_html( $cron_cta ); ?></a>
