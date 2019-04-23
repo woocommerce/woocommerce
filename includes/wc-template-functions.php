@@ -3598,7 +3598,7 @@ function wc_get_cart_undo_url( $cart_item_key ) {
  */
 function woocommerce_output_all_notices() {
 	$notices = wc_print_notices( true );
-	
+
 	if ( strlen( $notices ) > 0 ) {
 		echo '<div class="woocommerce-notices-wrapper">' . $notices . '</div>';
 	}
