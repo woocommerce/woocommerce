@@ -3600,9 +3600,7 @@ function woocommerce_output_all_notices() {
 	$notices = wc_print_notices(true);
 	
 	if(strlen($notices) > 0) {
-		echo '<div class="woocommerce-notices-wrapper">';
-		echo $notices;
-		echo '</div>';
+		echo '<div class="woocommerce-notices-wrapper">'.$notices.'</div>';
 	}
 }
 
