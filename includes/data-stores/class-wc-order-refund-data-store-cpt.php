@@ -60,8 +60,8 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	/**
 	 * Read refund data. Can be overridden by child classes to load other props.
 	 *
-	 * @param WC_Order $refund Refund object.
-	 * @param object   $post_object Post object.
+	 * @param WC_Order_Refund $refund Refund object.
+	 * @param object          $post_object Post object.
 	 * @since 3.0.0
 	 */
 	protected function read_order_data( &$refund, $post_object ) {
@@ -80,7 +80,7 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	/**
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
-	 * @param WC_Order $refund Refund object.
+	 * @param WC_Order_Refund $refund Refund object.
 	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$refund ) {
