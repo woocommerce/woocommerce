@@ -75,9 +75,9 @@ if ( ! comments_open() ) {
 
 				$comment_form = array(
 					/* translators: %s is product title */
-					'title_reply'         => have_comments() ? __( 'Add a review', 'woocommerce' ) : sprintf( __( 'Be the first to review &ldquo;%s&rdquo;', 'woocommerce' ), get_the_title() ),
+					'title_reply'         => have_comments() ? esc_html__( 'Add a review', 'woocommerce' ) : sprintf( esc_html__( 'Be the first to review &ldquo;%s&rdquo;', 'woocommerce' ), get_the_title() ),
 					/* translators: %s is product title */
-					'title_reply_to'      => __( 'Leave a Reply to %s', 'woocommerce' ),
+					'title_reply_to'      => esc_html__( 'Leave a Reply to %s', 'woocommerce' ),
 					'title_reply_before'  => '<span id="reply-title" class="comment-reply-title">',
 					'title_reply_after'   => '</span>',
 					'comment_notes_after' => '',
@@ -87,7 +87,7 @@ if ( ! comments_open() ) {
 						'email'  => '<p class="comment-form-email"><label for="email">' . esc_html__( 'Email', 'woocommerce' ) . '&nbsp;<span class="required">*</span></label> ' .
 									'<input id="email" name="email" type="email" value="' . esc_attr( $commenter['comment_author_email'] ) . '" size="30" required /></p>',
 					),
-					'label_submit'        => __( 'Submit', 'woocommerce' ),
+					'label_submit'        => esc_html__( 'Submit', 'woocommerce' ),
 					'logged_in_as'        => '',
 					'comment_field'       => '',
 				);

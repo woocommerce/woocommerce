@@ -67,7 +67,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php if ( wc_tax_enabled() && ! WC()->cart->display_prices_including_tax() ) :
 			$taxable_address = WC()->customer->get_taxable_address();
 			$estimated_text  = WC()->customer->is_customer_outside_base() && ! WC()->customer->has_calculated_shipping()
-					? sprintf( ' <small>' . __( '(estimated for %s)', 'woocommerce' ) . '</small>', WC()->countries->estimated_for_prefix( $taxable_address[0] ) . WC()->countries->countries[ $taxable_address[0] ] )
+					? sprintf( ' <small>' . esc_html__( '(estimated for %s)', 'woocommerce' ) . '</small>', WC()->countries->estimated_for_prefix( $taxable_address[0] ) . WC()->countries->countries[ $taxable_address[0] ] )
 					: '';
 
 			if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) : ?>

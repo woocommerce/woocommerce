@@ -10,10 +10,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $my_orders_columns = apply_filters( 'woocommerce_my_account_my_orders_columns', array(
-	'order-number'  => __( 'Order', 'woocommerce' ),
-	'order-date'    => __( 'Date', 'woocommerce' ),
-	'order-status'  => __( 'Status', 'woocommerce' ),
-	'order-total'   => __( 'Total', 'woocommerce' ),
+	'order-number'  => esc_html__( 'Order', 'woocommerce' ),
+	'order-date'    => esc_html__( 'Date', 'woocommerce' ),
+	'order-status'  => esc_html__( 'Status', 'woocommerce' ),
+	'order-total'   => esc_html__( 'Total', 'woocommerce' ),
 	'order-actions' => '&nbsp;',
 ) );
 
@@ -27,7 +27,7 @@ $customer_orders = get_posts( apply_filters( 'woocommerce_my_account_my_orders_q
 
 if ( $customer_orders ) : ?>
 
-	<h2><?php echo apply_filters( 'woocommerce_my_account_my_orders_title', __( 'Recent orders', 'woocommerce' ) ); ?></h2>
+	<h2><?php echo apply_filters( 'woocommerce_my_account_my_orders_title', esc_html__( 'Recent orders', 'woocommerce' ) ); ?></h2>
 
 	<table class="shop_table shop_table_responsive my_account_orders">
 
@@ -70,7 +70,7 @@ if ( $customer_orders ) : ?>
 							<?php elseif ( 'order-actions' === $column_id ) : ?>
 								<?php
 								$actions = wc_get_account_orders_actions( $order );
-	
+
 								if ( ! empty( $actions ) ) {
 									foreach ( $actions as $key => $action ) {
 										echo '<a href="' . esc_url( $action['url'] ) . '" class="button ' . sanitize_html_class( $key ) . '">' . esc_html( $action['name'] ) . '</a>';

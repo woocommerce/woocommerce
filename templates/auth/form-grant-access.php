@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <?php wc_print_notices(); ?>
 
-<p><?php printf( __( 'This will give "%1$s" %2$s access which will allow it to:', 'woocommerce' ), '<strong>' . esc_html( $app_name ) . '</strong>', '<strong>' . esc_html( $scope ) . '</strong>' ); ?></p>
+<p><?php printf( esc_html__( 'This will give "%1$s" %2$s access which will allow it to:', 'woocommerce' ), '<strong>' . esc_html( $app_name ) . '</strong>', '<strong>' . esc_html( $scope ) . '</strong>' ); ?></p>
 
 <ul class="wc-auth-permissions">
 	<?php foreach ( $permissions as $permission ) : ?>
@@ -35,7 +35,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div class="wc-auth-logged-in-as">
 	<?php echo get_avatar( $user->ID, 70 ); ?>
-	<p><?php printf( __( 'Logged in as %s', 'woocommerce' ), esc_html( $user->display_name ) ); ?> <a href="<?php echo esc_url( $logout_url ); ?>" class="wc-auth-logout"><?php esc_html_e( 'Logout', 'woocommerce' ); ?></a>
+	<p><?php printf( esc_html__( 'Logged in as %s', 'woocommerce' ), esc_html( $user->display_name ) ); ?> <a href="<?php echo esc_url( $logout_url ); ?>" class="wc-auth-logout"><?php esc_html_e( 'Logout', 'woocommerce' ); ?></a>
 </div>
 
 <p class="wc-auth-actions">

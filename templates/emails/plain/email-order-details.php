@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text, $email );
 
 /* translators: %1$s: Order ID. %2$s: Order date */
-echo wp_kses_post( wc_strtoupper( sprintf( __( '[Order #%1$s] (%2$s)', 'woocommerce' ), $order->get_order_number(), wc_format_datetime( $order->get_date_created() ) ) ) ) . "\n";
+echo wp_kses_post( wc_strtoupper( sprintf( esc_html__( '[Order #%1$s] (%2$s)', 'woocommerce' ), $order->get_order_number(), wc_format_datetime( $order->get_date_created() ) ) ) ) . "\n";
 echo "\n" . wc_get_email_order_items( $order, array( // WPCS: XSS ok.
 	'show_sku'      => $sent_to_admin,
 	'show_image'    => false,
