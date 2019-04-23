@@ -72,8 +72,8 @@ class WC_Admin {
 		}
 
 		// Setup/welcome.
-		if ( ! empty( $_GET['page'] ) ) {
-			switch ( $_GET['page'] ) {
+		if ( ! empty( $_GET['page'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			switch ( $_GET['page'] ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 				case 'wc-setup':
 					include_once dirname( __FILE__ ) . '/class-wc-admin-setup-wizard.php';
 					break;
@@ -254,7 +254,7 @@ class WC_Admin {
 		$wc_pages = array_diff( $wc_pages, array( 'profile', 'user-edit' ) );
 
 		// Check to make sure we're on a WooCommerce admin page.
-		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, $wc_pages ) ) ) {
+		if ( isset( $current_screen->id ) && apply_filters( 'woocommerce_display_admin_footer_text', in_array( $current_screen->id, $wc_pages, true ) ) ) {
 			// Change the footer text.
 			if ( ! get_option( 'woocommerce_admin_footer_text_rated' ) ) {
 				$footer_text = sprintf(
