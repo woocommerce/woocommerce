@@ -144,6 +144,10 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 				'clause' => 'where',
 				'column' => $table_name . '.date_registered',
 			),
+			'order'       => array(
+				'clause' => 'where',
+				'column' => $wpdb->prefix . 'wc_order_stats.date_created',
+			),
 			'last_active' => array(
 				'clause' => 'where',
 				'column' => $table_name . '.date_last_active',
@@ -338,11 +342,13 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 
 		// These defaults are only partially applied when used via REST API, as that has its own defaults.
 		$defaults   = array(
-			'per_page' => get_option( 'posts_per_page' ),
-			'page'     => 1,
-			'order'    => 'DESC',
-			'orderby'  => 'date_registered',
-			'fields'   => '*',
+			'per_page'     => get_option( 'posts_per_page' ),
+			'page'         => 1,
+			'order'        => 'DESC',
+			'orderby'      => 'date_registered',
+			'order_before' => WC_Admin_Reports_Interval::default_before(),
+			'order_after'  => WC_Admin_Reports_Interval::default_after(),
+			'fields'       => '*',
 		);
 		$query_args = wp_parse_args( $query_args, $defaults );
 		$this->normalize_timezones( $query_args, $defaults );

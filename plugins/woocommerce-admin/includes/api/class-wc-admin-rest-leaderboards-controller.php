@@ -206,9 +206,11 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 		$customers_data_store = new WC_Admin_Reports_Customers_Data_Store();
 		$customers_data       = $per_page > 0 ? $customers_data_store->get_data(
 			array(
-				'orderby'  => 'total_spend',
-				'order'    => 'desc',
-				'per_page' => $per_page,
+				'orderby'      => 'total_spend',
+				'order'        => 'desc',
+				'order_after'  => $after,
+				'order_before' => $before,
+				'per_page'     => $per_page,
 			)
 		)->data : array();
 
