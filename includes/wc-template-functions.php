@@ -573,15 +573,37 @@ function wc_get_product_class( $class = '', $product = null ) {
 		$product = wc_get_product( $product );
 	}
 
-	// Make sure we have an array.
-	$classes = is_array( $class ) ? $class : preg_split( '#\s+#', $class );
+	if ( $class ) {
+		if ( ! is_array() ) {
+			$class = preg_split( '#\s+#', $class );
+		}
+	} else {
+		$class = array();
+	}
+
+	$post_classes = array_map( 'esc_attr', $class );
 
 	if ( ! $product ) {
-		return array_map( 'esc_attr', $classes );
+		return $post_classes;
+	}
+
+	// Run through the post_class hook so 3rd parties using this previously can still append classes.
+	// Note, to change classes you will need to use the newer woocommerce_post_class filter.
+	// @internal This removes the wc_product_post_class filter so classes are not duplicated.
+	$filtered = has_filter( 'post_class', 'wc_product_post_class' );
+
+	if ( $filtered ) {
+		remove_filter( 'post_class', 'wc_product_post_class', 20, 3 );
+	}
+
+	$post_classes = apply_filters( 'post_class', $post_classes, $class, $product->get_id() );
+
+	if ( $filtered ) {
+		add_filter( 'post_class', 'wc_product_post_class', 20, 3 );
 	}
 
 	$classes = array_merge(
-		$classes,
+		$post_classes,
 		array(
 			'product',
 			'type-product',
@@ -651,7 +673,7 @@ function wc_get_product_class( $class = '', $product = null ) {
 	 */
 	$classes = apply_filters( 'woocommerce_post_class', $classes, $product );
 
-	return array_map( 'esc_attr', array_filter( array_unique( $classes ) ) );
+	return array_map( 'esc_attr', array_unique( array_filter( $classes ) ) );
 }
 
 /**
