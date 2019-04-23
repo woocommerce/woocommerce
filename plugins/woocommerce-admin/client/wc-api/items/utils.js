@@ -35,7 +35,7 @@ export function getLeaderboard( options ) {
 		after: appendTimestamp( datesFromQuery.primary.after, 'start' ),
 		before: appendTimestamp( datesFromQuery.primary.before, 'end' ),
 		per_page,
-		persisted_query,
+		persisted_query: JSON.stringify( persisted_query ),
 	};
 
 	const leaderboards = getItems( endpoint, leaderboardQuery );

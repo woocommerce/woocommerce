@@ -109,7 +109,7 @@ class WC_Tests_API_Leaderboards extends WC_REST_Unit_Test_Case {
 			5
 		);
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
-		$request->set_query_params( array( 'persisted_query' => 'persisted_param=1' ) );
+		$request->set_query_params( array( 'persisted_query' => '{ "persisted_param": 1 }' ) );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
