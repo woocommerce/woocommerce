@@ -1302,6 +1302,9 @@ function wc_update_product_lookup_tables() {
 		WC_Admin_Notices::add_notice( 'regenerating_lookup_table' );
 	}
 
+	// Note that the table is not yet generated.
+	update_option( 'woocommerce_product_lookup_table_is_generating', true );
+
 	// Make a row per product in lookup table.
 	$wpdb->query(
 		"
@@ -1324,7 +1327,7 @@ function wc_update_product_lookup_tables() {
 		'total_sales',
 		'downloadable',
 		'virtual',
-		'onsale',
+		'onsale', // When last column is updated, woocommerce_product_lookup_table_is_generating is updated.
 	);
 
 	foreach ( $columns as $index => $column ) {
@@ -1482,6 +1485,8 @@ function wc_update_product_lookup_tables_column( $column ) {
 					$decimals
 				)
 			);
+
+			delete_option( 'woocommerce_product_lookup_table_is_generating' ); // Complete.
 			break;
 	}
 	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
