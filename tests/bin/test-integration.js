@@ -12,6 +12,7 @@ program
 const testEnvVars = {
 	NODE_ENV: 'test',
 	JEST_PUPPETEER_CONFIG: 'tests/e2e-tests/config/jest-puppeteer.config.js',
+	NODE_CONFIG_DIR: 'tests/e2e-tests/config',
 };
 
 if ( program.dev ) {
