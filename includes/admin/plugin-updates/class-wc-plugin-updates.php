@@ -213,7 +213,7 @@ class WC_Plugin_Updates {
 					$plugin_version .= '.' . $plugin_version_parts[1];
 				}
 
-				if ( version_compare( $plugin_version, $version, '<' ) ) {
+				if ( version_compare( $plugin_version, $version, '<=' ) ) {
 					$untested[ $file ] = $plugin;
 				}
 			} else {
