@@ -263,19 +263,14 @@ class WC_Regenerate_Images {
 	private static function get_full_size_image_dimensions( $attachment_id ) {
 		$imagedata = wp_get_attachment_metadata( $attachment_id );
 
-		if ( ! $imagedata ) {
-			return array();
-		}
+        if ( $imagedata && ! isset( $imagedata['file'] ) && isset( $imagedata['sizes']['full'] ) ) {
+            return array(
+                'width' => $imagedata['sizes']['full']['width'],
+                'height' => $imagedata['sizes']['full']['height'],
+            );
+        }
 
-		if ( ! isset( $imagedata['file'] ) && isset( $imagedata['sizes']['full'] ) ) {
-			$imagedata['height'] = $imagedata['sizes']['full']['height'];
-			$imagedata['width']  = $imagedata['sizes']['full']['width'];
-		}
-
-		return array(
-			'width'  => $imagedata['width'],
-			'height' => $imagedata['height'],
-		);
+        return array();
 	}
 
 	/**
