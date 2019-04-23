@@ -15,9 +15,7 @@
  * @version 3.3.1
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 $text_align = is_rtl() ? 'right' : 'left';
 
@@ -48,18 +46,21 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 		</thead>
 		<tbody>
 			<?php
-			echo wc_get_email_order_items( $order, array( // WPCS: XSS ok.
-				'show_sku'      => $sent_to_admin,
-				'show_image'    => false,
-				'image_size'    => array( 32, 32 ),
-				'plain_text'    => $plain_text,
-				'sent_to_admin' => $sent_to_admin,
-			) );
+			echo wc_get_email_order_items( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				$order,
+				array(
+					'show_sku'      => $sent_to_admin,
+					'show_image'    => false,
+					'image_size'    => array( 32, 32 ),
+					'plain_text'    => $plain_text,
+					'sent_to_admin' => $sent_to_admin,
+				)
+			);
 			?>
 		</tbody>
 		<tfoot>
 			<?php
-			$totals = $order->get_order_item_totals();
+			$totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
 
 			if ( $totals ) {
 				$i = 0;

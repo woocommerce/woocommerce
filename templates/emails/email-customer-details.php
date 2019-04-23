@@ -17,10 +17,7 @@
  * @version 2.5.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
+defined( 'ABSPATH' ) || exit;
 ?>
 <?php if ( ! empty( $fields ) ) : ?>
 	<div style="font-family: 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif; margin-bottom: 40px;">
