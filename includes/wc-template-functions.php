@@ -574,7 +574,7 @@ function wc_get_product_class( $class = '', $product = null ) {
 	}
 
 	if ( $class ) {
-		if ( ! is_array() ) {
+		if ( ! is_array( $class ) ) {
 			$class = preg_split( '#\s+#', $class );
 		}
 	} else {
