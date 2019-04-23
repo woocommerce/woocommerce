@@ -852,4 +852,4 @@ function wc_update_user_last_active( $user_id ) {
 		return;
 	}
 	update_user_meta( $user_id, 'wc_last_active', (string) strtotime( date( 'Y-m-d', current_time( 'timestamp', true ) ) ) );
-}
+} 
