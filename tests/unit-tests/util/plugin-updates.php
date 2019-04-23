@@ -76,10 +76,10 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 		);
 		$new_version = '4.0.0';
 		$untested = $this->updates->get_untested_plugins( $new_version, $release );
-		$this->assertArrayNotHasKey( 'test/test.php', $untested );
+		$this->assertArrayHasKey( 'test/test.php', $untested );
 		$this->assertArrayNotHasKey( 'test2/test2.php', $untested );
-		$this->assertArrayNotHasKey( 'test3/test3.php', $untested );
-		$this->assertArrayNotHasKey( 'test4/test4.php', $untested );
+		$this->assertArrayHasKey( 'test3/test3.php', $untested );
+		$this->assertArrayHasKey( 'test4/test4.php', $untested );
 
 		$new_version = '3.9.0';
 		$untested = $this->updates->get_untested_plugins( $new_version, $release );
@@ -90,17 +90,17 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 
 		$new_version = '4.3.0';
 		$untested = $this->updates->get_untested_plugins( $new_version, $release );
-		$this->assertArrayNotHasKey( 'test/test.php', $untested );
+		$this->assertArrayHasKey( 'test/test.php', $untested );
 		$this->assertArrayNotHasKey( 'test2/test2.php', $untested );
-		$this->assertArrayNotHasKey( 'test3/test3.php', $untested );
-		$this->assertArrayNotHasKey( 'test4/test4.php', $untested );
+		$this->assertArrayHasKey( 'test3/test3.php', $untested );
+		$this->assertArrayHasKey( 'test4/test4.php', $untested );
 
 		$new_version = '4.0.2';
 		$untested = $this->updates->get_untested_plugins( $new_version, $release );
-		$this->assertArrayNotHasKey( 'test/test.php', $untested );
+		$this->assertArrayHasKey( 'test/test.php', $untested );
 		$this->assertArrayNotHasKey( 'test2/test2.php', $untested );
-		$this->assertArrayNotHasKey( 'test3/test3.php', $untested );
-		$this->assertArrayNotHasKey( 'test4/test4.php', $untested );
+		$this->assertArrayHasKey( 'test3/test3.php', $untested );
+		$this->assertArrayHasKey( 'test4/test4.php', $untested );
 	}
 
 	/**
@@ -168,9 +168,9 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 		);
 		$new_version = '4.1.0';
 		$untested = $this->updates->get_untested_plugins( $new_version, $release );
-		$this->assertArrayNotHasKey( 'test/test.php', $untested );
+		$this->assertArrayHasKey( 'test/test.php', $untested );
 		$this->assertArrayNotHasKey( 'test2/test2.php', $untested );
-		$this->assertArrayNotHasKey( 'test3/test3.php', $untested );
+		$this->assertArrayHasKey( 'test3/test3.php', $untested );
 		$this->assertArrayNotHasKey( 'test4/test4.php', $untested );
 
 		$new_version = '4.2.0';
@@ -178,13 +178,13 @@ class WC_Tests_Plugin_Updates extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'test/test.php', $untested );
 		$this->assertArrayNotHasKey( 'test2/test2.php', $untested );
 		$this->assertArrayHasKey( 'test3/test3.php', $untested );
-		$this->assertArrayNotHasKey( 'test4/test4.php', $untested );
+		$this->assertArrayHasKey( 'test4/test4.php', $untested );
 
 		$new_version = '4.1.5';
 		$untested = $this->updates->get_untested_plugins( $new_version, $release );
-		$this->assertArrayNotHasKey( 'test/test.php', $untested );
+		$this->assertArrayHasKey( 'test/test.php', $untested );
 		$this->assertArrayNotHasKey( 'test2/test2.php', $untested );
-		$this->assertArrayNotHasKey( 'test3/test3.php', $untested );
+		$this->assertArrayHasKey( 'test3/test3.php', $untested );
 		$this->assertArrayNotHasKey( 'test4/test4.php', $untested );
 	}
 
