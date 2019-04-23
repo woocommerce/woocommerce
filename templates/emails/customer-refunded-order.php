@@ -61,7 +61,7 @@ do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_
 
 ?>
 <p>
-<?php _e( 'We hope to see you again soon.', 'woocommerce' ); // phpcs:ignore WordPress.XSS.EscapeOutput ?>
+<?php esc_html_e( 'We hope to see you again soon.', 'woocommerce' ); ?>
 </p>
 <?php
 
