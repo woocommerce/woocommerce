@@ -30,6 +30,9 @@ class WC_Admin {
 		add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 1 );
 		add_action( 'wp_ajax_setup_wizard_check_jetpack', array( $this, 'setup_wizard_check_jetpack' ) );
 		add_action( 'init', array( 'WC_Site_Tracking', 'init' ) );
+
+		// Disable WXR export of schedule action posts.
+		add_filter( 'action_scheduler_post_type_args', array( $this, 'disable_webhook_post_export' ) );
 	}
 
 	/**
@@ -287,6 +290,20 @@ class WC_Admin {
 				'is_active' => $jetpack_active ? 'yes' : 'no',
 			)
 		);
+	}
+
+	/**
+	 * Disable WXR export of scheduled action posts.
+	 *
+	 * @since 3.6.2
+	 *
+	 * @param array $args Scehduled action post type registration args.
+	 *
+	 * @return array
+	 */
+	public function disable_webhook_post_export( $args ) {
+		$args['can_export'] = false;
+		return $args;
 	}
 }
 
