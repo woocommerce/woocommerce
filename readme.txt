@@ -170,6 +170,9 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - [3.6.x] Prevent term ordering queries inserted by wc_terms_clauses from conflicting with custom where clauses. #23449
 * Fix - [3.6.x] When product lookup table is generating for the first time, avoid wrong stock statuses being set for variable products. #23455
 * Fix - [3.6.x] Ensure webhooks respect registered order args. #23444
+* Fix - [3.6.x] REST API - Return custom attribute with defined name instead of lowercase name. #23482
+* Fix - [3.6.x] Fix 3.6 conflict with Woo Blocks plugin 1.4. #23399
+* Fix - [3.6.x] Allow default sorting of WC taxonomies to be overwritten by get_terms orderby. #23477
 * Fix - Revert selectWoo escaping change and instead escape user names. Avoids issues displaying slash characters. #23334
 * Fix - If an empty array is passed to the v3 API for images, images should be unset. #23339
 * Fix - Fix attribute renaming when dealing with unicode characters. #23132
@@ -190,6 +193,8 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Prevent plugins causing notices by calling get_catalog_ordering_args incorrectly. #23451
 * Fix - Product list view shipping class filter display correct products. #23446
 * Fix - Twenty Seventeen On Sale badge hidden behind product image. #23450
+* Fix - Correct postcode validation on my-account page. #23483
+* Tweak - Update action scheduler to version 2.2.5. #23489
 * Tweak - Removed 2 old admin notices for featured moved in past versions. #23263
 * Localization - Make the state/county field optional at checkout for Greece. #23365
 
