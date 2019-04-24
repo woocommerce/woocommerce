@@ -9,9 +9,12 @@ const config = require( 'config' );
 
 const baseUrl = config.get( 'url' );
 
+const WP_ADMIN_LOGIN = baseUrl + 'wp-login.php';
+const WP_ADMIN_NEW_COUPON = baseUrl + 'wp-admin/post-new.php?post_type=shop_coupon';
+
 const StoreOwnerFlow = {
     login: async () => {
-        await page.goto( baseUrl + 'wp-login.php', {
+        await page.goto( WP_ADMIN_LOGIN, {
 			waitUntil: 'networkidle0',
 		} );
 
@@ -24,7 +27,13 @@ const StoreOwnerFlow = {
 			page.click( 'input[type=submit]' ),
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 		] );
-    },
+	},
+
+	openNewCoupon: async () => {
+		await page.goto( WP_ADMIN_NEW_COUPON, {
+			waitUntil: 'networkidle0',
+		} );
+	},
 };
 
 module.exports = {
