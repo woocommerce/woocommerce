@@ -44,6 +44,31 @@ class WC_Test_Taxonomies extends WC_Unit_Test_Case {
 			print_r( $terms, true ) // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		);
 
+		// Explicit menu_order sort, backwards.
+		$terms = array_values(
+			wp_list_pluck(
+				get_terms(
+					array(
+						'taxonomy'   => 'product_cat',
+						'hide_empty' => false,
+						'orderby'    => 'menu_order',
+						'order'      => 'DESC',
+						'exclude'    => $default_category_id,
+					)
+				),
+				'name'
+			)
+		);
+		$this->assertEquals(
+			array(
+				'Beta Category',
+				'Zulu Category',
+				'Alpha Category',
+			),
+			$terms,
+			print_r( $terms, true ) // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+		);
+
 		// Force sort by name.
 		$terms = array_values(
 			wp_list_pluck(
