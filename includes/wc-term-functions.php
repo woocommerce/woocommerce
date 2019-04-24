@@ -32,16 +32,13 @@ function wc_change_get_terms_defaults( $defaults, $taxonomies ) {
 		$orderby = 'menu_order';
 	}
 
+	// Change defaults. Invalid values will be changed later @see wc_change_pre_get_terms.
+	// These are in place so we know if a specific order was requested.
 	switch ( $orderby ) {
 		case 'menu_order':
-			$defaults['force_menu_order_sort'] = true;
-			break;
 		case 'name_num':
-			$defaults['orderby']            = 'name';
-			$defaults['force_numeric_name'] = true;
-			break;
 		case 'parent':
-			$defaults['orderby'] = 'parent';
+			$defaults['orderby'] = $orderby;
 			break;
 	}
 
@@ -58,11 +55,23 @@ add_filter( 'get_terms_defaults', 'wc_change_get_terms_defaults', 10, 2 );
 function wc_change_pre_get_terms( $terms_query ) {
 	$args = &$terms_query->query_vars;
 
+	// Put back valid orderby values.
+	if ( 'menu_order' === $args['orderby'] ) {
+		$args['orderby']               = 'name';
+		$args['force_menu_order_sort'] = true;
+	}
+
+	if ( 'name_num' === $args['orderby'] ) {
+		$args['orderby']            = 'name';
+		$args['force_numeric_name'] = true;
+	}
+
 	// When COUNTING, disable custom sorting.
 	if ( 'count' === $args['fields'] ) {
 		return;
 	}
 
+	// Support menu_order arg used in previous versions.
 	if ( ! empty( $args['menu_order'] ) ) {
 		$args['order']                 = 'DESC' === strtoupper( $args['menu_order'] ) ? 'DESC' : 'ASC';
 		$args['force_menu_order_sort'] = true;
