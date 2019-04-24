@@ -122,16 +122,22 @@ class WC_Form_Handler {
 					foreach ( $field['validate'] as $rule ) {
 						switch ( $rule ) {
 							case 'postcode':
-								$value = strtoupper( str_replace( ' ', '', $value ) );
+								$country = wc_clean( wp_unslash( $_POST[ $load_address . '_country' ] ) );
+								$value   = wc_format_postcode( $value, $country );
 
-								if ( ! WC_Validation::is_postcode( $value, wc_clean( wp_unslash( $_POST[ $load_address . '_country' ] ) ) ) ) {
-									wc_add_notice( __( 'Please enter a valid postcode / ZIP.', 'woocommerce' ), 'error' );
-								} else {
-									$value = wc_format_postcode( $value, wc_clean( wp_unslash( $_POST[ $load_address . '_country' ] ) ) );
+								if ( '' !== $value && ! WC_Validation::is_postcode( $value, $country ) ) {
+									switch ( $country ) {
+										case 'IE':
+											$postcode_validation_notice = __( 'Please enter a valid Eircode.', 'woocommerce' );
+											break;
+										default:
+											$postcode_validation_notice = __( 'Please enter a valid postcode / ZIP.', 'woocommerce' );
+									}
+									wc_add_notice( $postcode_validation_notice, 'error' );
 								}
 								break;
 							case 'phone':
-								if ( ! WC_Validation::is_phone( $value ) ) {
+								if ( '' !== $value && ! WC_Validation::is_phone( $value ) ) {
 									/* translators: %s: Phone number. */
 									wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
 								}
