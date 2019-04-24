@@ -199,7 +199,7 @@ class WC_Marketplace_Suggestions {
 		if ( empty( $data['updated'] ) || ( time() - WEEK_IN_SECONDS ) > $data['updated'] ) {
 			$next = WC()->queue()->get_next( 'woocommerce_update_marketplace_suggestions' );
 			if ( ! $next ) {
-				WC()->queue()->cancel( 'woocommerce_update_marketplace_suggestions' );
+				WC()->queue()->cancel_all( 'woocommerce_update_marketplace_suggestions' );
 				WC()->queue()->schedule_single( time(), 'woocommerce_update_marketplace_suggestions' );
 			}
 		}
