@@ -77,6 +77,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'default'  => '',
 						'class'    => 'wc-enhanced-select-nostd',
 						'css'      => 'min-width:300px;',
+						'args'     => array( 'exclude' => array( wc_get_page_id( 'checkout' ), wc_get_page_id( 'myaccount' ) ) ),
 						'desc_tip' => true,
 					),
 
