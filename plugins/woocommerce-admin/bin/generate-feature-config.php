@@ -35,7 +35,8 @@ if ( 'core' !== $phase ) {
 	}
 	$write .= "\t\t\t)";
 
-	if ( is_file( './dist' ) || ! wp_mkdir_p( './dist' ) ) {
+	if ( ! is_dir( './dist' ) && ! @mkdir( './dist' ) ) {
+		echo 'Run `npm run clean` to wipe artifacts.';
 		exit( 1 );
 	}
 
