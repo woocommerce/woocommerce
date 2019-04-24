@@ -188,12 +188,22 @@ class WC_Marketplace_Suggestions {
 	}
 
 	/**
-	 * Pull suggestion data from remote endpoint & cache in a transient.
+	 * Pull suggestion data from options. This is retrieved from a remote endpoint.
 	 *
 	 * @return array of json API data
 	 */
 	public static function get_suggestions_api_data() {
 		$data = get_option( 'woocommerce_marketplace_suggestions', array() );
+
+		// If the options have never been updated, or were updated over a week ago, queue update.
+		if ( empty( $data['updated'] ) || ( time() - WEEK_IN_SECONDS ) > $data['updated'] ) {
+			$next = WC()->queue()->get_next( 'woocommerce_update_marketplace_suggestions' );
+			if ( ! $next ) {
+				WC()->queue()->cancel_all( 'woocommerce_update_marketplace_suggestions' );
+				WC()->queue()->schedule_single( time(), 'woocommerce_update_marketplace_suggestions' );
+			}
+		}
+
 		return ! empty( $data['suggestions'] ) ? $data['suggestions'] : array();
 	}
 }
