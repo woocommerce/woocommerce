@@ -58,7 +58,7 @@
     "node-sass": "4.11.0",
     "prettier": "github:automattic/calypso-prettier#c56b4251",
     "stylelint": "10.0.1",
-    "stylelint-config-wordpress": "13.1.0",
+    "stylelint-config-wordpress": "14.0.0",
     "wc-e2e-page-objects": "0.10.0"
   },
   "engines": {
