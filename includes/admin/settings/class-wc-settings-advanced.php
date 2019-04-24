@@ -433,14 +433,14 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			}
 
 			// Prevent the Cart, checkout and my account page from being set to the same page.
-			if ( isset( $_POST['woocommerce_cart_page_id'], $_POST['woocommerce_checkout_page_id'], $_POST['woocommerce_myaccount_page_id'] ) ) {
-				if ( $_POST['woocommerce_cart_page_id'] === $_POST['woocommerce_checkout_page_id'] ) {
+			if ( isset( $_POST['woocommerce_cart_page_id'], $_POST['woocommerce_checkout_page_id'], $_POST['woocommerce_myaccount_page_id'] ) ) { // WPCS: input var ok, CSRF ok.
+				if ( $_POST['woocommerce_cart_page_id'] === $_POST['woocommerce_checkout_page_id'] ) { // WPCS: input var ok, CSRF ok.
 					$_POST['woocommerce_checkout_page_id'] = '';
 				}
-				if ( $_POST['woocommerce_cart_page_id'] === $_POST['woocommerce_myaccount_page_id'] ) {
+				if ( $_POST['woocommerce_cart_page_id'] === $_POST['woocommerce_myaccount_page_id'] ) { // WPCS: input var ok, CSRF ok.
 					$_POST['woocommerce_myaccount_page_id'] = '';
 				}
-				if ( $_POST['woocommerce_checkout_page_id'] === $_POST['woocommerce_myaccount_page_id'] ) {
+				if ( $_POST['woocommerce_checkout_page_id'] === $_POST['woocommerce_myaccount_page_id'] ) { // WPCS: input var ok, CSRF ok.
 					$_POST['woocommerce_myaccount_page_id'] = '';
 				}
 			}
