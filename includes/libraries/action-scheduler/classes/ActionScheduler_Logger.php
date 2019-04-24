@@ -55,6 +55,7 @@ abstract class ActionScheduler_Logger {
 		add_action( 'action_scheduler_unexpected_shutdown', array( $this, 'log_unexpected_shutdown' ), 10, 2 );
 		add_action( 'action_scheduler_reset_action', array( $this, 'log_reset_action' ), 10, 1 );
 		add_action( 'action_scheduler_execution_ignored', array( $this, 'log_ignored_action' ), 10, 1 );
+		add_action( 'action_scheduler_failed_fetch_action', array( $this, 'log_failed_fetch_action' ), 10, 1 );
 	}
 
 	public function log_stored_action( $action_id ) {
@@ -94,5 +95,8 @@ abstract class ActionScheduler_Logger {
 	public function log_ignored_action( $action_id ) {
 		$this->log( $action_id, __( 'action ignored', 'action-scheduler' ) );
 	}
+
+	public function log_failed_fetch_action( $action_id ) {
+		$this->log( $action_id, __( 'There was a failure fetching this action', 'action-scheduler' ) );
+	}
 }
- 
