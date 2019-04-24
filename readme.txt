@@ -3,7 +3,7 @@ Contributors: automattic, mikejolley, jameskoster, claudiosanches, claudiulodro,
 Tags: ecommerce, e-commerce, store, sales, sell, shop, cart, checkout, downloadable, downloads, payments, paypal, storefront, stripe, woo commerce, woo
 Requires at least: 4.7
 Tested up to: 5.1
-Stable tag: 3.6.1
+Stable tag: 3.6.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -33,7 +33,7 @@ Beyond the basics, WooCommerce is fully customizable and extendable:
 
 Open-source freedoms mean full ownership of content and data forever – plus the expertise of a friendly [global community](https://woocommerce.com/meetups/?utm_source=wp%20org%20repo%20listing&utm_content=3.6).
 
-WooCommerce is built to allow store managers to run an eCommerce site themselves, no web developer needed. There is also a free WooCommerce [mobile app](https://woocommerce.com/mobile/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) (Android and iOS) for store management on the go. 
+WooCommerce is built to allow store managers to run an eCommerce site themselves, no web developer needed. There is also a free WooCommerce [mobile app](https://woocommerce.com/mobile/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) (Android and iOS) for store management on the go.
 
 WooCommerce is developed and supported by Automattic, the creators of Jetpack and WordPress.com, along with independent contributors. The [official extension marketplace](https://woocommerce.com/product-category/woocommerce-extensions/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) is on WooCommerce.com.
 
@@ -55,24 +55,24 @@ And those are just the out-of-the-box options. With paid extensions, you can ext
 Start a monthly wine subscription box, offer a discount on yoga mats to members who’ve attended 10+ classes, offer configurable hampers or personalized jewelry – it’s all possible with WooCommerce.
 
 = Comprehensive payment options =
-WooCommerce comes bundled with the ability to accept major credit cards, alternative payment methods, BACS (bank transfers), and cash on delivery. 
+WooCommerce comes bundled with the ability to accept major credit cards, alternative payment methods, BACS (bank transfers), and cash on delivery.
 
 For additional options, WooCommerce also integrates with more than 140 region-specific gateways including popular choices like [Stripe](https://woocommerce.com/products/stripe/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), [PayPal](https://woocommerce.com/products/woocommerce-gateway-paypal-checkout/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), [Square](https://woocommerce.com/products/square/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) and [Amazon Pay](https://woocommerce.com/products/pay-with-amazon/?utm_source=wp%20org%20repo%20listing&utm_content=3.6). [Apple Pay](https://woocommerce.com/apple-pay/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) and Google Pay are also supported.
 
 Search for your payment service provider of choice on the [official marketplace](https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=wp%20org%20repo%20listing&utm_content=3.6).
 
 = Ship locally and globally =
-Shipping with WooCommerce is highly configurable. Adjust the built-in settings to offer free shipping or flat rate shipping, limit your shipments to specific countries by setting up shipping zones, or open your store up to the world. 
+Shipping with WooCommerce is highly configurable. Adjust the built-in settings to offer free shipping or flat rate shipping, limit your shipments to specific countries by setting up shipping zones, or open your store up to the world.
 
 Official extensions connect you with hundreds of local and international carriers – including [Royal Mail](https://woocommerce.com/products/royal-mail/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), [FedEx](https://woocommerce.com/products/fedex-shipping-module/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), and [Australia Post](https://woocommerce.com/products/australia-post-shipping-method/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) – and let you integrate with [inventory management and fulfilment providers](https://woocommerce.com/product-category/woocommerce-extensions/shipping-methods/inventory-fulfillment/?utm_source=wp%20org%20repo%20listing&utm_content=3.6).
 
-There are also extensions available to add [delivery and shipping options](https://woocommerce.com/product-category/woocommerce-extensions/shipping-methods/delivery-shipping-options/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) and support strategies like buy-one-get-one free, free gifts, and add-ons. [WooCommerce Shipping](https://woocommerce.com/products/shipping/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) supports real-time calculations and printing labels at home.  
+There are also extensions available to add [delivery and shipping options](https://woocommerce.com/product-category/woocommerce-extensions/shipping-methods/delivery-shipping-options/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) and support strategies like buy-one-get-one free, free gifts, and add-ons. [WooCommerce Shipping](https://woocommerce.com/products/shipping/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) supports real-time calculations and printing labels at home.
 
 = Design your store with themes and blocks =
 
-WooCommerce store design starts with a theme of your choice. There are hundreds of free and paid themes available, including [Storefront](https://woocommerce.com/storefront/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) by Automattic -- it's free to all stores and you can choose to have it installed for you during the hguided setup. 
+WooCommerce store design starts with a theme of your choice. There are hundreds of free and paid themes available, including [Storefront](https://woocommerce.com/storefront/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) by Automattic -- it's free to all stores and you can choose to have it installed for you during the hguided setup.
 
-Storefront offers deep WooCommerce integration and prioritizes speed and uptime. You can add your brand and define your style by customizing Storefront yourself or adding one of several industry-themed [Storefront child themes](https://woocommerce.com/product-category/themes/storefront-child-theme-themes/?utm_source=wp%20org%20repo%20listing&utm_content=3.6). 
+Storefront offers deep WooCommerce integration and prioritizes speed and uptime. You can add your brand and define your style by customizing Storefront yourself or adding one of several industry-themed [Storefront child themes](https://woocommerce.com/product-category/themes/storefront-child-theme-themes/?utm_source=wp%20org%20repo%20listing&utm_content=3.6).
 
 Personalize your store's design even more with WooCommerce Blocks (available in WooCommerce 3.6 and above) -- use them to add selections of or single products to any page, for a seamless blending of commerce into content.
 
@@ -80,25 +80,25 @@ Personalize your store's design even more with WooCommerce Blocks (available in 
 
 The easiest way to add features and functionality to a WooCommerce store is with an extension:
 
-- Sell anything - [Subscriptions](https://woocommerce.com/products/woocommerce-subscriptions/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), [Memberships](https://woocommerce.com/products/woocommerce-memberships/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), [Bookings](https://woocommerce.com/products/woocommerce-bookings/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), [Product Bundles](https://woocommerce.com/products/product-bundles/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), and [more](https://woocommerce.com/product-category/woocommerce-extensions/product-type/). 
+- Sell anything - [Subscriptions](https://woocommerce.com/products/woocommerce-subscriptions/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), [Memberships](https://woocommerce.com/products/woocommerce-memberships/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), [Bookings](https://woocommerce.com/products/woocommerce-bookings/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), [Product Bundles](https://woocommerce.com/products/product-bundles/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), and [more](https://woocommerce.com/product-category/woocommerce-extensions/product-type/).
 - Make your store, your way - [Product Add-Ons](https://woocommerce.com/products/product-add-ons/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), [Checkout Field Editor](https://woocommerce.com/products/woocommerce-checkout-field-editor/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), [Additional Variation Images](https://woocommerce.com/products/woocommerce-additional-variation-images/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), and [more](https://woocommerce.com/customize-product-pages?utm_source=wp%20org%20repo%20listing&utm_content=3.6).
 - Customize your shipping options - [Table Rate Shipping](https://woocommerce.com/products/table-rate-shipping/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), [Shipment Tracking](https://woocommerce.com/products/shipment-tracking/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), live rates from [top carriers](https://woocommerce.com/product-category/woocommerce-extensions/shipping-methods/shipping-carriers/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), and [more](https://woocommerce.com/product-category/woocommerce-extensions/shipping-methods/?utm_source=wp%20org%20repo%20listing&utm_content=3.6).
 - Find your audience, market to them your way - [Google Product Feed](https://woocommerce.com/products/google-product-feed/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), [LiveChat](https://woocommerce.com/products/livechat/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), [Amazon/eBay marketplace integration](https://woocommerce.com/products/amazon-ebay-integration/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), and [more](https://woocommerce.com/product-category/woocommerce-extensions/marketing-extensions/?utm_source=wp%20org%20repo%20listing&utm_content=3.6).
 - Drive sales – [Dynamic Pricing](https://woocommerce.com/products/dynamic-pricing/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), [Smart Coupons](https://woocommerce.com/products/smart-coupons/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), [Google Ads](https://woocommerce.com/products/google-ads/?utm_source=wp%20org%20repo%20listing&utm_content=3.6), and [more](https://woocommerce.com/product-category/woocommerce-extensions/marketing-extensions/promotions/?utm_source=wp%20org%20repo%20listing&utm_content=3.6).
 
-There are hundreds of official extensions reviewed by WooCommerce developers available on the WooCommerce.com marketplace, and many in the WordPress.org repository and on the wider web. 
+There are hundreds of official extensions reviewed by WooCommerce developers available on the WooCommerce.com marketplace, and many in the WordPress.org repository and on the wider web.
 
 = Control your data forever =
 
-WooCommerce gives you complete control – from taxes to stock levels to customer accounts. Add and remove extensions, change your store’s design, and switch themes or hosts or payment service providers, all as you please. 
+WooCommerce gives you complete control – from taxes to stock levels to customer accounts. Add and remove extensions, change your store’s design, and switch themes or hosts or payment service providers, all as you please.
 
-In a world increasingly aware of the importance of data protection, WooCommerce gives you full ownership over what is tracked and stored. If you opt to share [usage data](https://woocommerce.com/usage-tracking/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) with us, your data is anonymized and kept secure. At any stage, you can opt out of all forms of tracking while still enjoying all of WooCommerce's capabilities. 
+In a world increasingly aware of the importance of data protection, WooCommerce gives you full ownership over what is tracked and stored. If you opt to share [usage data](https://woocommerce.com/usage-tracking/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) with us, your data is anonymized and kept secure. At any stage, you can opt out of all forms of tracking while still enjoying all of WooCommerce's capabilities.
 
 With WooCommerce, your data belongs to you. One of the risks of using a hosted eCommerce platform the risk of losing your store if the provider closes. WooCommerce store data is future-proof -- you’re are free to export all your content and take your site  wherever you choose.
 
 = Why developers like WooCommerce =
 
-WooCommerce was originally created with developers in mind. Built with a REST API, it integrates with virtually any service. Store data can be accessed anywhere, anytime, 100% securely. 
+WooCommerce was originally created with developers in mind. Built with a REST API, it integrates with virtually any service. Store data can be accessed anywhere, anytime, 100% securely.
 
 WooCommerce allows developers to easily create, modify, and scale a store that meets client’s specifications, and to make enhancements either with extensions or with customs solution.
 
@@ -163,7 +163,7 @@ Visit the [WooCommerce server requirements documentation](https://docs.woocommer
 = Automatic installation =
 
 Automatic installation is the easiest option -- WordPress will handles the file transfer, and you won’t need to leave your web browser. To do an automatic install of WooCommerce, log in to your WordPress dashboard, navigate to the Plugins menu, and click “Add New.”
- 
+
 In the search field type “WooCommerce,” then click “Search Plugins.” Once you’ve found us,  you can view details about it such as the point release, rating, and description. Most importantly of course, you can install it by! Clicki “Install Now,” and WordPress will take it from there.
 
 = Manual installation =
@@ -188,7 +188,7 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 3.6.2 - 2019-xx-xx =
+= 3.6.2 - 2019-04-24 =
 * Fix - [3.6.x] Fix CSS classname conflict with themes due to missing product object global. #23377
 * Fix - [3.6.x] Fix security check on email template preview page. #23356
 * Fix - [3.6.x] Prevent `wc_ascii_uasort_comparison` throwing notices in some server configs. #23363
