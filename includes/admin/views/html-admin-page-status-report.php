@@ -881,7 +881,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 					echo '<mark class="yes"><span class="dashicons dashicons-yes"></span></mark>';
 				} else {
 					/* Translators: %s docs link. */
-					echo '<span class="dashicons dashicons-no-alt"></span> &ndash; ' . wp_kses_post( sprintf( __( 'If you are modifying WooCommerce on a parent theme that you did not build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'https://codex.wordpress.org/Child_Themes' ) );
+					echo '<span class="dashicons dashicons-no-alt"></span> &ndash; ' . wp_kses_post( sprintf( __( 'If you are modifying WooCommerce on a parent theme that you did not build personally we recommend using a child theme. See: <a href="%s" target="_blank">How to create a child theme</a>', 'woocommerce' ), 'https://developer.wordpress.org/themes/advanced-topics/child-themes/' ) );
 				}
 				?>
 				</td>
