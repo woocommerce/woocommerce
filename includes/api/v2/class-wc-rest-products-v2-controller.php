@@ -457,13 +457,21 @@ class WC_REST_Products_V2_Controller extends WC_REST_Legacy_Products_Controller 
 	 * @return string
 	 */
 	protected function get_attribute_taxonomy_name( $slug, $product ) {
+		// Format slug so it matches attributes of the product.
+		$slug       = wc_attribute_taxonomy_slug( $slug );
 		$attributes = $product->get_attributes();
+		$attribute  = false;
 
-		if ( ! isset( $attributes[ $slug ] ) ) {
-			return wc_attribute_taxonomy_slug( $slug );
+		// pa_ attributes.
+		if ( isset( $attributes[ wc_attribute_taxonomy_name( $slug ) ] ) ) {
+			$attribute = $attributes[ wc_attribute_taxonomy_name( $slug ) ];
+		} elseif ( isset( $attributes[ $slug ] ) ) {
+			$attribute = $attributes[ $slug ];
 		}
 
-		$attribute = $attributes[ $slug ];
+		if ( ! $attribute ) {
+			return $slug;
+		}
 
 		// Taxonomy attribute name.
 		if ( $attribute->is_taxonomy() ) {
