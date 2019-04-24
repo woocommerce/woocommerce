@@ -166,7 +166,7 @@
     "stylelint": "9.10.1",
     "stylelint-config-wordpress": "13.1.0",
     "webpack": "4.30.0",
-    "webpack-cli": "3.1.2",
+    "webpack-cli": "3.3.1",
     "webpack-rtl-plugin": "github:yoavf/webpack-rtl-plugin#develop"
   },
   "engines": {
