@@ -5,7 +5,7 @@
 /** 
  * Internal dependencies
  */
-const { StoreOwnerFlow } = require( '../utils/flows' );
+const { clickTab, StoreOwnerFlow } = require( '../utils' );
 
 describe( 'Add New Coupon Page', () => {
 	beforeAll( async () => {
@@ -25,7 +25,7 @@ describe( 'Add New Coupon Page', () => {
         await expect( page ).toFill( '#woocommerce-coupon-description', 'test coupon' );
         
         // Set general coupon data
-        await expect( page ).toClick( '.wc-tabs > li > a', { text: 'General' } );
+        await clickTab( 'General' );
         await expect( page ).toSelect( '#discount_type', 'Fixed cart discount' );
         await expect( page ).toFill( '#coupon_amount', '100' );
 
