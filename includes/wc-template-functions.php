@@ -593,7 +593,7 @@ function wc_get_product_class( $class = '', $product = null ) {
 	$filtered = has_filter( 'post_class', 'wc_product_post_class' );
 
 	if ( $filtered ) {
-		remove_filter( 'post_class', 'wc_product_post_class', 20, 3 );
+		remove_filter( 'post_class', 'wc_product_post_class', 20 );
 	}
 
 	$post_classes = apply_filters( 'post_class', $post_classes, $class, $product->get_id() );
