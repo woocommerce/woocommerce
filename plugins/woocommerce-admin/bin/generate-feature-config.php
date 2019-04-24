@@ -36,7 +36,7 @@ if ( 'core' !== $phase ) {
 	$write .= "\t\t\t)";
 
 	if ( ! is_dir( './dist' ) && ! @mkdir( './dist' ) ) {
-		echo 'Run `npm run clean` to wipe artifacts.';
+		echo "Run `npm run clean` to wipe artifacts.\n\n";
 		exit( 1 );
 	}
 
