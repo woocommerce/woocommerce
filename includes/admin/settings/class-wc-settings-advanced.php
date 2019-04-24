@@ -51,6 +51,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * Get settings array.
 	 *
 	 * @param string $current_section Current section slug.
+	 *
 	 * @return array
 	 */
 	public function get_settings( $current_section = '' ) {
@@ -77,8 +78,15 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'default'  => '',
 						'class'    => 'wc-enhanced-select-nostd',
 						'css'      => 'min-width:300px;',
-						'args'     => array( 'exclude' => array( wc_get_page_id( 'checkout' ), wc_get_page_id( 'myaccount' ) ) ),
+						'args'     => array(
+							'exclude' =>
+								array(
+									wc_get_page_id( 'checkout' ),
+									wc_get_page_id( 'myaccount' )
+								)
+						),
 						'desc_tip' => true,
+						'autoload' => false,
 					),
 
 					array(
@@ -90,8 +98,15 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'default'  => '',
 						'class'    => 'wc-enhanced-select-nostd',
 						'css'      => 'min-width:300px;',
-						'args'     => array( 'exclude' => array( wc_get_page_id( 'cart' ), wc_get_page_id( 'myaccount' ) ) ),
+						'args'     => array(
+							'exclude' =>
+								array(
+									wc_get_page_id( 'cart' ),
+									wc_get_page_id( 'myaccount' )
+								)
+						),
 						'desc_tip' => true,
+						'autoload' => false,
 					),
 
 					array(
@@ -103,8 +118,15 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'default'  => '',
 						'class'    => 'wc-enhanced-select-nostd',
 						'css'      => 'min-width:300px;',
-						'args'     => array( 'exclude' => array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ) ) ),
+						'args'     => array(
+							'exclude' =>
+								array(
+									wc_get_page_id( 'cart' ),
+									wc_get_page_id( 'checkout' )
+								)
+						),
 						'desc_tip' => true,
+						'autoload' => false,
 					),
 
 					array(
@@ -131,7 +153,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'id'    => 'checkout_process_options',
 					),
 
-					'force_ssl_checkout'   => array(
+					'force_ssl_checkout' => array(
 						'title'           => __( 'Secure checkout', 'woocommerce' ),
 						'desc'            => __( 'Force secure checkout', 'woocommerce' ),
 						'id'              => 'woocommerce_force_ssl_checkout',
@@ -384,7 +406,9 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * Form method.
 	 *
 	 * @deprecated 3.4.4
+	 *
 	 * @param  string $method Method name.
+	 *
 	 * @return string
 	 */
 	public function form_method( $method ) {
@@ -461,6 +485,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
  * @deprecated 3.4 in favour of WC_Settings_Advanced.
  * @todo remove in 4.0.
  */
-class WC_Settings_Rest_API extends WC_Settings_Advanced {} // @codingStandardsIgnoreLine.
+class WC_Settings_Rest_API extends WC_Settings_Advanced {
+} // @codingStandardsIgnoreLine.
 
 return new WC_Settings_Advanced();
