@@ -17,6 +17,17 @@ if ( process.env.JEST_PUPPETEER_CONFIG === 'tests/e2e-tests/config/jest-puppetee
 jest.setTimeout( jestTimeoutInMilliSeconds );
 
 /**
+ * Allow test cases to operate in a fresh context (separate browser session).
+ */
+jestPuppeteer.resetContext = async () => {
+	if ( global.context && global.context.isIncognito() ) {
+		global.context = await global.browser.createIncognitoBrowserContext();
+
+		await jestPuppeteer.resetPage();
+	}
+};
+
+/**
  * Override the test case method so we can take screenshots of assertion failures.
  *
  * See: https://github.com/smooth-code/jest-puppeteer/issues/131#issuecomment-469439666

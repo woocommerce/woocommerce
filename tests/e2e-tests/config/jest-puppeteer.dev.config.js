@@ -13,6 +13,7 @@ module.exports = {
 			width: 1280,
 			height: 800,
 		},
+		browserContext: 'incognito',
 		// This will pipe browser's console to node.
 		dumpio: true,
 	},

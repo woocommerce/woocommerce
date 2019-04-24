@@ -16,6 +16,7 @@ const baseUrl = config.get( 'url' );
 
 describe( 'Check for functional WordPress installation', () => {
 	beforeAll( async () => {
+		await jestPuppeteer.resetContext();
 		await StoreOwnerFlow.login();
 	} );
 

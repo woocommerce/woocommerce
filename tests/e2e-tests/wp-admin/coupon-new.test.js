@@ -7,17 +7,14 @@
  */
 const { StoreOwnerFlow } = require( '../utils/flows' );
 
-/** 
- * External dependencies
- */
-const config = require( 'config' );
-
-const baseUrl = config.get( 'url' );
-
 describe( 'Add New Coupon Page', () => {
+	beforeAll( async () => {
+		await jestPuppeteer.resetContext();
+		await StoreOwnerFlow.login();
+	} );
+
     it( 'can create new coupon', async () => {
-        // Login and go to "add coupon" page
-        await StoreOwnerFlow.login();
+        // Go to "add coupon" page
         await StoreOwnerFlow.openNewCoupon();
         
         // Make sure we're on the add coupon page
