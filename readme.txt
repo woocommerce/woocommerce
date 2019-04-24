@@ -159,9 +159,17 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 == Changelog ==
 
 = 3.6.2 - 2019-xx-xx =
+* Fix - [3.6.x] Fix CSS classname conflict with themes due to missing product object global. #23377
 * Fix - [3.6.x] Fix security check on email template preview page. #23356
-* Fix - [3.6.x] wc_ascii_uasort_comparison throwing notices in some server configs. #23363
+* Fix - [3.6.x] Prevent `wc_ascii_uasort_comparison` throwing notices in some server configs. #23363
 * Fix - [3.6.x] `is_request_to_rest_api` should check for wc endpoints only. #23372
+* Fix - [3.6.x] Fixed use of get_term_meta in REST API endpoints. #23457
+* Fix - [3.6.x] Fixed missing closing tag for log-in link for reviews. #23445
+* Fix - [3.6.x] Fixed average_rating in the db upgrade routine for lookup table. #23465
+* Fix - [3.6.x] More useful update notices if cron is disabled. #23383
+* Fix - [3.6.x] Prevent term ordering queries inserted by wc_terms_clauses from conflicting with custom where clauses. #23449
+* Fix - [3.6.x] When product lookup table is generating for the first time, avoid wrong stock statuses being set for variable products. #23455
+* Fix - [3.6.x] Ensure webhooks respect registered order args. #23444
 * Fix - Revert selectWoo escaping change and instead escape user names. Avoids issues displaying slash characters. #23334
 * Fix - If an empty array is passed to the v3 API for images, images should be unset. #23339
 * Fix - Fix attribute renaming when dealing with unicode characters. #23132
@@ -178,6 +186,10 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Switch to subquery for sale products to prevent large query errors on some hosting environments. #23266
 * Fix - Add offerCount to variable product structured data. #23349
 * Fix - Cart widget - Allow title to be removed. #23370
+* Fix - Prevent order data being escaped incorrectly on save when using quotes. #23380
+* Fix - Prevent plugins causing notices by calling get_catalog_ordering_args incorrectly. #23451
+* Fix - Product list view shipping class filter display correct products. #23446
+* Fix - Twenty Seventeen On Sale badge hidden behind product image. #23450
 * Tweak - Removed 2 old admin notices for featured moved in past versions. #23263
 * Localization - Make the state/county field optional at checkout for Greece. #23365
 
