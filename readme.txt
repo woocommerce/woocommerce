@@ -225,6 +225,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Twenty Seventeen On Sale badge hidden behind product image. #23450
 * Fix - Correct postcode validation on my-account page. #23483
 * Fix - Fixed compatibility with the Jetpack Beta Tester plugin when loading the Tracks client library. #23397
+* Fix - Updated anchor for "How to create a child theme" with the correct target address in the Codex. #23469
 * Tweak - Update action scheduler to version 2.2.5. #23489
 * Tweak - Removed 2 old admin notices for featured moved in past versions. #23263
 * Localization - Make the state/county field optional at checkout for Greece. #23365
