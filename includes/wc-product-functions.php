@@ -1425,7 +1425,13 @@ function wc_update_product_lookup_tables_column( $column ) {
 		case 'stock_status':
 		case 'average_rating':
 		case 'total_sales':
-			$meta_key = 'total_sales' === $column ? $column : '_' . $column;
+			if ( 'total_sales' === $column ) {
+				$meta_key = 'total_sales';
+			} elseif ( 'average_rating' === $column ) {
+				$meta_key = '_wc_average_rating';
+			} else {
+				$meta_key = '_' . $column;
+			}
 			$column   = esc_sql( $column );
 			$wpdb->query(
 				$wpdb->prepare(
