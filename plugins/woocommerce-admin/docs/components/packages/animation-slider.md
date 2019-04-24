@@ -30,10 +30,10 @@ A unique identifier for each slideable page.
 
 null, 'left', 'right', to designate which direction to slide on a change.
 
-### `focusOnChange`
+### `onExited`
 
-- Type: Boolean
+- Type: Function
 - Default: null
 
-When set to true, the first focusable element will be focused after an animation has finished.
+A function to be executed after a transition is complete, passing the containing ref as the argument.
 

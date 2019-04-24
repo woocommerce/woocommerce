@@ -157,7 +157,7 @@
     "raw-loader": "1.0.0",
     "react-docgen": "2.21.0",
     "readline-sync": "1.4.9",
-    "recast": "0.17.4",
+    "recast": "0.17.5",
     "replace": "1.1.0",
     "rimraf": "2.6.3",
     "rtlcss": "2.4.0",
