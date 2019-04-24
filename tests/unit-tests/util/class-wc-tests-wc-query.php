@@ -282,6 +282,20 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 					'meta_key' => '',
 				),
 			),
+			array(
+				'orderby'  => array(
+					'price',
+					'date',
+				),
+				'order'    => array(
+					'DESC',
+				),
+				'expected' => array(
+					'orderby'  => 'price',
+					'order'    => 'DESC',
+					'meta_key' => '',
+				),
+			),
 		);
 
 		foreach ( $data as $test ) {
