@@ -89,6 +89,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'default'  => '',
 						'class'    => 'wc-enhanced-select-nostd',
 						'css'      => 'min-width:300px;',
+						'args'     => array( 'exclude' => array( wc_get_page_id( 'cart' ), wc_get_page_id( 'myaccount' ) ) ),
 						'desc_tip' => true,
 					),
 
@@ -101,6 +102,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 						'default'  => '',
 						'class'    => 'wc-enhanced-select-nostd',
 						'css'      => 'min-width:300px;',
+						'args'     => array( 'exclude' => array( wc_get_page_id( 'cart' ), wc_get_page_id( 'checkout' ) ) ),
 						'desc_tip' => true,
 					),
 
@@ -428,6 +430,19 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			// Prevent the T&Cs and checkout page from being set to the same page.
 			if ( isset( $_POST['woocommerce_terms_page_id'], $_POST['woocommerce_checkout_page_id'] ) && $_POST['woocommerce_terms_page_id'] === $_POST['woocommerce_checkout_page_id'] ) { // WPCS: input var ok, CSRF ok.
 				$_POST['woocommerce_terms_page_id'] = '';
+			}
+
+			// Prevent the Cart, checkout and my account page from being set to the same page.
+			if ( isset( $_POST['woocommerce_cart_page_id'], $_POST['woocommerce_checkout_page_id'], $_POST['woocommerce_myaccount_page_id'] ) ) {
+				if ( $_POST['woocommerce_cart_page_id'] === $_POST['woocommerce_checkout_page_id'] ) {
+					$_POST['woocommerce_checkout_page_id'] = '';
+				}
+				if ( $_POST['woocommerce_cart_page_id'] === $_POST['woocommerce_myaccount_page_id'] ) {
+					$_POST['woocommerce_myaccount_page_id'] = '';
+				}
+				if ( $_POST['woocommerce_checkout_page_id'] === $_POST['woocommerce_myaccount_page_id'] ) {
+					$_POST['woocommerce_myaccount_page_id'] = '';
+				}
 			}
 
 			WC_Admin_Settings::save_fields( $settings );
