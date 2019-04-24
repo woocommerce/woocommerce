@@ -26,12 +26,6 @@ class WC_Marketplace_Updater {
 	 * Schedule events and hook appropriate actions.
 	 */
 	public static function init() {
-		$queue = WC()->queue();
-		$next  = $queue->get_next( 'woocommerce_update_marketplace_suggestions' );
-		if ( ! $next ) {
-			$queue->schedule_recurring( time(), WEEK_IN_SECONDS, 'woocommerce_update_marketplace_suggestions' );
-		}
-
 		add_action( 'woocommerce_update_marketplace_suggestions', array( __CLASS__, 'update_marketplace_suggestions' ) );
 	}
 
