@@ -204,6 +204,7 @@ INTERESTED IN DEVELOPMENT?
 * Fix - [3.6.x] Fix 3.6 conflict with Woo Blocks plugin 1.4. #23399
 * Fix - [3.6.x] Allow default sorting of WC taxonomies to be overwritten by get_terms orderby. #23477
 * Fix - [3.6.x] Improve wc_rating_count lookup table generation with large numbers of posts. #23486
+* Fix - [3.6.x] Avoid recurring event for suggestions updates. #23484
 * Fix - Revert selectWoo escaping change and instead escape user names. Avoids issues displaying slash characters. #23334
 * Fix - If an empty array is passed to the v3 API for images, images should be unset. #23339
 * Fix - Fix attribute renaming when dealing with unicode characters. #23132
