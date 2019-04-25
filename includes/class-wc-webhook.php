@@ -38,7 +38,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		'event'            => '',
 		'failure_count'    => 0,
 		'user_id'          => 0,
-		'api_version'      => 2,
+		'api_version'      => 3,
 		'pending_delivery' => false,
 	);
 
