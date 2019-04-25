@@ -7,7 +7,7 @@
  * Author URI: https://woocommerce.com/
  * Text Domain: woocommerce-admin
  * Domain Path: /languages
- * Version: 0.10.0
+ * Version: 0.11.0
  *
  * WC requires at least: 3.5.0
  * WC tested up to: 3.5.7
@@ -40,7 +40,7 @@ if ( ! defined( 'WC_ADMIN_PLUGIN_FILE' ) ) {
 }
 
 if ( ! defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
-	define( 'WC_ADMIN_VERSION_NUMBER', '0.10.0' );
+	define( 'WC_ADMIN_VERSION_NUMBER', '0.11.0' );
 }
 
 /**
@@ -112,7 +112,7 @@ function wc_admin_build_notice() {
  * @return bool
  */
 function wc_admin_dependencies_satisfied() {
-	$woocommerce_minimum_met = class_exists( 'WooCommerce' ) && version_compare( WC_VERSION, '3.5', '>' );
+	$woocommerce_minimum_met = class_exists( 'WooCommerce' ) && version_compare( WC_VERSION, '3.6', '>=' );
 	if ( ! $woocommerce_minimum_met ) {
 		return false;
 	}
@@ -153,6 +153,7 @@ add_action( 'admin_menu', 'wc_admin_devdocs' );
  */
 function wc_admin_do_wc_admin_daily() {
 	WC_Admin_Notes_New_Sales_Record::possibly_add_sales_record_note();
+	WC_Admin_Notes_Giving_Feedback_Notes::add_notes_for_admin_giving_feedback();
 	WC_Admin_Notes_Mobile_App::possibly_add_mobile_app_note();
 }
 add_action( 'wc_admin_daily', 'wc_admin_do_wc_admin_daily' );
@@ -207,9 +208,11 @@ function wc_admin_plugins_loaded() {
 	require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-install.php';
 	require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-api-init.php';
 
+	// Admin note providers.
 	// @todo These should be bundled in the features/ folder, but loading them from there currently has a load order issue.
 	require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-new-sales-record.php';
 	require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-settings-notes.php';
+	require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-giving-feedback-notes.php';
 	require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-woo-subscriptions-notes.php';
 	require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-historical-data.php';
 	require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-order-milestones.php';

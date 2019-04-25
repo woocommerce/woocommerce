@@ -376,6 +376,7 @@ class TableCard extends Component {
 				) }
 
 				<Pagination
+					key={ parseInt( query.page ) || 1 }
 					page={ parseInt( query.page ) || 1 }
 					perPage={ rowsPerPage }
 					total={ totalRows }

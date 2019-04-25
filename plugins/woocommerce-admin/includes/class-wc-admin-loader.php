@@ -782,6 +782,9 @@ class WC_Admin_Loader {
 		$settings['reviewsEnabled']    = get_option( 'woocommerce_enable_reviews' );
 		$settings['manageStock']       = get_option( 'woocommerce_manage_stock' );
 		$settings['commentModeration'] = get_option( 'comment_moderation' );
+		// @todo On merge, once plugin images are added to core WooCommerce, `wcAdminAssetUrl` can be retired,
+		// and `wcAssetUrl` can be used in its place throughout the codebase.
+		$settings['wcAdminAssetUrl']   = plugins_url( 'images/', plugin_dir_path( dirname( __FILE__ ) ) . 'woocommerce-admin.php' );
 
 		if ( ! empty( $preload_data_endpoints ) ) {
 			foreach ( $preload_data_endpoints as $key => $endpoint ) {

@@ -572,13 +572,21 @@ class WC_Admin_Reports_Data_Store {
 		);
 
 		if ( isset( $query_args['before'] ) && '' !== $query_args['before'] ) {
-			$datetime_str                    = $query_args['before']->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+			if ( is_a( $query_args['before'], 'WC_DateTime' ) ) {
+				$datetime_str = $query_args['before']->date( WC_Admin_Reports_Interval::$sql_datetime_format );
+			} else {
+				$datetime_str = $query_args['before']->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+			}
 			$sql_query['where_time_clause'] .= " AND {$table_name}.date_created <= '$datetime_str'";
 
 		}
 
 		if ( isset( $query_args['after'] ) && '' !== $query_args['after'] ) {
-			$datetime_str                    = $query_args['after']->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+			if ( is_a( $query_args['after'], 'WC_DateTime' ) ) {
+				$datetime_str = $query_args['after']->date( WC_Admin_Reports_Interval::$sql_datetime_format );
+			} else {
+				$datetime_str = $query_args['after']->format( WC_Admin_Reports_Interval::$sql_datetime_format );
+			}
 			$sql_query['where_time_clause'] .= " AND {$table_name}.date_created >= '$datetime_str'";
 		}
 

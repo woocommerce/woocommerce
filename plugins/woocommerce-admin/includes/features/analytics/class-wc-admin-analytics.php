@@ -83,87 +83,66 @@ class WC_Admin_Analytics {
 			56 // After WooCommerce & Product menu items.
 		);
 
-		wc_admin_register_page(
+		$report_pages = array(
 			array(
 				'title'  => __( 'Revenue', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/revenue',
-			)
-		);
-
-		wc_admin_register_page(
+			),
 			array(
 				'title'  => __( 'Orders', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/orders',
-			)
-		);
-
-		wc_admin_register_page(
+			),
 			array(
 				'title'  => __( 'Products', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/products',
-			)
-		);
-
-		wc_admin_register_page(
+			),
 			array(
 				'title'  => __( 'Categories', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/categories',
-			)
-		);
-
-		wc_admin_register_page(
+			),
 			array(
 				'title'  => __( 'Coupons', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/coupons',
-			)
-		);
-
-		wc_admin_register_page(
+			),
 			array(
 				'title'  => __( 'Taxes', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/taxes',
-			)
-		);
-
-		wc_admin_register_page(
+			),
 			array(
 				'title'  => __( 'Downloads', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/downloads',
-			)
-		);
-
-		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
-			wc_admin_register_page(
-				array(
-					'title'  => __( 'Stock', 'woocommerce-admin' ),
-					'parent' => '/analytics/revenue',
-					'path'   => '/analytics/stock',
-				)
-			);
-		}
-
-		wc_admin_register_page(
+			),
+			'yes' === get_option( 'woocommerce_manage_stock' ) ? array(
+				'title'  => __( 'Stock', 'woocommerce-admin' ),
+				'parent' => '/analytics/revenue',
+				'path'   => '/analytics/stock',
+			) : null,
 			array(
 				'title'  => __( 'Customers', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/customers',
-			)
-		);
-
-		wc_admin_register_page(
+			),
 			array(
 				'title'  => __( 'Settings', 'woocommerce-admin' ),
 				'parent' => '/analytics/revenue',
 				'path'   => '/analytics/settings',
-			)
+			),
 		);
+
+		$report_pages = apply_filters( 'woocommerce_admin_report_menu_items', $report_pages );
+
+		foreach ( $report_pages as $report_page ) {
+			if ( ! is_null( $report_page ) ) {
+				wc_admin_register_page( $report_page );
+			}
+		}
 	}
 }
 

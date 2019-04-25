@@ -41,6 +41,8 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		$args                        = array();
 		$args['registered_before']   = $request['registered_before'];
 		$args['registered_after']    = $request['registered_after'];
+		$args['order_before']        = $request['before'];
+		$args['order_after']         = $request['after'];
 		$args['page']                = $request['page'];
 		$args['per_page']            = $request['per_page'];
 		$args['order']               = $request['order'];
@@ -284,6 +286,18 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 		);
 		$params['registered_after']        = array(
 			'description'       => __( 'Limit response to objects registered after (or at) a given ISO8601 compliant datetime.', 'woocommerce-admin' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['after']                   = array(
+			'description'       => __( 'Limit response to resources with orders published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['before']                  = array(
+			'description'       => __( 'Limit response to resources with orders published before a given ISO8601 compliant date.', 'woocommerce-admin' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',

@@ -88,6 +88,7 @@ class ReportTable extends Component {
 		const isLoading = isRequesting || tableData.isRequesting || primaryData.isRequesting;
 		const totals = get( primaryData, [ 'data', 'totals' ], {} );
 		const totalResults = items.totalResults;
+		const downloadable = 0 < totalResults;
 		const { headers, ids, rows, summary } = applyFilters( TABLE_FILTER, {
 			endpoint: endpoint,
 			headers: getHeadersContent(),
@@ -102,7 +103,7 @@ class ReportTable extends Component {
 
 		return (
 			<TableCard
-				downloadable
+				downloadable={ downloadable }
 				headers={ filteredHeaders }
 				ids={ ids }
 				isLoading={ isLoading }

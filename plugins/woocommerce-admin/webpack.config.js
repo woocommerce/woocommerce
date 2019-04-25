@@ -38,6 +38,7 @@ const externals = {
 	tinymce: 'tinymce',
 	moment: 'moment',
 	react: 'React',
+	lodash: 'lodash',
 	'react-dom': 'ReactDOM',
 };
 
@@ -96,6 +97,7 @@ const webpackConfig = {
 					},
 				},
 				include: new RegExp( '/node_modules\/(' +
+					'|acorn-jsx' +
 					'|d3-array' +
 					'|debug' +
 					'|regexpu-core' +

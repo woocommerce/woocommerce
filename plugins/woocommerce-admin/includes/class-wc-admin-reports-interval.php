@@ -44,8 +44,13 @@ class WC_Admin_Reports_Interval {
 	 * @return DateTime
 	 */
 	public static function default_before() {
-		$datetime = new DateTime();
-		$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+		$datetime = new WC_DateTime();
+		// Set local timezone or offset.
+		if ( get_option( 'timezone_string' ) ) {
+			$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+		} else {
+			$datetime->set_utc_offset( wc_timezone_offset() );
+		}
 		return $datetime;
 	}
 
@@ -58,9 +63,14 @@ class WC_Admin_Reports_Interval {
 		$now       = time();
 		$week_back = $now - WEEK_IN_SECONDS;
 
-		$datetime = new DateTime();
+		$datetime = new WC_DateTime();
 		$datetime->setTimestamp( $week_back );
-		$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+		// Set local timezone or offset.
+		if ( get_option( 'timezone_string' ) ) {
+			$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+		} else {
+			$datetime->set_utc_offset( wc_timezone_offset() );
+		}
 		return $datetime;
 	}
 

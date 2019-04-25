@@ -23,6 +23,12 @@ $inner-border: $core-grey-light-500;
 	.woocommerce-summary__item-prev-value {
 		display: block;
 	}
+
+	&.is-placeholder {
+		.woocommerce-summary__item-prev-label {
+			margin-right: calc( 100% - 80px );
+		}
+	}
 }
 
 @mixin reset-wrap() {
@@ -34,6 +40,12 @@ $inner-border: $core-grey-light-500;
 	.woocommerce-summary__item-prev-label,
 	.woocommerce-summary__item-prev-value {
 		display: inline;
+	}
+
+	&.is-placeholder {
+		.woocommerce-summary__item-prev-label {
+			margin-right: 0;
+		}
 	}
 }
 
@@ -97,7 +109,7 @@ $inner-border: $core-grey-light-500;
 		max-height: 100%;
 		margin-top: 0;
 		margin-bottom: 0;
-		overflow-y: scroll;
+		overflow-y: auto;
 		border: none;
 	}
 
@@ -215,10 +227,10 @@ $inner-border: $core-grey-light-500;
 	&.is-dropdown-button {
 		padding: 0;
 		list-style: none;
-		border-bottom: 1px solid $outer-border;
 		border-right: 1px solid $outer-border;
 
 		.components-button {
+			border-bottom: 1px solid $outer-border;
 			text-align: left;
 			display: block;
 		}
@@ -233,6 +245,7 @@ $inner-border: $core-grey-light-500;
 			@include placeholder();
 			display: inline-block;
 			height: 16px;
+			margin-top: 2.2px;
 			max-width: 110px;
 			width: 70%;
 		}
@@ -242,19 +255,31 @@ $inner-border: $core-grey-light-500;
 		}
 
 		.woocommerce-summary__item-value,
+		.woocommerce-summary__item-delta-value,
+		.woocommerce-summary__item-prev-label,
 		.woocommerce-summary__item-prev-value {
 			@include placeholder();
 			display: inline-block;
 			height: 16px;
-			max-width: 140px;
-			width: 80%;
+			min-width: auto;
+		}
+
+		.woocommerce-summary__item-value {
+			margin-top: 2.2px;
+			max-width: 60px;
 		}
 
 		.woocommerce-summary__item-delta-value {
-			@include placeholder();
-			display: inline-block;
-			height: 16px;
-			width: 20px;
+			margin-top: 2.2px;
+			width: 50px;
+		}
+
+		.woocommerce-summary__item-prev-label {
+			width: 80px;
+		}
+
+		.woocommerce-summary__item-prev-value {
+			width: 40px;
 		}
 	}
 }
@@ -265,6 +290,7 @@ $inner-border: $core-grey-light-500;
 	background-color: $core-grey-light-100;
 	border-bottom: 1px solid $outer-border;
 	border-right: 1px solid $inner-border;
+	line-height: 1.4em;
 	text-decoration: none;
 
 	&:hover {
@@ -359,6 +385,7 @@ $inner-border: $core-grey-light-500;
 	.woocommerce-summary__item-prev-value {
 		@include font-size( 13 );
 		color: $core-grey-dark-500;
+		display: inline-block;
 	}
 
 	.woocommerce-summary__toggle {

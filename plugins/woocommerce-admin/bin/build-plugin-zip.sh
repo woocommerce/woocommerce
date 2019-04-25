@@ -63,7 +63,6 @@ fi
 
 # Run the build.
 status "Generating build... 👷‍♀️"
-npm run build:feature-config
 npm run build
 npm run docs
 
@@ -73,10 +72,8 @@ build_files=$(ls dist/*/*.{js,css})
 status "Creating archive... 🎁"
 zip -r woocommerce-admin.zip \
 	woocommerce-admin.php \
-	lib/*.php \
-	includes/*.php \
-	includes/**/*.php \
-	images/* \
+	includes/ \
+	images/ \
 	$build_files \
 	languages/woocommerce-admin.pot \
 	languages/woocommerce-admin.php \

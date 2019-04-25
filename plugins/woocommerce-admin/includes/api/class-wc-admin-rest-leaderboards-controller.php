@@ -206,9 +206,11 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 		$customers_data_store = new WC_Admin_Reports_Customers_Data_Store();
 		$customers_data       = $per_page > 0 ? $customers_data_store->get_data(
 			array(
-				'orderby'  => 'total_spend',
-				'order'    => 'desc',
-				'per_page' => $per_page,
+				'orderby'      => 'total_spend',
+				'order'        => 'desc',
+				'order_after'  => $after,
+				'order_before' => $before,
+				'per_page'     => $per_page,
 			)
 		)->data : array();
 
@@ -349,10 +351,9 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		parse_str( $request['persisted_query'], $persisted_query );
-
-		$leaderboards = $this->get_leaderboards( $request['per_page'], $request['after'], $request['before'], $persisted_query );
-		$data         = array();
+		$persisted_query = json_decode( $request['persisted_query'], true );
+		$leaderboards    = $this->get_leaderboards( $request['per_page'], $request['after'], $request['before'], $persisted_query );
+		$data            = array();
 
 		if ( ! empty( $leaderboards ) ) {
 			foreach ( $leaderboards as $leaderboard ) {
