@@ -271,6 +271,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			if ( 'order' === $resource && 'draft' === $status ) {
 				return false;
 			}
+
+			// Check registered order types for order types args.
+			if ( 'order' === $resource && ! in_array( get_post_type( absint( $arg ) ), wc_get_order_types( 'order-webhooks' ), true ) ) {
+				return false;
+			}
 		}
 		return true;
 	}

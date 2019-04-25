@@ -60,8 +60,8 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	/**
 	 * Read refund data. Can be overridden by child classes to load other props.
 	 *
-	 * @param WC_Order $refund Refund object.
-	 * @param object   $post_object Post object.
+	 * @param WC_Order_Refund $refund Refund object.
+	 * @param object          $post_object Post object.
 	 * @since 3.0.0
 	 */
 	protected function read_order_data( &$refund, $post_object ) {
@@ -70,9 +70,9 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 		$refund->set_props(
 			array(
 				'amount'           => get_post_meta( $id, '_refund_amount', true ),
-				'refunded_by'      => metadata_exists( 'post', $id, '_refunded_by' ) ? get_post_meta( $id, '_refunded_by', true )    : absint( $post_object->post_author ),
+				'refunded_by'      => metadata_exists( 'post', $id, '_refunded_by' ) ? get_post_meta( $id, '_refunded_by', true ) : absint( $post_object->post_author ),
 				'refunded_payment' => wc_string_to_bool( get_post_meta( $id, '_refunded_payment', true ) ),
-				'reason'           => metadata_exists( 'post', $id, '_refund_reason' ) ? get_post_meta( $id, '_refund_reason', true ): $post_object->post_excerpt,
+				'reason'           => metadata_exists( 'post', $id, '_refund_reason' ) ? get_post_meta( $id, '_refund_reason', true ) : $post_object->post_excerpt,
 			)
 		);
 	}
@@ -80,7 +80,7 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	/**
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
-	 * @param WC_Order $refund Refund object.
+	 * @param WC_Order_Refund $refund Refund object.
 	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$refund ) {

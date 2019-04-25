@@ -454,8 +454,9 @@ class WC_Query {
 			$order         = ! empty( $orderby_value[1] ) ? $orderby_value[1] : $order;
 		}
 
-		$orderby = strtolower( $orderby );
-		$order   = strtoupper( $order );
+		// Convert to correct format.
+		$orderby = strtolower( is_array( $orderby ) ? (string) current( $orderby ) : (string) $orderby );
+		$order   = strtoupper( is_array( $order ) ? (string) current( $order ) : (string) $order );
 		$args    = array(
 			'orderby'  => $orderby,
 			'order'    => ( 'DESC' === $order ) ? 'DESC' : 'ASC',
