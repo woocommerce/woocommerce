@@ -7,7 +7,7 @@
 
 $phase = isset( $_SERVER['WC_ADMIN_PHASE'] ) ? $_SERVER['WC_ADMIN_PHASE'] : ''; // WPCS: sanitization ok.
 if ( ! in_array( $phase, array( 'development', 'plugin', 'core' ), true ) ) {
-	$phase = 'core';
+	$phase = 'development';
 }
 $config_json = file_get_contents( 'config/' . $phase . '.json' );
 $config      = json_decode( $config_json );
@@ -34,6 +34,11 @@ if ( 'core' !== $phase ) {
 		}
 	}
 	$write .= "\t\t\t)";
+
+	if ( ! is_dir( './dist' ) && ! @mkdir( './dist' ) ) {
+		echo "Run `npm run clean` to wipe artifacts.\n\n";
+		exit( 1 );
+	}
 
 	$config_file = fopen( 'dist/feature-config-core.php', 'w' );
 }
