@@ -17,7 +17,7 @@
     "build:core": "cross-env NODE_ENV=production webpack",
     "build": "npm run build:feature-config && npm run build:packages && npm run build:core",
     "build:release": "cross-env WC_ADMIN_PHASE=plugin ./bin/build-plugin-zip.sh",
-    "build:feature-config": "php bin/generate-feature-config.php",
+    "build:feature-config": "WC_ADMIN_PHASE=core php bin/generate-feature-config.php",
     "postbuild": "npm run -s i18n:php && npm run -s i18n:pot",
     "postshrinkwrap": "replace --silent 'http://' 'https://' ./package-lock.json",
     "prestart": "npm run -s install-if-deps-outdated && php ./bin/update-version.php",
