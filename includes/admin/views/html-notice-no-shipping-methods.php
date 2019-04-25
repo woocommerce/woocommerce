@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<div id="message" class="updated woocommerce-message woocommerce-no-shipping-methods-notice">
+<div id="message" class="updated woocommerce-message">
 	<a class="woocommerce-message-close notice-dismiss" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'no_shipping_methods' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ); ?>">
 		<?php esc_html_e( 'Dismiss', 'woocommerce' ); ?>
 	</a>
