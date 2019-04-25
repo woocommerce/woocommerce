@@ -82,8 +82,8 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 							'exclude' =>
 								array(
 									wc_get_page_id( 'checkout' ),
-									wc_get_page_id( 'myaccount' )
-								)
+									wc_get_page_id( 'myaccount' ),
+								),
 						),
 						'desc_tip' => true,
 						'autoload' => false,
@@ -102,8 +102,8 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 							'exclude' =>
 								array(
 									wc_get_page_id( 'cart' ),
-									wc_get_page_id( 'myaccount' )
-								)
+									wc_get_page_id( 'myaccount' ),
+								),
 						),
 						'desc_tip' => true,
 						'autoload' => false,
@@ -122,8 +122,8 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 							'exclude' =>
 								array(
 									wc_get_page_id( 'cart' ),
-									wc_get_page_id( 'checkout' )
-								)
+									wc_get_page_id( 'checkout' ),
+								),
 						),
 						'desc_tip' => true,
 						'autoload' => false,
