@@ -3403,7 +3403,7 @@ class WC_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$coupon->save();
 
 		// Create order.
-		$order = new WC_Order();
+		$order = WC_Helper_Order::create_order();
 		$order->add_product( $product, 1 );
 		$order->set_status( 'completed' );
 		$order->set_shipping_total( 10 );
