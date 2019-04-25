@@ -37,16 +37,6 @@ WooCommerce is built to allow store managers to run an eCommerce site themselves
 
 WooCommerce is developed and supported by Automattic, the creators of Jetpack and WordPress.com, along with independent contributors. The [official extension marketplace](https://woocommerce.com/product-category/woocommerce-extensions/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) is on WooCommerce.com.
 
-= Screenshots =
-
-- WC-Admin to show off new central dashboard
-- WooCommerce products admin.
-- Product data panel.
-- (New) WooCommerce sales reports.
-- A single product page.
-- A product archive (grid).
-- Blocks in action
-
 = From subscriptions to gym classes to luxury cars =
 With WooCommerce, you can sell both physical and digital goods in all shapes and sizes, offer product variations, complex configurations, and instant downloads to shoppers; and even sell affiliate goods from online marketplaces.
 
