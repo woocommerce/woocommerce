@@ -50,6 +50,7 @@ class WC_Admin_Setup_Wizard_Tracking {
 	public function add_footer_scripts() {
 		wp_print_scripts();
 		WC_Site_Tracking::add_tracking_function();
+		wc_print_js();
 	}
 
 	/**
