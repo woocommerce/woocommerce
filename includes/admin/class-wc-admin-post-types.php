@@ -631,17 +631,21 @@ class WC_Admin_Post_Types {
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
 			$change_stock = absint( $_REQUEST['change_stock'] );
+			// Product is re-read in wc_update_product_stock twice, so it needs to be synced before calling the function.
+			$product->save();
 			switch ( $change_stock ) {
 				case 2:
-					wc_update_product_stock( $product, $stock_amount, 'increase' );
+					$new_qty = wc_update_product_stock( $product, $stock_amount, 'increase' );
 					break;
 				case 3:
-					wc_update_product_stock( $product, $stock_amount, 'decrease' );
+					$new_qty = wc_update_product_stock( $product, $stock_amount, 'decrease' );
 					break;
 				default:
-					wc_update_product_stock( $product, $stock_amount, 'set' );
+					$new_qty = wc_update_product_stock( $product, $stock_amount, 'set' );
 					break;
 			}
+			// Need to update the stock quantity on this copy of product so that further functions adjust the object correctly when saving.
+			$product->set_stock_quantity( $new_qty );
 		}
 
 		// Apply product type constraints to stock status.
