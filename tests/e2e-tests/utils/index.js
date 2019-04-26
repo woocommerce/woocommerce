@@ -1,4 +1,21 @@
+/**
+ * Internal dependencies
+ */
 const flows = require( './flows' );
+// NOTE: change this to @wordpress/e2e-test-utils when it gets updated.
+const { pressKeyWithModifier } = require( './press-key-with-modifier' );
+
+/**
+ * Perform a "select all" and then fill a input.
+ *
+ * @param {string} selector 
+ * @param {string} value 
+ */
+const clearAndFillInput = async ( selector, value ) => {
+    await page.focus( selector );
+    await pressKeyWithModifier( 'primary', 'a' );
+    await page.type( selector, value );
+};
 
 /**
  * Click a tab (on post type edit screen).
@@ -42,7 +59,9 @@ const uiUnblocked = async () => {
 };
 
 module.exports = {
+    clearAndFillInput,
     clickTab,
+    pressKeyWithModifier,
     selectSelect2Option,
     settingsPageSaveChanges,
     StoreOwnerFlow: flows.StoreOwnerFlow,
