@@ -34,9 +34,17 @@ const settingsPageSaveChanges = async () => {
 	] );
 };
 
+/**
+ * Wait for UI blocking to end.
+ */
+const uiUnblocked = async () => {
+    await page.waitForFunction( () => ! Boolean( document.querySelector( '.blockUI' ) ) );
+};
+
 module.exports = {
     clickTab,
     selectSelect2Option,
     settingsPageSaveChanges,
     StoreOwnerFlow: flows.StoreOwnerFlow,
+    uiUnblocked,
 };

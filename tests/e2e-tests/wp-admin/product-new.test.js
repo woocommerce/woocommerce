@@ -5,14 +5,12 @@
 /** 
  * Internal dependencies
  */
-const { clickTab, StoreOwnerFlow } = require( '../utils' );
+const { clickTab, StoreOwnerFlow, uiUnblocked } = require( '../utils' );
 
 /** 
  * External dependencies
  */
 const config = require( 'config' );
-
-const baseUrl = config.get( 'url' );
 
 const verifyPublishAndTrash = async () => {
     // Wait for auto save
@@ -31,10 +29,6 @@ const verifyPublishAndTrash = async () => {
 
     // // Verify
     await expect( page ).toMatchElement( '.updated.notice', { text: '1 product moved to the Trash.' } );
-};
-
-const uiUnblocked = async () => {
-    await page.waitForFunction( () => ! Boolean( document.querySelector( '.blockUI' ) ) );
 };
 
 describe( 'Add New Product Page', () => {
