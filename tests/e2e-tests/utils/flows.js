@@ -17,6 +17,7 @@ const WP_ADMIN_WC_SETTINGS = baseUrl + 'wp-admin/admin.php?page=wc-settings&tab=
 
 const SHOP_PRODUCT = baseUrl + 'product/';
 const SHOP_CART_PAGE = baseUrl + 'cart/';
+const SHOP_MY_ACCOUNT_PAGE = baseUrl + 'my-account/';
 
 const CustomerFlow = {
 	addToCart: async () => {
@@ -36,6 +37,22 @@ const CustomerFlow = {
 		await page.goto( SHOP_CART_PAGE, {
 			waitUntil: 'networkidle0',
 		} );
+	},
+
+	login: async () => {
+        await page.goto( SHOP_MY_ACCOUNT_PAGE, {
+			waitUntil: 'networkidle0',
+		} );
+
+		await expect( page.title() ).resolves.toMatch( 'My account' );
+
+		await page.type( '#username', config.get( 'users.customer.username' ) );
+		await page.type( '#password', config.get( 'users.customer.password' ) );
+
+		await Promise.all( [
+			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+			page.click( 'button[name="login"]' ),
+		] );
 	},
 };
 
