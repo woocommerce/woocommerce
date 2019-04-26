@@ -22,7 +22,7 @@
     "build": "npm run build:feature-config && npm run build:packages && npm run build:core",
     "postbuild": "npm run -s i18n:php && npm run -s i18n:pot",
     "build:core": "cross-env NODE_ENV=production webpack",
-    "build:feature-config": "WC_ADMIN_PHASE=core php bin/generate-feature-config.php",
+    "build:feature-config": "php bin/generate-feature-config.php",
     "build:packages": "node ./bin/packages/build.js",
     "build:release": "cross-env WC_ADMIN_PHASE=plugin ./bin/build-plugin-zip.sh",
     "clean": "rimraf ./dist ./packages/*/build ./packages/*/build-module ./packages/*/build-style",

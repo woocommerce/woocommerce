@@ -19,6 +19,7 @@ For better debugging, it's also recommended you add `define( 'SCRIPT_DEBUG', tru
 After cloning the repo, install dependencies with `npm install`. Now you can build the files using one of these commands:
 
  - `npm run build` : Build a production version
+ - `npm run dev` : Build a development version
  - `npm start` : Build a development version, watch files for changes
  - `npm run build:release` : Build a WordPress plugin ZIP file (`woocommerce-admin.zip` will be created in the repository root)
 

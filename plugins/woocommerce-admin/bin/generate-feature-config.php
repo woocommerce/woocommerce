@@ -5,9 +5,15 @@
  * @package WooCommerce Admin
  */
 
+/**
+ * Get phase for feature flags
+ * - development: All features should be enabled in development.
+ * - plugin: For the standalone feature plugin, for GitHub and WordPress.org.
+ * - core: Stable features for WooCommerce core merge.
+ */
 $phase = isset( $_SERVER['WC_ADMIN_PHASE'] ) ? $_SERVER['WC_ADMIN_PHASE'] : ''; // WPCS: sanitization ok.
 if ( ! in_array( $phase, array( 'development', 'plugin', 'core' ), true ) ) {
-	$phase = 'development';
+	$phase = 'plugin'; // Default to plugin when running `npm run build`.
 }
 $config_json = file_get_contents( 'config/' . $phase . '.json' );
 $config      = json_decode( $config_json );
