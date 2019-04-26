@@ -5,7 +5,7 @@
 /** 
  * Internal dependencies
  */
-const { StoreOwnerFlow } = require( '../utils/flows' );
+const { selectSelect2Option, StoreOwnerFlow } = require( '../utils' );
 
 describe( 'Add New Order Page', () => {
     beforeAll( async () => {
@@ -21,12 +21,7 @@ describe( 'Add New Order Page', () => {
         await expect( page.title() ).resolves.toMatch( 'Add new order' );
 
         // Set order data
-        await expect( page ).toClick( '.wc-order-status span.select2' );
-        const [ processingOption ] = await page.$x(
-            '//li[contains(@class, "select2-results__option") and contains(text(), "Processing")]'
-        );
-        processingOption.click();
-
+        await selectSelect2Option( '.wc-order-status', 'Processing' );
         await expect( page ).toFill( 'input[name=order_date]',  '2016-12-13' );
         await expect( page ).toFill( 'input[name=order_date_hour]',  '18' );
         await expect( page ).toFill( 'input[name=order_date_minute]',  '55' );
