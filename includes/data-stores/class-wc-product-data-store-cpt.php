@@ -364,6 +364,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
+	 * Re-reads stock from the DB ignoring changes.
+	 *
+	 * @param WC_Product $product Product object.
+	 * @param int|float  $new_stock New stock level if already read.
+	 */
+	public function read_stock_quantity( &$product, $new_stock = null ) {
+		$object_read = $product->get_object_read();
+		$product->set_object_read( false );
+		$product->set_stock_quantity( is_null( $new_stock ) ? get_post_meta( $product->get_id(), '_stock', true ) : $new_stock );
+		$product->set_object_read( $object_read );
+	}
+
+	/**
 	 * Read extra data associated with the product, like button text or product URL for external products.
 	 *
 	 * @param WC_Product $product Product object.
