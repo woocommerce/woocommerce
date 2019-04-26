@@ -477,7 +477,13 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 			'properties' => array(
 				'id'      => array(
 					'type'        => 'string',
-					'description' => __( 'Leaderboard Name.', 'woocommerce-admin' ),
+					'description' => __( 'Leaderboard ID.', 'woocommerce-admin' ),
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'label'   => array(
+					'type'        => 'string',
+					'description' => __( 'Displayed title for the leaderboard.', 'woocommerce-admin' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
@@ -525,5 +531,16 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 		);
 
 		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Get schema for the list of allowed leaderboards.
+	 *
+	 * @return array $schema
+	 */
+	public function get_public_allowed_item_schema() {
+		$schema = $this->get_public_item_schema();
+		unset( $schema['properties']['rows'] );
+		return $schema;
 	}
 }

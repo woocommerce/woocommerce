@@ -56,8 +56,16 @@ class WC_Tests_API_Leaderboards extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertCount( 3, $properties );
+		$this->assertCount( 4, $properties );
 		$this->assert_item_schema( $properties );
+
+		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint . '/allowed' );
+		$response   = $this->server->dispatch( $request );
+		$data       = $response->get_data();
+		$properties = $data['schema']['properties'];
+
+		$this->assertCount( 3, $properties );
+		$this->assert_allowed_item_schema( $properties );
 	}
 
 	/**
@@ -67,6 +75,7 @@ class WC_Tests_API_Leaderboards extends WC_REST_Unit_Test_Case {
 	 */
 	public function assert_item_schema( $schema ) {
 		$this->assertArrayHasKey( 'id', $schema );
+		$this->assertArrayHasKey( 'label', $schema );
 		$this->assertArrayHasKey( 'headers', $schema );
 		$this->assertArrayHasKey( 'rows', $schema );
 
@@ -81,6 +90,21 @@ class WC_Tests_API_Leaderboards extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Asserts the allowed item schema is correct.
+	 *
+	 * @param array $schema Item to check schema.
+	 */
+	public function assert_allowed_item_schema( $schema ) {
+		$this->assertArrayHasKey( 'id', $schema );
+		$this->assertArrayHasKey( 'label', $schema );
+		$this->assertArrayHasKey( 'headers', $schema );
+
+		$header_properties = $schema['headers']['items']['properties'];
+		$this->assertCount( 1, $header_properties );
+		$this->assertArrayHasKey( 'label', $header_properties );
+	}
+
+	/**
 	 * Test that leaderboards response changes based on applied filters.
 	 */
 	public function test_filter_leaderboards() {
@@ -91,6 +115,7 @@ class WC_Tests_API_Leaderboards extends WC_REST_Unit_Test_Case {
 			function( $leaderboards, $per_page, $after, $before, $persisted_query ) {
 				$leaderboards[] = array(
 					'id'      => 'top_widgets',
+					'label'   => 'Top Widgets',
 					'headers' => array(
 						array(
 							'label' => 'Widget Link',
@@ -117,5 +142,13 @@ class WC_Tests_API_Leaderboards extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'top_widgets', $widgets_leaderboard['id'] );
 		$this->assertEquals( admin_url( 'admin.php?page=wc-admin#test/path?persisted_param=1' ), $widgets_leaderboard['rows'][0]['display'] );
+
+		$request  = new WP_REST_Request( 'GET', $this->endpoint . '/allowed' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$widgets_leaderboard = end( $data );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'top_widgets', $widgets_leaderboard['id'] );
 	}
 }
