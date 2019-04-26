@@ -21,8 +21,7 @@ describe( 'Single Product Page', () => {
 
         // Verify cart contents
         await CustomerFlow.goToCart();
-        await expect( page ).toMatchElement( '.cart_item .product-name a', { text: 'T-Shirt' } );
-        await expect( page ).toMatchElement( '.cart_item .product-quantity input[value="5"]' );
+        await CustomerFlow.productIsInCart( 'T-Shirt', 5 );
     } );
     
     it( 'should be able to add variation products to the cart', async () => {
@@ -42,7 +41,7 @@ describe( 'Single Product Page', () => {
 
         // Verify cart contents
         await CustomerFlow.goToCart();
-        await expect( page ).toMatchElement( '.cart_item .product-name a', { text: 'Hoodie - Blue, Yes' } );
-        await expect( page ).toMatchElement( '.cart_item .product-name a', { text: 'Hoodie - Green, No' } );
+        await CustomerFlow.productIsInCart( 'Hoodie - Blue, Yes' );
+        await CustomerFlow.productIsInCart( 'Hoodie - Green, No' );
 	} );
 } );

@@ -19,6 +19,36 @@ const SHOP_PRODUCT = baseUrl + 'product/';
 const SHOP_CART_PAGE = baseUrl + 'cart/';
 const SHOP_MY_ACCOUNT_PAGE = baseUrl + 'my-account/';
 
+const getCartItemExpression = ( productTitle, args ) => (
+	'//tr[contains(@class, "cart_item") and ' +
+		getProductColumnExpression( productTitle ) +
+		' and ' +
+		getQtyColumnExpression( args ) +
+	']'
+);
+
+const getProductColumnExpression = ( productTitle ) => (
+	'td[@class="product-name" and ' +
+		`a[contains(text(), "${ productTitle }")]` +
+	']'
+);
+
+const getQtyColumnExpression = ( args ) => (
+	'td[@class="product-quantity" and ' +
+		'.//' + getQtyInputExpression( args ) +
+	']'
+);
+
+const getQtyInputExpression = ( args ) => {
+	let qtyValue = '';
+
+	if ( args.checkQty ) {
+		qtyValue = ` and @value="${ args.qty }"`;
+	}
+
+	return 'input[contains(@class, "input-text")' + qtyValue + ']';
+};
+
 const CustomerFlow = {
 	addToCart: async () => {
 		await Promise.all( [
@@ -53,6 +83,13 @@ const CustomerFlow = {
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
 			page.click( 'button[name="login"]' ),
 		] );
+	},
+
+	productIsInCart: async ( productTitle, quantity = null ) => {
+		const cartItemArgs = quantity ? { qty: quantity } : {};
+		const cartItemXPath = getCartItemExpression( productTitle, cartItemArgs );
+
+		await expect( page.$x( cartItemXPath ) ).resolves.toHaveLength( 1 );
 	},
 };
 
