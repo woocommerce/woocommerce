@@ -1,5 +1,49 @@
 == Changelog ==
 
+= 3.6.2 - 2019-04-24 =
+* Fix - Fix CSS classname conflict with themes due to missing product object global. #23377
+* Fix - Fix security check on email template preview page. #23356
+* Fix - Prevent `wc_ascii_uasort_comparison` throwing notices in some server configs. #23363
+* Fix - `is_request_to_rest_api` should check for wc endpoints only. #23372
+* Fix - Fixed use of get_term_meta in REST API endpoints. #23457
+* Fix - Fixed missing closing tag for log-in link for reviews. #23445
+* Fix - Fixed average_rating in the db upgrade routine for lookup table. #23465
+* Fix - More useful update notices if cron is disabled. #23383
+* Fix - Prevent term ordering queries inserted by wc_terms_clauses from conflicting with custom where clauses. #23449
+* Fix - When product lookup table is generating for the first time, avoid wrong stock statuses being set for variable products. #23455
+* Fix - Ensure webhooks respect registered order args. #23444
+* Fix - REST API - Return custom attribute with defined name instead of lowercase name. #23482
+* Fix - Fix 3.6 conflict with Woo Blocks plugin 1.4. #23399
+* Fix - Allow default sorting of WC taxonomies to be overwritten by get_terms orderby. #23477
+* Fix - Improve wc_rating_count lookup table generation with large numbers of posts. #23486
+* Fix - Avoid recurring event for suggestions updates. #23484
+* Fix - Revert selectWoo escaping change and instead escape user names. Avoids issues displaying slash characters. #23334
+* Fix - If an empty array is passed to the v3 API for images, images should be unset. #23339
+* Fix - Fix attribute renaming when dealing with unicode characters. #23132
+* Fix - Preserve full-stops in external product URLs. #23196
+* Fix - Add check for VAT exemption inside `display_prices_including_tax`. #23201
+* Fix - Avoid post update in `wc_update_product_stock` to prevent product titles being updated. #23249
+* Fix - Updated Back to Items link when editing attribute terms. #23238
+* Fix - Network orders widget not showing orders when installed as a network plugin. #23270
+* Fix - Correctly map attributes in CSV when the number is not at the end of the cell. #23251
+* Fix - Fixed highlighting of Orders list item in My Account when looking at individual order. #23236
+* Fix - Applies `wp_strip_all_tags` to the line item name when building PayPal request URL. #23297
+* Fix - Non int value handling in `wc_let_to_num`. #23329
+* Fix - Style span.description elements after select2 boxes. #23252
+* Fix - Switch to subquery for sale products to prevent large query errors on some hosting environments. #23266
+* Fix - Add offerCount to variable product structured data. #23349
+* Fix - Cart widget - Allow title to be removed. #23370
+* Fix - Prevent order data being escaped incorrectly on save when using quotes. #23380
+* Fix - Prevent plugins causing notices by calling get_catalog_ordering_args incorrectly. #23451
+* Fix - Product list view shipping class filter display correct products. #23446
+* Fix - Twenty Seventeen On Sale badge hidden behind product image. #23450
+* Fix - Correct postcode validation on my-account page. #23483
+* Fix - Fixed compatibility with the Jetpack Beta Tester plugin when loading the Tracks client library. #23397
+* Fix - Updated anchor for "How to create a child theme" with the correct target address in the Codex. #23469
+* Tweak - Update action scheduler to version 2.2.5. #23489
+* Tweak - Removed 2 old admin notices for featured moved in past versions. #23263
+* Localization - Make the state/county field optional at checkout for Greece. #23365
+
 = 3.6.1 - 2019-04-18 =
 * Fix - Remove calls to 'header_register_callback' to prevent conflicts with some hosting providers and PHP versions.
 
