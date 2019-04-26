@@ -50,8 +50,14 @@ const StoreOwnerFlow = {
 		} );
 	},
 
-	openSettings: async ( tab ) => {
-		await page.goto( WP_ADMIN_WC_SETTINGS + tab, {
+	openSettings: async ( tab, section = null ) => {
+		let settingsUrl = WP_ADMIN_WC_SETTINGS + tab;
+
+		if ( section ) {
+			settingsUrl += `&section=${ section }`;
+		}
+
+		await page.goto( settingsUrl, {
 			waitUntil: 'networkidle0',
 		} );
 	},

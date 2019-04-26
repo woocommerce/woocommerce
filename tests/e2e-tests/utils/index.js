@@ -23,8 +23,20 @@ const selectSelect2Option = async ( selector, optionText ) => {
     option.click();
 };
 
+/**
+ * Save changes on a WooCommerce settings page.
+ */
+const settingsPageSaveChanges = async () => {
+	await page.focus( 'button.woocommerce-save-button' );
+	await Promise.all( [
+		page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+		page.click( 'button.woocommerce-save-button' ),
+	] );
+};
+
 module.exports = {
     clickTab,
     selectSelect2Option,
+    settingsPageSaveChanges,
     StoreOwnerFlow: flows.StoreOwnerFlow,
 };
