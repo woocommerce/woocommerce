@@ -152,6 +152,7 @@ final class WooCommerce {
 	 */
 	public function __construct() {
 		$this->define_constants();
+		$this->define_tables();
 		$this->includes();
 		$this->init_hooks();
 	}
@@ -184,7 +185,6 @@ final class WooCommerce {
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
-		add_action( 'init', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
@@ -228,6 +228,25 @@ final class WooCommerce {
 		$this->define( 'WC_LOG_DIR', $upload_dir['basedir'] . '/wc-logs/' );
 		$this->define( 'WC_SESSION_CACHE_GROUP', 'wc_session_id' );
 		$this->define( 'WC_TEMPLATE_DEBUG_MODE', false );
+	}
+
+	/**
+	 * Register custom tables within $wpdb object.
+	 */
+	private function define_tables() {
+		global $wpdb;
+
+		// List of tables without prefixes.
+		$tables = array(
+			'payment_tokenmeta'      => 'woocommerce_payment_tokenmeta',
+			'order_itemmeta'         => 'woocommerce_order_itemmeta',
+			'wc_product_meta_lookup' => 'wc_product_meta_lookup',
+		);
+
+		foreach ( $tables as $name => $table ) {
+			$wpdb->$name    = $wpdb->prefix . $table;
+			$wpdb->tables[] = $table;
+		}
 	}
 
 	/**
@@ -710,16 +729,7 @@ final class WooCommerce {
 	 * Set tablenames inside WPDB object.
 	 */
 	public function wpdb_table_fix() {
-		global $wpdb;
-
-		$wpdb->payment_tokenmeta = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
-		$wpdb->tables[]          = 'woocommerce_payment_tokenmeta';
-
-		$wpdb->order_itemmeta = $wpdb->prefix . 'woocommerce_order_itemmeta';
-		$wpdb->tables[]       = 'woocommerce_order_itemmeta';
-
-		$wpdb->wc_product_meta_lookup = $wpdb->prefix . 'wc_product_meta_lookup';
-		$wpdb->tables[]               = 'wc_product_meta_lookup';
+		$this->define_tables();
 	}
 
 	/**
