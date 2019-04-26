@@ -130,16 +130,16 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$expected_html = '<input type="hidden" name="test" value="1" /><input type="hidden" name="test2" value="something" />';
 		$this->assertEquals( $expected_html, $actual_html );
 
-		$actual_html   = wc_query_string_form_fields( '?test.something=something', array(), '', true );
-		$expected_html = '<input type="hidden" name="test.something" value="something" />';
+		$actual_html   = wc_query_string_form_fields( '?test.something=something.else', array(), '', true );
+		$expected_html = '<input type="hidden" name="test.something" value="something.else" />';
 		$this->assertEquals( $expected_html, $actual_html );
 
-		$actual_html   = wc_query_string_form_fields( '?test+something=something', array(), '', true );
-		$expected_html = '<input type="hidden" name="test+something" value="something" />';
+		$actual_html   = wc_query_string_form_fields( '?test+something=something+else', array(), '', true );
+		$expected_html = '<input type="hidden" name="test+something" value="something+else" />';
 		$this->assertEquals( $expected_html, $actual_html );
 
-		$actual_html   = wc_query_string_form_fields( '?test%20something=something', array(), '', true );
-		$expected_html = '<input type="hidden" name="test%20something" value="something" />';
+		$actual_html   = wc_query_string_form_fields( '?test%20something=something%20else', array(), '', true );
+		$expected_html = '<input type="hidden" name="test%20something" value="something%20else" />';
 		$this->assertEquals( $expected_html, $actual_html );
 	}
 }
