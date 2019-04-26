@@ -150,8 +150,8 @@ class WC_Admin_Loader {
 			$feature = strtolower( $feature );
 			$file    = WC_ADMIN_FEATURES_PATH . $feature . '/class-wc-admin-' . $feature . '.php';
 			if ( file_exists( $file ) ) {
-				require_once( $file );
-				$feature = ucfirst( $feature );
+				require_once $file;
+				$feature         = ucfirst( $feature );
 				self::$classes[] = 'WC_Admin_' . $feature;
 			}
 		}
@@ -214,6 +214,10 @@ class WC_Admin_Loader {
 	 * Registers all the neccessary scripts and styles to show the admin experience.
 	 */
 	public static function register_scripts() {
+		if ( ! function_exists( 'wp_set_script_translations' ) ) {
+			return;
+		}
+
 		wp_register_script(
 			'wc-csv',
 			self::get_url( 'csv-export/index.js' ),
@@ -784,7 +788,7 @@ class WC_Admin_Loader {
 		$settings['commentModeration'] = get_option( 'comment_moderation' );
 		// @todo On merge, once plugin images are added to core WooCommerce, `wcAdminAssetUrl` can be retired,
 		// and `wcAssetUrl` can be used in its place throughout the codebase.
-		$settings['wcAdminAssetUrl']   = plugins_url( 'images/', plugin_dir_path( dirname( __FILE__ ) ) . 'woocommerce-admin.php' );
+		$settings['wcAdminAssetUrl'] = plugins_url( 'images/', plugin_dir_path( dirname( __FILE__ ) ) . 'woocommerce-admin.php' );
 
 		if ( ! empty( $preload_data_endpoints ) ) {
 			foreach ( $preload_data_endpoints as $key => $endpoint ) {
