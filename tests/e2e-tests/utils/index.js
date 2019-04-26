@@ -59,11 +59,11 @@ const uiUnblocked = async () => {
 };
 
 module.exports = {
+    ...flows,
     clearAndFillInput,
     clickTab,
     pressKeyWithModifier,
     selectSelect2Option,
     settingsPageSaveChanges,
-    StoreOwnerFlow: flows.StoreOwnerFlow,
     uiUnblocked,
 };

@@ -15,6 +15,30 @@ const WP_ADMIN_NEW_ORDER = baseUrl + 'wp-admin/post-new.php?post_type=shop_order
 const WP_ADMIN_NEW_PRODUCT = baseUrl + 'wp-admin/post-new.php?post_type=product';
 const WP_ADMIN_WC_SETTINGS = baseUrl + 'wp-admin/admin.php?page=wc-settings&tab=';
 
+const SHOP_PRODUCT = baseUrl + 'product/';
+const SHOP_CART_PAGE = baseUrl + 'cart/';
+
+const CustomerFlow = {
+	addToCart: async () => {
+		await Promise.all( [
+            page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+            page.click( '.single_add_to_cart_button' ),
+        ] );
+	},
+
+	goToProduct: async ( productSlug ) => {
+		await page.goto( SHOP_PRODUCT + productSlug, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	goToCart: async () => {
+		await page.goto( SHOP_CART_PAGE, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+};
+
 const StoreOwnerFlow = {
     login: async () => {
         await page.goto( WP_ADMIN_LOGIN, {
@@ -64,5 +88,6 @@ const StoreOwnerFlow = {
 };
 
 module.exports = {
+	CustomerFlow,
     StoreOwnerFlow,
 };
