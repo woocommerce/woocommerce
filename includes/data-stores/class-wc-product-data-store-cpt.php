@@ -1291,43 +1291,51 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
 	 *
 	 * @since  3.0.0 this supports set, increase and decrease.
-	 * @param  int      $product_id_with_stock Product ID.
-	 * @param  int|null $stock_quantity Stock quantity.
-	 * @param  string   $operation Set, increase and decrease.
+	 * @param  int            $product_id_with_stock Product ID.
+	 * @param  int|float|null $stock_quantity Stock quantity.
+	 * @param  string         $operation Set, increase and decrease.
+	 * @return int|float New stock level.
 	 */
 	public function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' ) {
 		global $wpdb;
+
+		// Ensures a row exists to update.
 		add_post_meta( $product_id_with_stock, '_stock', 0, true );
 
-		// Update stock in DB directly.
-		switch ( $operation ) {
-			case 'increase':
-				$sql = $wpdb->prepare(
-					"UPDATE {$wpdb->postmeta} SET meta_value = meta_value + %f WHERE post_id = %d AND meta_key='_stock'",
-					$stock_quantity,
-					$product_id_with_stock
-				);
-				break;
-			case 'decrease':
-				$sql = $wpdb->prepare(
-					"UPDATE {$wpdb->postmeta} SET meta_value = meta_value - %f WHERE post_id = %d AND meta_key='_stock'",
-					$stock_quantity,
-					$product_id_with_stock
-				);
-				break;
-			default:
-				$sql = $wpdb->prepare(
-					"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
-					$stock_quantity,
-					$product_id_with_stock
-				);
-				break;
+		if ( 'set' === $operation ) {
+			$new_stock = wc_stock_amount( $stock_quantity );
+		} else {
+			// Read current stock level and lock the row.
+			$current_stock = wc_stock_amount(
+				$wpdb->get_var(
+					$wpdb->prepare(
+						"SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key='_stock' FOR UPDATE;",
+						$product_id_with_stock
+					)
+				)
+			);
+
+			// Calculate new value.
+			switch ( $operation ) {
+				case 'increase':
+					$new_stock = $current_stock + wc_stock_amount( $stock_quantity );
+					break;
+				default:
+					$new_stock = $current_stock - wc_stock_amount( $stock_quantity );
+					break;
+			}
 		}
+
+		// Generate SQL.
+		$sql = $wpdb->prepare(
+			"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
+			$new_stock,
+			$product_id_with_stock
+		);
 
 		$sql = apply_filters( 'woocommerce_update_product_stock_query', $sql, $product_id_with_stock, $stock_quantity, $operation );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
-		$wpdb->query( $sql );
+		$wpdb->query( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
 
 		wp_cache_delete( $product_id_with_stock, 'post_meta' );
 
@@ -1340,6 +1348,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		 * @param int $product_id_with_stock Product ID that was updated directly.
 		 */
 		do_action( 'woocommerce_updated_product_stock', $product_id_with_stock );
+
+		return $new_stock;
 	}
 
 	/**
