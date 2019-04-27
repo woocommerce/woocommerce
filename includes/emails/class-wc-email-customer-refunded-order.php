@@ -1,220 +1,281 @@
 <?php
+/**
+ * Class WC_Email_Customer_Refunded_Order file.
+ *
+ * @package WooCommerce\Emails
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
-if ( ! class_exists( 'WC_Email_Customer_Refunded_Order' ) ) :
-
-/**
- * Customer Refunded Order Email
- *
- * Order refunded emails are sent to the customer when the order is marked refunded.
- *
- * @class    WC_Email_Customer_Refunded_Order
- * @version  2.4.0
- * @package  WooCommerce/Classes/Emails
- * @author   WooThemes
- * @extends  WC_Email
- */
-class WC_Email_Customer_Refunded_Order extends WC_Email {
-	
-	public $refund;
-	public $partial_refund;
+if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 
 	/**
-	 * Constructor
+	 * Customer Refunded Order Email.
+	 *
+	 * Order refunded emails are sent to the customer when the order is marked refunded.
+	 *
+	 * @class    WC_Email_Customer_Refunded_Order
+	 * @version  3.5.0
+	 * @package  WooCommerce/Classes/Emails
+	 * @extends  WC_Email
 	 */
-	public function __construct() {
-		$this->set_email_strings();
+	class WC_Email_Customer_Refunded_Order extends WC_Email {
 
-		// Triggers for this email
-		add_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'trigger_full' ), 10, 2 );
-		add_action( 'woocommerce_order_partially_refunded_notification', array( $this, 'trigger_partial' ), 10, 2 );
+		/**
+		 * Refund order.
+		 *
+		 * @var WC_Order|bool
+		 */
+		public $refund;
 
-		// Call parent constuctor
-		parent::__construct();
-	}
+		/**
+		 * Is the order partial refunded?
+		 *
+		 * @var bool
+		 */
+		public $partial_refund;
 
-	public function set_email_strings( $partial_refund = false ) {
-		$this->subject_partial     = $this->get_option( 'subject_partial', __( 'Your {site_title} order from {order_date} has been partially refunded', 'woocommerce' ) );
-		$this->subject_full        = $this->get_option( 'subject_full', __( 'Your {site_title} order from {order_date} has been refunded', 'woocommerce' ) );
-
-		$this->heading_full        = $this->get_option( 'heading_full', __( 'Your order has been fully refunded', 'woocommerce' ) );
-		$this->heading_partial     = $this->get_option( 'heading_partial', __( 'Your order has been partially refunded', 'woocommerce' ) );
-
-		if ( $partial_refund ) {
-			$this->id             = 'customer_partially_refunded_order';
-			$this->title          = __( 'Partially Refunded order', 'woocommerce' );
-			$this->description    = __( 'Order partially refunded emails are sent to customers when their orders are partially refunded.', 'woocommerce' );
-			$this->template_html  = 'emails/customer-refunded-order.php';
-			$this->template_plain = 'emails/plain/customer-refunded-order.php';
-			$this->heading        = $this->heading_partial;
-			$this->subject        = $this->subject_partial;
-		}
-		else {
+		/**
+		 * Constructor.
+		 */
+		public function __construct() {
+			$this->customer_email = true;
 			$this->id             = 'customer_refunded_order';
 			$this->title          = __( 'Refunded order', 'woocommerce' );
-			$this->description    = __( 'Order refunded emails are sent to customers when their orders are marked refunded.', 'woocommerce' );
+			$this->description    = __( 'Order refunded emails are sent to customers when their orders are refunded.', 'woocommerce' );
 			$this->template_html  = 'emails/customer-refunded-order.php';
 			$this->template_plain = 'emails/plain/customer-refunded-order.php';
-			$this->heading        = $this->heading_full;
-			$this->subject        = $this->subject_full;
-		}
-	}
+			$this->placeholders   = array(
+				'{site_title}'   => $this->get_blogname(),
+				'{order_date}'   => '',
+				'{order_number}' => '',
+			);
 
-	/**
-	 * Full refund notification
-	 */
-	public function trigger_full( $order_id, $refund_id = null ) {
-		$this->trigger( $order_id, false, $refund_id );
-	}
+			// Triggers for this email.
+			add_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'trigger_full' ), 10, 2 );
+			add_action( 'woocommerce_order_partially_refunded_notification', array( $this, 'trigger_partial' ), 10, 2 );
 
-	/**
-	 * Partial refund notification
-	 */
-	public function trigger_partial( $order_id, $refund_id = null ) {
-		$this->trigger( $order_id, true, $refund_id );
-	}
-
-	/**
-	 * Trigger.
-	 */
-	public function trigger( $order_id, $partial_refund = false, $refund_id = null ) {
-		$this->partial_refund = $partial_refund;
-		$this->set_email_strings( $partial_refund );
-
-		if ( $order_id ) {
-			$this->object    = wc_get_order( $order_id );
-			$this->recipient = $this->object->billing_email;
-
-			$this->find['order-date']      = '{order_date}';
-			$this->find['order-number']    = '{order_number}';
-
-			$this->replace['order-date']   = date_i18n( wc_date_format(), strtotime( $this->object->order_date ) );
-			$this->replace['order-number'] = $this->object->get_order_number();
+			// Call parent constructor.
+			parent::__construct();
 		}
 
-		if ( $refund_id ) {
-			$this->refund = wc_get_order( $refund_id );
-		} else {
-			$this->refund = false;
+		/**
+		 * Get email subject.
+		 *
+		 * @param bool $partial Whether it is a partial refund or a full refund.
+		 * @since  3.1.0
+		 * @return string
+		 */
+		public function get_default_subject( $partial = false ) {
+			if ( $partial ) {
+				return __( 'Your {site_title} order #{order_number} has been partially refunded', 'woocommerce' );
+			} else {
+				return __( 'Your {site_title} order #{order_number} has been refunded', 'woocommerce' );
+			}
 		}
 
-		if ( ! $this->is_enabled() || ! $this->get_recipient() ) {
-			return;
+		/**
+		 * Get email heading.
+		 *
+		 * @param bool $partial Whether it is a partial refund or a full refund.
+		 * @since  3.1.0
+		 * @return string
+		 */
+		public function get_default_heading( $partial = false ) {
+			if ( $partial ) {
+				return __( 'Partial Refund: Order {order_number}', 'woocommerce' );
+			} else {
+				return __( 'Order Refunded: {order_number}', 'woocommerce' );
+			}
 		}
 
-		$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-	}
+		/**
+		 * Get email subject.
+		 *
+		 * @return string
+		 */
+		public function get_subject() {
+			if ( $this->partial_refund ) {
+				$subject = $this->get_option( 'subject_partial', $this->get_default_subject( true ) );
+			} else {
+				$subject = $this->get_option( 'subject_full', $this->get_default_subject() );
+			}
+			return apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $subject ), $this->object, $this );
+		}
 
-	/**
-	 * get_subject function.
-	 *
-	 * @access public
-	 * @return string
-	 */
-	public function get_subject() {
-		return apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $this->subject ), $this->object );
-	}
+		/**
+		 * Get email heading.
+		 *
+		 * @return string
+		 */
+		public function get_heading() {
+			if ( $this->partial_refund ) {
+				$heading = $this->get_option( 'heading_partial', $this->get_default_heading( true ) );
+			} else {
+				$heading = $this->get_option( 'heading_full', $this->get_default_heading() );
+			}
+			return apply_filters( 'woocommerce_email_heading_customer_refunded_order', $this->format_string( $heading ), $this->object, $this );
+		}
 
-	/**
-	 * get_heading function.
-	 *
-	 * @access public
-	 * @return string
-	 */
-	public function get_heading() {
-		return apply_filters( 'woocommerce_email_heading_customer_refunded_order', $this->format_string( $this->heading ), $this->object );
-	}
+		/**
+		 * Set email strings.
+		 *
+		 * @param bool $partial_refund Whether it is a partial refund or a full refund.
+		 * @deprecated 3.1.0 Unused.
+		 */
+		public function set_email_strings( $partial_refund = false ) {}
 
-	/**
-	 * get_content_html function.
-	 *
-	 * @access public
-	 * @return string
-	 */
-	public function get_content_html() {
-		ob_start();
-		wc_get_template( $this->template_html, array(
-			'order'          => $this->object,
-			'refund'		 => $this->refund,
-			'partial_refund' => $this->partial_refund,
-			'email_heading'  => $this->get_heading(),
-			'sent_to_admin'  => false,
-			'plain_text'     => false
-		) );
-		return ob_get_clean();
-	}
+		/**
+		 * Full refund notification.
+		 *
+		 * @param int $order_id Order ID.
+		 * @param int $refund_id Refund ID.
+		 */
+		public function trigger_full( $order_id, $refund_id = null ) {
+			$this->trigger( $order_id, false, $refund_id );
+		}
 
-	/**
-	 * Get content plain.
-	 *
-	 * @return string
-	 */
-	public function get_content_plain() {
-		ob_start();
-		wc_get_template( $this->template_plain, array(
-			'order'          => $this->object,
-			'refund'		 => $this->refund,
-			'partial_refund' => $this->partial_refund,
-			'email_heading'  => $this->get_heading(),
-			'sent_to_admin'  => false,
-			'plain_text'     => true
-		) );
-		return ob_get_clean();
-	}
+		/**
+		 * Partial refund notification.
+		 *
+		 * @param int $order_id Order ID.
+		 * @param int $refund_id Refund ID.
+		 */
+		public function trigger_partial( $order_id, $refund_id = null ) {
+			$this->trigger( $order_id, true, $refund_id );
+		}
 
-	/**
-	 * Initialise settings form fields.
-	 */
-	public function init_form_fields() {
-		$this->form_fields = array(
-			'enabled' => array(
-				'title'   => __( 'Enable/Disable', 'woocommerce' ),
-				'type'    => 'checkbox',
-				'label'   => __( 'Enable this email notification', 'woocommerce' ),
-				'default' => 'yes'
-			),
-			'subject_full' => array(
-				'title'       => __( 'Full Refund Subject', 'woocommerce' ),
-				'type'        => 'text',
-				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_full ),
-				'placeholder' => '',
-				'default'     => $this->subject_full
-			),
-			'subject_partial' => array(
-				'title'       => __( 'Partial Refund Subject', 'woocommerce' ),
-				'type'        => 'text',
-				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->subject_partial ),
-				'placeholder' => '',
-				'default'     => $this->subject_partial
-			),
-			'heading_full' => array(
-				'title'       => __( 'Full Refund Email Heading', 'woocommerce' ),
-				'type'        => 'text',
-				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_full ),
-				'placeholder' => '',
-				'default'     => $this->heading_full
-			),
-			'heading_partial' => array(
-				'title'       => __( 'Partial Refund Email Heading', 'woocommerce' ),
-				'type'        => 'text',
-				'description' => sprintf( __( 'Defaults to <code>%s</code>', 'woocommerce' ), $this->heading_partial ),
-				'placeholder' => '',
-				'default'     => $this->heading_partial
-			),
-			'email_type' => array(
-				'title'       => __( 'Email type', 'woocommerce' ),
-				'type'        => 'select',
-				'description' => __( 'Choose which format of email to send.', 'woocommerce' ),
-				'default'     => 'html',
-				'class'       => 'email_type wc-enhanced-select',
-				'options'     => $this->get_email_type_options()
-			)
-		);
+		/**
+		 * Trigger.
+		 *
+		 * @param int  $order_id Order ID.
+		 * @param bool $partial_refund Whether it is a partial refund or a full refund.
+		 * @param int  $refund_id Refund ID.
+		 */
+		public function trigger( $order_id, $partial_refund = false, $refund_id = null ) {
+			$this->setup_locale();
+			$this->partial_refund = $partial_refund;
+			$this->id             = $this->partial_refund ? 'customer_partially_refunded_order' : 'customer_refunded_order';
+
+			if ( $order_id ) {
+				$this->object                         = wc_get_order( $order_id );
+				$this->recipient                      = $this->object->get_billing_email();
+				$this->placeholders['{order_date}']   = wc_format_datetime( $this->object->get_date_created() );
+				$this->placeholders['{order_number}'] = $this->object->get_order_number();
+			}
+
+			if ( ! empty( $refund_id ) ) {
+				$this->refund = wc_get_order( $refund_id );
+			} else {
+				$this->refund = false;
+			}
+
+			if ( $this->is_enabled() && $this->get_recipient() ) {
+				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+			}
+
+			$this->restore_locale();
+		}
+
+		/**
+		 * Get content html.
+		 *
+		 * @return string
+		 */
+		public function get_content_html() {
+			return wc_get_template_html(
+				$this->template_html, array(
+					'order'          => $this->object,
+					'refund'         => $this->refund,
+					'partial_refund' => $this->partial_refund,
+					'email_heading'  => $this->get_heading(),
+					'sent_to_admin'  => false,
+					'plain_text'     => false,
+					'email'          => $this,
+				)
+			);
+		}
+
+		/**
+		 * Get content plain.
+		 *
+		 * @return string
+		 */
+		public function get_content_plain() {
+			return wc_get_template_html(
+				$this->template_plain, array(
+					'order'          => $this->object,
+					'refund'         => $this->refund,
+					'partial_refund' => $this->partial_refund,
+					'email_heading'  => $this->get_heading(),
+					'sent_to_admin'  => false,
+					'plain_text'     => true,
+					'email'          => $this,
+				)
+			);
+		}
+
+		/**
+		 * Initialise settings form fields.
+		 */
+		public function init_form_fields() {
+			$this->form_fields = array(
+				'enabled'         => array(
+					'title'   => __( 'Enable/Disable', 'woocommerce' ),
+					'type'    => 'checkbox',
+					'label'   => __( 'Enable this email notification', 'woocommerce' ),
+					'default' => 'yes',
+				),
+				'subject_full'    => array(
+					'title'       => __( 'Full refund subject', 'woocommerce' ),
+					'type'        => 'text',
+					'desc_tip'    => true,
+					/* translators: %s: list of placeholders */
+					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'placeholder' => $this->get_default_subject(),
+					'default'     => '',
+				),
+				'subject_partial' => array(
+					'title'       => __( 'Partial refund subject', 'woocommerce' ),
+					'type'        => 'text',
+					'desc_tip'    => true,
+					/* translators: %s: list of placeholders */
+					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'placeholder' => $this->get_default_subject( true ),
+					'default'     => '',
+				),
+				'heading_full'    => array(
+					'title'       => __( 'Full refund email heading', 'woocommerce' ),
+					'type'        => 'text',
+					'desc_tip'    => true,
+					/* translators: %s: list of placeholders */
+					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'placeholder' => $this->get_default_heading(),
+					'default'     => '',
+				),
+				'heading_partial' => array(
+					'title'       => __( 'Partial refund email heading', 'woocommerce' ),
+					'type'        => 'text',
+					'desc_tip'    => true,
+					/* translators: %s: list of placeholders */
+					'description' => sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>{site_title}, {order_date}, {order_number}</code>' ),
+					'placeholder' => $this->get_default_heading( true ),
+					'default'     => '',
+				),
+				'email_type'      => array(
+					'title'       => __( 'Email type', 'woocommerce' ),
+					'type'        => 'select',
+					'description' => __( 'Choose which format of email to send.', 'woocommerce' ),
+					'default'     => 'html',
+					'class'       => 'email_type wc-enhanced-select',
+					'options'     => $this->get_email_type_options(),
+					'desc_tip'    => true,
+				),
+			);
+		}
 	}
-}
 
 endif;
 

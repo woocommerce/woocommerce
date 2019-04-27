@@ -2,12 +2,13 @@
 /**
  * Spain states
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     2.0.11
+ * @package WooCommerce/i18n
+ * @version 2.0.11
  */
+
 global $states;
+
+defined( 'ABSPATH' ) || exit;
 
 $states['ES'] = array(
 	'C'  => __( 'A Coru&ntilde;a', 'woocommerce' ),
@@ -61,5 +62,5 @@ $states['ES'] = array(
 	'VA' => __( 'Valladolid', 'woocommerce' ),
 	'BI' => __( 'Bizkaia', 'woocommerce' ),
 	'ZA' => __( 'Zamora', 'woocommerce' ),
-	'Z'  => __( 'Zaragoza', 'woocommerce' )
+	'Z'  => __( 'Zaragoza', 'woocommerce' ),
 );

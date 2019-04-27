@@ -2,44 +2,55 @@
 /**
  * Customer processing order email
  *
- * @author 		WooThemes
- * @package 	WooCommerce/Templates/Emails/Plain
- * @version     2.3.0
+ * This template can be overridden by copying it to yourtheme/woocommerce/emails/plain/customer-processing-order.php.
+ *
+ * HOWEVER, on occasion WooCommerce will need to update template files and you
+ * (the theme developer) will need to copy the new files to your theme to
+ * maintain compatibility. We try to do this as little as possible, but it does
+ * happen. When this occurs the version of the template file will be bumped and
+ * the readme will list any important changes.
+ *
+ * @see https://docs.woocommerce.com/document/template-structure/
+ * @package WooCommerce/Templates/Emails/Plain
+ * @version 3.5.4
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
-echo "= " . $email_heading . " =\n\n";
+echo '= ' . esc_html( $email_heading ) . " =\n\n";
 
-echo __( "Your order has been received and is now being processed. Your order details are shown below for your reference:", 'woocommerce' ) . "\n\n";
+/* translators: %s: Customer first name */
+echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ) . "\n\n";
+/* translators: %s: Order number */
+echo sprintf( esc_html__( 'Just to let you know &mdash; we\'ve received your order #%s, and it is now being processed:', 'woocommerce' ), esc_html( $order->get_order_number() ) ) . "\n\n";
 
 echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text );
-
-echo strtoupper( sprintf( __( 'Order number: %s', 'woocommerce' ), $order->get_order_number() ) ) . "\n";
-echo date_i18n( __( 'jS F Y', 'woocommerce' ), strtotime( $order->order_date ) ) . "\n";
-
-do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text );
-
-echo "\n" . $order->email_order_items_table( $order->is_download_permitted(), true, $order->has_status( 'processing' ), '', '', true );
-
-echo "==========\n\n";
-
-if ( $totals = $order->get_order_item_totals() ) {
-	foreach ( $totals as $total ) {
-		echo $total['label'] . "\t " . $total['value'] . "\n";
-	}
-}
+/*
+ * @hooked WC_Emails::order_details() Shows the order details table.
+ * @hooked WC_Structured_Data::generate_order_data() Generates structured data.
+ * @hooked WC_Structured_Data::output_structured_data() Outputs structured data.
+ * @since 2.5.0
+ */
+do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-do_action( 'woocommerce_email_after_order_table', $order, $sent_to_admin, $plain_text );
+/*
+ * @hooked WC_Emails::order_meta() Shows order meta data.
+ */
+do_action( 'woocommerce_email_order_meta', $order, $sent_to_admin, $plain_text, $email );
 
-do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text );
+/*
+ * @hooked WC_Emails::customer_details() Shows customer details
+ * @hooked WC_Emails::email_address() Shows email address
+ */
+do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
+
+echo esc_html_e( 'Thanks!', 'woocommerce' ) . "\n\n";
 
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-echo apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) );
+echo esc_html( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );

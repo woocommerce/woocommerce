@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# see https://github.com/wp-cli/wp-cli/blob/master/templates/install-wp-tests.sh
+# See https://raw.githubusercontent.com/wp-cli/scaffold-command/master/templates/install-wp-tests.sh
 
 if [ $# -lt 3 ]; then
-	echo "usage: $0 <db-name> <db-user> <db-pass> [db-host] [wp-version]"
+	echo "usage: $0 <db-name> <db-user> <db-pass> [db-host] [wp-version] [skip-database-creation]"
 	exit 1
 fi
 
@@ -11,27 +11,86 @@ DB_USER=$2
 DB_PASS=$3
 DB_HOST=${4-localhost}
 WP_VERSION=${5-latest}
+SKIP_DB_CREATE=${6-false}
 
-# TODO: allow environment vars for WP_TESTS_DIR & WP_CORE_DIR
-WP_TESTS_DIR="${PWD}/tmp/wordpress-tests-lib"
-WP_CORE_DIR="${PWD}/tmp/wordpress/"
+TMPDIR=${TMPDIR-/tmp}
+TMPDIR=$(echo $TMPDIR | sed -e "s/\/$//")
+WP_TESTS_DIR=${WP_TESTS_DIR-$TMPDIR/wordpress-tests-lib}
+WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress/}
+
+download() {
+    if [ `which curl` ]; then
+        curl -s "$1" > "$2";
+    elif [ `which wget` ]; then
+        wget -nv -O "$2" "$1"
+    fi
+}
+
+if [[ $WP_VERSION =~ ^[0-9]+\.[0-9]+$ ]]; then
+	WP_TESTS_TAG="branches/$WP_VERSION"
+elif [[ $WP_VERSION =~ [0-9]+\.[0-9]+\.[0-9]+ ]]; then
+	if [[ $WP_VERSION =~ [0-9]+\.[0-9]+\.[0] ]]; then
+		# version x.x.0 means the first release of the major version, so strip off the .0 and download version x.x
+		WP_TESTS_TAG="tags/${WP_VERSION%??}"
+	else
+		WP_TESTS_TAG="tags/$WP_VERSION"
+	fi
+elif [[ $WP_VERSION == 'nightly' || $WP_VERSION == 'trunk' ]]; then
+	WP_TESTS_TAG="trunk"
+else
+	# http serves a single offer, whereas https serves multiple. we only want one
+	download http://api.wordpress.org/core/version-check/1.7/ $TMPDIR/wp-latest.json
+	grep '[0-9]+\.[0-9]+(\.[0-9]+)?' $TMPDIR/wp-latest.json
+	LATEST_VERSION=$(grep -o '"version":"[^"]*' $TMPDIR/wp-latest.json | sed 's/"version":"//')
+	if [[ -z "$LATEST_VERSION" ]]; then
+		echo "Latest WordPress version could not be found"
+		exit 1
+	fi
+	WP_TESTS_TAG="tags/$LATEST_VERSION"
+fi
 
 set -ex
 
 install_wp() {
-	mkdir -p $WP_CORE_DIR
 
-	if [ $WP_VERSION == 'latest' ]; then
-		local ARCHIVE_NAME='latest'
-	else
-		local ARCHIVE_NAME="wordpress-$WP_VERSION"
+	if [ -d $WP_CORE_DIR ]; then
+		return;
 	fi
 
-	curl https://wordpress.org/${ARCHIVE_NAME}.tar.gz --output /tmp/wordpress.tar.gz --silent
+	mkdir -p $WP_CORE_DIR
 
-	tar --strip-components=1 -zxmf /tmp/wordpress.tar.gz -C $WP_CORE_DIR
+	if [[ $WP_VERSION == 'nightly' || $WP_VERSION == 'trunk' ]]; then
+		mkdir -p $TMPDIR/wordpress-nightly
+		download https://wordpress.org/nightly-builds/wordpress-latest.zip  $TMPDIR/wordpress-nightly/wordpress-nightly.zip
+		unzip -q $TMPDIR/wordpress-nightly/wordpress-nightly.zip -d $TMPDIR/wordpress-nightly/
+		mv $TMPDIR/wordpress-nightly/wordpress/* $WP_CORE_DIR
+	else
+		if [ $WP_VERSION == 'latest' ]; then
+			local ARCHIVE_NAME='latest'
+		elif [[ $WP_VERSION =~ [0-9]+\.[0-9]+ ]]; then
+			# https serves multiple offers, whereas http serves single.
+			download https://api.wordpress.org/core/version-check/1.7/ $TMPDIR/wp-latest.json
+			if [[ $WP_VERSION =~ [0-9]+\.[0-9]+\.[0] ]]; then
+				# version x.x.0 means the first release of the major version, so strip off the .0 and download version x.x
+				LATEST_VERSION=${WP_VERSION%??}
+			else
+				# otherwise, scan the releases and get the most up to date minor version of the major release
+				local VERSION_ESCAPED=`echo $WP_VERSION | sed 's/\./\\\\./g'`
+				LATEST_VERSION=$(grep -o '"version":"'$VERSION_ESCAPED'[^"]*' $TMPDIR/wp-latest.json | sed 's/"version":"//' | head -1)
+			fi
+			if [[ -z "$LATEST_VERSION" ]]; then
+				local ARCHIVE_NAME="wordpress-$WP_VERSION"
+			else
+				local ARCHIVE_NAME="wordpress-$LATEST_VERSION"
+			fi
+		else
+			local ARCHIVE_NAME="wordpress-$WP_VERSION"
+		fi
+		download https://wordpress.org/${ARCHIVE_NAME}.tar.gz  $TMPDIR/wordpress.tar.gz
+		tar --strip-components=1 -zxmf $TMPDIR/wordpress.tar.gz -C $WP_CORE_DIR
+	fi
 
-	curl https://raw.github.com/markoheijnen/wp-mysqli/master/db.php --output $WP_CORE_DIR/wp-content/db.php --silent
+	download https://raw.github.com/markoheijnen/wp-mysqli/master/db.php $WP_CORE_DIR/wp-content/db.php
 }
 
 install_test_suite() {
@@ -42,25 +101,33 @@ install_test_suite() {
 		local ioption='-i'
 	fi
 
-	# set up testing suite
-	mkdir -p $WP_TESTS_DIR
-	cd $WP_TESTS_DIR
-	svn co --quiet http://develop.svn.wordpress.org/trunk/tests/phpunit/includes/
+	# set up testing suite if it doesn't yet exist
+	if [ ! -d $WP_TESTS_DIR ]; then
+		# set up testing suite
+		mkdir -p $WP_TESTS_DIR
+		svn co --quiet https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/includes/ $WP_TESTS_DIR/includes
+		svn co --quiet https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/data/ $WP_TESTS_DIR/data
+	fi
 
-	curl http://develop.svn.wordpress.org/trunk/wp-tests-config-sample.php --output wp-tests-config.php --silent
+	if [ ! -f wp-tests-config.php ]; then
+		download https://develop.svn.wordpress.org/${WP_TESTS_TAG}/wp-tests-config-sample.php "$WP_TESTS_DIR"/wp-tests-config.php
+		# remove all forward slashes in the end
+		WP_CORE_DIR=$(echo $WP_CORE_DIR | sed "s:/\+$::")
+		sed $ioption "s:dirname( __FILE__ ) . '/src/':'$WP_CORE_DIR/':" "$WP_TESTS_DIR"/wp-tests-config.php
+		sed $ioption "s/youremptytestdbnamehere/$DB_NAME/" "$WP_TESTS_DIR"/wp-tests-config.php
+		sed $ioption "s/yourusernamehere/$DB_USER/" "$WP_TESTS_DIR"/wp-tests-config.php
+		sed $ioption "s/yourpasswordhere/$DB_PASS/" "$WP_TESTS_DIR"/wp-tests-config.php
+		sed $ioption "s|localhost|${DB_HOST}|" "$WP_TESTS_DIR"/wp-tests-config.php
+	fi
 
-	sed $ioption "s:dirname( __FILE__ ) . '/src/':'$WP_CORE_DIR':" wp-tests-config.php
-	sed $ioption "s/youremptytestdbnamehere/$DB_NAME/" wp-tests-config.php
-	sed $ioption "s/yourusernamehere/$DB_USER/" wp-tests-config.php
-	sed $ioption "s/yourpasswordhere/$DB_PASS/" wp-tests-config.php
-	sed $ioption "s|localhost|${DB_HOST}|" wp-tests-config.php
-	sed $ioption "s/wptests_/wctests_/" wp-tests-config.php
-	sed $ioption "s/example.org/woocommerce.com/" wp-tests-config.php
-	sed $ioption "s/admin@example.org/tests@woocommerce.com/" wp-tests-config.php
-	sed $ioption "s/Test Blog/WooCommerce Unit Tests/" wp-tests-config.php
 }
 
 install_db() {
+
+	if [ ${SKIP_DB_CREATE} = "true" ]; then
+		return 0
+	fi
+
 	# parse DB_HOST for port or socket references
 	local PARTS=(${DB_HOST//\:/ })
 	local DB_HOSTNAME=${PARTS[0]};
@@ -68,7 +135,7 @@ install_db() {
 	local EXTRA=""
 
 	if ! [ -z $DB_HOSTNAME ] ; then
-		if [[ "$DB_SOCK_OR_PORT" =~ ^[0-9]+$ ]] ; then
+		if [ $(echo $DB_SOCK_OR_PORT | grep -e '^[0-9]\{1,\}$') ]; then
 			EXTRA=" --host=$DB_HOSTNAME --port=$DB_SOCK_OR_PORT --protocol=tcp"
 		elif ! [ -z $DB_SOCK_OR_PORT ] ; then
 			EXTRA=" --socket=$DB_SOCK_OR_PORT"
@@ -81,6 +148,72 @@ install_db() {
 	mysqladmin create $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA
 }
 
+install_e2e_site() {
+
+	if [[ ${RUN_E2E} == 1 ]]; then
+
+		# Script Variables
+		CONFIG_DIR="./tests/e2e-tests/config/travis"
+		WP_CORE_DIR="$HOME/wordpress"
+		NGINX_DIR="$HOME/nginx"
+		PHP_FPM_BIN="$HOME/.phpenv/versions/$TRAVIS_PHP_VERSION/sbin/php-fpm"
+		PHP_FPM_CONF="$NGINX_DIR/php-fpm.conf"
+		WP_SITE_URL="http://localhost:8080"
+		BRANCH=$TRAVIS_BRANCH
+		REPO=$TRAVIS_REPO_SLUG
+		WP_DB_DATA="$HOME/build/$REPO/tests/e2e-tests/data/e2e-db.sql"
+		WORKING_DIR="$PWD"
+
+		if [ "$TRAVIS_PULL_REQUEST_BRANCH" != "" ]; then
+			BRANCH=$TRAVIS_PULL_REQUEST_BRANCH
+			REPO=$TRAVIS_PULL_REQUEST_SLUG
+		fi
+
+		set -ev
+		npm install
+		export NODE_CONFIG_DIR="./tests/e2e-tests/config"
+
+		# Set up nginx to run the server
+		mkdir -p "$WP_CORE_DIR"
+		mkdir -p "$NGINX_DIR"
+		mkdir -p "$NGINX_DIR/sites-enabled"
+		mkdir -p "$NGINX_DIR/var"
+
+		cp "$CONFIG_DIR/travis_php-fpm.conf" "$PHP_FPM_CONF"
+
+		# Start php-fpm
+		"$PHP_FPM_BIN" --fpm-config "$PHP_FPM_CONF"
+
+		# Copy the default nginx config files.
+		cp "$CONFIG_DIR/travis_nginx.conf" "$NGINX_DIR/nginx.conf"
+		cp "$CONFIG_DIR/travis_fastcgi.conf" "$NGINX_DIR/fastcgi.conf"
+		cp "$CONFIG_DIR/travis_default-site.conf" "$NGINX_DIR/sites-enabled/default-site.conf"
+
+		# Start nginx.
+		nginx -c "$NGINX_DIR/nginx.conf"
+
+		# Set up WordPress using wp-cli
+		cd "$WP_CORE_DIR"
+
+		curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+		php wp-cli.phar core download --version=$WP_VERSION
+		php wp-cli.phar core config --dbname=$DB_NAME --dbuser=$DB_USER --dbpass=$DB_PASS --dbhost=$DB_HOST --dbprefix=wp_ --extra-php <<PHP
+/* Change WP_MEMORY_LIMIT to increase the memory limit for public pages. */
+define('WP_MEMORY_LIMIT', '256M');
+define('SCRIPT_DEBUG', true);
+PHP
+		php wp-cli.phar core install --url="$WP_SITE_URL" --title="Example" --admin_user=admin --admin_password=password --admin_email=info@example.com --path=$WP_CORE_DIR --skip-email
+		php wp-cli.phar db import $WP_DB_DATA
+		php wp-cli.phar search-replace "http://local.wordpress.test" "$WP_SITE_URL"
+		php wp-cli.phar theme install twentytwelve --activate
+		php wp-cli.phar plugin install https://github.com/$REPO/archive/$BRANCH.zip --activate
+
+		cd "$WORKING_DIR"
+
+	fi
+}
+
 install_wp
 install_test_suite
 install_db
+install_e2e_site

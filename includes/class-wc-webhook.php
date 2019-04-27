@@ -1,86 +1,81 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
- * WooCommerce Webhook class
+ * Webhook
  *
- * This class handles storing and retrieving webhook data from the associated
- * `shop_webhook` custom post type, as well as delivery logs from the `webhook_delivery`
- * comment type.
+ * This class handles storing and retrieving webhook data from the associated.
  *
  * Webhooks are enqueued to their associated actions, delivered, and logged.
  *
- * @author      WooThemes
- * @category    Webhooks
- * @package     WooCommerce/Webhooks
- * @since       2.2
+ * @version  3.2.0
+ * @package  WooCommerce/Webhooks
+ * @since    2.2.0
  */
-class WC_Webhook {
 
-	/** @var int webhook ID (post ID) */
-	public $id;
+defined( 'ABSPATH' ) || exit;
+
+require_once 'legacy/class-wc-legacy-webhook.php';
+
+/**
+ * Webhook class.
+ */
+class WC_Webhook extends WC_Legacy_Webhook {
 
 	/**
-	 * Setup webhook & load post data
+	 * Stores webhook data.
 	 *
-	 * @since 2.2
-	 * @param string|int $id
-	 * @return \WC_Webhook
+	 * @var array
 	 */
-	public function __construct( $id ) {
+	protected $data = array(
+		'date_created'     => null,
+		'date_modified'    => null,
+		'status'           => 'disabled',
+		'delivery_url'     => '',
+		'secret'           => '',
+		'name'             => '',
+		'topic'            => '',
+		'hooks'            => '',
+		'resource'         => '',
+		'event'            => '',
+		'failure_count'    => 0,
+		'user_id'          => 0,
+		'api_version'      => 2,
+		'pending_delivery' => false,
+	);
 
-		$id = absint( $id );
+	/**
+	 * Load webhook data based on how WC_Webhook is called.
+	 *
+	 * @param WC_Webhook|int $data Webhook ID or data.
+	 * @throws Exception If webhook cannot be read/found and $data is set.
+	 */
+	public function __construct( $data = 0 ) {
+		parent::__construct( $data );
 
-		if ( ! $id ) {
-			return;
+		if ( $data instanceof WC_Webhook ) {
+			$this->set_id( absint( $data->get_id() ) );
+		} elseif ( is_numeric( $data ) ) {
+			$this->set_id( $data );
 		}
 
-		$this->id = $id;
-		$this->post_data = get_post( $id );
-	}
+		$this->data_store = WC_Data_Store::load( 'webhook' );
 
-
-	/**
-	 * Magic isset as a wrapper around metadata_exists()
-	 *
-	 * @since 2.2
-	 * @param string $key
-	 * @return bool true if $key isset, false otherwise
-	 */
-	public function __isset( $key ) {
-		if ( ! $this->id ) {
-			return false;
-		}
-		return metadata_exists( 'post', $this->id, '_' . $key );
-	}
-
-
-	/**
-	 * Magic get, wraps get_post_meta() for all keys except $status
-	 *
-	 * @since 2.2
-	 * @param string $key
-	 * @return mixed value
-	 */
-	public function __get( $key ) {
-
-		if ( 'status' === $key ) {
-			$value = $this->get_status();
+		// If we have an ID, load the webhook from the DB.
+		if ( $this->get_id() ) {
+			try {
+				$this->data_store->read( $this );
+			} catch ( Exception $e ) {
+				$this->set_id( 0 );
+				$this->set_object_read( true );
+			}
 		} else {
-			$value = get_post_meta( $this->id, '_' . $key, true );
+			$this->set_object_read( true );
 		}
-
-		return $value;
 	}
 
-
 	/**
-	 * Enqueue the hooks associated with the webhook
+	 * Enqueue the hooks associated with the webhook.
 	 *
-	 * @since 2.2
+	 * @since 2.2.0
 	 */
 	public function enqueue() {
 		$hooks = $this->get_hooks();
@@ -93,99 +88,209 @@ class WC_Webhook {
 		}
 	}
 
-
 	/**
-	 * Process the webhook for delivery by verifying that it should be delivered
-	 * and scheduling the delivery (in the background by default, or immediately)
+	 * Process the webhook for delivery by verifying that it should be delivered.
+	 * and scheduling the delivery (in the background by default, or immediately).
 	 *
-	 * @since 2.2
-	 * @param mixed $arg the first argument provided from the associated hooks
+	 * @since  2.2.0
+	 * @param  mixed $arg The first argument provided from the associated hooks.
+	 * @return mixed $arg Returns the argument in case the webhook was hooked into a filter.
 	 */
 	public function process( $arg ) {
 
-		// verify that webhook should be processed for delivery
+		// Verify that webhook should be processed for delivery.
 		if ( ! $this->should_deliver( $arg ) ) {
 			return;
 		}
 
-		// webhooks are processed in the background by default
-		// so as to avoid delays or failures in delivery from affecting the
-		// user who triggered it
-		if ( apply_filters( 'woocommerce_webhook_deliver_async', true, $this ) ) {
+		/**
+		 * Process webhook delivery.
+		 *
+		 * @since 3.3.0
+		 * @hooked wc_webhook_process_delivery - 10
+		 */
+		do_action( 'woocommerce_webhook_process_delivery', $this, $arg );
 
-			// deliver in background
-			wp_schedule_single_event( time(), 'woocommerce_deliver_webhook_async', array( $this->id, is_scalar( $arg ) ? $arg : 0 ) );
-
-		} else {
-
-			// deliver immediately
-			$this->deliver( $arg );
-		}
+		return $arg;
 	}
 
 	/**
-	 * Helper to check if the webhook should be delivered, as some hooks
+	 * Helper to check if the webhook should be delivered, as some hooks.
 	 * (like `wp_trash_post`) will fire for every post type, not just ours.
 	 *
-	 * @since 2.2
-	 * @param mixed $arg first hook argument
-	 * @return bool true if webhook should be delivered, false otherwise
+	 * @since  2.2.0
+	 * @param  mixed $arg First hook argument.
+	 * @return bool       True if webhook should be delivered, false otherwise.
 	 */
 	private function should_deliver( $arg ) {
+		$should_deliver = $this->is_active() && $this->is_valid_topic() && $this->is_valid_action( $arg ) && $this->is_valid_resource( $arg );
 
-		// only active webhooks can be delivered
-		if ( 'active' != $this->get_status() ) {
+		/**
+		 * Let other plugins intercept deliver for some messages queue like rabbit/zeromq.
+		 *
+		 * @param bool       $should_deliver True if the webhook should be sent, or false to not send it.
+		 * @param WC_Webhook $this The current webhook class.
+		 * @param mixed      $arg First hook argument.
+		 */
+		return apply_filters( 'woocommerce_webhook_should_deliver', $should_deliver, $this, $arg );
+	}
+
+	/**
+	 * Returns if webhook is active.
+	 *
+	 * @since  3.6.0
+	 * @return bool  True if validation passes.
+	 */
+	private function is_active() {
+		return 'active' === $this->get_status();
+	}
+
+	/**
+	 * Returns if topic is valid.
+	 *
+	 * @since  3.6.0
+	 * @return bool  True if validation passes.
+	 */
+	private function is_valid_topic() {
+		return wc_is_webhook_valid_topic( $this->get_topic() );
+	}
+
+	/**
+	 * Validates the criteria for certain actions.
+	 *
+	 * @since  3.6.0
+	 * @param  mixed $arg First hook argument.
+	 * @return bool       True if validation passes.
+	 */
+	private function is_valid_action( $arg ) {
+		$current_action = current_action();
+		$return         = true;
+
+		switch ( $current_action ) {
+			case 'delete_post':
+			case 'wp_trash_post':
+			case 'untrashed_post':
+				$return = $this->is_valid_post_action( $arg );
+				break;
+			case 'delete_user':
+				$return = $this->is_valid_user_action( $arg );
+				break;
+		}
+
+		if ( 0 === strpos( $current_action, 'woocommerce_process_shop' ) || 0 === strpos( $current_action, 'woocommerce_process_product' ) ) {
+			$return = $this->is_valid_processing_action( $arg );
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Validates post actions.
+	 *
+	 * @since  3.6.0
+	 * @param  mixed $arg First hook argument.
+	 * @return bool       True if validation passes.
+	 */
+	private function is_valid_post_action( $arg ) {
+		// Only deliver deleted/restored event for coupons, orders, and products.
+		if ( isset( $GLOBALS['post_type'] ) && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ), true ) ) {
 			return false;
 		}
 
-		$current_action = current_action();
-
-		// only deliver deleted event for coupons, orders, and products
-		if ( 'delete_post' == $current_action && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ) ) ) {
+		// Check if is delivering for the correct resource.
+		if ( isset( $GLOBALS['post_type'] ) && str_replace( 'shop_', '', $GLOBALS['post_type'] ) !== $this->get_resource() ) {
 			return false;
+		}
+		return true;
+	}
 
-		} elseif ( 'delete_user' == $current_action ) {
-			$user = get_userdata( absint( $arg ) );
+	/**
+	 * Validates user actions.
+	 *
+	 * @since  3.6.0
+	 * @param  mixed $arg First hook argument.
+	 * @return bool       True if validation passes.
+	 */
+	private function is_valid_user_action( $arg ) {
+		$user = get_userdata( absint( $arg ) );
 
-			// only deliver deleted customer event for users with customer role
-			if ( ! $user || ! in_array( 'customer', (array) $user->roles ) ) {
-				return false;
-			}
-
-		// check if the custom order type has chosen to exclude order webhooks from triggering along with its own webhooks.
-		} elseif ( 'order' == $this->get_resource() && ! in_array( get_post_type( absint( $arg ) ), wc_get_order_types( 'order-webhooks' ) ) ) {
+		// Only deliver deleted customer event for users with customer role.
+		if ( ! $user || ! in_array( 'customer', (array) $user->roles, true ) ) {
 			return false;
-
-		} elseif ( 0 === strpos( $current_action, 'woocommerce_process_shop' ) ) {
-			// the `woocommerce_process_shop_*` hook fires for both updates
-			// and creation so check the post creation date to determine the actual event
-			$resource = get_post( absint( $arg ) );
-
-			// a resource is considered created when the hook is executed within 10 seconds of the post creation date
-			$resource_created = ( ( time() - 10 ) <= strtotime( $resource->post_date_gmt ) );
-
-			if ( 'created' == $this->get_event() && ! $resource_created ) {
-				return false;
-			} elseif ( 'updated' == $this->get_event() && $resource_created ) {
-				return false;
-			}
 		}
 
 		return true;
 	}
 
+	/**
+	 * Validates WC processing actions.
+	 *
+	 * @since  3.6.0
+	 * @param  mixed $arg First hook argument.
+	 * @return bool       True if validation passes.
+	 */
+	private function is_valid_processing_action( $arg ) {
+		// The `woocommerce_process_shop_*` and `woocommerce_process_product_*` hooks
+		// fire for create and update of products and orders, so check the post
+		// creation date to determine the actual event.
+		$resource = get_post( absint( $arg ) );
+
+		// Drafts don't have post_date_gmt so calculate it here.
+		$gmt_date = get_gmt_from_date( $resource->post_date );
+
+		// A resource is considered created when the hook is executed within 10 seconds of the post creation date.
+		$resource_created = ( ( time() - 10 ) <= strtotime( $gmt_date ) );
+
+		if ( 'created' === $this->get_event() && ! $resource_created ) {
+			return false;
+		} elseif ( 'updated' === $this->get_event() && $resource_created ) {
+			return false;
+		}
+		return true;
+	}
 
 	/**
-	 * Deliver the webhook payload using wp_safe_remote_request()
+	 * Checks the resource for this webhook is valid e.g. valid post status.
 	 *
-	 * @since 2.2
-	 * @param mixed $arg first hook argument
+	 * @since  3.6.0
+	 * @param  mixed $arg First hook argument.
+	 * @return bool       True if validation passes.
+	 */
+	private function is_valid_resource( $arg ) {
+		$resource = $this->get_resource();
+
+		if ( in_array( $resource, array( 'order', 'product', 'coupon' ), true ) ) {
+			$status = get_post_status( absint( $arg ) );
+
+			// Ignore auto drafts for all resources.
+			if ( in_array( $status, array( 'auto-draft', 'new' ), true ) ) {
+				return false;
+			}
+
+			// Ignore standard drafts for orders.
+			if ( 'order' === $resource && 'draft' === $status ) {
+				return false;
+			}
+
+			// Check registered order types for order types args.
+			if ( 'order' === $resource && ! in_array( get_post_type( absint( $arg ) ), wc_get_order_types( 'order-webhooks' ), true ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Deliver the webhook payload using wp_safe_remote_request().
+	 *
+	 * @since 2.2.0
+	 * @param mixed $arg First hook argument.
 	 */
 	public function deliver( $arg ) {
+		$start_time = microtime( true );
+		$payload    = $this->build_payload( $arg );
 
-		$payload = $this->build_payload( $arg );
-
-		// setup request args
+		// Setup request args.
 		$http_args = array(
 			'method'      => 'POST',
 			'timeout'     => MINUTE_IN_SECONDS,
@@ -193,167 +298,238 @@ class WC_Webhook {
 			'httpversion' => '1.0',
 			'blocking'    => true,
 			'user-agent'  => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', WC_VERSION, $GLOBALS['wp_version'] ),
-			'body'        => trim( json_encode( $payload ) ),
-			'headers'     => array( 'Content-Type' => 'application/json' ),
+			'body'        => trim( wp_json_encode( $payload ) ),
+			'headers'     => array(
+				'Content-Type' => 'application/json',
+			),
 			'cookies'     => array(),
 		);
 
-		$http_args = apply_filters( 'woocommerce_webhook_http_args', $http_args, $arg, $this->id );
+		$http_args = apply_filters( 'woocommerce_webhook_http_args', $http_args, $arg, $this->get_id() );
 
-		// add custom headers
+		// Add custom headers.
+		$delivery_id                                      = $this->get_new_delivery_id();
+		$http_args['headers']['X-WC-Webhook-Source']      = home_url( '/' ); // Since 2.6.0.
 		$http_args['headers']['X-WC-Webhook-Topic']       = $this->get_topic();
 		$http_args['headers']['X-WC-Webhook-Resource']    = $this->get_resource();
 		$http_args['headers']['X-WC-Webhook-Event']       = $this->get_event();
 		$http_args['headers']['X-WC-Webhook-Signature']   = $this->generate_signature( $http_args['body'] );
-		$http_args['headers']['X-WC-Webhook-ID']          = $this->id;
-		$http_args['headers']['X-WC-Webhook-Delivery-ID'] = $delivery_id = $this->get_new_delivery_id();
+		$http_args['headers']['X-WC-Webhook-ID']          = $this->get_id();
+		$http_args['headers']['X-WC-Webhook-Delivery-ID'] = $delivery_id;
 
-		$start_time = microtime( true );
-
-		// webhook away!
+		// Webhook away!
 		$response = wp_safe_remote_request( $this->get_delivery_url(), $http_args );
 
 		$duration = round( microtime( true ) - $start_time, 5 );
 
 		$this->log_delivery( $delivery_id, $http_args, $response, $duration );
 
-		do_action( 'woocommerce_webhook_delivery', $http_args, $response, $duration, $arg, $this->id );
+		do_action( 'woocommerce_webhook_delivery', $http_args, $response, $duration, $arg, $this->get_id() );
 	}
 
+	/**
+	 * Get Legacy API payload.
+	 *
+	 * @since  3.0.0
+	 * @param  string $resource    Resource type.
+	 * @param  int    $resource_id Resource ID.
+	 * @param  string $event       Event type.
+	 * @return array
+	 */
+	private function get_legacy_api_payload( $resource, $resource_id, $event ) {
+		// Include & load API classes.
+		WC()->api->includes();
+		WC()->api->register_resources( new WC_API_Server( '/' ) );
+
+		switch ( $resource ) {
+			case 'coupon':
+				$payload = WC()->api->WC_API_Coupons->get_coupon( $resource_id );
+				break;
+
+			case 'customer':
+				$payload = WC()->api->WC_API_Customers->get_customer( $resource_id );
+				break;
+
+			case 'order':
+				$payload = WC()->api->WC_API_Orders->get_order( $resource_id, null, apply_filters( 'woocommerce_webhook_order_payload_filters', array() ) );
+				break;
+
+			case 'product':
+				// Bulk and quick edit action hooks return a product object instead of an ID.
+				if ( 'updated' === $event && is_a( $resource_id, 'WC_Product' ) ) {
+					$resource_id = $resource_id->get_id();
+				}
+				$payload = WC()->api->WC_API_Products->get_product( $resource_id );
+				break;
+
+			// Custom topics include the first hook argument.
+			case 'action':
+				$payload = array(
+					'action' => current( $this->get_hooks() ),
+					'arg'    => $resource_id,
+				);
+				break;
+
+			default:
+				$payload = array();
+				break;
+		}
+
+		return $payload;
+	}
 
 	/**
-	 * Build the payload data for the webhook
+	 * Get WP API integration payload.
 	 *
-	 * @since 2.2
-	 * @param mixed $resource_id first hook argument, typically the resource ID
-	 * @return mixed payload data
+	 * @since  3.0.0
+	 * @param  string $resource    Resource type.
+	 * @param  int    $resource_id Resource ID.
+	 * @param  string $event       Event type.
+	 * @return array
 	 */
-	private function build_payload( $resource_id ) {
+	private function get_wp_api_payload( $resource, $resource_id, $event ) {
+		$rest_api_versions = wc_get_webhook_rest_api_versions();
+		$version_suffix    = end( $rest_api_versions ) !== $this->get_api_version() ? strtoupper( str_replace( 'wp_api', '', $this->get_api_version() ) ) : '';
 
-		// build the payload with the same user context as the user who created
+		// Load REST API endpoints to generate payload.
+		if ( ! did_action( 'rest_api_init' ) ) {
+			WC()->api->rest_api_includes();
+		}
+
+		switch ( $resource ) {
+			case 'coupon':
+			case 'customer':
+			case 'order':
+			case 'product':
+				$class      = 'WC_REST_' . ucfirst( $resource ) . 's' . $version_suffix . '_Controller';
+				$request    = new WP_REST_Request( 'GET' );
+				$controller = new $class();
+
+				// Bulk and quick edit action hooks return a product object instead of an ID.
+				if ( 'product' === $resource && 'updated' === $event && is_a( $resource_id, 'WC_Product' ) ) {
+					$resource_id = $resource_id->get_id();
+				}
+
+				$request->set_param( 'id', $resource_id );
+				$result  = $controller->get_item( $request );
+				$payload = isset( $result->data ) ? $result->data : array();
+				break;
+
+			// Custom topics include the first hook argument.
+			case 'action':
+				$payload = array(
+					'action' => current( $this->get_hooks() ),
+					'arg'    => $resource_id,
+				);
+				break;
+
+			default:
+				$payload = array();
+				break;
+		}
+
+		return $payload;
+	}
+
+	/**
+	 * Build the payload data for the webhook.
+	 *
+	 * @since  2.2.0
+	 * @param  mixed $resource_id First hook argument, typically the resource ID.
+	 * @return mixed              Payload data.
+	 */
+	public function build_payload( $resource_id ) {
+		// Build the payload with the same user context as the user who created
 		// the webhook -- this avoids permission errors as background processing
-		// runs with no user context
+		// runs with no user context.
 		$current_user = get_current_user_id();
 		wp_set_current_user( $this->get_user_id() );
 
 		$resource = $this->get_resource();
 		$event    = $this->get_event();
 
-		// if a resource has been deleted, just include the ID
-		if ( 'deleted' == $event ) {
-
+		// If a resource has been deleted, just include the ID.
+		if ( 'deleted' === $event ) {
 			$payload = array(
 				'id' => $resource_id,
 			);
-
 		} else {
-
-			// include & load API classes
-			WC()->api->includes();
-			WC()->api->register_resources( new WC_API_Server( '/' ) );
-
-			switch( $resource ) {
-
-				case 'coupon':
-					$payload = WC()->api->WC_API_Coupons->get_coupon( $resource_id );
-					break;
-
-				case 'customer':
-					$payload = WC()->api->WC_API_Customers->get_customer( $resource_id );
-					break;
-
-				case 'order':
-					$payload = WC()->api->WC_API_Orders->get_order( $resource_id );
-					break;
-
-				case 'product':
-					$payload = WC()->api->WC_API_Products->get_product( $resource_id );
-					break;
-
-				// custom topics include the first hook argument
-				case 'action':
-					$payload = array(
-						'action' => current( $this->get_hooks() ),
-						'arg'    => $resource_id,
-					);
-					break;
-
-				default:
-					$payload = array();
+			if ( in_array( $this->get_api_version(), wc_get_webhook_rest_api_versions(), true ) ) {
+				$payload = $this->get_wp_api_payload( $resource, $resource_id, $event );
+			} else {
+				$payload = $this->get_legacy_api_payload( $resource, $resource_id, $event );
 			}
 		}
 
-		// restore the current user
+		// Restore the current user.
 		wp_set_current_user( $current_user );
 
-		return apply_filters( 'woocommerce_webhook_payload', $payload, $resource, $resource_id, $this->id );
+		return apply_filters( 'woocommerce_webhook_payload', $payload, $resource, $resource_id, $this->get_id() );
 	}
 
-
 	/**
-	 * Generate a base64-encoded HMAC-SHA256 signature of the payload body so the
-	 * recipient can verify the authenticity of the webhook. Note that the signature
-	 * is calculated after the body has already been encoded (JSON by default)
+	 * Generate a base64-encoded HMAC-SHA256 signature of the payload body so the.
+	 * recipient can verify the authenticity of the webhook. Note that the signature.
+	 * is calculated after the body has already been encoded (JSON by default).
 	 *
-	 * @since 2.2
-	 * @param string $payload payload data to hash
-	 * @return string hash
+	 * @since  2.2.0
+	 * @param  string $payload Payload data to hash.
+	 * @return string
 	 */
 	public function generate_signature( $payload ) {
+		$hash_algo = apply_filters( 'woocommerce_webhook_hash_algorithm', 'sha256', $payload, $this->get_id() );
 
-		$hash_algo = apply_filters( 'woocommerce_webhook_hash_algorithm', 'sha256', $payload, $this->id );
-
-		return base64_encode( hash_hmac( $hash_algo, $payload, $this->get_secret(), true ) );
+		return base64_encode( hash_hmac( $hash_algo, $payload, wp_specialchars_decode( $this->get_secret(), ENT_QUOTES ), true ) );
 	}
 
-
 	/**
-	 * Create a new comment for log the delivery request/response and
-	 * return the ID for inclusion in the webhook request
+	 * Generate a new unique hash as a delivery id based on current time and wehbook id.
+	 * Return the hash for inclusion in the webhook request.
 	 *
-	 * @since 2.2
-	 * @return int delivery (comment) ID
+	 * @since  2.2.0
+	 * @return string
 	 */
 	public function get_new_delivery_id() {
-
-		$comment_data = apply_filters( 'woocommerce_new_webhook_delivery_data', array(
-			'comment_author'       => __( 'WooCommerce', 'woocommerce' ),
-			'comment_author_email' => sanitize_email( sprintf( '%s@%s', strtolower( __( 'WooCommerce', 'woocommerce' ) ), isset( $_SERVER['HTTP_HOST'] ) ? str_replace( 'www.', '', $_SERVER['HTTP_HOST'] ) : 'noreply.com' ) ),
-			'comment_post_ID'      => $this->id,
-			'comment_agent'        => 'WooCommerce Hookshot',
-			'comment_type'         => 'webhook_delivery',
-			'comment_parent'       => 0,
-			'comment_approved'     => 1,
-		), $this->id );
-
-		$comment_id = wp_insert_comment( $comment_data );
-
-		return $comment_id;
+		// Since we no longer use comments to store delivery logs, we generate a unique hash instead based on current time and webhook ID.
+		return wp_hash( $this->get_id() . strtotime( 'now' ) );
 	}
 
-
 	/**
-	 * Log the delivery request/response
+	 * Log the delivery request/response.
 	 *
-	 * @since 2.2
-	 * @param int $delivery_id previously created comment ID
-	 * @param array $request request data
-	 * @param array $response response data
-	 * @param float $duration request duration
+	 * @since 2.2.0
+	 * @param string         $delivery_id Previously created hash.
+	 * @param array          $request     Request data.
+	 * @param array|WP_Error $response    Response data.
+	 * @param float          $duration    Request duration.
 	 */
 	public function log_delivery( $delivery_id, $request, $response, $duration ) {
+		$logger  = wc_get_logger();
+		$message = array(
+			'Webhook Delivery' => array(
+				'Delivery ID' => $delivery_id,
+				'Date'        => date_i18n( __( 'M j, Y @ G:i', 'woocommerce' ), strtotime( 'now' ), true ),
+				'URL'         => $this->get_delivery_url(),
+				'Duration'    => $duration,
+				'Request'     => array(
+					'Method'  => $request['method'],
+					'Headers' => array_merge(
+						array(
+							'User-Agent' => $request['user-agent'],
+						),
+						$request['headers']
+					),
+				),
+				'Body'        => wp_slash( $request['body'] ),
+			),
+		);
 
-		// save request data
-		add_comment_meta( $delivery_id, '_request_method', $request['method'] );
-		add_comment_meta( $delivery_id, '_request_headers', array_merge( array( 'User-Agent' => $request['user-agent'] ), $request['headers'] ) );
-		add_comment_meta( $delivery_id, '_request_body', $request['body'] );
-
-		// parse response
+		// Parse response.
 		if ( is_wp_error( $response ) ) {
 			$response_code    = $response->get_error_code();
 			$response_message = $response->get_error_message();
-			$response_headers = $response_body = array();
-
+			$response_headers = array();
+			$response_body    = '';
 		} else {
 			$response_code    = wp_remote_retrieve_response_code( $response );
 			$response_message = wp_remote_retrieve_response_message( $response );
@@ -361,97 +537,65 @@ class WC_Webhook {
 			$response_body    = wp_remote_retrieve_body( $response );
 		}
 
-		// save response data
-		add_comment_meta( $delivery_id, '_response_code', $response_code );
-		add_comment_meta( $delivery_id, '_response_message', $response_message );
-		add_comment_meta( $delivery_id, '_response_headers', $response_headers );
-		add_comment_meta( $delivery_id, '_response_body', $response_body );
-
-		// save duration
-		add_comment_meta( $delivery_id, '_duration', $duration );
-
-		// set a summary for quick display
-		$args = array(
-			'comment_ID' => $delivery_id,
-			'comment_content' => sprintf( 'HTTP %s %s: %s', $response_code, $response_message, $response_body ),
+		$message['Webhook Delivery']['Response'] = array(
+			'Code'    => $response_code,
+			'Message' => $response_message,
+			'Headers' => $response_headers,
+			'Body'    => $response_body,
 		);
 
-		wp_update_comment( $args );
+		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+			$message['Webhook Delivery']['Body']             = 'Webhook body is not logged unless WP_DEBUG mode is turned on. This is to avoid the storing of personal data in the logs.';
+			$message['Webhook Delivery']['Response']['Body'] = 'Webhook body is not logged unless WP_DEBUG mode is turned on. This is to avoid the storing of personal data in the logs.';
+		}
 
-		// track failures
-		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 300 ) {
-			delete_post_meta( $this->id, '_failure_count' );
+		$logger->info(
+			wc_print_r( $message, true ),
+			array(
+				'source' => 'webhooks-delivery',
+			)
+		);
+
+		// Track failures.
+		// Check for a success, which is a 2xx, 301 or 302 Response Code.
+		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 303 ) {
+			$this->set_failure_count( 0 );
+			$this->save();
 		} else {
 			$this->failed_delivery();
 		}
-
-		// keep the 25 most recent delivery logs
-		$log = wp_count_comments( $this->id );
-		if ( $log->total_comments > apply_filters( 'woocommerce_max_webhook_delivery_logs', 25 ) ) {
-			global $wpdb;
-
-			$comment_id = $wpdb->get_var( $wpdb->prepare( "SELECT comment_ID FROM {$wpdb->comments} WHERE comment_post_ID = %d ORDER BY comment_date_gmt ASC LIMIT 1", $this->id ) );
-
-			if ( $comment_id ) {
-				wp_delete_comment( $comment_id, true );
-			}
-		}
 	}
 
 	/**
-	 * Track consecutive delivery failures and automatically disable the webhook
-	 * if more than 5 consecutive failures occur. A failure is defined as a
-	 * non-2xx response
+	 * Track consecutive delivery failures and automatically disable the webhook.
+	 * if more than 5 consecutive failures occur. A failure is defined as a.
+	 * non-2xx response.
 	 *
-	 * @since 2.2
+	 * @since 2.2.0
 	 */
 	private function failed_delivery() {
-
 		$failures = $this->get_failure_count();
 
 		if ( $failures > apply_filters( 'woocommerce_max_webhook_delivery_failures', 5 ) ) {
+			$this->set_status( 'disabled' );
 
-			$this->update_status( 'disabled' );
-
+			do_action( 'woocommerce_webhook_disabled_due_delivery_failures', $this->get_id() );
 		} else {
-
-			update_post_meta( $this->id, '_failure_count', ++$failures );
+			$this->set_failure_count( ++$failures );
 		}
-	}
 
+		$this->save();
+	}
 
 	/**
-	 * Get the delivery logs for this webhook
+	 * Get the delivery logs for this webhook.
 	 *
-	 * @since 2.2
-	 * @return array
+	 * @since  3.3.0
+	 * @return string
 	 */
 	public function get_delivery_logs() {
-
-		$args = array(
-			'post_id' => $this->id,
-			'status'  => 'approve',
-			'type'    => 'webhook_delivery',
-		);
-
-		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_webhook_comments' ), 10, 1 );
-
-		$logs = get_comments( $args );
-
-		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_webhook_comments' ), 10, 1 );
-
-		$delivery_logs = array();
-
-		foreach ( $logs as $log ) {
-
-			$log = $this->get_delivery_log( $log->comment_ID );
-
-			$delivery_logs[] = ( ! empty( $log )  ? $log : array() );
-		}
-
-		return $delivery_logs;
+		return esc_url( add_query_arg( 'log_file', wc_get_log_file_name( 'webhooks-delivery' ), admin_url( 'admin.php?page=wc-status&tab=logs' ) ) );
 	}
-
 
 	/**
 	 * Get the delivery log specified by the ID. The delivery log includes:
@@ -463,120 +607,395 @@ class WC_Webhook {
 	 * + response code/message/headers/body
 	 *
 	 * @since 2.2
-	 * @param int $delivery_id
-	 * @return bool|array false if invalid delivery ID, array of log data otherwise
+	 * @deprecated 3.3.0
+	 * @param int $delivery_id Delivery ID.
+	 * @return void
 	 */
 	public function get_delivery_log( $delivery_id ) {
+		wc_deprecated_function( 'WC_Webhook::get_delivery_log', '3.3' );
+	}
 
-		$log = get_comment( $delivery_id );
-
-		// valid comment and ensure delivery log belongs to this webhook
-		if ( is_null( $log ) || $log->comment_post_ID != $this->id ) {
-			return false;
-		}
-
-		$delivery_log = array(
-			'id'               => intval( $delivery_id ),
-			'duration'         => get_comment_meta( $delivery_id, '_duration', true ),
-			'summary'          => $log->comment_content,
-			'request_method'   => get_comment_meta( $delivery_id, '_request_method', true ),
-			'request_url'      => $this->get_delivery_url(),
-			'request_headers'  => get_comment_meta( $delivery_id, '_request_headers', true ),
-			'request_body'     => get_comment_meta( $delivery_id, '_request_body', true ),
-			'response_code'    => get_comment_meta( $delivery_id, '_response_code', true ),
-			'response_message' => get_comment_meta( $delivery_id, '_response_message', true ),
-			'response_headers' => get_comment_meta( $delivery_id, '_response_headers', true ),
-			'response_body'    => get_comment_meta( $delivery_id, '_response_body', true ),
-			'comment'          => $log,
+	/**
+	 * Send a test ping to the delivery URL, sent when the webhook is first created.
+	 *
+	 * @since  2.2.0
+	 * @return bool|WP_Error
+	 */
+	public function deliver_ping() {
+		$args = array(
+			'user-agent' => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', WC_VERSION, $GLOBALS['wp_version'] ),
+			'body'       => 'webhook_id=' . $this->get_id(),
 		);
 
-		return apply_filters( 'woocommerce_webhook_delivery_log', $delivery_log, $delivery_id, $this->id );
+		$test          = wp_safe_remote_post( $this->get_delivery_url(), $args );
+		$response_code = wp_remote_retrieve_response_code( $test );
+
+		if ( is_wp_error( $test ) ) {
+			/* translators: error message */
+			return new WP_Error( 'error', sprintf( __( 'Error: Delivery URL cannot be reached: %s', 'woocommerce' ), $test->get_error_message() ) );
+		}
+
+		if ( 200 !== $response_code ) {
+			/* translators: error message */
+			return new WP_Error( 'error', sprintf( __( 'Error: Delivery URL returned response code: %s', 'woocommerce' ), absint( $response_code ) ) );
+		}
+
+		$this->set_pending_delivery( false );
+		$this->save();
+
+		return true;
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Getters
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Get the friendly name for the webhook.
+	 *
+	 * @since  2.2.0
+	 * @param  string $context What the value is for.
+	 *                         Valid values are 'view' and 'edit'.
+	 * @return string
+	 */
+	public function get_name( $context = 'view' ) {
+		return apply_filters( 'woocommerce_webhook_name', $this->get_prop( 'name', $context ), $this->get_id() );
 	}
 
 	/**
-	 * Set the webhook topic and associated hooks. The topic resource & event
-	 * are also saved separately.
+	 * Get the webhook status.
 	 *
-	 * @since 2.2
-	 * @param string $topic
+	 * - 'active' - delivers payload.
+	 * - 'paused' - does not deliver payload, paused by admin.
+	 * - 'disabled' - does not delivery payload, paused automatically due to consecutive failures.
+	 *
+	 * @since  2.2.0
+	 * @param  string $context What the value is for.
+	 *                         Valid values are 'view' and 'edit'.
+	 * @return string status
+	 */
+	public function get_status( $context = 'view' ) {
+		return apply_filters( 'woocommerce_webhook_status', $this->get_prop( 'status', $context ), $this->get_id() );
+	}
+
+	/**
+	 * Get webhopk created date.
+	 *
+	 * @since  3.2.0
+	 * @param  string $context  What the value is for.
+	 *                          Valid values are 'view' and 'edit'.
+	 * @return WC_DateTime|null Object if the date is set or null if there is no date.
+	 */
+	public function get_date_created( $context = 'view' ) {
+		return $this->get_prop( 'date_created', $context );
+	}
+
+	/**
+	 * Get webhopk modified date.
+	 *
+	 * @since  3.2.0
+	 * @param  string $context  What the value is for.
+	 *                          Valid values are 'view' and 'edit'.
+	 * @return WC_DateTime|null Object if the date is set or null if there is no date.
+	 */
+	public function get_date_modified( $context = 'view' ) {
+		return $this->get_prop( 'date_modified', $context );
+	}
+
+	/**
+	 * Get the secret used for generating the HMAC-SHA256 signature.
+	 *
+	 * @since  2.2.0
+	 * @param  string $context What the value is for.
+	 *                         Valid values are 'view' and 'edit'.
+	 * @return string
+	 */
+	public function get_secret( $context = 'view' ) {
+		return apply_filters( 'woocommerce_webhook_secret', $this->get_prop( 'secret', $context ), $this->get_id() );
+	}
+
+	/**
+	 * Get the webhook topic, e.g. `order.created`.
+	 *
+	 * @since  2.2.0
+	 * @param  string $context What the value is for.
+	 *                         Valid values are 'view' and 'edit'.
+	 * @return string
+	 */
+	public function get_topic( $context = 'view' ) {
+		return apply_filters( 'woocommerce_webhook_topic', $this->get_prop( 'topic', $context ), $this->get_id() );
+	}
+
+	/**
+	 * Get the delivery URL.
+	 *
+	 * @since  2.2.0
+	 * @param  string $context What the value is for.
+	 *                         Valid values are 'view' and 'edit'.
+	 * @return string
+	 */
+	public function get_delivery_url( $context = 'view' ) {
+		return apply_filters( 'woocommerce_webhook_delivery_url', $this->get_prop( 'delivery_url', $context ), $this->get_id() );
+	}
+
+	/**
+	 * Get the user ID for this webhook.
+	 *
+	 * @since  2.2.0
+	 * @param  string $context What the value is for.
+	 *                         Valid values are 'view' and 'edit'.
+	 * @return int
+	 */
+	public function get_user_id( $context = 'view' ) {
+		return $this->get_prop( 'user_id', $context );
+	}
+
+	/**
+	 * API version.
+	 *
+	 * @since  3.0.0
+	 * @param  string $context What the value is for.
+	 *                         Valid values are 'view' and 'edit'.
+	 * @return string
+	 */
+	public function get_api_version( $context = 'view' ) {
+		$version = $this->get_prop( 'api_version', $context );
+
+		return 0 < $version ? 'wp_api_v' . $version : 'legacy_v3';
+	}
+
+	/**
+	 * Get the failure count.
+	 *
+	 * @since  2.2.0
+	 * @param  string $context What the value is for.
+	 *                         Valid values are 'view' and 'edit'.
+	 * @return int
+	 */
+	public function get_failure_count( $context = 'view' ) {
+		return $this->get_prop( 'failure_count', $context );
+	}
+
+	/**
+	 * Get pending delivery.
+	 *
+	 * @since  3.2.0
+	 * @param  string $context What the value is for.
+	 *                         Valid values are 'view' and 'edit'.
+	 * @return bool
+	 */
+	public function get_pending_delivery( $context = 'view' ) {
+		return $this->get_prop( 'pending_delivery', $context );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Setters
+	|--------------------------------------------------------------------------
+	 */
+
+	/**
+	 * Set webhook name.
+	 *
+	 * @since 3.2.0
+	 * @param string $name Webhook name.
+	 */
+	public function set_name( $name ) {
+		$this->set_prop( 'name', $name );
+	}
+
+	/**
+	 * Set webhook created date.
+	 *
+	 * @since 3.2.0
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime.
+	 *                                  If the DateTime string has no timezone or offset,
+	 *                                  WordPress site timezone will be assumed.
+	 *                                  Null if their is no date.
+	 */
+	public function set_date_created( $date = null ) {
+		$this->set_date_prop( 'date_created', $date );
+	}
+
+	/**
+	 * Set webhook modified date.
+	 *
+	 * @since 3.2.0
+	 * @param string|integer|null $date UTC timestamp, or ISO 8601 DateTime.
+	 *                                  If the DateTime string has no timezone or offset,
+	 *                                  WordPress site timezone will be assumed.
+	 *                                  Null if their is no date.
+	 */
+	public function set_date_modified( $date = null ) {
+		$this->set_date_prop( 'date_modified', $date );
+	}
+
+	/**
+	 * Set status.
+	 *
+	 * @since 3.2.0
+	 * @param string $status Status.
+	 */
+	public function set_status( $status ) {
+		if ( ! array_key_exists( $status, wc_get_webhook_statuses() ) ) {
+			$status = 'disabled';
+		}
+
+		$this->set_prop( 'status', $status );
+	}
+
+	/**
+	 * Set the secret used for generating the HMAC-SHA256 signature.
+	 *
+	 * @since 2.2.0
+	 * @param string $secret Secret.
+	 */
+	public function set_secret( $secret ) {
+		$this->set_prop( 'secret', $secret );
+	}
+
+	/**
+	 * Set the webhook topic and associated hooks.
+	 * The topic resource & event are also saved separately.
+	 *
+	 * @since 2.2.0
+	 * @param string $topic Webhook topic.
 	 */
 	public function set_topic( $topic ) {
+		$topic = wc_clean( $topic );
 
-		$topic = strtolower( $topic );
-
-		list( $resource, $event ) = explode( '.', $topic );
-
-		update_post_meta( $this->id, '_topic', $topic );
-		update_post_meta( $this->id, '_resource', $resource );
-		update_post_meta( $this->id, '_event', $event );
-
-		// custom topics are mapped to a single hook
-		if ( 'action' === $resource ) {
-
-			update_post_meta( $this->id, '_hooks', array( $event ) );
-
-		} else {
-
-			// API topics have multiple hooks
-			update_post_meta( $this->id, '_hooks', $this->get_topic_hooks( $topic ) );
+		if ( ! wc_is_webhook_valid_topic( $topic ) ) {
+			$topic = '';
 		}
+
+		$this->set_prop( 'topic', $topic );
 	}
 
 	/**
-	 * Get the associated hook names for a topic
+	 * Set the delivery URL.
 	 *
-	 * @since 2.2
-	 * @param string $topic
-	 * @return array hook names
+	 * @since 2.2.0
+	 * @param string $url Delivery URL.
+	 */
+	public function set_delivery_url( $url ) {
+		$this->set_prop( 'delivery_url', esc_url_raw( $url, array( 'http', 'https' ) ) );
+	}
+
+	/**
+	 * Set user ID.
+	 *
+	 * @since 3.2.0
+	 * @param int $user_id User ID.
+	 */
+	public function set_user_id( $user_id ) {
+		$this->set_prop( 'user_id', (int) $user_id );
+	}
+
+	/**
+	 * Set API version.
+	 *
+	 * @since 3.0.0
+	 * @param int|string $version REST API version.
+	 */
+	public function set_api_version( $version ) {
+		if ( ! is_numeric( $version ) ) {
+			$version = $this->data_store->get_api_version_number( $version );
+		}
+
+		$this->set_prop( 'api_version', (int) $version );
+	}
+
+	/**
+	 * Set pending delivery.
+	 *
+	 * @since 3.2.0
+	 * @param bool $pending_delivery Set true if is pending for delivery.
+	 */
+	public function set_pending_delivery( $pending_delivery ) {
+		$this->set_prop( 'pending_delivery', (bool) $pending_delivery );
+	}
+
+	/**
+	 * Set failure count.
+	 *
+	 * @since 3.2.0
+	 * @param bool $failure_count Total of failures.
+	 */
+	public function set_failure_count( $failure_count ) {
+		$this->set_prop( 'failure_count', intval( $failure_count ) );
+	}
+
+	/*
+	|--------------------------------------------------------------------------
+	| Non-CRUD Getters
+	|--------------------------------------------------------------------------
+	*/
+
+	/**
+	 * Get the associated hook names for a topic.
+	 *
+	 * @since  2.2.0
+	 * @param  string $topic Topic name.
+	 * @return array
 	 */
 	private function get_topic_hooks( $topic ) {
-
 		$topic_hooks = array(
-			'coupon.created' => array(
+			'coupon.created'   => array(
 				'woocommerce_process_shop_coupon_meta',
-				'woocommerce_api_create_coupon',
+				'woocommerce_new_coupon',
 			),
-			'coupon.updated' => array(
+			'coupon.updated'   => array(
 				'woocommerce_process_shop_coupon_meta',
-				'woocommerce_api_edit_coupon',
+				'woocommerce_update_coupon',
 			),
-			'coupon.deleted' => array(
+			'coupon.deleted'   => array(
 				'wp_trash_post',
 			),
+			'coupon.restored'  => array(
+				'untrashed_post',
+			),
 			'customer.created' => array(
+				'user_register',
 				'woocommerce_created_customer',
+				'woocommerce_new_customer',
 			),
 			'customer.updated' => array(
 				'profile_update',
-				'woocommerce_api_edit_customer',
+				'woocommerce_update_customer',
 			),
 			'customer.deleted' => array(
 				'delete_user',
 			),
 			'order.created'    => array(
-				'woocommerce_checkout_order_processed',
-				'woocommerce_process_shop_order_meta',
-				'woocommerce_api_create_order',
+				'woocommerce_new_order',
 			),
-			'order.updated' => array(
-				'woocommerce_process_shop_order_meta',
-				'woocommerce_api_edit_order',
-				'woocommerce_order_edit_status',
-				'woocommerce_order_status_changed'
+			'order.updated'    => array(
+				'woocommerce_update_order',
+				'woocommerce_order_refunded',
 			),
-			'order.deleted' => array(
+			'order.deleted'    => array(
 				'wp_trash_post',
 			),
-			'product.created' => array(
-				'woocommerce_process_product_meta',
-				'woocommerce_api_create_product',
+			'order.restored'   => array(
+				'untrashed_post',
 			),
-			'product.updated' => array(
+			'product.created'  => array(
 				'woocommerce_process_product_meta',
-				'woocommerce_api_edit_product',
+				'woocommerce_new_product',
+				'woocommerce_new_product_variation',
 			),
-			'product.deleted' => array(
+			'product.updated'  => array(
+				'woocommerce_process_product_meta',
+				'woocommerce_update_product',
+				'woocommerce_update_product_variation',
+			),
+			'product.deleted'  => array(
 				'wp_trash_post',
+			),
+			'product.restored' => array(
+				'untrashed_post',
 			),
 		);
 
@@ -586,56 +1005,47 @@ class WC_Webhook {
 	}
 
 	/**
-	 * Send a test ping to the delivery URL, sent when the webhook is first created
+	 * Get the hook names for the webhook.
 	 *
-	 * @since 2.2
+	 * @since  2.2.0
+	 * @return array
 	 */
-	public function deliver_ping() {
-
-		$args = array(
-			'user-agent' => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', WC_VERSION, $GLOBALS['wp_version'] ),
-			'body'       => "webhook_id={$this->id}",
-		);
-
-		wp_safe_remote_post( $this->get_delivery_url(), $args );
-	}
-
-	/**
-	 * Get the webhook status:
-	 *
-	 * + `active` - delivers payload
-	 * + `paused` - does not deliver payload, paused by admin
-	 * + `disabled` - does not delivery payload, paused automatically due to
-	 * consecutive failures
-	 *
-	 * @since 2.2
-	 * @return string status
-	 */
-	public function get_status() {
-
-		switch ( $this->get_post_data()->post_status ) {
-
-			case 'publish':
-				$status = 'active';
-				break;
-
-			case 'draft':
-				$status = 'paused';
-				break;
-
-			case 'pending':
-				$status = 'disabled';
-				break;
-
-			default:
-				$status = 'paused';
+	public function get_hooks() {
+		if ( 'action' === $this->get_resource() ) {
+			$hooks = array( $this->get_event() );
+		} else {
+			$hooks = $this->get_topic_hooks( $this->get_topic() );
 		}
 
-		return apply_filters( 'woocommerce_webhook_status', $status, $this->id );
+		return apply_filters( 'woocommerce_webhook_hooks', $hooks, $this->get_id() );
 	}
 
 	/**
-	 * Get the webhook i18n status
+	 * Get the resource for the webhook, e.g. `order`.
+	 *
+	 * @since  2.2.0
+	 * @return string
+	 */
+	public function get_resource() {
+		$topic = explode( '.', $this->get_topic() );
+
+		return apply_filters( 'woocommerce_webhook_resource', $topic[0], $this->get_id() );
+	}
+
+	/**
+	 * Get the event for the webhook, e.g. `created`.
+	 *
+	 * @since  2.2.0
+	 * @return string
+	 */
+	public function get_event() {
+		$topic = explode( '.', $this->get_topic() );
+
+		return apply_filters( 'woocommerce_webhook_event', isset( $topic[1] ) ? $topic[1] : '', $this->get_id() );
+	}
+
+	/**
+	 * Get the webhook i18n status.
 	 *
 	 * @return string
 	 */
@@ -645,159 +1055,4 @@ class WC_Webhook {
 
 		return isset( $statuses[ $status ] ) ? $statuses[ $status ] : $status;
 	}
-
-	/**
-	 * Update the webhook status, see get_status() for valid statuses
-	 *
-	 * @since 2.2
-	 * @param $status
-	 */
-	public function update_status( $status ) {
-		global $wpdb;
-
-		switch ( $status ) {
-
-			case 'active' :
-				$post_status = 'publish';
-				break;
-
-			case 'paused' :
-				$post_status = 'draft';
-				break;
-
-			case 'disabled' :
-				$post_status = 'pending';
-				break;
-
-			default :
-				$post_status = 'draft';
-				break;
-		}
-
-		$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status ), array( 'ID' => $this->id ) );
-	}
-
-	/**
-	 * Set the delivery URL
-	 *
-	 * @since 2.2
-	 * @param string $url
-	 */
-	public function set_delivery_url( $url ) {
-
-		update_post_meta( $this->id, '_delivery_url', esc_url_raw( $url, array( 'http', 'https' ) ) );
-	}
-
-	/**
-	 * Get the delivery URL
-	 *
-	 * @since 2.2
-	 * @return string
-	 */
-	public function get_delivery_url() {
-
-		return apply_filters( 'woocommerce_webhook_delivery_url', $this->delivery_url, $this->id );
-	}
-
-	/**
-	 * Set the secret used for generating the HMAC-SHA256 signature
-	 *
-	 * @since 2.2
-	 * @param string $secret
-	 */
-	public function set_secret( $secret ) {
-
-		update_post_meta( $this->id, '_secret', $secret );
-	}
-
-	/**
-	 * Get the secret used for generating the HMAC-SHA256 signature
-	 *
-	 * @since 2.2
-	 * @return string
-	 */
-	public function get_secret() {
-		return apply_filters( 'woocommerce_webhook_secret', $this->secret, $this->id );
-	}
-
-	/**
-	 * Get the friendly name for the webhook
-	 *
-	 * @since 2.2
-	 * @return string
-	 */
-	public function get_name() {
-		return apply_filters( 'woocommerce_webhook_name', $this->get_post_data()->post_title, $this->id );
-	}
-
-	/**
-	 * Get the webhook topic, e.g. `order.created`
-	 *
-	 * @since 2.2
-	 * @return string
-	 */
-	public function get_topic() {
-		return apply_filters( 'woocommerce_webhook_topic', $this->topic, $this->id );
-	}
-
-	/**
-	 * Get the hook names for the webhook
-	 *
-	 * @since 2.2
-	 * @return array hook names
-	 */
-	public function get_hooks() {
-		return apply_filters( 'woocommerce_webhook_hooks', $this->hooks, $this->id );
-	}
-
-	/**
-	 * Get the resource for the webhook, e.g. `order`
-	 *
-	 * @since 2.2
-	 * @return string
-	 */
-	public function get_resource() {
-		return apply_filters( 'woocommerce_webhook_resource', $this->resource, $this->id );
-	}
-
-	/**
-	 * Get the event for the webhook, e.g. `created`
-	 *
-	 * @since 2.2
-	 * @return string
-	 */
-	public function get_event() {
-		return apply_filters( 'woocommerce_webhook_event', $this->event, $this->id );
-	}
-
-	/**
-	 * Get the failure count
-	 *
-	 * @since 2.2
-	 * @return int
-	 */
-	public function get_failure_count() {
-		return intval( $this->failure_count );
-	}
-
-	/**
-	 * Get the user ID for this webhook
-	 *
-	 * @since 2.2
-	 * @return int|string user ID
-	 */
-	public function get_user_id() {
-		return $this->get_post_data()->post_author;
-	}
-
-	/**
-	 * Get the post data for the webhook
-	 *
-	 * @since 2.2
-	 * @return null|WP_Post
-	 */
-	public function get_post_data() {
-		return $this->post_data;
-	}
-
 }

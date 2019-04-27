@@ -2,15 +2,15 @@
 /**
  * WC API Unit Test Case
  *
- * Provides REST API specific setup/tear down/assert methods, along with some helper
- * functions
+ * Provides REST API specific setup/tear down/assert methods, along with some helper.
+ * functions.
  *
  * @since 2.2
  */
 class WC_API_Unit_Test_Case extends WC_Unit_Test_Case {
 
 	/**
-	 * Setup the test case case
+	 * Setup the test case case.
 	 *
 	 * @since 2.2
 	 * @see WC_Unit_Test_Case::setUp()
@@ -30,13 +30,14 @@ class WC_API_Unit_Test_Case extends WC_Unit_Test_Case {
 		$_SERVER['REQUEST_METHOD'] = null;
 
 		// mock the API server to prevent headers from being sent
-		$this->mock_server = $this->getMock( 'WC_API_Server', array ('header' ), array( '/' ) );
+		// $this->mock_server = $this->getMock( 'WC_API_Server', array( 'header' ), array( '/' ) );
+		$this->mock_server = $this->getMockBuilder( 'WC_API_Server' )->setMethods( array( 'header' ) )->disableOriginalConstructor()->getMock();
 
 		WC()->api->register_resources( $this->mock_server );
 	}
 
 	/**
-	 * Assert the given response is an API error with a specific code and status
+	 * Assert the given response is an API error with a specific code and status.
 	 *
 	 * @since 2.2
 	 * @param string $code error code, e.g. `woocommerce_api_user_cannot_read_orders_count`
@@ -60,8 +61,8 @@ class WC_API_Unit_Test_Case extends WC_Unit_Test_Case {
 
 
 	/**
-	 * Disable the given capability for the current user, used for testing
-	 * permission checking
+	 * Disable the given capability for the current user, used for testing.
+	 * permission checking.
 	 *
 	 * @since 2.2
 	 * @param string $capability, e.g. `read_private_shop_orders`
@@ -75,5 +76,4 @@ class WC_API_Unit_Test_Case extends WC_Unit_Test_Case {
 		$user->get_role_caps();
 		$user->update_user_level_from_caps();
 	}
-
 }

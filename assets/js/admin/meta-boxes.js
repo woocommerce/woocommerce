@@ -16,11 +16,11 @@ jQuery( function ( $ ) {
 	runTipTip();
 
 	// Allow Tabbing
-	$( '#titlediv #title' ).keyup( function( event ) {
+	$( '#titlediv' ).find( '#title' ).keyup( function( event ) {
 		var code = event.keyCode || event.which;
 
 		// Tab key
-		if ( code === '9' && $( '#woocommerce-coupon-description' ).size() > 0 ) {
+		if ( code === '9' && $( '#woocommerce-coupon-description' ).length > 0 ) {
 			event.stopPropagation();
 			$( '#woocommerce-coupon-description' ).focus();
 			return false;
@@ -34,13 +34,13 @@ jQuery( function ( $ ) {
 	// Tabbed Panels
 	$( document.body ).on( 'wc-init-tabbed-panels', function() {
 		$( 'ul.wc-tabs' ).show();
-		$( 'ul.wc-tabs a' ).click( function() {
+		$( 'ul.wc-tabs a' ).click( function( e ) {
+			e.preventDefault();
 			var panel_wrap = $( this ).closest( 'div.panel-wrap' );
 			$( 'ul.wc-tabs li', panel_wrap ).removeClass( 'active' );
 			$( this ).parent().addClass( 'active' );
 			$( 'div.panel', panel_wrap ).hide();
 			$( $( this ).attr( 'href' ) ).show();
-			return false;
 		});
 		$( 'div.panel-wrap' ).each( function() {
 			$( this ).find( 'ul.wc-tabs li' ).eq( 0 ).find( 'a' ).click();

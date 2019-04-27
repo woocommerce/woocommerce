@@ -1,30 +1,36 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
- * Simple Product Class
+ * Simple Product Class.
  *
  * The default product type kinda product.
  *
- * @class 		WC_Product_Simple
- * @version		2.0.0
- * @package		WooCommerce/Classes/Products
- * @category	Class
- * @author 		WooThemes
+ * @package WooCommerce/Classes/Products
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Simple product class.
  */
 class WC_Product_Simple extends WC_Product {
 
 	/**
 	 * Initialize simple product.
 	 *
-	 * @param mixed $product
+	 * @param WC_Product|int $product Product instance or ID.
 	 */
-	public function __construct( $product ) {
-		$this->product_type = 'simple';
+	public function __construct( $product = 0 ) {
+		$this->supports[] = 'ajax_add_to_cart';
 		parent::__construct( $product );
+	}
+
+	/**
+	 * Get internal type.
+	 *
+	 * @return string
+	 */
+	public function get_type() {
+		return 'simple';
 	}
 
 	/**
@@ -39,56 +45,26 @@ class WC_Product_Simple extends WC_Product {
 	}
 
 	/**
-	 * Get the add to cart button text
+	 * Get the add to cart button text.
 	 *
 	 * @return string
 	 */
 	public function add_to_cart_text() {
-		$text = $this->is_purchasable() && $this->is_in_stock() ? __( 'Add to cart', 'woocommerce' ) : __( 'Read More', 'woocommerce' );
+		$text = $this->is_purchasable() && $this->is_in_stock() ? __( 'Add to cart', 'woocommerce' ) : __( 'Read more', 'woocommerce' );
 
 		return apply_filters( 'woocommerce_product_add_to_cart_text', $text, $this );
 	}
 
 	/**
-	 * Get the title of the post.
+	 * Get the add to cart button text description - used in aria tags.
 	 *
+	 * @since 3.3.0
 	 * @return string
 	 */
-	public function get_title() {
+	public function add_to_cart_description() {
+		/* translators: %s: Product title */
+		$text = $this->is_purchasable() && $this->is_in_stock() ? __( 'Add &ldquo;%s&rdquo; to your cart', 'woocommerce' ) : __( 'Read more about &ldquo;%s&rdquo;', 'woocommerce' );
 
-		$title = $this->post->post_title;
-
-		if ( $this->get_parent() > 0 ) {
-			$title = get_the_title( $this->get_parent() ) . ' &rarr; ' . $title;
-		}
-
-		return apply_filters( 'woocommerce_product_title', $title, $this );
-	}
-
-	/**
-	 * Sync grouped products with the children lowest price (so they can be sorted by price accurately).
-	 */
-	public function grouped_product_sync() {
-		if ( ! $this->get_parent() ) return;
-
-		$children_by_price = get_posts( array(
-			'post_parent'    => $this->get_parent(),
-			'orderby'        => 'meta_value_num',
-			'order'          => 'asc',
-			'meta_key'       => '_price',
-			'posts_per_page' => 1,
-			'post_type'      => 'product',
-			'fields'         => 'ids'
-		));
-		if ( $children_by_price ) {
-			foreach ( $children_by_price as $child ) {
-				$child_price = get_post_meta( $child, '_price', true );
-				update_post_meta( $this->get_parent(), '_price', $child_price );
-			}
-		}
-
-		delete_transient( 'wc_products_onsale' );
-
-		do_action( 'woocommerce_grouped_product_sync', $this->id, $children_by_price );
+		return apply_filters( 'woocommerce_product_add_to_cart_description', sprintf( $text, $this->get_name() ), $this );
 	}
 }

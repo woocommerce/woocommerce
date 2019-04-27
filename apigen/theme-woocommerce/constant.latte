@@ -13,7 +13,7 @@
 	{$constant|longDescription|noescape}
 	</div>
 
-	<div class="info">
+	<div class="alert alert-info">
 		{if $constant->inNamespace()}<b>Namespace:</b> {$constant->namespaceName|namespaceLinks|noescape}<br>{/if}
 		{if $constant->inPackage()}<b>Package:</b> {$constant->packageName|packageLinks|noescape}<br>{/if}
 		{foreach $template->annotationSort($template->annotationFilter($constant->annotations, array('var'))) as $annotation => $values}
@@ -30,19 +30,21 @@
 
 	{var $annotations = $constant->annotations}
 
-	<table class="summary" id="vars">
-	<caption>Value summary</caption>
-	<tr>
-		<td class="name"><code>{$constant->typeHint|typeLinks:$constant|noescape}</code></td>
-		<td class="value">{block|strip}
-			{var $element = $template->resolveElement($constant->valueDefinition, $constant)}
-			{if $element}<a href="{$element|constantUrl}">{$constant->valueDefinition}</a>{else}<code>{$constant->valueDefinition|highlightValue:$constant|noescape}</code>{/if}
-		{/block}</td>
-	</tr>
-	</table>
+	<div class="panel panel-default">
+		<div class="panel-heading"><h2>Value summary</h2></div>
+		<table class="summary table table-bordered table-striped" id="vars">
+		<tr>
+			<td class="name"><code>{$constant->typeHint|typeLinks:$constant|noescape}</code></td>
+			<td class="value">{block|strip}
+				{var $element = $template->resolveElement($constant->valueDefinition, $constant)}
+				{if $element}<a href="{$element|constantUrl}">{$constant->valueDefinition}</a>{else}<code>{$constant->valueDefinition|highlightValue:$constant|noescape}</code>{/if}
+			{/block}</td>
+		</tr>
+		</table>
+	</div>
 
 	{else}
-		<div class="invalid">
+		<div class="alert alert-error">
 			<p>
 				Documentation of this constant could not be generated.
 			</p>

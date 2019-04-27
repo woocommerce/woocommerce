@@ -6,9 +6,8 @@
 /**
  * Imports
  */
-@import "bourbon";
-@import "mixins";
-@import "variables";
+@import 'mixins';
+@import 'variables';
 
 /**
  * Style begins
@@ -38,16 +37,29 @@
 
 			td {
 				display: block;
+				text-align: right !important; // Important to overwrite order status inline styling
 
-				&:before {
+				&.order-actions {
+					text-align: left !important; // This must always align left on handheld
+				}
+
+				&::before {
 					content: attr(data-title) ': ';
 					font-weight: 700;
+					float: left;
+				}
+
+				&.product-remove,
+				&.actions {
+					&::before {
+						display: none;
+					}
 				}
 			}
 
-			&:nth-child(2n) {
+			&:nth-child( 2n ) {
 				td {
-					background-color: rgba(0,0,0,0.025);
+					background-color: rgba(0, 0, 0, 0.025);
 				}
 			}
 		}
@@ -59,13 +71,13 @@
 				&.order-actions {
 					text-align: left;
 
-					&:before {
+					&::before {
 						display: none;
 					}
 
 					.button {
 						float: none;
-						margin: .125em .25em .125em 0;
+						margin: 0.125em 0.25em 0.125em 0;
 					}
 				}
 			}
@@ -86,16 +98,16 @@
 	/**
 	 * Products
 	 */
-	ul.products {
+	ul.products[class*='columns-'] {
 		li.product {
 			width: 48%;
 			float: left;
 			clear: both;
 			margin: 0 0 2.992em;
 
-			&:nth-child(2n) {
+			&:nth-child( 2n ) {
 				float: right;
-				clear: none !important;
+				clear: none !important; // This should never clear.
 			}
 		}
 	}
@@ -127,19 +139,24 @@
 			.coupon {
 				float: none;
 				@include clearfix();
-				padding-bottom: .5em;
+				padding-bottom: 0.5em;
+
+				input,
+				.button,
+				.input-text {
+					width: 48%;
+					box-sizing: border-box;
+				}
+
+				.input-text + .button,
+				.button.alt {
+					float: right;
+				}
 			}
 
-			input,
-			.button,
-			.input-text {
-				width: 48%;
-				box-sizing: border-box;
-			}
-
-			.input-text + .button,
-			.button.alt {
-				float: right;
+			.button {
+				display: block;
+				width: 100%;
 			}
 		}
 	}
@@ -190,6 +207,14 @@
 			float: none;
 			margin-right: 0;
 		}
+	}
+}
+
+.woocommerce-account {
+	.woocommerce-MyAccount-navigation,
+	.woocommerce-MyAccount-content {
+		float: none;
+		width: 100%;
 	}
 }
 

@@ -4,14 +4,9 @@
  */
 
 /**
- * Imports
- */
-@import "bourbon";
-
-/**
  * Styling begins
  */
-.woocommerce-message {
+div.woocommerce-message {
 	overflow: hidden;
 	position: relative;
 	border-left-color: #cc99c2 !important;
@@ -19,37 +14,44 @@
 
 p.woocommerce-actions,
 .woocommerce-message {
-	a.button-primary {
-		background: #cc99c2;
-		border-color: #b366a4;
-		-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
-		box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
+
+	.button-primary {
+		background: #bb77ae;
+		border-color: #a36597;
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 		color: #fff;
+		text-shadow: 0 -1px 1px #a36597, 1px 0 1px #a36597, 0 1px 1px #a36597, -1px 0 1px #a36597;
 
-		&:hover {
-			background: #bb77ae;
-			border-color: #aa559a;
-			-webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
-			box-shadow: inset 0 1px 0 rgba(255,255,255,.25),0 1px 0 rgba(0,0,0,.15);
-		}
-
+		&:hover,
+		&:focus,
 		&:active {
-			background: #aa559a;
-			border-color: #aa559a;
+			background: #a36597;
+			border-color: #a36597;
+			box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 0 #a36597;
 		}
 	}
 
-	a.skip,
-	a.docs {
-		opacity: 0.5;
+	a.woocommerce-message-close {
+		position: static;
+		float: right;
+		top: 0;
+		right: 0;
+		padding: 0 15px 10px 28px;
+		margin-top: -10px;
+		font-size: 13px;
+		line-height: 1.23076923;
+		text-decoration: none;
 
-		&:hover, &:focus {
-			opacity: 1;
+		&::before {
+			position: relative;
+			top: 18px;
+			left: -20px;
+			transition: all 0.1s ease-in-out;
 		}
 	}
 
-	a.button-primary,
-	a.button-secondary {
+	.button-primary,
+	.button-secondary {
 		text-decoration: none !important;
 	}
 
@@ -63,4 +65,35 @@ p.woocommerce-actions,
 p.woocommerce-actions,
 .woocommerce-about-text {
 	margin-bottom: 1em !important;
+}
+
+div.woocommerce-legacy-shipping-notice,
+div.woocommerce-no-shipping-methods-notice {
+	overflow: hidden;
+	padding: 1px 12px;
+
+	p {
+		position: relative;
+		z-index: 1;
+		line-height: 1.5em;
+		margin: 12px 0;
+
+		&.main {
+			font-size: 1.1em;
+		}
+	}
+
+	&::before {
+		content: "\e01b";
+		font-family: "WooCommerce";
+		text-align: center;
+		line-height: 1;
+		color: #f7f1f6;
+		display: block;
+		width: 1em;
+		font-size: 20em;
+		top: 36px;
+		right: 12px;
+		position: absolute;
+	}
 }

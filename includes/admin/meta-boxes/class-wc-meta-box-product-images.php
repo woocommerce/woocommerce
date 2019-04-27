@@ -15,57 +15,82 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Meta_Box_Product_Images Class
+ * WC_Meta_Box_Product_Images Class.
  */
 class WC_Meta_Box_Product_Images {
 
 	/**
-	 * Output the metabox
+	 * Output the metabox.
+	 *
+	 * @param WP_Post $post
 	 */
 	public static function output( $post ) {
+		global $thepostid, $product_object;
+
+		$thepostid      = $post->ID;
+		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product();
+		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 		?>
 		<div id="product_images_container">
 			<ul class="product_images">
 				<?php
-					if ( metadata_exists( 'post', $post->ID, '_product_image_gallery' ) ) {
-						$product_image_gallery = get_post_meta( $post->ID, '_product_image_gallery', true );
-					} else {
-						// Backwards compat
-						$attachment_ids = get_posts( 'post_parent=' . $post->ID . '&numberposts=-1&post_type=attachment&orderby=menu_order&order=ASC&post_mime_type=image&fields=ids&meta_key=_woocommerce_exclude_image&meta_value=0' );
-						$attachment_ids = array_diff( $attachment_ids, array( get_post_thumbnail_id() ) );
-						$product_image_gallery = implode( ',', $attachment_ids );
-					}
+				$product_image_gallery = $product_object->get_gallery_image_ids( 'edit' );
 
-					$attachments = array_filter( explode( ',', $product_image_gallery ) );
+				$attachments         = array_filter( $product_image_gallery );
+				$update_meta         = false;
+				$updated_gallery_ids = array();
 
-					if ( ! empty( $attachments ) ) {
-						foreach ( $attachments as $attachment_id ) {
-							echo '<li class="image" data-attachment_id="' . esc_attr( $attachment_id ) . '">
-								' . wp_get_attachment_image( $attachment_id, 'thumbnail' ) . '
+				if ( ! empty( $attachments ) ) {
+					foreach ( $attachments as $attachment_id ) {
+						$attachment = wp_get_attachment_image( $attachment_id, 'thumbnail' );
+
+						// if attachment is empty skip.
+						if ( empty( $attachment ) ) {
+							$update_meta = true;
+							continue;
+						}
+
+						echo '<li class="image" data-attachment_id="' . esc_attr( $attachment_id ) . '">
+								' . $attachment . '
 								<ul class="actions">
 									<li><a href="#" class="delete tips" data-tip="' . esc_attr__( 'Delete image', 'woocommerce' ) . '">' . __( 'Delete', 'woocommerce' ) . '</a></li>
 								</ul>
 							</li>';
-						}
+
+						// rebuild ids to be saved.
+						$updated_gallery_ids[] = $attachment_id;
 					}
+
+					// need to update product meta to set new gallery ids
+					if ( $update_meta ) {
+						update_post_meta( $post->ID, '_product_image_gallery', implode( ',', $updated_gallery_ids ) );
+					}
+				}
 				?>
 			</ul>
 
-			<input type="hidden" id="product_image_gallery" name="product_image_gallery" value="<?php echo esc_attr( $product_image_gallery ); ?>" />
+			<input type="hidden" id="product_image_gallery" name="product_image_gallery" value="<?php echo esc_attr( implode( ',', $updated_gallery_ids ) ); ?>" />
 
 		</div>
 		<p class="add_product_images hide-if-no-js">
-			<a href="#" data-choose="<?php esc_attr_e( 'Add Images to Product Gallery', 'woocommerce' ); ?>" data-update="<?php esc_attr_e( 'Add to gallery', 'woocommerce' ); ?>" data-delete="<?php esc_attr_e( 'Delete image', 'woocommerce' ); ?>" data-text="<?php esc_attr_e( 'Delete', 'woocommerce' ); ?>"><?php _e( 'Add product gallery images', 'woocommerce' ); ?></a>
+			<a href="#" data-choose="<?php esc_attr_e( 'Add images to product gallery', 'woocommerce' ); ?>" data-update="<?php esc_attr_e( 'Add to gallery', 'woocommerce' ); ?>" data-delete="<?php esc_attr_e( 'Delete image', 'woocommerce' ); ?>" data-text="<?php esc_attr_e( 'Delete', 'woocommerce' ); ?>"><?php _e( 'Add product gallery images', 'woocommerce' ); ?></a>
 		</p>
 		<?php
 	}
 
 	/**
-	 * Save meta box data
+	 * Save meta box data.
+	 *
+	 * @param int     $post_id
+	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
+		$product_type   = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( stripslashes( $_POST['product-type'] ) );
+		$classname      = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : 'simple' );
+		$product        = new $classname( $post_id );
 		$attachment_ids = isset( $_POST['product_image_gallery'] ) ? array_filter( explode( ',', wc_clean( $_POST['product_image_gallery'] ) ) ) : array();
 
-		update_post_meta( $post_id, '_product_image_gallery', implode( ',', $attachment_ids ) );
+		$product->set_gallery_image_ids( $attachment_ids );
+		$product->save();
 	}
 }

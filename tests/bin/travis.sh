@@ -1,34 +1,22 @@
 #!/usr/bin/env bash
 # usage: travis.sh before|after
 
-if [ $1 == 'before' ]; then
+if [ $1 == 'after' ]; then
 
-	# Lint files
-	for file in $(find . -name "*.php" -and -not -path "./tmp/*" -and -not -path "./tests/*" -and -not -path "./apigen/*"); do
-		output=$( php -l $file )
-		if [[ $output == *"Errors parsing"* ]]; then
-			echo "Build stopped because of a syntax error: $output";
-			exit 1;
+	if [[ ${RUN_CODE_COVERAGE} == 1 ]]; then
+		bash <(curl -s https://codecov.io/bash)
+		wget https://scrutinizer-ci.com/ocular.phar
+		chmod +x ocular.phar
+		php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+	fi
+
+	if [[ ${RUN_E2E} == 1 && $(ls -A $TRAVIS_BUILD_DIR/screenshots) ]]; then
+		if [[ -z "${ARTIFACTS_KEY}" ]]; then
+			echo "Screenshots were not uploaded. Please run the e2e tests locally to see failures."
+		else
+			curl -sL https://raw.githubusercontent.com/travis-ci/artifacts/master/install | bash
+			artifacts upload
 		fi
-	done
-
-	# composer install fails in PHP 5.2
-	[ $TRAVIS_PHP_VERSION == '5.2' ] && exit;
-
-	# install php-coveralls to send coverage info
-	composer init --require=satooshi/php-coveralls:0.7.x-dev -n
-	composer install --no-interaction
-
-elif [ $1 == 'after' ]; then
-
-	# no Xdebug and therefore no coverage in PHP 5.2
-	[ $TRAVIS_PHP_VERSION == '5.2' ] && exit;
-
-	# send coverage data to coveralls
-	php vendor/bin/coveralls --verbose --exclude-no-stmt
-
-	# get scrutinizer ocular and run it
-	wget https://scrutinizer-ci.com/ocular.phar
-	ocular.phar code-coverage:upload --format=php-clover ./tmp/clover.xml
+	fi
 
 fi

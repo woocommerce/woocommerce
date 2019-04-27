@@ -2,20 +2,18 @@
 /**
  * WooCommerce Shipping Settings
  *
- * @author      WooThemes
- * @category    Admin
  * @package     WooCommerce/Admin
- * @version     2.1.0
+ * @version     2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+defined( 'ABSPATH' ) || exit;
+
+if ( class_exists( 'WC_Settings_Shipping', false ) ) {
+	return new WC_Settings_Shipping();
 }
 
-if ( ! class_exists( 'WC_Settings_Shipping' ) ) :
-
 /**
- * WC_Settings_Shipping
+ * WC_Settings_Shipping.
  */
 class WC_Settings_Shipping extends WC_Settings_Page {
 
@@ -26,33 +24,41 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		$this->id    = 'shipping';
 		$this->label = __( 'Shipping', 'woocommerce' );
 
-		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'add_settings_page' ), 20 );
-		add_action( 'woocommerce_sections_' . $this->id, array( $this, 'output_sections' ) );
-		add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
-		add_action( 'woocommerce_admin_field_shipping_methods', array( $this, 'shipping_methods_setting' ) );
-		add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
+		parent::__construct();
 	}
 
 	/**
-	 * Get sections
+	 * Add this page to settings.
+	 *
+	 * @param array $pages Current pages.
+	 * @return array|mixed
+	 */
+	public function add_settings_page( $pages ) {
+		return wc_shipping_enabled() ? parent::add_settings_page( $pages ) : $pages;
+	}
+
+	/**
+	 * Get sections.
 	 *
 	 * @return array
 	 */
 	public function get_sections() {
 		$sections = array(
-			'' => __( 'Shipping Options', 'woocommerce' )
+			''        => __( 'Shipping zones', 'woocommerce' ),
+			'options' => __( 'Shipping options', 'woocommerce' ),
+			'classes' => __( 'Shipping classes', 'woocommerce' ),
 		);
 
 		if ( ! defined( 'WC_INSTALLING' ) ) {
-			// Load shipping methods so we can show any global options they may have
-			$shipping_methods = WC()->shipping->load_shipping_methods();
+			// Load shipping methods so we can show any global options they may have.
+			$shipping_methods = WC()->shipping()->load_shipping_methods();
 
 			foreach ( $shipping_methods as $method ) {
 				if ( ! $method->has_settings() ) {
 					continue;
 				}
-				$title = empty( $method->method_title ) ? ucfirst( $method->id ) : $method->method_title;
-				$sections[ strtolower( get_class( $method ) ) ] = esc_html( $title );
+				$title                                 = empty( $method->method_title ) ? ucfirst( $method->id ) : $method->method_title;
+				$sections[ strtolower( $method->id ) ] = esc_html( $title );
 			}
 		}
 
@@ -60,216 +66,319 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings array
+	 * Get settings array.
 	 *
+	 * @param string $current_section Current section.
 	 * @return array
 	 */
-	public function get_settings() {
+	public function get_settings( $current_section = '' ) {
+		$settings = array();
 
-		$settings = apply_filters('woocommerce_shipping_settings', array(
+		if ( '' === $current_section ) {
+			$settings = apply_filters(
+				'woocommerce_shipping_settings',
+				array(
+					array(
+						'title' => __( 'Shipping options', 'woocommerce' ),
+						'type'  => 'title',
+						'id'    => 'shipping_options',
+					),
 
-			array( 'title' => __( 'Shipping Options', 'woocommerce' ), 'type' => 'title', 'id' => 'shipping_options' ),
+					array(
+						'title'         => __( 'Calculations', 'woocommerce' ),
+						'desc'          => __( 'Enable the shipping calculator on the cart page', 'woocommerce' ),
+						'id'            => 'woocommerce_enable_shipping_calc',
+						'default'       => 'yes',
+						'type'          => 'checkbox',
+						'checkboxgroup' => 'start',
+						'autoload'      => false,
+					),
 
-			array(
-				'title'         => __( 'Shipping Calculations', 'woocommerce' ),
-				'desc'          => __( 'Enable shipping', 'woocommerce' ),
-				'id'            => 'woocommerce_calc_shipping',
-				'default'       => 'no',
-				'type'          => 'checkbox',
-				'checkboxgroup' => 'start'
-			),
+					array(
+						'desc'          => __( 'Hide shipping costs until an address is entered', 'woocommerce' ),
+						'id'            => 'woocommerce_shipping_cost_requires_address',
+						'default'       => 'no',
+						'type'          => 'checkbox',
+						'checkboxgroup' => 'end',
+					),
 
-			array(
-				'desc'          => __( 'Enable the shipping calculator on the cart page', 'woocommerce' ),
-				'id'            => 'woocommerce_enable_shipping_calc',
-				'default'       => 'yes',
-				'type'          => 'checkbox',
-				'checkboxgroup' => '',
-				'autoload'      => false
-			),
+					array(
+						'title'           => __( 'Shipping destination', 'woocommerce' ),
+						'desc'            => __( 'This controls which shipping address is used by default.', 'woocommerce' ),
+						'id'              => 'woocommerce_ship_to_destination',
+						'default'         => 'billing',
+						'type'            => 'radio',
+						'options'         => array(
+							'shipping'     => __( 'Default to customer shipping address', 'woocommerce' ),
+							'billing'      => __( 'Default to customer billing address', 'woocommerce' ),
+							'billing_only' => __( 'Force shipping to the customer billing address', 'woocommerce' ),
+						),
+						'autoload'        => false,
+						'desc_tip'        => true,
+						'show_if_checked' => 'option',
+					),
 
-			array(
-				'desc'          => __( 'Hide shipping costs until an address is entered', 'woocommerce' ),
-				'id'            => 'woocommerce_shipping_cost_requires_address',
-				'default'       => 'no',
-				'type'          => 'checkbox',
-				'checkboxgroup' => 'end',
-				'autoload'      => false
-			),
+					array(
+						'title'    => __( 'Debug mode', 'woocommerce' ),
+						'desc'     => __( 'Enable debug mode', 'woocommerce' ),
+						'desc_tip' => __( 'Enable shipping debug mode to show matching shipping zones and to bypass shipping rate cache.', 'woocommerce' ),
+						'id'       => 'woocommerce_shipping_debug_mode',
+						'default'  => 'no',
+						'type'     => 'checkbox',
+					),
 
-			array(
-				'title'    => __( 'Shipping Display Mode', 'woocommerce' ),
-				'desc'     => __( 'This controls how multiple shipping methods are displayed on the frontend.', 'woocommerce' ),
-				'id'       => 'woocommerce_shipping_method_format',
-				'default'  => '',
-				'type'     => 'radio',
-				'options'  => array(
-					''       => __( 'Display shipping methods with "radio" buttons', 'woocommerce' ),
-					'select' => __( 'Display shipping methods in a dropdown', 'woocommerce' ),
-				),
-				'desc_tip' =>  true,
-				'autoload' => false
-			),
+					array(
+						'type' => 'sectionend',
+						'id'   => 'shipping_options',
+					),
 
-			array(
-				'title'   => __( 'Shipping Destination', 'woocommerce' ),
-				'desc'    => __( 'This controls which shipping address is used by default.', 'woocommerce' ),
-				'id'      => 'woocommerce_ship_to_destination',
-				'default' => 'billing',
-				'type'    => 'radio',
-				'options' => array(
-					'shipping'     => __( 'Default to shipping address', 'woocommerce' ),
-					'billing'      => __( 'Default to billing address', 'woocommerce' ),
-					'billing_only' => __( 'Only ship to the customer\'s billing address', 'woocommerce' ),
-				),
-				'autoload'        => false,
-				'desc_tip'        =>  true,
-				'show_if_checked' => 'option',
-			),
-
-			array(
-				'title'    => __( 'Restrict shipping to Location(s)', 'woocommerce' ),
-				'desc'     => sprintf( __( 'Choose which countries you want to ship to, or choose to ship to all <a href="%s">locations you sell to</a>.', 'woocommerce' ), admin_url( 'admin.php?page=wc-settings&tab=general' ) ),
-				'id'       => 'woocommerce_ship_to_countries',
-				'default'  => '',
-				'type'     => 'select',
-				'class'    => 'wc-enhanced-select',
-				'desc_tip' => false,
-				'options'  => array(
-					''         => __( 'Ship to all countries you sell to', 'woocommerce' ),
-					'all'      => __( 'Ship to all countries', 'woocommerce' ),
-					'specific' => __( 'Ship to specific countries only', 'woocommerce' )
 				)
-			),
+			);
+		}
 
-			array(
-				'title'   => __( 'Specific Countries', 'woocommerce' ),
-				'desc'    => '',
-				'id'      => 'woocommerce_specific_ship_to_countries',
-				'css'     => '',
-				'default' => '',
-				'type'    => 'multi_select_countries'
-			),
-
-			array(
-				'type' => 'shipping_methods',
-			),
-
-			array( 'type' => 'sectionend', 'id' => 'shipping_options' ),
-
-		) );
-
-		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings );
+		return apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
 	}
 
 	/**
-	 * Output the settings
+	 * Output the settings.
 	 */
 	public function output() {
-		global $current_section;
+		global $current_section, $hide_save_button;
 
-		// Load shipping methods so we can show any global options they may have
-		$shipping_methods = WC()->shipping->load_shipping_methods();
+		// Load shipping methods so we can show any global options they may have.
+		$shipping_methods = WC()->shipping()->load_shipping_methods();
 
-		if ( $current_section ) {
-
- 			foreach ( $shipping_methods as $method ) {
-
-				if ( strtolower( get_class( $method ) ) == strtolower( $current_section ) && $method->has_settings() ) {
+		if ( '' === $current_section ) {
+			$this->output_zones_screen();
+		} elseif ( 'options' === $current_section ) {
+			$settings = $this->get_settings();
+			WC_Admin_Settings::output_fields( $settings );
+		} elseif ( 'classes' === $current_section ) {
+			$hide_save_button = true;
+			$this->output_shipping_class_screen();
+		} else {
+			$is_shipping_method = false;
+			foreach ( $shipping_methods as $method ) {
+				if ( in_array( $current_section, array( $method->id, sanitize_title( get_class( $method ) ) ), true ) && $method->has_settings() ) {
+					$is_shipping_method = true;
 					$method->admin_options();
-					break;
 				}
 			}
- 		} else {
-			$settings = $this->get_settings();
-
-			WC_Admin_Settings::output_fields( $settings );
+			if ( ! $is_shipping_method ) {
+				$settings = $this->get_settings();
+				$settings = apply_filters( 'woocommerce_get_settings_' . $this->id, $settings, $current_section );
+				WC_Admin_Settings::output_fields( $settings );
+			}
 		}
 	}
 
 	/**
-	 * Output shipping method settings.
-	 */
-	public function shipping_methods_setting() {
-		$selection_priority = get_option( 'woocommerce_shipping_method_selection_priority', array() );
-		?>
-		<tr valign="top">
-			<th scope="row" class="titledesc"><?php _e( 'Shipping Methods', 'woocommerce' ) ?></th>
-			<td class="forminp">
-				<table class="wc_shipping widefat wp-list-table" cellspacing="0">
-					<thead>
-						<tr>
-							<th class="sort">&nbsp;</th>
-							<th class="name"><?php _e( 'Name', 'woocommerce' ); ?></th>
-							<th class="id"><?php _e( 'ID', 'woocommerce' ); ?></th>
-							<th class="status"><?php _e( 'Enabled', 'woocommerce' ); ?></th>
-							<th class="priority"><?php _e( 'Selection Priority', 'woocommerce' ); ?> <span class="tips" data-tip="<?php echo esc_attr( __( 'Available methods will be chosen by default in this order. If multiple methods have the same priority, they will be sorted by cost.', 'woocommerce' ) ); ?>">[?]</span></th>
-						</tr>
-					</thead>
-					<tbody>
-						<?php foreach ( WC()->shipping->load_shipping_methods() as $key => $method ) : ?>
-							<tr>
-								<td width="1%" class="sort">
-									<input type="hidden" name="method_order[<?php echo esc_attr( $method->id ); ?>]" value="<?php echo esc_attr( $method->id ); ?>" />
-								</td>
-								<td class="name">
-									<?php if ( $method->has_settings ) : ?><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=' . strtolower( get_class( $method ) ) ) ); ?>"><?php endif; ?>
-									<?php echo esc_html( $method->get_title() ); ?>
-									<?php if ( $method->has_settings ) : ?></a><?php endif; ?>
-								</td>
-								<td class="id">
-									<?php echo esc_attr( $method->id ); ?>
-								</td>
-								<td class="status">
-									<?php if ( 'yes' === $method->enabled ) : ?>
-										<span class="status-enabled tips" data-tip="<?php esc_attr_e( 'Yes', 'woocommerce' ); ?>"><?php _e( 'Yes', 'woocommerce' ); ?></span>
-									<?php else : ?>
-										<span class="na">-</span>
-									<?php endif; ?>
-								</td>
-								<td width="1%" class="priority">
-									<input type="number" step="1" min="0" name="method_priority[<?php echo esc_attr( $method->id ); ?>]" value="<?php echo isset( $selection_priority[ $method->id ] ) ? absint( $selection_priority[ $method->id ] ) : 1; ?>" />
-								</td>
-							</tr>
-						<?php endforeach; ?>
-					</tbody>
-					<tfoot>
-						<tr>
-							<th>&nbsp;</th>
-							<th colspan="4"><span class="description"><?php _e( 'Drag and drop the above shipping methods to control their display order.', 'woocommerce' ); ?></span></th>
-						</tr>
-					</tfoot>
-				</table>
-			</td>
-		</tr>
-		<?php
-	}
-
-	/**
-	 * Save settings
+	 * Save settings.
 	 */
 	public function save() {
 		global $current_section;
 
-		$wc_shipping = WC_Shipping::instance();
+		switch ( $current_section ) {
+			case 'options':
+				WC_Admin_Settings::save_fields( $this->get_settings() );
+				do_action( 'woocommerce_update_options_' . $this->id . '_options' );
+				break;
+			case 'classes':
+				do_action( 'woocommerce_update_options_' . $this->id . '_classes' );
+				break;
+			case '':
+				break;
+			default:
+				$wc_shipping        = WC_Shipping::instance();
+				$is_shipping_method = false;
 
-		if ( ! $current_section ) {
-			WC_Admin_Settings::save_fields( $this->get_settings() );
-			$wc_shipping->process_admin_options();
-
-		} else {
-			foreach ( $wc_shipping->get_shipping_methods() as $method_id => $method ) {
-				if ( $current_section === sanitize_title( get_class( $method ) ) ) {
-					do_action( 'woocommerce_update_options_' . $this->id . '_' . $method->id );
+				foreach ( $wc_shipping->get_shipping_methods() as $method_id => $method ) {
+					if ( in_array( $current_section, array( $method->id, sanitize_title( get_class( $method ) ) ), true ) ) {
+						$is_shipping_method = true;
+						do_action( 'woocommerce_update_options_' . $this->id . '_' . $method->id );
+					}
 				}
+				if ( ! $is_shipping_method ) {
+					WC_Admin_Settings::save_fields( $this->get_settings( $current_section ) );
+				}
+				break;
+		}
+
+		// Increments the transient version to invalidate cache.
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+	}
+
+	/**
+	 * Handles output of the shipping zones page in admin.
+	 */
+	protected function output_zones_screen() {
+		global $hide_save_button;
+
+		if ( isset( $_REQUEST['zone_id'] ) ) { // WPCS: input var ok, CSRF ok.
+			$hide_save_button = true;
+			$this->zone_methods_screen( wc_clean( wp_unslash( $_REQUEST['zone_id'] ) ) ); // WPCS: input var ok, CSRF ok.
+		} elseif ( isset( $_REQUEST['instance_id'] ) ) {
+			$this->instance_settings_screen( absint( wp_unslash( $_REQUEST['instance_id'] ) ) ); // WPCS: input var ok, CSRF ok.
+		} else {
+			$hide_save_button = true;
+			$this->zones_screen();
+		}
+	}
+
+	/**
+	 * Show method for a zone
+	 *
+	 * @param int $zone_id Zone ID.
+	 */
+	protected function zone_methods_screen( $zone_id ) {
+		if ( 'new' === $zone_id ) {
+			$zone = new WC_Shipping_Zone();
+		} else {
+			$zone = WC_Shipping_Zones::get_zone( absint( $zone_id ) );
+		}
+
+		if ( ! $zone ) {
+			wp_die( esc_html__( 'Zone does not exist!', 'woocommerce' ) );
+		}
+
+		$allowed_countries   = WC()->countries->get_shipping_countries();
+		$shipping_continents = WC()->countries->get_shipping_continents();
+
+		// Prepare locations.
+		$locations = array();
+		$postcodes = array();
+
+		foreach ( $zone->get_zone_locations() as $location ) {
+			if ( 'postcode' === $location->type ) {
+				$postcodes[] = $location->code;
+			} else {
+				$locations[] = $location->type . ':' . $location->code;
 			}
 		}
 
-		// Increments the transient version to invalidate cache
-		WC_Cache_Helper::get_transient_version( 'shipping', true );
+		wp_localize_script(
+			'wc-shipping-zone-methods',
+			'shippingZoneMethodsLocalizeScript',
+			array(
+				'methods'                 => $zone->get_shipping_methods( false, 'json' ),
+				'zone_name'               => $zone->get_zone_name(),
+				'zone_id'                 => $zone->get_id(),
+				'wc_shipping_zones_nonce' => wp_create_nonce( 'wc_shipping_zones_nonce' ),
+				'strings'                 => array(
+					'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
+					'save_changes_prompt'     => __( 'Do you wish to save your changes first? Your changed data will be discarded if you choose to cancel.', 'woocommerce' ),
+					'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
+					'add_method_failed'       => __( 'Shipping method could not be added. Please retry.', 'woocommerce' ),
+					'yes'                     => __( 'Yes', 'woocommerce' ),
+					'no'                      => __( 'No', 'woocommerce' ),
+					'default_zone_name'       => __( 'Zone', 'woocommerce' ),
+				),
+			)
+		);
+		wp_enqueue_script( 'wc-shipping-zone-methods' );
+
+		include_once dirname( __FILE__ ) . '/views/html-admin-page-shipping-zone-methods.php';
+	}
+
+	/**
+	 * Show zones
+	 */
+	protected function zones_screen() {
+		$method_count = wc_get_shipping_method_count();
+
+		wp_localize_script(
+			'wc-shipping-zones',
+			'shippingZonesLocalizeScript',
+			array(
+				'zones'                   => WC_Shipping_Zones::get_zones( 'json' ),
+				'default_zone'            => array(
+					'zone_id'    => 0,
+					'zone_name'  => '',
+					'zone_order' => null,
+				),
+				'wc_shipping_zones_nonce' => wp_create_nonce( 'wc_shipping_zones_nonce' ),
+				'strings'                 => array(
+					'unload_confirmation_msg'     => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
+					'delete_confirmation_msg'     => __( 'Are you sure you want to delete this zone? This action cannot be undone.', 'woocommerce' ),
+					'save_failed'                 => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
+					'no_shipping_methods_offered' => __( 'No shipping methods offered to this zone.', 'woocommerce' ),
+				),
+			)
+		);
+		wp_enqueue_script( 'wc-shipping-zones' );
+
+		include_once dirname( __FILE__ ) . '/views/html-admin-page-shipping-zones.php';
+	}
+
+	/**
+	 * Show instance settings
+	 *
+	 * @param int $instance_id Shipping instance ID.
+	 */
+	protected function instance_settings_screen( $instance_id ) {
+		$zone            = WC_Shipping_Zones::get_zone_by( 'instance_id', $instance_id );
+		$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+
+		if ( ! $shipping_method ) {
+			wp_die( esc_html__( 'Invalid shipping method!', 'woocommerce' ) );
+		}
+		if ( ! $zone ) {
+			wp_die( esc_html__( 'Zone does not exist!', 'woocommerce' ) );
+		}
+		if ( ! $shipping_method->has_settings() ) {
+			wp_die( esc_html__( 'This shipping method does not have any settings to configure.', 'woocommerce' ) );
+		}
+
+		if ( ! empty( $_POST['save'] ) ) { // WPCS: input var ok, sanitization ok.
+
+			if ( empty( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_REQUEST['_wpnonce'] ), 'woocommerce-settings' ) ) { // WPCS: input var ok, sanitization ok.
+				echo '<div class="updated error"><p>' . esc_html__( 'Edit failed. Please try again.', 'woocommerce' ) . '</p></div>';
+			}
+
+			$shipping_method->process_admin_options();
+			$shipping_method->display_errors();
+		}
+
+		include_once dirname( __FILE__ ) . '/views/html-admin-page-shipping-zones-instance.php';
+	}
+
+	/**
+	 * Handles output of the shipping class settings screen.
+	 */
+	protected function output_shipping_class_screen() {
+		$wc_shipping = WC_Shipping::instance();
+		wp_localize_script(
+			'wc-shipping-classes',
+			'shippingClassesLocalizeScript',
+			array(
+				'classes'                   => $wc_shipping->get_shipping_classes(),
+				'default_shipping_class'    => array(
+					'term_id'     => 0,
+					'name'        => '',
+					'description' => '',
+				),
+				'wc_shipping_classes_nonce' => wp_create_nonce( 'wc_shipping_classes_nonce' ),
+				'strings'                   => array(
+					'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
+					'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
+				),
+			)
+		);
+		wp_enqueue_script( 'wc-shipping-classes' );
+
+		// Extendable columns to show on the shipping classes screen.
+		$shipping_class_columns = apply_filters(
+			'woocommerce_shipping_classes_columns',
+			array(
+				'wc-shipping-class-name'        => __( 'Shipping class', 'woocommerce' ),
+				'wc-shipping-class-slug'        => __( 'Slug', 'woocommerce' ),
+				'wc-shipping-class-description' => __( 'Description', 'woocommerce' ),
+				'wc-shipping-class-count'       => __( 'Product count', 'woocommerce' ),
+			)
+		);
+
+		include_once dirname( __FILE__ ) . '/views/html-admin-page-shipping-classes.php';
 	}
 }
-
-endif;
 
 return new WC_Settings_Shipping();

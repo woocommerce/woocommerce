@@ -1,30 +1,89 @@
 language: php
+dist: trusty
 
 sudo: false
 
+cache:
+  directories:
+    - vendor
+    - $HOME/.composer/cache
+
+# Test main supported versions of PHP against latest WP.
 php:
-  - 5.3
-  - 5.4
-  - 5.5
   - 5.6
+  - 7.0
+  - 7.1
+  - 7.2
+  - 7.3
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
-  - WP_VERSION=4.3 WP_MULTISITE=0
-  - WP_VERSION=4.2 WP_MULTISITE=0
-  - WP_VERSION=4.1 WP_MULTISITE=0
-  - WP_VERSION=4.0 WP_MULTISITE=0
 
+# Additional tests against stable PHP (min recommended version is 5.6) and past supported versions of WP
+# and code coverage report.
 matrix:
+  fast_finish: true
   include:
   - php: 5.3
-    env: WP_VERSION=latest WP_MULTISITE=1
+    dist: precise
+  - php: 5.2
+    dist: precise
+  - name: "Coding standard check"
+    php: 7.2
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
+  - name: "e2e tests"
+    php: 7.2
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_E2E=1
+    addons:
+      chrome: stable
+      apt:
+        packages:
+          - nginx
+  - name: "Unit tests code coverage"
+    php: 7.3
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
+  - name: "WooCommerce unit tests using WordPress nightly"
+    php: 7.3
+    env: WP_VERSION=nightly WP_MULTISITE=0
+  allow_failures:
+  - php: 7.3
+    env: WP_VERSION=latest WP_MULTISITE=0 RUN_CODE_COVERAGE=1
 
 before_script:
-  - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
-  - bash tests/bin/travis.sh before
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - |
+    # Remove Xdebug for a huge performance increase:
+    if [ -f ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini ]; then
+      phpenv config-rm xdebug.ini
+    else
+      echo "xdebug.ini does not exist"
+    fi
+  - |
+    # Install WP Test suite, install PHPUnit globally if needed:
+    if [[ ! -z "$WP_VERSION" ]]; then
+      bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
+      # PHP 5.2 does not have composer, do not try to run it.
+      if [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
+        composer global require "phpunit/phpunit=4.8.*|6.5.*"
+      fi
+    fi
+  - |
+    # Install wpcs globally if needed:
+    if [[ ${RUN_PHPCS} == 1 ]] && [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
+      composer require woocommerce/woocommerce-sniffs
+    fi
 
-script: phpunit -c phpunit.xml.dist
+script:
+  - bash tests/bin/phpunit.sh
+  - bash tests/bin/phpcs.sh
+  - travis_retry bash tests/bin/run-e2e-CI.sh
 
 after_script:
   - bash tests/bin/travis.sh after
+
+# Specifies that Travis should create builds for master and release branches and also tags.
+branches:
+  only:
+    - master
+    - /^\d+\.\d+(\.\d+)?(-\S*)?$/
+    - /^release\//

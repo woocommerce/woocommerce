@@ -6,68 +6,65 @@ jQuery( function( $ ) {
 		return false;
 	}
 
-	function getEnhancedSelectFormatString() {
-		var formatString = {
-			formatMatches: function( matches ) {
-				if ( 1 === matches ) {
-					return wc_country_select_params.i18n_matches_1;
+	// Select2 Enhancement if it exists
+	if ( $().selectWoo ) {
+		var getEnhancedSelectFormatString = function() {
+			return {
+				'language': {
+					errorLoading: function() {
+						// Workaround for https://github.com/select2/select2/issues/4355 instead of i18n_ajax_error.
+						return wc_country_select_params.i18n_searching;
+					},
+					inputTooLong: function( args ) {
+						var overChars = args.input.length - args.maximum;
+
+						if ( 1 === overChars ) {
+							return wc_country_select_params.i18n_input_too_long_1;
+						}
+
+						return wc_country_select_params.i18n_input_too_long_n.replace( '%qty%', overChars );
+					},
+					inputTooShort: function( args ) {
+						var remainingChars = args.minimum - args.input.length;
+
+						if ( 1 === remainingChars ) {
+							return wc_country_select_params.i18n_input_too_short_1;
+						}
+
+						return wc_country_select_params.i18n_input_too_short_n.replace( '%qty%', remainingChars );
+					},
+					loadingMore: function() {
+						return wc_country_select_params.i18n_load_more;
+					},
+					maximumSelected: function( args ) {
+						if ( args.maximum === 1 ) {
+							return wc_country_select_params.i18n_selection_too_long_1;
+						}
+
+						return wc_country_select_params.i18n_selection_too_long_n.replace( '%qty%', args.maximum );
+					},
+					noResults: function() {
+						return wc_country_select_params.i18n_no_matches;
+					},
+					searching: function() {
+						return wc_country_select_params.i18n_searching;
+					}
 				}
-
-				return wc_country_select_params.i18n_matches_n.replace( '%qty%', matches );
-			},
-			formatNoMatches: function() {
-				return wc_country_select_params.i18n_no_matches;
-			},
-			formatAjaxError: function() {
-				return wc_country_select_params.i18n_ajax_error;
-			},
-			formatInputTooShort: function( input, min ) {
-				var number = min - input.length;
-
-				if ( 1 === number ) {
-					return wc_country_select_params.i18n_input_too_short_1;
-				}
-
-				return wc_country_select_params.i18n_input_too_short_n.replace( '%qty%', number );
-			},
-			formatInputTooLong: function( input, max ) {
-				var number = input.length - max;
-
-				if ( 1 === number ) {
-					return wc_country_select_params.i18n_input_too_long_1;
-				}
-
-				return wc_country_select_params.i18n_input_too_long_n.replace( '%qty%', number );
-			},
-			formatSelectionTooBig: function( limit ) {
-				if ( 1 === limit ) {
-					return wc_country_select_params.i18n_selection_too_long_1;
-				}
-
-				return wc_country_select_params.i18n_selection_too_long_n.replace( '%qty%', limit );
-			},
-			formatLoadMore: function() {
-				return wc_country_select_params.i18n_load_more;
-			},
-			formatSearching: function() {
-				return wc_country_select_params.i18n_searching;
-			}
+			};
 		};
 
-		return formatString;
-	}
-
-	// Select2 Enhancement if it exists
-	if ( $().select2 ) {
 		var wc_country_select_select2 = function() {
 			$( 'select.country_select:visible, select.state_select:visible' ).each( function() {
 				var select2_args = $.extend({
-					placeholder: $( this ).attr( 'placeholder' ),
-					placeholderOption: 'first',
+					placeholder: $( this ).attr( 'data-placeholder' ) || $( this ).attr( 'placeholder' ) || '',
 					width: '100%'
 				}, getEnhancedSelectFormatString() );
 
-				$( this ).select2( select2_args );
+				$( this )
+					.on( 'select2:select', function() {
+						$( this ).focus(); // Maintain focus after select https://github.com/select2/select2/issues/4384
+					} )
+					.selectWoo( select2_args );
 			});
 		};
 
@@ -79,77 +76,99 @@ jQuery( function( $ ) {
 	}
 
 	/* State/Country select boxes */
-	var states_json = wc_country_select_params.countries.replace( /&quot;/g, '"' ),
-		states = $.parseJSON( states_json );
+	var states_json       = wc_country_select_params.countries.replace( /&quot;/g, '"' ),
+		states            = $.parseJSON( states_json ),
+		wrapper_selectors = '.woocommerce-billing-fields,' +
+			'.woocommerce-shipping-fields,' +
+			'.woocommerce-address-fields,' +
+			'.woocommerce-shipping-calculator';
 
-	$( document.body ).on( 'change', 'select.country_to_state, input.country_to_state', function() {
+	$( document.body ).on( 'change refresh', 'select.country_to_state, input.country_to_state', function() {
+		// Grab wrapping element to target only stateboxes in same 'group'
+		var $wrapper = $( this ).closest( wrapper_selectors );
+
+		if ( ! $wrapper.length ) {
+			$wrapper = $( this ).closest('.form-row').parent();
+		}
 
 		var country     = $( this ).val(),
-			$wrapper    = $( this ).closest('.form-row').parent(), // Grab wrapping form-row parent to target stateboxes in same 'group'
 			$statebox   = $wrapper.find( '#billing_state, #shipping_state, #calc_shipping_state' ),
-			$parent     = $statebox.parent(),
+			$parent     = $statebox.closest( 'p.form-row' ),
 			input_name  = $statebox.attr( 'name' ),
 			input_id    = $statebox.attr( 'id' ),
 			value       = $statebox.val(),
-			placeholder = $statebox.attr( 'placeholder' );
+			placeholder = $statebox.attr( 'placeholder' ) || $statebox.attr( 'data-placeholder' ) || '',
+			$newstate;
 
 		if ( states[ country ] ) {
 			if ( $.isEmptyObject( states[ country ] ) ) {
-
-				$statebox.parent().hide().find( '.select2-container' ).remove();
-				$statebox.replaceWith( '<input type="hidden" class="hidden" name="' + input_name + '" id="' + input_id + '" value="" placeholder="' + placeholder + '" />' );
-
+				$newstate = $( '<input type="hidden" />' )
+					.prop( 'id', input_id )
+					.prop( 'name', input_name )
+					.prop( 'placeholder', placeholder )
+					.addClass( 'hidden' );
+				$parent.hide().find( '.select2-container' ).remove();
+				$statebox.replaceWith( $newstate );
 				$( document.body ).trigger( 'country_to_state_changed', [ country, $wrapper ] );
-
 			} else {
+				var state          = states[ country ],
+					$defaultOption = $( '<option value=""></option>' ).text( wc_country_select_params.i18n_select_state_text );
 
-				var options = '',
-					state = states[ country ];
-
-				for( var index in state ) {
-					if ( state.hasOwnProperty( index ) ) {
-						options = options + '<option value="' + index + '">' + state[ index ] + '</option>';
-					}
+				if ( ! placeholder ) {
+					placeholder = wc_country_select_params.i18n_select_state_text;
 				}
 
-				$statebox.parent().show();
+				$parent.show();
 
 				if ( $statebox.is( 'input' ) ) {
-					// Change for select
-					$statebox.replaceWith( '<select name="' + input_name + '" id="' + input_id + '" class="state_select" placeholder="' + placeholder + '"></select>' );
+					$newstate = $( '<select></select>' )
+						.prop( 'id', input_id )
+						.prop( 'name', input_name )
+						.data( 'placeholder', placeholder )
+						.addClass( 'state_select' );
+					$statebox.replaceWith( $newstate );
 					$statebox = $wrapper.find( '#billing_state, #shipping_state, #calc_shipping_state' );
 				}
 
-				$statebox.html( '<option value="">' + wc_country_select_params.i18n_select_state_text + '</option>' + options );
+				$statebox.empty().append( $defaultOption );
+
+				$.each( state, function( index ) {
+					var $option = $( '<option></option>' )
+						.prop( 'value', index )
+						.text( state[ index ] );
+					$statebox.append( $option );
+				} );
+
 				$statebox.val( value ).change();
 
 				$( document.body ).trigger( 'country_to_state_changed', [country, $wrapper ] );
-
 			}
 		} else {
-			if ( $statebox.is( 'select' ) ) {
-
+			if ( $statebox.is( 'select, input[type="hidden"]' ) ) {
+				$newstate = $( '<input type="text" />' )
+					.prop( 'id', input_id )
+					.prop( 'name', input_name )
+					.prop( 'placeholder', placeholder )
+					.addClass( 'input-text' );
 				$parent.show().find( '.select2-container' ).remove();
-				$statebox.replaceWith( '<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />' );
-
+				$statebox.replaceWith( $newstate );
 				$( document.body ).trigger( 'country_to_state_changed', [country, $wrapper ] );
-
-			} else if ( $statebox.is( '.hidden' ) ) {
-
-				$parent.show().find( '.select2-container' ).remove();
-				$statebox.replaceWith( '<input type="text" class="input-text" name="' + input_name + '" id="' + input_id + '" placeholder="' + placeholder + '" />' );
-
-				$( document.body ).trigger( 'country_to_state_changed', [country, $wrapper ] );
-
 			}
 		}
 
 		$( document.body ).trigger( 'country_to_state_changing', [country, $wrapper ] );
-
 	});
 
-	$(function() {
-		$( ':input.country_to_state' ).change();
-	});
+	$( document.body ).on( 'wc_address_i18n_ready', function() {
+		// Init country selects with their default value once the page loads.
+		$( wrapper_selectors ).each( function() {
+			var $country_input = $( this ).find( '#billing_country, #shipping_country, #calc_shipping_country' );
 
+			if ( 0 === $country_input.length || 0 === $country_input.val().length ) {
+				return;
+			}
+
+			$country_input.trigger( 'refresh' );
+		});
+	});
 });

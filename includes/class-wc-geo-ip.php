@@ -1,13 +1,12 @@
 <?php
 /**
- * Geo IP class.
+ * Geo IP class
  *
  * This class is a fork of GeoIP class from MaxMind LLC.
  *
- * @author 	 WooThemes
- * @category Admin
- * @package  WooCommerce/Classes
- * @version  2.4.0
+ * @package    WooCommerce/Classes
+ * @version    2.4.0
+ * @deprecated 3.4.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,7 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Geolocation Class
+ * WC_Geo_IP Class.
+ *
+ * @deprecated 3.4.0
  */
 class WC_Geo_IP {
 
@@ -54,20 +55,60 @@ class WC_Geo_IP {
 	const GEOIP_ORG_EDITION_V6           = 23;
 	const GEOIP_DOMAIN_EDITION_V6        = 24;
 
+	/**
+	 * Flags.
+	 *
+	 * @var int
+	 */
 	public $flags;
 
+	/**
+	 * File handler.
+	 *
+	 * @var resource
+	 */
 	public $filehandle;
 
+	/**
+	 * Memory buffer.
+	 *
+	 * @var string
+	 */
 	public $memory_buffer;
 
+	/**
+	 * Database type.
+	 *
+	 * @var int
+	 */
 	public $databaseType;
 
+	/**
+	 * Database segments.
+	 *
+	 * @var int
+	 */
 	public $databaseSegments;
 
+	/**
+	 * Record length.
+	 *
+	 * @var int
+	 */
 	public $record_length;
 
+	/**
+	 * Shmid.
+	 *
+	 * @var string
+	 */
 	public $shmid;
 
+	/**
+	 * Two letters country codes.
+	 *
+	 * @var array
+	 */
 	public $GEOIP_COUNTRY_CODES = array(
 		'',
 		'AP',
@@ -324,9 +365,14 @@ class WC_Geo_IP {
 		'MF',
 		'BQ',
 		'SS',
-		'O1'
+		'O1',
 	);
 
+	/**
+	 * 3 letters country codes.
+	 *
+	 * @var array
+	 */
 	public $GEOIP_COUNTRY_CODES3 = array(
 		'',
 		'AP',
@@ -583,9 +629,14 @@ class WC_Geo_IP {
 		'MAF',
 		'BES',
 		'SSD',
-		'O1'
+		'O1',
 	);
 
+	/**
+	 * Contry names.
+	 *
+	 * @var array
+	 */
 	public $GEOIP_COUNTRY_NAMES = array(
 		'',
 		'Asia/Pacific Region',
@@ -842,9 +893,14 @@ class WC_Geo_IP {
 		'Saint Martin',
 		'Bonaire, Saint Eustatius and Saba',
 		'South Sudan',
-		'Other'
+		'Other',
 	);
 
+	/**
+	 * 2 letters continent codes.
+	 *
+	 * @var array
+	 */
 	public $GEOIP_CONTINENT_CODES = array(
 		'--',
 		'AS',
@@ -1101,24 +1157,44 @@ class WC_Geo_IP {
 		'NA',
 		'NA',
 		'AF',
-		'--'
+		'--',
 	);
 
+	/** @var WC_Logger Logger instance */
+	public static $log = false;
+
 	/**
-	 * Open geoip file
+	 * Logging method.
 	 *
-	 * @param  string $filename
-	 * @param  int $flags
+	 * @param string $message Log message.
+	 * @param string $level   Optional. Default 'info'.
+	 *     emergency|alert|critical|error|warning|notice|info|debug
+	 */
+	public static function log( $message, $level = 'info' ) {
+		if ( empty( self::$log ) ) {
+			self::$log = wc_get_logger();
+		}
+		self::$log->log( $level, $message, array( 'source' => 'geoip' ) );
+	}
+
+	/**
+	 * Open geoip file.
+	 *
+	 * @param string $filename
+	 * @param int    $flags
 	 */
 	public function geoip_open( $filename, $flags ) {
 		$this->flags = $flags;
 		if ( $this->flags & self::GEOIP_SHARED_MEMORY ) {
-			$this->shmid = @shmop_open( self::GEOIP_SHM_KEY, "a", 0, 0 );
+			$this->shmid = @shmop_open( self::GEOIP_SHM_KEY, 'a', 0, 0 );
 		} else {
-			$this->filehandle = fopen( $filename, 'rb' ) or trigger_error( "GeoIP API: Can not open $filename\n", E_USER_ERROR );
-			if ( $this->flags & self::GEOIP_MEMORY_CACHE ) {
-				$s_array = fstat( $this->filehandle );
-				$this->memory_buffer = fread( $this->filehandle, $s_array['size'] );
+			if ( $this->filehandle = fopen( $filename, 'rb' ) ) {
+				if ( $this->flags & self::GEOIP_MEMORY_CACHE ) {
+					$s_array = fstat( $this->filehandle );
+					$this->memory_buffer = fread( $this->filehandle, $s_array['size'] );
+				}
+			} else {
+				$this->log( 'GeoIP API: Can not open ' . $filename, 'error' );
 			}
 		}
 
@@ -1126,7 +1202,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Setup segments
+	 * Setup segments.
 	 *
 	 * @return WC_Geo_IP instance
 	 */
@@ -1141,7 +1217,7 @@ class WC_Geo_IP {
 				$delim   = @shmop_read( $this->shmid, $offset, 3 );
 				$offset += 3;
 
-				if ( $delim == ( chr( 255 ) . chr( 255 ) . chr( 255 ) ) ) {
+				if ( ( chr( 255 ) . chr( 255 ) . chr( 255 ) ) == $delim ) {
 					$this->databaseType = ord( @shmop_read( $this->shmid, $offset, 1 ) );
 
 					if ( $this->databaseType >= 106 ) {
@@ -1150,28 +1226,28 @@ class WC_Geo_IP {
 
 					$offset++;
 
-					if ( $this->databaseType == self::GEOIP_REGION_EDITION_REV0 ) {
+					if ( self::GEOIP_REGION_EDITION_REV0 == $this->databaseType ) {
 						$this->databaseSegments = self::GEOIP_STATE_BEGIN_REV0;
-					} elseif ( $this->databaseType == self::GEOIP_REGION_EDITION_REV1 ) {
+					} elseif ( self::GEOIP_REGION_EDITION_REV1 == $this->databaseType ) {
 						$this->databaseSegments = self::GEOIP_STATE_BEGIN_REV1;
-					} elseif ( ( $this->databaseType == self::GEOIP_CITY_EDITION_REV0 )
-						|| ( $this->databaseType == self::GEOIP_CITY_EDITION_REV1 )
-						|| ( $this->databaseType == self::GEOIP_ORG_EDITION )
-						|| ( $this->databaseType == self::GEOIP_ORG_EDITION_V6 )
-						|| ( $this->databaseType == self::GEOIP_DOMAIN_EDITION )
-						|| ( $this->databaseType == self::GEOIP_DOMAIN_EDITION_V6 )
-						|| ( $this->databaseType == self::GEOIP_ISP_EDITION )
-						|| ( $this->databaseType == self::GEOIP_ISP_EDITION_V6 )
-						|| ( $this->databaseType == self::GEOIP_USERTYPE_EDITION )
-						|| ( $this->databaseType == self::GEOIP_USERTYPE_EDITION_V6 )
-						|| ( $this->databaseType == self::GEOIP_LOCATIONA_EDITION )
-						|| ( $this->databaseType == self::GEOIP_ACCURACYRADIUS_EDITION )
-						|| ( $this->databaseType == self::GEOIP_CITY_EDITION_REV0_V6 )
-						|| ( $this->databaseType == self::GEOIP_CITY_EDITION_REV1_V6 )
-						|| ( $this->databaseType == self::GEOIP_NETSPEED_EDITION_REV1 )
-						|| ( $this->databaseType == self::GEOIP_NETSPEED_EDITION_REV1_V6 )
-						|| ( $this->databaseType == self::GEOIP_ASNUM_EDITION )
-						|| ( $this->databaseType == self::GEOIP_ASNUM_EDITION_V6 )
+					} elseif ( ( self::GEOIP_CITY_EDITION_REV0 == $this->databaseType )
+						|| ( self::GEOIP_CITY_EDITION_REV1 == $this->databaseType )
+						|| ( self::GEOIP_ORG_EDITION == $this->databaseType )
+						|| ( self::GEOIP_ORG_EDITION_V6 == $this->databaseType )
+						|| ( self::GEOIP_DOMAIN_EDITION == $this->databaseType )
+						|| ( self::GEOIP_DOMAIN_EDITION_V6 == $this->databaseType )
+						|| ( self::GEOIP_ISP_EDITION == $this->databaseType )
+						|| ( self::GEOIP_ISP_EDITION_V6 == $this->databaseType )
+						|| ( self::GEOIP_USERTYPE_EDITION == $this->databaseType )
+						|| ( self::GEOIP_USERTYPE_EDITION_V6 == $this->databaseType )
+						|| ( self::GEOIP_LOCATIONA_EDITION == $this->databaseType )
+						|| ( self::GEOIP_ACCURACYRADIUS_EDITION == $this->databaseType )
+						|| ( self::GEOIP_CITY_EDITION_REV0_V6 == $this->databaseType )
+						|| ( self::GEOIP_CITY_EDITION_REV1_V6 == $this->databaseType )
+						|| ( self::GEOIP_NETSPEED_EDITION_REV1 == $this->databaseType )
+						|| ( self::GEOIP_NETSPEED_EDITION_REV1_V6 == $this->databaseType )
+						|| ( self::GEOIP_ASNUM_EDITION == $this->databaseType )
+						|| ( self::GEOIP_ASNUM_EDITION_V6 == $this->databaseType )
 					) {
 						$this->databaseSegments = 0;
 						$buf                    = @shmop_read( $this->shmid, $offset, self::SEGMENT_RECORD_LENGTH );
@@ -1180,12 +1256,12 @@ class WC_Geo_IP {
 							$this->databaseSegments += ( ord( $buf[ $j ] ) << ( $j * 8 ) );
 						}
 
-						if ( ( $this->databaseType == self::GEOIP_ORG_EDITION )
-							|| ( $this->databaseType == self::GEOIP_ORG_EDITION_V6 )
-							|| ( $this->databaseType == self::GEOIP_DOMAIN_EDITION )
-							|| ( $this->databaseType == self::GEOIP_DOMAIN_EDITION_V6 )
-							|| ( $this->databaseType == self::GEOIP_ISP_EDITION )
-							|| ( $this->databaseType == self::GEOIP_ISP_EDITION_V6 )
+						if ( ( self::GEOIP_ORG_EDITION == $this->databaseType )
+							|| ( self::GEOIP_ORG_EDITION_V6 == $this->databaseType )
+							|| ( self::GEOIP_DOMAIN_EDITION == $this->databaseType )
+							|| ( self::GEOIP_DOMAIN_EDITION_V6 == $this->databaseType )
+							|| ( self::GEOIP_ISP_EDITION == $this->databaseType )
+							|| ( self::GEOIP_ISP_EDITION_V6 == $this->databaseType )
 						) {
 							$this->record_length = self::ORG_RECORD_LENGTH;
 						}
@@ -1196,10 +1272,10 @@ class WC_Geo_IP {
 					$offset -= 4;
 				}
 			}
-			if ( ( $this->databaseType == self::GEOIP_COUNTRY_EDITION )
-				|| ( $this->databaseType == self::GEOIP_COUNTRY_EDITION_V6 )
-				|| ( $this->databaseType == self::GEOIP_PROXY_EDITION )
-				|| ( $this->databaseType == self::GEOIP_NETSPEED_EDITION )
+			if ( ( self::GEOIP_COUNTRY_EDITION == $this->databaseType )
+				|| ( self::GEOIP_COUNTRY_EDITION_V6 == $this->databaseType )
+				|| ( self::GEOIP_PROXY_EDITION == $this->databaseType )
+				|| ( self::GEOIP_NETSPEED_EDITION == $this->databaseType )
 			) {
 				$this->databaseSegments = self::GEOIP_COUNTRY_BEGIN;
 			}
@@ -1210,37 +1286,35 @@ class WC_Geo_IP {
 			for ( $i = 0; $i < self::STRUCTURE_INFO_MAX_SIZE; $i++ ) {
 
 				$delim = fread( $this->filehandle, 3 );
-				if ( $delim == ( chr( 255 ) . chr( 255 ) . chr( 255 ) ) ) {
+				if ( ( chr( 255 ) . chr( 255 ) . chr( 255 ) ) == $delim ) {
 
 					$this->databaseType = ord( fread( $this->filehandle, 1 ) );
 					if ( $this->databaseType >= 106 ) {
 						$this->databaseType -= 105;
 					}
 
-					if ( $this->databaseType == self::GEOIP_REGION_EDITION_REV0 ) {
+					if ( self::GEOIP_REGION_EDITION_REV0 == $this->databaseType ) {
 						$this->databaseSegments = self::GEOIP_STATE_BEGIN_REV0;
-					} elseif ( $this->databaseType == self::GEOIP_REGION_EDITION_REV1 ) {
+					} elseif ( self::GEOIP_REGION_EDITION_REV1 == $this->databaseType ) {
 						$this->databaseSegments = self::GEOIP_STATE_BEGIN_REV1;
-					} elseif ( ( $this->databaseType == self::GEOIP_CITY_EDITION_REV0 )
-						|| ( $this->databaseType == self::GEOIP_CITY_EDITION_REV1 )
-						|| ( $this->databaseType == self::GEOIP_CITY_EDITION_REV0_V6 )
-						|| ( $this->databaseType == self::GEOIP_CITY_EDITION_REV1_V6 )
-						|| ( $this->databaseType == self::GEOIP_ORG_EDITION )
-						|| ( $this->databaseType == self::GEOIP_DOMAIN_EDITION )
-						|| ( $this->databaseType == self::GEOIP_ISP_EDITION )
-						|| ( $this->databaseType == self::GEOIP_ORG_EDITION_V6 )
-						|| ( $this->databaseType == self::GEOIP_DOMAIN_EDITION_V6 )
-						|| ( $this->databaseType == self::GEOIP_ISP_EDITION_V6 )
-						|| ( $this->databaseType == self::GEOIP_LOCATIONA_EDITION )
-						|| ( $this->databaseType == self::GEOIP_ACCURACYRADIUS_EDITION )
-						|| ( $this->databaseType == self::GEOIP_CITY_EDITION_REV0_V6 )
-						|| ( $this->databaseType == self::GEOIP_CITY_EDITION_REV1_V6 )
-						|| ( $this->databaseType == self::GEOIP_NETSPEED_EDITION_REV1 )
-						|| ( $this->databaseType == self::GEOIP_NETSPEED_EDITION_REV1_V6 )
-						|| ( $this->databaseType == self::GEOIP_USERTYPE_EDITION )
-						|| ( $this->databaseType == self::GEOIP_USERTYPE_EDITION_V6 )
-						|| ( $this->databaseType == self::GEOIP_ASNUM_EDITION )
-						|| ( $this->databaseType == self::GEOIP_ASNUM_EDITION_V6 )
+					} elseif ( ( self::GEOIP_CITY_EDITION_REV0 == $this->databaseType )
+						|| ( self::GEOIP_CITY_EDITION_REV1 == $this->databaseType )
+						|| ( self::GEOIP_CITY_EDITION_REV0_V6 == $this->databaseType )
+						|| ( self::GEOIP_CITY_EDITION_REV1_V6 == $this->databaseType )
+						|| ( self::GEOIP_ORG_EDITION == $this->databaseType )
+						|| ( self::GEOIP_DOMAIN_EDITION == $this->databaseType )
+						|| ( self::GEOIP_ISP_EDITION == $this->databaseType )
+						|| ( self::GEOIP_ORG_EDITION_V6 == $this->databaseType )
+						|| ( self::GEOIP_DOMAIN_EDITION_V6 == $this->databaseType )
+						|| ( self::GEOIP_ISP_EDITION_V6 == $this->databaseType )
+						|| ( self::GEOIP_LOCATIONA_EDITION == $this->databaseType )
+						|| ( self::GEOIP_ACCURACYRADIUS_EDITION == $this->databaseType )
+						|| ( self::GEOIP_NETSPEED_EDITION_REV1 == $this->databaseType )
+						|| ( self::GEOIP_NETSPEED_EDITION_REV1_V6 == $this->databaseType )
+						|| ( self::GEOIP_USERTYPE_EDITION == $this->databaseType )
+						|| ( self::GEOIP_USERTYPE_EDITION_V6 == $this->databaseType )
+						|| ( self::GEOIP_ASNUM_EDITION == $this->databaseType )
+						|| ( self::GEOIP_ASNUM_EDITION_V6 == $this->databaseType )
 					) {
 						$this->databaseSegments = 0;
 						$buf = fread( $this->filehandle, self::SEGMENT_RECORD_LENGTH );
@@ -1249,12 +1323,12 @@ class WC_Geo_IP {
 							$this->databaseSegments += ( ord( $buf[ $j ] ) << ( $j * 8 ) );
 						}
 
-						if ( ( $this->databaseType == self::GEOIP_ORG_EDITION )
-							|| ( $this->databaseType == self::GEOIP_DOMAIN_EDITION )
-							|| ( $this->databaseType == self::GEOIP_ISP_EDITION )
-							|| ( $this->databaseType == self::GEOIP_ORG_EDITION_V6 )
-							|| ( $this->databaseType == self::GEOIP_DOMAIN_EDITION_V6 )
-							|| ( $this->databaseType == self::GEOIP_ISP_EDITION_V6 )
+						if ( ( self::GEOIP_ORG_EDITION == $this->databaseType )
+							|| ( self::GEOIP_DOMAIN_EDITION == $this->databaseType )
+							|| ( self::GEOIP_ISP_EDITION == $this->databaseType )
+							|| ( self::GEOIP_ORG_EDITION_V6 == $this->databaseType )
+							|| ( self::GEOIP_DOMAIN_EDITION_V6 == $this->databaseType )
+							|| ( self::GEOIP_ISP_EDITION_V6 == $this->databaseType )
 						) {
 							$this->record_length = self::ORG_RECORD_LENGTH;
 						}
@@ -1266,10 +1340,10 @@ class WC_Geo_IP {
 				}
 			}
 
-			if ( ( $this->databaseType == self::GEOIP_COUNTRY_EDITION )
-				|| ( $this->databaseType == self::GEOIP_COUNTRY_EDITION_V6 )
-				|| ( $this->databaseType == self::GEOIP_PROXY_EDITION )
-				|| ( $this->databaseType == self::GEOIP_NETSPEED_EDITION )
+			if ( ( self::GEOIP_COUNTRY_EDITION == $this->databaseType )
+				|| ( self::GEOIP_COUNTRY_EDITION_V6 == $this->databaseType )
+				|| ( self::GEOIP_PROXY_EDITION == $this->databaseType )
+				|| ( self::GEOIP_NETSPEED_EDITION == $this->databaseType )
 			) {
 				$this->databaseSegments = self::GEOIP_COUNTRY_BEGIN;
 			}
@@ -1281,7 +1355,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Close geoip file
+	 * Close geoip file.
 	 *
 	 * @return bool
 	 */
@@ -1294,7 +1368,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Common get record
+	 * Common get record.
 	 *
 	 * @param  string $seek_country
 	 * @return WC_Geo_IP_Record instance
@@ -1332,7 +1406,7 @@ class WC_Geo_IP {
 
 		// Get region
 		$char = ord( substr( $record_buf, $record_buf_pos + $str_length, 1 ) );
-		while ( $char != 0 ) {
+		while ( 0 != $char ) {
 			$str_length++;
 			$char = ord( substr( $record_buf, $record_buf_pos + $str_length, 1 ) );
 		}
@@ -1346,7 +1420,7 @@ class WC_Geo_IP {
 
 		// Get city
 		$char = ord( substr( $record_buf, $record_buf_pos + $str_length, 1 ) );
-		while ( $char != 0 ) {
+		while ( 0 != $char ) {
 			$str_length++;
 			$char = ord( substr( $record_buf, $record_buf_pos + $str_length, 1 ) );
 		}
@@ -1360,7 +1434,7 @@ class WC_Geo_IP {
 
 		// Get postal code
 		$char = ord( substr( $record_buf, $record_buf_pos + $str_length, 1 ) );
-		while ( $char != 0 ) {
+		while ( 0 != $char ) {
 			$str_length++;
 			$char = ord( substr( $record_buf, $record_buf_pos + $str_length, 1 ) );
 		}
@@ -1390,7 +1464,7 @@ class WC_Geo_IP {
 
 		if ( self::GEOIP_CITY_EDITION_REV1 == $this->databaseType ) {
 			$metroarea_combo = 0;
-			if ( $record->country_code == "US" ) {
+			if ( 'US' === $record->country_code ) {
 				for ( $j = 0; $j < 3; ++$j ) {
 					$char             = ord( substr( $record_buf, $record_buf_pos++, 1 ) );
 					$metroarea_combo += ( $char << ( $j * 8 ) );
@@ -1409,7 +1483,7 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Get record
+	 * Get record.
 	 *
 	 * @param  int $ipnum
 	 * @return WC_Geo_IP_Record instance
@@ -1424,12 +1498,12 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Seek country IPv6
+	 * Seek country IPv6.
 	 *
-	 * @param  int $ipnum [description]
-	 * @return bool|int
+	 * @param  int $ipnum
+	 * @return string
 	 */
-	function _geoip_seek_country_v6( $ipnum ) {
+	public function _geoip_seek_country_v6( $ipnum ) {
 		// arrays from unpack start with offset 1
 		// yet another php mystery. array_merge work around
 		// this broken behaviour
@@ -1450,8 +1524,9 @@ class WC_Geo_IP {
 					2 * $this->record_length
 				);
 			} else {
-				fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) == 0
-				or trigger_error( 'GeoIP API: fseek failed', E_USER_ERROR );
+				if ( 0 != fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) ) {
+					break;
+				}
 
 				$buf = fread( $this->filehandle, 2 * $this->record_length );
 			}
@@ -1478,16 +1553,16 @@ class WC_Geo_IP {
 			}
 		}
 
-		trigger_error( 'GeoIP API: Error traversing database - perhaps it is corrupt?', E_USER_ERROR );
+		$this->log( 'GeoIP API: Error traversing database - perhaps it is corrupt?', 'error' );
 
 		return false;
 	}
 
 	/**
-	 * Seek country
+	 * Seek country.
 	 *
 	 * @param  int $ipnum
-	 * @return bool|int
+	 * @return string
 	 */
 	private function _geoip_seek_country( $ipnum ) {
 		$offset = 0;
@@ -1505,8 +1580,9 @@ class WC_Geo_IP {
 					2 * $this->record_length
 				);
 			} else {
-				fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) == 0
-				or trigger_error( 'GeoIP API: fseek failed', E_USER_ERROR );
+				if ( 0 != fseek( $this->filehandle, 2 * $this->record_length * $offset, SEEK_SET ) ) {
+					break;
+				}
 
 				$buf = fread( $this->filehandle, 2 * $this->record_length );
 			}
@@ -1532,19 +1608,20 @@ class WC_Geo_IP {
 			}
 		}
 
-		trigger_error( 'GeoIP API: Error traversing database - perhaps it is corrupt?', E_USER_ERROR );
+		$this->log( 'GeoIP API: Error traversing database - perhaps it is corrupt?', 'error' );
 
 		return false;
 	}
 
 	/**
-	 * Record by addr
+	 * Record by addr.
 	 *
 	 * @param  string $addr
-	 * @return int
+	 *
+	 * @return WC_Geo_IP_Record
 	 */
 	public function geoip_record_by_addr( $addr ) {
-		if ( $addr == null ) {
+		if ( null == $addr ) {
 			return 0;
 		}
 
@@ -1553,18 +1630,22 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Country ID by addr IPv6
+	 * Country ID by addr IPv6.
 	 *
 	 * @param  string $addr
-	 * @return int
+	 * @return int|bool
 	 */
 	public function geoip_country_id_by_addr_v6( $addr ) {
+		if ( ! defined( 'AF_INET6' ) ) {
+			$this->log( 'GEOIP (geoip_country_id_by_addr_v6): PHP was compiled with --disable-ipv6 option' );
+			return false;
+		}
 		$ipnum = inet_pton( $addr );
 		return $this->_geoip_seek_country_v6( $ipnum ) - self::GEOIP_COUNTRY_BEGIN;
 	}
 
 	/**
-	 * Country ID by addr
+	 * Country ID by addr.
 	 *
 	 * @param  string $addr
 	 * @return int
@@ -1575,14 +1656,14 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Country code by addr IPv6
+	 * Country code by addr IPv6.
 	 *
 	 * @param  string $addr
-	 * @return bool|int
+	 * @return string
 	 */
 	public function geoip_country_code_by_addr_v6( $addr ) {
 		$country_id = $this->geoip_country_id_by_addr_v6( $addr );
-		if ( $country_id !== false ) {
+		if ( false !== $country_id && isset( $this->GEOIP_COUNTRY_CODES[ $country_id ] ) ) {
 			return $this->GEOIP_COUNTRY_CODES[ $country_id ];
 		}
 
@@ -1590,20 +1671,20 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Country code by addr
+	 * Country code by addr.
 	 *
 	 * @param  string $addr
-	 * @return bool|int
+	 * @return string
 	 */
 	public function geoip_country_code_by_addr( $addr ) {
-		if ( $this->databaseType == self::GEOIP_CITY_EDITION_REV1 ) {
-			$record = $this->geoip_record_by_addr( $addr);
-			if ( $record !== false ) {
+		if ( self::GEOIP_CITY_EDITION_REV1 == $this->databaseType ) {
+			$record = $this->geoip_record_by_addr( $addr );
+			if ( false !== $record ) {
 				return $record->country_code;
 			}
 		} else {
 			$country_id = $this->geoip_country_id_by_addr( $addr );
-			if ( $country_id !== false ) {
+			if ( false !== $country_id && isset( $this->GEOIP_COUNTRY_CODES[ $country_id ] ) ) {
 				return $this->GEOIP_COUNTRY_CODES[ $country_id ];
 			}
 		}
@@ -1612,12 +1693,11 @@ class WC_Geo_IP {
 	}
 
 	/**
-	 * Encode string
+	 * Encode string.
 	 *
 	 * @param  string $string
-	 * @param  int $start
-	 * @param  int $length
-	 *
+	 * @param  int    $start
+	 * @param  int    $length
 	 * @return string
 	 */
 	private function _safe_substr( $string, $start, $length ) {
@@ -1641,19 +1721,94 @@ class WC_Geo_IP {
 }
 
 /**
- * Geo IP Record class
+ * Geo IP Record class.
  */
 class WC_Geo_IP_Record {
+
+	/**
+	 * Country code.
+	 *
+	 * @var string
+	 */
 	public $country_code;
+
+	/**
+	 * 3 letters country code.
+	 *
+	 * @var string
+	 */
 	public $country_code3;
+
+	/**
+	 * Country name.
+	 *
+	 * @var string
+	 */
 	public $country_name;
+
+	/**
+	 * Region.
+	 *
+	 * @var string
+	 */
 	public $region;
+
+	/**
+	 * City.
+	 *
+	 * @var string
+	 */
 	public $city;
+
+	/**
+	 * Postal code.
+	 *
+	 * @var string
+	 */
 	public $postal_code;
+
+	/**
+	 * Latitude
+	 *
+	 * @var int
+	 */
 	public $latitude;
+
+	/**
+	 * Longitude.
+	 *
+	 * @var int
+	 */
 	public $longitude;
+
+	/**
+	 * Area code.
+	 *
+	 * @var int
+	 */
 	public $area_code;
-	public $dma_code; // metro and dma code are the same. use metro_code
+
+	/**
+	 * DMA Code.
+	 *
+	 * Metro and DMA code are the same.
+	 * Use metro code instead.
+	 *
+	 * @var float
+	 */
+	public $dma_code;
+
+	/**
+	 * Metro code.
+	 *
+	 * @var float
+	 */
 	public $metro_code;
+
+	/**
+	 * Continent code.
+	 *
+	 * @var string
+	 */
 	public $continent_code;
 }

@@ -11,11 +11,11 @@
 	-ms-filter: none !important;
 	font-size: 9pt !important;
 	opacity: 1;
-	-webkit-transition: none !important;
+	transition: none !important;
 }
 
 @page {
-  margin: .5cm;
+	margin: 0.5cm;
 }
 
 #adminmenuwrap,
@@ -67,7 +67,7 @@ h2 .nav-tab {
 
 .chart-legend li,
 .chart-legend li {
-	padding: .25em .5em !important;
+	padding: 0.25em 0.5em !important;
 	box-shadow: none !important;
 	border-bottom: 1px solid gray !important;
 }

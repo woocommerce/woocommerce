@@ -1,4 +1,4 @@
-/*global ajaxurl, inlineEditPost, inlineEditL10n */
+/*global inlineEditPost, woocommerce_admin, woocommerce_quick_edit */
 jQuery(function( $ ) {
 	$( '#the-list' ).on( 'click', '.editinline', function() {
 
@@ -28,9 +28,12 @@ jQuery(function( $ ) {
 			tax_class      = $wc_inline_data.find( '.tax_class' ).text(),
 			backorders     = $wc_inline_data.find( '.backorders' ).text();
 
+		var formatted_regular_price = regular_price.replace('.', woocommerce_admin.mon_decimal_point ),
+			formatted_sale_price	= sale_price.replace('.', woocommerce_admin.mon_decimal_point );
+
 		$( 'input[name="_sku"]', '.inline-edit-row' ).val( sku );
-		$( 'input[name="_regular_price"]', '.inline-edit-row' ).val( regular_price );
-		$( 'input[name="_sale_price"]', '.inline-edit-row' ).val( sale_price );
+		$( 'input[name="_regular_price"]', '.inline-edit-row' ).val( formatted_regular_price );
+		$( 'input[name="_sale_price"]', '.inline-edit-row' ).val( formatted_sale_price );
 		$( 'input[name="_weight"]', '.inline-edit-row' ).val( weight );
 		$( 'input[name="_length"]', '.inline-edit-row' ).val( length );
 		$( 'input[name="_width"]', '.inline-edit-row' ).val( width );
@@ -42,11 +45,10 @@ jQuery(function( $ ) {
 		$( 'input[name="_stock"]', '.inline-edit-row' ).val( stock );
 		$( 'input[name="menu_order"]', '.inline-edit-row' ).val( menu_order );
 
+		$( 'select[name="_tax_status"] option, select[name="_tax_class"] option, select[name="_visibility"] option, select[name="_stock_status"] option, select[name="_backorders"] option' ).removeAttr( 'selected' );
+
 		$( 'select[name="_tax_status"] option[value="' + tax_status + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
 		$( 'select[name="_tax_class"] option[value="' + tax_class + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
-
-		$( 'select[name="_visibility"] option, select[name="_stock_status"] option, select[name="_backorders"] option' ).removeAttr( 'selected' );
-
 		$( 'select[name="_visibility"] option[value="' + visibility + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
 		$( 'select[name="_stock_status"] option[value="' + stock_status + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
 		$( 'select[name="_backorders"] option[value="' + backorders + '"]', '.inline-edit-row' ).attr( 'selected', 'selected' );
@@ -57,17 +59,30 @@ jQuery(function( $ ) {
 			$( 'input[name="_featured"]', '.inline-edit-row' ).removeAttr( 'checked' );
 		}
 
-		if ( 'yes' === manage_stock ) {
-			$( '.stock_qty_field', '.inline-edit-row' ).show().removeAttr( 'style' );
-			$( 'input[name="_manage_stock"]', '.inline-edit-row' ).attr( 'checked', 'checked' );
-		} else {
-			$( '.stock_qty_field', '.inline-edit-row' ).hide();
-			$( 'input[name="_manage_stock"]', '.inline-edit-row' ).removeAttr( 'checked' );
-		}
-
 		// Conditional display
 		var product_type       = $wc_inline_data.find( '.product_type' ).text(),
 			product_is_virtual = $wc_inline_data.find( '.product_is_virtual' ).text();
+
+		var product_supports_stock_status = 'external' !== product_type;
+		var product_supports_stock_fields = 'external' !== product_type && 'grouped' !== product_type;
+
+		$( '.stock_fields, .manage_stock_field, .stock_status_field, .backorder_field' ).show();
+
+		if ( product_supports_stock_fields ) {
+			if ( 'yes' === manage_stock ) {
+				$( '.stock_qty_field, .backorder_field', '.inline-edit-row' ).show().removeAttr( 'style' );
+				$( '.stock_status_field' ).hide();
+				$( '.manage_stock_field input' ).prop( 'checked', true );
+			} else {
+				$( '.stock_qty_field, .backorder_field', '.inline-edit-row' ).hide();
+				$( '.stock_status_field' ).show().removeAttr( 'style' );
+				$( '.manage_stock_field input' ).prop( 'checked', false );
+			}
+		} else if ( product_supports_stock_status ) {
+			$( '.stock_fields, .manage_stock_field, .backorder_field' ).hide();
+		} else {
+			$( '.stock_fields, .manage_stock_field, .stock_status_field, .backorder_field' ).hide();
+		}
 
 		if ( 'simple' === product_type || 'external' === product_type ) {
 			$( '.price_fields', '.inline-edit-row' ).show().removeAttr( 'style' );
@@ -81,31 +96,26 @@ jQuery(function( $ ) {
 			$( '.dimension_fields', '.inline-edit-row' ).show().removeAttr( 'style' );
 		}
 
-		if ( 'grouped' === product_type ) {
-			$( '.stock_fields', '.inline-edit-row' ).hide();
-		} else {
-			$( '.stock_fields', '.inline-edit-row' ).show().removeAttr( 'style' );
-		}
+		// Rename core strings
+		$( 'input[name="comment_status"]' ).parent().find( '.checkbox-title' ).text( woocommerce_quick_edit.strings.allow_reviews );
 	});
 
 	$( '#the-list' ).on( 'change', '.inline-edit-row input[name="_manage_stock"]', function() {
 
 		if ( $( this ).is( ':checked' ) ) {
-			$( '.stock_qty_field', '.inline-edit-row' ).show().removeAttr( 'style' );
+			$( '.stock_qty_field, .backorder_field', '.inline-edit-row' ).show().removeAttr( 'style' );
+			$( '.stock_status_field' ).hide();
 		} else {
-			$( '.stock_qty_field', '.inline-edit-row' ).hide();
+			$( '.stock_qty_field, .backorder_field', '.inline-edit-row' ).hide();
+			$( '.stock_status_field' ).show().removeAttr( 'style' );
 		}
 
 	});
 
 	$( '#wpbody' ).on( 'click', '#doaction, #doaction2', function() {
 		$( 'input.text', '.inline-edit-row' ).val( '' );
-		$( '#woocommerce-fields select' ).prop( 'selectedIndex', 0 );
-		$( '#woocommerce-fields-bulk .inline-edit-group .change-input' ).hide();
-
-		// Autosuggest product tags on bulk edit
-		var tax = 'product_tag';
-		$( 'tr.inline-editor textarea[name="tax_input[' + tax + ']"]' ).suggest( ajaxurl + '?action=ajax-tag-search&tax=' + tax, { delay: 500, minchars: 2, multiple: true, multipleSep: inlineEditL10n.comma } );
+		$( '#woocommerce-fields' ).find( 'select' ).prop( 'selectedIndex', 0 );
+		$( '#woocommerce-fields-bulk' ).find( '.inline-edit-group .change-input' ).hide();
 	});
 
 	$( '#wpbody' ).on( 'change', '#woocommerce-fields-bulk .inline-edit-group .change_to', function() {
@@ -116,5 +126,9 @@ jQuery(function( $ ) {
 			$( this ).closest( 'div' ).find( '.change-input' ).hide();
 		}
 
+	});
+
+	$( '#wpbody' ).on( 'click', '.trash-product', function() {
+		return window.confirm( woocommerce_admin.i18n_delete_product_notice );
 	});
 });
