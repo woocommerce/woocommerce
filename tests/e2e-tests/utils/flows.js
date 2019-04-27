@@ -20,6 +20,7 @@ const WP_ADMIN_WC_SETTINGS = baseUrl + 'wp-admin/admin.php?page=wc-settings&tab=
 const SHOP_PAGE = baseUrl + 'shop/';
 const SHOP_PRODUCT = baseUrl + 'product/';
 const SHOP_CART_PAGE = baseUrl + 'cart/';
+const SHOP_CHECKOUT_PAGE = baseUrl + 'checkout/';
 const SHOP_MY_ACCOUNT_PAGE = baseUrl + 'my-account/';
 
 const getCartItemExpression = ( productTitle, args ) => (
@@ -86,6 +87,12 @@ const CustomerFlow = {
 		} );
 	},
 
+	goToCheckout: async () => {
+		await page.goto( SHOP_CHECKOUT_PAGE, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
 	goToShop: async () => {
 		await page.goto( SHOP_PAGE, {
 			waitUntil: 'networkidle0',
@@ -108,11 +115,28 @@ const CustomerFlow = {
 		] );
 	},
 
+	placeOrder: async () => {
+		await Promise.all( [
+			expect( page ).toClick( '#place_order' ),
+			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+        ] );
+	},
+
 	productIsInCart: async ( productTitle, quantity = null ) => {
 		const cartItemArgs = quantity ? { qty: quantity } : {};
 		const cartItemXPath = getCartItemExpression( productTitle, cartItemArgs );
 
 		await expect( page.$x( cartItemXPath ) ).resolves.toHaveLength( 1 );
+	},
+
+	productIsInCheckout: async ( productTitle, quantity, total ) => {
+		const checkoutItemXPath =
+			'//tr[@class="cart_item" and ' +
+				`.//td[contains(., "${ productTitle }") and contains(., "× ${ quantity }")] and ` +
+				`.//td[contains(., "${ total }")]` +
+			']';
+
+		await expect( page.$x( checkoutItemXPath ) ).resolves.toHaveLength( 1 );
 	},
 
 	removeCartProduct: async ( productTitle ) => {
@@ -148,6 +172,19 @@ const StoreOwnerFlow = {
 		await Promise.all( [
 			page.click( 'input[type=submit]' ),
 			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+		] );
+	},
+
+	logout: async () => {
+		await page.goto( baseUrl + 'wp-login.php?action=logout', {
+			waitUntil: 'networkidle0',
+		} );
+
+		await expect( page ).toMatch( 'You are attempting to log out' );
+
+		await Promise.all( [
+			page.waitForNavigation( { waitUntil: 'networkidle0' } ),
+			page.click( 'a' ),
 		] );
 	},
 
