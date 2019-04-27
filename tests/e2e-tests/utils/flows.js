@@ -6,6 +6,8 @@
  * External dependencies
  */
 const config = require( 'config' );
+// NOTE: change this to @wordpress/e2e-test-utils when it gets updated.
+const { pressKeyWithModifier } = require( './press-key-with-modifier' );
 
 const baseUrl = config.get( 'url' );
 
@@ -15,6 +17,7 @@ const WP_ADMIN_NEW_ORDER = baseUrl + 'wp-admin/post-new.php?post_type=shop_order
 const WP_ADMIN_NEW_PRODUCT = baseUrl + 'wp-admin/post-new.php?post_type=product';
 const WP_ADMIN_WC_SETTINGS = baseUrl + 'wp-admin/admin.php?page=wc-settings&tab=';
 
+const SHOP_PAGE = baseUrl + 'shop/';
 const SHOP_PRODUCT = baseUrl + 'product/';
 const SHOP_CART_PAGE = baseUrl + 'cart/';
 const SHOP_MY_ACCOUNT_PAGE = baseUrl + 'my-account/';
@@ -39,7 +42,7 @@ const getQtyColumnExpression = ( args ) => (
 	']'
 );
 
-const getQtyInputExpression = ( args ) => {
+const getQtyInputExpression = ( args = {} ) => {
 	let qtyValue = '';
 
 	if ( args.checkQty ) {
@@ -49,12 +52,26 @@ const getQtyInputExpression = ( args ) => {
 	return 'input[contains(@class, "input-text")' + qtyValue + ']';
 };
 
+const getRemoveExpression = () => (
+	'td[@class="product-remove"]//a[@class="remove"]'
+);
+
 const CustomerFlow = {
 	addToCart: async () => {
 		await Promise.all( [
             page.waitForNavigation( { waitUntil: 'networkidle0' } ),
             page.click( '.single_add_to_cart_button' ),
         ] );
+	},
+
+	addToCartFromShopPage: async ( productTitle ) => {
+		const addToCartXPath = `//li[contains(@class, "type-product") and a/h2[contains(text(), "${ productTitle }")]]` +
+		'//a[contains(@class, "add_to_cart_button") and contains(@class, "ajax_add_to_cart")';
+
+		const [ addToCartButton ] = await page.$x( addToCartXPath + ']' );
+		addToCartButton.click();
+
+		await page.waitFor( addToCartXPath + ' and contains(@class, "added")]' );
 	},
 
 	goToProduct: async ( productSlug ) => {
@@ -65,6 +82,12 @@ const CustomerFlow = {
 
 	goToCart: async () => {
 		await page.goto( SHOP_CART_PAGE, {
+			waitUntil: 'networkidle0',
+		} );
+	},
+
+	goToShop: async () => {
+		await page.goto( SHOP_PAGE, {
 			waitUntil: 'networkidle0',
 		} );
 	},
@@ -90,6 +113,24 @@ const CustomerFlow = {
 		const cartItemXPath = getCartItemExpression( productTitle, cartItemArgs );
 
 		await expect( page.$x( cartItemXPath ) ).resolves.toHaveLength( 1 );
+	},
+
+	removeCartProduct: async ( productTitle ) => {
+		const cartItemXPath = getCartItemExpression( productTitle );
+		const removeItemXPath = cartItemXPath + '//' + getRemoveExpression();
+
+		const [ removeButton ] = await page.$x( removeItemXPath );
+		await removeButton.click();
+	},
+
+	setCartQuantity: async ( productTitle, quantityValue ) => {
+		const cartItemXPath = getCartItemExpression( productTitle );
+		const quantityInputXPath = cartItemXPath + '//' + getQtyInputExpression();
+
+		const [ quantityInput ] = await page.$x( quantityInputXPath );
+		await quantityInput.focus();
+		await pressKeyWithModifier( 'primary', 'a' );
+		await quantityInput.type( quantityValue.toString() );
 	},
 };
 
