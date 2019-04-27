@@ -11,7 +11,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( $order ) : ?>
+if ( $order ) :
+
+	do_action( 'woocommerce_before_thankyou', $order->id ); ?>
 
 	<?php if ( $order->has_status( 'failed' ) ) : ?>
 
