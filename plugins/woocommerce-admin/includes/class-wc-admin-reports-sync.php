@@ -85,7 +85,7 @@ class WC_Admin_Reports_Sync {
 		// Initialize scheduled action handlers.
 		add_action( self::QUEUE_BATCH_ACTION, array( __CLASS__, 'queue_batches' ), 10, 4 );
 		add_action( self::QUEUE_DEPEDENT_ACTION, array( __CLASS__, 'queue_dependent_action' ), 10, 3 );
-		add_action( self::CUSTOMERS_BATCH_ACTION, array( __CLASS__, 'customer_lookup_process_batch' ) );
+		add_action( self::CUSTOMERS_BATCH_ACTION, array( __CLASS__, 'customer_lookup_process_batch' ), 10, 3 );
 		add_action( self::ORDERS_BATCH_ACTION, array( __CLASS__, 'orders_lookup_process_batch' ), 10, 3 );
 		add_action( self::ORDERS_LOOKUP_BATCH_INIT, array( __CLASS__, 'orders_lookup_batch_init' ), 10, 2 );
 		add_action( self::SINGLE_ORDER_ACTION, array( __CLASS__, 'orders_lookup_process_order' ) );
@@ -99,7 +99,8 @@ class WC_Admin_Reports_Sync {
 	 * @return string
 	 */
 	public static function regenerate_report_data( $days, $skip_existing ) {
-		self::queue()->schedule_single( time() + 5, self::ORDERS_LOOKUP_BATCH_INIT, array( $days, $skip_existing ), self::QUEUE_GROUP );
+		self::customer_lookup_batch_init( $days, $skip_existing );
+		self::queue_dependent_action( self::ORDERS_LOOKUP_BATCH_INIT, array( $days, $skip_existing ), self::CUSTOMERS_BATCH_ACTION );
 
 		return __( 'Report table data is being rebuilt.  Please allow some time for data to fully populate.', 'woocommerce-admin' );
 	}
@@ -161,7 +162,8 @@ class WC_Admin_Reports_Sync {
 			}
 		}
 
-		self::queue()->schedule_single( time() + 5, self::SINGLE_ORDER_ACTION, array( $order_id ), self::QUEUE_GROUP );
+		// We want to ensure that customer lookup updates are scheduled before order updates.
+		self::queue_dependent_action( self::SINGLE_ORDER_ACTION, array( $order_id ), self::CUSTOMERS_BATCH_ACTION );
 	}
 
 	/**
@@ -406,11 +408,64 @@ class WC_Admin_Reports_Sync {
 	}
 
 	/**
-	 * Init customer lookup table update (in batches).
+	 * Exclude users that already exist in our customer lookup table.
+	 *
+	 * Meant to be hooked into 'pre_user_query' action.
+	 *
+	 * @param WP_User_Query $wp_user_query WP_User_Query to modify.
 	 */
-	public static function customer_lookup_batch_init() {
+	public static function exclude_existing_customers_from_query( $wp_user_query ) {
+		global $wpdb;
+
+		$wp_user_query->query_where .= " AND NOT EXISTS (
+			SELECT ID FROM {$wpdb->prefix}wc_customer_lookup
+			WHERE {$wpdb->prefix}wc_customer_lookup.user_id = {$wpdb->users}.ID
+		)";
+	}
+
+	/**
+	 * Retrieve user IDs given import criteria.
+	 *
+	 * @param int|bool $days Number of days to process.
+	 * @param bool     $skip_existing Skip exisiting records.
+	 * @param array    $query_args Optional. WP_User_Query args.
+	 * @return WP_User_Query
+	 */
+	public static function get_user_ids_for_batch( $days, $skip_existing, $query_args = array() ) {
+		if ( ! is_array( $query_args ) ) {
+			$query_args = array();
+		}
+
+		if ( $days ) {
+			$query_args['date_query'] = array(
+				'after' => date( 'Y-m-d 00:00:00', time() - ( DAY_IN_SECONDS * $days ) ),
+			);
+		}
+
+		if ( $skip_existing ) {
+			add_action( 'pre_user_query', array( __CLASS__, 'exclude_existing_customers_from_query' ) );
+		}
+
+		$customer_query = new WP_User_Query( $query_args );
+
+		remove_action( 'pre_user_query', array( __CLASS__, 'exclude_existing_customers_from_query' ) );
+
+		return $customer_query;
+	}
+
+
+
+	/**
+	 * Init customer lookup table update (in batches).
+	 *
+	 * @param int|bool $days Number of days to process.
+	 * @param bool     $skip_existing Skip exisiting records.
+	 */
+	public static function customer_lookup_batch_init( $days, $skip_existing ) {
 		$batch_size      = self::get_batch_size( self::CUSTOMERS_BATCH_ACTION );
-		$customer_query  = new WP_User_Query(
+		$customer_query  = self::get_user_ids_for_batch(
+			$days,
+			$skip_existing,
 			array(
 				'fields' => 'ID',
 				'number' => 1,
@@ -424,18 +479,22 @@ class WC_Admin_Reports_Sync {
 
 		$num_batches = ceil( $total_customers / $batch_size );
 
-		self::queue_batches( 1, $num_batches, self::CUSTOMERS_BATCH_ACTION );
+		self::queue_batches( 1, $num_batches, self::CUSTOMERS_BATCH_ACTION, array( $days, $skip_existing ) );
 	}
 
 	/**
 	 * Process a batch of customers to update.
 	 *
-	 * @param int $batch_number Batch number to process (essentially a query page number).
+	 * @param int      $batch_number Batch number to process (essentially a query page number).
+	 * @param int|bool $days Number of days to process.
+	 * @param bool     $skip_existing Skip exisiting records.
 	 * @return void
 	 */
-	public static function customer_lookup_process_batch( $batch_number ) {
+	public static function customer_lookup_process_batch( $batch_number, $days, $skip_existing ) {
 		$batch_size     = self::get_batch_size( self::CUSTOMERS_BATCH_ACTION );
-		$customer_query = new WP_User_Query(
+		$customer_query = self::get_user_ids_for_batch(
+			$days,
+			$skip_existing,
 			array(
 				'fields'  => 'ID',
 				'orderby' => 'ID',

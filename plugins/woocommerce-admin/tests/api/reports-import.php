@@ -109,7 +109,8 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'success', $report['status'] );
 
-		// Run pending twice to process batch and order.
+		// Run pending thrice to process batch and order.
+		WC_Helper_Queue::run_all_pending();
 		WC_Helper_Queue::run_all_pending();
 		WC_Helper_Queue::run_all_pending();
 
@@ -137,7 +138,8 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'success', $report['status'] );
 
-		// Run pending twice to process batch and order.
+		// Run pending thrice to process batch and order.
+		WC_Helper_Queue::run_all_pending();
 		WC_Helper_Queue::run_all_pending();
 		WC_Helper_Queue::run_all_pending();
 
