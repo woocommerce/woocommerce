@@ -62,7 +62,7 @@
     "js-md5": "0.7.3",
     "lint-staged": "8.1.5",
     "mini-css-extract-plugin": "0.6.0",
-    "node-sass": "4.11.0",
+    "node-sass": "4.12.0",
     "po2json": "1.0.0-alpha",
     "postcss-loader": "3.0.0",
     "react-test-renderer": "16.8.6",
