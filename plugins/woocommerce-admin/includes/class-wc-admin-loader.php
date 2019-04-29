@@ -187,7 +187,7 @@ class WC_Admin_Loader {
 	public static function update_link_structure() {
 		global $submenu;
 		// User does not have capabilites to see the submenu.
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) || empty( $submenu['woocommerce'] ) ) {
 			return;
 		}
 
