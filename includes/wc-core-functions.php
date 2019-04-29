@@ -158,7 +158,13 @@ function wc_update_order( $args ) {
  */
 function wc_get_template_part( $slug, $name = '' ) {
 	$cache_key = sanitize_key( implode( '-', array( 'template-part', $slug, $name ) ) );
-	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
+	$template  = wp_cache_get( $cache_key, 'woocommerce' );
+
+	if ( isset( $template['version'], $template['value'] ) && WC()->version === $template['version'] ) {
+		$template = (string) $template['value'];
+	} else {
+		$template = false;
+	}
 
 	if ( ! $template ) {
 		if ( $name ) {
@@ -185,7 +191,11 @@ function wc_get_template_part( $slug, $name = '' ) {
 			);
 		}
 
-		wp_cache_set( $cache_key, $template, 'woocommerce' );
+		$template_cache_value = array(
+			'version' => WC()->version,
+			'value'   => $template,
+		);
+		wp_cache_set( $cache_key, $template_cache_value, 'woocommerce' );
 	}
 
 	// Allow 3rd party plugins to filter template file from their plugin.
