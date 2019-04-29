@@ -252,6 +252,7 @@ function wc_paying_customer( $order_id ) {
 	}
 }
 add_action( 'woocommerce_payment_complete', 'wc_paying_customer' );
+add_action( 'woocommerce_order_status_completed', 'wc_paying_customer' );
 
 /**
  * Checks if a user (by email or ID or both) has bought an item.
