@@ -216,11 +216,22 @@ function wc_get_template_part( $slug, $name = '' ) {
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
 	$cache_key = sanitize_key( implode( '-', array( 'template', $template_name, $template_path, $default_path ) ) );
-	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
+	$template  = wp_cache_get( $cache_key, 'woocommerce' );
+
+	if ( isset( $template['version'], $template['value'] ) && WC()->version === $template['version'] ) {
+		$template = (string) $template['value'];
+	} else {
+		$template = false;
+	}
 
 	if ( ! $template ) {
 		$template = wc_locate_template( $template_name, $template_path, $default_path );
-		wp_cache_set( $cache_key, $template, 'woocommerce' );
+
+		$template_cache_value = array(
+			'version' => WC()->version,
+			'value'   => $template,
+		);
+		wp_cache_set( $cache_key, $template_cache_value, 'woocommerce' );
 	}
 
 	// Allow 3rd party plugin filter template file from their plugin.
