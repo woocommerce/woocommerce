@@ -677,7 +677,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	protected static function is_valid_customer( $user_id ) {
 		$customer = new WC_Customer( $user_id );
 
-		if ( $customer->get_id() !== $user_id ) {
+		if ( $customer->get_id() != $user_id ) {
 			return false;
 		}
 
