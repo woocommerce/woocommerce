@@ -5,10 +5,10 @@ The core reports offered by WooCommerce live in this folder. The Header is added
 
 ## Extending Reports
 
-New reports can be added by third-parties without altering `woocommerce-admin`, by hooking into the reports filter, `woocommerce-reports-list`. For example:
+New reports can be added by third-parties without altering `woocommerce-admin`, by hooking into the reports filter, `woocommerce_admin_reports_list`. For example:
 
 ```js
-addFilter( 'woocommerce-reports-list', 'wc-example/my-report', pages => {
+addFilter( 'woocommerce_admin_reports_list', 'analytics/my-report', pages => {
 	return [
 		...pages,
 		{
@@ -33,4 +33,4 @@ The component will get the following props:
 - `pathMatch` (string): The route matched for this view, should always be `/analytics/:report`.
 - `params` (object): This will contain the `report` from the path, which should match `report` in the page object.
 
-**Note:** Adding your page to `woocommerce-reports-list` does not add the item to the admin menu, you'll need to do that in PHP with `wc_admin_register_page`.
+**Note:** Adding your page to `woocommerce_admin_reports_list` does not add the item to the admin menu, you'll need to do that in PHP with the `woocommerce_admin_report_menu_items` filter.
