@@ -1,6 +1,6 @@
 # Feature Flags
 
-Features inside the `wc-admin` repository can be in various states of completeness. In addition to the development copy of `wc-admin`, feature plugin versions are bundled, and code is merged to WooCommerce core. To provide a way for improved control over how these features are released in these different environments, `wc-admin` has a system for feature flags.
+Features inside the `woocommerce-admin` repository can be in various states of completeness. In addition to the development copy of `woocommerce-admin`, feature plugin versions are bundled, and code is merged to WooCommerce core. To provide a way for improved control over how these features are released in these different environments, `woocommerce-admin` has a system for feature flags.
 
 We currently support the following environments:
 
