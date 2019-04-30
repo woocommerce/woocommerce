@@ -4,24 +4,40 @@
 import getQuery from '../get-query';
 
 describe( 'getQuery', () => {
-	test( 'should set per_page as a result of row * col', () => {
-		let query = getQuery( {
-			columns: 4,
-			rows: 3,
-		} );
-		expect( query.per_page ).toBe( 12 );
+	describe( 'per_page calculations', () => {
+		test( 'should set per_page as a result of row * col', () => {
+			let query = getQuery( {
+				columns: 4,
+				rows: 3,
+			} );
+			expect( query.per_page ).toBe( 12 );
 
-		query = getQuery( {
-			columns: 1,
-			rows: 3,
-		} );
-		expect( query.per_page ).toBe( 3 );
+			query = getQuery( {
+				columns: 1,
+				rows: 3,
+			} );
+			expect( query.per_page ).toBe( 3 );
 
-		query = getQuery( {
-			columns: 4,
-			rows: 1,
+			query = getQuery( {
+				columns: 4,
+				rows: 1,
+			} );
+			expect( query.per_page ).toBe( 4 );
 		} );
-		expect( query.per_page ).toBe( 4 );
+
+		test( 'should restrict per_page to under 100', () => {
+			let query = getQuery( {
+				columns: 4,
+				rows: 30,
+			} );
+			expect( query.per_page ).toBe( 100 );
+
+			query = getQuery( {
+				columns: 3,
+				rows: 87,
+			} );
+			expect( query.per_page ).toBe( 99 );
+		} );
 	} );
 
 	describe( 'for different query orders', () => {
