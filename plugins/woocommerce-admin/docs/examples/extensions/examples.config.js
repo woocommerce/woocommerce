@@ -5,6 +5,7 @@
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const fs = require( 'fs' );
+const woocommerceAdminConfig = require( path.resolve( __dirname, '../../../webpack.config.js' ) );
 
 const extArg = process.argv.find( arg => arg.startsWith( '--ext=' ) );
 
@@ -19,31 +20,6 @@ if ( ! fs.existsSync( extensionPath ) ) {
 	throw new Error( 'Extension example does not exist.' );
 }
 
-const externals = {
-	'@wordpress/api-fetch': 'window.wp.apiFetch',
-	'@wordpress/blocks': 'window.wp.blocks',
-	'@wordpress/components': 'window.wp.components',
-	'@wordpress/compose': 'window.wp.compose',
-	'@wordpress/data': 'window.wp.data',
-	'@wordpress/editor': 'window.wp.editor',
-	'@wordpress/element': 'window.wp.element',
-	'@wordpress/hooks': 'window.wp.hooks',
-	'@wordpress/html-entities': 'window.wp.htmlEntities',
-	'@wordpress/i18n': 'window.wp.i18n',
-	'@wordpress/keycodes': 'window.wp.keycodes',
-	tinymce: 'tinymce',
-	moment: 'moment',
-	react: 'React',
-	lodash: 'lodash',
-	'react-dom': 'ReactDOM',
-	'@woocommerce/components': 'window.wc.components',
-	'@woocommerce/csv-export': 'window.wc.csvExport',
-	'@woocommerce/currency': 'window.wc.currency',
-	'@woocommerce/date': 'window.wc.date',
-	'@woocommerce/navigation': 'window.wc.navigation',
-	'@woocommerce/number': 'window.wc.number',
-};
-
 const webpackConfig = {
 	mode: 'development',
 	entry: {
@@ -52,8 +28,9 @@ const webpackConfig = {
 	output: {
 		filename: '[name]/dist/index.js',
 		path: path.resolve( __dirname ),
+		libraryTarget: 'this',
 	},
-	externals,
+	externals: woocommerceAdminConfig.externals,
 	module: {
 		rules: [
 			{
