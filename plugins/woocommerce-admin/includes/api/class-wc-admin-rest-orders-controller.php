@@ -30,10 +30,10 @@ class WC_Admin_REST_Orders_Controller extends WC_REST_Orders_Controller {
 	 */
 	public function get_collection_params() {
 		$params           = parent::get_collection_params();
+		// This needs to remain a string to support extensions that filter Order Number.
 		$params['number'] = array(
 			'description'       => __( 'Limit result set to orders matching part of an order number.', 'woocommerce-admin' ),
-			'type'              => 'integer',
-			'sanitize_callback' => 'absint',
+			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		return $params;
@@ -51,15 +51,22 @@ class WC_Admin_REST_Orders_Controller extends WC_REST_Orders_Controller {
 
 		// Search by partial order number.
 		if ( ! empty( $request['number'] ) ) {
-			$order_ids = $wpdb->get_col(
+			$partial_number = trim( $request['number'] );
+			$limit          = intval( $args['posts_per_page'] );
+			$order_ids      = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT ID FROM {$wpdb->prefix}posts WHERE post_type = 'shop_order' AND ID LIKE %s",
-					intval( $request['number'] ) . '%'
+					"SELECT ID
+					FROM {$wpdb->prefix}posts
+					WHERE post_type = 'shop_order'
+					AND ID LIKE %s
+					LIMIT %d",
+					$wpdb->esc_like( absint( $partial_number ) ) . '%',
+					$limit
 				)
 			);
 
 			// Force WP_Query return empty if don't found any order.
-			$order_ids        = ! empty( $order_ids ) ? $order_ids : array( 0 );
+			$order_ids        = empty( $order_ids ) ? array( 0 ) : $order_ids;
 			$args['post__in'] = $order_ids;
 		}
 

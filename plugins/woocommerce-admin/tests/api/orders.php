@@ -46,7 +46,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'number' => $order->get_id(),
+				'number' => (string) $order->get_id(),
 			)
 		);
 
