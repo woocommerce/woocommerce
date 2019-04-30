@@ -116,7 +116,7 @@ class Table extends Component {
 			'is-scrollable': isScrollable,
 		} );
 		const sortedBy = query.orderby || get( find( headers, { defaultSort: true } ), 'key', false );
-		const sortDir = query.order || DESC;
+		const sortDir = query.order || get( find( headers, { key: sortedBy } ), 'defaultOrder', DESC );
 
 		return (
 			<div
@@ -248,6 +248,10 @@ Table.propTypes = {
 			 * Boolean, true if this column is the default for sorting. Only one column should have this set.
 			 */
 			defaultSort: PropTypes.bool,
+			/**
+			 * String, asc|desc if this column is the default for sorting. Only one column should have this set.
+			 */
+			defaultOrder: PropTypes.string,
 			/**
 			 * Boolean, true if this column should be aligned to the left.
 			 */
