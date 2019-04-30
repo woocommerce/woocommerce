@@ -25,6 +25,7 @@ import ChartBlock from './block';
 import { getChartFromKey, uniqCharts } from './config';
 import withSelect from 'wc-api/with-select';
 import './style.scss';
+import SectionControls from 'dashboard/components/section-controls';
 
 class DashboardCharts extends Component {
 	constructor( props ) {
@@ -74,39 +75,57 @@ class DashboardCharts extends Component {
 	}
 
 	renderMenu() {
-		const { onTitleBlur, onTitleChange, titleInput } = this.props;
+		const {
+			onTitleBlur,
+			onTitleChange,
+			titleInput,
+			onMove,
+			onRemove,
+			isFirst,
+			isLast,
+		} = this.props;
 		const { hiddenChartKeys } = this.state;
 
 		return (
 			<EllipsisMenu
-				label={ __( 'Choose which charts to display and the section name', 'woocommerce-admin' ) }
-			>
-				{ window.wcAdminFeatures[ 'dashboard/customizable' ] && (
-					<div className="woocommerce-ellipsis-menu__item">
-						<TextControl
-							label={ __( 'Section Title', 'woocommerce-admin' ) }
-							onBlur={ onTitleBlur }
-							onChange={ onTitleChange }
-							required
-							value={ titleInput }
+				label={ __( 'Choose which charts to display', 'woocommerce-admin' ) }
+				renderChildren={ ( { onToggle } ) => (
+					<Fragment>
+						{ window.wcAdminFeatures[ 'dashboard/customizable' ] && (
+							<div className="woocommerce-ellipsis-menu__item">
+								<TextControl
+									label={ __( 'Section Title', 'woocommerce-admin' ) }
+									onBlur={ onTitleBlur }
+									onChange={ onTitleChange }
+									required
+									value={ titleInput }
+								/>
+							</div>
+						) }
+						<MenuTitle>{ __( 'Charts', 'woocommerce-admin' ) }</MenuTitle>
+						{ uniqCharts.map( chart => {
+							return (
+								<MenuItem
+									checked={ ! hiddenChartKeys.includes( chart.key ) }
+									isCheckbox
+									isClickable
+									key={ chart.key }
+									onInvoke={ this.toggle( chart.key ) }
+								>
+									{ __( `${ chart.label }`, 'woocommerce-admin' ) }
+								</MenuItem>
+							);
+						} ) }
+						<SectionControls
+							onToggle={ onToggle }
+							onMove={ onMove }
+							onRemove={ onRemove }
+							isFirst={ isFirst }
+							isLast={ isLast }
 						/>
-					</div>
+					</Fragment>
 				) }
-				<MenuTitle>{ __( 'Charts', 'woocommerce-admin' ) }</MenuTitle>
-				{ uniqCharts.map( chart => {
-					return (
-						<MenuItem
-							checked={ ! hiddenChartKeys.includes( chart.key ) }
-							isCheckbox
-							isClickable
-							key={ chart.key }
-							onInvoke={ this.toggle( chart.key ) }
-						>
-							{ __( `${ chart.label }`, 'woocommerce-admin' ) }
-						</MenuItem>
-					);
-				} ) }
-			</EllipsisMenu>
+			/>
 		);
 	}
 

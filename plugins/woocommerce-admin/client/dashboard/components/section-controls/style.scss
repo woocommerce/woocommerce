@@ -1,0 +1,14 @@
+/** @format */
+
+.woocommerce-section-controls {
+	border-top: $border-width solid $core-grey-light-500;
+
+	.dashicon {
+		margin: 0 $gap-smaller 0 0;
+		vertical-align: bottom;
+	}
+
+	.woocommerce-ellipsis-menu__item {
+		padding-bottom: 10px;
+	}
+}

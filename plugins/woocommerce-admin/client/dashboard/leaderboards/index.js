@@ -20,6 +20,7 @@ import { EllipsisMenu, MenuItem, MenuTitle, SectionHeader } from '@woocommerce/c
  */
 import Leaderboard from 'analytics/components/leaderboard';
 import withSelect from 'wc-api/with-select';
+import SectionControls from 'dashboard/components/section-controls';
 import './style.scss';
 
 class Leaderboards extends Component {
@@ -54,7 +55,16 @@ class Leaderboards extends Component {
 	};
 
 	renderMenu() {
-		const { allLeaderboards, onTitleBlur, onTitleChange, titleInput } = this.props;
+		const {
+			allLeaderboards,
+			onTitleBlur,
+			onTitleChange,
+			titleInput,
+			onMove,
+			onRemove,
+			isFirst,
+			isLast,
+		} = this.props;
 		const { hiddenLeaderboardKeys, rowsPerTable } = this.state;
 
 		return (
@@ -63,45 +73,53 @@ class Leaderboards extends Component {
 					'Choose which leaderboards to display and other settings',
 					'woocommerce-admin'
 				) }
-			>
-				<Fragment>
-					{ window.wcAdminFeatures[ 'dashboard/customizable' ] && (
-						<div className="woocommerce-ellipsis-menu__item">
-							<TextControl
-								label={ __( 'Section Title', 'woocommerce-admin' ) }
-								onBlur={ onTitleBlur }
-								onChange={ onTitleChange }
-								required
-								value={ titleInput }
-							/>
-						</div>
-					) }
-					<MenuTitle>{ __( 'Leaderboards', 'woocommerce-admin' ) }</MenuTitle>
-					{ allLeaderboards.map( leaderboard => {
-						return (
-							<MenuItem
-								checked={ ! hiddenLeaderboardKeys.includes( leaderboard.id ) }
-								isCheckbox
-								isClickable
-								key={ leaderboard.id }
-								onInvoke={ this.toggle( leaderboard.id ) }
-							>
-								{ leaderboard.label }
-							</MenuItem>
-						);
-					} ) }
-					<SelectControl
-						className="woocommerce-dashboard__dashboard-leaderboards__select"
-						label={ <MenuTitle>{ __( 'Rows Per Table', 'woocommerce-admin' ) }</MenuTitle> }
-						value={ rowsPerTable }
-						options={ Array.from( { length: 20 }, ( v, key ) => ( {
-							v: key + 1,
-							label: key + 1,
-						} ) ) }
-						onChange={ this.setRowsPerTable }
-					/>
-				</Fragment>
-			</EllipsisMenu>
+				renderChildren={ ( { onToggle } ) => (
+					<Fragment>
+						{ window.wcAdminFeatures[ 'dashboard/customizable' ] && (
+							<div className="woocommerce-ellipsis-menu__item">
+								<TextControl
+									label={ __( 'Section Title', 'woocommerce-admin' ) }
+									onBlur={ onTitleBlur }
+									onChange={ onTitleChange }
+									required
+									value={ titleInput }
+								/>
+							</div>
+						) }
+						<MenuTitle>{ __( 'Leaderboards', 'woocommerce-admin' ) }</MenuTitle>
+						{ allLeaderboards.map( leaderboard => {
+							return (
+								<MenuItem
+									checked={ ! hiddenLeaderboardKeys.includes( leaderboard.id ) }
+									isCheckbox
+									isClickable
+									key={ leaderboard.id }
+									onInvoke={ this.toggle( leaderboard.id ) }
+								>
+									{ leaderboard.label }
+								</MenuItem>
+							);
+						} ) }
+						<SelectControl
+							className="woocommerce-dashboard__dashboard-leaderboards__select"
+							label={ <MenuTitle>{ __( 'Rows Per Table', 'woocommerce-admin' ) }</MenuTitle> }
+							value={ rowsPerTable }
+							options={ Array.from( { length: 20 }, ( v, key ) => ( {
+								v: key + 1,
+								label: key + 1,
+							} ) ) }
+							onChange={ this.setRowsPerTable }
+						/>
+						<SectionControls
+							onToggle={ onToggle }
+							onMove={ onMove }
+							onRemove={ onRemove }
+							isFirst={ isFirst }
+							isLast={ isLast }
+						/>
+					</Fragment>
+				) }
+			/>
 		);
 	}
 

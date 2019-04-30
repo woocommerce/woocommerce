@@ -31,6 +31,7 @@ import {
 	SummaryNumber,
 } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
+import SectionControls from 'dashboard/components/section-controls';
 import './style.scss';
 
 class StorePerformance extends Component {
@@ -66,7 +67,16 @@ class StorePerformance extends Component {
 	}
 
 	renderMenu() {
-		const { indicators, onTitleBlur, onTitleChange, titleInput } = this.props;
+		const {
+			indicators,
+			onTitleBlur,
+			onTitleChange,
+			titleInput,
+			onMove,
+			onRemove,
+			isFirst,
+			isLast,
+		} = this.props;
 
 		return (
 			<EllipsisMenu
@@ -74,34 +84,44 @@ class StorePerformance extends Component {
 					'Choose which analytics to display and the section name',
 					'woocommerce-admin'
 				) }
-			>
-				{ window.wcAdminFeatures[ 'dashboard/customizable' ] && (
-					<div className="woocommerce-ellipsis-menu__item">
-						<TextControl
-							label={ __( 'Section Title', 'woocommerce-admin' ) }
-							onBlur={ onTitleBlur }
-							onChange={ onTitleChange }
-							required
-							value={ titleInput }
+				renderChildren={ ( { onToggle } ) => (
+					<Fragment>
+						{ window.wcAdminFeatures[ 'dashboard/customizable' ] && (
+							<div className="woocommerce-ellipsis-menu__item">
+								<TextControl
+									label={ __( 'Section Title', 'woocommerce-admin' ) }
+									onBlur={ onTitleBlur }
+									onChange={ onTitleChange }
+									required
+									value={ titleInput }
+								/>
+							</div>
+						) }
+						<MenuTitle>{ __( 'Display Stats:', 'woocommerce-admin' ) }</MenuTitle>
+						{ indicators.map( ( indicator, i ) => {
+							const checked = ! this.state.hiddenIndicators.includes( indicator.stat );
+							return (
+								<MenuItem
+									checked={ checked }
+									isCheckbox
+									isClickable
+									key={ i }
+									onInvoke={ this.toggle( indicator.stat ) }
+								>
+									{ sprintf( __( 'Show %s', 'woocommerce-admin' ), indicator.label ) }
+								</MenuItem>
+							);
+						} ) }
+						<SectionControls
+							onToggle={ onToggle }
+							onMove={ onMove }
+							onRemove={ onRemove }
+							isFirst={ isFirst }
+							isLast={ isLast }
 						/>
-					</div>
+					</Fragment>
 				) }
-				<MenuTitle>{ __( 'Display Stats:', 'woocommerce-admin' ) }</MenuTitle>
-				{ indicators.map( ( indicator, i ) => {
-					const checked = ! this.state.hiddenIndicators.includes( indicator.stat );
-					return (
-						<MenuItem
-							checked={ checked }
-							isCheckbox
-							isClickable
-							key={ i }
-							onInvoke={ this.toggle( indicator.stat ) }
-						>
-							{ sprintf( __( 'Show %s', 'woocommerce-admin' ), indicator.label ) }
-						</MenuItem>
-					);
-				} ) }
-			</EllipsisMenu>
+			/>
 		);
 	}
 
