@@ -1,3 +1,8 @@
+/**
+ * External dependencies
+ */
+import { min } from 'lodash';
+
 export default function getQuery( blockAttributes, name ) {
 	const {
 		attributes,
@@ -9,10 +14,11 @@ export default function getQuery( blockAttributes, name ) {
 	} = blockAttributes;
 	const columns = blockAttributes.columns || wc_product_block_data.default_columns;
 	const rows = blockAttributes.rows || wc_product_block_data.default_rows;
+	const apiMax = Math.floor( 100 / columns ) * columns; // Prevent uneven final row.
 
 	const query = {
 		status: 'publish',
-		per_page: rows * columns,
+		per_page: min( [ rows * columns, apiMax ] ),
 		catalog_visibility: 'visible',
 	};
 
