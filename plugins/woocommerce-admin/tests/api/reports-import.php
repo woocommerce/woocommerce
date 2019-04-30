@@ -29,6 +29,14 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 				'role' => 'administrator',
 			)
 		);
+
+		$this->customer = $this->factory->user->create(
+			array(
+				'first_name' => 'Steve',
+				'last_name'  => 'User',
+				'role'       => 'customer',
+			)
+		);
 	}
 
 	/**
@@ -114,6 +122,14 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		WC_Helper_Queue::run_all_pending();
 		WC_Helper_Queue::run_all_pending();
 
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/reports/customers' );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $reports );
+		$this->assertEquals( $this->customer, $reports[0]['user_id'] );
+
 		$request  = new WP_REST_Request( 'GET', '/wc/v4/reports/orders' );
 		$response = $this->server->dispatch( $request );
 		$reports  = $response->get_data();
@@ -122,10 +138,18 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 1, $reports );
 		$this->assertEquals( $order_2->get_id(), $reports[0]['order_id'] );
 
-		// Use the skip existing params to skip processing orders.
+		// Use the skip existing params to skip processing customers/orders.
 		// Compare against order status to make sure previously imported order was skipped.
 		$order_2->set_status( 'processing' );
 		$order_2->save();
+
+		// Compare against name to make sure previously imported customer was skipped.
+		wp_update_user(
+			array(
+				'ID'         => $this->customer,
+				'first_name' => 'Changed',
+			)
+		);
 
 		// Delete scheduled actions to avoid default order processing.
 		$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type = 'scheduled-action'" );
@@ -142,6 +166,14 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		WC_Helper_Queue::run_all_pending();
 		WC_Helper_Queue::run_all_pending();
 		WC_Helper_Queue::run_all_pending();
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/reports/customers' );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $reports );
+		$this->assertEquals( 'Steve User', $reports[0]['name'] );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/reports/orders' );
 		$request->set_query_params( array( 'per_page' => 5 ) );
