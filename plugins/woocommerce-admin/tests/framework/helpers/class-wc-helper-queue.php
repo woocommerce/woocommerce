@@ -12,11 +12,11 @@
  */
 class WC_Helper_Queue {
 	/**
-	 * Run all pending queued actions.
+	 * Get all pending queued actions.
 	 *
-	 * @return void
+	 * @return array Pending jobs.
 	 */
-	public static function run_all_pending() {
+	public static function get_all_pending() {
 		$jobs = WC()->queue()->search(
 			array(
 				'per_page' => -1,
@@ -24,6 +24,17 @@ class WC_Helper_Queue {
 				'claimed'  => false,
 			)
 		);
+
+		return $jobs;
+	}
+
+	/**
+	 * Run all pending queued actions.
+	 *
+	 * @return void
+	 */
+	public static function run_all_pending() {
+		$jobs = self::get_all_pending();
 
 		foreach ( $jobs as $job ) {
 			$job->execute();

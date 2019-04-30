@@ -202,6 +202,10 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$order->set_date_created( time() - ( 3 * DAY_IN_SECONDS ) );
 		$order->save();
 
+		// Verify there are actions to cancel.
+		$pending_actions = WC_Helper_Queue::get_all_pending();
+		$this->assertCount( 1, $pending_actions );
+
 		// Cancel outstanding actions.
 		$request  = new WP_REST_Request( 'POST', $this->endpoint . '/cancel' );
 		$response = $this->server->dispatch( $request );
@@ -209,15 +213,9 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'success', $report['status'] );
-		WC_Helper_Queue::run_all_pending();
 
-		// @todo It may be better to compare against outstanding actions
-		// pulled from the import API once #1850 is complete.
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/reports/orders' );
-		$response = $this->server->dispatch( $request );
-		$reports  = $response->get_data();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 0, $reports );
+		// Verify there are no pending actions.
+		$pending_actions = WC_Helper_Queue::get_all_pending();
+		$this->assertCount( 0, $pending_actions );
 	}
 }
