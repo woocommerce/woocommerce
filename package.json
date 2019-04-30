@@ -18,6 +18,9 @@
     "test:single": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha --require babel-register",
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
+  "dependencies": {
+    "@woocommerce/block-library": "2.0.1"
+  },
   "devDependencies": {
     "autoprefixer": "9.5.1",
     "babel": "6.23.0",
@@ -65,9 +68,6 @@
   "engines": {
     "node": ">=10.15.0",
     "npm": ">=6.4.1"
-  },
-  "dependencies": {
-    "@woocommerce/block-library": "2.0.1"
   },
   "husky": {
     "hooks": {
