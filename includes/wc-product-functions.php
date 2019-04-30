@@ -1160,6 +1160,8 @@ function wc_products_array_orderby( $products, $orderby = 'date', $order = 'desc
 		case 'price':
 			usort( $products, 'wc_products_array_orderby_' . $orderby );
 			break;
+		case 'none':
+			break;
 		default:
 			shuffle( $products );
 			break;
