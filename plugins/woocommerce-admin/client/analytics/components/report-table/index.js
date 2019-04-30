@@ -3,8 +3,9 @@
  * External dependencies
  */
 import { applyFilters } from '@wordpress/hooks';
-import { Component } from '@wordpress/element';
+import { Component, createRef, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
+import { focus } from '@wordpress/dom';
 import { withDispatch } from '@wordpress/data';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
@@ -24,6 +25,8 @@ import { QUERY_DEFAULTS } from 'wc-api/constants';
 import withSelect from 'wc-api/with-select';
 import { extendTableData } from './utils';
 
+import './style.scss';
+
 const TABLE_FILTER = 'woocommerce_admin_report_table';
 
 /**
@@ -34,6 +37,8 @@ class ReportTable extends Component {
 		super( props );
 
 		this.onColumnsChange = this.onColumnsChange.bind( this );
+		this.onPageChange = this.onPageChange.bind( this );
+		this.scrollPointRef = createRef();
 	}
 
 	onColumnsChange( shownColumns ) {
@@ -46,6 +51,18 @@ class ReportTable extends Component {
 				[ columnPrefsKey ]: hiddenColumns,
 			};
 			updateCurrentUserData( userDataFields );
+		}
+	}
+
+	onPageChange() {
+		this.scrollPointRef.current.scrollIntoView();
+		const tableElement = this.scrollPointRef.current.nextSibling.querySelector(
+			'.woocommerce-table__table'
+		);
+		const focusableElements = focus.focusable.find( tableElement );
+
+		if ( focusableElements.length ) {
+			focusableElements[ 0 ].focus();
 		}
 	}
 
@@ -102,19 +119,27 @@ class ReportTable extends Component {
 		const filteredHeaders = this.filterShownHeaders( headers, userPrefColumns );
 
 		return (
-			<TableCard
-				downloadable={ downloadable }
-				headers={ filteredHeaders }
-				ids={ ids }
-				isLoading={ isLoading }
-				onQueryChange={ onQueryChange }
-				onColumnsChange={ this.onColumnsChange }
-				rows={ rows }
-				rowsPerPage={ parseInt( query.per_page ) || QUERY_DEFAULTS.pageSize }
-				summary={ summary }
-				totalRows={ totalResults }
-				{ ...tableProps }
-			/>
+			<Fragment>
+				<div
+					className="woocommerce-report-table__scroll-point"
+					ref={ this.scrollPointRef }
+					aria-hidden
+				/>
+				<TableCard
+					downloadable={ downloadable }
+					headers={ filteredHeaders }
+					ids={ ids }
+					isLoading={ isLoading }
+					onQueryChange={ onQueryChange }
+					onColumnsChange={ this.onColumnsChange }
+					onPageChange={ this.onPageChange }
+					rows={ rows }
+					rowsPerPage={ parseInt( query.per_page ) || QUERY_DEFAULTS.pageSize }
+					summary={ summary }
+					totalRows={ totalResults }
+					{ ...tableProps }
+				/>
+			</Fragment>
 		);
 	}
 }

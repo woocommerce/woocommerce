@@ -67,10 +67,10 @@ class Pagination extends Component {
 	}
 
 	onInputBlur( event ) {
-		const { onPageChange } = this.props;
+		const { onPageChange, page } = this.props;
 		const newPage = parseInt( event.target.value, 10 );
 
-		if ( isFinite( newPage ) && newPage > 0 && this.pageCount && this.pageCount >= newPage ) {
+		if ( newPage !== page && isFinite( newPage ) && newPage > 0 && this.pageCount && this.pageCount >= newPage ) {
 			onPageChange( newPage );
 		}
 	}

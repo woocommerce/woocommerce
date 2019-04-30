@@ -53,6 +53,7 @@ class TableCard extends Component {
 		this.onColumnToggle = this.onColumnToggle.bind( this );
 		this.onClickDownload = this.onClickDownload.bind( this );
 		this.onCompare = this.onCompare.bind( this );
+		this.onPageChange = this.onPageChange.bind( this );
 		this.onSearch = this.onSearch.bind( this );
 		this.selectRow = this.selectRow.bind( this );
 		this.selectAllRows = this.selectAllRows.bind( this );
@@ -165,6 +166,16 @@ class TableCard extends Component {
 		const { selectedRows } = this.state;
 		if ( compareBy ) {
 			onQueryChange( 'compare' )( compareBy, compareParam, selectedRows.join( ',' ) );
+		}
+	}
+
+	onPageChange( ...params ) {
+		const { onPageChange, onQueryChange } = this.props;
+		if ( onPageChange ) {
+			onPageChange( ...params );
+		}
+		if ( onQueryChange ) {
+			onQueryChange( 'page' )( ...params );
 		}
 	}
 
@@ -380,7 +391,7 @@ class TableCard extends Component {
 					page={ parseInt( query.page ) || 1 }
 					perPage={ rowsPerPage }
 					total={ totalRows }
-					onPageChange={ onQueryChange( 'page' ) }
+					onPageChange={ this.onPageChange }
 					onPerPageChange={ onQueryChange( 'per_page' ) }
 				/>
 

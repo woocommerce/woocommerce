@@ -6,26 +6,24 @@
 	align-items: center;
 	position: fixed;
 	right: 0;
-	height: 80px;
+	height: $medium-header-height;
 
 	@include breakpoint( '<782px' ) {
 		position: relative;
 		background: $white;
 		margin: 0;
 		padding: 0;
-		top: -3px;
 		width: 100vw;
 		display: none;
-		height: 60px;
 		flex: 1 100%;
 	}
 
 	@include breakpoint( '782px-960px' ) {
 		max-width: 280px;
-		height: 60px;
 	}
 
 	@include breakpoint( '>960px' ) {
+		height: $large-header-height;
 		max-width: 400px;
 	}
 
@@ -37,11 +35,11 @@
 .woocommerce-layout__activity-panel-tabs {
 	width: 100%;
 	display: flex;
-	height: 60px;
+	height: $medium-header-height;
 	justify-content: flex-end;
 
 	@include breakpoint( '>960px' ) {
-		height: 80px;
+		height: $large-header-height;
 	}
 
 	.dashicon,
@@ -78,10 +76,10 @@
 		min-width: 80px;
 		width: 100%;
 		font-size: 11px;
-		height: 60px;
+		height: $medium-header-height;
 		@include breakpoint( '>960px' ) {
 			font-size: 13px;
-			height: 80px;
+			height: $large-header-height;
 		}
 
 		&.is-active {
@@ -149,9 +147,9 @@
 .woocommerce-layout__activity-panel-mobile-toggle {
 	margin-right: 10px;
 	max-width: 48px;
-	height: 46px;
+	height: $small-header-height;
 	position: fixed;
-	top: 50px;
+	top: $adminbar-height-mobile;
 	right: 0;
 	@include breakpoint( '>782px' ) {
 		display: none;
@@ -194,31 +192,26 @@
 }
 
 .woocommerce-layout__activity-panel-wrapper {
-	height: calc(100vh - 80px);
-	min-height: calc(100vh - 80px);
+	height: calc(100vh - #{$medium-header-height + $small-header-height + $adminbar-height-mobile});
 	background: $core-grey-light-200;
 	box-shadow: 0 12px 12px 0 rgba(85, 93, 102, 0.3);
 	width: 0;
 	@include activity-panel-slide();
 	position: fixed;
 	right: 0;
-	top: 92px;
+	top: #{$medium-header-height + $small-header-height + $adminbar-height-mobile};
 	z-index: 1000;
 	overflow-x: hidden;
 	overflow-y: auto;
 
-	// Extra padding is needed at the bottom of the wrapper because of our positioning, height, and overflow rules. Otherwise, some content can get cut off.
-	padding-bottom: $gap-small * 6;
 	@include breakpoint( '782px-960px' ) {
-		padding-bottom: $gap-small;
-	}
-	@include breakpoint( '>960px' ) {
-		top: 112px;
-		padding-bottom: $gap * 2;
+		height: calc(100vh - #{$medium-header-height + $adminbar-height});
+		top: #{$medium-header-height + $adminbar-height};
 	}
 
-	@include breakpoint( '<782px' ) {
-		top: 153px;
+	@include breakpoint( '>960px' ) {
+		height: calc(100vh - #{$large-header-height + $adminbar-height});
+		top: #{$large-header-height + $adminbar-height};
 	}
 
 	&.is-open {

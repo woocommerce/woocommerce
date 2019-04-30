@@ -1,4 +1,5 @@
 # unreleased
+- TableCard component: new `onPageChange` prop.
 - Pagination no longer considers `0` a valid input and triggers `onPageChange` on the input blur event.
 - Tweaks to SummaryListPlaceholder height in order to better match SummaryNumber.
 
