@@ -32,7 +32,7 @@ class WC_Admin_Reports_Sync {
 	const CUSTOMERS_DELETE_BATCH_INIT = 'wc-admin_delete_customers_batch_init';
 
 	/**
-	 * Action hook for importing a batch of customers.
+	 * Action hook for deleting a batch of customers.
 	 */
 	const CUSTOMERS_DELETE_BATCH_ACTION = 'wc-admin_delete_customers_batch';
 
@@ -575,11 +575,8 @@ class WC_Admin_Reports_Sync {
 
 	/**
 	 * Delete a batch of customers.
-	 *
-	 * @param int $batch_number Batch number to import (essentially a query page number).
-	 * @return void
 	 */
-	public static function customer_lookup_delete_batch( $batch_number ) {
+	public static function customer_lookup_delete_batch() {
 		global $wpdb;
 		$batch_size   = self::get_batch_size( self::CUSTOMERS_DELETE_BATCH_ACTION );
 		$customer_ids = $wpdb->get_col(

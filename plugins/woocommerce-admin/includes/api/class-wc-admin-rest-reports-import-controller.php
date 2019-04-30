@@ -212,7 +212,7 @@ class WC_Admin_REST_Reports_Import_Controller extends WC_Admin_REST_Reports_Cont
 	public function cancel_import( $request ) {
 		WC_Admin_Reports_Sync::clear_queued_actions();
 
-		$result   = array(
+		$result = array(
 			'status'  => 'success',
 			'message' => __( 'All pending and in-progress import actions have been cancelled.', 'woocommerce-admin' ),
 		);
@@ -229,7 +229,6 @@ class WC_Admin_REST_Reports_Import_Controller extends WC_Admin_REST_Reports_Cont
 	 * @param  WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	
 	public function delete_imported_items( $request ) {
 		$delete = WC_Admin_Reports_Sync::delete_report_data();
 
