@@ -185,4 +185,37 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'completed', $reports[0]['status'] );
 	}
 
+	/**
+	 * Test cancelling import actions.
+	 */
+	public function test_cancel_import() {
+		wp_set_current_user( $this->user );
+
+		// Populate all of the data.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( 'completed' );
+		$order->set_date_created( time() - ( 3 * DAY_IN_SECONDS ) );
+		$order->save();
+
+		// Verify there are actions to cancel.
+		$pending_actions = WC_Helper_Queue::get_all_pending();
+		$this->assertCount( 1, $pending_actions );
+
+		// Cancel outstanding actions.
+		$request  = new WP_REST_Request( 'POST', $this->endpoint . '/cancel' );
+		$response = $this->server->dispatch( $request );
+		$report   = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'success', $report['status'] );
+
+		// Verify there are no pending actions.
+		$pending_actions = WC_Helper_Queue::get_all_pending();
+		$this->assertCount( 0, $pending_actions );
+	}
 }
