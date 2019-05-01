@@ -115,7 +115,6 @@ class WC_Admin_Api_Init {
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-product-variations-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-setting-options-controller.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-system-status-tools-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-categories-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-coupons-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-coupons-stats-controller.php';
@@ -124,6 +123,7 @@ class WC_Admin_Api_Init {
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-downloads-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-downloads-files-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-downloads-stats-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-import-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-orders-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-orders-stats-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-products-controller.php';
@@ -157,7 +157,7 @@ class WC_Admin_Api_Init {
 				'WC_Admin_REST_Product_Variations_Controller',
 				'WC_Admin_REST_Reports_Controller',
 				'WC_Admin_REST_Setting_Options_Controller',
-				'WC_Admin_REST_System_Status_Tools_Controller',
+				'WC_Admin_REST_Reports_Import_Controller',
 				'WC_Admin_REST_Reports_Products_Controller',
 				'WC_Admin_REST_Reports_Variations_Controller',
 				'WC_Admin_REST_Reports_Products_Stats_Controller',

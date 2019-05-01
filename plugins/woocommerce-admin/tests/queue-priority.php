@@ -37,13 +37,13 @@ class WC_Tests_Reports_Queue_Prioritization extends WC_REST_Unit_Test_Case {
 	 * Test that we're setting a priority on our actions.
 	 */
 	public function test_queue_action_sets_priority() {
-		WC_Admin_Reports_Sync::queue()->schedule_single( time(), WC_Admin_Reports_Sync::SINGLE_ORDER_ACTION );
+		WC_Admin_Reports_Sync::queue()->schedule_single( time(), WC_Admin_Reports_Sync::SINGLE_ORDER_IMPORT_ACTION );
 
 		$actions = WC_Admin_Reports_Sync::queue()->search(
 			array(
 				'status'  => 'pending',
 				'claimed' => false,
-				'hook'    => WC_Admin_Reports_Sync::SINGLE_ORDER_ACTION,
+				'hook'    => WC_Admin_Reports_Sync::SINGLE_ORDER_IMPORT_ACTION,
 			)
 		);
 
@@ -55,7 +55,7 @@ class WC_Tests_Reports_Queue_Prioritization extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( WC_Admin_ActionScheduler_wpPostStore::JOB_PRIORITY, $action->menu_order );
 
-		WC_Admin_Reports_Sync::queue()->cancel_all( WC_Admin_Reports_Sync::SINGLE_ORDER_ACTION );
+		WC_Admin_Reports_Sync::queue()->cancel_all( WC_Admin_Reports_Sync::SINGLE_ORDER_IMPORT_ACTION );
 	}
 }
 
