@@ -18,6 +18,9 @@
     "test:single": "cross-env NODE_CONFIG_DIR='./tests/e2e-tests/config' BABEL_ENV=commonjs mocha --require babel-register",
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
+  "dependencies": {
+    "@woocommerce/block-library": "2.0.1"
+  },
   "devDependencies": {
     "autoprefixer": "9.5.1",
     "babel": "6.23.0",
@@ -59,15 +62,12 @@
     "prettier": "github:automattic/calypso-prettier#c56b4251",
     "stylelint": "10.0.1",
     "stylelint-config-wordpress": "14.0.0",
-    "wc-e2e-page-objects": "0.10.0"
+    "wc-e2e-page-objects": "0.10.0",
+    "github-contributors-list": "https://github.com/woocommerce/github-contributors-list/tarball/master"
   },
   "engines": {
     "node": ">=10.15.0",
     "npm": ">=6.4.1"
-  },
-  "dependencies": {
-    "@woocommerce/block-library": "2.0.1",
-    "github-contributors-list": "https://github.com/woocommerce/github-contributors-list/tarball/master"
   },
   "husky": {
     "hooks": {
