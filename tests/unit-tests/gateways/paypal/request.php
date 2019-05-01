@@ -213,21 +213,21 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 		$this->assertEquals( '_cart', $query_array['cmd'] );
 
 		$this->check_shipping_tax( $query_array, $shipping_tax_included );
-    }
-    
-    /**
-     * Test removing HTML tags from product title and request URL
-     *
-     * @param  bool $testmode Whether to use Paypal sandbox.
-     */
-    protected function check_product_title_containing_html( $testmode ) {
-        $order = WC_Helper_Order::create_order();
+	}
 
-        foreach ( $order->get_items() as $item ) {
+	/**
+	 * Test removing HTML tags from product title and request URL
+	 *
+	 * @param  bool $testmode Whether to use Paypal sandbox.
+	 */
+	protected function check_product_title_containing_html( $testmode ) {
+		$order = WC_Helper_Order::create_order();
+
+		foreach ( $order->get_items() as $item ) {
 			$order->remove_item( $item->get_id() );
-        }
+		}
 
-        $product = new WC_Product_Simple();
+		$product = new WC_Product_Simple();
 		$product->set_props(
 			array(
 				'name'          => 'New Product <a href="#" style="color: red;">Link</a>',
@@ -235,33 +235,35 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 				'price'         => 10,
 			)
 		);
-        $product->save();
-        $product = wc_get_product( $product->get_id() );
+		$product->save();
+		$product = wc_get_product( $product->get_id() );
 
-        $qty = 1;
-        
-        $item = new WC_Order_Item_Product();
-		$item->set_props( array(
-			'product'  => $product,
-			'quantity' => $qty,
-			'subtotal' => wc_get_price_excluding_tax( $product, array( 'qty' => $qty ) ),
-			'total'    => wc_get_price_excluding_tax( $product, array( 'qty' => $qty ) ),
-		) );
-        $item->save();
-        
-        $order->add_item( $item );
-        $order->save();
+		$qty = 1;
 
-        $request_url = $this->paypal_request->get_request_url( $order, $testmode );
+		$item = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => $qty,
+				'subtotal' => wc_get_price_excluding_tax( $product, array( 'qty' => $qty ) ),
+				'total'    => wc_get_price_excluding_tax( $product, array( 'qty' => $qty ) ),
+			)
+		);
+		$item->save();
 
-        $query_string = wp_parse_url( $request_url, PHP_URL_QUERY )
+		$order->add_item( $item );
+		$order->save();
+
+		$request_url = $this->paypal_request->get_request_url( $order, $testmode );
+
+		$query_string = wp_parse_url( $request_url, PHP_URL_QUERY )
 			? wp_parse_url( $request_url, PHP_URL_QUERY )
-            : '';
-        $query_array  = array();
-        parse_str( $query_string, $query_array );
+			: '';
+		$query_array  = array();
+		parse_str( $query_string, $query_array );
 
-        $this->assertEquals( $query_array['item_name_1'], 'New Product Link x ' . $qty );
-    }
+		$this->assertEquals( $query_array['item_name_1'], 'New Product Link x ' . $qty );
+	}
 
 	/**
 	 * Return true if value is < 0, false otherwise.
@@ -395,10 +397,10 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 
 			// Test order with URL longer than limit.
 			// Many items in order -> forced to use one line item -> shipping tax included.
-            $this->check_large_order( true, $testmode );
-            
-            // Test removing tags from line item name
-            $this->check_product_title_containing_html( $testmode );
+			$this->check_large_order( true, $testmode );
+
+			// Test removing tags from line item name
+			$this->check_product_title_containing_html( $testmode );
 
 			// Test amount < 0.
 			$this->check_negative_amount( $testmode );

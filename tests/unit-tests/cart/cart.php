@@ -109,7 +109,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
 
-		$tax_rate = array(
+		$tax_rate    = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
 			'tax_rate'          => '23.0000',
@@ -122,7 +122,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		);
 		$tax_rate_23 = WC_Tax::_insert_tax_rate( $tax_rate );
 
-		$tax_rate = array(
+		$tax_rate   = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
 			'tax_rate'          => '5.0000',
@@ -196,7 +196,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 */
 	public function test_cart_get_discounted_price_issue_10963() {
 		// Create dummy coupon - fixed cart, 1 value
-		$coupon  = WC_Helper_Coupon::create_coupon();
+		$coupon = WC_Helper_Coupon::create_coupon();
 
 		// Add coupon
 		WC()->cart->add_discount( $coupon->get_code() );
@@ -290,7 +290,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	 */
 	public function test_cart_get_discounted_price_issue_10573() {
 		// Create dummy coupon - fixed cart, 1 value
-		$coupon  = WC_Helper_Coupon::create_coupon();
+		$coupon = WC_Helper_Coupon::create_coupon();
 
 		// Create dummy product - price will be 10
 		$product = WC_Helper_Product::create_simple_product();
@@ -1580,7 +1580,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	public function test_add_individual_use_coupon_removal() {
-		$coupon = WC_Helper_Coupon::create_coupon();
+		$coupon    = WC_Helper_Coupon::create_coupon();
 		$iu_coupon = WC_Helper_Coupon::create_coupon( 'code1' );
 		$iu_coupon->set_individual_use( true );
 		$iu_coupon->save();
@@ -1649,7 +1649,7 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 		$new_cart = clone $cart;
 
 		// Get the properties from each object.
-		$cart_fees = $cart->fees_api();
+		$cart_fees     = $cart->fees_api();
 		$new_cart_fees = $new_cart->fees_api();
 
 		// Ensure that cloned properties are not identical.

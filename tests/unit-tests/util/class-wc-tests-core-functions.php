@@ -900,10 +900,10 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'billing_first_name' => array(
 				'priority' => 10,
 			),
-			'billing_last_name' => array(
+			'billing_last_name'  => array(
 				'priority' => 20,
 			),
-			'billing_email' => array(
+			'billing_email'      => array(
 				'priority' => 1,
 			),
 		);

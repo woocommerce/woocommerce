@@ -98,7 +98,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 				'bob@bobbobson.com',
 				array(
 					'first_name' => 'Bob',
-					'last_name' => 'Bobson',
+					'last_name'  => 'Bobson',
 				)
 			)
 		);
@@ -110,7 +110,7 @@ class WC_Tests_Customer_Functions extends WC_Unit_Test_Case {
 				'unicode@unicode.com',
 				array(
 					'first_name' => 'こんにちは',
-					'last_name' => 'こんにちは',
+					'last_name'  => 'こんにちは',
 				)
 			)
 		);

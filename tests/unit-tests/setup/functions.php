@@ -25,45 +25,63 @@ class WC_Tests_Setup_Functions extends WC_Unit_Test_Case {
 		// non-admin user
 		$this->user_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
 		wp_set_current_user( $this->user_id );
-		$this->assertEquals( gateways( $setup_wizard ), array(
-			'paypal' => false,
-		) );
+		$this->assertEquals(
+			gateways( $setup_wizard ),
+			array(
+				'paypal' => false,
+			)
+		);
 
 		// set admin user
 		$this->user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->user_id );
 
 		update_option( 'woocommerce_default_country', 'US' );
-		$this->assertEquals( gateways( $setup_wizard ), array(
-			'stripe' => true,
-			'ppec_paypal' => true,
-		) );
+		$this->assertEquals(
+			gateways( $setup_wizard ),
+			array(
+				'stripe'      => true,
+				'ppec_paypal' => true,
+			)
+		);
 
 		update_option( 'woocommerce_default_country', 'CN' );
-		$this->assertEquals( gateways( $setup_wizard ), array(
-			'ppec_paypal' => true,
-		) );
+		$this->assertEquals(
+			gateways( $setup_wizard ),
+			array(
+				'ppec_paypal' => true,
+			)
+		);
 
 		update_option( 'woocommerce_default_country', 'SE' );
-		$this->assertEquals( gateways( $setup_wizard ), array(
-			'klarna_checkout' => true,
-			'ppec_paypal' => true,
-			'stripe' => false,
-		) );
+		$this->assertEquals(
+			gateways( $setup_wizard ),
+			array(
+				'klarna_checkout' => true,
+				'ppec_paypal'     => true,
+				'stripe'          => false,
+			)
+		);
 
 		update_option( 'woocommerce_default_country', 'DE' );
-		$this->assertEquals( gateways( $setup_wizard ), array(
-			'klarna_payments' => true,
-			'ppec_paypal' => true,
-			'stripe' => false,
-		) );
+		$this->assertEquals(
+			gateways( $setup_wizard ),
+			array(
+				'klarna_payments' => true,
+				'ppec_paypal'     => true,
+				'stripe'          => false,
+			)
+		);
 
 		update_option( 'woocommerce_default_country', 'GB' );
 		update_option( 'woocommerce_sell_in_person', 'yes' );
-		$this->assertEquals( gateways( $setup_wizard ), array(
-			'square' => true,
-			'ppec_paypal' => true,
-			'stripe' => false,
-		) );
-    }
+		$this->assertEquals(
+			gateways( $setup_wizard ),
+			array(
+				'square'      => true,
+				'ppec_paypal' => true,
+				'stripe'      => false,
+			)
+		);
+	}
 }

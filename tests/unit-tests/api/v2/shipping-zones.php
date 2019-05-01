@@ -96,7 +96,8 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 						),
 					),
 				),
-			), $data
+			),
+			$data
 		);
 
 		// Create a zone and make sure it's in the response
@@ -129,7 +130,8 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 						),
 					),
 				),
-			), $data
+			),
+			$data
 		);
 	}
 
@@ -215,7 +217,8 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 						),
 					),
 				),
-			), $data
+			),
+			$data
 		);
 	}
 
@@ -279,7 +282,8 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 						),
 					),
 				),
-			), $data
+			),
+			$data
 		);
 	}
 
@@ -377,7 +381,8 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 						),
 					),
 				),
-			), $data
+			),
+			$data
 		);
 	}
 
@@ -402,7 +407,9 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 
 		// Create a zone
 		$zone = $this->create_shipping_zone(
-			'Zone 1', 0, array(
+			'Zone 1',
+			0,
+			array(
 				array(
 					'code' => 'US',
 					'type' => 'country',
@@ -433,7 +440,8 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 						),
 					),
 				),
-			), $data
+			),
+			$data
 		);
 	}
 
@@ -534,7 +542,8 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 						),
 					),
 				),
-			), $data
+			),
+			$data
 		);
 	}
 
