@@ -59,6 +59,18 @@ class WC_Admin_REST_Reports_Import_Controller extends WC_Admin_REST_Reports_Cont
 				'schema' => array( $this, 'get_import_public_schema' ),
 			)
 		);
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/delete',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'delete_imported_items' ),
+					'permission_callback' => array( $this, 'import_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_import_public_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -200,10 +212,38 @@ class WC_Admin_REST_Reports_Import_Controller extends WC_Admin_REST_Reports_Cont
 	public function cancel_import( $request ) {
 		WC_Admin_Reports_Sync::clear_queued_actions();
 
-		$result   = array(
+		$result = array(
 			'status'  => 'success',
 			'message' => __( 'All pending and in-progress import actions have been cancelled.', 'woocommerce-admin' ),
 		);
+
+		$response = $this->prepare_item_for_response( $result, $request );
+		$data     = $this->prepare_response_for_collection( $response );
+
+		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Delete all imported items.
+	 *
+	 * @param  WP_REST_Request $request Request data.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function delete_imported_items( $request ) {
+		$delete = WC_Admin_Reports_Sync::delete_report_data();
+
+		if ( is_wp_error( $delete ) ) {
+			$result = array(
+				'status'  => 'error',
+				'message' => $delete->get_error_message(),
+			);
+		} else {
+			$result = array(
+				'status'  => 'success',
+				'message' => $delete,
+			);
+		}
+
 		$response = $this->prepare_item_for_response( $result, $request );
 		$data     = $this->prepare_response_for_collection( $response );
 

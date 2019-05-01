@@ -689,6 +689,31 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	}
 
 	/**
+	 * Delete a customer lookup row.
+	 *
+	 * @param int $customer_id Customer ID.
+	 */
+	public static function delete_customer( $customer_id ) {
+		global $wpdb;
+		$customer_id = (int) $customer_id;
+		$table_name  = $wpdb->prefix . self::TABLE_NAME;
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM ${table_name} WHERE customer_id = %d",
+				$customer_id
+			)
+		);
+
+		/**
+		 * Fires when a customer is deleted.
+		 *
+		 * @param int $order_id Order ID.
+		 */
+		do_action( 'woocommerce_reports_delete_customer', $customer_id );
+	}
+
+	/**
 	 * Returns string to be used as cache key for the data.
 	 *
 	 * @param array $params Query parameters.

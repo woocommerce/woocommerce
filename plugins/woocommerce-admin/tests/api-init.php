@@ -72,13 +72,13 @@ class WC_Tests_API_Init extends WC_REST_Unit_Test_Case {
 		add_filter( 'query', array( $this, 'filter_order_query' ) );
 
 		// Initiate sync.
-		WC_Admin_Reports_Sync::orders_lookup_process_order( $order->get_id() );
+		WC_Admin_Reports_Sync::orders_lookup_import_order( $order->get_id() );
 
 		// Verify that a retry job was scheduled.
 		$this->assertCount( 1, $this->queue->actions );
 		$this->assertArraySubset(
 			array(
-				'hook' => WC_Admin_Reports_Sync::SINGLE_ORDER_ACTION,
+				'hook' => WC_Admin_Reports_Sync::SINGLE_ORDER_IMPORT_ACTION,
 				'args' => array( $order->get_id() ),
 			),
 			$this->queue->actions[0]
