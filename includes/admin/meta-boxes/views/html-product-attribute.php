@@ -42,6 +42,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 									$args      = array(
 										'orderby'    => 'name',
 										'hide_empty' => 0,
+										'menu_order' => 'ASC'
 									);
 									$all_terms = get_terms( $attribute->get_taxonomy(), apply_filters( 'woocommerce_product_attribute_terms', $args ) );
 									if ( $all_terms ) {
