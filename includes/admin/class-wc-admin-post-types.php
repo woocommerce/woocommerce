@@ -633,13 +633,13 @@ class WC_Admin_Post_Types {
 			$change_stock = absint( $_REQUEST['change_stock'] );
 			switch ( $change_stock ) {
 				case 2:
-					$new_qty = wc_update_product_stock( $product, $stock_amount, 'increase', true );
+					wc_update_product_stock( $product, $stock_amount, 'increase', true );
 					break;
 				case 3:
-					$new_qty = wc_update_product_stock( $product, $stock_amount, 'decrease', true );
+					wc_update_product_stock( $product, $stock_amount, 'decrease', true );
 					break;
 				default:
-					$new_qty = wc_update_product_stock( $product, $stock_amount, 'set', true );
+					wc_update_product_stock( $product, $stock_amount, 'set', true );
 					break;
 			}
 		}
