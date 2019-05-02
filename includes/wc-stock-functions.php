@@ -33,13 +33,17 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 	}
 
 	if ( ! is_null( $stock_quantity ) && $product->managing_stock() ) {
-		// Some products (variations) can have their stock managed by their parent. Get the correct ID to reduce here.
+		// Some products (variations) can have their stock managed by their parent. Get the correct object to be updated here.
 		$product_id_with_stock = $product->get_stock_managed_by_id();
 		$product_with_stock    = $product_id_with_stock !== $product->get_id() ? wc_get_product( $product_id_with_stock ) : $product;
 		$data_store            = WC_Data_Store::load( 'product' );
-		$new_stock             = $data_store->update_product_stock( $product_id_with_stock, $stock_quantity, $operation );
 
-		// Force product object stock level to be updated to the value we just persisted.
+		// Update the database.
+		// This can fail, i.e. not update stock level if the record is locked and will then return 'old' stock level.
+		$new_stock = $data_store->update_product_stock( $product_id_with_stock, $stock_quantity, $operation );
+
+		// Update the product object.
+		// Force product object stock level to be updated to the value we just persisted (or the value from the db, if not persisted due to lock).
 		$data_store->read_stock_quantity( $product_with_stock, $new_stock );
 
 		// If this is not being called during an update routine, save the product so stock status etc is in sync, and caches are cleared.
