@@ -74,7 +74,7 @@ class FilterPicker extends Component {
 	getFilter( value ) {
 		const { config, query } = this.props;
 		const allFilters = flattenFilters( config.filters );
-		value = value || query[ config.param ] || DEFAULT_FILTER;
+		value = value || query[ config.param ] || config.defaultValue || DEFAULT_FILTER;
 		return find( allFilters, { value } ) || {};
 	}
 
@@ -255,6 +255,10 @@ FilterPicker.propTypes = {
 		 * The url paramter this filter will modify.
 		 */
 		param: PropTypes.string.isRequired,
+		/**
+		 * The default paramter value to use instead of 'all'.
+		 */
+		defaultValue: PropTypes.string,
 		/**
 		 * Determine if the filter should be shown. Supply a function with the query object as an argument returning a boolean.
 		 */
