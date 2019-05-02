@@ -157,14 +157,8 @@ function wc_update_order( $args ) {
  * @param string $name Template name (default: '').
  */
 function wc_get_template_part( $slug, $name = '' ) {
-	$cache_key = sanitize_key( implode( '-', array( 'template-part', $slug, $name ) ) );
-	$template  = wp_cache_get( $cache_key, 'woocommerce' );
-
-	if ( isset( $template['version'], $template['value'] ) && WC()->version === $template['version'] ) {
-		$template = (string) $template['value'];
-	} else {
-		$template = false;
-	}
+	$cache_key = sanitize_key( implode( '-', array( 'template-part', $slug, $name ) ) ) . '_' . WC()->version;
+	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
 
 	if ( ! $template ) {
 		if ( $name ) {
@@ -191,11 +185,7 @@ function wc_get_template_part( $slug, $name = '' ) {
 			);
 		}
 
-		$template_cache_value = array(
-			'version' => WC()->version,
-			'value'   => $template,
-		);
-		wp_cache_set( $cache_key, $template_cache_value, 'woocommerce' );
+		wp_cache_set( $cache_key, $template, 'woocommerce' );
 	}
 
 	// Allow 3rd party plugins to filter template file from their plugin.
@@ -215,23 +205,12 @@ function wc_get_template_part( $slug, $name = '' ) {
  * @param string $default_path  Default path. (default: '').
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
-	$cache_key = sanitize_key( implode( '-', array( 'template', $template_name, $template_path, $default_path ) ) );
-	$template  = wp_cache_get( $cache_key, 'woocommerce' );
-
-	if ( isset( $template['version'], $template['value'] ) && WC()->version === $template['version'] ) {
-		$template = (string) $template['value'];
-	} else {
-		$template = false;
-	}
+	$cache_key = sanitize_key( implode( '-', array( 'template', $template_name, $template_path, $default_path ) ) ) . '_' . WC()->version;
+	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
 
 	if ( ! $template ) {
 		$template = wc_locate_template( $template_name, $template_path, $default_path );
-
-		$template_cache_value = array(
-			'version' => WC()->version,
-			'value'   => $template,
-		);
-		wp_cache_set( $cache_key, $template_cache_value, 'woocommerce' );
+		wp_cache_set( $cache_key, $template, 'woocommerce' );
 	}
 
 	// Allow 3rd party plugin filter template file from their plugin.
