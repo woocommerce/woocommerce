@@ -138,9 +138,10 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				'woocommerce_settings',
 				'woocommerce_settings_params',
 				array(
-					'i18n_nav_warning' => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' ),
-					'i18n_moved_up'    => __( 'Item moved up', 'woocommerce' ),
-					'i18n_moved_down'  => __( 'Item moved down', 'woocommerce' ),
+					'i18n_nav_warning'                    => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' ),
+					'i18n_moved_up'                       => __( 'Item moved up', 'woocommerce' ),
+					'i18n_moved_down'                     => __( 'Item moved down', 'woocommerce' ),
+					'i18n_no_specific_countries_selected' => __( 'Selecting no country to sell to prevents from completing the checkout. Continue anyway?', 'woocommerce' ),
 				)
 			);
 
