@@ -173,11 +173,13 @@
 
 
 		$( '.submit button' ).on( 'click', function() {
-			if ( $( 'select#woocommerce_allowed_countries' ).val() === 'specific'
-				&& ! $("[name='woocommerce_specific_allowed_countries[]']").val() ) {
+			if (
+				$( 'select#woocommerce_allowed_countries' ).val() === 'specific' &&
+				! $( '[name="woocommerce_specific_allowed_countries[]"]' ).val()
+			) {
 				if ( window.confirm( woocommerce_settings_params.i18n_no_specific_countries_selected ) ) {
 					return true;
-				};
+				}
 				return false;
 			}
 		} );
