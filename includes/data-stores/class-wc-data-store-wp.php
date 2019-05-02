@@ -555,9 +555,10 @@ class WC_Data_Store_WP {
 	 * @since 3.6.0
 	 * @param int    $id ID of object to update.
 	 * @param string $table Lookup table name.
+	 * @param bool   $ignore_manage_stock If set to true, stock quantity will be returned regardless of _manage_stock meta value on the product.
 	 * @return array
 	 */
-	protected function get_data_for_lookup_table( $id, $table ) {
+	protected function get_data_for_lookup_table( $id, $table, $ignore_manage_stock = false ) {
 		return array();
 	}
 
@@ -578,8 +579,11 @@ class WC_Data_Store_WP {
 	 * @since 3.6.0
 	 * @param int    $id ID of object to update.
 	 * @param string $table Lookup table name.
+	 * @param bool   $force_qty_update If set to true, stock quantity for update of lookup table will be read from the database regardless of manage stock setting on the product.
+	 *
+	 * @return NULL
 	 */
-	protected function update_lookup_table( $id, $table ) {
+	protected function update_lookup_table( $id, $table, $force_qty_update = false ) {
 		global $wpdb;
 
 		$id    = absint( $id );
@@ -590,7 +594,7 @@ class WC_Data_Store_WP {
 		}
 
 		$existing_data = wp_cache_get( 'lookup_table', 'object_' . $id );
-		$update_data   = $this->get_data_for_lookup_table( $id, $table );
+		$update_data   = $this->get_data_for_lookup_table( $id, $table, $force_qty_update );
 
 		if ( ! empty( $update_data ) && $update_data !== $existing_data ) {
 			$wpdb->replace(
