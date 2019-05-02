@@ -1957,13 +1957,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 3.6.0
 	 * @param int    $id ID of object to update.
 	 * @param string $table Lookup table name.
+	 * @param bool   $ignore_manage_stock If set to true, stock quantity will be returned regardless of _manage_stock meta value on the product.
 	 * @return array
 	 */
-	protected function get_data_for_lookup_table( $id, $table ) {
+	protected function get_data_for_lookup_table( $id, $table, $ignore_manage_stock = false ) {
 		if ( 'wc_product_meta_lookup' === $table ) {
 			$price_meta   = (array) get_post_meta( $id, '_price', false );
-			$manage_stock = get_post_meta( $id, '_manage_stock', true );
-			$stock        = 'yes' === $manage_stock ? wc_stock_amount( get_post_meta( $id, '_stock', true ) ) : null;
+			$manage_stock = get_post_meta( $id, '_manage_stock', true ); // while product is being modified, manage stock could be 'no' in the db, but we want to change the stock qty anyway.
+			$stock        = 'yes' === $manage_stock || $ignore_manage_stock ? wc_stock_amount( get_post_meta( $id, '_stock', true ) ) : null;
 			$price        = wc_format_decimal( get_post_meta( $id, '_price', true ) );
 			$sale_price   = wc_format_decimal( get_post_meta( $id, '_sale_price', true ) );
 			return array(
