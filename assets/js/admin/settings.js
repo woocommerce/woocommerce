@@ -161,9 +161,12 @@
 				lastRow  = $( this ).find( 'tbody tr:last' ),
 				firstRow = $( this ).find( 'tbody tr:first' );
 
-			table.find( '.wc-item-reorder-nav .wc-move-disabled' ).removeClass( 'wc-move-disabled' ).attr( { 'tabindex': '0', 'aria-hidden': 'false' } );
-			firstRow.find( '.wc-item-reorder-nav .wc-move-up' ).addClass( 'wc-move-disabled' ).attr( { 'tabindex': '-1', 'aria-hidden': 'true' } );
-			lastRow.find( '.wc-item-reorder-nav .wc-move-down' ).addClass( 'wc-move-disabled' ).attr( { 'tabindex': '-1', 'aria-hidden': 'true' } );
+			table.find( '.wc-item-reorder-nav .wc-move-disabled' ).removeClass( 'wc-move-disabled' )
+				.attr( { 'tabindex': '0', 'aria-hidden': 'false' } );
+			firstRow.find( '.wc-item-reorder-nav .wc-move-up' ).addClass( 'wc-move-disabled' )
+				.attr( { 'tabindex': '-1', 'aria-hidden': 'true' } );
+			lastRow.find( '.wc-item-reorder-nav .wc-move-down' ).addClass( 'wc-move-disabled' )
+				.attr( { 'tabindex': '-1', 'aria-hidden': 'true' } );
 		} );
 
 		$( '.wc-item-reorder-nav').closest( 'table' ).trigger( 'updateMoveButtons' );
