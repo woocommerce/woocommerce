@@ -83,7 +83,7 @@ class Table extends Component {
 		return () => {
 			const currentKey =
 				query.orderby || get( find( headers, { defaultSort: true } ), 'key', false );
-			const currentDir = query.order || DESC;
+			const currentDir = query.order || get( find( headers, { key: currentKey } ), 'defaultOrder', DESC );
 			let dir = DESC;
 			if ( key === currentKey ) {
 				dir = DESC === currentDir ? ASC : DESC;
