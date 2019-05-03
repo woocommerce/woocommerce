@@ -15,6 +15,7 @@ import {
 } from '@wordpress/editor';
 import {
 	Button,
+	FocalPointPicker,
 	IconButton,
 	PanelBody,
 	Placeholder,
@@ -124,6 +125,10 @@ class FeaturedProduct extends Component {
 			setOverlayColor,
 		} = this.props;
 
+		const url =
+			attributes.mediaSrc || getImageSrcFromProduct( this.state.product );
+		const { focalPoint = { x: 0.5, y: 0.5 } } = attributes;
+
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody title={ __( 'Content', 'woo-gutenberg-products-block' ) }>
@@ -156,6 +161,14 @@ class FeaturedProduct extends Component {
 						max={ 100 }
 						step={ 10 }
 					/>
+					{ !! FocalPointPicker && !! url &&
+						<FocalPointPicker
+							label={ __( 'Focal Point Picker' ) }
+							url={ url }
+							value={ focalPoint }
+							onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
+						/>
+					}
 				</PanelColorSettings>
 			</InspectorControls>
 		);
@@ -205,6 +218,7 @@ class FeaturedProduct extends Component {
 			contentAlign,
 			dimRatio,
 			editMode,
+			focalPoint,
 			height,
 			showDesc,
 			showPrice,
@@ -228,6 +242,10 @@ class FeaturedProduct extends Component {
 			{};
 		if ( overlayColor.color ) {
 			style.backgroundColor = overlayColor.color;
+		}
+		if ( focalPoint ) {
+			style.backgroundPosition = `${ focalPoint.x * 100 }% ${ focalPoint.y *
+				100 }%`;
 		}
 
 		const onResizeStop = ( event, direction, elt ) => {
@@ -257,6 +275,7 @@ class FeaturedProduct extends Component {
 										label={ __( 'Edit media' ) }
 										icon="format-image"
 										onClick={ open }
+										disabled={ ! this.state.product }
 									/>
 								) }
 							/>
@@ -304,7 +323,10 @@ class FeaturedProduct extends Component {
 												[
 													'core/button',
 													{
-														text: __( 'Shop now', 'woo-gutenberg-products-block' ),
+														text: __(
+															'Shop now',
+															'woo-gutenberg-products-block'
+														),
 														url: product.permalink,
 														align: 'center',
 													},

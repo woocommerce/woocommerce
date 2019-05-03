@@ -31,6 +31,7 @@ class WGPB_Block_Featured_Product {
 		'align'        => 'none',
 		'contentAlign' => 'center',
 		'dimRatio'     => 50,
+		'focalPoint'   => false,
 		'height'       => false,
 		'mediaId'      => 0,
 		'mediaSrc'     => '',
@@ -116,6 +117,14 @@ class WGPB_Block_Featured_Product {
 
 		if ( isset( $attributes['height'] ) ) {
 			$style .= sprintf( 'min-height:%dpx;', intval( $attributes['height'] ) );
+		}
+
+		if ( is_array( $attributes['focalPoint'] ) && 2 === count( $attributes['focalPoint'] ) ) {
+			$style .= sprintf(
+				'background-position: %s%% %s%%',
+				$attributes['focalPoint']['x'] * 100,
+				$attributes['focalPoint']['y'] * 100
+			);
 		}
 
 		return $style;
