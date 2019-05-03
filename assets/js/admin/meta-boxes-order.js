@@ -83,7 +83,7 @@ jQuery( function ( $ ) {
 					.prop( 'name', input_name )
 					.prop( 'placeholder', placeholder )
 					.addClass( 'js_field-state' )
-					.val( value );
+					.val( '' );
 				$state.replaceWith( $newstate );
 			}
 
