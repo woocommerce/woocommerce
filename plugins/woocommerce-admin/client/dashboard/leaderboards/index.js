@@ -73,7 +73,7 @@ class Leaderboards extends Component {
 					'Choose which leaderboards to display and other settings',
 					'woocommerce-admin'
 				) }
-				renderChildren={ ( { onToggle } ) => (
+				renderContent={ ( { onToggle } ) => (
 					<Fragment>
 						{ window.wcAdminFeatures[ 'dashboard/customizable' ] && (
 							<div className="woocommerce-ellipsis-menu__item">

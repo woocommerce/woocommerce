@@ -89,7 +89,7 @@ class DashboardCharts extends Component {
 		return (
 			<EllipsisMenu
 				label={ __( 'Choose which charts to display', 'woocommerce-admin' ) }
-				renderChildren={ ( { onToggle } ) => (
+				renderContent={ ( { onToggle } ) => (
 					<Fragment>
 						{ window.wcAdminFeatures[ 'dashboard/customizable' ] && (
 							<div className="woocommerce-ellipsis-menu__item">

@@ -1,7 +1,8 @@
-# unreleased
+# 3.0.0 (unreleased)
 - TableCard component: new `onPageChange` prop.
 - Pagination no longer considers `0` a valid input and triggers `onPageChange` on the input blur event.
 - Tweaks to SummaryListPlaceholder height in order to better match SummaryNumber.
+- EllipsisMenu component (breaking change): Remove `children` prop in favor of a render prop `renderContent` so that function arguments `isOpen`, `onToggle`, and `onClose` can be passed down. 
 
 # 2.0.0
 - Chart legend component now uses withInstanceId HOC so the ids used in several HTML elements are unique.

@@ -235,10 +235,15 @@ class OrdersPanel extends Component {
 		}
 
 		const menu = (
-			<EllipsisMenu label="Demo Menu">
-				<MenuTitle>Test</MenuTitle>
-				<MenuItem onInvoke={ noop }>Test</MenuItem>
-			</EllipsisMenu>
+			<EllipsisMenu
+				label="Demo Menu"
+				renderContent={ () => (
+					<Fragment>
+						<MenuTitle>Test</MenuTitle>
+						<MenuItem onInvoke={ noop }>Test</MenuItem>
+					</Fragment>
+				) }
+			/>
 		);
 
 		const title =
