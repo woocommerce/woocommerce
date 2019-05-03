@@ -10,7 +10,7 @@ import { SearchListControl } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { isLargeCatalog, getProducts } from './utils';
+import { isLargeCatalog, getProducts } from '../utils';
 
 class ProductsControl extends Component {
 	constructor() {
