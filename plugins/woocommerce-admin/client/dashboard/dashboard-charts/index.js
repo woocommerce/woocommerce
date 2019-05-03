@@ -46,7 +46,7 @@ class DashboardCharts extends Component {
 				'order_tax',
 				'shipping_tax',
 			],
-			interval: props.userPrefIntervals || 'day',
+			interval: props.userPrefChartInterval || 'day',
 		};
 
 		this.toggle = this.toggle.bind( this );
