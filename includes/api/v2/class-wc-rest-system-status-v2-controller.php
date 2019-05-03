@@ -876,8 +876,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		$version_latest = $data['Version'];
 
 		// Find latest version.
-		if ( isset( $available_updates[ $plugin ]->update->new_version ) ) {
-			$version_latest = $available_updates[ $plugin ]->update->new_version;
+		if ( isset( $this->available_updates[ $plugin ]->update->new_version ) ) {
+			$version_latest = $this->available_updates[ $plugin ]->update->new_version;
 		}
 
 		return array(
