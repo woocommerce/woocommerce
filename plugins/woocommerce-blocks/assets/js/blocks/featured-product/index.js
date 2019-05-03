@@ -53,6 +53,13 @@ registerBlockType( 'woocommerce/featured-product', {
 		},
 
 		/**
+		 * Focus point for the background image
+		 */
+		focalPoint: {
+			type: 'object',
+		},
+
+		/**
 		 * A fixed height for the block.
 		 */
 		height: {
