@@ -84,7 +84,7 @@ class StorePerformance extends Component {
 					'Choose which analytics to display and the section name',
 					'woocommerce-admin'
 				) }
-				renderChildren={ ( { onToggle } ) => (
+				renderContent={ ( { onToggle } ) => (
 					<Fragment>
 						{ window.wcAdminFeatures[ 'dashboard/customizable' ] && (
 							<div className="woocommerce-ellipsis-menu__item">

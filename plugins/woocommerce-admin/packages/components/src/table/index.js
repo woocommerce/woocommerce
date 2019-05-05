@@ -340,25 +340,29 @@ class TableCard extends Component {
 					),
 				] }
 				menu={
-					showMenu && <EllipsisMenu label={ __( 'Choose which values to display', 'woocommerce-admin' ) }>
-						<MenuTitle>{ __( 'Columns:', 'woocommerce-admin' ) }</MenuTitle>
-						{ allHeaders.map( ( { key, label, required } ) => {
-							if ( required ) {
-								return null;
-							}
-							return (
-								<MenuItem
-									checked={ showCols.includes( key ) }
-									isCheckbox
-									isClickable
-									key={ key }
-									onInvoke={ this.onColumnToggle( key ) }
-								>
-									{ label }
-								</MenuItem>
-							);
-						} ) }
-					</EllipsisMenu>
+					showMenu && <EllipsisMenu label={ __( 'Choose which values to display', 'woocommerce-admin' ) }
+						renderContent={ () => (
+							<Fragment>
+								<MenuTitle>{ __( 'Columns:', 'woocommerce-admin' ) }</MenuTitle>
+								{ allHeaders.map( ( { key, label, required } ) => {
+									if ( required ) {
+										return null;
+									}
+									return (
+										<MenuItem
+											checked={ showCols.includes( key ) }
+											isCheckbox
+											isClickable
+											key={ key }
+											onInvoke={ this.onColumnToggle( key ) }
+										>
+											{ label }
+										</MenuItem>
+									);
+								} ) }
+							</Fragment>
+						) }
+					/>
 				}
 			>
 				{ isLoading ? (
