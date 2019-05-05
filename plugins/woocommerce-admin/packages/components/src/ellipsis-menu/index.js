@@ -12,8 +12,8 @@ import PropTypes from 'prop-types';
  */
 class EllipsisMenu extends Component {
 	render() {
-		const { children, label } = this.props;
-		if ( ! children ) {
+		const { children, label, renderChildren } = this.props;
+		if ( ! children && ! renderChildren ) {
 			return null;
 		}
 
@@ -33,8 +33,12 @@ class EllipsisMenu extends Component {
 			);
 		};
 
-		const renderContent = () => (
-			<NavigableMenu className="woocommerce-ellipsis-menu__content">{ children }</NavigableMenu>
+		// @todo Make all children rendered by render props so Dropdown args can be passed?
+		const renderContent = renderContentArgs => (
+			<NavigableMenu className="woocommerce-ellipsis-menu__content">
+				{ children && children }
+				{ renderChildren && renderChildren( renderContentArgs ) }
+			</NavigableMenu>
 		);
 
 		return (
@@ -59,6 +63,10 @@ EllipsisMenu.propTypes = {
 	 * A list of `MenuTitle`/`MenuItem` components
 	 */
 	children: PropTypes.node,
+	/**
+	 * A list of `MenuTitle`/`MenuItem` components as a render prop. Arguments from Dropdown passed as function arguments.
+	 */
+	renderChildren: PropTypes.func,
 };
 
 export default EllipsisMenu;
