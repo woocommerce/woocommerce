@@ -520,9 +520,10 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	/**
 	 * Remove ordering queries.
 	 *
-	 * @return void
+	 * @param array $posts Posts array, keeping this for backwards compatibility defaulting to empty array.
+	 * @return array
 	 */
-	public function remove_ordering_args() {
+	public function remove_ordering_args( $posts = array() ) {
 		remove_filter( 'posts_clauses', array( $this, 'order_by_price_asc_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'order_by_price_desc_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'order_by_sku_asc_post_clauses' ) );
@@ -530,6 +531,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		remove_filter( 'posts_clauses', array( $this, 'filter_downloadable_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_virtual_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_stock_status_post_clauses' ) );
+		return $posts; // Keeping this here for backward compatibility.
 	}
 
 	/**
