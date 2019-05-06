@@ -6,6 +6,7 @@ const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const fs = require( 'fs' );
 const woocommerceAdminConfig = require( path.resolve( __dirname, '../../../webpack.config.js' ) );
+const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 
 const extArg = process.argv.find( arg => arg.startsWith( '--ext=' ) );
 
@@ -55,6 +56,13 @@ const webpackConfig = {
 					},
 				},
 			},
+			{
+				test: /\.s?css$/,
+				use: [
+					MiniCssExtractPlugin.loader,
+					'css-loader',
+				],
+			},
 		],
 	},
 	resolve: {
@@ -73,6 +81,9 @@ const webpackConfig = {
 				to: path.resolve( __dirname, `../../../../${ extension }/` ),
 			},
 		] ),
+		new MiniCssExtractPlugin( {
+			filename: '[name]/dist/style.css',
+		} ),
 	],
 };
 
