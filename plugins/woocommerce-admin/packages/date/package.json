@@ -21,7 +21,7 @@
   "module": "build-module/index.js",
   "react-native": "src/index",
   "dependencies": {
-    "@babel/runtime-corejs2": "7.4.3",
+    "@babel/runtime-corejs2": "7.4.4",
     "@wordpress/date": "3.0.1",
     "@wordpress/i18n": "3.1.0",
     "lodash": "4.17.11",
