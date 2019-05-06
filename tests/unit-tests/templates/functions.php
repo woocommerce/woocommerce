@@ -44,7 +44,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 			'purchasable',
 			'product-type-simple',
 		);
-		$actual = array_values( wc_get_product_class( 'foo', $product ) );
+		$actual   = array_values( wc_get_product_class( 'foo', $product ) );
 
 		$this->assertEquals( $expected, $actual, print_r( $actual, true ) );
 
@@ -63,7 +63,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 			'purchasable',
 			'product-type-simple',
 		);
-		$actual = array_values( wc_get_product_class( 'foo', $product ) );
+		$actual   = array_values( wc_get_product_class( 'foo', $product ) );
 
 		$this->assertEquals( $expected, $actual, print_r( $actual, true ) );
 		add_filter( 'woocommerce_get_product_class_include_taxonomies', '__return_false' );
@@ -91,7 +91,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 
 		wc_dropdown_variation_attribute_options(
 			array(
-				'product' => $product,
+				'product'   => $product,
 				'attribute' => 'pa_size',
 			)
 		);
@@ -101,14 +101,14 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	 * Test: test_wc_dropdown_variation_attribute_options_should_return_attributes_list_and_selected_element.
 	 */
 	public function test_wc_dropdown_variation_attribute_options_should_return_attributes_list_and_selected_element() {
-		$product = WC_Helper_Product::create_variation_product();
+		$product                       = WC_Helper_Product::create_variation_product();
 		$_REQUEST['attribute_pa_size'] = 'large';
 
 		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="large"  selected=\'selected\'>large</option><option value="small" >small</option></select>' );
 
 		wc_dropdown_variation_attribute_options(
 			array(
-				'product' => $product,
+				'product'   => $product,
 				'attribute' => 'pa_size',
 			)
 		);

@@ -599,7 +599,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 *
 	 * This function is called by WP_HTTP_TestCase::http_request_listner().
 	 *
-	 * @param array $request Request arguments.
+	 * @param array  $request Request arguments.
 	 * @param string $url URL of the request.
 	 *
 	 * @return array|false mocked response or false to let WP perform a regular request.

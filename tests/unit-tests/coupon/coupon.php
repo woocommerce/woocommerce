@@ -235,11 +235,14 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		update_post_meta( $product->get_id(), '_regular_price', '10' );
 
 		// Create coupon
-		$coupon = WC_Helper_Coupon::create_coupon( 'dummycoupon', array(
-			'discount_type'          => 'percent',
-			'coupon_amount'          => '5',
-			'limit_usage_to_x_items' => 1,
-		) );
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'dummycoupon',
+			array(
+				'discount_type'          => 'percent',
+				'coupon_amount'          => '5',
+				'limit_usage_to_x_items' => 1,
+			)
+		);
 
 		// We need this to have the calculate_totals() method calculate totals.
 		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
@@ -265,11 +268,14 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		update_post_meta( $product->get_id(), '_regular_price', '10' );
 
 		// Create coupon
-		$coupon = WC_Helper_Coupon::create_coupon( 'dummycoupon', array(
-			'discount_type'          => __FUNCTION__,
-			'coupon_amount'          => '5',
-			'limit_usage_to_x_items' => 1,
-		) );
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'dummycoupon',
+			array(
+				'discount_type'          => __FUNCTION__,
+				'coupon_amount'          => '5',
+				'limit_usage_to_x_items' => 1,
+			)
+		);
 
 		// Add 4 products and coupon to cart.
 		WC()->cart->add_to_cart( $product->get_id(), 4 );
