@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php if ( $order ) : 
 
-	do_action( 'woocommerce_before_thankyou', $order->id ); ?>
+		do_action( 'woocommerce_before_thankyou', $order->get_id() ); ?>
 
 		<?php if ( $order->has_status( 'failed' ) ) : ?>
 
