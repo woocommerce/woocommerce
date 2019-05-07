@@ -10,6 +10,10 @@
  * WC_Admin_Loader Class.
  */
 class WC_Admin_Loader {
+	/**
+	 * App entry point.
+	 */
+	const APP_ENTRY_POINT = 'wc-admin';
 
 	/**
 	 * Class instance.
@@ -56,7 +60,7 @@ class WC_Admin_Loader {
 		add_action( 'admin_notices', array( 'WC_Admin_Loader', 'inject_after_notices' ), PHP_INT_MAX );
 
 		// priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165.
-		add_action( 'admin_head', array( 'WC_Admin_Loader', 'update_link_structure' ), 20 );
+		add_action( 'admin_head', array( 'WC_Admin_Loader', 'remove_app_entry_page_menu_item' ), 20 );
 	}
 
 	/**
@@ -138,28 +142,20 @@ class WC_Admin_Loader {
 	 * @todo The entry point for the embed needs moved to this class as well.
 	 */
 	public static function register_page_handler() {
-		$page_title = null;
-		$menu_title = null;
-
-		if ( self::is_feature_enabled( 'analytics-dashboard' ) ) {
-			$page_title = __( 'WooCommerce Dashboard', 'woocommerce-admin' );
-			$menu_title = __( 'Dashboard', 'woocommerce-admin' );
-		}
-
-		add_submenu_page(
-			'woocommerce',
-			$page_title,
-			$menu_title,
-			'manage_options',
-			'wc-admin',
-			array( 'WC_Admin_Loader', 'page_wrapper' )
+		wc_admin_register_page(
+			array(
+				'id'     => 'woocommerce-dashboard', // Expected to be overridden if dashboard is enabled.
+				'parent' => 'woocommerce',
+				'title'  => null,
+				'path'   => self::APP_ENTRY_POINT,
+			)
 		);
 	}
 
 	/**
-	 * Update the WooCommerce menu structure to make our main dashboard/handler the top level link for 'WooCommerce'.
+	 * Remove the menu item for the app entry point page.
 	 */
-	public static function update_link_structure() {
+	public static function remove_app_entry_page_menu_item() {
 		global $submenu;
 		// User does not have capabilites to see the submenu.
 		if ( ! current_user_can( 'manage_woocommerce' ) || empty( $submenu['woocommerce'] ) ) {
@@ -168,7 +164,8 @@ class WC_Admin_Loader {
 
 		$wc_admin_key = null;
 		foreach ( $submenu['woocommerce'] as $submenu_key => $submenu_item ) {
-			if ( 'wc-admin' === $submenu_item[2] ) {
+			// Our app entry page menu item has no title.
+			if ( is_null( $submenu_item[0] ) && self::APP_ENTRY_POINT === $submenu_item[2] ) {
 				$wc_admin_key = $submenu_key;
 				break;
 			}
@@ -178,11 +175,7 @@ class WC_Admin_Loader {
 			return;
 		}
 
-		$menu = $submenu['woocommerce'][ $wc_admin_key ];
-
-		// Move menu item to top of array.
 		unset( $submenu['woocommerce'][ $wc_admin_key ] );
-		array_unshift( $submenu['woocommerce'], $menu );
 	}
 
 	/**

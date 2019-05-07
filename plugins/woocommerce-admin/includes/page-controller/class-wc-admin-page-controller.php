@@ -10,7 +10,7 @@
  */
 class WC_Admin_Page_Controller {
 	// JS-powered page root.
-	const PAGE_ROOT = 'wc-admin#';
+	const PAGE_ROOT = 'wc-admin';
 
 	/**
 	 * Singleton instance of self.
@@ -42,13 +42,13 @@ class WC_Admin_Page_Controller {
 	 * Returns the path from an ID.
 	 *
 	 * @param  string $id  ID to get path for.
-	 * @return string|null Path for the given ID.
+	 * @return string Path for the given ID, or the ID on lookup miss.
 	 */
 	public function get_path_from_id( $id ) {
 		if ( isset( $this->pages[ $id ] ) && isset( $this->pages[ $id ]['path'] ) ) {
 			return $this->pages[ $id ]['path'];
 		}
-		return null;
+		return $id;
 	}
 
 	/**
@@ -77,8 +77,11 @@ class WC_Admin_Page_Controller {
 			'position'   => null,
 		);
 
-		$options         = wp_parse_args( $options, $defaults );
-		$options['path'] = self::PAGE_ROOT . $options['path'];
+		$options = wp_parse_args( $options, $defaults );
+
+		if ( 0 !== strpos( $options['path'], self::PAGE_ROOT ) ) {
+			$options['path'] = self::PAGE_ROOT . '#' . $options['path'];
+		}
 
 		// TODO: check for null ID, or collision.
 		$this->pages[ $options['id'] ] = $options;
