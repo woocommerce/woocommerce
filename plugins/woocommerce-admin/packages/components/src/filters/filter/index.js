@@ -110,7 +110,7 @@ class FilterPicker extends Component {
 		// Keep only time related queries when updating to a new filter
 		const persistedQuery = getPersistedQuery( query );
 		const update = {
-			[ config.param ]: 'all' === value ? undefined : value,
+			[ config.param ]: ( config.defaultValue || DEFAULT_FILTER ) === value ? undefined : value,
 			...additionalQueries,
 		};
 		// Keep any url parameters as designated by the config
@@ -120,7 +120,7 @@ class FilterPicker extends Component {
 		updateQueryString( update, path, persistedQuery );
 	}
 
-	onTagChange( filter, onClose, tags ) {
+	onTagChange( filter, onClose, config, tags ) {
 		const tag = last( tags );
 		const { value, settings } = filter;
 		const { param: filterParam } = settings;
@@ -128,12 +128,12 @@ class FilterPicker extends Component {
 			this.update( value, { [ filterParam ]: tag.id } );
 			onClose();
 		} else {
-			this.update( 'all' );
+			this.update( config.defaultValue || DEFAULT_FILTER );
 		}
 		this.updateSelectedTag( [ tag ] );
 	}
 
-	renderButton( filter, onClose ) {
+	renderButton( filter, onClose, config ) {
 		if ( filter.component ) {
 			const { type, labels } = filter.settings;
 			const persistedFilter = this.getFilter();
@@ -145,7 +145,7 @@ class FilterPicker extends Component {
 					type={ type }
 					placeholder={ labels.placeholder }
 					selected={ selectedTag ? [ selectedTag ] : [] }
-					onChange={ partial( this.onTagChange, filter, onClose ) }
+					onChange={ partial( this.onTagChange, filter, onClose, config ) }
 					inlineTags
 					staticResults
 				/>
@@ -202,7 +202,11 @@ class FilterPicker extends Component {
 						/>
 					) }
 					renderContent={ ( { onClose } ) => (
-						<AnimationSlider animationKey={ nav } animate={ animate } onExited={ this.onContentMount }>
+						<AnimationSlider
+							animationKey={ nav }
+							animate={ animate }
+							onExited={ this.onContentMount }
+						>
 							{ () => (
 								<ul className="woocommerce-filters-filter__content-list">
 									{ parentFilter && (
@@ -225,7 +229,7 @@ class FilterPicker extends Component {
 													( selectedFilter.path && includes( selectedFilter.path, filter.value ) ),
 											} ) }
 										>
-											{ this.renderButton( filter, onClose ) }
+											{ this.renderButton( filter, onClose, config ) }
 										</li>
 									) ) }
 								</ul>
