@@ -6,34 +6,6 @@
  * @package Woocommerce Admin
  */
 
-if ( ! function_exists( 'wc_admin_register_page' ) ) {
-	/**
-	 * Add a single page to a given parent top-level-item.
-	 *
-	 * @param array $options {
-	 *     Array describing the menu item.
-	 *
-	 *     @type string $title Menu title
-	 *     @type string $parent Parent path or menu ID
-	 *     @type string $path Path for this page, full path in app context; ex /analytics/report
-	 * }
-	 */
-	function wc_admin_register_page( $options ) {
-		$defaults = array(
-			'parent' => '/analytics',
-		);
-		$options  = wp_parse_args( $options, $defaults );
-		add_submenu_page(
-			'/' === $options['parent'][0] ? "wc-admin#{$options['parent']}" : $options['parent'],
-			$options['title'],
-			$options['title'],
-			'manage_options',
-			"wc-admin#{$options['path']}",
-			array( 'WC_Admin_Loader', 'page_wrapper' )
-		);
-	}
-}
-
 /**
  * WC_Admin_Loader Class.
  */
@@ -145,6 +117,9 @@ class WC_Admin_Loader {
 	 * Class loader for enabled WooCommerce Admin features/sections.
 	 */
 	public static function load_features() {
+		require_once WC_ADMIN_ABSPATH . 'includes/page-controller/class-wc-admin-page-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/page-controller/page-controller-functions.php';
+
 		$features = self::get_features();
 		foreach ( $features as $feature ) {
 			$feature = strtolower( $feature );
