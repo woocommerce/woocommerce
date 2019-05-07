@@ -20,7 +20,6 @@ none
 
 # Compiled CSS
 /assets/css/*.css
-!/assets/css/select2.css
 
 # Minified JS
 /assets/js/admin/*.min.js
