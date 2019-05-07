@@ -19,7 +19,7 @@ import { H, Section } from '@woocommerce/components';
 import {
 	getUnreadNotes,
 	getUnreadOrders,
-	getUnreadReviews,
+	getUnapprovedReviews,
 	getUnreadStock,
 } from './unread-indicators';
 import InboxPanel from './panels/inbox';
@@ -98,7 +98,7 @@ class ActivityPanel extends Component {
 
 	// @todo Pull in dynamic unread status/count
 	getTabs() {
-		const { hasUnreadNotes, hasUnreadOrders, hasUnreadReviews, hasUnreadStock } = this.props;
+		const { hasUnreadNotes, hasUnreadOrders, hasUnapprovedReviews, hasUnreadStock } = this.props;
 		return [
 			{
 				name: 'inbox',
@@ -125,7 +125,7 @@ class ActivityPanel extends Component {
 						name: 'reviews',
 						title: __( 'Reviews', 'woocommerce-admin' ),
 						icon: <Gridicon icon="star" />,
-						unread: hasUnreadReviews,
+						unread: hasUnapprovedReviews,
 					}
 				: null,
 		].filter( Boolean );
@@ -141,8 +141,8 @@ class ActivityPanel extends Component {
 			case 'stock':
 				return <StockPanel />;
 			case 'reviews':
-				const { numberOfReviews } = this.props;
-				return <ReviewsPanel numberOfReviews={ numberOfReviews } />;
+				const { hasUnapprovedReviews } = this.props;
+				return <ReviewsPanel hasUnapprovedReviews={ hasUnapprovedReviews } />;
 			default:
 				return null;
 		}
@@ -272,7 +272,7 @@ export default withSelect( select => {
 	const hasUnreadNotes = getUnreadNotes( select );
 	const hasUnreadOrders = getUnreadOrders( select );
 	const hasUnreadStock = getUnreadStock( select );
-	const { numberOfReviews, hasUnreadReviews } = getUnreadReviews( select );
+	const hasUnapprovedReviews = getUnapprovedReviews( select );
 
-	return { hasUnreadNotes, hasUnreadOrders, hasUnreadReviews, hasUnreadStock, numberOfReviews };
+	return { hasUnreadNotes, hasUnreadOrders, hasUnreadStock, hasUnapprovedReviews };
 } )( clickOutside( ActivityPanel ) );

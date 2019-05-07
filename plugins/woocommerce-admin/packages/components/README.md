@@ -10,4 +10,4 @@ Install the module
 npm install @woocommerce/components --save
 ```
 
-View [the full Component documentation](https://woocommerce.github.io/wc-admin/#/components/) for usage information.
+View [the full Component documentation](https://woocommerce.github.io/woocommerce-admin/#/components/) for usage information.

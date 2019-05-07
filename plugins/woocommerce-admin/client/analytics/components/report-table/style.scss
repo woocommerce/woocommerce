@@ -1,0 +1,22 @@
+/** @format */
+
+.woocommerce-report-table__scroll-point {
+	position: relative;
+	top: -#{$adminbar-height + $gap};
+
+	@include breakpoint( '<782px' ) {
+		top: -#{$adminbar-height-mobile + $gap};
+	}
+
+	.woocommerce-feature-enabled-activity-panels & {
+		top: -#{$adminbar-height + $large-header-height + $gap};
+
+		@include breakpoint( '<782px' ) {
+			top: -#{$adminbar-height-mobile + $small-header-height + $gap};
+		}
+
+		@include breakpoint( '782px-960px' ) {
+			top: -#{$adminbar-height + $medium-header-height + $gap};
+		}
+	}
+}

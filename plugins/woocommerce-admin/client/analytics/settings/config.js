@@ -58,9 +58,9 @@ export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 				'woocommerce-admin'
 			);
 
-			apiFetch( { path: '/wc/v3/system_status/tools/rebuild_stats', method: 'PUT' } )
+			apiFetch( { path: '/wc/v4/reports/import', method: 'PUT' } )
 				.then( response => {
-					if ( response.success ) {
+					if ( 'success' === response.status ) {
 						addNotice( { status: 'success', message: response.message } );
 						// @todo This should be changed to detect when the lookup table population is complete.
 						setTimeout( () => resolve(), 300000 );

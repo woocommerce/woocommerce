@@ -12,12 +12,12 @@ import PropTypes from 'prop-types';
  */
 class EllipsisMenu extends Component {
 	render() {
-		const { children, label } = this.props;
-		if ( ! children ) {
+		const { label, renderContent } = this.props;
+		if ( ! renderContent ) {
 			return null;
 		}
 
-		const renderToggle = ( { onToggle, isOpen } ) => {
+		const renderEllipsis = ( { onToggle, isOpen } ) => {
 			const toggleClassname = classnames( 'woocommerce-ellipsis-menu__toggle', {
 				'is-opened': isOpen,
 			} );
@@ -33,8 +33,10 @@ class EllipsisMenu extends Component {
 			);
 		};
 
-		const renderContent = () => (
-			<NavigableMenu className="woocommerce-ellipsis-menu__content">{ children }</NavigableMenu>
+		const renderMenu = renderContentArgs => (
+			<NavigableMenu className="woocommerce-ellipsis-menu__content">
+				{ renderContent( renderContentArgs ) }
+			</NavigableMenu>
 		);
 
 		return (
@@ -42,8 +44,8 @@ class EllipsisMenu extends Component {
 				<Dropdown
 					contentClassName="woocommerce-ellipsis-menu__popover"
 					position="bottom left"
-					renderToggle={ renderToggle }
-					renderContent={ renderContent }
+					renderToggle={ renderEllipsis }
+					renderContent={ renderMenu }
 				/>
 			</div>
 		);
@@ -56,9 +58,9 @@ EllipsisMenu.propTypes = {
 	 */
 	label: PropTypes.string.isRequired,
 	/**
-	 * A list of `MenuTitle`/`MenuItem` components
+	 * A function returning `MenuTitle`/`MenuItem` components as a render prop. Arguments from Dropdown passed as function arguments.
 	 */
-	children: PropTypes.node,
+	renderContent: PropTypes.func,
 };
 
 export default EllipsisMenu;

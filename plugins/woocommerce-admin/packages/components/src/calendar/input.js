@@ -8,6 +8,7 @@ import { uniqueId, noop } from 'lodash';
 import PropTypes from 'prop-types';
 
 const DateInput = ( {
+	disabled,
 	value,
 	onChange,
 	dateFormat,
@@ -36,6 +37,7 @@ const DateInput = ( {
 				placeholder={ dateFormat.toLowerCase() }
 				onFocus={ onFocus }
 				onKeyDown={ onKeyDown }
+				disabled={ disabled }
 			/>
 			{ error && (
 				<Popover
@@ -55,6 +57,7 @@ const DateInput = ( {
 };
 
 DateInput.propTypes = {
+	disabled: PropTypes.bool,
 	value: PropTypes.string,
 	onChange: PropTypes.func.isRequired,
 	dateFormat: PropTypes.string.isRequired,
@@ -67,6 +70,7 @@ DateInput.propTypes = {
 };
 
 DateInput.defaultProps = {
+	disabled: false,
 	onFocus: () => {},
 	errorPosition: 'bottom center',
 	onKeyDown: noop,

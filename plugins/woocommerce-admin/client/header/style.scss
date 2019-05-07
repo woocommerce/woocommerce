@@ -8,7 +8,7 @@
 	box-sizing: border-box;
 	border-bottom: 1px solid $white;
 	padding: 0;
-	height: 80px;
+	height: $large-header-height;
 	position: fixed;
 	width: 100%;
 	top: $adminbar-height;
@@ -20,12 +20,12 @@
 
 	@include breakpoint( '<782px' ) {
 		top: $adminbar-height-mobile;
-		height: 50px;
+		height: $small-header-height;
 		flex-flow: row wrap;
 	}
 
 	@include breakpoint( '782px-960px' ) {
-		height: 60px;
+		height: $medium-header-height;
 	}
 
 	.woocommerce-layout__header-breadcrumbs {
@@ -34,18 +34,18 @@
 		padding: 0 0 0 $fallback-gutter-large;
 		padding: 0 0 0 $gutter-large;
 		flex: 1 auto;
-		height: 50px;
-		line-height: 50px;
+		height: $small-header-height;
+		line-height: $small-header-height;
 		background: $white;
 
 		@include breakpoint( '782px-960px' ) {
-			height: 60px;
-			line-height: 60px;
+			height: $medium-header-height;
+			line-height: $medium-header-height;
 		}
 
 		@include breakpoint( '>960px' ) {
-			height: 80px;
-			line-height: 80px;
+			height: $large-header-height;
+			line-height: $large-header-height;
 		}
 
 		span + span::before {

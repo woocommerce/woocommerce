@@ -28,3 +28,35 @@
 .woocommerce-dashboard__widget-item {
 	flex: 1;
 }
+
+.woocommerce-dashboard-section__add-more {
+	margin: 0 auto;
+	width: 84px;
+	padding: 0 $gap-large $gap-large;
+
+	.components-popover__content {
+		padding: 0 $gap $gap-smaller;
+	}
+}
+
+.woocommerce-dashboard-section__add-more-choices {
+	display: flex;
+	justify-content: center;
+}
+
+.woocommerce-dashboard-section__add-more-btn {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: $gap;
+	margin: $gap-smaller;
+
+	.dashicons-arrow-right-alt {
+		transform: rotate(-45deg);
+	}
+}
+
+.woocommerce-dashboard-section__add-more-btn-title {
+	color: $core-grey-dark-300;
+	padding-top: 8px;
+}

@@ -36,7 +36,7 @@ class WC_Admin_Dashboard {
 	}
 
 	/**
-	 * Preload data from the performance indiciators endpoint.
+	 * Preload data from the performance indicators endpoint.
 	 *
 	 * @param array $endpoints Array of preloaded endpoints.
 	 * @return array
@@ -48,7 +48,7 @@ class WC_Admin_Dashboard {
 	}
 
 	/**
-	 * Adds fields so that we can store performance indiciators, row settings, and chart type settings for users.
+	 * Adds fields so that we can store performance indicators, row settings, and chart type settings for users.
 	 *
 	 * @param array $user_data_fields User data fields.
 	 * @return array
@@ -57,11 +57,9 @@ class WC_Admin_Dashboard {
 		return array_merge(
 			$user_data_fields,
 			array(
-				'dashboard_performance_indicators',
-				'dashboard_charts',
+				'dashboard_sections',
 				'dashboard_chart_type',
 				'dashboard_chart_interval',
-				'dashboard_leaderboards',
 				'dashboard_leaderboard_rows',
 			)
 		);
