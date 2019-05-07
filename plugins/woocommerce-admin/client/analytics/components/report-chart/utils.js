@@ -22,7 +22,7 @@ export function getSelectedFilter( filters, query, selectedFilterArgs = {} ) {
 
 	if ( filterConfig.showFilters( query, selectedFilterArgs ) ) {
 		const allFilters = flattenFilters( filterConfig.filters );
-		const value = query[ filterConfig.param ] || DEFAULT_FILTER;
+		const value = query[ filterConfig.param ] || filterConfig.defaultValue || DEFAULT_FILTER;
 		return find( allFilters, { value } );
 	}
 
