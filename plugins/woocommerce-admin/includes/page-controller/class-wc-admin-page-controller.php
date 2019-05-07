@@ -20,6 +20,13 @@ class WC_Admin_Page_Controller {
 	private static $instance = false;
 
 	/**
+	 * Current page ID (or false if not registered with this controller).
+	 *
+	 * @var string
+	 */
+	private $current_page = null;
+
+	/**
 	 * Registered pages
 	 * Contains information (breadcrumbs, menu info) about JS powered pages and classic WooCommerce pages.
 	 *
@@ -39,6 +46,52 @@ class WC_Admin_Page_Controller {
 	}
 
 	/**
+	 * Determine the current page ID, if it was registered with this controller.
+	 */
+	public function determine_current_page() {
+		$current_url = '';
+
+		if ( isset( $_SERVER['REQUEST_URI'] ) ) {
+			$current_url = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+		}
+
+		$current_path     = wp_parse_url( $current_url, PHP_URL_PATH );
+		$current_query    = wp_parse_url( $current_url, PHP_URL_QUERY );
+		$current_fragment = wp_parse_url( $current_url, PHP_URL_FRAGMENT );
+
+		foreach ( $this->pages as $page ) {
+			$page_url      = admin_url( 'admin.php?page=' . $page['path'] ); // See: menu_page_url().
+			$page_path     = wp_parse_url( $page_url, PHP_URL_PATH );
+			$page_query    = wp_parse_url( $page_url, PHP_URL_QUERY );
+			$page_fragment = wp_parse_url( $page_url, PHP_URL_FRAGMENT );
+
+			if (
+				$page_path === $current_path &&
+				$page_query === $current_query &&
+				$page_fragment === $current_fragment
+			) {
+				$this->current_page = $page['id'];
+				return;
+			}
+		}
+
+		$this->current_page = false;
+	}
+
+	/**
+	 * Get the current page ID.
+	 *
+	 * @return string|boolean Current page ID or false if not registered with this controller.
+	 */
+	public function get_current_page() {
+		if ( is_null( $this->current_page ) ) {
+			$this->determine_current_page();
+		}
+
+		return $this->current_page;
+	}
+
+	/**
 	 * Returns the path from an ID.
 	 *
 	 * @param  string $id  ID to get path for.
@@ -49,6 +102,16 @@ class WC_Admin_Page_Controller {
 			return $this->pages[ $id ]['path'];
 		}
 		return $id;
+	}
+
+	/**
+	 * Returns true if we are on a page registed with this controller.
+	 *
+	 * @return boolean
+	 */
+	public function is_registered_page() {
+		$current_page = $this->get_current_page();
+		return ! empty( $current_page );
 	}
 
 	/**

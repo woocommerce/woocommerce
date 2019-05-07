@@ -319,11 +319,7 @@ class WC_Admin_Loader {
 	 * Returns true if we are on a JS powered admin page.
 	 */
 	public static function is_admin_page() {
-		$current_screen = get_current_screen();
-		if ( '_page_wc-admin' === substr( $current_screen->id, -14 ) ) {
-			return true;
-		}
-		return false;
+		return wc_admin_is_registered_page();
 	}
 
 	/**
