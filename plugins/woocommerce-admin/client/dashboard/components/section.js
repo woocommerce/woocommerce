@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { Component } from '@wordpress/element';
+import { xor } from 'lodash';
 
 export default class Section extends Component {
 	constructor( props ) {
@@ -13,6 +14,7 @@ export default class Section extends Component {
 			titleInput: title,
 		};
 
+		this.onToggleHiddenBlock = this.onToggleHiddenBlock.bind( this );
 		this.onTitleChange = this.onTitleChange.bind( this );
 		this.onTitleBlur = this.onTitleBlur.bind( this );
 	}
@@ -32,8 +34,20 @@ export default class Section extends Component {
 		}
 	}
 
+	onToggleHiddenBlock( key ) {
+		return () => {
+			const hiddenBlocks = xor( this.props.hiddenBlocks, [ key ] );
+			this.props.onChangeHiddenBlocks( hiddenBlocks );
+		};
+	}
+
 	render() {
-		const { component: SectionComponent, ...props } = this.props;
+		const {
+			component: SectionComponent,
+			onChangeHiddenBlocks,
+			onTitleUpdate,
+			...props
+		} = this.props;
 		const { titleInput } = this.state;
 
 		return (
@@ -41,6 +55,7 @@ export default class Section extends Component {
 				<SectionComponent
 					onTitleChange={ this.onTitleChange }
 					onTitleBlur={ this.onTitleBlur }
+					onToggleHiddenBlock={ this.onToggleHiddenBlock }
 					titleInput={ titleInput }
 					{ ...props }
 				/>

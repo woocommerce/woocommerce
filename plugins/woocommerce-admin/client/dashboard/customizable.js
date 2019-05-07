@@ -4,65 +4,88 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { applyFilters } from '@wordpress/hooks';
+import { compose } from '@wordpress/compose';
 import { partial } from 'lodash';
 import { IconButton, Icon, Dropdown, Button } from '@wordpress/components';
+import { withDispatch } from '@wordpress/data';
+
+/**
+ * WooCommerce dependencies
+ */
+import { H, ReportFilters } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
-import DashboardCharts from './dashboard-charts';
-import Leaderboards from './leaderboards';
-import Section from './section';
-import { ReportFilters, H } from '@woocommerce/components';
-import StorePerformance from './store-performance';
+import defaultSections from './default-sections';
+import Section from './components/section';
+import withSelect from 'wc-api/with-select';
 
-export default class CustomizableDashboard extends Component {
+class CustomizableDashboard extends Component {
 	constructor( props ) {
 		super( props );
+
 		this.state = {
-			sections: applyFilters( 'woocommerce_dashboard_sections', [
-				{
-					key: 'store-performance',
-					component: StorePerformance,
-					title: __( 'Performance', 'woocommerce-admin' ),
-					isVisible: true,
-					icon: 'arrow-right-alt',
-				},
-				{
-					key: 'charts',
-					component: DashboardCharts,
-					title: __( 'Charts', 'woocommerce-admin' ),
-					isVisible: true,
-					icon: 'chart-bar',
-				},
-				{
-					key: 'leaderboards',
-					component: Leaderboards,
-					title: __( 'Leaderboards', 'woocommerce-admin' ),
-					isVisible: true,
-					icon: 'editor-ol',
-				},
-			] ),
+			sections: this.mergeSectionsWithDefaults( props.userPrefSections ),
 		};
 
 		this.onMove = this.onMove.bind( this );
+		this.updateSection = this.updateSection.bind( this );
+	}
+
+	mergeSectionsWithDefaults( prefSections ) {
+		if ( ! prefSections || prefSections.length === 0 ) {
+			return defaultSections;
+		}
+		const defaultKeys = defaultSections.map( section => section.key );
+		const prefKeys = prefSections.map( section => section.key );
+		const keys = new Set( [ ...prefKeys, ...defaultKeys ] );
+		const sections = [];
+
+		keys.forEach( key => {
+			const defaultSection = defaultSections.find( section => section.key === key );
+			if ( ! defaultSection ) {
+				return;
+			}
+			const prefSection = prefSections.find( section => section.key === key );
+
+			sections.push( {
+				...defaultSection,
+				...prefSection,
+			} );
+		} );
+
+		return sections;
+	}
+
+	updateSections( newSections ) {
+		this.setState( { sections: newSections } );
+		this.props.updateCurrentUserData( { dashboard_sections: newSections } );
+	}
+
+	updateSection( updatedKey, newSettings ) {
+		const newSections = this.state.sections.map( section => {
+			if ( section.key === updatedKey ) {
+				return {
+					...section,
+					...newSettings,
+				};
+			}
+			return section;
+		} );
+		this.updateSections( newSections );
+	}
+
+	onChangeHiddenBlocks( updatedKey ) {
+		return updatedHiddenBlocks => {
+			this.updateSection( updatedKey, { hiddenBlocks: updatedHiddenBlocks } );
+		};
 	}
 
 	onSectionTitleUpdate( updatedKey ) {
 		return updatedTitle => {
-			this.setState( {
-				sections: this.state.sections.map( section => {
-					if ( section.key === updatedKey ) {
-						return {
-							...section,
-							title: updatedTitle,
-						};
-					}
-					return section;
-				} ),
-			} );
+			this.updateSection( updatedKey, { title: updatedTitle } );
 		};
 	}
 
@@ -72,16 +95,14 @@ export default class CustomizableDashboard extends Component {
 				// Close the dropdown before setting state so an action is not performed on an unmounted component.
 				onToggle();
 			}
-			this.setState( state => {
-				// When toggling visibility, place section at the end of the array.
-				const sections = [ ...state.sections ];
-				const index = sections.findIndex( s => key === s.key );
-				const toggledSection = sections.splice( index, 1 ).shift();
-				toggledSection.isVisible = ! toggledSection.isVisible;
-				sections.push( toggledSection );
+			// When toggling visibility, place section at the end of the array.
+			const sections = [ ...this.state.sections ];
+			const index = sections.findIndex( s => key === s.key );
+			const toggledSection = sections.splice( index, 1 ).shift();
+			toggledSection.isVisible = ! toggledSection.isVisible;
+			sections.push( toggledSection );
 
-				return { sections };
-			} );
+			this.updateSections( sections );
 		};
 	}
 
@@ -90,7 +111,7 @@ export default class CustomizableDashboard extends Component {
 		const movedSection = sections.splice( index, 1 ).shift();
 		sections.splice( index + change, 0, movedSection );
 
-		this.setState( { sections } );
+		this.updateSections( sections );
 	}
 
 	renderAddMore() {
@@ -152,7 +173,9 @@ export default class CustomizableDashboard extends Component {
 					return (
 						<Section
 							component={ section.component }
+							hiddenBlocks={ section.hiddenBlocks }
 							key={ section.key }
+							onChangeHiddenBlocks={ this.onChangeHiddenBlocks( section.key ) }
 							onTitleUpdate={ this.onSectionTitleUpdate( section.key ) }
 							path={ path }
 							query={ query }
@@ -169,3 +192,21 @@ export default class CustomizableDashboard extends Component {
 		);
 	}
 }
+
+export default compose(
+	withSelect( select => {
+		const { getCurrentUserData } = select( 'wc-api' );
+		const userData = getCurrentUserData();
+
+		return {
+			userPrefSections: userData.dashboard_sections,
+		};
+	} ),
+	withDispatch( dispatch => {
+		const { updateCurrentUserData } = dispatch( 'wc-api' );
+
+		return {
+			updateCurrentUserData,
+		};
+	} )
+)( CustomizableDashboard );

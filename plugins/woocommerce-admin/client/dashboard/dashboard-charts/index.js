@@ -7,7 +7,6 @@ import classNames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import Gridicon from 'gridicons';
-import { xor } from 'lodash';
 import PropTypes from 'prop-types';
 import { IconButton, NavigableMenu, SelectControl, TextControl } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
@@ -33,34 +32,7 @@ class DashboardCharts extends Component {
 
 		this.state = {
 			chartType: props.userPrefChartType || 'line',
-			hiddenChartKeys: props.userPrefCharts || [
-				'avg_order_value',
-				'avg_items_per_order',
-				'items_sold',
-				'gross_revenue',
-				'refunds',
-				'coupons',
-				'taxes',
-				'shipping',
-				'amount',
-				'total_tax',
-				'order_tax',
-				'shipping_tax',
-			],
 			interval: props.userPrefChartInterval || 'day',
-		};
-
-		this.toggle = this.toggle.bind( this );
-	}
-
-	toggle( key ) {
-		return () => {
-			const hiddenChartKeys = xor( this.state.hiddenChartKeys, [ key ] );
-			this.setState( { hiddenChartKeys } );
-			const userDataFields = {
-				[ 'dashboard_charts' ]: hiddenChartKeys,
-			};
-			this.props.updateCurrentUserData( userDataFields );
 		};
 	}
 
@@ -76,15 +48,16 @@ class DashboardCharts extends Component {
 
 	renderMenu() {
 		const {
-			onTitleBlur,
-			onTitleChange,
-			titleInput,
-			onMove,
-			onRemove,
+			hiddenBlocks,
 			isFirst,
 			isLast,
+			onMove,
+			onRemove,
+			onTitleBlur,
+			onTitleChange,
+			onToggleHiddenBlock,
+			titleInput,
 		} = this.props;
-		const { hiddenChartKeys } = this.state;
 
 		return (
 			<EllipsisMenu
@@ -106,11 +79,11 @@ class DashboardCharts extends Component {
 						{ uniqCharts.map( chart => {
 							return (
 								<MenuItem
-									checked={ ! hiddenChartKeys.includes( chart.key ) }
+									checked={ ! hiddenBlocks.includes( chart.key ) }
 									isCheckbox
 									isClickable
 									key={ chart.key }
-									onInvoke={ this.toggle( chart.key ) }
+									onInvoke={ () => onToggleHiddenBlock( chart.key )() }
 								>
 									{ __( `${ chart.label }`, 'woocommerce-admin' ) }
 								</MenuItem>
@@ -167,8 +140,8 @@ class DashboardCharts extends Component {
 	};
 
 	render() {
-		const { path, title } = this.props;
-		const { chartType, hiddenChartKeys, interval } = this.state;
+		const { hiddenBlocks, path, title } = this.props;
+		const { chartType, interval } = this.state;
 		const query = { ...this.props.query, chartType, interval };
 		return (
 			<Fragment>
@@ -211,7 +184,7 @@ class DashboardCharts extends Component {
 					</SectionHeader>
 					<div className="woocommerce-dashboard__columns">
 						{ uniqCharts.map( chart => {
-							return hiddenChartKeys.includes( chart.key ) ? null : (
+							return hiddenBlocks.includes( chart.key ) ? null : (
 								<ChartBlock
 									charts={ getChartFromKey( chart.key ) }
 									endpoint={ chart.endpoint }
@@ -239,7 +212,6 @@ export default compose(
 		const userData = getCurrentUserData();
 
 		return {
-			userPrefCharts: userData.dashboard_charts,
 			userPrefChartType: userData.dashboard_chart_type,
 			userPrefChartInterval: userData.dashboard_chart_interval,
 		};

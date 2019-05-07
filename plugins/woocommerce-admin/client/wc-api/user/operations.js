@@ -40,11 +40,9 @@ function updateCurrentUserData( resourceNames, data, fetch ) {
 		'revenue_report_columns',
 		'taxes_report_columns',
 		'variations_report_columns',
-		'dashboard_performance_indicators',
-		'dashboard_charts',
+		'dashboard_sections',
 		'dashboard_chart_type',
 		'dashboard_chart_interval',
-		'dashboard_leaderboards',
 		'dashboard_leaderboard_rows',
 		'activity_panel_inbox_last_read',
 	];
