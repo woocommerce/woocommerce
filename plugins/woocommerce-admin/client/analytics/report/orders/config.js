@@ -144,7 +144,7 @@ export const advancedFilters = {
 				getLabels: getCouponLabels,
 			},
 		},
-		customer: {
+		customer_type: {
 			labels: {
 				add: __( 'Customer Type', 'woocommerce-admin' ),
 				remove: __( 'Remove customer filter', 'woocommerce-admin' ),
