@@ -71,7 +71,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_order_status_on-hold_to_processing', array( $this, 'capture_payment' ) );
-		add_action( 'woocommerce_order_status_on-hold_to_completed', array( $this, 'capture_payment' ) );
+		add_action( 'woocommerce_order_status_completed', array( $this, 'capture_payment' ) );
 
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
