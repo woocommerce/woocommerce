@@ -29,7 +29,7 @@ class WC_Admin_REST_Orders_Controller extends WC_REST_Orders_Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params           = parent::get_collection_params();
+		$params = parent::get_collection_params();
 		// This needs to remain a string to support extensions that filter Order Number.
 		$params['number'] = array(
 			'description'       => __( 'Limit result set to orders matching part of an order number.', 'woocommerce-admin' ),

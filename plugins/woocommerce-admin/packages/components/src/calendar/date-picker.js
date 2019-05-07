@@ -12,10 +12,14 @@ import { TAB } from '@wordpress/keycodes';
 import moment from 'moment';
 
 /**
+ * WooCommerce dependencies
+ */
+import { dateValidationMessages, toMoment } from '@woocommerce/date';
+
+/**
  * Internal dependencies
  */
 import DateInput from './input';
-import { toMoment } from '@woocommerce/date';
 import { H, Section } from '../section';
 import PropTypes from 'prop-types';
 
@@ -54,7 +58,7 @@ class DatePicker extends Component {
 		const value = event.target.value;
 		const { dateFormat } = this.props;
 		const date = toMoment( dateFormat, value );
-		const error = date ? null : __( 'Invalid date', 'woocommerce-admin' );
+		const error = date ? null : dateValidationMessages.invalid;
 
 		this.props.onUpdate( {
 			date,
@@ -64,7 +68,7 @@ class DatePicker extends Component {
 	}
 
 	render() {
-		const { date, text, dateFormat, error, isInvalidDate } = this.props;
+		const { date, disabled, text, dateFormat, error, isInvalidDate } = this.props;
 
 		return (
 			<Dropdown
@@ -72,6 +76,7 @@ class DatePicker extends Component {
 				focusOnMount={ false }
 				renderToggle={ ( { isOpen, onToggle } ) => (
 					<DateInput
+						disabled={ disabled }
 						value={ text }
 						onChange={ this.onInputChange }
 						dateFormat={ dateFormat }
@@ -112,6 +117,10 @@ DatePicker.propTypes = {
 	 * A moment date object representing the selected date. `null` for no selection.
 	 */
 	date: PropTypes.object,
+	/**
+	 * Whether the input is disabled.
+	 */
+	disabled: PropTypes.bool,
 	/**
 	 * The date in human-readable format. Displayed in the text input.
 	 */
