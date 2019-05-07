@@ -1,4 +1,5 @@
 # unreleased
+- TableCard now has a `defaultOrder` parameter to specify default sort column sort order.
 - Pagination no longer considers `0` a valid input and triggers `onPageChange` on the input blur event.
 - Tweaks to SummaryListPlaceholder height in order to better match SummaryNumber.
 
