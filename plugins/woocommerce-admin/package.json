@@ -139,7 +139,7 @@
     "eslint-loader": "2.1.2",
     "eslint-plugin-jest": "22.5.1",
     "eslint-plugin-jsx-a11y": "6.2.1",
-    "eslint-plugin-react": "7.12.4",
+    "eslint-plugin-react": "7.13.0",
     "eslint-plugin-wpcalypso": "4.0.2",
     "grunt": "1.0.4",
     "grunt-checktextdomain": "1.0.1",
