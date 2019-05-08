@@ -51,67 +51,21 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 
 		if ( 'date' === $args['orderby'] ) {
 			$args['orderby'] = 'date ID';
-		} elseif ( 'stock_status' === $args['orderby'] ) {
-			$args['meta_query'] = array( // WPCS: slow query ok.
-				'relation'      => 'AND',
-				'_stock_status' => array(
-					'key'     => '_stock_status',
-					'compare' => 'EXISTS',
-				),
-				'_stock'        => array(
-					'key'     => '_stock',
-					'compare' => 'EXISTS',
-					'type'    => 'NUMERIC',
-				),
-			);
-			$args['orderby']    = array(
-				'_stock_status' => $args['order'],
-				'_stock'        => 'desc' === $args['order'] ? 'asc' : 'desc',
-			);
-		} elseif ( 'stock_quantity' === $args['orderby'] ) {
-			$args['meta_key'] = '_stock'; // WPCS: slow query ok.
-			$args['orderby']  = 'meta_value_num';
 		} elseif ( 'include' === $args['orderby'] ) {
 			$args['orderby'] = 'post__in';
 		} elseif ( 'id' === $args['orderby'] ) {
 			$args['orderby'] = 'ID'; // ID must be capitalized.
-		} elseif ( 'sku' === $args['orderby'] ) {
-			$args['meta_key'] = '_sku'; // WPCS: slow query ok.
-			$args['orderby']  = 'meta_value';
 		}
 
 		$args['post_type'] = array( 'product', 'product_variation' );
 
 		if ( 'lowstock' === $request['type'] ) {
-			$low_stock = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
-			$no_stock  = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
-
-			$args['meta_query'] = array( // WPCS: slow query ok.
-				array(
-					'key'   => '_manage_stock',
-					'value' => 'yes',
-				),
-				array(
-					'key'     => '_stock',
-					'value'   => array( $no_stock, $low_stock ),
-					'compare' => 'BETWEEN',
-					'type'    => 'NUMERIC',
-				),
-				array(
-					'key'   => '_stock_status',
-					'value' => 'instock',
-				),
-			);
+			$args['low_in_stock'] = true;
 		} elseif ( in_array( $request['type'], array_keys( wc_get_product_stock_status_options() ), true ) ) {
-			$args['meta_query'] = array( // WPCS: slow query ok.
-				array(
-					'key'   => '_stock_status',
-					'value' => $request['type'],
-				),
-			);
+			$args['stock_status'] = $request['type'];
 		}
 
-		$query_args['ignore_sticky_posts'] = true;
+		$args['ignore_sticky_posts'] = true;
 
 		return $args;
 	}
@@ -149,8 +103,16 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
+		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10, 2 );
+		add_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10, 2 );
+		add_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_group_by' ), 10, 2 );
+		add_filter( 'posts_clauses', array( __CLASS__, 'add_wp_query_orderby' ), 10, 2 );
 		$query_args    = $this->prepare_reports_query( $request );
 		$query_results = $this->get_products( $query_args );
+		remove_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10 );
+		remove_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10 );
+		remove_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_group_by' ), 10 );
+		remove_filter( 'posts_clauses', array( __CLASS__, 'add_wp_query_orderby' ), 10 );
 
 		$objects = array();
 		foreach ( $query_results['objects'] as $object ) {
@@ -182,6 +144,134 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Add in conditional search filters for products.
+	 *
+	 * @param string $where Where clause used to search posts.
+	 * @param object $wp_query WP_Query object.
+	 * @return string
+	 */
+	public static function add_wp_query_filter( $where, $wp_query ) {
+		global $wpdb;
+
+		$stock_status = $wp_query->get( 'stock_status' );
+		if ( $stock_status ) {
+			$where .= $wpdb->prepare(
+				' AND wc_product_meta_lookup.stock_status = %s ',
+				$stock_status
+			);
+		}
+
+		if ( $wp_query->get( 'low_in_stock' ) ) {
+			// We want products with stock < low stock amount, but greater than no stock amount.
+			$no_stock_amount  = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
+			$low_stock_amount = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
+			$where           .= "
+			AND wc_product_meta_lookup.stock_quantity IS NOT NULL
+			AND (
+				(
+					low_stock_amount_meta.meta_value > ''
+					AND wc_product_meta_lookup.stock_quantity <= CAST(low_stock_amount_meta.meta_value AS SIGNED)
+					AND wc_product_meta_lookup.stock_quantity > {$no_stock_amount}
+				)
+				OR (
+					(
+						low_stock_amount_meta.meta_value IS NULL OR low_stock_amount_meta.meta_value <= ''
+					)
+					AND wc_product_meta_lookup.stock_quantity <= {$low_stock_amount}
+					AND wc_product_meta_lookup.stock_quantity > {$no_stock_amount}
+				)
+			)";
+		}
+
+		return $where;
+	}
+
+	/**
+	 * Join posts meta tables when product search or low stock query is present.
+	 *
+	 * @param string $join Join clause used to search posts.
+	 * @param object $wp_query WP_Query object.
+	 * @return string
+	 */
+	public static function add_wp_query_join( $join, $wp_query ) {
+		global $wpdb;
+
+		$stock_status = $wp_query->get( 'stock_status' );
+		if ( $stock_status ) {
+			$join = self::append_product_sorting_table_join( $join );
+		}
+
+		if ( $wp_query->get( 'low_in_stock' ) ) {
+			$join  = self::append_product_sorting_table_join( $join );
+			$join .= " LEFT JOIN {$wpdb->postmeta} AS low_stock_amount_meta ON {$wpdb->posts}.ID = low_stock_amount_meta.post_id AND low_stock_amount_meta.meta_key = '_low_stock_amount' ";
+		}
+
+		return $join;
+	}
+
+	/**
+	 * Join wc_product_meta_lookup to posts if not already joined.
+	 *
+	 * @param string $sql SQL join.
+	 * @return string
+	 */
+	protected static function append_product_sorting_table_join( $sql ) {
+		global $wpdb;
+
+		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
+			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
+		}
+		return $sql;
+	}
+
+	/**
+	 * Group by post ID to prevent duplicates.
+	 *
+	 * @param string $groupby Group by clause used to organize posts.
+	 * @param object $wp_query WP_Query object.
+	 * @return string
+	 */
+	public static function add_wp_query_group_by( $groupby, $wp_query ) {
+		global $wpdb;
+
+		if ( empty( $groupby ) ) {
+			$groupby = $wpdb->posts . '.ID';
+		}
+		return $groupby;
+	}
+
+	/**
+	 * Custom orderby clauses using the lookup tables.
+	 *
+	 * @param array  $args Query args.
+	 * @param object $wp_query WP_Query object.
+	 * @return array
+	 */
+	public static function add_wp_query_orderby( $args, $wp_query ) {
+		global $wpdb;
+
+		$orderby = $wp_query->get( 'orderby' );
+		$order   = esc_sql( $wp_query->get( 'order' ) ? $wp_query->get( 'order' ) : 'desc' );
+
+		switch ( $orderby ) {
+			case 'stock_quantity':
+				$args['join']    = self::append_product_sorting_table_join( $args['join'] );
+				$args['orderby'] = " wc_product_meta_lookup.stock_quantity {$order}, wc_product_meta_lookup.product_id {$order} ";
+				break;
+			case 'stock_status':
+				$args['join']    = self::append_product_sorting_table_join( $args['join'] );
+				$args['orderby'] = " wc_product_meta_lookup.stock_status {$order}, wc_product_meta_lookup.stock_quantity {$order} ";
+				break;
+			case 'sku':
+				$args['join']    = self::append_product_sorting_table_join( $args['join'] );
+				$args['orderby'] = " wc_product_meta_lookup.sku {$order}, wc_product_meta_lookup.product_id {$order} ";
+				break;
+		}
+
+		return $args;
 	}
 
 	/**
