@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { __, _n } from '@wordpress/i18n';
+import { __, _n, _x } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 
 /**
@@ -16,6 +16,7 @@ import { numberFormat } from '@woocommerce/number';
  * Internal dependencies
  */
 import ReportTable from 'analytics/components/report-table';
+import { isLowStock } from './utils';
 
 export default class StockReportTable extends Component {
 	constructor() {
@@ -60,7 +61,16 @@ export default class StockReportTable extends Component {
 		const { stockStatuses } = wcSettings;
 
 		return products.map( product => {
-			const { id, manage_stock, name, parent_id, sku, stock_quantity, stock_status } = product;
+			const {
+				id,
+				manage_stock,
+				name,
+				parent_id,
+				sku,
+				stock_quantity,
+				stock_status,
+				low_stock_amount,
+			} = product;
 
 			const productDetailLink = getNewPath( persistedQuery, '/analytics/products', {
 				filter: 'single_product',
@@ -73,7 +83,11 @@ export default class StockReportTable extends Component {
 				</Link>
 			);
 
-			const stockStatusLink = (
+			const stockStatusLink = isLowStock( stock_status, stock_quantity, low_stock_amount ) ? (
+				<Link href={ 'post.php?action=edit&post=' + ( parent_id || id ) } type="wp-admin">
+					{ _x( 'Low', 'Indication of a low quantity', 'woocommerce-admin' ) }
+				</Link>
+			) : (
 				<Link href={ 'post.php?action=edit&post=' + ( parent_id || id ) } type="wp-admin">
 					{ stockStatuses[ stock_status ] }
 				</Link>
