@@ -36,7 +36,7 @@ export default class Dashboard extends Component {
 
 		// @todo When the customizable dashboard is ready to be launched, we can pull `CustomizableDashboard`'s render
 		// method into `index.js`, and replace both this feature check, and the existing dashboard below.
-		if ( window.wcAdminFeatures[ 'dashboard/customizable' ] ) {
+		if ( window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] ) {
 			return <CustomizableDashboard query={ query } path={ path } />;
 		}
 

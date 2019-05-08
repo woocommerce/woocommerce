@@ -38,7 +38,7 @@ const getPages = () => {
 		} );
 	}
 
-	if ( window.wcAdminFeatures.dashboard ) {
+	if ( window.wcAdminFeatures[ 'analytics-dashboard' ] ) {
 		pages.push( {
 			container: Dashboard,
 			path: '/',

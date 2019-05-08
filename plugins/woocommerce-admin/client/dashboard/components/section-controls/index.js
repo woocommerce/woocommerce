@@ -36,7 +36,7 @@ class SectionControls extends Component {
 	render() {
 		const { onRemove, isFirst, isLast } = this.props;
 
-		if ( ! window.wcAdminFeatures[ 'dashboard/customizable' ] ) {
+		if ( ! window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] ) {
 			return null;
 		}
 

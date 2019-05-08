@@ -2,8 +2,8 @@
 	"features": {
 		"activity-panels": false,
 		"analytics": false,
-		"dashboard": false,
-		"dashboard/customizable": false,
+		"analytics-dashboard": false,
+		"analytics-dashboard/customizable": false,
 		"devdocs": false,
 		"onboarding": false,
 		"store-alerts": false

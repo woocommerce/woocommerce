@@ -64,7 +64,7 @@ class DashboardCharts extends Component {
 				label={ __( 'Choose which charts to display', 'woocommerce-admin' ) }
 				renderContent={ ( { onToggle } ) => (
 					<Fragment>
-						{ window.wcAdminFeatures[ 'dashboard/customizable' ] && (
+						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
 							<div className="woocommerce-ellipsis-menu__item">
 								<TextControl
 									label={ __( 'Section Title', 'woocommerce-admin' ) }

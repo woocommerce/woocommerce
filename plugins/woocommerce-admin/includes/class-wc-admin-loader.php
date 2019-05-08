@@ -166,7 +166,7 @@ class WC_Admin_Loader {
 		$page_title = null;
 		$menu_title = null;
 
-		if ( self::is_feature_enabled( 'dashboard' ) ) {
+		if ( self::is_feature_enabled( 'analytics-dashboard' ) ) {
 			$page_title = __( 'WooCommerce Dashboard', 'woocommerce-admin' );
 			$menu_title = __( 'Dashboard', 'woocommerce-admin' );
 		}
