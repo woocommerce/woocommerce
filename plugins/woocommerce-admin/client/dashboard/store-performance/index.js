@@ -199,7 +199,7 @@ export default compose(
 
 		if ( statKeys.length === 0 ) {
 			return {
-				hiddenIndicators,
+				hiddenBlocks,
 				userIndicators,
 				indicators,
 			};
