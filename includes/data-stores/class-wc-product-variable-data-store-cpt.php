@@ -486,7 +486,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			$query_in   = '(' . implode( ',', $format ) . ')';
 			$query_args = array( 'stock_status' => $status ) + $children;
 			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-			if ( get_option( 'woocommerce_product_lookup_table_is_generating' ) ) {
+			if ( ! get_option( 'woocommerce_product_lookup_table_is_generating' ) ) {
 				$query = "SELECT COUNT( post_id ) FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value = %s AND post_id IN {$query_in}";
 			} else {
 				$query = "SELECT COUNT( product_id ) FROM {$wpdb->wc_product_meta_lookup} WHERE stock_status = %s AND product_id IN {$query_in}";
