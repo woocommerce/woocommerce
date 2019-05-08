@@ -19,7 +19,8 @@
     "git:update-hooks": "rm -r .git/hooks && mkdir -p .git/hooks && node ./node_modules/husky/husky.js install"
   },
   "dependencies": {
-    "@woocommerce/block-library": "2.0.1"
+    "@woocommerce/block-library": "2.0.1",
+    "@woocommerce/admin-library": "./woocommerce-admin-library-0.12.0.tgz"
   },
   "devDependencies": {
     "autoprefixer": "9.6.0",

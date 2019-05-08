@@ -304,6 +304,13 @@ module.exports = function( grunt ) {
 					'<%= dirs.css %>/blocks',
 					'<%= dirs.php %>/blocks'
 				]
+			},
+			'wc-admin': {
+				src: [
+					'<%= dirs.js %>/wc-admin',
+					'<%= dirs.css %>/wc-admin',
+					'<%= dirs.php %>/wc-admin'
+				]
 			}
 		},
 
@@ -348,7 +355,7 @@ module.exports = function( grunt ) {
 
 		// Copy block files from npm package.
 		copy: {
-			js: {
+			'blocks-js': {
 				expand: true,
 				cwd: 'node_modules/@woocommerce/block-library/build',
 				src: '*.js',
@@ -357,13 +364,13 @@ module.exports = function( grunt ) {
 					process: ( content ) => content.replace( /'woo-gutenberg-products-block'/g, "'woocommerce'" )
 				}
 			},
-			css: {
+			'blocks-css': {
 				expand: true,
 				cwd: 'node_modules/@woocommerce/block-library/build',
 				src: '*.css',
 				dest: '<%= dirs.css %>/blocks/'
 			},
-			php: {
+			'blocks-php': {
 				expand: true,
 				cwd: 'node_modules/@woocommerce/block-library/assets/php',
 				src: '*.php',
@@ -388,6 +395,80 @@ module.exports = function( grunt ) {
 						.replace( /FP_VERSION/g, 'WGPB_VERSION' )
 						// Replace file imports
 						.replace( /-wgpb-/g, '-wc-' )
+				}
+			},
+			'wc-admin-js': {
+				expand: true,
+				cwd: 'node_modules/@woocommerce/admin-library/dist',
+				src: '**/*.js',
+				dest: '<%= dirs.js %>/wc-admin/',
+				options: {
+					process: ( content ) => content.replace( /'woocommerce-admin'/g, "'woocommerce'" )
+				}
+			},
+			'wc-admin-css': {
+				expand: true,
+				cwd: 'node_modules/@woocommerce/admin-library/dist',
+				src: '**/*.css',
+				dest: '<%= dirs.css %>/wc-admin/'
+			},
+			'wc-admin-php': {
+				expand: true,
+				cwd: 'node_modules/@woocommerce/admin-library/includes',
+				src: '**/*.php',
+				dest: '<%= dirs.php %>/wc-admin/',
+				rename: ( dest, src ) => dest + '/' + src.replace( '-wc-admin-loader', '-wc-admin-library' ),
+				options: {
+					process: ( content, srcpath ) => {
+						var featureConfigSrc = 'node_modules/@woocommerce/admin-library/dist/feature-config-core.php';
+						var loaderSrc = 'node_modules/@woocommerce/admin-library/includes/class-wc-admin-loader.php';
+
+						if ( loaderSrc === srcpath ) {
+							// Takes the allowed features from the build and adds it inline to the library/loader class.
+							var featureConfig = grunt.file.read( featureConfigSrc );
+							content = content.replace(
+								/apply_filters\( \'woocommerce_admin_features\', array\(\) \);/g,
+								"apply_filters(\n\t\t\t'woocommerce_admin_features',\n" + featureConfig + "\n\t\t);"
+							);
+						}
+
+						return content
+						// Replace textdomain.
+						.replace( /'woocommerce-admin'/g, "'woocommerce'" )
+						.replace( /WC_ADMIN_VERSION_NUMBER/g, "WC_VERSION" )
+						// Replace source for JS files.
+						.replace(
+							/return plugins_url\( self::get_path\( \$file \) . \$file, WC_ADMIN_PLUGIN_FILE \);/g,
+							"return WC()->plugin_url() . self::get_path( $file ) . $file;"
+						)
+						.replace(
+							/WC_ADMIN_PLUGIN_FILE/g,
+							"WC_PLUGIN_FILE"
+						)
+						.replace(
+							/WC_ADMIN_ABSPATH/g,
+							"WC_ABSPATH"
+						)
+						.replace(
+							/WC_ADMIN_FEATURES_PATH/g,
+							"WC_ABSPATH . 'includes/wc-admin/features/'"
+						)
+						.replace(
+							/WC_ADMIN_DIST_CSS_FOLDER/g,
+							"'/assets/css/wc-admin/'"
+						)
+						.replace(
+							/WC_ADMIN_DIST_JS_FOLDER/g,
+							"'/assets/js/wc-admin/'"
+						)
+						.replace(
+							/WC_ADMIN_APP/g,
+							"'woocommerce-admin'"
+						).replace(
+							/WC_Admin_Loader/g,
+							"WC_Admin_Library"
+						)
+					}
 				}
 			}
 		}
@@ -416,6 +497,7 @@ module.exports = function( grunt ) {
 		'js',
 		'css',
 		'blocks',
+		'wc-admin',
 		'i18n'
 	]);
 
@@ -436,7 +518,16 @@ module.exports = function( grunt ) {
 
 	grunt.registerTask( 'blocks', [
 		'clean:blocks',
-		'copy'
+		'copy:blocks-js',
+		'copy:blocks-css',
+		'copy:blocks-php'
+	]);
+
+	grunt.registerTask( 'wc-admin', [
+		'clean:wc-admin',
+		'copy:wc-admin-js',
+		'copy:wc-admin-css',
+		'copy:wc-admin-php',
 	]);
 
 	grunt.registerTask( 'docs', [

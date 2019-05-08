@@ -446,6 +446,10 @@ final class WooCommerce {
 
 		if ( $this->is_request( 'admin' ) ) {
 			include_once WC_ABSPATH . 'includes/admin/class-wc-admin.php';
+
+			if ( file_exists( WC_ABSPATH . 'includes/wc-admin/class-wc-admin-library.php' ) ) {
+				include_once WC_ABSPATH . 'includes/wc-admin/class-wc-admin-library.php';
+			}
 		}
 
 		if ( $this->is_request( 'frontend' ) ) {
