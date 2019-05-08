@@ -150,6 +150,589 @@ class WC_Admin_Loader {
 				'path'   => self::APP_ENTRY_POINT,
 			)
 		);
+
+		// TODO: move this somewhere else?
+		$admin_page_base    = wp_parse_url( admin_url( 'admin.php' ), PHP_URL_PATH );
+		$posttype_list_base = wp_parse_url( admin_url( 'edit.php' ), PHP_URL_PATH );
+
+		// WooCommerce.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce',
+				'screen_id' => 'woocommerce_page_wc-admin',
+				'title'     => __( 'WooCommerce', 'woocommerce-admin' ),
+				'full_path' => add_query_arg( 'page', self::APP_ENTRY_POINT, $admin_page_base ),
+			)
+		);
+
+		// WooCommerce > Settings > General (default tab).
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings',
+				'parent'    => 'woocommerce',
+				'screen_id' => 'woocommerce_page_wc-settings-general',
+				'title'     => array(
+					__( 'Settings', 'woocommerce-admin' ),
+					__( 'General', 'woocommerce-admin' ),
+				),
+				'full_path' => add_query_arg( 'page', 'wc-settings', $admin_page_base ),
+			)
+		);
+
+		// WooCommerce > Settings > Products > General (default tab).
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-products',
+				'parent'    => 'woocommerce-settings',
+				'screen_id' => 'woocommerce_page_wc-settings-products',
+				'title'     => array(
+					__( 'Products', 'woocommerce-admin' ),
+					__( 'General', 'woocommerce-admin' ),
+				),
+				'full_path' => add_query_arg(
+					array(
+						'page' => 'wc-settings',
+						'tab'  => 'products',
+					),
+					$admin_page_base
+				),
+			)
+		);
+
+		// WooCommerce > Settings > Products > Inventory.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-products-inventory',
+				'parent'    => 'woocommerce-settings-products',
+				'screen_id' => 'woocommerce_page_wc-settings-products-inventory',
+				'title'     => __( 'Inventory', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Settings > Products > Downloadable products.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-products-downloadable',
+				'parent'    => 'woocommerce-settings-products',
+				'screen_id' => 'woocommerce_page_wc-settings-products-downloadable',
+				'title'     => __( 'Downloadable products', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Settings > Shipping > Shipping zones (default tab).
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-shipping',
+				'parent'    => 'woocommerce-settings',
+				'screen_id' => 'woocommerce_page_wc-settings-shipping',
+				'title'     => array(
+					__( 'Shipping', 'woocommerce-admin' ),
+					__( 'Shipping zones', 'woocommerce-admin' ),
+				),
+				'full_path' => add_query_arg(
+					array(
+						'page' => 'wc-settings',
+						'tab'  => 'shipping',
+					),
+					$admin_page_base
+				),
+			)
+		);
+
+		// WooCommerce > Settings > Shipping > Shipping zones > Edit zone.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-edit-shipping-zone',
+				'parent'    => 'woocommerce-settings',
+				'screen_id' => 'woocommerce_page_wc-settings-shipping-edit_zone',
+				'title'     => array(
+					__( 'Shipping zones', 'woocommerce-admin' ),
+					__( 'Edit zone', 'woocommerce-admin' ),
+				),
+				'full_path' => add_query_arg(
+					array(
+						'page' => 'wc-settings',
+						'tab'  => 'shipping',
+					),
+					$admin_page_base
+				),
+			)
+		);
+
+		// WooCommerce > Settings > Shipping > Shipping options.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-shipping-options',
+				'parent'    => 'woocommerce-settings-shipping',
+				'screen_id' => 'woocommerce_page_wc-settings-shipping-options',
+				'title'     => __( 'Shipping options', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Settings > Shipping > Shipping classes.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-shipping-classes',
+				'parent'    => 'woocommerce-settings-shipping',
+				'screen_id' => 'woocommerce_page_wc-settings-shipping-classes',
+				'title'     => __( 'Shipping classes', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Settings > Payments.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-payments',
+				'parent'    => 'woocommerce-settings',
+				'screen_id' => 'woocommerce_page_wc-settings-checkout',
+				'title'     => __( 'Payments', 'woocommerce-admin' ),
+				'full_path' => add_query_arg(
+					array(
+						'page' => 'wc-settings',
+						'tab'  => 'checkout',
+					),
+					$admin_page_base
+				),
+			)
+		);
+
+		// WooCommerce > Settings > Payments > Direct bank transfer.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-payments-bacs',
+				'parent'    => 'woocommerce-settings-payments',
+				'screen_id' => 'woocommerce_page_wc-settings-checkout-bacs',
+				'title'     => __( 'Direct bank transfer', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Settings > Payments > Check payments.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-payments-cheque',
+				'parent'    => 'woocommerce-settings-payments',
+				'screen_id' => 'woocommerce_page_wc-settings-checkout-cheque',
+				'title'     => __( 'Check payments', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Settings > Payments > Cash on delivery.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-payments-cod',
+				'parent'    => 'woocommerce-settings-payments',
+				'screen_id' => 'woocommerce_page_wc-settings-checkout-cod',
+				'title'     => __( 'Cash on delivery', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Settings > Payments > PayPal.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-payments-paypal',
+				'parent'    => 'woocommerce-settings-payments',
+				'screen_id' => 'woocommerce_page_wc-settings-checkout-paypal',
+				'title'     => __( 'PayPal', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Settings > Accounts & Privacy.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-accounts-privacy',
+				'parent'    => 'woocommerce-settings',
+				'screen_id' => 'woocommerce_page_wc-settings-account',
+				'title'     => __( 'Accounts & Privacy', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Settings > Emails.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-email',
+				'parent'    => 'woocommerce-settings',
+				'screen_id' => 'woocommerce_page_wc-settings-email',
+				'title'     => __( 'Emails', 'woocommerce-admin' ),
+				'full_path' => add_query_arg(
+					array(
+						'page' => 'wc-settings',
+						'tab'  => 'email',
+					),
+					$admin_page_base
+				),
+			)
+		);
+
+		// WooCommerce > Settings > Emails > Edit email (all email editing).
+		$emails = array(
+			'wc_email_new_order',
+			'wc_email_cancelled_order',
+			'wc_email_failed_order',
+			'wc_email_customer_on_hold_order',
+			'wc_email_customer_processing_order',
+			'wc_email_customer_completed_order',
+			'wc_email_customer_refunded_order',
+			'wc_email_customer_invoice',
+			'wc_email_customer_note',
+			'wc_email_customer_reset_password',
+			'wc_email_customer_new_account',
+		);
+
+		foreach ( $emails as $email ) {
+			wc_admin_connect_page(
+				array(
+					'id'        => 'woocommerce-settings-email-' . $email,
+					'parent'    => 'woocommerce-settings-email',
+					'screen_id' => 'woocommerce_page_wc-settings-email-' . $email,
+					'title'     => __( 'Edit email', 'woocommerce-admin' ),
+				)
+			);
+		}
+
+		// WooCommerce > Settings > Advanced > Page setup (default tab).
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-advanced',
+				'parent'    => 'woocommerce-settings',
+				'screen_id' => 'woocommerce_page_wc-settings-advanced',
+				'title'     => array(
+					__( 'Advanced', 'woocommerce-admin' ),
+					__( 'Page setup', 'woocommerce-admin' ),
+				),
+				'full_path' => add_query_arg(
+					array(
+						'page' => 'wc-settings',
+						'tab'  => 'advanced',
+					),
+					$admin_page_base
+				),
+			)
+		);
+
+		// WooCommerce > Settings > Advanced > REST API.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-advanced-rest-api',
+				'parent'    => 'woocommerce-settings-advanced',
+				'screen_id' => 'woocommerce_page_wc-settings-advanced-keys',
+				'title'     => __( 'REST API', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Settings > Advanced > Webhooks.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-advanced-webhooks',
+				'parent'    => 'woocommerce-settings-advanced',
+				'screen_id' => 'woocommerce_page_wc-settings-advanced-webhooks',
+				'title'     => __( 'Webhooks', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Settings > Advanced > Legacy API.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-advanced-legacy-api',
+				'parent'    => 'woocommerce-settings-advanced',
+				'screen_id' => 'woocommerce_page_wc-settings-advanced-legacy_api',
+				'title'     => __( 'Legacy API', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Settings > Advanced > WooCommerce.com.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-settings-advanced-woocommerce-com',
+				'parent'    => 'woocommerce-settings-advanced',
+				'screen_id' => 'woocommerce_page_wc-settings-advanced-woocommerce_com',
+				'title'     => __( 'WooCommerce.com', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Orders.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-orders',
+				'parent'    => 'woocommerce',
+				'screen_id' => 'edit-shop_order',
+				'title'     => __( 'Orders', 'woocommerce-admin' ),
+				'full_path' => add_query_arg( 'post_type', 'shop_order', $posttype_list_base ),
+			)
+		);
+
+		// WooCommerce > Orders > Add New.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-add-order',
+				'parent'    => 'woocommerce-orders',
+				'screen_id' => 'shop_order-add',
+				'title'     => __( 'Add New', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Orders > Edit Order.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-edit-order',
+				'parent'    => 'woocommerce-orders',
+				'screen_id' => 'shop_order',
+				'title'     => __( 'Edit Order', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Coupons.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-coupons',
+				'parent'    => 'woocommerce',
+				'screen_id' => 'edit-shop_coupon',
+				'title'     => __( 'Coupons', 'woocommerce-admin' ),
+				'full_path' => add_query_arg( 'post_type', 'shop_coupon', $posttype_list_base ),
+			)
+		);
+
+		// WooCommerce > Coupons > Add New.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-add-coupon',
+				'parent'    => 'woocommerce-coupons',
+				'screen_id' => 'shop_coupon-add',
+				'title'     => __( 'Add New', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Coupons > Edit Coupon.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-edit-coupon',
+				'parent'    => 'woocommerce-coupons',
+				'screen_id' => 'shop_coupon',
+				'title'     => __( 'Edit Coupon', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Reports > Orders (default tab).
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-reports',
+				'parent'    => 'woocommerce',
+				'screen_id' => 'woocommerce_page_wc-reports-orders',
+				'title'     => array(
+					__( 'Reports', 'woocommerce-admin' ),
+					__( 'Orders', 'woocommerce-admin' ),
+				),
+				'full_path' => add_query_arg( 'page', 'wc-reports', $admin_page_base ),
+			)
+		);
+
+		// WooCommerce > Reports > Customers.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-reports-customers',
+				'parent'    => 'woocommerce-reports',
+				'screen_id' => 'woocommerce_page_wc-reports-customers',
+				'title'     => __( 'Customers', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Reports > Stock.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-reports-stock',
+				'parent'    => 'woocommerce-reports',
+				'screen_id' => 'woocommerce_page_wc-reports-stock',
+				'title'     => __( 'Stock', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Reports > Taxes.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-reports-taxes',
+				'parent'    => 'woocommerce-reports',
+				'screen_id' => 'woocommerce_page_wc-reports-taxes',
+				'title'     => __( 'Taxes', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Status > System status (default tab).
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-status',
+				'parent'    => 'woocommerce',
+				'screen_id' => 'woocommerce_page_wc-status-status',
+				'title'     => array(
+					__( 'Status', 'woocommerce-admin' ),
+					__( 'System status', 'woocommerce-admin' ),
+				),
+				'full_path' => add_query_arg( 'page', 'wc-status', $admin_page_base ),
+			)
+		);
+
+		// WooCommerce > Status > Tools.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-status-tools',
+				'parent'    => 'woocommerce-status',
+				'screen_id' => 'woocommerce_page_wc-status-tools',
+				'title'     => __( 'Tools', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Status > Logs.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-status-logs',
+				'parent'    => 'woocommerce-status',
+				'screen_id' => 'woocommerce_page_wc-status-tools',
+				'title'     => __( 'Tools', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Status > Scheduled Actions.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-status-action-scheduler',
+				'parent'    => 'woocommerce-status',
+				'screen_id' => 'woocommerce_page_wc-status-action-scheduler',
+				'title'     => __( 'Scheduled Actions', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Extensions > Browse Extensions (default tab).
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-addons',
+				'parent'    => 'woocommerce',
+				'screen_id' => 'woocommerce_page_wc-addons-browse-extensions',
+				'title'     => array(
+					__( 'Extensions', 'woocommerce-admin' ),
+					__( 'Browse Extensions', 'woocommerce-admin' ),
+				),
+				'full_path' => add_query_arg( 'page', 'wc-addons', $admin_page_base ),
+			)
+		);
+
+		// WooCommerce > Extensions > WooCommerce.com Subscriptions.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-addons-subscriptions',
+				'parent'    => 'woocommerce-addons',
+				'screen_id' => 'woocommerce_page_wc-addons-browse-extensions-helper',
+				'title'     => __( 'WooCommerce.com Subscriptions', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Products.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-products',
+				'parent'    => 'woocommerce',
+				'screen_id' => 'edit-product',
+				'title'     => __( 'Products', 'woocommerce-admin' ),
+				'full_path' => add_query_arg( 'post_type', 'product', $posttype_list_base ),
+			)
+		);
+
+		// WooCommerce > Products > Add New.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-add-product',
+				'parent'    => 'woocommerce-products',
+				'screen_id' => 'product-add',
+				'title'     => __( 'Add New', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Products > Edit Order.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-edit-product',
+				'parent'    => 'woocommerce-products',
+				'screen_id' => 'product',
+				'title'     => __( 'Edit Product', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Products > Import Products.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-import-products',
+				'parent'    => 'woocommerce-products',
+				'screen_id' => 'product_page_product_importer',
+				'title'     => __( 'Import Products', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Products > Export Products.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-export-products',
+				'parent'    => 'woocommerce-products',
+				'screen_id' => 'product_page_product_exporter',
+				'title'     => __( 'Export Products', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Products > Product categories.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-product-categories',
+				'parent'    => 'woocommerce-products',
+				'screen_id' => 'edit-product_cat',
+				'title'     => __( 'Product categories', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Products > Edit category.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-product-edit-category',
+				'parent'    => 'woocommerce-products',
+				'screen_id' => 'product_cat',
+				'title'     => __( 'Edit category', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Products > Product tags.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-product-tags',
+				'parent'    => 'woocommerce-products',
+				'screen_id' => 'edit-product_tag',
+				'title'     => __( 'Product tags', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Products > Edit tag.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-product-edit-tag',
+				'parent'    => 'woocommerce-products',
+				'screen_id' => 'product_tag',
+				'title'     => __( 'Edit tag', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Products > Attributes.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-product-attributes',
+				'parent'    => 'woocommerce-products',
+				'screen_id' => 'product_page_product_attributes',
+				'title'     => __( 'Attributes', 'woocommerce-admin' ),
+			)
+		);
+
+		// WooCommerce > Products > Edit attribute.
+		wc_admin_connect_page(
+			array(
+				'id'        => 'woocommerce-product-edit-attribute',
+				'parent'    => 'woocommerce-products',
+				'screen_id' => 'product_page_product_attribute-edit',
+				'title'     => __( 'Edit attribute', 'woocommerce-admin' ),
+			)
+		);
 	}
 
 	/**
@@ -328,248 +911,14 @@ class WC_Admin_Loader {
 	 * @todo See usage in `admin.php`. This needs refactored and implemented properly in core.
 	 */
 	public static function is_embed_page() {
-		$is_embed  = false;
-		$screen_id = self::get_current_screen_id();
-		if ( ! $screen_id ) {
-			return false;
-		}
-
-		$screens = self::get_embed_enabled_screen_ids();
-
-		if ( in_array( $screen_id, $screens, true ) ) {
-			$is_embed = true;
-		}
-
-		return apply_filters( 'woocommerce_page_is_embed_page', $is_embed );
-	}
-
-	/**
-	 * Returns the current screen ID.
-	 * This is slightly different from WP's get_current_screen, in that it attaches an action,
-	 * so certain pages like 'add new' pages can have different breadcrumbs or handling.
-	 * It also catches some more unique dynamic pages like taxonomy/attribute management.
-	 *
-	 * Format: {$current_screen->action}-{$current_screen->action}, or just {$current_screen->action} if no action is found
-	 *
-	 * @todo Refactor: https://github.com/woocommerce/woocommerce-admin/issues/1432.
-	 * @return string Current screen ID.
-	 */
-	public static function get_current_screen_id() {
-		$current_screen = get_current_screen();
-		if ( ! $current_screen ) {
-			return false;
-		}
-		$current_screen_id = $current_screen->action ? $current_screen->action . '-' . $current_screen->id : $current_screen->id;
-
-		if ( ! empty( $_GET['taxonomy'] ) && ! empty( $_GET['post_type'] ) && 'product' === $_GET['post_type'] ) {
-			$current_screen_id = 'product_page_product_attributes';
-		}
-
-		return $current_screen_id;
-	}
-
-	/**
-	 * `WC_Admin_Loader::get_embed_enabled_screen_ids`,  `WC_Admin_Loader::get_embed_enabled_plugin_screen_ids`,
-	 * `WC_Admin_Loader::get_embed_enabled_screen_ids` should be considered temporary functions for the feature plugin.
-	 *  This is separate from WC's screen_id functions so that extensions explictly have to opt-in to the feature plugin.
-	 *
-	 * @todo Refactor: https://github.com/woocommerce/woocommerce-admin/issues/1432.
-	 */
-	public static function get_embed_enabled_core_screen_ids() {
-		$screens = array(
-			'edit-shop_order',
-			'shop_order',
-			'add-shop_order',
-			'edit-shop_coupon',
-			'shop_coupon',
-			'add-shop_coupon',
-			'woocommerce_page_wc-reports',
-			'woocommerce_page_wc-settings',
-			'woocommerce_page_wc-status',
-			'woocommerce_page_wc-addons',
-			'edit-product',
-			'product_page_product_importer',
-			'product_page_product_exporter',
-			'add-product',
-			'product',
-			'edit-product_cat',
-			'edit-product_tag',
-			'product_page_product_attributes',
-		);
-		return apply_filters( 'wc_admin_get_embed_enabled_core_screens_ids', $screens );
-	}
-
-	/**
-	 * If any extensions want to show the new header, they can register their screen ids.
-	 * Separate so extensions can register support for the feature plugin separately.
-	 *
-	 * @todo Refactor: https://github.com/woocommerce/woocommerce-admin/issues/1432.
-	 */
-	public static function get_embed_enabled_plugin_screen_ids() {
-		$screens = array();
-		return apply_filters( 'wc_admin_get_embed_enabled_plugin_screens_ids', $screens );
-	}
-
-	/**
-	 * Returns core and plugin screen IDs for a list of screens the new header should be enabled on.
-	 */
-	public static function get_embed_enabled_screen_ids() {
-		return array_merge( self::get_embed_enabled_core_screen_ids(), self::get_embed_enabled_plugin_screen_ids() );
+		return wc_admin_is_connected_page();
 	}
 
 	/**
 	 * Returns breadcrumbs for the current page.
-	 *
-	 * @todo Refactor: https://github.com/woocommerce/woocommerce-admin/issues/1432.
 	 */
 	private static function get_embed_breadcrumbs() {
-		$current_screen_id = self::get_current_screen_id();
-
-		// If a page has a tab, we can append that to the screen ID and show another pagination level.
-		$pages_with_tabs = array(
-			'wc-reports'  => 'orders',
-			'wc-settings' => 'general',
-			'wc-status'   => 'status',
-		);
-		$tab             = '';
-		$get_tab         = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : '';
-		if ( isset( $_GET['page'] ) ) {
-			$page = sanitize_text_field( wp_unslash( $_GET['page'] ) );
-			if ( in_array( $page, array_keys( $pages_with_tabs ) ) ) {
-				$tab = ! empty( $get_tab ) ? $get_tab . '-' : $pages_with_tabs[ $page ] . '-';
-			}
-		}
-
-		$breadcrumbs = apply_filters(
-			'wc_admin_get_breadcrumbs',
-			array(
-				'edit-shop_order'                       => __( 'Orders', 'woocommerce-admin' ),
-				'add-shop_order'                        => array(
-					array( '/edit.php?post_type=shop_order', __( 'Orders', 'woocommerce-admin' ) ),
-					__( 'Add New', 'woocommerce-admin' ),
-				),
-				'shop_order'                            => array(
-					array( '/edit.php?post_type=shop_order', __( 'Orders', 'woocommerce-admin' ) ),
-					__( 'Edit Order', 'woocommerce-admin' ),
-				),
-				'edit-shop_coupon'                      => __( 'Coupons', 'woocommerce-admin' ),
-				'add-shop_coupon'                       => array(
-					array( 'edit.php?post_type=shop_coupon', __( 'Coupons', 'woocommerce-admin' ) ),
-					__( 'Add New', 'woocommerce-admin' ),
-				),
-				'shop_coupon'                           => array(
-					array( 'edit.php?post_type=shop_coupon', __( 'Coupons', 'woocommerce-admin' ) ),
-					__( 'Edit Coupon', 'woocommerce-admin' ),
-				),
-				'woocommerce_page_wc-reports'           => array(
-					array( 'admin.php?page=wc-reports', __( 'Reports', 'woocommerce-admin' ) ),
-				),
-				'orders-woocommerce_page_wc-reports'    => array(
-					array( 'admin.php?page=wc-reports', __( 'Reports', 'woocommerce-admin' ) ),
-					__( 'Orders', 'woocommerce-admin' ),
-				),
-				'customers-woocommerce_page_wc-reports' => array(
-					array( 'admin.php?page=wc-reports', __( 'Reports', 'woocommerce-admin' ) ),
-					__( 'Customers', 'woocommerce-admin' ),
-				),
-				'stock-woocommerce_page_wc-reports'     => array(
-					array( 'admin.php?page=wc-reports', __( 'Reports', 'woocommerce-admin' ) ),
-					__( 'Stock', 'woocommerce-admin' ),
-				),
-				'taxes-woocommerce_page_wc-reports'     => array(
-					array( 'admin.php?page=wc-reports', __( 'Reports', 'woocommerce-admin' ) ),
-					__( 'Taxes', 'woocommerce-admin' ),
-				),
-				'woocommerce_page_wc-settings'          => array(
-					array( 'admin.php?page=wc-settings', __( 'Settings', 'woocommerce-admin' ) ),
-				),
-				'general-woocommerce_page_wc-settings'  => array(
-					array( 'admin.php?page=wc-settings', __( 'Settings', 'woocommerce-admin' ) ),
-					__( 'General', 'woocommerce-admin' ),
-				),
-				'products-woocommerce_page_wc-settings' => array(
-					array( 'admin.php?page=wc-settings', __( 'Settings', 'woocommerce-admin' ) ),
-					__( 'Products', 'woocommerce-admin' ),
-				),
-				'tax-woocommerce_page_wc-settings'      => array(
-					array( 'admin.php?page=wc-settings', __( 'Settings', 'woocommerce-admin' ) ),
-					__( 'Tax', 'woocommerce-admin' ),
-				),
-				'shipping-woocommerce_page_wc-settings' => array(
-					array( 'admin.php?page=wc-settings', __( 'Settings', 'woocommerce-admin' ) ),
-					__( 'Shipping', 'woocommerce-admin' ),
-				),
-				'checkout-woocommerce_page_wc-settings' => array(
-					array( 'admin.php?page=wc-settings', __( 'Settings', 'woocommerce-admin' ) ),
-					__( 'Payments', 'woocommerce-admin' ),
-				),
-				'email-woocommerce_page_wc-settings'    => array(
-					array( 'admin.php?page=wc-settings', __( 'Settings', 'woocommerce-admin' ) ),
-					__( 'Emails', 'woocommerce-admin' ),
-				),
-				'advanced-woocommerce_page_wc-settings' => array(
-					array( 'admin.php?page=wc-settings', __( 'Settings', 'woocommerce-admin' ) ),
-					__( 'Advanced', 'woocommerce-admin' ),
-				),
-				'woocommerce_page_wc-status'            => array(
-					__( 'Status', 'woocommerce-admin' ),
-				),
-				'status-woocommerce_page_wc-status'     => array(
-					array( 'admin.php?page=wc-status', __( 'Status', 'woocommerce-admin' ) ),
-					__( 'System Status', 'woocommerce-admin' ),
-				),
-				'tools-woocommerce_page_wc-status'      => array(
-					array( 'admin.php?page=wc-status', __( 'Status', 'woocommerce-admin' ) ),
-					__( 'Tools', 'woocommerce-admin' ),
-				),
-				'logs-woocommerce_page_wc-status'       => array(
-					array( 'admin.php?page=wc-status', __( 'Status', 'woocommerce-admin' ) ),
-					__( 'Logs', 'woocommerce-admin' ),
-				),
-				'connect-woocommerce_page_wc-status'    => array(
-					array( 'admin.php?page=wc-status', __( 'Status', 'woocommerce-admin' ) ),
-					__( 'WooCommerce Services Status', 'woocommerce-admin' ),
-				),
-				'woocommerce_page_wc-addons'            => __( 'Extensions', 'woocommerce-admin' ),
-				'edit-product'                          => __( 'Products', 'woocommerce-admin' ),
-				'product_page_product_importer'         => array(
-					array( 'edit.php?post_type=product', __( 'Products', 'woocommerce-admin' ) ),
-					__( 'Import', 'woocommerce-admin' ),
-				),
-				'product_page_product_exporter'         => array(
-					array( 'edit.php?post_type=product', __( 'Products', 'woocommerce-admin' ) ),
-					__( 'Export', 'woocommerce-admin' ),
-				),
-				'add-product'                           => array(
-					array( 'edit.php?post_type=product', __( 'Products', 'woocommerce-admin' ) ),
-					__( 'Add New', 'woocommerce-admin' ),
-				),
-				'product'                               => array(
-					array( 'edit.php?post_type=product', __( 'Products', 'woocommerce-admin' ) ),
-					__( 'Edit Product', 'woocommerce-admin' ),
-				),
-				'edit-product_cat'                      => array(
-					array( 'edit.php?post_type=product', __( 'Products', 'woocommerce-admin' ) ),
-					__( 'Categories', 'woocommerce-admin' ),
-				),
-				'edit-product_tag'                      => array(
-					array( 'edit.php?post_type=product', __( 'Products', 'woocommerce-admin' ) ),
-					__( 'Tags', 'woocommerce-admin' ),
-				),
-				'product_page_product_attributes'       => array(
-					array( 'edit.php?post_type=product', __( 'Products', 'woocommerce-admin' ) ),
-					__( 'Attributes', 'woocommerce-admin' ),
-				),
-			)
-		);
-
-		if ( ! empty( $breadcrumbs[ $tab . $current_screen_id ] ) ) {
-			return $breadcrumbs[ $tab . $current_screen_id ];
-		} elseif ( ! empty( $breadcrumbs[ $current_screen_id ] ) ) {
-			return $breadcrumbs[ $current_screen_id ];
-		} else {
-			return '';
-		}
+		return wc_admin_get_breadcrumbs();
 	}
 
 	/**
@@ -607,7 +956,6 @@ class WC_Admin_Loader {
 			<div class="woocommerce-layout">
 				<div class="woocommerce-layout__header is-embed-loading">
 					<h1 class="woocommerce-layout__header-breadcrumbs">
-						<span><a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-admin#/' ) ); ?>">WooCommerce</a></span>
 						<?php foreach ( $sections as $section ) : ?>
 							<?php self::output_breadcrumbs( $section ); ?>
 						<?php endforeach; ?>
@@ -695,22 +1043,18 @@ class WC_Admin_Loader {
 			return $admin_title;
 		}
 
-		if ( self::is_embed_page() ) {
-			$sections = self::get_embed_breadcrumbs();
-			$sections = is_array( $sections ) ? $sections : array( $sections );
-			$pieces   = array();
+		$sections = self::get_embed_breadcrumbs();
+		$pieces   = array();
 
-			foreach ( $sections as $section ) {
-				$pieces[] = is_array( $section ) ? $section[1] : $section;
-			}
-
-			$pieces = array_reverse( $pieces );
-			$title  = implode( ' &lsaquo; ', $pieces );
-		} else {
-			$title = __( 'Dashboard', 'woocommerce-admin' );
+		foreach ( $sections as $section ) {
+			$pieces[] = is_array( $section ) ? $section[1] : $section;
 		}
+
+		$pieces = array_reverse( $pieces );
+		$title  = implode( ' &lsaquo; ', $pieces );
+
 		/* translators: %1$s: updated title, %2$s: blog info name */
-		return sprintf( __( '%1$s &lsaquo; %2$s &#8212; WooCommerce', 'woocommerce-admin' ), $title, get_bloginfo( 'name' ) );
+		return sprintf( __( '%1$s &lsaquo; %2$s', 'woocommerce-admin' ), $title, get_bloginfo( 'name' ) );
 	}
 
 	/**
