@@ -525,25 +525,24 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 
 		if (
 			$user_id &&
-			get_user_meta( $user_id, 'first_name', true ) ||
-			get_user_meta( $user_id, 'last_name', true )
+			(
+				get_user_meta( $user_id, 'first_name', true ) ||
+				get_user_meta( $user_id, 'last_name', true )
+			)
 		) {
 			$first_name = get_user_meta( $user_id, 'first_name', true );
 			$last_name  = get_user_meta( $user_id, 'last_name', true );
-		} elseif (
-			$order &&
-			$order->get_billing_first_name( 'edit' ) ||
-			$order->get_billing_last_name( 'edit' )
-		) {
-			$first_name = $order->get_billing_first_name( 'edit' );
-			$last_name  = $order->get_billing_last_name( 'edit' );
-		} elseif (
-			$order &&
-			$order->get_shipping_first_name( 'edit' ) ||
-			$order->get_shipping_last_name( 'edit' )
-		) {
-			$first_name = $order->get_shipping_first_name( 'edit' );
-			$last_name  = $order->get_shipping_last_name( 'edit' );
+		} elseif ( $order ) {
+			if (
+				$order->get_billing_first_name( 'edit' ) ||
+				$order->get_billing_last_name( 'edit' )
+			) {
+				$first_name = $order->get_billing_first_name( 'edit' );
+				$last_name  = $order->get_billing_last_name( 'edit' );
+			} else {
+				$first_name = $order->get_shipping_first_name( 'edit' );
+				$last_name  = $order->get_shipping_last_name( 'edit' );
+			}
 		}
 
 		return apply_filters( 'woocommerce_reports_customer_name', array( $first_name, $last_name ), $order );
