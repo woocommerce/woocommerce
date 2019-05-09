@@ -161,6 +161,27 @@ function wc_create_new_customer_username( $email, $new_user_args, $suffix = '' )
 		$username .= $suffix;
 	}
 
+	/**
+	 * WordPress 4.4 - filters the list of blacklisted usernames.
+	 *
+	 * @since 3.7.0
+	 * @param array $usernames Array of blacklisted usernames.
+	 */
+	$illegal_logins = (array) apply_filters( 'illegal_user_logins', array() );
+	if ( in_array( strtolower( $username ), array_map( 'strtolower', $illegal_logins ), true ) ) {
+		$new_args = array();
+
+		/**
+		 * Filter generated usernames.
+		 *
+		 * @since 3.7.0
+		 * @param string $username Generated username.
+		 */
+		$new_args['first_name'] = apply_filters( 'wc_create_new_customer_username_generated', 'woo_user_' . zeroise( wp_rand( 0, 9999 ), 4 ) );
+
+		return wc_create_new_customer_username( $email, $new_args, $suffix );
+	}
+
 	if ( username_exists( $username ) ) {
 		// Generate something unique to append to the username in case of a conflict with another user.
 		$suffix = '-' . zeroise( wp_rand( 0, 9999 ), 4 );
