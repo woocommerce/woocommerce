@@ -175,9 +175,18 @@ function wc_create_new_customer_username( $email, $new_user_args, $suffix = '' )
 		 * Filter generated usernames.
 		 *
 		 * @since 3.7.0
-		 * @param string $username Generated username.
+		 * @param string $username      Generated username.
+		 * @param string $email         New customer email address.
+		 * @param array  $new_user_args Array of new user args, maybe including first and last names.
+		 * @param string $suffix        Append string to username to make it unique.
 		 */
-		$new_args['first_name'] = apply_filters( 'wc_create_new_customer_username_generated', 'woo_user_' . zeroise( wp_rand( 0, 9999 ), 4 ) );
+		$new_args['first_name'] = apply_filters(
+			'woocommerce_generated_customer_username',
+			'woo_user_' . zeroise( wp_rand( 0, 9999 ), 4 ),
+			$email,
+			$new_user_args,
+			$suffix
+		);
 
 		return wc_create_new_customer_username( $email, $new_args, $suffix );
 	}
