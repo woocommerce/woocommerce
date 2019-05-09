@@ -12,7 +12,7 @@ import {
 	getOrderedKeys,
 	getUniqueDates,
 } from '../index';
-import { getXGroupScale, getXScale, getXLineScale, getYScaleLimits, getYScale } from '../scales';
+import { calculateStep, getXGroupScale, getXScale, getXLineScale, getYScaleLimits, getYScale } from '../scales';
 
 jest.mock( 'd3-scale', () => ( {
 	...require.requireActual( 'd3-scale' ),
@@ -88,6 +88,28 @@ describe( 'X scales', () => {
 } );
 
 describe( 'Y scales', () => {
+	describe( 'calculateStep', () => {
+		it( 'returns 1 when arguments are invalid', () => {
+			expect( calculateStep() ).toEqual( 1 );
+		} );
+
+		it( 'returns 1/3 when max and min values are 0', () => {
+			expect( calculateStep( 0, 0 ) ).toEqual( 1 / 3 );
+		} );
+
+		it( 'returns decimals for scales below 1', () => {
+			expect( calculateStep( 0, 0.5 ) ).toEqual( 0.25 );
+		} );
+
+		it( 'returns integers for scales over 1', () => {
+			expect( calculateStep( 0, 100 ) ).toEqual( 50 );
+		} );
+
+		it( 'returns positive values for negative scales', () => {
+			expect( calculateStep( -100, 0 ) ).toEqual( 50 );
+		} );
+	} );
+
 	describe( 'getYScaleLimits', () => {
 		it( 'calculate the correct y value limits', () => {
 			expect( getYScaleLimits( dummyOrders ) ).toEqual( { lower: 0, upper: 15000000, step: 5000000 } );

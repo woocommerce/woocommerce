@@ -46,12 +46,13 @@ class D3Chart extends Component {
 	}
 
 	getFormatParams() {
-		const { screenReaderFormat, xFormat, x2Format, yFormat } = this.props;
+		const { screenReaderFormat, xFormat, x2Format, yFormat, yBelow1Format } = this.props;
 
 		return {
 			screenReaderFormat: getFormatter( screenReaderFormat, d3TimeFormat ),
 			xFormat: getFormatter( xFormat, d3TimeFormat ),
 			x2Format: getFormatter( x2Format, d3TimeFormat ),
+			yBelow1Format: getFormatter( yBelow1Format ),
 			yFormat: getFormatter( yFormat ),
 		};
 	}
@@ -304,6 +305,11 @@ D3Chart.propTypes = {
 	 */
 	x2Format: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
 	/**
+	 * A number formatting string or function for numbers between -1 and 1, passed to d3Format.
+	 * If missing, `yFormat` will be used.
+	 */
+	yBelow1Format: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
+	/**
 	 * A number formatting string or function, passed to d3Format.
 	 */
 	yFormat: PropTypes.oneOfType( [ PropTypes.string, PropTypes.func ] ),
@@ -329,7 +335,8 @@ D3Chart.defaultProps = {
 	width: 600,
 	xFormat: '%Y-%m-%d',
 	x2Format: '',
-	yFormat: '.3s',
+	yBelow1Format: '.3~f',
+	yFormat: '.3~s',
 };
 
 export default D3Chart;

@@ -69,16 +69,25 @@ const getYValueLimits = data => {
 	return { upper: maxYValue, lower: minYValue };
 };
 
-const calculateStep = ( minValue, maxValue ) => {
+export const calculateStep = ( minValue, maxValue ) => {
 	if ( ! Number.isFinite( minValue ) || ! Number.isFinite( maxValue ) ) {
 		return 1;
+	}
+
+	if ( maxValue === 0 && minValue === 0 ) {
+		return 1 / 3;
 	}
 
 	const maxAbsValue = Math.max( -minValue, maxValue );
 	const maxLimit = 4 / 3 * maxAbsValue;
 	const pow3Y = Math.pow( 10, ( ( Math.log( maxLimit ) * Math.LOG10E + 1 ) | 0 ) - 2 ) * 3;
+	const step = Math.ceil( maxLimit / pow3Y ) * pow3Y / 3;
 
-	return Math.max( Math.ceil( Math.ceil( maxLimit / pow3Y ) * pow3Y / 3 ), 1 / 3 );
+	if ( maxValue < 1 && minValue > -1 ) {
+		return Math.round( step * 4 ) / 4;
+	}
+
+	return Math.ceil( step );
 };
 
 /**

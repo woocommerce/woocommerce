@@ -286,6 +286,7 @@ class Chart extends Component {
 			valueType,
 			xFormat,
 			x2Format,
+			yBelow1Format,
 			yFormat,
 		} = this.props;
 		const selectedIds = filterParam ? getIdsFromQuery( query[ filterParam ] ) : [];
@@ -317,6 +318,7 @@ class Chart extends Component {
 		};
 
 		let d3chartYFormat = yFormat;
+		let d3chartYBelow1Format = yBelow1Format;
 		if ( ! yFormat ) {
 			switch ( valueType ) {
 				case 'average':
@@ -324,6 +326,7 @@ class Chart extends Component {
 					break;
 				case 'currency':
 					d3chartYFormat = '$.3~s';
+					d3chartYBelow1Format = '$.3~f';
 					break;
 				case 'number':
 					d3chartYFormat = ',.0f';
@@ -407,6 +410,7 @@ class Chart extends Component {
 									width={ chartDirection === 'row' ? width - 320 : width }
 									xFormat={ xFormat }
 									x2Format={ x2Format }
+									yBelow1Format={ d3chartYBelow1Format }
 									yFormat={ d3chartYFormat }
 								/>
 							) }
@@ -527,6 +531,10 @@ Chart.propTypes = {
 	 * A datetime formatting string, passed to d3TimeFormat.
 	 */
 	x2Format: PropTypes.string,
+	/**
+	 * A number formatting string, passed to d3Format.
+	 */
+	yBelow1Format: PropTypes.string,
 	/**
 	 * A number formatting string, passed to d3Format.
 	 */

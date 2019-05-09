@@ -71,6 +71,11 @@ export const drawYAxis = ( node, scales, formats, margin, isRTL ) => {
 		.call(
 			d3AxisLeft( scales.yScale )
 				.tickValues( scales.yMax === 0 && scales.yMin === 0 ? [ yGrids[ 0 ] ] : yGrids )
-				.tickFormat( d => formats.yFormat( d !== 0 ? d : 0 ) )
+				.tickFormat( d => {
+					if ( d > -1 && d < 1 && formats.yBelow1Format ) {
+						return formats.yBelow1Format( d );
+					}
+					return formats.yFormat( d );
+				} )
 		);
 };
