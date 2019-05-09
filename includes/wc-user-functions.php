@@ -117,7 +117,7 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
  * @param string $suffix Append string to username to make it unique.
  * @return string Generated username.
  */
-function wc_create_new_customer_username( $email, $new_user_args, $suffix = '' ) {
+function wc_create_new_customer_username( $email, $new_user_args = array(), $suffix = '' ) {
 	$username_parts = array();
 
 	if ( isset( $new_user_args['first_name'] ) ) {
