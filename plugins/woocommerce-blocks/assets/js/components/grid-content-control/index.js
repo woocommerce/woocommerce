@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import { ToggleControl } from '@wordpress/components';
 
 /**
- * A combination of range controls for product grid layout settings.
+ * A combination of toggle controls for content visibility in product grids.
  */
 const GridContentControl = ( { onChange, settings } ) => {
 	const { button, price, rating, title } = settings;
