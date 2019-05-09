@@ -155,7 +155,7 @@ function wc_create_new_customer_username( $email, $new_user_args, $suffix = '' )
 		$username_parts[] = $email_username;
 	}
 
-	$username = sanitize_user( wc_strtolower( implode( '', $username_parts ) ), true );
+	$username = sanitize_user( wc_strtolower( implode( '.', $username_parts ) ), true );
 
 	if ( $suffix ) {
 		$username .= $suffix;
