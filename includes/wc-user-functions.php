@@ -121,11 +121,11 @@ function wc_create_new_customer_username( $email, $new_user_args, $suffix = '' )
 	$username_parts = array();
 
 	if ( isset( $new_user_args['first_name'] ) ) {
-		$username_parts[] = sanitize_user( $new_user_args['first_name'], true );
+		$username_parts[] = $new_user_args['first_name'];
 	}
 
 	if ( isset( $new_user_args['last_name'] ) ) {
-		$username_parts[] = sanitize_user( $new_user_args['last_name'], true );
+		$username_parts[] = $new_user_args['last_name'];
 	}
 
 	// Remove empty parts.
@@ -152,10 +152,10 @@ function wc_create_new_customer_username( $email, $new_user_args, $suffix = '' )
 			$email_username = $email_parts[1];
 		}
 
-		$username_parts[] = sanitize_user( $email_username, true );
+		$username_parts[] = $email_username;
 	}
 
-	$username = wc_strtolower( implode( '', $username_parts ) );
+	$username = sanitize_user( wc_strtolower( implode( '', $username_parts ) ), true );
 
 	if ( $suffix ) {
 		$username .= $suffix;
@@ -168,6 +168,8 @@ function wc_create_new_customer_username( $email, $new_user_args, $suffix = '' )
 	 * @param array $usernames Array of blacklisted usernames.
 	 */
 	$illegal_logins = (array) apply_filters( 'illegal_user_logins', array() );
+
+	// Stop illegal logins and generate a new random username.
 	if ( in_array( strtolower( $username ), array_map( 'strtolower', $illegal_logins ), true ) ) {
 		$new_args = array();
 
