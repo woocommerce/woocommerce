@@ -10,7 +10,6 @@ import { Component } from '@wordpress/element';
  * Internal dependencies
  */
 import { MenuItem } from '@woocommerce/components';
-import './style.scss';
 
 class SectionControls extends Component {
 	constructor( props ) {
@@ -35,10 +34,6 @@ class SectionControls extends Component {
 
 	render() {
 		const { onRemove, isFirst, isLast } = this.props;
-
-		if ( ! window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] ) {
-			return null;
-		}
 
 		return (
 			<div className="woocommerce-section-controls">

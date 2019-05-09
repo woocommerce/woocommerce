@@ -19,7 +19,6 @@ import { EllipsisMenu, MenuItem, MenuTitle, SectionHeader } from '@woocommerce/c
  */
 import Leaderboard from 'analytics/components/leaderboard';
 import withSelect from 'wc-api/with-select';
-import SectionControls from 'dashboard/components/section-controls';
 import './style.scss';
 
 class Leaderboards extends Component {
@@ -51,6 +50,7 @@ class Leaderboards extends Component {
 			onTitleChange,
 			onToggleHiddenBlock,
 			titleInput,
+			controls: Controls,
 		} = this.props;
 		const { rowsPerTable } = this.state;
 
@@ -97,13 +97,15 @@ class Leaderboards extends Component {
 							} ) ) }
 							onChange={ this.setRowsPerTable }
 						/>
-						<SectionControls
-							onToggle={ onToggle }
-							onMove={ onMove }
-							onRemove={ onRemove }
-							isFirst={ isFirst }
-							isLast={ isLast }
-						/>
+						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
+							<Controls
+								onToggle={ onToggle }
+								onMove={ onMove }
+								onRemove={ onRemove }
+								isFirst={ isFirst }
+								isLast={ isLast }
+							/>
+						) }
 					</Fragment>
 				) }
 			/>

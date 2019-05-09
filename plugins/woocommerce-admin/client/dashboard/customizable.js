@@ -19,7 +19,7 @@ import { H, ReportFilters } from '@woocommerce/components';
  */
 import './style.scss';
 import defaultSections from './default-sections';
-import Section from './components/section';
+import Section from './section';
 import withSelect from 'wc-api/with-select';
 
 class CustomizableDashboard extends Component {
@@ -109,9 +109,23 @@ class CustomizableDashboard extends Component {
 	onMove( index, change ) {
 		const sections = [ ...this.state.sections ];
 		const movedSection = sections.splice( index, 1 ).shift();
-		sections.splice( index + change, 0, movedSection );
+		const newIndex = index + change;
 
-		this.updateSections( sections );
+		// Figure out the index of the skipped section.
+		const nextJumpedSectionIndex = change < 0 ? newIndex : newIndex - 1;
+
+		if (
+			sections[ nextJumpedSectionIndex ].isVisible || // Is the skipped section visible?
+			index === 0 || // Will this be the first element?
+			index === sections.length - 1 // Will this be the last element?
+		) {
+			// Yes, lets insert.
+			sections.splice( newIndex, 0, movedSection );
+			this.updateSections( sections );
+		} else {
+			// No, lets try the next one.
+			this.onMove( index, change + change );
+		}
 	}
 
 	renderAddMore() {
@@ -163,29 +177,34 @@ class CustomizableDashboard extends Component {
 	render() {
 		const { query, path } = this.props;
 		const { sections } = this.state;
-		const visibleSections = sections.filter( section => section.isVisible );
+		const visibleSectionKeys = sections
+			.filter( section => section.isVisible )
+			.map( section => section.key );
 
 		return (
 			<Fragment>
 				<H>{ __( 'Customizable Dashboard', 'woocommerce-admin' ) }</H>
 				<ReportFilters query={ query } path={ path } />
-				{ visibleSections.map( ( section, index ) => {
-					return (
-						<Section
-							component={ section.component }
-							hiddenBlocks={ section.hiddenBlocks }
-							key={ section.key }
-							onChangeHiddenBlocks={ this.onChangeHiddenBlocks( section.key ) }
-							onTitleUpdate={ this.onSectionTitleUpdate( section.key ) }
-							path={ path }
-							query={ query }
-							title={ section.title }
-							onMove={ partial( this.onMove, index ) }
-							onRemove={ this.toggleVisibility( section.key ) }
-							isFirst={ 0 === index }
-							isLast={ visibleSections.length === index + 1 }
-						/>
-					);
+				{ sections.map( ( section, index ) => {
+					if ( section.isVisible ) {
+						return (
+							<Section
+								component={ section.component }
+								hiddenBlocks={ section.hiddenBlocks }
+								key={ section.key }
+								onChangeHiddenBlocks={ this.onChangeHiddenBlocks( section.key ) }
+								onTitleUpdate={ this.onSectionTitleUpdate( section.key ) }
+								path={ path }
+								query={ query }
+								title={ section.title }
+								onMove={ partial( this.onMove, index ) }
+								onRemove={ this.toggleVisibility( section.key ) }
+								isFirst={ section.key === visibleSectionKeys[ 0 ] }
+								isLast={ section.key === visibleSectionKeys[ visibleSectionKeys.length - 1 ] }
+							/>
+						);
+					}
+					return null;
 				} ) }
 				{ this.renderAddMore() }
 			</Fragment>
