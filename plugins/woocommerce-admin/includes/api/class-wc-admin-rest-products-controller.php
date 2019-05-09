@@ -131,6 +131,7 @@ class WC_Admin_REST_Products_Controller extends WC_REST_Products_Controller {
 			$low_stock_amount = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 			$where           .= "
 			AND wc_product_meta_lookup.stock_quantity IS NOT NULL
+			AND wc_product_meta_lookup.stock_status = 'instock'
 			AND (
 				(
 					low_stock_amount_meta.meta_value > ''
