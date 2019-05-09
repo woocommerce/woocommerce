@@ -99,18 +99,19 @@ class WC_Admin_Reports_Stock_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 	 * @return int Count.
 	 */
 	private function get_count( $status ) {
-		$query_args               = array();
-		$query_args['post_type']  = array( 'product', 'product_variation' );
-		$query_args['meta_query'] = array( // WPCS: slow query ok.
-			array(
-				'key'   => '_stock_status',
-				'value' => $status,
-			),
-		);
+		global $wpdb;
 
-		$query = new WP_Query();
-		$query->query( $query_args );
-		return intval( $query->found_posts );
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"
+				SELECT count( DISTINCT posts.ID ) FROM {$wpdb->posts} posts
+				LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
+				WHERE posts.post_type IN ( 'product', 'product_variation' )
+				AND wc_product_meta_lookup.stock_status = %s
+				",
+				$status
+			)
+		);
 	}
 
 	/**
