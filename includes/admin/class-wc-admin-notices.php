@@ -34,6 +34,7 @@ class WC_Admin_Notices {
 		'regenerating_thumbnails'   => 'regenerating_thumbnails_notice',
 		'regenerating_lookup_table' => 'regenerating_lookup_table_notice',
 		'no_secure_connection'      => 'secure_connection_notice',
+		'wc_admin'                  => 'wc_admin_feature_plugin_notice',
 	);
 
 	/**
@@ -82,6 +83,7 @@ class WC_Admin_Notices {
 		if ( ! self::is_ssl() ) {
 			self::add_notice( 'no_secure_connection' );
 		}
+		self::add_wc_admin_feature_plugin_notice();
 		self::add_notice( 'template_files' );
 	}
 
@@ -339,6 +341,36 @@ class WC_Admin_Notices {
 		}
 
 		include dirname( __FILE__ ) . '/views/html-notice-regenerating-lookup-table.php';
+	}
+
+
+	/**
+	 * If on WordPress 5.0 or greater, inform users of WooCommerce Admin feature plugin.
+	 *
+	 * @since 3.6.4
+	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
+	 */
+	public static function add_wc_admin_feature_plugin_notice() {
+		$wordpress_version            = get_bloginfo( 'version' );
+
+		if ( version_compare( $wordpress_version, '4.9.9', '>' ) ) {
+			self::add_notice( 'wc_admin' );
+		}
+	}
+
+	/**
+	 * Notice to try WooCommerce Admin
+	 *
+	 * @since 3.6.4
+	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
+	 */
+	public static function wc_admin_feature_plugin_notice() {
+		if ( get_user_meta( get_current_user_id(), 'dismissed_wc_admin_notice', true ) || self::is_plugin_active( 'woocommerce-admin/woocommerce-admin.php' ) ) {
+			self::remove_notice( 'wc_admin' );
+			return;
+		}
+
+		include dirname( __FILE__ ) . '/views/html-notice-wc-admin.php';
 	}
 
 	/**
