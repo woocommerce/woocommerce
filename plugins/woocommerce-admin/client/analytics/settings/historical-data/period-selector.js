@@ -68,11 +68,11 @@ function HistoricalDataPeriodSelector( {
 					onChange={ onSelectChange }
 					options={ [
 						{ label: 'All', value: 'all' },
-						{ label: 'Last 365 days', value: '365_days' },
-						{ label: 'Last 90 days', value: '90_days' },
-						{ label: 'Last 30 days', value: '30_days' },
-						{ label: 'Last 7 days', value: '7_days' },
-						{ label: 'Last 24 hours', value: '24_hours' },
+						{ label: 'Last 365 days', value: '365' },
+						{ label: 'Last 90 days', value: '90' },
+						{ label: 'Last 30 days', value: '30' },
+						{ label: 'Last 7 days', value: '7' },
+						{ label: 'Last 24 hours', value: '1' },
 						{ label: 'Custom', value: 'custom' },
 					] }
 				/>

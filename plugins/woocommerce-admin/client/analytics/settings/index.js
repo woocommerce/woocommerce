@@ -110,6 +110,7 @@ class Settings extends Component {
 	}
 
 	render() {
+		const { addNotice } = this.props;
 		const { hasError } = this.state;
 		if ( hasError ) {
 			return null;
@@ -141,7 +142,7 @@ class Settings extends Component {
 							{ __( 'Save Changes', 'woocommerce-admin' ) }
 						</Button>
 					</div>
-					<HistoricalData />
+					<HistoricalData addNotice={ addNotice } />
 				</div>
 			</Fragment>
 		);

@@ -3,8 +3,14 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
 import { Component, Fragment } from '@wordpress/element';
 import moment from 'moment';
+
+/**
+ * WooCommerce dependencies
+ */
+import { stringifyQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -31,9 +37,74 @@ class HistoricalData extends Component {
 			skipChecked: true,
 		};
 
+		this.makeQuery = this.makeQuery.bind( this );
+		this.onDeletePreviousData = this.onDeletePreviousData.bind( this );
+		this.onStartImport = this.onStartImport.bind( this );
+		this.onStopImport = this.onStopImport.bind( this );
 		this.onDateChange = this.onDateChange.bind( this );
 		this.onPeriodChange = this.onPeriodChange.bind( this );
 		this.onSkipChange = this.onSkipChange.bind( this );
+	}
+
+	makeQuery( path, errorMessage ) {
+		const { addNotice } = this.props;
+		apiFetch( { path, method: 'POST' } )
+			.then( response => {
+				if ( 'success' === response.status ) {
+					addNotice( { status: 'success', message: response.message } );
+				} else {
+					addNotice( { status: 'error', message: errorMessage } );
+				}
+			} )
+			.catch( error => {
+				if ( error && error.message ) {
+					addNotice( { status: 'error', message: error.message } );
+				}
+			} );
+	}
+
+	onDeletePreviousData() {
+		const path = '/wc/v4/reports/import/delete';
+		const errorMessage = __(
+			'There was a problem deleting your previous data.',
+			'woocommerce-admin'
+		);
+		this.makeQuery( path, errorMessage );
+	}
+
+	onStartImport() {
+		const { period, skipChecked } = this.state;
+		const params = {};
+		if ( skipChecked ) {
+			params.skip_existing = true;
+		}
+		if ( period.label !== 'all' ) {
+			if ( period.label === 'custom' ) {
+				const daysDifference = moment().diff(
+					moment( period.date, this.dateFormat ),
+					'days',
+					true
+				);
+				params.days = Math.ceil( daysDifference );
+			} else {
+				params.days = parseInt( period.label, 10 );
+			}
+		}
+		const path = '/wc/v4/reports/import' + stringifyQuery( params );
+		const errorMessage = __(
+			'There was a problem rebuilding your report data.',
+			'woocommerce-admin'
+		);
+		this.makeQuery( path, errorMessage );
+	}
+
+	onStopImport() {
+		const path = '/wc/v4/reports/import/cancel';
+		const errorMessage = __(
+			'There was a problem stopping your current import.',
+			'woocommerce-admin'
+		);
+		this.makeQuery( path, errorMessage );
 	}
 
 	onPeriodChange( val ) {
@@ -153,6 +224,9 @@ class HistoricalData extends Component {
 					customersTotal={ customersTotal }
 					hasImportedData={ hasImportedData }
 					inProgress={ inProgress }
+					onDeletePreviousData={ this.onDeletePreviousData }
+					onStartImport={ this.onStartImport }
+					onStopImport={ this.onStopImport }
 					ordersProgress={ ordersProgress }
 					ordersTotal={ ordersTotal }
 				/>
