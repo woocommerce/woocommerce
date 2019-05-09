@@ -351,8 +351,8 @@ class WC_Admin_Loader {
 	 * Returns true if we are on a JS powered admin page.
 	 */
 	public static function is_admin_page() {
-		global $hook_suffix;
-		if ( in_array( $hook_suffix, array( 'woocommerce_page_wc-admin' ) ) ) {
+		$current_screen = get_current_screen();
+		if ( '_page_wc-admin' === substr( $current_screen->id, -14 ) ) {
 			return true;
 		}
 		return false;
