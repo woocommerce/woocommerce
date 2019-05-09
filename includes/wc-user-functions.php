@@ -121,11 +121,11 @@ function wc_create_new_customer_username( $email, $new_user_args = array(), $suf
 	$username_parts = array();
 
 	if ( isset( $new_user_args['first_name'] ) ) {
-		$username_parts[] = $new_user_args['first_name'];
+		$username_parts[] = sanitize_user( $new_user_args['first_name'], true );
 	}
 
 	if ( isset( $new_user_args['last_name'] ) ) {
-		$username_parts[] = $new_user_args['last_name'];
+		$username_parts[] = sanitize_user( $new_user_args['last_name'], true );
 	}
 
 	// Remove empty parts.
@@ -152,10 +152,10 @@ function wc_create_new_customer_username( $email, $new_user_args = array(), $suf
 			$email_username = $email_parts[1];
 		}
 
-		$username_parts[] = $email_username;
+		$username_parts[] = sanitize_user( $email_username, true );
 	}
 
-	$username = sanitize_user( wc_strtolower( implode( '.', $username_parts ) ), true );
+	$username = wc_strtolower( implode( '.', $username_parts ) );
 
 	if ( $suffix ) {
 		$username .= $suffix;
