@@ -46,10 +46,18 @@ function HistoricalDataActions( {
 
 		// Has no imported data
 		if ( ! hasImportedData ) {
+			// @todo When the import status endpoint is hooked up,
+			// the 'Delete Previously Imported Data' button should be
+			// removed from this section.
 			return (
-				<Button isPrimary onClick={ onStartImport }>
-					{ __( 'Start', 'woocommerce-admin' ) }
-				</Button>
+				<Fragment>
+					<Button isPrimary onClick={ onStartImport }>
+						{ __( 'Start', 'woocommerce-admin' ) }
+					</Button>
+					<Button isDefault onClick={ onDeletePreviousData }>
+						{ __( 'Delete Previously Imported Data', 'woocommerce-admin' ) }
+					</Button>
+				</Fragment>
 			);
 		}
 

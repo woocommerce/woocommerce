@@ -3,7 +3,6 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
 import { applyFilters } from '@wordpress/hooks';
 import interpolateComponents from 'interpolate-components';
 
@@ -42,41 +41,6 @@ const orderStatuses = Object.keys( wcSettings.orderStatuses )
 	} );
 
 export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
-	{
-		name: 'woocommerce_rebuild_reports_data',
-		label: __( 'Rebuild reports data:', 'woocommerce-admin' ),
-		inputType: 'button',
-		inputText: __( 'Rebuild reports', 'woocommerce-admin' ),
-		helpText: __(
-			'This tool will rebuild all of the information used by the reports. ' +
-				'Data will be processed in the background and may take some time depending on the size of your store.',
-			'woocommerce-admin'
-		),
-		callback: ( resolve, reject, addNotice ) => {
-			const errorMessage = __(
-				'There was a problem rebuilding your report data.',
-				'woocommerce-admin'
-			);
-
-			apiFetch( { path: '/wc/v4/reports/import', method: 'PUT' } )
-				.then( response => {
-					if ( 'success' === response.status ) {
-						addNotice( { status: 'success', message: response.message } );
-						// @todo This should be changed to detect when the lookup table population is complete.
-						setTimeout( () => resolve(), 300000 );
-					} else {
-						addNotice( { status: 'error', message: errorMessage } );
-						reject();
-					}
-				} )
-				.catch( error => {
-					if ( error && error.message ) {
-						addNotice( { status: 'error', message: error.message } );
-					}
-					reject();
-				} );
-		},
-	},
 	{
 		name: 'woocommerce_excluded_report_order_statuses',
 		label: __( 'Excluded Statuses:', 'woocommerce-admin' ),
