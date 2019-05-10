@@ -108,7 +108,7 @@ class WC_Tests_WC_Query extends WC_Unit_Test_Case {
 	public function test_add_query_vars() {
 		WC()->query->init_query_vars();
 
-		$vars = array(
+		$vars  = array(
 			'test1',
 			'test2',
 		);

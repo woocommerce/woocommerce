@@ -62,7 +62,7 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 
 	public function test_get_session_should_return_default_value() {
 		$default_session = array( 'session' => 'default' );
-		$session = $this->handler->get_session( 'non-existent key', $default_session );
+		$session         = $this->handler->get_session( 'non-existent key', $default_session );
 		$this->assertEquals( $default_session, $session );
 	}
 
@@ -106,7 +106,7 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 		wp_set_current_user( 1 );
 		$this->handler->set( 'cart', 'fake cart' );
 		$this->handler->save_data();
-		$this->session_key = $this->handler->get_customer_id();
+		$this->session_key  = $this->handler->get_customer_id();
 		$this->cache_prefix = WC_Cache_Helper::get_cache_prefix( WC_SESSION_CACHE_GROUP );
 	}
 

@@ -28,7 +28,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$tax_rates = WC_Tax::get_rates();
 
 		$this->assertSame(
-			$tax_rates, array(
+			$tax_rates,
+			array(
 				$tax_rate_id => array(
 					'rate'     => 20.0,
 					'label'    => 'VAT',
@@ -56,7 +57,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 
 		$tax_rates = WC_Tax::get_rates();
 		$this->assertSame(
-			$tax_rates, array(
+			$tax_rates,
+			array(
 				$tax_rate_catch_all_id => array(
 					'rate'     => 0.0,
 					'label'    => 'VAT',
@@ -89,14 +91,16 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$tax_rates = WC_Tax::get_shipping_tax_rates();
 
 		$this->assertEquals(
-			$tax_rates, array(
+			$tax_rates,
+			array(
 				$tax_rate_id => array(
 					'rate'     => '20.0000',
 					'label'    => 'VAT',
 					'shipping' => 'yes',
 					'compound' => 'no',
 				),
-			), print_r( $tax_rates, true )
+			),
+			print_r( $tax_rates, true )
 		);
 	}
 
@@ -121,7 +125,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		$tax_rates = WC_Tax::get_base_tax_rates();
 
 		$this->assertEquals(
-			$tax_rates, array(
+			$tax_rates,
+			array(
 				$tax_rate_id => array(
 					'rate'     => '20.0000',
 					'label'    => 'VAT',
@@ -161,7 +166,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals(
-			$tax_rates, array(
+			$tax_rates,
+			array(
 				$tax_rate_id => array(
 					'rate'     => '20.0000',
 					'label'    => 'VAT',
@@ -201,7 +207,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals(
-			$tax_rates, array(
+			$tax_rates,
+			array(
 				$tax_rate_id => array(
 					'rate'     => '20.0000',
 					'label'    => 'VAT',
@@ -296,7 +303,8 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		// prices exclusive of tax
 		$calced_tax = WC_Tax::calc_tax( '100', $tax_rates, false, false );
 		$this->assertEquals(
-			$calced_tax, array(
+			$calced_tax,
+			array(
 				$tax_rate_1_id => '5.0000',
 				$tax_rate_2_id => '8.925',
 			)
