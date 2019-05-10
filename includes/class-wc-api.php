@@ -127,7 +127,7 @@ class WC_API extends WC_Legacy_API {
 	 */
 	public function rest_api_init() {
 		// Queue the core version as it may be newer than other registered versions.
-		$this->register( WC_VERSION, array( $this, 'init_core_rest_api' ) );
+		$this->register( WC_REST_API_VERSION, 'self::init_core_rest_api' );
 		call_user_func( $this->latest_version_callback() );
 	}
 
@@ -142,7 +142,7 @@ class WC_API extends WC_Legacy_API {
 	/**
 	 * Init the REST API bundled with core.
 	 */
-	protected function init_core_rest_api() {
+	protected static function init_core_rest_api() {
 		require_once dirname( __FILE__ ) . '/api/RestApi.php';
 		\WC\RestAPI\RestApi::instance()->init();
 	}

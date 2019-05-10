@@ -14,7 +14,7 @@ if ( ! did_action( 'rest_api_init' ) ) {
 	WC()->api->rest_api_includes();
 }
 
-if ( ! class_exists( 'WC_REST_System_Status_Controller', false ) ) {
+if ( ! class_exists( 'WC_REST_System_Status_Controller' ) ) {
 	wp_die( 'Cannot load the REST API to access WC_REST_System_Status_Controller.' );
 }
 
