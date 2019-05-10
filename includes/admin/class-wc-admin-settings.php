@@ -135,10 +135,13 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			wp_enqueue_script( 'woocommerce_settings', WC()->plugin_url() . '/assets/js/admin/settings' . $suffix . '.js', array( 'jquery', 'wp-util', 'jquery-ui-datepicker', 'jquery-ui-sortable', 'iris', 'selectWoo' ), WC()->version, true );
 
 			wp_localize_script(
-				'woocommerce_settings', 'woocommerce_settings_params', array(
-					'i18n_nav_warning' => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' ),
-					'i18n_moved_up'    => __( 'Item moved up', 'woocommerce' ),
-					'i18n_moved_down'  => __( 'Item moved down', 'woocommerce' ),
+				'woocommerce_settings',
+				'woocommerce_settings_params',
+				array(
+					'i18n_nav_warning'                    => __( 'The changes you made will be lost if you navigate away from this page.', 'woocommerce' ),
+					'i18n_moved_up'                       => __( 'Item moved up', 'woocommerce' ),
+					'i18n_moved_down'                     => __( 'Item moved down', 'woocommerce' ),
+					'i18n_no_specific_countries_selected' => __( 'Selecting no country to sell to prevents from completing the checkout. Continue anyway?', 'woocommerce' ),
 				)
 			);
 
@@ -391,7 +394,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 												selected( $option_value, (string) $key );
 											}
 
-										?>
+											?>
 										><?php echo esc_html( $val ); ?></option>
 										<?php
 									}
@@ -494,7 +497,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						<?php
 
 						if ( ! isset( $value['checkboxgroup'] ) || 'end' === $value['checkboxgroup'] ) {
-										?>
+							?>
 										</fieldset>
 									</td>
 								</tr>
