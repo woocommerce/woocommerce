@@ -25,7 +25,7 @@ if ( ! function_exists( 'wc_rest_api_1_dot_1_dot_0' ) ) {
 	 * @internal Never call manually - this function will change between versions.
 	 */
 	function wc_rest_api_1_dot_1_dot_0() {
-		require_once dirname( __FILE__ ) . '/includes/RestApi.php';
+		require_once dirname( __FILE__ ) . '/RestApi.php';
 		\WC\RestAPI\RestApi::instance()->init();
 	}
 }
