@@ -705,7 +705,7 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 		$values    = array();
 
 		if ( ! empty( $url_parts['query'] ) ) {
-			// This is to preserve full-stops and spaces in the query string when ran through parse_str.
+			// This is to preserve full-stops, pluses and spaces in the query string when ran through parse_str.
 			$replace_chars = array(
 				'.'   => '{dot}',
 				'+'   => '{plus}',
@@ -717,9 +717,11 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 			// Parse the string.
 			parse_str( $query_string, $parsed_query_string );
 
-			// Convert the full-stops back and add to values array.
+			// Convert the full-stops, pluses and spaces back and add to values array.
 			foreach ( $parsed_query_string as $key => $value ) {
-				$values[ str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $key ) ] = $value;
+				$new_key            = str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $key );
+				$new_value          = str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $value );
+				$values[ $new_key ] = $new_value;
 			}
 		}
 	}
