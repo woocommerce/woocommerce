@@ -53,17 +53,17 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * @var array
 	 */
 	protected $report_columns = array(
-		'orders_count'            => 'COUNT(*) as orders_count',
+		'orders_count'            => 'SUM( CASE WHEN parent_id = 0 THEN 1 ELSE 0 END ) as orders_count',
 		'num_items_sold'          => 'SUM(num_items_sold) as num_items_sold',
 		'gross_revenue'           => 'SUM(gross_total) AS gross_revenue',
 		'coupons'                 => 'SUM(discount_amount) AS coupons',
 		'coupons_count'           => 'COUNT(DISTINCT coupon_id) as coupons_count',
-		'refunds'                 => 'SUM(refund_total) AS refunds',
+		'refunds'                 => 'ABS( SUM( CASE WHEN gross_total < 0 THEN gross_total END ) ) AS refunds',
 		'taxes'                   => 'SUM(tax_total) AS taxes',
 		'shipping'                => 'SUM(shipping_total) AS shipping',
-		'net_revenue'             => '( SUM(net_total) - SUM(refund_total) ) AS net_revenue',
-		'avg_items_per_order'     => 'AVG(num_items_sold) AS avg_items_per_order',
-		'avg_order_value'         => '( SUM(net_total) - SUM(refund_total) ) / COUNT(*) AS avg_order_value',
+		'net_revenue'             => 'SUM(net_total) AS net_revenue',
+		'avg_items_per_order'     => 'SUM( num_items_sold ) / SUM( CASE WHEN parent_id = 0 THEN 1 ELSE 0 END ) AS avg_items_per_order',
+		'avg_order_value'         => 'SUM( net_total ) / SUM( CASE WHEN parent_id = 0 THEN 1 ELSE 0 END ) AS avg_order_value',
 		// Count returning customers as ( total_customers - new_customers ) to get an accurate number and count customers in with both new and old statuses as new.
 		'num_returning_customers' => '( COUNT( DISTINCT( customer_id ) ) -  COUNT( DISTINCT( CASE WHEN returning_customer = 0 THEN customer_id END ) ) ) AS num_returning_customers',
 		'num_new_customers'       => 'COUNT( DISTINCT( CASE WHEN returning_customer = 0 THEN customer_id END ) ) AS num_new_customers',
@@ -73,7 +73,6 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * Set up all the hooks for maintaining and populating table data.
 	 */
 	public static function init() {
-		add_action( 'woocommerce_refund_deleted', array( __CLASS__, 'sync_on_refund_delete' ), 10, 2 );
 		add_action( 'delete_post', array( __CLASS__, 'delete_order' ) );
 	}
 
@@ -365,7 +364,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
 	 */
 	public static function sync_order( $post_id ) {
-		if ( 'shop_order' !== get_post_type( $post_id ) ) {
+		if ( 'shop_order' !== get_post_type( $post_id ) && 'shop_order_refund' !== get_post_type( $post_id ) ) {
 			return -1;
 		}
 
@@ -378,19 +377,9 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	}
 
 	/**
-	 * Syncs order information when a refund is deleted.
-	 *
-	 * @param int $refund_id Refund ID.
-	 * @param int $order_id Order ID.
-	 */
-	public static function sync_on_refund_delete( $refund_id, $order_id ) {
-		self::sync_order( $order_id );
-	}
-
-	/**
 	 * Update the database with stats data.
 	 *
-	 * @param WC_Order $order Order to update row for.
+	 * @param WC_Order|WC_Order_Refund $order Order or refund to update row for.
 	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
 	 */
 	public static function update( $order ) {
@@ -403,28 +392,28 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 
 		$data   = array(
 			'order_id'           => $order->get_id(),
+			'parent_id'          => $order->get_parent_id(),
 			'date_created'       => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
 			'num_items_sold'     => self::get_num_items_sold( $order ),
 			'gross_total'        => $order->get_total(),
-			'refund_total'       => $order->get_total_refunded(),
 			'tax_total'          => $order->get_total_tax(),
 			'shipping_total'     => $order->get_shipping_total(),
 			'net_total'          => self::get_net_total( $order ),
-			'returning_customer' => self::is_returning_customer( $order ),
 			'status'             => self::normalize_order_status( $order->get_status() ),
-			'customer_id'        => WC_Admin_Reports_Customers_Data_Store::get_or_create_customer_from_order( $order ),
+			'customer_id'        => $order->get_report_customer_id(),
+			'returning_customer' => $order->is_returning_customer(),
 		);
 		$format = array(
 			'%d',
+			'%d',
 			'%s',
 			'%d',
 			'%f',
 			'%f',
 			'%f',
 			'%f',
-			'%f',
-			'%d',
 			'%s',
+			'%d',
 			'%d',
 		);
 
@@ -452,7 +441,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		$order_id   = (int) $post_id;
 		$table_name = $wpdb->prefix . self::TABLE_NAME;
 
-		if ( 'shop_order' !== get_post_type( $order_id ) ) {
+		if ( 'shop_order' !== get_post_type( $order_id ) && 'shop_order_refund' !== get_post_type( $order_id ) ) {
 			return;
 		}
 
@@ -501,13 +490,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 */
 	protected static function get_net_total( $order ) {
 		$net_total = floatval( $order->get_total() ) - floatval( $order->get_total_tax() ) - floatval( $order->get_shipping_total() );
-
-		$refunds = $order->get_refunds();
-		foreach ( $refunds as $refund ) {
-			$net_total += floatval( $refund->get_total() ) - floatval( $refund->get_total_tax() ) - floatval( $refund->get_shipping_total() );
-		}
-
-		return $net_total > 0 ? (float) $net_total : 0;
+		return (float) $net_total;
 	}
 
 	/**
@@ -516,7 +499,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 * @param array $order WC_Order object.
 	 * @return bool
 	 */
-	protected static function is_returning_customer( $order ) {
+	public static function is_returning_customer( $order ) {
 		$customer_id = WC_Admin_Reports_Customers_Data_Store::get_existing_customer_id_from_order( $order );
 
 		if ( ! $customer_id ) {

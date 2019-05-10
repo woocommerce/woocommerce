@@ -358,9 +358,9 @@ class WC_Admin_Reports_Coupons_Data_Store extends WC_Admin_Reports_Data_Store im
 
 		$order = wc_get_order( $order_id );
 
-		// Skip `shop_order_refunds` when factoring stats on coupon usage.
-		if ( ! $order || 'shop_order' !== $order->get_type() ) {
-			return -1;
+		// Refunds don't affect coupon stats so return successfully if one is called here.
+		if ( 'shop_order_refund' === $order->get_type() ) {
+			return true;
 		}
 
 		$coupon_items       = $order->get_items( 'coupon' );

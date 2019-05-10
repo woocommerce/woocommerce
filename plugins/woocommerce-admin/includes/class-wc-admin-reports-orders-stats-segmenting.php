@@ -25,10 +25,9 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 			'gross_revenue'  => "SUM($products_table.product_gross_revenue) AS gross_revenue",
 			'coupons'        => 'SUM( coupon_lookup_left_join.discount_amount ) AS coupons',
 			'coupons_count'  => 'COUNT( DISTINCT( coupon_lookup_left_join.coupon_id ) ) AS coupons_count',
-			'refunds'        => "SUM($products_table.refund_amount) AS refunds",
+			'refunds'        => "SUM( CASE WHEN $products_table.product_gross_revenue < 0 THEN $products_table.product_gross_revenue ELSE 0 END ) AS refunds",
 			'taxes'          => "SUM($products_table.tax_amount) AS taxes",
 			'shipping'       => "SUM($products_table.shipping_amount) AS shipping",
-			// @todo product_net_revenue should already have refunds subtracted, so it should not be here. Pls check.
 			'net_revenue'    => "SUM($products_table.product_net_revenue) AS net_revenue",
 		);
 
@@ -46,7 +45,7 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 		$columns_mapping = array(
 			'orders_count'            => "COUNT($unique_orders_table.order_id) AS orders_count",
 			'avg_items_per_order'     => "AVG($unique_orders_table.num_items_sold) AS avg_items_per_order",
-			'avg_order_value'         => "(SUM($unique_orders_table.net_total) - SUM($unique_orders_table.refund_total))/COUNT($unique_orders_table.order_id) AS avg_order_value",
+			'avg_order_value'         => "SUM($unique_orders_table.net_total) / COUNT($unique_orders_table.order_id) AS avg_order_value",
 			'num_returning_customers' => "SUM($unique_orders_table.returning_customer) AS num_returning_customers",
 			'num_new_customers'       => "COUNT($unique_orders_table.returning_customer) - SUM($unique_orders_table.returning_customer) AS num_new_customers",
 		);
@@ -68,13 +67,13 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 			'gross_revenue'           => "SUM($order_stats_table.gross_total) AS gross_revenue",
 			'coupons'                 => "SUM($order_stats_table.discount_amount) AS coupons",
 			'coupons_count'           => 'COUNT( DISTINCT(coupon_lookup_left_join.coupon_id) ) AS coupons_count',
-			'refunds'                 => "SUM($order_stats_table.refund_total) AS refunds",
+			'refunds'                 => "SUM( CASE WHEN $order_stats_table.parent_id != 0 THEN $order_stats_table.gross_total END ) AS refunds",
 			'taxes'                   => "SUM($order_stats_table.tax_total) AS taxes",
 			'shipping'                => "SUM($order_stats_table.shipping_total) AS shipping",
-			'net_revenue'             => "SUM($order_stats_table.net_total) - SUM($order_stats_table.refund_total) AS net_revenue",
+			'net_revenue'             => "SUM($order_stats_table.net_total) AS net_revenue",
 			'orders_count'            => "COUNT($order_stats_table.order_id) AS orders_count",
 			'avg_items_per_order'     => "AVG($order_stats_table.num_items_sold) AS avg_items_per_order",
-			'avg_order_value'         => "(SUM($order_stats_table.net_total) - SUM($order_stats_table.refund_total))/COUNT($order_stats_table.order_id) AS avg_order_value",
+			'avg_order_value'         => "SUM($order_stats_table.net_total) / COUNT($order_stats_table.order_id) AS avg_order_value",
 			'num_returning_customers' => "SUM($order_stats_table.returning_customer) AS num_returning_customers",
 			'num_new_customers'       => "COUNT($order_stats_table.returning_customer) - SUM($order_stats_table.returning_customer) AS num_new_customers",
 		);
@@ -138,7 +137,6 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 				        $segmenting_groupby AS $segmenting_dimension_name,
 				        MAX( num_items_sold ) AS num_items_sold, 
 				        MAX( net_total ) as net_total, 
-				        MAX( refund_total ) as refund_total,
 				        MAX( returning_customer ) AS returning_customer
 				    FROM
 				        $table_name 
@@ -223,7 +221,6 @@ class WC_Admin_Reports_Orders_Stats_Segmenting extends WC_Admin_Reports_Segmenti
 				        $segmenting_groupby AS $segmenting_dimension_name,
 				        MAX( num_items_sold ) AS num_items_sold,
 				        MAX( net_total ) as net_total,
-				        MAX( refund_total ) as refund_total,
 				        MAX( returning_customer ) AS returning_customer
 				    FROM
 				        $table_name 

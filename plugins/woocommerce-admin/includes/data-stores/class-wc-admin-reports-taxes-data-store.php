@@ -52,7 +52,7 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 		'total_tax'    => 'SUM(total_tax) as total_tax',
 		'order_tax'    => 'SUM(order_tax) as order_tax',
 		'shipping_tax' => 'SUM(shipping_tax) as shipping_tax',
-		'orders_count' => 'COUNT(DISTINCT order_id) as orders_count',
+		'orders_count' => 'COUNT( DISTINCT ( CASE WHEN total_tax >= 0 THEN order_id END ) ) as orders_count',
 	);
 
 	/**
@@ -71,7 +71,6 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 	 */
 	public static function init() {
 		add_action( 'woocommerce_reports_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 15 );
-		add_action( 'woocommerce_refund_deleted', array( __CLASS__, 'sync_on_refund_delete' ), 10, 2 );
 	}
 
 	/**
@@ -312,35 +311,20 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 	 */
 	public static function sync_order_taxes( $order_id ) {
 		global $wpdb;
-		$order = wc_get_order( $order_id );
-
-		// Skip `shop_order_refunds` when factoring stats on order tax.
-		if ( ! $order || 'shop_order' !== $order->get_type() ) {
-			return -1;
-		}
-
+		$order       = wc_get_order( $order_id );
 		$tax_items   = $order->get_items( 'tax' );
 		$num_updated = 0;
 
 		foreach ( $tax_items as $tax_item ) {
-			$item_refunds     = 0;
-			$shipping_refunds = 0;
-			foreach ( $order->get_items() as $item_id => $item ) {
-				$item_refunds += $order->get_tax_refunded_for_item( $item_id, $tax_item->get_rate_id() );
-			}
-			foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
-				$shipping_refunds += $order->get_tax_refunded_for_item( $item_id, $tax_item->get_rate_id(), 'shipping' );
-			}
-
 			$result = $wpdb->replace(
 				$wpdb->prefix . self::TABLE_NAME,
 				array(
 					'order_id'     => $order->get_id(),
 					'date_created' => $order->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format ),
 					'tax_rate_id'  => $tax_item->get_rate_id(),
-					'shipping_tax' => $tax_item->get_shipping_tax_total() - $shipping_refunds,
-					'order_tax'    => $tax_item->get_tax_total() - $item_refunds,
-					'total_tax'    => $tax_item->get_tax_total() + $tax_item->get_shipping_tax_total() - $item_refunds - $shipping_refunds,
+					'shipping_tax' => $tax_item->get_shipping_tax_total(),
+					'order_tax'    => $tax_item->get_tax_total(),
+					'total_tax'    => $tax_item->get_tax_total() + $tax_item->get_shipping_tax_total(),
 				),
 				array(
 					'%d',
@@ -391,15 +375,5 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 		 * @param int $order_id    Order ID.
 		 */
 		do_action( 'woocommerce_reports_delete_tax', 0, $order_id );
-	}
-
-	/**
-	 * Syncs tax information when a refund is deleted.
-	 *
-	 * @param int $refund_id Refund ID.
-	 * @param int $order_id Order ID.
-	 */
-	public static function sync_on_refund_delete( $refund_id, $order_id ) {
-		self::sync_order_taxes( $order_id );
 	}
 }

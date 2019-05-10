@@ -43,8 +43,18 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 		'total_tax'    => 'SUM(total_tax) AS total_tax',
 		'order_tax'    => 'SUM(order_tax) as order_tax',
 		'shipping_tax' => 'SUM(shipping_tax) as shipping_tax',
-		'orders_count' => 'COUNT(DISTINCT order_id) as orders_count',
+		'orders_count' => 'COUNT( DISTINCT ( CASE WHEN parent_id = 0 THEN order_id END ) ) as orders_count',
 	);
+
+	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		// Avoid ambigious column order_id in SQL query.
+		$this->report_columns['orders_count'] = str_replace( 'order_id', $table_name . '.order_id', $this->report_columns['orders_count'] );
+	}
 
 	/**
 	 * Updates the database query with parameters used for Taxes report: categories and order status.
@@ -68,7 +78,6 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 
 		$order_status_filter = $this->get_status_subquery( $query_args );
 		if ( $order_status_filter ) {
-			$sql_query_params['from_clause']  .= " JOIN {$wpdb->prefix}wc_order_stats ON {$order_product_lookup_table}.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 			$sql_query_params['where_clause'] .= " AND ( {$order_status_filter} )";
 		}
 
@@ -174,6 +183,8 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 						FROM
 							{$table_name}
 							{$intervals_query['from_clause']}
+						JOIN
+							{$wpdb->prefix}wc_order_stats ON {$table_name}.order_id = {$wpdb->prefix}wc_order_stats.order_id
 						WHERE
 							1=1
 							{$intervals_query['where_time_clause']}
@@ -196,6 +207,8 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 					FROM
 						{$table_name}
 						{$totals_query['from_clause']}
+					JOIN
+						{$wpdb->prefix}wc_order_stats ON {$table_name}.order_id = {$wpdb->prefix}wc_order_stats.order_id
 					WHERE
 						1=1
 						{$totals_query['where_time_clause']}
@@ -217,12 +230,14 @@ class WC_Admin_Reports_Taxes_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 
 			$intervals = $wpdb->get_results(
 				"SELECT
-							MAX(date_created) AS datetime_anchor,
+							MAX({$table_name}.date_created) AS datetime_anchor,
 							{$intervals_query['select_clause']} AS time_interval
 							{$selections}
 						FROM
 							{$table_name}
 							{$intervals_query['from_clause']}
+						JOIN
+							{$wpdb->prefix}wc_order_stats ON {$table_name}.order_id = {$wpdb->prefix}wc_order_stats.order_id
 						WHERE
 							1=1
 							{$intervals_query['where_time_clause']}

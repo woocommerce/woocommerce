@@ -31,7 +31,6 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		'customer_id'    => 'intval',
 		'net_total'      => 'floatval',
 		'gross_total'    => 'floatval',
-		'refund_total'   => 'floatval',
 		'num_items_sold' => 'intval',
 		'customer_type'  => 'strval',
 	);
@@ -48,7 +47,6 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		'customer_id'    => 'customer_id',
 		'net_total'      => 'net_total',
 		'gross_total'    => 'gross_total',
-		'refund_total'   => 'refund_total',
 		'num_items_sold' => 'num_items_sold',
 		'customer_type'  => '(CASE WHEN returning_customer <> 0 THEN "returning" ELSE "new" END) as customer_type',
 	);

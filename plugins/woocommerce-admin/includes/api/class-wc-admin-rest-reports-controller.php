@@ -183,7 +183,13 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 		if ( ! has_filter( 'woocommerce_order_number' ) ) {
 			return $order_id;
 		}
+
 		$order = new WC_Order( $order_id );
+
+		if ( 'shop_order' !== $order->get_type() ) {
+			return $order_id;
+		}
+
 		return $order->get_order_number();
 	}
 

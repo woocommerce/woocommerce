@@ -3,7 +3,7 @@ Contributors: automattic
 Tags: ecommerce, e-commerce, store, sales, reports, analytics, dashboard, activity, notices, insights, stats, woo commerce, woocommerce
 Requires at least: 5.0.0
 Tested up to: 5.1.1
-Requires PHP: 5.2.4
+Requires PHP: 5.4.0
 Stable tag: 1.0.0
 License: GPLv2
 License URI: https://github.com/woocommerce/woocommerce-admin/blob/master/LICENSE.md
@@ -42,7 +42,7 @@ Once again: This plugin is under active development and, as such, we advise you 
 
 * WordPress 5.0
 * WooCommerce 3.6.0 or greater
-* PHP version 5.2.4 or greater. PHP 7.2 or greater is recommended
+* PHP version 5.4 or greater. PHP 7.2 or greater is recommended
 * MySQL version 5.0 or greater. MySQL 5.6 or greater is recommended
 
 Visit the [WooCommerce server requirements documentation](https://docs.woocommerce.com/document/server-requirements/) for a detailed list of server requirements.

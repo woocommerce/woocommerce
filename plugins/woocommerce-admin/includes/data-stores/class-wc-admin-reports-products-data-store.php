@@ -53,7 +53,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		'product_id'   => 'product_id',
 		'items_sold'   => 'SUM(product_qty) as items_sold',
 		'net_revenue'  => 'SUM(product_net_revenue) AS net_revenue',
-		'orders_count' => 'COUNT(DISTINCT order_id) as orders_count',
+		'orders_count' => 'COUNT( DISTINCT ( CASE WHEN product_gross_revenue >= 0 THEN order_id END ) ) as orders_count',
 	);
 
 	/**
@@ -388,9 +388,7 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 		global $wpdb;
 
 		$order = wc_get_order( $order_id );
-
-		// This hook gets called on refunds as well, so return early to avoid errors.
-		if ( ! $order || 'shop_order_refund' === $order->get_type() ) {
+		if ( ! $order ) {
 			return -1;
 		}
 
@@ -399,17 +397,13 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 
 		foreach ( $order_items as $order_item ) {
 			$order_item_id       = $order_item->get_id();
-			$quantity_refunded   = $order->get_item_quantity_refunded( $order_item );
-			$amount_refunded     = $order->get_item_amount_refunded( $order_item );
-			$product_qty         = $order->get_item_quantity_minus_refunded( $order_item );
+			$product_qty         = $order_item->get_quantity( 'edit' );
 			$shipping_amount     = $order->get_item_shipping_amount( $order_item );
 			$shipping_tax_amount = $order->get_item_shipping_tax_amount( $order_item );
 			$coupon_amount       = $order->get_item_coupon_amount( $order_item );
 
 			// Tax amount.
-			// @todo Check if this calculates tax correctly with refunds.
-			$tax_amount = 0;
-
+			$tax_amount  = 0;
 			$order_taxes = $order->get_taxes();
 			$tax_data    = $order_item->get_taxes();
 			foreach ( $order_taxes as $tax_item ) {
@@ -417,72 +411,50 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 				$tax_amount += isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : 0;
 			}
 
-			// @todo Should net revenue be affected by refunds, as refunds are tracked separately?
-			$net_revenue = $order_item->get_subtotal( 'edit' ) - $amount_refunded;
+			$net_revenue = $order_item->get_subtotal( 'edit' );
 
-			if ( $quantity_refunded >= $order_item->get_quantity( 'edit' ) ) {
-				$result = $wpdb->delete(
-					$wpdb->prefix . self::TABLE_NAME,
-					array( 'order_item_id' => $order_item_id ),
-					array( '%d' )
-				); // WPCS: cache ok, DB call ok.
+			$result = $wpdb->replace(
+				$wpdb->prefix . self::TABLE_NAME,
+				array(
+					'order_item_id'         => $order_item_id,
+					'order_id'              => $order->get_id(),
+					'product_id'            => wc_get_order_item_meta( $order_item_id, '_product_id' ),
+					'variation_id'          => wc_get_order_item_meta( $order_item_id, '_variation_id' ),
+					'customer_id'           => $order->get_report_customer_id(),
+					'product_qty'           => $product_qty,
+					'product_net_revenue'   => $net_revenue,
+					'date_created'          => $order->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format ),
+					'coupon_amount'         => $coupon_amount,
+					'tax_amount'            => $tax_amount,
+					'shipping_amount'       => $shipping_amount,
+					'shipping_tax_amount'   => $shipping_tax_amount,
+					// @todo Can this be incorrect if modified by filters?
+					'product_gross_revenue' => $net_revenue + $tax_amount + $shipping_amount + $shipping_tax_amount,
+				),
+				array(
+					'%d', // order_item_id.
+					'%d', // order_id.
+					'%d', // product_id.
+					'%d', // variation_id.
+					'%d', // customer_id.
+					'%d', // product_qty.
+					'%f', // product_net_revenue.
+					'%s', // date_created.
+					'%f', // coupon_amount.
+					'%f', // tax_amount.
+					'%f', // shipping_amount.
+					'%f', // shipping_tax_amount.
+					'%f', // product_gross_revenue.
+				)
+			); // WPCS: cache ok, DB call ok, unprepared SQL ok.
 
-				// Deleting 0 items here isn't a problem, and we should force a successful return.
-				$result = ( 0 === $result ) ? 1 : $result;
-
-				/**
-				 * Fires when product's reports are deleted.
-				 *
-				 * @param int $order_item_id Order Item ID.
-				 * @param int $order_id      Order ID.
-				 */
-				do_action( 'woocommerce_reports_delete_product', $order_item_id, $order->get_id() );
-			} else {
-				$result = $wpdb->replace(
-					$wpdb->prefix . self::TABLE_NAME,
-					array(
-						'order_item_id'         => $order_item_id,
-						'order_id'              => $order->get_id(),
-						'product_id'            => wc_get_order_item_meta( $order_item_id, '_product_id' ),
-						'variation_id'          => wc_get_order_item_meta( $order_item_id, '_variation_id' ),
-						'customer_id'           => ( 0 < $order->get_customer_id( 'edit' ) ) ? $order->get_customer_id( 'edit' ) : null,
-						'product_qty'           => $product_qty,
-						'product_net_revenue'   => $net_revenue,
-						'date_created'          => $order->get_date_created( 'edit' )->date( WC_Admin_Reports_Interval::$sql_datetime_format ),
-						'coupon_amount'         => $coupon_amount,
-						'tax_amount'            => $tax_amount,
-						'shipping_amount'       => $shipping_amount,
-						'shipping_tax_amount'   => $shipping_tax_amount,
-						// @todo Can this be incorrect if modified by filters?
-						'product_gross_revenue' => $net_revenue + $tax_amount + $shipping_amount + $shipping_tax_amount,
-						'refund_amount'         => $amount_refunded,
-					),
-					array(
-						'%d', // order_item_id.
-						'%d', // order_id.
-						'%d', // product_id.
-						'%d', // variation_id.
-						'%d', // customer_id.
-						'%d', // product_qty.
-						'%f', // product_net_revenue.
-						'%s', // date_created.
-						'%f', // coupon_amount.
-						'%f', // tax_amount.
-						'%f', // shipping_amount.
-						'%f', // shipping_tax_amount.
-						'%f', // product_gross_revenue.
-						'%f', // refund_amount.
-					)
-				); // WPCS: cache ok, DB call ok, unprepared SQL ok.
-
-				/**
-				 * Fires when product's reports are updated.
-				 *
-				 * @param int $order_item_id Order Item ID.
-				 * @param int $order_id      Order ID.
-				 */
-				do_action( 'woocommerce_reports_update_product', $order_item_id, $order->get_id() );
-			}
+			/**
+			 * Fires when product's reports are updated.
+			 *
+			 * @param int $order_item_id Order Item ID.
+			 * @param int $order_id      Order ID.
+			 */
+			do_action( 'woocommerce_reports_update_product', $order_item_id, $order->get_id() );
 
 			// Sum the rows affected. Using REPLACE can affect 2 rows if the row already exists.
 			$num_updated += 2 === intval( $result ) ? 1 : intval( $result );

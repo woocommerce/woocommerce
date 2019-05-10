@@ -24,7 +24,7 @@ import {
 	OrderStatus,
 	Section,
 } from '@woocommerce/components';
-import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+import { formatCurrency } from '@woocommerce/currency';
 import { getAdminLink, getNewPath } from '@woocommerce/navigation';
 
 /**
@@ -145,8 +145,6 @@ class OrdersPanel extends Component {
 				extended_info && extended_info.products ? extended_info.products.length : 0;
 
 			const total = order.gross_total;
-			const refundValue = order.refund_total;
-			const remainingTotal = getCurrencyFormatDecimal( total ) + refundValue;
 
 			cards.push(
 				<ActivityCard
@@ -162,13 +160,7 @@ class OrdersPanel extends Component {
 									productsCount
 								) }
 							</span>
-							{ refundValue ? (
-								<span>
-									<s>{ formatCurrency( total ) }</s> { formatCurrency( remainingTotal ) }
-								</span>
-							) : (
-								<span>{ formatCurrency( total ) }</span>
-							) }
+							<span>{ formatCurrency( total ) }</span>
 						</div>
 					}
 					actions={
