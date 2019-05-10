@@ -87,13 +87,13 @@ class RestApi {
 		// Non-namespaced files.
 		if ( stristr( $class, 'WC_REST_' ) ) {
 			if ( stristr( $class, '_V1_' ) ) {
-				$dir = dirname( __FILE__ ) . '/v1/';
+				$dir = dirname( __FILE__ ) . '/includes/v1/';
 			} elseif ( stristr( $class, '_V2_' ) ) {
-				$dir = dirname( __FILE__ ) . '/v2/';
+				$dir = dirname( __FILE__ ) . '/includes/v2/';
 			} elseif ( stristr( $class, 'WC_REST_Blocks' ) ) {
-				$dir = dirname( __FILE__ ) . '/wc-blocks/';
+				$dir = dirname( __FILE__ ) . '/includes/wc-blocks/';
 			} else {
-				$dir = dirname( __FILE__ ) . '/v3/';
+				$dir = dirname( __FILE__ ) . '/includes/v3/';
 			}
 
 			$file = $this->get_file_name_from_class( $class );
@@ -105,14 +105,14 @@ class RestApi {
 
 			$file = $this->get_file_name_from_class( $class, 'abstract-' );
 
-			if ( file_exists( dirname( __FILE__ ) . "/abstracts/{$file}" ) ) {
-				include dirname( __FILE__ ) . "/abstracts/{$file}";
+			if ( file_exists( dirname( __FILE__ ) . "/includes/abstracts/{$file}" ) ) {
+				include dirname( __FILE__ ) . "/includes/abstracts/{$file}";
 				return;
 			}
 		}
 
-		if ( file_exists( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . "{$class}.php" ) ) {
-			include dirname( __FILE__ ) . DIRECTORY_SEPARATOR . "{$class}.php";
+		if ( file_exists( dirname( __FILE__ ) . "/includes/{$class}.php" ) ) {
+			include dirname( __FILE__ ) . "/includes/{$class}.php";
 			return;
 		}
 	}
