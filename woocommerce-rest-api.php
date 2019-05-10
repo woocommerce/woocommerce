@@ -5,8 +5,8 @@
  * Description: The WooCommerce core REST API, installed as a feature plugin for development and testing purposes. Requires WooCommerce 3.7+ and PHP 5.3+.
  * Author: Automattic
  * Author URI: https://woocommerce.com
- * Version: 0.0.1
- * Requires PHP: 5.3
+ * Version: 1.0.0-dev
+ * Requires PHP: 5.6
  * License: GPLv3
  *
  * @package WooCommerce/RestAPI
@@ -14,19 +14,19 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( version_compare( PHP_VERSION, '5.3.0', '<' ) ) {
+if ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
 	return;
 }
 
-if ( ! function_exists( 'wc_rest_api_1_dot_1_dot_0' ) ) {
+if ( ! function_exists( 'wc_rest_api_1_dot_0_dot_0_dev' ) ) {
 	/**
 	 * This is a version specific loader used as a callback so only the latest version of the API plugin is used.
 	 *
 	 * @internal Never call manually - this function will change between versions.
 	 */
-	function wc_rest_api_1_dot_1_dot_0() {
-		require_once dirname( __FILE__ ) . '/RestApi.php';
-		\WC\RestAPI\RestApi::instance()->init();
+	function wc_rest_api_1_dot_0_dot_0_dev() {
+		require_once dirname( __FILE__ ) . '/src/class-server.php';
+		\WooCommerce\Rest_Api\Server::instance()->init();
 	}
 }
 
@@ -35,7 +35,7 @@ add_action(
 	function() {
 		if ( is_callable( array( wc()->api, 'register' ) ) ) {
 			// @internal When bumping the version remember to update the function names below.
-			wc()->api->register( '1.1.0', 'wc_rest_api_1_dot_1_dot_0' );
+			wc()->api->register( '1.1.0', 'wc_rest_api_1_dot_0_dot_0_dev' );
 		}
 	}
 );
