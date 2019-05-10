@@ -353,26 +353,15 @@ class WC_Admin_Loader {
 		);
 
 		// WooCommerce > Settings > Emails > Edit email (all email editing).
-		$emails = array(
-			'wc_email_new_order',
-			'wc_email_cancelled_order',
-			'wc_email_failed_order',
-			'wc_email_customer_on_hold_order',
-			'wc_email_customer_processing_order',
-			'wc_email_customer_completed_order',
-			'wc_email_customer_refunded_order',
-			'wc_email_customer_invoice',
-			'wc_email_customer_note',
-			'wc_email_customer_reset_password',
-			'wc_email_customer_new_account',
-		);
+		$wc_emails    = WC_Emails::instance();
+		$wc_email_ids = array_map( 'sanitize_title', array_keys( $wc_emails->get_emails() ) );
 
-		foreach ( $emails as $email ) {
+		foreach ( $wc_email_ids as $email_id ) {
 			wc_admin_connect_page(
 				array(
-					'id'        => 'woocommerce-settings-email-' . $email,
+					'id'        => 'woocommerce-settings-email-' . $email_id,
 					'parent'    => 'woocommerce-settings-email',
-					'screen_id' => 'woocommerce_page_wc-settings-email-' . $email,
+					'screen_id' => 'woocommerce_page_wc-settings-email-' . $email_id,
 					'title'     => __( 'Edit email', 'woocommerce-admin' ),
 				)
 			);
