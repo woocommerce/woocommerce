@@ -189,7 +189,20 @@ INTERESTED IN DEVELOPMENT?
 == Changelog ==
 
 = 3.6.3 - ????-??-?? =
+* Fix - State not required for Serbia. #23430
+* Fix - # symbol in product category name broke product export. #23454
+* Fix - XML export caused fatal errors due to Action Scheduler adding invalid characters. #23456
+* Fix - Invalid password messages when password contains backslashes. #23499
+* Fix - Dismiss button in WC admin notices "legacy_shipping" and "no_shipping_methods" were not clickable. #23517
+* Fix - WC $wpdb->tables not defined early enough. #23529
+* Fix - Tracks JS not printed on last page of OBW. #23519
+* Fix - Error in the logic used to build fields for external products when the query string contained full-stops, pluses or spaces in the values of the parameters. #23535
+* Fix - UI page width issue on OBW. #23526
+* Fix - Customer address not auto populated on checkout after registering and filling in address prior. #23528
 
+* Tweak - Change default WC API version used when creating webhooks to the latest WC API version. #23515
+* Localization - Add Serbia locale defaults. #23428
+* Localization - Add address format for Serbia. #23429
 
 = 3.6.2 - 2019-04-24 =
 * Fix - [3.6.x] Fix CSS classname conflict with themes due to missing product object global. #23377
