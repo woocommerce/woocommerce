@@ -20,14 +20,16 @@ if ( ! function_exists( 'wc_admin_register_page' ) ) {
 	 */
 	function wc_admin_register_page( $options ) {
 		$defaults = array(
-			'parent' => '/analytics',
+			'parent'     => '/analytics',
+			'capability' => 'view_woocommerce_reports',
 		);
 		$options  = wp_parse_args( $options, $defaults );
+
 		add_submenu_page(
 			'/' === $options['parent'][0] ? "wc-admin#{$options['parent']}" : $options['parent'],
 			$options['title'],
 			$options['title'],
-			'manage_options',
+			$options['capability'],
 			"wc-admin#{$options['path']}",
 			array( 'WC_Admin_Loader', 'page_wrapper' )
 		);
@@ -171,11 +173,12 @@ class WC_Admin_Loader {
 			$menu_title = __( 'Dashboard', 'woocommerce-admin' );
 		}
 
+		$analytics_cap = apply_filters( 'woocommerce_admin_analytics_menu_capability', 'view_woocommerce_reports' );
 		add_submenu_page(
 			'woocommerce',
 			$page_title,
 			$menu_title,
-			'manage_options',
+			$analytics_cap,
 			'wc-admin',
 			array( 'WC_Admin_Loader', 'page_wrapper' )
 		);

@@ -76,7 +76,7 @@ class WC_Admin_Analytics {
 		add_menu_page(
 			__( 'WooCommerce Analytics', 'woocommerce-admin' ),
 			__( 'Analytics', 'woocommerce-admin' ),
-			'manage_options',
+			'view_woocommerce_reports',
 			'wc-admin#/analytics/revenue',
 			array( 'WC_Admin_Loader', 'page_wrapper' ),
 			'dashicons-chart-bar',
