@@ -58,6 +58,7 @@ class WC_Admin_Page_Controller {
 	 *   @type string       capability   Capability needed to access the page.
 	 *   @type string       icon         Icon. Dashicons helper class, base64-encoded SVG, or 'none'.
 	 *   @type int          position     Menu item position.
+	 *   @type boolean      js_page      If this is a JS-powered page.
 	 * }
 	 */
 	public function connect_page( $options ) {
@@ -65,7 +66,27 @@ class WC_Admin_Page_Controller {
 			$options['title'] = array( $options['title'] );
 		}
 
-		// TODO: check for null ID, or collision.
+		/**
+		 * Filter the options when connecting or registering a page.
+		 *
+		 * Use the `js_page` option to determine if registering.
+		 *
+		 * @param array $options {
+		 *   Array describing the page.
+		 *
+		 *   @type string       id           Id to reference the page.
+		 *   @type string|array title        Page title. Used in menus and breadcrumbs.
+		 *   @type string|null  parent       Parent ID. Null for new top level page.
+		 *   @type string       path         Path for this page. E.g. admin.php?page=wc-settings&tab=checkout
+		 *   @type string       capability   Capability needed to access the page.
+		 *   @type string       icon         Icon. Dashicons helper class, base64-encoded SVG, or 'none'.
+		 *   @type int          position     Menu item position.
+		 *   @type boolean      js_page      If this is a JS-powered page.
+		 * }
+		 */
+		$options = apply_filters( 'wc_admin_connect_page_options', $options );
+
+		// @todo check for null ID, or collision.
 		$this->pages[ $options['id'] ] = $options;
 	}
 
@@ -126,7 +147,8 @@ class WC_Admin_Page_Controller {
 
 		// Bail if this isn't a page registered with this controller.
 		if ( false === $current_page ) {
-			return array( '' );
+			// Filter documentation below.
+			return apply_filters( 'wc_admin_get_breadcrumbs', array( '' ), $current_page );
 		}
 
 		if ( 1 === count( $current_page['title'] ) ) {
@@ -155,7 +177,13 @@ class WC_Admin_Page_Controller {
 			}
 		}
 
-		return $breadcrumbs;
+		/**
+		 * The navigation breadcrumbs for the current page.
+		 *
+		 * @param array         $breadcrumbs Navigation pieces (breadcrumbs).
+		 * @param array|boolean $current_page The connected page data or false if not identified.
+		 */
+		return apply_filters( 'wc_admin_get_breadcrumbs', $breadcrumbs, $current_page );
 	}
 
 	/**
@@ -174,20 +202,24 @@ class WC_Admin_Page_Controller {
 
 	/**
 	 * Returns the current screen ID.
+	 *
 	 * This is slightly different from WP's get_current_screen, in that it attaches an action,
 	 * so certain pages like 'add new' pages can have different breadcrumbs or handling.
 	 * It also catches some more unique dynamic pages like taxonomy/attribute management.
 	 *
-	 * Format: {$current_screen->action}-{$current_screen->action}-tab,
-	 * {$current_screen->action}-{$current_screen->action} if no tab is present,
-	 * or just {$current_screen->action} if no action or tab is present.
+	 * Format:
+	 * - {$current_screen->action}-{$current_screen->action}-tab-section
+	 * - {$current_screen->action}-{$current_screen->action}-tab
+	 * - {$current_screen->action}-{$current_screen->action} if no tab is present
+	 * - {$current_screen->action} if no action or tab is present
 	 *
 	 * @return string Current screen ID.
 	 */
 	public function get_current_screen_id() {
 		$current_screen = get_current_screen();
 		if ( ! $current_screen ) {
-			return false;
+			// Filter documentation below.
+			return apply_filters( 'wc_admin_current_screen_id', false, $current_screen );
 		}
 
 		$screen_pieces = array( $current_screen->id );
@@ -203,12 +235,12 @@ class WC_Admin_Page_Controller {
 		) {
 			// Editing a product attribute.
 			if ( 0 === strpos( $current_screen->taxonomy, 'pa_' ) ) {
-				return 'product_page_product_attribute-edit';
+				$screen_pieces = array( 'product_page_product_attribute-edit' );
 			}
 
 			// Editing a product taxonomy term.
 			if ( ! empty( $_GET['tag_ID'] ) ) {
-				return $current_screen->taxonomy;
+				$screen_pieces = array( $current_screen->taxonomy );
 			}
 		}
 
@@ -231,6 +263,7 @@ class WC_Admin_Page_Controller {
 				'shipping'          => array( '', 'options', 'classes' ),
 				'checkout'          => array( 'bacs', 'cheque', 'cod', 'paypal' ),
 				'email'             => array(
+					// @todo: dynamically generate this.
 					'wc_email_new_order',
 					'wc_email_cancelled_order',
 					'wc_email_failed_order',
@@ -280,7 +313,15 @@ class WC_Admin_Page_Controller {
 			}
 		}
 
-		return implode( '-', $screen_pieces );
+		/**
+		 * The current screen id.
+		 *
+		 * Used for identifying pages to render the WooCommerce Admin header.
+		 *
+		 * @param string|boolean $screen_id The screen id or false if not identified.
+		 * @param WP_Screen      $current_screen The current WP_Screen.
+		 */
+		return apply_filters( 'wc_admin_current_screen_id', implode( '-', $screen_pieces ), $current_screen );
 	}
 
 	/**
@@ -305,10 +346,20 @@ class WC_Admin_Page_Controller {
 		$current_page = $this->get_current_page();
 
 		if ( false === $current_page ) {
-			return false;
+			$is_connected_page = false;
+		} else {
+			$is_connected_page = isset( $current_page['js_page'] ) ? ! $current_page['js_page'] : true;
 		}
 
-		return ( isset( $current_page['js_page'] ) ? ! $current_page['js_page'] : true );
+		/**
+		 * Whether or not the current page is an existing page connected to this controller.
+		 *
+		 * Used to determine if the WooCommerce Admin header should be rendered.
+		 *
+		 * @param boolean       $is_connected_page True if the current page is connected.
+		 * @param array|boolean $current_page The connected page data or false if not identified.
+		 */
+		return apply_filters( 'woocommerce_page_is_connected_page', $is_connected_page, $current_page );
 	}
 
 	/**
@@ -320,10 +371,20 @@ class WC_Admin_Page_Controller {
 		$current_page = $this->get_current_page();
 
 		if ( false === $current_page ) {
-			return false;
+			$is_registered_page = false;
+		} else {
+			$is_registered_page = isset( $current_page['js_page'] ) && $current_page['js_page'];
 		}
 
-		return ( isset( $current_page['js_page'] ) && $current_page['js_page'] );
+		/**
+		 * Whether or not the current page was registered with this controller.
+		 *
+		 * Used to determine if this is a JS-powered WooCommerce Admin page.
+		 *
+		 * @param boolean       $is_registered_page True if the current page was registered with this controller.
+		 * @param array|boolean $current_page The registered page data or false if not identified.
+		 */
+		return apply_filters( 'woocommerce_page_is_registered_page', $is_registered_page, $current_page );
 	}
 
 	/**
@@ -371,7 +432,7 @@ class WC_Admin_Page_Controller {
 			);
 		} else {
 			$parent_path = $this->get_path_from_id( $options['parent'] );
-			// TODO: check for null path.
+			// @todo check for null path.
 			add_submenu_page(
 				$parent_path,
 				$options['title'],
