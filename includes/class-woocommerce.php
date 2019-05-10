@@ -425,6 +425,8 @@ final class WooCommerce {
 		 */
 		include_once WC_ABSPATH . 'includes/legacy/class-wc-legacy-api.php';
 		include_once WC_ABSPATH . 'includes/class-wc-api.php';
+		include_once WC_ABSPATH . 'includes/class-wc-rest-authentication.php';
+		include_once WC_ABSPATH . 'includes/class-wc-rest-exception.php';
 		include_once WC_ABSPATH . 'includes/class-wc-auth.php';
 		include_once WC_ABSPATH . 'includes/class-wc-register-wp-admin-settings.php';
 
@@ -459,6 +461,7 @@ final class WooCommerce {
 		$this->theme_support_includes();
 		$this->query = new WC_Query();
 		$this->api   = new WC_API();
+		$this->api->init();
 	}
 
 	/**
