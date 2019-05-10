@@ -6,7 +6,7 @@
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Version: 1.0.0-dev
- * Requires PHP: 5.3
+ * Requires PHP: 5.6
  * License: GPLv3
  *
  * @package WooCommerce/RestAPI
@@ -14,7 +14,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( version_compare( PHP_VERSION, '5.3.0', '<' ) ) {
+if ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
 	return;
 }
 
