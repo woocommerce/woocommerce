@@ -67,11 +67,13 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 		?>
 	</ul>
 
-	<p class="woocommerce-mini-cart__total total"><strong><?php _e( 'Subtotal', 'woocommerce' ); ?>:</strong> <?php echo WC()->cart->get_cart_subtotal(); ?></p>
+	<p class="woocommerce-mini-cart__total total"><?php do_action( 'woocommerce_widget_shopping_cart_total' ); ?></p>
 
 	<?php do_action( 'woocommerce_widget_shopping_cart_before_buttons' ); ?>
 
 	<p class="woocommerce-mini-cart__buttons buttons"><?php do_action( 'woocommerce_widget_shopping_cart_buttons' ); ?></p>
+
+	<?php do_action( 'woocommerce_widget_shopping_cart_after_buttons' ); ?>
 
 <?php else : ?>
 
