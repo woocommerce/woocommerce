@@ -70,11 +70,7 @@ There are also extensions available to add [delivery and shipping options](https
 
 = Design your store with themes and blocks =
 
-<<<<<<< HEAD
-WooCommerce store design starts with a theme of your choice. There are hundreds of free and paid themes available, including [Storefront](https://woocommerce.com/storefront/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) by Automattic -- it's free to all stores and you can choose to have it installed for you during the hguided setup.
-=======
 WooCommerce store design starts with a theme of your choice. There are hundreds of free and paid themes available, including [Storefront](https://woocommerce.com/storefront/?utm_source=wp%20org%20repo%20listing&utm_content=3.6) by Automattic -- it's free to all stores and you can choose to have it installed for you during the guided setup. 
->>>>>>> Minor Typos
 
 Storefront offers deep WooCommerce integration and prioritizes speed and uptime. You can add your brand and define your style by customizing Storefront yourself or adding one of several industry-themed [Storefront child themes](https://woocommerce.com/product-category/themes/storefront-child-theme-themes/?utm_source=wp%20org%20repo%20listing&utm_content=3.6).
 
@@ -167,13 +163,8 @@ Visit the [WooCommerce server requirements documentation](https://docs.woocommer
 = Automatic installation =
 
 Automatic installation is the easiest option -- WordPress will handles the file transfer, and you won’t need to leave your web browser. To do an automatic install of WooCommerce, log in to your WordPress dashboard, navigate to the Plugins menu, and click “Add New.”
-<<<<<<< HEAD
-
-In the search field type “WooCommerce,” then click “Search Plugins.” Once you’ve found us,  you can view details about it such as the point release, rating, and description. Most importantly of course, you can install it by! Clicki “Install Now,” and WordPress will take it from there.
-=======
  
 In the search field type “WooCommerce,” then click “Search Plugins.” Once you’ve found us,  you can view details about it such as the point release, rating, and description. Most importantly of course, you can install it by! Click “Install Now,” and WordPress will take it from there.
->>>>>>> Minor Typos
 
 = Manual installation =
 
@@ -208,8 +199,10 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Error in the logic used to build fields for external products when the query string contained full-stops, pluses or spaces in the values of the parameters. #23535
 * Fix - UI page width issue on OBW. #23526
 * Fix - Customer address not auto populated on checkout after registering and filling in address prior. #23528
-
+* Fix - Available WooCommerce extension updates not showing in System Status report. #23601
+* Tweak - Confirm before saving empty list of countries to sell to in settings. #23597
 * Tweak - Change default WC API version used when creating webhooks to the latest WC API version. #23515
+* Tweak - Report a bug button now points to the new issue template in GitHub. #23580
 * Localization - Add Serbia locale defaults. #23428
 * Localization - Add address format for Serbia. #23429
 
