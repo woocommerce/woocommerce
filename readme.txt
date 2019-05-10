@@ -200,9 +200,17 @@ INTERESTED IN DEVELOPMENT?
 * Fix - UI page width issue on OBW. #23526
 * Fix - Customer address not auto populated on checkout after registering and filling in address prior. #23528
 * Fix - Available WooCommerce extension updates not showing in System Status report. #23601
+* Fix - wc_change_get_terms_defaults throwing undefined index notices. #23611
+* Fix - System Status report alway showing checkmark next to Connected to WooCommerce.com. #23617
+* Fix - State field never populated when loading customer address on order via wp-admin. #23615
+* Fix - Order sorting not working in wp-admin when Yoast SEO active. #23590
+* Fix - Attribute ordering not working in product edit screen. #23625
+* Fix - Tracks reporting incorrect order totals due to refunds being excluded in calculation. #23671
 * Tweak - Confirm before saving empty list of countries to sell to in settings. #23597
 * Tweak - Change default WC API version used when creating webhooks to the latest WC API version. #23515
 * Tweak - Report a bug button now points to the new issue template in GitHub. #23580
+* Tweak - Do not display taxes in totals columns when taxes not enabled. #23579
+* Tweak - WC WP-CLI upgrade routine mimics wp-admin upgrade when no updates found by setting DB version to current version. #23666
 * Localization - Add Serbia locale defaults. #23428
 * Localization - Add address format for Serbia. #23429
 
