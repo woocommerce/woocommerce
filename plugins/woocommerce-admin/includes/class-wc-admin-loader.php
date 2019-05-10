@@ -152,30 +152,19 @@ class WC_Admin_Loader {
 		);
 
 		// TODO: move this somewhere else?
-		$admin_page_base    = wp_parse_url( admin_url( 'admin.php' ), PHP_URL_PATH );
-		$posttype_list_base = wp_parse_url( admin_url( 'edit.php' ), PHP_URL_PATH );
-
-		// WooCommerce.
-		wc_admin_connect_page(
-			array(
-				'id'        => 'woocommerce',
-				'screen_id' => 'woocommerce_page_wc-admin',
-				'title'     => __( 'WooCommerce', 'woocommerce-admin' ),
-				'full_path' => add_query_arg( 'page', self::APP_ENTRY_POINT, $admin_page_base ),
-			)
-		);
+		$admin_page_base    = 'admin.php';
+		$posttype_list_base = 'edit.php';
 
 		// WooCommerce > Settings > General (default tab).
 		wc_admin_connect_page(
 			array(
 				'id'        => 'woocommerce-settings',
-				'parent'    => 'woocommerce',
 				'screen_id' => 'woocommerce_page_wc-settings-general',
 				'title'     => array(
 					__( 'Settings', 'woocommerce-admin' ),
 					__( 'General', 'woocommerce-admin' ),
 				),
-				'full_path' => add_query_arg( 'page', 'wc-settings', $admin_page_base ),
+				'path'      => add_query_arg( 'page', 'wc-settings', $admin_page_base ),
 			)
 		);
 
@@ -189,7 +178,7 @@ class WC_Admin_Loader {
 					__( 'Products', 'woocommerce-admin' ),
 					__( 'General', 'woocommerce-admin' ),
 				),
-				'full_path' => add_query_arg(
+				'path'      => add_query_arg(
 					array(
 						'page' => 'wc-settings',
 						'tab'  => 'products',
@@ -229,7 +218,7 @@ class WC_Admin_Loader {
 					__( 'Shipping', 'woocommerce-admin' ),
 					__( 'Shipping zones', 'woocommerce-admin' ),
 				),
-				'full_path' => add_query_arg(
+				'path'      => add_query_arg(
 					array(
 						'page' => 'wc-settings',
 						'tab'  => 'shipping',
@@ -249,7 +238,7 @@ class WC_Admin_Loader {
 					__( 'Shipping zones', 'woocommerce-admin' ),
 					__( 'Edit zone', 'woocommerce-admin' ),
 				),
-				'full_path' => add_query_arg(
+				'path'      => add_query_arg(
 					array(
 						'page' => 'wc-settings',
 						'tab'  => 'shipping',
@@ -286,7 +275,7 @@ class WC_Admin_Loader {
 				'parent'    => 'woocommerce-settings',
 				'screen_id' => 'woocommerce_page_wc-settings-checkout',
 				'title'     => __( 'Payments', 'woocommerce-admin' ),
-				'full_path' => add_query_arg(
+				'path'      => add_query_arg(
 					array(
 						'page' => 'wc-settings',
 						'tab'  => 'checkout',
@@ -353,7 +342,7 @@ class WC_Admin_Loader {
 				'parent'    => 'woocommerce-settings',
 				'screen_id' => 'woocommerce_page_wc-settings-email',
 				'title'     => __( 'Emails', 'woocommerce-admin' ),
-				'full_path' => add_query_arg(
+				'path'      => add_query_arg(
 					array(
 						'page' => 'wc-settings',
 						'tab'  => 'email',
@@ -399,7 +388,7 @@ class WC_Admin_Loader {
 					__( 'Advanced', 'woocommerce-admin' ),
 					__( 'Page setup', 'woocommerce-admin' ),
 				),
-				'full_path' => add_query_arg(
+				'path'      => add_query_arg(
 					array(
 						'page' => 'wc-settings',
 						'tab'  => 'advanced',
@@ -453,10 +442,9 @@ class WC_Admin_Loader {
 		wc_admin_connect_page(
 			array(
 				'id'        => 'woocommerce-orders',
-				'parent'    => 'woocommerce',
 				'screen_id' => 'edit-shop_order',
 				'title'     => __( 'Orders', 'woocommerce-admin' ),
-				'full_path' => add_query_arg( 'post_type', 'shop_order', $posttype_list_base ),
+				'path'      => add_query_arg( 'post_type', 'shop_order', $posttype_list_base ),
 			)
 		);
 
@@ -484,10 +472,9 @@ class WC_Admin_Loader {
 		wc_admin_connect_page(
 			array(
 				'id'        => 'woocommerce-coupons',
-				'parent'    => 'woocommerce',
 				'screen_id' => 'edit-shop_coupon',
 				'title'     => __( 'Coupons', 'woocommerce-admin' ),
-				'full_path' => add_query_arg( 'post_type', 'shop_coupon', $posttype_list_base ),
+				'path'      => add_query_arg( 'post_type', 'shop_coupon', $posttype_list_base ),
 			)
 		);
 
@@ -515,13 +502,12 @@ class WC_Admin_Loader {
 		wc_admin_connect_page(
 			array(
 				'id'        => 'woocommerce-reports',
-				'parent'    => 'woocommerce',
 				'screen_id' => 'woocommerce_page_wc-reports-orders',
 				'title'     => array(
 					__( 'Reports', 'woocommerce-admin' ),
 					__( 'Orders', 'woocommerce-admin' ),
 				),
-				'full_path' => add_query_arg( 'page', 'wc-reports', $admin_page_base ),
+				'path'      => add_query_arg( 'page', 'wc-reports', $admin_page_base ),
 			)
 		);
 
@@ -559,13 +545,12 @@ class WC_Admin_Loader {
 		wc_admin_connect_page(
 			array(
 				'id'        => 'woocommerce-status',
-				'parent'    => 'woocommerce',
 				'screen_id' => 'woocommerce_page_wc-status-status',
 				'title'     => array(
 					__( 'Status', 'woocommerce-admin' ),
 					__( 'System status', 'woocommerce-admin' ),
 				),
-				'full_path' => add_query_arg( 'page', 'wc-status', $admin_page_base ),
+				'path'      => add_query_arg( 'page', 'wc-status', $admin_page_base ),
 			)
 		);
 
@@ -603,13 +588,12 @@ class WC_Admin_Loader {
 		wc_admin_connect_page(
 			array(
 				'id'        => 'woocommerce-addons',
-				'parent'    => 'woocommerce',
 				'screen_id' => 'woocommerce_page_wc-addons-browse-extensions',
 				'title'     => array(
 					__( 'Extensions', 'woocommerce-admin' ),
 					__( 'Browse Extensions', 'woocommerce-admin' ),
 				),
-				'full_path' => add_query_arg( 'page', 'wc-addons', $admin_page_base ),
+				'path'      => add_query_arg( 'page', 'wc-addons', $admin_page_base ),
 			)
 		);
 
@@ -627,10 +611,9 @@ class WC_Admin_Loader {
 		wc_admin_connect_page(
 			array(
 				'id'        => 'woocommerce-products',
-				'parent'    => 'woocommerce',
 				'screen_id' => 'edit-product',
 				'title'     => __( 'Products', 'woocommerce-admin' ),
-				'full_path' => add_query_arg( 'post_type', 'product', $posttype_list_base ),
+				'path'      => add_query_arg( 'post_type', 'product', $posttype_list_base ),
 			)
 		);
 
@@ -930,9 +913,7 @@ class WC_Admin_Loader {
 		?>
 		<span>
 		<?php if ( is_array( $section ) ) : ?>
-			<a href="<?php echo esc_url( admin_url( $section[0] ) ); ?>">
-				<?php echo esc_html( $section[1] ); ?>
-			</a>
+			<a href="<?php echo esc_url( admin_url( $section[0] ) ); ?>"><?php echo esc_html( $section[1] ); ?></a>
 		<?php else : ?>
 			<?php echo esc_html( $section ); ?>
 		<?php endif; ?>
@@ -956,6 +937,9 @@ class WC_Admin_Loader {
 			<div class="woocommerce-layout">
 				<div class="woocommerce-layout__header is-embed-loading">
 					<h1 class="woocommerce-layout__header-breadcrumbs">
+					<span>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-admin#/' ) ); ?>"><?php esc_html_e( 'WooCommerce', 'woocommerce-admin' ); ?></a>
+					</span>
 						<?php foreach ( $sections as $section ) : ?>
 							<?php self::output_breadcrumbs( $section ); ?>
 						<?php endforeach; ?>

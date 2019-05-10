@@ -54,7 +54,7 @@ class WC_Admin_Page_Controller {
 	 *   @type string       id           Id to reference the page.
 	 *   @type string|array title        Page title. Used in menus and breadcrumbs.
 	 *   @type string|null  parent       Parent ID. Null for new top level page.
-	 *   @type string       full_path    Full path for this page. E.g. /wp-admin/admin.php?page=wc-settings&tab=checkout
+	 *   @type string       path         Path for this page. E.g. admin.php?page=wc-settings&tab=checkout
 	 *   @type string       capability   Capability needed to access the page.
 	 *   @type string       icon         Icon. Dashicons helper class, base64-encoded SVG, or 'none'.
 	 *   @type int          position     Menu item position.
@@ -87,9 +87,10 @@ class WC_Admin_Page_Controller {
 		foreach ( $this->pages as $page ) {
 			if ( isset( $page['js_page'] ) && $page['js_page'] ) {
 				// Check registered admin pages.
-				$page_path     = wp_parse_url( $page['full_path'], PHP_URL_PATH );
-				$page_query    = wp_parse_url( $page['full_path'], PHP_URL_QUERY );
-				$page_fragment = wp_parse_url( $page['full_path'], PHP_URL_FRAGMENT );
+				$full_page_path = add_query_arg( 'page', $page['path'], admin_url( 'admin.php' ) );
+				$page_path      = wp_parse_url( $full_page_path, PHP_URL_PATH );
+				$page_query     = wp_parse_url( $full_page_path, PHP_URL_QUERY );
+				$page_fragment  = wp_parse_url( $full_page_path, PHP_URL_FRAGMENT );
 
 				if (
 					$page_path === $current_path &&
@@ -134,7 +135,7 @@ class WC_Admin_Page_Controller {
 			// If this page has multiple title pieces, only link the first one.
 			$breadcrumbs = array_merge(
 				array(
-					array( $current_page['full_path'], reset( $current_page['title'] ) ),
+					array( $current_page['path'], reset( $current_page['title'] ) ),
 				),
 				array_slice( $current_page['title'], 1 )
 			);
@@ -146,7 +147,7 @@ class WC_Admin_Page_Controller {
 			while ( $parent_id ) {
 				if ( isset( $this->pages[ $parent_id ] ) ) {
 					$parent = $this->pages[ $parent_id ];
-					array_unshift( $breadcrumbs, array( $parent['full_path'], reset( $parent['title'] ) ) );
+					array_unshift( $breadcrumbs, array( $parent['path'], reset( $parent['title'] ) ) );
 					$parent_id = isset( $parent['parent'] ) ? $parent['parent'] : false;
 				} else {
 					$parent_id = false;
@@ -380,10 +381,6 @@ class WC_Admin_Page_Controller {
 				array( __CLASS__, 'page_wrapper' )
 			);
 		}
-
-		// Set full path for matching purposes later (embed, breadcrumbs).
-		$admin_path_base      = wp_parse_url( admin_url( 'admin.php' ), PHP_URL_PATH );
-		$options['full_path'] = add_query_arg( 'page', $options['path'], $admin_path_base ); // See: menu_page_url().
 
 		$this->connect_page( $options );
 	}
