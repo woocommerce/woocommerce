@@ -126,8 +126,13 @@ class WC_API extends WC_Legacy_API {
 	 * @since 2.6.0
 	 */
 	public function rest_api_init() {
-		// Queue the core version as it may be newer than other registered versions.
-		$this->register( WC_REST_API_VERSION, 'self::init_core_rest_api' );
+		$callback = $this->latest_version_callback();
+
+		if ( ! $callback ) {
+			require_once dirname( __FILE__ ) . '/api/src/class-server.php';
+			\WooCommerce\Rest_Api\Server::instance()->init();
+		}
+
 		call_user_func( $this->latest_version_callback() );
 	}
 
@@ -137,14 +142,6 @@ class WC_API extends WC_Legacy_API {
 	public function rest_api_includes() {
 		// Just init latest REST API - it will autoload any REST classes.
 		$this->rest_api_init();
-	}
-
-	/**
-	 * Init the REST API bundled with core.
-	 */
-	protected static function init_core_rest_api() {
-		require_once dirname( __FILE__ ) . '/api/RestApi.php';
-		\WC\RestAPI\RestApi::instance()->init();
 	}
 
 	/**
@@ -195,7 +192,7 @@ class WC_API extends WC_Legacy_API {
 	public function latest_version_callback() {
 		$latest = $this->latest_version();
 		if ( empty( $latest ) || ! isset( $this->versions[ $latest ] ) ) {
-			return '__return_null';
+			return '';
 		}
 		return $this->versions[ $latest ];
 	}
