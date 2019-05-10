@@ -53,6 +53,7 @@ class WC_Admin_REST_Reports_Orders_Controller extends WC_Admin_REST_Reports_Cont
 		$args['status_is_not']    = (array) $request['status_is_not'];
 		$args['customer_type']    = $request['customer_type'];
 		$args['extended_info']    = $request['extended_info'];
+		$args['refunds']          = $request['refunds'];
 		return $args;
 	}
 
@@ -347,6 +348,19 @@ class WC_Admin_REST_Reports_Orders_Controller extends WC_Admin_REST_Reports_Cont
 				'',
 				'returning',
 				'new',
+			),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['refunds']          = array(
+			'description'       => __( 'Limit result set to specific types of refunds.', 'woocommerce-admin' ),
+			'type'              => 'string',
+			'default'           => '',
+			'enum'              => array(
+				'',
+				'all',
+				'partial',
+				'full',
+				'none',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);

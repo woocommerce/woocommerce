@@ -55,6 +55,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 		$args['coupon_includes']  = (array) $request['coupon_includes'];
 		$args['coupon_excludes']  = (array) $request['coupon_excludes'];
 		$args['customer']         = $request['customer'];
+		$args['refunds']          = $request['refunds'];
 		$args['categories']       = (array) $request['categories'];
 		$args['segmentby']        = $request['segmentby'];
 
@@ -457,6 +458,19 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 			'enum'              => array(
 				'new',
 				'returning',
+			),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['refunds']          = array(
+			'description'       => __( 'Limit result set to specific types of refunds.', 'woocommerce-admin' ),
+			'type'              => 'string',
+			'default'           => '',
+			'enum'              => array(
+				'',
+				'all',
+				'partial',
+				'full',
+				'none',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);

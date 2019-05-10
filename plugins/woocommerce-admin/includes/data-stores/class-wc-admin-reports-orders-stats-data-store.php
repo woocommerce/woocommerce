@@ -52,22 +52,32 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 	 *
 	 * @var array
 	 */
-	protected $report_columns = array(
-		'orders_count'            => 'SUM( CASE WHEN parent_id = 0 THEN 1 ELSE 0 END ) as orders_count',
-		'num_items_sold'          => 'SUM(num_items_sold) as num_items_sold',
-		'gross_revenue'           => 'SUM(gross_total) AS gross_revenue',
-		'coupons'                 => 'SUM(discount_amount) AS coupons',
-		'coupons_count'           => 'COUNT(DISTINCT coupon_id) as coupons_count',
-		'refunds'                 => 'ABS( SUM( CASE WHEN gross_total < 0 THEN gross_total END ) ) AS refunds',
-		'taxes'                   => 'SUM(tax_total) AS taxes',
-		'shipping'                => 'SUM(shipping_total) AS shipping',
-		'net_revenue'             => 'SUM(net_total) AS net_revenue',
-		'avg_items_per_order'     => 'SUM( num_items_sold ) / SUM( CASE WHEN parent_id = 0 THEN 1 ELSE 0 END ) AS avg_items_per_order',
-		'avg_order_value'         => 'SUM( net_total ) / SUM( CASE WHEN parent_id = 0 THEN 1 ELSE 0 END ) AS avg_order_value',
-		// Count returning customers as ( total_customers - new_customers ) to get an accurate number and count customers in with both new and old statuses as new.
-		'num_returning_customers' => '( COUNT( DISTINCT( customer_id ) ) -  COUNT( DISTINCT( CASE WHEN returning_customer = 0 THEN customer_id END ) ) ) AS num_returning_customers',
-		'num_new_customers'       => 'COUNT( DISTINCT( CASE WHEN returning_customer = 0 THEN customer_id END ) ) AS num_new_customers',
-	);
+	protected $report_columns = array();
+
+	/**
+	 * Constructor
+	 */
+	public function __construct() {
+		global $wpdb;
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		// Avoid ambigious columns in SQL query.
+		$this->report_columns = array(
+			'orders_count'            => "SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) as orders_count",
+			'num_items_sold'          => "SUM({$table_name}.num_items_sold) as num_items_sold",
+			'gross_revenue'           => "SUM({$table_name}.gross_total) AS gross_revenue",
+			'coupons'                 => 'SUM(discount_amount) AS coupons',
+			'coupons_count'           => 'COUNT(DISTINCT coupon_id) as coupons_count',
+			'refunds'                 => "ABS( SUM( CASE WHEN {$table_name}.gross_total < 0 THEN {$table_name}.gross_total END ) ) AS refunds",
+			'taxes'                   => "SUM({$table_name}.tax_total) AS taxes",
+			'shipping'                => "SUM({$table_name}.shipping_total) AS shipping",
+			'net_revenue'             => "SUM({$table_name}.net_total) AS net_revenue",
+			'avg_items_per_order'     => "SUM( {$table_name}.num_items_sold ) / SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) AS avg_items_per_order",
+			'avg_order_value'         => "SUM( {$table_name}.net_total ) / SUM( CASE WHEN {$table_name}.parent_id = 0 THEN 1 ELSE 0 END ) AS avg_order_value",
+			// Count returning customers as ( total_customers - new_customers ) to get an accurate number and count customers in with both new and old statuses as new.
+			'num_returning_customers' => "( COUNT( DISTINCT( {$table_name}.customer_id ) ) -  COUNT( DISTINCT( CASE WHEN {$table_name}.returning_customer = 0 THEN {$table_name}.customer_id END ) ) ) AS num_returning_customers",
+			'num_new_customers'       => "COUNT( DISTINCT( CASE WHEN {$table_name}.returning_customer = 0 THEN {$table_name}.customer_id END ) ) AS num_new_customers",
+		);
+	}
 
 	/**
 	 * Set up all the hooks for maintaining and populating table data.
@@ -147,6 +157,12 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		$customer_filter = $this->get_customer_subquery( $query_args );
 		if ( $customer_filter ) {
 			$where_filters[] = $customer_filter;
+		}
+
+		$refund_subquery = $this->get_refund_subquery( $query_args );
+		if ( $refund_subquery['where_clause'] ) {
+			$where_filters[] = $refund_subquery['where_clause'];
+			$from_clause    .= $refund_subquery['from_clause'];
 		}
 
 		$where_subclause = implode( " $operator ", $where_filters );

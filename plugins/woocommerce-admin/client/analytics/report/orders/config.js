@@ -162,6 +162,25 @@ export const advancedFilters = {
 				defaultOption: 'new',
 			},
 		},
+		refunds: {
+			labels: {
+				add: __( 'Refunds', 'woocommerce-admin' ),
+				remove: __( 'Remove refunds filter', 'woocommerce-admin' ),
+				rule: __( 'Select a refund filter match', 'woocommerce-admin' ),
+				title: __( '{{title}}Refunds{{/title}} {{filter /}}', 'woocommerce-admin' ),
+				filter: __( 'Select a refund type', 'woocommerce-admin' ),
+			},
+			input: {
+				component: 'SelectControl',
+				options: [
+					{ value: 'all', label: __( 'All', 'woocommerce-admin' ) },
+					{ value: 'partial', label: __( 'Partially refunded', 'woocommerce-admin' ) },
+					{ value: 'full', label: __( 'Fully refunded', 'woocommerce-admin' ) },
+					{ value: 'none', label: __( 'None', 'woocommerce-admin' ) },
+				],
+				defaultOption: 'all',
+			},
+		},
 	},
 };
 /*eslint-enable max-len*/

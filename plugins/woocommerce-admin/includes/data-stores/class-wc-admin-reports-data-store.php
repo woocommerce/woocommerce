@@ -719,6 +719,41 @@ class WC_Admin_Reports_Data_Store {
 	}
 
 	/**
+	 * Get join and where clauses for refunds based on user supplied parameters.
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return array
+	 */
+	protected function get_refund_subquery( $query_args ) {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'wc_order_stats';
+		$sql_query  = array(
+			'where_clause' => '',
+			'from_clause'  => '',
+		);
+
+		if ( ! isset( $query_args['refunds'] ) ) {
+			return $sql_query;
+		}
+
+		if ( 'all' === $query_args['refunds'] ) {
+			$sql_query['where_clause'] .= 'parent_id != 0';
+		}
+
+		if ( 'none' === $query_args['refunds'] ) {
+			$sql_query['where_clause'] .= 'parent_id = 0';
+		}
+
+		if ( 'full' === $query_args['refunds'] || 'partial' === $query_args['refunds'] ) {
+			$operator                   = 'full' === $query_args['refunds'] ? '=' : '!=';
+			$sql_query['from_clause']  .= " JOIN {$table_name} parent_order_stats ON {$table_name}.parent_id = parent_order_stats.order_id";
+			$sql_query['where_clause'] .= "parent_order_stats.status {$operator} '{$this->normalize_order_status( 'refunded' )}'";
+		}
+
+		return $sql_query;
+	}
+
+	/**
 	 * Returns an array of products belonging to given categories.
 	 *
 	 * @param array $categories List of categories IDs.
