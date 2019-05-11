@@ -178,7 +178,6 @@ class WC_Structured_Data {
 	 * Generates Product structured data.
 	 *
 	 * Hooked into `woocommerce_single_product_summary` action hook.
-	 * Hooked into `woocommerce_shop_loop` action hook.
 	 *
 	 * @param WC_Product $product Product data (default: null).
 	 */
