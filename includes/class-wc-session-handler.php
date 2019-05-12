@@ -94,9 +94,10 @@ class WC_Session_Handler extends WC_Session {
 
 			// If the user logs in, update session.
 			if ( is_user_logged_in() && get_current_user_id() !== $this->_customer_id ) {
+				$guest_session_id = $this->_customer_id;
 				$this->_customer_id = get_current_user_id();
 				$this->_dirty       = true;
-				$this->save_data();
+				$this->save_data($guest_session_id);
 				$this->set_customer_session_cookie( true );
 			}
 
@@ -236,7 +237,7 @@ class WC_Session_Handler extends WC_Session {
 	/**
 	 * Save data.
 	 */
-	public function save_data() {
+	public function save_data($old_session_key = false) {
 		// Dirty if something changed - prevents saving nothing new.
 		if ( $this->_dirty && $this->has_session() ) {
 			global $wpdb;
@@ -253,6 +254,9 @@ class WC_Session_Handler extends WC_Session {
 
 			wp_cache_set( $this->get_cache_prefix() . $this->_customer_id, $this->_data, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
 			$this->_dirty = false;
+			if (get_current_user_id() !== $old_session_key) {
+				$this->delete_session( $old_session_key );
+			}
 		}
 	}
 
