@@ -64,17 +64,6 @@ class DashboardCharts extends Component {
 				label={ __( 'Choose which charts to display', 'woocommerce-admin' ) }
 				renderContent={ ( { onToggle } ) => (
 					<Fragment>
-						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
-							<div className="woocommerce-ellipsis-menu__item">
-								<TextControl
-									label={ __( 'Section Title', 'woocommerce-admin' ) }
-									onBlur={ onTitleBlur }
-									onChange={ onTitleChange }
-									required
-									value={ titleInput }
-								/>
-							</div>
-						) }
 						<MenuTitle>{ __( 'Charts', 'woocommerce-admin' ) }</MenuTitle>
 						{ uniqCharts.map( chart => {
 							return (
@@ -90,13 +79,24 @@ class DashboardCharts extends Component {
 							);
 						} ) }
 						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
-							<Controls
-								onToggle={ onToggle }
-								onMove={ onMove }
-								onRemove={ onRemove }
-								isFirst={ isFirst }
-								isLast={ isLast }
-							/>
+							<Fragment>
+								<div className="woocommerce-ellipsis-menu__item">
+									<TextControl
+										label={ __( 'Section Title', 'woocommerce-admin' ) }
+										onBlur={ onTitleBlur }
+										onChange={ onTitleChange }
+										required
+										value={ titleInput }
+									/>
+								</div>
+								<Controls
+									onToggle={ onToggle }
+									onMove={ onMove }
+									onRemove={ onRemove }
+									isFirst={ isFirst }
+									isLast={ isLast }
+								/>
+							</Fragment>
 						) }
 					</Fragment>
 				) }
