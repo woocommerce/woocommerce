@@ -363,7 +363,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( false, $report['is_importing'] );
-		$this->assertEquals( 3, $report['customers_count'] );
+		$this->assertEquals( 1, $report['customers_count'] );
 		$this->assertEquals( 3, $report['customers_total'] );
 		$this->assertEquals( 5, $report['orders_count'] );
 		$this->assertEquals( 5, $report['orders_total'] );
