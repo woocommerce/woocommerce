@@ -229,7 +229,13 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			if ( false === $outofstock_count ) {
 				$outofstock_count = (int) $wpdb->get_var(
 					$wpdb->prepare(
-						"SELECT COUNT( product_id ) FROM {$wpdb->wc_product_meta_lookup} WHERE stock_quantity <= %d",
+						"SELECT COUNT( product_id )
+						FROM {$wpdb->wc_product_meta_lookup} AS lookup
+						INNER JOIN {$wpdb->posts} as posts ON lookup.product_id = posts.ID
+						WHERE 1=1
+						AND stock_quantity <= %d
+						AND posts.post_type IN ( 'product', 'product_variation' )
+						AND posts.post_status = 'publish'",
 						$nostock
 					)
 				);
