@@ -77,6 +77,7 @@ class WC_Admin_Page_Controller {
 		 *   @type string       id           Id to reference the page.
 		 *   @type string|array title        Page title. Used in menus and breadcrumbs.
 		 *   @type string|null  parent       Parent ID. Null for new top level page.
+		 *   @type string       screen_id    The screen ID that represents the connected page. (Not required for registering).
 		 *   @type string       path         Path for this page. E.g. admin.php?page=wc-settings&tab=checkout
 		 *   @type string       capability   Capability needed to access the page.
 		 *   @type string       icon         Icon. Dashicons helper class, base64-encoded SVG, or 'none'.
