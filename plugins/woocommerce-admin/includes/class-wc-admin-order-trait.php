@@ -60,7 +60,7 @@ trait WC_Admin_Order_Trait {
 			if ( $tax_data ) {
 				foreach ( $order_taxes as $tax_item ) {
 					$tax_item_id                = $tax_item->get_rate_id();
-					$tax_item_total             = isset( $tax_data['total'][ $tax_item_id ] ) ? $tax_data['total'][ $tax_item_id ] : 0;
+					$tax_item_total             = isset( $tax_data['total'][ $tax_item_id ] ) ? (float) $tax_data['total'][ $tax_item_id ] : 0;
 					$total_shipping_tax_amount += $tax_item_total;
 				}
 			}
