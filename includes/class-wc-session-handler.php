@@ -235,9 +235,11 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Save data.
+	 * Save data and delete guest session.
+	 *
+	 * @param int $old_session_key session ID before user logs in.
 	 */
-	public function save_data( $old_session_key ) {
+	public function save_data( $old_session_key = 0 ) {
 		// Dirty if something changed - prevents saving nothing new.
 		if ( $this->_dirty && $this->has_session() ) {
 			global $wpdb;
