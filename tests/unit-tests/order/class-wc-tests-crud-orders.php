@@ -452,9 +452,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test: get_used_coupons
+	 * Test: get_used_coupon_codes
 	 */
-	public function test_get_used_coupons() {
+	public function test_get_used_coupon_codes() {
 		$object = new WC_Order();
 		$item   = new WC_Order_Item_Coupon();
 		$item->set_props(
@@ -466,7 +466,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		);
 		$object->add_item( $item );
 		$object->save();
-		$this->assertCount( 1, $object->get_used_coupons() );
+		$this->assertCount( 1, $object->get_used_coupon_codes() );
 	}
 
 	/**

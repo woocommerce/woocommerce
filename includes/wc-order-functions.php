@@ -854,8 +854,8 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		return;
 	}
 
-	if ( count( $order->get_used_coupons() ) > 0 ) {
-		foreach ( $order->get_used_coupons() as $code ) {
+	if ( count( $order->get_used_coupon_codes() ) > 0 ) {
+		foreach ( $order->get_used_coupon_codes() as $code ) {
 			if ( ! $code ) {
 				continue;
 			}
