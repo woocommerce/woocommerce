@@ -589,12 +589,14 @@ class WC_Admin_Reports_Sync {
 	 */
 	public static function customer_lookup_import_batch_init( $days, $skip_existing ) {
 		$batch_size      = self::get_batch_size( self::CUSTOMERS_IMPORT_BATCH_ACTION );
+		$customer_roles  = apply_filters( 'woocommerce_admin_import_customer_roles', array( 'customer' ) );
 		$customer_query  = self::get_user_ids_for_batch(
 			$days,
 			$skip_existing,
 			array(
-				'fields' => 'ID',
-				'number' => 1,
+				'fields'   => 'ID',
+				'number'   => 1,
+				'role__in' => $customer_roles,
 			)
 		);
 		$total_customers = $customer_query->get_total();
@@ -618,15 +620,17 @@ class WC_Admin_Reports_Sync {
 	 */
 	public static function customer_lookup_import_batch( $batch_number, $days, $skip_existing ) {
 		$batch_size     = self::get_batch_size( self::CUSTOMERS_IMPORT_BATCH_ACTION );
+		$customer_roles = apply_filters( 'woocommerce_admin_import_customer_roles', array( 'customer' ) );
 		$customer_query = self::get_user_ids_for_batch(
 			$days,
 			$skip_existing,
 			array(
-				'fields'  => 'ID',
-				'orderby' => 'ID',
-				'order'   => 'ASC',
-				'number'  => $batch_size,
-				'paged'   => $batch_number,
+				'fields'   => 'ID',
+				'orderby'  => 'ID',
+				'order'    => 'ASC',
+				'number'   => $batch_size,
+				'paged'    => $batch_number,
+				'role__in' => $customer_roles,
 			)
 		);
 
