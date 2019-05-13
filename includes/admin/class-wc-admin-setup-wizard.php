@@ -1432,7 +1432,7 @@ class WC_Admin_Setup_Wizard {
 			'klarna_checkout' => array(
 				'name'        => __( 'Klarna Checkout for WooCommerce', 'woocommerce' ),
 				'description' => $klarna_checkout_description,
-				'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
+				'image'       => WC()->plugin_url() . '/assets/images/klarna-black.png',
 				'enabled'     => true,
 				'class'       => 'klarna-logo',
 				'repo-slug'   => 'klarna-checkout-for-woocommerce',
@@ -1440,7 +1440,7 @@ class WC_Admin_Setup_Wizard {
 			'klarna_payments' => array(
 				'name'        => __( 'Klarna Payments for WooCommerce', 'woocommerce' ),
 				'description' => $klarna_payments_description,
-				'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
+				'image'       => WC()->plugin_url() . '/assets/images/klarna-black.png',
 				'enabled'     => true,
 				'class'       => 'klarna-logo',
 				'repo-slug'   => 'klarna-payments-for-woocommerce',
@@ -1448,9 +1448,9 @@ class WC_Admin_Setup_Wizard {
 			'square'          => array(
 				'name'        => __( 'WooCommerce Square', 'woocommerce' ),
 				'description' => $square_description,
-				'image'       => WC()->plugin_url() . '/assets/images/square-white.png',
+				'image'       => WC()->plugin_url() . '/assets/images/square-black.png',
 				'class'       => 'square-logo',
-				'enabled'     => true,
+				'enabled'     => false,
 				'repo-slug'   => 'woocommerce-square',
 			),
 			'eway'            => array(
@@ -1503,16 +1503,29 @@ class WC_Admin_Setup_Wizard {
 		}
 
 		if ( $spotlight ) {
-			$offered_gateways = array(
-				$spotlight => $gateways[ $spotlight ],
-			);
+			$offered_gateways = array();
+
+			if ( $can_stripe ) {
+				$gateways['stripe']['enabled']  = true;
+				$gateways['stripe']['featured'] = true;
+				$offered_gateways              += array( 'stripe' => $gateways['stripe'] );
+			}
+
+			if ( in_array( $spotlight, array( 'klarna_checkout', 'klarna_payments' ), true ) ) {
+				$gateways[ $spotlight ]['enabled']  = true;
+				$gateways[ $spotlight ]['featured'] = true;
+				$offered_gateways += array(
+					$spotlight => $gateways[ $spotlight ],
+				);
+
+			} else {
+				$offered_gateways += array(
+					$spotlight => $gateways[ $spotlight ],
+				);
+			}
 
 			if ( $can_paypal ) {
 				$offered_gateways += array( 'ppec_paypal' => $gateways['ppec_paypal'] );
-			}
-
-			if ( $can_stripe ) {
-				$offered_gateways += array( 'stripe' => $gateways['stripe'] );
 			}
 
 			if ( $can_eway ) {
