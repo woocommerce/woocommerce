@@ -190,6 +190,7 @@ function wc_admin_deactivate_wc_admin_plugin() {
 	if ( wc_admin_dependencies_satisfied() ) {
 		wp_clear_scheduled_hook( 'wc_admin_daily' );
 		WC_Admin_Reports_Sync::clear_queued_actions();
+		WC_Admin_Notes::clear_queued_actions();
 	}
 }
 register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, 'wc_admin_deactivate_wc_admin_plugin' );

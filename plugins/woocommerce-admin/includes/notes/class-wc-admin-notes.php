@@ -18,6 +18,11 @@ class WC_Admin_Notes {
 	const UNSNOOZE_HOOK = 'wc_admin_unsnooze_admin_notes';
 
 	/**
+	 * Action scheduler group.
+	 */
+	const QUEUE_GROUP = 'wc-admin-notes';
+
+	/**
 	 * Hook appropriate actions.
 	 */
 	public static function init() {
@@ -131,7 +136,22 @@ class WC_Admin_Notes {
 		$next  = $queue->get_next( self::UNSNOOZE_HOOK );
 
 		if ( ! $next ) {
-			$queue->schedule_recurring( time(), HOUR_IN_SECONDS, self::UNSNOOZE_HOOK, array(), WC_Admin_Reports_Sync::QUEUE_GROUP );
+			$queue->schedule_recurring( time(), HOUR_IN_SECONDS, self::UNSNOOZE_HOOK, array(), self::QUEUE_GROUP );
+		}
+	}
+
+	/**
+	 * Clears all queued actions.
+	 */
+	public static function clear_queued_actions() {
+		$store = ActionScheduler::store();
+
+		if ( is_a( $store, 'WC_Admin_ActionScheduler_WPPostStore' ) ) {
+			// If we're using our data store, call our bespoke deletion method.
+			$action_types = array( self::UNSNOOZE_HOOK );
+			$store->clear_pending_wcadmin_actions( $action_types );
+		} else {
+			self::queue()->cancel_all( null, array(), self::QUEUE_GROUP );
 		}
 	}
 }

@@ -123,10 +123,75 @@ class WC_Admin_Reports_Sync {
 	 * @return string
 	 */
 	public static function regenerate_report_data( $days, $skip_existing ) {
+		self::reset_import_stats( $days, $skip_existing );
 		self::customer_lookup_import_batch_init( $days, $skip_existing );
 		self::queue_dependent_action( self::ORDERS_IMPORT_BATCH_INIT, array( $days, $skip_existing ), self::CUSTOMERS_IMPORT_BATCH_ACTION );
 
 		return __( 'Report table data is being rebuilt.  Please allow some time for data to fully populate.', 'woocommerce-admin' );
+	}
+
+	/**
+	 * Update the import stat totals and counts.
+	 *
+	 * @param int|bool $days Number of days to import.
+	 * @param bool     $skip_existing Skip exisiting records.
+	 */
+	public static function reset_import_stats( $days, $skip_existing ) {
+		$totals = self::get_import_totals( $days, $skip_existing );
+		update_option( 'wc_admin_import_customers_count', 0 );
+		update_option( 'wc_admin_import_orders_count', 0 );
+		update_option( 'wc_admin_import_customers_total', $totals['customers'] );
+		update_option( 'wc_admin_import_orders_total', $totals['orders'] );
+
+		// Update imported from date if older than previous.
+		$previous_import_date = get_option( 'wc_admin_imported_from_date' );
+		$current_import_date  = $days ? date( 'Y-m-d 00:00:00', time() - ( DAY_IN_SECONDS * $days ) ) : -1;
+
+		if ( ! $previous_import_date || -1 === $current_import_date || new DateTime( $previous_import_date ) > new DateTime( $current_import_date ) ) {
+			update_option( 'wc_admin_imported_from_date', $current_import_date );
+		}
+	}
+
+	/**
+	 * Get the import totals for customers and orders.
+	 *
+	 * @param int|bool $days Number of days to import.
+	 * @param bool     $skip_existing Skip exisiting records.
+	 * @return array
+	 */
+	public static function get_import_totals( $days, $skip_existing ) {
+		$orders         = self::get_orders( 1, 1, $days, $skip_existing );
+		$customer_query = self::get_user_ids_for_batch(
+			$days,
+			$skip_existing,
+			array(
+				'fields' => 'ID',
+				'number' => 1,
+			)
+		);
+
+		return array(
+			'customers' => $customer_query->get_total(),
+			'orders'    => $orders->total,
+		);
+	}
+
+	/**
+	 * Returns true if an import is in progress.
+	 *
+	 * @return bool
+	 */
+	public static function is_importing() {
+		$pending_jobs = self::queue()->search(
+			array(
+				'status'   => 'pending',
+				'per_page' => 1,
+				'claimed'  => false,
+				'group'    => self::QUEUE_GROUP,
+			)
+		);
+
+		return ! empty( $pending_jobs );
 	}
 
 	/**
@@ -137,7 +202,19 @@ class WC_Admin_Reports_Sync {
 
 		if ( is_a( $store, 'WC_Admin_ActionScheduler_WPPostStore' ) ) {
 			// If we're using our data store, call our bespoke deletion method.
-			$store->clear_pending_wcadmin_actions();
+			$action_types = array(
+				self::QUEUE_BATCH_ACTION,
+				self::QUEUE_DEPEDENT_ACTION,
+				self::CUSTOMERS_IMPORT_BATCH_ACTION,
+				self::CUSTOMERS_DELETE_BATCH_INIT,
+				self::CUSTOMERS_DELETE_BATCH_ACTION,
+				self::ORDERS_IMPORT_BATCH_ACTION,
+				self::ORDERS_IMPORT_BATCH_INIT,
+				self::ORDERS_DELETE_BATCH_INIT,
+				self::ORDERS_DELETE_BATCH_ACTION,
+				self::SINGLE_ORDER_IMPORT_ACTION,
+			);
+			$store->clear_pending_wcadmin_actions( $action_types );
 		} else {
 			self::queue()->cancel_all( null, array(), self::QUEUE_GROUP );
 		}
@@ -311,6 +388,9 @@ class WC_Admin_Reports_Sync {
 		foreach ( $orders->order_ids as $order_id ) {
 			self::orders_lookup_import_order( $order_id );
 		}
+
+		$imported_count = get_option( 'wc_admin_import_orders_count', 0 );
+		update_option( 'wc_admin_import_orders_count', $imported_count + count( $orders->order_ids ) );
 	}
 
 	/**
@@ -556,6 +636,9 @@ class WC_Admin_Reports_Sync {
 			// @todo Schedule single customer update if this fails?
 			WC_Admin_Reports_Customers_Data_Store::update_registered_customer( $customer_id );
 		}
+
+		$imported_count = get_option( 'wc_admin_import_customers_count', 0 );
+		update_option( 'wc_admin_import_customers_count', $imported_count + count( $customer_ids ) );
 	}
 
 	/**
