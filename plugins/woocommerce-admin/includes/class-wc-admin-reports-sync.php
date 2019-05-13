@@ -274,7 +274,7 @@ class WC_Admin_Reports_Sync {
 				( self::SINGLE_ORDER_IMPORT_ACTION === $existing_job->get_hook() ) ||
 				(
 					self::QUEUE_DEPEDENT_ACTION === $existing_job->get_hook() &&
-					in_array( self::SINGLE_ORDER_IMPORT_ACTION, $existing_job->get_args() )
+					in_array( self::SINGLE_ORDER_IMPORT_ACTION, $existing_job->get_args(), true )
 				)
 			) {
 				return;
