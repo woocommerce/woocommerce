@@ -57,6 +57,7 @@ class WC_Admin_Feature_Plugin {
 		$this->define_constants();
 		register_activation_hook( WC_ADMIN_PLUGIN_FILE, array( $this, 'on_activation' ) );
 		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ) );
+		add_filter( 'action_scheduler_store_class', array( $this, 'replace_actionscheduler_store_class' ) );
 	}
 
 	/**
@@ -117,6 +118,8 @@ class WC_Admin_Feature_Plugin {
 	 * Include WC Admin classes.
 	 */
 	public function includes() {
+		require_once WC_ADMIN_ABSPATH . 'includes/core-functions.php';
+
 		// Initialize the WC API extensions.
 		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-sync.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-install.php';
@@ -133,6 +136,26 @@ class WC_Admin_Feature_Plugin {
 		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-order-milestones.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-mobile-app.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes-welcome-message.php';
+	}
+
+	/**
+	 * Filter in our ActionScheduler Store class.
+	 *
+	 * @param string $store_class ActionScheduler Store class name.
+	 * @return string ActionScheduler Store class name.
+	 */
+	public function replace_actionscheduler_store_class( $store_class ) {
+		// Don't override any other overrides.
+		if ( 'ActionScheduler_wpPostStore' !== $store_class ) {
+			return $store_class;
+		}
+
+		// Include our store class here instead of wc_admin_plugins_loaded()
+		// because ActionScheduler is hooked into `plugins_loaded` at a
+		// much higher priority.
+		require_once WC_ADMIN_ABSPATH . '/includes/class-wc-admin-actionscheduler-wppoststore.php';
+
+		return 'WC_Admin_ActionScheduler_WPPostStore';
 	}
 
 	/**
