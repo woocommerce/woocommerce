@@ -324,7 +324,7 @@ class WC_Admin_Reports_Sync {
 	}
 
 	/**
-	 * Get the order IDs and total count that need to be synced.
+	 * Get the order/refund IDs and total count that need to be synced.
 	 *
 	 * @param int      $limit Number of records to retrieve.
 	 * @param int      $page  Page number.
@@ -350,14 +350,14 @@ class WC_Admin_Reports_Sync {
 
 		$count = $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->posts}
-			WHERE post_type = 'shop_order'
+			WHERE post_type IN ( 'shop_order', 'shop_order_refund' )
 			{$where_clause}"
 		); // WPCS: unprepared SQL ok.
 
 		$order_ids = absint( $count ) > 0 ? $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts}
-				WHERE post_type = 'shop_order'
+				WHERE post_type IN ( 'shop_order', 'shop_order_refund' )
 				{$where_clause}
 				ORDER BY post_date ASC
 				LIMIT %d
