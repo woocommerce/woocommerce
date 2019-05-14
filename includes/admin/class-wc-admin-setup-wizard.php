@@ -1513,7 +1513,7 @@ class WC_Admin_Setup_Wizard {
 
 			if ( in_array( $spotlight, array( 'klarna_checkout', 'klarna_payments' ), true ) ) {
 				$gateways[ $spotlight ]['enabled']  = true;
-				$gateways[ $spotlight ]['featured'] = true;
+				$gateways[ $spotlight ]['featured'] = false;
 				$offered_gateways += array(
 					$spotlight => $gateways[ $spotlight ],
 				);
