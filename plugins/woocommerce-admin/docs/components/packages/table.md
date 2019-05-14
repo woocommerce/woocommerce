@@ -317,6 +317,7 @@ Additional CSS classes.
 
 - Type: Array
   - defaultSort: Boolean - Boolean, true if this column is the default for sorting. Only one column should have this set.
+  - defaultOrder: String - String, asc|desc if this column is the default for sorting. Only one column should have this set.
   - isLeftAligned: Boolean - Boolean, true if this column should be aligned to the left.
   - isNumeric: Boolean - Boolean, true if this column is a number value.
   - isSortable: Boolean - Boolean, true if this column is sortable.

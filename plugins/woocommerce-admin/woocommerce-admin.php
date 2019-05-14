@@ -7,7 +7,7 @@
  * Author URI: https://woocommerce.com/
  * Text Domain: woocommerce-admin
  * Domain Path: /languages
- * Version: 0.11.0
+ * Version: 0.12.0
  *
  * WC requires at least: 3.6.0
  * WC tested up to: 3.6.2
@@ -40,7 +40,7 @@ if ( ! defined( 'WC_ADMIN_PLUGIN_FILE' ) ) {
 }
 
 if ( ! defined( 'WC_ADMIN_VERSION_NUMBER' ) ) {
-	define( 'WC_ADMIN_VERSION_NUMBER', '0.11.0' );
+	define( 'WC_ADMIN_VERSION_NUMBER', '0.12.0' );
 }
 
 /**
