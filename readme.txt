@@ -165,6 +165,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Fix - Use version_compare for determining max version number. #23092
 * Dev - Add quantity input action hooks (`woocommerce_before_add_to_cart_quantity`, `woocommerce_after_add_to_cart_quantity`). #23166
 * Dev - Add $this parameter to email class filters. #23250
+* Dev - Add new WC_Abstract_Order::get_coupons() method for returning all coupon line item objects on an order. #23663
 * Tweak - When cleaning up variations due to product type change, force delete them instead of trashing. #23478
 * Tweak - Change wording on link to change address to reflect if an address is already present or not. #23532
 * Performance - Improve the speed of the admin dashboard by only updating transients once per class. #23011
