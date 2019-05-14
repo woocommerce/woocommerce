@@ -30,10 +30,20 @@
 		}
 	}
 
+	.woocommerce-layout .woocommerce-layout__main {
+		padding-right: 0;
+	}
+
 	/* Hide wp-admin and WooCommerce elements when viewing the profile wizard*/
 	#adminmenumain,
 	#wpadminbar,
-	.woocommerce-layout__header {
+	.woocommerce-layout__header,
+	.update-nag,
+	.woocommerce-store-alerts,
+	.woocommerce-message,
+	.notice,
+	.error,
+	.updated {
 		display: none;
 	}
 
