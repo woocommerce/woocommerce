@@ -31,7 +31,6 @@ import {
 	SummaryNumber,
 } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
-import SectionControls from 'dashboard/components/section-controls';
 import './style.scss';
 
 class StorePerformance extends Component {
@@ -47,6 +46,7 @@ class StorePerformance extends Component {
 			onTitleChange,
 			onToggleHiddenBlock,
 			titleInput,
+			controls: Controls,
 		} = this.props;
 
 		return (
@@ -83,13 +83,15 @@ class StorePerformance extends Component {
 								</MenuItem>
 							);
 						} ) }
-						<SectionControls
-							onToggle={ onToggle }
-							onMove={ onMove }
-							onRemove={ onRemove }
-							isFirst={ isFirst }
-							isLast={ isLast }
-						/>
+						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
+							<Controls
+								onToggle={ onToggle }
+								onMove={ onMove }
+								onRemove={ onRemove }
+								isFirst={ isFirst }
+								isLast={ isLast }
+							/>
+						) }
 					</Fragment>
 				) }
 			/>

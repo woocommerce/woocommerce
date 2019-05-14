@@ -24,7 +24,6 @@ import ChartBlock from './block';
 import { getChartFromKey, uniqCharts } from './config';
 import withSelect from 'wc-api/with-select';
 import './style.scss';
-import SectionControls from 'dashboard/components/section-controls';
 
 class DashboardCharts extends Component {
 	constructor( props ) {
@@ -57,6 +56,7 @@ class DashboardCharts extends Component {
 			onTitleChange,
 			onToggleHiddenBlock,
 			titleInput,
+			controls: Controls,
 		} = this.props;
 
 		return (
@@ -89,13 +89,15 @@ class DashboardCharts extends Component {
 								</MenuItem>
 							);
 						} ) }
-						<SectionControls
-							onToggle={ onToggle }
-							onMove={ onMove }
-							onRemove={ onRemove }
-							isFirst={ isFirst }
-							isLast={ isLast }
-						/>
+						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
+							<Controls
+								onToggle={ onToggle }
+								onMove={ onMove }
+								onRemove={ onRemove }
+								isFirst={ isFirst }
+								isLast={ isLast }
+							/>
+						) }
 					</Fragment>
 				) }
 			/>

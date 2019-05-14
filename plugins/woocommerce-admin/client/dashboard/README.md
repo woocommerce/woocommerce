@@ -46,3 +46,4 @@ The component will get the following props:
 - `path` (string): The exact path for this view.
 - `query` (object): The query string for the current view, can be used to read current preferences for time periods or chart interval/type.
 - `title` (string): Title of the section according to the default settings or the user preferences if they had made any modification.
+- `controls` (react component): Controls to move a section up/down or remove it from view to be rendered inside the EllipsisMenu. 
