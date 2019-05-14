@@ -57,17 +57,6 @@ class StorePerformance extends Component {
 				) }
 				renderContent={ ( { onToggle } ) => (
 					<Fragment>
-						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
-							<div className="woocommerce-ellipsis-menu__item">
-								<TextControl
-									label={ __( 'Section Title', 'woocommerce-admin' ) }
-									onBlur={ onTitleBlur }
-									onChange={ onTitleChange }
-									required
-									value={ titleInput }
-								/>
-							</div>
-						) }
 						<MenuTitle>{ __( 'Display Stats:', 'woocommerce-admin' ) }</MenuTitle>
 						{ indicators.map( ( indicator, i ) => {
 							const checked = ! hiddenBlocks.includes( indicator.stat );
@@ -84,13 +73,24 @@ class StorePerformance extends Component {
 							);
 						} ) }
 						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
-							<Controls
-								onToggle={ onToggle }
-								onMove={ onMove }
-								onRemove={ onRemove }
-								isFirst={ isFirst }
-								isLast={ isLast }
-							/>
+							<Fragment>
+								<div className="woocommerce-ellipsis-menu__item">
+									<TextControl
+										label={ __( 'Section Title', 'woocommerce-admin' ) }
+										onBlur={ onTitleBlur }
+										onChange={ onTitleChange }
+										required
+										value={ titleInput }
+									/>
+								</div>
+								<Controls
+									onToggle={ onToggle }
+									onMove={ onMove }
+									onRemove={ onRemove }
+									isFirst={ isFirst }
+									isLast={ isLast }
+								/>
+							</Fragment>
 						) }
 					</Fragment>
 				) }

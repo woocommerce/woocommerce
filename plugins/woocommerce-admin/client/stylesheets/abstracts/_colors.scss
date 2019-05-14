@@ -2,14 +2,6 @@
 
 $white: rgba(255, 255, 255, 1);
 
-// Grays (deprecated. Use greys below as we move to HiFi designs)
-$gray: #ccc;
-$gray-darken-10: darken($gray, 10%);
-$gray-darken-20: darken($gray, 20%);
-$gray-darken-30: darken($gray, 30%);
-$gray-darken-40: darken($gray, 40%);
-$gray-light-10: lighten($gray, 10%);
-
 // Greys
 $core-grey-light-100: #f8f9f9;
 $core-grey-light-200: #f3f4f5;

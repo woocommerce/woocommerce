@@ -36,7 +36,7 @@ class SectionControls extends Component {
 		const { onRemove, isFirst, isLast } = this.props;
 
 		return (
-			<div className="woocommerce-section-controls">
+			<div className="woocommerce-dashboard-section-controls">
 				{ ! isFirst && (
 					<MenuItem isClickable onInvoke={ this.onMoveUp }>
 						<Icon icon={ 'arrow-up-alt2' } label={ __( 'Move up' ) } />
