@@ -80,7 +80,7 @@ class WC_Admin_Analytics_Dashboard {
 		wc_admin_register_page(
 			array(
 				'id'     => 'woocommerce-dashboard',
-				'title'  => 'Dashboard',
+				'title'  => __( 'Dashboard', 'woocommerce-admin' ),
 				'parent' => 'woocommerce',
 				'path'   => self::MENU_SLUG,
 			)

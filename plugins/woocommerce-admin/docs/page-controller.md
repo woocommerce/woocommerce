@@ -106,7 +106,7 @@ import { addFilter } from '@wordpress/hooks';
 addFilter( 'woocommerce_admin_reports_list', 'my-namespace', ( reports ) => {
 	reports.push( {
 		report: 'example',
-		title: 'Example',
+		title: __( 'Example', 'my-textdomain' ),
 		component: ExampleReportComponent,
 	} );
 
@@ -120,7 +120,7 @@ Register the report page with the controller:
 wc_admin_register_page(
 	array(
 		'id'     => 'woocommerce-analytics-example',
-		'title'  => 'Example',
+		'title'  => __( 'Example', 'my-textdomain' ),
 		'parent' => 'woocommerce-analytics',
 		'path'   => '/analytics/example',
 	)
