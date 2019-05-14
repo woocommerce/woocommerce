@@ -257,26 +257,16 @@ class WC_Admin_Page_Controller {
 		);
 
 		// Tabs that have sections as well.
+		$wc_emails    = WC_Emails::instance();
+		$wc_email_ids = array_map( 'sanitize_title', array_keys( $wc_emails->get_emails() ) );
+
 		$tabs_with_sections = apply_filters(
 			'wc_admin_page_tab_sections',
 			array(
 				'products'          => array( '', 'inventory', 'downloadable' ),
 				'shipping'          => array( '', 'options', 'classes' ),
 				'checkout'          => array( 'bacs', 'cheque', 'cod', 'paypal' ),
-				'email'             => array(
-					// @todo: dynamically generate this.
-					'wc_email_new_order',
-					'wc_email_cancelled_order',
-					'wc_email_failed_order',
-					'wc_email_customer_on_hold_order',
-					'wc_email_customer_processing_order',
-					'wc_email_customer_completed_order',
-					'wc_email_customer_refunded_order',
-					'wc_email_customer_invoice',
-					'wc_email_customer_note',
-					'wc_email_customer_reset_password',
-					'wc_email_customer_new_account',
-				),
+				'email'             => $wc_email_ids,
 				'advanced'          => array(
 					'',
 					'keys',
