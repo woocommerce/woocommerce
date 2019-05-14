@@ -40,4 +40,18 @@ class WC_Helper_Queue {
 			$job->execute();
 		}
 	}
+
+	/**
+	 * Run all pending queued actions.
+	 *
+	 * @return void
+	 */
+	public static function process_pending() {
+		$jobs = self::get_all_pending();
+
+		$queue_runner = new ActionScheduler_QueueRunner();
+		foreach ( $jobs as $job_id => $job ) {
+			$queue_runner->process_action( $job_id );
+		}
+	}
 }

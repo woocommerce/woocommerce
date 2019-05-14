@@ -169,6 +169,10 @@ function wc_admin_activate_wc_admin_plugin() {
 	if ( ! wp_next_scheduled( 'wc_admin_daily' ) ) {
 		wp_schedule_event( time(), 'daily', 'wc_admin_daily' );
 	}
+
+	// Run the installer on activation.
+	require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-install.php';
+	WC_Admin_Install::create_tables();
 }
 register_activation_hook( WC_ADMIN_PLUGIN_FILE, 'wc_admin_activate_wc_admin_plugin' );
 
@@ -190,6 +194,7 @@ function wc_admin_deactivate_wc_admin_plugin() {
 	if ( wc_admin_dependencies_satisfied() ) {
 		wp_clear_scheduled_hook( 'wc_admin_daily' );
 		WC_Admin_Reports_Sync::clear_queued_actions();
+		WC_Admin_Notes::clear_queued_actions();
 	}
 }
 register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, 'wc_admin_deactivate_wc_admin_plugin' );

@@ -285,4 +285,97 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 0, $reports );
 	}
+
+	/**
+	 * Test import status and totals query.
+	 */
+	public function test_import_status() {
+		// Delete any pending actions that weren't fully run.
+		WC_Admin_Reports_Sync::clear_queued_actions();
+
+		wp_set_current_user( $this->user );
+
+		// Populate all of the data.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		for ( $i = 0; $i < 5; $i++ ) {
+			$order = WC_Helper_Order::create_order( 1, $product );
+			$order->set_status( 'completed' );
+			$order->set_date_created( time() - ( ( $i + 1 ) * DAY_IN_SECONDS ) );
+			$order->save();
+		}
+
+		// Test totals and total params.
+		$request    = new WP_REST_Request( 'GET', $this->endpoint . '/totals' );
+		$response   = $this->server->dispatch( $request );
+		$report     = $response->get_data();
+		$user_query = new WP_User_Query(
+			array(
+				'fields' => 'ID',
+				'number' => 1,
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $i, $report['orders'] );
+		$this->assertEquals( $user_query->get_total(), $report['customers'] );
+
+		// Test totals with days param.
+		$request = new WP_REST_Request( 'GET', $this->endpoint . '/totals' );
+		$request->set_query_params( array( 'days' => 2 ) );
+		$response = $this->server->dispatch( $request );
+		$report   = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, $report['orders'] );
+
+		// Test import status.
+		$request  = new WP_REST_Request( 'POST', $this->endpoint );
+		$response = $this->server->dispatch( $request );
+		$report   = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'success', $report['status'] );
+
+		$request  = new WP_REST_Request( 'GET', $this->endpoint . '/status' );
+		$response = $this->server->dispatch( $request );
+		$report   = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( true, $report['is_importing'] );
+		$this->assertEquals( 0, $report['customers_count'] );
+		$this->assertEquals( 3, $report['customers_total'] );
+		$this->assertEquals( 0, $report['orders_count'] );
+		$this->assertEquals( 5, $report['orders_total'] );
+
+		// Run pending thrice to process batch and order.
+		WC_Helper_Queue::process_pending();
+		WC_Helper_Queue::process_pending();
+		WC_Helper_Queue::process_pending();
+
+		// Test import status after processing.
+		$request  = new WP_REST_Request( 'GET', $this->endpoint . '/status' );
+		$response = $this->server->dispatch( $request );
+		$report   = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( false, $report['is_importing'] );
+		$this->assertEquals( 3, $report['customers_count'] );
+		$this->assertEquals( 3, $report['customers_total'] );
+		$this->assertEquals( 5, $report['orders_count'] );
+		$this->assertEquals( 5, $report['orders_total'] );
+
+		// Test totals with skip existing param.
+		$request = new WP_REST_Request( 'GET', $this->endpoint . '/totals' );
+		$request->set_query_params( array( 'skip_existing' => 1 ) );
+		$response = $this->server->dispatch( $request );
+		$report   = $response->get_data();
+
+		// @todo The following line should be uncommented when https://github.com/woocommerce/woocommerce-admin/issues/2195 is resolved.
+		// $this->assertEquals( 0, $report['customers'] );
+		$this->assertEquals( 0, $report['orders'] );
+	}
 }
