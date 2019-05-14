@@ -42,7 +42,7 @@ class WC_Admin_Events {
 	 * Cron event handlers.
 	 */
 	public function init() {
-		add_action( 'wc_admin_daily', array( __CLASS__, 'do_wc_admin_daily' ) );
+		add_action( 'wc_admin_daily', array( $this, 'do_wc_admin_daily' ) );
 	}
 
 	/**
