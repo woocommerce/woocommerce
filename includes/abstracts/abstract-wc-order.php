@@ -731,6 +731,16 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Return an array of coupons within this order.
+	 *
+	 * @since  3.7.0
+	 * @return WC_Order_Item_Coupon[]
+	 */
+	public function get_coupons() {
+		return $this->get_items( 'coupon' );
+	}
+
+	/**
 	 * Return an array of fees within this order.
 	 *
 	 * @return WC_Order_item_Fee[]
