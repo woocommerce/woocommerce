@@ -58,7 +58,7 @@
     "eslint-plugin-react": "7.13.0",
     "eslint-plugin-wordpress": "git://github.com/WordPress-Coding-Standards/eslint-plugin-wordpress.git#1774343f6226052a46b081e01db3fca8793cc9f1",
     "har-validator": "5.1.3",
-    "husky": "2.2.0",
+    "husky": "2.3.0",
     "interpolate-components": "1.1.1",
     "js-md5": "0.7.3",
     "lint-staged": "8.1.6",
