@@ -87,7 +87,6 @@ class WC_Admin_Feature_Plugin {
 
 		if ( ! $this->check_build() ) {
 			add_action( 'admin_notices', array( $this, 'render_build_notice' ) );
-			return;
 		}
 
 		$this->includes();
