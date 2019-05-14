@@ -350,7 +350,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 
 		foreach ( $orders as $order ) {
 			if ( $order['customer_id'] ) {
-				$customer_ids[] = $order['customer_id'];
+				$customer_ids[] = intval( $order['customer_id'] );
 			}
 		}
 
