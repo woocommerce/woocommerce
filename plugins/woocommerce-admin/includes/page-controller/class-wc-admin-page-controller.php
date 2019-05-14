@@ -398,7 +398,7 @@ class WC_Admin_Page_Controller {
 			'id'         => null,
 			'parent'     => null,
 			'title'      => '',
-			'capability' => 'manage_options',
+			'capability' => 'view_woocommerce_reports',
 			'path'       => '',
 			'icon'       => '',
 			'position'   => null,
