@@ -599,6 +599,17 @@ abstract class WC_Abstract_Legacy_Order extends WC_Data {
 	}
 
 	/**
+	 * Get coupon codes only.
+	 *
+	 * @deprecated 3.7.0 - Replaced with better named method to reflect the actual data being returned.
+	 * @return array
+	 */
+	public function get_used_coupons() {
+		wc_deprecated_function( 'get_used_coupons', '3.7', 'WC_Abstract_Order::get_coupon_codes' );
+		return $this->get_coupon_codes();
+	}
+
+	/**
 	 * Expand item meta into the $item array.
 	 * @deprecated 3.0.0 Item meta no longer expanded due to new order item
 	 *		classes. This function now does nothing to avoid data breakage.

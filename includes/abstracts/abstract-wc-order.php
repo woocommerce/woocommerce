@@ -771,23 +771,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Get coupon codes only.
-	 *
-	 * @deprecated 3.7.0 - Replaced with better named method to reflect the actual data being returned.
-	 * @return array
-	 */
-	public function get_used_coupons() {
-		wc_deprecated_function( 'get_used_coupons', '3.7', 'WC_Abstract_Order::get_used_coupon_codes' );
-		return $this->get_used_coupon_codes();
-	}
-
-	/**
 	 * Get used coupon codes only.
 	 *
 	 * @since 3.7.0
 	 * @return array
 	 */
-	public function get_used_coupon_codes() {
+	public function get_coupon_codes() {
 		$coupon_codes = array();
 		$coupons      = $this->get_items( 'coupon' );
 
