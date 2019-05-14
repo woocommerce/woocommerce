@@ -54,7 +54,7 @@ class WC_Tests_Setup_Functions extends WC_Unit_Test_Case {
 			array(
 				'klarna_checkout' => true,
 				'ppec_paypal'     => true,
-				'stripe'          => false,
+				'stripe'          => true,
 			),
 			$this->get_gateways_statuses( $setup_wizard )
 		);
@@ -64,7 +64,7 @@ class WC_Tests_Setup_Functions extends WC_Unit_Test_Case {
 			array(
 				'klarna_payments' => true,
 				'ppec_paypal'     => true,
-				'stripe'          => false,
+				'stripe'          => true,
 			),
 			$this->get_gateways_statuses( $setup_wizard )
 		);
@@ -73,9 +73,9 @@ class WC_Tests_Setup_Functions extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_sell_in_person', 'yes' );
 		$this->assertEquals(
 			array(
-				'square'      => true,
+				'square'      => false,
 				'ppec_paypal' => true,
-				'stripe'      => false,
+				'stripe'      => true,
 			),
 			$this->get_gateways_statuses( $setup_wizard )
 		);
