@@ -32,6 +32,9 @@ class WC_Admin_Api_Init {
 	 * Init classes.
 	 */
 	public function init_classes() {
+		// Core functions.
+		require_once WC_ADMIN_ABSPATH . 'includes/core-functions.php';
+
 		// Interfaces.
 		require_once WC_ADMIN_ABSPATH . 'includes/interfaces/class-wc-admin-reports-data-store-interface.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-reports-query.php';
