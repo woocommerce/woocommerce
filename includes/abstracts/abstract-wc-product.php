@@ -828,7 +828,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $price Price.
 	 */
 	public function set_price( $price ) {
-		$this->set_prop( 'price', wc_format_decimal( $price ) );
+		$this->set_prop( 'price', wc_format_decimal( $price, false, false, true ) );
 	}
 
 	/**
@@ -838,7 +838,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $price Regular price.
 	 */
 	public function set_regular_price( $price ) {
-		$this->set_prop( 'regular_price', wc_format_decimal( $price ) );
+		$this->set_prop( 'regular_price', wc_format_decimal( $price, false, false, true ) );
 	}
 
 	/**
@@ -848,7 +848,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $price sale price.
 	 */
 	public function set_sale_price( $price ) {
-		$this->set_prop( 'sale_price', wc_format_decimal( $price ) );
+		$this->set_prop( 'sale_price', wc_format_decimal( $price, false, false, true ) );
 	}
 
 	/**
