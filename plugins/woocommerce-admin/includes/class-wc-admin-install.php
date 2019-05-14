@@ -21,7 +21,7 @@ class WC_Admin_Install {
 	 *
 	 * @var array
 	 */
-	private static $db_updates = array();
+	protected static $db_updates = array();
 
 	/**
 	 * Hook in tabs.
@@ -67,8 +67,8 @@ class WC_Admin_Install {
 		wc_maybe_define_constant( 'WC_ADMIN_INSTALLING', true );
 
 		self::create_tables();
-		WC_Admin_Notes_Historical_Data::add_note();
-		WC_Admin_Notes_Welcome_Message::add_welcome_note();
+		self::create_events();
+		self::create_notes();
 		self::update_wc_admin_version();
 
 		delete_transient( 'wc_admin_installing' );
@@ -82,7 +82,7 @@ class WC_Admin_Install {
 	 *
 	 * @return string
 	 */
-	private static function get_schema() {
+	protected static function get_schema() {
 		global $wpdb;
 
 		if ( $wpdb->has_cap( 'collation' ) ) {
@@ -250,9 +250,26 @@ class WC_Admin_Install {
 	/**
 	 * Update WC Admin version to current.
 	 */
-	private static function update_wc_admin_version() {
+	protected static function update_wc_admin_version() {
 		delete_option( self::VERSION_OPTION );
 		add_option( self::VERSION_OPTION, WC_ADMIN_VERSION_NUMBER );
+	}
+
+	/**
+	 * Schedule cron events.
+	 */
+	public static function create_events() {
+		if ( ! wp_next_scheduled( 'wc_admin_daily' ) ) {
+			wp_schedule_event( time(), 'daily', 'wc_admin_daily' );
+		}
+	}
+
+	/**
+	 * Create notes.
+	 */
+	protected static function create_notes() {
+		WC_Admin_Notes_Historical_Data::add_note();
+		WC_Admin_Notes_Welcome_Message::add_welcome_note();
 	}
 }
 
