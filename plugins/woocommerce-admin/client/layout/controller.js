@@ -5,6 +5,7 @@
 import { Component, createElement } from '@wordpress/element';
 import { parse } from 'qs';
 import { find, last, isEqual } from 'lodash';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * WooCommerce dependencies
@@ -19,6 +20,8 @@ import AnalyticsReport from 'analytics/report';
 import AnalyticsSettings from 'analytics/settings';
 import Dashboard from 'dashboard';
 import DevDocs from 'devdocs';
+
+const TIME_EXCLUDED_SCREENS_FILTER = 'woocommerce_admin_time_excluded_screens';
 
 const getPages = () => {
 	const pages = [];
@@ -121,28 +124,55 @@ class Controller extends Component {
 	}
 }
 
-// Update links in wp-admin menu to persist time related queries
-window.wpNavMenuUrlUpdate = function( page, query ) {
-	const search = stringifyQuery( getPersistedQuery( query ) );
+/**
+ * Update an anchor's link in sidebar to include persisted queries. Leave excluded screens
+ * as is.
+ *
+ * @param {HTMLElement} item - Sidebar anchor link.
+ * @param {string} nextQuery - A query string to be added to updated hrefs.
+ * @param {Array} excludedScreens - wc-admin screens to avoid updating.
+ */
+export function updateLinkHref( item, nextQuery, excludedScreens ) {
+	/**
+	 * Regular expression for finding any WooCommerce Admin screen.
+	 * The groupings are as follows:
+	 *
+	 * 0 - Full match
+	 * 1 - "#/" (optional)
+	 * 2 - "analytics/" (optional)
+	 * 3 - Any string, eg "orders"
+	 * 4 - "?" or end of line
+	 */
+	const _exp = /page=wc-admin(#\/)?(analytics\/)?(.*?)(\?|$)/;
+	const wcAdminMatches = item.href.match( _exp );
 
-	Array.from(
-		document.querySelectorAll( `#${ page.wpOpenMenu } a, #${ page.wpClosedMenu } a` )
-	).forEach( item => {
-		/**
-		 * Example hrefs:
-		 *
-		 * http://example.com/wp-admin/admin.php?page=wc-admin#/analytics/orders?period=today&compare=previous_year
-		 * http://example.com/wp-admin/admin.php?page=wc-admin#/?period=week&compare=previous_year
-		 * http://example.com/wp-admin/admin.php?page=wc-admin
-		 */
-		if ( item.href.includes( 'wc-admin' ) && ! item.href.includes( 'devdocs' ) ) {
+	if ( wcAdminMatches ) {
+		// Get fourth grouping
+		const screen = wcAdminMatches[ 3 ];
+
+		if ( ! excludedScreens.includes( screen ) ) {
 			const url = item.href.split( 'wc-admin' );
 			const hashUrl = last( url );
 			const base = hashUrl.split( '?' )[ 0 ];
-			const href = `${ url[ 0 ] }wc-admin${ '#' === base[ 0 ] ? '' : '#/' }${ base }${ search }`;
+			const href = `${ url[ 0 ] }wc-admin${ '#' === base[ 0 ] ? '' : '#/' }${ base }${ nextQuery }`;
 			item.href = href;
 		}
-	} );
+	}
+}
+
+// Update links in wp-admin menu to persist time related queries
+window.wpNavMenuUrlUpdate = function( page, query ) {
+	const excludedScreens = applyFilters( TIME_EXCLUDED_SCREENS_FILTER, [
+		'devdocs',
+		'stock',
+		'settings',
+		'customers',
+	] );
+	const nextQuery = stringifyQuery( getPersistedQuery( query ) );
+
+	Array.from(
+		document.querySelectorAll( `#${ page.wpOpenMenu } a, #${ page.wpClosedMenu } a` )
+	).forEach( item => updateLinkHref( item, nextQuery, excludedScreens ) );
 };
 
 // When the route changes, we need to update wp-admin's menu with the correct section & current link
