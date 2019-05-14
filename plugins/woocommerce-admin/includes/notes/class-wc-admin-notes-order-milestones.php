@@ -14,16 +14,6 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Admin_Notes_Order_Milestones {
 	/**
-	 * Name of the "first order" note.
-	 */
-	const FIRST_ORDER_NOTE_NAME = 'wc-admin-first-order';
-
-	/**
-	 * Name of the "ten orders" note.
-	 */
-	const TEN_ORDERS_NOTE_NAME = 'wc-admin-ten-orders';
-
-	/**
 	 * Name of the "other milestones" note.
 	 */
 	const ORDERS_MILESTONE_NOTE_NAME = 'wc-admin-orders-milestone';
@@ -62,6 +52,8 @@ class WC_Admin_Notes_Order_Milestones {
 	 * @var array
 	 */
 	protected $milestones = array(
+		1,
+		10,
 		100,
 		250,
 		500,
@@ -101,10 +93,6 @@ class WC_Admin_Notes_Order_Milestones {
 
 		add_action( 'wc_admin_installed', array( $this, 'backfill_last_milestone' ) );
 
-		if ( $this->get_orders_count() <= 10 ) {
-			add_action( 'woocommerce_new_order', array( $this, 'first_two_milestones' ) );
-		}
-
 		add_action( self::PROCESS_ORDERS_MILESTONE_HOOK, array( $this, 'other_milestones' ) );
 	}
 
@@ -128,59 +116,6 @@ class WC_Admin_Notes_Order_Milestones {
 		}
 
 		return $this->orders_count;
-	}
-
-	/**
-	 * Add a milestone notes for the store's first order and first 10 orders.
-	 *
-	 * @param int $order_id WC_Order ID.
-	 */
-	public function first_two_milestones( $order_id ) {
-		$order = wc_get_order( $order_id );
-
-		// Make sure this is the first pending/processing/completed order.
-		if ( ! in_array( $order->get_status(), $this->allowed_statuses ) ) {
-			return;
-		}
-
-		// Retrieve the orders count, forcing a cache refresh.
-		$orders_count = $this->get_orders_count( true );
-
-		if ( 1 === $orders_count ) {
-			// Add the first order note.
-			$note = new WC_Admin_Note();
-			$note->set_title( __( 'First order', 'woocommerce-admin' ) );
-			$note->set_content(
-				__( 'Congratulations on getting your first order from a customer! Learn how to manage your orders.', 'woocommerce-admin' )
-			);
-			$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-			$note->set_icon( 'trophy' );
-			$note->set_name( self::FIRST_ORDER_NOTE_NAME );
-			$note->set_source( 'woocommerce-admin' );
-			$note->add_action( 'learn-more', __( 'Learn more', 'woocommerce-admin' ), 'https://docs.woocommerce.com/document/managing-orders/' );
-			$note->save();
-		}
-
-		if ( 10 === $orders_count ) {
-			// Add the first ten orders note.
-			$note = new WC_Admin_Note();
-			$note->set_title(
-				sprintf(
-					/* translators: Number of orders processed. */
-					__( 'Congratulations on processing %s orders!', 'woocommerce-admin' ),
-					wc_format_decimal( 10 )
-				)
-			);
-			$note->set_content(
-				__( "You've hit the 10 orders milestone! Look at you go. Browse some WooCommerce success stories for inspiration.", 'woocommerce-admin' )
-			);
-			$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
-			$note->set_icon( 'trophy' );
-			$note->set_name( self::TEN_ORDERS_NOTE_NAME );
-			$note->set_source( 'woocommerce-admin' );
-			$note->add_action( 'browse', __( 'Browse', 'woocommerce-admin' ), 'https://woocommerce.com/success-stories/' );
-			$note->save();
-		}
 	}
 
 	/**
@@ -231,6 +166,103 @@ class WC_Admin_Notes_Order_Milestones {
 	}
 
 	/**
+	 * Get the appropriate note title for a given milestone.
+	 *
+	 * @param int $milestone Order milestone.
+	 * @return string Note title for the milestone.
+	 */
+	public function get_note_title_for_milestone( $milestone ) {
+		switch ( $milestone ) {
+			case 1:
+				return __( 'First order', 'woocommerce-admin' );
+			case 10:
+			case 100:
+			case 250:
+			case 500:
+			case 1000:
+			case 5000:
+			case 10000:
+			case 500000:
+			case 1000000:
+				return sprintf(
+					/* translators: Number of orders processed. */
+					__( 'Congratulations on processing %s orders!', 'woocommerce-admin' ),
+					wc_format_decimal( $milestone )
+				);
+			default:
+				return '';
+		}
+	}
+
+	/**
+	 * Get the appropriate note content for a given milestone.
+	 *
+	 * @param int $milestone Order milestone.
+	 * @return string Note content for the milestone.
+	 */
+	public function get_note_content_for_milestone( $milestone ) {
+		switch ( $milestone ) {
+			case 1:
+				return __( 'Congratulations on getting your first order from a customer! Learn how to manage your orders.', 'woocommerce-admin' );
+			case 10:
+				return __( "You've hit the 10 orders milestone! Look at you go. Browse some WooCommerce success stories for inspiration.", 'woocommerce-admin' );
+			case 100:
+			case 250:
+			case 500:
+			case 1000:
+			case 5000:
+			case 10000:
+			case 500000:
+			case 1000000:
+				return __( 'Another order milestone! Take a look at your Orders Report to review your orders to date.', 'woocommerce-admin' );
+			default:
+				return '';
+		}
+	}
+
+	/**
+	 * Get the appropriate note action for a given milestone.
+	 *
+	 * @param int $milestone Order milestone.
+	 * @return array Note actoion (name, label, query) for the milestone.
+	 */
+	public function get_note_action_for_milestone( $milestone ) {
+		switch ( $milestone ) {
+			case 1:
+				return array(
+					'name'  => 'learn-more',
+					'label' => __( 'Learn more', 'woocommerce-admin' ),
+					'query' => 'https://docs.woocommerce.com/document/managing-orders/',
+				);
+			case 10:
+				return array(
+					'name'  => 'browse',
+					'label' => __( 'Browse', 'woocommerce-admin' ),
+					'query' => 'https://woocommerce.com/success-stories/',
+				);
+			case 100:
+			case 250:
+			case 500:
+			case 1000:
+			case 5000:
+			case 10000:
+			case 500000:
+			case 1000000:
+				return array(
+					'name'  => 'review-orders',
+					'label' => __( 'Review your orders', 'woocommerce-admin' ),
+					'query' => '?page=wc-admin#/analytics/orders',
+				);
+			default:
+				return array(
+					'name'  => '',
+					'label' => '',
+					'query' => '',
+				);
+		}
+	}
+
+	/**
 	 * Add milestone notes for other significant thresholds.
 	 */
 	public function other_milestones() {
@@ -248,21 +280,14 @@ class WC_Admin_Notes_Order_Milestones {
 
 		// Add the milestone note.
 		$note = new WC_Admin_Note();
-		$note->set_title(
-			sprintf(
-				/* translators: Number of orders processed. */
-				__( 'Congratulations on processing %s orders!', 'woocommerce-admin' ),
-				wc_format_decimal( $current_milestone )
-			)
-		);
-		$note->set_content(
-			__( 'Another order milestone! Take a look at your Orders Report to review your orders to date.', 'woocommerce-admin' )
-		);
+		$note->set_title( $this->get_note_title_for_milestone( $current_milestone ) );
+		$note->set_content( $this->get_note_content_for_milestone( $current_milestone ) );
+		$note_action = $this->get_note_action_for_milestone( $current_milestone );
+		$note->add_action( $note_action['name'], $note_action['label'], $note_action['query'] );
 		$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_icon( 'trophy' );
 		$note->set_name( self::ORDERS_MILESTONE_NOTE_NAME );
 		$note->set_source( 'woocommerce-admin' );
-		$note->add_action( 'review-orders', __( 'Review your orders', 'woocommerce-admin' ), '?page=wc-admin#/analytics/orders' );
 		$note->save();
 	}
 }
