@@ -311,6 +311,15 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		// Trim zeros and round.
 		$this->assertEquals( '10', wc_format_decimal( 9.9999, '', true ) );
 
+		// Negative values.
+		$this->assertEquals( '-9.9999', wc_format_decimal( -9.9999 ) );
+		$this->assertEquals( '-10.00', wc_format_decimal( -9.9999, '' ) );
+		$this->assertEquals( '-9.991', wc_format_decimal( -9.9912, 3 ) );
+		$this->assertEquals( '-9', wc_format_decimal( -9.00, false, true ) );
+
+		// Convert nevative to absolute value.
+		$this->assertEquals( '9.9999', wc_format_decimal( -9.9999, false, false, true ) );
+
 		// Given string with thousands in german format.
 		update_option( 'woocommerce_price_decimal_sep', ',' );
 		update_option( 'woocommerce_price_thousand_sep', '.' );
