@@ -64,9 +64,9 @@
 				var regex;
 
 				if ( $( this ).is( '.wc_input_price' ) || $( this ).is( '#refund_amount' ) ) {
-					regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
+					regex = new RegExp( '[^0-9\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
 				} else {
-					regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
+					regex = new RegExp( '[^0-9\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
 				}
 
 				var value    = $( this ).val();
@@ -81,13 +81,13 @@
 				var regex, error;
 
 				if ( $( this ).is( '.wc_input_price' ) || $( this ).is( '#refund_amount' ) ) {
-					regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
+					regex = new RegExp( '[^0-9\\' + woocommerce_admin.mon_decimal_point + ']+', 'gi' );
 					error = 'i18n_mon_decimal_error';
 				} else if ( $( this ).is( '.wc_input_country_iso' ) ) {
 					regex = new RegExp( '([^A-Z])+|(.){3,}', 'im' );
 					error = 'i18n_country_iso_error';
 				} else {
-					regex = new RegExp( '[^\-0-9\%\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
+					regex = new RegExp( '[^0-9\\' + woocommerce_admin.decimal_point + ']+', 'gi' );
 					error = 'i18n_decimal_error';
 				}
 
