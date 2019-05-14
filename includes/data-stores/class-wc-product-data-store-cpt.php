@@ -1760,12 +1760,30 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Handle total_sales.
 		// This query doesn't get auto-generated since the meta key doesn't have the underscore prefix.
+		//var_dump( "before", $query_vars['total_sales'] );
 		if ( isset( $query_vars['total_sales'] ) && '' !== $query_vars['total_sales'] ) {
-			$wp_query_args['meta_query'][] = array(
+			
+			$left_val = $right_val = $full_string = '';
+			$compare = '=';
+			$is_range = false;
+			
+			if ( !is_numeric( $query_vars['total_sales'] ) ) {
+				
+				$total_sales_query_parts = [];
+				preg_match( '/(\d*)(\.*)(\d+)/', $query_vars['total_sales'], $total_sales_query_parts );
+				$is_range = !empty( $total_sales_query_parts[1] );
+				list($full_string, $left_val, $compare, $right_val) = $total_sales_query_parts;
+				
+			}
+			else {
+				$right_val = absint( $query_vars['total_sales'] );
+			}
+			$wp_query_args['meta_query'][] = [
 				'key'     => 'total_sales',
-				'value'   => absint( $query_vars['total_sales'] ),
-				'compare' => '=',
-			);
+				'value'   => $is_range ? [ absint( $left_val ), absint( $right_val ) ] : absint( $right_val ),
+				'compare' => $is_range ? 'BETWEEN' : $compare,
+			];
+			var_dump( $wp_query_args['meta_query'] );
 		}
 
 		// Handle SKU.
