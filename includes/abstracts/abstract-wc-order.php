@@ -1319,8 +1319,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$default          = wc_get_base_location();
 			$args['country']  = $default['country'];
 			$args['state']    = $default['state'];
-			$args['postcode'] = '';
-			$args['city']     = '';
+			$args['postcode'] = WC()->countries->get_base_postcode();
+			$args['city']     = WC()->countries->get_base_city();
 		}
 
 		return $args;
