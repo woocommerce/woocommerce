@@ -131,6 +131,7 @@ class WC_API extends WC_Legacy_API {
 		if ( ! $callback ) {
 			require_once dirname( __FILE__ ) . '/api/src/class-server.php';
 			\WooCommerce\Rest_Api\Server::instance()->init();
+			return;
 		}
 
 		call_user_func( $this->latest_version_callback() );
