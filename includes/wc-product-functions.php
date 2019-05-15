@@ -216,7 +216,11 @@ function wc_product_post_type_link( $permalink, $post ) {
 			$ancestors = get_ancestors( $category_object->term_id, 'product_cat' );
 			foreach ( $ancestors as $ancestor ) {
 				$ancestor_object = get_term( $ancestor, 'product_cat' );
-				$product_cat     = $ancestor_object->slug . '/' . $product_cat;
+				if ( apply_filters( 'woocommerce_product_post_type_link_parent_category_only', false ) ) {
+					$product_cat = $ancestor_object->slug;
+				} else {
+					$product_cat = $ancestor_object->slug . '/' . $product_cat;
+				}
 			}
 		}
 	} else {
