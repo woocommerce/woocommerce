@@ -1347,53 +1347,47 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		add_post_meta( $product_id_with_stock, '_stock', 0, true );
 
 		if ( 'set' === $operation ) {
-			// 'set' does not need locking as it directly updates db to the new value.
 			$new_stock = wc_stock_amount( $stock_quantity );
-			$this->set_product_stock( $product_id_with_stock, $new_stock );
 		} else {
-			// 'fetch-and-update' atomic operation for stock quantity.
-			try {
-				wc_transaction_query( 'start' );
-
-				// Read current stock level and lock the row. If the lock can't be acquired, don't wait.
-				$current_stock = wc_stock_amount(
-					$wpdb->get_var(
-						$wpdb->prepare(
-							"SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key='_stock' FOR UPDATE NOWAIT;",
-							$product_id_with_stock
-						)
-					)
-				);
-
-				// Calculate new value.
-				switch ( $operation ) {
-					case 'increase':
-						$new_stock = $current_stock + wc_stock_amount( $stock_quantity );
-						break;
-					default:
-						$new_stock = $current_stock - wc_stock_amount( $stock_quantity );
-						break;
-				}
-				$this->set_product_stock( $product_id_with_stock, $new_stock );
-
-				wc_transaction_query( 'commit' );
-
-			} catch ( Exception $e ) {
-				wc_transaction_query( 'rollback' );
-
-				// Read current stock level and return it.
-				$current_stock = $wpdb->get_var(
+			// @todo: potential race condition.
+			// Read current stock level and lock the row. If the lock can't be acquired, don't wait.
+			$current_stock = wc_stock_amount(
+				$wpdb->get_var(
 					$wpdb->prepare(
 						"SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key='_stock';",
 						$product_id_with_stock
 					)
-				);
+				)
+			);
 
-				return $current_stock;
+			// Calculate new value.
+			switch ( $operation ) {
+				case 'increase':
+					$new_stock = $current_stock + wc_stock_amount( $stock_quantity );
+					break;
+				default:
+					$new_stock = $current_stock - wc_stock_amount( $stock_quantity );
+					break;
 			}
 		}
 
-		// This should run only if update was successful.
+		// Generate SQL.
+		$sql = $wpdb->prepare(
+			"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
+			$stock_quantity,
+			$product_id_with_stock
+		);
+
+		$sql = apply_filters( 'woocommerce_update_product_stock_query', $sql, $product_id_with_stock, $stock_quantity, 'set' );
+
+		$wpdb->query( $sql ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.PreparedSQL.NotPrepared
+
+		// Cache delete is required (not only) to set correct data for lookup table (which reads from cache).
+		// Sometimes I wonder if it shouldn't be part of update_lookup_table.
+		wp_cache_delete( $product_id_with_stock, 'post_meta' );
+
+		$this->update_lookup_table( $product_id_with_stock, 'wc_product_meta_lookup' );
+
 		/**
 		 * Fire an action for this direct update so it can be detected by other code.
 		 *
