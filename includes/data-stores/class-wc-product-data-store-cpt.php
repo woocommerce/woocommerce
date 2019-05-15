@@ -1776,7 +1776,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				// split into [ value ] [ < | > | = | >= | <= | ... ] [ value ]
 				// first value can be empty (for example, in "<5" case)
 				//
-				preg_match( '/(\d*)(\.*)(\d+)/', $query_vars['total_sales'], $total_sales_query_parts );
+				preg_match( '/(\d*)(\D+)(\d+)/', $query_vars['total_sales'], $total_sales_query_parts );
+				var_dump( $total_sales_query_parts );
 				$is_range = !empty( $total_sales_query_parts[1] );
 				list( $full_string, $left_val, $compare, $right_val ) = $total_sales_query_parts;
 
