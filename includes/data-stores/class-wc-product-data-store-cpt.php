@@ -1760,7 +1760,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Handle total_sales.
 		// This query doesn't get auto-generated since the meta key doesn't have the underscore prefix.
-		//var_dump( "before", $query_vars['total_sales'] );
+
 		if ( isset( $query_vars['total_sales'] ) && '' !== $query_vars['total_sales'] ) {
 
 			$left_val = $right_val = $full_string = '';
