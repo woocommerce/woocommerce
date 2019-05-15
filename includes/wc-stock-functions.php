@@ -39,11 +39,9 @@ function wc_update_product_stock( $product, $stock_quantity = null, $operation =
 		$data_store            = WC_Data_Store::load( 'product' );
 
 		// Update the database.
-		// This can fail, i.e. not update stock level if the record is locked and will then return 'old' stock level.
 		$new_stock = $data_store->update_product_stock( $product_id_with_stock, $stock_quantity, $operation );
 
 		// Update the product object.
-		// Force product object stock level to be updated to the value we just persisted (or the value from the db, if not persisted due to lock).
 		$data_store->read_stock_quantity( $product_with_stock, $new_stock );
 
 		// If this is not being called during an update routine, save the product so stock status etc is in sync, and caches are cleared.
