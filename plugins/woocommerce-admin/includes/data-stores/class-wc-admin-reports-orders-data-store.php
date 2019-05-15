@@ -79,7 +79,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 
 		$status_subquery = $this->get_status_subquery( $query_args );
 		if ( $status_subquery ) {
-			$where_subquery[] = $status_subquery;
+			$sql_query_params['where_clause'] .= " AND {$status_subquery}";
 		}
 
 		if ( $query_args['customer_type'] ) {
@@ -120,7 +120,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		}
 
 		if ( 0 < count( $where_subquery ) ) {
-			$sql_query_params['where_clause'] = ' AND (' . implode( " {$operator} ", $where_subquery ) . ')';
+			$sql_query_params['where_clause'] .= ' AND (' . implode( " {$operator} ", $where_subquery ) . ')';
 		}
 
 		return $sql_query_params;
