@@ -781,11 +781,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Get coupon codes only.
+	 * Get used coupon codes only.
 	 *
+	 * @since 3.7.0
 	 * @return array
 	 */
-	public function get_used_coupons() {
+	public function get_coupon_codes() {
 		$coupon_codes = array();
 		$coupons      = $this->get_items( 'coupon' );
 
