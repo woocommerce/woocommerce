@@ -1783,7 +1783,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'value'   => $is_range ? [ absint( $left_val ), absint( $right_val ) ] : absint( $right_val ),
 				'compare' => $is_range ? 'BETWEEN' : $compare,
 			);
-			var_dump( $wp_query_args['meta_query'] );
+
 		}
 
 		// Handle SKU.
