@@ -14,12 +14,12 @@ Props
 
 The label shown when hovering/focusing on the icon button.
 
-### `children`
+### `renderContent`
 
-- Type: ReactNode
+- Type: Function
 - Default: null
 
-A list of `MenuTitle`/`MenuItem` components
+A function returning `MenuTitle`/`MenuItem` components as a render prop. Arguments from Dropdown passed as function arguments.
 
 `MenuItem` (component)
 ======================

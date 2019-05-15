@@ -187,6 +187,13 @@ A datetime formatting string, passed to d3TimeFormat.
 
 A datetime formatting string, passed to d3TimeFormat.
 
+### `yBelow1Format`
+
+- Type: String
+- Default: null
+
+A number formatting string, passed to d3Format.
+
 ### `yFormat`
 
 - Type: String

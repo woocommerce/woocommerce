@@ -77,6 +77,41 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
+= 0.12.0 2019-05-14
+
+- Fix: dashboard issues #2194
+- Fix: Dashboard: re-arrange section dropdown order #2216
+- Fix: Refactor page handler API #2209
+- Fix: EllipsisMenu misalignment in wide containers #2207
+- Dev: Handle “all guests” when getting customers from orders. #2038
+- Dev: Order milestones: prevent order count queries from being issues on every request. #2224
+- Dev: Replace Rebuild reports settings with Import Historical Data #2198
+- Dev: add a defaultValue parameter to the ReportFilters component #2150 👏 @rrennick
+- Dev: Record refunds separate from order entries #2083
+- Dev: Add refund filtering to order reports #2179
+- Dev: Hook up API Historical Data screen to API endpoints #2177
+- Fix: Show Y grid ticks/lines in charts where all values are lower than 1 #2147
+- Fix: Dashboard: Rename class/feature to remove conflict with legacy dashboard widget #2138
+- Fix: add defaultOrder field to tablecard header #2139 👏 @rrennick
+- Fix: Travis: Exit scripts with error when one occurs #2184
+- Dev: Add profile wizard base page #1933
+- Dev: Save section/block preferences in user data #2148
+- Fix: Vertically center Dashboard 'Add more' button #2171
+- Fix: Don't make an API call when there are no performance indicators #2157
+- Dev: Add Historical Data Import Screen #2073
+- Fix: Fix customer type filter param in orders report #2169
+- Dev: EllipsisMenu: Refactor children to renderContent #2154
+- Dev: Dashboard: Section add, remove, move up, and move down #2134
+- Fix: Persist chart interval in Dashboard #2156
+- Dev: Allow renaming Dashboard sections #2131
+- Dev: Add import endpoint and controller #2034
+- Fix: Prevent chart type buttons breaking in two lines #2135
+- Dev: Support Sequential Order Numbers in Downloads Report order number filter #1907
+- Dev: Scroll to top of the table when navigating table pages #2051
+- Dev: Add empty state for the Reviews panels #2124
+
+== Changelog ==
+
 = 0.11.0 2019-04-17
 
 - Dev: Extend report submenu items #2033
