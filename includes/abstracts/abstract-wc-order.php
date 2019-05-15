@@ -1668,9 +1668,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Gets order total - formatted for display.
 	 *
+	 * @param string $tax_display Excl or incl tax display mode.
+	 *
 	 * @return string
 	 */
-	public function get_formatted_order_total() {
+	public function get_formatted_order_total( $tax_display ) {
 		$formatted_total = wc_price( $this->get_total(), array( 'currency' => $this->get_currency() ) );
 		return apply_filters( 'woocommerce_get_formatted_order_total', $formatted_total, $this );
 	}
