@@ -188,7 +188,7 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
-= 3.6.3 - ????-??-?? =
+= 3.6.3 - 2019-05-16 =
 * Fix - State not required for Serbia. #23430
 * Fix - # symbol in product category name broke product export. #23454
 * Fix - XML export caused fatal errors due to Action Scheduler adding invalid characters. #23456
