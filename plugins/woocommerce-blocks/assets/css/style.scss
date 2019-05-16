@@ -29,13 +29,19 @@
 }
 
 .wc-block-grid {
-	display: flex;
-	flex-wrap: wrap;
-	list-style: none;
-	padding-left: 0;
+
+	ul {
+		display: flex;
+		flex-wrap: wrap;
+		list-style: none;
+		padding-left: 0;
+	}
 
 	&.has-1-columns {
-		display: block;
+
+		ul {
+			display: block;
+		}
 
 		.wc-block-grid__product {
 			margin-left: auto;
@@ -99,7 +105,7 @@
 	}
 
 	// Remove some default storefront styles.
-	.site-main &.products li.product {
+	.site-main & .products li.product {
 		float: none;
 		width: auto;
 		margin-right: 0;
