@@ -40,10 +40,7 @@ function wc_admin_install() {
 	require_once dirname( dirname( __FILE__ ) ) . '/includes/class-wc-admin-install.php';
 
 	WC_Admin_Install::create_tables();
-
-	if ( ! wp_next_scheduled( 'wc_admin_daily' ) ) {
-		wp_schedule_event( time(), 'daily', 'wc_admin_daily' );
-	}
+	WC_Admin_Install::create_events();
 
 	// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
 	$GLOBALS['wp_roles'] = null; // WPCS: override ok.
