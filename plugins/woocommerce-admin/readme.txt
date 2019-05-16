@@ -5,8 +5,8 @@ Requires at least: 5.0.0
 Tested up to: 5.1.1
 Requires PHP: 5.4.0
 Stable tag: 1.0.0
-License: GPLv2
-License URI: https://github.com/woocommerce/woocommerce-admin/blob/master/LICENSE.md
+License: GPLv3
+License URI: https://github.com/woocommerce/woocommerce-admin/blob/master/license.txt
 
 == Description ==
 

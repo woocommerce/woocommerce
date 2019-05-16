@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com:woocommerce/woocommerce-admin.git"
   },
-  "license": "GPL-2.0-or-later",
+  "license": "GPL-3.0-or-later",
   "author": "Automattic",
   "files": [
     "dist/**/*.css",
@@ -15,7 +15,7 @@
     "includes/class-wc-admin-loader.php",
     "includes/features/**/*.php",
     "languages/**/*.json",
-    "LICENSE.MD"
+    "license.txt"
   ],
   "scripts": {
     "prebuild": "npm run -s install-if-deps-outdated && php ./bin/update-version.php",
