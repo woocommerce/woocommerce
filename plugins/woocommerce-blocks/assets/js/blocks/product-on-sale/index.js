@@ -2,18 +2,18 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
 import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { without } from 'lodash';
 import Gridicon from 'gridicons';
-import { RawHTML } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
-import getShortcode from '../../utils/get-shortcode';
-import sharedAttributes, { sharedAttributeBlockTypes } from '../../utils/shared-attributes';
+import { deprecatedConvertToShortcode } from '../../utils/deprecations';
+import sharedAttributes, {
+	sharedAttributeBlockTypes,
+} from '../../utils/shared-attributes';
 
 registerBlockType( 'woocommerce/product-on-sale', {
 	title: __( 'On Sale Products', 'woo-gutenberg-products-block' ),
@@ -26,6 +26,7 @@ registerBlockType( 'woocommerce/product-on-sale', {
 	),
 	supports: {
 		align: [ 'wide', 'full' ],
+		html: false,
 	},
 	attributes: {
 		...sharedAttributes,
@@ -42,14 +43,29 @@ registerBlockType( 'woocommerce/product-on-sale', {
 		from: [
 			{
 				type: 'block',
-				blocks: without( sharedAttributeBlockTypes, 'woocommerce/product-on-sale' ),
-				transform: ( attributes ) => createBlock(
-					'woocommerce/product-on-sale',
-					attributes
+				blocks: without(
+					sharedAttributeBlockTypes,
+					'woocommerce/product-on-sale'
 				),
+				transform: ( attributes ) =>
+					createBlock( 'woocommerce/product-on-sale', attributes ),
 			},
 		],
 	},
+
+	deprecated: [
+		{
+			// Deprecate shortcode save method in favor of dynamic rendering.
+			attributes: {
+				...sharedAttributes,
+				orderby: {
+					type: 'string',
+					default: 'date',
+				},
+			},
+			save: deprecatedConvertToShortcode( 'woocommerce/product-on-sale' ),
+		},
+	],
 
 	/**
 	 * Renders and manages the block.
@@ -58,29 +74,7 @@ registerBlockType( 'woocommerce/product-on-sale', {
 		return <Block { ...props } />;
 	},
 
-	/**
-	 * Save the block content in the post content. Block content is saved as a products shortcode.
-	 *
-	 * @return string
-	 */
-	save( props ) {
-		const {
-			align,
-			contentVisibility,
-		} = props.attributes; /* eslint-disable-line react/prop-types */
-		const classes = classnames(
-			align ? `align${ align }` : '',
-			{
-				'is-hidden-title': ! contentVisibility.title,
-				'is-hidden-price': ! contentVisibility.price,
-				'is-hidden-rating': ! contentVisibility.rating,
-				'is-hidden-button': ! contentVisibility.button,
-			}
-		);
-		return (
-			<RawHTML className={ classes }>
-				{ getShortcode( props, 'woocommerce/product-on-sale' ) }
-			</RawHTML>
-		);
+	save() {
+		return null;
 	},
 } );

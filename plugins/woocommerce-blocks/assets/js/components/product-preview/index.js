@@ -46,27 +46,29 @@ const ProductPreview = ( { product } ) => {
 
 	return (
 		<div
-			className="wc-product-preview"
+			className="wc-product-preview wc-block-grid__product"
 			style={ { maxWidth: `${ wc_product_block_data.thumbnail_size }px` } }
 		>
-			{ image }
+			<div className="wc-product-preview__image wc-block-grid__product-image">
+				{ image }
+			</div>
 			<div
-				className="wc-product-preview__title"
+				className="wc-product-preview__title wc-block-grid__product-title"
 				dangerouslySetInnerHTML={ { __html: product.name } }
 			/>
 			<div
-				className="wc-product-preview__price"
+				className="wc-product-preview__price wc-block-grid__product-price"
 				dangerouslySetInnerHTML={ { __html: product.price_html } }
 			/>
 
 			{ displayRating && (
-				<div className="wc-product-preview__rating star-rating" role="img">
+				<div className="wc-product-preview__rating star-rating wc-block-grid__product-rating" role="img">
 					<span style={ { width: `${ displayRating }%` } } />
 				</div>
 			) }
 
 			<span className="wp-block-button">
-				<span className="wc-product-preview__add-to-cart wp-block-button__link">
+				<span className="wc-product-preview__add-to-cart wc-block-grid__product-add-to-cart wp-block-button__link">
 					{ __( 'Add to cart', 'woo-gutenberg-products-block' ) }
 				</span>
 			</span>
