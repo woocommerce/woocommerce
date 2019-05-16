@@ -21,7 +21,7 @@ class WC_Admin_REST_Onboarding_Levels_Controller extends WC_REST_Data_Controller
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v4';
+	protected $namespace = 'wc-admin/v1';
 
 	/**
 	 * Route base.
