@@ -19,7 +19,6 @@ import { EllipsisMenu, MenuItem, MenuTitle, SectionHeader } from '@woocommerce/c
  */
 import Leaderboard from 'analytics/components/leaderboard';
 import withSelect from 'wc-api/with-select';
-import SectionControls from 'dashboard/components/section-controls';
 import './style.scss';
 
 class Leaderboards extends Component {
@@ -51,6 +50,7 @@ class Leaderboards extends Component {
 			onTitleChange,
 			onToggleHiddenBlock,
 			titleInput,
+			controls: Controls,
 		} = this.props;
 		const { rowsPerTable } = this.state;
 
@@ -62,17 +62,6 @@ class Leaderboards extends Component {
 				) }
 				renderContent={ ( { onToggle } ) => (
 					<Fragment>
-						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
-							<div className="woocommerce-ellipsis-menu__item">
-								<TextControl
-									label={ __( 'Section Title', 'woocommerce-admin' ) }
-									onBlur={ onTitleBlur }
-									onChange={ onTitleChange }
-									required
-									value={ titleInput }
-								/>
-							</div>
-						) }
 						<MenuTitle>{ __( 'Leaderboards', 'woocommerce-admin' ) }</MenuTitle>
 						{ allLeaderboards.map( leaderboard => {
 							return (
@@ -89,7 +78,7 @@ class Leaderboards extends Component {
 						} ) }
 						<SelectControl
 							className="woocommerce-dashboard__dashboard-leaderboards__select"
-							label={ <MenuTitle>{ __( 'Rows Per Table', 'woocommerce-admin' ) }</MenuTitle> }
+							label={ __( 'Rows Per Table', 'woocommerce-admin' ) }
 							value={ rowsPerTable }
 							options={ Array.from( { length: 20 }, ( v, key ) => ( {
 								v: key + 1,
@@ -97,13 +86,26 @@ class Leaderboards extends Component {
 							} ) ) }
 							onChange={ this.setRowsPerTable }
 						/>
-						<SectionControls
-							onToggle={ onToggle }
-							onMove={ onMove }
-							onRemove={ onRemove }
-							isFirst={ isFirst }
-							isLast={ isLast }
-						/>
+						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
+							<Fragment>
+								<div className="woocommerce-ellipsis-menu__item">
+									<TextControl
+										label={ __( 'Section Title', 'woocommerce-admin' ) }
+										onBlur={ onTitleBlur }
+										onChange={ onTitleChange }
+										required
+										value={ titleInput }
+									/>
+								</div>
+								<Controls
+									onToggle={ onToggle }
+									onMove={ onMove }
+									onRemove={ onRemove }
+									isFirst={ isFirst }
+									isLast={ isLast }
+								/>
+							</Fragment>
+						) }
 					</Fragment>
 				) }
 			/>

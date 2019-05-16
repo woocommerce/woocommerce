@@ -37,7 +37,7 @@ class WC_Admin_Reports_Products_Stats_Data_Store extends WC_Admin_Reports_Produc
 	protected $report_columns = array(
 		'items_sold'       => 'SUM(product_qty) as items_sold',
 		'net_revenue'      => 'SUM(product_net_revenue) AS net_revenue',
-		'orders_count'     => 'COUNT(DISTINCT order_id) as orders_count',
+		'orders_count'     => 'COUNT( DISTINCT ( CASE WHEN product_gross_revenue >= 0 THEN order_id END ) ) as orders_count',
 		'products_count'   => 'COUNT(DISTINCT product_id) as products_count',
 		'variations_count' => 'COUNT(DISTINCT variation_id) as variations_count',
 	);

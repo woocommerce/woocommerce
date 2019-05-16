@@ -13,7 +13,7 @@ import { get } from 'lodash';
  */
 import { appendTimestamp, defaultTableDateFormat, getCurrentDates } from '@woocommerce/date';
 import { Date, Link } from '@woocommerce/components';
-import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+import { formatCurrency, getCurrencyFormatDecimal, renderCurrency } from '@woocommerce/currency';
 import { numberFormat } from '@woocommerce/number';
 
 /**
@@ -126,7 +126,7 @@ class RevenueReportTable extends Component {
 					value: Number( orders_count ),
 				},
 				{
-					display: formatCurrency( gross_revenue ),
+					display: renderCurrency( gross_revenue ),
 					value: getCurrencyFormatDecimal( gross_revenue ),
 				},
 				{
@@ -138,15 +138,15 @@ class RevenueReportTable extends Component {
 					value: getCurrencyFormatDecimal( coupons ),
 				},
 				{
-					display: formatCurrency( taxes ),
+					display: renderCurrency( taxes ),
 					value: getCurrencyFormatDecimal( taxes ),
 				},
 				{
-					display: formatCurrency( shipping ),
+					display: renderCurrency( shipping ),
 					value: getCurrencyFormatDecimal( shipping ),
 				},
 				{
-					display: formatCurrency( net_revenue ),
+					display: renderCurrency( net_revenue ),
 					value: getCurrencyFormatDecimal( net_revenue ),
 				},
 			];

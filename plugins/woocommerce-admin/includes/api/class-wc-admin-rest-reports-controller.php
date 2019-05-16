@@ -175,19 +175,20 @@ class WC_Admin_REST_Reports_Controller extends WC_REST_Reports_Controller {
 
 	/**
 	 * Get the order number for an order. If no filter is present for `woocommerce_order_number`, we can just return the ID.
+	 * Returns the parent order number if the order is actually a refund.
 	 *
 	 * @param  int $order_id Order ID.
 	 * @return string
 	 */
 	public function get_order_number( $order_id ) {
-		if ( ! has_filter( 'woocommerce_order_number' ) ) {
-			return $order_id;
+		$order = wc_get_order( $order_id );
+
+		if ( 'shop_order_refund' === $order->get_type() ) {
+			$order = wc_get_order( $order->get_parent_id() );
 		}
 
-		$order = new WC_Order( $order_id );
-
-		if ( 'shop_order' !== $order->get_type() ) {
-			return $order_id;
+		if ( ! has_filter( 'woocommerce_order_number' ) ) {
+			return $order->get_id();
 		}
 
 		return $order->get_order_number();

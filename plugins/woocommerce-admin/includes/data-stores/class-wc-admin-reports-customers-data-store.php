@@ -48,7 +48,7 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		'postcode'         => 'postcode',
 		'date_registered'  => 'date_registered',
 		'date_last_active' => 'date_last_active',
-		'orders_count'     => 'COUNT( order_id ) as orders_count',
+		'orders_count'     => 'SUM( CASE WHEN parent_id = 0 THEN 1 ELSE 0 END ) as orders_count',
 		'total_spend'      => 'SUM( gross_total ) as total_spend',
 		'avg_order_value'  => '( SUM( gross_total ) / COUNT( order_id ) ) as avg_order_value',
 	);
@@ -686,7 +686,8 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			return false;
 		}
 
-		if ( $customer->get_order_count() < 1 && 'customer' !== $customer->get_role() ) {
+		$customer_roles = (array) apply_filters( 'woocommerce_admin_customer_roles', array( 'customer' ) );
+		if ( $customer->get_order_count() < 1 && ! in_array( $customer->get_role(), $customer_roles, true ) ) {
 			return false;
 		}
 

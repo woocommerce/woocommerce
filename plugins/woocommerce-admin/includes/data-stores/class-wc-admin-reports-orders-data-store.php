@@ -26,6 +26,7 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 	 */
 	protected $column_types = array(
 		'order_id'       => 'intval',
+		'parent_id'      => 'intval',
 		'date_created'   => 'strval',
 		'status'         => 'strval',
 		'customer_id'    => 'intval',
@@ -51,13 +52,14 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 		// Avoid ambigious columns in SQL query.
 		$this->report_columns = array(
 			'order_id'       => "{$table_name}.order_id",
+			'parent_id'      => "{$table_name}.parent_id",
 			'date_created'   => "{$table_name}.date_created",
 			'status'         => "REPLACE({$table_name}.status, 'wc-', '') as status",
 			'customer_id'    => "{$table_name}.customer_id",
 			'net_total'      => "{$table_name}.net_total",
 			'gross_total'    => "{$table_name}.gross_total",
 			'num_items_sold' => "{$table_name}.num_items_sold",
-			'customer_type'  => "(CASE WHEN {$table_name}.returning_customer <> 0 THEN 'returning' ELSE 'new' END) as customer_type",
+			'customer_type'  => "(CASE WHEN {$table_name}.returning_customer = 1 THEN 'returning' WHEN {$table_name}.returning_customer = 0 THEN 'new' ELSE '' END) as customer_type",
 		);
 	}
 

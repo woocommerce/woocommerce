@@ -5,6 +5,11 @@
 import { Component } from '@wordpress/element';
 import { xor } from 'lodash';
 
+/**
+ * Internal dependencies
+ */
+import SectionControls from './section-controls';
+
 export default class Section extends Component {
 	constructor( props ) {
 		super( props );
@@ -57,6 +62,7 @@ export default class Section extends Component {
 					onTitleBlur={ this.onTitleBlur }
 					onToggleHiddenBlock={ this.onToggleHiddenBlock }
 					titleInput={ titleInput }
+					controls={ SectionControls }
 					{ ...props }
 				/>
 			</div>

@@ -13,6 +13,13 @@ Props
 
 A moment date object representing the selected date. `null` for no selection.
 
+### `disabled`
+
+- Type: Boolean
+- Default: null
+
+Whether the input is disabled.
+
 ### `text`
 
 - Type: String

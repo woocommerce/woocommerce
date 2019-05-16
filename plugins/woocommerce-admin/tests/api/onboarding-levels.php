@@ -15,7 +15,7 @@ class WC_Tests_API_Onboarding_Levels extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	protected $endpoint = '/wc/v4/onboarding/levels';
+	protected $endpoint = '/wc-admin/v1/onboarding/levels';
 
 	/**
 	 * Setup test data. Called before every test.

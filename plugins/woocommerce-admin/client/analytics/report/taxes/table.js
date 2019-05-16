@@ -10,7 +10,7 @@ import { map } from 'lodash';
  * WooCommerce dependencies
  */
 import { Link } from '@woocommerce/components';
-import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+import { formatCurrency, getCurrencyFormatDecimal, renderCurrency } from '@woocommerce/currency';
 import { getTaxCode } from './utils';
 import { numberFormat } from '@woocommerce/number';
 
@@ -91,15 +91,15 @@ export default class TaxesReportTable extends Component {
 					value: tax_rate,
 				},
 				{
-					display: formatCurrency( total_tax ),
+					display: renderCurrency( total_tax ),
 					value: getCurrencyFormatDecimal( total_tax ),
 				},
 				{
-					display: formatCurrency( order_tax ),
+					display: renderCurrency( order_tax ),
 					value: getCurrencyFormatDecimal( order_tax ),
 				},
 				{
-					display: formatCurrency( shipping_tax ),
+					display: renderCurrency( shipping_tax ),
 					value: getCurrencyFormatDecimal( shipping_tax ),
 				},
 				{

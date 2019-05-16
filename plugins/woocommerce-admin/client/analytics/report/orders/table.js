@@ -11,7 +11,7 @@ import { map } from 'lodash';
  */
 import { Date, Link, OrderStatus, ViewMoreList } from '@woocommerce/components';
 import { defaultTableDateFormat } from '@woocommerce/date';
-import { formatCurrency } from '@woocommerce/currency';
+import { formatCurrency, renderCurrency } from '@woocommerce/currency';
 import { numberFormat } from '@woocommerce/number';
 
 /**
@@ -90,6 +90,17 @@ export default class OrdersReportTable extends Component {
 		];
 	}
 
+	getCustomerType( customerType ) {
+		switch ( customerType ) {
+			case 'new':
+				return _x( 'New', 'customer type', 'woocommerce-admin' );
+			case 'returning':
+				return _x( 'Returning', 'customer type', 'woocommerce-admin' );
+			default:
+				return _x( 'N/A', 'customer type', 'woocommerce-admin' );
+		}
+	}
+
 	getRowsContent( tableData ) {
 		const { query } = this.props;
 		const persistedQuery = getPersistedQuery( query );
@@ -102,6 +113,7 @@ export default class OrdersReportTable extends Component {
 				num_items_sold,
 				order_id,
 				order_number,
+				parent_id,
 				status,
 			} = row;
 			const extended_info = row.extended_info || {};
@@ -133,7 +145,15 @@ export default class OrdersReportTable extends Component {
 				},
 				{
 					display: (
-						<Link href={ 'post.php?post=' + order_id + '&action=edit' } type="wp-admin">
+						<Link
+							href={
+								'post.php?post=' +
+								( parent_id ? parent_id : order_id ) +
+								'&action=edit' +
+								( parent_id ? '#order_refunds' : '' )
+							}
+							type="wp-admin"
+						>
 							{ order_number }
 						</Link>
 					),
@@ -146,10 +166,7 @@ export default class OrdersReportTable extends Component {
 					value: status,
 				},
 				{
-					display:
-						customer_type === 'new'
-							? _x( 'New', 'customer type', 'woocommerce-admin' )
-							: _x( 'Returning', 'customer type', 'woocommerce-admin' ),
+					display: this.getCustomerType( customer_type ),
 					value: customer_type,
 				},
 				{
@@ -178,7 +195,7 @@ export default class OrdersReportTable extends Component {
 					value: formattedCoupons.map( item => item.code ).join( ' ' ),
 				},
 				{
-					display: formatCurrency( net_total, currency ),
+					display: renderCurrency( net_total, currency ),
 					value: net_total,
 				},
 			];

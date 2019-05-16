@@ -31,7 +31,6 @@ import {
 	SummaryNumber,
 } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
-import SectionControls from 'dashboard/components/section-controls';
 import './style.scss';
 
 class StorePerformance extends Component {
@@ -47,6 +46,7 @@ class StorePerformance extends Component {
 			onTitleChange,
 			onToggleHiddenBlock,
 			titleInput,
+			controls: Controls,
 		} = this.props;
 
 		return (
@@ -57,17 +57,6 @@ class StorePerformance extends Component {
 				) }
 				renderContent={ ( { onToggle } ) => (
 					<Fragment>
-						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
-							<div className="woocommerce-ellipsis-menu__item">
-								<TextControl
-									label={ __( 'Section Title', 'woocommerce-admin' ) }
-									onBlur={ onTitleBlur }
-									onChange={ onTitleChange }
-									required
-									value={ titleInput }
-								/>
-							</div>
-						) }
 						<MenuTitle>{ __( 'Display Stats:', 'woocommerce-admin' ) }</MenuTitle>
 						{ indicators.map( ( indicator, i ) => {
 							const checked = ! hiddenBlocks.includes( indicator.stat );
@@ -83,13 +72,26 @@ class StorePerformance extends Component {
 								</MenuItem>
 							);
 						} ) }
-						<SectionControls
-							onToggle={ onToggle }
-							onMove={ onMove }
-							onRemove={ onRemove }
-							isFirst={ isFirst }
-							isLast={ isLast }
-						/>
+						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
+							<Fragment>
+								<div className="woocommerce-ellipsis-menu__item">
+									<TextControl
+										label={ __( 'Section Title', 'woocommerce-admin' ) }
+										onBlur={ onTitleBlur }
+										onChange={ onTitleChange }
+										required
+										value={ titleInput }
+									/>
+								</div>
+								<Controls
+									onToggle={ onToggle }
+									onMove={ onMove }
+									onRemove={ onRemove }
+									isFirst={ isFirst }
+									isLast={ isLast }
+								/>
+							</Fragment>
+						) }
 					</Fragment>
 				) }
 			/>
