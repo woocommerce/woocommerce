@@ -218,6 +218,7 @@ INTERESTED IN DEVELOPMENT?
 * Tweak - Do not display taxes in totals columns when taxes not enabled. #23579
 * Tweak - WC WP-CLI upgrade routine mimics wp-admin upgrade when no updates found by setting DB version to current version. #23666
 * Tweak - Template caching now cache based on WC_VERSION to avoid issues with symlinked plugin folders. #23546
+* Tweak - OBW payment gateway selection defaults. #23690
 * Localization - Add Serbia locale defaults. #23428
 * Localization - Add address format for Serbia. #23429
 
