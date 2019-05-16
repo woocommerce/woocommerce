@@ -1642,7 +1642,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Gets line subtotal - formatted for display.
 	 *
-	 * @param array  $item Item to get total from.
+	 * @param object $item Item to get total from.
 	 * @param string $tax_display Incl or excl tax display mode.
 	 * @return string
 	 */
