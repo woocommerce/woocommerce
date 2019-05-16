@@ -210,6 +210,8 @@ INTERESTED IN DEVELOPMENT?
 * Fix - New webhooks not showing in the webhook admin list page when you have object caching enabled. #23713
 * Fix - Missing coupon expiry dates, restore coupons expiry_date backward compatibility. #23714
 * Fix - Bulk stock update could result in all products set to out of stock, change ensures consistency between db and Product instance in memory. #23534
+* Fix - Dashboard stats widget including unpublished products in out of stock and low in stock counts. #23734
+* Fix - PayPal payment not captured when you transition an order from a custom order status to completed or processing. #23634
 * Tweak - Confirm before saving empty list of countries to sell to in settings. #23597
 * Tweak - Change default WC API version used when creating webhooks to the latest WC API version. #23515
 * Tweak - Report a bug button now points to the new issue template in GitHub. #23580
