@@ -36,7 +36,7 @@ class WC_Tests_Setup_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			array(
 				'stripe'      => true,
-				'ppec_paypal' => true,
+				'ppec_paypal' => false,
 			),
 			$this->get_gateways_statuses( $setup_wizard )
 		);
@@ -53,7 +53,7 @@ class WC_Tests_Setup_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			array(
 				'klarna_checkout' => true,
-				'ppec_paypal'     => true,
+				'ppec_paypal'     => false,
 				'stripe'          => true,
 			),
 			$this->get_gateways_statuses( $setup_wizard )
@@ -63,7 +63,7 @@ class WC_Tests_Setup_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			array(
 				'klarna_payments' => true,
-				'ppec_paypal'     => true,
+				'ppec_paypal'     => false,
 				'stripe'          => true,
 			),
 			$this->get_gateways_statuses( $setup_wizard )
@@ -74,7 +74,7 @@ class WC_Tests_Setup_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals(
 			array(
 				'square'      => false,
-				'ppec_paypal' => true,
+				'ppec_paypal' => false,
 				'stripe'      => true,
 			),
 			$this->get_gateways_statuses( $setup_wizard )
