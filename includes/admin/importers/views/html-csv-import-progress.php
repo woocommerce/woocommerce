@@ -1,7 +1,10 @@
 <?php
 /**
  * Admin View: Importer - CSV import progress
+ *
+ * @package WooCommerce\Admin\Importers
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

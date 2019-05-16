@@ -317,13 +317,14 @@ class WC_API_Reports extends WC_API_Resource {
 	 */
 	protected function validate_request( $id = null, $type = null, $context = null ) {
 
-		if ( ! current_user_can( 'view_woocommerce_reports' ) ) {
-
-			return new WP_Error( 'woocommerce_api_user_cannot_read_report', __( 'You do not have permission to read this report', 'woocommerce' ), array( 'status' => 401 ) );
-
-		} else {
-
+		if ( current_user_can( 'view_woocommerce_reports' ) ) {
 			return true;
 		}
+
+		return new WP_Error(
+			'woocommerce_api_user_cannot_read_report',
+			__( 'You do not have permission to read this report', 'woocommerce' ),
+			array( 'status' => 401 )
+		);
 	}
 }

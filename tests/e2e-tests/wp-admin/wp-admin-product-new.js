@@ -13,7 +13,8 @@ let manager;
 let driver;
 
 test.describe( 'Add New Product Page', function() {
-	test.before( 'open browser', function() {
+	// open browser
+	test.before( function() {
 		this.timeout( config.get( 'startBrowserTimeoutMs' ) );
 
 		manager = new WebDriverManager( 'chrome', { baseUrl: config.get( 'url' ) } );
@@ -24,7 +25,8 @@ test.describe( 'Add New Product Page', function() {
 
 	this.timeout( config.get( 'mochaTimeoutMs' ) );
 
-	test.before( 'login', () => {
+	// login
+	test.before( () => {
 		const wpLogin = new WPLogin( driver, { url: manager.getPageUrl( '/wp-login.php' ) } );
 		wpLogin.login( config.get( 'users.admin.username' ), config.get( 'users.admin.password' ) );
 	} );
@@ -66,14 +68,14 @@ test.describe( 'Add New Product Page', function() {
 		attr1.toggle();
 
 		const attr2 = panelAttributes.add();
-		assert.eventually.ok( attr1.displayed() );
+		assert.eventually.ok( attr2.displayed() );
 		attr2.setName( 'attr #2' );
 		attr2.checkVisibleOnTheProductPage();
 		attr2.checkUsedForVariations();
 		attr2.setValue( 'val1 | val2' );
 
 		const attr3 = panelAttributes.add();
-		assert.eventually.ok( attr1.displayed() );
+		assert.eventually.ok( attr3.displayed() );
 		attr3.setName( 'attr #3' );
 		attr3.checkVisibleOnTheProductPage();
 		attr3.checkUsedForVariations();
@@ -121,7 +123,15 @@ test.describe( 'Add New Product Page', function() {
 		assert.eventually.ok( product.hasNotice( '1 product moved to the Trash.' ) );
 	} );
 
-	test.after( 'quit browser', () => {
+	// take screenshot
+	test.afterEach( function() {
+		if ( this.currentTest.state === 'failed' ) {
+			helper.takeScreenshot( manager, this.currentTest );
+		}
+	} );
+
+	// quit browser
+	test.after( () => {
 		manager.quitBrowser();
 	} );
 } );

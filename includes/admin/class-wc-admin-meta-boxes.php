@@ -31,7 +31,7 @@ class WC_Admin_Meta_Boxes {
 	 *
 	 * @var array
 	 */
-	public static $meta_box_errors  = array();
+	public static $meta_box_errors = array();
 
 	/**
 	 * Constructor.
@@ -65,7 +65,7 @@ class WC_Admin_Meta_Boxes {
 		add_action( 'woocommerce_process_shop_coupon_meta', 'WC_Meta_Box_Coupon_Data::save', 10, 2 );
 
 		// Save Rating Meta Boxes.
-		add_action( 'comment_edit_redirect', 'WC_Meta_Box_Product_Reviews::save', 1, 2 );
+		add_filter( 'wp_update_comment_data', 'WC_Meta_Box_Product_Reviews::save', 1 );
 
 		// Error handling (for showing errors from meta boxes on next page load).
 		add_action( 'admin_notices', array( $this, 'output_errors' ) );
@@ -74,6 +74,7 @@ class WC_Admin_Meta_Boxes {
 
 	/**
 	 * Add an error message.
+	 *
 	 * @param string $text
 	 */
 	public static function add_error( $text ) {
@@ -177,7 +178,7 @@ class WC_Admin_Meta_Boxes {
 	/**
 	 * Check if we're saving, the trigger an action based on the post type.
 	 *
-	 * @param  int $post_id
+	 * @param  int    $post_id
 	 * @param  object $post
 	 */
 	public function save_meta_boxes( $post_id, $post ) {

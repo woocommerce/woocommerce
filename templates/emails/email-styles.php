@@ -11,21 +11,27 @@
  * the readme will list any important changes.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
- * @author  WooThemes
  * @package WooCommerce/Templates/Emails
- * @version 2.3.0
+ * @version 3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit;
 }
 
-// Load colors
-$bg              = get_option( 'woocommerce_email_background_color' );
-$body            = get_option( 'woocommerce_email_body_background_color' );
-$base            = get_option( 'woocommerce_email_base_color' );
-$base_text       = wc_light_or_dark( $base, '#202020', '#ffffff' );
-$text            = get_option( 'woocommerce_email_text_color' );
+// Load colors.
+$bg        = get_option( 'woocommerce_email_background_color' );
+$body      = get_option( 'woocommerce_email_body_background_color' );
+$base      = get_option( 'woocommerce_email_base_color' );
+$base_text = wc_light_or_dark( $base, '#202020', '#ffffff' );
+$text      = get_option( 'woocommerce_email_text_color' );
+
+// Pick a contrasting color for links.
+$link_color = wc_hex_is_light( $base ) ? $base : $base_text;
+
+if ( wc_hex_is_light( $body ) ) {
+	$link_color = wc_hex_is_light( $base ) ? $base_text : $base;
+}
 
 $bg_darker_10    = wc_hex_darker( $bg, 10 );
 $body_darker_10  = wc_hex_darker( $body, 10 );
@@ -34,17 +40,22 @@ $base_lighter_40 = wc_hex_lighter( $base, 40 );
 $text_lighter_20 = wc_hex_lighter( $text, 20 );
 
 // !important; is a gmail hack to prevent styles being stripped if it doesn't like something.
+// body{padding: 0;} ensures proper scale/positioning of the email in the iOS native email app.
 ?>
+body {
+	padding: 0;
+}
+
 #wrapper {
 	background-color: <?php echo esc_attr( $bg ); ?>;
 	margin: 0;
-	padding: 70px 0 70px 0;
+	padding: 70px 0;
 	-webkit-text-size-adjust: none !important;
 	width: 100%;
 }
 
 #template_container {
-	box-shadow: 0 1px 4px rgba(0,0,0,0.1) !important;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
 	background-color: <?php echo esc_attr( $body ); ?>;
 	border: 1px solid <?php echo esc_attr( $bg_darker_10 ); ?>;
 	border-radius: 3px !important;
@@ -68,16 +79,16 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 
 #template_footer td {
 	padding: 0;
-	-webkit-border-radius: 6px;
+	border-radius: 6px;
 }
 
 #template_footer #credit {
-	border:0;
+	border: 0;
 	color: <?php echo esc_attr( $base_lighter_40 ); ?>;
-	font-family: Arial;
-	font-size:12px;
-	line-height:125%;
-	text-align:center;
+	font-family: "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+	font-size: 12px;
+	line-height: 125%;
+	text-align: center;
 	padding: 0 48px 48px 48px;
 }
 
@@ -86,7 +97,7 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 }
 
 #body_content table td {
-	padding: 48px;
+	padding: 48px 48px 0;
 }
 
 #body_content table td td {
@@ -128,10 +139,11 @@ $text_lighter_20 = wc_hex_lighter( $text, 20 );
 .td {
 	color: <?php echo esc_attr( $text_lighter_20 ); ?>;
 	border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
+	vertical-align: middle;
 }
 
 .address {
-	padding:12px 12px 0;
+	padding: 12px;
 	color: <?php echo esc_attr( $text_lighter_20 ); ?>;
 	border: 1px solid <?php echo esc_attr( $body_darker_10 ); ?>;
 }
@@ -159,7 +171,6 @@ h1 {
 	margin: 0;
 	text-align: <?php echo is_rtl() ? 'right' : 'left'; ?>;
 	text-shadow: 0 1px 0 <?php echo esc_attr( $base_lighter_20 ); ?>;
-	-webkit-font-smoothing: antialiased;
 }
 
 h2 {
@@ -185,20 +196,21 @@ h3 {
 }
 
 a {
-	color: <?php echo esc_attr( $base ); ?>;
+	color: <?php echo esc_attr( $link_color ); ?>;
 	font-weight: normal;
 	text-decoration: underline;
 }
 
 img {
 	border: none;
-	display: inline;
+	display: inline-block;
 	font-size: 14px;
 	font-weight: bold;
 	height: auto;
-	line-height: 100%;
 	outline: none;
 	text-decoration: none;
 	text-transform: capitalize;
+	vertical-align: middle;
+	margin-<?php echo is_rtl() ? 'left' : 'right'; ?>: 10px;
 }
 <?php

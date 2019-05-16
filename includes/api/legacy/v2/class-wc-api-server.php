@@ -565,7 +565,7 @@ class WC_API_Server {
 	 * Send pagination headers for resources
 	 *
 	 * @since 2.1
-	 * @param WP_Query|WP_User_Query $query
+	 * @param WP_Query|WP_User_Query|stdClass $query
 	 */
 	public function add_pagination_headers( $query ) {
 
@@ -582,6 +582,11 @@ class WC_API_Server {
 				$page = 1;
 				$total_pages = 1;
 			}
+		} elseif ( is_a( $query, 'stdClass' ) ) {
+			$page        = $query->page;
+			$single      = $query->is_single;
+			$total       = $query->total;
+			$total_pages = $query->total_pages;
 
 		// WP_Query
 		} else {
@@ -651,7 +656,8 @@ class WC_API_Server {
 	 * @return string
 	 */
 	public function get_raw_data() {
-		// $HTTP_RAW_POST_DATA is deprecated on PHP 5.6
+		// @codingStandardsIgnoreStart
+		// $HTTP_RAW_POST_DATA is deprecated on PHP 5.6.
 		if ( function_exists( 'phpversion' ) && version_compare( phpversion(), '5.6', '>=' ) ) {
 			return file_get_contents( 'php://input' );
 		}
@@ -665,6 +671,7 @@ class WC_API_Server {
 		}
 
 		return $HTTP_RAW_POST_DATA;
+		// @codingStandardsIgnoreEnd
 	}
 
 	/**

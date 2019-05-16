@@ -134,7 +134,7 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		// Get term order.
-		$menu_order = get_woocommerce_term_meta( $item->term_id, 'order_' . $this->taxonomy );
+		$menu_order = get_term_meta( $item->term_id, 'order_' . $this->taxonomy, true );
 
 		$data = array(
 			'id'          => (int) $item->term_id,
@@ -175,7 +175,7 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 	protected function update_term_meta_fields( $term, $request ) {
 		$id = (int) $term->term_id;
 
-		update_woocommerce_term_meta( $id, 'order_' . $this->taxonomy, $request['menu_order'] );
+		update_term_meta( $id, 'order_' . $this->taxonomy, $request['menu_order'] );
 
 		return true;
 	}

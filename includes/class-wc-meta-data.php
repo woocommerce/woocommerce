@@ -7,18 +7,14 @@
  *
  * @version 3.2.0
  * @package WooCommerce
- * @category Class
- * @author crodas
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
- * WC_Meta_Data class.
+ * Meta data class.
  */
-class WC_Meta_Data {
+class WC_Meta_Data implements JsonSerializable {
 
 	/**
 	 * Current data for metadata
@@ -39,11 +35,20 @@ class WC_Meta_Data {
 	/**
 	 * Constructor.
 	 *
-	 * @param array	$meta Data to wrap behind this function.
+	 * @param array $meta Data to wrap behind this function.
 	 */
 	public function __construct( $meta = array() ) {
 		$this->current_data = $meta;
 		$this->apply_changes();
+	}
+
+	/**
+	 * When converted to JSON.
+	 *
+	 * @return object|array
+	 */
+	public function jsonSerialize() {
+		return $this->get_data();
 	}
 
 	/**
@@ -68,6 +73,8 @@ class WC_Meta_Data {
 	 * by `empty` and `isset`.
 	 *
 	 * @param string $key Key to check if set.
+	 *
+	 * @return bool
 	 */
 	public function __isset( $key ) {
 		return array_key_exists( $key, $this->current_data );
@@ -101,4 +108,12 @@ class WC_Meta_Data {
 		return $changes;
 	}
 
+	/**
+	 * Return all data as an array.
+	 *
+	 * @return array
+	 */
+	public function get_data() {
+		return $this->data;
+	}
 }

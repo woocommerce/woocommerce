@@ -4,26 +4,26 @@
  *
  * Functions for account specific things.
  *
- * @author   WooThemes
- * @category Core
- * @package  WooCommerce/Functions
- * @version  2.6.0
+ * @package WooCommerce/Functions
+ * @version 2.6.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Returns the url to the lost password endpoint url.
  *
- * @access public
- * @param  string $default_url
+ * @param  string $default_url Default lost password URL.
  * @return string
  */
 function wc_lostpassword_url( $default_url = '' ) {
+	// Avoid loading too early.
+	if ( ! did_action( 'init' ) ) {
+		return $default_url;
+	}
+
 	// Don't redirect to the woocommerce endpoint on global network admin lost passwords.
-	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( $_GET['redirect_to'], network_admin_url() ) ) {
+	if ( is_multisite() && isset( $_GET['redirect_to'] ) && false !== strpos( wp_unslash( $_GET['redirect_to'] ), network_admin_url() ) ) { // WPCS: input var ok, sanitization ok, CSRF ok.
 		return $default_url;
 	}
 
@@ -54,16 +54,19 @@ function wc_customer_edit_account_url() {
 /**
  * Get the edit address slug translation.
  *
- * @param  string  $id   Address ID.
- * @param  bool    $flip Flip the array to make it possible to retrieve the values ​​from both sides.
+ * @param  string $id   Address ID.
+ * @param  bool   $flip Flip the array to make it possible to retrieve the values ​​from both sides.
  *
- * @return string        Address slug i18n.
+ * @return string       Address slug i18n.
  */
 function wc_edit_address_i18n( $id, $flip = false ) {
-	$slugs = apply_filters( 'woocommerce_edit_address_slugs', array(
-		'billing'  => sanitize_title( _x( 'billing', 'edit-address-slug', 'woocommerce' ) ),
-		'shipping' => sanitize_title( _x( 'shipping', 'edit-address-slug', 'woocommerce' ) ),
-	) );
+	$slugs = apply_filters(
+		'woocommerce_edit_address_slugs',
+		array(
+			'billing'  => sanitize_title( _x( 'billing', 'edit-address-slug', 'woocommerce' ) ),
+			'shipping' => sanitize_title( _x( 'shipping', 'edit-address-slug', 'woocommerce' ) ),
+		)
+	);
 
 	if ( $flip ) {
 		$slugs = array_flip( $slugs );
@@ -124,14 +127,14 @@ function wc_get_account_menu_items() {
 		}
 	}
 
-	return apply_filters( 'woocommerce_account_menu_items', $items );
+	return apply_filters( 'woocommerce_account_menu_items', $items, $endpoints );
 }
 
 /**
  * Get account menu item classes.
  *
  * @since 2.6.0
- * @param string $endpoint
+ * @param string $endpoint Endpoint.
  * @return string
  */
 function wc_get_account_menu_item_classes( $endpoint ) {
@@ -146,6 +149,8 @@ function wc_get_account_menu_item_classes( $endpoint ) {
 	$current = isset( $wp->query_vars[ $endpoint ] );
 	if ( 'dashboard' === $endpoint && ( isset( $wp->query_vars['page'] ) || empty( $wp->query_vars ) ) ) {
 		$current = true; // Dashboard is not an endpoint, so needs a custom check.
+	} elseif ( 'orders' === $endpoint && isset( $wp->query_vars['view-order'] ) ) {
+		$current = true; // When looking at individual order, highlight Orders list item (to signify where in the menu the user currently is).
 	}
 
 	if ( $current ) {
@@ -161,12 +166,16 @@ function wc_get_account_menu_item_classes( $endpoint ) {
  * Get account endpoint URL.
  *
  * @since 2.6.0
- * @param string $endpoint
+ * @param string $endpoint Endpoint.
  * @return string
  */
 function wc_get_account_endpoint_url( $endpoint ) {
 	if ( 'dashboard' === $endpoint ) {
 		return wc_get_page_permalink( 'myaccount' );
+	}
+
+	if ( 'customer-logout' === $endpoint ) {
+		return wc_logout_url();
 	}
 
 	return wc_get_endpoint_url( $endpoint, '', wc_get_page_permalink( 'myaccount' ) );
@@ -179,13 +188,16 @@ function wc_get_account_endpoint_url( $endpoint ) {
  * @return array
  */
 function wc_get_account_orders_columns() {
-	$columns = apply_filters( 'woocommerce_account_orders_columns', array(
-		'order-number'  => __( 'Order', 'woocommerce' ),
-		'order-date'    => __( 'Date', 'woocommerce' ),
-		'order-status'  => __( 'Status', 'woocommerce' ),
-		'order-total'   => __( 'Total', 'woocommerce' ),
-		'order-actions' => __( 'Actions', 'woocommerce' ),
-	) );
+	$columns = apply_filters(
+		'woocommerce_account_orders_columns',
+		array(
+			'order-number'  => __( 'Order', 'woocommerce' ),
+			'order-date'    => __( 'Date', 'woocommerce' ),
+			'order-status'  => __( 'Status', 'woocommerce' ),
+			'order-total'   => __( 'Total', 'woocommerce' ),
+			'order-actions' => __( 'Actions', 'woocommerce' ),
+		)
+	);
 
 	// Deprecated filter since 2.6.0.
 	return apply_filters( 'woocommerce_my_account_my_orders_columns', $columns );
@@ -198,13 +210,16 @@ function wc_get_account_orders_columns() {
  * @return array
  */
 function wc_get_account_downloads_columns() {
-	$columns = apply_filters( 'woocommerce_account_downloads_columns', array(
-		'download-product'   => __( 'Product', 'woocommerce' ),
-		'download-remaining' => __( 'Downloads remaining', 'woocommerce' ),
-		'download-expires'   => __( 'Expires', 'woocommerce' ),
-		'download-file'      => __( 'Download', 'woocommerce' ),
-		'download-actions'   => '&nbsp;',
-	) );
+	$columns = apply_filters(
+		'woocommerce_account_downloads_columns',
+		array(
+			'download-product'   => __( 'Product', 'woocommerce' ),
+			'download-remaining' => __( 'Downloads remaining', 'woocommerce' ),
+			'download-expires'   => __( 'Expires', 'woocommerce' ),
+			'download-file'      => __( 'Download', 'woocommerce' ),
+			'download-actions'   => '&nbsp;',
+		)
+	);
 
 	if ( ! has_filter( 'woocommerce_account_download_actions' ) ) {
 		unset( $columns['download-actions'] );
@@ -220,11 +235,14 @@ function wc_get_account_downloads_columns() {
  * @return array
  */
 function wc_get_account_payment_methods_columns() {
-	return apply_filters( 'woocommerce_account_payment_methods_columns', array(
-		'method'  => __( 'Method', 'woocommerce' ),
-		'expires' => __( 'Expires', 'woocommerce' ),
-		'actions' => '&nbsp;',
-	) );
+	return apply_filters(
+		'woocommerce_account_payment_methods_columns',
+		array(
+			'method'  => __( 'Method', 'woocommerce' ),
+			'expires' => __( 'Expires', 'woocommerce' ),
+			'actions' => '&nbsp;',
+		)
+	);
 }
 
 /**
@@ -234,17 +252,20 @@ function wc_get_account_payment_methods_columns() {
  * @return array
  */
 function wc_get_account_payment_methods_types() {
-	return apply_filters( 'woocommerce_payment_methods_types', array(
-		'cc'     => __( 'Credit card', 'woocommerce' ),
-		'echeck' => __( 'eCheck', 'woocommerce' ),
-	) );
+	return apply_filters(
+		'woocommerce_payment_methods_types',
+		array(
+			'cc'     => __( 'Credit card', 'woocommerce' ),
+			'echeck' => __( 'eCheck', 'woocommerce' ),
+		)
+	);
 }
 
 /**
  * Get account orders actions.
  *
  * @since  3.2.0
- * @param  int|WC_Order $order
+ * @param  int|WC_Order $order Order instance or ID.
  * @return array
  */
 function wc_get_account_orders_actions( $order ) {
@@ -272,7 +293,7 @@ function wc_get_account_orders_actions( $order ) {
 		unset( $actions['pay'] );
 	}
 
-	if ( ! in_array( $order->get_status(), apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ) ) ) {
+	if ( ! in_array( $order->get_status(), apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ), true ) ) {
 		unset( $actions['cancel'] );
 	}
 
@@ -312,9 +333,9 @@ function wc_get_account_formatted_address( $address_type = 'billing', $customer_
  * Returns an array of a user's saved payments list for output on the account tab.
  *
  * @since  2.6
- * @param  array $list         List of payment methods passed from wc_get_customer_saved_methods_list()
- * @param  int   $customer_id  The customer to fetch payment methods for
- * @return array               Filtered list of customers payment methods
+ * @param  array $list         List of payment methods passed from wc_get_customer_saved_methods_list().
+ * @param  int   $customer_id  The customer to fetch payment methods for.
+ * @return array               Filtered list of customers payment methods.
  */
 function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
 	$payment_tokens = WC_Payment_Tokens::get_customer_tokens( $customer_id );
@@ -326,7 +347,7 @@ function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
 
 		$type            = strtolower( $payment_token->get_type() );
 		$list[ $type ][] = array(
-			'method' => array(
+			'method'     => array(
 				'gateway' => $payment_token->get_gateway_id(),
 			),
 			'expires'    => esc_html__( 'N/A', 'woocommerce' ),
@@ -338,11 +359,11 @@ function wc_get_account_saved_payment_methods_list( $list, $customer_id ) {
 				),
 			),
 		);
-		$key = key( array_slice( $list[ $type ], -1, 1, true ) );
+		$key             = key( array_slice( $list[ $type ], -1, 1, true ) );
 
 		if ( ! $payment_token->is_default() ) {
 			$list[ $type ][ $key ]['actions']['default'] = array(
-				'url' => $set_default_url,
+				'url'  => $set_default_url,
 				'name' => esc_html__( 'Make default', 'woocommerce' ),
 			);
 		}
@@ -358,9 +379,9 @@ add_filter( 'woocommerce_saved_payment_methods_list', 'wc_get_account_saved_paym
  * Controls the output for credit cards on the my account page.
  *
  * @since 2.6
- * @param  array             $item         Individual list item from woocommerce_saved_payment_methods_list
- * @param  WC_Payment_Token $payment_token The payment token associated with this method entry
- * @return array                           Filtered item
+ * @param  array            $item         Individual list item from woocommerce_saved_payment_methods_list.
+ * @param  WC_Payment_Token $payment_token The payment token associated with this method entry.
+ * @return array                           Filtered item.
  */
 function wc_get_account_saved_payment_methods_list_item_cc( $item, $payment_token ) {
 	if ( 'cc' !== strtolower( $payment_token->get_type() ) ) {
@@ -381,9 +402,9 @@ add_filter( 'woocommerce_payment_methods_list_item', 'wc_get_account_saved_payme
  * Controls the output for eChecks on the my account page.
  *
  * @since 2.6
- * @param  array             $item         Individual list item from woocommerce_saved_payment_methods_list
- * @param  WC_Payment_Token $payment_token The payment token associated with this method entry
- * @return array                           Filtered item
+ * @param  array            $item         Individual list item from woocommerce_saved_payment_methods_list.
+ * @param  WC_Payment_Token $payment_token The payment token associated with this method entry.
+ * @return array                           Filtered item.
  */
 function wc_get_account_saved_payment_methods_list_item_echeck( $item, $payment_token ) {
 	if ( 'echeck' !== strtolower( $payment_token->get_type() ) ) {

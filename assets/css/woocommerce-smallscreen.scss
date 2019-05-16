@@ -98,18 +98,16 @@
 	/**
 	 * Products
 	 */
-	&, &[class*='columns-'] {
-		ul.products {
-			li.product {
-				width: 48%;
-				float: left;
-				clear: both;
-				margin: 0 0 2.992em;
+	ul.products[class*='columns-'] {
+		li.product {
+			width: 48%;
+			float: left;
+			clear: both;
+			margin: 0 0 2.992em;
 
-				&:nth-child( 2n ) {
-					float: right;
-					clear: none !important; // This should never clear.
-				}
+			&:nth-child( 2n ) {
+				float: right;
+				clear: none !important; // This should never clear.
 			}
 		}
 	}

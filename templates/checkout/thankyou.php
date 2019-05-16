@@ -11,7 +11,6 @@
  * the readme will list any important changes.
  *
  * @see 	    https://docs.woocommerce.com/document/template-structure/
- * @author 		WooThemes
  * @package 	WooCommerce/Templates
  * @version     3.2.0
  */
@@ -23,7 +22,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <div class="woocommerce-order">
 
-	<?php if ( $order ) : ?>
+	<?php if ( $order ) : 
+
+		do_action( 'woocommerce_before_thankyou', $order->get_id() ); ?>
 
 		<?php if ( $order->has_status( 'failed' ) ) : ?>
 
@@ -53,7 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				</li>
 
 				<?php if ( is_user_logged_in() && $order->get_user_id() === get_current_user_id() && $order->get_billing_email() ) : ?>
-					<li class="woocommerce-order-overview__total total">
+					<li class="woocommerce-order-overview__email email">
 						<?php _e( 'Email:', 'woocommerce' ); ?>
 						<strong><?php echo $order->get_billing_email(); ?></strong>
 					</li>

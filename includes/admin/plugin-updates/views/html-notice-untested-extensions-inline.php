@@ -1,13 +1,16 @@
 <?php
 /**
  * Admin View: Notice - Untested extensions.
+ *
+ * @package WooCommerce\Admin
  */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 ?>
-<div class="wc_plugin_upgrade_notice extensions_warning <?php echo esc_attr( $upgrade_type ) ?>">
-	<p><?php echo wp_kses_post( $message ) ?></p>
+<div class="wc_plugin_upgrade_notice extensions_warning <?php echo esc_attr( $upgrade_type ); ?>">
+	<p><?php echo wp_kses_post( $message ); ?></p>
 
 	<table class="plugin-details-table" cellspacing="0">
 		<thead>

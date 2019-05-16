@@ -11,7 +11,6 @@
  * the readme will list any important changes.
  *
  * @see 	https://docs.woocommerce.com/document/template-structure/
- * @author  WooThemes
  * @package WooCommerce/Templates
  * @version 3.0.0
  */
@@ -34,11 +33,11 @@ if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 			echo apply_filters( 'woocommerce_order_item_name', $product_permalink ? sprintf( '<a href="%s">%s</a>', $product_permalink, $item->get_name() ) : $item->get_name(), $item, $is_visible );
 			echo apply_filters( 'woocommerce_order_item_quantity_html', ' <strong class="product-quantity">' . sprintf( '&times; %s', $item->get_quantity() ) . '</strong>', $item );
 
-			do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order );
+			do_action( 'woocommerce_order_item_meta_start', $item_id, $item, $order, false );
 
 			wc_display_item_meta( $item );
 
-			do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order );
+			do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, false );
 		?>
 	</td>
 

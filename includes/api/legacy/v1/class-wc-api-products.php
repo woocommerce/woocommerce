@@ -500,7 +500,7 @@ class WC_API_Products extends WC_API_Resource {
 
 				// taxonomy-based attributes are prefixed with `pa_`, otherwise simply `attribute_`
 				$attributes[] = array(
-					'name'   => ucwords( str_replace( 'attribute_', '', str_replace( 'pa_', '', $attribute_name ) ) ),
+					'name'   => ucwords( str_replace( 'attribute_', '', wc_attribute_taxonomy_slug( $attribute_name ) ) ),
 					'option' => $attribute,
 				);
 			}
@@ -508,7 +508,7 @@ class WC_API_Products extends WC_API_Resource {
 
 			foreach ( $product->get_attributes() as $attribute ) {
 				$attributes[] = array(
-					'name'      => ucwords( str_replace( 'pa_', '', $attribute['name'] ) ),
+					'name'      => ucwords( wc_attribute_taxonomy_slug( $attribute['name'] ) ),
 					'position'  => $attribute['position'],
 					'visible'   => (bool) $attribute['is_visible'],
 					'variation' => (bool) $attribute['is_variation'],

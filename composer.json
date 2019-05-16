@@ -1,32 +1,39 @@
 {
   "name": "woocommerce/woocommerce",
-  "description": "An e-commerce toolkit that helps you sell anything. Beautifully.",
+  "description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
   "homepage": "https://woocommerce.com/",
   "type": "wordpress-plugin",
-  "license": "GPL-2.0+",
+  "license": "GPL-3.0-or-later",
+  "prefer-stable": true,
+  "minimum-stability": "dev",
   "require": {
-    "composer/installers": "~1.2"
+    "composer/installers": "1.6.0"
   },
   "require-dev": {
-    "squizlabs/php_codesniffer": "*",
-    "wp-coding-standards/wpcs": "0.10.0",
-    "phpunit/phpunit": "6.2.3",
-    "woocommerce/woocommerce-git-hooks": "1.0.2"
+    "apigen/apigen": "4.1.2",
+    "nette/utils": "2.5.3",
+    "phpunit/phpunit": "6.5.14",
+    "woocommerce/woocommerce-sniffs": "0.0.6"
   },
   "scripts": {
-    "pre-update-cmd": [
-      "WooCommerce\\GitHooks\\Hooks::preHooks"
+    "test": [
+      "phpunit"
     ],
-    "pre-install-cmd": [
-      "WooCommerce\\GitHooks\\Hooks::preHooks"
+    "phpcs": [
+      "phpcs -s -p"
     ],
-    "post-install-cmd": [
-      "\"vendor/bin/phpcs\" --config-set installed_paths vendor/wp-coding-standards/wpcs",
-      "WooCommerce\\GitHooks\\Hooks::postHooks"
+    "phpcs-pre-commit": [
+      "phpcs -s -p -n"
     ],
-    "post-update-cmd": [
-      "\"vendor/bin/phpcs\" --config-set installed_paths vendor/wp-coding-standards/wpcs",
-      "WooCommerce\\GitHooks\\Hooks::postHooks"
+    "phpcbf": [
+      "phpcbf -p"
     ]
+  },
+  "extra": {
+    "scripts-description": {
+      "test": "Run unit tests",
+      "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
+      "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+    }
   }
 }

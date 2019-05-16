@@ -7,8 +7,8 @@ jQuery( function( $ ) {
 	}
 
 	/* Storage Handling */
-	var $supports_html5_storage;
-	var cart_hash_key = wc_cart_fragments_params.ajax_url.toString() + '-wc_cart_hash';
+	var $supports_html5_storage = true,
+		cart_hash_key           = wc_cart_fragments_params.cart_hash_key;
 
 	try {
 		$supports_html5_storage = ( 'sessionStorage' in window && window.sessionStorage !== null );
@@ -38,6 +38,10 @@ jQuery( function( $ ) {
 	var $fragment_refresh = {
 		url: wc_cart_fragments_params.wc_ajax_url.toString().replace( '%%endpoint%%', 'get_refreshed_fragments' ),
 		type: 'POST',
+		data: {
+			time: new Date().getTime()
+		},
+		timeout: wc_cart_fragments_params.request_timeout,
 		success: function( data ) {
 			if ( data && data.fragments ) {
 
@@ -56,6 +60,9 @@ jQuery( function( $ ) {
 
 				$( document.body ).trigger( 'wc_fragments_refreshed' );
 			}
+		},
+		error: function() {
+			$( document.body ).trigger( 'wc_fragments_ajax_error' );
 		}
 	};
 
@@ -74,7 +81,7 @@ jQuery( function( $ ) {
 			refresh_cart_fragment();
 		});
 
-		$( document.body ).on( 'added_to_cart', function( event, fragments, cart_hash ) {
+		$( document.body ).on( 'added_to_cart removed_from_cart', function( event, fragments, cart_hash ) {
 			var prev_cart_hash = sessionStorage.getItem( cart_hash_key );
 
 			if ( prev_cart_hash === null || prev_cart_hash === undefined || prev_cart_hash === '' ) {
@@ -92,7 +99,9 @@ jQuery( function( $ ) {
 
 		// Refresh when storage changes in another tab
 		$( window ).on( 'storage onstorage', function ( e ) {
-			if ( cart_hash_key === e.originalEvent.key && localStorage.getItem( cart_hash_key ) !== sessionStorage.getItem( cart_hash_key ) ) {
+			if (
+				cart_hash_key === e.originalEvent.key && localStorage.getItem( cart_hash_key ) !== sessionStorage.getItem( cart_hash_key )
+			) {
 				refresh_cart_fragment();
 			}
 		});
@@ -161,4 +170,18 @@ jQuery( function( $ ) {
 	$( document.body ).on( 'adding_to_cart', function() {
 		$( '.hide_cart_widget_if_empty' ).closest( '.widget_shopping_cart' ).show();
 	});
+
+	// Customiser support.
+	var hasSelectiveRefresh = (
+		'undefined' !== typeof wp &&
+		wp.customize &&
+		wp.customize.selectiveRefresh &&
+		wp.customize.widgetsPreview &&
+		wp.customize.widgetsPreview.WidgetPartial
+	);
+	if ( hasSelectiveRefresh ) {
+		wp.customize.selectiveRefresh.bind( 'partial-content-rendered', function() {
+			refresh_cart_fragment();
+		} );
+	}
 });

@@ -1,19 +1,17 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
  * WooCommerce Integrations class
  *
  * Loads Integrations into WooCommerce.
  *
- * @class    WC_Integrations
- * @version  2.3.0
- * @package  WooCommerce/Classes/Integrations
- * @category Class
- * @author   WooThemes
+ * @version 2.3.0
+ * @package WooCommerce/Classes/Integrations
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Integrations class.
  */
 class WC_Integrations {
 
@@ -33,7 +31,7 @@ class WC_Integrations {
 
 		$load_integrations = apply_filters( 'woocommerce_integrations', array() );
 
-		// Load integration classes
+		// Load integration classes.
 		foreach ( $load_integrations as $integration ) {
 
 			$load_integration = new $integration();
@@ -45,7 +43,6 @@ class WC_Integrations {
 	/**
 	 * Return loaded integrations.
 	 *
-	 * @access public
 	 * @return array
 	 */
 	public function get_integrations() {

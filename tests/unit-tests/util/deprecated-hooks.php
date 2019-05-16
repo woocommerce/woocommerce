@@ -40,6 +40,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 
 	function setUp() {
 		add_filter( 'deprecated_function_trigger_error', '__return_false' );
+		add_filter( 'deprecated_hook_trigger_error', '__return_false' );
 		$this->handlers = WC()->deprecated_hook_handlers;
 	}
 
@@ -87,8 +88,8 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	function test_handle_deprecated_hook_filter() {
 		$new_hook = 'wc_new_hook';
 		$old_hook = 'wc_old_hook';
-		$args = array( false );
-		$return = -1;
+		$args     = array( false );
+		$return   = -1;
 
 		add_filter( $old_hook, array( $this, 'toggle_value' ) );
 
@@ -102,11 +103,11 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	 * @since 3.0
 	 */
 	function test_handle_deprecated_hook_action() {
-		$new_hook = 'wc_new_hook';
-		$old_hook = 'wc_old_hook';
+		$new_hook   = 'wc_new_hook';
+		$old_hook   = 'wc_old_hook';
 		$test_value = false;
-		$args = array( &$test_value );
-		$return = -1;
+		$args       = array( &$test_value );
+		$return     = -1;
 
 		add_filter( $old_hook, array( $this, 'toggle_value_by_ref' ) );
 
@@ -134,18 +135,18 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 	 * @since 3.0
 	 */
 	function test_action_handler() {
-		$test_product = WC_Helper_Product::create_simple_product();
-		$test_order = WC_Helper_Order::create_order( 1, $test_product );
+		$test_product  = WC_Helper_Product::create_simple_product();
+		$test_order    = WC_Helper_Order::create_order( 1, $test_product );
 		$test_order_id = $test_order->get_id();
-		$test_items = $test_order->get_items();
-		$test_item = reset( $test_items );
-		$test_item_id = $test_item->get_id();
+		$test_items    = $test_order->get_items();
+		$test_item     = reset( $test_items );
+		$test_item_id  = $test_item->get_id();
 
 		add_action( 'woocommerce_order_edit_product', array( $this, 'set_meta' ), 10, 2 );
 		do_action( 'woocommerce_update_order_item', $test_item_id, $test_item, $test_order_id );
 
 		$order_update_worked = (bool) get_post_meta( $test_order_id, 'wc_deprecated_hook_test_item1_meta', 1 );
-		$item_update_worked = (bool) get_post_meta( $test_item_id, 'wc_deprecated_hook_test_item2_meta', 2 );
+		$item_update_worked  = (bool) get_post_meta( $test_item_id, 'wc_deprecated_hook_test_item2_meta', 2 );
 
 		$this->assertTrue( $order_update_worked );
 		$this->assertTrue( $item_update_worked );
@@ -163,7 +164,7 @@ class WC_Tests_Deprecated_Hooks extends WC_Unit_Test_Case {
 		$token = WC_Helper_Payment_Token::create_stub_token( __FUNCTION__ );
 		$token->save();
 
-		$product = new WC_Product_Variation;
+		$product = new WC_Product_Variation();
 		$product->save();
 
 		$this->assertEquals( 1, did_action( 'woocommerce_payment_token_created' ) );

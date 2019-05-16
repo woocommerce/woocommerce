@@ -70,12 +70,15 @@ class WC_Helper_Compat {
 			return;
 		}
 
-		$request = WC_Helper_API::post( 'oauth/migrate', array(
-			'body' => array(
-				'home_url' => home_url(),
-				'master_key' => $master_key,
-			),
-		) );
+		$request = WC_Helper_API::post(
+			'oauth/migrate',
+			array(
+				'body' => array(
+					'home_url'   => home_url(),
+					'master_key' => $master_key,
+				),
+			)
+		);
 
 		if ( is_wp_error( $request ) || wp_remote_retrieve_response_code( $request ) !== 200 ) {
 			WC_Helper::log( 'Call to oauth/migrate returned a non-200 response code' );
@@ -89,13 +92,16 @@ class WC_Helper_Compat {
 		}
 
 		// Obtain an access token.
-		$request = WC_Helper_API::post( 'oauth/access_token', array(
-			'body' => array(
-				'request_token' => $request_token,
-				'home_url' => home_url(),
-				'migrate' => true,
-			),
-		) );
+		$request = WC_Helper_API::post(
+			'oauth/access_token',
+			array(
+				'body' => array(
+					'request_token' => $request_token,
+					'home_url'      => home_url(),
+					'migrate'       => true,
+				),
+			)
+		);
 
 		if ( is_wp_error( $request ) || wp_remote_retrieve_response_code( $request ) !== 200 ) {
 			WC_Helper::log( 'Call to oauth/access_token returned a non-200 response code' );
@@ -108,13 +114,16 @@ class WC_Helper_Compat {
 			return;
 		}
 
-		WC_Helper_Options::update( 'auth', array(
-			'access_token' => $access_token['access_token'],
-			'access_token_secret' => $access_token['access_token_secret'],
-			'site_id' => $access_token['site_id'],
-			'user_id' => null, // Set this later
-			'updated' => time(),
-		) );
+		WC_Helper_Options::update(
+			'auth',
+			array(
+				'access_token'        => $access_token['access_token'],
+				'access_token_secret' => $access_token['access_token_secret'],
+				'site_id'             => $access_token['site_id'],
+				'user_id'             => null, // Set this later
+				'updated'             => time(),
+			)
+		);
 
 		// Obtain the connected user info.
 		if ( ! WC_Helper::_flush_authentication_cache() ) {
@@ -128,14 +137,28 @@ class WC_Helper_Compat {
 	 * Attempt to deactivate the legacy helper plugin.
 	 */
 	public static function deactivate_plugin() {
-		include_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+		include_once ABSPATH . 'wp-admin/includes/plugin.php';
 		if ( ! function_exists( 'deactivate_plugins' ) ) {
 			return;
 		}
 
 		if ( is_plugin_active( 'woothemes-updater/woothemes-updater.php' ) ) {
 			deactivate_plugins( 'woothemes-updater/woothemes-updater.php' );
+
+			// Notify the user when the plugin is deactivated.
+			add_action( 'pre_current_active_plugins', array( __CLASS__, 'plugin_deactivation_notice' ) );
 		}
+	}
+
+	/**
+	 * Display admin notice directing the user where to go.
+	 */
+	public static function plugin_deactivation_notice() {
+		?>
+		<div id="message" class="error is-dismissible">
+			<p><?php printf( __( 'The WooCommerce Helper plugin is no longer needed. <a href="%s">Manage subscriptions</a> from the extensions tab instead.', 'woocommerce' ), esc_url( admin_url( 'admin.php?page=wc-addons&section=helper' ) ) ); ?></p>
+		</div>
+		<?php
 	}
 
 	/**
@@ -161,11 +184,13 @@ class WC_Helper_Compat {
 	 * Render the legacy helper compat view.
 	 */
 	public static function render_compat_menu() {
-		$helper_url = add_query_arg( array(
-			'page' => 'wc-addons',
-			'section' => 'helper',
-		), admin_url( 'admin.php' ) );
-		include( WC_Helper::get_view_filename( 'html-helper-compat.php' ) );
+		$helper_url = add_query_arg(
+			array(
+				'page'    => 'wc-addons',
+				'section' => 'helper',
+			), admin_url( 'admin.php' )
+		);
+		include WC_Helper::get_view_filename( 'html-helper-compat.php' );
 	}
 }
 

@@ -360,8 +360,6 @@ class WC_API_Orders extends WC_API_Resource {
 	public function create_order( $data ) {
 		global $wpdb;
 
-		wc_transaction_query( 'start' );
-
 		try {
 			if ( ! isset( $data['order'] ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_missing_order_data', sprintf( __( 'No %1$s data specified to create %1$s', 'woocommerce' ), 'order' ), 400 );
@@ -435,7 +433,7 @@ class WC_API_Orders extends WC_API_Resource {
 				}
 
 				update_post_meta( $order->get_id(), '_payment_method', $data['payment_details']['method_id'] );
-				update_post_meta( $order->get_id(), '_payment_method_title', $data['payment_details']['method_title'] );
+				update_post_meta( $order->get_id(), '_payment_method_title', sanitize_text_field( $data['payment_details']['method_title'] ) );
 
 				// mark as paid if set
 				if ( isset( $data['payment_details']['paid'] ) && true === $data['payment_details']['paid'] ) {
@@ -466,15 +464,10 @@ class WC_API_Orders extends WC_API_Resource {
 			do_action( 'woocommerce_api_create_order', $order->get_id(), $data, $this );
 			do_action( 'woocommerce_new_order', $order->get_id() );
 
-			wc_transaction_query( 'commit' );
-
 			return $this->get_order( $order->get_id() );
-
 		} catch ( WC_Data_Exception $e ) {
-			wc_transaction_query( 'rollback' );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => 400 ) );
 		} catch ( WC_API_Exception $e ) {
-			wc_transaction_query( 'rollback' );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -592,7 +585,7 @@ class WC_API_Orders extends WC_API_Resource {
 
 				// Method title.
 				if ( isset( $data['payment_details']['method_title'] ) ) {
-					update_post_meta( $order->get_id(), '_payment_method_title', $data['payment_details']['method_title'] );
+					update_post_meta( $order->get_id(), '_payment_method_title', sanitize_text_field( $data['payment_details']['method_title'] ) );
 				}
 
 				// Mark as paid if set.
@@ -980,7 +973,7 @@ class WC_API_Orders extends WC_API_Resource {
 			if ( isset( $variations ) && is_array( $variations ) ) {
 				// start by normalizing the passed variations
 				foreach ( $variations as $key => $value ) {
-					$key = str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) ); // from get_attributes in class-wc-api-products.php
+					$key = str_replace( 'attribute_', '', wc_attribute_taxonomy_slug( $key ) ); // from get_attributes in class-wc-api-products.php
 					$variations_normalized[ $key ] = strtolower( $value );
 				}
 				// now search through each product child and see if our passed variations match anything
@@ -988,7 +981,7 @@ class WC_API_Orders extends WC_API_Resource {
 					$meta = array();
 					foreach ( get_post_meta( $variation ) as $key => $value ) {
 						$value = $value[0];
-						$key = str_replace( 'attribute_', '', str_replace( 'pa_', '', $key ) );
+						$key = str_replace( 'attribute_', '', wc_attribute_taxonomy_slug( $key ) );
 						$meta[ $key ] = strtolower( $value );
 					}
 					// if the variation array is a part of the $meta array, we found our match
@@ -1269,7 +1262,7 @@ class WC_API_Orders extends WC_API_Resource {
 				'id'            => $note->comment_ID,
 				'created_at'    => $this->server->format_datetime( $note->comment_date_gmt ),
 				'note'          => $note->comment_content,
-				'customer_note' => get_comment_meta( $note->comment_ID, 'is_customer_note', true ) ? true : false,
+				'customer_note' => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
 			);
 
 			return array( 'order_note' => apply_filters( 'woocommerce_api_order_note_response', $order_note, $id, $fields, $note, $order_id, $this ) );
@@ -1499,11 +1492,12 @@ class WC_API_Orders extends WC_API_Resource {
 	 *
 	 * @param string $order_id order ID
 	 * @param int $id
-	 * @param string $fields fields to limit response to
+	 * @param string|null $fields fields to limit response to
+	 * @param array $filter
 	 *
 	 * @return array|WP_Error
 	 */
-	public function get_order_refund( $order_id, $id, $fields = null ) {
+	public function get_order_refund( $order_id, $id, $fields = null, $filter = array() ) {
 		try {
 			// Validate order ID
 			$order_id = $this->validate_request( $order_id, $this->post_type, 'read' );

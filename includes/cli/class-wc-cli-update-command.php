@@ -1,4 +1,9 @@
 <?php
+/**
+ * WC_CLI_Update_Command class file.
+ *
+ * @package WooCommerce\CLI
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -27,23 +32,50 @@ class WC_CLI_Update_Command {
 
 		$wpdb->hide_errors();
 
-		include_once( WC_ABSPATH . 'includes/class-wc-install.php' );
-		include_once( WC_ABSPATH . 'includes/wc-update-functions.php' );
+		include_once WC_ABSPATH . 'includes/class-wc-install.php';
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
 
 		$current_db_version = get_option( 'woocommerce_db_version' );
 		$update_count       = 0;
+		$callbacks          = WC_Install::get_db_update_callbacks();
+		$callbacks_to_run   = array();
 
-		foreach ( WC_Install::get_db_update_callbacks() as $version => $update_callbacks ) {
+		foreach ( $callbacks as $version => $update_callbacks ) {
 			if ( version_compare( $current_db_version, $version, '<' ) ) {
 				foreach ( $update_callbacks as $update_callback ) {
-					WP_CLI::log( sprintf( __( 'Calling update function: %s', 'woocommerce' ), $update_callback ) );
-					call_user_func( $update_callback );
-					$update_count ++;
+					$callbacks_to_run[] = $update_callback;
 				}
 			}
 		}
 
+		if ( empty( $callbacks_to_run ) ) {
+			// Ensure DB version is set to the current WC version to match WP-Admin update routine.
+			WC_Install::update_db_version();
+			/* translators: %s Database version number */
+			WP_CLI::success( sprintf( __( 'No updates required. Database version is %s', 'woocommerce' ), get_option( 'woocommerce_db_version' ) ) );
+			return;
+		}
+
+		/* translators: 1: Number of database updates 2: List of update callbacks */
+		WP_CLI::log( sprintf( __( 'Found %1$d updates (%2$s)', 'woocommerce' ), count( $callbacks_to_run ), implode( ', ', $callbacks_to_run ) ) );
+
+		$progress = \WP_CLI\Utils\make_progress_bar( __( 'Updating database', 'woocommerce' ), count( $callbacks_to_run ) ); // phpcs:ignore PHPCompatibility.LanguageConstructs.NewLanguageConstructs.t_ns_separatorFound
+
+		foreach ( $callbacks_to_run as $update_callback ) {
+			call_user_func( $update_callback );
+			$result = false;
+			while ( $result ) {
+				$result = (bool) call_user_func( $update_callback );
+			}
+			$update_count ++;
+			$progress->tick();
+		}
+
+		$progress->finish();
+
 		WC_Admin_Notices::remove_notice( 'update' );
-		WP_CLI::success( sprintf( __( '%1$d updates complete. Database version is %2$s', 'woocommerce' ), absint( $update_count ), get_option( 'woocommerce_db_version' ) ) );
+
+		/* translators: 1: Number of database updates performed 2: Database version number */
+		WP_CLI::success( sprintf( __( '%1$d update functions completed. Database version is %2$s', 'woocommerce' ), absint( $update_count ), get_option( 'woocommerce_db_version' ) ) );
 	}
 }

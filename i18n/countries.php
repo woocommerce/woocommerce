@@ -4,15 +4,11 @@
  *
  * Returns an array of countries and codes.
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     2.5.0
+ * @package WooCommerce/i18n
+ * @version 2.5.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 return array(
 	'AF' => __( 'Afghanistan', 'woocommerce' ),
@@ -49,7 +45,6 @@ return array(
 	'BV' => __( 'Bouvet Island', 'woocommerce' ),
 	'BR' => __( 'Brazil', 'woocommerce' ),
 	'IO' => __( 'British Indian Ocean Territory', 'woocommerce' ),
-	'VG' => __( 'British Virgin Islands', 'woocommerce' ),
 	'BN' => __( 'Brunei', 'woocommerce' ),
 	'BG' => __( 'Bulgaria', 'woocommerce' ),
 	'BF' => __( 'Burkina Faso', 'woocommerce' ),
@@ -145,7 +140,7 @@ return array(
 	'LT' => __( 'Lithuania', 'woocommerce' ),
 	'LU' => __( 'Luxembourg', 'woocommerce' ),
 	'MO' => __( 'Macao S.A.R., China', 'woocommerce' ),
-	'MK' => __( 'Macedonia', 'woocommerce' ),
+	'MK' => __( 'North Macedonia', 'woocommerce' ),
 	'MG' => __( 'Madagascar', 'woocommerce' ),
 	'MW' => __( 'Malawi', 'woocommerce' ),
 	'MY' => __( 'Malaysia', 'woocommerce' ),
@@ -251,13 +246,14 @@ return array(
 	'GB' => __( 'United Kingdom (UK)', 'woocommerce' ),
 	'US' => __( 'United States (US)', 'woocommerce' ),
 	'UM' => __( 'United States (US) Minor Outlying Islands', 'woocommerce' ),
-	'VI' => __( 'United States (US) Virgin Islands', 'woocommerce' ),
 	'UY' => __( 'Uruguay', 'woocommerce' ),
 	'UZ' => __( 'Uzbekistan', 'woocommerce' ),
 	'VU' => __( 'Vanuatu', 'woocommerce' ),
 	'VA' => __( 'Vatican', 'woocommerce' ),
 	'VE' => __( 'Venezuela', 'woocommerce' ),
 	'VN' => __( 'Vietnam', 'woocommerce' ),
+	'VG' => __( 'Virgin Islands (British)', 'woocommerce' ),
+	'VI' => __( 'Virgin Islands (US)', 'woocommerce' ),
 	'WF' => __( 'Wallis and Futuna', 'woocommerce' ),
 	'EH' => __( 'Western Sahara', 'woocommerce' ),
 	'WS' => __( 'Samoa', 'woocommerce' ),

@@ -2,16 +2,13 @@
 /**
  * New Zealand States
  *
- * @author      WooThemes
- * @category    i18n
- * @package     WooCommerce/i18n
- * @version     2.3.0
+ * @package WooCommerce/i18n
+ * @version 2.3.0
  */
+
 global $states;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 $states['NZ'] = array(
 	'NL' => __( 'Northland', 'woocommerce' ),

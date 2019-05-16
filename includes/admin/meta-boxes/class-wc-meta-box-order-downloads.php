@@ -26,12 +26,15 @@ class WC_Meta_Box_Order_Downloads {
 		?>
 		<div class="order_download_permissions wc-metaboxes-wrapper">
 
-			<div class="wc-metaboxes"><?php
-				$data_store = WC_Data_Store::load( 'customer-download' );
-				$download_permissions = $data_store->get_downloads( array(
-					'order_id' => $post->ID,
-					'orderby'  => 'product_id',
-				) );
+			<div class="wc-metaboxes">
+				<?php
+				$data_store           = WC_Data_Store::load( 'customer-download' );
+				$download_permissions = $data_store->get_downloads(
+					array(
+						'order_id' => $post->ID,
+						'orderby'  => 'product_id',
+					)
+				);
 
 				$product      = null;
 				$loop         = 0;
@@ -44,27 +47,30 @@ class WC_Meta_Box_Order_Downloads {
 							$file_counter = 1;
 						}
 
-						// don't show permissions to files that have since been removed
+						// don't show permissions to files that have since been removed.
 						if ( ! $product || ! $product->exists() || ! $product->has_file( $download->get_download_id() ) ) {
 							continue;
 						}
 
-						// Show file title instead of count if set
+						// Show file title instead of count if set.
 						$file       = $product->get_file( $download->get_download_id() );
 						$file_count = isset( $file['name'] ) ? $file['name'] : sprintf( __( 'File %d', 'woocommerce' ), $file_counter );
 
-						include( 'views/html-order-download-permission.php' );
+						include 'views/html-order-download-permission.php';
 
 						$loop++;
 						$file_counter++;
 					}
 				}
-			?></div>
+				?>
+			</div>
 
 			<div class="toolbar">
 				<p class="buttons">
 					<select id="grant_access_id" class="wc-product-search" name="grant_access_id[]" multiple="multiple" style="width: 400px;" data-placeholder="<?php esc_attr_e( 'Search for a downloadable product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_downloadable_products_and_variations"></select>
-					<button type="button" class="button grant_access"><?php _e( 'Grant access', 'woocommerce' ); ?></button>
+					<button type="button" class="button grant_access">
+						<?php _e( 'Grant access', 'woocommerce' ); ?>
+					</button>
 				</p>
 				<div class="clear"></div>
 			</div>
@@ -76,7 +82,7 @@ class WC_Meta_Box_Order_Downloads {
 	/**
 	 * Save meta box data.
 	 *
-	 * @param int $post_id
+	 * @param int     $post_id
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {

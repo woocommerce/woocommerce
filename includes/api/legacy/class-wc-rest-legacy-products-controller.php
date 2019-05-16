@@ -94,6 +94,7 @@ class WC_REST_Legacy_Products_Controller extends WC_REST_CRUD_Controller {
 				'taxonomy' => 'product_visibility',
 				'field'    => 'name',
 				'terms'    => 'featured',
+				'operator' => true === $request['featured'] ? 'IN' : 'NOT IN',
 			);
 		}
 

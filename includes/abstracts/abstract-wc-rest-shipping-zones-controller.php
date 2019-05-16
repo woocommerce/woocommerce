@@ -4,9 +4,7 @@
  *
  * Houses common functionality between Shipping Zones and Locations.
  *
- * @author   WooThemes
- * @category API
- * @package  WooCommerce/API
+ * @package  WooCommerce/Abstracts
  * @since    3.0.0
  */
 

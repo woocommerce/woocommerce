@@ -26,7 +26,7 @@ class WC_Helper_API {
 	 * Perform an HTTP request to the Helper API.
 	 *
 	 * @param string $endpoint The endpoint to request.
-	 * @param array $args Additional data for the request. Set authenticated to a truthy value to enable auth.
+	 * @param array  $args Additional data for the request. Set authenticated to a truthy value to enable auth.
 	 *
 	 * @return array|WP_Error The response from wp_safe_remote_request()
 	 */
@@ -53,7 +53,7 @@ class WC_Helper_API {
 	 * Adds authentication headers to an HTTP request.
 	 *
 	 * @param string $url The request URI.
-	 * @param array $args By-ref, the args that will be passed to wp_remote_request().
+	 * @param array  $args By-ref, the args that will be passed to wp_remote_request().
 	 * @return bool Were the headers added?
 	 */
 	private static function _authenticate( $url, &$args ) {
@@ -86,7 +86,7 @@ class WC_Helper_API {
 		}
 
 		$args['headers'] = array(
-			'Authorization' => 'Bearer ' . $auth['access_token'],
+			'Authorization'   => 'Bearer ' . $auth['access_token'],
 			'X-Woo-Signature' => $signature,
 		);
 
@@ -97,7 +97,7 @@ class WC_Helper_API {
 	 * Wrapper for self::request().
 	 *
 	 * @param string $endpoint The helper API endpoint to request.
-	 * @param array $args Arguments passed to wp_remote_request().
+	 * @param array  $args Arguments passed to wp_remote_request().
 	 *
 	 * @return array The response object from wp_safe_remote_request().
 	 */
@@ -110,7 +110,7 @@ class WC_Helper_API {
 	 * Wrapper for self::request().
 	 *
 	 * @param string $endpoint The helper API endpoint to request.
-	 * @param array $args Arguments passed to wp_remote_request().
+	 * @param array  $args Arguments passed to wp_remote_request().
 	 *
 	 * @return array The response object from wp_safe_remote_request().
 	 */

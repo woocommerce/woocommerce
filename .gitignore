@@ -6,6 +6,10 @@ project.properties
 .project
 .settings*
 .idea
+.vscode
+*.sublime-project
+*.sublime-workspace
+.sublimelinterrc
 
 # Grunt
 /node_modules/
@@ -34,9 +38,14 @@ tests/cli/vendor
 /tmp
 /tests/bin/tmp
 /tests/e2e-tests/config/local-*.json
+/tests/e2e-tests/config/local.json
 
 # Logs
 /logs
 
 # Composer
 /vendor/
+contributors.md
+
+# Screenshots for e2e tests failures
+/screenshots/

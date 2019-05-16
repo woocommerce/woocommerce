@@ -1,4 +1,11 @@
 <?php
+/**
+ * Customer Data Store Interface
+ *
+ * @version 3.0.0
+ * @package WooCommerce/Interface
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -9,15 +16,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Functions that must be defined by customer store classes.
  *
  * @version  3.0.0
- * @category Interface
- * @author   WooThemes
  */
 interface WC_Customer_Data_Store_Interface {
 
 	/**
 	 * Gets the customers last order.
 	 *
-	 * @param WC_Customer &$customer
+	 * @param WC_Customer $customer Customer object.
 	 * @return WC_Order|false
 	 */
 	public function get_last_order( &$customer );
@@ -25,7 +30,7 @@ interface WC_Customer_Data_Store_Interface {
 	/**
 	 * Return the number of orders this customer has.
 	 *
-	 * @param WC_Customer &$customer
+	 * @param WC_Customer $customer Customer object.
 	 * @return integer
 	 */
 	public function get_order_count( &$customer );
@@ -33,7 +38,7 @@ interface WC_Customer_Data_Store_Interface {
 	/**
 	 * Return how much money this customer has spent.
 	 *
-	 * @param WC_Customer &$customer
+	 * @param WC_Customer $customer Customer object.
 	 * @return float
 	 */
 	public function get_total_spent( &$customer );

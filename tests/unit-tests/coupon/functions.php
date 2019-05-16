@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Class Functions.
  * @package WooCommerce\Tests\Coupon
@@ -40,7 +39,7 @@ class WC_Tests_Functions extends WC_Unit_Test_Case {
 	 * @since 2.5.0
 	 */
 	public function test_wc_coupons_enabled() {
-		$this->assertEquals( apply_filters( 'woocommerce_coupons_enabled', get_option( 'woocommerce_enable_coupons' ) == 'yes' ), wc_coupons_enabled() );
+		$this->assertEquals( apply_filters( 'woocommerce_coupons_enabled', get_option( 'woocommerce_enable_coupons' ) === 'yes' ), wc_coupons_enabled() );
 	}
 
 	/**
@@ -76,6 +75,9 @@ class WC_Tests_Functions extends WC_Unit_Test_Case {
 		// Delete coupon.
 		WC_Helper_Coupon::delete_coupon( $coupon->get_id() );
 
+		$this->assertEquals( 0, wc_get_coupon_id_by_code( '' ) );
+
 		$this->assertEmpty( wc_get_coupon_id_by_code( 0 ) );
 	}
+
 }

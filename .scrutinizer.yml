@@ -24,12 +24,9 @@ checks:
 filter:
   excluded_paths:
     - apigen/
-    - dummy-data/
+    - sample-data/
     - i18n/
     - includes/api/legacy/
-    - includes/class-wc-legacy-api.php
-    - includes/gateways/simplify-commerce-deprecated/
-    - includes/gateways/simplify-commerce/includes/
     - includes/legacy/
     - includes/libraries/
     - includes/shipping/legacy-*

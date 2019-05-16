@@ -1,20 +1,22 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+/**
+ * Order Line Item (tax)
+ *
+ * @package WooCommerce/Classes
+ * @version 3.0.0
+ * @since   3.0.0
+ */
+
+defined( 'ABSPATH' ) || exit;
 
 /**
- * Order Line Item (tax).
- *
- * @version     3.0.0
- * @since       3.0.0
- * @package     WooCommerce/Classes
- * @author      WooThemes
+ * Order item tax.
  */
 class WC_Order_Item_Tax extends WC_Order_Item {
 
 	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
+	 *
 	 * @since 3.0.0
 	 * @var array
 	 */
@@ -36,8 +38,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	/**
 	 * Set order item name.
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Name.
 	 */
 	public function set_name( $value ) {
 		$this->set_rate_code( $value );
@@ -46,8 +47,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	/**
 	 * Set item name.
 	 *
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * @param string $value Rate code.
 	 */
 	public function set_rate_code( $value ) {
 		$this->set_prop( 'rate_code', wc_clean( $value ) );
@@ -55,8 +55,8 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 
 	/**
 	 * Set item name.
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 *
+	 * @param string $value Label.
 	 */
 	public function set_label( $value ) {
 		$this->set_prop( 'label', wc_clean( $value ) );
@@ -64,8 +64,8 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 
 	/**
 	 * Set tax rate id.
-	 * @param int $value
-	 * @throws WC_Data_Exception
+	 *
+	 * @param int $value Rate ID.
 	 */
 	public function set_rate_id( $value ) {
 		$this->set_prop( 'rate_id', absint( $value ) );
@@ -73,26 +73,26 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 
 	/**
 	 * Set tax total.
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 *
+	 * @param string $value Tax total.
 	 */
 	public function set_tax_total( $value ) {
 		$this->set_prop( 'tax_total', $value ? wc_format_decimal( $value ) : 0 );
 	}
 
 	/**
-	 * Set shipping_tax_total
-	 * @param string $value
-	 * @throws WC_Data_Exception
+	 * Set shipping tax total.
+	 *
+	 * @param string $value Shipping tax total.
 	 */
 	public function set_shipping_tax_total( $value ) {
 		$this->set_prop( 'shipping_tax_total', $value ? wc_format_decimal( $value ) : 0 );
 	}
 
 	/**
-	 * Set compound
-	 * @param bool $value
-	 * @throws WC_Data_Exception
+	 * Set compound.
+	 *
+	 * @param bool $value If tax is compound.
 	 */
 	public function set_compound( $value ) {
 		$this->set_prop( 'compound', (bool) $value );
@@ -100,8 +100,8 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 
 	/**
 	 * Set properties based on passed in tax rate by ID.
-	 * @param int $tax_rate_id
-	 * @throws WC_Data_Exception
+	 *
+	 * @param int $tax_rate_id Tax rate ID.
 	 */
 	public function set_rate( $tax_rate_id ) {
 		$tax_rate = WC_Tax::_get_tax_rate( $tax_rate_id, OBJECT );
@@ -130,7 +130,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	/**
 	 * Get rate code/name.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_name( $context = 'view' ) {
@@ -140,7 +140,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	/**
 	 * Get rate code/name.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_rate_code( $context = 'view' ) {
@@ -150,7 +150,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	/**
 	 * Get label.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_label( $context = 'view' ) {
@@ -165,7 +165,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	/**
 	 * Get tax rate ID.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return int
 	 */
 	public function get_rate_id( $context = 'view' ) {
@@ -175,7 +175,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	/**
 	 * Get tax_total
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_tax_total( $context = 'view' ) {
@@ -185,7 +185,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	/**
 	 * Get shipping_tax_total
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_shipping_tax_total( $context = 'view' ) {
@@ -195,7 +195,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	/**
 	 * Get compound.
 	 *
-	 * @param  string $context
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return bool
 	 */
 	public function get_compound( $context = 'view' ) {
@@ -204,6 +204,7 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 
 	/**
 	 * Is this a compound tax rate?
+	 *
 	 * @return boolean
 	 */
 	public function is_compound() {
@@ -220,9 +221,10 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	*/
 
 	/**
-	 * offsetGet for ArrayAccess/Backwards compatibility.
+	 * O for ArrayAccess/Backwards compatibility.
+	 *
 	 * @deprecated Add deprecation notices in future release.
-	 * @param string $offset
+	 * @param string $offset Offset.
 	 * @return mixed
 	 */
 	public function offsetGet( $offset ) {
@@ -235,10 +237,11 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	}
 
 	/**
-	 * offsetSet for ArrayAccess/Backwards compatibility.
+	 * OffsetSet for ArrayAccess/Backwards compatibility.
+	 *
 	 * @deprecated Add deprecation notices in future release.
-	 * @param string $offset
-	 * @param mixed $value
+	 * @param string $offset Offset.
+	 * @param mixed  $value  Value.
 	 */
 	public function offsetSet( $offset, $value ) {
 		if ( 'tax_amount' === $offset ) {
@@ -250,12 +253,13 @@ class WC_Order_Item_Tax extends WC_Order_Item {
 	}
 
 	/**
-	 * offsetExists for ArrayAccess
-	 * @param string $offset
+	 * OffsetExists for ArrayAccess.
+	 *
+	 * @param string $offset Offset.
 	 * @return bool
 	 */
 	public function offsetExists( $offset ) {
-		if ( in_array( $offset, array( 'tax_amount', 'shipping_tax_amount' ) ) ) {
+		if ( in_array( $offset, array( 'tax_amount', 'shipping_tax_amount' ), true ) ) {
 			return true;
 		}
 		return parent::offsetExists( $offset );

@@ -1,6 +1,13 @@
 <?php
+/**
+ * Log handling functionality.
+ *
+ * @class WC_Log_Handler
+ * @package WooCommerce/Abstracts
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -8,8 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @version        1.0.0
  * @package        WooCommerce/Abstracts
- * @category       Abstract Class
- * @author         WooThemes
  */
 abstract class WC_Log_Handler implements WC_Log_Handler_Interface {
 
@@ -26,10 +31,10 @@ abstract class WC_Log_Handler implements WC_Log_Handler_Interface {
 	/**
 	 * Builds a log entry text from level, timestamp and message.
 	 *
-	 * @param int $timestamp Log timestamp.
-	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug
+	 * @param int    $timestamp Log timestamp.
+	 * @param string $level emergency|alert|critical|error|warning|notice|info|debug.
 	 * @param string $message Log message.
-	 * @param array $context Additional information for log handlers.
+	 * @param array  $context Additional information for log handlers.
 	 *
 	 * @return string Formatted log entry.
 	 */

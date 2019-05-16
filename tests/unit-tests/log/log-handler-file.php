@@ -11,25 +11,25 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 		$log_files = array(
 			'unit-tests',
 			'log',
-			 '_test_clear',
-			 '_test_remove',
-			 '_test_log_rotate',
-			 '_test_log_rotate.0',
-			 '_test_log_rotate.1',
-			 '_test_log_rotate.2',
-			 '_test_log_rotate.3',
-			 '_test_log_rotate.4',
-			 '_test_log_rotate.5',
-			 '_test_log_rotate.6',
-			 '_test_log_rotate.7',
-			 '_test_log_rotate.8',
-			 '_test_log_rotate.9',
+			'_test_clear',
+			'_test_remove',
+			'_test_log_rotate',
+			'_test_log_rotate.0',
+			'_test_log_rotate.1',
+			'_test_log_rotate.2',
+			'_test_log_rotate.3',
+			'_test_log_rotate.4',
+			'_test_log_rotate.5',
+			'_test_log_rotate.6',
+			'_test_log_rotate.7',
+			'_test_log_rotate.8',
+			'_test_log_rotate.9',
 		);
 
 		foreach ( $log_files as $file ) {
 			$file_path = WC_Log_Handler_File::get_log_file_path( $file );
-			if ( file_exists( $file_path ) && is_writable( $file_path ) ) {
-				unlink( $file_path );
+			if ( file_exists( $file_path ) && is_writable( $file_path ) ) { // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_is_writable
+				unlink( $file_path ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_unlink
 			}
 		}
 		parent::tearDown();
@@ -47,7 +47,15 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	public function test_legacy_format() {
 		$handler = new WC_Log_Handler_File( array( 'threshold' => 'debug' ) );
 
-		$handler->handle( time(), 'info', 'this is a message', array( 'source' => 'unit-tests', '_legacy' => true ) );
+		$handler->handle(
+			time(),
+			'info',
+			'this is a message',
+			array(
+				'source'  => 'unit-tests',
+				'_legacy' => true,
+			)
+		);
 
 		$this->assertStringMatchesFormat( '%d-%d-%d @ %d:%d:%d - %s', $this->read_content( 'unit-tests' ) );
 		$this->assertStringEndsWith( ' - this is a message' . PHP_EOL, $this->read_content( 'unit-tests' ) );
@@ -59,7 +67,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_clear() {
-		$handler = new WC_Log_Handler_File();
+		$handler  = new WC_Log_Handler_File();
 		$log_name = '_test_clear';
 		$handler->handle( time(), 'debug', 'debug', array( 'source' => $log_name ) );
 		$handler->clear( $log_name );
@@ -72,10 +80,10 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_remove() {
-		$handler = new WC_Log_Handler_File();
+		$handler  = new WC_Log_Handler_File();
 		$log_name = '_test_remove';
 		$handler->handle( time(), 'debug', 'debug', array( 'source' => $log_name ) );
-		$handler->remove( $log_name );
+		$handler->remove( wc_get_log_file_name( $log_name ) );
 		$this->assertFileNotExists( WC_Log_Handler_File::get_log_file_path( $log_name ) );
 	}
 
@@ -86,7 +94,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 */
 	public function test_writes_file() {
 		$handler = new WC_Log_Handler_File();
-		$time = time();
+		$time    = time();
 
 		$handler->handle( $time, 'debug', 'debug', array() );
 		$handler->handle( $time, 'info', 'info', array() );
@@ -107,8 +115,8 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_log_file_source() {
-		$handler = new WC_Log_Handler_File();
-		$time = time();
+		$handler        = new WC_Log_Handler_File();
+		$time           = time();
 		$context_source = array( 'source' => 'unit-tests' );
 
 		$handler->handle( $time, 'debug', 'debug', $context_source );
@@ -130,9 +138,9 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_multiple_handlers() {
-		$handler_a = new WC_Log_Handler_File();
-		$handler_b = new WC_Log_Handler_File();
-		$time = time();
+		$handler_a      = new WC_Log_Handler_File();
+		$handler_b      = new WC_Log_Handler_File();
+		$time           = time();
 		$context_source = array( 'source' => 'unit-tests' );
 
 		// Different loggers should not conflict.
@@ -159,9 +167,9 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	public function test_log_rotate() {
 
 		// Handler with log size limit of 5mb
-		$handler = new WC_Log_Handler_File( 5 * 1024 * 1024 );
-		$time = time();
-		$log_name = '_test_log_rotate';
+		$handler       = new WC_Log_Handler_File( 5 * 1024 * 1024 );
+		$time          = time();
+		$log_name      = '_test_log_rotate';
 		$base_log_file = WC_Log_Handler_File::get_log_file_path( $log_name );
 
 		// Create log file larger than 5mb to ensure log is rotated
@@ -172,7 +180,7 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 
 		// Write some files to ensure they've rotated correctly
 		for ( $i = 0; $i < 10; $i++ ) {
-			file_put_contents( WC_Log_Handler_File::get_log_file_path( $log_name . ".{$i}" ), $i );
+			file_put_contents( WC_Log_Handler_File::get_log_file_path( $log_name . ".{$i}" ), $i ); // phpcs:ignore WordPress.VIP.FileSystemWritesDisallow.file_ops_file_put_contents
 		}
 
 		$context_source = array( 'source' => $log_name );
@@ -196,9 +204,10 @@ class WC_Tests_Log_Handler_File extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_get_log_file_path() {
-		$log_dir   = trailingslashit( WC_LOG_DIR );
-		$hash_name = sanitize_file_name( wp_hash( 'unit-tests' ) );
-		$this->assertEquals( $log_dir . 'unit-tests-' . $hash_name . '.log', WC_Log_Handler_File::get_log_file_path( 'unit-tests' ) );
+		$log_dir     = trailingslashit( WC_LOG_DIR );
+		$date_suffix = date( 'Y-m-d', current_time( 'timestamp', true ) );
+		$hash_name   = sanitize_file_name( wp_hash( 'unit-tests' ) );
+		$this->assertEquals( $log_dir . 'unit-tests-' . $date_suffix . '-' . $hash_name . '.log', WC_Log_Handler_File::get_log_file_path( 'unit-tests' ) );
 	}
 
 }

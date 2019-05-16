@@ -11,7 +11,10 @@ class WC_Tests_Order_Item_Meta extends WC_Unit_Test_Case {
 	 * Suppress deprecation notice from WC_Order_Item_Meta constructor.
 	 */
 	public function setUp() {
-		add_filter( 'deprecated_function_trigger_error', '__return_false' );
+		parent::setUp();
+
+		wp_insert_term( 'Testing Categories', 'category', array( 'slug' => 'testing' ) );
+		$this->setExpectedDeprecated( 'WC_Order_Item_Meta::__construct' );
 	}
 
 	/**
@@ -29,7 +32,7 @@ class WC_Tests_Order_Item_Meta extends WC_Unit_Test_Case {
 		$expected = array();
 		foreach ( $item->get_meta_data() as $metadata ) {
 			$expected[ $metadata->id ] = array(
-				'key' => $metadata->key,
+				'key'   => $metadata->key,
 				'label' => wc_attribute_label( $metadata->key, null ),
 				'value' => $metadata->value,
 			);
@@ -39,9 +42,6 @@ class WC_Tests_Order_Item_Meta extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 3, count( $result ) );
 		$this->assertEquals( $expected, $result );
-
-		// Clean up.
-		$item->delete( true );
 	}
 
 	/**
@@ -50,8 +50,6 @@ class WC_Tests_Order_Item_Meta extends WC_Unit_Test_Case {
 	 * @since 3.2.0
 	 */
 	public function test_get_formatted() {
-		wp_insert_term( 'Testing Categories', 'category', array( 'slug' => 'testing' ) );
-
 		$item = new WC_Order_Item_Fee();
 		$item->add_meta_data( 'regularkey', '1' );
 		$item->add_meta_data( 'category', 'testing' );
@@ -60,12 +58,12 @@ class WC_Tests_Order_Item_Meta extends WC_Unit_Test_Case {
 
 		$meta = new WC_Order_Item_Meta( $item );
 
-		$expected = array( 'regularkey' => '1', 'category' => 'Testing Categories' );
-		$actual = wp_list_pluck( $meta->get_formatted(), 'value', 'key' );
+		$expected = array(
+			'regularkey' => '1',
+			'category'   => 'Testing Categories',
+		);
+		$actual   = wp_list_pluck( $meta->get_formatted(), 'value', 'key' );
 		$this->assertEquals( $expected, $actual );
-
-		// Clean up.
-		$item->delete( true );
 	}
 
 
@@ -84,7 +82,7 @@ class WC_Tests_Order_Item_Meta extends WC_Unit_Test_Case {
 		$meta = new WC_Order_Item_Meta( $item );
 
 		$expected = "regularkey: 1, \ncategory: Testing Categories";
-		$flat = $meta->display( true, true );
+		$flat     = $meta->display( true, true );
 		$this->assertEquals( $expected, $flat );
 
 		$not_flat = $meta->display( false, true );
@@ -92,8 +90,5 @@ class WC_Tests_Order_Item_Meta extends WC_Unit_Test_Case {
 		$this->assertContains( 'class="variation-regularkey"><p>1</p>', $not_flat );
 		$this->assertContains( 'class="variation-category">category:', $not_flat );
 		$this->assertContains( 'class="variation-category"><p>Testing Categories</p>', $not_flat );
-
-		// Clean up.
-		$item->delete( true );
 	}
 }

@@ -1,4 +1,20 @@
 <?php
+/**
+ * REST Controller
+ *
+ * This class extend `WP_REST_Controller` in order to include /batch endpoint
+ * for almost all endpoints in WooCommerce REST API.
+ *
+ * It's required to follow "Controller Classes" guide before extending this class:
+ * <https://developer.wordpress.org/rest-api/extending-the-rest-api/controller-classes/>
+ *
+ * NOTE THAT ONLY CODE RELEVANT FOR MOST ENDPOINTS SHOULD BE INCLUDED INTO THIS CLASS.
+ * If necessary extend this class and create new abstract classes like `WC_REST_CRUD_Controller` or `WC_REST_Terms_Controller`.
+ *
+ * @class   WC_REST_Controller
+ * @package WooCommerce/Abstracts
+ * @see     https://developer.wordpress.org/rest-api/extending-the-rest-api/controller-classes/
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -7,8 +23,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Abstract Rest Controller Class
  *
- * @author   WooThemes
- * @category API
  * @package  WooCommerce/Abstracts
  * @extends  WP_REST_Controller
  * @version  2.6.0
@@ -109,7 +123,11 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @return array Of WP_Error or WP_REST_Response.
 	 */
 	public function batch_items( $request ) {
-		/** @var WP_REST_Server $wp_rest_server */
+		/**
+		 * REST Server
+		 *
+		 * @var WP_REST_Server $wp_rest_server
+		 */
 		global $wp_rest_server;
 
 		// Get the request params.
@@ -143,7 +161,11 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 				if ( is_wp_error( $_response ) ) {
 					$response['create'][] = array(
 						'id'    => 0,
-						'error' => array( 'code' => $_response->get_error_code(), 'message' => $_response->get_error_message(), 'data' => $_response->get_error_data() ),
+						'error' => array(
+							'code'    => $_response->get_error_code(),
+							'message' => $_response->get_error_message(),
+							'data'    => $_response->get_error_data(),
+						),
 					);
 				} else {
 					$response['create'][] = $wp_rest_server->response_to_data( $_response, '' );
@@ -160,7 +182,11 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 				if ( is_wp_error( $_response ) ) {
 					$response['update'][] = array(
 						'id'    => $item['id'],
-						'error' => array( 'code' => $_response->get_error_code(), 'message' => $_response->get_error_message(), 'data' => $_response->get_error_data() ),
+						'error' => array(
+							'code'    => $_response->get_error_code(),
+							'message' => $_response->get_error_message(),
+							'data'    => $_response->get_error_data(),
+						),
 					);
 				} else {
 					$response['update'][] = $wp_rest_server->response_to_data( $_response, '' );
@@ -177,13 +203,22 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 				}
 
 				$_item = new WP_REST_Request( 'DELETE' );
-				$_item->set_query_params( array( 'id' => $id, 'force' => true ) );
+				$_item->set_query_params(
+					array(
+						'id'    => $id,
+						'force' => true,
+					)
+				);
 				$_response = $this->delete_item( $_item );
 
 				if ( is_wp_error( $_response ) ) {
 					$response['delete'][] = array(
 						'id'    => $id,
-						'error' => array( 'code' => $_response->get_error_code(), 'message' => $_response->get_error_message(), 'data' => $_response->get_error_data() ),
+						'error' => array(
+							'code'    => $_response->get_error_code(),
+							'message' => $_response->get_error_message(),
+							'data'    => $_response->get_error_data(),
+						),
 					);
 				} else {
 					$response['delete'][] = $wp_rest_server->response_to_data( $_response, '' );
@@ -198,8 +233,8 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * Validate a text value for a text based setting.
 	 *
 	 * @since 3.0.0
-	 * @param string $value
-	 * @param array  $setting
+	 * @param string $value Value.
+	 * @param array  $setting Setting.
 	 * @return string
 	 */
 	public function validate_setting_text_field( $value, $setting ) {
@@ -211,8 +246,8 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * Validate select based settings.
 	 *
 	 * @since 3.0.0
-	 * @param string $value
-	 * @param array  $setting
+	 * @param string $value Value.
+	 * @param array  $setting Setting.
 	 * @return string|WP_Error
 	 */
 	public function validate_setting_select_field( $value, $setting ) {
@@ -227,8 +262,8 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * Validate multiselect based settings.
 	 *
 	 * @since 3.0.0
-	 * @param array $values
-	 * @param array  $setting
+	 * @param array $values Values.
+	 * @param array $setting Setting.
 	 * @return array|WP_Error
 	 */
 	public function validate_setting_multiselect_field( $values, $setting ) {
@@ -254,8 +289,8 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * Validate image_width based settings.
 	 *
 	 * @since 3.0.0
-	 * @param array $values
-	 * @param array $setting
+	 * @param array $values Values.
+	 * @param array $setting Setting.
 	 * @return string|WP_Error
 	 */
 	public function validate_setting_image_width_field( $values, $setting ) {
@@ -280,8 +315,8 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * Validate radio based settings.
 	 *
 	 * @since 3.0.0
-	 * @param string $value
-	 * @param array  $setting
+	 * @param string $value Value.
+	 * @param array  $setting Setting.
 	 * @return string|WP_Error
 	 */
 	public function validate_setting_radio_field( $value, $setting ) {
@@ -292,8 +327,8 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * Validate checkbox based settings.
 	 *
 	 * @since 3.0.0
-	 * @param string $value
-	 * @param array  $setting
+	 * @param string $value Value.
+	 * @param array  $setting Setting.
 	 * @return string|WP_Error
 	 */
 	public function validate_setting_checkbox_field( $value, $setting ) {
@@ -311,16 +346,22 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * Validate textarea based settings.
 	 *
 	 * @since 3.0.0
-	 * @param string $value
-	 * @param array  $setting
+	 * @param string $value Value.
+	 * @param array  $setting Setting.
 	 * @return string
 	 */
 	public function validate_setting_textarea_field( $value, $setting ) {
 		$value = is_null( $value ) ? '' : $value;
-		return wp_kses( trim( stripslashes( $value ) ),
+		return wp_kses(
+			trim( stripslashes( $value ) ),
 			array_merge(
 				array(
-					'iframe' => array( 'src' => true, 'style' => true, 'id' => true, 'class' => true ),
+					'iframe' => array(
+						'src'   => true,
+						'style' => true,
+						'id'    => true,
+						'class' => true,
+					),
 				),
 				wp_kses_allowed_html( 'post' )
 			)
@@ -336,7 +377,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 * @return array
 	 */
 	protected function add_meta_query( $args, $meta_query ) {
-		if ( ! empty( $args['meta_query'] ) ) {
+		if ( empty( $args['meta_query'] ) ) {
 			$args['meta_query'] = array();
 		}
 
@@ -384,5 +425,43 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		);
 
 		return $schema;
+	}
+
+	/**
+	 * Gets an array of fields to be included on the response.
+	 * Included fields are based on item schema and `_fields=` request argument.
+	 * Introduced to support WordPress 4.9.6 changes.
+	 *
+	 * @since 3.5.0
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return array Fields to be included in the response.
+	 */
+	public function get_fields_for_response( $request ) {
+		$schema = $this->get_item_schema();
+		$fields = isset( $schema['properties'] ) ? array_keys( $schema['properties'] ) : array();
+
+		$additional_fields = $this->get_additional_fields();
+		foreach ( $additional_fields as $field_name => $field_options ) {
+			// For back-compat, include any field with an empty schema
+			// because it won't be present in $this->get_item_schema().
+			if ( is_null( $field_options['schema'] ) ) {
+				$fields[] = $field_name;
+			}
+		}
+
+		if ( ! isset( $request['_fields'] ) ) {
+			return $fields;
+		}
+		$requested_fields = is_array( $request['_fields'] ) ? $request['_fields'] : preg_split( '/[\s,]+/', $request['_fields'] );
+		if ( 0 === count( $requested_fields ) ) {
+			return $fields;
+		}
+		// Trim off outside whitespace from the comma delimited list.
+		$requested_fields = array_map( 'trim', $requested_fields );
+		// Always persist 'id', because it can be needed for add_additional_fields_to_object().
+		if ( in_array( 'id', $fields, true ) ) {
+			$requested_fields[] = 'id';
+		}
+		return array_intersect( $fields, $requested_fields );
 	}
 }

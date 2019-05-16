@@ -12,7 +12,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 	 * @return string
 	 * @since 3.0.0
 	 */
-	function get_function_name( $function ) {
+	public function get_function_name( $function ) {
 		if ( 'exclude_product_ids' === $function ) {
 			$function = 'excluded_product_ids';
 		} elseif ( 'exclude_product_categories' === $function ) {
@@ -32,7 +32,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 	public function test_coupon_backwards_compat_props_use_correct_getters() {
 		// Accessing properties directly will throw some wanted deprected notices
 		// So we need to let PHPUnit know we are expecting them and it's fine to continue
-		$legacy_keys = array(
+		$legacy_keys                   = array(
 			'id',
 			'exists',
 			'coupon_custom_fields',
@@ -92,26 +92,29 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_read_manual_coupon() {
-		$code = 'manual_coupon_' . time();
+		$code   = 'manual_coupon_' . time();
 		$coupon = new WC_Coupon( $code );
-		$coupon->read_manual_coupon( $code, array(
-			'id'                         => true,
-			'type'                       => 'fixed_cart',
-			'amount'                     => 0,
-			'individual_use'             => true,
-			'product_ids'                => array(),
-			'exclude_product_ids'        => array(),
-			'usage_limit'                => '',
-			'usage_count'                => '',
-			'expiry_date'                => '',
-			'free_shipping'              => false,
-			'product_categories'         => array(),
-			'exclude_product_categories' => array(),
-			'exclude_sale_items'         => false,
-			'minimum_amount'             => '',
-			'maximum_amount'             => 100,
-			'customer_email'             => '',
-		) );
+		$coupon->read_manual_coupon(
+			$code,
+			array(
+				'id'                         => true,
+				'type'                       => 'fixed_cart',
+				'amount'                     => 0,
+				'individual_use'             => true,
+				'product_ids'                => array(),
+				'exclude_product_ids'        => array(),
+				'usage_limit'                => '',
+				'usage_count'                => '',
+				'expiry_date'                => '',
+				'free_shipping'              => false,
+				'product_categories'         => array(),
+				'exclude_product_categories' => array(),
+				'exclude_sale_items'         => false,
+				'minimum_amount'             => '',
+				'maximum_amount'             => 100,
+				'customer_email'             => '',
+			)
+		);
 		$this->assertEquals( $code, $coupon->get_code() );
 		$this->assertTrue( $coupon->get_individual_use() );
 		$this->assertEquals( 100, $coupon->get_maximum_amount() );
@@ -122,28 +125,37 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 		 * setting these values this way will also throw a deprecated notice so we will let
 		 * PHPUnit know that its okay to continue.
 		 */
-		$legacy_keys = array( 'product_ids', 'exclude_product_ids', 'individual_use', 'free_shipping', 'exclude_sale_items' );
+		$legacy_keys                   = array(
+			'product_ids',
+			'exclude_product_ids',
+			'individual_use',
+			'free_shipping',
+			'exclude_sale_items',
+		);
 		$this->expected_doing_it_wrong = array_merge( $this->expected_doing_it_wrong, $legacy_keys );
-		$code = 'bc_manual_coupon_' . time();
-		$coupon = new WC_Coupon( $code );
-		$coupon->read_manual_coupon( $code, array(
-			'id'                         => true,
-			'type'                       => 'fixed_cart',
-			'amount'                     => 0,
-			'individual_use'             => 'yes',
-			'product_ids'                => '',
-			'exclude_product_ids'        => '5,6',
-			'usage_limit'                => '',
-			'usage_count'                => '',
-			'expiry_date'                => '',
-			'free_shipping'              => 'no',
-			'product_categories'         => array(),
-			'exclude_product_categories' => array(),
-			'exclude_sale_items'         => 'no',
-			'minimum_amount'             => '',
-			'maximum_amount'             => 100,
-			'customer_email'             => '',
-		) );
+		$code                          = 'bc_manual_coupon_' . time();
+		$coupon                        = new WC_Coupon( $code );
+		$coupon->read_manual_coupon(
+			$code,
+			array(
+				'id'                         => true,
+				'type'                       => 'fixed_cart',
+				'amount'                     => 0,
+				'individual_use'             => 'yes',
+				'product_ids'                => '',
+				'exclude_product_ids'        => '5,6',
+				'usage_limit'                => '',
+				'usage_count'                => '',
+				'expiry_date'                => '',
+				'free_shipping'              => 'no',
+				'product_categories'         => array(),
+				'exclude_product_categories' => array(),
+				'exclude_sale_items'         => 'no',
+				'minimum_amount'             => '',
+				'maximum_amount'             => 100,
+				'customer_email'             => '',
+			)
+		);
 		$this->assertEquals( $code, $coupon->get_code() );
 		$this->assertTrue( $coupon->get_individual_use() );
 		$this->assertFalse( $coupon->get_free_shipping() );
@@ -157,32 +169,31 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_coupon_getters_and_setters() {
-		$time = time();
 		$standard_getters_and_setters = array(
-			'code' => 'test',
-			'description' => 'hello world',
-			'discount_type' => 'percent',
-			'amount' => 10.50,
-			'usage_count' => 5,
-			'individual_use' => true,
-			'product_ids' => array( 5, 10 ),
-			'exclude_product_ids' => array( 2, 1 ),
-			'usage_limit' => 2,
-			'usage_limit_per_user' => 10,
-			'limit_usage_to_x_items' => 2,
-			'free_shipping' => true,
-			'product_categories' => array( 6 ),
+			'code'                       => 'test',
+			'description'                => 'hello world',
+			'discount_type'              => 'percent',
+			'amount'                     => 10.50,
+			'usage_count'                => 5,
+			'individual_use'             => true,
+			'product_ids'                => array( 5, 10 ),
+			'exclude_product_ids'        => array( 2, 1 ),
+			'usage_limit'                => 2,
+			'usage_limit_per_user'       => 10,
+			'limit_usage_to_x_items'     => 2,
+			'free_shipping'              => true,
+			'product_categories'         => array( 6 ),
 			'exclude_product_categories' => array( 8 ),
-			'exclude_sale_items' => true,
-			'minimum_amount' => 2,
-			'maximum_amount' => 1000,
-			'customer_email' => array( 'test@woo.local' ),
-			'used_by' => array( 1 ),
+			'exclude_sale_items'         => true,
+			'minimum_amount'             => 2,
+			'maximum_amount'             => 1000,
+			'customer_email'             => array( 'test@woo.local' ),
+			'used_by'                    => array( 1 ),
 		);
 
-		$coupon = new WC_Coupon;
-		 foreach ( $standard_getters_and_setters as $function => $value ) {
-		 	$function = $this->get_function_name( $function );
+		$coupon = new WC_Coupon();
+		foreach ( $standard_getters_and_setters as $function => $value ) {
+			$function = $this->get_function_name( $function );
 			$coupon->{"set_{$function}"}( $value );
 			$this->assertEquals( $value, $coupon->{"get_{$function}"}(), $function );
 		}
@@ -199,7 +210,7 @@ class WC_Tests_Coupon_Data extends WC_Unit_Test_Case {
 		$coupon->add_meta_data( 'test_coupon_field', $meta_value, true );
 		$coupon->save_meta_data();
 
-		$coupon = new WC_Coupon( $coupon_id );
+		$coupon        = new WC_Coupon( $coupon_id );
 		$custom_fields = $coupon->get_meta_data();
 		$this->assertCount( 1, $custom_fields );
 		$this->assertEquals( $meta_value, $coupon->get_meta( 'test_coupon_field' ) );

@@ -11,7 +11,7 @@ class WC_Tests_Payment_Token_eCheck extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	function test_wc_payment_token_echeck_validate_empty() {
-		$token = new WC_Payment_Token_eCheck();
+		$token = new WC_Payment_Token_ECheck();
 		$token->set_token( time() . ' ' . __FUNCTION__ );
 		$this->assertFalse( $token->validate() );
 		$token->set_last4( '1111' );
@@ -23,7 +23,7 @@ class WC_Tests_Payment_Token_eCheck extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_echeck_last4() {
-		$token = new WC_Payment_Token_eCheck();
+		$token = new WC_Payment_Token_ECheck();
 		$token->set_last4( '1111' );
 		$this->assertEquals( '1111', $token->get_last4() );
 	}
@@ -33,10 +33,10 @@ class WC_Tests_Payment_Token_eCheck extends WC_Unit_Test_Case {
 	 * @since 2.6.0
 	 */
 	public function test_wc_payment_token_echeck_read_pulls_meta() {
-		$token = WC_Helper_Payment_Token::create_eCheck_token();
+		$token    = WC_Helper_Payment_Token::create_eCheck_token();
 		$token_id = $token->get_id();
 
-		$token_read = new WC_Payment_Token_eCheck( $token_id );
+		$token_read = new WC_Payment_Token_ECheck( $token_id );
 		$this->assertEquals( '1234', $token_read->get_last4() );
 	}
 }

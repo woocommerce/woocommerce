@@ -1,18 +1,14 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * WooCommerce Coupons Functions
  *
  * Functions for coupon specific things.
  *
- * @author 		WooThemes
- * @category 	Core
- * @package 	WooCommerce/Functions
- * @version     3.0.0
+ * @package WooCommerce/Functions
+ * @version 3.0.0
  */
+
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Get coupon types.
@@ -20,17 +16,20 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array
  */
 function wc_get_coupon_types() {
-	return (array) apply_filters( 'woocommerce_coupon_discount_types', array(
-		'percent'         => __( 'Percentage discount', 'woocommerce' ),
-		'fixed_cart'      => __( 'Fixed cart discount', 'woocommerce' ),
-		'fixed_product'   => __( 'Fixed product discount', 'woocommerce' ),
-	) );
+	return (array) apply_filters(
+		'woocommerce_coupon_discount_types',
+		array(
+			'percent'       => __( 'Percentage discount', 'woocommerce' ),
+			'fixed_cart'    => __( 'Fixed cart discount', 'woocommerce' ),
+			'fixed_product' => __( 'Fixed product discount', 'woocommerce' ),
+		)
+	);
 }
 
 /**
  * Get a coupon type's name.
  *
- * @param string $type (default: '')
+ * @param string $type Coupon type.
  * @return string
  */
 function wc_get_coupon_type( $type = '' ) {
@@ -79,18 +78,23 @@ function wc_coupons_enabled() {
  */
 function wc_get_coupon_code_by_id( $id ) {
 	$data_store = WC_Data_Store::load( 'coupon' );
-	return (string) $data_store->get_code_by_id( $id );
+	return empty( $id ) ? '' : (string) $data_store->get_code_by_id( $id );
 }
 
 /**
  * Get coupon code by ID.
  *
  * @since 3.0.0
- * @param string $code
- * @param int $exclude Used to exclude an ID from the check if you're checking existence.
+ * @param string $code    Coupon code.
+ * @param int    $exclude Used to exclude an ID from the check if you're checking existence.
  * @return int
  */
 function wc_get_coupon_id_by_code( $code, $exclude = 0 ) {
+
+	if ( empty( $code ) ) {
+		return 0;
+	}
+
 	$data_store = WC_Data_Store::load( 'coupon' );
 	$ids        = wp_cache_get( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $code, 'coupons' );
 

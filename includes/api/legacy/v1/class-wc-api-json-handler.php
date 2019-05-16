@@ -48,32 +48,27 @@ class WC_API_JSON_Handler implements WC_API_Handler {
 	 * @return string
 	 */
 	public function generate_response( $data ) {
-
 		if ( isset( $_GET['_jsonp'] ) ) {
 
-			// JSONP enabled by default
 			if ( ! apply_filters( 'woocommerce_api_jsonp_enabled', true ) ) {
-
 				WC()->api->server->send_status( 400 );
-
-				$data = array( array( 'code' => 'woocommerce_api_jsonp_disabled', 'message' => __( 'JSONP support is disabled on this site', 'woocommerce' ) ) );
+				return wp_json_encode( array( array( 'code' => 'woocommerce_api_jsonp_disabled', 'message' => __( 'JSONP support is disabled on this site', 'woocommerce' ) ) ) );
 			}
 
-			// Check for invalid characters (only alphanumeric allowed)
-			if ( preg_match( '/\W/', $_GET['_jsonp'] ) ) {
+			$jsonp_callback = $_GET['_jsonp'];
 
+			if ( ! wp_check_jsonp_callback( $jsonp_callback ) ) {
 				WC()->api->server->send_status( 400 );
-
-				$data = array( array( 'code' => 'woocommerce_api_jsonp_callback_invalid', __( 'The JSONP callback function is invalid', 'woocommerce' ) ) );
+				return wp_json_encode( array( array( 'code' => 'woocommerce_api_jsonp_callback_invalid', __( 'The JSONP callback function is invalid', 'woocommerce' ) ) ) );
 			}
 
-			// see http://miki.it/blog/2014/7/8/abusing-jsonp-with-rosetta-flash/
 			WC()->api->server->header( 'X-Content-Type-Options', 'nosniff' );
 
-			// Prepend '/**/' to mitigate possible JSONP Flash attacks
-			return '/**/' . $_GET['_jsonp'] . '(' . json_encode( $data ) . ')';
+			// Prepend '/**/' to mitigate possible JSONP Flash attacks.
+			// https://miki.it/blog/2014/7/8/abusing-jsonp-with-rosetta-flash/
+			return '/**/' . $jsonp_callback . '(' . wp_json_encode( $data ) . ')';
 		}
 
-		return json_encode( $data );
+		return wp_json_encode( $data );
 	}
 }

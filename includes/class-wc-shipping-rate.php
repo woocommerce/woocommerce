@@ -1,18 +1,17 @@
 <?php
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
-}
-
 /**
- * WooCommerce Shipping Rate Class.
+ * WooCommerce Shipping Rate
  *
  * Simple Class for storing rates.
  *
- * @class    WC_Shipping_Rate
- * @package  WooCommerce/Classes/Shipping
- * @category Class
- * @author   Automattic
+ * @package WooCommerce/Classes/Shipping
+ * @since   2.6.0
+ */
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Shipping rate class.
  */
 class WC_Shipping_Rate {
 
@@ -42,12 +41,12 @@ class WC_Shipping_Rate {
 	/**
 	 * Constructor.
 	 *
-	 * @param string $id
-	 * @param string $label
-	 * @param integer $cost
-	 * @param array $taxes
-	 * @param string $method_id
-	 * @param int $instance_id
+	 * @param string  $id          Shipping rate ID.
+	 * @param string  $label       Shipping rate label.
+	 * @param integer $cost        Cost.
+	 * @param array   $taxes       Taxes applied to shipping rate.
+	 * @param string  $method_id   Shipping method ID.
+	 * @param int     $instance_id Shipping instance ID.
 	 */
 	public function __construct( $id = '', $label = '', $cost = 0, $taxes = array(), $method_id = '', $instance_id = 0 ) {
 		$this->set_id( $id );
@@ -62,7 +61,7 @@ class WC_Shipping_Rate {
 	 * Magic methods to support direct access to props.
 	 *
 	 * @since 3.2.0
-	 * @param string $key
+	 * @param string $key Key.
 	 * @return bool
 	 */
 	public function __isset( $key ) {
@@ -73,7 +72,7 @@ class WC_Shipping_Rate {
 	 * Magic methods to support direct access to props.
 	 *
 	 * @since 3.2.0
-	 * @param string $key
+	 * @param string $key Key.
 	 * @return mixed
 	 */
 	public function __get( $key ) {
@@ -90,8 +89,8 @@ class WC_Shipping_Rate {
 	 * Magic methods to support direct access to props.
 	 *
 	 * @since 3.2.0
-	 * @param string $key
-	 * @param mixed  $value
+	 * @param string $key   Key.
+	 * @param mixed  $value Value.
 	 */
 	public function __set( $key, $value ) {
 		if ( is_callable( array( $this, "set_{$key}" ) ) ) {
@@ -105,7 +104,7 @@ class WC_Shipping_Rate {
 	 * Set ID for the rate. This is usually a combination of the method and instance IDs.
 	 *
 	 * @since 3.2.0
-	 * @param string $id
+	 * @param string $id Shipping rate ID.
 	 */
 	public function set_id( $id ) {
 		$this->data['id'] = (string) $id;
@@ -115,7 +114,7 @@ class WC_Shipping_Rate {
 	 * Set shipping method ID the rate belongs to.
 	 *
 	 * @since 3.2.0
-	 * @param string $method_id
+	 * @param string $method_id Shipping method ID.
 	 */
 	public function set_method_id( $method_id ) {
 		$this->data['method_id'] = (string) $method_id;
@@ -125,7 +124,7 @@ class WC_Shipping_Rate {
 	 * Set instance ID the rate belongs to.
 	 *
 	 * @since 3.2.0
-	 * @param int $instance_id
+	 * @param int $instance_id Instance ID.
 	 */
 	public function set_instance_id( $instance_id ) {
 		$this->data['instance_id'] = absint( $instance_id );
@@ -135,7 +134,7 @@ class WC_Shipping_Rate {
 	 * Set rate label.
 	 *
 	 * @since 3.2.0
-	 * @param string $method_id
+	 * @param string $label Shipping rate label.
 	 */
 	public function set_label( $label ) {
 		$this->data['label'] = (string) $label;
@@ -144,8 +143,9 @@ class WC_Shipping_Rate {
 	/**
 	 * Set rate cost.
 	 *
+	 * @todo 4.0 Prevent negative value being set. #19293
 	 * @since 3.2.0
-	 * @param string $cost
+	 * @param string $cost Shipping rate cost.
 	 */
 	public function set_cost( $cost ) {
 		$this->data['cost'] = $cost;
@@ -155,7 +155,7 @@ class WC_Shipping_Rate {
 	 * Set rate taxes.
 	 *
 	 * @since 3.2.0
-	 * @param array $taxes
+	 * @param array $taxes List of taxes applied to shipping rate.
 	 */
 	public function set_taxes( $taxes ) {
 		$this->data['taxes'] = ! empty( $taxes ) && is_array( $taxes ) ? $taxes : array();
@@ -226,15 +226,15 @@ class WC_Shipping_Rate {
 	 * @return array
 	 */
 	public function get_shipping_tax() {
-		return apply_filters( 'woocommerce_get_shipping_tax', sizeof( $this->taxes ) > 0 && ! WC()->customer->get_is_vat_exempt() ? array_sum( $this->taxes ) : 0, $this );
+		return apply_filters( 'woocommerce_get_shipping_tax', count( $this->taxes ) > 0 && ! WC()->customer->get_is_vat_exempt() ? array_sum( $this->taxes ) : 0, $this );
 	}
 
 	/**
 	 * Add some meta data for this rate.
 	 *
 	 * @since 2.6.0
-	 * @param string $key
-	 * @param string $value
+	 * @param string $key   Key.
+	 * @param string $value Value.
 	 */
 	public function add_meta_data( $key, $value ) {
 		$this->meta_data[ wc_clean( $key ) ] = wc_clean( $value );

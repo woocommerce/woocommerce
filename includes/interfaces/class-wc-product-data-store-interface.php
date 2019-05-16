@@ -1,4 +1,11 @@
 <?php
+/**
+ * Product Data Store Interface
+ *
+ * @version 3.0.0
+ * @package WooCommerce/Interface
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -9,8 +16,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Functions that must be defined by product store classes.
  *
  * @version  3.0.0
- * @category Interface
- * @author   WooThemes
  */
 interface WC_Product_Data_Store_Interface {
 
@@ -34,8 +39,8 @@ interface WC_Product_Data_Store_Interface {
 	/**
 	 * Check if product sku is found for any other product IDs.
 	 *
-	 * @param int $product_id
-	 * @param string $sku
+	 * @param int    $product_id Product ID.
+	 * @param string $sku SKU.
 	 * @return bool
 	 */
 	public function is_existing_sku( $product_id, $sku );
@@ -43,7 +48,7 @@ interface WC_Product_Data_Store_Interface {
 	/**
 	 * Return product ID based on SKU.
 	 *
-	 * @param string $sku
+	 * @param string $sku SKU.
 	 * @return int
 	 */
 	public function get_product_id_by_sku( $sku );
@@ -65,8 +70,8 @@ interface WC_Product_Data_Store_Interface {
 	/**
 	 * Find a matching (enabled) variation within a variable product.
 	 *
-	 * @param  WC_Product $product Variable product.
-	 * @param  array $match_attributes Array of attributes we want to try to match.
+	 * @param WC_Product $product Variable product object.
+	 * @param array      $match_attributes Array of attributes we want to try to match.
 	 * @return int Matching variation ID or 0.
 	 */
 	public function find_matching_product_variation( $product, $match_attributes = array() );
@@ -74,18 +79,18 @@ interface WC_Product_Data_Store_Interface {
 	/**
 	 * Make sure all variations have a sort order set so they can be reordered correctly.
 	 *
-	 * @param int $parent_id
+	 * @param int $parent_id Parent ID.
 	 */
 	public function sort_all_product_variations( $parent_id );
 
 	/**
 	 * Return a list of related products (using data like categories and IDs).
 	 *
-	 * @param array $cats_array  List of categories IDs.
-	 * @param array $tags_array  List of tags IDs.
+	 * @param array $cats_array List of categories IDs.
+	 * @param array $tags_array List of tags IDs.
 	 * @param array $exclude_ids Excluded IDs.
-	 * @param int   $limit       Limit of results.
-	 * @param int   $product_id
+	 * @param int   $limit Limit of results.
+	 * @param int   $product_id Product ID.
 	 * @return array
 	 */
 	public function get_related_products( $cats_array, $tags_array, $exclude_ids, $limit, $product_id );
@@ -95,9 +100,9 @@ interface WC_Product_Data_Store_Interface {
 	 *
 	 * Uses queries rather than update_post_meta so we can do this in one query (to avoid stock issues).
 	 *
-	 * @param  int $product_id_with_stock
-	 * @param  int|null $stock_quantity
-	 * @param  string $operation set, increase and decrease.
+	 * @param int      $product_id_with_stock Product ID.
+	 * @param int|null $stock_quantity Stock quantity to update to.
+	 * @param string   $operation Either set, increase or decrease.
 	 */
 	public function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' );
 
@@ -106,16 +111,16 @@ interface WC_Product_Data_Store_Interface {
 	 *
 	 * Uses queries rather than update_post_meta so we can do this in one query for performance.
 	 *
-	 * @since  3.0.0 this supports set, increase and decrease.
-	 * @param  int $product_id
-	 * @param  int|null $quantity
-	 * @param  string $operation set, increase and decrease.
+	 * @param int      $product_id Product ID.
+	 * @param int|null $quantity Stock quantity to use for update.
+	 * @param string   $operation Either set, increase or decrease.
 	 */
 	public function update_product_sales( $product_id, $quantity = null, $operation = 'set' );
 
 	/**
 	 * Get shipping class ID by slug.
-	 * @param string $slug
+	 *
+	 * @param string $slug Shipping class slug.
 	 * @return int|false
 	 */
 	public function get_shipping_class_id_by_slug( $slug );
@@ -123,14 +128,15 @@ interface WC_Product_Data_Store_Interface {
 	/**
 	 * Returns an array of products.
 	 *
-	 * @param  array $args @see wc_get_products
+	 * @param array $args @see wc_get_products.
 	 * @return array
 	 */
 	public function get_products( $args = array() );
 
 	/**
 	 * Get the product type based on product ID.
-	 * @param  int $product_id
+	 *
+	 * @param int $product_id Product ID.
 	 * @return bool|string
 	 */
 	public function get_product_type( $product_id );
