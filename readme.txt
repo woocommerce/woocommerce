@@ -206,11 +206,16 @@ INTERESTED IN DEVELOPMENT?
 * Fix - Order sorting not working in wp-admin when Yoast SEO active. #23590
 * Fix - Attribute ordering not working in product edit screen. #23625
 * Fix - Tracks reporting incorrect order totals due to refunds being excluded in calculation. #23671
+* Fix - Reload state options when creating a new order in WP-Admin and changing country. #23602
+* Fix - New webhooks not showing in the webhook admin list page when you have object caching enabled. #23713
+* Fix - Missing coupon expiry dates, restore coupons expiry_date backward compatibility. #23714
+* Fix - Bulk stock update could result in all products set to out of stock, change ensures consistency between db and Product instance in memory. #23534
 * Tweak - Confirm before saving empty list of countries to sell to in settings. #23597
 * Tweak - Change default WC API version used when creating webhooks to the latest WC API version. #23515
 * Tweak - Report a bug button now points to the new issue template in GitHub. #23580
 * Tweak - Do not display taxes in totals columns when taxes not enabled. #23579
 * Tweak - WC WP-CLI upgrade routine mimics wp-admin upgrade when no updates found by setting DB version to current version. #23666
+* Tweak - Template caching now cache based on WC_VERSION to avoid issues with symlinked plugin folders. #23546
 * Localization - Add Serbia locale defaults. #23428
 * Localization - Add address format for Serbia. #23429
 
