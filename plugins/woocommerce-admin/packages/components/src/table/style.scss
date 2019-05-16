@@ -223,6 +223,11 @@
 		max-width: 40px;
 	}
 
+	.is-negative {
+		color: $alert-red;
+		font-weight: bold;
+	}
+
 	&.is-sorted {
 		background-color: $core-grey-light-100;
 	}

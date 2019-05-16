@@ -10,7 +10,7 @@ import { map } from 'lodash';
 /**
  * WooCommerce dependencies
  */
-import { formatCurrency, getCurrencyFormatDecimal } from '@woocommerce/currency';
+import { formatCurrency, getCurrencyFormatDecimal, renderCurrency } from '@woocommerce/currency';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link, Tag } from '@woocommerce/components';
 import { numberFormat } from '@woocommerce/number';
@@ -153,7 +153,7 @@ class ProductsReportTable extends Component {
 					value: items_sold,
 				},
 				{
-					display: formatCurrency( net_revenue ),
+					display: renderCurrency( net_revenue ),
 					value: getCurrencyFormatDecimal( net_revenue ),
 				},
 				{

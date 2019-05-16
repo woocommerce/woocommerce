@@ -94,7 +94,7 @@ class WC_Admin_Install {
 			order_id bigint(20) unsigned NOT NULL,
 			parent_id bigint(20) unsigned DEFAULT 0 NOT NULL,
 			date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-			num_items_sold int(11) UNSIGNED DEFAULT 0 NOT NULL,
+			num_items_sold int(11) DEFAULT 0 NOT NULL,
 			gross_total double DEFAULT 0 NOT NULL,
 			tax_total double DEFAULT 0 NOT NULL,
 			shipping_total double DEFAULT 0 NOT NULL,

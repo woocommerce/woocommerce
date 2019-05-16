@@ -69,3 +69,13 @@ export function getCurrencyFormatString( number ) {
 	}
 	return number.toFixed( precision );
 }
+
+export function renderCurrency( number, currencySymbol ) {
+	if ( 'number' !== typeof number ) {
+		number = parseFloat( number );
+	}
+	if ( number < 0 ) {
+		return <span className="is-negative">{ formatCurrency( number, currencySymbol ) }</span>;
+	}
+	return formatCurrency( number, currencySymbol );
+}

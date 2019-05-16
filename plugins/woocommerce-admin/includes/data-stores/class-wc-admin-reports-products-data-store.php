@@ -402,6 +402,12 @@ class WC_Admin_Reports_Products_Data_Store extends WC_Admin_Reports_Data_Store i
 			$shipping_tax_amount = $order->get_item_shipping_tax_amount( $order_item );
 			$coupon_amount       = $order->get_item_coupon_amount( $order_item );
 
+			// Skip line items without changes to product quantity.
+			if ( ! $product_qty ) {
+				$num_updated++;
+				continue;
+			}
+
 			// Tax amount.
 			$tax_amount  = 0;
 			$order_taxes = $order->get_taxes();
