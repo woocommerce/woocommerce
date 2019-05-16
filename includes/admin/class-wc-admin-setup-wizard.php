@@ -1524,6 +1524,10 @@ class WC_Admin_Setup_Wizard {
 				);
 			}
 
+			if ( $can_paypal && ! $can_stripe ) {
+				$gateways['ppec_paypal']['enabled'] = true;
+			}
+
 			if ( $can_paypal ) {
 				$offered_gateways += array( 'ppec_paypal' => $gateways['ppec_paypal'] );
 			}
@@ -1545,6 +1549,10 @@ class WC_Admin_Setup_Wizard {
 			$gateways['stripe']['enabled']  = true;
 			$gateways['stripe']['featured'] = true;
 			$offered_gateways              += array( 'stripe' => $gateways['stripe'] );
+		}
+
+		if ( $can_paypal && ! $can_stripe ) {
+			$gateways['ppec_paypal']['enabled'] = true;
 		}
 
 		if ( $can_paypal ) {
