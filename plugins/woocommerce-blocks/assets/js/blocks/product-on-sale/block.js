@@ -139,8 +139,9 @@ class ProductOnSaleBlock extends Component {
 		const { loaded, products = [] } = this.state;
 		const classes = classnames( {
 			'wc-block-products-grid': true,
+			'wc-block-grid': true,
 			'wc-block-on-sale-products': true,
-			[ `cols-${ columns }` ]: columns,
+			[ `has-${ columns }-columns` ]: columns,
 			'is-loading': ! loaded,
 			'is-not-found': loaded && ! products.length,
 			'is-hidden-title': ! contentVisibility.title,

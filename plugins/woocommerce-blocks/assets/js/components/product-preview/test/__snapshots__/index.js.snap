@@ -2,25 +2,29 @@
 
 exports[`ProductPreview should render a single product preview with an image 1`] = `
 <div
-  className="wc-product-preview"
+  className="wc-product-preview wc-block-grid__product"
   style={
     Object {
       "maxWidth": "300px",
     }
   }
 >
-  <img
-    alt=""
-    className="wc-product-preview__image"
-    src="https://example.local/product.jpg"
-    style={
-      Object {
-        "width": "300px",
-      }
-    }
-  />
   <div
-    className="wc-product-preview__title"
+    className="wc-product-preview__image wc-block-grid__product-image"
+  >
+    <img
+      alt=""
+      className="wc-product-preview__image"
+      src="https://example.local/product.jpg"
+      style={
+        Object {
+          "width": "300px",
+        }
+      }
+    />
+  </div>
+  <div
+    className="wc-product-preview__title wc-block-grid__product-title"
     dangerouslySetInnerHTML={
       Object {
         "__html": "Winter Jacket",
@@ -28,7 +32,7 @@ exports[`ProductPreview should render a single product preview with an image 1`]
     }
   />
   <div
-    className="wc-product-preview__price"
+    className="wc-product-preview__price wc-block-grid__product-price"
     dangerouslySetInnerHTML={
       Object {
         "__html": "<span class=\\"woocommerce-Price-amount amount\\"><span class=\\"woocommerce-Price-currencySymbol\\">&#36;</span>65.00</span>",
@@ -39,7 +43,7 @@ exports[`ProductPreview should render a single product preview with an image 1`]
     className="wp-block-button"
   >
     <span
-      className="wc-product-preview__add-to-cart wp-block-button__link"
+      className="wc-product-preview__add-to-cart wc-block-grid__product-add-to-cart wp-block-button__link"
     >
       Add to cart
     </span>
@@ -49,25 +53,29 @@ exports[`ProductPreview should render a single product preview with an image 1`]
 
 exports[`ProductPreview should render a single product preview without an image 1`] = `
 <div
-  className="wc-product-preview"
+  className="wc-product-preview wc-block-grid__product"
   style={
     Object {
       "maxWidth": "300px",
     }
   }
 >
-  <img
-    alt=""
-    className="wc-product-preview__image"
-    src="placeholder.png"
-    style={
-      Object {
-        "width": "300px",
-      }
-    }
-  />
   <div
-    className="wc-product-preview__title"
+    className="wc-product-preview__image wc-block-grid__product-image"
+  >
+    <img
+      alt=""
+      className="wc-product-preview__image"
+      src="placeholder.png"
+      style={
+        Object {
+          "width": "300px",
+        }
+      }
+    />
+  </div>
+  <div
+    className="wc-product-preview__title wc-block-grid__product-title"
     dangerouslySetInnerHTML={
       Object {
         "__html": "Winter Jacket",
@@ -75,7 +83,7 @@ exports[`ProductPreview should render a single product preview without an image 
     }
   />
   <div
-    className="wc-product-preview__price"
+    className="wc-product-preview__price wc-block-grid__product-price"
     dangerouslySetInnerHTML={
       Object {
         "__html": "<span class=\\"woocommerce-Price-amount amount\\"><span class=\\"woocommerce-Price-currencySymbol\\">&#36;</span>65.00</span>",
@@ -86,7 +94,7 @@ exports[`ProductPreview should render a single product preview without an image 
     className="wp-block-button"
   >
     <span
-      className="wc-product-preview__add-to-cart wp-block-button__link"
+      className="wc-product-preview__add-to-cart wc-block-grid__product-add-to-cart wp-block-button__link"
     >
       Add to cart
     </span>
