@@ -308,10 +308,10 @@ jQuery( function( $ ) {
 			index: $( clicked ).index(),
 			addCaptionHTMLFn: function( item, captionEl ) {
 				if ( ! item.title ) {
-					captionEl.children[0].textContent = '';
+					captionEl.children[0].innerHTML = '';
 					return false;
 				}
-				captionEl.children[0].textContent = item.title;
+				captionEl.children[0].innerHTML = item.title;
 				return true;
 			}
 		}, wc_single_product_params.photoswipe_options );
