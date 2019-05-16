@@ -1509,6 +1509,8 @@ class WC_Admin_Setup_Wizard {
 				$gateways['stripe']['enabled']  = true;
 				$gateways['stripe']['featured'] = true;
 				$offered_gateways              += array( 'stripe' => $gateways['stripe'] );
+			} elseif ( $can_paypal ) {
+				$gateways['ppec_paypal']['enabled'] = true;
 			}
 
 			if ( in_array( $spotlight, array( 'klarna_checkout', 'klarna_payments' ), true ) ) {
@@ -1522,10 +1524,6 @@ class WC_Admin_Setup_Wizard {
 				$offered_gateways += array(
 					$spotlight => $gateways[ $spotlight ],
 				);
-			}
-
-			if ( $can_paypal && ! $can_stripe ) {
-				$gateways['ppec_paypal']['enabled'] = true;
 			}
 
 			if ( $can_paypal ) {
@@ -1549,9 +1547,7 @@ class WC_Admin_Setup_Wizard {
 			$gateways['stripe']['enabled']  = true;
 			$gateways['stripe']['featured'] = true;
 			$offered_gateways              += array( 'stripe' => $gateways['stripe'] );
-		}
-
-		if ( $can_paypal && ! $can_stripe ) {
+		} elseif ( $can_paypal ) {
 			$gateways['ppec_paypal']['enabled'] = true;
 		}
 
@@ -1617,7 +1613,7 @@ class WC_Admin_Setup_Wizard {
 		// Show the user-saved state if it was previously saved.
 		// Otherwise, rely on the item info.
 		if ( is_array( $previously_saved_settings ) ) {
-			$should_enable_toggle = isset( $previously_saved_settings['enabled'] ) && 'yes' === $previously_saved_settings['enabled'];
+			$should_enable_toggle = ( isset( $previously_saved_settings['enabled'] ) && 'yes' === $previously_saved_settings['enabled'] ) ? true : ( isset( $item_info['enabled'] ) && $item_info['enabled'] );
 		} else {
 			$should_enable_toggle = isset( $item_info['enabled'] ) && $item_info['enabled'];
 		}
