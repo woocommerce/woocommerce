@@ -7,7 +7,7 @@ import classnames from 'classnames';
 import { Component } from '@wordpress/element';
 import Gridicon from 'gridicons';
 import { IconButton } from '@wordpress/components';
-import { partial, noop } from 'lodash';
+import { intersection, noop, partial } from 'lodash';
 import PropTypes from 'prop-types';
 
 class WordPressNotices extends Component {
@@ -116,33 +116,34 @@ class WordPressNotices extends Component {
 
 	// Some messages should not be displayed in the toggle, like Jetpack JITM messages or update/success messages
 	shouldCollapseNotice( element ) {
+		// element id, [ classes to include ], [ classes to exclude ]
 		const noticesToHide = [
-			[ null, [ 'jetpack-jitm-message' ] ], // ID and/or array of classes
+			[ null, [ 'jetpack-jitm-message' ] ],
 			[ 'woocommerce_errors', null ],
 			[ null, [ 'hidden' ] ],
-			[ 'message', [ 'notice', 'updated' ] ],
+			[ 'message', [ 'notice', 'updated' ], [ 'woocommerce-message' ] ],
 		];
 
-		let collapse = true;
-		for ( let i = 0; collapse && i < noticesToHide.length; i++ ) {
-			const [ id, classes ] = noticesToHide[ i ];
+		for ( let i = 0; i < noticesToHide.length; i++ ) {
+			const [ id, includeClasses, excludeClasses ] = noticesToHide[ i ];
 
-			if ( Array.isArray( classes ) ) {
-				for ( let j = 0; j < classes.length; j++ ) {
-					if (
-						element.classList.contains( classes[ j ] ) &&
-						( ! id || ( id && id === element.id ) )
-					) {
-						collapse = false;
-						break;
-					}
-				}
-			} else if ( id && id === element.id ) {
-				collapse = false;
+			const idMatch = null === id || id === element.id;
+			let classMatch = true;
+
+			if ( Array.isArray( includeClasses ) ) {
+				classMatch = 0 < intersection( element.classList, includeClasses ).length;
+			}
+
+			if ( Array.isArray( excludeClasses ) ) {
+				classMatch = classMatch && 0 === intersection( element.classList, excludeClasses ).length;
+			}
+
+			if ( idMatch && classMatch ) {
+				return false;
 			}
 		}
 
-		return collapse;
+		return true;
 	}
 
 	updateCount() {
