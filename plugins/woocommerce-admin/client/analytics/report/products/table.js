@@ -216,7 +216,7 @@ class ProductsReportTable extends Component {
 		const { products_count = 0, items_sold = 0, net_revenue = 0, orders_count = 0 } = totals;
 		return [
 			{
-				label: _n( 'product sold', 'products sold', products_count, 'woocommerce-admin' ),
+				label: _n( 'product', 'products', products_count, 'woocommerce-admin' ),
 				value: numberFormat( products_count ),
 			},
 			{
