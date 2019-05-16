@@ -178,12 +178,6 @@ class WC_Admin_Feature_Plugin {
 
 		remove_action( 'admin_head', array( 'WC_Admin_Library', 'update_link_structure' ), 20 );
 
-		/*
-		* Remove the emoji script as it always defaults to replacing emojis with Twemoji images.
-		* Gutenberg has also disabled emojis. More on that here -> https://github.com/WordPress/gutenberg/pull/6151
-		*/
-		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
-
 		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-loader.php';
 
 		add_filter( 'woocommerce_admin_features', array( $this, 'replace_supported_features' ) );

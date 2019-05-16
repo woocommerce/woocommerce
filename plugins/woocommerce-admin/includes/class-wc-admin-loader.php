@@ -61,6 +61,12 @@ class WC_Admin_Loader {
 
 		// priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165.
 		add_action( 'admin_head', array( 'WC_Admin_Loader', 'remove_app_entry_page_menu_item' ), 20 );
+
+		/*
+		* Remove the emoji script as it always defaults to replacing emojis with Twemoji images.
+		* Gutenberg has also disabled emojis. More on that here -> https://github.com/WordPress/gutenberg/pull/6151
+		*/
+		remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
 	}
 
 	/**
