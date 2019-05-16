@@ -69,7 +69,7 @@ class WC_Admin_Install {
 		self::create_tables();
 		self::create_events();
 		self::create_notes();
-		self::update_wc_admin_version();
+		self::update_db_version();
 
 		delete_transient( 'wc_admin_installing' );
 
@@ -250,7 +250,7 @@ class WC_Admin_Install {
 	/**
 	 * Update WC Admin version to current.
 	 */
-	protected static function update_wc_admin_version() {
+	protected static function update_db_version() {
 		delete_option( self::VERSION_OPTION );
 		add_option( self::VERSION_OPTION, WC_ADMIN_VERSION_NUMBER );
 	}
