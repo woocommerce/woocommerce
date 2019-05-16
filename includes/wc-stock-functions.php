@@ -20,31 +20,37 @@ defined( 'ABSPATH' ) || exit;
  * @param  int|WC_Product $product        Product ID or product instance.
  * @param  int|null       $stock_quantity Stock quantity.
  * @param  string         $operation      Type of opertion, allows 'set', 'increase' and 'decrease'.
- *
+ * @param  bool           $updating       If true, the product object won't be saved here as it will be updated later.
  * @return bool|int|null
  */
-function wc_update_product_stock( $product, $stock_quantity = null, $operation = 'set' ) {
-	$product = wc_get_product( $product );
+function wc_update_product_stock( $product, $stock_quantity = null, $operation = 'set', $updating = false ) {
+	if ( ! is_a( $product, 'WC_Product' ) ) {
+		$product = wc_get_product( $product );
+	}
 
 	if ( ! $product ) {
 		return false;
 	}
 
 	if ( ! is_null( $stock_quantity ) && $product->managing_stock() ) {
-		// Some products (variations) can have their stock managed by their parent. Get the correct ID to reduce here.
+		// Some products (variations) can have their stock managed by their parent. Get the correct object to be updated here.
 		$product_id_with_stock = $product->get_stock_managed_by_id();
+		$product_with_stock    = $product_id_with_stock !== $product->get_id() ? wc_get_product( $product_id_with_stock ) : $product;
 		$data_store            = WC_Data_Store::load( 'product' );
-		$data_store->update_product_stock( $product_id_with_stock, $stock_quantity, $operation );
-		delete_transient( 'wc_low_stock_count' );
-		delete_transient( 'wc_outofstock_count' );
-		delete_transient( 'wc_product_children_' . ( $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id() ) );
-		wp_cache_delete( 'product-' . $product_id_with_stock, 'products' );
 
-		// Re-read product data after updating stock, then have stock status calculated and saved.
-		$product_with_stock = wc_get_product( $product_id_with_stock );
-		$product_with_stock->set_stock_status();
-		$product_with_stock->save();
+		// Update the database.
+		$new_stock = $data_store->update_product_stock( $product_id_with_stock, $stock_quantity, $operation );
 
+		// Update the product object.
+		$data_store->read_stock_quantity( $product_with_stock, $new_stock );
+
+		// If this is not being called during an update routine, save the product so stock status etc is in sync, and caches are cleared.
+		if ( ! $updating ) {
+			$product_with_stock->set_stock_status();
+			$product_with_stock->save();
+		}
+
+		// Fire actions to let 3rd parties know the stock changed.
 		if ( $product_with_stock->is_type( 'variation' ) ) {
 			do_action( 'woocommerce_variation_set_stock', $product_with_stock );
 		} else {

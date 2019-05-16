@@ -578,6 +578,8 @@ class WC_Data_Store_WP {
 	 * @since 3.6.0
 	 * @param int    $id ID of object to update.
 	 * @param string $table Lookup table name.
+	 *
+	 * @return NULL
 	 */
 	protected function update_lookup_table( $id, $table ) {
 		global $wpdb;
