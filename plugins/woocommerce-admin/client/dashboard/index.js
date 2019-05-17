@@ -20,10 +20,12 @@ import ProfileWizard from './profile-wizard';
 
 export default class Dashboard extends Component {
 	renderDashboardOutput() {
+		const { query, path } = this.props;
+
 		// @todo This should be replaced by a check from the REST API response from #1897.
 		const profileWizardComplete = true;
 		if ( window.wcAdminFeatures.onboarding && ! profileWizardComplete ) {
-			return <ProfileWizard />;
+			return <ProfileWizard query={ query } />;
 		}
 
 		// @todo This should be replaced by a check of tasks from the REST API response from #1897.
@@ -31,8 +33,6 @@ export default class Dashboard extends Component {
 		if ( window.wcAdminFeatures.onboarding && ! requiredTasksComplete ) {
 			return <TaskList />;
 		}
-
-		const { query, path } = this.props;
 
 		// @todo When the customizable dashboard is ready to be launched, we can pull `CustomizableDashboard`'s render
 		// method into `index.js`, and replace both this feature check, and the existing dashboard below.

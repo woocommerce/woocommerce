@@ -6,6 +6,18 @@
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
 		'Helvetica Neue', sans-serif;
 
+	.woocommerce-profile-wizard__header {
+		height: 56px;
+		border-bottom: 1px solid #1f112e;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		svg > g {
+			transform: translateX(25%);
+		}
+	}
+
 	.woocommerce-profile-wizard__header-title {
 		color: #fff;
 		font-size: 24px;
@@ -14,6 +26,14 @@
 	}
 
 	.woocommerce-profile-wizard__container {
+		margin-top: $gap-larger;
+		margin-left: auto;
+		margin-right: auto;
+
+		@include breakpoint( '>960px' ) {
+			width: 70%;
+		}
+
 		p {
 			font-size: 16px;
 			line-height: 24px;
@@ -23,11 +43,8 @@
 
 	#woocommerce-layout__primary {
 		text-align: center;
-		margin-left: auto;
-		margin-right: auto;
-		@include breakpoint( '>960px' ) {
-			width: 70%;
-		}
+		margin: 0;
+		width: 100%;
 	}
 
 	.woocommerce-layout .woocommerce-layout__main {
