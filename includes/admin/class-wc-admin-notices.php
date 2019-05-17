@@ -353,7 +353,7 @@ class WC_Admin_Notices {
 	public static function add_wc_admin_feature_plugin_notice() {
 		$wordpress_version            = get_bloginfo( 'version' );
 
-		if ( version_compare( $wordpress_version, '4.9.9', '>' ) ) {
+		if ( version_compare( $wordpress_version, '5.0', '>=' ) ) {
 			self::add_notice( 'wc_admin' );
 		}
 	}
