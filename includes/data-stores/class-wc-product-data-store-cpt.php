@@ -90,7 +90,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @var array
 	 */
-	protected $updated_props = array();
+	protected $updated_props = [];
 
 	/*
 	|--------------------------------------------------------------------------
@@ -271,7 +271,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param WC_Product $product Product object.
 	 * @param array      $args Array of args to pass to the delete method.
 	 */
-	public function delete( &$product, $args = array() ) {
+	public function delete( &$product, $args = [] ) {
 		$id        = $product->get_id();
 		$post_type = $product->is_type( 'variation' ) ? 'product_variation' : 'product';
 
@@ -348,7 +348,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'_product_image_gallery' => 'gallery_image_ids',
 		);
 
-		$set_props = array();
+		$set_props = [];
 
 		foreach ( $meta_key_to_props as $meta_key => $prop ) {
 			$meta_value         = isset( $post_meta_values[ $meta_key ][0] ) ? $post_meta_values[ $meta_key ][0] : null;
@@ -387,7 +387,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected function read_visibility( &$product ) {
 		$terms           = get_the_terms( $product->get_id(), 'product_visibility' );
-		$term_names      = is_array( $terms ) ? wp_list_pluck( $terms, 'name' ) : array();
+		$term_names      = is_array( $terms ) ? wp_list_pluck( $terms, 'name' ) : [];
 		$featured        = in_array( 'featured', $term_names, true );
 		$exclude_search  = in_array( 'exclude-from-search', $term_names, true );
 		$exclude_catalog = in_array( 'exclude-from-catalog', $term_names, true );
@@ -419,7 +419,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$meta_attributes = get_post_meta( $product->get_id(), '_product_attributes', true );
 
 		if ( ! empty( $meta_attributes ) && is_array( $meta_attributes ) ) {
-			$attributes = array();
+			$attributes = [];
 			foreach ( $meta_attributes as $meta_attribute_key => $meta_attribute_value ) {
 				$meta_value = array_merge(
 					array(
@@ -468,7 +468,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$meta_values = array_filter( (array) get_post_meta( $product->get_id(), '_downloadable_files', true ) );
 
 		if ( $meta_values ) {
-			$downloads = array();
+			$downloads = [];
 			foreach ( $meta_values as $key => $value ) {
 				if ( ! isset( $value['name'], $value['file'] ) ) {
 					continue;
@@ -637,7 +637,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		do_action( 'woocommerce_product_object_updated_props', $product, $this->updated_props );
 
 		// After handling, we can reset the props array.
-		$this->updated_props = array();
+		$this->updated_props = [];
 	}
 
 	/**
@@ -679,7 +679,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$changes = $product->get_changes();
 
 		if ( $force || array_intersect( array( 'featured', 'stock_status', 'average_rating', 'catalog_visibility' ), array_keys( $changes ) ) ) {
-			$terms = array();
+			$terms = [];
 
 			if ( $product->get_featured() ) {
 				$terms[] = 'featured';
@@ -726,7 +726,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( $force || array_key_exists( 'attributes', $changes ) ) {
 			$attributes  = $product->get_attributes();
-			$meta_values = array();
+			$meta_values = [];
 
 			if ( $attributes ) {
 				foreach ( $attributes as $attribute_key => $attribute ) {
@@ -735,10 +735,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					if ( is_null( $attribute ) ) {
 						if ( taxonomy_exists( $attribute_key ) ) {
 							// Handle attributes that have been unset.
-							wp_set_object_terms( $product->get_id(), array(), $attribute_key );
+							wp_set_object_terms( $product->get_id(), [], $attribute_key );
 						} elseif ( taxonomy_exists( urldecode( $attribute_key ) ) ) {
 							// Handle attributes that have been unset.
-							wp_set_object_terms( $product->get_id(), array(), urldecode( $attribute_key ) );
+							wp_set_object_terms( $product->get_id(), [], urldecode( $attribute_key ) );
 						}
 						continue;
 
@@ -777,7 +777,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( $force || array_key_exists( 'downloads', $changes ) ) {
 			$downloads   = $product->get_downloads();
-			$meta_values = array();
+			$meta_values = [];
 
 			if ( $downloads ) {
 				foreach ( $downloads as $key => $download ) {
@@ -849,7 +849,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function get_on_sale_products() {
 		global $wpdb;
 
-		$exclude_term_ids            = array();
+		$exclude_term_ids            = [];
 		$outofstock_join             = '';
 		$outofstock_where            = '';
 		$non_published_where         = '';
@@ -1043,10 +1043,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param  array      $match_attributes Array of attributes we want to try to match.
 	 * @return int Matching variation ID or 0.
 	 */
-	public function find_matching_product_variation( $product, $match_attributes = array() ) {
+	public function find_matching_product_variation( $product, $match_attributes = [] ) {
 		global $wpdb;
 
-		$meta_attribute_names = array();
+		$meta_attribute_names = [];
 
 		// Get attributes to match in meta.
 		foreach ( $product->get_attributes() as $attribute ) {
@@ -1086,7 +1086,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return 0;
 		}
 
-		$sorted_meta = array();
+		$sorted_meta = [];
 
 		foreach ( $attributes as $m ) {
 			$sorted_meta[ $m->post_id ][ $m->meta_key ] = $m->meta_value; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
@@ -1146,7 +1146,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Get existing variations so we don't create duplicates.
 		$existing_variations = array_map( 'wc_get_product', $product->get_children() );
-		$existing_attributes = array();
+		$existing_attributes = [];
 
 		foreach ( $existing_variations as $existing_variation ) {
 			$existing_attributes[] = $existing_variation->get_attributes();
@@ -1242,7 +1242,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		global $wpdb;
 
 		$include_term_ids            = array_merge( $cats_array, $tags_array );
-		$exclude_term_ids            = array();
+		$exclude_term_ids            = [];
 		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 
 		if ( $product_visibility_term_ids['exclude-from-catalog'] ) {
@@ -1460,7 +1460,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @return array|object
 	 * @see wc_get_products
 	 */
-	public function get_products( $args = array() ) {
+	public function get_products( $args = [] ) {
 		$query = new WC_Product_Query( $args );
 		return $query->get_products();
 	}
@@ -1501,7 +1501,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		$search_where   = '';
-		$search_queries = array();
+		$search_queries = [];
 
 		foreach ( $term_groups as $term_group ) {
 			// Parse search terms.
@@ -1653,14 +1653,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected function get_wp_query_args( $query_vars ) {
 
 		// Map query vars to ones that get_wp_query_args or WP_Query recognize.
-		$key_mapping = array(
+		$key_mapping = [
 			'status'         => 'post_status',
 			'page'           => 'paged',
 			'include'        => 'post__in',
 			'stock_quantity' => 'stock',
 			'average_rating' => 'wc_average_rating',
 			'review_count'   => 'wc_review_count',
-		);
+		];
 		foreach ( $key_mapping as $query_key => $db_key ) {
 			if ( isset( $query_vars[ $query_key ] ) ) {
 				$query_vars[ $db_key ] = $query_vars[ $query_key ];
@@ -1669,12 +1669,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		// Map boolean queries that are stored as 'yes'/'no' in the DB to 'yes' or 'no'.
-		$boolean_queries = array(
+		$boolean_queries = [
 			'virtual',
 			'downloadable',
 			'sold_individually',
 			'manage_stock',
-		);
+		];
 		foreach ( $boolean_queries as $boolean_query ) {
 			if ( isset( $query_vars[ $boolean_query ] ) && '' !== $query_vars[ $boolean_query ] ) {
 				$query_vars[ $boolean_query ] = $query_vars[ $boolean_query ] ? 'yes' : 'no';
@@ -1682,11 +1682,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		// These queries cannot be auto-generated so we have to remove them and build them manually.
-		$manual_queries = array(
+		$manual_queries = [
 			'sku'        => '',
 			'featured'   => '',
 			'visibility' => '',
-		);
+		];
 		foreach ( $manual_queries as $key => $manual_query ) {
 			if ( isset( $query_vars[ $key ] ) ) {
 				$manual_queries[ $key ] = $query_vars[ $key ];
@@ -1697,65 +1697,65 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
 
 		if ( ! isset( $wp_query_args['date_query'] ) ) {
-			$wp_query_args['date_query'] = array();
+			$wp_query_args['date_query'] = [];
 		}
 		if ( ! isset( $wp_query_args['meta_query'] ) ) {
-			$wp_query_args['meta_query'] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			$wp_query_args['meta_query'] = []; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		}
 
 		// Handle product types.
 		if ( 'variation' === $query_vars['type'] ) {
 			$wp_query_args['post_type'] = 'product_variation';
 		} elseif ( is_array( $query_vars['type'] ) && in_array( 'variation', $query_vars['type'], true ) ) {
-			$wp_query_args['post_type']   = array( 'product_variation', 'product' );
-			$wp_query_args['tax_query'][] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			$wp_query_args['post_type']   = [ 'product_variation', 'product' ];
+			$wp_query_args['tax_query'][] = [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 				'relation' => 'OR',
-				array(
+				[
 					'taxonomy' => 'product_type',
 					'field'    => 'slug',
 					'terms'    => $query_vars['type'],
-				),
-				array(
+				],
+				[
 					'taxonomy' => 'product_type',
 					'field'    => 'id',
 					'operator' => 'NOT EXISTS',
-				),
-			);
+				],
+			];
 		} else {
 			$wp_query_args['post_type']   = 'product';
-			$wp_query_args['tax_query'][] = array(
+			$wp_query_args['tax_query'][] = [
 				'taxonomy' => 'product_type',
 				'field'    => 'slug',
 				'terms'    => $query_vars['type'],
-			);
+			];
 		}
 
 		// Handle product categories.
 		if ( ! empty( $query_vars['category'] ) ) {
-			$wp_query_args['tax_query'][] = array(
+			$wp_query_args['tax_query'][] = [
 				'taxonomy' => 'product_cat',
 				'field'    => 'slug',
 				'terms'    => $query_vars['category'],
-			);
+			];
 		}
 
 		// Handle product tags.
 		if ( ! empty( $query_vars['tag'] ) ) {
 			unset( $wp_query_args['tag'] );
-			$wp_query_args['tax_query'][] = array(
+			$wp_query_args['tax_query'][] = [
 				'taxonomy' => 'product_tag',
 				'field'    => 'slug',
 				'terms'    => $query_vars['tag'],
-			);
+			];
 		}
 
 		// Handle shipping classes.
 		if ( ! empty( $query_vars['shipping_class'] ) ) {
-			$wp_query_args['tax_query'][] = array(
+			$wp_query_args['tax_query'][] = [
 				'taxonomy' => 'product_shipping_class',
 				'field'    => 'slug',
 				'terms'    => $query_vars['shipping_class'],
-			);
+			];
 		}
 
 		// Handle total_sales.
@@ -1795,23 +1795,23 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( $manual_queries['sku'] ) {
 			// Check for existing values if wildcard is used.
 			if ( '*' === $manual_queries['sku'] ) {
-				$wp_query_args['meta_query'][] = array(
-					array(
+				$wp_query_args['meta_query'][] = [
+					[
 						'key'     => '_sku',
 						'compare' => 'EXISTS',
-					),
-					array(
+					],
+					[
 						'key'     => '_sku',
 						'value'   => '',
 						'compare' => '!=',
-					),
-				);
+					],
+				];
 			} else {
-				$wp_query_args['meta_query'][] = array(
+				$wp_query_args['meta_query'][] = [
 					'key'     => '_sku',
 					'value'   => $manual_queries['sku'],
 					'compare' => 'LIKE',
-				);
+				];
 			}
 		}
 
@@ -1819,24 +1819,24 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( '' !== $manual_queries['featured'] ) {
 			$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 			if ( $manual_queries['featured'] ) {
-				$wp_query_args['tax_query'][] = array(
+				$wp_query_args['tax_query'][] = [
 					'taxonomy' => 'product_visibility',
 					'field'    => 'term_taxonomy_id',
-					'terms'    => array( $product_visibility_term_ids['featured'] ),
-				);
-				$wp_query_args['tax_query'][] = array(
+					'terms'    => [ $product_visibility_term_ids['featured'] ],
+				];
+				$wp_query_args['tax_query'][] = [
 					'taxonomy' => 'product_visibility',
 					'field'    => 'term_taxonomy_id',
-					'terms'    => array( $product_visibility_term_ids['exclude-from-catalog'] ),
+					'terms'    => [ $product_visibility_term_ids['exclude-from-catalog'] ],
 					'operator' => 'NOT IN',
-				);
+				];
 			} else {
-				$wp_query_args['tax_query'][] = array(
+				$wp_query_args['tax_query'][] = [
 					'taxonomy' => 'product_visibility',
 					'field'    => 'term_taxonomy_id',
-					'terms'    => array( $product_visibility_term_ids['featured'] ),
+					'terms'    => [ $product_visibility_term_ids['featured'] ],
 					'operator' => 'NOT IN',
-				);
+				];
 			}
 		}
 
@@ -1844,47 +1844,47 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( $manual_queries['visibility'] ) {
 			switch ( $manual_queries['visibility'] ) {
 				case 'search':
-					$wp_query_args['tax_query'][] = array(
+					$wp_query_args['tax_query'][] = [
 						'taxonomy' => 'product_visibility',
 						'field'    => 'slug',
-						'terms'    => array( 'exclude-from-search' ),
+						'terms'    => [ 'exclude-from-search' ],
 						'operator' => 'NOT IN',
-					);
+					];
 					break;
 				case 'catalog':
-					$wp_query_args['tax_query'][] = array(
+					$wp_query_args['tax_query'][] = [
 						'taxonomy' => 'product_visibility',
 						'field'    => 'slug',
-						'terms'    => array( 'exclude-from-catalog' ),
+						'terms'    => [ 'exclude-from-catalog' ],
 						'operator' => 'NOT IN',
-					);
+					];
 					break;
 				case 'visible':
-					$wp_query_args['tax_query'][] = array(
+					$wp_query_args['tax_query'][] = [
 						'taxonomy' => 'product_visibility',
 						'field'    => 'slug',
-						'terms'    => array( 'exclude-from-catalog', 'exclude-from-search' ),
+						'terms'    => [ 'exclude-from-catalog', 'exclude-from-search' ],
 						'operator' => 'NOT IN',
-					);
+					];
 					break;
 				case 'hidden':
-					$wp_query_args['tax_query'][] = array(
+					$wp_query_args['tax_query'][] = [
 						'taxonomy' => 'product_visibility',
 						'field'    => 'slug',
-						'terms'    => array( 'exclude-from-catalog', 'exclude-from-search' ),
+						'terms'    => [ 'exclude-from-catalog', 'exclude-from-search' ],
 						'operator' => 'AND',
-					);
+					];
 					break;
 			}
 		}
 
 		// Handle date queries.
-		$date_queries = array(
+		$date_queries = [
 			'date_created'      => 'post_date',
 			'date_modified'     => 'post_modified',
 			'date_on_sale_from' => '_sale_price_dates_from',
 			'date_on_sale_to'   => '_sale_price_dates_to',
-		);
+		];
 		foreach ( $date_queries as $query_var_key => $db_key ) {
 			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] ) {
 
@@ -1905,7 +1905,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Handle reviews_allowed.
 		if ( isset( $query_vars['reviews_allowed'] ) && is_bool( $query_vars['reviews_allowed'] ) ) {
-			add_filter( 'posts_where', array( $this, 'reviews_allowed_query_where' ), 10, 2 );
+			add_filter( 'posts_where', [ $this, 'reviews_allowed_query_where' ], 10, 2 );
 		}
 
 		return apply_filters( 'woocommerce_product_data_store_cpt_get_products_query', $wp_query_args, $query_vars, $this );
@@ -1925,7 +1925,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( ! empty( $args['errors'] ) ) {
 			$query = (object) array(
-				'posts'         => array(),
+				'posts'         => [],
 				'found_posts'   => 0,
 				'max_num_pages' => 0,
 			);
@@ -1981,7 +1981,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'total_sales'    => get_post_meta( $id, 'total_sales', true ),
 			);
 		}
-		return array();
+		return [];
 	}
 
 	/**
