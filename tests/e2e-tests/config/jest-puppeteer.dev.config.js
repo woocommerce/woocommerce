@@ -4,6 +4,7 @@ module.exports = {
 	launch: {
 		slowMo: process.env.PUPPETEER_HEADLESS ? false : 200,
 		headless: process.env.PUPPETEER_HEADLESS || false,
+		ignoreHTTPSErrors: true,
 		args: [
 			'--window-size=1920,1080',
 			'--user-agent=puppeteer-debug',
