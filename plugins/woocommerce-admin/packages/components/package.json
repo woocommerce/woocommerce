@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "description": "UI components for WooCommerce.",
   "author": "Automattic",
-  "license": "GPL-2.0-or-later",
+  "license": "GPL-3.0-or-later",
   "keywords": [
     "wordpress",
     "woocommerce",
