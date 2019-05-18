@@ -29,7 +29,7 @@ foreach ( $items as $item_id => $item ) :
 		}
 
 		echo apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false );
-		if ( $show_sku && !empty( $sku ) ) {
+		if ( $show_sku && ! empty( $sku ) ) {
 			echo ' (#' . $sku . ')';
 		}
 		echo ' X ' . apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item );
@@ -49,7 +49,7 @@ foreach ( $items as $item_id => $item ) :
 		do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, $plain_text );
 	}
 	// Note
-	if ( $show_purchase_note && !empty( $purchase_note ) ) {
+	if ( $show_purchase_note && ! empty( $purchase_note ) ) {
 		echo "\n" . do_shortcode( wp_kses_post( $purchase_note ) );
 	}
 	echo "\n\n";
