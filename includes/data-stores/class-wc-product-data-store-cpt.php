@@ -1818,11 +1818,34 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Handle total_sales.
 		// This query doesn't get auto-generated since the meta key doesn't have the underscore prefix.
 		if ( isset( $query_vars['total_sales'] ) && '' !== $query_vars['total_sales'] ) {
+
+			$total_sales_left_val = '';
+			$total_sales_right_val = '';
+			$total_sales_compare = '=';
+			$total_sales_is_range = false;
+
+			// if total_sales is not numeric, it means it's not the most basic form of comparison and we have to parse it.
+			if ( ! is_numeric( $query_vars['total_sales'] ) ) {
+
+				$total_sales_query_parts = array();
+
+				// split into [ value ] [ < | > | = | >= | <= | ... ] [ value ].
+				// first value can be empty (for example, in "<5" case).
+				preg_match( '/(\d*)(\D+)(\d+)/', $query_vars['total_sales'], $total_sales_query_parts );
+
+				$total_sales_is_range = ! empty( $total_sales_query_parts[1] );
+				list( , $total_sales_left_val, $total_sales_compare, $total_sales_right_val ) = $total_sales_query_parts;
+
+			} else { // simple "=" comparison.
+				$total_sales_right_val = absint( $query_vars['total_sales'] );
+			}
+
 			$wp_query_args['meta_query'][] = array(
 				'key'     => 'total_sales',
-				'value'   => absint( $query_vars['total_sales'] ),
-				'compare' => '=',
+				'value'   => $total_sales_is_range ? [ absint( $total_sales_left_val ), absint( $total_sales_right_val ) ] : absint( $total_sales_right_val ),
+				'compare' => $total_sales_is_range ? 'BETWEEN' : $total_sales_compare,
 			);
+
 		}
 
 		// Handle SKU.
