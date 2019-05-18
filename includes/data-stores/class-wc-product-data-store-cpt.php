@@ -1819,10 +1819,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// This query doesn't get auto-generated since the meta key doesn't have the underscore prefix.
 		if ( isset( $query_vars['total_sales'] ) && '' !== $query_vars['total_sales'] ) {
 
-			$total_sales_left_val	= '';
-			$total_sales_right_val	= '';
-			$total_sales_compare	= '=';
-			$total_sales_is_range	= false;
+			$total_sales_left_val = '';
+			$total_sales_right_val = '';
+			$total_sales_compare = '=';
+			$total_sales_is_range = false;
 
 			// if total_sales is not numeric, it means it's not the most basic form of comparison and we have to parse it.
 			if ( ! is_numeric( $query_vars['total_sales'] ) ) {
