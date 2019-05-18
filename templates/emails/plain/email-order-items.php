@@ -49,7 +49,7 @@ foreach ( $items as $item_id => $item ) :
 		do_action( 'woocommerce_order_item_meta_end', $item_id, $item, $order, $plain_text );
 	}
 	// Note
-	if ( $show_purchase_note && !empty( $purchase_note ) ) ) {
+	if ( $show_purchase_note && !empty( $purchase_note ) ) {
 		echo "\n" . do_shortcode( wp_kses_post( $purchase_note ) );
 	}
 	echo "\n\n";
