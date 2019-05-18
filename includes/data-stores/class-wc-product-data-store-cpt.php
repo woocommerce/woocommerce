@@ -22,7 +22,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 3.0.0
 	 * @var array
 	 */
-	protected $internal_meta_keys = array(
+	protected $internal_meta_keys = [
 		'_visibility',
 		'_sku',
 		'_price',
@@ -65,7 +65,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_wp_old_slug',
 		'_edit_last',
 		'_edit_lock',
-	);
+	];
 
 	/**
 	 * Meta data which should exist in the DB, even if empty.
@@ -74,9 +74,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @var array
 	 */
-	protected $must_exist_meta_keys = array(
+	protected $must_exist_meta_keys = [
 		'_tax_class',
-	);
+	];
 
 	/**
 	 * If we have already saved our extra data, don't do automatic / default handling.
@@ -111,7 +111,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$id = wp_insert_post(
 			apply_filters(
 				'woocommerce_new_product_data',
-				array(
+				[
 					'post_type'      => 'product',
 					'post_status'    => $product->get_status() ? $product->get_status() : 'publish',
 					'post_author'    => get_current_user_id(),
@@ -126,7 +126,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
 					'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
 					'post_name'      => $product->get_slug( 'edit' ),
-				)
+				]
 			),
 			true
 		);
@@ -164,7 +164,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		$product->set_props(
-			array(
+			[
 				'name'              => $post_object->post_title,
 				'slug'              => $post_object->post_name,
 				'date_created'      => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
@@ -176,7 +176,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'menu_order'        => $post_object->menu_order,
 				'post_password'     => $post_object->post_password,
 				'reviews_allowed'   => 'open' === $post_object->comment_status,
-			)
+			]
 		);
 
 		$this->read_attributes( $product );
@@ -198,7 +198,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Only update the post when the post data changes.
 		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order', 'date_created', 'date_modified', 'slug' ), array_keys( $changes ) ) ) {
-			$post_data = array(
+			$post_data = [
 				'post_content'   => $product->get_description( 'edit' ),
 				'post_excerpt'   => $product->get_short_description( 'edit' ),
 				'post_title'     => $product->get_name( 'edit' ),
@@ -209,7 +209,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'post_password'  => $product->get_post_password( 'edit' ),
 				'post_name'      => $product->get_slug( 'edit' ),
 				'post_type'      => 'product',
-			);
+			];
 			if ( $product->get_date_created( 'edit' ) ) {
 				$post_data['post_date']     = gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() );
 				$post_data['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() );
@@ -241,13 +241,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		} else { // Only update post modified time to record this save event.
 			$GLOBALS['wpdb']->update(
 				$GLOBALS['wpdb']->posts,
-				array(
+				[
 					'post_modified'     => current_time( 'mysql' ),
 					'post_modified_gmt' => current_time( 'mysql', 1 ),
-				),
-				array(
+				],
+				[
 					'ID' => $product->get_id(),
-				)
+				]
 			);
 			clean_post_cache( $product->get_id() );
 		}
@@ -277,9 +277,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$args = wp_parse_args(
 			$args,
-			array(
+			[
 				'force_delete' => false,
-			)
+			]
 		);
 
 		if ( ! $id ) {
@@ -313,7 +313,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected function read_product_data( &$product ) {
 		$id                = $product->get_id();
 		$post_meta_values  = get_post_meta( $id );
-		$meta_key_to_props = array(
+		$meta_key_to_props = [
 			'_sku'                   => 'sku',
 			'_regular_price'         => 'regular_price',
 			'_sale_price'            => 'sale_price',
@@ -346,7 +346,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'_wc_rating_count'       => 'rating_counts',
 			'_wc_review_count'       => 'review_count',
 			'_product_image_gallery' => 'gallery_image_ids',
-		);
+		];
 
 		$set_props = [];
 
@@ -403,10 +403,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		$product->set_props(
-			array(
+			[
 				'featured'           => $featured,
 				'catalog_visibility' => $catalog_visibility,
-			)
+			]
 		);
 	}
 
@@ -422,14 +422,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$attributes = [];
 			foreach ( $meta_attributes as $meta_attribute_key => $meta_attribute_value ) {
 				$meta_value = array_merge(
-					array(
+					[
 						'name'         => '',
 						'value'        => '',
 						'position'     => 0,
 						'is_visible'   => 0,
 						'is_variation' => 0,
 						'is_taxonomy'  => 0,
-					),
+					],
 					(array) $meta_attribute_value
 				);
 
@@ -491,7 +491,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 3.0.0
 	 */
 	protected function update_post_meta( &$product, $force = false ) {
-		$meta_key_to_props = array(
+		$meta_key_to_props = [
 			'_sku'                   => 'sku',
 			'_regular_price'         => 'regular_price',
 			'_sale_price'            => 'sale_price',
@@ -523,7 +523,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'_wc_average_rating'     => 'average_rating',
 			'_wc_rating_count'       => 'rating_counts',
 			'_wc_review_count'       => 'review_count',
-		);
+		];
 
 		// Make sure to take extra data (like product url or text for external products) into account.
 		$extra_data_keys = $product->get_extra_data_keys();
@@ -749,14 +749,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					}
 
 					// Store in format WC uses in meta.
-					$meta_values[ $attribute_key ] = array(
+					$meta_values[ $attribute_key ] = [
 						'name'         => $attribute->get_name(),
 						'value'        => $value,
 						'position'     => $attribute->get_position(),
 						'is_visible'   => $attribute->get_visible() ? 1 : 0,
 						'is_variation' => $attribute->get_variation() ? 1 : 0,
 						'is_taxonomy'  => $attribute->is_taxonomy() ? 1 : 0,
-					);
+					];
 				}
 			}
 			// Note, we use wp_slash to add extra level of escaping. See https://codex.wordpress.org/Function_Reference/update_post_meta#Workaround.
@@ -899,26 +899,26 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
 
 		return get_posts(
-			array(
-				'post_type'      => array( 'product', 'product_variation' ),
+			[
+				'post_type'      => [ 'product', 'product_variation' ],
 				'posts_per_page' => -1,
 				'post_status'    => 'publish',
-				'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'tax_query'      => [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 					'relation' => 'AND',
-					array(
+					[
 						'taxonomy' => 'product_visibility',
 						'field'    => 'term_taxonomy_id',
-						'terms'    => array( $product_visibility_term_ids['featured'] ),
-					),
-					array(
+						'terms'    => [ $product_visibility_term_ids['featured'] ],
+					],
+					[
 						'taxonomy' => 'product_visibility',
 						'field'    => 'term_taxonomy_id',
-						'terms'    => array( $product_visibility_term_ids['exclude-from-catalog'] ),
+						'terms'    => [ $product_visibility_term_ids['exclude-from-catalog'] ],
 						'operator' => 'NOT IN',
-					),
-				),
+					],
+				],
 				'fields'         => 'id=>parent',
-			)
+			]
 		);
 	}
 
@@ -1195,7 +1195,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		foreach ( $ids as $id ) {
 			// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
-			$wpdb->update( $wpdb->posts, array( 'menu_order' => ( $index++ ) ), array( 'ID' => absint( $id ) ) );
+			$wpdb->update( $wpdb->posts, [ 'menu_order' => ( $index++ ) ], [ 'ID' => absint( $id ) ] );
 		}
 	}
 
@@ -1213,12 +1213,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function get_related_products( $cats_array, $tags_array, $exclude_ids, $limit, $product_id ) {
 		global $wpdb;
 
-		$args = array(
+		$args = [
 			'categories'  => $cats_array,
 			'tags'        => $tags_array,
 			'exclude_ids' => $exclude_ids,
 			'limit'       => $limit + 10,
-		);
+		];
 
 		$related_product_query = (array) apply_filters( 'woocommerce_product_related_posts_query', $this->get_related_products_query( $cats_array, $tags_array, $exclude_ids, $limit + 10 ), $product_id, $args );
 
@@ -1253,7 +1253,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$exclude_term_ids[] = $product_visibility_term_ids['outofstock'];
 		}
 
-		$query = array(
+		$query = [
 			'fields' => "
 				SELECT DISTINCT ID FROM {$wpdb->posts} p
 			",
@@ -1267,7 +1267,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'limits' => '
 				LIMIT ' . absint( $limit ) . '
 			',
-		);
+		];
 
 		if ( count( $exclude_term_ids ) ) {
 			$query['join']  .= " LEFT JOIN ( SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN ( " . implode( ',', array_map( 'absint', $exclude_term_ids ) ) . ' ) ) AS exclude_join ON exclude_join.object_id = p.ID';
@@ -1924,11 +1924,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$args = $this->get_wp_query_args( $query_vars );
 
 		if ( ! empty( $args['errors'] ) ) {
-			$query = (object) array(
+			$query = (object) [
 				'posts'         => [],
 				'found_posts'   => 0,
 				'max_num_pages' => 0,
-			);
+			];
 		} else {
 			$query = new WP_Query( $args );
 		}
@@ -1941,11 +1941,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$products = ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) ? $query->posts : array_filter( array_map( 'wc_get_product', $query->posts ) );
 
 		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
-			return (object) array(
+			return (object) [
 				'products'      => $products,
 				'total'         => $query->found_posts,
 				'max_num_pages' => $query->max_num_pages,
-			);
+			];
 		}
 
 		return $products;
@@ -1966,7 +1966,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$stock        = 'yes' === $manage_stock ? wc_stock_amount( get_post_meta( $id, '_stock', true ) ) : null;
 			$price        = wc_format_decimal( get_post_meta( $id, '_price', true ) );
 			$sale_price   = wc_format_decimal( get_post_meta( $id, '_sale_price', true ) );
-			return array(
+			return [
 				'product_id'     => absint( $id ),
 				'sku'            => get_post_meta( $id, '_sku', true ),
 				'virtual'        => 'yes' === get_post_meta( $id, '_virtual', true ) ? 1 : 0,
@@ -1979,7 +1979,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'rating_count'   => array_sum( (array) get_post_meta( $id, '_wc_rating_count', true ) ),
 				'average_rating' => get_post_meta( $id, '_wc_average_rating', true ),
 				'total_sales'    => get_post_meta( $id, 'total_sales', true ),
-			);
+			];
 		}
 		return [];
 	}
