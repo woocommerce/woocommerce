@@ -1842,7 +1842,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			$wp_query_args['meta_query'][] = array(
 				'key'     => 'total_sales',
-				'value'   => $total_sales_is_range ? [ absint( $total_sales_left_val ), absint( $total_sales_right_val ) ] : absint( $total_sales_right_val ),
+				'value'   => $total_sales_is_range ? array( absint( $total_sales_left_val ), absint( $total_sales_right_val ) ) : absint( $total_sales_right_val ),
 				'compare' => $total_sales_is_range ? 'BETWEEN' : $total_sales_compare,
 			);
 
