@@ -197,7 +197,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$changes = $product->get_changes();
 
 		// Only update the post when the post data changes.
-		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order', 'date_created', 'date_modified', 'slug' ), array_keys( $changes ) ) ) {
+		if ( array_intersect( [ 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order', 'date_created', 'date_modified', 'slug' ], array_keys( $changes ) ) ) {
 			$post_data = [
 				'post_content'   => $product->get_description( 'edit' ),
 				'post_excerpt'   => $product->get_short_description( 'edit' ),
@@ -231,10 +231,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			 * or an update purely from CRUD.
 			 */
 			if ( doing_action( 'save_post' ) ) {
-				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $product->get_id() ) );
+				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, [ 'ID' => $product->get_id() ] );
 				clean_post_cache( $product->get_id() );
 			} else {
-				wp_update_post( array_merge( array( 'ID' => $product->get_id() ), $post_data ) );
+				wp_update_post( array_merge( [ 'ID' => $product->get_id() ], $post_data ) );
 			}
 			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 
@@ -372,7 +372,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected function read_extra_data( &$product ) {
 		foreach ( $product->get_extra_data_keys() as $key ) {
 			$function = 'set_' . $key;
-			if ( is_callable( array( $product, $function ) ) ) {
+			if ( is_callable( [ $product, $function ] ) ) {
 				$product->{$function}( get_post_meta( $product->get_id(), '_' . $key, true ) );
 			}
 		}
@@ -568,7 +568,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				if ( ! array_key_exists( $meta_key, $props_to_update ) ) {
 					continue;
 				}
-				if ( is_callable( array( $product, $function ) ) ) {
+				if ( is_callable( [ $product, $function ] ) ) {
 					$value   = $product->{$function}( 'edit' );
 					$value   = is_string( $value ) ? wp_slash( $value ) : $value;
 					$updated = $this->update_or_delete_post_meta( $product, $meta_key, $value );
@@ -592,7 +592,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param WC_Product $product Product Object.
 	 */
 	protected function handle_updated_props( &$product ) {
-		$price_is_synced = $product->is_type( array( 'variable', 'grouped' ) );
+		$price_is_synced = $product->is_type( [ 'variable', 'grouped' ] );
 
 		if ( ! $price_is_synced ) {
 			if ( in_array( 'regular_price', $this->updated_props, true ) || in_array( 'sale_price', $this->updated_props, true ) ) {
@@ -629,7 +629,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		if ( array_intersect( $this->updated_props, array( 'sku', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual' ) ) ) {
+		if ( array_intersect( $this->updated_props, [ 'sku', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual' ] ) ) {
 			$this->update_lookup_table( $product->get_id(), 'wc_product_meta_lookup' );
 		}
 
@@ -654,7 +654,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$categories = $product->get_category_ids( 'edit' );
 
 			if ( empty( $categories ) && get_option( 'default_product_cat', 0 ) ) {
-				$categories = array( get_option( 'default_product_cat', 0 ) );
+				$categories = [ get_option( 'default_product_cat', 0 ) ];
 			}
 
 			wp_set_post_terms( $product->get_id(), $categories, 'product_cat', false );
@@ -663,7 +663,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			wp_set_post_terms( $product->get_id(), $product->get_tag_ids( 'edit' ), 'product_tag', false );
 		}
 		if ( $force || array_key_exists( 'shipping_class_id', $changes ) ) {
-			wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
+			wp_set_post_terms( $product->get_id(), [ $product->get_shipping_class_id( 'edit' ) ], 'product_shipping_class', false );
 		}
 	}
 
@@ -678,7 +678,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected function update_visibility( &$product, $force = false ) {
 		$changes = $product->get_changes();
 
-		if ( $force || array_intersect( array( 'featured', 'stock_status', 'average_rating', 'catalog_visibility' ), array_keys( $changes ) ) ) {
+		if ( $force || array_intersect( [ 'featured', 'stock_status', 'average_rating', 'catalog_visibility' ], array_keys( $changes ) ) ) {
 			$terms = [];
 
 			if ( $product->get_featured() ) {
@@ -1486,8 +1486,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return $custom_results;
 		}
 
-		$post_types    = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
-		$post_statuses = current_user_can( 'edit_private_products' ) ? array( 'private', 'publish' ) : array( 'publish' );
+		$post_types    = $include_variations ? [ 'product', 'product_variation' ] : [ 'product' ];
+		$post_statuses = current_user_can( 'edit_private_products' ) ? [ 'private', 'publish' ] : [ 'publish' ];
 		$type_where    = '';
 		$status_where  = '';
 		$limit_query   = '';
@@ -1497,7 +1497,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( strstr( $term, ' or ' ) ) {
 			$term_groups = explode( ' or ', $term );
 		} else {
-			$term_groups = array( $term );
+			$term_groups = [ $term ];
 		}
 
 		$search_where   = '';
@@ -1511,10 +1511,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 				// if the search string has only short terms or stopwords, or is 10+ terms long, match it as sentence.
 				if ( 9 < $count || 0 === $count ) {
-					$search_terms = array( $term_group );
+					$search_terms = [ $term_group ];
 				}
 			} else {
-				$search_terms = array( $term_group );
+				$search_terms = [ $term_group ];
 			}
 
 			$term_group_query = '';
@@ -1935,7 +1935,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( isset( $query_vars['return'] ) && 'objects' === $query_vars['return'] && ! empty( $query->posts ) ) {
 			// Prime caches before grabbing objects.
-			update_post_caches( $query->posts, array( 'product', 'product_variation' ) );
+			update_post_caches( $query->posts, [ 'product', 'product_variation' ] );
 		}
 
 		$products = ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) ? $query->posts : array_filter( array_map( 'wc_get_product', $query->posts ) );
