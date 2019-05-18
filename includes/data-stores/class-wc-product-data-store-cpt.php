@@ -1837,7 +1837,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				list( , $total_sales_left_val, $total_sales_compare, $total_sales_right_val ) = $total_sales_query_parts;
 
 			} else { // simple "=" comparison.
-				$total_sales_right_val = absint( $query_vars['total_sales'] );
+				 $total_sales_right_val = absint( $query_vars['total_sales'] );
 			}
 
 			$wp_query_args['meta_query'][] = array(
