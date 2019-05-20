@@ -195,20 +195,18 @@ class WC_Shortcode_Products {
 			$this->attributes['limit'] = $this->attributes['columns'] * $this->attributes['rows'];
 		}
 
-		// @codingStandardsIgnoreStart
-		$ordering_args                = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
-		$query_args['orderby']        = $ordering_args['orderby'];
-		$query_args['order']          = $ordering_args['order'];
+		$ordering_args         = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
+		$query_args['orderby'] = $ordering_args['orderby'];
+		$query_args['order']   = $ordering_args['order'];
 		if ( $ordering_args['meta_key'] ) {
-			$query_args['meta_key']       = $ordering_args['meta_key'];
+			$query_args['meta_key'] = $ordering_args['meta_key']; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		}
 		$query_args['posts_per_page'] = intval( $this->attributes['limit'] );
 		if ( 1 < $this->attributes['page'] ) {
-			$query_args['paged']          = absint( $this->attributes['page'] );
+			$query_args['paged'] = absint( $this->attributes['page'] );
 		}
-		$query_args['meta_query']     = WC()->query->get_meta_query();
-		$query_args['tax_query']      = array();
-		// @codingStandardsIgnoreEnd
+		$query_args['meta_query'] = WC()->query->get_meta_query(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		$query_args['tax_query']  = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 
 		// Visibility.
 		$this->set_visibility_query_args( $query_args );
@@ -482,9 +480,7 @@ class WC_Shortcode_Products {
 	 * @param array $query_args Query args.
 	 */
 	protected function set_visibility_featured_query_args( &$query_args ) {
-		// @codingStandardsIgnoreStart
-		$query_args['tax_query'] = array_merge( $query_args['tax_query'], WC()->query->get_tax_query() );
-		// @codingStandardsIgnoreEnd
+		$query_args['tax_query'] = array_merge( $query_args['tax_query'], WC()->query->get_tax_query() ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 
 		$query_args['tax_query'][] = array(
 			'taxonomy'         => 'product_visibility',
@@ -505,9 +501,7 @@ class WC_Shortcode_Products {
 		if ( method_exists( $this, 'set_visibility_' . $this->attributes['visibility'] . '_query_args' ) ) {
 			$this->{'set_visibility_' . $this->attributes['visibility'] . '_query_args'}( $query_args );
 		} else {
-			// @codingStandardsIgnoreStart
-			$query_args['tax_query'] = array_merge( $query_args['tax_query'], WC()->query->get_tax_query() );
-			// @codingStandardsIgnoreEnd
+			$query_args['tax_query'] = array_merge( $query_args['tax_query'], WC()->query->get_tax_query() ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 		}
 	}
 
