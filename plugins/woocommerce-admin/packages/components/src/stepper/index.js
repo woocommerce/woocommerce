@@ -5,6 +5,7 @@
 import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
+import { Spinner } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -16,28 +17,36 @@ import CheckIcon from './check-icon';
  */
 class Stepper extends Component {
 	render() {
-        const { className, currentStep, steps } = this.props;
+		const { className, currentStep, steps, direction, isPending } = this.props;
 		const currentIndex = steps.findIndex( s => currentStep === s.key );
-		const stepperClassName = classnames( 'woocommerce-stepper', className );
+		const stepperClassName = classnames( 'woocommerce-stepper', className, {
+			'is-vertical': 'vertical' === direction,
+		} );
 
 		return (
 			<div className={ stepperClassName }>
-                { steps.map( ( step, i ) => {
+				{ steps.map( ( step, i ) => {
 					const { key, label, isComplete } = step;
-                    const stepClassName = classnames( 'woocommerce-stepper__step', {
-                        'is-active': key === currentStep,
-                        'is-complete': 'undefined' !== typeof isComplete ? isComplete : currentIndex > i,
-                    } );
+					const stepClassName = classnames( 'woocommerce-stepper__step', {
+						'is-active': key === currentStep,
+						'is-complete': 'undefined' !== typeof isComplete ? isComplete : currentIndex > i,
+					} );
 
-                    return (
+					// @todo Update Spinner Styles
+					// https://material.io/design/components/progress-indicators.html
+					const icon = currentStep === key && isPending ? <Spinner /> : (
+						<div className="woocommerce-stepper__step-icon">
+							<span className="woocommerce-stepper__step-number">{ i + 1 }</span>
+							<CheckIcon />
+						</div>
+					);
+
+					return (
 						<Fragment key={ key } >
 							<div
 								className={ stepClassName }
 							>
-								<div className="woocommerce-stepper__step-icon">
-									<span className="woocommerce-stepper__step-number">{ i + 1 }</span>
-									<CheckIcon />
-								</div>
+								{ icon }
 								<span className="woocommerce-stepper_step-label">
 									{ label }
 								</span>
@@ -79,6 +88,21 @@ Stepper.propTypes = {
             isComplete: PropTypes.bool,
 		} )
 	).isRequired,
+
+	/**
+	 * Direction of the stepper.
+	 */
+	direction: PropTypes.oneOf( [ 'horizontal', 'vertical' ] ),
+
+	/**
+	 * Optionally mark the current step as pending to show a spinner.
+	 */
+	isPending: PropTypes.bool,
+};
+
+Stepper.defaultProps = {
+	direction: 'horizontal',
+	isPending: false,
 };
 
 export default Stepper;

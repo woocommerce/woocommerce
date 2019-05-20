@@ -8,7 +8,7 @@ import { Component, Fragment } from '@wordpress/element';
 /**
  * Internal depdencies
  */
-import { H } from '@woocommerce/components';
+import { H, Stepper } from '@woocommerce/components';
 import ProfileWizardHeader from '../header';
 
 export default class Start extends Component {
@@ -28,6 +28,22 @@ export default class Start extends Component {
 							'woocommerce-admin'
 						) }
 					</p>
+
+					<Stepper
+						direction="vertical"
+						currentStep="install"
+						isPending
+						steps={ [
+							{
+								label: __( 'Install Jetpack and WooCommerce Services', 'woocommerce-admin' ),
+								key: 'install',
+							},
+							{
+								label: __( 'Activate Jetpack and WooCommerce Services', 'woocommerce-admin' ),
+								key: 'activate',
+							},
+						] }
+					/>
 				</div>
 			</Fragment>
 		);

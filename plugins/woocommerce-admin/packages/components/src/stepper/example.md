@@ -62,6 +62,12 @@ const MyStepper = withState( {
 				steps={ steps }
 				currentStep={ currentStep }
 			/>
+
+			<Stepper
+				direction="vertical"
+				steps={ steps }
+				currentStep={ currentStep }
+			/>
 		</div>
 	);
 } );
