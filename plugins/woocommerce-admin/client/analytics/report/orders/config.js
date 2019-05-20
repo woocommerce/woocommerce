@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { __, _x } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -11,7 +12,9 @@ import { getCouponLabels, getProductLabels } from 'lib/async-requests';
 
 const { orderStatuses } = wcSettings;
 
-export const charts = [
+const ORDERS_REPORT_CHART_FILTER = 'woocommerce_admin_orders_report_chart_filter';
+
+export const charts = applyFilters( ORDERS_REPORT_CHART_FILTER, [
 	{
 		key: 'orders_count',
 		label: __( 'Orders Count', 'woocommerce-admin' ),
@@ -36,7 +39,7 @@ export const charts = [
 		orderby: 'num_items_sold',
 		type: 'average',
 	},
-];
+] );
 
 export const filters = [
 	{

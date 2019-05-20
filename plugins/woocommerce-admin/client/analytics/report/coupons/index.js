@@ -60,7 +60,6 @@ export default class CouponsReport extends Component {
 				/>
 				<ReportChart
 					filters={ filters }
-					charts={ charts }
 					mode={ mode }
 					endpoint="coupons"
 					path={ path }

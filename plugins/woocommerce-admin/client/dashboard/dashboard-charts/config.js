@@ -1,5 +1,10 @@
 /** @format */
 /**
+ * External dependencies
+ */
+import { applyFilters } from '@wordpress/hooks';
+
+/**
  * Internal dependencies
  */
 
@@ -9,16 +14,23 @@ import { charts as revenueCharts } from 'analytics/report/revenue/config';
 import { charts as categoriesCharts } from 'analytics/report/categories/config';
 import { charts as couponsCharts } from 'analytics/report/coupons/config';
 import { charts as taxesCharts } from 'analytics/report/taxes/config';
+import { charts as downloadsCharts } from 'analytics/report/downloads/config';
 
-const allCharts = ordersCharts
-	.map( d => ( { ...d, endpoint: 'orders' } ) )
-	.concat(
-		productsCharts.map( d => ( { ...d, endpoint: 'products' } ) ),
-		revenueCharts.map( d => ( { ...d, endpoint: 'revenue' } ) ),
-		categoriesCharts.map( d => ( { ...d, endpoint: 'categories' } ) ),
-		couponsCharts.map( d => ( { ...d, endpoint: 'orders' } ) ),
-		taxesCharts.map( d => ( { ...d, endpoint: 'taxes' } ) )
-	);
+const DASHBOARD_CHARTS_FILTER = 'woocommerce_admin_dashboard_charts_filter';
+
+const allCharts = applyFilters(
+	DASHBOARD_CHARTS_FILTER,
+	revenueCharts
+		.map( d => ( { ...d, endpoint: 'orders' } ) )
+		.concat(
+			ordersCharts.map( d => ( { ...d, endpoint: 'revenue' } ) ),
+			productsCharts.map( d => ( { ...d, endpoint: 'products' } ) ),
+			categoriesCharts.map( d => ( { ...d, endpoint: 'categories' } ) ),
+			couponsCharts.map( d => ( { ...d, endpoint: 'orders' } ) ),
+			taxesCharts.map( d => ( { ...d, endpoint: 'taxes' } ) ),
+			downloadsCharts.map( d => ( { ...d, endpoint: 'downloads' } ) )
+		)
+);
 
 // Need to remove duplicate charts, by key, from the configs
 export const uniqCharts = allCharts.reduce( ( a, b ) => {

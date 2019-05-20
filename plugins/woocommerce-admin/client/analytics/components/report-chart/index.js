@@ -229,7 +229,28 @@ ReportChart.propTypes = {
 	/**
 	 * Properties of the selected chart.
 	 */
-	selectedChart: PropTypes.object.isRequired,
+	selectedChart: PropTypes.shape( {
+		/**
+		 * Key of the selected chart.
+		 */
+		key: PropTypes.string.isRequired,
+		/**
+		 * Chart label.
+		 */
+		label: PropTypes.string.isRequired,
+		/**
+		 * Order query argument.
+		 */
+		order: PropTypes.oneOf( [ 'asc', 'desc' ] ),
+		/**
+		 * Order by query argument.
+		 */
+		orderby: PropTypes.string,
+		/**
+		 * Number type for formatting.
+		 */
+		type: PropTypes.oneOf( [ 'average', 'number', 'currency' ] ).isRequired,
+	} ).isRequired,
 };
 
 ReportChart.defaultProps = {

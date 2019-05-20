@@ -44,7 +44,7 @@ class WC_Admin_Analytics_Dashboard {
 	}
 
 	/**
-	 * Preload data from the performance indicators endpoint.
+	 * Preload data from API endpoints.
 	 *
 	 * @param array $endpoints Array of preloaded endpoints.
 	 * @return array
