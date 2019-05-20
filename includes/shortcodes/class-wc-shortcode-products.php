@@ -397,7 +397,7 @@ class WC_Shortcode_Products {
 		$query_args['order']    = 'DESC';
 		$query_args['orderby']  = 'meta_value_num';
 	}
-	
+
 	/**
 	 * Set top rated products query args.
 	 *
@@ -574,7 +574,7 @@ class WC_Shortcode_Products {
 		if ( isset( $transient_value['value'], $transient_value['version'] ) && $transient_value['version'] === $transient_version ) {
 			$results = $transient_value['value'];
 		} else {
-			$query = new WP_Query( $this->query_args );	
+			$query = new WP_Query( $this->query_args );
 
 			$paginated = ! $query->get( 'no_found_rows' );
 
@@ -679,5 +679,23 @@ class WC_Shortcode_Products {
 		}
 
 		return '<div class="' . esc_attr( implode( ' ', $classes ) ) . '">' . ob_get_clean() . '</div>';
+	}
+
+	/**
+	 * Order by rating.
+	 *
+	 * @since  3.2.0
+	 * @param  array $args Query args.
+	 * @return array
+	 */
+	public static function order_by_rating_post_clauses( $args ) {
+		global $wpdb;
+
+		$args['where']  .= " AND $wpdb->commentmeta.meta_key = 'rating' ";
+		$args['join']   .= "LEFT JOIN $wpdb->comments ON($wpdb->posts.ID = $wpdb->comments.comment_post_ID) LEFT JOIN $wpdb->commentmeta ON($wpdb->comments.comment_ID = $wpdb->commentmeta.comment_id)";
+		$args['orderby'] = "$wpdb->commentmeta.meta_value DESC";
+		$args['groupby'] = "$wpdb->posts.ID";
+
+		return $args;
 	}
 }
