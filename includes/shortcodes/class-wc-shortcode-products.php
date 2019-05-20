@@ -125,7 +125,7 @@ class WC_Shortcode_Products {
 				'terms'          => '',        // Comma separated term slugs or ids.
 				'terms_operator' => 'IN',      // Operator to compare terms. Possible values are 'IN', 'NOT IN', 'AND'.
 				'tag'            => '',        // Comma separated tag slugs.
-				'visibility'     => 'visible', // Possible values are 'visible', 'catalog', 'search', 'hidden'.
+				'visibility'     => 'visible', // Product visibility setting. Possible values are 'visible', 'catalog', 'search', 'hidden'.
 				'class'          => '',        // HTML class.
 				'page'           => 1,         // Page for pagination.
 				'paginate'       => false,     // Should results be paginated.
@@ -178,7 +178,7 @@ class WC_Shortcode_Products {
 			'post_status'         => 'publish',
 			'ignore_sticky_posts' => true,
 			'no_found_rows'       => false === wc_string_to_bool( $this->attributes['paginate'] ),
-			'orderby'             => empty( $_GET['orderby'] ) ? $this->attributes['orderby'] : wc_clean( wp_unslash( $_GET['orderby'] ) ),
+			'orderby'             => empty( $_GET['orderby'] ) ? $this->attributes['orderby'] : wc_clean( wp_unslash( $_GET['orderby'] ) ), // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 		);
 
 		$orderby_value         = explode( '-', $query_args['orderby'] );
@@ -333,7 +333,7 @@ class WC_Shortcode_Products {
 			$field      = 'slug';
 
 			if ( is_numeric( $categories[0] ) ) {
-				$field = 'term_id';
+				$field      = 'term_id';
 				$categories = array_map( 'absint', $categories );
 				// Check numeric slugs.
 				foreach ( $categories as $cat ) {
@@ -393,7 +393,7 @@ class WC_Shortcode_Products {
 	 * @param array $query_args Query args.
 	 */
 	protected function set_best_selling_products_query_args( &$query_args ) {
-		$query_args['meta_key'] = 'total_sales'; // @codingStandardsIgnoreLine
+		$query_args['meta_key'] = 'total_sales'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		$query_args['order']    = 'DESC';
 		$query_args['orderby']  = 'meta_value_num';
 	}
@@ -405,7 +405,7 @@ class WC_Shortcode_Products {
 	 * @param array $query_args Query args.
 	 */
 	protected function set_top_rated_products_query_args( &$query_args ) {
-		$query_args['meta_key'] = '_wc_average_rating'; // @codingStandardsIgnoreLine
+		$query_args['meta_key'] = '_wc_average_rating'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		$query_args['order']    = 'DESC';
 		$query_args['orderby']  = 'meta_value_num';
 	}
@@ -552,7 +552,7 @@ class WC_Shortcode_Products {
 
 		if ( 'rand' === $this->query_args['orderby'] ) {
 			// When using rand, we'll cache a number of random queries and pull those to avoid querying rand on each page load.
-			$rand_index      = rand( 0, max( 1, absint( apply_filters( 'woocommerce_product_query_max_rand_cache_count', 5 ) ) ) );
+			$rand_index      = wp_rand( 0, max( 1, absint( apply_filters( 'woocommerce_product_query_max_rand_cache_count', 5 ) ) ) );
 			$transient_name .= $rand_index;
 		}
 
