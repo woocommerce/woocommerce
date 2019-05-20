@@ -9,7 +9,7 @@ export default () => (
 		version="1.1"
 		xmlns="http://www.w3.org/2000/svg"
 	>
-		<g fill="none" fill-rule="evenodd">
+		<g fill="none" fillRule="evenodd">
 			<g>
 				<g>
 					<g transform="translate(219 35.082353)">
@@ -25,7 +25,7 @@ export default () => (
 							</g>
 						</svg>
 					</g>
-					<g fill-rule="nonzero" transform="translate(360)">
+					<g fillRule="nonzero" transform="translate(360)">
 						<path
 							d="M23.7,0.2 L222.8,0.2 C235.4,0.2 245.6,10.4 245.6,23
                                 L245.6,99 C245.6,111.6 235.4,121.8 222.8,121.8 L151.4,121.8
@@ -47,7 +47,7 @@ export default () => (
                                 11.6,27.6 C11.3,25 11.8,22.7 13.2,20.9 Z"
 							id="Shape"
 							fill="#342148"
-							fill-rule="nonzero"
+							fillRule="nonzero"
 						/>
 						<path
 							d="M228.2,36.6 C224.6,30.3 219.3,26.5 212.2,25 C210.3,24.6 208.5,24.4 206.8,24.4
@@ -61,7 +61,7 @@ export default () => (
                                 C215.7,50.9 216.3,54 216.3,56.9 C216.3,59.5 216,62 215.6,64.3 Z"
 							id="Shape"
 							fill="#342148"
-							fill-rule="nonzero"
+							fillRule="nonzero"
 						/>
 						<path
 							d="M165.5,36.6 C161.9,30.3 156.5,26.5 149.5,25 C147.6,24.6 145.8,24.4 144.1,24.4
@@ -75,7 +75,7 @@ export default () => (
                                 C153,50.9 153.6,54 153.6,56.9 C153.6,59.5 153.4,62 152.9,64.3 Z"
 							id="Shape"
 							fill="#342148"
-							fill-rule="nonzero"
+							fillRule="nonzero"
 						/>
 					</g>
 					<svg height="150" width="150" viewBox="0 0 32 32">
