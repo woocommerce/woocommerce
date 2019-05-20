@@ -50,6 +50,7 @@ export default applyFilters( DEFAULT_SECTIONS_FILTER, [
 			'total_tax',
 			'order_tax',
 			'shipping_tax',
+			'download_count',
 		],
 	},
 	{

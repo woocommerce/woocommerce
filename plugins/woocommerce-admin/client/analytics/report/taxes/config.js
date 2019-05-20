@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -11,7 +12,9 @@ import { getRequestByIdString } from 'lib/async-requests';
 import { getTaxCode } from './utils';
 import { NAMESPACE } from 'wc-api/constants';
 
-export const charts = [
+const TAXES_REPORT_CHART_FILTER = 'woocommerce_admin_taxes_report_chart_filter';
+
+export const charts = applyFilters( TAXES_REPORT_CHART_FILTER, [
 	{
 		key: 'total_tax',
 		label: __( 'Total Tax', 'woocommerce-admin' ),
@@ -40,7 +43,7 @@ export const charts = [
 		orderby: 'orders_count',
 		type: 'number',
 	},
-];
+] );
 
 export const filters = [
 	{

@@ -33,7 +33,6 @@ export default class RevenueReport extends Component {
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 				/>
 				<ReportChart
-					charts={ charts }
 					endpoint="revenue"
 					path={ path }
 					query={ query }

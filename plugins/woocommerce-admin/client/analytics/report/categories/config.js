@@ -3,13 +3,16 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
  */
 import { getCategoryLabels } from 'lib/async-requests';
 
-export const charts = [
+const CATEGORY_REPORT_CHART_FILTER = 'woocommerce_admin_category_report_chart_filter';
+
+export const charts = applyFilters( CATEGORY_REPORT_CHART_FILTER, [
 	{
 		key: 'items_sold',
 		label: __( 'Items Sold', 'woocommerce-admin' ),
@@ -31,7 +34,7 @@ export const charts = [
 		orderby: 'orders_count',
 		type: 'number',
 	},
-];
+] );
 
 export const filters = [
 	{

@@ -3,8 +3,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 
-export const charts = [
+const REVENUE_REPORT_CHART_FILTER = 'woocommerce_admin_revenue_report_chart_filter';
+
+export const charts = applyFilters( REVENUE_REPORT_CHART_FILTER, [
 	{
 		key: 'gross_revenue',
 		label: __( 'Gross Revenue', 'woocommerce-admin' ),
@@ -45,4 +48,4 @@ export const charts = [
 		orderby: 'net_revenue',
 		type: 'currency',
 	},
-];
+] );

@@ -40,7 +40,6 @@ export default class DownloadsReport extends Component {
 					advancedFilters={ advancedFilters }
 				/>
 				<ReportChart
-					charts={ charts }
 					endpoint="downloads"
 					path={ path }
 					query={ query }

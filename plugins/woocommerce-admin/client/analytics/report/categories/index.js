@@ -68,7 +68,6 @@ export default class CategoriesReport extends Component {
 				/>
 				<ReportChart
 					filters={ filters }
-					charts={ charts }
 					mode={ mode }
 					endpoint="products"
 					limitProperties={ isSingleCategoryView ? [ 'products', 'categories' ] : [ 'categories' ] }

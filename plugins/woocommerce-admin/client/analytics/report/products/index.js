@@ -81,7 +81,6 @@ class ProductsReport extends Component {
 				<ReportChart
 					mode={ mode }
 					filters={ filters }
-					charts={ charts }
 					endpoint="products"
 					isRequesting={ isRequesting }
 					itemsLabel={ itemsLabel }

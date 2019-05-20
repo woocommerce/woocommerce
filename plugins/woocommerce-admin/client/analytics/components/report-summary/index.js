@@ -129,6 +129,22 @@ ReportSummary.propTypes = {
 		 * Key of the selected chart.
 		 */
 		key: PropTypes.string.isRequired,
+		/**
+		 * Chart label.
+		 */
+		label: PropTypes.string.isRequired,
+		/**
+		 * Order query argument.
+		 */
+		order: PropTypes.oneOf( [ 'asc', 'desc' ] ),
+		/**
+		 * Order by query argument.
+		 */
+		orderby: PropTypes.string,
+		/**
+		 * Number type for formatting.
+		 */
+		type: PropTypes.oneOf( [ 'average', 'number', 'currency' ] ).isRequired,
 	} ).isRequired,
 	/**
 	 * Data to display in the SummaryNumbers.

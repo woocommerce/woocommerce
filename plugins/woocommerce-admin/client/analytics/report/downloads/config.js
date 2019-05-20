@@ -3,19 +3,22 @@
  * External dependencies
  */
 import { __, _x } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
  */
 import { getCustomerLabels, getProductLabels } from 'lib/async-requests';
 
-export const charts = [
+const DOWLOADS_REPORT_CHART_FILTER = 'woocommerce_admin_downloads_report_chart_filter';
+
+export const charts = applyFilters( DOWLOADS_REPORT_CHART_FILTER, [
 	{
 		key: 'download_count',
 		label: __( 'Downloads', 'woocommerce-admin' ),
 		type: 'number',
 	},
-];
+] );
 
 export const filters = [
 	{

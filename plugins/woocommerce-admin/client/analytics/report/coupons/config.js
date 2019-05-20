@@ -3,13 +3,16 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
  */
 import { getCouponLabels } from 'lib/async-requests';
 
-export const charts = [
+const COUPON_REPORT_CHART_FILTER = 'woocommerce_admin_coupon_report_chart_filter';
+
+export const charts = applyFilters( COUPON_REPORT_CHART_FILTER, [
 	{
 		key: 'orders_count',
 		label: __( 'Discounted Orders', 'woocommerce-admin' ),
@@ -24,7 +27,7 @@ export const charts = [
 		orderby: 'amount',
 		type: 'currency',
 	},
-];
+] );
 
 export const filters = [
 	{

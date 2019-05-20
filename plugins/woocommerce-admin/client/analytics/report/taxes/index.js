@@ -57,7 +57,6 @@ export default class TaxesReport extends Component {
 				/>
 				<ReportChart
 					filters={ filters }
-					charts={ charts }
 					mode={ mode }
 					endpoint="taxes"
 					query={ chartQuery }
