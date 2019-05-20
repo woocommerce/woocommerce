@@ -301,12 +301,28 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$product->set_regular_price( 25 );
 		$product->save();
 
+		// Create 5 completed orders.
 		for ( $i = 0; $i < 5; $i++ ) {
 			$order = WC_Helper_Order::create_order( 1, $product );
 			$order->set_status( 'completed' );
 			$order->set_date_created( time() - ( ( $i + 1 ) * DAY_IN_SECONDS ) );
 			$order->save();
 		}
+
+		// Trash one test order - excludes it from totals.
+		$order->set_status( 'trash' );
+		$order->save();
+
+		// Create 1 draft order - to be excluded from totals.
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_date_created( time() - ( 5 * DAY_IN_SECONDS ) );
+		$order->save();
+		wp_update_post(
+			array(
+				'ID'          => $order->get_id(),
+				'post_status' => 'auto-draft',
+			)
+		);
 
 		// Test totals and total params.
 		$request    = new WP_REST_Request( 'GET', $this->endpoint . '/totals' );
@@ -320,7 +336,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( $i, $report['orders'] );
+		$this->assertEquals( 4, $report['orders'] );
 		$this->assertEquals( $user_query->get_total(), $report['customers'] );
 
 		// Test totals with days param.
@@ -349,7 +365,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 0, $report['customers_count'] );
 		$this->assertEquals( 3, $report['customers_total'] );
 		$this->assertEquals( 0, $report['orders_count'] );
-		$this->assertEquals( 5, $report['orders_total'] );
+		$this->assertEquals( 4, $report['orders_total'] );
 
 		// Run pending thrice to process batch and order.
 		WC_Helper_Queue::process_pending();
@@ -365,8 +381,8 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( false, $report['is_importing'] );
 		$this->assertEquals( 1, $report['customers_count'] );
 		$this->assertEquals( 3, $report['customers_total'] );
-		$this->assertEquals( 5, $report['orders_count'] );
-		$this->assertEquals( 5, $report['orders_total'] );
+		$this->assertEquals( 4, $report['orders_count'] );
+		$this->assertEquals( 4, $report['orders_total'] );
 
 		// Test totals with skip existing param.
 		$request = new WP_REST_Request( 'GET', $this->endpoint . '/totals' );
