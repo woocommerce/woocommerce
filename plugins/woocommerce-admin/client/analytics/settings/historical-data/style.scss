@@ -50,10 +50,14 @@
 }
 
 .woocommerce-settings-historical-data__progress-label {
-	display: block;
+	display: inline-block;
 	font-weight: bold;
 	margin-bottom: $gap-small;
 	margin-top: $gap-large;
+
+	& + & {
+		margin-left: 0.25em;
+	}
 }
 
 .woocommerce-settings-historical-data__progress-bar {

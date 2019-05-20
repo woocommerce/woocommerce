@@ -4,6 +4,7 @@
  * Internal dependencies
  */
 import items from './items';
+import imports from './imports';
 import notes from './notes';
 import reportItems from './reports/items';
 import reportStats from './reports/stats';
@@ -21,6 +22,7 @@ function createWcApiSpec() {
 			...user.mutations,
 		},
 		selectors: {
+			...imports.selectors,
 			...items.selectors,
 			...notes.selectors,
 			...reportItems.selectors,
@@ -32,6 +34,7 @@ function createWcApiSpec() {
 		operations: {
 			read( resourceNames ) {
 				return [
+					...imports.operations.read( resourceNames ),
 					...items.operations.read( resourceNames ),
 					...notes.operations.read( resourceNames ),
 					...reportItems.operations.read( resourceNames ),
@@ -43,6 +46,7 @@ function createWcApiSpec() {
 			},
 			update( resourceNames, data ) {
 				return [
+					...imports.operations.update( resourceNames, data ),
 					...items.operations.update( resourceNames, data ),
 					...notes.operations.update( resourceNames, data ),
 					...settings.operations.update( resourceNames, data ),

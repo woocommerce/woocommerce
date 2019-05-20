@@ -4,7 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import moment from 'moment';
 
 /**
@@ -15,13 +15,8 @@ import { stringifyQuery } from '@woocommerce/navigation';
 /**
  * Internal dependencies
  */
-import HistoricalDataActions from './actions';
-import HistoricalDataPeriodSelector from './period-selector';
-import HistoricalDataProgress from './progress';
-import HistoricalDataStatus from './status';
-import HistoricalDataSkipCheckbox from './skip-checkbox';
-import withSelect from 'wc-api/with-select';
-import './style.scss';
+import { formatParams } from './utils';
+import HistoricalDataLayout from './layout';
 
 class HistoricalData extends Component {
 	constructor() {
@@ -78,23 +73,7 @@ class HistoricalData extends Component {
 		this.setState( {
 			inProgress: true,
 		} );
-		const params = {};
-		if ( skipChecked ) {
-			params.skip_existing = true;
-		}
-		if ( period.label !== 'all' ) {
-			if ( period.label === 'custom' ) {
-				const daysDifference = moment().diff(
-					moment( period.date, this.dateFormat ),
-					'days',
-					true
-				);
-				params.days = Math.ceil( daysDifference );
-			} else {
-				params.days = parseInt( period.label, 10 );
-			}
-		}
-		const path = '/wc/v4/reports/import' + stringifyQuery( params );
+		const path = '/wc/v4/reports/import' + stringifyQuery( formatParams( period, skipChecked ) );
 		const errorMessage = __(
 			'There was a problem rebuilding your report data.',
 			'woocommerce-admin'
@@ -138,120 +117,24 @@ class HistoricalData extends Component {
 		} );
 	}
 
-	getStatus() {
-		const { customersProgress, customersTotal, ordersProgress, ordersTotal } = this.props;
-		const { inProgress } = this.state;
-
-		if ( inProgress ) {
-			if ( customersProgress < customersTotal ) {
-				return 'customers';
-			}
-			if ( ordersProgress < ordersTotal ) {
-				return 'orders';
-			}
-			return 'finalizing';
-		}
-		if (
-			( customersTotal > 0 || ordersTotal > 0 ) &&
-			customersProgress === customersTotal &&
-			ordersProgress === ordersTotal
-		) {
-			return 'finished';
-		}
-		return 'ready';
-	}
-
 	render() {
-		const {
-			customersProgress,
-			customersTotal,
-			hasImportedData,
-			importDate,
-			ordersProgress,
-			ordersTotal,
-		} = this.props;
 		const { inProgress, period, skipChecked } = this.state;
-		const hasImportedAllData =
-			! inProgress &&
-			hasImportedData &&
-			customersProgress === customersTotal &&
-			ordersProgress === ordersTotal;
-		// @todo When the import status endpoint is hooked up,
-		// this bool should be removed and assume it's true.
-		const showImportStatus = false;
 
 		return (
-			<Fragment>
-				<div className="woocommerce-setting">
-					<div className="woocommerce-setting__label" id="import-historical-data-label">
-						{ __( 'Import Historical Data:', 'woocommerce-admin' ) }
-					</div>
-					<div className="woocommerce-setting__input">
-						<span className="woocommerce-setting__help">
-							{ __(
-								'This tool populates historical analytics data by processing customers ' +
-									'and orders created prior to activating WooCommerce Admin.',
-								'woocommerce-admin'
-							) }
-						</span>
-						{ ! hasImportedAllData && (
-							<Fragment>
-								<HistoricalDataPeriodSelector
-									dateFormat={ this.dateFormat }
-									disabled={ inProgress }
-									onPeriodChange={ this.onPeriodChange }
-									onDateChange={ this.onDateChange }
-									value={ period }
-								/>
-								<HistoricalDataSkipCheckbox
-									disabled={ inProgress }
-									checked={ skipChecked }
-									onChange={ this.onSkipChange }
-								/>
-								{ showImportStatus && (
-									<Fragment>
-										<HistoricalDataProgress
-											label={ __( 'Registered Customers', 'woocommerce-admin' ) }
-											progress={ customersProgress }
-											total={ customersTotal }
-										/>
-										<HistoricalDataProgress
-											label={ __( 'Orders', 'woocommerce-admin' ) }
-											progress={ ordersProgress }
-											total={ ordersTotal }
-										/>
-									</Fragment>
-								) }
-							</Fragment>
-						) }
-						{ showImportStatus && (
-							<HistoricalDataStatus importDate={ importDate } status={ this.getStatus() } />
-						) }
-					</div>
-				</div>
-				<HistoricalDataActions
-					customersProgress={ customersProgress }
-					customersTotal={ customersTotal }
-					hasImportedData={ hasImportedData }
-					inProgress={ inProgress }
-					onDeletePreviousData={ this.onDeletePreviousData }
-					onStartImport={ this.onStartImport }
-					onStopImport={ this.onStopImport }
-					ordersProgress={ ordersProgress }
-					ordersTotal={ ordersTotal }
-				/>
-			</Fragment>
+			<HistoricalDataLayout
+				dateFormat={ this.dateFormat }
+				inProgress={ inProgress }
+				onPeriodChange={ this.onPeriodChange }
+				onDateChange={ this.onDateChange }
+				onSkipChange={ this.onSkipChange }
+				onDeletePreviousData={ this.onDeletePreviousData }
+				onStartImport={ this.onStartImport }
+				onStopImport={ this.onStopImport }
+				period={ period }
+				skipChecked={ skipChecked }
+			/>
 		);
 	}
 }
 
-export default withSelect( () => {
-	return {
-		customersProgress: 0,
-		customersTotal: 0,
-		hasImportedData: false,
-		importDate: '2019-04-01',
-		ordersProgress: 0,
-		ordersTotal: 0,
-	};
-} )( HistoricalData );
+export default HistoricalData;
