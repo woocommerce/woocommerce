@@ -454,6 +454,34 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'marketplace-suggestions' );
 			}
 
+			if ( $wc_screen_id . '_page_wc-settings' === $screen_id && isset( $_GET['tab'] ) && 'shipping' == $_GET['tab'] ) {
+				wc_enqueue_js(
+					"jQuery( function( $ ) {
+						function wcFreeShippingShowHideMinAmountField( el ) {
+							var form = $( el ).closest( 'form' );
+							var minAmountField = $( '#woocommerce_free_shipping_min_amount', form ).closest( 'tr' );
+							if ( 'coupon' === $( el ).val() || '' === $( el ).val() ) {
+								minAmountField.hide();
+							} else {
+								minAmountField.show();
+							}
+						}
+	
+						$( document.body ).on( 'change', '#woocommerce_free_shipping_requires', function() {
+							wcFreeShippingShowHideMinAmountField( this );
+						});
+	
+						// Change while load.
+						$( '#woocommerce_free_shipping_requires' ).change();
+						$( document.body ).on( 'wc_backbone_modal_loaded', function( evt, target ) {
+							if ( 'wc-modal-shipping-method-settings' === target ) {
+								wcFreeShippingShowHideMinAmountField( $( '#wc-backbone-modal-dialog #woocommerce_free_shipping_requires', evt.currentTarget ) );
+							}
+						} );
+					});"
+				);
+			}
+
 		}
 
 	}
