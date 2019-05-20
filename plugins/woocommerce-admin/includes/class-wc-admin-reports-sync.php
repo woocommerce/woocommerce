@@ -351,6 +351,7 @@ class WC_Admin_Reports_Sync {
 		$count = $wpdb->get_var(
 			"SELECT COUNT(*) FROM {$wpdb->posts}
 			WHERE post_type IN ( 'shop_order', 'shop_order_refund' )
+			AND post_status NOT IN ( 'auto-draft', 'trash' )
 			{$where_clause}"
 		); // WPCS: unprepared SQL ok.
 
@@ -358,6 +359,7 @@ class WC_Admin_Reports_Sync {
 			$wpdb->prepare(
 				"SELECT ID FROM {$wpdb->posts}
 				WHERE post_type IN ( 'shop_order', 'shop_order_refund' )
+				AND post_status NOT IN ( 'auto-draft', 'trash' )
 				{$where_clause}
 				ORDER BY post_date ASC
 				LIMIT %d
