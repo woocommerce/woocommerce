@@ -29,7 +29,7 @@
     "test:watch": "npm run test -- --watch"
   },
   "devDependencies": {
-    "@babel/core": "7.4.4",
+    "@babel/core": "7.4.5",
     "@wordpress/babel-preset-default": "4.1.0",
     "@wordpress/blocks": "6.2.5",
     "@wordpress/components": "7.3.2",
