@@ -606,10 +606,8 @@ function wc_price( $price, $args = array() ) {
  * @return int
  */
 function wc_let_to_num( $size ) {
-	$l    = substr( $size, -1 );
-	$ret  = substr( $size, 0, -1 );
-	$byte = 1024;
-
+	$l   = substr( $size, -1 );
+	$ret = (int) substr( $size, 0, -1 );
 	switch ( strtoupper( $l ) ) {
 		case 'P':
 			$ret *= 1024;

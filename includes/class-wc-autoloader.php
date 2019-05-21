@@ -90,6 +90,12 @@ class WC_Autoloader {
 			$path = $this->include_path . 'log-handlers/';
 		}
 
+		// Prevent plugins from breaking if they extend the rest API early.
+		if ( 0 === strpos( $class, 'wc_rest_' ) && ! did_action( 'rest_api_init' ) ) {
+			wc_doing_it_wrong( $class, __( 'Classes that extend the WooCommerce/WordPress REST API should only be loaded during the rest_api_init action, or should call WC()->api->rest_api_includes() manually.', 'woocommerce' ), '3.6' );
+			WC()->api->rest_api_includes();
+		}
+
 		if ( empty( $path ) || ! $this->load_file( $path . $file ) ) {
 			$this->load_file( $this->include_path . $file );
 		}

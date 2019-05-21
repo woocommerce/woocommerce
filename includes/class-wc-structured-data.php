@@ -178,7 +178,6 @@ class WC_Structured_Data {
 	 * Generates Product structured data.
 	 *
 	 * Hooked into `woocommerce_single_product_summary` action hook.
-	 * Hooked into `woocommerce_shop_loop` action hook.
 	 *
 	 * @param WC_Product $product Product data (default: null).
 	 */
@@ -233,9 +232,10 @@ class WC_Structured_Data {
 					);
 				} else {
 					$markup_offer = array(
-						'@type'     => 'AggregateOffer',
-						'lowPrice'  => wc_format_decimal( $lowest, wc_get_price_decimals() ),
-						'highPrice' => wc_format_decimal( $highest, wc_get_price_decimals() ),
+						'@type'      => 'AggregateOffer',
+						'lowPrice'   => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+						'highPrice'  => wc_format_decimal( $highest, wc_get_price_decimals() ),
+						'offerCount' => count( $product->get_children() ),
 					);
 				}
 			} else {

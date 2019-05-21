@@ -20,7 +20,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '3.6.0';
+	public $version = '3.7.0';
 
 	/**
 	 * The single instance of the class.
@@ -152,6 +152,7 @@ final class WooCommerce {
 	 */
 	public function __construct() {
 		$this->define_constants();
+		$this->define_tables();
 		$this->includes();
 		$this->init_hooks();
 	}
@@ -184,7 +185,6 @@ final class WooCommerce {
 		add_action( 'init', array( $this, 'init' ), 0 );
 		add_action( 'init', array( 'WC_Shortcodes', 'init' ) );
 		add_action( 'init', array( 'WC_Emails', 'init_transactional_emails' ) );
-		add_action( 'init', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'init', array( $this, 'add_image_sizes' ) );
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
@@ -231,6 +231,25 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Register custom tables within $wpdb object.
+	 */
+	private function define_tables() {
+		global $wpdb;
+
+		// List of tables without prefixes.
+		$tables = array(
+			'payment_tokenmeta'      => 'woocommerce_payment_tokenmeta',
+			'order_itemmeta'         => 'woocommerce_order_itemmeta',
+			'wc_product_meta_lookup' => 'wc_product_meta_lookup',
+		);
+
+		foreach ( $tables as $name => $table ) {
+			$wpdb->$name    = $wpdb->prefix . $table;
+			$wpdb->tables[] = $table;
+		}
+	}
+
+	/**
 	 * Define constant if not already set.
 	 *
 	 * @param string      $name  Constant name.
@@ -256,13 +275,10 @@ final class WooCommerce {
 			return false;
 		}
 
-		// REST API prefix.
-		$rest_prefix = trailingslashit( rest_get_url_prefix() );
+		$rest_prefix         = trailingslashit( rest_get_url_prefix() );
+		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-		// Check if this is a WC endpoint.
-		$is_woocommerce_endpoint = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix . 'wc/' ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		return apply_filters( 'woocommerce_is_rest_api_request', $is_woocommerce_endpoint );
+		return apply_filters( 'woocommerce_is_rest_api_request', $is_rest_api_request );
 	}
 
 	/**
@@ -713,16 +729,7 @@ final class WooCommerce {
 	 * Set tablenames inside WPDB object.
 	 */
 	public function wpdb_table_fix() {
-		global $wpdb;
-
-		$wpdb->payment_tokenmeta = $wpdb->prefix . 'woocommerce_payment_tokenmeta';
-		$wpdb->tables[]          = 'woocommerce_payment_tokenmeta';
-
-		$wpdb->order_itemmeta = $wpdb->prefix . 'woocommerce_order_itemmeta';
-		$wpdb->tables[]       = 'woocommerce_order_itemmeta';
-
-		$wpdb->wc_product_meta_lookup = $wpdb->prefix . 'wc_product_meta_lookup';
-		$wpdb->tables[]               = 'wc_product_meta_lookup';
+		$this->define_tables();
 	}
 
 	/**

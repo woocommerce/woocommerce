@@ -7,6 +7,8 @@ source:
 exclude:
     - includes/libraries/
     - includes/api/legacy/
+    - api/legacy/
+    - libraries/
 charset: [UTF-8]
 main: WC
 title: WooCommerce Code Reference

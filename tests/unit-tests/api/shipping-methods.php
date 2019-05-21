@@ -14,9 +14,11 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Shipping_Methods_Controller();
-		$this->user = $this->factory->user->create( array(
-			'role' => 'administrator',
-		) );
+		$this->user     = $this->factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
 	}
 
 	/**
@@ -39,26 +41,29 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/shipping_methods' ) );
-		$methods = $response->get_data();
+		$methods  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertContains( array(
-			'id'          => 'free_shipping',
-			'title'       => 'Free shipping',
-			'description' => 'Free shipping is a special method which can be triggered with coupons and minimum spends.',
-			'_links' => array(
-				'self'       => array(
-					array(
-						'href' => rest_url( '/wc/v3/shipping_methods/free_shipping' ),
+		$this->assertContains(
+			array(
+				'id'          => 'free_shipping',
+				'title'       => 'Free shipping',
+				'description' => 'Free shipping is a special method which can be triggered with coupons and minimum spends.',
+				'_links'      => array(
+					'self'       => array(
+						array(
+							'href' => rest_url( '/wc/v3/shipping_methods/free_shipping' ),
+						),
 					),
-				),
-				'collection' => array(
-					array(
-						'href' => rest_url( '/wc/v3/shipping_methods' ),
+					'collection' => array(
+						array(
+							'href' => rest_url( '/wc/v3/shipping_methods' ),
+						),
 					),
 				),
 			),
-		), $methods );
+			$methods
+		);
 	}
 
 	/**
@@ -84,11 +89,14 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 		$method   = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( array(
-			'id'          => 'local_pickup',
-			'title'       => 'Local pickup',
-			'description' => 'Allow customers to pick up orders themselves. By default, when using local pickup store base taxes will apply regardless of customer address.',
-		), $method );
+		$this->assertEquals(
+			array(
+				'id'          => 'local_pickup',
+				'title'       => 'Local pickup',
+				'description' => 'Allow customers to pick up orders themselves. By default, when using local pickup store base taxes will apply regardless of customer address.',
+			),
+			$method
+		);
 	}
 
 	/**
@@ -122,9 +130,9 @@ class Shipping_Methods extends WC_REST_Unit_Test_Case {
 	public function test_shipping_method_schema() {
 		wp_set_current_user( $this->user );
 
-		$request = new WP_REST_Request( 'OPTIONS', '/wc/v3/shipping_methods' );
-		$response = $this->server->dispatch( $request );
-		$data = $response->get_data();
+		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v3/shipping_methods' );
+		$response   = $this->server->dispatch( $request );
+		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
 		$this->assertEquals( 3, count( $properties ) );
