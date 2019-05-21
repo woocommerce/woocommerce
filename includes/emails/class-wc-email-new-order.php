@@ -142,7 +142,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		/**
 		 * Default content to show below main email content.
 		 *
-		 * @since 3.6.0
+		 * @since 3.7.0
 		 * @return string
 		 */
 		public function get_default_additional_content() {

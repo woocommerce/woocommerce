@@ -108,7 +108,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		/**
 		 * Default content to show below main email content.
 		 *
-		 * @since 3.6.0
+		 * @since 3.7.0
 		 * @return string
 		 */
 		public function get_default_additional_content() {

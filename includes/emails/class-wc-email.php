@@ -350,7 +350,7 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Default content to show below main email content.
 	 *
-	 * @since 3.6.0
+	 * @since 3.7.0
 	 * @return string
 	 */
 	public function get_default_additional_content() {
@@ -362,7 +362,7 @@ class WC_Email extends WC_Settings_API {
 	 *
 	 * Displayed above the footer.
 	 *
-	 * @since 3.6.0
+	 * @since 3.7.0
 	 * @return string
 	 */
 	public function get_additional_content() {
