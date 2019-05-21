@@ -285,10 +285,17 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array
 	 */
 	public function get_available_variations() {
+
+		$variation_ids        = $this->get_children();
 		$available_variations = array();
 
-		foreach ( $this->get_children() as $child_id ) {
-			$variation = wc_get_product( $child_id );
+		if ( is_callable( '_prime_post_caches' ) ) {
+			_prime_post_caches( $variation_ids );
+		}
+
+		foreach ( $variation_ids as $variation_id ) {
+
+			$variation = wc_get_product( $variation_id );
 
 			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
 			if ( ! $variation || ! $variation->exists() || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
@@ -302,6 +309,7 @@ class WC_Product_Variable extends WC_Product {
 
 			$available_variations[] = $this->get_available_variation( $variation );
 		}
+
 		$available_variations = array_values( array_filter( $available_variations ) );
 
 		return $available_variations;

@@ -122,16 +122,22 @@ class WC_Form_Handler {
 					foreach ( $field['validate'] as $rule ) {
 						switch ( $rule ) {
 							case 'postcode':
-								$value = strtoupper( str_replace( ' ', '', $value ) );
+								$country = wc_clean( wp_unslash( $_POST[ $load_address . '_country' ] ) );
+								$value   = wc_format_postcode( $value, $country );
 
-								if ( ! WC_Validation::is_postcode( $value, wc_clean( wp_unslash( $_POST[ $load_address . '_country' ] ) ) ) ) {
-									wc_add_notice( __( 'Please enter a valid postcode / ZIP.', 'woocommerce' ), 'error' );
-								} else {
-									$value = wc_format_postcode( $value, wc_clean( wp_unslash( $_POST[ $load_address . '_country' ] ) ) );
+								if ( '' !== $value && ! WC_Validation::is_postcode( $value, $country ) ) {
+									switch ( $country ) {
+										case 'IE':
+											$postcode_validation_notice = __( 'Please enter a valid Eircode.', 'woocommerce' );
+											break;
+										default:
+											$postcode_validation_notice = __( 'Please enter a valid postcode / ZIP.', 'woocommerce' );
+									}
+									wc_add_notice( $postcode_validation_notice, 'error' );
 								}
 								break;
 							case 'phone':
-								if ( ! WC_Validation::is_phone( $value ) ) {
+								if ( '' !== $value && ! WC_Validation::is_phone( $value ) ) {
 									/* translators: %s: Phone number. */
 									wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
 								}
@@ -350,6 +356,8 @@ class WC_Form_Handler {
 
 	/**
 	 * Process the pay form.
+	 *
+	 * @throws Exception On payment error.
 	 */
 	public static function pay_action() {
 		global $wp;
@@ -391,35 +399,39 @@ class WC_Form_Handler {
 
 				// Update payment method.
 				if ( $order->needs_payment() ) {
-					$payment_method     = isset( $_POST['payment_method'] ) ? wc_clean( wp_unslash( $_POST['payment_method'] ) ) : false;
-					$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+					try {
+						$payment_method_id = isset( $_POST['payment_method'] ) ? wc_clean( wp_unslash( $_POST['payment_method'] ) ) : false;
 
-					if ( ! $payment_method ) {
-						wc_add_notice( __( 'Invalid payment method.', 'woocommerce' ), 'error' );
-						return;
-					}
-
-					update_post_meta( $order_id, '_payment_method', $payment_method );
-
-					if ( isset( $available_gateways[ $payment_method ] ) ) {
-						$payment_method_title = $available_gateways[ $payment_method ]->get_title();
-					} else {
-						$payment_method_title = '';
-					}
-
-					update_post_meta( $order_id, '_payment_method_title', $payment_method_title );
-
-					$available_gateways[ $payment_method ]->validate_fields();
-
-					if ( 0 === wc_notice_count( 'error' ) ) {
-
-						$result = $available_gateways[ $payment_method ]->process_payment( $order_id );
-
-						// Redirect to success/confirmation/payment page.
-						if ( 'success' === $result['result'] ) {
-							wp_redirect( $result['redirect'] ); //phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
-							exit;
+						if ( ! $payment_method_id ) {
+							throw new Exception( __( 'Invalid payment method.', 'woocommerce' ) );
 						}
+
+						$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+						$payment_method     = isset( $available_gateways[ $payment_method_id ] ) ? $available_gateways[ $payment_method_id ] : false;
+
+						if ( ! $payment_method ) {
+							throw new Exception( __( 'Invalid payment method.', 'woocommerce' ) );
+						}
+
+						$order->set_payment_method( $payment_method );
+						$order->save();
+
+						$payment_method->validate_fields();
+
+						if ( 0 === wc_notice_count( 'error' ) ) {
+
+							$result = $payment_method->process_payment( $order_id );
+
+							// Redirect to success/confirmation/payment page.
+							if ( isset( $result['result'] ) && 'success' === $result['result'] ) {
+								$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
+
+								wp_redirect( $result['redirect'] ); //phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
+								exit;
+							}
+						}
+					} catch ( Exception $e ) {
+						wc_add_notice( $e->getMessage(), 'error' );
 					}
 				} else {
 					// No payment was required for order.
@@ -547,10 +559,10 @@ class WC_Form_Handler {
 		$nonce_value = wc_get_var( $_REQUEST['woocommerce-cart-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
 
 		if ( ! empty( $_POST['apply_coupon'] ) && ! empty( $_POST['coupon_code'] ) ) {
-			WC()->cart->add_discount( sanitize_text_field( wp_unslash( $_POST['coupon_code'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			WC()->cart->add_discount( wc_format_coupon_code( wp_unslash( $_POST['coupon_code'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		} elseif ( isset( $_GET['remove_coupon'] ) ) {
-			WC()->cart->remove_coupon( wc_clean( wp_unslash( $_GET['remove_coupon'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			WC()->cart->remove_coupon( wc_format_coupon_code( urldecode( wp_unslash( $_GET['remove_coupon'] ) ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		} elseif ( ! empty( $_GET['remove_item'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) {
 			$cart_item_key = sanitize_text_field( wp_unslash( $_GET['remove_item'] ) );
@@ -678,7 +690,7 @@ class WC_Form_Handler {
 			$order_id         = absint( $_GET['order_id'] );
 			$order            = wc_get_order( $order_id );
 			$user_can_cancel  = current_user_can( 'cancel_order', $order_id );
-			$order_can_cancel = $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ) ) );
+			$order_can_cancel = $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ) );
 			$redirect         = isset( $_GET['redirect'] ) ? wp_unslash( $_GET['redirect'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 			if ( $user_can_cancel && $order_can_cancel && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
@@ -949,7 +961,7 @@ class WC_Form_Handler {
 			try {
 				$creds = array(
 					'user_login'    => trim( wp_unslash( $_POST['username'] ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-					'user_password' => wp_unslash( $_POST['password'] ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+					'user_password' => $_POST['password'], // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 					'remember'      => isset( $_POST['rememberme'] ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 				);
 

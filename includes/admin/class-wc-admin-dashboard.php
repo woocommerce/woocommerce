@@ -78,7 +78,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			$query['orderby'] = 'ORDER BY qty DESC';
 			$query['limits']  = 'LIMIT 1';
 
-			return $wpdb->get_row( implode( ' ', apply_filters( 'woocommerce_dashboard_status_widget_top_seller_query', $query ) ) );
+			return $wpdb->get_row( implode( ' ', apply_filters( 'woocommerce_dashboard_status_widget_top_seller_query', $query ) ) ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		}
 
 		/**
@@ -91,7 +91,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			$sales_by_date                 = new WC_Report_Sales_By_Date();
 			$sales_by_date->start_date     = strtotime( date( 'Y-m-01', current_time( 'timestamp' ) ) );
-			$sales_by_date->end_date       = current_time( 'timestamp' );
+			$sales_by_date->end_date       = strtotime( date( 'Y-m-d', current_time( 'timestamp' ) ) );
 			$sales_by_date->chart_groupby  = 'day';
 			$sales_by_date->group_by_query = 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)';
 
@@ -201,45 +201,47 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		private function status_widget_stock_rows() {
 			global $wpdb;
 
-			// Get products using a query - this is too advanced for get_posts.
-			$stock          = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
-			$nostock        = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
-			$transient_name = 'wc_low_stock_count';
+			// Requires lookup table added in 3.6.
+			if ( version_compare( get_option( 'woocommerce_db_version', null ), '3.6', '<' ) ) {
+				return;
+			}
 
+			$stock   = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
+			$nostock = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
+
+			$transient_name   = 'wc_low_stock_count';
 			$lowinstock_count = get_transient( $transient_name );
+
 			if ( false === $lowinstock_count ) {
-				$query_from       = apply_filters(
-					'woocommerce_report_low_in_stock_query_from',
-					"FROM {$wpdb->posts} as posts
-					INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
-					INNER JOIN {$wpdb->postmeta} AS postmeta2 ON posts.ID = postmeta2.post_id
-					WHERE 1=1
-					AND posts.post_type IN ( 'product', 'product_variation' )
-					AND posts.post_status = 'publish'
-					AND postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes'
-					AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$stock}'
-					AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) > '{$nostock}'"
+				$lowinstock_count = (int) $wpdb->get_var(
+					$wpdb->prepare(
+						"SELECT COUNT( product_id )
+						FROM {$wpdb->wc_product_meta_lookup} AS lookup
+						INNER JOIN {$wpdb->posts} as posts ON lookup.product_id = posts.ID
+						WHERE stock_quantity <= %d
+						AND stock_quantity > %d
+						AND posts.post_status = 'publish'",
+						$stock,
+						$nostock
+					)
 				);
-				$lowinstock_count = absint( $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" ) );
 				set_transient( $transient_name, $lowinstock_count, DAY_IN_SECONDS * 30 );
 			}
 
-			$transient_name = 'wc_outofstock_count';
-
+			$transient_name   = 'wc_outofstock_count';
 			$outofstock_count = get_transient( $transient_name );
+
 			if ( false === $outofstock_count ) {
-				$query_from       = apply_filters(
-					'woocommerce_report_out_of_stock_query_from',
-					"FROM {$wpdb->posts} as posts
-					INNER JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
-					INNER JOIN {$wpdb->postmeta} AS postmeta2 ON posts.ID = postmeta2.post_id
-					WHERE 1=1
-					AND posts.post_type IN ( 'product', 'product_variation' )
-					AND posts.post_status = 'publish'
-					AND postmeta2.meta_key = '_manage_stock' AND postmeta2.meta_value = 'yes'
-					AND postmeta.meta_key = '_stock' AND CAST(postmeta.meta_value AS SIGNED) <= '{$nostock}'"
+				$outofstock_count = (int) $wpdb->get_var(
+					$wpdb->prepare(
+						"SELECT COUNT( product_id )
+						FROM {$wpdb->wc_product_meta_lookup} AS lookup
+						INNER JOIN {$wpdb->posts} as posts ON lookup.product_id = posts.ID
+						WHERE stock_quantity <= %d
+						AND posts.post_status = 'publish'",
+						$nostock
+					)
 				);
-				$outofstock_count = absint( $wpdb->get_var( "SELECT COUNT( DISTINCT posts.ID ) {$query_from};" ) );
 				set_transient( $transient_name, $outofstock_count, DAY_IN_SECONDS * 30 );
 			}
 			?>
@@ -288,7 +290,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			);
 
 			$comments = $wpdb->get_results(
-				"SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_ID, comments.comment_content {$query_from};"
+				"SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_ID, comments.comment_content {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			);
 
 			if ( $comments ) {

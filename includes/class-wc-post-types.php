@@ -235,6 +235,8 @@ class WC_Post_Types {
 							'new_item_name'     => sprintf( __( 'New %s', 'woocommerce' ), $label ),
 							/* translators: %s: attribute name */
 							'not_found'         => sprintf( __( 'No &quot;%s&quot; found', 'woocommerce' ), $label ),
+							/* translators: %s: attribute name */
+							'back_to_items'     => sprintf( __( '&larr; Back to "%s" attributes', 'woocommerce' ), $label ),
 						),
 						'show_ui'               => true,
 						'show_in_quick_edit'    => false,
@@ -295,7 +297,8 @@ class WC_Post_Types {
 		}
 
 		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
-		if ( update_option( 'current_theme_supports_woocommerce', current_theme_supports( 'woocommerce' ) ? 'yes' : 'no' ) ) {
+		$theme_support = current_theme_supports( 'woocommerce' ) ? 'yes' : 'no';
+		if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
 		}
 

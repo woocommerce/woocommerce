@@ -91,6 +91,30 @@ class WC_Countries {
 	}
 
 	/**
+	 * Get calling code for a country code.
+	 *
+	 * @since 3.6.0
+	 * @param string $cc Country code.
+	 * @return string|array Some countries have multiple. The code will be stripped of - and spaces and always be prefixed with +.
+	 */
+	public function get_country_calling_code( $cc ) {
+		$codes = wp_cache_get( 'calling-codes', 'countries' );
+
+		if ( ! $codes ) {
+			$codes = include WC()->plugin_path() . '/i18n/phone.php';
+			wp_cache_set( 'calling-codes', $codes, 'countries' );
+		}
+
+		$calling_code = isset( $codes[ $cc ] ) ? $codes[ $cc ] : '';
+
+		if ( is_array( $calling_code ) ) {
+			$calling_code = $calling_code[0];
+		}
+
+		return $calling_code;
+	}
+
+	/**
 	 * Get continents that the store ships to.
 	 *
 	 * @since 3.6.0
@@ -477,6 +501,7 @@ class WC_Countries {
 					'PL'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'PT'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'SK'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
+					'RS'      => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'SI'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
 					'ES'      => "{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{state}\n{country}",
 					'SE'      => "{company}\n{name}\n{address_1}\n{address_2}\n{postcode} {city}\n{country}",
@@ -640,8 +665,6 @@ class WC_Countries {
 				'priority'     => 50,
 			),
 			'address_2'  => array(
-				'label'        => __( 'Apartment, suite, unit etc.', 'woocommerce' ),
-				'label_class'  => array( 'screen-reader-text' ),
 				'placeholder'  => esc_attr( $address_2_placeholder ),
 				'class'        => array( 'form-row-wide', 'address-field' ),
 				'autocomplete' => 'address-line2',
@@ -899,6 +922,11 @@ class WC_Countries {
 							'required' => false,
 						),
 					),
+					'GR' => array(
+						'state' => array(
+							'required' => false,
+						),
+					),
 					'HK' => array(
 						'postcode' => array(
 							'required' => false,
@@ -1074,6 +1102,12 @@ class WC_Countries {
 						'state' => array(
 							'label'    => __( 'County', 'woocommerce' ),
 							'required' => true,
+						),
+					),
+					'RS' => array(
+						'state' => array(
+							'required' => false,
+							'hidden'   => true,
 						),
 					),
 					'SG' => array(

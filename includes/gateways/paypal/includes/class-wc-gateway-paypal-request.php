@@ -216,8 +216,9 @@ class WC_Gateway_Paypal_Request {
 	 * @return array
 	 */
 	protected function get_phone_number_args( $order ) {
+		$phone_number = wc_sanitize_phone_number( $order->get_billing_phone() );
+
 		if ( in_array( $order->get_billing_country(), array( 'US', 'CA' ), true ) ) {
-			$phone_number = str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->get_billing_phone() );
 			$phone_number = ltrim( $phone_number, '+1' );
 			$phone_args   = array(
 				'night_phone_a' => substr( $phone_number, 0, 3 ),
@@ -225,8 +226,16 @@ class WC_Gateway_Paypal_Request {
 				'night_phone_c' => substr( $phone_number, 6, 4 ),
 			);
 		} else {
+			$calling_code = WC()->countries->get_country_calling_code( $order->get_billing_country() );
+			$calling_code = is_array( $calling_code ) ? $calling_code[0] : $calling_code;
+
+			if ( $calling_code ) {
+				$phone_number = str_replace( $calling_code, '', preg_replace( '/^0/', '', $order->get_billing_phone() ) );
+			}
+
 			$phone_args = array(
-				'night_phone_b' => $order->get_billing_phone(),
+				'night_phone_a' => $calling_code,
+				'night_phone_b' => $phone_number,
 			);
 		}
 		return $phone_args;
@@ -483,7 +492,7 @@ class WC_Gateway_Paypal_Request {
 		$item = apply_filters(
 			'woocommerce_paypal_line_item',
 			array(
-				'item_name'   => html_entity_decode( wc_trim_string( $item_name ? $item_name : __( 'Item', 'woocommerce' ), 127 ), ENT_NOQUOTES, 'UTF-8' ),
+				'item_name'   => html_entity_decode( wc_trim_string( $item_name ? wp_strip_all_tags( $item_name ) : __( 'Item', 'woocommerce' ), 127 ), ENT_NOQUOTES, 'UTF-8' ),
 				'quantity'    => (int) $quantity,
 				'amount'      => wc_float_to_string( (float) $amount ),
 				'item_number' => $item_number,

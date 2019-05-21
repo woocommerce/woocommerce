@@ -67,7 +67,6 @@ class WC_Session_Handler extends WC_Session {
 	 */
 	public function init() {
 		$this->init_session_cookie();
-		$this->_data = $this->get_session_data();
 
 		add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
@@ -91,6 +90,15 @@ class WC_Session_Handler extends WC_Session {
 			$this->_session_expiration = $cookie[1];
 			$this->_session_expiring   = $cookie[2];
 			$this->_has_cookie         = true;
+			$this->_data               = $this->get_session_data();
+
+			// If the user logs in, update session.
+			if ( is_user_logged_in() && get_current_user_id() !== $this->_customer_id ) {
+				$this->_customer_id = get_current_user_id();
+				$this->_dirty       = true;
+				$this->save_data();
+				$this->set_customer_session_cookie( true );
+			}
 
 			// Update session if its close to expiring.
 			if ( time() > $this->_session_expiring ) {
@@ -100,6 +108,7 @@ class WC_Session_Handler extends WC_Session {
 		} else {
 			$this->set_session_expiration();
 			$this->_customer_id = $this->generate_customer_id();
+			$this->_data        = $this->get_session_data();
 		}
 	}
 
@@ -120,9 +129,19 @@ class WC_Session_Handler extends WC_Session {
 			$this->_has_cookie = true;
 
 			if ( ! isset( $_COOKIE[ $this->_cookie ] ) || $_COOKIE[ $this->_cookie ] !== $cookie_value ) {
-				wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, apply_filters( 'wc_session_use_secure_cookie', false ) );
+				wc_setcookie( $this->_cookie, $cookie_value, $this->_session_expiration, $this->use_secure_cookie(), true );
 			}
 		}
+	}
+
+	/**
+	 * Should the session cookie be secure?
+	 *
+	 * @since 3.6.0
+	 * @return bool
+	 */
+	protected function use_secure_cookie() {
+		return apply_filters( 'wc_session_use_secure_cookie', wc_site_is_https() && is_ssl() );
 	}
 
 	/**
@@ -249,7 +268,7 @@ class WC_Session_Handler extends WC_Session {
 	 * Forget all session data without destroying it.
 	 */
 	public function forget_session() {
-		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, apply_filters( 'wc_session_use_secure_cookie', false ) );
+		wc_setcookie( $this->_cookie, '', time() - YEAR_IN_SECONDS, $this->use_secure_cookie(), true );
 
 		wc_empty_cart();
 

@@ -216,7 +216,11 @@ function wc_product_post_type_link( $permalink, $post ) {
 			$ancestors = get_ancestors( $category_object->term_id, 'product_cat' );
 			foreach ( $ancestors as $ancestor ) {
 				$ancestor_object = get_term( $ancestor, 'product_cat' );
-				$product_cat     = $ancestor_object->slug . '/' . $product_cat;
+				if ( apply_filters( 'woocommerce_product_post_type_link_parent_category_only', false ) ) {
+					$product_cat = $ancestor_object->slug;
+				} else {
+					$product_cat = $ancestor_object->slug . '/' . $product_cat;
+				}
 			}
 		}
 	} else {
@@ -779,51 +783,6 @@ function wc_get_product_visibility_options() {
 }
 
 /**
- * Get min/max price meta query args.
- *
- * @since 3.0.0
- * @param array $args Min price and max price arguments.
- * @return array
- */
-function wc_get_min_max_price_meta_query( $args ) {
-	$min = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
-	$max = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : 9999999999;
-
-	/**
-	 * Adjust if the store taxes are not displayed how they are stored.
-	 * Kicks in when prices excluding tax are displayed including tax.
-	 */
-	if ( wc_tax_enabled() && 'incl' === get_option( 'woocommerce_tax_display_shop' ) && ! wc_prices_include_tax() ) {
-		$tax_classes = array_merge( array( '' ), WC_Tax::get_tax_classes() );
-		$class_min   = $min;
-		$class_max   = $max;
-
-		foreach ( $tax_classes as $tax_class ) {
-			$tax_rates = WC_Tax::get_rates( $tax_class );
-
-			if ( $tax_rates ) {
-				$class_min = $min + WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $min, $tax_rates ) );
-				$class_max = $max - WC_Tax::get_tax_total( WC_Tax::calc_exclusive_tax( $max, $tax_rates ) );
-			}
-		}
-
-		$min = $class_min;
-		$max = $class_max;
-	}
-
-	return apply_filters(
-		'woocommerce_get_min_max_price_meta_query',
-		array(
-			'key'     => '_price',
-			'value'   => array( $min, $max ),
-			'compare' => 'BETWEEN',
-			'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
-		),
-		$args
-	);
-}
-
-/**
  * Get product tax class options.
  *
  * @since 3.0.0
@@ -849,11 +808,14 @@ function wc_get_product_tax_class_options() {
  * @return array
  */
 function wc_get_product_stock_status_options() {
-	return apply_filters( 'woocommerce_product_stock_status_options', array(
-		'instock'     => __( 'In stock', 'woocommerce' ),
-		'outofstock'  => __( 'Out of stock', 'woocommerce' ),
-		'onbackorder' => __( 'On backorder', 'woocommerce' ),
-	) );
+	return apply_filters(
+		'woocommerce_product_stock_status_options',
+		array(
+			'instock'     => __( 'In stock', 'woocommerce' ),
+			'outofstock'  => __( 'Out of stock', 'woocommerce' ),
+			'onbackorder' => __( 'On backorder', 'woocommerce' ),
+		)
+	);
 }
 
 /**
@@ -1311,3 +1273,289 @@ function wc_deferred_product_sync( $product_id ) {
 
 	$wc_deferred_product_sync[] = $product_id;
 }
+
+/**
+ * See if the lookup table is being generated already.
+ *
+ * @since 3.6.0
+ * @return bool
+ */
+function wc_update_product_lookup_tables_is_running() {
+	$table_updates_pending = WC()->queue()->search(
+		array(
+			'status'   => 'pending',
+			'group'    => 'wc_update_product_lookup_tables',
+			'per_page' => 1,
+		)
+	);
+
+	return (bool) count( $table_updates_pending );
+}
+
+/**
+ * Populate lookup table data for products.
+ *
+ * @since 3.6.0
+ */
+function wc_update_product_lookup_tables() {
+	global $wpdb;
+
+	$is_cli = defined( 'WP_CLI' ) && WP_CLI;
+
+	if ( ! $is_cli ) {
+		WC_Admin_Notices::add_notice( 'regenerating_lookup_table' );
+	}
+
+	// Note that the table is not yet generated.
+	update_option( 'woocommerce_product_lookup_table_is_generating', true );
+
+	// Make a row per product in lookup table.
+	$wpdb->query(
+		"
+		INSERT IGNORE INTO {$wpdb->wc_product_meta_lookup} (`product_id`)
+		SELECT
+			posts.ID
+		FROM {$wpdb->posts} posts
+		WHERE
+			posts.post_type IN ('product', 'product_variation')
+		"
+	);
+
+	// List of column names in the lookup table we need to populate.
+	$columns = array(
+		'min_max_price',
+		'stock_quantity',
+		'sku',
+		'stock_status',
+		'average_rating',
+		'total_sales',
+		'downloadable',
+		'virtual',
+		'onsale', // When last column is updated, woocommerce_product_lookup_table_is_generating is updated.
+	);
+
+	foreach ( $columns as $index => $column ) {
+		if ( $is_cli ) {
+			wc_update_product_lookup_tables_column( $column );
+		} else {
+			WC()->queue()->schedule_single(
+				time() + $index,
+				'wc_update_product_lookup_tables_column',
+				array(
+					'column' => $column,
+				),
+				'wc_update_product_lookup_tables'
+			);
+		}
+	}
+
+	// Rating counts are serialised so they have to be unserialised before populating the lookup table.
+	if ( $is_cli ) {
+		$rating_count_rows = $wpdb->get_results(
+			"
+			SELECT post_id, meta_value FROM {$wpdb->postmeta}
+			WHERE meta_key = '_wc_rating_count'
+			AND meta_value != ''
+			AND meta_value != 'a:0:{}'
+			",
+			ARRAY_A
+		);
+		wc_update_product_lookup_tables_rating_count( $rating_count_rows );
+	} else {
+		WC()->queue()->schedule_single(
+			time() + 10,
+			'wc_update_product_lookup_tables_rating_count_batch',
+			array(
+				'offset' => 0,
+				'limit'  => 50,
+			),
+			'wc_update_product_lookup_tables'
+		);
+	}
+}
+
+/**
+ * Populate lookup table column data.
+ *
+ * @since 3.6.0
+ * @param string $column Column name to set.
+ */
+function wc_update_product_lookup_tables_column( $column ) {
+	if ( empty( $column ) ) {
+		return;
+	}
+	global $wpdb;
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+	switch ( $column ) {
+		case 'min_max_price':
+			$wpdb->query(
+				"
+				UPDATE
+					{$wpdb->wc_product_meta_lookup} lookup_table
+					INNER JOIN (
+						SELECT lookup_table.product_id, MIN( meta_value+0 ) as min_price, MAX( meta_value+0 ) as max_price
+						FROM {$wpdb->wc_product_meta_lookup} lookup_table
+						LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_price'
+						WHERE
+							meta1.meta_value <> ''
+						GROUP BY lookup_table.product_id
+					) as source on source.product_id = lookup_table.product_id
+				SET
+					lookup_table.min_price = source.min_price,
+					lookup_table.max_price = source.max_price
+				"
+			);
+			break;
+		case 'stock_quantity':
+			$wpdb->query(
+				"
+				UPDATE
+					{$wpdb->wc_product_meta_lookup} lookup_table
+					LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_manage_stock'
+					LEFT JOIN {$wpdb->postmeta} meta2 ON lookup_table.product_id = meta2.post_id AND meta2.meta_key = '_stock'
+				SET
+					lookup_table.stock_quantity = meta2.meta_value
+				WHERE
+					meta1.meta_value = 'yes'
+				"
+			);
+			break;
+		case 'sku':
+		case 'stock_status':
+		case 'average_rating':
+		case 'total_sales':
+			if ( 'total_sales' === $column ) {
+				$meta_key = 'total_sales';
+			} elseif ( 'average_rating' === $column ) {
+				$meta_key = '_wc_average_rating';
+			} else {
+				$meta_key = '_' . $column;
+			}
+			$column   = esc_sql( $column );
+			$wpdb->query(
+				$wpdb->prepare(
+					"
+					UPDATE
+						{$wpdb->wc_product_meta_lookup} lookup_table
+						LEFT JOIN {$wpdb->postmeta} meta ON lookup_table.product_id = meta.post_id AND meta.meta_key = %s
+					SET
+						lookup_table.`{$column}` = meta.meta_value
+					",
+					$meta_key
+				)
+			);
+			break;
+		case 'downloadable':
+		case 'virtual':
+			$column = esc_sql( $column );
+
+			$wpdb->query(
+				"
+				UPDATE
+					{$wpdb->wc_product_meta_lookup} lookup_table
+					LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_virtual'
+				SET
+					lookup_table.`{$column}` = IF ( meta1.meta_value = 'yes', 1, 0 )
+				"
+			);
+			break;
+		case 'onsale':
+			$column   = esc_sql( $column );
+			$decimals = absint( wc_get_price_decimals() );
+
+			$wpdb->query(
+				$wpdb->prepare(
+					"
+					UPDATE
+						{$wpdb->wc_product_meta_lookup} lookup_table
+						LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_price'
+						LEFT JOIN {$wpdb->postmeta} meta2 ON lookup_table.product_id = meta2.post_id AND meta2.meta_key = '_sale_price'
+					SET
+						lookup_table.`{$column}` = IF (
+							CAST( meta1.meta_value AS DECIMAL ) >= 0
+							AND CAST( meta2.meta_value AS CHAR ) != ''
+							AND CAST( meta1.meta_value AS DECIMAL( 10, %d ) ) = CAST( meta2.meta_value AS DECIMAL( 10, %d ) )
+						, 1, 0 )
+					",
+					$decimals,
+					$decimals
+				)
+			);
+
+			delete_option( 'woocommerce_product_lookup_table_is_generating' ); // Complete.
+			break;
+	}
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+}
+add_action( 'wc_update_product_lookup_tables_column', 'wc_update_product_lookup_tables_column' );
+
+/**
+ * Populate rating count lookup table data for products.
+ *
+ * @since 3.6.0
+ * @param array $rows Rows of rating counts to update in lookup table.
+ */
+function wc_update_product_lookup_tables_rating_count( $rows ) {
+	if ( ! $rows || ! is_array( $rows ) ) {
+		return;
+	}
+	global $wpdb;
+
+	foreach ( $rows as $row ) {
+		$count = array_sum( (array) maybe_unserialize( $row['meta_value'] ) );
+		$wpdb->update(
+			$wpdb->wc_product_meta_lookup,
+			array(
+				'rating_count' => absint( $count ),
+			),
+			array(
+				'product_id' => absint( $row['post_id'] ),
+			)
+		);
+	}
+}
+
+/**
+ * Populate a batch of rating count lookup table data for products.
+ *
+ * @since 3.6.2
+ * @param array $offset Offset to query.
+ * @param array $limit  Limit to query.
+ */
+function wc_update_product_lookup_tables_rating_count_batch( $offset = 0, $limit = 0 ) {
+	global $wpdb;
+
+	if ( ! $limit ) {
+		return;
+	}
+
+	$rating_count_rows = $wpdb->get_results(
+		$wpdb->prepare(
+			"
+			SELECT post_id, meta_value FROM {$wpdb->postmeta}
+			WHERE meta_key = '_wc_rating_count'
+			AND meta_value != ''
+			AND meta_value != 'a:0:{}'
+			ORDER BY post_id ASC
+			LIMIT %d, %d
+			",
+			$offset,
+			$limit
+		),
+		ARRAY_A
+	);
+
+	if ( $rating_count_rows ) {
+		wc_update_product_lookup_tables_rating_count( $rating_count_rows );
+		WC()->queue()->schedule_single(
+			time() + 1,
+			'wc_update_product_lookup_tables_rating_count_batch',
+			array(
+				'offset' => $offset + $limit,
+				'limit'  => $limit,
+			),
+			'wc_update_product_lookup_tables'
+		);
+	}
+}
+add_action( 'wc_update_product_lookup_tables_rating_count_batch', 'wc_update_product_lookup_tables_rating_count_batch', 10, 2 );

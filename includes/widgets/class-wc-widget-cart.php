@@ -58,7 +58,7 @@ class WC_Widget_Cart extends WC_Widget {
 
 		$hide_if_empty = empty( $instance['hide_if_empty'] ) ? 0 : 1;
 
-		if ( empty( $instance['title'] ) ) {
+		if ( ! isset( $instance['title'] ) ) {
 			$instance['title'] = __( 'Cart', 'woocommerce' );
 		}
 

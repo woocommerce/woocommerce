@@ -19,7 +19,13 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 			$this->validate_action( $action );
 			$post_array = $this->create_post_array( $action, $scheduled_date );
 			$post_id = $this->save_post_array( $post_array );
-			$this->save_post_schedule( $post_id, $action->get_schedule() );
+			$schedule = $action->get_schedule();
+
+			if ( ! is_null( $scheduled_date ) && $schedule->is_recurring() ) {
+				$schedule = new ActionScheduler_IntervalSchedule( $scheduled_date, $schedule->interval_in_seconds() );
+			}
+
+			$this->save_post_schedule( $post_id, $schedule );
 			$this->save_action_group( $post_id, $action->get_group() );
 			do_action( 'action_scheduler_stored_action', $post_id );
 			return $post_id;
@@ -32,7 +38,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 		$post = array(
 			'post_type' => self::POST_TYPE,
 			'post_title' => $action->get_hook(),
-			'post_content' => wp_json_encode($action->get_args()),
+			'post_content' => json_encode($action->get_args()),
 			'post_status' => ( $action->is_finished() ? 'publish' : 'pending' ),
 			'post_date_gmt' => $this->get_scheduled_date_string( $action, $scheduled_date ),
 			'post_date'     => $this->get_scheduled_date_string_local( $action, $scheduled_date ),
@@ -42,8 +48,10 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 
 	protected function save_post_array( $post_array ) {
 		add_filter( 'wp_insert_post_data', array( $this, 'filter_insert_post_data' ), 10, 1 );
+		add_filter( 'pre_wp_unique_post_slug', array( $this, 'set_unique_post_slug' ), 10, 5 );
 		$post_id = wp_insert_post($post_array);
 		remove_filter( 'wp_insert_post_data', array( $this, 'filter_insert_post_data' ), 10 );
+		remove_filter( 'pre_wp_unique_post_slug', array( $this, 'set_unique_post_slug' ), 10 );
 
 		if ( is_wp_error($post_id) || empty($post_id) ) {
 			throw new RuntimeException(__('Unable to save action.', 'action-scheduler'));
@@ -59,6 +67,41 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 			}
 		}
 		return $postdata;
+	}
+
+	/**
+	 * Create a (probably unique) post name for scheduled actions in a more performant manner than wp_unique_post_slug().
+	 *
+	 * When an action's post status is transitioned to something other than 'draft', 'pending' or 'auto-draft, like 'publish'
+	 * or 'failed' or 'trash', WordPress will find a unique slug (stored in post_name column) using the wp_unique_post_slug()
+	 * function. This is done to ensure URL uniqueness. The approach taken by wp_unique_post_slug() is to iterate over existing
+	 * post_name values that match, and append a number 1 greater than the largest. This makes sense when manually creating a
+	 * post from the Edit Post screen. It becomes a bottleneck when automatically processing thousands of actions, with a
+	 * database containing thousands of related post_name values.
+	 *
+	 * WordPress 5.1 introduces the 'pre_wp_unique_post_slug' filter for plugins to address this issue.
+	 *
+	 * We can short-circuit WordPress's wp_unique_post_slug() approach using the 'pre_wp_unique_post_slug' filter. This
+	 * method is available to be used as a callback on that filter. It provides a more scalable approach to generating a
+	 * post_name/slug that is probably unique. Because Action Scheduler never actually uses the post_name field, or an
+	 * action's slug, being probably unique is good enough.
+	 *
+	 * For more backstory on this issue, see:
+	 * - https://github.com/Prospress/action-scheduler/issues/44 and
+	 * - https://core.trac.wordpress.org/ticket/21112
+	 *
+	 * @param string $override_slug Short-circuit return value.
+	 * @param string $slug          The desired slug (post_name).
+	 * @param int    $post_ID       Post ID.
+	 * @param string $post_status   The post status.
+	 * @param string $post_type     Post type.
+	 * @return string
+	 */
+	public function set_unique_post_slug( $override_slug, $slug, $post_ID, $post_status, $post_type ) {
+		if ( self::POST_TYPE == $post_type ) {
+			$override_slug = uniqid( self::POST_TYPE . '-', true ) . '-' . wp_generate_password( 32, false );
+		}
+		return $override_slug;
 	}
 
 	protected function save_post_schedule( $post_id, $schedule ) {
@@ -94,17 +137,21 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 
 	protected function make_action_from_post( $post ) {
 		$hook = $post->post_title;
-		$args = json_decode( $post->post_content, true );
 
-		// Handle args that do not decode properly.
-		if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $args ) ) {
-			throw ActionScheduler_InvalidActionException::from_decoding_args( $post->ID );
-		}
+		try {
+			$args = json_decode( $post->post_content, true );
+			$this->validate_args( $args, $post->ID );
 
-		$schedule = get_post_meta( $post->ID, self::SCHEDULE_META_KEY, true );
-		if ( empty($schedule) ) {
+			$schedule = get_post_meta( $post->ID, self::SCHEDULE_META_KEY, true );
+			if ( empty( $schedule ) || ! is_a( $schedule, 'ActionScheduler_Schedule' ) ) {
+				throw ActionScheduler_InvalidActionException::from_decoding_args( $post->ID );
+			}
+		} catch ( ActionScheduler_InvalidActionException $exception ) {
 			$schedule = new ActionScheduler_NullSchedule();
+			$args = array();
+			do_action( 'action_scheduler_failed_fetch_action', $post->ID );
 		}
+
 		$group = wp_get_object_terms( $post->ID, self::GROUP_TAXONOMY, array('fields' => 'names') );
 		$group = empty( $group ) ? '' : reset($group);
 
@@ -190,7 +237,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 		$args[] = self::POST_TYPE;
 		if ( !is_null($params['args']) ) {
 			$query .= " AND p.post_content=%s";
-			$args[] = wp_json_encode($params['args']);
+			$args[] = json_encode($params['args']);
 		}
 
 		if ( ! empty( $params['status'] ) ) {
@@ -271,7 +318,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 		}
 		if ( !is_null($query['args']) ) {
 			$sql .= " AND p.post_content=%s";
-			$sql_params[] = wp_json_encode($query['args']);
+			$sql_params[] = json_encode($query['args']);
 		}
 
 		if ( ! empty( $query['status'] ) ) {
@@ -404,7 +451,9 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 			throw new InvalidArgumentException(sprintf(__('Unidentified action %s', 'action-scheduler'), $action_id));
 		}
 		do_action( 'action_scheduler_canceled_action', $action_id );
+		add_filter( 'pre_wp_unique_post_slug', array( $this, 'set_unique_post_slug' ), 10, 5 );
 		wp_trash_post($action_id);
+		remove_filter( 'pre_wp_unique_post_slug', array( $this, 'set_unique_post_slug' ), 10 );
 	}
 
 	public function delete_action( $action_id ) {
@@ -587,16 +636,9 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 				'ID'         => 'ASC',
 			),
 			'date_query'       => array(
-				'column' => 'post_date',
-				array(
-					'compare' => '<=',
-					'year'    => $date->format( 'Y' ),
-					'month'   => $date->format( 'n' ),
-					'day'     => $date->format( 'j' ),
-					'hour'    => $date->format( 'G' ),
-					'minute'  => $date->format( 'i' ),
-					'second'  => $date->format( 's' ),
-				),
+				'column' => 'post_date_gmt',
+				'before' => $date->format( 'Y-m-d H:i' ),
+				'inclusive' => true,
 			),
 			'tax_query' => array(
 				array(
@@ -716,11 +758,13 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 			throw new InvalidArgumentException(sprintf(__('Unidentified action %s', 'action-scheduler'), $action_id));
 		}
 		add_filter( 'wp_insert_post_data', array( $this, 'filter_insert_post_data' ), 10, 1 );
+		add_filter( 'pre_wp_unique_post_slug', array( $this, 'set_unique_post_slug' ), 10, 5 );
 		$result = wp_update_post(array(
 			'ID' => $action_id,
 			'post_status' => 'publish',
 		), TRUE);
 		remove_filter( 'wp_insert_post_data', array( $this, 'filter_insert_post_data' ), 10 );
+		remove_filter( 'pre_wp_unique_post_slug', array( $this, 'set_unique_post_slug' ), 10 );
 		if ( is_wp_error($result) ) {
 			throw new RuntimeException($result->get_error_message());
 		}
@@ -736,7 +780,7 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 	 * @param ActionScheduler_Action $action
 	 */
 	protected function validate_action( ActionScheduler_Action $action ) {
-		if ( strlen( wp_json_encode( $action->get_args() ) ) > self::$max_index_length ) {
+		if ( strlen( json_encode( $action->get_args() ) ) > self::$max_index_length ) {
 			_doing_it_wrong( 'ActionScheduler_Action::$args', sprintf( 'To ensure the action args column can be indexed, action args should not be more than %d characters when encoded as JSON. Support for strings longer than this will be removed in a future version.', self::$max_index_length ), '2.1.0' );
 		}
 	}
@@ -753,5 +797,25 @@ class ActionScheduler_wpPostStore extends ActionScheduler_Store {
 
 		$taxonomy_registrar = new ActionScheduler_wpPostStore_TaxonomyRegistrar();
 		$taxonomy_registrar->register();
+	}
+
+	/**
+	 * Validate that we could decode action arguments.
+	 *
+	 * @param mixed $args      The decoded arguments.
+	 * @param int   $action_id The action ID.
+	 *
+	 * @throws ActionScheduler_InvalidActionException When the decoded arguments are invalid.
+	 */
+	private function validate_args( $args, $action_id ) {
+		// Ensure we have an array of args.
+		if ( ! is_array( $args ) ) {
+			throw ActionScheduler_InvalidActionException::from_decoding_args( $action_id );
+		}
+
+		// Validate JSON decoding if possible.
+		if ( function_exists( 'json_last_error' ) && JSON_ERROR_NONE !== json_last_error() ) {
+			throw ActionScheduler_InvalidActionException::from_decoding_args( $action_id );
+		}
 	}
 }

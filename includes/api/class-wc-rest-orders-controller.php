@@ -144,6 +144,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 	 * @return WC_Data|WP_Error
 	 */
 	protected function save_object( $request, $creating = false ) {
+		$object = null;
+
 		try {
 			$object = $this->prepare_object_for_database( $request, $creating );
 
@@ -196,10 +198,27 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 			return $this->get_object( $object->get_id() );
 		} catch ( WC_Data_Exception $e ) {
+			$this->purge( $object, $creating );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
+			$this->purge( $object, $creating );
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
+	}
+
+	/**
+	 * Purge object when creating.
+	 *
+	 * @param WC_Data $object  Object data.
+	 * @param bool    $creating If is creating a new object.
+	 * @return bool
+	 */
+	protected function purge( $object, $creating ) {
+		if ( $object instanceof WC_Data && $creating ) {
+			return $object->delete( true );
+		}
+
+		return false;
 	}
 
 	/**
@@ -257,7 +276,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		$params['status'] = array(
 			'default'           => 'any',
-			'description'       => __( 'Limit result set to orders assigned a specific status.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to orders which have specific statuses.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'string',

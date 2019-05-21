@@ -83,11 +83,11 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 			if ( $this->object->has_status( array( 'completed', 'processing' ) ) ) {
 				$subject = $this->get_option( 'subject_paid', $this->get_default_subject( true ) );
 
-				return apply_filters( 'woocommerce_email_subject_customer_invoice_paid', $this->format_string( $subject ), $this->object );
+				return apply_filters( 'woocommerce_email_subject_customer_invoice_paid', $this->format_string( $subject ), $this->object, $this );
 			}
 
 			$subject = $this->get_option( 'subject', $this->get_default_subject() );
-			return apply_filters( 'woocommerce_email_subject_customer_invoice', $this->format_string( $subject ), $this->object );
+			return apply_filters( 'woocommerce_email_subject_customer_invoice', $this->format_string( $subject ), $this->object, $this );
 		}
 
 		/**
@@ -98,11 +98,11 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 		public function get_heading() {
 			if ( $this->object->has_status( wc_get_is_paid_statuses() ) ) {
 				$heading = $this->get_option( 'heading_paid', $this->get_default_heading( true ) );
-				return apply_filters( 'woocommerce_email_heading_customer_invoice_paid', $this->format_string( $heading ), $this->object );
+				return apply_filters( 'woocommerce_email_heading_customer_invoice_paid', $this->format_string( $heading ), $this->object, $this );
 			}
 
 			$heading = $this->get_option( 'heading', $this->get_default_heading() );
-			return apply_filters( 'woocommerce_email_heading_customer_invoice', $this->format_string( $heading ), $this->object );
+			return apply_filters( 'woocommerce_email_heading_customer_invoice', $this->format_string( $heading ), $this->object, $this );
 		}
 
 		/**

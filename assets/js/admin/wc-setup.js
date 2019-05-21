@@ -67,6 +67,15 @@ jQuery( function( $ ) {
 		}
 	} );
 
+	$( '.wc-wizard-services' ).on( 'keyup', function( e ) {
+		var code = e.keyCode || e.which,
+			$focused = $( document.activeElement );
+
+		if ( $focused.is( '.wc-wizard-service-toggle, .wc-wizard-service-enable' ) && ( 13 === code || 32 === code ) ) {
+			$focused.find( ':input' ).click();
+		}
+	} );
+
 	$( '.wc-wizard-services' ).on( 'click', '.wc-wizard-service-enable', function( e ) {
 		var eventTarget = $( e.target );
 

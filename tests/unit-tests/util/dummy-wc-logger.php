@@ -23,7 +23,7 @@ class Dummy_WC_Logger implements WC_Logger_Interface {
 	 *
 	 * @param string $level
 	 * @param string $message
-	 * @param array $context
+	 * @param array  $context
 	 */
 	public function log( $level, $message, $context = array() ) {
 	}
@@ -32,7 +32,7 @@ class Dummy_WC_Logger implements WC_Logger_Interface {
 	 * Do nothing.
 	 *
 	 * @param string $message
-	 * @param array $context
+	 * @param array  $context
 	 */
 	public function emergency( $message, $context = array() ) {
 	}
@@ -41,7 +41,7 @@ class Dummy_WC_Logger implements WC_Logger_Interface {
 	 * Do nothing.
 	 *
 	 * @param string $message
-	 * @param array $context
+	 * @param array  $context
 	 */
 	public function alert( $message, $context = array() ) {
 	}
@@ -50,7 +50,7 @@ class Dummy_WC_Logger implements WC_Logger_Interface {
 	 * Do nothing.
 	 *
 	 * @param string $message
-	 * @param array $context
+	 * @param array  $context
 	 */
 	public function critical( $message, $context = array() ) {
 	}
@@ -59,7 +59,7 @@ class Dummy_WC_Logger implements WC_Logger_Interface {
 	 * Do nothing.
 	 *
 	 * @param string $message
-	 * @param array $context
+	 * @param array  $context
 	 */
 	public function error( $message, $context = array() ) {
 	}
@@ -68,7 +68,7 @@ class Dummy_WC_Logger implements WC_Logger_Interface {
 	 * Do nothing.
 	 *
 	 * @param string $message
-	 * @param array $context
+	 * @param array  $context
 	 */
 	public function warning( $message, $context = array() ) {
 	}
@@ -77,7 +77,7 @@ class Dummy_WC_Logger implements WC_Logger_Interface {
 	 * Do nothing.
 	 *
 	 * @param string $message
-	 * @param array $context
+	 * @param array  $context
 	 */
 	public function notice( $message, $context = array() ) {
 	}
@@ -86,7 +86,7 @@ class Dummy_WC_Logger implements WC_Logger_Interface {
 	 * Do nothing.
 	 *
 	 * @param string $message
-	 * @param array $context
+	 * @param array  $context
 	 */
 	public function info( $message, $context = array() ) {
 	}
@@ -95,7 +95,7 @@ class Dummy_WC_Logger implements WC_Logger_Interface {
 	 * Do nothing.
 	 *
 	 * @param string $message
-	 * @param array $context
+	 * @param array  $context
 	 */
 	public function debug( $message, $context = array() ) {
 	}

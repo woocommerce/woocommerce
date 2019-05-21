@@ -78,8 +78,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 					'relation' => 'OR',
 					array(
 						'type'       => 'order_item_meta',
-						'meta_key'   => array( '_product_id', '_variation_id' ), // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-						'meta_value' => $this->product_ids, // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value
+						'meta_key'   => array( '_product_id', '_variation_id' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+						'meta_value' => $this->product_ids, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 						'operator'   => 'IN',
 					),
 				),
@@ -104,8 +104,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'relation' => 'OR',
 						array(
 							'type'       => 'order_item_meta',
-							'meta_key'   => array( '_product_id', '_variation_id' ), // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-							'meta_value' => $this->product_ids, // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value
+							'meta_key'   => array( '_product_id', '_variation_id' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+							'meta_value' => $this->product_ids, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 							'operator'   => 'IN',
 						),
 					),
@@ -299,8 +299,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'where_meta'   => array(
 							array(
 								'type'       => 'order_item_meta',
-								'meta_key'   => '_line_subtotal', // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-								'meta_value' => '0', // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value
+								'meta_key'   => '_line_subtotal', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+								'meta_value' => '0', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 								'operator'   => '=',
 							),
 						),
@@ -454,8 +454,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'relation' => 'OR',
 						array(
 							'type'       => 'order_item_meta',
-							'meta_key'   => array( '_product_id', '_variation_id' ), // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-							'meta_value' => $this->product_ids, // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value
+							'meta_key'   => array( '_product_id', '_variation_id' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+							'meta_value' => $this->product_ids, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 							'operator'   => 'IN',
 						),
 					),
@@ -492,8 +492,8 @@ class WC_Report_Sales_By_Product extends WC_Admin_Report {
 						'relation' => 'OR',
 						array(
 							'type'       => 'order_item_meta',
-							'meta_key'   => array( '_product_id', '_variation_id' ), // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_key
-							'meta_value' => $this->product_ids, // phpcs:ignore WordPress.VIP.SlowDBQuery.slow_db_query_meta_value
+							'meta_key'   => array( '_product_id', '_variation_id' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+							'meta_value' => $this->product_ids, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 							'operator'   => 'IN',
 						),
 					),

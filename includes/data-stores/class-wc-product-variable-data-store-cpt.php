@@ -482,15 +482,22 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$children = $product->get_children();
 
 		if ( $children ) {
-			$format               = array_fill( 0, count( $children ), '%d' );
-			$query_in             = '(' . implode( ',', $format ) . ')';
-			$query_args           = array( 'stock_status' => $status ) + $children;
+			$format     = array_fill( 0, count( $children ), '%d' );
+			$query_in   = '(' . implode( ',', $format ) . ')';
+			$query_args = array( 'stock_status' => $status ) + $children;
+			// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+			if ( get_option( 'woocommerce_product_lookup_table_is_generating' ) ) {
+				$query = "SELECT COUNT( post_id ) FROM {$wpdb->postmeta} WHERE meta_key = '_stock_status' AND meta_value = %s AND post_id IN {$query_in}";
+			} else {
+				$query = "SELECT COUNT( product_id ) FROM {$wpdb->wc_product_meta_lookup} WHERE stock_status = %s AND product_id IN {$query_in}";
+			}
 			$children_with_status = $wpdb->get_var(
-				$wpdb->prepare( // wpcs: PreparedSQLPlaceholders replacement count ok.
-					"SELECT COUNT( post_id ) FROM $wpdb->postmeta WHERE meta_key = '_stock_status' AND meta_value = %s AND post_id IN {$query_in}", // @codingStandardsIgnoreLine.
+				$wpdb->prepare(
+					$query,
 					$query_args
 				)
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 		} else {
 			$children_with_status = 0;
 		}
@@ -547,6 +554,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$managed_children = array_unique( $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN {$query_in}", $children ) ) ); // @codingStandardsIgnoreLine.
 				foreach ( $managed_children as $managed_child ) {
 					if ( update_post_meta( $managed_child, '_stock_status', $status ) ) {
+						$this->update_lookup_table( $managed_child, 'wc_product_meta_lookup' );
 						$changed = true;
 					}
 				}
@@ -584,7 +592,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		delete_post_meta( $product->get_id(), '_regular_price' );
 
 		if ( $prices ) {
-			sort( $prices );
+			sort( $prices, SORT_NUMERIC );
 			// To allow sorting and filtering by multiple values, we have no choice but to store child prices in this manner.
 			foreach ( $prices as $price ) {
 				if ( is_null( $price ) || '' === $price ) {
@@ -593,6 +601,16 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				add_post_meta( $product->get_id(), '_price', $price, false );
 			}
 		}
+
+		$this->update_lookup_table( $product->get_id(), 'wc_product_meta_lookup' );
+
+		/**
+		 * Fire an action for this direct update so it can be detected by other code.
+		 *
+		 * @since 3.6
+		 * @param int $product_id Product ID that was updated directly.
+		 */
+		do_action( 'woocommerce_updated_product_price', $product->get_id() );
 	}
 
 	/**

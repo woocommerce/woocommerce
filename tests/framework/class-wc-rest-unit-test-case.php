@@ -22,7 +22,7 @@ class WC_REST_Unit_Test_Case extends WC_Unit_Test_Case {
 		do_action( 'rest_api_init' );
 
 		// Reset payment gateways.
-		$gateways = WC_Payment_Gateways::instance();
+		$gateways                   = WC_Payment_Gateways::instance();
 		$gateways->payment_gateways = array();
 		$gateways->init();
 	}

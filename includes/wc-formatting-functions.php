@@ -363,6 +363,20 @@ function wc_format_coupon_code( $value ) {
 }
 
 /**
+ * Sanitize a coupon code.
+ *
+ * Uses sanitize_post_field since coupon codes are stored as
+ * post_titles - the sanitization and escaping must match.
+ *
+ * @since  3.6.0
+ * @param  string $value Coupon code to format.
+ * @return string
+ */
+function wc_sanitize_coupon_code( $value ) {
+	return sanitize_post_field( 'post_title', $value, 0, 'db' );
+}
+
+/**
  * Clean variables using sanitize_text_field. Arrays are cleaned recursively.
  * Non-scalar values are ignored.
  *
@@ -592,10 +606,8 @@ function wc_price( $price, $args = array() ) {
  * @return int
  */
 function wc_let_to_num( $size ) {
-	$l    = substr( $size, -1 );
-	$ret  = substr( $size, 0, -1 );
-	$byte = 1024;
-
+	$l   = substr( $size, -1 );
+	$ret = (int) substr( $size, 0, -1 );
 	switch ( strtoupper( $l ) ) {
 		case 'P':
 			$ret *= 1024;
@@ -968,6 +980,18 @@ function wc_format_phone_number( $phone ) {
 }
 
 /**
+ * Sanitize phone number.
+ * Allows only numbers and "+" (plus sign).
+ *
+ * @since 3.6.0
+ * @param string $phone Phone number.
+ * @return string
+ */
+function wc_sanitize_phone_number( $phone ) {
+	return preg_replace( '/[^\d+]/', '', $phone );
+}
+
+/**
  * Wrapper for mb_strtoupper which see's if supported first.
  *
  * @since  3.1.0
@@ -1108,7 +1132,7 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_hold_stock_m
  * @return string
  */
 function wc_sanitize_term_text_based( $term ) {
-	return trim( wp_unslash( strip_tags( $term ) ) );
+	return trim( wp_strip_all_tags( wp_unslash( $term ) ) );
 }
 
 if ( ! function_exists( 'wc_make_numeric_postcode' ) ) {
@@ -1383,9 +1407,9 @@ function wc_implode_html_attributes( $raw_attributes ) {
 function wc_esc_json( $json, $html = false ) {
 	return _wp_specialchars(
 		$json,
-		$html ? ENT_NOQUOTES : ENT_QUOTES, // Escape quotes in attribute nodes only,
+		$html ? ENT_NOQUOTES : ENT_QUOTES, // Escape quotes in attribute nodes only.
 		'UTF-8',                           // json_encode() outputs UTF-8 (really just ASCII), not the blog's charset.
-		true                               // Double escape entities: `&amp;` -> `&amp;amp;`
+		true                               // Double escape entities: `&amp;` -> `&amp;amp;`.
 	);
 }
 

@@ -51,11 +51,11 @@ class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 			array( false, wc_is_valid_url( 'https://google.com/test invalid' ) ),
 
 			// Test some valid URLs
-			array( true,  wc_is_valid_url( 'http://google.com' ) ),
-			array( true,  wc_is_valid_url( 'https://google.com' ) ),
-			array( true,  wc_is_valid_url( 'https://google.com/test%20valid' ) ),
-			array( true,  wc_is_valid_url( 'https://google.com/test-valid/?query=test' ) ),
-			array( true,  wc_is_valid_url( 'https://google.com/test-valid/#hash' ) ),
+			array( true, wc_is_valid_url( 'http://google.com' ) ),
+			array( true, wc_is_valid_url( 'https://google.com' ) ),
+			array( true, wc_is_valid_url( 'https://google.com/test%20valid' ) ),
+			array( true, wc_is_valid_url( 'https://google.com/test-valid/?query=test' ) ),
+			array( true, wc_is_valid_url( 'https://google.com/test-valid/#hash' ) ),
 		);
 	}
 
@@ -86,6 +86,6 @@ class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 	 * @since 2.3.0
 	 */
 	public function test_wc_is_valid_url( $assert, $values ) {
-		$this->assertEquals( $assert,  $values );
+		$this->assertEquals( $assert, $values );
 	}
 }

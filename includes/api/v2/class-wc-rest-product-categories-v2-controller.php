@@ -34,10 +34,10 @@ class WC_REST_Product_Categories_V2_Controller extends WC_REST_Product_Categorie
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		// Get category display type.
-		$display_type = get_woocommerce_term_meta( $item->term_id, 'display_type' );
+		$display_type = get_term_meta( $item->term_id, 'display_type', true );
 
 		// Get category order.
-		$menu_order = get_woocommerce_term_meta( $item->term_id, 'order' );
+		$menu_order = get_term_meta( $item->term_id, 'order', true );
 
 		$data = array(
 			'id'          => (int) $item->term_id,
@@ -52,7 +52,7 @@ class WC_REST_Product_Categories_V2_Controller extends WC_REST_Product_Categorie
 		);
 
 		// Get category image.
-		$image_id = get_woocommerce_term_meta( $item->term_id, 'thumbnail_id' );
+		$image_id = get_term_meta( $item->term_id, 'thumbnail_id', true );
 		if ( $image_id ) {
 			$attachment = get_post( $image_id );
 

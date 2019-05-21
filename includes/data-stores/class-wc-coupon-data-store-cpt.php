@@ -115,7 +115,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'description'                 => $post_object->post_excerpt,
 				'date_created'                => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
 				'date_modified'               => 0 < $post_object->post_modified_gmt ? wc_string_to_timestamp( $post_object->post_modified_gmt ) : null,
-				'date_expires'                => metadata_exists( 'post', $coupon_id, 'date_expires' ) ? get_post_meta( $coupon_id, 'date_expires', true ) : get_post_meta( $coupon_id, 'expiry_date', true ),
+				'date_expires'                => metadata_exists( 'post', $coupon_id, 'date_expires' ) ? get_post_meta( $coupon_id, 'date_expires', true ) : get_post_meta( $coupon_id, 'expiry_date', true ), // @todo: Migrate expiry_date meta to date_expires in upgrade routine.
 				'discount_type'               => get_post_meta( $coupon_id, 'discount_type', true ),
 				'amount'                      => get_post_meta( $coupon_id, 'coupon_amount', true ),
 				'usage_count'                 => get_post_meta( $coupon_id, 'usage_count', true ),
@@ -248,33 +248,33 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		$props_to_update = $this->get_props_to_update( $coupon, $meta_key_to_props );
 		foreach ( $props_to_update as $meta_key => $prop ) {
 			$value = $coupon->{"get_$prop"}( 'edit' );
+			$value = is_string( $value ) ? wp_slash( $value ) : $value;
 			switch ( $prop ) {
 				case 'individual_use':
 				case 'free_shipping':
 				case 'exclude_sale_items':
-					$updated = update_post_meta( $coupon->get_id(), $meta_key, wc_bool_to_string( $value ) );
+					$value = wc_bool_to_string( $value );
 					break;
 				case 'product_ids':
 				case 'excluded_product_ids':
-					$updated = update_post_meta( $coupon->get_id(), $meta_key, implode( ',', array_filter( array_map( 'intval', $value ) ) ) );
+					$value = implode( ',', array_filter( array_map( 'intval', $value ) ) );
 					break;
 				case 'product_categories':
 				case 'excluded_product_categories':
-					$updated = update_post_meta( $coupon->get_id(), $meta_key, array_filter( array_map( 'intval', $value ) ) );
+					$value = array_filter( array_map( 'intval', $value ) );
 					break;
 				case 'email_restrictions':
-					$updated = update_post_meta( $coupon->get_id(), $meta_key, array_filter( array_map( 'sanitize_email', $value ) ) );
+					$value = array_filter( array_map( 'sanitize_email', $value ) );
 					break;
 				case 'date_expires':
-					$updated = update_post_meta( $coupon->get_id(), $meta_key, ( $value ? $value->getTimestamp() : null ) );
-					update_post_meta( $coupon->get_id(), 'expiry_date', ( $value ? $value->date( 'Y-m-d' ) : '' ) ); // Update the old meta key for backwards compatibility.
-					break;
-				default:
-					$updated = update_post_meta( $coupon->get_id(), $meta_key, $value );
+					$value = $value ? $value->getTimestamp() : null;
 					break;
 			}
+
+			$updated = $this->update_or_delete_post_meta( $coupon, $meta_key, $value );
+
 			if ( $updated ) {
-				$updated_props[] = $prop;
+				$this->updated_props[] = $prop;
 			}
 		}
 

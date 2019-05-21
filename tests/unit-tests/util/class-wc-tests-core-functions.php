@@ -10,7 +10,6 @@
  * Core function unit tests.
  */
 class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
-
 	/**
 	 * Test get_woocommerce_currency().
 	 *
@@ -311,6 +310,9 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 * @return WC_Logger_Interface
 	 */
 	public function return_valid_logger_instance() {
+		if ( ! class_exists( 'Dummy_WC_Logger' ) ) {
+			include_once 'dummy-wc-logger.php';
+		}
 		return new Dummy_WC_Logger();
 	}
 
@@ -546,12 +548,49 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the wc_get_template function.
+	 * Test the wc_get_template_part function.
 	 *
 	 * @return void
 	 */
 	public function test_wc_get_template_part() {
 		$this->assertEmpty( wc_get_template_part( 'nothinghere' ) );
+	}
+
+	/**
+	 * Test wc_get_template.
+	 *
+	 * @expectedIncorrectUsage wc_get_template
+	 */
+	public function test_wc_get_template_invalid_action_args() {
+		ob_start();
+		wc_get_template(
+			'global/wrapper-start.php',
+			array(
+				'action_args' => 'this is bad',
+			)
+		);
+		$template = ob_get_clean();
+	}
+
+	/**
+	 * Test wc_get_template.
+	 */
+	public function test_wc_get_template() {
+		ob_start();
+		wc_get_template( 'global/wrapper-start.php' );
+		$template = ob_get_clean();
+		$this->assertNotEmpty( $template );
+
+		ob_start();
+		wc_get_template(
+			'global/wrapper-start.php',
+			array(
+				'template' => 'x',
+				'located'  => 'x',
+			)
+		);
+		$template = ob_get_clean();
+		$this->assertNotEmpty( $template );
 	}
 
 	/**
@@ -861,10 +900,10 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'billing_first_name' => array(
 				'priority' => 10,
 			),
-			'billing_last_name' => array(
+			'billing_last_name'  => array(
 				'priority' => 20,
 			),
-			'billing_email' => array(
+			'billing_email'      => array(
 				'priority' => 1,
 			),
 		);

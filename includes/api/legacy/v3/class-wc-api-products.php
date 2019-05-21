@@ -666,11 +666,11 @@ class WC_API_Products extends WC_API_Resource {
 			$term_id = intval( $term->term_id );
 
 			// Get category display type
-			$display_type = get_woocommerce_term_meta( $term_id, 'display_type' );
+			$display_type = get_term_meta( $term_id, 'display_type', true );
 
 			// Get category image
 			$image = '';
-			if ( $image_id = get_woocommerce_term_meta( $term_id, 'thumbnail_id' ) ) {
+			if ( $image_id = get_term_meta( $term_id, 'thumbnail_id', true ) ) {
 				$image = wp_get_attachment_url( $image_id );
 			}
 
@@ -750,11 +750,11 @@ class WC_API_Products extends WC_API_Resource {
 
 			$id = $insert['term_id'];
 
-			update_woocommerce_term_meta( $id, 'display_type', 'default' === $data['display'] ? '' : sanitize_text_field( $data['display'] ) );
+			update_term_meta( $id, 'display_type', 'default' === $data['display'] ? '' : sanitize_text_field( $data['display'] ) );
 
 			// Check if image_id is a valid image attachment before updating the term meta.
 			if ( $image_id && wp_attachment_is_image( $image_id ) ) {
-				update_woocommerce_term_meta( $id, 'thumbnail_id', $image_id );
+				update_term_meta( $id, 'thumbnail_id', $image_id );
 			}
 
 			do_action( 'woocommerce_api_create_product_category', $id, $data );
@@ -823,11 +823,11 @@ class WC_API_Products extends WC_API_Resource {
 			}
 
 			if ( ! empty( $data['display'] ) ) {
-				update_woocommerce_term_meta( $id, 'display_type', 'default' === $data['display'] ? '' : sanitize_text_field( $data['display'] ) );
+				update_term_meta( $id, 'display_type', 'default' === $data['display'] ? '' : sanitize_text_field( $data['display'] ) );
 			}
 
 			if ( isset( $image_id ) ) {
-				update_woocommerce_term_meta( $id, 'thumbnail_id', $image_id );
+				update_term_meta( $id, 'thumbnail_id', $image_id );
 			}
 
 			do_action( 'woocommerce_api_edit_product_category', $id, $data );
@@ -859,11 +859,6 @@ class WC_API_Products extends WC_API_Resource {
 			$deleted = wp_delete_term( $id, 'product_cat' );
 			if ( ! $deleted || is_wp_error( $deleted ) ) {
 				throw new WC_API_Exception( 'woocommerce_api_cannot_delete_product_category', __( 'Could not delete the category', 'woocommerce' ), 401 );
-			}
-
-			// When a term is deleted, delete its meta.
-			if ( get_option( 'db_version' ) < 34370 ) {
-				$wpdb->delete( $wpdb->woocommerce_termmeta, array( 'woocommerce_term_id' => $id ), array( '%d' ) );
 			}
 
 			do_action( 'woocommerce_api_delete_product_category', $id, $this );
@@ -2582,6 +2577,7 @@ class WC_API_Products extends WC_API_Resource {
 			// Clear transients.
 			wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 			delete_transient( 'wc_attribute_taxonomies' );
+			WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
 
 			$this->server->send_status( 201 );
 
@@ -2668,6 +2664,7 @@ class WC_API_Products extends WC_API_Resource {
 			// Clear transients.
 			wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 			delete_transient( 'wc_attribute_taxonomies' );
+			WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
 
 			return $this->get_product_attribute( $id );
 		} catch ( WC_API_Exception $e ) {
@@ -2730,6 +2727,7 @@ class WC_API_Products extends WC_API_Resource {
 			// Clear transients.
 			wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 			delete_transient( 'wc_attribute_taxonomies' );
+			WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
 
 			return array( 'message' => sprintf( __( 'Deleted %s', 'woocommerce' ), 'product_attribute' ) );
 		} catch ( WC_API_Exception $e ) {
@@ -2760,25 +2758,7 @@ class WC_API_Products extends WC_API_Resource {
 				throw new WC_API_Exception( 'woocommerce_api_invalid_product_attribute_id', __( 'A product attribute with the provided ID could not be found', 'woocommerce' ), 404 );
 			}
 
-			$args    = array( 'hide_empty' => false );
-			$orderby = wc_attribute_orderby( $taxonomy );
-
-			switch ( $orderby ) {
-				case 'name' :
-					$args['orderby']    = 'name';
-					$args['menu_order'] = false;
-				break;
-				case 'id' :
-					$args['orderby']    = 'id';
-					$args['order']      = 'ASC';
-					$args['menu_order'] = false;
-				break;
-				case 'menu_order' :
-					$args['menu_order'] = 'ASC';
-				break;
-			}
-
-			$terms = get_terms( $taxonomy, $args );
+			$terms = get_terms( $taxonomy, array( 'hide_empty' => false ) );
 			$attribute_terms = array();
 
 			foreach ( $terms as $term ) {

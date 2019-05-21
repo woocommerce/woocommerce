@@ -305,7 +305,15 @@ jQuery( function( $ ) {
 		}
 
 		var options = $.extend( {
-			index: $( clicked ).index()
+			index: $( clicked ).index(),
+			addCaptionHTMLFn: function( item, captionEl ) {
+				if ( ! item.title ) {
+					captionEl.children[0].textContent = '';
+					return false;
+				}
+				captionEl.children[0].textContent = item.title;
+				return true;
+			}
 		}, wc_single_product_params.photoswipe_options );
 
 		// Initializes and opens PhotoSwipe.
@@ -317,7 +325,7 @@ jQuery( function( $ ) {
 	 * Function to call wc_product_gallery on jquery selector.
 	 */
 	$.fn.wc_product_gallery = function( args ) {
-		new ProductGallery( this, args );
+		new ProductGallery( this, args || wc_single_product_params );
 		return this;
 	};
 
