@@ -1821,6 +1821,37 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test the coupon usage limit based on guest orders with emails only.
+	 *
+	 * @return void
+	 */
+	public function test_coupon_email_usage_limit() {
+		// Orders.
+		$order1 = WC_Helper_Order::create_order();
+		$order2 = WC_Helper_Order::create_order();
+
+		// Setup coupon.
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'usage-limit-coupon' );
+		$coupon->set_amount( 100 );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_usage_limit_per_user( 1 );
+		$coupon->save();
+
+		// Set as guest users with the same email.
+		$order1->set_customer_id( 0 );
+		$order1->set_billing_email( 'coupontest@example.com' );
+		$order1->set_customer_id( 0 );
+		$order2->set_billing_email( 'coupontest@example.com' );
+
+		$order1->apply_coupon( 'usage-limit-coupon' );
+		$this->assertEquals( 1, count( $order1->get_coupons() ) );
+
+		$order2->apply_coupon( 'usage-limit-coupon' );
+		$this->assertEquals( 0, count( $order2->get_coupons() ) );
+	}
+
+	/**
 	 * Test removing and adding items + recalculation.
 	 *
 	 * @since 3.2.0

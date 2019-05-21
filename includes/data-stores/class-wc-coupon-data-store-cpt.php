@@ -369,6 +369,19 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 	}
 
 	/**
+	 * Get the number of uses for a coupon by email address
+	 *
+	 * @since 3.6.4
+	 * @param WC_Coupon $coupon Coupon object.
+	 * @param string    $email Email address.
+	 * @return int
+	 */
+	public function get_usage_by_email( &$coupon, $email ) {
+		global $wpdb;
+		return $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( meta_id ) FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_used_by' AND meta_value = %s;", $coupon->get_id(), $email ) );
+	}
+
+	/**
 	 * Return a coupon code for a specific ID.
 	 *
 	 * @since 3.0.0

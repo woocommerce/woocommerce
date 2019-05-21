@@ -1128,11 +1128,15 @@ class WC_AJAX {
 				throw new Exception( __( 'Invalid coupon', 'woocommerce' ) );
 			}
 
-			// Add user ID so validation for coupon limits works.
-			$user_id_arg = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
+			// Add user ID and/or email so validation for coupon limits works.
+			$user_id_arg    = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
+			$user_email_arg = isset( $_POST['user_email'] ) ? sanitize_email( wp_unslash( $_POST['user_email'] ) ) : '';
 
 			if ( $user_id_arg ) {
 				$order->set_customer_id( $user_id_arg );
+			}
+			if ( $user_email_arg ) {
+				$order->set_billing_email( $user_email_arg );
 			}
 
 			$result = $order->apply_coupon( wc_format_coupon_code( wp_unslash( $_POST['coupon'] ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

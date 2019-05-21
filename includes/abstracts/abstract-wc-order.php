@@ -954,6 +954,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return $applied;
 		}
 
+		// Check specific for guest checkouts here as well since WC_Cart handles that seperately in check_customer_coupons.
+		$data_store  = $coupon->get_data_store();
+		$usage_count = $data_store->get_usage_by_email( $coupon, $this->get_billing_email() );
+		if ( $usage_count >= $coupon->get_usage_limit_per_user() ) {
+			return new WP_Error(
+				'invalid_coupon',
+				$coupon->get_coupon_error( 106 ),
+				array(
+					'status' => 400,
+				)
+			);
+		}
+
 		$this->set_coupon_discount_amounts( $discounts );
 		$this->save();
 
