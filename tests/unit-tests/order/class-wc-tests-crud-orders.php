@@ -1841,7 +1841,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		// Set as guest users with the same email.
 		$order1->set_customer_id( 0 );
 		$order1->set_billing_email( 'coupontest@example.com' );
-		$order1->set_customer_id( 0 );
+		$order2->set_customer_id( 0 );
 		$order2->set_billing_email( 'coupontest@example.com' );
 
 		$order1->apply_coupon( 'usage-limit-coupon' );
