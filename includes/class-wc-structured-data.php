@@ -257,7 +257,7 @@ class WC_Structured_Data {
 
 			$markup_offer += array(
 				'priceCurrency' => $currency,
-				'availability'  => 'https://schema.org/' . ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
+				'availability'  => 'http://schema.org/' . ( $product->is_in_stock() ? 'InStock' : 'OutOfStock' ),
 				'url'           => $permalink,
 				'seller'        => array(
 					'@type' => 'Organization',
