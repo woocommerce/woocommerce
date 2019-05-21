@@ -157,12 +157,8 @@ function wc_update_order( $args ) {
  * @param string $name Template name (default: '').
  */
 function wc_get_template_part( $slug, $name = '' ) {
-	if ( isset( $_SERVER['SERVER_NAME'] ) ) {
-		$uniquepath = sanitize_key( $_SERVER['SERVER_NAME'] );
-	} else {
-		$uniquepath = '';
-	}
-	$cache_key = sanitize_key( implode( '-', array( 'template-part', $slug, $name, WC_VERSION, $uniquepath ) ) );
+	$server_name = isset( $_SERVER['SERVER_NAME'] ) ? sanitize_key( $_SERVER['SERVER_NAME'] ) : '';
+	$cache_key = sanitize_key( apply_filters( 'woocommerce_get_template_part_cache_key', implode( '-', array( 'template-part', $slug, $name, WC_VERSION, $server_name ) ), $slug, $name, WC_VERSION, $server_name ) );
 	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
 
 	if ( ! $template ) {
@@ -210,12 +206,8 @@ function wc_get_template_part( $slug, $name = '' ) {
  * @param string $default_path  Default path. (default: '').
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
-	if ( isset( $_SERVER['SERVER_NAME'] ) ) {
-		$uniquepath = sanitize_key( $_SERVER['SERVER_NAME'] );
-	} else {
-		$uniquepath = '';
-	}
-	$cache_key = sanitize_key( implode( '-', array( 'template', $template_name, $template_path, $default_path, WC_VERSION, $uniquepath ) ) );
+	$server_name = isset( $_SERVER['SERVER_NAME'] ) ? sanitize_key( $_SERVER['SERVER_NAME'] ) : '';
+	$cache_key = sanitize_key( apply_filters( 'woocommerce_get_template_cache_key', implode( '-', array( 'template', $template_name, $template_path, $default_path, WC_VERSION, $server_name ) ) ) );
 	$template  = (string) wp_cache_get( $cache_key, 'woocommerce' );
 
 	if ( ! $template ) {
