@@ -74,13 +74,9 @@ class WC_Tracks {
 	 */
 	public static function record_event( $event_name, $properties = array() ) {
 		/**
-		 * Don't track users who haven't opted-in to tracking or if a filter
-		 * has been applied to turn it off.
+		 * Don't track users who don't have tracking enabled.
 		 */
-		if (
-			'yes' !== get_option( 'woocommerce_allow_tracking' ) ||
-			! apply_filters( 'woocommerce_apply_tracking', true )
-		) {
+		if ( ! WC_Site_Tracking::is_tracking_enabled() ) {
 			return false;
 		}
 
