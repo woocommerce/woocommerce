@@ -249,7 +249,7 @@ class WC_Gateway_Paypal_Request {
 	 */
 	protected function get_shipping_args( $order ) {
 		$shipping_args = array();
-		if ( $order->has_shipping_method() ) {
+		if ( $order->needs_shipping_address() ) {
 			$shipping_args['address_override'] = $this->gateway->get_option( 'address_override' ) === 'yes' ? 1 : 0;
 			$shipping_args['no_shipping']      = 0;
 			if ( 'yes' === $this->gateway->get_option( 'send_shipping' ) ) {
