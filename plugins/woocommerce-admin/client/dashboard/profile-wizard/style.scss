@@ -1,14 +1,14 @@
 /** @format */
 
 .woocommerce-profile-wizard__body {
-	background: #342248;
-	color: #beabce;
+	background: $muriel-gray-0;
+	color: $muriel-gray-600;
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
 		'Helvetica Neue', sans-serif;
 
 	.woocommerce-profile-wizard__header {
 		height: 56px;
-		border-bottom: 1px solid #1f112e;
+		border-bottom: 1px solid $muriel-gray-50;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -16,10 +16,14 @@
 		svg > g {
 			transform: translateX(25%);
 		}
+
+		.woocommerce-profile-wizard__plus {
+			stroke: $muriel-gray-800;
+		}
 	}
 
 	.woocommerce-profile-wizard__header-title {
-		color: #fff;
+		color: $muriel-gray-800;
 		font-size: 24px;
 		line-height: 32px;
 		font-weight: 400;

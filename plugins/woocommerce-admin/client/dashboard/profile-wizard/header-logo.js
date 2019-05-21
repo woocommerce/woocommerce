@@ -12,13 +12,13 @@ export default () => (
 		<g fill="none" fillRule="evenodd">
 			<g>
 				<g>
-					<g transform="translate(219 35.082353)">
+					<g transform="translate(219 35.082353)" className="woocommerce-profile-wizard__plus">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							viewBox="0 0 24 24"
 							height="72"
 							width="72"
-							fill="#bbc9d5"
+							fill="#2B2D2F"
 						>
 							<g xmlns="http://www.w3.org/2000/svg">
 								<path d="M18 11h-5V6h-2v5H6v2h5v5h2v-5h5" />
@@ -32,7 +32,7 @@ export default () => (
                                 L161.2,145.8 L118.1,121.8 L23.8,121.8 C11.2,121.8 1,111.6 1,99
                                 L1,23 C0.9,10.5 11.1,0.2 23.7,0.2 Z"
 							id="Shape"
-							fill="#BEABCE"
+							fill="#2B2D2F"
 						/>
 						<path
 							d="M13.2,20.9 C14.6,19 16.7,18 19.5,17.8 C24.6,17.4 27.5,19.8 28.2,25
@@ -46,7 +46,7 @@ export default () => (
                                 39.3,110.1 35.1,110.4 C32.4,110.6 30.1,108.3 28.1,103.5 C23,90.4 17.5,65.1
                                 11.6,27.6 C11.3,25 11.8,22.7 13.2,20.9 Z"
 							id="Shape"
-							fill="#342148"
+							fill="#F6F6F6"
 							fillRule="nonzero"
 						/>
 						<path
@@ -60,7 +60,7 @@ export default () => (
                                 198.2,47.5 C201.5,42.6 205,40.6 208.6,41.3 C211,41.8 213,43.9 214.5,47.8
                                 C215.7,50.9 216.3,54 216.3,56.9 C216.3,59.5 216,62 215.6,64.3 Z"
 							id="Shape"
-							fill="#342148"
+							fill="#F6F6F6"
 							fillRule="nonzero"
 						/>
 						<path
@@ -74,17 +74,17 @@ export default () => (
                                 135.5,47.5 C138.8,42.6 142.3,40.6 145.9,41.3 C148.3,41.8 150.3,43.9 151.8,47.8
                                 C153,50.9 153.6,54 153.6,56.9 C153.6,59.5 153.4,62 152.9,64.3 Z"
 							id="Shape"
-							fill="#342148"
+							fill="#F6F6F6"
 							fillRule="nonzero"
 						/>
 					</g>
 					<svg height="150" width="150" viewBox="0 0 32 32">
 						<path
-							fill="#BEABCE"
+							fill="#2B2D2F"
 							d="M16,0C7.2,0,0,7.2,0,16s7.2,16,16,16s16-7.2,16-16S24.8,0,16,0z"
 						/>
-						<polygon fill="#342148" points="15,19 7,19 15,3 " />
-						<polygon fill="#342148" points="17,29 17,13 25,13 " />
+						<polygon fill="#F6F6F6" points="15,19 7,19 15,3 " />
+						<polygon fill="#F6F6F6" points="17,29 17,13 25,13 " />
 					</svg>
 				</g>
 			</g>

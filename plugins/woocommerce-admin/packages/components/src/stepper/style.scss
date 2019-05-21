@@ -30,7 +30,7 @@
 		&.is-complete {
 			.woocommerce-stepper__step-icon,
 			.components-spinner {
-				background: $muriel-active;
+				background: $muriel-hot-orange-700;
 			}
 		}
 
@@ -59,7 +59,7 @@
 		width: 24px;
 		height: 24px;
 		margin-right: $gap-small;
-		background: $muriel-gray-dark-300;
+		background: $muriel-gray-300;
 		color: #fff;
 		border-radius: 50%;
 	}
