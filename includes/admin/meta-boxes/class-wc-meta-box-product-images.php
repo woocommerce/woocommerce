@@ -27,30 +27,6 @@ class WC_Meta_Box_Product_Images {
 	public static function output( $post ) {
 		global $thepostid, $product_object;
 
-		// Restrict the markup of the new filter to these tags and attributes.
-		$allow_markup = array(
-			'a' => array(
-				'id'      => array(),
-				'href'    => array(),
-				'title'   => array(),
-				'onclick' => array(),
-				'class'   => array(),
-			),
-			'div' => array(
-				'id'      => array(),
-				'title'   => array(),
-				'onclick' => array(),
-				'class'   => array(),
-			),
-			'input' => array(
-				'type'  => array(),
-				'name'  => array(),
-				'id'    => array(),
-				'value' => array(),
-				'class' => array(),
-			),
-		);
-
 		$thepostid      = $post->ID;
 		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product();
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
@@ -73,20 +49,18 @@ class WC_Meta_Box_Product_Images {
 							$update_meta = true;
 							continue;
 						}
-
-						// Allow for extra info or action to be exposed for this attachment, but restrict it's output.
-						$attachment_info_action = wp_kses(
-							apply_filters( 'woocommerce_product_gallery_item_info_action', '', $thepostid, $attachment_id ),
-							$allow_markup
-						);
-
-						echo '<li class="image" data-attachment_id="' . esc_attr( $attachment_id ) . '">
-								' . $attachment . '
-								<ul class="actions">
-									<li><a href="#" class="delete tips" data-tip="' . esc_attr__( 'Delete image', 'woocommerce' ) . '">' . __( 'Delete', 'woocommerce' ) . '</a></li>
-								</ul>
-								' . $attachment_info_action . '
-							</li>';
+						?>
+						<li class="image" data-attachment_id="<?php echo (int) $attachment_id; ?>">
+							<?php echo $attachment; // WPCS: XSS OK. ?>
+							<ul class="actions">
+								<li><a href="#" class="delete tips" data-tip="<?php esc_attr_e( 'Delete image', 'woocommerce' ); ?>"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a></li>
+							</ul>
+							<?php
+							// Allow for extra info to be exposed or extra action to be executed for this attachment.
+							do_action( 'woocommerce_product_gallery_item_info_action', $thepostid, $attachment_id );
+							?>
+						</li>
+						<?php
 
 						// rebuild ids to be saved.
 						$updated_gallery_ids[] = $attachment_id;
