@@ -69,3 +69,23 @@ On npm…
 ## Publishing the WooCommerce Blocks plugin
 
 TBD
+
+## How to test `@woocommerce/block-library` without publishing to npm
+
+If you need to test how something works once built into WooCommerce core, you can `pack` a .tgz file and tell WooCommerce to use this local .tgz file instead of the version on npmjs.com.
+
+- Run `npm pack` to create the .tgz file
+- Move the file into the `woocommerce` plugin directory, optionally renaming it to something unique
+- Update `/woocommerce/package.json`:
+
+```json
+"dependencies": {
+  "@woocommerce/block-library": "file://./woocommerce-block-library-2.2.0-dev.tgz"
+},
+```
+
+- Now you can run `npm install` in woocommerce to install from this local file
+- Run `npx grunt blocks` to build just the blocks code, or `npx grunt` to run the full build process
+- Test whatever you were testing 🎉
+
+If you're testing something multiple times, note that the **.tgz is cached,** so if you're doing this more than once, the tgz name needs to be different to break that cache.
