@@ -24,7 +24,14 @@ class WC_Orders_Tracking {
 	 */
 	public function track_orders_view() {
 		if ( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			WC_Tracks::record_event( 'orders_view' );
+
+			// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput
+			$properties = array(
+				'status' => isset( $_GET['post_status'] ) ? sanitize_text_field( $_GET['post_status'] ) : 'all',
+			);
+			// phpcs:enable
+
+			WC_Tracks::record_event( 'orders_view', $properties );
 		}
 	}
 

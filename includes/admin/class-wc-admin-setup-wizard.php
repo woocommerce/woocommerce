@@ -141,11 +141,7 @@ class WC_Admin_Setup_Wizard {
 	 * @return boolean
 	 */
 	protected function should_show_facebook() {
-		$end_date_facebook_recommendation = new DateTime( '8 October 2019' );
-		$current_user_date = new DateTime( current_time( 'Y-m-d' ) );
-
-		return current_user_can( 'install_plugins' ) &&
-			$end_date_facebook_recommendation >= $current_user_date;
+		return current_user_can( 'install_plugins' );
 	}
 
 	/**
@@ -172,7 +168,7 @@ class WC_Admin_Setup_Wizard {
 		$suffix          = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
 
 		wp_register_script( 'jquery-blockui', WC()->plugin_url() . '/assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js', array( 'jquery' ), '2.70', true );
-		wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.0' );
+		wp_register_script( 'selectWoo', WC()->plugin_url() . '/assets/js/selectWoo/selectWoo.full' . $suffix . '.js', array( 'jquery' ), '1.0.6' );
 		wp_register_script( 'wc-enhanced-select', WC()->plugin_url() . '/assets/js/admin/wc-enhanced-select' . $suffix . '.js', array( 'jquery', 'selectWoo' ), WC_VERSION );
 		wp_localize_script(
 			'wc-enhanced-select',
@@ -488,7 +484,7 @@ class WC_Admin_Setup_Wizard {
 							echo esc_html( sprintf( __( '%1$s (%2$s)', 'woocommerce' ), $name, $code ) );
 						} else {
 							/* translators: 1: currency name 2: currency symbol, 3: currency code */
-							echo esc_html( sprintf( __( '%1$s (%2$s / %3$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ), $code ) );
+							echo esc_html( sprintf( __( '%1$s (%2$s %3$s)', 'woocommerce' ), $name, get_woocommerce_currency_symbol( $code ), $code ) );
 						}
 						?>
 					</option>
@@ -522,24 +518,18 @@ class WC_Admin_Setup_Wizard {
 				<?php esc_html_e( 'I will also be selling products or services in person.', 'woocommerce' ); ?>
 			</label>
 
-			<?php
-			if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) {
-				?>
-				<div class="woocommerce-tracker">
-					<p class="checkbox">
-						<input type="checkbox" id="wc_tracker_checkbox" name="wc_tracker_checkbox" value="yes" checked />
-						<label for="wc_tracker_checkbox"><?php esc_html_e( 'Help WooCommerce improve with usage tracking.', 'woocommerce' ); ?></label>
-					</p>
-					<p>
-					<?php
-					esc_html_e( 'Gathering usage data allows us to make WooCommerce better &mdash; your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense. If you would rather opt-out, and do not check this box, we will not know this store exists and we will not collect any usage data.', 'woocommerce' );
-					echo ' <a target="_blank" href="https://woocommerce.com/usage-tracking/">' . esc_html__( 'Read more about what we collect.', 'woocommerce' ) . '</a>';
-					?>
-					</p>
-				</div>
+			<div class="woocommerce-tracker">
+				<p class="checkbox">
+					<input type="checkbox" id="wc_tracker_checkbox" name="wc_tracker_checkbox" value="yes" checked />
+					<label for="wc_tracker_checkbox"><?php esc_html_e( 'Help WooCommerce improve with usage tracking.', 'woocommerce' ); ?></label>
+				</p>
+				<p>
 				<?php
-			}
-			?>
+				esc_html_e( 'Gathering usage data allows us to make WooCommerce better &mdash; your store will be considered as we evaluate new features, judge the quality of an update, or determine if an improvement makes sense. If you would rather opt-out, and do not check this box, we will not know this store exists and we will not collect any usage data.', 'woocommerce' );
+				echo ' <a target="_blank" href="https://woocommerce.com/usage-tracking/">' . esc_html__( 'Read more about what we collect.', 'woocommerce' ) . '</a>';
+				?>
+				</p>
+			</div>
 			<p class="wc-setup-actions step">
 				<button type="submit" class="button-primary button button-large button-next" value="<?php esc_attr_e( "Let's go!", 'woocommerce' ); ?>" name="save_step"><?php esc_html_e( "Let's go!", 'woocommerce' ); ?></button>
 			</p>
@@ -587,13 +577,12 @@ class WC_Admin_Setup_Wizard {
 				update_option( 'woocommerce_price_thousand_sep', $locale_info[ $country ]['thousand_sep'] );
 			}
 		}
-		if ( 'unknown' === get_option( 'woocommerce_allow_tracking', 'unknown' ) ) {
-			if ( $tracking ) {
-				update_option( 'woocommerce_allow_tracking', 'yes' );
-				wp_schedule_single_event( time() + 10, 'woocommerce_tracker_send_event', array( true ) );
-			} else {
-				update_option( 'woocommerce_allow_tracking', 'no' );
-			}
+
+		if ( $tracking ) {
+			update_option( 'woocommerce_allow_tracking', 'yes' );
+			wp_schedule_single_event( time() + 10, 'woocommerce_tracker_send_event', array( true ) );
+		} else {
+			update_option( 'woocommerce_allow_tracking', 'no' );
 		}
 
 		WC_Install::create_pages();
@@ -1404,7 +1393,7 @@ class WC_Admin_Setup_Wizard {
 				'name'        => __( 'WooCommerce PayPal Checkout Gateway', 'woocommerce' ),
 				'image'       => WC()->plugin_url() . '/assets/images/paypal.png',
 				'description' => $paypal_checkout_description,
-				'enabled'     => true,
+				'enabled'     => false,
 				'class'       => 'checked paypal-logo',
 				'repo-slug'   => 'woocommerce-gateway-paypal-express-checkout',
 				'settings'    => array(
@@ -1443,7 +1432,7 @@ class WC_Admin_Setup_Wizard {
 			'klarna_checkout' => array(
 				'name'        => __( 'Klarna Checkout for WooCommerce', 'woocommerce' ),
 				'description' => $klarna_checkout_description,
-				'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
+				'image'       => WC()->plugin_url() . '/assets/images/klarna-black.png',
 				'enabled'     => true,
 				'class'       => 'klarna-logo',
 				'repo-slug'   => 'klarna-checkout-for-woocommerce',
@@ -1451,7 +1440,7 @@ class WC_Admin_Setup_Wizard {
 			'klarna_payments' => array(
 				'name'        => __( 'Klarna Payments for WooCommerce', 'woocommerce' ),
 				'description' => $klarna_payments_description,
-				'image'       => WC()->plugin_url() . '/assets/images/klarna-white.png',
+				'image'       => WC()->plugin_url() . '/assets/images/klarna-black.png',
 				'enabled'     => true,
 				'class'       => 'klarna-logo',
 				'repo-slug'   => 'klarna-payments-for-woocommerce',
@@ -1459,9 +1448,9 @@ class WC_Admin_Setup_Wizard {
 			'square'          => array(
 				'name'        => __( 'WooCommerce Square', 'woocommerce' ),
 				'description' => $square_description,
-				'image'       => WC()->plugin_url() . '/assets/images/square-white.png',
+				'image'       => WC()->plugin_url() . '/assets/images/square-black.png',
 				'class'       => 'square-logo',
-				'enabled'     => true,
+				'enabled'     => false,
 				'repo-slug'   => 'woocommerce-square',
 			),
 			'eway'            => array(
@@ -1503,38 +1492,14 @@ class WC_Admin_Setup_Wizard {
 			return $can_paypal ? array( 'paypal' => $gateways['paypal'] ) : array();
 		}
 
-		$spotlight = '';
+		$klarna_or_square = false;
 
 		if ( $this->is_klarna_checkout_supported_country( $country ) ) {
-			$spotlight = 'klarna_checkout';
+			$klarna_or_square = 'klarna_checkout';
 		} elseif ( $this->is_klarna_payments_supported_country( $country ) ) {
-			$spotlight = 'klarna_payments';
+			$klarna_or_square = 'klarna_payments';
 		} elseif ( $this->is_square_supported_country( $country ) && get_option( 'woocommerce_sell_in_person' ) ) {
-			$spotlight = 'square';
-		}
-
-		if ( $spotlight ) {
-			$offered_gateways = array(
-				$spotlight => $gateways[ $spotlight ],
-			);
-
-			if ( $can_paypal ) {
-				$offered_gateways += array( 'ppec_paypal' => $gateways['ppec_paypal'] );
-			}
-
-			if ( $can_stripe ) {
-				$offered_gateways += array( 'stripe' => $gateways['stripe'] );
-			}
-
-			if ( $can_eway ) {
-				$offered_gateways += array( 'eway' => $gateways['eway'] );
-			}
-
-			if ( $can_payfast ) {
-				$offered_gateways += array( 'payfast' => $gateways['payfast'] );
-			}
-
-			return $offered_gateways;
+			$klarna_or_square = 'square';
 		}
 
 		$offered_gateways = array();
@@ -1543,6 +1508,22 @@ class WC_Admin_Setup_Wizard {
 			$gateways['stripe']['enabled']  = true;
 			$gateways['stripe']['featured'] = true;
 			$offered_gateways              += array( 'stripe' => $gateways['stripe'] );
+		} elseif ( $can_paypal ) {
+			$gateways['ppec_paypal']['enabled'] = true;
+		}
+
+		if ( $klarna_or_square ) {
+			if ( in_array( $klarna_or_square, array( 'klarna_checkout', 'klarna_payments' ), true ) ) {
+				$gateways[ $klarna_or_square ]['enabled']  = true;
+				$gateways[ $klarna_or_square ]['featured'] = false;
+				$offered_gateways                          += array(
+					$klarna_or_square => $gateways[ $klarna_or_square ],
+				);
+			} else {
+				$offered_gateways += array(
+					$klarna_or_square => $gateways[ $klarna_or_square ],
+				);
+			}
 		}
 
 		if ( $can_paypal ) {
@@ -1607,7 +1588,7 @@ class WC_Admin_Setup_Wizard {
 		// Show the user-saved state if it was previously saved.
 		// Otherwise, rely on the item info.
 		if ( is_array( $previously_saved_settings ) ) {
-			$should_enable_toggle = isset( $previously_saved_settings['enabled'] ) && 'yes' === $previously_saved_settings['enabled'];
+			$should_enable_toggle = ( isset( $previously_saved_settings['enabled'] ) && 'yes' === $previously_saved_settings['enabled'] ) ? true : ( isset( $item_info['enabled'] ) && $item_info['enabled'] );
 		} else {
 			$should_enable_toggle = isset( $item_info['enabled'] ) && $item_info['enabled'];
 		}

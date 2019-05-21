@@ -1,16 +1,6 @@
 #!/usr/bin/env bash
 # usage: travis.sh before|after
 
-if [ $1 == 'before' ]; then
-
-	composer global require "phpunit/phpunit=6.*"
-
-	if [[ ${RUN_PHPCS} == 1 ]]; then
-		composer install
-	fi
-
-fi
-
 if [ $1 == 'after' ]; then
 
 	if [[ ${RUN_CODE_COVERAGE} == 1 ]]; then
@@ -22,9 +12,9 @@ if [ $1 == 'after' ]; then
 
 	if [[ ${RUN_E2E} == 1 && $(ls -A $TRAVIS_BUILD_DIR/screenshots) ]]; then
 		if [[ -z "${ARTIFACTS_KEY}" ]]; then
-  			echo "Screenshots were not uploaded. Please run the e2e tests locally to see failures."
+			echo "Screenshots were not uploaded. Please run the e2e tests locally to see failures."
 		else
-  			curl -sL https://raw.githubusercontent.com/travis-ci/artifacts/master/install | bash
+			curl -sL https://raw.githubusercontent.com/travis-ci/artifacts/master/install | bash
 			artifacts upload
 		fi
 	fi

@@ -52,7 +52,8 @@ class WC_Tests_API_Reports_Coupons_Totals extends WC_REST_Unit_Test_Case {
 					FROM $wpdb->postmeta
 					WHERE meta_key = 'discount_type'
 					AND meta_value = %s
-				", $slug
+				",
+					$slug
 				)
 			);
 

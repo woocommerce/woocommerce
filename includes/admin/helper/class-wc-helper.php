@@ -185,7 +185,7 @@ class WC_Helper {
 			}
 
 			$subscription['download_primary'] = true;
-			$subscription['download_url']     = $subscription['product_url'];
+			$subscription['download_url']     = 'https://woocommerce.com/my-account/downloads/';
 			if ( ! $subscription['local']['installed'] && ! empty( $updates[ $subscription['product_id'] ] ) ) {
 				$subscription['download_url'] = $updates[ $subscription['product_id'] ]['package'];
 			}

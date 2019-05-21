@@ -122,16 +122,22 @@ class WC_Form_Handler {
 					foreach ( $field['validate'] as $rule ) {
 						switch ( $rule ) {
 							case 'postcode':
-								$value = strtoupper( str_replace( ' ', '', $value ) );
+								$country = wc_clean( wp_unslash( $_POST[ $load_address . '_country' ] ) );
+								$value   = wc_format_postcode( $value, $country );
 
-								if ( ! WC_Validation::is_postcode( $value, wc_clean( wp_unslash( $_POST[ $load_address . '_country' ] ) ) ) ) {
-									wc_add_notice( __( 'Please enter a valid postcode / ZIP.', 'woocommerce' ), 'error' );
-								} else {
-									$value = wc_format_postcode( $value, wc_clean( wp_unslash( $_POST[ $load_address . '_country' ] ) ) );
+								if ( '' !== $value && ! WC_Validation::is_postcode( $value, $country ) ) {
+									switch ( $country ) {
+										case 'IE':
+											$postcode_validation_notice = __( 'Please enter a valid Eircode.', 'woocommerce' );
+											break;
+										default:
+											$postcode_validation_notice = __( 'Please enter a valid postcode / ZIP.', 'woocommerce' );
+									}
+									wc_add_notice( $postcode_validation_notice, 'error' );
 								}
 								break;
 							case 'phone':
-								if ( ! WC_Validation::is_phone( $value ) ) {
+								if ( '' !== $value && ! WC_Validation::is_phone( $value ) ) {
 									/* translators: %s: Phone number. */
 									wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
 								}
@@ -684,7 +690,7 @@ class WC_Form_Handler {
 			$order_id         = absint( $_GET['order_id'] );
 			$order            = wc_get_order( $order_id );
 			$user_can_cancel  = current_user_can( 'cancel_order', $order_id );
-			$order_can_cancel = $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ) ) );
+			$order_can_cancel = $order->has_status( apply_filters( 'woocommerce_valid_order_statuses_for_cancel', array( 'pending', 'failed' ), $order ) );
 			$redirect         = isset( $_GET['redirect'] ) ? wp_unslash( $_GET['redirect'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 			if ( $user_can_cancel && $order_can_cancel && $order->get_id() === $order_id && hash_equals( $order->get_order_key(), $order_key ) ) {
@@ -955,7 +961,7 @@ class WC_Form_Handler {
 			try {
 				$creds = array(
 					'user_login'    => trim( wp_unslash( $_POST['username'] ) ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-					'user_password' => wp_unslash( $_POST['password'] ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+					'user_password' => $_POST['password'], // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 					'remember'      => isset( $_POST['rememberme'] ), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 				);
 

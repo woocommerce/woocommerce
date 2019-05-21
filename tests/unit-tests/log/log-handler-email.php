@@ -23,8 +23,8 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_handle() {
-		$mailer = tests_retrieve_phpmailer_instance();
-		$time = time();
+		$mailer    = tests_retrieve_phpmailer_instance();
+		$time      = time();
 		$site_name = get_bloginfo( 'name' );
 
 		$handler = new WC_Log_Handler_Email();
@@ -82,8 +82,8 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 	 * @since 3.0.0
 	 */
 	public function test_email_subject() {
-		$mailer = tests_retrieve_phpmailer_instance();
-		$time = time();
+		$mailer    = tests_retrieve_phpmailer_instance();
+		$time      = time();
 		$site_name = get_bloginfo( 'name' );
 
 		$handler = new WC_Log_Handler_Email( null, WC_Log_Levels::DEBUG );
@@ -114,10 +114,12 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 	public function test_multiple_recipients() {
 		$mailer = tests_retrieve_phpmailer_instance();
 
-		$handler = new WC_Log_Handler_Email( array(
-			'first@test.com',
-			'Second Recipient <second@test.com>',
-		) );
+		$handler = new WC_Log_Handler_Email(
+			array(
+				'first@test.com',
+				'Second Recipient <second@test.com>',
+			)
+		);
 		$handler->handle( time(), 'emergency', '', array() );
 		$handler->send_log_email();
 
@@ -141,7 +143,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 		$handler->handle( time(), 'emergency', '', array() );
 		$handler->send_log_email();
 
-		$recipient  = $mailer->get_recipient( 'to' );
+		$recipient = $mailer->get_recipient( 'to' );
 		$this->assertEquals( 'user@test.com', $recipient->address );
 		$this->assertEquals( 'User', $recipient->name );
 	}
@@ -200,7 +202,7 @@ class WC_Tests_Log_Handler_Email extends WC_Unit_Test_Case {
 		$mailer = tests_retrieve_phpmailer_instance();
 
 		$handler = new WC_Log_Handler_Email();
-		$time = time();
+		$time    = time();
 		$handler->handle( $time, 'emergency', 'message 1', array() );
 		$handler->send_log_email();
 		$handler->handle( $time, 'emergency', 'message 2', array() );

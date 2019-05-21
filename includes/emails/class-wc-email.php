@@ -351,7 +351,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_subject() {
-		return apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option( 'subject', $this->get_default_subject() ) ), $this->object );
+		return apply_filters( 'woocommerce_email_subject_' . $this->id, $this->format_string( $this->get_option( 'subject', $this->get_default_subject() ) ), $this->object, $this );
 	}
 
 	/**
@@ -360,7 +360,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_heading() {
-		return apply_filters( 'woocommerce_email_heading_' . $this->id, $this->format_string( $this->get_option( 'heading', $this->get_default_heading() ) ), $this->object );
+		return apply_filters( 'woocommerce_email_heading_' . $this->id, $this->format_string( $this->get_option( 'heading', $this->get_default_heading() ) ), $this->object, $this );
 	}
 
 	/**
@@ -369,7 +369,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_recipient() {
-		$recipient  = apply_filters( 'woocommerce_email_recipient_' . $this->id, $this->recipient, $this->object );
+		$recipient  = apply_filters( 'woocommerce_email_recipient_' . $this->id, $this->recipient, $this->object, $this );
 		$recipients = array_map( 'trim', explode( ',', $recipient ) );
 		$recipients = array_filter( $recipients, 'is_email' );
 		return implode( ', ', $recipients );
@@ -391,7 +391,7 @@ class WC_Email extends WC_Settings_API {
 			$header .= 'Reply-to: ' . $this->get_from_name() . ' <' . $this->get_from_address() . ">\r\n";
 		}
 
-		return apply_filters( 'woocommerce_email_headers', $header, $this->id, $this->object );
+		return apply_filters( 'woocommerce_email_headers', $header, $this->id, $this->object, $this );
 	}
 
 	/**
@@ -400,7 +400,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return array
 	 */
 	public function get_attachments() {
-		return apply_filters( 'woocommerce_email_attachments', array(), $this->id, $this->object );
+		return apply_filters( 'woocommerce_email_attachments', array(), $this->id, $this->object, $this );
 	}
 
 	/**
@@ -464,7 +464,7 @@ class WC_Email extends WC_Settings_API {
 	 * @return bool
 	 */
 	public function is_enabled() {
-		return apply_filters( 'woocommerce_email_enabled_' . $this->id, 'yes' === $this->enabled, $this->object );
+		return apply_filters( 'woocommerce_email_enabled_' . $this->id, 'yes' === $this->enabled, $this->object, $this );
 	}
 
 	/**
@@ -526,11 +526,12 @@ class WC_Email extends WC_Settings_API {
 			$css = apply_filters( 'woocommerce_email_styles', ob_get_clean(), $this );
 
 			if ( $this->supports_emogrifier() ) {
-				if ( ! class_exists( 'Emogrifier' ) ) {
+				$emogrifier_class = '\\Pelago\\Emogrifier';
+				if ( ! class_exists( $emogrifier_class ) ) {
 					include_once dirname( dirname( __FILE__ ) ) . '/libraries/class-emogrifier.php';
 				}
 				try {
-					$emogrifier = new Emogrifier( $content, $css );
+					$emogrifier = new $emogrifier_class( $content, $css );
 					$content    = $emogrifier->emogrify();
 				} catch ( Exception $e ) {
 					$logger = wc_get_logger();

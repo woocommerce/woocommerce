@@ -80,7 +80,8 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 						),
 					),
 				),
-			), $product_reviews
+			),
+			$product_reviews
 		);
 	}
 
@@ -134,7 +135,8 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 				'rating'               => 0,
 				'verified'             => false,
 				'reviewer_avatar_urls' => $data['reviewer_avatar_urls'],
-			), $data
+			),
+			$data
 		);
 	}
 
@@ -198,7 +200,8 @@ class WC_Tests_API_Product_Reviews extends WC_REST_Unit_Test_Case {
 				'rating'               => 5,
 				'verified'             => false,
 				'reviewer_avatar_urls' => $data['reviewer_avatar_urls'],
-			), $data
+			),
+			$data
 		);
 	}
 

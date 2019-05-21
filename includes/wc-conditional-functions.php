@@ -361,7 +361,7 @@ if ( ! function_exists( 'wc_prices_include_tax' ) ) {
 	 * @return bool
 	 */
 	function wc_prices_include_tax() {
-		return wc_tax_enabled() && 'yes' === get_option( 'woocommerce_prices_include_tax' );
+		return wc_tax_enabled() && apply_filters( 'woocommerce_prices_include_tax', get_option( 'woocommerce_prices_include_tax' ) === 'yes' );
 	}
 }
 

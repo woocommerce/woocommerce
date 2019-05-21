@@ -594,6 +594,29 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse the published field. 1 is published, 0 is private, -1 is draft.
+	 * Alternatively, 'true' can be used for published and 'false' for draft.
+	 *
+	 * @param string $value Field value.
+	 *
+	 * @return float|string
+	 */
+	public function parse_published_field( $value ) {
+		if ( '' === $value ) {
+			return $value;
+		}
+
+		// Remove the ' prepended to fields that start with - if needed.
+		$value = $this->unescape_data( $value );
+
+		if ( 'true' === strtolower( $value ) || 'false' === strtolower( $value ) ) {
+			return wc_string_to_bool( $value ) ? 1 : -1;
+		}
+
+		return floatval( $value );
+	}
+
+	/**
 	 * Get formatting callback.
 	 *
 	 * @return array
@@ -607,7 +630,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$data_formatting = array(
 			'id'                => array( $this, 'parse_id_field' ),
 			'type'              => array( $this, 'parse_comma_field' ),
-			'published'         => array( $this, 'parse_float_field' ),
+			'published'         => array( $this, 'parse_published_field' ),
 			'featured'          => array( $this, 'parse_bool_field' ),
 			'date_on_sale_from' => array( $this, 'parse_date_field' ),
 			'date_on_sale_to'   => array( $this, 'parse_date_field' ),

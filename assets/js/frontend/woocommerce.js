@@ -25,9 +25,10 @@ jQuery( function( $ ) {
 	}
 
 	// Set a cookie and hide the store notice when the dismiss button is clicked
-	$( '.woocommerce-store-notice__dismiss-link' ).click( function() {
+	$( '.woocommerce-store-notice__dismiss-link' ).click( function( event ) {
 		Cookies.set( cookieName, 'hidden', { path: '/' } );
 		$( '.woocommerce-store-notice' ).hide();
+		event.preventDefault();
 	});
 
 	// Make form field descriptions toggle on focus.

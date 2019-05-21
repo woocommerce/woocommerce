@@ -206,7 +206,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * @throws Exception If item cannot be processed.
 	 * @param  array $data Raw CSV data.
-	 * @return array|WC_Error
+	 * @return array|WP_Error
 	 */
 	protected function process_item( $data ) {
 		try {

@@ -44,15 +44,16 @@ $col    = 1;
 	<div class="u-columns woocommerce-Addresses col2-set addresses">
 <?php endif; ?>
 
-<?php foreach ( $get_addresses as $name => $title ) : ?>
+<?php foreach ( $get_addresses as $name => $title ) : 
+		
+	$address = wc_get_account_formatted_address( $name ); ?>
 
 	<div class="u-column<?php echo ( ( $col = $col * -1 ) < 0 ) ? 1 : 2; ?> col-<?php echo ( ( $oldcol = $oldcol * -1 ) < 0 ) ? 1 : 2; ?> woocommerce-Address">
 		<header class="woocommerce-Address-title title">
 			<h3><?php echo $title; ?></h3>
-			<a href="<?php echo esc_url( wc_get_endpoint_url( 'edit-address', $name ) ); ?>" class="edit"><?php _e( 'Edit', 'woocommerce' ); ?></a>
+			<a href="<?php echo esc_url( wc_get_endpoint_url( 'edit-address', $name ) ); ?>" class="edit"><?php echo $address ? esc_html__( 'Edit', 'woocommerce' ) : esc_html__( 'Add', 'woocommerce' ); ?></a>
 		</header>
 		<address><?php
-			$address = wc_get_account_formatted_address( $name );
 			echo $address ? wp_kses_post( $address ) : esc_html_e( 'You have not set up this type of address yet.', 'woocommerce' );
 		?></address>
 	</div>
