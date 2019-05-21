@@ -100,25 +100,25 @@ test.describe( 'Checkout Page', function() {
 		assert.eventually.ok( billingDetails.setZip( '94107' ) );
 	} );
 
-	test.it( 'allows customer to fill shipping details', () => {
-		const guest = new GuestCustomerFlow( driver, { baseUrl: config.get( 'url' ) } );
-		guest.fromShopAddProductsToCart( 'Beanie', 'Long Sleeve Tee' );
-
-		const checkoutPage = guest.open( PAGE.CHECKOUT );
-		assert.eventually.ok( Helper.waitTillUIBlockNotPresent( driver ) );
-		assert.eventually.ok( checkoutPage.checkShipToDifferentAddress() );
-
-		const shippingDetails = checkoutPage.components.shippingDetails;
-		assert.eventually.ok( shippingDetails.setFirstName( 'John' ) );
-		assert.eventually.ok( shippingDetails.setLastName( 'Doe' ) );
-		assert.eventually.ok( shippingDetails.setCompany( 'Automattic' ) );
-		assert.eventually.ok( shippingDetails.selectCountry( 'united states', 'United States (US)' ) );
-		assert.eventually.ok( shippingDetails.setAddress1( 'addr 1' ) );
-		assert.eventually.ok( shippingDetails.setAddress2( 'addr 2' ) );
-		assert.eventually.ok( shippingDetails.setCity( 'San Francisco' ) );
-		assert.eventually.ok( shippingDetails.selectState( 'cali', 'California' ) );
-		assert.eventually.ok( shippingDetails.setZip( '94107' ) );
-	} );
+	// test.it( 'allows customer to fill shipping details', () => {
+	// 	const guest = new GuestCustomerFlow( driver, { baseUrl: config.get( 'url' ) } );
+	// 	guest.fromShopAddProductsToCart( 'Beanie', 'Long Sleeve Tee' );
+	//
+	// 	const checkoutPage = guest.open( PAGE.CHECKOUT );
+	// 	assert.eventually.ok( Helper.waitTillUIBlockNotPresent( driver ) );
+	// 	assert.eventually.ok( checkoutPage.checkShipToDifferentAddress() );
+	//
+	// 	const shippingDetails = checkoutPage.components.shippingDetails;
+	// 	assert.eventually.ok( shippingDetails.setFirstName( 'John' ) );
+	// 	assert.eventually.ok( shippingDetails.setLastName( 'Doe' ) );
+	// 	assert.eventually.ok( shippingDetails.setCompany( 'Automattic' ) );
+	// 	assert.eventually.ok( shippingDetails.selectCountry( 'united states', 'United States (US)' ) );
+	// 	assert.eventually.ok( shippingDetails.setAddress1( 'addr 1' ) );
+	// 	assert.eventually.ok( shippingDetails.setAddress2( 'addr 2' ) );
+	// 	assert.eventually.ok( shippingDetails.setCity( 'San Francisco' ) );
+	// 	assert.eventually.ok( shippingDetails.selectState( 'cali', 'California' ) );
+	// 	assert.eventually.ok( shippingDetails.setZip( '94107' ) );
+	// } );
 
 	test.it( 'allows guest customer to place order', () => {
 		const guest = new GuestCustomerFlow( driver, { baseUrl: config.get( 'url' ) } );
