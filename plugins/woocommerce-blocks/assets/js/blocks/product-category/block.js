@@ -30,33 +30,112 @@ import ProductOrderbyControl from '../../components/product-orderby-control';
  * Component to handle edit mode of "Products by Category".
  */
 class ProductByCategoryBlock extends Component {
+	constructor() {
+		super( ...arguments );
+		this.state = {
+			products: [],
+			loaded: false,
+			changedAttributes: null,
+			isEditing: false,
+		};
+		this.startEditing = this.startEditing.bind( this );
+		this.stopEditing = this.stopEditing.bind( this );
+		this.setAttributes = this.setAttributes.bind( this );
+		this.save = this.save.bind( this );
+		this.debouncedGetProducts = debounce( this.getProducts.bind( this ), 200 );
+	}
+
+	componentDidMount() {
+		if ( this.props.attributes.categories ) {
+			this.getProducts();
+		}
+	}
+
+	startEditing() {
+		this.setState( {
+			isEditing: true,
+			changedAttributes: {},
+		} );
+	}
+
+	stopEditing() {
+		this.setState( {
+			isEditing: false,
+			changedAttributes: null,
+		} );
+	}
+
+	setAttributes( attributes ) {
+		this.setState( ( prevState ) => {
+			if ( prevState.changedAttributes !== null ) {
+				return { changedAttributes: { ...prevState.changedAttributes, ...attributes } };
+			}
+		} );
+	}
+
+	save() {
+		const { changedAttributes } = this.state;
+		const { setAttributes } = this.props;
+
+		setAttributes( changedAttributes );
+		this.stopEditing();
+	}
+
+	componentDidUpdate( prevProps ) {
+		const hasChange = [
+			'categories',
+			'catOperator',
+			'columns',
+			'orderby',
+			'rows',
+		].reduce( ( acc, key ) => {
+			return acc || prevProps.attributes[ key ] !== this.props.attributes[ key ];
+		}, false );
+		if ( hasChange ) {
+			this.debouncedGetProducts();
+		}
+	}
+
+	getProducts() {
+		if ( ! this.props.attributes.categories.length ) {
+			// We've removed all selected categories, or no categories have been selected yet.
+			this.setState( { products: [], loaded: true, isEditing: true } );
+			return;
+		}
+		apiFetch( {
+			path: addQueryArgs(
+				'/wc-blocks/v1/products',
+				getQuery( this.props.attributes, this.props.name )
+			),
+		} )
+			.then( ( products ) => {
+				this.setState( { products, loaded: true } );
+			} )
+			.catch( () => {
+				this.setState( { products: [], loaded: true } );
+			} );
+	}
+
 	getInspectorControls() {
 		const { attributes, setAttributes } = this.props;
-		const {
-			columns,
-			catOperator,
-			contentVisibility,
-			editMode,
-			orderby,
-			rows,
-			alignButtons,
-		} = attributes;
+		const { isEditing } = this.state;
+		const { columns, catOperator, contentVisibility, orderby, rows } = attributes;
 
 		return (
 			<InspectorControls key="inspector">
 				<PanelBody
 					title={ __( 'Product Category', 'woo-gutenberg-products-block' ) }
-					initialOpen={ ! attributes.categories.length && ! editMode }
+					initialOpen={ ! attributes.categories.length && ! isEditing }
 				>
 					<ProductCategoryControl
 						selected={ attributes.categories }
 						onChange={ ( value = [] ) => {
 							const ids = value.map( ( { id } ) => id );
-							setAttributes( { categories: ids } );
+							this.setAttributes( { categories: ids } );
 						} }
 						operator={ catOperator }
 						onOperatorChange={ ( value = 'any' ) =>
-							setAttributes( { catOperator: value } )
+							this.setAttributes( { catOperator: value } )
 						}
 					/>
 				</PanelBody>
@@ -77,7 +156,7 @@ class ProductByCategoryBlock extends Component {
 				>
 					<GridContentControl
 						settings={ contentVisibility }
-						onChange={ ( value ) => setAttributes( { contentVisibility: value } ) }
+						onChange={ ( value ) => this.setAttributes( { contentVisibility: value } ) }
 					/>
 				</PanelBody>
 				<PanelBody
@@ -94,9 +173,20 @@ class ProductByCategoryBlock extends Component {
 	}
 
 	renderEditMode() {
-		const { attributes, debouncedSpeak, setAttributes } = this.props;
+		const { attributes, debouncedSpeak } = this.props;
+		const { changedAttributes } = this.state;
+		const currentAttributes = { ...attributes, ...changedAttributes };
 		const onDone = () => {
-			setAttributes( { editMode: false } );
+			this.save();
+			debouncedSpeak(
+				__(
+					'Showing Products by Category block preview.',
+					'woo-gutenberg-products-block'
+				)
+			);
+		};
+		const onCancel = () => {
+			this.stopEditing();
 			debouncedSpeak(
 				__(
 					'Showing Products by Category block preview.',
@@ -117,18 +207,26 @@ class ProductByCategoryBlock extends Component {
 				) }
 				<div className="wc-block-products-category__selection">
 					<ProductCategoryControl
-						selected={ attributes.categories }
+						selected={ currentAttributes.categories }
 						onChange={ ( value = [] ) => {
 							const ids = value.map( ( { id } ) => id );
-							setAttributes( { categories: ids } );
+							this.setAttributes( { categories: ids } );
 						} }
-						operator={ attributes.catOperator }
+						operator={ currentAttributes.catOperator }
 						onOperatorChange={ ( value = 'any' ) =>
-							setAttributes( { catOperator: value } )
+							this.setAttributes( { catOperator: value } )
 						}
 					/>
 					<Button isDefault onClick={ onDone }>
 						{ __( 'Done', 'woo-gutenberg-products-block' ) }
+					</Button>
+					<Button
+						className="wc-block-products-category__cancel-button"
+						title={ __( 'Cancel', 'woo-gutenberg-products-block' ) }
+						isLink
+						onClick={ onCancel }
+					>
+						{ __( 'Cancel', 'woo-gutenberg-products-block' ) }
 					</Button>
 				</div>
 			</Placeholder>
@@ -136,8 +234,35 @@ class ProductByCategoryBlock extends Component {
 	}
 
 	render() {
-		const { attributes, name, setAttributes } = this.props;
-		const { editMode } = attributes;
+		const {
+			categories,
+			columns,
+			contentVisibility,
+		} = this.props.attributes;
+		const { loaded, products = [], isEditing } = this.state;
+		const classes = classnames( {
+			'wc-block-products-grid': true,
+			'wc-block-products-category': true,
+			[ `cols-${ columns }` ]: columns,
+			'is-loading': ! loaded,
+			'is-not-found': loaded && ! products.length,
+			'is-hidden-title': ! contentVisibility.title,
+			'is-hidden-price': ! contentVisibility.price,
+			'is-hidden-rating': ! contentVisibility.rating,
+			'is-hidden-button': ! contentVisibility.button,
+		} );
+
+		const nothingFound = ! categories.length ?
+			__(
+				'Select at least one category to display its products.',
+				'woo-gutenberg-products-block'
+			) :
+			_n(
+				'No products in this category.',
+				'No products in these categories.',
+				categories.length,
+				'woo-gutenberg-products-block'
+			);
 
 		return (
 			<Fragment>
@@ -147,14 +272,14 @@ class ProductByCategoryBlock extends Component {
 							{
 								icon: 'edit',
 								title: __( 'Edit' ),
-								onClick: () => setAttributes( { editMode: ! editMode } ),
-								isActive: editMode,
+								onClick: () => this.startEditing(),
+								isActive: isEditing,
 							},
 						] }
 					/>
 				</BlockControls>
 				{ this.getInspectorControls() }
-				{ editMode ? (
+				{ isEditing ? (
 					this.renderEditMode()
 				) : (
 					<Disabled>
@@ -179,6 +304,7 @@ ProductByCategoryBlock.propTypes = {
 	 * A callback to update attributes
 	 */
 	setAttributes: PropTypes.func.isRequired,
+
 	// from withSpokenMessages
 	debouncedSpeak: PropTypes.func.isRequired,
 };
