@@ -49,7 +49,8 @@ class WC_Admin_Notes_Historical_Data {
 			'get-started',
 			__( 'Get Started', 'woocommerce-admin' ),
 			'?page=wc-admin#/analytics/settings',
-			'actioned'
+			'actioned',
+			true
 		);
 
 		$note->save();
