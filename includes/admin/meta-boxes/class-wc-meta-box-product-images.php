@@ -57,7 +57,7 @@ class WC_Meta_Box_Product_Images {
 							</ul>
 							<?php
 							// Allow for extra info to be exposed or extra action to be executed for this attachment.
-							do_action( 'woocommerce_product_gallery_item_info_action', $thepostid, $attachment_id );
+							do_action( 'woocommerce_admin_after_product_gallery_item', $thepostid, $attachment_id );
 							?>
 						</li>
 						<?php
