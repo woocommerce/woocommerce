@@ -5,8 +5,8 @@ const path = require( 'path' );
 const MergeExtractFilesPlugin = require( './bin/merge-extract-files-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const CleanWebpackPlugin = require( 'clean-webpack-plugin' );
-const ProgressBarPlugin = require('progress-bar-webpack-plugin');
-const chalk = require('chalk');
+const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
+const chalk = require( 'chalk' );
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const externals = {
@@ -72,6 +72,7 @@ const GutenbergBlocksConfig = {
 					test: /[\\/]node_modules[\\/]/,
 					name: 'vendors',
 					chunks: 'all',
+					enforce: true,
 				},
 				editor: {
 					// Capture all `editor` stylesheets and the components stylesheets.
