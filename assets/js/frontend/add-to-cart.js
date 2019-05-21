@@ -13,7 +13,6 @@ jQuery( function( $ ) {
 			.on( 'click', '.add_to_cart_button', this.onAddToCart )
 			.on( 'click', '.remove_from_cart_button', this.onRemoveFromCart )
 			.on( 'added_to_cart', this.updateButton )
-			.on( 'added_to_cart', this.updateCartPage )
 			.on( 'added_to_cart removed_from_cart', this.updateFragments );
 	};
 
@@ -111,21 +110,6 @@ jQuery( function( $ ) {
 
 			$( document.body ).trigger( 'wc_cart_button_updated', [ $button ] );
 		}
-	};
-
-	/**
-	 * Update cart page elements after add to cart events.
-	 */
-	AddToCartHandler.prototype.updateCartPage = function() {
-		var page = window.location.toString().replace( 'add-to-cart', 'added-to-cart' );
-
-		$.get( page, function( data ) {
-			$( '.shop_table.cart:eq(0)' ).replaceWith( $( data ).find( '.shop_table.cart:eq(0)' ) );
-			$( '.cart_totals:eq(0)' ).replaceWith( $( data ).find( '.cart_totals:eq(0)' ) );
-			$( '.cart_totals, .shop_table.cart' ).stop( true ).css( 'opacity', '1' ).unblock();
-			$( document.body ).trigger( 'cart_page_refreshed' );
-			$( document.body ).trigger( 'cart_totals_refreshed' );
-		} );
 	};
 
 	/**
