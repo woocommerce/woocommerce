@@ -733,7 +733,7 @@ p.demo_store,
 		}
 
 		&:hover {
-			background-color: darken( $secondary, 5% );
+			background-color: darken($secondary, 5%);
 			text-decoration: none;
 			background-image: none;
 			color: $secondarytext;
@@ -745,7 +745,7 @@ p.demo_store,
 			-webkit-font-smoothing: antialiased;
 
 			&:hover {
-				background-color: darken( $primary, 5% );
+				background-color: darken($primary, 5%);
 				color: $primarytext;
 			}
 
@@ -1099,6 +1099,10 @@ p.demo_store,
 			line-height: 1.5em;
 
 			small {
+				font-weight: normal;
+			}
+
+			del {
 				font-weight: normal;
 			}
 		}
@@ -1674,7 +1678,7 @@ p.demo_store,
 
 		.price_slider_wrapper .ui-widget-content {
 			border-radius: 1em;
-			background-color: darken( $primary, 30% );
+			background-color: darken($primary, 30%);
 			border: 0;
 		}
 
