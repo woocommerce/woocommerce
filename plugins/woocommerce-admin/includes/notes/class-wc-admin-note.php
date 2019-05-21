@@ -347,6 +347,15 @@ class WC_Admin_Note extends WC_Data {
 			'br'     => array(),
 			'em'     => array(),
 			'strong' => array(),
+			'a'      => array(
+				'href'     => true,
+				'rel'      => true,
+				'name'     => true,
+				'target'   => true,
+				'download' => array(
+					'valueless' => 'y',
+				),
+			),
 		);
 
 		$content = wp_kses( $content, $allowed_html );
