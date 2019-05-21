@@ -275,7 +275,7 @@ class WC_Emails {
 	/**
 	 * Replace placeholder text in strings.
 	 *
-	 * @since  3.6.0
+	 * @since  3.7.0
 	 * @param  string $string Email footer text.
 	 * @return string         Email footer text with any replacements done.
 	 */
@@ -286,11 +286,13 @@ class WC_Emails {
 			array(
 				'{site_title}',
 				'{site_address}',
+				'{woocommerce}',
 				'{WooCommerce}',
 			),
 			array(
 				$this->get_blogname(),
 				$domain,
+				'<a href="https://woocommerce.com">WooCommerce</a>',
 				'<a href="https://woocommerce.com">WooCommerce</a>',
 			),
 			$string
