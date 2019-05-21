@@ -50,7 +50,12 @@ final class WC_Cart_Session {
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'set_session' ) );
-		add_action( 'woocommerce_cart_updated', array( $this, 'persistent_cart_update' ) );
+
+		// Persistent cart stored to usermeta.
+		add_action( 'woocommerce_add_to_cart', array( $this, 'persistent_cart_update' ) );
+		add_action( 'woocommerce_cart_item_removed', array( $this, 'persistent_cart_update' ) );
+		add_action( 'woocommerce_cart_item_restored', array( $this, 'persistent_cart_update' ) );
+		add_action( 'woocommerce_cart_item_set_quantity', array( $this, 'persistent_cart_update' ) );
 
 		// Cookie events - cart cookies need to be set before headers are sent.
 		add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
@@ -249,7 +254,7 @@ final class WC_Cart_Session {
 	 * Delete the persistent cart permanently.
 	 */
 	public function persistent_cart_destroy() {
-		if ( get_current_user_id() ) {
+		if ( get_current_user_id() && apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id() );
 		}
 	}
