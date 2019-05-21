@@ -595,6 +595,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 	/**
 	 * Parse the published field. 1 is published, 0 is private, -1 is draft.
+	 * Alternatively, 'true' can be used for published and 'false' for draft.
 	 *
 	 * @param string $value Field value.
 	 *
