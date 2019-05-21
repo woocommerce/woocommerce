@@ -186,6 +186,7 @@ class WGPB_Block_Library {
 				'editor_script'   => 'wc-product-new',
 				'editor_style'    => 'wc-block-editor',
 				'style'           => 'wc-block-style',
+				'attributes'      => self::get_shared_attributes(),
 			)
 		);
 		register_block_type(
@@ -195,6 +196,15 @@ class WGPB_Block_Library {
 				'editor_script'   => 'wc-product-on-sale',
 				'editor_style'    => 'wc-block-editor',
 				'style'           => 'wc-block-style',
+				'attributes'      => array_merge(
+					self::get_shared_attributes(),
+					array(
+						'orderby' => array(
+							'type'    => 'string',
+							'default' => 'date',
+						),
+					)
+				),
 			)
 		);
 		register_block_type(
@@ -306,6 +316,53 @@ class WGPB_Block_Library {
 			var wc_product_block_data = JSON.parse( decodeURIComponent( '<?php echo rawurlencode( wp_json_encode( $block_settings ) ); ?>' ) );
 		</script>
 		<?php
+	}
+
+	/**
+	 * Get a set of attributes shared across most of the grid blocks.
+	 *
+	 * @return array List of block attributes with type and defaults.
+	 */
+	public static function get_shared_attributes() {
+		return array(
+			'columns'           => array(
+				'type'    => 'number',
+				'default' => wc_get_theme_support( 'product_blocks::default_columns', 3 ),
+			),
+			'rows'              => array(
+				'type'    => 'number',
+				'default' => wc_get_theme_support( 'product_blocks::default_rows', 1 ),
+			),
+			'categories'        => array(
+				'type'    => 'array',
+				'default' => array(),
+			),
+			'catOperator'       => array(
+				'type'    => 'string',
+				'default' => 'any',
+			),
+			'contentVisibility' => array(
+				'type'       => 'object',
+				'properties' => array(
+					'title'  => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+					'price'  => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+					'rating' => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+					'button' => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+				),
+			),
+		);
 	}
 
 	/**

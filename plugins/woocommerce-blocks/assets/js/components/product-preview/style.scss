@@ -5,45 +5,6 @@
 		margin-right: auto;
 	}
 
-	.star-rating {
-		overflow: hidden;
-		position: relative;
-		margin-left: auto;
-		margin-right: auto;
-		width: 5.3em;
-		height: 1.618em;
-		line-height: 1.618;
-		font-size: 1em;
-		font-family: star;
-		font-weight: 400;
-
-		&::before {
-			content: '\53\53\53\53\53';
-			top: 0;
-			left: 0;
-			right: 0;
-			position: absolute;
-			opacity: 0.25;
-		}
-
-		span {
-			overflow: hidden;
-			top: 0;
-			left: 0;
-			right: 0;
-			position: absolute;
-			padding-top: 1.5em;
-		}
-
-		span::before {
-			content: '\53\53\53\53\53';
-			top: 0;
-			left: 0;
-			right: 0;
-			position: absolute;
-		}
-	}
-
 	.wp-block-button {
 		margin-bottom: 0;
 	}

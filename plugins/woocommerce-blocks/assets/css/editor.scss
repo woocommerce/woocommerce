@@ -13,7 +13,14 @@
 	fill: currentColor;
 }
 
-.wc-block-products-grid {
+// Remove the list styling, which is added back by core GB styles.
+.editor-styles-wrapper .wc-block-grid {
+	list-style: none;
+	margin-left: 0;
+}
+
+.wc-block-products-grid,
+.wc-block-grid {
 	overflow: hidden;
 	display: flex;
 	flex-wrap: wrap;
@@ -42,6 +49,43 @@
 		&.is-loading,
 		&.is-not-found {
 			min-width: auto;
+		}
+	}
+
+	.star-rating {
+		overflow: hidden;
+		position: relative;
+		width: 5.3em;
+		height: 1.618em;
+		line-height: 1.618;
+		font-size: 1em;
+		font-family: star; /* stylelint-disable-line */
+		font-weight: 400;
+
+		&::before {
+			content: "\53\53\53\53\53";
+			top: 0;
+			left: 0;
+			right: 0;
+			position: absolute;
+			opacity: 0.25;
+		}
+
+		span {
+			overflow: hidden;
+			top: 0;
+			left: 0;
+			right: 0;
+			position: absolute;
+			padding-top: 1.5em;
+		}
+
+		span::before {
+			content: "\53\53\53\53\53";
+			top: 0;
+			left: 0;
+			right: 0;
+			position: absolute;
 		}
 	}
 }
