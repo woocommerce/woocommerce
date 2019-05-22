@@ -9,6 +9,10 @@ namespace WooCommerce;
 
 defined( 'ABSPATH' ) || exit;
 
+if ( file_exists( __DIR__ . '/../vendor/autoload.php' ) ) {
+	require __DIR__ . '/../vendor/autoload.php';
+}
+
 use WooCommerce\Utilities\SingletonTrait;
 
 /**
@@ -28,10 +32,6 @@ class RestApi {
 	 * Hook into WordPress ready to init the REST API as needed.
 	 */
 	public function init() {
-		// Get the autoloader for this version of the API.
-		if ( file_exists( __DIR__ . '/../vendor/autoload.php' ) ) {
-			require __DIR__ . '/../vendor/autoload.php';
-		}
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
 	}
 
