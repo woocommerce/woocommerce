@@ -10,6 +10,17 @@
  * Core function unit tests.
  */
 class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
+
+	/**
+	 * Set up test
+	 *
+	 * @return void
+	 */
+	public function setUp() {
+		parent::setUp();
+		$this->wc = WC();
+	}
+
 	/**
 	 * Test get_woocommerce_currency().
 	 *
@@ -931,5 +942,27 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		// Now test the new wc_ascii_uasort_comparison function which sorts the strings correctly.
 		uasort( $sorted_values, 'wc_ascii_uasort_comparison' );
 		$this->assertSame( array( 'Bélgica', 'Benin' ), array_values( $sorted_values ) );
+	}
+
+	/**
+	 * Test wc_load_cart function.
+	 *
+	 * @return void
+	 */
+	public function test_wc_load_cart() {
+		$this->assertInstanceOf( 'WC_Cart', $this->wc->cart );
+		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
+		$this->assertInstanceOf( 'WC_Session', $this->wc->session );
+
+		$this->wc->cart = $this->wc->customer = $this->wc->session = null;
+		$this->assertNull( $this->wc->cart );
+		$this->assertNull( $this->wc->customer );
+		$this->assertNull( $this->wc->session );
+
+		wc_load_cart();
+		$this->assertInstanceOf( 'WC_Cart', $this->wc->cart );
+		$this->assertInstanceOf( 'WC_Customer', $this->wc->customer );
+		$this->assertInstanceOf( 'WC_Session', $this->wc->session );
+
 	}
 }

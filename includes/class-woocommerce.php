@@ -546,17 +546,7 @@ final class WooCommerce {
 
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
-			// Session class, handles session data for users - can be overwritten if custom handler is needed.
-			$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
-			$this->session = new $session_class();
-			$this->session->init();
-
-			$this->customer = new WC_Customer( get_current_user_id(), true );
-			// Cart needs the customer info.
-			$this->cart = new WC_Cart();
-
-			// Customer should be saved during shutdown.
-			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );
+			wc_load_cart();
 		}
 
 		$this->load_webhooks();
@@ -723,6 +713,39 @@ final class WooCommerce {
 		$limit = apply_filters( 'woocommerce_load_webhooks_limit', null );
 
 		wc_load_webhooks( 'active', $limit );
+	}
+
+	/**
+	 * Initialize the customer and cart objects and setup customer saving on shutdown.
+	 *
+	 * @since 3.6.4
+	 * @return void
+	 */
+	public function initialize_cart() {
+		// Cart needs customer info.
+		if ( is_null( $this->customer ) || ! $this->customer instanceof WC_Customer ) {
+			$this->customer = new WC_Customer( get_current_user_id(), true );
+			// Customer should be saved during shutdown.
+			add_action( 'shutdown', array( $this->customer, 'save' ), 10 );
+		}
+		if ( is_null( $this->cart ) || ! $this->cart instanceof WC_Cart ) {
+			$this->cart = new WC_Cart();
+		}
+	}
+
+	/**
+	 * Initialize the session class.
+	 *
+	 * @since 3.6.4
+	 * @return void
+	 */
+	public function initialize_session() {
+		// Session class, handles session data for users - can be overwritten if custom handler is needed.
+		$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );
+		if ( is_null( $this->session ) || ! $this->session instanceof $session_class ) {
+			$this->session = new $session_class();
+			$this->session->init();
+		}
 	}
 
 	/**
