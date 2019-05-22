@@ -1327,11 +1327,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Default to base.
 		if ( 'base' === $tax_based_on || empty( $args['country'] ) ) {
-			$default          = wc_get_base_location();
-			$args['country']  = $default['country'];
-			$args['state']    = $default['state'];
-			$args['postcode'] = '';
-			$args['city']     = '';
+			$args['country']  = WC()->countries->get_base_country();
+			$args['state']    = WC()->countries->get_base_state();
+			$args['postcode'] = WC()->countries->get_base_postcode();
+			$args['city']     = WC()->countries->get_base_city();
 		}
 
 		return $args;
