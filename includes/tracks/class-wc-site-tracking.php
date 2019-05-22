@@ -22,7 +22,7 @@ class WC_Site_Tracking {
 		 * `woocommerce_apply_tracking` will be deprecated. Please use
 		 * `woocommerce_apply_user_tracking` instead.
 		 */
-		if ( ! apply_filters( 'woocommerce_apply_user_tracking', true ) && ! apply_filters( 'woocommerce_apply_tracking', true ) ) {
+		if ( ! apply_filters( 'woocommerce_apply_user_tracking', true ) || ! apply_filters( 'woocommerce_apply_tracking', true ) ) {
 			return false;
 		}
 
