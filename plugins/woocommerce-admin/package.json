@@ -108,10 +108,10 @@
   },
   "devDependencies": {
     "@babel/cli": "7.4.4",
-    "@babel/core": "7.4.4",
+    "@babel/core": "7.4.5",
     "@babel/plugin-transform-async-to-generator": "7.4.4",
     "@babel/plugin-transform-react-jsx": "7.3.0",
-    "@babel/runtime-corejs2": "7.4.4",
+    "@babel/runtime-corejs2": "7.4.5",
     "@wordpress/babel-plugin-import-jsx-pragma": "1.1.2",
     "@wordpress/babel-plugin-makepot": "2.1.2",
     "@wordpress/babel-preset-default": "3.0.1",
