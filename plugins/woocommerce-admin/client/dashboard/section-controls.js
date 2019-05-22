@@ -3,8 +3,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Icon } from '@wordpress/components';
-import { Component } from '@wordpress/element';
+import { Icon, TextControl } from '@wordpress/components';
+import { Component, Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -33,27 +33,38 @@ class SectionControls extends Component {
 	}
 
 	render() {
-		const { onRemove, isFirst, isLast } = this.props;
+		const { onRemove, isFirst, isLast, onTitleBlur, onTitleChange, titleInput } = this.props;
 
 		return (
-			<div className="woocommerce-dashboard-section-controls">
-				{ ! isFirst && (
-					<MenuItem isClickable onInvoke={ this.onMoveUp }>
-						<Icon icon={ 'arrow-up-alt2' } label={ __( 'Move up' ) } />
-						{ __( 'Move up', 'woocommerce-admin' ) }
+			<Fragment>
+				<div className="woocommerce-ellipsis-menu__item">
+					<TextControl
+						label={ __( 'Section Title', 'woocommerce-admin' ) }
+						onBlur={ onTitleBlur }
+						onChange={ onTitleChange }
+						required
+						value={ titleInput }
+					/>
+				</div>
+				<div className="woocommerce-dashboard-section-controls">
+					{ ! isFirst && (
+						<MenuItem isClickable onInvoke={ this.onMoveUp }>
+							<Icon icon={ 'arrow-up-alt2' } label={ __( 'Move up' ) } />
+							{ __( 'Move up', 'woocommerce-admin' ) }
+						</MenuItem>
+					) }
+					{ ! isLast && (
+						<MenuItem isClickable onInvoke={ this.onMoveDown }>
+							<Icon icon={ 'arrow-down-alt2' } label={ __( 'Move Down' ) } />
+							{ __( 'Move Down', 'woocommerce-admin' ) }
+						</MenuItem>
+					) }
+					<MenuItem isClickable onInvoke={ onRemove }>
+						<Icon icon={ 'trash' } label={ __( 'Remove block' ) } />
+						{ __( 'Remove section', 'woocommerce-admin' ) }
 					</MenuItem>
-				) }
-				{ ! isLast && (
-					<MenuItem isClickable onInvoke={ this.onMoveDown }>
-						<Icon icon={ 'arrow-down-alt2' } label={ __( 'Move Down' ) } />
-						{ __( 'Move Down', 'woocommerce-admin' ) }
-					</MenuItem>
-				) }
-				<MenuItem isClickable onInvoke={ onRemove }>
-					<Icon icon={ 'trash' } label={ __( 'Remove block' ) } />
-					{ __( 'Remove section', 'woocommerce-admin' ) }
-				</MenuItem>
-			</div>
+				</div>
+			</Fragment>
 		);
 	}
 }

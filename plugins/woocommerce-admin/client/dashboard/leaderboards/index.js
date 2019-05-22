@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
-import { SelectControl, TextControl } from '@wordpress/components';
+import { SelectControl } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 
 /**
@@ -87,24 +87,16 @@ class Leaderboards extends Component {
 							onChange={ this.setRowsPerTable }
 						/>
 						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
-							<Fragment>
-								<div className="woocommerce-ellipsis-menu__item">
-									<TextControl
-										label={ __( 'Section Title', 'woocommerce-admin' ) }
-										onBlur={ onTitleBlur }
-										onChange={ onTitleChange }
-										required
-										value={ titleInput }
-									/>
-								</div>
-								<Controls
-									onToggle={ onToggle }
-									onMove={ onMove }
-									onRemove={ onRemove }
-									isFirst={ isFirst }
-									isLast={ isLast }
-								/>
-							</Fragment>
+							<Controls
+								onToggle={ onToggle }
+								onMove={ onMove }
+								onRemove={ onRemove }
+								isFirst={ isFirst }
+								isLast={ isLast }
+								onTitleBlur={ onTitleBlur }
+								onTitleChange={ onTitleChange }
+								titleInput={ titleInput }
+							/>
 						) }
 					</Fragment>
 				) }

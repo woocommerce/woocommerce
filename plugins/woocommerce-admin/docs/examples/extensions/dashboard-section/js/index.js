@@ -5,7 +5,6 @@
 
 import { addFilter } from '@wordpress/hooks';
 import { Component, Fragment } from '@wordpress/element';
-import { TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -78,21 +77,15 @@ class Section extends Component {
 								{ item.title }
 							</MenuItem>
 						) ) }
-						<div className="woocommerce-ellipsis-menu__item">
-							<TextControl
-								label={ __( 'Section Title', 'woocommerce-admin' ) }
-								onBlur={ onTitleBlur }
-								onChange={ onTitleChange }
-								required
-								value={ titleInput }
-							/>
-						</div>
 						<Controls
 							onToggle={ onToggle }
 							onMove={ onMove }
 							onRemove={ onRemove }
 							isFirst={ isFirst }
 							isLast={ isLast }
+							onTitleBlur={ onTitleBlur }
+							onTitleChange={ onTitleChange }
+							titleInput={ titleInput }
 						/>
 					</Fragment>
 				) }
