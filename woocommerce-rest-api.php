@@ -9,7 +9,7 @@
  * Requires PHP: 5.6
  * License: GPLv3
  *
- * @package WooCommerce/RestAPI
+ * @package WooCommerce/RestApi
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -18,24 +18,29 @@ if ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
 	return;
 }
 
-if ( ! function_exists( 'wc_rest_api_1_dot_0_dot_0_dev' ) ) {
-	/**
-	 * This is a version specific loader used as a callback so only the latest version of the API plugin is used.
-	 *
-	 * @internal Never call manually - this function will change between versions.
-	 */
-	function wc_rest_api_1_dot_0_dot_0_dev() {
-		require_once dirname( __FILE__ ) . '/src/class-server.php';
-		\WooCommerce\Rest_Api\Server::instance()->init();
-	}
-}
+/**
+ * API feature plugin version.
+ *
+ * @internal This version needs incrementing when releasing new versions of the API.
+ */
+$version = '1.1.0';
 
-add_action(
-	'woocommerce_loaded',
-	function() {
-		if ( is_callable( array( wc()->api, 'register' ) ) ) {
-			// @internal When bumping the version remember to update the function names below.
-			wc()->api->register( '1.1.0', 'wc_rest_api_1_dot_0_dot_0_dev' );
-		}
+/**
+ * This callback loads this version of the API.
+ */
+$init_callback = function() {
+	require __DIR__ . '/vendor/autoload.php';
+	\WooCommerce\RestApi::instance()->init();
+};
+
+/**
+ * This callback registers this version of the API with WooCommerce.
+ */
+$register_callback = function() use ( $version, $init_callback ) {
+	if ( ! is_callable( array( wc()->api, 'register' ) ) ) {
+		return;
 	}
-);
+	wc()->api->register( $version, $init_callback );
+};
+
+add_action( 'woocommerce_loaded', $register_callback );
