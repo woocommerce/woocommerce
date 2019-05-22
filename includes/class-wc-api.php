@@ -126,7 +126,7 @@ class WC_API extends WC_Legacy_API {
 	 * @since 2.6.0
 	 */
 	public function rest_api_init() {
-		$callback = $this->latest_version_callback();
+		$callback = $this->get_latest_version_callback();
 
 		if ( ! $callback ) {
 			require_once dirname( __FILE__ ) . '/api/src/class-server.php';
@@ -176,7 +176,7 @@ class WC_API extends WC_Legacy_API {
 	 *
 	 * @return string|bool
 	 */
-	public function latest_version() {
+	public function get_latest_version() {
 		$keys = array_keys( $this->versions );
 		if ( empty( $keys ) ) {
 			return false;
@@ -190,8 +190,8 @@ class WC_API extends WC_Legacy_API {
 	 *
 	 * @return string
 	 */
-	public function latest_version_callback() {
-		$latest = $this->latest_version();
+	public function get_latest_version_callback() {
+		$latest = $this->get_latest_version();
 		if ( empty( $latest ) || ! isset( $this->versions[ $latest ] ) ) {
 			return '';
 		}
