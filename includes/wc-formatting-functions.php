@@ -373,7 +373,7 @@ function wc_format_coupon_code( $value ) {
  * @return string
  */
 function wc_sanitize_coupon_code( $value ) {
-	return sanitize_post_field( 'post_title', $value, 0, 'db' );
+	return sanitize_post_field( 'post_name', $value, 0, 'db' );
 }
 
 /**
