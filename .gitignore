@@ -24,9 +24,6 @@ none
 # Windows junk
 Thumbs.db
 
-# ApiGen
-/wc-apidocs/
-
 # Behat/CLI Tests
 tests/cli/installer
 tests/cli/composer.phar
@@ -37,15 +34,6 @@ tests/cli/vendor
 # Unit tests
 /tmp
 /tests/bin/tmp
-/tests/e2e-tests/config/local-*.json
-/tests/e2e-tests/config/local.json
 
 # Logs
 /logs
-
-# Composer
-/vendor/
-contributors.md
-
-# Screenshots for e2e tests failures
-/screenshots/

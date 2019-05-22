@@ -19,21 +19,10 @@ if ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
 }
 
 /**
- * API feature plugin version.
- *
- * @internal This version needs incrementing when releasing new versions of the API.
+ * Get API feature plugin version and callback function.
  */
-$version = '1.1.0';
-
-/**
- * This callback loads this version of the API.
- */
-$init_callback = function() use ( $version ) {
-	require __DIR__ . '/vendor/autoload.php';
-	$rest_api = \WooCommerce\RestApi::instance();
-	$rest_api->set_version( $version );
-	$rest_api->init();
-};
+$version       = include __DIR__ . '/version.php';
+$init_callback = include __DIR__ . '/init.php';
 
 /**
  * This callback registers this version of the API with WooCommerce.

@@ -10,9 +10,6 @@
     "composer/installers" : "~1.0"
   },
   "autoload": {
-      "psr-4": {
-        "WooCommerce\\": "src/"
-      },
-      "classmap": ["src/RestApi/V1", "src/RestApi/V2", "src/RestApi/V3", "src/RestApi/wc-blocks"]
+    "classmap": ["src"]
   }
 }
