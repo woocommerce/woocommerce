@@ -16,6 +16,11 @@
     "phpunit/phpunit": "6.5.14",
     "woocommerce/woocommerce-sniffs": "0.0.6"
   },
+  "config": {
+    "preferred-install": {
+        "woocommerce/woocommerce-rest-api": "dist"
+    }
+  },
   "scripts": {
     "test": [
       "phpunit"
