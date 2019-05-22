@@ -119,19 +119,12 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 	public function update_items( $request ) {
 		$query_args      = $this->prepare_objects_query( $request );
 		$onboarding_data = get_option( 'wc_onboarding_profile', array() );
-		$update          = update_option( 'wc_onboarding_profile', array_merge( $onboarding_data, $query_args ) );
+		update_option( 'wc_onboarding_profile', array_merge( $onboarding_data, $query_args ) );
 
-		if ( $update ) {
-			$result = array(
-				'status'  => 'success',
-				'message' => __( 'Onboarding profile data has been updated.', 'woocommerce-admin' ),
-			);
-		} else {
-			$result = array(
-				'status'  => 'error',
-				'message' => __( 'There was an error updating the onboarding profile data.', 'woocommerce-admin' ),
-			);
-		}
+		$result = array(
+			'status'  => 'success',
+			'message' => __( 'Onboarding profile data has been updated.', 'woocommerce-admin' ),
+		);
 
 		$response = $this->prepare_item_for_response( $result, $request );
 		$data     = $this->prepare_response_for_collection( $response );
