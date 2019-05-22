@@ -46,7 +46,6 @@ function createWcApiSpec() {
 			},
 			update( resourceNames, data ) {
 				return [
-					...imports.operations.update( resourceNames, data ),
 					...items.operations.update( resourceNames, data ),
 					...notes.operations.update( resourceNames, data ),
 					...settings.operations.update( resourceNames, data ),
