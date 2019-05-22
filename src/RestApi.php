@@ -178,6 +178,6 @@ class RestApi {
 					'WC_REST_Blocks_Products_Controller',
 				];
 		}
-		return array();
+		return [];
 	}
 }

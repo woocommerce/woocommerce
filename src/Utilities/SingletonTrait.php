@@ -2,6 +2,8 @@
 /**
  * Abstract singleton class.
  *
+ * TODO: move to core?
+ *
  * @package WooCommerce/Utilities
  */
 
