@@ -2255,3 +2255,14 @@ function wc_get_server_database_version() {
 		'number' => preg_replace( '/([^\d.]+).*/', '', $server_info ),
 	);
 }
+
+/**
+ * Initialize and load the cart functionality.
+ *
+ * @since 3.6.4
+ * @return void
+ */
+function wc_load_cart() {
+	WC()->initialize_session();
+	WC()->initialize_cart();
+}
