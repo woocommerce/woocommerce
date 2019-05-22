@@ -180,7 +180,7 @@ class StoreAlerts extends Component {
 		const numberOfAlerts = alerts.length;
 		const alert = alerts[ currentIndex ];
 		const type = alert.type;
-		const className = classnames( 'woocommerce-store-alerts', {
+		const className = classnames( 'woocommerce-store-alerts', 'woocommerce-analytics__card', {
 			'is-alert-error': 'error' === type,
 			'is-alert-update': 'update' === type,
 		} );

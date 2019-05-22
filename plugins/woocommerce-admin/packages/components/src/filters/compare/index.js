@@ -79,7 +79,7 @@ class CompareFilter extends Component {
 		const { labels, type } = this.props;
 		const { selected } = this.state;
 		return (
-			<Card title={ labels.title } className="woocommerce-filters__compare">
+			<Card title={ labels.title } className="woocommerce-filters__compare woocommerce-analytics__card">
 				<div className="woocommerce-filters__compare-body">
 					<Search
 						type={ type }

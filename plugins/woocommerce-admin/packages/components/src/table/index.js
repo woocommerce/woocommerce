@@ -288,7 +288,7 @@ class TableCard extends Component {
 			headers = [ this.getAllCheckbox(), ...headers ];
 		}
 
-		const className = classnames( {
+		const className = classnames( 'woocommerce-analytics__card', {
 			'woocommerce-table': true,
 			'has-compare': !! compareBy,
 			'has-search': !! searchBy,

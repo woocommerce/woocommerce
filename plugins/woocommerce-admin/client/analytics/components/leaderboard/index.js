@@ -56,7 +56,7 @@ export class Leaderboard extends Component {
 
 		if ( ! isRequesting && rows.length === 0 ) {
 			return (
-				<Card title={ title } className="woocommerce-leaderboard">
+				<Card title={ title } className="woocommerce-leaderboard woocommerce-analytics__card">
 					<EmptyTable>
 						{ __( 'No data recorded for the selected time period.', 'woocommerce-admin' ) }
 					</EmptyTable>

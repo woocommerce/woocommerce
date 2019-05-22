@@ -42,7 +42,10 @@ class ChartBlock extends Component {
 				className="woocommerce-dashboard__chart-block-wrapper"
 				onClick={ this.handleChartClick }
 			>
-				<Card className="woocommerce-dashboard__chart-block" title={ charts[ 0 ].label }>
+				<Card
+					className="woocommerce-dashboard__chart-block woocommerce-analytics__card"
+					title={ charts[ 0 ].label }
+				>
 					<a
 						className="screen-reader-text"
 						href={ getAdminLink(

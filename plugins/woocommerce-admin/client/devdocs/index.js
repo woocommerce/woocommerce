@@ -55,7 +55,8 @@ export default class extends Component {
 					const { componentName, filePath, render, docPath } = getExampleData( example );
 					const cardClasses = classnames(
 						'woocommerce-devdocs__card',
-						`woocommerce-devdocs__card--${ filePath }`
+						`woocommerce-devdocs__card--${ filePath }`,
+						'woocommerce-analytics__card'
 					);
 					return (
 						<Card

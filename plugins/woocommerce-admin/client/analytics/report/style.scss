@@ -12,3 +12,34 @@
 		}
 	}
 }
+
+.woocommerce-analytics__card {
+	border-radius: 0;
+	border: 1px solid $core-grey-light-700;
+	box-shadow: none;
+
+	&:hover {
+		box-shadow: none;
+	}
+
+	@include breakpoint( '<782px' ) {
+		border-left: none;
+		border-right: none;
+		margin-left: -16px;
+		margin-right: -16px;
+	}
+
+	> .woocommerce-card__header {
+		padding: ($gap - 3) $gap;
+		border-bottom: 1px solid $core-grey-light-700;
+		border-radius: 0;
+
+		> .woocommerce-card__title-wrapper > .woocommerce-card__title {
+			// EllipsisMenu is 24px, so to match we add 6px padding around the
+			// heading text, which we know is 18px from line-height.
+			padding: 3px 0;
+			@include font-size( 15 );
+			font-weight: 600;
+		}
+	}
+}

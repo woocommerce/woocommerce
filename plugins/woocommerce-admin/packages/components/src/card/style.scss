@@ -3,23 +3,33 @@
 .woocommerce-card {
 	margin-bottom: $gap-large;
 	background: $white;
-	border: 1px solid $core-grey-light-700;
+	border-radius: 3px;
+	box-shadow: $muriel-card-box-shadow;
+	transition: box-shadow 0.2s cubic-bezier(0.4, 1, 0.4, 1);
 
 	@include breakpoint( '<782px' ) {
-		margin-left: -16px;
-		margin-right: -16px;
 		margin-bottom: $gap-small;
-		border-left: none;
-		border-right: none;
 		width: auto;
+	}
+
+	&:hover {
+		box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+			0 8px 10px 1px rgba(0, 0, 0, 0.14),
+			0 3px 14px 2px rgba(0, 0, 0, 0.12);
+	}
+
+	&.is-inactive {
+		background-color: #f6f6f6;
+		box-shadow: none;
 	}
 }
 
 .woocommerce-card__header {
-	padding: ($gap - 3) $gap;
-	border-bottom: 1px solid $core-grey-light-700;
+	padding: $gap;
 	display: grid;
 	align-items: center;
+	border-top-left-radius: 3px;
+	border-top-left-radius: 4px;
 
 	.has-action & {
 		grid-template-columns: auto 1fr;
@@ -55,10 +65,16 @@
 
 .woocommerce-card__title {
 	margin: 0;
-	// EllipsisMenu is 24px, so to match we add 6px padding around the
-	// heading text, which we know is 18px from line-height.
-	padding: 3px 0;
-	@include font-size( 15 );
+	@include font-size( 24 );
 	line-height: 1.2;
-	font-weight: 600;
+	font-weight: 400;
+}
+
+.woocommerce-card__description {
+	@include font-size( 16 );
+	line-height: 1.5;
+	color: $muriel-gray-500;
+	margin-top: $gap-small;
+	margin-bottom: 0;
+	font-weight: 400;
 }

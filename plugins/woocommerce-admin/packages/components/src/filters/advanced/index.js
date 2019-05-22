@@ -187,7 +187,7 @@ class AdvancedFilters extends Component {
 		const updateDisabled = window.location.hash && ( window.location.hash.substr( 1 ) === updateHref || 0 === activeFilters.length );
 		const isEnglish = this.isEnglish();
 		return (
-			<Card className="woocommerce-filters-advanced" title={ this.getTitle() }>
+			<Card className="woocommerce-filters-advanced woocommerce-analytics__card" title={ this.getTitle() }>
 				<ul className="woocommerce-filters-advanced__list" ref={ this.filterListRef }>
 					{ activeFilters.map( filter => {
 						const { key } = filter;
