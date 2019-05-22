@@ -1,0 +1,8 @@
+/.* export-ignore
+composer.* export-ignore
+Gruntfile.js export-ignore
+package.json export-ignore
+package-lock.json export-ignore
+phpcs.xml export-ignore
+phpunit.* export-ignore
+tests export-ignore
