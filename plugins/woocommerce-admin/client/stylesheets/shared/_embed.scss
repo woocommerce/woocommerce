@@ -14,9 +14,26 @@
 		padding: 20px;
 	}
 
+	#screen-meta,
+	#screen-meta-links {
+		top: $large-header-height;
+
+		@include breakpoint( '782px-960px' ) {
+			top: $medium-header-height;
+		}
+
+		@include breakpoint( '<782px' ) {
+			top: $small-header-height;
+		}
+	}
+
 	#screen-meta {
 		border-right: 0;
 		margin: 0;
+	}
+
+	#screen-meta-links {
+		position: relative;
 	}
 
 	.notice {
@@ -46,10 +63,10 @@
 
 	.woocommerce-layout__primary {
 		margin: 0;
-		padding-top: 80px;
+		padding-top: $large-header-height + 20;
 
 		@include breakpoint( '782px-960px' ) {
-			padding-top: 60px;
+			padding-top: $medium-header-height + 20;
 		}
 	}
 
