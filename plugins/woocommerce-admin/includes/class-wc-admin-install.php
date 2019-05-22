@@ -170,6 +170,7 @@ class WC_Admin_Install {
 			label varchar(255) NOT NULL,
 			query longtext NOT NULL,
 			status varchar(255) NOT NULL,
+			is_primary boolean DEFAULT 0 NOT NULL,
 			PRIMARY KEY (action_id),
 			KEY note_id (note_id)
 		) $collate;
