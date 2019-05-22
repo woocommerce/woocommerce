@@ -6,6 +6,9 @@
   "license": "GPL-3.0-or-later",
   "prefer-stable": true,
   "minimum-stability": "dev",
+  "require" : {
+    "composer/installers" : "~1.0"
+  },
   "autoload": {
       "psr-4": {
         "WooCommerce\\": "src/"
