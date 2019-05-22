@@ -28,9 +28,11 @@ $version = '1.1.0';
 /**
  * This callback loads this version of the API.
  */
-$init_callback = function() {
+$init_callback = function() use ( $version ) {
 	require __DIR__ . '/vendor/autoload.php';
-	\WooCommerce\RestApi::instance()->init();
+	$rest_api = \WooCommerce\RestApi::instance();
+	$rest_api->set_version( $version );
+	$rest_api->init();
 };
 
 /**

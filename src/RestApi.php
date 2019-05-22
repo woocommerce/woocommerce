@@ -25,10 +25,35 @@ class RestApi {
 	protected $endpoints = [];
 
 	/**
+	 * REST API package version.
+	 *
+	 * @var string
+	 */
+	protected $version;
+
+	/**
 	 * Hook into WordPress ready to init the REST API as needed.
 	 */
 	public function init() {
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
+	}
+
+	/**
+	 * Return REST API package version.
+	 *
+	 * @return string
+	 */
+	public function get_version() {
+		return $this->version;
+	}
+
+	/**
+	 * Set REST API package version.
+	 *
+	 * @param string $version Version to set.
+	 */
+	public function set_version( $version ) {
+		$this->version = $version;
 	}
 
 	/**
