@@ -1,5 +1,5 @@
 {
-  "name": "woocommerce/rest-api",
+  "name": "woocommerce/woocommerce-rest-api",
   "description": "The WooCommerce core REST API.",
   "homepage": "https://github.com/woocommerce/woocommerce-rest-api",
   "type": "wordpress-plugin",
