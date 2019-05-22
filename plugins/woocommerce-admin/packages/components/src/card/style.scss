@@ -4,7 +4,7 @@
 	margin-bottom: $gap-large;
 	background: $white;
 	border-radius: 3px;
-	box-shadow: $muriel-card-box-shadow;
+	box-shadow: $muriel-box-shadow-1dp;
 	transition: box-shadow 0.2s cubic-bezier(0.4, 1, 0.4, 1);
 
 	@include breakpoint( '<782px' ) {
@@ -13,13 +13,11 @@
 	}
 
 	&:hover {
-		box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-			0 8px 10px 1px rgba(0, 0, 0, 0.14),
-			0 3px 14px 2px rgba(0, 0, 0, 0.12);
+		box-shadow: $box-shadow-8dp;
 	}
 
 	&.is-inactive {
-		background-color: #f6f6f6;
+		background-color: $muriel-gray-0;
 		box-shadow: none;
 	}
 }

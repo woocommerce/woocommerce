@@ -8,7 +8,7 @@ import { Component, createElement } from '@wordpress/element';
  * Internal depdencies
  */
 import Plugins from './steps/plugins';
-import Start from './steps/start';
+import Start from './steps/start/';
 import './style.scss';
 
 const getSteps = () => {
