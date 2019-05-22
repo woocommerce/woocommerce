@@ -23,6 +23,10 @@
 	flex-direction: column;
 	@include breakpoint( '>1280px' ) {
 		width: 35%;
+
+		.woocommerce-filters-filter {
+			width: 100%;
+		}
 	}
 
 	label {
@@ -30,6 +34,10 @@
 		display: block;
 		margin-bottom: $gap-small;
 		color: $core-grey-dark-500;
+	}
+
+	.woocommerce-filters-filter label {
+		margin-bottom: 0;
 	}
 
 	input[type='checkbox'] {

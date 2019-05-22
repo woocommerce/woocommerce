@@ -598,6 +598,14 @@ class WC_Admin_Loader {
 			'type'        => 'multiselect',
 			'options'     => $statuses,
 		);
+		$settings[] = array(
+			'id'          => 'woocommerce_default_date_range',
+			'option_key'  => 'woocommerce_default_date_range',
+			'label'       => __( 'Default Date Range', 'woocommerce-admin' ),
+			'description' => __( 'Default Date Range', 'woocommerce-admin' ),
+			'default'     => 'period=month&compare=previous_year',
+			'type'        => 'text',
+		);
 		return $settings;
 	}
 
