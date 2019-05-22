@@ -121,35 +121,11 @@ class WC_API extends WC_Legacy_API {
 	}
 
 	/**
-	 * Init WP REST API by hooking into `rest_api_init`.
-	 *
-	 * @since 2.6.0
-	 */
-	public function rest_api_init() {
-		$callback = $this->get_latest_version_callback();
-
-		if ( ! $callback ) {
-			require_once dirname( __FILE__ ) . '/api/src/class-server.php';
-			\WooCommerce\Rest_Api\Server::instance()->init();
-			return;
-		}
-
-		call_user_func( $this->latest_version_callback() );
-	}
-
-	/**
-	 * Include REST API classes.
-	 */
-	public function rest_api_includes() {
-		// Just init latest REST API - it will autoload any REST classes.
-		$this->rest_api_init();
-	}
-
-	/**
 	 * Register the WC Rest API.
 	 *
 	 * This is used to ensure we load the latest version of the REST API, if for example using a feature plugin version.
 	 *
+	 * @since 3.7.0
 	 * @param string $version Version of the REST API being registered.
 	 * @param mixed  $callback Callback function to load the REST API.
 	 * @return bool
@@ -163,17 +139,9 @@ class WC_API extends WC_Legacy_API {
 	}
 
 	/**
-	 * Get registered versions of the REST API.
-	 *
-	 * @return array
-	 */
-	public function get_versions() {
-		return $this->versions;
-	}
-
-	/**
 	 * Get latest version number of the registered REST APIs.
 	 *
+	 * @since 3.7.0
 	 * @return string|bool
 	 */
 	public function get_latest_version() {
@@ -186,11 +154,60 @@ class WC_API extends WC_Legacy_API {
 	}
 
 	/**
+	 * Init WP REST API by hooking into `rest_api_init`.
+	 *
+	 * @since 2.6.0
+	 */
+	public function rest_api_init() {
+		if ( $this->is_rest_api_loaded() ) {
+			return;
+		}
+
+		$this->register_core_api();
+
+		$callback = $this->get_latest_version_callback();
+
+		if ( $callback ) {
+			call_user_func( $callback );
+		}
+	}
+
+	/**
+	 * Include REST API classes.
+	 */
+	public function rest_api_includes() {
+		// Just init latest REST API - it will autoload any REST classes.
+		$this->rest_api_init();
+	}
+
+	/**
+	 * Return if the rest API classes were already loaded.
+	 *
+	 * @since 3.7.0
+	 * @return boolean
+	 */
+	protected function is_rest_api_loaded() {
+		return class_exists( '\WooCommerce\RestApi', false );
+	}
+
+	/**
+	 * Register the REST API package included in core.
+	 *
+	 * @since 3.7.0
+	 */
+	protected function register_core_api() {
+		$version       = __DIR__ . '/rest-api/version.php';
+		$init_callback = include __DIR__ . '/rest-api/init.php';
+		$this->register( $version, $init_callback );
+	}
+
+	/**
 	 * Get the initialization callback for the latest registered version of the REST API.
 	 *
+	 * @since 3.7.0
 	 * @return string
 	 */
-	public function get_latest_version_callback() {
+	protected function get_latest_version_callback() {
 		$latest = $this->get_latest_version();
 		if ( empty( $latest ) || ! isset( $this->versions[ $latest ] ) ) {
 			return '';

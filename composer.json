@@ -7,7 +7,8 @@
   "prefer-stable": true,
   "minimum-stability": "dev",
   "require": {
-    "composer/installers": "1.6.0"
+    "composer/installers": "1.6.0",
+    "woocommerce/woocommerce-rest-api": ">0"
   },
   "require-dev": {
     "apigen/apigen": "4.1.2",
@@ -29,11 +30,17 @@
       "phpcbf -p"
     ]
   },
+  "autoload": {
+    "exclude-from-classmap": ["/includes/rest-api"]
+  },
   "extra": {
     "scripts-description": {
       "test": "Run unit tests",
       "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
       "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+    },
+    "installer-paths": {
+      "includes/rest-api": ["woocommerce/woocommerce-rest-api"]
     }
   }
 }
