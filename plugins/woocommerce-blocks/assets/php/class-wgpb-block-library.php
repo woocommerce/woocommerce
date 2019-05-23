@@ -174,9 +174,24 @@ class WGPB_Block_Library {
 		register_block_type(
 			'woocommerce/product-category',
 			array(
-				'editor_script' => 'wc-product-category',
-				'editor_style'  => 'wc-block-editor',
-				'style'         => 'wc-block-style',
+				'render_callback' => array( __CLASS__, 'render_product_category' ),
+				'editor_script'   => 'wc-product-category',
+				'editor_style'    => 'wc-block-editor',
+				'style'           => 'wc-block-style',
+				'attributes'      => array_merge(
+					self::get_shared_attributes(),
+					array(
+						'orderby'  => array(
+							'type'    => 'string',
+							'enum'    => array( 'date', 'popularity', 'price_asc', 'price_desc', 'rating', 'title' ),
+							'default' => 'date',
+						),
+						'editMode' => array(
+							'type'    => 'boolean',
+							'default' => true,
+						),
+					)
+				),
 			)
 		);
 		register_block_type(
@@ -201,6 +216,7 @@ class WGPB_Block_Library {
 					array(
 						'orderby' => array(
 							'type'    => 'string',
+							'enum'    => array( 'date', 'popularity', 'price_asc', 'price_desc', 'rating', 'title' ),
 							'default' => 'date',
 						),
 					)
@@ -335,6 +351,9 @@ class WGPB_Block_Library {
 			),
 			'categories'        => array(
 				'type'    => 'array',
+				'items'   => array(
+					'type' => 'number',
+				),
 				'default' => array(),
 			),
 			'catOperator'       => array(
@@ -390,6 +409,20 @@ class WGPB_Block_Library {
 		require_once dirname( __FILE__ ) . '/class-wgpb-block-product-on-sale.php';
 
 		$block = new WGPB_Block_Product_On_Sale( $attributes, $content );
+		return $block->render();
+	}
+
+	/**
+	 * Products by category: Include and render the dynamic block.
+	 *
+	 * @param array  $attributes Block attributes. Default empty array.
+	 * @param string $content    Block content. Default empty string.
+	 * @return string Rendered block type output.
+	 */
+	public static function render_product_category( $attributes, $content ) {
+		require_once dirname( __FILE__ ) . '/class-wgpb-block-product-category.php';
+
+		$block = new WGPB_Block_Product_Category( $attributes, $content );
 		return $block->render();
 	}
 }
