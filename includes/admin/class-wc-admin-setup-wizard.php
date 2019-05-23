@@ -1013,9 +1013,9 @@ class WC_Admin_Setup_Wizard {
 					)
 				);
 			endif;
-		endif;
-		?>
+			?>
 			</ul>
+		<?php endif; ?>
 
 			<div class="wc-setup-shipping-units">
 				<p>
