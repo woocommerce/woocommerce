@@ -226,7 +226,44 @@ class WC_Admin_Notices {
 	 * If we have just installed, show a message with the install pages button.
 	 */
 	public static function install_notice() {
+		// Always show the traditional notice for the setup wizard.
 		include dirname( __FILE__ ) . '/views/html-notice-install.php';
+
+		// Add a note to the Inbox if WooCommerce Admin is active.
+		if ( class_exists( 'WC_Admin_Note' ) ) {
+			// First, see if we've already created this kind of note so we don't do it again.
+			$data_store = WC_Data_Store::load( 'admin-note' );
+			$note_ids   = $data_store->get_notes_with_name( 'wc-install' );
+
+			if ( ! empty( $note_ids ) ) {
+				return;
+			}
+
+			$note = new WC_Admin_Note();
+			$note->set_title( __( 'Welcome to WooCommerce', 'woocommerce' ) );
+			$note->set_content( __( 'You&lsquo;re almost ready to start selling :)', 'woocommerce' ) );
+			$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+			$note->set_icon( 'cart' );
+			$note->set_name( 'wc-install' );
+			$note->set_content_data( (object) array() );
+			$note->set_source( 'woocommerce' );
+
+			$note->add_action(
+				'run-setup',
+				__( 'Run the Setup Wizard', 'woocommerce' ),
+				esc_url( admin_url( 'admin.php?page=wc-setup' ) ),
+				'actioned',
+				true
+			);
+			$note->add_action(
+				'skip-setup',
+				__( 'Skip setup', 'woocommerce' ),
+				wp_nonce_url( add_query_arg( 'wc-hide-notice', 'install' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ),
+				'actioned'
+			);
+
+			$note->save();
+		}
 	}
 
 	/**
