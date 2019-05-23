@@ -9,11 +9,6 @@ defined( 'ABSPATH' ) || exit;
 
 global $wpdb;
 
-// This screen requires classes from the REST API.
-if ( ! did_action( 'rest_api_init' ) ) {
-	WC()->api->rest_api_includes();
-}
-
 if ( ! class_exists( 'WC_REST_System_Status_Controller' ) ) {
 	wp_die( 'Cannot load the REST API to access WC_REST_System_Status_Controller.' );
 }
@@ -78,8 +73,8 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 		</tr>
 		<tr>
 			<td data-export-label="WC Version"><?php esc_html_e( 'WooCommerce REST API package', 'woocommerce' ); ?>:</td>
-			<td class="help"><?php echo wc_help_tip( esc_html__( 'The version of WooCommerce REST API package running on your site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
-			<td><?php echo esc_html( wc()->api->get_latest_version() ); ?></td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The WooCommerce REST API package version running on your site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td><?php echo esc_html( wc()->api->get_latest_package_version() ); ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Log Directory Writable"><?php esc_html_e( 'Log directory writable', 'woocommerce' ); ?>:</td>

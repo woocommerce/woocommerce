@@ -19,22 +19,125 @@ defined( 'ABSPATH' ) || exit;
 class WC_API extends WC_Legacy_API {
 
 	/**
-	 * Rest API versions.
+	 * Rest API packages.
 	 *
 	 * @var array
 	 */
-	protected $versions = array();
+	protected $packages = array();
 
 	/**
 	 * Setup class.
 	 */
 	public function init() {
 		parent::init();
-		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
+		$this->register_core_api();
 		add_action( 'init', array( $this, 'add_endpoint' ), 0 );
+		add_action( 'init', array( $this, 'rest_api_init' ) );
+		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
 		add_action( 'parse_request', array( $this, 'handle_api_requests' ), 0 );
 		add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
-		add_action( 'rest_api_init', array( $this, 'rest_api_init' ), 0 );
+	}
+
+	/**
+	 * Register a WC Rest API package.
+	 *
+	 * This is used to ensure we load the latest version of the REST API, if for example using a feature plugin version.
+	 *
+	 * @since 3.7.0
+	 * @param string $version Version of the REST API being registered.
+	 * @param mixed  $callback Callback function to load the REST API.
+	 * @return bool
+	 */
+	public function register( $version, $callback ) {
+		if ( isset( $this->packages[ $version ] ) ) {
+			return false;
+		}
+		$this->packages[ $version ] = $callback;
+		return true;
+	}
+
+	/**
+	 * Get REST API packages sorted by version (oldest to newest).
+	 *
+	 * @since 3.7.0
+	 * @return array
+	 */
+	public function get_rest_api_packages() {
+		uksort( $this->packages, 'version_compare' );
+		return $this->packages;
+	}
+
+	/**
+	 * Get latest version number of the registered REST API packages.
+	 *
+	 * @since 3.7.0
+	 * @return string|bool
+	 */
+	public function get_latest_package_version() {
+		$packages = $this->get_rest_api_packages();
+		$versions = array_keys( $packages );
+
+		return end( $versions );
+	}
+
+	/**
+	 * Get latest version number of the registered REST API packages.
+	 *
+	 * @since 3.7.0
+	 * @return string|bool
+	 */
+	public function get_latest_package_callback() {
+		$packages = $this->get_rest_api_packages();
+
+		return end( $packages );
+	}
+
+	/**
+	 * Register the REST API package included in core.
+	 *
+	 * @since 3.7.0
+	 */
+	protected function register_core_api() {
+		$version       = include __DIR__ . '/rest-api/version.php';
+		$init_callback = include __DIR__ . '/rest-api/init.php';
+		$this->register( $version, $init_callback );
+	}
+
+	/**
+	 * Look though registered REST API packages and load the latest one.
+	 * Once loaded, it's class autoloader will be available for use.
+	 *
+	 * Packages should be registered during plugins_loaded/woocommerce_loaded hook.
+	 *
+	 * @see WC_API::register().
+	 *
+	 * @since 3.7.0
+	 */
+	public function rest_api_init() {
+		if ( $this->is_rest_api_loaded() ) {
+			return;
+		}
+		call_user_func( $this->get_latest_package_callback() );
+	}
+
+	/**
+	 * Return if the rest API classes were already loaded.
+	 *
+	 * @since 3.7.0
+	 * @return boolean
+	 */
+	protected function is_rest_api_loaded() {
+		return class_exists( '\WooCommerce\RestApi', false );
+	}
+
+	/**
+	 * WC API for payment gateway IPNs, etc.
+	 *
+	 * @since 2.0
+	 */
+	public static function add_endpoint() {
+		parent::add_endpoint();
+		add_rewrite_endpoint( 'wc-api', EP_ALL );
 	}
 
 	/**
@@ -48,16 +151,6 @@ class WC_API extends WC_Legacy_API {
 		$vars   = parent::add_query_vars( $vars );
 		$vars[] = 'wc-api';
 		return $vars;
-	}
-
-	/**
-	 * WC API for payment gateway IPNs, etc.
-	 *
-	 * @since 2.0
-	 */
-	public static function add_endpoint() {
-		parent::add_endpoint();
-		add_rewrite_endpoint( 'wc-api', EP_ALL );
 	}
 
 	/**
@@ -118,100 +211,5 @@ class WC_API extends WC_Legacy_API {
 		foreach ( $emails->get_emails() as $email ) {
 			new WC_Register_WP_Admin_Settings( $email, 'email' );
 		}
-	}
-
-	/**
-	 * Register the WC Rest API.
-	 *
-	 * This is used to ensure we load the latest version of the REST API, if for example using a feature plugin version.
-	 *
-	 * @since 3.7.0
-	 * @param string $version Version of the REST API being registered.
-	 * @param mixed  $callback Callback function to load the REST API.
-	 * @return bool
-	 */
-	public function register( $version, $callback ) {
-		if ( isset( $this->versions[ $version ] ) ) {
-			return false;
-		}
-		$this->versions[ $version ] = $callback;
-		return true;
-	}
-
-	/**
-	 * Get latest version number of the registered REST APIs.
-	 *
-	 * @since 3.7.0
-	 * @return string|bool
-	 */
-	public function get_latest_version() {
-		$keys = array_keys( $this->versions );
-		if ( empty( $keys ) ) {
-			return false;
-		}
-		uasort( $keys, 'version_compare' );
-		return end( $keys );
-	}
-
-	/**
-	 * Init WP REST API by hooking into `rest_api_init`.
-	 *
-	 * @since 2.6.0
-	 */
-	public function rest_api_init() {
-		if ( $this->is_rest_api_loaded() ) {
-			return;
-		}
-
-		$this->register_core_api();
-
-		$callback = $this->get_latest_version_callback();
-
-		if ( $callback ) {
-			call_user_func( $callback );
-		}
-	}
-
-	/**
-	 * Include REST API classes.
-	 */
-	public function rest_api_includes() {
-		// Just init latest REST API - it will autoload any REST classes.
-		$this->rest_api_init();
-	}
-
-	/**
-	 * Return if the rest API classes were already loaded.
-	 *
-	 * @since 3.7.0
-	 * @return boolean
-	 */
-	protected function is_rest_api_loaded() {
-		return class_exists( '\WooCommerce\RestApi', false );
-	}
-
-	/**
-	 * Register the REST API package included in core.
-	 *
-	 * @since 3.7.0
-	 */
-	protected function register_core_api() {
-		$version       = include __DIR__ . '/rest-api/version.php';
-		$init_callback = include __DIR__ . '/rest-api/init.php';
-		$this->register( $version, $init_callback );
-	}
-
-	/**
-	 * Get the initialization callback for the latest registered version of the REST API.
-	 *
-	 * @since 3.7.0
-	 * @return string
-	 */
-	protected function get_latest_version_callback() {
-		$latest = $this->get_latest_version();
-		if ( empty( $latest ) || ! isset( $this->versions[ $latest ] ) ) {
-			return '';
-		}
-		return $this->versions[ $latest ];
 	}
 }
