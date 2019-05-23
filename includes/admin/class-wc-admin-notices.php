@@ -571,7 +571,36 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		include dirname( __FILE__ ) . '/views/html-notice-secure-connection.php';
+		if ( class_exists( 'WC_Admin_Note' ) ) {
+			// First, see if we've already created this kind of note so we don't do it again.
+			$data_store = WC_Data_Store::load( 'admin-note' );
+			$note_ids   = $data_store->get_notes_with_name( 'wc-secure-connection' );
+
+			if ( ! empty( $note_ids ) ) {
+				return;
+			}
+
+			$note = new WC_Admin_Note();
+			$note->set_title( __( 'Your store does not appear to be using a secure connection.', 'woocommerce' ) );
+			$note->set_content( __( 'We highly recommend serving your entire website over an HTTPS connection to help keep customer data secure.', 'woocommerce' ) );
+			$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+			$note->set_icon( 'lock' );
+			$note->set_name( 'wc-secure-connection' );
+			$note->set_content_data( (object) array() );
+			$note->set_source( 'woocommerce' );
+
+			$note->add_action(
+				'secure-connection-learn-more',
+				__( 'Learn more', 'woocommerce' ),
+				'https://docs.woocommerce.com/document/ssl-and-https/',
+				'actioned',
+				true
+			);
+
+			$note->save();
+		} else {
+			include dirname( __FILE__ ) . '/views/html-notice-secure-connection.php';
+		}
 	}
 
 	/**
