@@ -117,14 +117,17 @@ addFilter( 'woocommerce_admin_reports_list', 'my-namespace', ( reports ) => {
 Register the report page with the controller:
 
 ```php
-wc_admin_register_page(
-	array(
-		'id'     => 'woocommerce-analytics-example',
-		'title'  => __( 'Example', 'my-textdomain' ),
+function add_report_menu_item( $report_pages ) {
+	$report_pages[] = array(
+		'id'     => 'example-analytics-report',
+		'title'  => __( 'Example', 'woocommerce-admin' ),
 		'parent' => 'woocommerce-analytics',
 		'path'   => '/analytics/example',
-	)
-);
+	);
+
+	return $report_pages;
+}
+add_filter( 'woocommerce_admin_report_menu_items', 'add_report_menu_item' );
 ```
 
 ### Further Reading
