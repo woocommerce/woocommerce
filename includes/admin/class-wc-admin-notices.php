@@ -512,11 +512,65 @@ class WC_Admin_Notices {
 	public static function regenerating_lookup_table_notice() {
 		// See if this is still relevent.
 		if ( ! wc_update_product_lookup_tables_is_running() ) {
-			self::remove_notice( 'regenerating_lookup_table' );
+			if ( class_exists( 'WC_Admin_Note' ) ) {
+				// @todo - delete this note instead?
+				$data_store = WC_Data_Store::load( 'admin-note' );
+				$note_ids   = $data_store->get_notes_with_name( 'wc-regen-lookup' );
+
+				if ( $note_ids ) {
+					$note = WC_Admin_Notes::get_note( $note_ids[0] );
+					$note->set_status( WC_Admin_Note::E_WC_ADMIN_NOTE_ACTIONED );
+					$note->save();
+				}
+			} else {
+				self::remove_notice( 'regenerating_lookup_table' );
+			}
+
 			return;
 		}
 
-		include dirname( __FILE__ ) . '/views/html-notice-regenerating-lookup-table.php';
+		if ( class_exists( 'WC_Admin_Note' ) ) {
+			// First, see if we've already created this kind of note so we don't do it again.
+			$data_store = WC_Data_Store::load( 'admin-note' );
+			$note_ids   = $data_store->get_notes_with_name( 'wc-regen-lookup' );
+
+			if ( ! empty( $note_ids ) ) {
+				return;
+			}
+
+			$cron_disabled = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON;
+
+			$note = new WC_Admin_Note();
+			$note->set_title( __( 'WooCommerce is updating product data in the background', 'woocommerce' ) );
+
+			$content = __( 'Product display, sorting, and reports may not be accurate until this finishes. It will take a few minutes and this notice will disappear when complete.', 'woocommerce' );
+
+			if ( $cron_disabled ) {
+				$content .= '<br>' . __( 'Note: WP CRON has been disabled on your install which may prevent this update from completing.', 'woocommerce' );
+			}
+
+			$note->set_content( $content );
+			$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_UPDATE );
+			$note->set_icon( 'sync' );
+			$note->set_name( 'wc-regen-lookup' );
+			$note->set_content_data( (object) array() );
+			$note->set_source( 'woocommerce' );
+
+			$pending_actions_cta = $cron_disabled ? __( 'You can manually run queued updates here.', 'woocommerce' ) : __( 'View progress →', 'woocommerce' );
+			$pending_actions_url = admin_url( 'admin.php?page=wc-status&tab=action-scheduler&s=wc_update_product_lookup_tables&status=pending' );
+
+			$note->add_action(
+				'regen-lookup-actions',
+				$pending_actions_cta,
+				$pending_actions_url,
+				'unactioned',
+				true
+			);
+
+			$note->save();
+		} else {
+			include dirname( __FILE__ ) . '/views/html-notice-regenerating-lookup-table.php';
+		}
 	}
 
 	/**
