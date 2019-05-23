@@ -205,6 +205,147 @@ class WC_Admin_Notices {
 	}
 
 	/**
+	 * Notice for DB update in progress.
+	 */
+	public static function update_notice_updating() {
+		if ( class_exists( 'WC_Admin_Note' ) ) {
+			WC_Admin_Notes::delete_notes_with_name( 'wc-update' );
+			// First, see if we've already created this kind of note so we don't do it again.
+			$data_store = WC_Data_Store::load( 'admin-note' );
+			$note_ids   = $data_store->get_notes_with_name( 'wc-updating' );
+
+			if ( ! empty( $note_ids ) ) {
+				return;
+			}
+
+			$cron_disabled = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON;
+
+			$note = new WC_Admin_Note();
+			$note->set_title( __( 'WooCommerce database update', 'woocommerce' ) );
+
+			$content = __( 'WooCommerce is updating the database in the background. The database update process may take a little while, so please be patient.', 'woocommerce' );
+
+			if ( $cron_disabled ) {
+				$content .= '<br>' . __( 'Note: WP CRON has been disabled on your install which may prevent this update from completing.', 'woocommerce' );
+			}
+
+			$note->set_content( $content );
+			$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_UPDATE );
+			$note->set_icon( 'sync' );
+			$note->set_name( 'wc-updating' );
+			$note->set_content_data( (object) array() );
+			$note->set_source( 'woocommerce' );
+
+			$pending_actions_cta = $cron_disabled ? __( 'You can manually run queued updates here.', 'woocommerce' ) : __( 'View progress →', 'woocommerce' );
+			$pending_actions_url = admin_url( 'admin.php?page=wc-status&tab=action-scheduler&s=woocommerce_run_update&status=pending' );
+
+			$note->add_action(
+				'pending-update-actions',
+				$pending_actions_cta,
+				$pending_actions_url,
+				'unactioned',
+				true
+			);
+
+			$note->save();
+		} else {
+			include dirname( __FILE__ ) . '/views/html-notice-updating.php';
+		}
+	}
+
+	/**
+	 * Notice for DB update required.
+	 */
+	public static function update_notice_update_required() {
+		if ( class_exists( 'WC_Admin_Note' ) ) {
+			// First, see if we've already created this kind of note so we don't do it again.
+			$data_store = WC_Data_Store::load( 'admin-note' );
+			$note_ids   = $data_store->get_notes_with_name( 'wc-update' );
+
+			if ( ! empty( $note_ids ) ) {
+				return;
+			}
+
+			$note = new WC_Admin_Note();
+			$note->set_title( __( 'WooCommerce database update required', 'woocommerce' ) );
+
+			$content = sprintf(
+				/* translators: 1: Link to docs 2: Close link. */
+				__( 'WooCommerce has been updated! To keep things running smoothly, we have to update your database to the newest version. The database update process runs in the background and may take a little while, so please be patient. Advanced users can alternatively update via %1$sWP CLI%2$s.', 'woocommerce' ),
+				'<a name="wp-cli" rel="nofollow" target="_blank" href="https://github.com/woocommerce/woocommerce/wiki/Upgrading-the-database-using-WP-CLI">',
+				'</a>'
+			);
+
+			$note->set_content( $content );
+			$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_UPDATE );
+			$note->set_icon( 'sync' );
+			$note->set_name( 'wc-update' );
+			$note->set_content_data( (object) array() );
+			$note->set_source( 'woocommerce' );
+
+			$update_url = wp_nonce_url(
+				add_query_arg( 'do_update_woocommerce', 'true', admin_url( 'admin.php?page=wc-settings' ) ),
+				'wc_db_update',
+				'wc_db_update_nonce'
+			);
+
+			$note->add_action(
+				'update-database',
+				__( 'Update WooCommerce Database', 'woocommerce' ),
+				$update_url,
+				'actioned',
+				true
+			);
+			$note->add_action(
+				'update-learn-more',
+				__( 'Learn more about updates', 'woocommerce' ),
+				'https://docs.woocommerce.com/document/how-to-update-woocommerce/'
+			);
+
+			$note->save();
+		} else {
+			include dirname( __FILE__ ) . '/views/html-notice-update.php';
+		}
+	}
+
+	/**
+	 * Notice for completed DB update.
+	 */
+	public static function update_notice_updated() {
+		if ( class_exists( 'WC_Admin_Note' ) ) {
+			WC_Admin_Notes::delete_notes_with_name( 'wc-updating' );
+			// First, see if we've already created this kind of note so we don't do it again.
+			$data_store = WC_Data_Store::load( 'admin-note' );
+			$note_ids   = $data_store->get_notes_with_name( 'wc-updated' );
+
+			if ( ! empty( $note_ids ) ) {
+				return;
+			}
+
+			$note = new WC_Admin_Note();
+			$note->set_title( __( 'WooCommerce database update complete.', 'woocommerce' ) );
+			$note->set_content( __( 'Thank you for updating to the latest version!', 'woocommerce' ) );
+			$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_UPDATE );
+			$note->set_icon( 'sync' );
+			$note->set_name( 'wc-updated' );
+			$note->set_content_data( (object) array() );
+			$note->set_source( 'woocommerce' );
+
+			$note->add_action(
+				'dismiss-database-updated',
+				__( 'Dismiss', 'woocommerce' ),
+				'#',
+				'actioned',
+				true
+			);
+
+			$note->save();
+		} else {
+			include dirname( __FILE__ ) . '/views/html-notice-updated.php';
+		}
+	}
+
+	/**
 	 * If we need to update, include a message with the update button.
 	 */
 	public static function update_notice() {
@@ -212,13 +353,13 @@ class WC_Admin_Notices {
 			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
 
 			if ( $next_scheduled_date || ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok, CSRF ok.
-				include dirname( __FILE__ ) . '/views/html-notice-updating.php';
+				self::update_notice_updating();
 			} else {
-				include dirname( __FILE__ ) . '/views/html-notice-update.php';
+				self::update_notice_update_required();
 			}
 		} else {
 			WC_Install::update_db_version();
-			include dirname( __FILE__ ) . '/views/html-notice-updated.php';
+			self::update_notice_updated();
 		}
 	}
 
