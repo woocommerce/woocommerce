@@ -94,17 +94,6 @@ Layout.propTypes = {
 	isEmbedded: PropTypes.bool,
 };
 
-export class NoticeArea extends Component {
-	render() {
-		return (
-			<Fragment>
-				{ window.wcAdminFeatures[ 'store-alerts' ] && <StoreAlerts /> }
-				<Notices />
-			</Fragment>
-		);
-	}
-}
-
 export class PageLayout extends Component {
 	render() {
 		return (
