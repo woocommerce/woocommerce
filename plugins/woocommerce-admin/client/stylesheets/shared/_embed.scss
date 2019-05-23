@@ -80,6 +80,10 @@
 		@include breakpoint( '782px-960px' ) {
 			padding-top: $medium-header-height + 20;
 		}
+
+		@include breakpoint( '<782px' ) {
+			padding-top: 10px;
+		}
 	}
 
 	@keyframes isLoaded {
