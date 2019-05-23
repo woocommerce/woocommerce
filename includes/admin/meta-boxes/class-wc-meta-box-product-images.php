@@ -50,8 +50,8 @@ class WC_Meta_Box_Product_Images {
 							continue;
 						}
 						?>
-						<li class="image" data-attachment_id="<?php echo (int) $attachment_id; ?>">
-							<?php echo $attachment; // WPCS: XSS OK. ?>
+						<li class="image" data-attachment_id="<?php echo esc_attr( $attachment_id ); ?>">
+							<?php echo $attachment; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							<ul class="actions">
 								<li><a href="#" class="delete tips" data-tip="<?php esc_attr_e( 'Delete image', 'woocommerce' ); ?>"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a></li>
 							</ul>
