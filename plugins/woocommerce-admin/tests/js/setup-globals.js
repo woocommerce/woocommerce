@@ -62,6 +62,7 @@ global.wcSettings = {
 		userLocale: 'en_US',
 		weekdaysShort: [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ],
 	},
+	wcAdminSettings: {},
 };
 
 const config = require( '../../config/development.json' );
