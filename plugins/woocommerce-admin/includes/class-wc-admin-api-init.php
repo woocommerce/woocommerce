@@ -110,6 +110,7 @@ class WC_Admin_Api_Init {
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-leaderboards-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-onboarding-levels-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-onboarding-profile-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-onboarding-plugins-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-orders-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-products-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-product-categories-controller.php';
@@ -153,6 +154,7 @@ class WC_Admin_Api_Init {
 				'WC_Admin_REST_Leaderboards_Controller',
 				'WC_Admin_REST_Onboarding_Levels_Controller',
 				'WC_Admin_REST_Onboarding_Profile_Controller',
+				'WC_Admin_REST_Onboarding_Plugins_Controller',
 				'WC_Admin_REST_Orders_Controller',
 				'WC_Admin_REST_Products_Controller',
 				'WC_Admin_REST_Product_Categories_Controller',
