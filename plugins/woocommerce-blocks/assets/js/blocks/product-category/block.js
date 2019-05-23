@@ -37,12 +37,12 @@ class ProductByCategoryBlock extends Component {
 		this.state = {
 			products: [],
 			loaded: false,
-			changedAttributes: null,
+			changedAttributes: {},
 			isEditing: false,
 		};
 		this.startEditing = this.startEditing.bind( this );
 		this.stopEditing = this.stopEditing.bind( this );
-		this.setAttributes = this.setAttributes.bind( this );
+		this.setChangedAttributes = this.setChangedAttributes.bind( this );
 		this.save = this.save.bind( this );
 		this.debouncedGetProducts = debounce( this.getProducts.bind( this ), 200 );
 	}
@@ -67,7 +67,7 @@ class ProductByCategoryBlock extends Component {
 		} );
 	}
 
-	setAttributes( attributes ) {
+	setChangedAttributes( attributes ) {
 		this.setState( ( prevState ) => {
 			if ( prevState.changedAttributes !== null ) {
 				return { changedAttributes: { ...prevState.changedAttributes, ...attributes } };
@@ -133,11 +133,11 @@ class ProductByCategoryBlock extends Component {
 						selected={ attributes.categories }
 						onChange={ ( value = [] ) => {
 							const ids = value.map( ( { id } ) => id );
-							this.setAttributes( { categories: ids } );
+							setAttributes( { categories: ids } );
 						} }
 						operator={ catOperator }
 						onOperatorChange={ ( value = 'any' ) =>
-							this.setAttributes( { catOperator: value } )
+							setAttributes( { catOperator: value } )
 						}
 					/>
 				</PanelBody>
@@ -157,7 +157,7 @@ class ProductByCategoryBlock extends Component {
 				>
 					<GridContentControl
 						settings={ contentVisibility }
-						onChange={ ( value ) => this.setAttributes( { contentVisibility: value } ) }
+						onChange={ ( value ) => setAttributes( { contentVisibility: value } ) }
 					/>
 				</PanelBody>
 				<PanelBody
@@ -211,11 +211,11 @@ class ProductByCategoryBlock extends Component {
 						selected={ currentAttributes.categories }
 						onChange={ ( value = [] ) => {
 							const ids = value.map( ( { id } ) => id );
-							this.setAttributes( { categories: ids } );
+							this.setChangedAttributes( { categories: ids } );
 						} }
 						operator={ currentAttributes.catOperator }
 						onOperatorChange={ ( value = 'any' ) =>
-							this.setAttributes( { catOperator: value } )
+							this.setChangedAttributes( { catOperator: value } )
 						}
 					/>
 					<Button isDefault onClick={ onDone }>
@@ -223,8 +223,7 @@ class ProductByCategoryBlock extends Component {
 					</Button>
 					<Button
 						className="wc-block-products-category__cancel-button"
-						title={ __( 'Cancel', 'woo-gutenberg-products-block' ) }
-						isLink
+						isTertiary
 						onClick={ onCancel }
 					>
 						{ __( 'Cancel', 'woo-gutenberg-products-block' ) }
@@ -273,7 +272,7 @@ class ProductByCategoryBlock extends Component {
 							{
 								icon: 'edit',
 								title: __( 'Edit' ),
-								onClick: () => this.startEditing(),
+								onClick: () => isEditing ? this.stopEditing() : this.startEditing(),
 								isActive: isEditing,
 							},
 						] }
