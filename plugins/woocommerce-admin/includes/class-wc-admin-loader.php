@@ -378,7 +378,7 @@ class WC_Admin_Loader {
 		$sections = self::get_embed_breadcrumbs();
 		$sections = is_array( $sections ) ? $sections : array( $sections );
 		?>
-		<div id="woocommerce-embedded-root">
+		<div id="woocommerce-embedded-root" class="is-embed-loading">
 			<div class="woocommerce-layout">
 				<div class="woocommerce-layout__header is-embed-loading">
 					<h1 class="woocommerce-layout__header-breadcrumbs">
@@ -390,9 +390,6 @@ class WC_Admin_Loader {
 						<?php endforeach; ?>
 					</h1>
 				</div>
-			</div>
-			<div class="woocommerce-layout__primary is-embed-loading" id="woocommerce-layout__primary">
-				<div id="woocommerce-layout__notice-list" class="woocommerce-layout__notice-list"></div>
 			</div>
 		</div>
 		<?php

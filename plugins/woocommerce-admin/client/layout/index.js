@@ -24,6 +24,19 @@ import { recordPageView } from 'lib/tracks';
 import TransientNotices from './transient-notices';
 import StoreAlerts from './store-alerts';
 
+export class PrimaryLayout extends Component {
+	render() {
+		const { children } = this.props;
+		return (
+			<div className="woocommerce-layout__primary" id="woocommerce-layout__primary">
+				{ window.wcAdminFeatures[ 'store-alerts' ] && <StoreAlerts /> }
+				<Notices />
+				{ children }
+			</div>
+		);
+	}
+}
+
 class Layout extends Component {
 	componentDidMount() {
 		this.recordPageViewTrack();
@@ -60,28 +73,25 @@ class Layout extends Component {
 	}
 
 	render() {
-		const { isEmbeded, ...restProps } = this.props;
+		const { isEmbedded, ...restProps } = this.props;
 		return (
 			<div className="woocommerce-layout">
 				<Slot name="header" />
 				<TransientNotices />
-
-				<div className="woocommerce-layout__primary" id="woocommerce-layout__primary">
-					{ window.wcAdminFeatures[ 'store-alerts' ] && <StoreAlerts /> }
-					<Notices />
-					{ ! isEmbeded && (
+				{ ! isEmbedded && (
+					<PrimaryLayout>
 						<div className="woocommerce-layout__main">
 							<Controller { ...restProps } />
 						</div>
-					) }
-				</div>
+					</PrimaryLayout>
+				) }
 			</div>
 		);
 	}
 }
 
 Layout.propTypes = {
-	isEmbededLayout: PropTypes.bool,
+	isEmbedded: PropTypes.bool,
 };
 
 export class PageLayout extends Component {
@@ -104,7 +114,7 @@ export class EmbedLayout extends Component {
 		return (
 			<Fragment>
 				<Header sections={ wcSettings.embedBreadcrumbs } isEmbedded />
-				<Layout isEmbeded />
+				<Layout isEmbedded />
 			</Fragment>
 		);
 	}
