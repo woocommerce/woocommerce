@@ -77,6 +77,11 @@ body {
 	color: <?php echo esc_attr( $base_text ); ?>;
 }
 
+#template_header_image img {
+	margin-left: 0;
+	margin-right: 0;
+}
+
 #template_footer td {
 	padding: 0;
 	border-radius: 6px;
