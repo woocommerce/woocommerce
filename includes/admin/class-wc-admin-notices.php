@@ -438,10 +438,80 @@ class WC_Admin_Notices {
 			}
 		}
 
-		if ( $outdated ) {
-			include dirname( __FILE__ ) . '/views/html-notice-template-check.php';
+		if ( class_exists( 'WC_Admin_Note' ) ) {
+			if ( $outdated ) {
+				// First, see if we've already created this kind of note so we don't do it again.
+				$data_store = WC_Data_Store::load( 'admin-note' );
+				$note_ids   = $data_store->get_notes_with_name( 'wc-template-check' );
+
+				if ( ! empty( $note_ids ) ) {
+					return;
+				}
+
+				$theme = wp_get_theme();
+
+				$note = new WC_Admin_Note();
+				$note->set_title( __( 'Your theme contains outdated WooCommerce template files.', 'woocommerce' ) );
+
+				ob_start();
+
+				?>
+				<?php /* translators: %s: theme name */ ?>
+				<?php printf( __( '<strong>Your theme (%s) contains outdated copies of some WooCommerce template files.</strong> These files may need updating to ensure they are compatible with the current version of WooCommerce. Suggestions to fix this:', 'woocommerce' ), esc_html( $theme['Name'] ) ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped ?>
+					<ol>
+						<li><?php esc_html_e( 'Update your theme to the latest version. If no update is available contact your theme author asking about compatibility with the current WooCommerce version.', 'woocommerce' ); ?></li>
+						<li><?php esc_html_e( 'If you copied over a template file to change something, then you will need to copy the new version of the template and apply your changes again.', 'woocommerce' ); ?></li>
+					</ol>
+				<?php
+
+				$content = ob_get_clean();
+
+				$note->set_content( $content );
+				$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+				$note->set_icon( 'code' );
+				$note->set_name( 'wc-template-check' );
+				$note->set_content_data( (object) array() );
+				$note->set_source( 'woocommerce' );
+
+				$note->add_action(
+					'template-check-learn-more',
+					__( 'Learn more about templates', 'woocommerce' ),
+					'https://docs.woocommerce.com/document/template-structure/',
+					'unactioned',
+					true
+				);
+				$note->add_action(
+					'template-check-view-affected',
+					__( 'View affected templates', 'woocommerce' ),
+					esc_url( admin_url( 'admin.php?page=wc-status' ) ),
+					'unactioned',
+					true
+				);
+				$note->add_action(
+					'template-check-dismiss',
+					__( 'Dismiss', 'woocommerce' ),
+					'#',
+					'actioned'
+				);
+
+				$note->save();
+			} else {
+				// @todo - delete this note instead?
+				$data_store = WC_Data_Store::load( 'admin-note' );
+				$note_ids   = $data_store->get_notes_with_name( 'wc-template-check' );
+
+				if ( $note_ids ) {
+					$note = WC_Admin_Notes::get_note( $note_ids[0] );
+					$note->set_status( WC_Admin_Note::E_WC_ADMIN_NOTE_ACTIONED );
+					$note->save();
+				}
+			}
 		} else {
-			self::remove_notice( 'template_files' );
+			if ( $outdated ) {
+				include dirname( __FILE__ ) . '/views/html-notice-template-check.php';
+			} else {
+				self::remove_notice( 'template_files' );
+			}
 		}
 	}
 
