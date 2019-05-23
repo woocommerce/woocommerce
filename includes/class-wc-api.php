@@ -196,7 +196,7 @@ class WC_API extends WC_Legacy_API {
 	 * @since 3.7.0
 	 */
 	protected function register_core_api() {
-		$version       = __DIR__ . '/rest-api/version.php';
+		$version       = include __DIR__ . '/rest-api/version.php';
 		$init_callback = include __DIR__ . '/rest-api/init.php';
 		$this->register( $version, $init_callback );
 	}
