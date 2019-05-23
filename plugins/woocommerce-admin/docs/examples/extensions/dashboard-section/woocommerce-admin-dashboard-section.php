@@ -15,7 +15,7 @@ function dashboard_section_register_script() {
 	}
 
 	wp_register_script(
-		'add-report',
+		'dashboard_section',
 		plugins_url( '/dist/index.js', __FILE__ ),
 		array(
 			'wp-hooks',
@@ -27,6 +27,6 @@ function dashboard_section_register_script() {
 		true
 	);
 
-	wp_enqueue_script( 'add-report' );
+	wp_enqueue_script( 'dashboard_section' );
 }
 add_action( 'admin_enqueue_scripts', 'dashboard_section_register_script' );
