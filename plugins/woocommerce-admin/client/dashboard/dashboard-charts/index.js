@@ -8,7 +8,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import Gridicon from 'gridicons';
 import PropTypes from 'prop-types';
-import { IconButton, NavigableMenu, SelectControl, TextControl } from '@wordpress/components';
+import { IconButton, NavigableMenu, SelectControl } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 
 /**
@@ -79,24 +79,16 @@ class DashboardCharts extends Component {
 							);
 						} ) }
 						{ window.wcAdminFeatures[ 'analytics-dashboard/customizable' ] && (
-							<Fragment>
-								<div className="woocommerce-ellipsis-menu__item">
-									<TextControl
-										label={ __( 'Section Title', 'woocommerce-admin' ) }
-										onBlur={ onTitleBlur }
-										onChange={ onTitleChange }
-										required
-										value={ titleInput }
-									/>
-								</div>
-								<Controls
-									onToggle={ onToggle }
-									onMove={ onMove }
-									onRemove={ onRemove }
-									isFirst={ isFirst }
-									isLast={ isLast }
-								/>
-							</Fragment>
+							<Controls
+								onToggle={ onToggle }
+								onMove={ onMove }
+								onRemove={ onRemove }
+								isFirst={ isFirst }
+								isLast={ isLast }
+								onTitleBlur={ onTitleBlur }
+								onTitleChange={ onTitleChange }
+								titleInput={ titleInput }
+							/>
 						) }
 					</Fragment>
 				) }
