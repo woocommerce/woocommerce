@@ -25,6 +25,28 @@
 		}
 	}
 
+	.woocommerce-stepper .woocommerce-stepper__step {
+		.woocommerce-stepper__step-label {
+			color: $muriel-gray-800;
+		}
+
+		&.is-active,
+		&.is-complete {
+			.woocommerce-stepper__step-icon {
+				background: $muriel-gray-900;
+				color: $muriel-white;
+			}
+
+			.woocommerce-stepper__step-label {
+				color: $muriel-gray-900;
+			}
+		}
+
+		.woocommerce-spinner__circle {
+			stroke: $muriel-gray-900;
+		}
+	}
+
 	.woocommerce-profile-wizard__header {
 		height: 56px;
 		border-bottom: 1px solid $muriel-gray-50;
@@ -111,6 +133,7 @@
 	.woocommerce-profile-wizard__plugins-actions {
 		text-align: left;
 		margin-left: 64px;
+		min-height: 28px;
 
 		button {
 			display: initial;

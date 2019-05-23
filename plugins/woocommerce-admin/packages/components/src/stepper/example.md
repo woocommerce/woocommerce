@@ -2,73 +2,82 @@
 import { Stepper } from '@woocommerce/components';
 
 const MyStepper = withState( {
-    currentStep: 'first',
-    isComplete: false,
-} )( ( { currentStep, isComplete, setState } ) => {
-    const steps = [
-        {
-            label: 'First',
-            key: 'first',
-        },
-        {
-            label: 'Second',
-            key: 'second',
-        },
-        {
-            label: 'Third',
-            key: 'third',
-        },
-        {
-            label: 'Fourth',
-            key: 'fourth',
-        },
-    ];
-    const currentIndex = steps.findIndex( s => currentStep === s.key );
+	currentStep: 'first',
+	isComplete: false,
+	isPending: false,
+} )( ( { currentStep, isComplete, isPending, setState } ) => {
+	const steps = [
+		{
+			label: 'First',
+			key: 'first',
+		},
+		{
+			label: 'Second',
+			key: 'second',
+		},
+		{
+			label: 'Third',
+			key: 'third',
+		},
+		{
+			label: 'Fourth',
+			key: 'fourth',
+		},
+	];
 
-    if ( isComplete ) {
-        steps.forEach( s => s.isComplete = true );
-    }
+	const currentIndex = steps.findIndex( s => currentStep === s.key );
 
-    return (
-        <div>
-            { isComplete ? (
-                <button onClick={ () => setState( { currentStep: 'first', isComplete: false } ) } >
-                    Reset
-                </button>
-            ) : (
-                <div>
-                    <button
-                        onClick={ () => setState( { currentStep: steps[ currentIndex - 1 ]['key'] } ) }
-                        disabled={ currentIndex < 1 }
-                    >
-                        Previous step
-                    </button>
-                    <button
-                        onClick={ () => setState( { currentStep: steps[ currentIndex + 1 ]['key'] } ) }
-                        disabled={ currentIndex >= steps.length - 1 }
-                    >
-                        Next step
-                    </button>
-                    <button
-                        onClick={ () => setState( { isComplete: true } ) }
-                        disabled={ currentIndex !== steps.length - 1 }
-                    >
-                        Complete
-                    </button>
-                </div>
-            ) }
+	if ( isComplete ) {
+		steps.forEach( s => s.isComplete = true );
+	}
 
-			<Stepper
-				steps={ steps }
-				currentStep={ currentStep }
+	return (
+	<div>
+		{ isComplete ? (
+			<button onClick={ () => setState( { currentStep: 'first', isComplete: false } ) } >
+				Reset
+			</button>
+		) : (
+			<div>
+				<button
+					onClick={ () => setState( { currentStep: steps[ currentIndex - 1 ]['key'] } ) }
+					disabled={ currentIndex < 1 }
+				>
+					Previous step
+				</button>
+				<button
+					onClick={ () => setState( { currentStep: steps[ currentIndex + 1 ]['key'] } ) }
+					disabled={ currentIndex >= steps.length - 1 }
+				>
+					Next step
+				</button>
+				<button
+					onClick={ () => setState( { isComplete: true } ) }
+					disabled={ currentIndex !== steps.length - 1 }
+				>
+					Complete
+				</button>
+				<button
+					onClick={ () => setState( { isPending: ! isPending } ) }
+				>
+					Toggle Spinner
+				</button>
+			</div>
+		) }
+
+		<Stepper
+			steps={ steps }
+			currentStep={ currentStep }
+			isPending={ isPending }
+		/>
+
+		<Stepper
+			isPending={ isPending }
+			direction="vertical"
+			steps={ steps }
+			currentStep={ currentStep }
 			/>
-
-			<Stepper
-				direction="vertical"
-				steps={ steps }
-				currentStep={ currentStep }
-			/>
-		</div>
+	</div>
 	);
 } );
 ```

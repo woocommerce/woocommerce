@@ -5,11 +5,11 @@
 import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import { Spinner } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
+import Spinner from '../spinner';
 import CheckIcon from './check-icon';
 
 /**
@@ -32,8 +32,6 @@ class Stepper extends Component {
 						'is-complete': 'undefined' !== typeof isComplete ? isComplete : currentIndex > i,
 					} );
 
-					// @todo Update Spinner Styles
-					// https://material.io/design/components/progress-indicators.html
 					const icon = currentStep === key && isPending ? <Spinner /> : (
 						<div className="woocommerce-stepper__step-icon">
 							<span className="woocommerce-stepper__step-number">{ i + 1 }</span>
@@ -47,7 +45,7 @@ class Stepper extends Component {
 								className={ stepClassName }
 							>
 								{ icon }
-								<span className="woocommerce-stepper_step-label">
+								<span className="woocommerce-stepper__step-label">
 									{ label }
 								</span>
 							</div>

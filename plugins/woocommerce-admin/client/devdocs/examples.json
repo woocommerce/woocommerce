@@ -21,6 +21,7 @@
   { "component": "SearchListControl" },
   { "component": "Section" },
   { "component": "SegmentedSelection" },
+  { "component": "Spinner" },
   { "component": "SplitButton" },
   { "component": "Stepper" },
   { "component": "Summary", "render": "MySummaryList" },

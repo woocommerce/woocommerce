@@ -40,6 +40,7 @@ export { default as SearchListItem } from './search-list-control/item';
 export { default as SectionHeader } from './section-header';
 export { default as SegmentedSelection } from './segmented-selection';
 export { default as SplitButton } from './split-button';
+export { default as Spinner } from './spinner';
 export { default as Stepper } from './stepper';
 export { default as SummaryList } from './summary';
 export { default as SummaryListPlaceholder } from './summary/placeholder';

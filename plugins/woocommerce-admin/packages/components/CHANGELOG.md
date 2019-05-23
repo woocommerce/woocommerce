@@ -7,6 +7,7 @@
 - EllipsisMenu component (breaking change): Remove `children` prop in favor of a render prop `renderContent` so that function arguments `isOpen`, `onToggle`, and `onClose` can be passed down.
 - Chart has a new prop named `yBelow1Format` which overrides the `yFormat` for values between -1 and 1 (not included).
 - Add new component `<Stepper />` for showing a list of steps and progress.
+- Add new `<Spinner />` component.
 - Card component: updated default Muriel design.
 - Card component: new `description` prop.
 - Card component: new `isInactive` prop.
