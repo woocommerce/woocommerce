@@ -13,13 +13,17 @@ import { EmbedLayout, PrimaryLayout as NoticeArea } from './layout';
 import 'store';
 import 'wc-api/wp-data-store';
 
+const embeddedRoot = document.getElementById( 'woocommerce-embedded-root' );
+
 // Render the header.
 render(
 	<SlotFillProvider>
 		<EmbedLayout />
 	</SlotFillProvider>,
-	document.getElementById( 'woocommerce-embedded-root' )
+	embeddedRoot
 );
+
+embeddedRoot.classList.remove( 'is-embed-loading' );
 
 // Render notices just above the WP content div.
 const wpBody = document.getElementById( 'wpbody-content' );

@@ -14,6 +14,18 @@
 		padding: 20px;
 	}
 
+	#woocommerce-embedded-root.is-embed-loading + #wpbody .wrap {
+		padding-top: $large-header-height + 40;
+
+		@include breakpoint( '782px-960px' ) {
+			padding-top: $medium-header-height + 40;
+		}
+
+		@include breakpoint( '<782px' ) {
+			padding-top: $small-header-height + 40;
+		}
+	}
+
 	#screen-meta,
 	#screen-meta-links {
 		top: $large-header-height;
