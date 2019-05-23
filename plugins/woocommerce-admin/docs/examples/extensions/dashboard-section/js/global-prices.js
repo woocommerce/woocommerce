@@ -26,7 +26,7 @@ for ( let i = 1; i <= 20; i++ ) {
 
 const GlobalPrices = () => {
 	return (
-		<Card className="woocommerce-dashboard__chart-block" title="Global Apple Prices">
+		<Card className="woocommerce-dashboard__chart-block woocommerce-analytics__card" title="Global Apple Prices">
 			<Chart
 				title="Global Apple Prices"
 				interval="day"
