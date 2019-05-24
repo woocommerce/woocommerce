@@ -63,15 +63,13 @@ class ProductByCategoryBlock extends Component {
 	stopEditing() {
 		this.setState( {
 			isEditing: false,
-			changedAttributes: null,
+			changedAttributes: {},
 		} );
 	}
 
 	setChangedAttributes( attributes ) {
 		this.setState( ( prevState ) => {
-			if ( prevState.changedAttributes !== null ) {
-				return { changedAttributes: { ...prevState.changedAttributes, ...attributes } };
-			}
+			return { changedAttributes: { ...prevState.changedAttributes, ...attributes } };
 		} );
 	}
 
@@ -133,12 +131,18 @@ class ProductByCategoryBlock extends Component {
 						selected={ attributes.categories }
 						onChange={ ( value = [] ) => {
 							const ids = value.map( ( { id } ) => id );
-							setAttributes( { categories: ids } );
+							const changes = { categories: ids };
+
+							// Changes in the sidebar save instantly and overwrite any unsaved changes.
+							setAttributes( changes );
+							this.setChangedAttributes( changes );
 						} }
 						operator={ catOperator }
-						onOperatorChange={ ( value = 'any' ) =>
-							setAttributes( { catOperator: value } )
-						}
+						onOperatorChange={ ( value = 'any' ) => {
+							const changes = { catOperator: value };
+							setAttributes( changes );
+							this.setChangedAttributes( changes );
+						} }
 					/>
 				</PanelBody>
 				<PanelBody
