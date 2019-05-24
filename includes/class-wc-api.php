@@ -98,8 +98,29 @@ class WC_API extends WC_Legacy_API {
 	 * @since 3.7.0
 	 */
 	protected function register_core_api() {
-		$version       = include __DIR__ . '/rest-api/version.php';
-		$init_callback = include __DIR__ . '/rest-api/init.php';
+		if ( file_exists( __DIR__ . '/rest-api/init.php' ) ) {
+			$version       = include __DIR__ . '/rest-api/version.php';
+			$init_callback = include __DIR__ . '/rest-api/init.php';
+		} else {
+			// Build step required.
+			$version       = 0;
+			$init_callback = function() {
+				add_action(
+					'admin_notices',
+					function() {
+						echo '<div class="error"><p>';
+						printf(
+							/* Translators: %1$s WooCommerce plugin directory, %2$s is the install command, %3$s is the build command. */
+							esc_html__( 'The development version of WooCommerce requires files to be built before it can function properly. From the plugin directory (%1$s), run %2$s to install dependencies and %3$s to build assets.', 'woocommerce' ),
+							'<code>' . esc_html( str_replace( ABSPATH, '', WC_ABSPATH ) ) . '</code>',
+							'<code>npm install</code>',
+							'<code>npm run build</code>'
+						);
+						echo '</p></div>';
+					}
+				);
+			};
+		}
 		$this->register( $version, $init_callback );
 	}
 
