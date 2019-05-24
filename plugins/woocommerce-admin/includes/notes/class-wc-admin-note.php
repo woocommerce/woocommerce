@@ -485,7 +485,7 @@ class WC_Admin_Note extends WC_Data {
 	public function add_action( $name, $label, $url = '', $status = self::E_WC_ADMIN_NOTE_ACTIONED, $primary = false ) {
 		$name    = wc_clean( $name );
 		$label   = wc_clean( $label );
-		$query   = esc_url( $url );
+		$query   = esc_url_raw( $url );
 		$status  = wc_clean( $status );
 		$primary = (bool) $primary;
 
