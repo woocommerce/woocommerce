@@ -85,17 +85,18 @@ class WC_Admin_REST_Admin_Note_Action_Controller extends WC_Admin_REST_Admin_Not
 		/**
 		 * Fires when an admin note action is taken.
 		 *
-		 * @param string $name   The triggered action name.
-		 * @param object $action The triggered action.
+		 * @param string        $name The triggered action name.
+		 * @param WC_Admin_Note $note The corresponding Note.
 		 */
-		do_action( 'woocommerce_admin_note_action', $triggered_action->name, $triggered_action );
+		do_action( 'woocommerce_admin_note_action', $triggered_action->name, $note );
 
 		/**
 		 * Fires when an admin note action is taken.
-		 *
 		 * For more specific targeting of note actions.
+		 *
+		 * @param WC_Admin_Note $note The corresponding Note.
 		 */
-		do_action( 'woocommerce_admin_note_action_' . $triggered_action->name );
+		do_action( 'woocommerce_admin_note_action_' . $triggered_action->name, $note );
 
 		// Update the note with the status for this action.
 		$note->set_status( $triggered_action->status );
