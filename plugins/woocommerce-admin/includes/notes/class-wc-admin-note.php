@@ -509,4 +509,13 @@ class WC_Admin_Note extends WC_Data {
 		$note_actions[] = (object) $action;
 		$this->set_prop( 'actions', $note_actions );
 	}
+
+	/**
+	 * Set actions on a note.
+	 *
+	 * @param array $actions Note actions.
+	 */
+	public function set_actions( $actions ) {
+		$this->set_prop( 'actions', $actions );
+	}
 }
