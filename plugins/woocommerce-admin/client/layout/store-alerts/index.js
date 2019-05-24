@@ -8,7 +8,6 @@ import { IconButton, Button, Dashicon, Dropdown, NavigableMenu } from '@wordpres
 import classnames from 'classnames';
 import interpolateComponents from 'interpolate-components';
 import { compose } from '@wordpress/compose';
-import { noop } from 'lodash';
 import { withDispatch } from '@wordpress/data';
 import moment from 'moment';
 
@@ -64,18 +63,15 @@ class StoreAlerts extends Component {
 	}
 
 	renderActions( alert ) {
-		const { updateNote } = this.props;
+		const { triggerNoteAction, updateNote } = this.props;
 		const actions = alert.actions.map( action => {
-			const markStatus = () => {
-				updateNote( alert.id, { status: action.status } );
-			};
 			return (
 				<Button
 					key={ action.name }
 					isDefault
 					isPrimary={ action.primary }
 					href={ action.url || undefined }
-					onClick={ '' === action.status ? noop : markStatus }
+					onClick={ () => triggerNoteAction( alert.id, action.id ) }
 				>
 					{ action.label }
 				</Button>
@@ -257,8 +253,10 @@ export default compose(
 		};
 	} ),
 	withDispatch( dispatch => {
-		const { updateNote } = dispatch( 'wc-api' );
+		const { triggerNoteAction, updateNote } = dispatch( 'wc-api' );
+
 		return {
+			triggerNoteAction,
 			updateNote,
 		};
 	} )
