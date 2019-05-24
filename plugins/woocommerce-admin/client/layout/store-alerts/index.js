@@ -74,7 +74,7 @@ class StoreAlerts extends Component {
 					key={ action.name }
 					isDefault
 					isPrimary={ action.primary }
-					href={ action.url }
+					href={ action.url || undefined }
 					onClick={ '' === action.status ? noop : markStatus }
 				>
 					{ action.label }

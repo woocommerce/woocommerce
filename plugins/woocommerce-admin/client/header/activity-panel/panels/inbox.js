@@ -60,7 +60,7 @@ class InboxPanel extends Component {
 				return [];
 			}
 			return actions.map( action => (
-				<Button isDefault href={ action.url }>
+				<Button isDefault href={ action.url || undefined }>
 					{ action.label }
 				</Button>
 			) );

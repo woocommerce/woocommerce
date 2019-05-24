@@ -475,16 +475,16 @@ class WC_Admin_Note extends WC_Data {
 	/**
 	 * Add an action to the note
 	 *
-	 * @param string  $name    Label name (not presented to user).
-	 * @param string  $label   Note label (e.g. presented as button label).
-	 * @param string  $query   Note query (for redirect).
-	 * @param string  $status  The status to set for the action should on click.
+	 * @param string  $name    Action name (not presented to user).
+	 * @param string  $label   Action label (presented as button label).
+	 * @param string  $url     Action URL, if navigation needed. Optional.
+	 * @param string  $status  Status to transition parent Note to upon click. Defaults to 'actioned'.
 	 * @param boolean $primary Whether or not this is the primary action. Defaults to false.
 	 */
-	public function add_action( $name, $label, $query, $status = '', $primary = false ) {
+	public function add_action( $name, $label, $url = '', $status = self::E_WC_ADMIN_NOTE_ACTIONED, $primary = false ) {
 		$name    = wc_clean( $name );
 		$label   = wc_clean( $label );
-		$query   = wc_clean( $query );
+		$query   = esc_url( $url );
 		$status  = wc_clean( $status );
 		$primary = (bool) $primary;
 
@@ -494,11 +494,6 @@ class WC_Admin_Note extends WC_Data {
 
 		if ( empty( $label ) ) {
 			$this->error( 'admin_note_invalid_data', __( 'The admin note action label prop cannot be empty.', 'woocommerce-admin' ) );
-		}
-
-		// @todo - maybe allow empty queries? for dismissals that don't need navigation.
-		if ( empty( $query ) ) {
-			$this->error( 'admin_note_invalid_data', __( 'The admin note action query prop cannot be empty.', 'woocommerce-admin' ) );
 		}
 
 		$action = array(
