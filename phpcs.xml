@@ -16,7 +16,7 @@
 
 	<!-- Configs -->
 	<config name="minimum_supported_wp_version" value="4.7" />
-	<config name="testVersion" value="5.3-" />
+	<config name="testVersion" value="5.2-" />
 
 	<!-- Rules -->
 	<rule ref="WooCommerce-Core" />
