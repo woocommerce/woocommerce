@@ -51,6 +51,15 @@ class ProductByCategoryBlock extends Component {
 		}
 	}
 
+	componentDidMount() {
+		const { attributes } = this.props;
+
+		if ( ! attributes.categories.length ) {
+			// We've removed all selected categories, or no categories have been selected yet.
+			this.setState( { isEditing: true } );
+		}
+	}
+
 	startEditing() {
 		this.setState( {
 			isEditing: true,
@@ -236,36 +245,29 @@ class ProductByCategoryBlock extends Component {
 		);
 	}
 
-	render() {
-		const {
-			categories,
-			columns,
-			contentVisibility,
-		} = this.props.attributes;
-		const { loaded, products = [], isEditing } = this.state;
-		const classes = classnames( {
-			'wc-block-products-grid': true,
-			'wc-block-products-category': true,
-			[ `cols-${ columns }` ]: columns,
-			'is-loading': ! loaded,
-			'is-not-found': loaded && ! products.length,
-			'is-hidden-title': ! contentVisibility.title,
-			'is-hidden-price': ! contentVisibility.price,
-			'is-hidden-rating': ! contentVisibility.rating,
-			'is-hidden-button': ! contentVisibility.button,
-		} );
+	renderViewMode() {
+		const { attributes } = this.props;
+		const hasCategories = attributes.categories.length;
 
-		const nothingFound = ! categories.length ?
-			__(
-				'Select at least one category to display its products.',
-				'woo-gutenberg-products-block'
-			) :
-			_n(
-				'No products in this category.',
-				'No products in these categories.',
-				categories.length,
-				'woo-gutenberg-products-block'
-			);
+		return (
+			<Disabled>
+				{ hasCategories ? (
+					<ServerSideRender
+						block="woocommerce/product-category"
+						attributes={ attributes }
+					/>
+				) : (
+					__(
+						'Select at least one category to display its products.',
+						'woo-gutenberg-products-block'
+					)
+				) }
+			</Disabled>
+		);
+	}
+
+	render() {
+		const { isEditing } = this.state;
 
 		return (
 			<Fragment>
@@ -285,9 +287,7 @@ class ProductByCategoryBlock extends Component {
 				{ isEditing ? (
 					this.renderEditMode()
 				) : (
-					<Disabled>
-						<ServerSideRender block={ name } attributes={ attributes } />
-					</Disabled>
+					this.renderViewMode()
 				) }
 			</Fragment>
 		);
