@@ -38,6 +38,15 @@ class ProductByCategoryBlock extends Component {
 		this.save = this.save.bind( this );
 	}
 
+	componentDidMount() {
+		const { attributes } = this.props;
+
+		if ( ! attributes.categories.length ) {
+			// We've removed all selected categories, or no categories have been selected yet.
+			this.setState( { isEditing: true } );
+		}
+	}
+
 	startEditing() {
 		this.setState( {
 			isEditing: true,
@@ -193,8 +202,28 @@ class ProductByCategoryBlock extends Component {
 		);
 	}
 
-	render() {
+	renderViewMode() {
 		const { attributes } = this.props;
+		const hasCategories = attributes.categories.length;
+
+		return (
+			<Disabled>
+				{ hasCategories ? (
+					<ServerSideRender
+						block="woocommerce/product-category"
+						attributes={ attributes }
+					/>
+				) : (
+					__(
+						'Select at least one category to display its products.',
+						'woo-gutenberg-products-block'
+					)
+				) }
+			</Disabled>
+		);
+	}
+
+	render() {
 		const { isEditing } = this.state;
 
 		return (
@@ -215,12 +244,7 @@ class ProductByCategoryBlock extends Component {
 				{ isEditing ? (
 					this.renderEditMode()
 				) : (
-					<Disabled>
-						<ServerSideRender
-							block="woocommerce/product-category"
-							attributes={ attributes }
-						/>
-					</Disabled>
+					this.renderViewMode()
 				) }
 			</Fragment>
 		);
