@@ -924,8 +924,8 @@ class WC_Admin_Setup_Wizard {
 					$this->display_recommended_item(
 						array(
 							'type'        => 'woocommerce_services',
-							'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
-							'description' => __( 'We recommend WooCommerce Services & Jetpack. These plugins will save you time at the Post Office by enabling you to print your shipping labels at home.', 'woocommerce' ),
+							'title'       => __( 'Did you know you can print shipping labels at home?', 'woocommerce' ),
+							'description' => __( 'Use WooCommerce Shipping (powered by WooCommerce Services & Jetpack) to save time at the post office by printing your shipping labels at home.', 'woocommerce' ),
 							'img_url'     => WC()->plugin_url() . '/assets/images/obw-woocommerce-services-icon.png',
 							'img_alt'     => __( 'WooCommerce Services icon', 'woocommerce' ),
 							'plugins'     => $this->get_wcs_requisite_plugins(),
@@ -935,8 +935,8 @@ class WC_Admin_Setup_Wizard {
 					$this->display_recommended_item(
 						array(
 							'type'        => 'shipstation',
-							'title'       => __( 'Print shipping labels at home', 'woocommerce' ),
-							'description' => __( 'We recommend using ShipStation to save time at the Post Office by printing your shipping labels at home. Try ShipStation free for 30 days.', 'woocommerce' ),
+							'title'       => __( 'Did you know you can print shipping labels at home?', 'woocommerce' ),
+							'description' => __( 'We recommend using ShipStation to save time at the post office by printing your shipping labels at home. Try ShipStation free for 30 days.', 'woocommerce' ),
 							'img_url'     => WC()->plugin_url() . '/assets/images/obw-shipstation-icon.png',
 							'img_alt'     => __( 'ShipStation icon', 'woocommerce' ),
 							'plugins'     => array(
