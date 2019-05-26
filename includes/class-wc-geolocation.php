@@ -237,7 +237,9 @@ class WC_Geolocation {
 	 * @return string
 	 */
 	public static function get_local_database_path( $deprecated = '2' ) {
-		return apply_filters( 'woocommerce_geolocation_local_database_path', WP_CONTENT_DIR . '/uploads/GeoLite2-Country.mmdb', $deprecated );
+		$upload_dir = wp_upload_dir()['basedir'];
+		$geolite_dir = ! empty( $upload_dir ) ? trailingslashit( $upload_dir ) : WP_CONTENT_DIR . '/uploads/';
+		return apply_filters( 'woocommerce_geolocation_local_database_path', $geolite_dir . 'GeoLite2-Country.mmdb', $deprecated );
 	}
 
 	/**
