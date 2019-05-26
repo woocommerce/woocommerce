@@ -581,7 +581,7 @@ class WC_Data_Store_WP {
 	 *
 	 * @return NULL
 	 */
-	protected function update_lookup_table( $id, $table ) {
+	public function update_lookup_table( $id, $table ) {
 		global $wpdb;
 
 		$id    = absint( $id );
