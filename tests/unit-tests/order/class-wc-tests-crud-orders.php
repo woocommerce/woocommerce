@@ -1845,10 +1845,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$order2->set_billing_email( 'coupontest@example.com' );
 
 		$order1->apply_coupon( 'usage-limit-coupon' );
-		$this->assertEquals( 1, count( $order1->get_coupons() ) );
+		$this->assertEquals( 1, count( $order1->get_items( 'coupon' ) ) );
 
 		$order2->apply_coupon( 'usage-limit-coupon' );
-		$this->assertEquals( 0, count( $order2->get_coupons() ) );
+		$this->assertEquals( 0, count( $order2->get_items( 'coupon' ) ) );
 	}
 
 	/**
