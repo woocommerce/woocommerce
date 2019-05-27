@@ -410,7 +410,7 @@ jQuery( function ( $ ) {
 					security   : woocommerce_admin_meta_boxes.order_item_nonce,
 					coupon     : value,
 					user_id    : user_id,
-					user_email : user_email,
+					user_email : user_email
 				} );
 
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
