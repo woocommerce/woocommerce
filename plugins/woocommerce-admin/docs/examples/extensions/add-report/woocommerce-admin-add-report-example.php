@@ -39,8 +39,9 @@ add_action( 'admin_enqueue_scripts', 'add_report_register_script' );
  */
 function add_report_add_report_menu_item( $report_pages ) {
 	$report_pages[] = array(
+		'id'     => 'example-analytics-report',
 		'title'  => __( 'Example', 'woocommerce-admin' ),
-		'parent' => '/analytics/revenue',
+		'parent' => 'woocommerce-analytics',
 		'path'   => '/analytics/example',
 	);
 
