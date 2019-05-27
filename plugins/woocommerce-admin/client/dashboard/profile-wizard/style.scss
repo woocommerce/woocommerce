@@ -6,6 +6,10 @@
 	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
 		'Helvetica Neue', sans-serif;
 
+	#wpbody-content {
+		min-height: 100vh;
+	}
+
 	.woocommerce-profile-wizard__container a {
 		color: $muriel-gray-600;
 	}
@@ -53,6 +57,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		background: $muriel-white;
 
 		svg > g {
 			transform: translateX(25%);
@@ -138,5 +143,27 @@
 		button {
 			display: initial;
 		}
+	}
+}
+
+.woocommerce-profile-wizard__header.is-stepper {
+	svg > g {
+		transform: initial;
+	}
+
+	@include breakpoint( '<782px' ) {
+		position: absolute;
+		width: 100%;
+		bottom: 0;
+		border-top: 1px solid $muriel-gray-50;
+		border-bottom: none;
+	}
+
+	.woocommerce-stepper {
+		margin: 0 $gap 0 $gap;
+		background: transparent;
+		box-shadow: none;
+		margin-bottom: 0;
+		width: 100%;
 	}
 }

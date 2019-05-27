@@ -14,7 +14,6 @@ import { withDispatch } from '@wordpress/data';
  * Internal depdencies
  */
 import { H, Stepper, Card } from '@woocommerce/components';
-import ProfileWizardHeader from '../header';
 
 const plugins = [ 'jetpack', 'woocommerce-services' ];
 
@@ -162,45 +161,42 @@ class Plugins extends Component {
 		const { step, isPending, isError } = this.state;
 		return (
 			<Fragment>
-				<ProfileWizardHeader />
-				<div className="woocommerce-profile-wizard__container">
-					<H className="woocommerce-profile-wizard__header-title">
-						{ __( 'Install plugins', 'woocommerce-admin' ) }
-					</H>
+				<H className="woocommerce-profile-wizard__header-title">
+					{ __( 'Install plugins', 'woocommerce-admin' ) }
+				</H>
 
-					<Card className="woocommerce-profile-wizard__plugins-card">
-						<Stepper
-							direction="vertical"
-							currentStep={ step }
-							isPending={ isPending }
-							steps={ [
-								{
-									label: __( 'Install Jetpack and WooCommerce Services', 'woocommerce-admin' ),
-									key: 'install',
-								},
-								{
-									label: __( 'Activate Jetpack and WooCommerce Services', 'woocommerce-admin' ),
-									key: 'activate',
-								},
-							] }
-						/>
+				<Card className="woocommerce-profile-wizard__plugins-card">
+					<Stepper
+						direction="vertical"
+						currentStep={ step }
+						isPending={ isPending }
+						steps={ [
+							{
+								label: __( 'Install Jetpack and WooCommerce Services', 'woocommerce-admin' ),
+								key: 'install',
+							},
+							{
+								label: __( 'Activate Jetpack and WooCommerce Services', 'woocommerce-admin' ),
+								key: 'activate',
+							},
+						] }
+					/>
 
-						<div className="woocommerce-profile-wizard__plugins-actions">
-							{ isError && (
-								<Button isPrimary onClick={ () => location.reload() }>
-									{ __( 'Retry', 'woocommerce-admin' ) }
+					<div className="woocommerce-profile-wizard__plugins-actions">
+						{ isError && (
+							<Button isPrimary onClick={ () => location.reload() }>
+								{ __( 'Retry', 'woocommerce-admin' ) }
+							</Button>
+						) }
+
+						{ ! isError &&
+							'activate' === step && (
+								<Button isPrimary isBusy={ isPending } onClick={ this.activatePlugins }>
+									{ __( 'Activate & continue', 'woocommerce-admin' ) }
 								</Button>
 							) }
-
-							{ ! isError &&
-								'activate' === step && (
-									<Button isPrimary isBusy={ isPending } onClick={ this.activatePlugins }>
-										{ __( 'Activate & continue', 'woocommerce-admin' ) }
-									</Button>
-								) }
-						</div>
-					</Card>
-				</div>
+					</div>
+				</Card>
 			</Fragment>
 		);
 	}
