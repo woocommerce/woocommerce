@@ -120,7 +120,7 @@ Register the report page with the controller:
 function add_report_menu_item( $report_pages ) {
 	$report_pages[] = array(
 		'id'     => 'example-analytics-report',
-		'title'  => __( 'Example', 'woocommerce-admin' ),
+		'title'  => __( 'Example', 'my-textdomain' ),
 		'parent' => 'woocommerce-analytics',
 		'path'   => '/analytics/example',
 	);
