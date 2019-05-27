@@ -211,7 +211,7 @@
 
 	.woocommerce-activity-card__subtitle {
 		span + span::before {
-			content: ' \2022 ';
+			content: ' \2022\ ';
 		}
 	}
 }
