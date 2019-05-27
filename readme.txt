@@ -188,6 +188,18 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
+= 3.6.4 - 2019-05-27 =
+* Enhancement - Add notice to install WooCommerce Admin. #23659
+* Fix - Tracks: Add check for OBW is-opting-in. #23772
+* Fix - Use HTTP protocol for schema.org's availability. #23774
+* Fix - Coupon usage limit checks based on email never ran when orders are created via wp-admin. #23775
+* Fix - Duplicate out of stock notices when navigating from cart to checkout and back to cart. #23791
+* Fix - Remove sensitive information from refund reason when manually refunding an order, and move it to an order note. #23739
+* Tweak - Tracks: set cookie on admin_init instead of wp_loaded. #23787
+* Dev - Fixed number of arguments for all occurrences of the woocommerce_valid_order_statuses_for_cancel filter. #23704
+* Dev - REST API - Stop order creation if invalid data is sent. #23325
+* Dev - Introduce new wc_load_cart function for dynamically loading and initializing the cart. #23794
+
 = 3.6.3 - 2019-05-16 =
 * Fix - State not required for Serbia. #23430
 * Fix - # symbol in product category name broke product export. #23454
