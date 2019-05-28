@@ -3,7 +3,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, CheckboxControl, FormToggle } from '@wordpress/components';
+import { FormToggle } from '@wordpress/components';
+import { Button, CheckboxControl } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
 import interpolateComponents from 'interpolate-components';
 
@@ -99,7 +100,7 @@ export default class Start extends Component {
 
 		const trackingLabel = interpolateComponents( {
 			mixedString: __(
-				'Help improve WooCommerce with usage tracking. {{link}}Learn More.{{/link}}',
+				'Help improve WooCommerce with {{link}}usage tracking{{/link}}',
 				'woocommerce-admin'
 			),
 			components: {
@@ -128,29 +129,33 @@ export default class Start extends Component {
 					} ) }
 				</p>
 
-				<div className="woocommerce-profile-wizard__tracking">
-					<CheckboxControl
-						className="woocommerce-profile-wizard__tracking-checkbox"
-						checked={ trackingChecked }
-						label={ __( trackingLabel, 'woocommerce-admin' ) }
-						onChange={ this.onTrackingChange }
-					/>
-
-					<FormToggle
-						aria-hidden="true"
-						checked={ trackingChecked }
-						onChange={ this.onTrackingChange }
-						onClick={ e => e.stopPropagation() }
-						tabIndex="-1"
-					/>
-				</div>
-
 				<Card>
 					<div className="woocommerce-profile-wizard__benefits">
 						{ benefits.map( benefit => this.renderBenefit( benefit ) ) }
 					</div>
 
-					<Button isPrimary onClick={ this.startWizard }>
+					<div className="woocommerce-profile-wizard__tracking">
+						<CheckboxControl
+							className="woocommerce-profile-wizard__tracking-checkbox"
+							checked={ trackingChecked }
+							label={ __( trackingLabel, 'woocommerce-admin' ) }
+							onChange={ this.onTrackingChange }
+						/>
+
+						<FormToggle
+							aria-hidden="true"
+							checked={ trackingChecked }
+							onChange={ this.onTrackingChange }
+							onClick={ e => e.stopPropagation() }
+							tabIndex="-1"
+						/>
+					</div>
+
+					<Button
+						isPrimary
+						onClick={ this.startWizard }
+						className="woocommerce-profile-wizard__start"
+					>
 						{ __( 'Get started', 'woocommerce-admin' ) }
 					</Button>
 				</Card>

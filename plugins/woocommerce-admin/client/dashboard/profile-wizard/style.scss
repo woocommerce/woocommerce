@@ -108,7 +108,70 @@
 		padding-right: 0;
 	}
 
-	/* Hide wp-admin and WooCommerce elements when viewing the profile wizard*/
+	/* Muriel style overrides */
+	.muriel-input-text {
+		&.empty {
+			.components-base-control__label {
+				display: none;
+			}
+
+			input {
+				top: 15px;
+			}
+		}
+
+		input[type='text']:focus {
+			box-shadow: none;
+			border: 0;
+		}
+	}
+
+	.muriel-input-text label,
+	.muriel-select label {
+		display: initial;
+		width: auto;
+		right: auto;
+		left: $gap;
+	}
+
+	.muriel-select select {
+		left: 15px;
+	}
+
+	.muriel-select.empty label {
+		top: 15px;
+	}
+
+	.muriel-select::after {
+		margin-top: -$gap-smallest;
+	}
+
+	.muriel-input-text.active,
+	.muriel-select.active {
+		border: 2px solid $muriel-hot-purple-600;
+
+		input,
+		select {
+			top: 25px;
+		}
+	}
+
+	.muriel-checkbox input[type='checkbox'] {
+		width: 18px;
+		height: 18px;
+	}
+
+	.muriel-checkbox input[type='checkbox']:checked::before {
+		font-size: 18px;
+		margin-left: -3px;
+		margin-top: -1px;
+	}
+
+	.muriel-button.is-button {
+		height: 48px;
+	}
+
+	/* Hide wp-admin and WooCommerce elements when viewing the profile wizard */
 	#adminmenumain,
 	#wpadminbar,
 	.woocommerce-layout__header,

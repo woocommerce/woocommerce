@@ -10,6 +10,13 @@ module.exports = {
 				outlines: '#007cba',
 			},
 			themes: {
+				'woocommerce-profile-wizard__body': {
+					primary: '#d52c82',
+					secondary: '#d52c82',
+					toggle: '#d52c82',
+					button: '#d52c82',
+					outlines: '#d52c82',
+				},
 				'woocommerce-page': {
 					primary: '#95588a',
 					secondary: '#95588a',

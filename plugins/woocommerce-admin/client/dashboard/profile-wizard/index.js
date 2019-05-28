@@ -19,6 +19,7 @@ import { updateQueryString } from '@woocommerce/navigation';
 import ProfileWizardHeader from './header';
 import Plugins from './steps/plugins';
 import Start from './steps/start';
+import Industry from './steps/industry';
 import './style.scss';
 import { __ } from '@wordpress/i18n';
 
@@ -39,7 +40,7 @@ const getSteps = () => {
 	} );
 	steps.push( {
 		key: 'industry',
-		container: Fragment,
+		container: Industry,
 		label: __( 'Industry', 'woocommerce-admin' ),
 	} );
 	steps.push( {
