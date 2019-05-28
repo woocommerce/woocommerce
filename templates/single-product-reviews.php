@@ -105,7 +105,7 @@ if ( ! comments_open() ) {
 
 				foreach ( $fields as $key => $field ) {
 					$field_html  = '<p class="comment-form-' . esc_attr( $key ) . '">';
-					$field_html .= '<label for="author">' . esc_html( $field['label'] );
+					$field_html .= '<label for="' . esc_attr( $key ) . '">' . esc_html( $field['label'] );
 
 					if ( $field['required'] ) {
 						$field_html .= '&nbsp;<span class="required">*</span>';
