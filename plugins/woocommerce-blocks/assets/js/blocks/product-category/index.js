@@ -18,7 +18,10 @@ import sharedAttributes, { sharedAttributeBlockTypes } from '../../utils/shared-
  */
 registerBlockType( 'woocommerce/product-category', {
 	title: __( 'Products by Category', 'woo-gutenberg-products-block' ),
-	icon: 'category',
+	icon: {
+		src: 'category',
+		foreground: '#96588a',
+	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(

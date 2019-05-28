@@ -17,7 +17,10 @@ import sharedAttributes, {
 
 registerBlockType( 'woocommerce/product-on-sale', {
 	title: __( 'On Sale Products', 'woo-gutenberg-products-block' ),
-	icon: <Gridicon icon="tag" />,
+	icon: {
+		src: <Gridicon icon="tag" />,
+		foreground: '#96588a',
+	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(

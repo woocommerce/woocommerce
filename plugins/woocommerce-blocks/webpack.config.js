@@ -42,6 +42,8 @@ function findModuleMatch( module, match ) {
 const GutenbergBlocksConfig = {
 	mode: NODE_ENV,
 	entry: {
+		// Shared blocks code
+		blocks: './assets/js/index.js',
 		// Blocks
 		'handpicked-products': './assets/js/blocks/handpicked-products/index.js',
 		'product-best-sellers': './assets/js/blocks/product-best-sellers/index.js',

@@ -17,7 +17,10 @@ import sharedAttributes, { sharedAttributeBlockTypes } from '../../utils/shared-
 
 registerBlockType( 'woocommerce/product-best-sellers', {
 	title: __( 'Best Selling Products', 'woo-gutenberg-products-block' ),
-	icon: <Gridicon icon="stats-up-alt" />,
+	icon: {
+		src: <Gridicon icon="stats-up-alt" />,
+		foreground: '#96588a',
+	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
