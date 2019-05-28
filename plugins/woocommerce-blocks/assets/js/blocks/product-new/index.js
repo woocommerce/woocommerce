@@ -17,7 +17,10 @@ import sharedAttributes, {
 
 registerBlockType( 'woocommerce/product-new', {
 	title: __( 'Newest Products', 'woo-gutenberg-products-block' ),
-	icon: <IconNewReleases />,
+	icon: {
+		src: <IconNewReleases />,
+		foreground: '#96588a',
+	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(

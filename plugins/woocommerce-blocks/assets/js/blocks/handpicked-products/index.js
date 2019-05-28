@@ -16,7 +16,10 @@ import { IconWidgets } from '../../components/icons';
 
 registerBlockType( 'woocommerce/handpicked-products', {
 	title: __( 'Hand-picked Products', 'woo-gutenberg-products-block' ),
-	icon: <IconWidgets />,
+	icon: {
+		src: <IconWidgets />,
+		foreground: '#96588a',
+	},
 	category: 'woocommerce',
 	keywords: [ __( 'WooCommerce', 'woo-gutenberg-products-block' ) ],
 	description: __(
