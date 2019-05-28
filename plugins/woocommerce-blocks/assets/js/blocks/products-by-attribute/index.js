@@ -2,9 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
 import Gridicon from 'gridicons';
-import { RawHTML } from '@wordpress/element';
 import { registerBlockType } from '@wordpress/blocks';
 
 /**
@@ -12,9 +10,11 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import './editor.scss';
 import Block from './block';
-import getShortcode from '../../utils/get-shortcode';
+import { deprecatedConvertToShortcode } from '../../utils/deprecations';
 
-registerBlockType( 'woocommerce/products-by-attribute', {
+const blockTypeName = 'woocommerce/products-by-attribute';
+
+registerBlockType( blockTypeName, {
 	title: __( 'Products by Attribute', 'woo-gutenberg-products-block' ),
 	icon: {
 		src: <Gridicon icon="custom-post-type" />,
@@ -92,6 +92,48 @@ registerBlockType( 'woocommerce/products-by-attribute', {
 		},
 	},
 
+	deprecated: [
+		{
+			// Deprecate shortcode save method in favor of dynamic rendering.
+			attributes: {
+				attributes: {
+					type: 'array',
+					default: [],
+				},
+				attrOperator: {
+					type: 'string',
+					default: 'any',
+				},
+				columns: {
+					type: 'number',
+					default: wc_product_block_data.default_columns,
+				},
+				editMode: {
+					type: 'boolean',
+					default: true,
+				},
+				contentVisibility: {
+					type: 'object',
+					default: {
+						title: true,
+						price: true,
+						rating: true,
+						button: true,
+					},
+				},
+				orderby: {
+					type: 'string',
+					default: 'date',
+				},
+				rows: {
+					type: 'number',
+					default: wc_product_block_data.default_rows,
+				},
+			},
+			save: deprecatedConvertToShortcode( blockTypeName ),
+		},
+	],
+
 	/**
 	 * Renders and manages the block.
 	 */
@@ -99,29 +141,7 @@ registerBlockType( 'woocommerce/products-by-attribute', {
 		return <Block { ...props } />;
 	},
 
-	/**
-	 * Save the block content in the post content. Block content is saved as a products shortcode.
-	 *
-	 * @return string
-	 */
-	save( props ) {
-		const {
-			align,
-			contentVisibility,
-		} = props.attributes; /* eslint-disable-line react/prop-types */
-		const classes = classnames(
-			align ? `align${ align }` : '',
-			{
-				'is-hidden-title': ! contentVisibility.title,
-				'is-hidden-price': ! contentVisibility.price,
-				'is-hidden-rating': ! contentVisibility.rating,
-				'is-hidden-button': ! contentVisibility.button,
-			}
-		);
-		return (
-			<RawHTML className={ classes }>
-				{ getShortcode( props, 'woocommerce/products-by-attribute' ) }
-			</RawHTML>
-		);
+	save() {
+		return null;
 	},
 } );
