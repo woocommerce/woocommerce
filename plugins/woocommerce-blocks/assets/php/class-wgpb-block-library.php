@@ -264,9 +264,70 @@ class WGPB_Block_Library {
 		register_block_type(
 			'woocommerce/products-by-attribute',
 			array(
-				'editor_script' => 'wc-products-attribute',
-				'editor_style'  => 'wc-block-editor',
-				'style'         => 'wc-block-style',
+				'render_callback' => array( __CLASS__, 'render_products_by_attribute' ),
+				'editor_script'   => 'wc-products-attribute',
+				'editor_style'    => 'wc-block-editor',
+				'style'           => 'wc-block-style',
+				'attributes'      => array(
+					'attributes'        => array(
+						'type'    => 'array',
+						'items'   => array(
+							'type'       => 'object',
+							'properties' => array(
+								'id'        => array(
+									'type' => 'number',
+								),
+								'attr_slug' => array(
+									'type' => 'string',
+								),
+							),
+						),
+						'default' => array(),
+					),
+					'attrOperator'      => array(
+						'type'    => 'string',
+						'default' => 'any',
+					),
+					'columns'           => array(
+						'type'    => 'number',
+						'default' => wc_get_theme_support( 'product_blocks::default_columns', 3 ),
+					),
+					'contentVisibility' => array(
+						'type'       => 'object',
+						'properties' => array(
+							'title'  => array(
+								'type'    => 'boolean',
+								'default' => true,
+							),
+							'price'  => array(
+								'type'    => 'boolean',
+								'default' => true,
+							),
+							'rating' => array(
+								'type'    => 'boolean',
+								'default' => true,
+							),
+							'button' => array(
+								'type'    => 'boolean',
+								'default' => true,
+							),
+						),
+					),
+					'editMode'          => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+					'orderby'           => array(
+						'type'    => 'string',
+						'enum'    => array( 'date', 'popularity', 'price_asc', 'price_desc', 'rating', 'title' ),
+						'default' => 'date',
+					),
+					'rows'              => array(
+						'type'    => 'number',
+						'default' => wc_get_theme_support( 'product_blocks::default_rows', 1 ),
+					),
+
+				),
 			)
 		);
 		register_block_type(
@@ -441,6 +502,20 @@ class WGPB_Block_Library {
 		require_once dirname( __FILE__ ) . '/class-wgpb-block-product-category.php';
 
 		$block = new WGPB_Block_Product_Category( $attributes, $content );
+		return $block->render();
+	}
+
+	/**
+	 * Products by attribute: Include and render the dynamic block.
+	 *
+	 * @param array  $attributes Block attributes. Default empty array.
+	 * @param string $content    Block content. Default empty string.
+	 * @return string Rendered block type output.
+	 */
+	public static function render_products_by_attribute( $attributes, $content ) {
+		require_once dirname( __FILE__ ) . '/class-wgpb-block-products-by-attribute.php';
+
+		$block = new WGPB_Block_Products_By_Attribute( $attributes, $content );
 		return $block->render();
 	}
 
