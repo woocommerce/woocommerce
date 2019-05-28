@@ -183,7 +183,6 @@ class CustomizableDashboard extends Component {
 
 		return (
 			<Fragment>
-				<H>{ __( 'Customizable Dashboard', 'woocommerce-admin' ) }</H>
 				<ReportFilters query={ query } path={ path } />
 				{ sections.map( ( section, index ) => {
 					if ( section.isVisible ) {
