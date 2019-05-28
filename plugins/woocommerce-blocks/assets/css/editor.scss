@@ -14,120 +14,24 @@
 }
 
 // Remove the list styling, which is added back by core GB styles.
-.editor-styles-wrapper .wc-block-grid {
-	list-style: none;
-	margin-left: 0;
-}
+.editor-styles-wrapper {
+	.wc-block-grid {
+		.wc-block-grid__products {
+			list-style: none;
+			margin: 0;
 
-.wc-block-products-grid,
-.wc-block-grid {
-	overflow: hidden;
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: flex-start;
-
-	&.components-placeholder {
-		padding: 2em 1em;
-	}
-
-	&.is-loading,
-	&.is-not-found {
-		display: block;
-	}
-
-	// Styles for "resuable block" preview.
-	.editor-block-preview & {
-		min-width: 5em;
-
-		@for $i from 1 to 7 {
-			&.cols-#{$i},
-			&.has-#{$i}-columns {
-				min-width: $i * 5em;
+			.wp-block-button__link {
+				color: inherit;
 			}
+		}
+
+		&.components-placeholder {
+			padding: 2em 1em;
 		}
 
 		&.is-loading,
 		&.is-not-found {
-			min-width: auto;
-		}
-	}
-
-	.star-rating {
-		overflow: hidden;
-		position: relative;
-		width: 5.3em;
-		height: 1.618em;
-		line-height: 1.618;
-		font-size: 1em;
-		font-family: star; /* stylelint-disable-line */
-		font-weight: 400;
-
-		&::before {
-			content: "\53\53\53\53\53";
-			top: 0;
-			left: 0;
-			right: 0;
-			position: absolute;
-			opacity: 0.25;
-		}
-
-		span {
-			overflow: hidden;
-			top: 0;
-			left: 0;
-			right: 0;
-			position: absolute;
-			padding-top: 1.5em;
-		}
-
-		span::before {
-			content: "\53\53\53\53\53";
-			top: 0;
-			left: 0;
-			right: 0;
-			position: absolute;
-		}
-	}
-}
-
-// @todo Remove this once all grid blocks are switched to dynamic.
-.wc-block-products-grid {
-	display: flex;
-	flex-wrap: wrap;
-
-	&.cols-1 {
-		display: block;
-
-		.wc-block-grid__product {
-			margin-left: auto;
-			margin-right: auto;
-		}
-	}
-
-	@for $i from 2 to 9 {
-		&.cols-#{$i} .wc-block-grid__product {
-			flex: 1 0 calc(#{ 100% / $i });
-			max-width: 100% / $i !important;
-		}
-	}
-
-	&.cols-4:not(.alignwide):not(.alignfull),
-	&.cols-5:not(.alignfull),
-	&.cols-6:not(.alignfull),
-	&.cols-7,
-	&.cols-8 {
-
-		.wc-block-grid__product-title {
-			font-size: 0.9em;
-		}
-
-		.wc-block-grid__product-price {
-			font-size: 0.8em;
-		}
-
-		.wc-block-grid__product-add-to-cart {
-			font-size: 0.8em !important;
-			line-height: 1.4 !important;
+			display: block;
 		}
 	}
 }

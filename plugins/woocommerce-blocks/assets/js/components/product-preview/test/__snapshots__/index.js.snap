@@ -3,11 +3,6 @@
 exports[`ProductPreview should render a single product preview with an image 1`] = `
 <div
   className="wc-product-preview wc-block-grid__product"
-  style={
-    Object {
-      "maxWidth": "300px",
-    }
-  }
 >
   <div
     className="wc-product-preview__image wc-block-grid__product-image"
@@ -54,11 +49,6 @@ exports[`ProductPreview should render a single product preview with an image 1`]
 exports[`ProductPreview should render a single product preview without an image 1`] = `
 <div
   className="wc-product-preview wc-block-grid__product"
-  style={
-    Object {
-      "maxWidth": "300px",
-    }
-  }
 >
   <div
     className="wc-product-preview__image wc-block-grid__product-image"
