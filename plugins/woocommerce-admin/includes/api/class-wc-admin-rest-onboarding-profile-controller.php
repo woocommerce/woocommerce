@@ -193,6 +193,13 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 	 */
 	public static function get_profile_properties() {
 		$properties = array(
+			'completed'       => array(
+				'type'              => 'bool',
+				'description'       => __( 'Whether or not the profile was completed.', 'woocommerce-admin' ),
+				'context'           => array( 'view' ),
+				'readonly'          => true,
+				'validate_callback' => 'rest_validate_request_arg',
+			),
 			'skipped'         => array(
 				'type'              => 'bool',
 				'description'       => __( 'Whether or not the profile was skipped.', 'woocommerce-admin' ),

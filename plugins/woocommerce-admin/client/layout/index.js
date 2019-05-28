@@ -40,6 +40,7 @@ export class PrimaryLayout extends Component {
 class Layout extends Component {
 	componentDidMount() {
 		this.recordPageViewTrack();
+		document.body.classList.remove( 'woocommerce-admin-is-loading' );
 	}
 
 	componentDidUpdate( prevProps ) {

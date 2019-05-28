@@ -86,7 +86,7 @@ class WC_Admin_Loader {
 	 */
 	public static function is_feature_enabled( $feature ) {
 		$features = self::get_features();
-		return in_array( $feature, $features );
+		return in_array( $feature, $features, true );
 	}
 
 	/**
@@ -401,8 +401,6 @@ class WC_Admin_Loader {
 	 * @param string $admin_body_class Body class to add.
 	 */
 	public static function add_admin_body_classes( $admin_body_class = '' ) {
-		global $hook_suffix;
-
 		if ( ! self::is_admin_page() && ! self::is_embed_page() ) {
 			return $admin_body_class;
 		}
@@ -411,6 +409,12 @@ class WC_Admin_Loader {
 		$classes[] = 'woocommerce-page';
 		if ( self::is_embed_page() ) {
 			$classes[] = 'woocommerce-embed-page';
+		}
+
+		// Some routes or features like onboarding hide the wp-admin navigation and masterbar. Setting `woocommerce_admin_is_loading` to true allows us
+		// to premeptively hide these elements while the JS app loads. This class is removed when `<Layout />` is rendered.
+		if ( self::is_admin_page() && apply_filters( 'woocommerce_admin_is_loading', false ) ) {
+			$classes[] = 'woocommerce-admin-is-loading';
 		}
 
 		$features = self::get_features();
