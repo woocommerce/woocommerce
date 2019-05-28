@@ -1037,6 +1037,15 @@ class WC_Countries {
 							'required' => false,
 						),
 					),
+					'MZ' => array(
+						'postcode' => array(
+							'required' => false,
+							'hidden'   => true,
+						),
+						'state'    => array(
+							'label' => __( 'Province', 'woocommerce' ),
+						),
+					),
 					'NL' => array(
 						'postcode' => array(
 							'priority' => 65,
