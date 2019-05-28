@@ -254,9 +254,11 @@ class WGPB_Block_Library {
 		register_block_type(
 			'woocommerce/product-top-rated',
 			array(
-				'editor_script' => 'wc-product-top-rated',
-				'editor_style'  => 'wc-block-editor',
-				'style'         => 'wc-block-style',
+				'render_callback' => array( __CLASS__, 'render_product_top_rated' ),
+				'editor_script'   => 'wc-product-top-rated',
+				'editor_style'    => 'wc-block-editor',
+				'style'           => 'wc-block-style',
+				'attributes'      => self::get_shared_attributes(),
 			)
 		);
 		register_block_type(
@@ -439,6 +441,20 @@ class WGPB_Block_Library {
 		require_once dirname( __FILE__ ) . '/class-wgpb-block-product-category.php';
 
 		$block = new WGPB_Block_Product_Category( $attributes, $content );
+		return $block->render();
+	}
+
+	/**
+	 * Top rated products: Include and render the dynamic block.
+	 *
+	 * @param array  $attributes Block attributes. Default empty array.
+	 * @param string $content    Block content. Default empty string.
+	 * @return string Rendered block type output.
+	 */
+	public static function render_product_top_rated( $attributes, $content ) {
+		require_once dirname( __FILE__ ) . '/class-wgpb-block-product-top-rated.php';
+
+		$block = new WGPB_Block_Product_Top_Rated( $attributes, $content );
 		return $block->render();
 	}
 
