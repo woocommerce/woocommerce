@@ -16,6 +16,7 @@ import { updateQueryString } from '@woocommerce/navigation';
 /**
  * Internal depdencies
  */
+import { NAMESPACE } from 'wc-api/onboarding/constants';
 import ProfileWizardHeader from './header';
 import Plugins from './steps/plugins';
 import Start from './steps/start';
@@ -105,7 +106,7 @@ class ProfileWizard extends Component {
 		const { addNotice } = this.props;
 
 		return apiFetch( {
-			path: '/wc-admin/v1/onboarding/profile',
+			path: `${ NAMESPACE }/onboarding/profile`,
 			method: 'POST',
 			data: params,
 		} ).catch( error => {

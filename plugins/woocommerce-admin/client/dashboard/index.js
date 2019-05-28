@@ -4,6 +4,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -17,13 +18,13 @@ import { ReportFilters } from '@woocommerce/components';
 import StorePerformance from './store-performance';
 import TaskList from './task-list';
 import ProfileWizard from './profile-wizard';
+import withSelect from 'wc-api/with-select';
 
-export default class Dashboard extends Component {
+class Dashboard extends Component {
 	renderDashboardOutput() {
-		const { query, path } = this.props;
+		const { path, profileItems, query } = this.props;
 
-		// @todo This should check a selector client side, with wcSettings.showProfiler as initial state.
-		if ( window.wcAdminFeatures.onboarding && wcSettings.showProfiler ) {
+		if ( window.wcAdminFeatures.onboarding && ! profileItems.skipped && ! profileItems.completed ) {
 			return <ProfileWizard query={ query } />;
 		}
 
@@ -58,3 +59,12 @@ export default class Dashboard extends Component {
 		);
 	}
 }
+
+export default compose(
+	withSelect( select => {
+		const { getProfileItems } = select( 'wc-api' );
+		const profileItems = getProfileItems();
+
+		return { profileItems };
+	} )
+)( Dashboard );

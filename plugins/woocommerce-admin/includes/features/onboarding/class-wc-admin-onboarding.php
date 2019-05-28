@@ -41,15 +41,10 @@ class WC_Admin_Onboarding {
 	 * @return bool
 	 */
 	public function should_show_profiler() {
-		// @todo Remove this once we have a proper way to dismiss the profiler.
-		if ( ! defined( 'WOOCOMMERCE_ADMIN_DEV_SHOW_PROFILER' ) || false === WOOCOMMERCE_ADMIN_DEV_SHOW_PROFILER ) {
-			return false;
-		}
 		$onboarding_data = get_option( 'wc_onboarding_profile', array() );
 
-		// @todo Update this to compare to proper bools (https://github.com/woocommerce/woocommerce-admin/issues/2299).
-		$is_completed = isset( $onboarding_data['completed'] ) && 'true' === $onboarding_data['completed'];
-		$is_skipped   = isset( $onboarding_data['skipped'] ) && 'true' === $onboarding_data['skipped'];
+		$is_completed = isset( $onboarding_data['completed'] ) && true === $onboarding_data['completed'];
+		$is_skipped   = isset( $onboarding_data['skipped'] ) && true === $onboarding_data['skipped'];
 
 		// @todo When merging to WooCommerce Core, we should set the `completed` flag to true during the upgrade progress.
 		// https://github.com/woocommerce/woocommerce-admin/pull/2300#discussion_r287237498.
@@ -57,12 +52,12 @@ class WC_Admin_Onboarding {
 	}
 
 	/**
-	 * Add profiler status to component settings.
+	 * Add profiler items to component settings.
 	 *
 	 * @param array $settings Component settings.
 	 */
 	public function component_settings( $settings ) {
-		$settings['showProfiler'] = $this->should_show_profiler();
+		$settings['onboardingProfile'] = get_option( 'wc_onboarding_profile', array() );
 		return $settings;
 	}
 

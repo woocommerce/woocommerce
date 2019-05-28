@@ -14,6 +14,7 @@ import { withDispatch } from '@wordpress/data';
  * Internal depdencies
  */
 import { H, Stepper, Card } from '@woocommerce/components';
+import { NAMESPACE } from 'wc-api/onboarding/constants';
 
 const plugins = [ 'jetpack', 'woocommerce-services' ];
 
@@ -107,7 +108,7 @@ class Plugins extends Component {
 	async doPluginAction( action, plugin ) {
 		try {
 			const pluginResponse = await apiFetch( {
-				path: `/wc-admin/v1/onboarding/plugins/${ action }`,
+				path: `${ NAMESPACE }/onboarding/plugins/${ action }`,
 				method: 'POST',
 				data: {
 					plugin,
@@ -129,7 +130,7 @@ class Plugins extends Component {
 	async connectJetpack() {
 		try {
 			const connectResponse = await apiFetch( {
-				path: '/wc-admin/v1/onboarding/plugins/connect-jetpack',
+				path: `${ NAMESPACE }/onboarding/plugins/connect-jetpack`,
 			} );
 			if ( connectResponse && connectResponse.connectAction ) {
 				window.location = connectResponse.connectAction;
