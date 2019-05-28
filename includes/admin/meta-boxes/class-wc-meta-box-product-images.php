@@ -49,13 +49,18 @@ class WC_Meta_Box_Product_Images {
 							$update_meta = true;
 							continue;
 						}
-
-						echo '<li class="image" data-attachment_id="' . esc_attr( $attachment_id ) . '">
-								' . $attachment . '
-								<ul class="actions">
-									<li><a href="#" class="delete tips" data-tip="' . esc_attr__( 'Delete image', 'woocommerce' ) . '">' . __( 'Delete', 'woocommerce' ) . '</a></li>
-								</ul>
-							</li>';
+						?>
+						<li class="image" data-attachment_id="<?php echo esc_attr( $attachment_id ); ?>">
+							<?php echo $attachment; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<ul class="actions">
+								<li><a href="#" class="delete tips" data-tip="<?php esc_attr_e( 'Delete image', 'woocommerce' ); ?>"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a></li>
+							</ul>
+							<?php
+							// Allow for extra info to be exposed or extra action to be executed for this attachment.
+							do_action( 'woocommerce_admin_after_product_gallery_item', $thepostid, $attachment_id );
+							?>
+						</li>
+						<?php
 
 						// rebuild ids to be saved.
 						$updated_gallery_ids[] = $attachment_id;
