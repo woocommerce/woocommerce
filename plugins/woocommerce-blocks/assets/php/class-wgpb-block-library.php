@@ -160,9 +160,33 @@ class WGPB_Block_Library {
 		register_block_type(
 			'woocommerce/handpicked-products',
 			array(
-				'editor_script' => 'wc-handpicked-products',
-				'editor_style'  => 'wc-block-editor',
-				'style'         => 'wc-block-style',
+				'render_callback' => array( __CLASS__, 'render_handpicked_products' ),
+				'editor_script'   => 'wc-handpicked-products',
+				'editor_style'    => 'wc-block-editor',
+				'style'           => 'wc-block-style',
+				'attributes'      => array(
+					'columns'           => array(
+						'type'    => 'number',
+						'default' => wc_get_theme_support( 'product_blocks::default_columns', 3 ),
+					),
+					'editMode'          => array(
+						'type'    => 'boolean',
+						'default' => true,
+					),
+					'orderby'           => array(
+						'type'    => 'string',
+						'enum'    => array( 'date', 'popularity', 'price_asc', 'price_desc', 'rating', 'title' ),
+						'default' => 'date',
+					),
+					'products'          => array(
+						'type'    => 'array',
+						'items'   => array(
+							'type' => 'number',
+						),
+						'default' => array(),
+					),
+					'contentVisibility' => self::get_schema_content_visibility(),
+				),
 			)
 		);
 		register_block_type(
@@ -316,6 +340,35 @@ class WGPB_Block_Library {
 	}
 
 	/**
+	 * Get the schema for the contentVisibility attribute
+	 *
+	 * @return array List of block attributes with type and defaults.
+	 */
+	public static function get_schema_content_visibility() {
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'title'  => array(
+					'type'    => 'boolean',
+					'default' => true,
+				),
+				'price'  => array(
+					'type'    => 'boolean',
+					'default' => true,
+				),
+				'rating' => array(
+					'type'    => 'boolean',
+					'default' => true,
+				),
+				'button' => array(
+					'type'    => 'boolean',
+					'default' => true,
+				),
+			),
+		);
+	}
+
+	/**
 	 * Get a set of attributes shared across most of the grid blocks.
 	 *
 	 * @return array List of block attributes with type and defaults.
@@ -341,27 +394,7 @@ class WGPB_Block_Library {
 				'type'    => 'string',
 				'default' => 'any',
 			),
-			'contentVisibility' => array(
-				'type'       => 'object',
-				'properties' => array(
-					'title'  => array(
-						'type'    => 'boolean',
-						'default' => true,
-					),
-					'price'  => array(
-						'type'    => 'boolean',
-						'default' => true,
-					),
-					'rating' => array(
-						'type'    => 'boolean',
-						'default' => true,
-					),
-					'button' => array(
-						'type'    => 'boolean',
-						'default' => true,
-					),
-				),
-			),
+			'contentVisibility' => self::get_schema_content_visibility(),
 		);
 	}
 
@@ -404,6 +437,20 @@ class WGPB_Block_Library {
 		require_once dirname( __FILE__ ) . '/class-wgpb-block-product-category.php';
 
 		$block = new WGPB_Block_Product_Category( $attributes, $content );
+		return $block->render();
+	}
+
+	/**
+	 * Hand-picked Products: Include and render the dynamic block.
+	 *
+	 * @param array  $attributes Block attributes. Default empty array.
+	 * @param string $content    Block content. Default empty string.
+	 * @return string Rendered block type output.
+	 */
+	public static function render_handpicked_products( $attributes, $content ) {
+		require_once dirname( __FILE__ ) . '/class-wgpb-block-handpicked-products.php';
+
+		$block = new WGPB_Block_Handpicked_Products( $attributes, $content );
 		return $block->render();
 	}
 
