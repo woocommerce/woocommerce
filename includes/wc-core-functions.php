@@ -2266,3 +2266,66 @@ function wc_load_cart() {
 	WC()->initialize_session();
 	WC()->initialize_cart();
 }
+
+// This can be removed when WP 5.1.0 is minimum requirement.
+if ( ! function_exists( 'wp_check_php_version' ) ) {
+	/**
+	 * Check against serve happy api for minimum PHP version.
+	 *
+	 * @return bool|array
+	 */
+	function wp_check_php_version() {
+		$version = phpversion();
+		$key     = md5( $version );
+
+		$response = get_site_transient( 'php_check_' . $key );
+		if ( false === $response ) {
+			$url = 'http://api.wordpress.org/core/serve-happy/1.0/';
+			if ( wp_http_supports( array( 'ssl' ) ) ) {
+				$url = set_url_scheme( $url, 'https' );
+			}
+
+			$url = add_query_arg( 'php_version', $version, $url );
+
+			$response = wp_remote_get( $url );
+
+			if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+				return false;
+			}
+
+			/**
+			 * Response should be an array with:
+			 *  'recommended_version' - string - The PHP version recommended by WordPress.
+			 *  'is_supported' - boolean - Whether the PHP version is actively supported.
+			 *  'is_secure' - boolean - Whether the PHP version receives security updates.
+			 *  'is_acceptable' - boolean - Whether the PHP version is still acceptable for WordPress.
+			 */
+			$response = json_decode( wp_remote_retrieve_body( $response ), true );
+
+			if ( ! is_array( $response ) ) {
+				return false;
+			}
+
+			set_site_transient( 'php_check_' . $key, $response, WEEK_IN_SECONDS );
+		}
+
+		if ( isset( $response['is_acceptable'] ) && $response['is_acceptable'] ) {
+			/**
+			 * Filters whether the active PHP version is considered acceptable by WordPress.
+			 *
+			 * Returning false will trigger a PHP version warning to show up in the admin dashboard to administrators.
+			 *
+			 * This filter is only run if the wordpress.org Serve Happy API considers the PHP version acceptable, ensuring
+			 * that this filter can only make this check stricter, but not loosen it.
+			 *
+			 * @since 5.1.1
+			 *
+			 * @param bool   $is_acceptable Whether the PHP version is considered acceptable. Default true.
+			 * @param string $version       PHP version checked.
+			 */
+			$response['is_acceptable'] = (bool) apply_filters( 'wp_is_php_version_acceptable', true, $version );
+		}
+
+		return $response;
+	}
+}
