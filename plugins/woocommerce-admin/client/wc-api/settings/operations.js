@@ -8,6 +8,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
+import { getResourceName } from '../utils';
 import { NAMESPACE } from '../constants';
 
 function read( resourceNames, fetch = apiFetch ) {
@@ -58,22 +59,34 @@ function updateSettings( resourceNames, data, fetch ) {
 }
 
 function settingsToSettingsResource( resourceName, settings ) {
-	const settingsData = {};
-	settings.forEach( setting => ( settingsData[ setting.id ] = setting.value ) );
-	return { [ resourceName ]: { data: settingsData } };
+	const resources = {};
+
+	const settingIds = settings.map( setting => setting.id );
+	settings.forEach(
+		setting =>
+			( resources[ getResourceName( resourceName, setting.id ) ] = { data: setting.value } )
+	);
+
+	return {
+		[ resourceName ]: {
+			data: settingIds,
+		},
+		...resources,
+	};
 }
 
 function settingToSettingsResource( resourceName, data ) {
-	const settings = {};
 	if ( 'undefined' === typeof data.update ) {
 		return '';
 	}
 
-	// @todo This will only return updated fields so fields
-	// not updated may be temporarily overwritten in the store.
-	data.update.forEach( setting => ( settings[ setting.id ] = setting.value ) );
+	const resources = {};
+	data.update.forEach(
+		setting =>
+			( resources[ getResourceName( resourceName, setting.id ) ] = { data: setting.value } )
+	);
 
-	return { [ resourceName ]: { data: settings } };
+	return resources;
 }
 
 export default {
