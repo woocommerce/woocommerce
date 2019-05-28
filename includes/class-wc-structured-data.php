@@ -268,7 +268,7 @@ class WC_Structured_Data {
 			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
 		}
 
-		if ( $product->get_rating_count() && wc_review_ratings_enabled() ) {
+		if ( $product->get_review_count() && wc_review_ratings_enabled() ) {
 			$markup['aggregateRating'] = array(
 				'@type'       => 'AggregateRating',
 				'ratingValue' => $product->get_average_rating(),
