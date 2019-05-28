@@ -116,7 +116,7 @@ class WC_Admin_Page_Controller {
 
 				if (
 					$page_path === $current_path &&
-					$page_query === $current_query &&
+					0 === strpos( $current_query, $page_query ) &&
 					$page_fragment === $current_fragment
 				) {
 					$this->current_page = $page;
