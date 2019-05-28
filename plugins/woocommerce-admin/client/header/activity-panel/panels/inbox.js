@@ -18,6 +18,7 @@ import { EmptyContent, Section } from '@woocommerce/components';
 import sanitizeHTML from 'lib/sanitize-html';
 import { QUERY_DEFAULTS } from 'wc-api/constants';
 import withSelect from 'wc-api/with-select';
+import classnames from 'classnames';
 
 class InboxPanel extends Component {
 	constructor( props ) {
@@ -76,7 +77,9 @@ class InboxPanel extends Component {
 		return notesArray.map( note => (
 			<ActivityCard
 				key={ note.id }
-				className="woocommerce-inbox-activity-card"
+				className={ classnames( 'woocommerce-inbox-activity-card', {
+					actioned: 'unactioned' !== note.status,
+				} ) }
 				title={ note.title }
 				date={ note.date_created_gmt }
 				icon={ <Gridicon icon={ note.icon } size={ 48 } /> }
@@ -150,6 +153,7 @@ export default compose(
 			type: 'info,warning',
 			orderby: 'date',
 			order: 'desc',
+			status: 'unactioned',
 		};
 
 		const notes = getNotes( inboxQuery );
