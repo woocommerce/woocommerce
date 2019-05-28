@@ -203,7 +203,7 @@ abstract class WGPB_Block_Grid_Base {
 		$classes  = $this->get_container_classes();
 		$output   = implode( '', array_map( array( $this, 'render_product' ), $products ) );
 
-		return sprintf( '<div class="%s"><ul class="wc-block-grid__products products">%s</ul></div>', esc_attr( $classes ), $output );
+		return sprintf( '<div class="%s"><ul class="wc-block-grid__products">%s</ul></div>', esc_attr( $classes ), $output );
 	}
 
 	/**
@@ -217,7 +217,6 @@ abstract class WGPB_Block_Grid_Base {
 			"wp-block-{$this->block_name}",
 			"wc-block-{$this->block_name}",
 			"has-{$this->attributes['columns']}-columns",
-			'woocommerce',
 		);
 
 		if ( $this->attributes['rows'] > 1 ) {
@@ -245,25 +244,30 @@ abstract class WGPB_Block_Grid_Base {
 		}
 
 		$data = (object) array(
-			'permalink' => $product->get_permalink(),
+			'permalink' => esc_url( $product->get_permalink() ),
 			'image'     => $this->get_image_html( $product ),
 			'title'     => $this->get_title_html( $product ),
 			'rating'    => $this->get_rating_html( $product ),
 			'price'     => $this->get_price_html( $product ),
+			'badge'     => $this->get_sale_badge_html( $product ),
 			'button'    => $this->get_button_html( $product ),
 		);
 
-		return "
-			<li class=\"wc-block-grid__product product\">
+		return apply_filters(
+			'woocommerce_blocks_product_grid_item_html',
+			"<li class=\"wc-block-grid__product\">
 				<a href=\"{$data->permalink}\" class=\"wc-block-grid__product-link\">
 					{$data->image}
 					{$data->title}
-					{$data->rating}
-					{$data->price}
 				</a>
+				{$data->price}
+				{$data->badge}
+				{$data->rating}
 				{$data->button}
-			</li>
-		";
+			</li>",
+			$data,
+			$product
+		);
 	}
 
 	/**
@@ -305,7 +309,7 @@ abstract class WGPB_Block_Grid_Base {
 
 		if ( $rating_count > 0 ) {
 			return sprintf(
-				'<div class="wc-block-grid__product-rating woocommerce-product-rating">%s</div>',
+				'<div class="wc-block-grid__product-rating">%s</div>',
 				wc_get_rating_html( $average, $rating_count )
 			);
 		}
@@ -322,17 +326,28 @@ abstract class WGPB_Block_Grid_Base {
 		if ( empty( $this->attributes['contentVisibility']['price'] ) ) {
 			return '';
 		}
-		$badge = '';
+		return sprintf(
+			'<div class="wc-block-grid__product-price price">%s</div>',
+			$product->get_price_html()
+		);
+	}
 
-		if ( $product->is_on_sale() ) {
-			$badge = '<span class="wc-block-grid__product-onsale onsale">' . esc_html__( 'Sale!', 'woo-gutenberg-products-block' ) . '</span>';
+	/**
+	 * Get the sale badge.
+	 *
+	 * @param WC_Product $product Product.
+	 * @return string Rendered product output.
+	 */
+	protected function get_sale_badge_html( $product ) {
+		if ( empty( $this->attributes['contentVisibility']['price'] ) ) {
+			return '';
 		}
 
-		return sprintf(
-			'<div class="wc-block-grid__product-price">%s%s</div>',
-			$product->get_price_html(),
-			$badge
-		);
+		if ( ! $product->is_on_sale() ) {
+			return;
+		}
+
+		return '<span class="wc-block-grid__product-onsale">' . esc_html__( 'Sale!', 'woo-gutenberg-products-block' ) . '</span>';
 	}
 
 	/**
@@ -345,7 +360,7 @@ abstract class WGPB_Block_Grid_Base {
 		if ( empty( $this->attributes['contentVisibility']['button'] ) ) {
 			return '';
 		}
-		return '<div class="wc-block-grid__product-add-to-cart">' . $this->get_add_to_cart( $product ) . '</div>';
+		return '<div class="wp-block-button wc-block-grid__product-add-to-cart">' . $this->get_add_to_cart( $product ) . '</div>';
 	}
 
 	/**
@@ -355,21 +370,23 @@ abstract class WGPB_Block_Grid_Base {
 	 * @return string Rendered product output.
 	 */
 	protected function get_add_to_cart( $product ) {
+		$attributes = array(
+			'aria-label'       => $product->add_to_cart_description(),
+			'data-quantity'    => '1',
+			'data-product_id'  => $product->get_id(),
+			'data-product_sku' => $product->get_sku(),
+			'rel'              => 'nofollow',
+			'class'            => 'wp-block-button__link add_to_cart_button',
+		);
+
 		if ( $product->supports( 'ajax_add_to_cart' ) ) {
-			return sprintf(
-				'<a href="%1$s" data-quantity="1" data-product_id="%2$s" data-product_sku="%3$s" class="button add_to_cart_button ajax_add_to_cart" rel="nofollow" aria-label="%4$s">%5$s</a>',
-				esc_url( $product->add_to_cart_url() ),
-				esc_attr( $product->get_id() ),
-				esc_attr( $product->get_sku() ),
-				esc_attr( $product->add_to_cart_description() ),
-				esc_html( $product->add_to_cart_text() )
-			);
+			$attributes['class'] .= ' ajax_add_to_cart';
 		}
 
 		return sprintf(
-			'<a href="%1$s" class="button add_to_cart_button" rel="nofollow" aria-label="%2$s">%3$s</a>',
+			'<a href="%s" %s>%s</a>',
 			esc_url( $product->add_to_cart_url() ),
-			esc_attr( $product->add_to_cart_description() ),
+			wc_implode_html_attributes( $attributes ),
 			esc_html( $product->add_to_cart_text() )
 		);
 	}

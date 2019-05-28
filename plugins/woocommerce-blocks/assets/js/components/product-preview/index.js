@@ -47,7 +47,6 @@ const ProductPreview = ( { product } ) => {
 	return (
 		<div
 			className="wc-product-preview wc-block-grid__product"
-			style={ { maxWidth: `${ wc_product_block_data.thumbnail_size }px` } }
 		>
 			<div className="wc-product-preview__image wc-block-grid__product-image">
 				{ image }

@@ -55,6 +55,7 @@ class WGPB_Block_Library {
 		self::register_assets();
 		add_filter( 'block_categories', array( 'WGPB_Block_Library', 'add_block_category' ) );
 		add_action( 'admin_print_footer_scripts', array( 'WGPB_Block_Library', 'print_script_settings' ), 1 );
+		add_action( 'body_class', array( 'WGPB_Block_Library', 'add_theme_body_class' ), 1 );
 	}
 
 	/**
@@ -424,6 +425,17 @@ class WGPB_Block_Library {
 
 		$block = new WGPB_Block_Product_Category( $attributes, $content );
 		return $block->render();
+	}
+
+	/**
+	 * Add body classes.
+	 *
+	 * @param array $classes Array of CSS classnames.
+	 * @return array Modified array of CSS classnames.
+	 */
+	public static function add_theme_body_class( $classes = array() ) {
+		$classes[] = 'theme-' . get_template();
+		return $classes;
 	}
 }
 
