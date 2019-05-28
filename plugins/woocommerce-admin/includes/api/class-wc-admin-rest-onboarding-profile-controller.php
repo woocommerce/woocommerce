@@ -117,7 +117,8 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_items( $request ) {
-		$query_args      = $this->prepare_objects_query( $request );
+		$params          = $request->get_json_params();
+		$query_args      = $this->prepare_objects_query( $params );
 		$onboarding_data = get_option( 'wc_onboarding_profile', array() );
 		update_option( 'wc_onboarding_profile', array_merge( $onboarding_data, $query_args ) );
 
@@ -135,16 +136,16 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 	/**
 	 * Prepare objects query.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  array $params The params sent in the request.
 	 * @return array
 	 */
-	protected function prepare_objects_query( $request ) {
+	protected function prepare_objects_query( $params ) {
 		$args       = array();
 		$properties = self::get_profile_properties();
 
 		foreach ( $properties as $key => $property ) {
-			if ( isset( $request[ $key ] ) ) {
-				$args[ $key ] = $request[ $key ];
+			if ( isset( $params[ $key ] ) ) {
+				$args[ $key ] = $params[ $key ];
 			}
 		}
 
@@ -154,10 +155,10 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 		 * Enables adding extra arguments or setting defaults for a post
 		 * collection request.
 		 *
-		 * @param array           $args    Key value array of query var to query value.
-		 * @param WP_REST_Request $request The request used.
+		 * @param array $args    Key value array of query var to query value.
+		 * @param array $params The params sent in the request.
 		 */
-		$args = apply_filters( 'woocommerce_rest_onboarding_profile_object_query', $args, $request );
+		$args = apply_filters( 'woocommerce_rest_onboarding_profile_object_query', $args, $params );
 
 		return $args;
 	}

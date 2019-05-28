@@ -56,7 +56,8 @@ class WC_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 
 		// Test updating 2 fields separately.
 		$request = new WP_REST_Request( 'POST', $this->endpoint );
-		$request->set_param( 'industry', 'health-beauty' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$request->set_body( wp_json_encode( array( 'industry' => 'health-beauty' ) ) );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -65,7 +66,8 @@ class WC_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 
 		// Test that the update works.
 		$request = new WP_REST_Request( 'POST', $this->endpoint );
-		$request->set_param( 'theme', 'Storefront' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$request->set_body( wp_json_encode( array( 'theme' => 'Storefront' ) ) );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -128,7 +130,8 @@ class WC_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 
 		// Test that the update works.
 		$request = new WP_REST_Request( 'POST', $this->endpoint );
-		$request->set_param( 'test_profile_datum', 'woo' );
+		$request->set_headers( array( 'content-type' => 'application/json' ) );
+		$request->set_body( wp_json_encode( array( 'test_profile_datum' => 'woo' ) ) );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 

@@ -61,14 +61,17 @@ export default class Start extends Component {
 		};
 
 		this.onTrackingChange = this.onTrackingChange.bind( this );
+		this.startWizard = this.startWizard.bind( this );
+		this.skipWizard = this.skipWizard.bind( this );
 	}
 
 	skipWizard() {
-		// @todo This should close the wizard and set the `skipped` property to true via the API.
+		this.props.updateProfile( { skipped: true } );
 	}
 
 	startWizard() {
-		// @todo This should go to the next step.
+		// @todo This should update the settings with the tracking selection. See #2281.
+		this.props.goToNextStep();
 	}
 
 	onTrackingChange() {

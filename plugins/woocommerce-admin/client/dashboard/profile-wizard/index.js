@@ -2,8 +2,16 @@
 /**
  * External dependencies
  */
+import apiFetch from '@wordpress/api-fetch';
 import { Component, createElement, Fragment } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
 import { pick } from 'lodash';
+import { withDispatch } from '@wordpress/data';
+
+/**
+ * WooCommerce dependencies
+ */
+import { updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal depdencies
@@ -52,7 +60,13 @@ const getSteps = () => {
 	return steps;
 };
 
-export default class ProfileWizard extends Component {
+class ProfileWizard extends Component {
+	constructor() {
+		super( ...arguments );
+		this.goToNextStep = this.goToNextStep.bind( this );
+		this.updateProfile = this.updateProfile.bind( this );
+	}
+
 	componentDidMount() {
 		document.documentElement.classList.remove( 'wp-toolbar' );
 		document.body.classList.add( 'woocommerce-profile-wizard__body' );
@@ -63,7 +77,7 @@ export default class ProfileWizard extends Component {
 		document.body.classList.remove( 'woocommerce-profile-wizard__body' );
 	}
 
-	getStep() {
+	getCurrentStep() {
 		const { step } = this.props.query;
 		const currentStep = getSteps().find( s => s.key === step );
 
@@ -74,11 +88,42 @@ export default class ProfileWizard extends Component {
 		return currentStep;
 	}
 
+	goToNextStep() {
+		const currentStep = this.getCurrentStep();
+		const currentStepIndex = getSteps().findIndex( s => s.key === currentStep.key );
+		const nextStep = getSteps()[ currentStepIndex + 1 ];
+
+		if ( 'undefined' === nextStep ) {
+			this.updateProfile( { complete: true } );
+		}
+
+		return updateQueryString( { step: nextStep.key } );
+	}
+
+	updateProfile( params ) {
+		const { addNotice } = this.props;
+
+		return apiFetch( {
+			path: '/wc-admin/v1/onboarding/profile',
+			method: 'POST',
+			data: params,
+		} ).catch( error => {
+			if ( error && error.message ) {
+				addNotice( { status: 'error', message: error.message } );
+			}
+		} );
+	}
+
 	render() {
 		const { query } = this.props;
-		const step = this.getStep();
+		const step = this.getCurrentStep();
 
-		const container = createElement( step.container, { query } );
+		const container = createElement( step.container, {
+			query,
+			step,
+			goToNextStep: this.goToNextStep,
+			updateProfile: this.updateProfile,
+		} );
 		const steps = getSteps().map( _step => pick( _step, [ 'key', 'label' ] ) );
 
 		return (
@@ -89,3 +134,13 @@ export default class ProfileWizard extends Component {
 		);
 	}
 }
+
+export default compose(
+	withDispatch( dispatch => {
+		const { addNotice } = dispatch( 'wc-admin' );
+
+		return {
+			addNotice,
+		};
+	} )
+)( ProfileWizard );
