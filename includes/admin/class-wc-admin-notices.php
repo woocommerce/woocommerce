@@ -550,7 +550,35 @@ class WC_Admin_Notices {
 	 * Notice shown when regenerating thumbnails background process is running.
 	 */
 	public static function regenerating_thumbnails_notice() {
-		include dirname( __FILE__ ) . '/views/html-notice-regenerating-thumbnails.php';
+		if ( class_exists( 'WC_Admin_Note' ) ) {
+			// First, see if we've already created this kind of note so we don't do it again.
+			$data_store = WC_Data_Store::load( 'admin-note' );
+			$note_ids   = $data_store->get_notes_with_name( 'wc-regen-thumbnails' );
+
+			if ( ! empty( $note_ids ) ) {
+				return;
+			}
+
+			$note->set_title( __( 'Thumbnail regeneration is running in the background.', 'woocommerce' ) );
+			$note->set_content( __( 'Depending on the amount of images in your store this may take a while.', 'woocommerce' ) );
+			$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+			$note->set_icon( 'image' );
+			$note->set_name( 'wc-regen-thumbnails' );
+			$note->set_content_data( (object) array() );
+			$note->set_source( 'woocommerce' );
+
+			$note->add_action(
+				'regen-thumbnails-cancel',
+				__( 'Cancel thumbnail regeneration', 'woocommerce' ),
+				'',
+				'actioned',
+				true
+			);
+
+			$note->save();
+		} else {
+			include dirname( __FILE__ ) . '/views/html-notice-regenerating-thumbnails.php';
+		}
 	}
 
 	/**

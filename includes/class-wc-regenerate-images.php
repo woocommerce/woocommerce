@@ -49,7 +49,7 @@ class WC_Regenerate_Images {
 			self::$background_process = new WC_Regenerate_Images_Request();
 
 			add_action( 'admin_init', array( __CLASS__, 'regenerating_notice' ) );
-			add_action( 'woocommerce_hide_regenerating_thumbnails_notice', array( __CLASS__, 'dismiss_regenerating_notice' ) );
+			add_action( 'woocommerce_admin_note_action_regen-thumbnails-cancel', array( __CLASS__, 'dismiss_regenerating_notice' ) );
 
 			// Regenerate thumbnails in the background after settings changes. Not ran on multisite to avoid multiple simultanious jobs.
 			if ( ! is_multisite() ) {
