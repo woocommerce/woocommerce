@@ -521,10 +521,69 @@ class WC_Admin_Notices {
 			}
 		}
 
-		if ( $enabled ) {
-			include dirname( __FILE__ ) . '/views/html-notice-legacy-shipping.php';
+		if ( class_exists( 'WC_Admin_Note' ) ) {
+			if ( $enabled ) {
+				// First, see if we've already created this kind of note so we don't do it again.
+				$data_store = WC_Data_Store::load( 'admin-note' );
+				$note_ids   = $data_store->get_notes_with_name( 'wc-legacy-shipping' );
+
+				if ( ! empty( $note_ids ) ) {
+					return;
+				}
+
+				$theme = wp_get_theme();
+
+				$note = new WC_Admin_Note();
+				$note->set_title( __( 'New: Shipping zones', 'woocommerce' ) );
+
+				$content = '<p>' . implode(
+					'</p><p>',
+					array(
+						__( 'Shipping zones are a group of regions that can be assigned different shipping methods and rates.', 'woocommerce' ),
+						__( 'Legacy shipping methods (flat rate, international flat rate, local pickup and delivery, and free shipping) are deprecated but will continue to work as normal for now. <strong><em>They will be removed in future versions of WooCommerce</em></strong>. We recommend disabling these and setting up new rates within shipping zones as soon as possible.', 'woocommerce' ),
+					)
+				) . '</p>';
+
+				$note->set_content( $content );
+				$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+				$note->set_icon( 'shipping' );
+				$note->set_name( 'wc-legacy-shipping' );
+				$note->set_content_data( (object) array() );
+				$note->set_source( 'woocommerce' );
+
+				$note->add_action(
+					'setup-shipping-zones',
+					__( 'Setup shipping zones', 'woocommerce' ),
+					admin_url( 'admin.php?page=wc-settings&tab=shipping' ),
+					'unactioned',
+					true
+				);
+				$note->add_action(
+					'learn-more-shipping-zones',
+					__( 'Learn more about shipping zones', 'woocommerce' ),
+					'https://docs.woocommerce.com/document/setting-up-shipping-zones/',
+					'unactioned',
+					true
+				);
+
+				$note->save();
+			} else {
+				// @todo - delete this note instead?
+				$data_store = WC_Data_Store::load( 'admin-note' );
+				$note_ids   = $data_store->get_notes_with_name( 'wc-legacy-shipping' );
+
+				if ( $note_ids ) {
+					$note = WC_Admin_Notes::get_note( $note_ids[0] );
+					$note->set_status( WC_Admin_Note::E_WC_ADMIN_NOTE_ACTIONED );
+					$note->save();
+				}
+			}
 		} else {
-			self::remove_notice( 'template_files' );
+			if ( $enabled ) {
+				include dirname( __FILE__ ) . '/views/html-notice-legacy-shipping.php';
+			} else {
+				self::remove_notice( 'legacy_shipping' );
+			}
 		}
 	}
 
