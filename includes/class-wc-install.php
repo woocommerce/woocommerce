@@ -138,11 +138,11 @@ class WC_Install {
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
-		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
 		add_filter( 'plugin_row_meta', array( __CLASS__, 'plugin_row_meta' ), 10, 2 );
 		add_filter( 'wpmu_drop_tables', array( __CLASS__, 'wpmu_drop_tables' ) );
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
+		add_action( 'woocommerce_admin_note_action_update-database', array( __CLASS__, 'update' ) );
 	}
 
 	/**
@@ -199,19 +199,6 @@ class WC_Install {
 				),
 				'woocommerce-db-updates'
 			);
-		}
-	}
-
-	/**
-	 * Install actions when a update button is clicked within the admin area.
-	 *
-	 * This function is hooked into admin_init to affect admin only.
-	 */
-	public static function install_actions() {
-		if ( ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok.
-			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
-			self::update();
-			WC_Admin_Notices::add_notice( 'update' );
 		}
 	}
 
@@ -353,7 +340,7 @@ class WC_Install {
 	/**
 	 * Push all needed DB updates to the queue for processing.
 	 */
-	private static function update() {
+	public static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
 		$loop               = 0;
 

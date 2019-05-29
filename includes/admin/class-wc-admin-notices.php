@@ -283,23 +283,18 @@ class WC_Admin_Notices {
 			$note->set_content_data( (object) array() );
 			$note->set_source( 'woocommerce' );
 
-			$update_url = wp_nonce_url(
-				add_query_arg( 'do_update_woocommerce', 'true', admin_url( 'admin.php?page=wc-settings' ) ),
-				'wc_db_update',
-				'wc_db_update_nonce'
-			);
-
 			$note->add_action(
 				'update-database',
 				__( 'Update WooCommerce Database', 'woocommerce' ),
-				$update_url,
+				'',
 				'actioned',
 				true
 			);
 			$note->add_action(
 				'update-learn-more',
 				__( 'Learn more about updates', 'woocommerce' ),
-				'https://docs.woocommerce.com/document/how-to-update-woocommerce/'
+				'https://docs.woocommerce.com/document/how-to-update-woocommerce/',
+				'unactioned'
 			);
 
 			$note->save();
@@ -313,6 +308,7 @@ class WC_Admin_Notices {
 	 */
 	public static function update_notice_updated() {
 		if ( class_exists( 'WC_Admin_Note' ) ) {
+			WC_Admin_Notes::delete_notes_with_name( 'wc-update' );
 			WC_Admin_Notes::delete_notes_with_name( 'wc-updating' );
 			// First, see if we've already created this kind of note so we don't do it again.
 			$data_store = WC_Data_Store::load( 'admin-note' );
@@ -334,7 +330,7 @@ class WC_Admin_Notices {
 			$note->add_action(
 				'dismiss-database-updated',
 				__( 'Dismiss', 'woocommerce' ),
-				'#',
+				'',
 				'actioned',
 				true
 			);
@@ -399,7 +395,7 @@ class WC_Admin_Notices {
 			$note->add_action(
 				'skip-setup',
 				__( 'Skip setup', 'woocommerce' ),
-				wp_nonce_url( add_query_arg( 'wc-hide-notice', 'install' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ),
+				'',
 				'actioned'
 			);
 
