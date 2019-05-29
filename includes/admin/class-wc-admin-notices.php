@@ -596,11 +596,70 @@ class WC_Admin_Notices {
 			$method_count  = wc_get_shipping_method_count();
 
 			if ( $product_count->publish > 0 && 0 === $method_count ) {
-				include dirname( __FILE__ ) . '/views/html-notice-no-shipping-methods.php';
+				if ( class_exists( 'WC_Admin_Note' ) ) {
+					// First, see if we've already created this kind of note so we don't do it again.
+					$data_store = WC_Data_Store::load( 'admin-note' );
+					$note_ids   = $data_store->get_notes_with_name( 'wc-no-shipping-methods' );
+
+					if ( ! empty( $note_ids ) ) {
+						return;
+					}
+
+					$theme = wp_get_theme();
+
+					$note = new WC_Admin_Note();
+					$note->set_title( __( 'Add shipping methods & zones', 'woocommerce' ) );
+
+					$content = '<p>' . implode(
+						'</p><p>',
+						array(
+							__( 'Shipping is currently enabled, but you have not added any shipping methods to your shipping zones.', 'woocommerce' ),
+							__( 'Customers will not be able to purchase physical goods from your store until a shipping method is available.', 'woocommerce' ),
+						)
+					) . '</p>';
+
+					$note->set_content( $content );
+					$note->set_type( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
+					$note->set_icon( 'shipping' );
+					$note->set_name( 'wc-no-shipping-methods' );
+					$note->set_content_data( (object) array() );
+					$note->set_source( 'woocommerce' );
+
+					$note->add_action(
+						'setup-shipping-zones',
+						__( 'Setup shipping zones', 'woocommerce' ),
+						admin_url( 'admin.php?page=wc-settings&tab=shipping' ),
+						'unactioned',
+						true
+					);
+					$note->add_action(
+						'learn-more-shipping-zones',
+						__( 'Learn more about shipping zones', 'woocommerce' ),
+						'https://docs.woocommerce.com/document/setting-up-shipping-zones/',
+						'unactioned',
+						true
+					);
+
+					$note->save();
+				} else {
+					include dirname( __FILE__ ) . '/views/html-notice-no-shipping-methods.php';
+				}
 			}
 
 			if ( $method_count > 0 ) {
-				self::remove_notice( 'no_shipping_methods' );
+				if ( class_exists( 'WC_Admin_Note' ) ) {
+					// @todo - delete this note instead?
+					$data_store = WC_Data_Store::load( 'admin-note' );
+					$note_ids   = $data_store->get_notes_with_name( 'wc-no-shipping-methods' );
+
+					if ( $note_ids ) {
+						$note = WC_Admin_Notes::get_note( $note_ids[0] );
+						$note->set_status( WC_Admin_Note::E_WC_ADMIN_NOTE_ACTIONED );
+						$note->save();
+					}
+				} else {
+					self::remove_notice( 'no_shipping_methods' );
+				}
 			}
 		}
 	}
