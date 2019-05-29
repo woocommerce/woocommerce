@@ -78,7 +78,7 @@
     "yargs": "13.2.4"
   },
   "engines": {
-    "node": "10.15.3",
+    "node": "10.16.0",
     "npm": "6.9.0"
   },
   "dependencies": {
