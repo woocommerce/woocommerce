@@ -483,12 +483,6 @@ class WC_Admin_Notices {
 					'unactioned',
 					true
 				);
-				$note->add_action(
-					'template-check-dismiss',
-					__( 'Dismiss', 'woocommerce' ),
-					'#',
-					'actioned'
-				);
 
 				$note->save();
 			} else {
