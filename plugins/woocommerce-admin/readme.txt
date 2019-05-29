@@ -12,10 +12,6 @@ License URI: https://github.com/woocommerce/woocommerce-admin/blob/master/licens
 
 WooCommerce Admin is a new JavaScript-driven interface for managing your store. The plugin includes new and improved reports and a dashboard to monitor key metrics of your site.
 
-**BETA SOFTWARE**
-
-This plugin is under active development and, as such, we advise you to first install WooCommerce Admin in a staging/test environment. While this code is being run in production on sites, we recommend you first verify it works for you in a test environment, the same as any plugin for WooCommerce.
-
 **New Reports for WooCommerce**
 
 WooCommerce Admin has a host of new reports that are optimized for speed and have advanced filters that allow you to dive into data about your store:
