@@ -4,30 +4,26 @@
  *
  * Handles requests to the /customers endpoint.
  *
- * @author   WooThemes
- * @category API
  * @package WooCommerce/RestApi
- * @since    3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+namespace WooCommerce\RestApi\Version4\Controllers;
+
+defined( 'ABSPATH' ) || exit;
+
+use \WC_REST_Controller;
 
 /**
- * REST API Customers controller class.
- *
- * @package WooCommerce/RestApi
- * @extends WC_REST_Controller
+ * REST API Coupons controller class.
  */
-class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
+class Customers extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.
@@ -40,88 +36,103 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	 * Register the routes for customers.
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base,
 			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				'args'                => $this->get_collection_params(),
-			),
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'create_item' ),
-				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
-					'email' => array(
-						'required' => true,
-						'type'     => 'string',
-						'description' => __( 'New user email address.', 'woocommerce' ),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'create_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => array_merge(
+						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+						array(
+							'email' => array(
+								'required' => true,
+								'type'     => 'string',
+								'description' => __( 'New user email address.', 'woocommerce' ),
+							),
+							'username' => array(
+								'required' => 'no' === get_option( 'woocommerce_registration_generate_username', 'yes' ),
+								'description' => __( 'New user username.', 'woocommerce' ),
+								'type'     => 'string',
+							),
+							'password' => array(
+								'required' => 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ),
+								'description' => __( 'New user password.', 'woocommerce' ),
+								'type'     => 'string',
+							),
+						)
 					),
-					'username' => array(
-						'required' => 'no' === get_option( 'woocommerce_registration_generate_username', 'yes' ),
-						'description' => __( 'New user username.', 'woocommerce' ),
-						'type'     => 'string',
-					),
-					'password' => array(
-						'required' => 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ),
-						'description' => __( 'New user password.', 'woocommerce' ),
-						'type'     => 'string',
-					),
-				) ),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
-			'args' => array(
-				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
-					'type'        => 'integer',
-				),
-			),
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
 			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_item' ),
-				'permission_callback' => array( $this, 'get_item_permissions_check' ),
-				'args'                => array(
-					'context' => $this->get_context_param( array( 'default' => 'view' ) ),
-				),
-			),
-			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_item' ),
-				'permission_callback' => array( $this, 'update_item_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-			),
-			array(
-				'methods'             => WP_REST_Server::DELETABLE,
-				'callback'            => array( $this, 'delete_item' ),
-				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
-				'args'                => array(
-					'force' => array(
-						'default'     => false,
-						'type'        => 'boolean',
-						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
-					),
-					'reassign' => array(
-						'default'     => 0,
+				'args' => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 						'type'        => 'integer',
-						'description' => __( 'ID to reassign posts to.', 'woocommerce' ),
 					),
 				),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'args'                => array(
+						'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_item' ),
+					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+					'args'                => array(
+						'force' => array(
+							'default'     => false,
+							'type'        => 'boolean',
+							'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
+						),
+						'reassign' => array(
+							'default'     => 0,
+							'type'        => 'integer',
+							'description' => __( 'ID to reassign posts to.', 'woocommerce' ),
+						),
+					),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/batch',
 			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'batch_items' ),
-				'permission_callback' => array( $this, 'batch_items_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-			),
-			'schema' => array( $this, 'get_public_batch_schema' ),
-		) );
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'batch_items' ),
+					'permission_callback' => array( $this, 'batch_items_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				'schema' => array( $this, 'get_public_batch_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -216,6 +227,45 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get formatted item data.
+	 *
+	 * @param WC_Data $object WC_Data instance.
+	 *
+	 * @since  3.0.0
+	 * @return array
+	 */
+	protected function get_formatted_item_data( $object ) {
+		$data        = $object->get_data();
+		$format_date = array( 'date_created', 'date_modified' );
+
+		// Format date values.
+		foreach ( $format_date as $key ) {
+			// Date created is stored UTC, date modified is stored WP local time.
+			$datetime              = 'date_created' === $key ? get_date_from_gmt( gmdate( 'Y-m-d H:i:s', $data[ $key ]->getTimestamp() ) ) : $data[ $key ];
+			$data[ $key ]          = wc_rest_prepare_date_response( $datetime, false );
+			$data[ $key . '_gmt' ] = wc_rest_prepare_date_response( $datetime );
+		}
+
+		return array(
+			'id'                 => $object->get_id(),
+			'date_created'       => $data['date_created'],
+			'date_created_gmt'   => $data['date_created_gmt'],
+			'date_modified'      => $data['date_modified'],
+			'date_modified_gmt'  => $data['date_modified_gmt'],
+			'email'              => $data['email'],
+			'first_name'         => $data['first_name'],
+			'last_name'          => $data['last_name'],
+			'role'               => $data['role'],
+			'username'           => $data['username'],
+			'billing'            => $data['billing'],
+			'shipping'           => $data['shipping'],
+			'is_paying_customer' => $data['is_paying_customer'],
+			'avatar_url'         => $object->get_avatar_url(),
+			'meta_data'          => $data['meta_data'],
+		);
 	}
 
 	/**
@@ -318,6 +368,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Create a single customer.
 	 *
+	 * @throws WC_REST_Exception On invalid params.
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
@@ -334,7 +385,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 			$request['password'] = ! empty( $request['password'] ) ? $request['password'] : '';
 
 			// Create customer.
-			$customer = new WC_Customer;
+			$customer = new WC_Customer();
 			$customer->set_username( $request['username'] );
 			$customer->set_password( $request['password'] );
 			$customer->set_email( $request['email'] );
@@ -392,6 +443,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Update a single user.
 	 *
+	 * @throws WC_REST_Exception On invalid params.
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
@@ -510,40 +562,13 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single customer output for response.
 	 *
-	 * @param  WP_User          $user_data User object.
-	 * @param  WP_REST_Request  $request Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @param  WP_User         $user_data User object.
+	 * @param  WP_REST_Request $request   Request object.
+	 * @return WP_REST_Response $response  Response data.
 	 */
 	public function prepare_item_for_response( $user_data, $request ) {
-		$customer    = new WC_Customer( $user_data->ID );
-		$_data       = $customer->get_data();
-		$last_order  = wc_get_customer_last_order( $customer->get_id() );
-		$format_date = array( 'date_created', 'date_modified' );
-
-		// Format date values.
-		foreach ( $format_date as $key ) {
-			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( $_data[ $key ] ) : null; // v1 API used UTC.
-		}
-
-		$data = array(
-			'id'            => $_data['id'],
-			'date_created'  => $_data['date_created'],
-			'date_modified' => $_data['date_modified'],
-			'email'         => $_data['email'],
-			'first_name'    => $_data['first_name'],
-			'last_name'     => $_data['last_name'],
-			'username'      => $_data['username'],
-			'last_order'    => array(
-				'id'   => is_object( $last_order ) ? $last_order->get_id() : null,
-				'date' => is_object( $last_order ) ? wc_rest_prepare_date_response( $last_order->get_date_created() ) : null, // v1 API used UTC.
-			),
-			'orders_count'  => $customer->get_order_count(),
-			'total_spent'   => $customer->get_total_spent(),
-			'avatar_url'    => $customer->get_avatar_url(),
-			'billing'       => $_data['billing'],
-			'shipping'      => $_data['shipping'],
-		);
-
+		$customer = new WC_Customer( $user_data->ID );
+		$data     = $this->get_formatted_item_data( $customer );
 		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, $context );
@@ -563,8 +588,8 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Update customer meta fields.
 	 *
-	 * @param WC_Customer $customer
-	 * @param WP_REST_Request $request
+	 * @param WC_Customer     $customer Customer being updated.
+	 * @param WP_REST_Request $request Request params.
 	 */
 	protected function update_customer_meta_fields( $customer, $request ) {
 		$schema = $this->get_item_schema();
@@ -593,6 +618,15 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 			foreach ( array_keys( $schema['properties']['shipping']['properties'] ) as $field ) {
 				if ( isset( $request['shipping'][ $field ] ) && is_callable( array( $customer, "set_shipping_{$field}" ) ) ) {
 					$customer->{"set_shipping_{$field}"}( $request['shipping'][ $field ] );
+				}
+			}
+		}
+
+		// Meta data.
+		if ( isset( $request['meta_data'] ) ) {
+			if ( is_array( $request['meta_data'] ) ) {
+				foreach ( $request['meta_data'] as $meta ) {
+					$customer->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
 				}
 			}
 		}
@@ -628,31 +662,43 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 			'title'      => 'customer',
 			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
+				'id'                 => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'date_created' => array(
+				'date_created'       => array(
+					'description' => __( "The date the customer was created, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_created_gmt'   => array(
 					'description' => __( 'The date the customer was created, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'date_modified' => array(
+				'date_modified'      => array(
+					'description' => __( "The date the customer was last modified, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_modified_gmt'  => array(
 					'description' => __( 'The date the customer was last modified, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'email' => array(
+				'email'              => array(
 					'description' => __( 'The email address for the customer.', 'woocommerce' ),
 					'type'        => 'string',
 					'format'      => 'email',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'first_name' => array(
+				'first_name'         => array(
 					'description' => __( 'Customer first name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -660,7 +706,7 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'last_name' => array(
+				'last_name'          => array(
 					'description' => __( 'Customer last name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -668,7 +714,13 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'username' => array(
+				'role'               => array(
+					'description' => __( 'Customer role.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'username'           => array(
 					'description' => __( 'Customer login name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -676,161 +728,161 @@ class WC_REST_Customers_V1_Controller extends WC_REST_Controller {
 						'sanitize_callback' => 'sanitize_user',
 					),
 				),
-				'password' => array(
+				'password'           => array(
 					'description' => __( 'Customer password.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'edit' ),
 				),
-				'last_order' => array(
-					'description' => __( 'Last order data.', 'woocommerce' ),
-					'type'        => 'object',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-					'properties'  => array(
-						'id' => array(
-							'description' => __( 'Last order ID.', 'woocommerce' ),
-							'type'        => 'integer',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'date' => array(
-							'description' => __( 'The date of the customer last order, as GMT.', 'woocommerce' ),
-							'type'        => 'date-time',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-					),
-				),
-				'orders_count' => array(
-					'description' => __( 'Quantity of orders made by the customer.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'total_spent' => array(
-					'description' => __( 'Total amount spent.', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'avatar_url' => array(
-					'description' => __( 'Avatar URL.', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'billing' => array(
+				'billing'            => array(
 					'description' => __( 'List of billing address data.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
-					'properties' => array(
+					'properties'  => array(
 						'first_name' => array(
 							'description' => __( 'First name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'last_name' => array(
+						'last_name'  => array(
 							'description' => __( 'Last name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'company' => array(
+						'company'    => array(
 							'description' => __( 'Company name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'address_1' => array(
-							'description' => __( 'Address line 1.', 'woocommerce' ),
+						'address_1'  => array(
+							'description' => __( 'Address line 1', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'address_2' => array(
-							'description' => __( 'Address line 2.', 'woocommerce' ),
+						'address_2'  => array(
+							'description' => __( 'Address line 2', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'city' => array(
+						'city'       => array(
 							'description' => __( 'City name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'state' => array(
+						'state'      => array(
 							'description' => __( 'ISO code or name of the state, province or district.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'postcode' => array(
+						'postcode'   => array(
 							'description' => __( 'Postal code.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'country' => array(
+						'country'    => array(
 							'description' => __( 'ISO code of the country.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'email' => array(
+						'email'      => array(
 							'description' => __( 'Email address.', 'woocommerce' ),
 							'type'        => 'string',
 							'format'      => 'email',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'phone' => array(
+						'phone'      => array(
 							'description' => __( 'Phone number.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 					),
 				),
-				'shipping' => array(
+				'shipping'           => array(
 					'description' => __( 'List of shipping address data.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
-					'properties' => array(
+					'properties'  => array(
 						'first_name' => array(
 							'description' => __( 'First name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'last_name' => array(
+						'last_name'  => array(
 							'description' => __( 'Last name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'company' => array(
+						'company'    => array(
 							'description' => __( 'Company name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'address_1' => array(
-							'description' => __( 'Address line 1.', 'woocommerce' ),
+						'address_1'  => array(
+							'description' => __( 'Address line 1', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'address_2' => array(
-							'description' => __( 'Address line 2.', 'woocommerce' ),
+						'address_2'  => array(
+							'description' => __( 'Address line 2', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'city' => array(
+						'city'       => array(
 							'description' => __( 'City name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'state' => array(
+						'state'      => array(
 							'description' => __( 'ISO code or name of the state, province or district.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'postcode' => array(
+						'postcode'   => array(
 							'description' => __( 'Postal code.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'country' => array(
+						'country'    => array(
 							'description' => __( 'ISO code of the country.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
+						),
+					),
+				),
+				'is_paying_customer' => array(
+					'description' => __( 'Is the customer a paying customer?', 'woocommerce' ),
+					'type'        => 'bool',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'avatar_url'         => array(
+					'description' => __( 'Avatar URL.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'meta_data'          => array(
+					'description' => __( 'Meta data.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'id'    => array(
+								'description' => __( 'Meta ID.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'key'   => array(
+								'description' => __( 'Meta key.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'value' => array(
+								'description' => __( 'Meta value.', 'woocommerce' ),
+								'type'        => 'mixed',
+								'context'     => array( 'view', 'edit' ),
+							),
 						),
 					),
 				),

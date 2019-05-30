@@ -26,7 +26,7 @@
 	</rule>
 
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
-		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>*</exclude-pattern>
 	</rule>
 
 	<rule ref="Generic.Commenting">
@@ -35,5 +35,6 @@
 
 	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
 		<exclude-pattern>i18n/</exclude-pattern>
+		<exclude-pattern>*</exclude-pattern>
 	</rule>
 </ruleset>
