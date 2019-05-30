@@ -4,30 +4,26 @@
  *
  * Handles requests to the products/categories endpoint.
  *
- * @author   WooThemes
- * @category API
  * @package WooCommerce/RestApi
- * @since    3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+namespace WooCommerce\RestApi\Version4\Controllers;
+
+defined( 'ABSPATH' ) || exit;
+
+use \WC_REST_Terms_Controller;
 
 /**
  * REST API Product Categories controller class.
- *
- * @package WooCommerce/RestApi
- * @extends WC_REST_Terms_Controller
  */
-class WC_REST_Product_Categories_V1_Controller extends WC_REST_Terms_Controller {
+class ProductCategories extends WC_REST_Terms_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.
@@ -75,12 +71,14 @@ class WC_REST_Product_Categories_V1_Controller extends WC_REST_Terms_Controller 
 			$attachment = get_post( $image_id );
 
 			$data['image'] = array(
-				'id'            => (int) $image_id,
-				'date_created'  => wc_rest_prepare_date_response( $attachment->post_date_gmt ),
-				'date_modified' => wc_rest_prepare_date_response( $attachment->post_modified_gmt ),
-				'src'           => wp_get_attachment_url( $image_id ),
-				'title'         => get_the_title( $attachment ),
-				'alt'           => get_post_meta( $image_id, '_wp_attachment_image_alt', true ),
+				'id'                => (int) $image_id,
+				'date_created'      => wc_rest_prepare_date_response( $attachment->post_date ),
+				'date_created_gmt'  => wc_rest_prepare_date_response( $attachment->post_date_gmt ),
+				'date_modified'     => wc_rest_prepare_date_response( $attachment->post_modified ),
+				'date_modified_gmt' => wc_rest_prepare_date_response( $attachment->post_modified_gmt ),
+				'src'               => wp_get_attachment_url( $image_id ),
+				'name'              => get_the_title( $attachment ),
+				'alt'               => get_post_meta( $image_id, '_wp_attachment_image_alt', true ),
 			);
 		}
 
@@ -110,6 +108,8 @@ class WC_REST_Product_Categories_V1_Controller extends WC_REST_Terms_Controller 
 	 * @param WP_Term         $term    Term object.
 	 * @param WP_REST_Request $request Request instance.
 	 * @return bool|WP_Error
+	 *
+	 * @since 3.5.5
 	 */
 	protected function update_term_meta_fields( $term, $request ) {
 		$id = (int) $term->term_id;
@@ -145,11 +145,13 @@ class WC_REST_Product_Categories_V1_Controller extends WC_REST_Terms_Controller 
 				}
 
 				// Set the image title.
-				if ( ! empty( $request['image']['title'] ) ) {
-					wp_update_post( array(
-						'ID'         => $image_id,
-						'post_title' => wc_clean( $request['image']['title'] ),
-					) );
+				if ( ! empty( $request['image']['name'] ) ) {
+					wp_update_post(
+						array(
+							'ID'         => $image_id,
+							'post_title' => wc_clean( $request['image']['name'] ),
+						)
+					);
 				}
 			} else {
 				delete_term_meta( $id, 'thumbnail_id' );
@@ -166,17 +168,17 @@ class WC_REST_Product_Categories_V1_Controller extends WC_REST_Terms_Controller 
 	 */
 	public function get_item_schema() {
 		$schema = array(
-			'$schema'              => 'http://json-schema.org/draft-04/schema#',
-			'title'                => $this->taxonomy,
-			'type'                 => 'object',
-			'properties'           => array(
-				'id' => array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => $this->taxonomy,
+			'type'       => 'object',
+			'properties' => array(
+				'id'          => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'name' => array(
+				'name'        => array(
 					'description' => __( 'Category name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -184,7 +186,7 @@ class WC_REST_Product_Categories_V1_Controller extends WC_REST_Terms_Controller 
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),
-				'slug' => array(
+				'slug'        => array(
 					'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
@@ -192,7 +194,7 @@ class WC_REST_Product_Categories_V1_Controller extends WC_REST_Terms_Controller 
 						'sanitize_callback' => 'sanitize_title',
 					),
 				),
-				'parent' => array(
+				'parent'      => array(
 					'description' => __( 'The ID for the parent of the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
@@ -205,59 +207,71 @@ class WC_REST_Product_Categories_V1_Controller extends WC_REST_Terms_Controller 
 						'sanitize_callback' => 'wp_filter_post_kses',
 					),
 				),
-				'display' => array(
+				'display'     => array(
 					'description' => __( 'Category archive display type.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'default',
 					'enum'        => array( 'default', 'products', 'subcategories', 'both' ),
 					'context'     => array( 'view', 'edit' ),
 				),
-				'image' => array(
+				'image'       => array(
 					'description' => __( 'Image data.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
-						'id' => array(
+						'id'                => array(
 							'description' => __( 'Image ID.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'date_created' => array(
+						'date_created'      => array(
 							'description' => __( "The date the image was created, in the site's timezone.", 'woocommerce' ),
 							'type'        => 'date-time',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
-						'date_modified' => array(
+						'date_created_gmt'  => array(
+							'description' => __( 'The date the image was created, as GMT.', 'woocommerce' ),
+							'type'        => 'date-time',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'date_modified'     => array(
 							'description' => __( "The date the image was last modified, in the site's timezone.", 'woocommerce' ),
 							'type'        => 'date-time',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
-						'src' => array(
+						'date_modified_gmt' => array(
+							'description' => __( 'The date the image was last modified, as GMT.', 'woocommerce' ),
+							'type'        => 'date-time',
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
+						'src'               => array(
 							'description' => __( 'Image URL.', 'woocommerce' ),
 							'type'        => 'string',
 							'format'      => 'uri',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'title' => array(
+						'name'              => array(
 							'description' => __( 'Image name.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'alt' => array(
+						'alt'               => array(
 							'description' => __( 'Image alternative text.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 					),
 				),
-				'menu_order' => array(
+				'menu_order'  => array(
 					'description' => __( 'Menu order, used to custom sort the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'count' => array(
+				'count'       => array(
 					'description' => __( 'Number of published products for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
