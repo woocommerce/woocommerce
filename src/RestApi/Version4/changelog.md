@@ -8,6 +8,7 @@
 - Product Reviews - Updated response links.
 - Products - Added `low_in_stock` and `search` parameter.
 - Reports - Updated with updated list of available reports.
+- Taxes - Added `code` and `include` params.
 
 ## New endpoints
 
