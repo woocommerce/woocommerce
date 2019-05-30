@@ -4,30 +4,26 @@
  *
  * Handles requests to the products/tags endpoint.
  *
- * @author   WooThemes
- * @category API
  * @package WooCommerce/RestApi
- * @since    3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+namespace WooCommerce\RestApi\Version4\Controllers;
+
+defined( 'ABSPATH' ) || exit;
+
+use \WC_REST_Terms_Controller;
 
 /**
  * REST API Product Tags controller class.
- *
- * @package WooCommerce/RestApi
- * @extends WC_REST_Terms_Controller
  */
-class WC_REST_Product_Tags_V1_Controller extends WC_REST_Terms_Controller {
+class ProductTags extends WC_REST_Terms_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.
@@ -46,8 +42,8 @@ class WC_REST_Product_Tags_V1_Controller extends WC_REST_Terms_Controller {
 	/**
 	 * Prepare a single product tag output for response.
 	 *
-	 * @param obj $item Term object.
-	 * @param WP_REST_Request $request
+	 * @param obj             $item Term object.
+	 * @param WP_REST_Request $request Request params.
 	 * @return WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
