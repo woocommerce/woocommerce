@@ -5,25 +5,166 @@
  * Handles requests to the /products/<product_id>/variations endpoints.
  *
  * @package WooCommerce/RestApi
- * @since   3.0.0
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API variations controller class.
- *
- * @package WooCommerce/RestApi
- * @extends WC_REST_Product_Variations_V2_Controller
  */
-class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V2_Controller {
+class ProductVariations extends Products {
 
 	/**
-	 * Endpoint namespace.
+	 * Route base.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v3';
+	protected $rest_base = 'products/(?P<product_id>[\d]+)/variations';
+
+	/**
+	 * Post type.
+	 *
+	 * @var string
+	 */
+	protected $post_type = 'product_variation';
+
+	/**
+	 * Initialize product actions (parent).
+	 */
+	public function __construct() {
+		add_filter( "woocommerce_rest_{$this->post_type}_query", array( $this, 'add_product_id' ), 9, 2 );
+		parent::__construct();
+	}
+
+	/**
+	 * Register the routes for products.
+	 */
+	public function register_routes() {
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
+				'args'   => array(
+					'product_id' => array(
+						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'create_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+			array(
+				'args'   => array(
+					'product_id' => array(
+						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+					'id'         => array(
+						'description' => __( 'Unique identifier for the variation.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'args'                => array(
+						'context' => $this->get_context_param(
+							array(
+								'default' => 'view',
+							)
+						),
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_item' ),
+					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+					'args'                => array(
+						'force' => array(
+							'default'     => false,
+							'type'        => 'boolean',
+							'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+						),
+					),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+		register_rest_route(
+			$this->namespace, '/' . $this->rest_base . '/batch',
+			array(
+				'args'   => array(
+					'product_id' => array(
+						'description' => __( 'Unique identifier for the variable product.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'batch_items' ),
+					'permission_callback' => array( $this, 'batch_items_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				'schema' => array( $this, 'get_public_batch_schema' ),
+			)
+		);
+	}
+
+	/**
+	 * Get object.
+	 *
+	 * @since  3.0.0
+	 * @param  int $id Object ID.
+	 * @return WC_Data
+	 */
+	protected function get_object( $id ) {
+		return wc_get_product( $id );
+	}
+
+	/**
+	 * Check if a given request has access to update an item.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function update_item_permissions_check( $request ) {
+		$object = $this->get_object( (int) $request['id'] );
+
+		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'edit', $object->get_id() ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		// Check if variation belongs to the correct parent product.
+		if ( $object && 0 !== $object->get_parent_id() && absint( $request['product_id'] ) !== $object->get_parent_id() ) {
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Parent product does not match current variation.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
 
 	/**
 	 * Prepare a single variation output for response.
@@ -35,6 +176,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	public function prepare_object_for_response( $object, $request ) {
 		$data = array(
 			'id'                    => $object->get_id(),
+			'name'                  => $object->get_name( $context ),
+			'type'                  =>  $object->get_type(),
+			'parent_id'             => $object->get_parent_id( $context ),
 			'date_created'          => wc_rest_prepare_date_response( $object->get_date_created(), false ),
 			'date_created_gmt'      => wc_rest_prepare_date_response( $object->get_date_created() ),
 			'date_modified'         => wc_rest_prepare_date_response( $object->get_date_modified(), false ),
@@ -96,6 +240,176 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		 * @param WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
+	}
+
+	/**
+	 * Get the image for a product variation.
+	 *
+	 * @param WC_Product_Variation $variation Variation data.
+	 * @return array
+	 */
+	protected function get_image( $variation ) {
+		if ( ! $variation->get_image_id() ) {
+			return;
+		}
+
+		$attachment_id   = $variation->get_image_id();
+		$attachment_post = get_post( $attachment_id );
+		if ( is_null( $attachment_post ) ) {
+			return;
+		}
+
+		$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+		if ( ! is_array( $attachment ) ) {
+			return;
+		}
+
+		if ( ! isset( $image ) ) {
+			return array(
+				'id'                => (int) $attachment_id,
+				'date_created'      => wc_rest_prepare_date_response( $attachment_post->post_date, false ),
+				'date_created_gmt'  => wc_rest_prepare_date_response( strtotime( $attachment_post->post_date_gmt ) ),
+				'date_modified'     => wc_rest_prepare_date_response( $attachment_post->post_modified, false ),
+				'date_modified_gmt' => wc_rest_prepare_date_response( strtotime( $attachment_post->post_modified_gmt ) ),
+				'src'               => current( $attachment ),
+				'name'              => get_the_title( $attachment_id ),
+				'alt'               => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+			);
+		}
+	}
+
+	/**
+	 * Set variation image.
+	 *
+	 * @throws WC_REST_Exception REST API exceptions.
+	 * @param  WC_Product_Variation $variation Variation instance.
+	 * @param  array                $image    Image data.
+	 * @return WC_Product_Variation
+	 */
+	protected function set_variation_image( $variation, $image ) {
+		$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+
+		if ( 0 === $attachment_id && isset( $image['src'] ) ) {
+			$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
+
+			if ( is_wp_error( $upload ) ) {
+				if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $variation->get_id(), array( $image ) ) ) {
+					throw new WC_REST_Exception( 'woocommerce_variation_image_upload_error', $upload->get_error_message(), 400 );
+				}
+			}
+
+			$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $variation->get_id() );
+		}
+
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			/* translators: %s: attachment ID */
+			throw new WC_REST_Exception( 'woocommerce_variation_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
+		}
+
+		$variation->set_image_id( $attachment_id );
+
+		// Set the image alt if present.
+		if ( ! empty( $image['alt'] ) ) {
+			update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
+		}
+
+		// Set the image name if present.
+		if ( ! empty( $image['name'] ) ) {
+			wp_update_post(
+				array(
+					'ID'         => $attachment_id,
+					'post_title' => $image['name'],
+				)
+			);
+		}
+
+		return $variation;
+	}
+
+	/**
+	 * Prepare objects query.
+	 *
+	 * @since  3.0.0
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return array
+	 */
+	protected function prepare_objects_query( $request ) {
+		$args = parent::prepare_objects_query( $request );
+
+		// Set post_status.
+		$args['post_status'] = $request['status'];
+
+		// Filter by sku.
+		if ( ! empty( $request['sku'] ) ) {
+			$skus = explode( ',', $request['sku'] );
+			// Include the current string as a SKU too.
+			if ( 1 < count( $skus ) ) {
+				$skus[] = $request['sku'];
+			}
+
+			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args,
+				array(
+					'key'     => '_sku',
+					'value'   => $skus,
+					'compare' => 'IN',
+				)
+			);
+		}
+
+		// Filter by tax class.
+		if ( ! empty( $request['tax_class'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args,
+				array(
+					'key'   => '_tax_class',
+					'value' => 'standard' !== $request['tax_class'] ? $request['tax_class'] : '',
+				)
+			);
+		}
+
+		// Price filter.
+		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
+		}
+
+		// Filter product based on stock_status.
+		if ( ! empty( $request['stock_status'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args,
+				array(
+					'key'   => '_stock_status',
+					'value' => $request['stock_status'],
+				)
+			);
+		}
+
+		// Filter by on sale products.
+		if ( is_bool( $request['on_sale'] ) ) {
+			$on_sale_key = $request['on_sale'] ? 'post__in' : 'post__not_in';
+			$on_sale_ids = wc_get_product_ids_on_sale();
+
+			// Use 0 when there's no on sale products to avoid return all products.
+			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
+
+			$args[ $on_sale_key ] += $on_sale_ids;
+		}
+
+		// Force the post_type argument, since it's not a user input variable.
+		if ( ! empty( $request['sku'] ) ) {
+			$args['post_type'] = array( 'product', 'product_variation' );
+		} else {
+			$args['post_type'] = $this->post_type;
+		}
+
+		$args['post_parent'] = $request['product_id'];
+
+		if ( ! empty( $request['search'] ) ) {
+			$args['search'] = $request['search'];
+			unset( $args['s'] );
+		}
+
+		return $args;
 	}
 
 	/**
@@ -308,87 +622,171 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	}
 
 	/**
-	 * Get the image for a product variation.
+	 * Clear caches here so in sync with any new variations.
 	 *
-	 * @param WC_Product_Variation $variation Variation data.
-	 * @return array
+	 * @param WC_Data $object Object data.
 	 */
-	protected function get_image( $variation ) {
-		if ( ! $variation->get_image_id() ) {
-			return;
-		}
-
-		$attachment_id   = $variation->get_image_id();
-		$attachment_post = get_post( $attachment_id );
-		if ( is_null( $attachment_post ) ) {
-			return;
-		}
-
-		$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
-		if ( ! is_array( $attachment ) ) {
-			return;
-		}
-
-		if ( ! isset( $image ) ) {
-			return array(
-				'id'                => (int) $attachment_id,
-				'date_created'      => wc_rest_prepare_date_response( $attachment_post->post_date, false ),
-				'date_created_gmt'  => wc_rest_prepare_date_response( strtotime( $attachment_post->post_date_gmt ) ),
-				'date_modified'     => wc_rest_prepare_date_response( $attachment_post->post_modified, false ),
-				'date_modified_gmt' => wc_rest_prepare_date_response( strtotime( $attachment_post->post_modified_gmt ) ),
-				'src'               => current( $attachment ),
-				'name'              => get_the_title( $attachment_id ),
-				'alt'               => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
-			);
-		}
+	public function clear_transients( $object ) {
+		wc_delete_product_transients( $object->get_parent_id() );
+		wp_cache_delete( 'product-' . $object->get_parent_id(), 'products' );
 	}
 
 	/**
-	 * Set variation image.
+	 * Delete a variation.
 	 *
-	 * @throws WC_REST_Exception REST API exceptions.
-	 * @param  WC_Product_Variation $variation Variation instance.
-	 * @param  array                $image    Image data.
-	 * @return WC_Product_Variation
+	 * @param WP_REST_Request $request Full details about the request.
+	 *
+	 * @return bool|WP_Error|WP_REST_Response
 	 */
-	protected function set_variation_image( $variation, $image ) {
-		$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+	public function delete_item( $request ) {
+		$force  = (bool) $request['force'];
+		$object = $this->get_object( (int) $request['id'] );
+		$result = false;
 
-		if ( 0 === $attachment_id && isset( $image['src'] ) ) {
-			$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
-
-			if ( is_wp_error( $upload ) ) {
-				if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $variation->get_id(), array( $image ) ) ) {
-					throw new WC_REST_Exception( 'woocommerce_variation_image_upload_error', $upload->get_error_message(), 400 );
-				}
-			}
-
-			$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $variation->get_id() );
-		}
-
-		if ( ! wp_attachment_is_image( $attachment_id ) ) {
-			/* translators: %s: attachment ID */
-			throw new WC_REST_Exception( 'woocommerce_variation_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
-		}
-
-		$variation->set_image_id( $attachment_id );
-
-		// Set the image alt if present.
-		if ( ! empty( $image['alt'] ) ) {
-			update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
-		}
-
-		// Set the image name if present.
-		if ( ! empty( $image['name'] ) ) {
-			wp_update_post(
-				array(
-					'ID'         => $attachment_id,
-					'post_title' => $image['name'],
+		if ( ! $object || 0 === $object->get_id() ) {
+			return new WP_Error(
+				"woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array(
+					'status' => 404,
 				)
 			);
 		}
 
-		return $variation;
+		$supports_trash = EMPTY_TRASH_DAYS > 0 && is_callable( array( $object, 'get_status' ) );
+
+		/**
+		 * Filter whether an object is trashable.
+		 *
+		 * Return false to disable trash support for the object.
+		 *
+		 * @param boolean $supports_trash Whether the object type support trashing.
+		 * @param WC_Data $object         The object being considered for trashing support.
+		 */
+		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );
+
+		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
+			return new WP_Error(
+				/* translators: %s: post type */
+				"woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array(
+					'status' => rest_authorization_required_code(),
+				)
+			);
+		}
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_object_for_response( $object, $request );
+
+		// If we're forcing, then delete permanently.
+		if ( $force ) {
+			$object->delete( true );
+			$result = 0 === $object->get_id();
+		} else {
+			// If we don't support trashing for this type, error out.
+			if ( ! $supports_trash ) {
+				return new WP_Error(
+					/* translators: %s: post type */
+					'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ), array(
+						'status' => 501,
+					)
+				);
+			}
+
+			// Otherwise, only trash if we haven't already.
+			if ( is_callable( array( $object, 'get_status' ) ) ) {
+				if ( 'trash' === $object->get_status() ) {
+					return new WP_Error(
+						/* translators: %s: post type */
+						'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array(
+							'status' => 410,
+						)
+					);
+				}
+
+				$object->delete();
+				$result = 'trash' === $object->get_status();
+			}
+		}
+
+		if ( ! $result ) {
+			return new WP_Error(
+				/* translators: %s: post type */
+				'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array(
+					'status' => 500,
+				)
+			);
+		}
+
+		// Delete parent product transients.
+		if ( 0 !== $object->get_parent_id() ) {
+			wc_delete_product_transients( $object->get_parent_id() );
+		}
+
+		/**
+		 * Fires after a single object is deleted or trashed via the REST API.
+		 *
+		 * @param WC_Data          $object   The deleted or trashed object.
+		 * @param WP_REST_Response $response The response data.
+		 * @param WP_REST_Request  $request  The request sent to the API.
+		 */
+		do_action( "woocommerce_rest_delete_{$this->post_type}_object", $object, $response, $request );
+
+		return $response;
+	}
+
+	/**
+	 * Bulk create, update and delete items.
+	 *
+	 * @since  3.0.0
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return array Of WP_Error or WP_REST_Response.
+	 */
+	public function batch_items( $request ) {
+		$items       = array_filter( $request->get_params() );
+		$params      = $request->get_url_params();
+		$product_id  = $params['product_id'];
+		$body_params = array();
+
+		foreach ( array( 'update', 'create', 'delete' ) as $batch_type ) {
+			if ( ! empty( $items[ $batch_type ] ) ) {
+				$injected_items = array();
+				foreach ( $items[ $batch_type ] as $item ) {
+					$injected_items[] = is_array( $item ) ? array_merge(
+						array(
+							'product_id' => $product_id,
+						), $item
+					) : $item;
+				}
+				$body_params[ $batch_type ] = $injected_items;
+			}
+		}
+
+		$request = new WP_REST_Request( $request->get_method() );
+		$request->set_body_params( $body_params );
+
+		return parent::batch_items( $request );
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param WC_Data         $object  Object data.
+	 * @param WP_REST_Request $request Request object.
+	 * @return array                   Links for the given post.
+	 */
+	protected function prepare_links( $object, $request ) {
+		$product_id = (int) $request['product_id'];
+		$base       = str_replace( '(?P<product_id>[\d]+)', $product_id, $this->rest_base );
+		$links      = array(
+			'self'       => array(
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $object->get_id() ) ),
+			),
+			'collection' => array(
+				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
+			),
+			'up'         => array(
+				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $product_id ) ),
+			),
+		);
+		return $links;
 	}
 
 	/**
@@ -409,6 +807,23 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
+				),
+				'name'                  => array(
+					'description' => __( 'Product parent name.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'type'                  => array(
+					'description' => __( 'Product type.', 'woocommerce' ),
+					'type'        => 'string',
+					'default'     => 'variation',
+					'enum'        => array( 'variation' ),
+					'context'     => array( 'view', 'edit' ),
+				),
+				'parent_id'             => array(
+					'description' => __( 'Product parent ID.', 'woocommerce' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
 				),
 				'date_created'          => array(
 					'description' => __( "The date the variation was created, in the site's timezone.", 'woocommerce' ),
@@ -748,87 +1163,6 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	}
 
 	/**
-	 * Prepare objects query.
-	 *
-	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return array
-	 */
-	protected function prepare_objects_query( $request ) {
-		$args = WC_REST_CRUD_Controller::prepare_objects_query( $request );
-
-		// Set post_status.
-		$args['post_status'] = $request['status'];
-
-		// Filter by sku.
-		if ( ! empty( $request['sku'] ) ) {
-			$skus = explode( ',', $request['sku'] );
-			// Include the current string as a SKU too.
-			if ( 1 < count( $skus ) ) {
-				$skus[] = $request['sku'];
-			}
-
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args,
-				array(
-					'key'     => '_sku',
-					'value'   => $skus,
-					'compare' => 'IN',
-				)
-			);
-		}
-
-		// Filter by tax class.
-		if ( ! empty( $request['tax_class'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args,
-				array(
-					'key'   => '_tax_class',
-					'value' => 'standard' !== $request['tax_class'] ? $request['tax_class'] : '',
-				)
-			);
-		}
-
-		// Price filter.
-		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
-		}
-
-		// Filter product based on stock_status.
-		if ( ! empty( $request['stock_status'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args,
-				array(
-					'key'   => '_stock_status',
-					'value' => $request['stock_status'],
-				)
-			);
-		}
-
-		// Filter by on sale products.
-		if ( is_bool( $request['on_sale'] ) ) {
-			$on_sale_key = $request['on_sale'] ? 'post__in' : 'post__not_in';
-			$on_sale_ids = wc_get_product_ids_on_sale();
-
-			// Use 0 when there's no on sale products to avoid return all products.
-			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
-
-			$args[ $on_sale_key ] += $on_sale_ids;
-		}
-
-		// Force the post_type argument, since it's not a user input variable.
-		if ( ! empty( $request['sku'] ) ) {
-			$args['post_type'] = array( 'product', 'product_variation' );
-		} else {
-			$args['post_type'] = $this->post_type;
-		}
-
-		$args['post_parent'] = $request['product_id'];
-
-		return $args;
-	}
-
-	/**
 	 * Get the query params for collections of attachments.
 	 *
 	 * @return array
@@ -854,7 +1188,29 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+		$params['search'] = array(
+			'description'       => __( 'Search by similar product name or sku.', 'woocommerce' ),
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
 
 		return $params;
+	}
+
+	/**
+	 * Get a collection of posts and add the post title filter option to WP_Query.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_items( $request ) {
+		add_filter( 'posts_where', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_filter' ), 10, 2 );
+		add_filter( 'posts_join', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_join' ), 10, 2 );
+		add_filter( 'posts_groupby', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_group_by' ), 10, 2 );
+		$response = parent::get_items( $request );
+		remove_filter( 'posts_where', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_filter' ), 10 );
+		remove_filter( 'posts_join', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_join' ), 10 );
+		remove_filter( 'posts_groupby', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_group_by' ), 10 );
+		return $response;
 	}
 }

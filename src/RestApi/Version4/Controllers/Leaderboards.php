@@ -4,24 +4,17 @@
  *
  * Handles requests to /leaderboards
  *
- * @package WooCommerce Admin/API
+ * @package WooCommerce/RestApi
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Leaderboards controller.
- *
- * @package WooCommerce Admin/API
- * @extends WC_REST_Data_Controller
+ * REST API Leaderboards class.
  */
-class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v4';
+class Leaderboards extends AbstractController {
 
 	/**
 	 * Route base.

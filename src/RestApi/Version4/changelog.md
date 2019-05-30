@@ -7,6 +7,8 @@
 - Orders - Added order number to schema.
 - Product Reviews - Updated response links.
 - Products - Added `low_in_stock` and `search` parameter.
+- Product Variations - Added `search` parameter.
+- Product Variations - Added `name`, `type`, `parent_id` to schema.
 - Reports - Updated with updated list of available reports.
 - Taxes - Added `code` and `include` params.
 
@@ -32,6 +34,7 @@
 - `reports/downloads/stats`
 - `reports/import`
 - `data/download-ips`
+- `leaderboards`
 
 ## Removed endpoints
 

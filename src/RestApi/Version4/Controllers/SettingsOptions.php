@@ -5,25 +5,16 @@
  * Handles requests to the /settings/$group/$setting endpoints.
  *
  * @package WooCommerce/RestApi
- * @since   3.0.0
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Setting Options controller class.
- *
- * @package WooCommerce/RestApi
- * @extends WC_REST_Controller
  */
-class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
-
-	/**
-	 * WP REST API namespace/version.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v2';
+class SettingsOptions extends AbstractController {
 
 	/**
 	 * Route base.
@@ -39,7 +30,9 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				'args'   => array(
 					'group' => array(
 						'description' => __( 'Settings group ID.', 'woocommerce' ),
@@ -56,7 +49,9 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/batch', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/batch',
+			array(
 				'args'   => array(
 					'group' => array(
 						'description' => __( 'Settings group ID.', 'woocommerce' ),
@@ -74,7 +69,9 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\w-]+)',
+			array(
 				'args'   => array(
 					'group' => array(
 						'description' => __( 'Settings group ID.', 'woocommerce' ),
@@ -150,7 +147,6 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Get all settings in a group.
 	 *
-	 * @since  3.0.0
 	 * @param string $group_id Group ID.
 	 * @return array|WP_Error
 	 */
@@ -159,7 +155,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 			return new WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$settings = apply_filters( 'woocommerce_settings-' . $group_id, array() );
+		$settings = apply_filters( 'woocommerce_settings-' . $group_id, array() ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 
 		if ( empty( $settings ) ) {
 			return new WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
@@ -185,6 +181,20 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 			} elseif ( 'single_select_country' === $setting['type'] ) {
 				$setting['type']    = 'select';
 				$setting['options'] = $this->get_countries_and_states();
+			} elseif ( 'single_select_page' === $setting['type'] ) {
+				$pages   = get_pages(
+					array(
+						'sort_column'  => 'menu_order',
+						'sort_order'   => 'ASC',
+						'hierarchical' => 0,
+					)
+				);
+				$options = array();
+				foreach ( $pages as $page ) {
+					$options[ $page->ID ] = ! empty( $page->post_title ) ? $page->post_title : '#' . $page->ID;
+				}
+				$setting['type']    = 'select';
+				$setting['options'] = $options;
 			}
 
 			$filtered_settings[] = $setting;
@@ -204,11 +214,10 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 		if ( ! $countries ) {
 			return array();
 		}
-
 		$output = array();
-
 		foreach ( $countries as $key => $value ) {
 			$states = WC()->countries->get_states( $key );
+
 			if ( $states ) {
 				foreach ( $states as $state_key => $state_value ) {
 					$output[ $key . ':' . $state_key ] = $value . ' - ' . $state_value;
@@ -217,7 +226,6 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 				$output[ $key ] = $value;
 			}
 		}
-
 		return $output;
 	}
 
@@ -251,6 +259,12 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 		if ( ! $this->is_setting_type_valid( $setting['type'] ) ) {
 			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
+
+		if ( is_wp_error( $setting ) ) {
+			return $setting;
+		}
+
+		$setting['group_id'] = $group_id;
 
 		return $setting;
 	}
@@ -442,7 +456,6 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Callback for allowed keys for each setting response.
 	 *
-	 * @since  3.0.0
 	 * @param  string $key Key to check.
 	 * @return boolean
 	 */
@@ -450,6 +463,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 		return in_array(
 			$key, array(
 				'id',
+				'group_id',
 				'label',
 				'description',
 				'default',
@@ -459,7 +473,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 				'options',
 				'value',
 				'option_key',
-			)
+			), true
 		);
 	}
 
@@ -492,7 +506,6 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Get the settings schema, conforming to JSON Schema.
 	 *
-	 * @since 3.0.0
 	 * @return array
 	 */
 	public function get_item_schema() {
@@ -503,6 +516,15 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 			'properties' => array(
 				'id'          => array(
 					'description' => __( 'A unique identifier for the setting.', 'woocommerce' ),
+					'type'        => 'string',
+					'arg_options' => array(
+						'sanitize_callback' => 'sanitize_title',
+					),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'group_id'    => array(
+					'description' => __( 'An identifier for the group this setting belongs to.', 'woocommerce' ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_title',
@@ -564,7 +586,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 					'context'     => array( 'view', 'edit' ),
-					'enum'        => array( 'text', 'email', 'number', 'color', 'password', 'textarea', 'select', 'multiselect', 'radio', 'image_width', 'checkbox', 'thumbnail_cropping' ),
+					'enum'        => array( 'text', 'email', 'number', 'color', 'password', 'textarea', 'select', 'multiselect', 'radio', 'image_width', 'checkbox' ),
 					'readonly'    => true,
 				),
 				'options'     => array(
