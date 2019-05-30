@@ -7,24 +7,23 @@
  * @package WooCommerce/RestApi
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+namespace WooCommerce\RestApi\Version4\Controllers;
+
+defined( 'ABSPATH' ) || exit;
+
+use \WC_REST_Posts_Controller;
 
 /**
  * REST API Coupons controller class.
- *
- * @package WooCommerce/RestApi
- * @extends WC_REST_Posts_Controller
  */
-class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
+class Coupons extends WC_REST_Posts_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.
@@ -250,6 +249,11 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 		if ( ! empty( $request['code'] ) ) {
 			$id               = wc_get_coupon_id_by_code( $request['code'] );
 			$args['post__in'] = array( $id );
+		}
+
+		if ( ! empty( $request['search'] ) ) {
+			$args['search'] = $request['search'];
+			$args['s']      = false;
 		}
 
 		// Get only ids.
@@ -542,6 +546,12 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
+		$params['search'] = array(
+			'description'       => __( 'Limit results to coupons with codes matching a given string.', 'woocommerce' ),
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
 		return $params;
 	}
 
@@ -797,5 +807,38 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 		} catch ( Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
+	}
+
+	/**
+	 * Get a collection of posts and add the code search option to WP_Query.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_items( $request ) {
+		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_search_code_filter' ), 10, 2 );
+		$response = parent::get_items( $request );
+		remove_filter( 'posts_where', array( __CLASS__, 'add_wp_query_search_code_filter' ), 10 );
+		return $response;
+	}
+
+	/**
+	 * Add code searching to the WP Query
+	 *
+	 * @param string $where Where clause used to search posts.
+	 * @param object $wp_query WP_Query object.
+	 * @return string
+	 */
+	public static function add_wp_query_search_code_filter( $where, $wp_query ) {
+		global $wpdb;
+
+		$search = $wp_query->get( 'search' );
+		if ( $search ) {
+			$search = $wpdb->esc_like( $search );
+			$search = "'%" . $search . "%'";
+			$where .= ' AND ' . $wpdb->posts . '.post_title LIKE ' . $search;
+		}
+
+		return $where;
 	}
 }
