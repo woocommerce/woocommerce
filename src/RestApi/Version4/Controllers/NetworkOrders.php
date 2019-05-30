@@ -5,25 +5,16 @@
  * Handles requests to the /orders/network endpoint
  *
  * @package WooCommerce/RestApi
- * @since    3.4.0
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Network Orders controller class.
- *
- * @package WooCommerce/RestApi
- * @extends WC_REST_Orders_V2_Controller
  */
-class WC_REST_Network_Orders_V2_Controller extends WC_REST_Orders_V2_Controller {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v2';
+class NetworkOrders extends Orders {
 
 	/**
 	 * Register the routes for network orders.
