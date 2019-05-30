@@ -4,30 +4,26 @@
  *
  * Handles requests to the /taxes/classes endpoint.
  *
- * @author   WooThemes
- * @category API
  * @package WooCommerce/RestApi
- * @since    3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+namespace WooCommerce\RestApi\Version4\Controllers;
+
+defined( 'ABSPATH' ) || exit;
+
+use \WC_REST_Terms_Controller;
 
 /**
- * REST API Tax Classes controller class.
- *
- * @package WooCommerce/RestApi
- * @extends WC_REST_Controller
+ * REST API Tax Class controller class.
  */
-class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {
+class TaxClasses extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.
@@ -40,43 +36,51 @@ class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {
 	 * Register the routes for tax classes.
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base,
 			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				'args'                => $this->get_collection_params(),
-			),
-			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'create_item' ),
-				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
-
-		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<slug>\w[\w\s\-]*)', array(
-			'args' => array(
-				'slug' => array(
-					'description' => __( 'Unique slug for the resource.', 'woocommerce' ),
-					'type'        => 'string',
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
 				),
-			),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'create_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<slug>\w[\w\s\-]*)',
 			array(
-				'methods'             => WP_REST_Server::DELETABLE,
-				'callback'            => array( $this, 'delete_item' ),
-				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
-				'args'                => array(
-					'force' => array(
-						'default'     => false,
-						'type'        => 'boolean',
-						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
+				'args' => array(
+					'slug' => array(
+						'description' => __( 'Unique slug for the resource.', 'woocommerce' ),
+						'type'        => 'string',
 					),
 				),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_item' ),
+					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+					'args'                => array(
+						'force' => array(
+							'default'     => false,
+							'type'        => 'boolean',
+							'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
+						),
+					),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -126,7 +130,7 @@ class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Get all tax classes.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request params.
 	 * @return array
 	 */
 	public function get_items( $request ) {
@@ -248,14 +252,19 @@ class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {
 		update_option( 'woocommerce_tax_classes', implode( "\n", $classes ) );
 
 		// Delete tax rate locations locations from the selected class.
-		$wpdb->query( $wpdb->prepare( "
-			DELETE locations.*
-			FROM {$wpdb->prefix}woocommerce_tax_rate_locations AS locations
-			INNER JOIN
-				{$wpdb->prefix}woocommerce_tax_rates AS rates
-				ON rates.tax_rate_id = locations.tax_rate_id
-			WHERE rates.tax_rate_class = '%s'
-		", $tax_class['slug'] ) );
+		$wpdb->query(
+			$wpdb->prepare(
+				"
+				DELETE locations.*
+				FROM {$wpdb->prefix}woocommerce_tax_rate_locations AS locations
+				INNER JOIN
+					{$wpdb->prefix}woocommerce_tax_rates AS rates
+					ON rates.tax_rate_id = locations.tax_rate_id
+				WHERE rates.tax_rate_class = %s
+				",
+				$tax_class['slug']
+			)
+		);
 
 		// Delete tax rates in the selected class.
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_class' => $tax_class['slug'] ), array( '%s' ) );
@@ -278,7 +287,7 @@ class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single tax class output for response.
 	 *
-	 * @param array $tax_class Tax class data.
+	 * @param array           $tax_class Tax class data.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
