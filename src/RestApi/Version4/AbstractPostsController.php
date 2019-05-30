@@ -2,28 +2,21 @@
 /**
  * Abstract Rest Posts Controller Class
  *
- * @class WC_REST_Posts_Controller
  * @package WooCommerce/RestApi
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+namespace WooCommerce\RestApi\Version4;
+
+defined( 'ABSPATH' ) || exit;
+
+use AbstractController;
 
 /**
- * WC_REST_Posts_Controller
+ * POSTS Controller.
  *
- * @package WooCommerce/RestApi
- * @version  2.6.0
+ * @extends AbstractController
  */
-abstract class WC_REST_Posts_Controller extends WC_REST_Controller {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v1';
+abstract class AbstractPostsController extends AbstractController {
 
 	/**
 	 * Route base.

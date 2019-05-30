@@ -8,17 +8,16 @@
  * It's required to follow "Controller Classes" guide before extending this class:
  * <https://developer.wordpress.org/rest-api/extending-the-rest-api/controller-classes/>
  *
- * NOTE THAT ONLY CODE RELEVANT FOR MOST ENDPOINTS SHOULD BE INCLUDED INTO THIS CLASS.
- * If necessary extend this class and create new abstract classes like `WC_REST_CRUD_Controller` or `WC_REST_Terms_Controller`.
- *
  * @class   WC_REST_Controller
- * @package WooCommerce/RestApi
  * @see     https://developer.wordpress.org/rest-api/extending-the-rest-api/controller-classes/
+ * @package WooCommerce/RestApi
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+namespace WooCommerce\RestApi\Version4;
+
+defined( 'ABSPATH' ) || exit;
+
+use \WP_REST_Controller;
 
 /**
  * Abstract Rest Controller Class
@@ -27,14 +26,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @extends  WP_REST_Controller
  * @version  2.6.0
  */
-abstract class WC_REST_Controller extends WP_REST_Controller {
+abstract class AbstractController extends WP_REST_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.

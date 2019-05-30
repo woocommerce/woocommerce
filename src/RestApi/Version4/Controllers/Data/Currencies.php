@@ -19,13 +19,6 @@ use \WooCommerce\RestApi\Version4\Controllers\Data as DataController;
 class Currencies extends DataController {
 
 	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v4';
-
-	/**
 	 * Route base.
 	 *
 	 * @var string

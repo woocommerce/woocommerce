@@ -2,28 +2,21 @@
 /**
  * Abstract Rest CRUD Controller Class
  *
- * @class    WC_REST_CRUD_Controller
  * @package WooCommerce/RestApi
- * @version  3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+namespace WooCommerce\RestApi\Version4;
+
+defined( 'ABSPATH' ) || exit;
+
+use AbstractPostsController;
 
 /**
- * WC_REST_CRUD_Controller class.
+ * CRUD Object Controller.
  *
  * @extends WC_REST_Posts_Controller
  */
-abstract class WC_REST_CRUD_Controller extends WC_REST_Posts_Controller {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v2';
+abstract class AbstractObjectsController extends AbstractPostsController {
 
 	/**
 	 * If object is hierarchical.

@@ -17,12 +17,6 @@ use \WooCommerce\RestApi\Version4\Controllers\Reports as Reports;
  * REST API CustomerStats Reports class.
  */
 class CustomerStats extends Reports {
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.

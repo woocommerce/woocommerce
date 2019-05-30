@@ -31,6 +31,7 @@
 - `reports/downloads`
 - `reports/downloads/stats`
 - `reports/import`
+- `data/download-ips`
 
 ## Removed endpoints
 

@@ -19,13 +19,6 @@ use \WC_REST_Posts_Controller;
 class Coupons extends WC_REST_Posts_Controller {
 
 	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v4';
-
-	/**
 	 * Route base.
 	 *
 	 * @var string

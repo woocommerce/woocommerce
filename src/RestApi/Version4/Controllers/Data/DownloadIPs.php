@@ -17,12 +17,6 @@ use \WooCommerce\RestApi\Version4\Controllers\Data as DataController;
  * Data Download IP controller.
  */
 class DownloadIPs extends DataController {
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.

@@ -3,17 +3,18 @@
  * Abstract Rest Terms Controller
  *
  * @package WooCommerce/RestApi
- * @version  3.3.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+namespace WooCommerce\RestApi\Version4\Controllers;
+
+defined( 'ABSPATH' ) || exit;
+
+use AbstractController;
 
 /**
  * Terms controller class.
  */
-abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
+abstract class AbstractTermsContoller extends AbstractController {
 
 	/**
 	 * Route base.

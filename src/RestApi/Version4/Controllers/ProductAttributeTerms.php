@@ -11,19 +11,12 @@ namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Terms_Controller;
+use AbstractTermsContoller;
 
 /**
  * REST API Product Attribute Terms controller class.
  */
-class ProductAttributeTerms extends WC_REST_Terms_Controller {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v4';
+class ProductAttributeTerms extends AbstractTermsContoller {
 
 	/**
 	 * Route base.

@@ -19,19 +19,11 @@ use \WooCommerce\RestApi\Version4\Controllers\Reports as Reports;
 class CouponStats extends Reports {
 
 	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v4';
-
-	/**
 	 * Route base.
 	 *
 	 * @var string
 	 */
 	protected $rest_base = 'reports/coupons/stats';
-
 
 	/**
 	 * Maps query arguments from the REST request.

@@ -19,13 +19,6 @@ use \WooCommerce\RestApi\Version4\Controllers\Reports as Reports;
 class Variations extends Reports {
 
 	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v4';
-
-	/**
 	 * Route base.
 	 *
 	 * @var string

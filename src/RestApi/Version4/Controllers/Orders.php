@@ -18,14 +18,6 @@ use \WC_REST_CRUD_Controller;
  */
 class Orders extends WC_REST_CRUD_Controller {
 
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v4';
-
 	/**
 	 * Route base.
 	 *

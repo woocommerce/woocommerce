@@ -19,13 +19,6 @@ use \WooCommerce\RestApi\Version4\Controllers\Orders as Orders;
 class OrderRefunds extends Orders {
 
 	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v4';
-
-	/**
 	 * Route base.
 	 *
 	 * @var string

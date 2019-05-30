@@ -8,24 +8,19 @@
  * @since    3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+namespace WooCommerce\RestApi\Version4\Controllers;
+
+defined( 'ABSPATH' ) || exit;
+
+use AbstractController;
 
 /**
  * REST API Shipping Zones base class.
  *
  * @package WooCommerce/RestApi
- * @extends WC_REST_Controller
+ * @extends AbstractController
  */
-abstract class WC_REST_Shipping_Zones_Controller_Base extends WC_REST_Controller {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v2';
+abstract class WC_REST_Shipping_Zones_Controller_Base extends AbstractController {
 
 	/**
 	 * Route base.

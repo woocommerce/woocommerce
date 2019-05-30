@@ -19,13 +19,6 @@ use \WC_REST_Controller;
 class Webhooks extends WC_REST_Controller {
 
 	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v4';
-
-	/**
 	 * Route base.
 	 *
 	 * @var string
