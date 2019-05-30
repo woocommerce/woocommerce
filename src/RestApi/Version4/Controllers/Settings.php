@@ -5,25 +5,16 @@
  * Handles requests to the /settings endpoints.
  *
  * @package WooCommerce/RestApi
- * @since   3.0.0
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Settings controller class.
- *
- * @package WooCommerce/RestApi
- * @extends WC_REST_Controller
  */
-class WC_REST_Settings_V2_Controller extends WC_REST_Controller {
-
-	/**
-	 * WP REST API namespace/version.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v2';
+class Settings extends AbstractController {
 
 	/**
 	 * Route base.
@@ -39,7 +30,9 @@ class WC_REST_Settings_V2_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -48,6 +41,45 @@ class WC_REST_Settings_V2_Controller extends WC_REST_Controller {
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/batch',
+			array(
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'batch_items' ),
+					'permission_callback' => array( $this, 'update_items_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_public_batch_schema' ),
+			)
+		);
+	}
+
+	/**
+	 * Makes sure the current user has access to WRITE the settings APIs.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function update_items_permissions_check( $request ) {
+		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Update a setting.
+	 *
+	 * @param  WP_REST_Request $request Request data.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function update_item( $request ) {
+		$options_controller = new WC_REST_Setting_Options_Controller();
+		$response           = $options_controller->update_item( $request );
+
+		return $response;
 	}
 
 	/**
@@ -197,32 +229,27 @@ class WC_REST_Settings_V2_Controller extends WC_REST_Controller {
 				'id'          => array(
 					'description' => __( 'A unique identifier that can be used to link settings together.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
 				),
 				'label'       => array(
 					'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
 				),
 				'description' => array(
 					'description' => __( 'A human readable description for the setting used in interfaces.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
 				),
 				'parent_id'   => array(
 					'description' => __( 'ID of parent grouping.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
 				),
 				'sub_groups'  => array(
 					'description' => __( 'IDs for settings sub groups.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
 				),
 			),
 		);
