@@ -7,6 +7,7 @@
 - Orders - Added order number to schema.
 - Product Reviews - Updated response links.
 - Products - Added `low_in_stock` and `search` parameter.
+- Reports - Updated with updated list of available reports.
 
 ## New endpoints
 
