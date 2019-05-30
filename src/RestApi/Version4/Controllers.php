@@ -9,20 +9,16 @@ namespace WooCommerce\RestApi\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
-use WooCommerce\Utilities\SingletonTrait;
-
 /**
- * Main V4 namespace class.
+ * Controllers class.
  */
-class Main {
-	use SingletonTrait;
-
+class Controllers {
 	/**
 	 * Return a list of controller classes for this REST API namespace.
 	 *
 	 * @return array
 	 */
-	public function get_controllers() {
+	public static function get_controllers() {
 		$controllers = [
 			'coupons'                  => __NAMESPACE__ . '\Controllers\Coupons',
 			'customer-downloads'       => __NAMESPACE__ . '\Controllers\CustomerDownloads',

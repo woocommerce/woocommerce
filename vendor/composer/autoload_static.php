@@ -7,12 +7,16 @@ namespace Composer\Autoload;
 class ComposerStaticInitf71e7bc9895f702f48d84a180f514421
 {
     public static $classMap = array (
+        'WC_REST_Blocks_Controllers' => __DIR__ . '/../..' . '/src/RestApi/Blocks/Version1/class-wc-rest-blocks-controllers.php',
         'WC_REST_Blocks_Product_Attribute_Terms_Controller' => __DIR__ . '/../..' . '/src/RestApi/Blocks/Version1/class-wc-rest-blocks-product-attribute-terms-controller.php',
         'WC_REST_Blocks_Product_Attributes_Controller' => __DIR__ . '/../..' . '/src/RestApi/Blocks/Version1/class-wc-rest-blocks-product-attributes-controller.php',
         'WC_REST_Blocks_Product_Categories_Controller' => __DIR__ . '/../..' . '/src/RestApi/Blocks/Version1/class-wc-rest-blocks-product-categories-controller.php',
         'WC_REST_Blocks_Products_Controller' => __DIR__ . '/../..' . '/src/RestApi/Blocks/Version1/class-wc-rest-blocks-products-controller.php',
         'WC_REST_CRUD_Controller' => __DIR__ . '/../..' . '/src/RestApi/Version3/class-wc-rest-crud-controller.php',
         'WC_REST_Controller' => __DIR__ . '/../..' . '/src/RestApi/Version3/class-wc-rest-controller.php',
+        'WC_REST_Controllers_V1' => __DIR__ . '/../..' . '/src/RestApi/Version1/class-wc-rest-controllers-v1.php',
+        'WC_REST_Controllers_V2' => __DIR__ . '/../..' . '/src/RestApi/Version2/class-wc-rest-controllers-v2.php',
+        'WC_REST_Controllers_V3' => __DIR__ . '/../..' . '/src/RestApi/Version3/class-wc-rest-controllers-v3.php',
         'WC_REST_Coupons_Controller' => __DIR__ . '/../..' . '/src/RestApi/Version3/class-wc-rest-coupons-controller.php',
         'WC_REST_Coupons_V1_Controller' => __DIR__ . '/../..' . '/src/RestApi/Version1/class-wc-rest-coupons-v1-controller.php',
         'WC_REST_Coupons_V2_Controller' => __DIR__ . '/../..' . '/src/RestApi/Version2/class-wc-rest-coupons-v2-controller.php',
@@ -107,6 +111,7 @@ class ComposerStaticInitf71e7bc9895f702f48d84a180f514421
         'WC_REST_Webhooks_V1_Controller' => __DIR__ . '/../..' . '/src/RestApi/Version1/class-wc-rest-webhooks-v1-controller.php',
         'WC_REST_Webhooks_V2_Controller' => __DIR__ . '/../..' . '/src/RestApi/Version2/class-wc-rest-webhooks-v2-controller.php',
         'WooCommerce\\RestApi' => __DIR__ . '/../..' . '/src/RestApi.php',
+        'WooCommerce\\RestApi\\Version4\\Controllers' => __DIR__ . '/../..' . '/src/RestApi/Version4/Controllers.php',
         'WooCommerce\\RestApi\\Version4\\Controllers\\AbstractController' => __DIR__ . '/../..' . '/src/RestApi/Version4/Controllers/AbstractController.php',
         'WooCommerce\\RestApi\\Version4\\Controllers\\AbstractObjectsController' => __DIR__ . '/../..' . '/src/RestApi/Version4/Controllers/AbstractObjectsController.php',
         'WooCommerce\\RestApi\\Version4\\Controllers\\AbstractPostsController' => __DIR__ . '/../..' . '/src/RestApi/Version4/Controllers/AbstractPostsController.php',
@@ -168,7 +173,6 @@ class ComposerStaticInitf71e7bc9895f702f48d84a180f514421
         'WooCommerce\\RestApi\\Version4\\Controllers\\TaxClasses' => __DIR__ . '/../..' . '/src/RestApi/Version4/Controllers/TaxClasses.php',
         'WooCommerce\\RestApi\\Version4\\Controllers\\Taxes' => __DIR__ . '/../..' . '/src/RestApi/Version4/Controllers/Taxes.php',
         'WooCommerce\\RestApi\\Version4\\Controllers\\Webhooks' => __DIR__ . '/../..' . '/src/RestApi/Version4/Controllers/Webhooks.php',
-        'WooCommerce\\RestApi\\Version4\\Main' => __DIR__ . '/../..' . '/src/RestApi/Version4/Main.php',
         'WooCommerce\\Utilities\\SingletonTrait' => __DIR__ . '/../..' . '/src/Utilities/SingletonTrait.php',
     );
 

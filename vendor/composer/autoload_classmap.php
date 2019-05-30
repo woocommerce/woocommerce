@@ -6,12 +6,16 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'WC_REST_Blocks_Controllers' => $baseDir . '/src/RestApi/Blocks/Version1/class-wc-rest-blocks-controllers.php',
     'WC_REST_Blocks_Product_Attribute_Terms_Controller' => $baseDir . '/src/RestApi/Blocks/Version1/class-wc-rest-blocks-product-attribute-terms-controller.php',
     'WC_REST_Blocks_Product_Attributes_Controller' => $baseDir . '/src/RestApi/Blocks/Version1/class-wc-rest-blocks-product-attributes-controller.php',
     'WC_REST_Blocks_Product_Categories_Controller' => $baseDir . '/src/RestApi/Blocks/Version1/class-wc-rest-blocks-product-categories-controller.php',
     'WC_REST_Blocks_Products_Controller' => $baseDir . '/src/RestApi/Blocks/Version1/class-wc-rest-blocks-products-controller.php',
     'WC_REST_CRUD_Controller' => $baseDir . '/src/RestApi/Version3/class-wc-rest-crud-controller.php',
     'WC_REST_Controller' => $baseDir . '/src/RestApi/Version3/class-wc-rest-controller.php',
+    'WC_REST_Controllers_V1' => $baseDir . '/src/RestApi/Version1/class-wc-rest-controllers-v1.php',
+    'WC_REST_Controllers_V2' => $baseDir . '/src/RestApi/Version2/class-wc-rest-controllers-v2.php',
+    'WC_REST_Controllers_V3' => $baseDir . '/src/RestApi/Version3/class-wc-rest-controllers-v3.php',
     'WC_REST_Coupons_Controller' => $baseDir . '/src/RestApi/Version3/class-wc-rest-coupons-controller.php',
     'WC_REST_Coupons_V1_Controller' => $baseDir . '/src/RestApi/Version1/class-wc-rest-coupons-v1-controller.php',
     'WC_REST_Coupons_V2_Controller' => $baseDir . '/src/RestApi/Version2/class-wc-rest-coupons-v2-controller.php',
@@ -106,6 +110,7 @@ return array(
     'WC_REST_Webhooks_V1_Controller' => $baseDir . '/src/RestApi/Version1/class-wc-rest-webhooks-v1-controller.php',
     'WC_REST_Webhooks_V2_Controller' => $baseDir . '/src/RestApi/Version2/class-wc-rest-webhooks-v2-controller.php',
     'WooCommerce\\RestApi' => $baseDir . '/src/RestApi.php',
+    'WooCommerce\\RestApi\\Version4\\Controllers' => $baseDir . '/src/RestApi/Version4/Controllers.php',
     'WooCommerce\\RestApi\\Version4\\Controllers\\AbstractController' => $baseDir . '/src/RestApi/Version4/Controllers/AbstractController.php',
     'WooCommerce\\RestApi\\Version4\\Controllers\\AbstractObjectsController' => $baseDir . '/src/RestApi/Version4/Controllers/AbstractObjectsController.php',
     'WooCommerce\\RestApi\\Version4\\Controllers\\AbstractPostsController' => $baseDir . '/src/RestApi/Version4/Controllers/AbstractPostsController.php',
@@ -167,6 +172,5 @@ return array(
     'WooCommerce\\RestApi\\Version4\\Controllers\\TaxClasses' => $baseDir . '/src/RestApi/Version4/Controllers/TaxClasses.php',
     'WooCommerce\\RestApi\\Version4\\Controllers\\Taxes' => $baseDir . '/src/RestApi/Version4/Controllers/Taxes.php',
     'WooCommerce\\RestApi\\Version4\\Controllers\\Webhooks' => $baseDir . '/src/RestApi/Version4/Controllers/Webhooks.php',
-    'WooCommerce\\RestApi\\Version4\\Main' => $baseDir . '/src/RestApi/Version4/Main.php',
     'WooCommerce\\Utilities\\SingletonTrait' => $baseDir . '/src/Utilities/SingletonTrait.php',
 );

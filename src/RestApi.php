@@ -40,7 +40,7 @@ class RestApi {
 	 */
 	public function register_rest_routes() {
 		foreach ( $this->get_rest_namespaces() as $namespace => $namespace_class ) {
-			$controllers = $namespace_class::instance()->get_controllers();
+			$controllers = $namespace_class::get_controllers();
 
 			foreach ( $controllers as $controller_name => $controller_class ) {
 				$this->endpoints[ $namespace ][ $controller_name ] = new $controller_class();
@@ -52,132 +52,36 @@ class RestApi {
 	/**
 	 * Get API namespaces - new namespaces should be registered here.
 	 *
-	 * @return array
+	 * @return array List of Namespaces and Main controller classes.
 	 */
 	protected function get_rest_namespaces() {
 		return [
-			//'wc/v1',
-			//'wc/v2',
-			'wc/v3' => '\WooCommerce\RestApi\Version4\Main',
-			//'wc-blocks/v1',
+			'wc/v1'        => 'WC_REST_Controllers_V1',
+			'wc/v2'        => 'WC_REST_Controllers_V2',
+			'wc/v3'        => 'WC_REST_Controllers_V3',
+			'wc/v4'        => '\WooCommerce\RestApi\Version4\Controllers',
+			'wc-blocks/v1' => 'WC_REST_Blocks_Controllers',
 		];
 	}
 
 	/**
-	 * Get API controllers - new controllers/endpoints should be registered here.
+	 * Get data from a WooCommerce API endpoint.
 	 *
-	 * @param string $namespace Namespace to get controllers for.
-	 * @return array
+	 * @param string $endpoint Endpoint.
+	 * @param array  $params Params to passwith request.
+	 * @return array|WP_Error
 	 */
-	protected function get_rest_controllers( $namespace ) {
-		switch ( $namespace ) {
-			case 'wc/v1':
-				return [
-					'WC_REST_Coupons_V1_Controller',
-					'WC_REST_Customer_Downloads_V1_Controller',
-					'WC_REST_Customers_V1_Controller',
-					'WC_REST_Order_Notes_V1_Controller',
-					'WC_REST_Order_Refunds_V1_Controller',
-					'WC_REST_Orders_V1_Controller',
-					'WC_REST_Product_Attribute_Terms_V1_Controller',
-					'WC_REST_Product_Attributes_V1_Controller',
-					'WC_REST_Product_Categories_V1_Controller',
-					'WC_REST_Product_Reviews_V1_Controller',
-					'WC_REST_Product_Shipping_Classes_V1_Controller',
-					'WC_REST_Product_Tags_V1_Controller',
-					'WC_REST_Products_V1_Controller',
-					'WC_REST_Report_Sales_V1_Controller',
-					'WC_REST_Report_Top_Sellers_V1_Controller',
-					'WC_REST_Reports_V1_Controller',
-					'WC_REST_Tax_Classes_V1_Controller',
-					'WC_REST_Taxes_V1_Controller',
-					'WC_REST_Webhook_Deliveries_V1_Controller',
-					'WC_REST_Webhooks_V1_Controller',
-				];
-			case 'wc/v2':
-				return [
-					'WC_REST_Coupons_V2_Controller',
-					'WC_REST_Customer_Downloads_V2_Controller',
-					'WC_REST_Customers_V2_Controller',
-					'WC_REST_Network_Orders_V2_Controller',
-					'WC_REST_Order_Notes_V2_Controller',
-					'WC_REST_Order_Refunds_V2_Controller',
-					'WC_REST_Orders_V2_Controller',
-					'WC_REST_Product_Attribute_Terms_V2_Controller',
-					'WC_REST_Product_Attributes_V2_Controller',
-					'WC_REST_Product_Categories_V2_Controller',
-					'WC_REST_Product_Reviews_V2_Controller',
-					'WC_REST_Product_Shipping_Classes_V2_Controller',
-					'WC_REST_Product_Tags_V2_Controller',
-					'WC_REST_Products_V2_Controller',
-					'WC_REST_Product_Variations_V2_Controller',
-					'WC_REST_Report_Sales_V2_Controller',
-					'WC_REST_Report_Top_Sellers_V2_Controller',
-					'WC_REST_Reports_V2_Controller',
-					'WC_REST_Settings_V2_Controller',
-					'WC_REST_Setting_Options_V2_Controller',
-					'WC_REST_Shipping_Zones_V2_Controller',
-					'WC_REST_Shipping_Zone_Locations_V2_Controller',
-					'WC_REST_Shipping_Zone_Methods_V2_Controller',
-					'WC_REST_Tax_Classes_V2_Controller',
-					'WC_REST_Taxes_V2_Controller',
-					'WC_REST_Webhook_Deliveries_V2_Controller',
-					'WC_REST_Webhooks_V2_Controller',
-					'WC_REST_System_Status_V2_Controller',
-					'WC_REST_System_Status_Tools_V2_Controller',
-					'WC_REST_Shipping_Methods_V2_Controller',
-					'WC_REST_Payment_Gateways_V2_Controller',
-				];
-			case 'wc/v3':
-				return [
-					'WC_REST_Coupons_Controller',
-					'WC_REST_Customer_Downloads_Controller',
-					'WC_REST_Customers_Controller',
-					'WC_REST_Network_Orders_Controller',
-					'WC_REST_Order_Notes_Controller',
-					'WC_REST_Order_Refunds_Controller',
-					'WC_REST_Orders_Controller',
-					'WC_REST_Product_Attribute_Terms_Controller',
-					'WC_REST_Product_Attributes_Controller',
-					'WC_REST_Product_Categories_Controller',
-					'WC_REST_Product_Reviews_Controller',
-					'WC_REST_Product_Shipping_Classes_Controller',
-					'WC_REST_Product_Tags_Controller',
-					'WC_REST_Products_Controller',
-					'WC_REST_Product_Variations_Controller',
-					'WC_REST_Report_Sales_Controller',
-					'WC_REST_Report_Top_Sellers_Controller',
-					'WC_REST_Report_Orders_Totals_Controller',
-					'WC_REST_Report_Products_Totals_Controller',
-					'WC_REST_Report_Customers_Totals_Controller',
-					'WC_REST_Report_Coupons_Totals_Controller',
-					'WC_REST_Report_Reviews_Totals_Controller',
-					'WC_REST_Reports_Controller',
-					'WC_REST_Settings_Controller',
-					'WC_REST_Setting_Options_Controller',
-					'WC_REST_Shipping_Zones_Controller',
-					'WC_REST_Shipping_Zone_Locations_Controller',
-					'WC_REST_Shipping_Zone_Methods_Controller',
-					'WC_REST_Tax_Classes_Controller',
-					'WC_REST_Taxes_Controller',
-					'WC_REST_Webhooks_Controller',
-					'WC_REST_System_Status_Controller',
-					'WC_REST_System_Status_Tools_Controller',
-					'WC_REST_Shipping_Methods_Controller',
-					'WC_REST_Payment_Gateways_Controller',
-					'WC_REST_Data_Controller',
-					'WC_REST_Data_Continents_Controller',
-					'WC_REST_Data_Countries_Controller',
-					'WC_REST_Data_Currencies_Controller',
-				];
-			case 'wc-blocks/v1':
-				return [
-					'WC_REST_Blocks_Product_Attributes_Controller',
-					'WC_REST_Blocks_Product_Attribute_Terms_Controller',
-					'WC_REST_Blocks_Product_Categories_Controller',
-					'WC_REST_Blocks_Products_Controller',
-				];
+	public function get_endpoint_data( $endpoint, $params = array() ) {
+		$request = new \WP_REST_Request( 'GET', $endpoint );
+
+		if ( $params ) {
+			$request->set_query_params( $params );
 		}
-		return [];
+
+		$response = \rest_do_request( $request );
+		$server   = \rest_get_server();
+		$json     = wp_json_encode( $server->response_to_data( $response, false ) );
+
+		return json_decode( $json, true );
 	}
 }
