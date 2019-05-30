@@ -34,7 +34,7 @@ class Data extends AbstractController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
@@ -47,11 +47,11 @@ class Data extends AbstractController {
 	 * Check whether a given request has permission to read site data.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -61,11 +61,11 @@ class Data extends AbstractController {
 	 * Check whether a given request has permission to read site settings.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -76,7 +76,7 @@ class Data extends AbstractController {
 	 *
 	 * @since  3.5.0
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$data      = array();

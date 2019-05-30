@@ -58,9 +58,9 @@ class CustomerStats extends Reports {
 		$args['customers']           = $request['customers'];
 
 		$between_params_numeric    = array( 'orders_count', 'total_spend', 'avg_order_value' );
-		$normalized_params_numeric = WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params_numeric, false );
+		$normalized_params_numeric = \WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params_numeric, false );
 		$between_params_date       = array( 'last_active', 'registered' );
-		$normalized_params_date    = WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params_date, true );
+		$normalized_params_date    = \WC_Admin_Reports_Interval::normalize_between_params( $request, $between_params_date, true );
 		$args                      = array_merge( $args, $normalized_params_numeric, $normalized_params_date );
 
 		return $args;
@@ -70,11 +70,11 @@ class CustomerStats extends Reports {
 	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$query_args      = $this->prepare_reports_query( $request );
-		$customers_query = new WC_Admin_Reports_Customers_Stats_Query( $query_args );
+		$customers_query = new \WC_Admin_Reports_Customers_Stats_Query( $query_args );
 		$report_data     = $customers_query->get_data();
 		$out_data        = array(
 			'totals' => $report_data,

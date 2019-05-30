@@ -36,7 +36,7 @@ class DownloadIPs extends DataController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
@@ -50,7 +50,7 @@ class DownloadIPs extends DataController {
 	 *
 	 * @since  3.5.0
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		global $wpdb;
@@ -65,7 +65,7 @@ class DownloadIPs extends DataController {
 				)
 			);
 		} else {
-			return new WP_Error( 'woocommerce_rest_data_download_ips_invalid_request', __( 'Invalid request. Please pass the match parameter.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_data_download_ips_invalid_request', __( 'Invalid request. Please pass the match parameter.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$data = array();

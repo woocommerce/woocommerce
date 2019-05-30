@@ -5,11 +5,9 @@
  * @package WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Version4;
+namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
-
-use AbstractPostsController;
 
 /**
  * CRUD Object Controller.
@@ -27,24 +25,24 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * Get object.
 	 *
 	 * @param  int $id Object ID.
-	 * @return object WC_Data object or WP_Error object.
+	 * @return object WC_Data object or \WP_Error object.
 	 */
 	protected function get_object( $id ) {
 		// translators: %s: Class method name.
-		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
+		return new \WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
 	 * Check if a given request has access to read an item.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'read', $object->get_id() ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -54,13 +52,13 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * Check if a given request has access to update an item.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'edit', $object->get_id() ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -70,13 +68,13 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * Check if a given request has access to delete an item.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -98,11 +96,11 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * @since  3.0.0
 	 * @param  WC_Data         $object  Object data.
 	 * @param  WP_REST_Request $request Request object.
-	 * @return WP_Error|WP_REST_Response Response object on success, or WP_Error object on failure.
+	 * @return \WP_Error|WP_REST_Response Response object on success, or \WP_Error object on failure.
 	 */
 	protected function prepare_object_for_response( $object, $request ) {
 		// translators: %s: Class method name.
-		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
+		return new \WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
@@ -111,24 +109,24 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * @since  3.0.0
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
-	 * @return WP_Error|WC_Data The prepared item, or WP_Error object on failure.
+	 * @return \WP_Error|WC_Data The prepared item, or \WP_Error object on failure.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		// translators: %s: Class method name.
-		return new WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
+		return new \WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
 	}
 
 	/**
 	 * Get a single item.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( ! $object || 0 === $object->get_id() ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$data     = $this->prepare_object_for_response( $object, $request );
@@ -147,7 +145,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * @since  3.0.0
 	 * @param  WP_REST_Request $request  Full details about the request.
 	 * @param  bool            $creating If is creating a new object.
-	 * @return WC_Data|WP_Error
+	 * @return WC_Data|\WP_Error
 	 */
 	protected function save_object( $request, $creating = false ) {
 		try {
@@ -161,9 +159,9 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 
 			return $this->get_object( $object->get_id() );
 		} catch ( WC_Data_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
 
@@ -171,12 +169,12 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * Create a single item.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
 			/* translators: %s: post type */
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
 		$object = $this->save_object( $request, true );
@@ -189,10 +187,10 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 			$this->update_additional_fields_for_object( $object, $request );
 		} catch ( WC_Data_Exception $e ) {
 			$object->delete();
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
 			$object->delete();
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
 		/**
@@ -217,13 +215,13 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * Update a single post.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( ! $object || 0 === $object->get_id() ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$object = $this->save_object( $request, false );
@@ -235,9 +233,9 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 		try {
 			$this->update_additional_fields_for_object( $object, $request );
 		} catch ( WC_Data_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
 		/**
@@ -315,14 +313,14 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * @return array
 	 */
 	protected function get_objects( $query_args ) {
-		$query  = new WP_Query();
+		$query  = new \WP_Query();
 		$result = $query->query( $query_args );
 
 		$total_posts = $query->found_posts;
 		if ( $total_posts < 1 ) {
 			// Out-of-bounds, run the query again without LIMIT for total count.
 			unset( $query_args['paged'] );
-			$count_query = new WP_Query();
+			$count_query = new \WP_Query();
 			$count_query->query( $query_args );
 			$total_posts = $count_query->found_posts;
 		}
@@ -338,7 +336,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * Get a collection of posts.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$query_args    = $this->prepare_objects_query( $request );
@@ -398,7 +396,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * Delete a single item.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
 		$force  = (bool) $request['force'];
@@ -406,7 +404,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 		$result = false;
 
 		if ( ! $object || 0 === $object->get_id() ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$supports_trash = EMPTY_TRASH_DAYS > 0 && is_callable( array( $object, 'get_status' ) );
@@ -423,7 +421,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
 			/* translators: %s: post type */
-			return new WP_Error( "woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( "woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -437,14 +435,14 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
 				/* translators: %s: post type */
-				return new WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ), array( 'status' => 501 ) );
+				return new \WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ), array( 'status' => 501 ) );
 			}
 
 			// Otherwise, only trash if we haven't already.
 			if ( is_callable( array( $object, 'get_status' ) ) ) {
 				if ( 'trash' === $object->get_status() ) {
 					/* translators: %s: post type */
-					return new WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 410 ) );
+					return new \WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 410 ) );
 				}
 
 				$object->delete();
@@ -454,7 +452,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 
 		if ( ! $result ) {
 			/* translators: %s: post type */
-			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -607,8 +605,8 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 		 * type slug for the controller.
 		 *
 		 * This filter registers the collection parameter, but does not map the
-		 * collection parameter to an internal WP_Query parameter. Use the
-		 * `rest_{$this->post_type}_query` filter to set WP_Query parameters.
+		 * collection parameter to an internal \WP_Query parameter. Use the
+		 * `rest_{$this->post_type}_query` filter to set \WP_Query parameters.
 		 *
 		 * @param array        $query_params JSON Schema-formatted collection parameters.
 		 * @param WP_Post_Type $post_type    Post type object.

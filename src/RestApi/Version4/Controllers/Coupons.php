@@ -46,17 +46,17 @@ class Coupons extends AbstractPostsController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array_merge(
-						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+						$this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
 						array(
 							'code' => array(
 								'description' => __( 'Coupon code.', 'woocommerce' ),
@@ -81,7 +81,7 @@ class Coupons extends AbstractPostsController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
@@ -89,13 +89,13 @@ class Coupons extends AbstractPostsController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				array(
-					'methods'             => WP_REST_Server::DELETABLE,
+					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 					'args'                => array(
@@ -115,10 +115,10 @@ class Coupons extends AbstractPostsController {
 			'/' . $this->rest_base . '/batch',
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
 					'permission_callback' => array( $this, 'batch_items_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_batch_schema' ),
 			)
@@ -133,7 +133,7 @@ class Coupons extends AbstractPostsController {
 	 * @return WC_Data
 	 */
 	protected function get_object( $id ) {
-		return new WC_Coupon( $id );
+		return new \WC_Coupon( $id );
 	}
 
 	/**
@@ -258,17 +258,17 @@ class Coupons extends AbstractPostsController {
 	 *
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
-	 * @return WP_Error|WC_Data
+	 * @return \WP_Error|WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		$id        = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
-		$coupon    = new WC_Coupon( $id );
+		$coupon    = new \WC_Coupon( $id );
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
 
 		// Validate required POST fields.
 		if ( $creating && empty( $request['code'] ) ) {
-			return new WP_Error( 'woocommerce_rest_empty_coupon_code', sprintf( __( 'The coupon code cannot be empty.', 'woocommerce' ), 'code' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_empty_coupon_code', sprintf( __( 'The coupon code cannot be empty.', 'woocommerce' ), 'code' ), array( 'status' => 400 ) );
 		}
 
 		// Handle all writable props.
@@ -283,7 +283,7 @@ class Coupons extends AbstractPostsController {
 						$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $id );
 
 						if ( $id_from_code ) {
-							return new WP_Error( 'woocommerce_rest_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), array( 'status' => 400 ) );
+							return new \WP_Error( 'woocommerce_rest_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), array( 'status' => 400 ) );
 						}
 
 						$coupon->set_code( $coupon_code );
@@ -570,7 +570,7 @@ class Coupons extends AbstractPostsController {
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
-		$coupon = new WC_Coupon( (int) $post->ID );
+		$coupon = new \WC_Coupon( (int) $post->ID );
 		$_data  = $coupon->get_data();
 
 		$format_decimal  = array( 'amount', 'minimum_amount', 'maximum_amount' );
@@ -655,11 +655,11 @@ class Coupons extends AbstractPostsController {
 	 * Prepare a single coupon for create or update.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return WP_Error|stdClass $data Post object.
+	 * @return \WP_Error|stdClass $data Post object.
 	 */
 	protected function prepare_item_for_database( $request ) {
 		$id        = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
-		$coupon    = new WC_Coupon( $id );
+		$coupon    = new \WC_Coupon( $id );
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
 
@@ -674,7 +674,7 @@ class Coupons extends AbstractPostsController {
 		// Validate required POST fields.
 		if ( 'POST' === $request->get_method() && 0 === $coupon->get_id() ) {
 			if ( empty( $request['code'] ) ) {
-				return new WP_Error( 'woocommerce_rest_empty_coupon_code', sprintf( __( 'The coupon code cannot be empty.', 'woocommerce' ), 'code' ), array( 'status' => 400 ) );
+				return new \WP_Error( 'woocommerce_rest_empty_coupon_code', sprintf( __( 'The coupon code cannot be empty.', 'woocommerce' ), 'code' ), array( 'status' => 400 ) );
 			}
 		}
 
@@ -690,7 +690,7 @@ class Coupons extends AbstractPostsController {
 						$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $id );
 
 						if ( $id_from_code ) {
-							return new WP_Error( 'woocommerce_rest_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), array( 'status' => 400 ) );
+							return new \WP_Error( 'woocommerce_rest_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), array( 'status' => 400 ) );
 						}
 
 						$coupon->set_code( $coupon_code );
@@ -726,12 +726,12 @@ class Coupons extends AbstractPostsController {
 	 * Create a single item.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
 			/* translators: %s: post type */
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
 		$coupon_id = $this->save_coupon( $request );
@@ -765,14 +765,14 @@ class Coupons extends AbstractPostsController {
 	 * Update a single coupon.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		try {
 			$post_id = (int) $request['id'];
 
 			if ( empty( $post_id ) || get_post_type( $post_id ) !== $this->post_type ) {
-				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
 			$coupon_id = $this->save_coupon( $request );
@@ -796,15 +796,15 @@ class Coupons extends AbstractPostsController {
 			return rest_ensure_response( $response );
 
 		} catch ( Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
 
 	/**
-	 * Get a collection of posts and add the code search option to WP_Query.
+	 * Get a collection of posts and add the code search option to \WP_Query.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_search_code_filter' ), 10, 2 );
@@ -817,7 +817,7 @@ class Coupons extends AbstractPostsController {
 	 * Add code searching to the WP Query
 	 *
 	 * @param string $where Where clause used to search posts.
-	 * @param object $wp_query WP_Query object.
+	 * @param object $wp_query \WP_Query object.
 	 * @return string
 	 */
 	public static function add_wp_query_search_code_filter( $where, $wp_query ) {

@@ -27,12 +27,16 @@ class Leaderboards extends AbstractController {
 	 * Register routes.
 	 */
 	public function register_routes() {
+		if ( ! class_exists( 'WC_Admin_Reports_Coupons_Data_Store' ) ) {
+			return;
+		}
+
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
@@ -46,7 +50,7 @@ class Leaderboards extends AbstractController {
 			'/' . $this->rest_base . '/allowed',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_allowed_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
@@ -64,7 +68,7 @@ class Leaderboards extends AbstractController {
 	 * @param string $persisted_query URL query string.
 	 */
 	public function get_coupons_leaderboard( $per_page, $after, $before, $persisted_query ) {
-		$coupons_data_store = new WC_Admin_Reports_Coupons_Data_Store();
+		$coupons_data_store = new \WC_Admin_Reports_Coupons_Data_Store();
 		$coupons_data       = $per_page > 0 ? $coupons_data_store->get_data(
 			array(
 				'orderby'       => 'orders_count',
@@ -130,7 +134,7 @@ class Leaderboards extends AbstractController {
 	 * @param string $persisted_query URL query string.
 	 */
 	public function get_categories_leaderboard( $per_page, $after, $before, $persisted_query ) {
-		$categories_data_store = new WC_Admin_Reports_Categories_Data_Store();
+		$categories_data_store = new \WC_Admin_Reports_Categories_Data_Store();
 		$categories_data       = $per_page > 0 ? $categories_data_store->get_data(
 			array(
 				'orderby'       => 'items_sold',
@@ -196,7 +200,7 @@ class Leaderboards extends AbstractController {
 	 * @param string $persisted_query URL query string.
 	 */
 	public function get_customers_leaderboard( $per_page, $after, $before, $persisted_query ) {
-		$customers_data_store = new WC_Admin_Reports_Customers_Data_Store();
+		$customers_data_store = new \WC_Admin_Reports_Customers_Data_Store();
 		$customers_data       = $per_page > 0 ? $customers_data_store->get_data(
 			array(
 				'orderby'      => 'total_spend',
@@ -260,7 +264,7 @@ class Leaderboards extends AbstractController {
 	 * @param string $persisted_query URL query string.
 	 */
 	public function get_products_leaderboard( $per_page, $after, $before, $persisted_query ) {
-		$products_data_store = new WC_Admin_Reports_Products_Data_Store();
+		$products_data_store = new \WC_Admin_Reports_Products_Data_Store();
 		$products_data       = $per_page > 0 ? $products_data_store->get_data(
 			array(
 				'orderby'       => 'items_sold',
@@ -341,7 +345,7 @@ class Leaderboards extends AbstractController {
 	 * Return all leaderboards.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$persisted_query = json_decode( $request['persisted_query'], true );
@@ -362,7 +366,7 @@ class Leaderboards extends AbstractController {
 	 * Returns a list of allowed leaderboards.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_allowed_items( $request ) {
 		$leaderboards = $this->get_leaderboards( 0, null, null, null );

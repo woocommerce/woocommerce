@@ -39,17 +39,17 @@ class ProductAttributes extends AbstractController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array_merge(
-						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+						$this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
 						array(
 							'name' => array(
 								'description' => __( 'Name for the resource.', 'woocommerce' ),
@@ -74,7 +74,7 @@ class ProductAttributes extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
@@ -82,13 +82,13 @@ class ProductAttributes extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				array(
-					'methods'             => WP_REST_Server::DELETABLE,
+					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 					'args'                => array(
@@ -108,10 +108,10 @@ class ProductAttributes extends AbstractController {
 			'/' . $this->rest_base . '/batch',
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
 					'permission_callback' => array( $this, 'batch_items_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_batch_schema' ),
 			)
@@ -122,11 +122,11 @@ class ProductAttributes extends AbstractController {
 	 * Check if a given request has access to read the attributes.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -136,11 +136,11 @@ class ProductAttributes extends AbstractController {
 	 * Check if a given request has access to create a attribute.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'create' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you cannot create new resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you cannot create new resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -150,15 +150,15 @@ class ProductAttributes extends AbstractController {
 	 * Check if a given request has access to read a attribute.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
 		if ( ! $this->get_taxonomy( $request ) ) {
-			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -168,15 +168,15 @@ class ProductAttributes extends AbstractController {
 	 * Check if a given request has access to update a attribute.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! $this->get_taxonomy( $request ) ) {
-			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'edit' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot update resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot update resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -186,15 +186,15 @@ class ProductAttributes extends AbstractController {
 	 * Check if a given request has access to delete a attribute.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function delete_item_permissions_check( $request ) {
 		if ( ! $this->get_taxonomy( $request ) ) {
-			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'delete' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -205,11 +205,11 @@ class ProductAttributes extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -237,7 +237,7 @@ class ProductAttributes extends AbstractController {
 	 * Create a single attribute.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @return WP_REST_Request|\WP_Error
 	 */
 	public function create_item( $request ) {
 		global $wpdb;
@@ -254,7 +254,7 @@ class ProductAttributes extends AbstractController {
 
 		// Checks for errors.
 		if ( is_wp_error( $id ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', $id->get_error_message(), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_create', $id->get_error_message(), array( 'status' => 400 ) );
 		}
 
 		$attribute = $this->get_attribute( $id );
@@ -287,7 +287,7 @@ class ProductAttributes extends AbstractController {
 	 * Get a single attribute.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @return WP_REST_Request|\WP_Error
 	 */
 	public function get_item( $request ) {
 		$attribute = $this->get_attribute( (int) $request['id'] );
@@ -305,7 +305,7 @@ class ProductAttributes extends AbstractController {
 	 * Update a single term from a taxonomy.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @return WP_REST_Request|\WP_Error
 	 */
 	public function update_item( $request ) {
 		global $wpdb;
@@ -324,7 +324,7 @@ class ProductAttributes extends AbstractController {
 
 		// Checks for errors.
 		if ( is_wp_error( $edited ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', $edited->get_error_message(), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_edit', $edited->get_error_message(), array( 'status' => 400 ) );
 		}
 
 		$attribute = $this->get_attribute( $id );
@@ -354,14 +354,14 @@ class ProductAttributes extends AbstractController {
 	 * Delete a single attribute.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
 		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
 
 		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
-			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Resource does not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+			return new \WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Resource does not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
 
 		$attribute = $this->get_attribute( (int) $request['id'] );
@@ -376,7 +376,7 @@ class ProductAttributes extends AbstractController {
 		$deleted = wc_delete_attribute( $attribute->attribute_id );
 
 		if ( false === $deleted ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -543,7 +543,7 @@ class ProductAttributes extends AbstractController {
 	 * Get attribute data.
 	 *
 	 * @param int $id Attribute ID.
-	 * @return stdClass|WP_Error
+	 * @return stdClass|\WP_Error
 	 */
 	protected function get_attribute( $id ) {
 		global $wpdb;
@@ -560,7 +560,7 @@ class ProductAttributes extends AbstractController {
 		);
 
 		if ( is_wp_error( $attribute ) || is_null( $attribute ) ) {
-			return new WP_Error( 'woocommerce_rest_attribute_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_attribute_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		return $attribute;
@@ -572,18 +572,18 @@ class ProductAttributes extends AbstractController {
 	 * @deprecated 3.2.0
 	 * @param string $slug Slug being set.
 	 * @param bool   $new_data Is the data new or old.
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	protected function validate_attribute_slug( $slug, $new_data = true ) {
 		if ( strlen( $slug ) >= 28 ) {
 			/* Translators: %s slug. */
-			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
 		} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
 			/* Translators: %s slug. */
-			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
 		} elseif ( $new_data && taxonomy_exists( wc_attribute_taxonomy_name( $slug ) ) ) {
 			/* Translators: %s slug. */
-			return new WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_already_exists', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_invalid_product_attribute_slug_already_exists', sprintf( __( 'Slug "%s" is already in use. Change it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
 		}
 
 		return true;

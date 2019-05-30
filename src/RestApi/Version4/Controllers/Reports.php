@@ -32,7 +32,7 @@ class Reports extends AbstractController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
@@ -46,11 +46,11 @@ class Reports extends AbstractController {
 	 * Check whether a given request has permission to read reports.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'reports', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -61,68 +61,71 @@ class Reports extends AbstractController {
 	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
-		$data    = array();
-		$reports = array(
-			array(
-				'slug'        => 'performance-indicators',
-				'description' => __( 'Batch endpoint for getting specific performance indicators from `stats` endpoints.', 'woocommerce' ),
-			),
-			array(
-				'slug'        => 'revenue/stats',
-				'description' => __( 'Stats about revenue.', 'woocommerce' ),
-			),
-			array(
-				'slug'        => 'orders/stats',
-				'description' => __( 'Stats about orders.', 'woocommerce' ),
-			),
-			array(
-				'slug'        => 'products',
-				'description' => __( 'Products detailed reports.', 'woocommerce' ),
-			),
-			array(
-				'slug'        => 'products/stats',
-				'description' => __( 'Stats about products.', 'woocommerce' ),
-			),
-			array(
-				'slug'        => 'categories',
-				'description' => __( 'Product categories detailed reports.', 'woocommerce' ),
-			),
-			array(
-				'slug'        => 'categories/stats',
-				'description' => __( 'Stats about product categories.', 'woocommerce' ),
-			),
-			array(
-				'slug'        => 'coupons',
-				'description' => __( 'Coupons detailed reports.', 'woocommerce' ),
-			),
-			array(
-				'slug'        => 'coupons/stats',
-				'description' => __( 'Stats about coupons.', 'woocommerce' ),
-			),
-			array(
-				'slug'        => 'taxes',
-				'description' => __( 'Taxes detailed reports.', 'woocommerce' ),
-			),
-			array(
-				'slug'        => 'taxes/stats',
-				'description' => __( 'Stats about taxes.', 'woocommerce' ),
-			),
-			array(
-				'slug'        => 'downloads',
-				'description' => __( 'Product downloads detailed reports.', 'woocommerce' ),
-			),
-			array(
-				'slug'        => 'downloads/stats',
-				'description' => __( 'Stats about product downloads.', 'woocommerce' ),
-			),
-			array(
-				'slug'        => 'customers',
-				'description' => __( 'Customers detailed reports.', 'woocommerce' ),
-			),
-		);
+		$data    = [];
+		$reports = [];
+		if ( class_exists( 'WC_Admin_Reports_Sync' ) ) {
+			$reports = array(
+				array(
+					'slug'        => 'performance-indicators',
+					'description' => __( 'Batch endpoint for getting specific performance indicators from `stats` endpoints.', 'woocommerce' ),
+				),
+				array(
+					'slug'        => 'revenue/stats',
+					'description' => __( 'Stats about revenue.', 'woocommerce' ),
+				),
+				array(
+					'slug'        => 'orders/stats',
+					'description' => __( 'Stats about orders.', 'woocommerce' ),
+				),
+				array(
+					'slug'        => 'products',
+					'description' => __( 'Products detailed reports.', 'woocommerce' ),
+				),
+				array(
+					'slug'        => 'products/stats',
+					'description' => __( 'Stats about products.', 'woocommerce' ),
+				),
+				array(
+					'slug'        => 'categories',
+					'description' => __( 'Product categories detailed reports.', 'woocommerce' ),
+				),
+				array(
+					'slug'        => 'categories/stats',
+					'description' => __( 'Stats about product categories.', 'woocommerce' ),
+				),
+				array(
+					'slug'        => 'coupons',
+					'description' => __( 'Coupons detailed reports.', 'woocommerce' ),
+				),
+				array(
+					'slug'        => 'coupons/stats',
+					'description' => __( 'Stats about coupons.', 'woocommerce' ),
+				),
+				array(
+					'slug'        => 'taxes',
+					'description' => __( 'Taxes detailed reports.', 'woocommerce' ),
+				),
+				array(
+					'slug'        => 'taxes/stats',
+					'description' => __( 'Stats about taxes.', 'woocommerce' ),
+				),
+				array(
+					'slug'        => 'downloads',
+					'description' => __( 'Product downloads detailed reports.', 'woocommerce' ),
+				),
+				array(
+					'slug'        => 'downloads/stats',
+					'description' => __( 'Stats about product downloads.', 'woocommerce' ),
+				),
+				array(
+					'slug'        => 'customers',
+					'description' => __( 'Customers detailed reports.', 'woocommerce' ),
+				),
+			);
+		}
 
 		/**
 		 * Filter the list of allowed reports, so that data can be loaded from third party extensions in addition to WooCommerce core.

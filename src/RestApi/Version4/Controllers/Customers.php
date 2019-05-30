@@ -11,6 +11,8 @@ namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WP_REST_Server;
+
 /**
  * REST API Customers controller class.
  */
@@ -32,17 +34,17 @@ class Customers extends AbstractController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array_merge(
-						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+						$this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
 						array(
 							'email' => array(
 								'required' => true,
@@ -77,7 +79,7 @@ class Customers extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
@@ -85,13 +87,13 @@ class Customers extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				array(
-					'methods'             => WP_REST_Server::DELETABLE,
+					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 					'args'                => array(
@@ -116,10 +118,10 @@ class Customers extends AbstractController {
 			'/' . $this->rest_base . '/batch',
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
 					'permission_callback' => array( $this, 'batch_items_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_batch_schema' ),
 			)
@@ -130,11 +132,11 @@ class Customers extends AbstractController {
 	 * Check whether a given request has permission to read customers.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_user_permissions( 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -145,11 +147,11 @@ class Customers extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_user_permissions( 'create' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -159,13 +161,13 @@ class Customers extends AbstractController {
 	 * Check if a given request has access to read a customer.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
 		$id = (int) $request['id'];
 
 		if ( ! wc_rest_check_user_permissions( 'read', $id ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -176,13 +178,13 @@ class Customers extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function update_item_permissions_check( $request ) {
 		$id = (int) $request['id'];
 
 		if ( ! wc_rest_check_user_permissions( 'edit', $id ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -193,13 +195,13 @@ class Customers extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
 		$id = (int) $request['id'];
 
 		if ( ! wc_rest_check_user_permissions( 'delete', $id ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -210,11 +212,11 @@ class Customers extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_user_permissions( 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -263,7 +265,7 @@ class Customers extends AbstractController {
 	 * Get all customers.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$prepared_args = array();
@@ -301,16 +303,16 @@ class Customers extends AbstractController {
 		}
 
 		/**
-		 * Filter arguments, before passing to WP_User_Query, when querying users via the REST API.
+		 * Filter arguments, before passing to \ WP_User_Query, when querying users via the REST API.
 		 *
-		 * @see https://developer.wordpress.org/reference/classes/wp_user_query/
+		 * @see https://developer.wordpress.org/reference/classes/\ WP_User_Query/
 		 *
-		 * @param array           $prepared_args Array of arguments for WP_User_Query.
+		 * @param array           $prepared_args Array of arguments for \ WP_User_Query.
 		 * @param WP_REST_Request $request       The current request.
 		 */
 		$prepared_args = apply_filters( 'woocommerce_rest_customer_query', $prepared_args, $request );
 
-		$query = new WP_User_Query( $prepared_args );
+		$query = new \ WP_User_Query( $prepared_args );
 
 		$users = array();
 		foreach ( $query->results as $user ) {
@@ -331,7 +333,7 @@ class Customers extends AbstractController {
 			// Out-of-bounds, run the query again without LIMIT for total count.
 			unset( $prepared_args['number'] );
 			unset( $prepared_args['offset'] );
-			$count_query = new WP_User_Query( $prepared_args );
+			$count_query = new \ WP_User_Query( $prepared_args );
 			$total_users = $count_query->get_total();
 		}
 		$response->header( 'X-WP-Total', (int) $total_users );
@@ -361,12 +363,12 @@ class Customers extends AbstractController {
 	 *
 	 * @throws WC_REST_Exception On invalid params.
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		try {
 			if ( ! empty( $request['id'] ) ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_customer_exists', __( 'Cannot create existing resource.', 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_customer_exists', __( 'Cannot create existing resource.', 'woocommerce' ), 400 );
 			}
 
 			// Sets the username.
@@ -376,7 +378,7 @@ class Customers extends AbstractController {
 			$request['password'] = ! empty( $request['password'] ) ? $request['password'] : '';
 
 			// Create customer.
-			$customer = new WC_Customer();
+			$customer = new \WC_Customer();
 			$customer->set_username( $request['username'] );
 			$customer->set_password( $request['password'] );
 			$customer->set_email( $request['email'] );
@@ -384,7 +386,7 @@ class Customers extends AbstractController {
 			$customer->save();
 
 			if ( ! $customer->get_id() ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_cannot_create', __( 'This resource cannot be created.', 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_cannot_create', __( 'This resource cannot be created.', 'woocommerce' ), 400 );
 			}
 
 			$user_data = get_userdata( $customer->get_id() );
@@ -407,7 +409,7 @@ class Customers extends AbstractController {
 
 			return $response;
 		} catch ( Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
 
@@ -415,14 +417,14 @@ class Customers extends AbstractController {
 	 * Get a single customer.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$id        = (int) $request['id'];
 		$user_data = get_userdata( $id );
 
 		if ( empty( $id ) || empty( $user_data->ID ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$customer = $this->prepare_item_for_response( $user_data, $request );
@@ -436,23 +438,23 @@ class Customers extends AbstractController {
 	 *
 	 * @throws WC_REST_Exception On invalid params.
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		try {
 			$id       = (int) $request['id'];
-			$customer = new WC_Customer( $id );
+			$customer = new \WC_Customer( $id );
 
 			if ( ! $customer->get_id() ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), 400 );
 			}
 
 			if ( ! empty( $request['email'] ) && email_exists( $request['email'] ) && $request['email'] !== $customer->get_email() ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_customer_invalid_email', __( 'Email address is invalid.', 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_customer_invalid_email', __( 'Email address is invalid.', 'woocommerce' ), 400 );
 			}
 
 			if ( ! empty( $request['username'] ) && $request['username'] !== $customer->get_username() ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_customer_invalid_argument', __( "Username isn't editable.", 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_customer_invalid_argument', __( "Username isn't editable.", 'woocommerce' ), 400 );
 			}
 
 			// Customer email.
@@ -489,7 +491,7 @@ class Customers extends AbstractController {
 			$response = rest_ensure_response( $response );
 			return $response;
 		} catch ( Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
 
@@ -497,7 +499,7 @@ class Customers extends AbstractController {
 	 * Delete a single customer.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function delete_item( $request ) {
 		$id       = (int) $request['id'];
@@ -506,17 +508,17 @@ class Customers extends AbstractController {
 
 		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
-			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Customers do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+			return new \WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Customers do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
 
 		$user_data = get_userdata( $id );
 		if ( ! $user_data ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		if ( ! empty( $reassign ) ) {
 			if ( $reassign === $id || ! get_userdata( $reassign ) ) {
-				return new WP_Error( 'woocommerce_rest_customer_invalid_reassign', __( 'Invalid resource id for reassignment.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new \WP_Error( 'woocommerce_rest_customer_invalid_reassign', __( 'Invalid resource id for reassignment.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 		}
 
@@ -526,7 +528,7 @@ class Customers extends AbstractController {
 		/** Include admin customer functions to get access to wp_delete_user() */
 		require_once ABSPATH . 'wp-admin/includes/user.php';
 
-		$customer = new WC_Customer( $id );
+		$customer = new \WC_Customer( $id );
 
 		if ( ! is_null( $reassign ) ) {
 			$result = $customer->delete_and_reassign( $reassign );
@@ -535,7 +537,7 @@ class Customers extends AbstractController {
 		}
 
 		if ( ! $result ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -558,7 +560,7 @@ class Customers extends AbstractController {
 	 * @return WP_REST_Response $response  Response data.
 	 */
 	public function prepare_item_for_response( $user_data, $request ) {
-		$customer = new WC_Customer( $user_data->ID );
+		$customer = new \WC_Customer( $user_data->ID );
 		$data     = $this->get_formatted_item_data( $customer );
 		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data     = $this->add_additional_fields_to_object( $data, $request );

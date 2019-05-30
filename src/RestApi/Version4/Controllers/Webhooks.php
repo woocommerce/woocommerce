@@ -36,16 +36,16 @@ class Webhooks extends AbstractController {
 	public function register_routes() {
 		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
 			array(
-				'methods'             => WP_REST_Server::READABLE,
+				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				'args'                => $this->get_collection_params(),
 			),
 			array(
-				'methods'             => WP_REST_Server::CREATABLE,
+				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_item' ),
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ), array(
 					'topic' => array(
 						'required'    => true,
 						'type'        => 'string',
@@ -69,7 +69,7 @@ class Webhooks extends AbstractController {
 				),
 			),
 			array(
-				'methods'             => WP_REST_Server::READABLE,
+				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
 				'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				'args'                => array(
@@ -77,13 +77,13 @@ class Webhooks extends AbstractController {
 				),
 			),
 			array(
-				'methods'             => WP_REST_Server::EDITABLE,
+				'methods'             => \WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'update_item' ),
 				'permission_callback' => array( $this, 'update_item_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 			),
 			array(
-				'methods'             => WP_REST_Server::DELETABLE,
+				'methods'             => \WP_REST_Server::DELETABLE,
 				'callback'            => array( $this, 'delete_item' ),
 				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 				'args'                => array(
@@ -99,10 +99,10 @@ class Webhooks extends AbstractController {
 
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/batch', array(
 			array(
-				'methods'             => WP_REST_Server::EDITABLE,
+				'methods'             => \WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'batch_items' ),
 				'permission_callback' => array( $this, 'batch_items_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 			),
 			'schema' => array( $this, 'get_public_batch_schema' ),
 		) );
@@ -112,11 +112,11 @@ class Webhooks extends AbstractController {
 	 * Check whether a given request has permission to read webhooks.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'webhooks', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -127,11 +127,11 @@ class Webhooks extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'webhooks', 'create' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -141,11 +141,11 @@ class Webhooks extends AbstractController {
 	 * Check if a given request has access to read a webhook.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'webhooks', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -156,11 +156,11 @@ class Webhooks extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'webhooks', 'edit' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -171,11 +171,11 @@ class Webhooks extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'webhooks', 'delete' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -186,11 +186,11 @@ class Webhooks extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'webhooks', 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -210,7 +210,7 @@ class Webhooks extends AbstractController {
 	 * Get all webhooks.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$args            = array();
@@ -240,7 +240,7 @@ class Webhooks extends AbstractController {
 
 		// Get the webhooks.
 		$webhooks       = array();
-		$data_store     = WC_Data_Store::load( 'webhook' );
+		$data_store     = \WC_Data_Store::load( 'webhook' );
 		$results        = $data_store->search_webhooks( $prepared_args );
 		$webhook_ids    = $results->webhooks;
 
@@ -280,13 +280,13 @@ class Webhooks extends AbstractController {
 	 * Get a single item.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$id = (int) $request['id'];
 
 		if ( empty( $id ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$data     = $this->prepare_item_for_response( $id, $request );
@@ -299,22 +299,22 @@ class Webhooks extends AbstractController {
 	 * Create a single webhook.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
 			/* translators: %s: post type */
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
 		// Validate topic.
 		if ( empty( $request['topic'] ) || ! wc_is_webhook_valid_topic( strtolower( $request['topic'] ) ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_topic", __( 'Webhook topic is required and must be valid.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_topic", __( 'Webhook topic is required and must be valid.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		// Validate delivery URL.
 		if ( empty( $request['delivery_url'] ) || ! wc_is_valid_url( $request['delivery_url'] ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_delivery_url", __( 'Webhook delivery URL must be a valid URL starting with http:// or https://.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_delivery_url", __( 'Webhook delivery URL must be a valid URL starting with http:// or https://.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$post = $this->prepare_item_for_database( $request );
@@ -322,7 +322,7 @@ class Webhooks extends AbstractController {
 			return $post;
 		}
 
-		$webhook = new WC_Webhook();
+		$webhook = new \WC_Webhook();
 		$webhook->set_name( $post->post_title );
 		$webhook->set_user_id( $post->post_author );
 		$webhook->set_status( 'publish' === $post->post_status ? 'active' : 'disabled' );
@@ -359,14 +359,14 @@ class Webhooks extends AbstractController {
 	 * Update a single webhook.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$id      = (int) $request['id'];
 		$webhook = wc_get_webhook( $id );
 
 		if ( empty( $webhook ) || is_null( $webhook ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		// Update topic.
@@ -374,7 +374,7 @@ class Webhooks extends AbstractController {
 			if ( wc_is_webhook_valid_topic( strtolower( $request['topic'] ) ) ) {
 				$webhook->set_topic( $request['topic'] );
 			} else {
-				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_topic", __( 'Webhook topic must be valid.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_topic", __( 'Webhook topic must be valid.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 		}
 
@@ -383,7 +383,7 @@ class Webhooks extends AbstractController {
 			if ( wc_is_valid_url( $request['delivery_url'] ) ) {
 				$webhook->set_delivery_url( $request['delivery_url'] );
 			} else {
-				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_delivery_url", __( 'Webhook delivery URL must be a valid URL starting with http:// or https://.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_delivery_url", __( 'Webhook delivery URL must be a valid URL starting with http:// or https://.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 		}
 
@@ -397,7 +397,7 @@ class Webhooks extends AbstractController {
 			if ( wc_is_webhook_valid_status( strtolower( $request['status'] ) ) ) {
 				$webhook->set_status( $request['status'] );
 			} else {
-				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_status", __( 'Webhook status must be valid.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_status", __( 'Webhook status must be valid.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 		}
 
@@ -433,7 +433,7 @@ class Webhooks extends AbstractController {
 	 * Delete a single webhook.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
 		$id    = (int) $request['id'];
@@ -441,13 +441,13 @@ class Webhooks extends AbstractController {
 
 		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
-			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Webhooks do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+			return new \WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Webhooks do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
 
 		$webhook = wc_get_webhook( $id );
 
 		if ( empty( $webhook ) || is_null( $webhook ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -456,7 +456,7 @@ class Webhooks extends AbstractController {
 
 		if ( ! $result ) {
 			/* translators: %s: post type */
-			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -475,10 +475,10 @@ class Webhooks extends AbstractController {
 	 * Prepare a single webhook for create or update.
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return WP_Error|stdClass $data Post object.
+	 * @return \WP_Error|stdClass $data Post object.
 	 */
 	protected function prepare_item_for_database( $request ) {
-		$data = new stdClass;
+		$data = new \stdClass;
 
 		// Post ID.
 		if ( isset( $request['id'] ) ) {
@@ -535,7 +535,7 @@ class Webhooks extends AbstractController {
 		$webhook = wc_get_webhook( $id );
 
 		if ( empty( $webhook ) || is_null( $webhook ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$data = array(

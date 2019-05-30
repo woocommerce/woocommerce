@@ -45,7 +45,7 @@ class ProductStats extends Reports {
 	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$query_args = array(
@@ -69,11 +69,11 @@ class ProductStats extends Reports {
 			}
 		}
 
-		$query = new WC_Admin_Reports_Products_Stats_Query( $query_args );
+		$query = new \WC_Admin_Reports_Products_Stats_Query( $query_args );
 		try {
 			$report_data = $query->get_data();
 		} catch ( WC_Admin_Reports_Parameter_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
 		$out_data = array(
@@ -279,9 +279,9 @@ class ProductStats extends Reports {
 	 */
 	public function set_default_report_data( $results ) {
 		if ( empty( $results ) ) {
-			$results                       = new stdClass();
+			$results                       = new \stdClass();
 			$results->total                = 0;
-			$results->totals               = new stdClass();
+			$results->totals               = new \stdClass();
 			$results->totals->items_sold   = 0;
 			$results->totals->net_revenue  = 0;
 			$results->totals->orders_count = 0;

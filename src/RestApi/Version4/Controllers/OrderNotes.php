@@ -42,16 +42,16 @@ class OrderNotes extends AbstractController {
 				),
 			),
 			array(
-				'methods'             => WP_REST_Server::READABLE,
+				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_items' ),
 				'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				'args'                => $this->get_collection_params(),
 			),
 			array(
-				'methods'             => WP_REST_Server::CREATABLE,
+				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_item' ),
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
+				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ), array(
 					'note' => array(
 						'type'        => 'string',
 						'description' => __( 'Order note content.', 'woocommerce' ),
@@ -74,7 +74,7 @@ class OrderNotes extends AbstractController {
 				),
 			),
 			array(
-				'methods'             => WP_REST_Server::READABLE,
+				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_item' ),
 				'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				'args'                => array(
@@ -82,7 +82,7 @@ class OrderNotes extends AbstractController {
 				),
 			),
 			array(
-				'methods'             => WP_REST_Server::DELETABLE,
+				'methods'             => \WP_REST_Server::DELETABLE,
 				'callback'            => array( $this, 'delete_item' ),
 				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 				'args'                => array(
@@ -101,11 +101,11 @@ class OrderNotes extends AbstractController {
 	 * Check whether a given request has permission to read order notes.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -116,11 +116,11 @@ class OrderNotes extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'create' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -130,13 +130,13 @@ class OrderNotes extends AbstractController {
 	 * Check if a given request has access to read a order note.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
 		$order = wc_get_order( (int) $request['order_id'] );
 
 		if ( $order && ! wc_rest_check_post_permissions( $this->post_type, 'read', $order->get_id() ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -147,13 +147,13 @@ class OrderNotes extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
 		$order = wc_get_order( (int) $request['order_id'] );
 
 		if ( $order && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $order->get_id() ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -164,13 +164,13 @@ class OrderNotes extends AbstractController {
 	 *
 	 * @param WP_REST_Request $request Request data.
 	 *
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$order = wc_get_order( (int) $request['order_id'] );
 
 		if ( ! $order || $this->post_type !== $order->get_type() ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$args = array(
@@ -217,25 +217,25 @@ class OrderNotes extends AbstractController {
 	 * Create a single order note.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
 			/* translators: %s: post type */
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
 		$order = wc_get_order( (int) $request['order_id'] );
 
 		if ( ! $order || $this->post_type !== $order->get_type() ) {
-			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		// Create the note.
 		$note_id = $order->add_order_note( $request['note'], $request['customer_note'], $request['added_by_user'] );
 
 		if ( ! $note_id ) {
-			return new WP_Error( 'woocommerce_api_cannot_create_order_note', __( 'Cannot create order note, please try again.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_api_cannot_create_order_note', __( 'Cannot create order note, please try again.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		$note = get_comment( $note_id );
@@ -263,20 +263,20 @@ class OrderNotes extends AbstractController {
 	 * Get a single order note.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$id    = (int) $request['id'];
 		$order = wc_get_order( (int) $request['order_id'] );
 
 		if ( ! $order || $this->post_type !== $order->get_type() ) {
-			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$note = get_comment( $id );
 
 		if ( empty( $id ) || empty( $note ) || intval( $note->comment_post_ID ) !== intval( $order->get_id() ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$order_note = $this->prepare_item_for_response( $note, $request );
@@ -289,7 +289,7 @@ class OrderNotes extends AbstractController {
 	 * Delete a single order note.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
 		$id    = (int) $request['id'];
@@ -297,19 +297,19 @@ class OrderNotes extends AbstractController {
 
 		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
-			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Webhooks do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+			return new \WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Webhooks do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
 
 		$order = wc_get_order( (int) $request['order_id'] );
 
 		if ( ! $order || $this->post_type !== $order->get_type() ) {
-			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$note = get_comment( $id );
 
 		if ( empty( $id ) || empty( $note ) || intval( $note->comment_post_ID ) !== intval( $order->get_id() ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -318,7 +318,7 @@ class OrderNotes extends AbstractController {
 		$result = wc_delete_order_note( $note->comment_ID );
 
 		if ( ! $result ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), 'order_note' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), 'order_note' ), array( 'status' => 500 ) );
 		}
 
 		/**

@@ -39,7 +39,7 @@ class Variations extends Reports {
 	 *
 	 * @param WP_REST_Request $request Request data.
 	 *
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$args       = array();
@@ -54,7 +54,7 @@ class Variations extends Reports {
 			}
 		}
 
-		$reports       = new WC_Admin_Reports_Variations_Query( $args );
+		$reports       = new \WC_Admin_Reports_Variations_Query( $args );
 		$products_data = $reports->get_data();
 
 		$data = array();

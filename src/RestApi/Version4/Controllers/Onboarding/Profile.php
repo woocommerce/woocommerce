@@ -44,7 +44,7 @@ class Profile extends WC_REST_Data_Controller {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
@@ -56,7 +56,7 @@ class Profile extends WC_REST_Data_Controller {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_items' ),
 					'permission_callback' => array( $this, 'update_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
@@ -70,11 +70,11 @@ class Profile extends WC_REST_Data_Controller {
 	 * Check whether a given request has permission to read onboarding profile data.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -84,11 +84,11 @@ class Profile extends WC_REST_Data_Controller {
 	 * Check whether a given request has permission to edit onboarding profile data.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function update_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -98,7 +98,7 @@ class Profile extends WC_REST_Data_Controller {
 	 * Return all onboarding profile data.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$onboarding_data = get_option( 'wc_onboarding_profile', array() );
@@ -119,7 +119,7 @@ class Profile extends WC_REST_Data_Controller {
 	 * Update onboarding profile data.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_items( $request ) {
 		$params          = $request->get_json_params();
@@ -232,7 +232,7 @@ class Profile extends WC_REST_Data_Controller {
 				'sanitize_callback' => 'wp_parse_slug_list',
 				'validate_callback' => 'rest_validate_request_arg',
 				'items'             => array(
-					'enum' => array_keys( WC_Admin_Onboarding::get_allowed_industries() ),
+					'enum' => array_keys( \WC_Admin_Onboarding::get_allowed_industries() ),
 					'type' => 'string',
 				),
 			),
@@ -244,7 +244,7 @@ class Profile extends WC_REST_Data_Controller {
 				'sanitize_callback' => 'wp_parse_slug_list',
 				'validate_callback' => 'rest_validate_request_arg',
 				'items'             => array(
-					'enum' => array_keys( WC_Admin_Onboarding::get_allowed_product_types() ),
+					'enum' => array_keys( \WC_Admin_Onboarding::get_allowed_product_types() ),
 					'type' => 'string',
 				),
 			),

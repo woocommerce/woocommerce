@@ -32,17 +32,17 @@ class ProductReviews extends AbstractController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array_merge(
-						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+						$this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
 						array(
 							'product_id'     => array(
 								'required'    => true,
@@ -82,7 +82,7 @@ class ProductReviews extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
@@ -90,13 +90,13 @@ class ProductReviews extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				array(
-					'methods'             => WP_REST_Server::DELETABLE,
+					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 					'args'                => array(
@@ -116,10 +116,10 @@ class ProductReviews extends AbstractController {
 			'/' . $this->rest_base . '/batch',
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
 					'permission_callback' => array( $this, 'batch_items_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_batch_schema' ),
 			)
@@ -130,11 +130,11 @@ class ProductReviews extends AbstractController {
 	 * Check whether a given request has permission to read webhook deliveries.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_product_reviews_permissions( 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -144,14 +144,14 @@ class ProductReviews extends AbstractController {
 	 * Check if a given request has access to read a product review.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
 		$id     = (int) $request['id'];
 		$review = get_comment( $id );
 
 		if ( $review && ! wc_rest_check_product_reviews_permissions( 'read', $review->comment_ID ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -161,11 +161,11 @@ class ProductReviews extends AbstractController {
 	 * Check if a given request has access to create a new product review.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_product_reviews_permissions( 'create' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -175,14 +175,14 @@ class ProductReviews extends AbstractController {
 	 * Check if a given request has access to update a product review.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
 		$id     = (int) $request['id'];
 		$review = get_comment( $id );
 
 		if ( $review && ! wc_rest_check_product_reviews_permissions( 'edit', $review->comment_ID ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -192,14 +192,14 @@ class ProductReviews extends AbstractController {
 	 * Check if a given request has access to delete a product review.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function delete_item_permissions_check( $request ) {
 		$id     = (int) $request['id'];
 		$review = get_comment( $id );
 
 		if ( $review && ! wc_rest_check_product_reviews_permissions( 'delete', $review->comment_ID ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -209,11 +209,11 @@ class ProductReviews extends AbstractController {
 	 * Check if a given request has access batch create, update and delete items.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return boolean|WP_Error
+	 * @return boolean|\WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_product_reviews_permissions( 'create' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -223,7 +223,7 @@ class ProductReviews extends AbstractController {
 	 * Get all reviews.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
 		// Retrieve the list of registered collection query parameters.
@@ -231,7 +231,7 @@ class ProductReviews extends AbstractController {
 
 		/*
 		 * This array defines mappings between public API query parameters whose
-		 * values are accepted as-passed, and their internal WP_Query parameter
+		 * values are accepted as-passed, and their internal \WP_Query parameter
 		 * name equivalents (some are the same). Only values which are also
 		 * present in $registered will be set.
 		 */
@@ -365,17 +365,17 @@ class ProductReviews extends AbstractController {
 	 * Create a single review.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
-			return new WP_Error( 'woocommerce_rest_review_exists', __( 'Cannot create existing product review.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_review_exists', __( 'Cannot create existing product review.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$product_id = (int) $request['product_id'];
 
 		if ( 'product' !== get_post_type( $product_id ) ) {
-			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$prepared_review = $this->prepare_item_for_database( $request );
@@ -389,7 +389,7 @@ class ProductReviews extends AbstractController {
 		 * Do not allow a comment to be created with missing or empty comment_content. See wp_handle_comment_submission().
 		 */
 		if ( empty( $prepared_review['comment_content'] ) ) {
-			return new WP_Error( 'woocommerce_rest_review_content_invalid', __( 'Invalid review content.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_review_content_invalid', __( 'Invalid review content.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		// Setting remaining values before wp_insert_comment so we can use wp_allow_comment().
@@ -414,7 +414,7 @@ class ProductReviews extends AbstractController {
 		$check_comment_lengths = wp_check_comment_data_max_lengths( $prepared_review );
 		if ( is_wp_error( $check_comment_lengths ) ) {
 			$error_code = str_replace( array( 'comment_author', 'comment_content' ), array( 'reviewer', 'review_content' ), $check_comment_lengths->get_error_code() );
-			return new WP_Error( 'woocommerce_rest_' . $error_code, __( 'Product review field exceeds maximum length allowed.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_' . $error_code, __( 'Product review field exceeds maximum length allowed.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$prepared_review['comment_parent']     = 0;
@@ -426,11 +426,11 @@ class ProductReviews extends AbstractController {
 			$error_message = $prepared_review['comment_approved']->get_error_message();
 
 			if ( 'comment_duplicate' === $error_code ) {
-				return new WP_Error( 'woocommerce_rest_' . $error_code, $error_message, array( 'status' => 409 ) );
+				return new \WP_Error( 'woocommerce_rest_' . $error_code, $error_message, array( 'status' => 409 ) );
 			}
 
 			if ( 'comment_flood' === $error_code ) {
-				return new WP_Error( 'woocommerce_rest_' . $error_code, $error_message, array( 'status' => 400 ) );
+				return new \WP_Error( 'woocommerce_rest_' . $error_code, $error_message, array( 'status' => 400 ) );
 			}
 
 			return $prepared_review['comment_approved'];
@@ -440,11 +440,11 @@ class ProductReviews extends AbstractController {
 		 * Filters a review before it is inserted via the REST API.
 		 *
 		 * Allows modification of the review right before it is inserted via wp_insert_comment().
-		 * Returning a WP_Error value from the filter will shortcircuit insertion and allow
+		 * Returning a \WP_Error value from the filter will shortcircuit insertion and allow
 		 * skipping further processing.
 		 *
 		 * @since 3.5.0
-		 * @param array|WP_Error  $prepared_review The prepared review data for wp_insert_comment().
+		 * @param array|\WP_Error  $prepared_review The prepared review data for wp_insert_comment().
 		 * @param WP_REST_Request $request          Request used to insert the review.
 		 */
 		$prepared_review = apply_filters( 'woocommerce_rest_pre_insert_product_review', $prepared_review, $request );
@@ -455,7 +455,7 @@ class ProductReviews extends AbstractController {
 		$review_id = wp_insert_comment( wp_filter_comment( wp_slash( (array) $prepared_review ) ) );
 
 		if ( ! $review_id ) {
-			return new WP_Error( 'woocommerce_rest_review_failed_create', __( 'Creating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_review_failed_create', __( 'Creating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		if ( isset( $request['status'] ) ) {
@@ -496,7 +496,7 @@ class ProductReviews extends AbstractController {
 	 * Get a single product review.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$review = $this->get_review( $request['id'] );
@@ -514,7 +514,7 @@ class ProductReviews extends AbstractController {
 	 * Updates a review.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response Response object on success, or error object on failure.
+	 * @return \WP_Error|WP_REST_Response Response object on success, or error object on failure.
 	 */
 	public function update_item( $request ) {
 		$review = $this->get_review( $request['id'] );
@@ -525,7 +525,7 @@ class ProductReviews extends AbstractController {
 		$id = (int) $review->comment_ID;
 
 		if ( isset( $request['type'] ) && 'review' !== get_comment_type( $id ) ) {
-			return new WP_Error( 'woocommerce_rest_review_invalid_type', __( 'Sorry, you are not allowed to change the comment type.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_review_invalid_type', __( 'Sorry, you are not allowed to change the comment type.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$prepared_args = $this->prepare_item_for_database( $request );
@@ -535,7 +535,7 @@ class ProductReviews extends AbstractController {
 
 		if ( ! empty( $prepared_args['comment_post_ID'] ) ) {
 			if ( 'product' !== get_post_type( (int) $prepared_args['comment_post_ID'] ) ) {
-				return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+				return new \WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 			}
 		}
 
@@ -544,7 +544,7 @@ class ProductReviews extends AbstractController {
 			$change = $this->handle_status_param( $request['status'], $id );
 
 			if ( ! $change ) {
-				return new WP_Error( 'woocommerce_rest_review_failed_edit', __( 'Updating review status failed.', 'woocommerce' ), array( 'status' => 500 ) );
+				return new \WP_Error( 'woocommerce_rest_review_failed_edit', __( 'Updating review status failed.', 'woocommerce' ), array( 'status' => 500 ) );
 			}
 		} elseif ( ! empty( $prepared_args ) ) {
 			if ( is_wp_error( $prepared_args ) ) {
@@ -552,7 +552,7 @@ class ProductReviews extends AbstractController {
 			}
 
 			if ( isset( $prepared_args['comment_content'] ) && empty( $prepared_args['comment_content'] ) ) {
-				return new WP_Error( 'woocommerce_rest_review_content_invalid', __( 'Invalid review content.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new \WP_Error( 'woocommerce_rest_review_content_invalid', __( 'Invalid review content.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
 			$prepared_args['comment_ID'] = $id;
@@ -560,13 +560,13 @@ class ProductReviews extends AbstractController {
 			$check_comment_lengths = wp_check_comment_data_max_lengths( $prepared_args );
 			if ( is_wp_error( $check_comment_lengths ) ) {
 				$error_code = str_replace( array( 'comment_author', 'comment_content' ), array( 'reviewer', 'review_content' ), $check_comment_lengths->get_error_code() );
-				return new WP_Error( 'woocommerce_rest_' . $error_code, __( 'Product review field exceeds maximum length allowed.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new \WP_Error( 'woocommerce_rest_' . $error_code, __( 'Product review field exceeds maximum length allowed.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
 			$updated = wp_update_comment( wp_slash( (array) $prepared_args ) );
 
 			if ( false === $updated ) {
-				return new WP_Error( 'woocommerce_rest_comment_failed_edit', __( 'Updating review failed.', 'woocommerce' ), array( 'status' => 500 ) );
+				return new \WP_Error( 'woocommerce_rest_comment_failed_edit', __( 'Updating review failed.', 'woocommerce' ), array( 'status' => 500 ) );
 			}
 
 			if ( isset( $request['status'] ) ) {
@@ -600,7 +600,7 @@ class ProductReviews extends AbstractController {
 	 * Deletes a review.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response Response object on success, or error object on failure.
+	 * @return \WP_Error|WP_REST_Response Response object on success, or error object on failure.
 	 */
 	public function delete_item( $request ) {
 		$review = $this->get_review( $request['id'] );
@@ -637,11 +637,11 @@ class ProductReviews extends AbstractController {
 			// If this type doesn't support trashing, error out.
 			if ( ! $supports_trash ) {
 				/* translators: %s: force=true */
-				return new WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( "The object does not support trashing. Set '%s' to delete.", 'woocommerce' ), 'force=true' ), array( 'status' => 501 ) );
+				return new \WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( "The object does not support trashing. Set '%s' to delete.", 'woocommerce' ), 'force=true' ), array( 'status' => 501 ) );
 			}
 
 			if ( 'trash' === $review->comment_approved ) {
-				return new WP_Error( 'woocommerce_rest_already_trashed', __( 'The object has already been trashed.', 'woocommerce' ), array( 'status' => 410 ) );
+				return new \WP_Error( 'woocommerce_rest_already_trashed', __( 'The object has already been trashed.', 'woocommerce' ), array( 'status' => 410 ) );
 			}
 
 			$result   = wp_trash_comment( $review->comment_ID );
@@ -650,7 +650,7 @@ class ProductReviews extends AbstractController {
 		}
 
 		if ( ! $result ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'The object cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'The object cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -733,7 +733,7 @@ class ProductReviews extends AbstractController {
 	 * Prepare a single product review to be inserted into the database.
 	 *
 	 * @param  WP_REST_Request $request Request object.
-	 * @return array|WP_Error  $prepared_review
+	 * @return array|\WP_Error  $prepared_review
 	 */
 	protected function prepare_item_for_database( $request ) {
 		if ( isset( $request['id'] ) ) {
@@ -1032,11 +1032,11 @@ class ProductReviews extends AbstractController {
 	 *
 	 * @since 3.5.0
 	 * @param int $id Supplied ID.
-	 * @return WP_Comment|WP_Error Comment object if ID is valid, WP_Error otherwise.
+	 * @return WP_Comment|\WP_Error Comment object if ID is valid, \WP_Error otherwise.
 	 */
 	protected function get_review( $id ) {
 		$id    = (int) $id;
-		$error = new WP_Error( 'woocommerce_rest_review_invalid_id', __( 'Invalid review ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		$error = new \WP_Error( 'woocommerce_rest_review_invalid_id', __( 'Invalid review ID.', 'woocommerce' ), array( 'status' => 404 ) );
 
 		if ( 0 >= $id ) {
 			return $error;
@@ -1051,7 +1051,7 @@ class ProductReviews extends AbstractController {
 			$post = get_post( (int) $review->comment_post_ID );
 
 			if ( 'product' !== get_post_type( (int) $review->comment_post_ID ) ) {
-				return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+				return new \WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 			}
 		}
 

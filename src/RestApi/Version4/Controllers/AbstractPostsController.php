@@ -5,11 +5,9 @@
  * @package WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Version4;
+namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
-
-use AbstractController;
 
 /**
  * POSTS Controller.
@@ -43,11 +41,11 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Check if a given request has access to read items.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -57,11 +55,11 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Check if a given request has access to create an item.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'create' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -71,13 +69,13 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Check if a given request has access to read an item.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
 		$post = get_post( (int) $request['id'] );
 
 		if ( $post && ! wc_rest_check_post_permissions( $this->post_type, 'read', $post->ID ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -87,13 +85,13 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Check if a given request has access to update an item.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
 		$post = get_post( (int) $request['id'] );
 
 		if ( $post && ! wc_rest_check_post_permissions( $this->post_type, 'edit', $post->ID ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -103,13 +101,13 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Check if a given request has access to delete an item.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
 		$post = get_post( (int) $request['id'] );
 
 		if ( $post && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $post->ID ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -120,11 +118,11 @@ abstract class AbstractPostsController extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return boolean|WP_Error
+	 * @return boolean|\WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -134,16 +132,16 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Get a single item.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$id   = (int) $request['id'];
 		$post = get_post( $id );
 
 		if ( ! empty( $post->post_type ) && 'product_variation' === $post->post_type && 'product' === $this->post_type ) {
-			return new WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ), array( 'status' => 404 ) );
 		} elseif ( empty( $id ) || empty( $post->ID ) || $post->post_type !== $this->post_type ) {
-			return new WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$data = $this->prepare_item_for_response( $post, $request );
@@ -160,12 +158,12 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Create a single item.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
 			/* translators: %s: post type */
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
 		$post = $this->prepare_item_for_database( $request );
@@ -222,7 +220,7 @@ abstract class AbstractPostsController extends AbstractController {
 	 *
 	 * @param WP_Post         $post Post Object.
 	 * @param WP_REST_Request $request WP_REST_Request Object.
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	protected function add_post_meta_fields( $post, $request ) {
 		return true;
@@ -241,16 +239,16 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Update a single post.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$id   = (int) $request['id'];
 		$post = get_post( $id );
 
 		if ( ! empty( $post->post_type ) && 'product_variation' === $post->post_type && 'product' === $this->post_type ) {
-			return new WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( "woocommerce_rest_invalid_{$this->post_type}_id", __( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ), array( 'status' => 404 ) );
 		} elseif ( empty( $id ) || empty( $post->ID ) || $post->post_type !== $this->post_type ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$post = $this->prepare_item_for_database( $request );
@@ -295,7 +293,7 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Get a collection of posts.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$args                         = array();
@@ -344,7 +342,7 @@ abstract class AbstractPostsController extends AbstractController {
 		$args = apply_filters( "woocommerce_rest_{$this->post_type}_query", $args, $request );
 		$query_args = $this->prepare_items_query( $args, $request );
 
-		$posts_query = new WP_Query();
+		$posts_query = new \WP_Query();
 		$query_result = $posts_query->query( $query_args );
 
 		$posts = array();
@@ -363,7 +361,7 @@ abstract class AbstractPostsController extends AbstractController {
 		if ( $total_posts < 1 ) {
 			// Out-of-bounds, run the query again without LIMIT for total count.
 			unset( $query_args['paged'] );
-			$count_query = new WP_Query();
+			$count_query = new \WP_Query();
 			$count_query->query( $query_args );
 			$total_posts = $count_query->found_posts;
 		}
@@ -403,7 +401,7 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Delete a single item.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
 		$id    = (int) $request['id'];
@@ -411,7 +409,7 @@ abstract class AbstractPostsController extends AbstractController {
 		$post  = get_post( $id );
 
 		if ( empty( $id ) || empty( $post->ID ) || $post->post_type !== $this->post_type ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$supports_trash = EMPTY_TRASH_DAYS > 0;
@@ -428,7 +426,7 @@ abstract class AbstractPostsController extends AbstractController {
 
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $post->ID ) ) {
 			/* translators: %s: post type */
-			return new WP_Error( "woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( "woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -441,13 +439,13 @@ abstract class AbstractPostsController extends AbstractController {
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
 				/* translators: %s: post type */
-				return new WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ), array( 'status' => 501 ) );
+				return new \WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ), array( 'status' => 501 ) );
 			}
 
 			// Otherwise, only trash if we haven't already.
 			if ( 'trash' === $post->post_status ) {
 				/* translators: %s: post type */
-				return new WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 410 ) );
+				return new \WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 410 ) );
 			}
 
 			// (Note that internally this falls through to `wp_delete_post` if
@@ -457,7 +455,7 @@ abstract class AbstractPostsController extends AbstractController {
 
 		if ( ! $result ) {
 			/* translators: %s: post type */
-			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -494,7 +492,7 @@ abstract class AbstractPostsController extends AbstractController {
 
 	/**
 	 * Determine the allowed query_vars for a get_items() response and
-	 * prepare for WP_Query.
+	 * prepare for \WP_Query.
 	 *
 	 * @param array           $prepared_args Prepared arguments.
 	 * @param WP_REST_Request $request Request object.
@@ -543,7 +541,7 @@ abstract class AbstractPostsController extends AbstractController {
 		 *
 		 * Allows adjusting of the default query vars that are made public.
 		 *
-		 * @param array  Array of allowed WP_Query query vars.
+		 * @param array  Array of allowed \WP_Query query vars.
 		 */
 		$valid_vars = apply_filters( 'query_vars', $wp->public_query_vars );
 
@@ -593,7 +591,7 @@ abstract class AbstractPostsController extends AbstractController {
 		 * vars for editors only.
 		 *
 		 * @param array {
-		 *    Array of allowed WP_Query query vars.
+		 *    Array of allowed \WP_Query query vars.
 		 *
 		 *    @param string $allowed_query_var The query var to allow.
 		 * }
@@ -708,7 +706,7 @@ abstract class AbstractPostsController extends AbstractController {
 	 *
 	 * @param WP_Post         $post Post object.
 	 * @param WP_REST_Request $request Request object.
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	protected function update_post_meta_fields( $post, $request ) {
 		return true;

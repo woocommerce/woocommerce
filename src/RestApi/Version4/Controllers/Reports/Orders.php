@@ -55,11 +55,11 @@ class Orders extends Reports {
 	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$query_args   = $this->prepare_reports_query( $request );
-		$orders_query = new WC_Admin_Reports_Orders_Query( $query_args );
+		$orders_query = new \WC_Admin_Reports_Orders_Query( $query_args );
 		$report_data  = $orders_query->get_data();
 
 		$data = array();

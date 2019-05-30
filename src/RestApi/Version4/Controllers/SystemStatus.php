@@ -32,7 +32,7 @@ class SystemStatus extends AbstractController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
@@ -46,11 +46,11 @@ class SystemStatus extends AbstractController {
 	 * Check whether a given request has permission to view system status.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -59,7 +59,7 @@ class SystemStatus extends AbstractController {
 	 * Get a system status info, by section.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$schema   = $this->get_item_schema();
@@ -767,7 +767,7 @@ class SystemStatus extends AbstractController {
 		return array(
 			'wc_database_version'    => get_option( 'woocommerce_db_version' ),
 			'database_prefix'        => $wpdb->prefix,
-			'maxmind_geoip_database' => WC_Geolocation::get_local_database_path(),
+			'maxmind_geoip_database' => \WC_Geolocation::get_local_database_path(),
 			'database_tables'        => $tables,
 			'database_size'          => $database_size,
 		);
@@ -934,7 +934,7 @@ class SystemStatus extends AbstractController {
 			$parent_theme_info = array(
 				'parent_name'           => $parent_theme->name,
 				'parent_version'        => $parent_theme->version,
-				'parent_version_latest' => WC_Admin_Status::get_latest_theme_version( $parent_theme ),
+				'parent_version_latest' => \WC_Admin_Status::get_latest_theme_version( $parent_theme ),
 				'parent_author_url'     => $parent_theme->{'Author URI'},
 			);
 		} else {
@@ -952,7 +952,7 @@ class SystemStatus extends AbstractController {
 		 */
 		$override_files     = array();
 		$outdated_templates = false;
-		$scan_files         = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates/' );
+		$scan_files         = \WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates/' );
 		foreach ( $scan_files as $file ) {
 			$located = apply_filters( 'wc_get_template', $file, $file, array(), WC()->template_path(), WC()->plugin_path() . '/templates/' );
 
@@ -971,8 +971,8 @@ class SystemStatus extends AbstractController {
 			}
 
 			if ( ! empty( $theme_file ) ) {
-				$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $file );
-				$theme_version = WC_Admin_Status::get_file_version( $theme_file );
+				$core_version  = \WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $file );
+				$theme_version = \WC_Admin_Status::get_file_version( $theme_file );
 				if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) ) {
 					if ( ! $outdated_templates ) {
 						$outdated_templates = true;
@@ -989,7 +989,7 @@ class SystemStatus extends AbstractController {
 		$active_theme_info = array(
 			'name'                    => $active_theme->name,
 			'version'                 => $active_theme->version,
-			'version_latest'          => WC_Admin_Status::get_latest_theme_version( $active_theme ),
+			'version_latest'          => \WC_Admin_Status::get_latest_theme_version( $active_theme ),
 			'author_url'              => esc_url_raw( $active_theme->{'Author URI'} ),
 			'is_child_theme'          => is_child_theme(),
 			'has_woocommerce_support' => current_theme_supports( 'woocommerce' ),

@@ -52,11 +52,11 @@ class Categories extends Reports {
 	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$query_args       = $this->prepare_reports_query( $request );
-		$categories_query = new WC_Admin_Reports_Categories_Query( $query_args );
+		$categories_query = new \WC_Admin_Reports_Categories_Query( $query_args );
 		$report_data      = $categories_query->get_data();
 
 		if ( is_wp_error( $report_data ) ) {
@@ -64,7 +64,7 @@ class Categories extends Reports {
 		}
 
 		if ( ! isset( $report_data->data ) || ! isset( $report_data->page_no ) || ! isset( $report_data->pages ) ) {
-			return new WP_Error( 'woocommerce_rest_reports_categories_invalid_response', __( 'Invalid response from data store.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_reports_categories_invalid_response', __( 'Invalid response from data store.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		$out_data = array();

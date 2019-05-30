@@ -40,7 +40,7 @@ class SettingsOptions extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
@@ -59,10 +59,10 @@ class SettingsOptions extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
 					'permission_callback' => array( $this, 'update_items_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_batch_schema' ),
 			)
@@ -83,15 +83,15 @@ class SettingsOptions extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_items_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -103,7 +103,7 @@ class SettingsOptions extends AbstractController {
 	 *
 	 * @since  3.0.0
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$setting = $this->get_setting( $request['group_id'], $request['id'] );
@@ -122,7 +122,7 @@ class SettingsOptions extends AbstractController {
 	 *
 	 * @since  3.0.0
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$settings = $this->get_group_settings( $request['group_id'] );
@@ -148,17 +148,17 @@ class SettingsOptions extends AbstractController {
 	 * Get all settings in a group.
 	 *
 	 * @param string $group_id Group ID.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_group_settings( $group_id ) {
 		if ( empty( $group_id ) ) {
-			return new WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$settings = apply_filters( 'woocommerce_settings-' . $group_id, array() ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 
 		if ( empty( $settings ) ) {
-			return new WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$filtered_settings = array();
@@ -171,7 +171,7 @@ class SettingsOptions extends AbstractController {
 				$option           = get_option( $option_key[0] );
 				$setting['value'] = isset( $option[ $option_key[1] ] ) ? $option[ $option_key[1] ] : $default;
 			} else {
-				$admin_setting_value = WC_Admin_Settings::get_option( $option_key, $default );
+				$admin_setting_value = \WC_Admin_Settings::get_option( $option_key, $default );
 				$setting['value']    = $admin_setting_value;
 			}
 
@@ -235,11 +235,11 @@ class SettingsOptions extends AbstractController {
 	 * @since  3.0.0
 	 * @param string $group_id Group ID.
 	 * @param string $setting_id Setting ID.
-	 * @return stdClass|WP_Error
+	 * @return stdClass|\WP_Error
 	 */
 	public function get_setting( $group_id, $setting_id ) {
 		if ( empty( $setting_id ) ) {
-			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$settings = $this->get_group_settings( $group_id );
@@ -251,13 +251,13 @@ class SettingsOptions extends AbstractController {
 		$array_key = array_keys( wp_list_pluck( $settings, 'id' ), $setting_id );
 
 		if ( empty( $array_key ) ) {
-			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$setting = $settings[ $array_key[0] ];
 
 		if ( ! $this->is_setting_type_valid( $setting['type'] ) ) {
-			return new WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( is_wp_error( $setting ) ) {
@@ -274,7 +274,7 @@ class SettingsOptions extends AbstractController {
 	 *
 	 * @since  3.0.0
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return array Of WP_Error or WP_REST_Response.
+	 * @return array Of \WP_Error or WP_REST_Response.
 	 */
 	public function batch_items( $request ) {
 		// Get the request params.
@@ -301,7 +301,7 @@ class SettingsOptions extends AbstractController {
 	 *
 	 * @since  3.0.0
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$setting = $this->get_setting( $request['group_id'], $request['id'] );
@@ -330,7 +330,7 @@ class SettingsOptions extends AbstractController {
 			$update_data                           = array();
 			$update_data[ $setting['option_key'] ] = $value;
 			$setting['value']                      = $value;
-			WC_Admin_Settings::save_fields( array( $setting ), $update_data );
+			\WC_Admin_Settings::save_fields( array( $setting ), $update_data );
 		}
 
 		$response = $this->prepare_item_for_response( $setting, $request );
@@ -383,11 +383,11 @@ class SettingsOptions extends AbstractController {
 	 *
 	 * @since  3.0.0
 	 * @param WP_REST_Request $request Full data about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -398,11 +398,11 @@ class SettingsOptions extends AbstractController {
 	 *
 	 * @since  3.0.0
 	 * @param WP_REST_Request $request Full data about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function update_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;

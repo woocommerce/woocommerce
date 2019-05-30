@@ -29,10 +29,10 @@ class StockStats extends Reports {
 	 * Get Stock Status Totals.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
-		$stock_query = new WC_Admin_Reports_Stock_Stats_Query();
+		$stock_query = new \WC_Admin_Reports_Stock_Stats_Query();
 		$report_data = $stock_query->get_data();
 		$out_data    = array(
 			'totals' => $report_data,

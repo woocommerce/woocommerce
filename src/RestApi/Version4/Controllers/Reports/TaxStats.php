@@ -40,9 +40,9 @@ class TaxStats extends Reports {
 	 */
 	public function set_default_report_data( $results ) {
 		if ( empty( $results ) ) {
-			$results                       = new stdClass();
+			$results                       = new \stdClass();
 			$results->total                = 0;
-			$results->totals               = new stdClass();
+			$results->totals               = new \stdClass();
 			$results->totals->tax_codes    = 0;
 			$results->totals->total_tax    = 0;
 			$results->totals->order_tax    = 0;
@@ -80,11 +80,11 @@ class TaxStats extends Reports {
 	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$query_args  = $this->prepare_reports_query( $request );
-		$taxes_query = new WC_Admin_Reports_Taxes_Stats_Query( $query_args );
+		$taxes_query = new \WC_Admin_Reports_Taxes_Stats_Query( $query_args );
 		$report_data = $taxes_query->get_data();
 
 		$out_data = array(

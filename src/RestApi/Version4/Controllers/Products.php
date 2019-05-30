@@ -53,16 +53,16 @@ class Products extends AbstractObjectsController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -79,7 +79,7 @@ class Products extends AbstractObjectsController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
@@ -91,13 +91,13 @@ class Products extends AbstractObjectsController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				array(
-					'methods'             => WP_REST_Server::DELETABLE,
+					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 					'args'                => array(
@@ -117,10 +117,10 @@ class Products extends AbstractObjectsController {
 			'/' . $this->rest_base . '/batch',
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
 					'permission_callback' => array( $this, 'batch_items_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_batch_schema' ),
 			)
@@ -140,18 +140,59 @@ class Products extends AbstractObjectsController {
 	}
 
 	/**
+	 * Prepare a single product output for response.
+	 *
+	 * @param WC_Data         $object  Object data.
+	 * @param WP_REST_Request $request Request object.
+	 *
+	 * @since  3.0.0
+	 * @return WP_REST_Response
+	 */
+	public function prepare_object_for_response( $object, $request ) {
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data    = $this->get_product_data( $object, $context );
+
+		// Add variations to variable products.
+		if ( $object->is_type( 'variable' ) && $object->has_child() ) {
+			$data['variations'] = $object->get_children();
+		}
+
+		// Add grouped products data.
+		if ( $object->is_type( 'grouped' ) && $object->has_child() ) {
+			$data['grouped_products'] = $object->get_children();
+		}
+
+		$data     = $this->add_additional_fields_to_object( $data, $request );
+		$data     = $this->filter_response_by_context( $data, $context );
+		$response = rest_ensure_response( $data );
+		$response->add_links( $this->prepare_links( $object, $request ) );
+
+		/**
+		 * Filter the data for a response.
+		 *
+		 * The dynamic portion of the hook name, $this->post_type,
+		 * refers to object type being prepared for the response.
+		 *
+		 * @param WP_REST_Response $response The response object.
+		 * @param WC_Data          $object   Object data.
+		 * @param WP_REST_Request  $request  Request object.
+		 */
+		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
+	}
+
+	/**
 	 * Prepare a single product for create or update.
 	 *
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
-	 * @return WP_Error|WC_Data
+	 * @return \WP_Error|WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		$id = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
 
 		// Type is the most important part here because we need to be using the correct class and methods.
 		if ( isset( $request['type'] ) ) {
-			$classname = WC_Product_Factory::get_classname_from_product_type( $request['type'] );
+			$classname = \WC_Product_Factory::get_classname_from_product_type( $request['type'] );
 
 			if ( ! class_exists( $classname ) ) {
 				$classname = 'WC_Product_Simple';
@@ -161,11 +202,11 @@ class Products extends AbstractObjectsController {
 		} elseif ( isset( $request['id'] ) ) {
 			$product = wc_get_product( $id );
 		} else {
-			$product = new WC_Product_Simple();
+			$product = new \WC_Product_Simple();
 		}
 
 		if ( 'variation' === $product->get_type() ) {
-			return new WP_Error(
+			return new \WP_Error(
 				"woocommerce_rest_invalid_{$this->post_type}_id",
 				__( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ),
 				array(
@@ -285,7 +326,7 @@ class Products extends AbstractObjectsController {
 
 					if ( ! empty( $values ) ) {
 						// Add attribute to array, but don't set values.
-						$attribute_object = new WC_Product_Attribute();
+						$attribute_object = new \WC_Product_Attribute();
 						$attribute_object->set_id( $attribute_id );
 						$attribute_object->set_name( $attribute_name );
 						$attribute_object->set_options( $values );
@@ -301,7 +342,7 @@ class Products extends AbstractObjectsController {
 					} else {
 						$values = explode( WC_DELIMITER, $attribute['options'] );
 					}
-					$attribute_object = new WC_Product_Attribute();
+					$attribute_object = new \WC_Product_Attribute();
 					$attribute_object->set_name( $attribute_name );
 					$attribute_object->set_options( $values );
 					$attribute_object->set_position( isset( $attribute['position'] ) ? (string) absint( $attribute['position'] ) : '0' );
@@ -550,10 +591,10 @@ class Products extends AbstractObjectsController {
 	}
 
 	/**
-	 * Get a collection of posts and add the post title filter option to WP_Query.
+	 * Get a collection of posts and add the post title filter option to \WP_Query.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10, 2 );
@@ -570,7 +611,7 @@ class Products extends AbstractObjectsController {
 	 * Add in conditional search filters for products.
 	 *
 	 * @param string $where Where clause used to search posts.
-	 * @param object $wp_query WP_Query object.
+	 * @param object $wp_query \WP_Query object.
 	 * @return string
 	 */
 	public static function add_wp_query_filter( $where, $wp_query ) {
@@ -606,7 +647,7 @@ class Products extends AbstractObjectsController {
 	 * Join posts meta tables when product search or low stock query is present.
 	 *
 	 * @param string $join Join clause used to search posts.
-	 * @param object $wp_query WP_Query object.
+	 * @param object $wp_query \WP_Query object.
 	 * @return string
 	 */
 	public static function add_wp_query_join( $join, $wp_query ) {
@@ -630,7 +671,7 @@ class Products extends AbstractObjectsController {
 	 * Group by post ID to prevent duplicates.
 	 *
 	 * @param string $groupby Group by clause used to organize posts.
-	 * @param object $wp_query WP_Query object.
+	 * @param object $wp_query \WP_Query object.
 	 * @return string
 	 */
 	public static function add_wp_query_group_by( $groupby, $wp_query ) {
@@ -652,7 +693,7 @@ class Products extends AbstractObjectsController {
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
-		$args = WC_REST_CRUD_Controller::prepare_objects_query( $request );
+		$args = parent::prepare_objects_query( $request );
 
 		// Set post_status.
 		$args['post_status'] = $request['status'];
@@ -1175,7 +1216,7 @@ class Products extends AbstractObjectsController {
 
 					if ( is_wp_error( $upload ) ) {
 						if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $product->get_id(), $images ) ) {
-							throw new WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
+							throw new \WC_REST_Exception( 'woocommerce_product_image_upload_error', $upload->get_error_message(), 400 );
 						} else {
 							continue;
 						}
@@ -1186,7 +1227,7 @@ class Products extends AbstractObjectsController {
 
 				if ( ! wp_attachment_is_image( $attachment_id ) ) {
 					/* translators: %s: image ID */
-					throw new WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
+					throw new \WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
 				}
 
 				$featured_image = $product->get_image_id();
@@ -1288,7 +1329,7 @@ class Products extends AbstractObjectsController {
 				continue;
 			}
 
-			$download = new WC_Product_Download();
+			$download = new \WC_Product_Download();
 			$download->set_id( ! empty( $file['id'] ) ? $file['id'] : wp_generate_uuid4() );
 			$download->set_name( $file['name'] ? $file['name'] : wc_get_filename_from_url( $file['file'] ) );
 			$download->set_file( apply_filters( 'woocommerce_file_download_path', $file['file'], $product, $key ) );
@@ -1396,7 +1437,7 @@ class Products extends AbstractObjectsController {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 *
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
 		$id     = (int) $request['id'];
@@ -1405,7 +1446,7 @@ class Products extends AbstractObjectsController {
 		$result = false;
 
 		if ( ! $object || 0 === $object->get_id() ) {
-			return new WP_Error(
+			return new \WP_Error(
 				"woocommerce_rest_{$this->post_type}_invalid_id",
 				__( 'Invalid ID.', 'woocommerce' ),
 				array(
@@ -1415,7 +1456,7 @@ class Products extends AbstractObjectsController {
 		}
 
 		if ( 'variation' === $object->get_type() ) {
-			return new WP_Error(
+			return new \WP_Error(
 				"woocommerce_rest_invalid_{$this->post_type}_id",
 				__( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ),
 				array(
@@ -1437,7 +1478,7 @@ class Products extends AbstractObjectsController {
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );
 
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
-			return new WP_Error(
+			return new \WP_Error(
 				"woocommerce_rest_user_cannot_delete_{$this->post_type}",
 				/* translators: %s: post type */
 				sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ),
@@ -1475,7 +1516,7 @@ class Products extends AbstractObjectsController {
 		} else {
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
-				return new WP_Error(
+				return new \WP_Error(
 					'woocommerce_rest_trash_not_supported',
 					/* translators: %s: post type */
 					sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ),
@@ -1488,7 +1529,7 @@ class Products extends AbstractObjectsController {
 			// Otherwise, only trash if we haven't already.
 			if ( is_callable( array( $object, 'get_status' ) ) ) {
 				if ( 'trash' === $object->get_status() ) {
-					return new WP_Error(
+					return new \WP_Error(
 						'woocommerce_rest_already_trashed',
 						/* translators: %s: post type */
 						sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ),
@@ -1504,7 +1545,7 @@ class Products extends AbstractObjectsController {
 		}
 
 		if ( ! $result ) {
-			return new WP_Error(
+			return new \WP_Error(
 				'woocommerce_rest_cannot_delete',
 				/* translators: %s: post type */
 				sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ),
@@ -2221,7 +2262,7 @@ class Products extends AbstractObjectsController {
 			$params['tax_class'] = array(
 				'description'       => __( 'Limit result set to products with a specific tax class.', 'woocommerce' ),
 				'type'              => 'string',
-				'enum'              => array_merge( array( 'standard' ), WC_Tax::get_tax_class_slugs() ),
+				'enum'              => array_merge( array( 'standard' ), \WC_Tax::get_tax_class_slugs() ),
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 			);

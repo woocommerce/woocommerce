@@ -59,16 +59,16 @@ class OrderRefunds extends Orders {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -89,7 +89,7 @@ class OrderRefunds extends Orders {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
@@ -97,7 +97,7 @@ class OrderRefunds extends Orders {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::DELETABLE,
+					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 					'args'                => array(
@@ -175,7 +175,7 @@ class OrderRefunds extends Orders {
 	 * @param  WC_Data         $object  Object data.
 	 * @param  WP_REST_Request $request Request object.
 	 *
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
 		$this->request       = $request;
@@ -183,11 +183,11 @@ class OrderRefunds extends Orders {
 		$order               = wc_get_order( (int) $request['order_id'] );
 
 		if ( ! $order ) {
-			return new WP_Error( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), 404 );
 		}
 
 		if ( ! $object || $object->get_parent_id() !== $order->get_id() ) {
-			return new WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
 		}
 
 		$data    = $this->get_formatted_item_data( $object );
@@ -219,19 +219,19 @@ class OrderRefunds extends Orders {
 	 * @param WP_Post         $post Post object.
 	 * @param WP_REST_Request $request Request object.
 	 *
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function prepare_item_for_response( $post, $request ) {
 		$order = wc_get_order( (int) $request['order_id'] );
 
 		if ( ! $order ) {
-			return new WP_Error( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), 404 );
 		}
 
 		$refund = wc_get_order( $post );
 
 		if ( ! $refund || $refund->get_parent_id() !== $order->get_id() ) {
-			return new WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
 		}
 
 		$dp = is_null( $request['dp'] ) ? wc_get_price_decimals() : absint( $request['dp'] );
@@ -375,22 +375,22 @@ class OrderRefunds extends Orders {
 	 * Create a single item.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
 			/* translators: %s: post type */
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
 		$order_data = get_post( (int) $request['order_id'] );
 
 		if ( empty( $order_data ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_order', __( 'Order is invalid', 'woocommerce' ), 400 );
+			return new \WP_Error( 'woocommerce_rest_invalid_order', __( 'Order is invalid', 'woocommerce' ), 400 );
 		}
 
 		if ( 0 > $request['amount'] ) {
-			return new WP_Error( 'woocommerce_rest_invalid_order_refund', __( 'Refund amount must be greater than zero.', 'woocommerce' ), 400 );
+			return new \WP_Error( 'woocommerce_rest_invalid_order_refund', __( 'Refund amount must be greater than zero.', 'woocommerce' ), 400 );
 		}
 
 		// Create the refund.
@@ -405,11 +405,11 @@ class OrderRefunds extends Orders {
 		);
 
 		if ( is_wp_error( $refund ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create_order_refund', $refund->get_error_message(), 500 );
+			return new \WP_Error( 'woocommerce_rest_cannot_create_order_refund', $refund->get_error_message(), 500 );
 		}
 
 		if ( ! $refund ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create_order_refund', __( 'Cannot create order refund, please try again.', 'woocommerce' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_cannot_create_order_refund', __( 'Cannot create order refund, please try again.', 'woocommerce' ), 500 );
 		}
 
 		$post = get_post( $refund->get_id() );
@@ -439,17 +439,17 @@ class OrderRefunds extends Orders {
 	 * @since  3.0.0
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
-	 * @return WP_Error|WC_Data The prepared item, or WP_Error object on failure.
+	 * @return \WP_Error|WC_Data The prepared item, or \WP_Error object on failure.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		$order = wc_get_order( (int) $request['order_id'] );
 
 		if ( ! $order ) {
-			return new WP_Error( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), 404 );
+			return new \WP_Error( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), 404 );
 		}
 
 		if ( 0 > $request['amount'] ) {
-			return new WP_Error( 'woocommerce_rest_invalid_order_refund', __( 'Refund amount must be greater than zero.', 'woocommerce' ), 400 );
+			return new \WP_Error( 'woocommerce_rest_invalid_order_refund', __( 'Refund amount must be greater than zero.', 'woocommerce' ), 400 );
 		}
 
 		// Create the refund.
@@ -465,11 +465,11 @@ class OrderRefunds extends Orders {
 		);
 
 		if ( is_wp_error( $refund ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create_order_refund', $refund->get_error_message(), 500 );
+			return new \WP_Error( 'woocommerce_rest_cannot_create_order_refund', $refund->get_error_message(), 500 );
 		}
 
 		if ( ! $refund ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create_order_refund', __( 'Cannot create order refund, please try again.', 'woocommerce' ), 500 );
+			return new \WP_Error( 'woocommerce_rest_cannot_create_order_refund', __( 'Cannot create order refund, please try again.', 'woocommerce' ), 500 );
 		}
 
 		if ( ! empty( $request['meta_data'] ) && is_array( $request['meta_data'] ) ) {
@@ -498,7 +498,7 @@ class OrderRefunds extends Orders {
 	 * @since  3.0.0
 	 * @param  WP_REST_Request $request  Full details about the request.
 	 * @param  bool            $creating If is creating a new object.
-	 * @return WC_Data|WP_Error
+	 * @return WC_Data|\WP_Error
 	 */
 	protected function save_object( $request, $creating = false ) {
 		try {
@@ -510,9 +510,9 @@ class OrderRefunds extends Orders {
 
 			return $this->get_object( $object->get_id() );
 		} catch ( WC_Data_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
 

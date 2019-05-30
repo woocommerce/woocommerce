@@ -62,7 +62,7 @@ class PerformanceIndicators extends Reports {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
@@ -76,7 +76,7 @@ class PerformanceIndicators extends Reports {
 			'/' . $this->rest_base . '/allowed',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_allowed_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
@@ -103,7 +103,7 @@ class PerformanceIndicators extends Reports {
 	/**
 	 * Get information such as allowed stats, stat labels, and endpoint data from stats reports.
 	 *
-	 * @return WP_Error|True
+	 * @return \WP_Error|True
 	 */
 	private function get_indicator_data() {
 		// Data already retrieved.
@@ -116,7 +116,7 @@ class PerformanceIndicators extends Reports {
 		$endpoints     = $response->get_data();
 		$allowed_stats = array();
 		if ( 200 !== $response->get_status() ) {
-			return new WP_Error( 'woocommerce_reports_performance_indicators_result_failed', __( 'Sorry, fetching performance indicators failed.', 'woocommerce' ) );
+			return new \WP_Error( 'woocommerce_reports_performance_indicators_result_failed', __( 'Sorry, fetching performance indicators failed.', 'woocommerce' ) );
 		}
 
 		foreach ( $endpoints as $endpoint ) {
@@ -156,7 +156,7 @@ class PerformanceIndicators extends Reports {
 	 * Returns a list of allowed performance indicators.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_allowed_items( $request ) {
 		$indicator_data = $this->get_indicator_data();
@@ -245,7 +245,7 @@ class PerformanceIndicators extends Reports {
 	 * Get all reports.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$indicator_data = $this->get_indicator_data();
@@ -255,7 +255,7 @@ class PerformanceIndicators extends Reports {
 
 		$query_args = $this->prepare_reports_query( $request );
 		if ( empty( $query_args['stats'] ) ) {
-			return new WP_Error( 'woocommerce_reports_performance_indicators_empty_query', __( 'A list of stats to query must be provided.', 'woocommerce' ), 400 );
+			return new \WP_Error( 'woocommerce_reports_performance_indicators_empty_query', __( 'A list of stats to query must be provided.', 'woocommerce' ), 400 );
 		}
 
 		$stats = array();

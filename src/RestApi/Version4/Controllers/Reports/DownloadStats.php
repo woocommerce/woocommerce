@@ -57,11 +57,11 @@ class DownloadStats extends Reports {
 	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$query_args      = $this->prepare_reports_query( $request );
-		$downloads_query = new WC_Admin_Reports_Downloads_Stats_Query( $query_args );
+		$downloads_query = new \WC_Admin_Reports_Downloads_Stats_Query( $query_args );
 		$report_data     = $downloads_query->get_data();
 
 		$out_data = array(

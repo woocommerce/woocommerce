@@ -25,16 +25,16 @@ class ShippingZones extends AbstractShippingZonesController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array_merge(
-						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+						$this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
 						array(
 							'name' => array(
 								'required'    => true,
@@ -59,18 +59,18 @@ class ShippingZones extends AbstractShippingZonesController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_items_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				array(
-					'methods'             => WP_REST_Server::DELETABLE,
+					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
 					'args'                => array(
@@ -90,7 +90,7 @@ class ShippingZones extends AbstractShippingZonesController {
 	 * Get a single Shipping Zone.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function get_item( $request ) {
 		$zone = $this->get_zone( $request->get_param( 'id' ) );
@@ -113,9 +113,9 @@ class ShippingZones extends AbstractShippingZonesController {
 	 * @return WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$rest_of_the_world = WC_Shipping_Zones::get_zone_by( 'zone_id', 0 );
+		$rest_of_the_world = \WC_Shipping_Zones::get_zone_by( 'zone_id', 0 );
 
-		$zones = WC_Shipping_Zones::get_zones();
+		$zones = \WC_Shipping_Zones::get_zones();
 		array_unshift( $zones, $rest_of_the_world->get_data() );
 		$data = array();
 
@@ -132,10 +132,10 @@ class ShippingZones extends AbstractShippingZonesController {
 	 * Create a single Shipping Zone.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @return WP_REST_Request|\WP_Error
 	 */
 	public function create_item( $request ) {
-		$zone = new WC_Shipping_Zone( null );
+		$zone = new \WC_Shipping_Zone( null );
 
 		if ( ! is_null( $request->get_param( 'name' ) ) ) {
 			$zone->set_zone_name( $request->get_param( 'name' ) );
@@ -154,7 +154,7 @@ class ShippingZones extends AbstractShippingZonesController {
 			$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $zone->get_id() ) ) );
 			return $response;
 		} else {
-			return new WP_Error( 'woocommerce_rest_shipping_zone_not_created', __( "Resource cannot be created. Check to make sure 'order' and 'name' are present.", 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_shipping_zone_not_created', __( "Resource cannot be created. Check to make sure 'order' and 'name' are present.", 'woocommerce' ), array( 'status' => 500 ) );
 		}
 	}
 
@@ -162,7 +162,7 @@ class ShippingZones extends AbstractShippingZonesController {
 	 * Update a single Shipping Zone.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @return WP_REST_Request|\WP_Error
 	 */
 	public function update_item( $request ) {
 		$zone = $this->get_zone( $request->get_param( 'id' ) );
@@ -172,7 +172,7 @@ class ShippingZones extends AbstractShippingZonesController {
 		}
 
 		if ( 0 === $zone->get_id() ) {
-			return new WP_Error( 'woocommerce_rest_shipping_zone_invalid_zone', __( 'The "locations not covered by your other zones" zone cannot be updated.', 'woocommerce' ), array( 'status' => 403 ) );
+			return new \WP_Error( 'woocommerce_rest_shipping_zone_invalid_zone', __( 'The "locations not covered by your other zones" zone cannot be updated.', 'woocommerce' ), array( 'status' => 403 ) );
 		}
 
 		$zone_changed = false;
@@ -198,7 +198,7 @@ class ShippingZones extends AbstractShippingZonesController {
 	 * Delete a single Shipping Zone.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @return WP_REST_Request|\WP_Error
 	 */
 	public function delete_item( $request ) {
 		$zone = $this->get_zone( $request->get_param( 'id' ) );
@@ -214,7 +214,7 @@ class ShippingZones extends AbstractShippingZonesController {
 		if ( $force ) {
 			$zone->delete();
 		} else {
-			return new WP_Error( 'rest_trash_not_supported', __( 'Shipping zones do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+			return new \WP_Error( 'rest_trash_not_supported', __( 'Shipping zones do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
 
 		return $response;

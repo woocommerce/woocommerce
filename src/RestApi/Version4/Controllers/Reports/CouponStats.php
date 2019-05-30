@@ -50,15 +50,15 @@ class CouponStats extends Reports {
 	 * Get all reports.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$query_args    = $this->prepare_reports_query( $request );
-		$coupons_query = new WC_Admin_Reports_Coupons_Stats_Query( $query_args );
+		$coupons_query = new \WC_Admin_Reports_Coupons_Stats_Query( $query_args );
 		try {
 			$report_data = $coupons_query->get_data();
 		} catch ( WC_Admin_Reports_Parameter_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
 		$out_data = array(

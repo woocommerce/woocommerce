@@ -34,7 +34,7 @@ class Import extends Reports {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'import_items' ),
 					'permission_callback' => array( $this, 'import_permissions_check' ),
 					'args'                => $this->get_import_collection_params(),
@@ -47,7 +47,7 @@ class Import extends Reports {
 			'/' . $this->rest_base . '/cancel',
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'cancel_import' ),
 					'permission_callback' => array( $this, 'import_permissions_check' ),
 				),
@@ -59,7 +59,7 @@ class Import extends Reports {
 			'/' . $this->rest_base . '/delete',
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'delete_imported_items' ),
 					'permission_callback' => array( $this, 'import_permissions_check' ),
 				),
@@ -71,7 +71,7 @@ class Import extends Reports {
 			'/' . $this->rest_base . '/status',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_import_status' ),
 					'permission_callback' => array( $this, 'import_permissions_check' ),
 				),
@@ -83,7 +83,7 @@ class Import extends Reports {
 			'/' . $this->rest_base . '/totals',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_import_totals' ),
 					'permission_callback' => array( $this, 'import_permissions_check' ),
 					'args'                => $this->get_import_collection_params(),
@@ -97,11 +97,11 @@ class Import extends Reports {
 	 * Makes sure the current user has access to WRITE the settings APIs.
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
-	 * @return WP_Error|bool
+	 * @return \WP_Error|bool
 	 */
 	public function import_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -110,11 +110,11 @@ class Import extends Reports {
 	 * Import data based on user request params.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function import_items( $request ) {
 		$query_args = $this->prepare_objects_query( $request );
-		$import     = WC_Admin_Reports_Sync::regenerate_report_data( $query_args['days'], $query_args['skip_existing'] );
+		$import     = \WC_Admin_Reports_Sync::regenerate_report_data( $query_args['days'], $query_args['skip_existing'] );
 
 		if ( is_wp_error( $import ) ) {
 			$result = array(
@@ -227,10 +227,10 @@ class Import extends Reports {
 	 * Cancel all queued import actions.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function cancel_import( $request ) {
-		WC_Admin_Reports_Sync::clear_queued_actions();
+		\WC_Admin_Reports_Sync::clear_queued_actions();
 
 		$result = array(
 			'status'  => 'success',
@@ -247,10 +247,10 @@ class Import extends Reports {
 	 * Delete all imported items.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function delete_imported_items( $request ) {
-		$delete = WC_Admin_Reports_Sync::delete_report_data();
+		$delete = \WC_Admin_Reports_Sync::delete_report_data();
 
 		if ( is_wp_error( $delete ) ) {
 			$result = array(
@@ -274,11 +274,11 @@ class Import extends Reports {
 	 * Get the status of the current import.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_import_status( $request ) {
 		$result = array(
-			'is_importing'    => WC_Admin_Reports_Sync::is_importing(),
+			'is_importing'    => \WC_Admin_Reports_Sync::is_importing(),
 			'customers_total' => get_option( 'wc_admin_import_customers_total', 0 ),
 			'customers_count' => get_option( 'wc_admin_import_customers_count', 0 ),
 			'orders_total'    => get_option( 'wc_admin_import_orders_total', 0 ),
@@ -296,11 +296,11 @@ class Import extends Reports {
 	 * Get the total orders and customers based on user supplied params.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_import_totals( $request ) {
 		$query_args = $this->prepare_objects_query( $request );
-		$totals     = WC_Admin_Reports_Sync::get_import_totals( $query_args['days'], $query_args['skip_existing'] );
+		$totals     = \WC_Admin_Reports_Sync::get_import_totals( $query_args['days'], $query_args['skip_existing'] );
 
 		$response = $this->prepare_item_for_response( $totals, $request );
 		$data     = $this->prepare_response_for_collection( $response );

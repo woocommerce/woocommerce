@@ -9,8 +9,6 @@ namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use AbstractController;
-
 /**
  * Terms controller class.
  */
@@ -39,17 +37,17 @@ abstract class AbstractTermsContoller extends AbstractController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array_merge(
-						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+						$this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
 						array(
 							'name' => array(
 								'type'        => 'string',
@@ -74,7 +72,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
@@ -82,13 +80,13 @@ abstract class AbstractTermsContoller extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				array(
-					'methods'             => WP_REST_Server::DELETABLE,
+					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 					'args'                => array(
@@ -108,10 +106,10 @@ abstract class AbstractTermsContoller extends AbstractController {
 			'/' . $this->rest_base . '/batch',
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
 					'permission_callback' => array( $this, 'batch_items_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_batch_schema' ),
 			)
@@ -122,7 +120,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Check if a given request has access to read the terms.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		$permissions = $this->check_permissions( $request, 'read' );
@@ -131,7 +129,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		}
 
 		if ( ! $permissions ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -141,7 +139,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Check if a given request has access to create a term.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
 		$permissions = $this->check_permissions( $request, 'create' );
@@ -150,7 +148,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		}
 
 		if ( ! $permissions ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -160,7 +158,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Check if a given request has access to read a term.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
 		$permissions = $this->check_permissions( $request, 'read' );
@@ -169,7 +167,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		}
 
 		if ( ! $permissions ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -179,7 +177,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Check if a given request has access to update a term.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
 		$permissions = $this->check_permissions( $request, 'edit' );
@@ -188,7 +186,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		}
 
 		if ( ! $permissions ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -198,7 +196,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Check if a given request has access to delete a term.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function delete_item_permissions_check( $request ) {
 		$permissions = $this->check_permissions( $request, 'delete' );
@@ -207,7 +205,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		}
 
 		if ( ! $permissions ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -217,7 +215,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Check if a given request has access batch create, update and delete items.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return boolean|WP_Error
+	 * @return boolean|\WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
 		$permissions = $this->check_permissions( $request, 'batch' );
@@ -226,7 +224,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		}
 
 		if ( ! $permissions ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -237,13 +235,13 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @param string          $context Request context.
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	protected function check_permissions( $request, $context = 'read' ) {
 		// Get taxonomy.
 		$taxonomy = $this->get_taxonomy( $request );
 		if ( ! $taxonomy || ! taxonomy_exists( $taxonomy ) ) {
-			return new WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Taxonomy does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Taxonomy does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		// Check permissions for a single term.
@@ -252,7 +250,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 			$term = get_term( $id, $taxonomy );
 
 			if ( is_wp_error( $term ) || ! $term || $term->taxonomy !== $taxonomy ) {
-				return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+				return new \WP_Error( 'woocommerce_rest_term_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 			}
 
 			return wc_rest_check_product_term_permissions( $taxonomy, $context, $term->term_id );
@@ -265,7 +263,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Get terms associated with a taxonomy.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$taxonomy      = $this->get_taxonomy( $request );
@@ -375,7 +373,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Create a single term for a taxonomy.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @return WP_REST_Request|\WP_Error
 	 */
 	public function create_item( $request ) {
 		$taxonomy = $this->get_taxonomy( $request );
@@ -391,7 +389,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		}
 		if ( isset( $request['parent'] ) ) {
 			if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
-				return new WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new \WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 			$args['parent'] = $request['parent'];
 		}
@@ -407,7 +405,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 				$error_data['resource_id'] = $term_id;
 			}
 
-			return new WP_Error( $term->get_error_code(), $term->get_error_message(), $error_data );
+			return new \WP_Error( $term->get_error_code(), $term->get_error_message(), $error_data );
 		}
 
 		$term = get_term( $term['term_id'], $taxonomy );
@@ -450,7 +448,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Get a single term from a taxonomy.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @return WP_REST_Request|\WP_Error
 	 */
 	public function get_item( $request ) {
 		$taxonomy = $this->get_taxonomy( $request );
@@ -469,7 +467,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Update a single term from a taxonomy.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @return WP_REST_Request|\WP_Error
 	 */
 	public function update_item( $request ) {
 		$taxonomy      = $this->get_taxonomy( $request );
@@ -488,7 +486,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		}
 		if ( isset( $request['parent'] ) ) {
 			if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
-				return new WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new \WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 			$prepared_args['parent'] = $request['parent'];
 		}
@@ -529,7 +527,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Delete a single term from a taxonomy.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
 		$taxonomy = $this->get_taxonomy( $request );
@@ -537,7 +535,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 
 		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
-			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Resource does not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+			return new \WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Resource does not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
 
 		$term = get_term( (int) $request['id'], $taxonomy );
@@ -546,7 +544,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 
 		// Prevent deleting the default product category.
 		if ( $default_category_id === (int) $request['id'] ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Default product category cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Default product category cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -554,7 +552,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 
 		$retval = wp_delete_term( $term->term_id, $term->taxonomy );
 		if ( ! $retval ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -609,7 +607,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 *
 	 * @param WP_Term         $term    Term object.
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	protected function update_term_meta_fields( $term, $request ) {
 		return true;
@@ -695,7 +693,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		if ( '' !== $this->taxonomy && taxonomy_exists( $this->taxonomy ) ) {
 			$taxonomy = get_taxonomy( $this->taxonomy );
 		} else {
-			$taxonomy               = new stdClass();
+			$taxonomy               = new \stdClass();
 			$taxonomy->hierarchical = true;
 		}
 
@@ -787,7 +785,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Get taxonomy.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return int|WP_Error
+	 * @return int|\WP_Error
 	 */
 	protected function get_taxonomy( $request ) {
 		// Check if taxonomy is defined.

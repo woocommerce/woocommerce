@@ -53,16 +53,16 @@ class Orders extends AbstractObjectsController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -79,7 +79,7 @@ class Orders extends AbstractObjectsController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
@@ -87,13 +87,13 @@ class Orders extends AbstractObjectsController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				array(
-					'methods'             => WP_REST_Server::DELETABLE,
+					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 					'args'                => array(
@@ -113,10 +113,10 @@ class Orders extends AbstractObjectsController {
 			'/' . $this->rest_base . '/batch',
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
 					'permission_callback' => array( $this, 'batch_items_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_batch_schema' ),
 			)
@@ -352,7 +352,7 @@ class Orders extends AbstractObjectsController {
 	protected function prepare_objects_query( $request ) {
 		global $wpdb;
 
-		// This is needed to get around an array to string notice in WC_REST_Orders_V2_Controller::prepare_objects_query.
+		// This is needed to get around an array to string notice in \WC_REST_Orders_V2_Controller::prepare_objects_query.
 		$statuses = $request['status'];
 		unset( $request['status'] );
 		$args = parent::prepare_objects_query( $request );
@@ -389,7 +389,7 @@ class Orders extends AbstractObjectsController {
 				)
 			);
 
-			// Force WP_Query return empty if don't found any order.
+			// Force \WP_Query return empty if don't found any order.
 			$order_ids        = empty( $order_ids ) ? array( 0 ) : $order_ids;
 			$args['post__in'] = $order_ids;
 		}
@@ -414,11 +414,11 @@ class Orders extends AbstractObjectsController {
 	 * @throws WC_REST_Exception When fails to set any item.
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
-	 * @return WP_Error|WC_Data
+	 * @return \WP_Error|WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		$id        = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
-		$order     = new WC_Order( $id );
+		$order     = new \WC_Order( $id );
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
 
@@ -487,7 +487,7 @@ class Orders extends AbstractObjectsController {
 	 * @throws WC_REST_Exception But all errors are validated before returning any data.
 	 * @param  WP_REST_Request $request  Full details about the request.
 	 * @param  bool            $creating If is creating a new object.
-	 * @return WC_Data|WP_Error
+	 * @return WC_Data|\WP_Error
 	 */
 	protected function save_object( $request, $creating = false ) {
 		try {
@@ -503,7 +503,7 @@ class Orders extends AbstractObjectsController {
 			if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
 				// Make sure customer exists.
 				if ( false === get_user_by( 'id', $request['customer_id'] ) ) {
-					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
+					throw new \WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 				}
 
 				// Make sure customer is part of blog.
@@ -542,9 +542,9 @@ class Orders extends AbstractObjectsController {
 
 			return $this->get_object( $object->get_id() );
 		} catch ( WC_Data_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( WC_REST_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
 
@@ -578,7 +578,7 @@ class Orders extends AbstractObjectsController {
 		} elseif ( ! empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['variation_id'];
 		} else {
-			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
+			throw new \WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
 		}
 		return $product_id;
 	}
@@ -636,7 +636,7 @@ class Orders extends AbstractObjectsController {
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_line_items( $posted, $action = 'create', $item = null ) {
-		$item    = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
+		$item    = is_null( $item ) ? new \WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
 		$product = wc_get_product( $this->get_product_id( $posted ) );
 
 		if ( $product !== $item->get_product() ) {
@@ -666,11 +666,11 @@ class Orders extends AbstractObjectsController {
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_shipping_lines( $posted, $action = 'create', $item = null ) {
-		$item = is_null( $item ) ? new WC_Order_Item_Shipping( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
+		$item = is_null( $item ) ? new \WC_Order_Item_Shipping( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
 
 		if ( 'create' === $action ) {
 			if ( empty( $posted['method_id'] ) ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_shipping_item', __( 'Shipping method ID is required.', 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_shipping_item', __( 'Shipping method ID is required.', 'woocommerce' ), 400 );
 			}
 		}
 
@@ -690,11 +690,11 @@ class Orders extends AbstractObjectsController {
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_fee_lines( $posted, $action = 'create', $item = null ) {
-		$item = is_null( $item ) ? new WC_Order_Item_Fee( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
+		$item = is_null( $item ) ? new \WC_Order_Item_Fee( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
 
 		if ( 'create' === $action ) {
 			if ( empty( $posted['name'] ) ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_fee_item', __( 'Fee name is required.', 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_fee_item', __( 'Fee name is required.', 'woocommerce' ), 400 );
 			}
 		}
 
@@ -714,11 +714,11 @@ class Orders extends AbstractObjectsController {
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_coupon_lines( $posted, $action = 'create', $item = null ) {
-		$item = is_null( $item ) ? new WC_Order_Item_Coupon( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
+		$item = is_null( $item ) ? new \WC_Order_Item_Coupon( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
 
 		if ( 'create' === $action ) {
 			if ( empty( $posted['code'] ) ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
 			}
 		}
 
@@ -755,7 +755,7 @@ class Orders extends AbstractObjectsController {
 			$item = $order->get_item( absint( $posted['id'] ), false );
 
 			if ( ! $item ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_item_id', __( 'Order item ID provided is not associated with order.', 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_item_id', __( 'Order item ID provided is not associated with order.', 'woocommerce' ), 400 );
 			}
 		}
 
@@ -1714,13 +1714,13 @@ class Orders extends AbstractObjectsController {
 			if ( is_array( $item ) ) {
 				if ( empty( $item['id'] ) ) {
 					if ( empty( $item['code'] ) ) {
-						throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
+						throw new \WC_REST_Exception( 'woocommerce_rest_invalid_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
 					}
 
 					$results = $order->apply_coupon( wc_clean( $item['code'] ) );
 
 					if ( is_wp_error( $results ) ) {
-						throw new WC_REST_Exception( 'woocommerce_rest_' . $results->get_error_code(), $results->get_error_message(), 400 );
+						throw new \WC_REST_Exception( 'woocommerce_rest_' . $results->get_error_code(), $results->get_error_message(), 400 );
 					}
 				}
 			}

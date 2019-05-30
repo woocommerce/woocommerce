@@ -29,7 +29,7 @@ class Downloads extends Reports {
 	 * Get items.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$args       = array();
@@ -40,7 +40,7 @@ class Downloads extends Reports {
 			}
 		}
 
-		$reports        = new WC_Admin_Reports_Downloads_Query( $args );
+		$reports        = new \WC_Admin_Reports_Downloads_Query( $args );
 		$downloads_data = $reports->get_data();
 
 		$data = array();
@@ -103,7 +103,7 @@ class Downloads extends Reports {
 		$filename                       = basename( $file_path );
 		$response->data['file_name']    = apply_filters( 'woocommerce_file_download_filename', $filename, $product_id );
 		$response->data['file_path']    = $file_path;
-		$customer                       = new WC_Customer( $data['user_id'] );
+		$customer                       = new \WC_Customer( $data['user_id'] );
 		$response->data['username']     = $customer->get_username();
 		$response->data['order_number'] = $this->get_order_number( $data['order_id'] );
 

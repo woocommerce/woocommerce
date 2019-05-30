@@ -117,14 +117,14 @@ class Stock extends Reports {
 	 * @return array
 	 */
 	protected function get_products( $query_args ) {
-		$query  = new WP_Query();
+		$query  = new \WP_Query();
 		$result = $query->query( $query_args );
 
 		$total_posts = $query->found_posts;
 		if ( $total_posts < 1 ) {
 			// Out-of-bounds, run the query again without LIMIT for total count.
 			unset( $query_args['paged'] );
-			$count_query = new WP_Query();
+			$count_query = new \WP_Query();
 			$count_query->query( $query_args );
 			$total_posts = $count_query->found_posts;
 		}
@@ -140,7 +140,7 @@ class Stock extends Reports {
 	 * Get all reports.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$query_args    = $this->prepare_reports_query( $request );

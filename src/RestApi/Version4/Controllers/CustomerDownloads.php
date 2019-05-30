@@ -38,7 +38,7 @@ class CustomerDownloads extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
@@ -52,17 +52,17 @@ class CustomerDownloads extends AbstractController {
 	 * Check whether a given request has permission to read customers.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		$customer = get_user_by( 'id', (int) $request['customer_id'] );
 
 		if ( ! $customer ) {
-			return new WP_Error( 'woocommerce_rest_customer_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_customer_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		if ( ! wc_rest_check_user_permissions( 'read', $customer->get_id() ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;

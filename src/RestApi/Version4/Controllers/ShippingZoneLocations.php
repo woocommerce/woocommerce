@@ -31,15 +31,15 @@ class ShippingZoneLocations extends AbstractShippingZonesController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_items' ),
 					'permission_callback' => array( $this, 'update_items_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -50,7 +50,7 @@ class ShippingZoneLocations extends AbstractShippingZonesController {
 	 * Get all Shipping Zone Locations.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$zone = $this->get_zone( (int) $request['id'] );
@@ -75,7 +75,7 @@ class ShippingZoneLocations extends AbstractShippingZonesController {
 	 * Update all Shipping Zone Locations.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function update_items( $request ) {
 		$zone = $this->get_zone( (int) $request['id'] );
@@ -85,7 +85,7 @@ class ShippingZoneLocations extends AbstractShippingZonesController {
 		}
 
 		if ( 0 === $zone->get_id() ) {
-			return new WP_Error( 'woocommerce_rest_shipping_zone_locations_invalid_zone', __( 'The "locations not covered by your other zones" zone cannot be updated.', 'woocommerce' ), array( 'status' => 403 ) );
+			return new \WP_Error( 'woocommerce_rest_shipping_zone_locations_invalid_zone', __( 'The "locations not covered by your other zones" zone cannot be updated.', 'woocommerce' ), array( 'status' => 403 ) );
 		}
 
 		$raw_locations = $request->get_json_params();

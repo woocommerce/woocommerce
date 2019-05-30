@@ -32,16 +32,16 @@ class TaxClasses extends AbstractController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -58,7 +58,7 @@ class TaxClasses extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::DELETABLE,
+					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 					'args'                => array(
@@ -78,11 +78,11 @@ class TaxClasses extends AbstractController {
 	 * Check whether a given request has permission to read tax classes.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -93,11 +93,11 @@ class TaxClasses extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'create' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -108,11 +108,11 @@ class TaxClasses extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'delete' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -133,7 +133,7 @@ class TaxClasses extends AbstractController {
 			'name' => __( 'Standard rate', 'woocommerce' ),
 		);
 
-		$classes = WC_Tax::get_tax_classes();
+		$classes = \WC_Tax::get_tax_classes();
 
 		foreach ( $classes as $class ) {
 			$tax_classes[] = array(
@@ -156,11 +156,11 @@ class TaxClasses extends AbstractController {
 	 * Create a single tax.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		$exists    = false;
-		$classes   = WC_Tax::get_tax_classes();
+		$classes   = \WC_Tax::get_tax_classes();
 		$tax_class = array(
 			'slug' => sanitize_title( $request['name'] ),
 			'name' => $request['name'],
@@ -176,7 +176,7 @@ class TaxClasses extends AbstractController {
 
 		// Return error if tax class already exists.
 		if ( $exists ) {
-			return new WP_Error( 'woocommerce_rest_tax_class_exists', __( 'Cannot create existing resource.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_tax_class_exists', __( 'Cannot create existing resource.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		// Add the new class.
@@ -208,7 +208,7 @@ class TaxClasses extends AbstractController {
 	 * Delete a single tax class.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function delete_item( $request ) {
 		global $wpdb;
@@ -217,14 +217,14 @@ class TaxClasses extends AbstractController {
 
 		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
-			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Taxes do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+			return new \WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Taxes do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
 
 		$tax_class = array(
 			'slug' => sanitize_title( $request['slug'] ),
 			'name' => '',
 		);
-		$classes = WC_Tax::get_tax_classes();
+		$classes = \WC_Tax::get_tax_classes();
 		$deleted = false;
 
 		foreach ( $classes as $key => $class ) {
@@ -237,7 +237,7 @@ class TaxClasses extends AbstractController {
 		}
 
 		if ( ! $deleted ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		update_option( 'woocommerce_tax_classes', implode( "\n", $classes ) );

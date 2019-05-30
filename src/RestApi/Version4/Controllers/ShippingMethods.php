@@ -32,7 +32,7 @@ class ShippingMethods extends AbstractController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
@@ -51,7 +51,7 @@ class ShippingMethods extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
@@ -67,11 +67,11 @@ class ShippingMethods extends AbstractController {
 	 * Check whether a given request has permission to view shipping methods.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'shipping_methods', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -80,11 +80,11 @@ class ShippingMethods extends AbstractController {
 	 * Check if a given request has access to read a shipping method.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'shipping_methods', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -93,10 +93,10 @@ class ShippingMethods extends AbstractController {
 	 * Get shipping methods.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$wc_shipping = WC_Shipping::instance();
+		$wc_shipping = \WC_Shipping::instance();
 		$response    = array();
 		foreach ( $wc_shipping->get_shipping_methods() as $id => $shipping_method ) {
 			$method     = $this->prepare_item_for_response( $shipping_method, $request );
@@ -110,13 +110,13 @@ class ShippingMethods extends AbstractController {
 	 * Get a single Shipping Method.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function get_item( $request ) {
-		$wc_shipping = WC_Shipping::instance();
+		$wc_shipping = \WC_Shipping::instance();
 		$methods     = $wc_shipping->get_shipping_methods();
 		if ( empty( $methods[ $request['id'] ] ) ) {
-			return new WP_Error( 'woocommerce_rest_shipping_method_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_shipping_method_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$method   = $methods[ $request['id'] ];

@@ -44,7 +44,7 @@ class Levels extends WC_REST_Data_Controller {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
@@ -124,7 +124,7 @@ class Levels extends WC_REST_Data_Controller {
 	 * Return all level items and child tasks.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		global $wpdb;

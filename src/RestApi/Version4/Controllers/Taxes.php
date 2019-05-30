@@ -32,16 +32,16 @@ class Taxes extends AbstractController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -58,7 +58,7 @@ class Taxes extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
@@ -66,13 +66,13 @@ class Taxes extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				array(
-					'methods'             => WP_REST_Server::DELETABLE,
+					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 					'args'                => array(
@@ -92,10 +92,10 @@ class Taxes extends AbstractController {
 			'/' . $this->rest_base . '/batch',
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
 					'permission_callback' => array( $this, 'batch_items_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_batch_schema' ),
 			)
@@ -106,11 +106,11 @@ class Taxes extends AbstractController {
 	 * Check whether a given request has permission to read taxes.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -121,11 +121,11 @@ class Taxes extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'create' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -135,11 +135,11 @@ class Taxes extends AbstractController {
 	 * Check if a given request has access to read a tax.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -150,11 +150,11 @@ class Taxes extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -165,11 +165,11 @@ class Taxes extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'delete' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -180,11 +180,11 @@ class Taxes extends AbstractController {
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -194,7 +194,7 @@ class Taxes extends AbstractController {
 	 * Get all taxes and allow filtering by tax code.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		global $wpdb;
@@ -353,31 +353,31 @@ class Taxes extends AbstractController {
 		}
 
 		if ( $id ) {
-			WC_Tax::_update_tax_rate( $id, $data );
+			\WC_Tax::_update_tax_rate( $id, $data );
 		} else {
-			$id = WC_Tax::_insert_tax_rate( $data );
+			$id = \WC_Tax::_insert_tax_rate( $data );
 		}
 
 		// Add locales.
 		if ( ! empty( $request['postcode'] ) ) {
-			WC_Tax::_update_tax_rate_postcodes( $id, wc_clean( $request['postcode'] ) );
+			\WC_Tax::_update_tax_rate_postcodes( $id, wc_clean( $request['postcode'] ) );
 		}
 		if ( ! empty( $request['city'] ) ) {
-			WC_Tax::_update_tax_rate_cities( $id, wc_clean( $request['city'] ) );
+			\WC_Tax::_update_tax_rate_cities( $id, wc_clean( $request['city'] ) );
 		}
 
-		return WC_Tax::_get_tax_rate( $id, OBJECT );
+		return \WC_Tax::_get_tax_rate( $id, OBJECT );
 	}
 
 	/**
 	 * Create a single tax.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
-			return new WP_Error( 'woocommerce_rest_tax_exists', __( 'Cannot create existing resource.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_tax_exists', __( 'Cannot create existing resource.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$tax = $this->create_or_update_tax( $request );
@@ -406,14 +406,14 @@ class Taxes extends AbstractController {
 	 * Get a single tax.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$id      = (int) $request['id'];
-		$tax_obj = WC_Tax::_get_tax_rate( $id, OBJECT );
+		$tax_obj = \WC_Tax::_get_tax_rate( $id, OBJECT );
 
 		if ( empty( $id ) || empty( $tax_obj ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$tax      = $this->prepare_item_for_response( $tax_obj, $request );
@@ -426,14 +426,14 @@ class Taxes extends AbstractController {
 	 * Update a single tax.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$id      = (int) $request['id'];
-		$tax_obj = WC_Tax::_get_tax_rate( $id, OBJECT );
+		$tax_obj = \WC_Tax::_get_tax_rate( $id, OBJECT );
 
 		if ( empty( $id ) || empty( $tax_obj ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$tax = $this->create_or_update_tax( $request, $tax_obj );
@@ -460,7 +460,7 @@ class Taxes extends AbstractController {
 	 * Delete a single tax.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function delete_item( $request ) {
 		global $wpdb;
@@ -470,22 +470,22 @@ class Taxes extends AbstractController {
 
 		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
-			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Taxes do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+			return new \WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Taxes do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
 
-		$tax = WC_Tax::_get_tax_rate( $id, OBJECT );
+		$tax = \WC_Tax::_get_tax_rate( $id, OBJECT );
 
 		if ( empty( $id ) || empty( $tax ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( $tax, $request );
 
-		WC_Tax::_delete_tax_rate( $id );
+		\WC_Tax::_delete_tax_rate( $id );
 
 		if ( 0 === $wpdb->rows_affected ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -656,7 +656,7 @@ class Taxes extends AbstractController {
 					'description' => __( 'Tax class.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'standard',
-					'enum'        => array_merge( array( 'standard' ), WC_Tax::get_tax_class_slugs() ),
+					'enum'        => array_merge( array( 'standard' ), \WC_Tax::get_tax_class_slugs() ),
 					'context'     => array( 'view', 'edit' ),
 				),
 			),
@@ -719,7 +719,7 @@ class Taxes extends AbstractController {
 		);
 		$params['class'] = array(
 			'description'        => __( 'Sort by tax class.', 'woocommerce' ),
-			'enum'               => array_merge( array( 'standard' ), WC_Tax::get_tax_class_slugs() ),
+			'enum'               => array_merge( array( 'standard' ), \WC_Tax::get_tax_class_slugs() ),
 			'sanitize_callback'  => 'sanitize_title',
 			'type'               => 'string',
 			'validate_callback'  => 'rest_validate_request_arg',

@@ -89,7 +89,7 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * Check batch limit.
 	 *
 	 * @param array $items Request items.
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	protected function check_batch_limit( $items ) {
 		$limit = apply_filters( 'woocommerce_rest_batch_items_limit', 100, $this->get_normalized_rest_base() );
@@ -109,7 +109,7 @@ abstract class AbstractController extends WP_REST_Controller {
 
 		if ( $total > $limit ) {
 			/* translators: %s: items limit */
-			return new WP_Error( 'woocommerce_rest_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), array( 'status' => 413 ) );
+			return new \WP_Error( 'woocommerce_rest_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), array( 'status' => 413 ) );
 		}
 
 		return true;
@@ -119,7 +119,7 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * Bulk create, update and delete items.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return array Of WP_Error or WP_REST_Response.
+	 * @return array Of \WP_Error or WP_REST_Response.
 	 */
 	public function batch_items( $request ) {
 		/**
@@ -247,13 +247,13 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @since 3.0.0
 	 * @param string $value Value.
 	 * @param array  $setting Setting.
-	 * @return string|WP_Error
+	 * @return string|\WP_Error
 	 */
 	public function validate_setting_select_field( $value, $setting ) {
 		if ( array_key_exists( $value, $setting['options'] ) ) {
 			return $value;
 		} else {
-			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 	}
 
@@ -263,7 +263,7 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @since 3.0.0
 	 * @param array $values Values.
 	 * @param array $setting Setting.
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function validate_setting_multiselect_field( $values, $setting ) {
 		if ( empty( $values ) ) {
@@ -271,7 +271,7 @@ abstract class AbstractController extends WP_REST_Controller {
 		}
 
 		if ( ! is_array( $values ) ) {
-			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$final_values = array();
@@ -290,11 +290,11 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @since 3.0.0
 	 * @param array $values Values.
 	 * @param array $setting Setting.
-	 * @return string|WP_Error
+	 * @return string|\WP_Error
 	 */
 	public function validate_setting_image_width_field( $values, $setting ) {
 		if ( ! is_array( $values ) ) {
-			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$current = $setting['value'];
@@ -316,7 +316,7 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @since 3.0.0
 	 * @param string $value Value.
 	 * @param array  $setting Setting.
-	 * @return string|WP_Error
+	 * @return string|\WP_Error
 	 */
 	public function validate_setting_radio_field( $value, $setting ) {
 		return $this->validate_setting_select_field( $value, $setting );
@@ -328,7 +328,7 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @since 3.0.0
 	 * @param string $value Value.
 	 * @param array  $setting Setting.
-	 * @return string|WP_Error
+	 * @return string|\WP_Error
 	 */
 	public function validate_setting_checkbox_field( $value, $setting ) {
 		if ( in_array( $value, array( 'yes', 'no' ) ) ) {
@@ -337,7 +337,7 @@ abstract class AbstractController extends WP_REST_Controller {
 			$value = isset( $setting['default'] ) ? $setting['default'] : 'no';
 			return $value;
 		} else {
-			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 	}
 

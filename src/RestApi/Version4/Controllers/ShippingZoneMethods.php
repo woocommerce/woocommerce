@@ -31,16 +31,16 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 					'args'                => array_merge(
-						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+						$this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
 						array(
 							'method_id' => array(
 								'required'    => true,
@@ -69,18 +69,18 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_items_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				array(
-					'methods'             => WP_REST_Server::DELETABLE,
+					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
 					'args'                => array(
@@ -100,7 +100,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	 * Get a single Shipping Zone Method.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function get_item( $request ) {
 		$zone = $this->get_zone( $request['zone_id'] );
@@ -121,7 +121,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 		}
 
 		if ( false === $method ) {
-			return new WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$data = $this->prepare_item_for_response( $method, $request );
@@ -133,7 +133,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	 * Get all Shipping Zone Methods.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$zone = $this->get_zone( $request['zone_id'] );
@@ -157,7 +157,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	 * Create a new shipping zone method instance.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @return WP_REST_Request|\WP_Error
 	 */
 	public function create_item( $request ) {
 		$method_id = $request['method_id'];
@@ -177,7 +177,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 		}
 
 		if ( false === $method ) {
-			return new WP_Error( 'woocommerce_rest_shipping_zone_not_created', __( 'Resource cannot be created.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_shipping_zone_not_created', __( 'Resource cannot be created.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		$method = $this->update_fields( $instance_id, $method, $request );
@@ -193,7 +193,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	 * Delete a shipping method instance.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function delete_item( $request ) {
 		$zone = $this->get_zone( $request['zone_id'] );
@@ -215,7 +215,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 		}
 
 		if ( false === $method ) {
-			return new WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$method = $this->update_fields( $instance_id, $method, $request );
@@ -230,7 +230,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 		if ( $force ) {
 			$zone->delete_shipping_method( $instance_id );
 		} else {
-			return new WP_Error( 'rest_trash_not_supported', __( 'Shipping methods do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+			return new \WP_Error( 'rest_trash_not_supported', __( 'Shipping methods do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
 
 		/**
@@ -249,7 +249,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	 * Update A Single Shipping Zone Method.
 	 *
 	 * @param WP_REST_Request $request Request data.
-	 * @return WP_REST_Response|WP_Error
+	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function update_item( $request ) {
 		$zone = $this->get_zone( $request['zone_id'] );
@@ -269,7 +269,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 		}
 
 		if ( false === $method ) {
-			return new WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$method = $this->update_fields( $instance_id, $method, $request );
@@ -314,7 +314,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 			}
 
 			if ( $errors_found ) {
-				return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new \WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
 			}
 
 			update_option( $method->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $method->id . '_instance_settings_values', $instance_settings, $method ) );

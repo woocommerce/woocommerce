@@ -36,7 +36,7 @@ class Countries extends DataController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
@@ -48,7 +48,7 @@ class Countries extends DataController {
 			'/' . $this->rest_base . '/(?P<location>[\w-]+)',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
@@ -102,7 +102,7 @@ class Countries extends DataController {
 	 *
 	 * @since  3.5.0
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$countries = WC()->countries->get_countries();
@@ -122,12 +122,12 @@ class Countries extends DataController {
 	 *
 	 * @since  3.5.0
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$data = $this->get_country( strtoupper( $request['location'] ), $request );
 		if ( empty( $data ) ) {
-			return new WP_Error( 'woocommerce_rest_data_invalid_location', __( 'There are no locations matching these parameters.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_data_invalid_location', __( 'There are no locations matching these parameters.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 		return $this->prepare_item_for_response( $data, $request );
 	}

@@ -26,7 +26,7 @@ class NetworkOrders extends Orders {
 				'/' . $this->rest_base . '/network',
 				array(
 					array(
-						'methods'             => WP_REST_Server::READABLE,
+						'methods'             => \WP_REST_Server::READABLE,
 						'callback'            => array( $this, 'network_orders' ),
 						'permission_callback' => array( $this, 'network_orders_permissions_check' ),
 						'args'                => $this->get_collection_params(),

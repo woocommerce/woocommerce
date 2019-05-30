@@ -98,7 +98,7 @@ class ProductCategories extends AbstractTermsContoller {
 	 *
 	 * @param WP_Term         $term    Term object.
 	 * @param WP_REST_Request $request Request instance.
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 *
 	 * @since 3.5.5
 	 */

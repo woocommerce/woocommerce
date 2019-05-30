@@ -34,7 +34,7 @@ class Currencies extends DataController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
@@ -46,7 +46,7 @@ class Currencies extends DataController {
 			'/' . $this->rest_base . '/current',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_current_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				),
@@ -58,7 +58,7 @@ class Currencies extends DataController {
 			'/' . $this->rest_base . '/(?P<currency>[\w-]{3})',
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
@@ -101,7 +101,7 @@ class Currencies extends DataController {
 	 * Return the list of currencies.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$currencies = get_woocommerce_currencies();
@@ -118,12 +118,12 @@ class Currencies extends DataController {
 	 * Return information for a specific currency.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$data = $this->get_currency( strtoupper( $request['currency'] ), $request );
 		if ( empty( $data ) ) {
-			return new WP_Error( 'woocommerce_rest_data_invalid_currency', __( 'There are no currencies matching these parameters.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_data_invalid_currency', __( 'There are no currencies matching these parameters.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 		return $this->prepare_item_for_response( $data, $request );
 	}
@@ -132,7 +132,7 @@ class Currencies extends DataController {
 	 * Return information for the current site currency.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_current_item( $request ) {
 		$currency = get_option( 'woocommerce_currency' );

@@ -39,12 +39,12 @@ class RestApi {
 	 * Register REST API routes.
 	 */
 	public function register_rest_routes() {
-		foreach ( $this->get_rest_namespaces() as $namespace ) {
-			$this->endpoints[ $namespace ] = [];
+		foreach ( $this->get_rest_namespaces() as $namespace => $namespace_class ) {
+			$controllers = $namespace_class::instance()->get_controllers();
 
-			foreach ( $this->get_rest_controllers( $namespace ) as $name => $class ) {
-				$this->endpoints[ $namespace ][ $class ] = new $class();
-				$this->endpoints[ $namespace ][ $class ]->register_routes();
+			foreach ( $controllers as $controller_name => $controller_class ) {
+				$this->endpoints[ $namespace ][ $controller_name ] = new $controller_class();
+				$this->endpoints[ $namespace ][ $controller_name ]->register_routes();
 			}
 		}
 	}
@@ -56,10 +56,10 @@ class RestApi {
 	 */
 	protected function get_rest_namespaces() {
 		return [
-			'wc/v1',
-			'wc/v2',
-			'wc/v3',
-			'wc-blocks/v1',
+			//'wc/v1',
+			//'wc/v2',
+			'wc/v3' => '\WooCommerce\RestApi\Version4\Main',
+			//'wc-blocks/v1',
 		];
 	}
 

@@ -34,7 +34,7 @@ class Settings extends AbstractController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
@@ -46,7 +46,7 @@ class Settings extends AbstractController {
 			'/' . $this->rest_base . '/batch',
 			array(
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
 					'permission_callback' => array( $this, 'update_items_permissions_check' ),
 				),
@@ -59,11 +59,11 @@ class Settings extends AbstractController {
 	 * Makes sure the current user has access to WRITE the settings APIs.
 	 *
 	 * @param WP_REST_Request $request Full data about the request.
-	 * @return WP_Error|bool
+	 * @return \WP_Error|bool
 	 */
 	public function update_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -73,10 +73,10 @@ class Settings extends AbstractController {
 	 * Update a setting.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
-		$options_controller = new WC_REST_Setting_Options_Controller();
+		$options_controller = new \WC_REST_Setting_Options_Controller();
 		$response           = $options_controller->update_item( $request );
 
 		return $response;
@@ -87,12 +87,12 @@ class Settings extends AbstractController {
 	 *
 	 * @since  3.0.0
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$groups = apply_filters( 'woocommerce_settings_groups', array() );
 		if ( empty( $groups ) ) {
-			return new WP_Error( 'rest_setting_groups_empty', __( 'No setting groups have been registered.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'rest_setting_groups_empty', __( 'No setting groups have been registered.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		$defaults        = $this->group_defaults();
@@ -204,11 +204,11 @@ class Settings extends AbstractController {
 	 *
 	 * @since  3.0.0
 	 * @param WP_REST_Request $request Full data about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;

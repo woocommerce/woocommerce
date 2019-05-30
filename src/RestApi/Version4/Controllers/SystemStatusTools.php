@@ -32,7 +32,7 @@ class SystemStatusTools extends AbstractController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
@@ -52,15 +52,15 @@ class SystemStatusTools extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 				),
 				array(
-					'methods'             => WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -71,11 +71,11 @@ class SystemStatusTools extends AbstractController {
 	 * Check whether a given request has permission to view system status tools.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -84,11 +84,11 @@ class SystemStatusTools extends AbstractController {
 	 * Check whether a given request has permission to view a specific system status tool.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -97,11 +97,11 @@ class SystemStatusTools extends AbstractController {
 	 * Check whether a given request has permission to execute a specific system status tool.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return \WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'system_status', 'edit' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot update resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot update resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}
@@ -204,7 +204,7 @@ class SystemStatusTools extends AbstractController {
 	 * Get a list of system status tools.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$tools = array();
@@ -230,12 +230,12 @@ class SystemStatusTools extends AbstractController {
 	 * Return a single tool.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$tools = $this->get_tools();
 		if ( empty( $tools[ $request['id'] ] ) ) {
-			return new WP_Error( 'woocommerce_rest_system_status_tool_invalid_id', __( 'Invalid tool ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_system_status_tool_invalid_id', __( 'Invalid tool ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 		$tool = $tools[ $request['id'] ];
 		return rest_ensure_response(
@@ -255,12 +255,12 @@ class SystemStatusTools extends AbstractController {
 	 * Update (execute) a tool.
 	 *
 	 * @param  WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$tools = $this->get_tools();
 		if ( empty( $tools[ $request['id'] ] ) ) {
-			return new WP_Error( 'woocommerce_rest_system_status_tool_invalid_id', __( 'Invalid tool ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_system_status_tool_invalid_id', __( 'Invalid tool ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$tool = $tools[ $request['id'] ];
@@ -420,7 +420,7 @@ class SystemStatusTools extends AbstractController {
 					}
 				}
 
-				WC_Cache_Helper::get_transient_version( 'shipping', true );
+				\WC_Cache_Helper::get_transient_version( 'shipping', true );
 				$message = __( 'Product transients cleared', 'woocommerce' );
 				break;
 
@@ -466,8 +466,8 @@ class SystemStatusTools extends AbstractController {
 				break;
 			case 'reset_roles':
 				// Remove then re-add caps and roles.
-				WC_Install::remove_roles();
-				WC_Install::create_roles();
+				\WC_Install::remove_roles();
+				\WC_Install::create_roles();
 				$message = __( 'Roles successfully reset', 'woocommerce' );
 				break;
 
@@ -500,19 +500,19 @@ class SystemStatusTools extends AbstractController {
 				break;
 
 			case 'install_pages':
-				WC_Install::create_pages();
+				\WC_Install::create_pages();
 				$message = __( 'All missing WooCommerce pages successfully installed', 'woocommerce' );
 				break;
 
 			case 'delete_taxes':
 				$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rates;" );
 				$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations;" );
-				WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+				\WC_Cache_Helper::incr_cache_prefix( 'taxes' );
 				$message = __( 'Tax rates successfully deleted', 'woocommerce' );
 				break;
 
 			case 'regenerate_thumbnails':
-				WC_Regenerate_Images::queue_image_regeneration();
+				\WC_Regenerate_Images::queue_image_regeneration();
 				$message = __( 'Thumbnail regeneration has been scheduled to run in the background.', 'woocommerce' );
 				break;
 
