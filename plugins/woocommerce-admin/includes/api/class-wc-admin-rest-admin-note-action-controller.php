@@ -58,7 +58,7 @@ class WC_Admin_REST_Admin_Note_Action_Controller extends WC_Admin_REST_Admin_Not
 		if ( ! $note ) {
 			return new WP_Error(
 				'woocommerce_admin_notes_invalid_id',
-				__( 'Sorry, there is no resouce with that ID.', 'woocommerce-admin' ),
+				__( 'Sorry, there is no resource with that ID.', 'woocommerce-admin' ),
 				array( 'status' => 404 )
 			);
 		}
@@ -77,7 +77,7 @@ class WC_Admin_REST_Admin_Note_Action_Controller extends WC_Admin_REST_Admin_Not
 		if ( ! $triggered_action ) {
 			return new WP_Error(
 				'woocommerce_admin_note_action_invalid_id',
-				__( 'Sorry, there is no resouce with that ID.', 'woocommerce-admin' ),
+				__( 'Sorry, there is no resource with that ID.', 'woocommerce-admin' ),
 				array( 'status' => 404 )
 			);
 		}
