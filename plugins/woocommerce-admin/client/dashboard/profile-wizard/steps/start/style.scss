@@ -24,11 +24,6 @@
 			margin-left: $gap-large;
 		}
 
-		.muriel-checkbox input {
-			background-color: $muriel-hot-purple-600;
-			border-color: $muriel-hot-purple-600;
-		}
-
 		.components-form-toggle__track {
 			background-color: $muriel-hot-purple-600;
 		}
@@ -85,10 +80,5 @@
 		&:last-child p {
 			border-bottom: 0;
 		}
-	}
-
-	.woocommerce-profile-wizard__start {
-		padding-left: $gap-larger * 2;
-		padding-right: $gap-larger * 2;
 	}
 }

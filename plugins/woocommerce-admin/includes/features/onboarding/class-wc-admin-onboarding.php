@@ -52,12 +52,35 @@ class WC_Admin_Onboarding {
 	}
 
 	/**
+	 * Get a list of allowed industries for the onboarding wizard.
+	 *
+	 * @return array
+	 */
+	public static function get_allowed_industries() {
+		return apply_filters(
+			'woocommerce_admin_onboarding_industries',
+			array(
+				'fashion-apparel-accessories' => __( 'Fashion, apparel & accessories', 'woocommerce-admin' ),
+				'health-beauty'               => __( 'Health & beauty', 'woocommerce-admin' ),
+				'art-music-photography'       => __( 'Art, music, & photography', 'woocommerce-admin' ),
+				'electronics-computers'       => __( 'Electronics & computers', 'woocommerce-admin' ),
+				'food-drink'                  => __( 'Food & drink', 'woocommerce-admin' ),
+				'home-furniture-garden'       => __( 'Home, furniture & garden', 'woocommerce-admin' ),
+				'other'                       => __( 'Other', 'woocommerce-admin' ),
+			)
+		);
+	}
+
+	/**
 	 * Add profiler items to component settings.
 	 *
 	 * @param array $settings Component settings.
 	 */
 	public function component_settings( $settings ) {
-		$settings['onboardingProfile'] = get_option( 'wc_onboarding_profile', array() );
+		$settings['onboarding'] = array(
+			'profile'    => get_option( 'wc_onboarding_profile', array() ),
+			'industries' => self::get_allowed_industries(),
+		);
 		return $settings;
 	}
 

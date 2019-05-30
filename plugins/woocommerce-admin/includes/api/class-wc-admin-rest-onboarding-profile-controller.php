@@ -227,14 +227,7 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 				'sanitize_callback' => 'wp_parse_slug_list',
 				'validate_callback' => 'rest_validate_request_arg',
 				'items'             => array(
-					'enum' => array(
-						'fashion-apparel-accessories',
-						'health-beauty',
-						'art-music-photography',
-						'food-drink',
-						'home-furniture-garden',
-						'other',
-					),
+					'enum' => array_keys( WC_Admin_Onboarding::get_allowed_industries() ),
 					'type' => 'string',
 				),
 			),

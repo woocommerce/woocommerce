@@ -154,7 +154,7 @@ export default class Start extends Component {
 					<Button
 						isPrimary
 						onClick={ this.startWizard }
-						className="woocommerce-profile-wizard__start"
+						className="woocommerce-profile-wizard__continue"
 					>
 						{ __( 'Get started', 'woocommerce-admin' ) }
 					</Button>

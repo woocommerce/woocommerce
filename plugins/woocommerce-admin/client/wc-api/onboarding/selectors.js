@@ -18,7 +18,7 @@ const getProfileItems = ( getResource, requireResource ) => (
 	const ids = requireResource( requirement, resourceName ).data || [];
 
 	if ( ! ids.length ) {
-		return wcSettings.onboardingProfile;
+		return wcSettings.onboarding.profile;
 	}
 
 	const items = {};

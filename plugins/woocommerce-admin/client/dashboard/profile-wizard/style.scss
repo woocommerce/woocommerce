@@ -171,6 +171,43 @@
 		height: 48px;
 	}
 
+	.muriel-checkbox input:checked {
+		background-color: $muriel-hot-purple-600;
+		border-color: $muriel-hot-purple-600;
+	}
+
+	.woocommerce-profile-wizard__checkbox-group {
+		.muriel-checkbox {
+			margin-top: 0;
+			margin-bottom: 0;
+			height: 56px;
+
+			label.components-checkbox-control__label {
+				border-bottom: 1px solid $muriel-gray-50;
+				position: absolute;
+				left: $gap-small;
+				width: calc(100% - #{$gap-large});
+				padding-bottom: $gap;
+			}
+
+			&:last-of-type {
+				label.components-checkbox-control__label {
+					border-bottom: 0;
+				}
+			}
+		}
+	}
+
+	.woocommerce-profile-wizard__industry-card {
+		.woocommerce-card__body {
+			padding-bottom: 0;
+		}
+
+		.woocommerce-profile-wizard__industry-actions {
+			padding-bottom: $gap;
+		}
+	}
+
 	/* Hide wp-admin and WooCommerce elements when viewing the profile wizard */
 	#adminmenumain,
 	#wpadminbar,

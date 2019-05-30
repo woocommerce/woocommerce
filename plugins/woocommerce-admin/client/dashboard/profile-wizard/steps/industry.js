@@ -2,55 +2,111 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { SelectControl, TextControl, Button } from 'newspack-components';
+import { Button, CheckboxControl } from 'newspack-components';
+import { includes, filter } from 'lodash';
+import { compose } from '@wordpress/compose';
+import { withDispatch } from '@wordpress/data';
+
+/**
+ * Internal dependencies
+ */
+import { H, Card } from '@woocommerce/components';
+import withSelect from 'wc-api/with-select';
 
 class Industry extends Component {
 	constructor() {
 		super();
 		this.state = {
-			textInput: '',
-			selectValue1: '1st',
-			selectValue2: '',
+			selected: [],
 		};
+		this.onContinue = this.onContinue.bind( this );
+		this.onChange = this.onChange.bind( this );
 	}
+
+	async onContinue() {
+		const { addNotice, goToNextStep, isError, updateProfileItems } = this.props;
+
+		await updateProfileItems( { industry: this.state.selected } );
+
+		if ( ! isError ) {
+			goToNextStep();
+		} else {
+			addNotice( {
+				status: 'error',
+				message: __( 'There was a problem updating your industries.', 'woocommerce-admin' ),
+			} );
+		}
+	}
+
+	onChange( slug ) {
+		this.setState( state => {
+			if ( includes( state.selected, slug ) ) {
+				return {
+					selected:
+						filter( state.selected, value => {
+							return value !== slug;
+						} ) || [],
+				};
+			}
+			const newSelected = state.selected;
+			newSelected.push( slug );
+			return {
+				selected: newSelected,
+			};
+		} );
+	}
+
 	render() {
+		const { industries } = wcSettings.onboarding;
+		const { selected } = this.state;
 		return (
 			<Fragment>
-				<TextControl
-					label={ 'Text Input' }
-					value={ this.state.textInput }
-					onChange={ value => {
-						this.setState( { textInput: value } );
-					} }
-				/>
+				<H className="woocommerce-profile-wizard__header-title">
+					{ __( 'In which industry does the store operate?', 'woocommerce-admin' ) }
+				</H>
+				<p>{ __( 'Choose any that apply' ) }</p>
+				<Card className="woocommerce-profile-wizard__industry-card">
+					<div className="woocommerce-profile-wizard__checkbox-group">
+						{ Object.keys( industries ).map( slug => {
+							return (
+								<CheckboxControl
+									key={ slug }
+									label={ industries[ slug ] }
+									onChange={ () => this.onChange( slug ) }
+								/>
+							);
+						} ) }
+					</div>
 
-				<SelectControl
-					label="Select with value"
-					value={ this.state.selectValue1 }
-					options={ [
-						{ value: '1st', label: 'First' },
-						{ value: '2nd', label: 'Second' },
-						{ value: '3rd', label: 'Third' },
-					] }
-					onChange={ value => this.setState( { selectValue1: value } ) }
-				/>
-
-				<SelectControl
-					label="Select empty"
-					value={ this.state.selectValue2 }
-					options={ [
-						{ value: '1st', label: 'First' },
-						{ value: '2nd', label: 'Second' },
-						{ value: '3rd', label: 'Third' },
-					] }
-					onChange={ value => this.setState( { selectValue2: value } ) }
-				/>
-
-				<Button isPrimary>Button</Button>
+					<div className="woocommerce-profile-wizard__industry-actions">
+						{ selected.length > 0 && (
+							<Button isPrimary onClick={ this.onContinue }>
+								{ __( 'Continue', 'woocommerce-admin' ) }
+							</Button>
+						) }
+					</div>
+				</Card>
 			</Fragment>
 		);
 	}
 }
 
-export default Industry;
+export default compose(
+	withSelect( select => {
+		const { getProfileItemsError } = select( 'wc-api' );
+
+		const isError = Boolean( getProfileItemsError() );
+
+		return { isError };
+	} ),
+	withDispatch( dispatch => {
+		const { addNotice, updateProfileItems } = dispatch( 'wc-api' );
+
+		return {
+			addNotice,
+			updateProfileItems,
+		};
+	} )
+)( Industry );
