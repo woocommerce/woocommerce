@@ -242,6 +242,9 @@ class WC_Admin_REST_Admin_Notes_Controller extends WC_REST_CRUD_Controller {
 	 * @return string A fully formed URL.
 	 */
 	public function prepare_query_for_response( $query ) {
+		if ( empty( $query ) ) {
+			return $query;
+		}
 		if ( 'https://' === substr( $query, 0, 8 ) ) {
 			return $query;
 		}
