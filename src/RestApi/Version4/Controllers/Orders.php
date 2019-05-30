@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 use \WC_REST_CRUD_Controller;
 
 /**
- * REST API Coupons controller class.
+ * REST API Orders controller class.
  */
 class Orders extends WC_REST_CRUD_Controller {
 
