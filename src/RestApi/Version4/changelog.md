@@ -34,5 +34,10 @@
 
 ## Removed endpoints
 
-- Removed `reports/top_sellers` endpoint.
-- Removed `reports/sales` endpoint.
+- `reports/top_sellers`
+- `reports/sales`
+- `reports/customers/totals`
+- `reports/orders/totals`
+- `reports/coupons/totals`
+- `reports/reviews/totals`
+- `reports/products/totals`
