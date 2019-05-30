@@ -5,25 +5,16 @@
  * Handles requests to the /payment_gateways endpoint.
  *
  * @package WooCommerce/RestApi
- * @since   3.0.0
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Paymenga gateways controller class.
- *
- * @package WooCommerce/RestApi
- * @extends WC_REST_Controller
+ * Payment gateways controller class.
  */
-class WC_REST_Payment_Gateways_V2_Controller extends WC_REST_Controller {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v2';
+class PaymentGateways extends AbstractController {
 
 	/**
 	 * Route base.
@@ -258,6 +249,7 @@ class WC_REST_Payment_Gateways_V2_Controller extends WC_REST_Controller {
 			'enabled'            => ( 'yes' === $gateway->enabled ),
 			'method_title'       => $gateway->get_method_title(),
 			'method_description' => $gateway->get_method_description(),
+			'method_supports'    => $gateway->supports,
 			'settings'           => $this->get_settings( $gateway ),
 		);
 
@@ -281,7 +273,7 @@ class WC_REST_Payment_Gateways_V2_Controller extends WC_REST_Controller {
 	/**
 	 * Return settings associated with this payment gateway.
 	 *
-	 * @param WC_Payment_Gateway $gateway Gateway data.
+	 * @param WC_Payment_Gateway $gateway Gateway instance.
 	 *
 	 * @return array
 	 */
@@ -293,14 +285,12 @@ class WC_REST_Payment_Gateways_V2_Controller extends WC_REST_Controller {
 			if ( empty( $field['title'] ) || empty( $field['type'] ) ) {
 				continue;
 			}
-			// Ignore 'title' settings/fields -- they are UI only.
-			if ( 'title' === $field['type'] ) {
-				continue;
-			}
+
 			// Ignore 'enabled' and 'description' which get included elsewhere.
 			if ( in_array( $id, array( 'enabled', 'description' ), true ) ) {
 				continue;
 			}
+
 			$data = array(
 				'id'          => $id,
 				'label'       => empty( $field['label'] ) ? $field['title'] : $field['label'],
@@ -390,6 +380,15 @@ class WC_REST_Payment_Gateways_V2_Controller extends WC_REST_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
+				),
+				'method_supports'    => array(
+					'description' => __( 'Supported features for this payment gateway.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+					'items'       => array(
+						'type' => 'string',
+					),
 				),
 				'settings'           => array(
 					'description' => __( 'Payment gateway settings.', 'woocommerce' ),
