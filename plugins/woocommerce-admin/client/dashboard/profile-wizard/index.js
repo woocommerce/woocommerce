@@ -23,6 +23,7 @@ import Plugins from './steps/plugins';
 import Start from './steps/start';
 import Industry from './steps/industry';
 import StoreDetails from './steps/store-details';
+import ProductTypes from './steps/product-types';
 import './style.scss';
 
 const getSteps = () => {
@@ -47,7 +48,7 @@ const getSteps = () => {
 	} );
 	steps.push( {
 		key: 'product-types',
-		container: Fragment,
+		container: ProductTypes,
 		label: __( 'Product Types', 'woocommerce-admin' ),
 	} );
 	steps.push( {

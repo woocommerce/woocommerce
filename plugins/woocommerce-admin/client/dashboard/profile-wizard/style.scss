@@ -27,7 +27,7 @@
 
 		button {
 			display: flex;
-			margin: 0 auto;
+			margin: $gap auto 0;
 			min-width: 310px;
 			max-width: 100%;
 			justify-content: center;
@@ -210,31 +210,57 @@
 		.muriel-checkbox {
 			margin-top: 0;
 			margin-bottom: 0;
-			height: 56px;
+			position: relative;
+			padding-top: $gap;
+			padding-bottom: $gap;
 
-			label.components-checkbox-control__label {
-				border-bottom: 1px solid $muriel-gray-50;
+			&::after {
+				content: '';
 				position: absolute;
-				left: $gap-small;
-				width: calc(100% - #{$gap-large});
-				padding-bottom: $gap;
+				left: $gap-large * 2;
+				width: calc(100% - #{$gap * 2});
+				height: 1px;
+				background-color: $muriel-gray-50;
+				bottom: 0;
+			}
+
+			.components-base-control {
+				position: relative;
+			}
+
+			.components-base-control__field {
+				margin: 0;
+			}
+
+			.components-checkbox-control__input {
+				position: absolute;
+				top: 7px;
+				left: 3px;
+			}
+
+			label.components-checkbox-control__label,
+			.components-base-control__help {
+				margin-left: $gap-large * 2;
+			}
+
+			.components-base-control__help {
+				color: $muriel-gray-600;
+				font-size: 14px;
+				line-height: 20px;
+				margin-top: 2px;
+			}
+
+			&:first-of-type {
+				padding-top: 0;
 			}
 
 			&:last-of-type {
-				label.components-checkbox-control__label {
-					border-bottom: 0;
+				padding-bottom: 0;
+
+				&::after {
+					display: none;
 				}
 			}
-		}
-	}
-
-	.woocommerce-profile-wizard__industry-card {
-		.woocommerce-card__body {
-			padding-bottom: 0;
-		}
-
-		.woocommerce-profile-wizard__industry-actions {
-			padding-bottom: $gap;
 		}
 	}
 
@@ -270,9 +296,10 @@
 		margin-left: 64px;
 		min-height: 28px;
 
-		button {
+		button.muriel-button {
+			margin: 0;
 			height: 40px;
-			min-width: none;
+			min-width: auto;
 			display: initial;
 		}
 	}

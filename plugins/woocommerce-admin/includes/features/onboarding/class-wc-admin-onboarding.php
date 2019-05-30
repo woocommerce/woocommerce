@@ -72,14 +72,62 @@ class WC_Admin_Onboarding {
 	}
 
 	/**
+	 * Get a list of allowed product types for the onboarding wizard.
+	 *
+	 * @todo Prices for products should be pulled dynamically.
+	 * @return array
+	 */
+	public static function get_allowed_product_types() {
+		return apply_filters(
+			'woocommerce_admin_onboarding_product_types',
+			array(
+				'physical'      => array(
+					'label'       => __( 'Physical products', 'woocommerce-admin' ),
+					'description' => __( 'Products you ship to customers.', 'woocommerce-admin' ),
+				),
+				'downloads'     => array(
+					'label'       => __( 'Downloads', 'woocommerce-admin' ),
+					'description' => __( 'Virtual products that customers download.', 'woocommerce-admin' ),
+				),
+				'subscriptions' => array(
+					'label'       => __( 'Subscriptions — $199 per year', 'woocommerce-admin' ),
+					'description' => __( 'Products with recurring payment.', 'woocommerce-admin' ),
+					'more_url'    => __( 'https://woocommerce.com/products/woocommerce-subscriptions/', 'woocommerce-admin' ),
+				),
+				'memberships'   => array(
+					'label'       => __( 'Memberships — $149 per year', 'woocommerce-admin' ),
+					'description' => __( 'Restrict content to customer groups.', 'woocommerce-admin' ),
+					'more_url'    => __( 'https://woocommerce.com/products/woocommerce-memberships/', 'woocommerce-admin' ),
+				),
+				'composite'     => array(
+					'label'       => __( 'Composite Products — $79 per year', 'woocommerce-admin' ),
+					'description' => __( 'Kits with configurable components.', 'woocommerce-admin' ),
+					'more_url'    => __( 'https://woocommerce.com/products/composite-products/', 'woocommerce-admin' ),
+				),
+				'spaces'        => array(
+					'label'       => __( 'Spaces — $249 per year', 'woocommerce-admin' ),
+					'description' => __( 'Sell access to spaces, e.g. hotel rooms.', 'woocommerce-admin' ),
+					'more_url'    => __( 'https://woocommerce.com/products/woocommerce-accommodation-bookings/', 'woocommerce-admin' ),
+				),
+				'rentals'       => array(
+					'label'       => __( 'Rentals — $249 per year', 'woocommerce-admin' ),
+					'description' => __( 'Sell access to rental items, e.g. cars.', 'woocommerce-admin' ),
+					'more_url'    => __( 'https://woocommerce.com/products/woocommerce-bookings/', 'woocommerce-admin' ),
+				),
+			)
+		);
+	}
+
+	/**
 	 * Add profiler items to component settings.
 	 *
 	 * @param array $settings Component settings.
 	 */
 	public function component_settings( $settings ) {
 		$settings['onboarding'] = array(
-			'profile'    => get_option( 'wc_onboarding_profile', array() ),
-			'industries' => self::get_allowed_industries(),
+			'industries'   => self::get_allowed_industries(),
+			'productTypes' => self::get_allowed_product_types(),
+			'profile'      => get_option( 'wc_onboarding_profile', array() ),
 		);
 		return $settings;
 	}

@@ -4,23 +4,26 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
 import { Button, CheckboxControl } from 'newspack-components';
 import { includes, filter } from 'lodash';
-import { compose } from '@wordpress/compose';
+import interpolateComponents from 'interpolate-components';
 import { withDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { H, Card } from '@woocommerce/components';
+import { H, Card, Link } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 
-class Industry extends Component {
+class ProductTypes extends Component {
 	constructor() {
 		super();
+
 		this.state = {
 			selected: [],
 		};
+
 		this.onContinue = this.onContinue.bind( this );
 		this.onChange = this.onChange.bind( this );
 	}
@@ -28,14 +31,14 @@ class Industry extends Component {
 	async onContinue() {
 		const { addNotice, goToNextStep, isError, updateProfileItems } = this.props;
 
-		await updateProfileItems( { industry: this.state.selected } );
+		await updateProfileItems( { product_types: this.state.selected } );
 
 		if ( ! isError ) {
 			goToNextStep();
 		} else {
 			addNotice( {
 				status: 'error',
-				message: __( 'There was a problem updating your industries.', 'woocommerce-admin' ),
+				message: __( 'There was a problem updating your product types.', 'woocommerce-admin' ),
 			} );
 		}
 	}
@@ -59,21 +62,38 @@ class Industry extends Component {
 	}
 
 	render() {
-		const { industries } = wcSettings.onboarding;
+		const { productTypes } = wcSettings.onboarding;
 		const { selected } = this.state;
 		return (
 			<Fragment>
 				<H className="woocommerce-profile-wizard__header-title">
-					{ __( 'In which industry does the store operate?', 'woocommerce-admin' ) }
+					{ __( 'What type of products will be listed?', 'woocommerce-admin' ) }
 				</H>
 				<p>{ __( 'Choose any that apply' ) }</p>
-				<Card className="woocommerce-profile-wizard__industry-card">
+
+				<Card className="woocommerce-profile-wizard__product-types-card">
 					<div className="woocommerce-profile-wizard__checkbox-group">
-						{ Object.keys( industries ).map( slug => {
+						{ Object.keys( productTypes ).map( slug => {
+							const helpText = interpolateComponents( {
+								mixedString:
+									productTypes[ slug ].description +
+									( productTypes[ slug ].more_url ? ' {{moreLink/}}' : '' ),
+								components: {
+									moreLink: productTypes[ slug ].more_url ? (
+										<Link href={ productTypes[ slug ].more_url } target="_blank" type="external">
+											{ __( 'Learn more', 'woocommerce-admin' ) }
+										</Link>
+									) : (
+										''
+									),
+								},
+							} );
+
 							return (
 								<CheckboxControl
 									key={ slug }
-									label={ industries[ slug ] }
+									label={ productTypes[ slug ].label }
+									help={ helpText }
 									onChange={ () => this.onChange( slug ) }
 								/>
 							);
@@ -81,7 +101,11 @@ class Industry extends Component {
 					</div>
 
 					{ selected.length > 0 && (
-						<Button isPrimary onClick={ this.onContinue }>
+						<Button
+							isPrimary
+							className="woocommerce-profile-wizard__continue"
+							onClick={ this.onContinue }
+						>
 							{ __( 'Continue', 'woocommerce-admin' ) }
 						</Button>
 					) }
@@ -107,4 +131,4 @@ export default compose(
 			updateProfileItems,
 		};
 	} )
-)( Industry );
+)( ProductTypes );
