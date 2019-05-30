@@ -4,10 +4,14 @@
  *
  * Handles requests to install and activate depedent plugins.
  *
- * @package WooCommerce Admin/API
+ * @package WooCommerce/RestApi
  */
 
+namespace WooCommerce\RestApi\Version4\Controllers\Onboarding;
+
 defined( 'ABSPATH' ) || exit;
+
+use \WC_REST_Data_Controller;
 
 /**
  * Onboarding Plugins Controller.
@@ -15,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
  * @package WooCommerce Admin/API
  * @extends WC_REST_Data_Controller
  */
-class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controller {
+class Plugins extends WC_REST_Data_Controller {
 	/**
 	 * Endpoint namespace.
 	 *
