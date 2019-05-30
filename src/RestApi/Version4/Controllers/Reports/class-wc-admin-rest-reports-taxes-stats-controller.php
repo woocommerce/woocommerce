@@ -164,7 +164,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 	public function get_item_schema() {
 		$data_values = array(
 			'total_tax'    => array(
-				'description' => __( 'Total tax.', 'woocommerce-admin' ),
+				'description' => __( 'Total tax.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -172,7 +172,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 				'format'      => 'currency',
 			),
 			'order_tax'    => array(
-				'description' => __( 'Order tax.', 'woocommerce-admin' ),
+				'description' => __( 'Order tax.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -180,7 +180,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 				'format'      => 'currency',
 			),
 			'shipping_tax' => array(
-				'description' => __( 'Shipping tax.', 'woocommerce-admin' ),
+				'description' => __( 'Shipping tax.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -188,13 +188,13 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 				'format'      => 'currency',
 			),
 			'orders_count' => array(
-				'description' => __( 'Amount of orders.', 'woocommerce-admin' ),
+				'description' => __( 'Amount of orders.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'tax_codes'    => array(
-				'description' => __( 'Amount of tax codes.', 'woocommerce-admin' ),
+				'description' => __( 'Amount of tax codes.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -203,7 +203,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 
 		$segments = array(
 			'segments' => array(
-				'description' => __( 'Reports data grouped by segment condition.', 'woocommerce-admin' ),
+				'description' => __( 'Reports data grouped by segment condition.', 'woocommerce' ),
 				'type'        => 'array',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -211,13 +211,13 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 					'type'       => 'object',
 					'properties' => array(
 						'segment_id' => array(
-							'description' => __( 'Segment identificator.', 'woocommerce-admin' ),
+							'description' => __( 'Segment identificator.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'subtotals'  => array(
-							'description' => __( 'Interval subtotals.', 'woocommerce-admin' ),
+							'description' => __( 'Interval subtotals.', 'woocommerce' ),
 							'type'        => 'object',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
@@ -236,14 +236,14 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 			'type'       => 'object',
 			'properties' => array(
 				'totals'    => array(
-					'description' => __( 'Totals data.', 'woocommerce-admin' ),
+					'description' => __( 'Totals data.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 					'properties'  => $totals,
 				),
 				'intervals' => array(
-					'description' => __( 'Reports data grouped by intervals.', 'woocommerce-admin' ),
+					'description' => __( 'Reports data grouped by intervals.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -251,38 +251,38 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 						'type'       => 'object',
 						'properties' => array(
 							'interval'       => array(
-								'description' => __( 'Type of interval.', 'woocommerce-admin' ),
+								'description' => __( 'Type of interval.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 								'enum'        => array( 'day', 'week', 'month', 'year' ),
 							),
 							'date_start'     => array(
-								'description' => __( "The date the report start, in the site's timezone.", 'woocommerce-admin' ),
+								'description' => __( "The date the report start, in the site's timezone.", 'woocommerce' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_start_gmt' => array(
-								'description' => __( 'The date the report start, as GMT.', 'woocommerce-admin' ),
+								'description' => __( 'The date the report start, as GMT.', 'woocommerce' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_end'       => array(
-								'description' => __( "The date the report end, in the site's timezone.", 'woocommerce-admin' ),
+								'description' => __( "The date the report end, in the site's timezone.", 'woocommerce' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_end_gmt'   => array(
-								'description' => __( 'The date the report end, as GMT.', 'woocommerce-admin' ),
+								'description' => __( 'The date the report end, as GMT.', 'woocommerce' ),
 								'type'        => 'date-time',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'subtotals'      => array(
-								'description' => __( 'Interval subtotals.', 'woocommerce-admin' ),
+								'description' => __( 'Interval subtotals.', 'woocommerce' ),
 								'type'        => 'object',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -306,7 +306,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 		$params              = array();
 		$params['context']   = $this->get_context_param( array( 'default' => 'view' ) );
 		$params['page']      = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
+			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
@@ -314,7 +314,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 			'minimum'           => 1,
 		);
 		$params['per_page']  = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 1,
@@ -323,26 +323,26 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['after']     = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['before']    = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['order']     = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-admin' ),
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby']   = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce-admin' ),
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'date',
 			'enum'              => array(
@@ -355,7 +355,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['interval']  = array(
-			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce-admin' ),
+			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'week',
 			'enum'              => array(
@@ -369,7 +369,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['taxes']     = array(
-			'description'       => __( 'Limit result set to all items that have the specified term assigned in the taxes taxonomy.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result set to all items that have the specified term assigned in the taxes taxonomy.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -378,7 +378,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 			),
 		);
 		$params['segmentby'] = array(
-			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce-admin' ),
+			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array(
 				'tax_rate_id',

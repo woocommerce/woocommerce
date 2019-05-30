@@ -112,16 +112,16 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 
 		return array(
 			'id'      => 'coupons',
-			'label'   => __( 'Top Coupons - Number of Orders', 'woocommerce-admin' ),
+			'label'   => __( 'Top Coupons - Number of Orders', 'woocommerce' ),
 			'headers' => array(
 				array(
-					'label' => __( 'Coupon Code', 'woocommerce-admin' ),
+					'label' => __( 'Coupon Code', 'woocommerce' ),
 				),
 				array(
-					'label' => __( 'Orders', 'woocommerce-admin' ),
+					'label' => __( 'Orders', 'woocommerce' ),
 				),
 				array(
-					'label' => __( 'Amount Discounted', 'woocommerce-admin' ),
+					'label' => __( 'Amount Discounted', 'woocommerce' ),
 				),
 			),
 			'rows'    => $rows,
@@ -178,16 +178,16 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 
 		return array(
 			'id'      => 'categories',
-			'label'   => __( 'Top Categories - Items Sold', 'woocommerce-admin' ),
+			'label'   => __( 'Top Categories - Items Sold', 'woocommerce' ),
 			'headers' => array(
 				array(
-					'label' => __( 'Category', 'woocommerce-admin' ),
+					'label' => __( 'Category', 'woocommerce' ),
 				),
 				array(
-					'label' => __( 'Items Sold', 'woocommerce-admin' ),
+					'label' => __( 'Items Sold', 'woocommerce' ),
 				),
 				array(
-					'label' => __( 'Net Revenue', 'woocommerce-admin' ),
+					'label' => __( 'Net Revenue', 'woocommerce' ),
 				),
 			),
 			'rows'    => $rows,
@@ -242,16 +242,16 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 
 		return array(
 			'id'      => 'customers',
-			'label'   => __( 'Top Customers - Total Spend', 'woocommerce-admin' ),
+			'label'   => __( 'Top Customers - Total Spend', 'woocommerce' ),
 			'headers' => array(
 				array(
-					'label' => __( 'Customer Name', 'woocommerce-admin' ),
+					'label' => __( 'Customer Name', 'woocommerce' ),
 				),
 				array(
-					'label' => __( 'Orders', 'woocommerce-admin' ),
+					'label' => __( 'Orders', 'woocommerce' ),
 				),
 				array(
-					'label' => __( 'Total Spend', 'woocommerce-admin' ),
+					'label' => __( 'Total Spend', 'woocommerce' ),
 				),
 			),
 			'rows'    => $rows,
@@ -308,16 +308,16 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 
 		return array(
 			'id'      => 'products',
-			'label'   => __( 'Top Products - Items Sold', 'woocommerce-admin' ),
+			'label'   => __( 'Top Products - Items Sold', 'woocommerce' ),
 			'headers' => array(
 				array(
-					'label' => __( 'Product', 'woocommerce-admin' ),
+					'label' => __( 'Product', 'woocommerce' ),
 				),
 				array(
-					'label' => __( 'Items Sold', 'woocommerce-admin' ),
+					'label' => __( 'Items Sold', 'woocommerce' ),
 				),
 				array(
-					'label' => __( 'Net Revenue', 'woocommerce-admin' ),
+					'label' => __( 'Net Revenue', 'woocommerce' ),
 				),
 			),
 			'rows'    => $rows,
@@ -428,7 +428,7 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 	public function get_collection_params() {
 		$params                    = array();
 		$params['page']            = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
+			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
@@ -436,7 +436,7 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 			'minimum'           => 1,
 		);
 		$params['per_page']        = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 5,
 			'minimum'           => 1,
@@ -445,19 +445,19 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['after']           = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['before']          = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['persisted_query'] = array(
-			'description'       => __( 'URL query to persist across links.', 'woocommerce-admin' ),
+			'description'       => __( 'URL query to persist across links.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
@@ -477,26 +477,26 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 			'properties' => array(
 				'id'      => array(
 					'type'        => 'string',
-					'description' => __( 'Leaderboard ID.', 'woocommerce-admin' ),
+					'description' => __( 'Leaderboard ID.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'label'   => array(
 					'type'        => 'string',
-					'description' => __( 'Displayed title for the leaderboard.', 'woocommerce-admin' ),
+					'description' => __( 'Displayed title for the leaderboard.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'headers' => array(
 					'type'        => 'array',
-					'description' => __( 'Table headers.', 'woocommerce-admin' ),
+					'description' => __( 'Table headers.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'items'       => array(
 						'type'       => 'array',
 						'properties' => array(
 							'label' => array(
-								'description' => __( 'Table column header.', 'woocommerce-admin' ),
+								'description' => __( 'Table column header.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -506,20 +506,20 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 				),
 				'rows'    => array(
 					'type'        => 'array',
-					'description' => __( 'Table rows.', 'woocommerce-admin' ),
+					'description' => __( 'Table rows.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'items'       => array(
 						'type'       => 'array',
 						'properties' => array(
 							'display' => array(
-								'description' => __( 'Table cell display.', 'woocommerce-admin' ),
+								'description' => __( 'Table cell display.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'value'   => array(
-								'description' => __( 'Table cell value.', 'woocommerce-admin' ),
+								'description' => __( 'Table cell value.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,

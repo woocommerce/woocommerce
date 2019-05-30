@@ -69,7 +69,7 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -83,7 +83,7 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 	 */
 	public function update_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot edit this resource.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -124,7 +124,7 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 
 		$result = array(
 			'status'  => 'success',
-			'message' => __( 'Onboarding profile data has been updated.', 'woocommerce-admin' ),
+			'message' => __( 'Onboarding profile data has been updated.', 'woocommerce' ),
 		);
 
 		$response = $this->prepare_item_for_response( $result, $request );
@@ -195,21 +195,21 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 		$properties = array(
 			'completed'       => array(
 				'type'              => 'boolean',
-				'description'       => __( 'Whether or not the profile was completed.', 'woocommerce-admin' ),
+				'description'       => __( 'Whether or not the profile was completed.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 			'skipped'         => array(
 				'type'              => 'boolean',
-				'description'       => __( 'Whether or not the profile was skipped.', 'woocommerce-admin' ),
+				'description'       => __( 'Whether or not the profile was skipped.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 			'account_type'    => array(
 				'type'              => 'string',
-				'description'       => __( 'Account type used for Jetpack.', 'woocommerce-admin' ),
+				'description'       => __( 'Account type used for Jetpack.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
@@ -221,7 +221,7 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 			),
 			'industry'        => array(
 				'type'              => 'array',
-				'description'       => __( 'Industry.', 'woocommerce-admin' ),
+				'description'       => __( 'Industry.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'sanitize_callback' => 'wp_parse_slug_list',
@@ -233,7 +233,7 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 			),
 			'product_types'   => array(
 				'type'              => 'array',
-				'description'       => __( 'Types of products sold.', 'woocommerce-admin' ),
+				'description'       => __( 'Types of products sold.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'sanitize_callback' => 'wp_parse_slug_list',
@@ -245,7 +245,7 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 			),
 			'product_count'   => array(
 				'type'              => 'string',
-				'description'       => __( 'Number of products to be added.', 'woocommerce-admin' ),
+				'description'       => __( 'Number of products to be added.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
@@ -258,7 +258,7 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 			),
 			'selling_venues'  => array(
 				'type'              => 'string',
-				'description'       => __( 'Other places the store is selling products.', 'woocommerce-admin' ),
+				'description'       => __( 'Other places the store is selling products.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
@@ -271,7 +271,7 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 			),
 			'other_platform'  => array(
 				'type'              => 'string',
-				'description'       => __( 'Name of other platform used to sell.', 'woocommerce-admin' ),
+				'description'       => __( 'Name of other platform used to sell.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
@@ -285,7 +285,7 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 			),
 			'theme'           => array(
 				'type'              => 'string',
-				'description'       => __( 'Selected store theme.', 'woocommerce-admin' ),
+				'description'       => __( 'Selected store theme.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'sanitize_callback' => 'sanitize_title_with_dashes',
@@ -293,7 +293,7 @@ class WC_Admin_REST_Onboarding_Profile_Controller extends WC_REST_Data_Controlle
 			),
 			'items_purchased' => array(
 				'type'              => 'boolean',
-				'description'       => __( 'Whether or not the user opted to purchase items now or later.', 'woocommerce-admin' ),
+				'description'       => __( 'Whether or not the user opted to purchase items now or later.', 'woocommerce' ),
 				'context'           => array( 'view' ),
 				'readonly'          => true,
 				'validate_callback' => 'rest_validate_request_arg',

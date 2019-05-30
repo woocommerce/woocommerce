@@ -270,44 +270,44 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 			'type'       => 'object',
 			'properties' => array(
 				'id'             => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce-admin' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'parent_id'      => array(
-					'description' => __( 'Product parent ID.', 'woocommerce-admin' ),
+					'description' => __( 'Product parent ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'name'           => array(
-					'description' => __( 'Product name.', 'woocommerce-admin' ),
+					'description' => __( 'Product name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'sku'            => array(
-					'description' => __( 'Unique identifier.', 'woocommerce-admin' ),
+					'description' => __( 'Unique identifier.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'stock_status'   => array(
-					'description' => __( 'Stock status.', 'woocommerce-admin' ),
+					'description' => __( 'Stock status.', 'woocommerce' ),
 					'type'        => 'string',
 					'enum'        => array_keys( wc_get_product_stock_status_options() ),
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'stock_quantity' => array(
-					'description' => __( 'Stock quantity.', 'woocommerce-admin' ),
+					'description' => __( 'Stock quantity.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'manage_stock'   => array(
-					'description' => __( 'Manage stock.', 'woocommerce-admin' ),
+					'description' => __( 'Manage stock.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -327,7 +327,7 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 		$params                   = array();
 		$params['context']        = $this->get_context_param( array( 'default' => 'view' ) );
 		$params['page']           = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
+			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
@@ -335,7 +335,7 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 			'minimum'           => 1,
 		);
 		$params['per_page']       = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 1,
@@ -344,7 +344,7 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['exclude']        = array(
-			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce-admin' ),
+			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -353,7 +353,7 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['include']        = array(
-			'description'       => __( 'Limit result set to specific ids.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -362,20 +362,20 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['offset']         = array(
-			'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce-admin' ),
+			'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['order']          = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-admin' ),
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'asc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby']        = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce-admin' ),
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'stock_status',
 			'enum'              => array(
@@ -390,7 +390,7 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['parent']         = array(
-			'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -399,7 +399,7 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 			'default'           => array(),
 		);
 		$params['parent_exclude'] = array(
-			'description'       => __( 'Limit result set to all items except those of a particular parent ID.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result set to all items except those of a particular parent ID.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -408,7 +408,7 @@ class WC_Admin_REST_Reports_Stock_Controller extends WC_REST_Reports_Controller 
 			'default'           => array(),
 		);
 		$params['type']           = array(
-			'description' => __( 'Limit result set to items assigned a stock report type.', 'woocommerce-admin' ),
+			'description' => __( 'Limit result set to items assigned a stock report type.', 'woocommerce' ),
 			'type'        => 'string',
 			'default'     => 'all',
 			'enum'        => array_merge( array( 'all', 'lowstock' ), array_keys( wc_get_product_stock_status_options() ) ),

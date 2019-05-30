@@ -58,8 +58,8 @@ class WC_Admin_REST_Onboarding_Levels_Controller extends WC_REST_Data_Controller
 			'account'    => array(
 				'tasks' => array(
 					'create_account' => array(
-						'label'        => __( 'Create an account', 'woocommerce-admin' ),
-						'description'  => __( 'Speed up & secure your store', 'woocommerce-admin' ),
+						'label'        => __( 'Create an account', 'woocommerce' ),
+						'description'  => __( 'Speed up & secure your store', 'woocommerce' ),
 						'illustration' => '',
 						'status'       => 'visible',
 						'is_required'  => false,
@@ -69,15 +69,15 @@ class WC_Admin_REST_Onboarding_Levels_Controller extends WC_REST_Data_Controller
 			'storefront' => array(
 				'tasks' => array(
 					'add_products'         => array(
-						'label'        => __( 'Add your products', 'woocommerce-admin' ),
-						'description'  => __( 'Bring your store to life', 'woocommerce-admin' ),
+						'label'        => __( 'Add your products', 'woocommerce' ),
+						'description'  => __( 'Bring your store to life', 'woocommerce' ),
 						'illustration' => '',
 						'status'       => 'visible',
 						'is_required'  => true,
 					),
 					'customize_appearance' => array(
-						'label'        => __( 'Customize Appearance', 'woocommerce-admin' ),
-						'description'  => __( 'Ensure your store is on-brand', 'woocommerce-admin' ),
+						'label'        => __( 'Customize Appearance', 'woocommerce' ),
+						'description'  => __( 'Ensure your store is on-brand', 'woocommerce' ),
 						'illustration' => '',
 						'status'       => 'visible',
 						'is_required'  => false,
@@ -88,22 +88,22 @@ class WC_Admin_REST_Onboarding_Levels_Controller extends WC_REST_Data_Controller
 				'id'    => 'checkout',
 				'tasks' => array(
 					'configure_shipping' => array(
-						'label'        => __( 'Configure shipping', 'woocommerce-admin' ),
-						'description'  => __( 'Set up prices and destinations', 'woocommerce-admin' ),
+						'label'        => __( 'Configure shipping', 'woocommerce' ),
+						'description'  => __( 'Set up prices and destinations', 'woocommerce' ),
 						'illustration' => '',
 						'status'       => 'visible',
 						'is_required'  => true,
 					),
 					'configure_taxes'    => array(
-						'label'        => __( 'Configure taxes', 'woocommerce-admin' ),
-						'description'  => __( 'Set up sales tax rates', 'woocommerce-admin' ),
+						'label'        => __( 'Configure taxes', 'woocommerce' ),
+						'description'  => __( 'Set up sales tax rates', 'woocommerce' ),
 						'illustration' => '',
 						'status'       => 'visible',
 						'is_required'  => false,
 					),
 					'configure_payments' => array(
-						'label'        => __( 'Configure payments', 'woocommerce-admin' ),
-						'description'  => __( 'Choose payment providers', 'woocommerce-admin' ),
+						'label'        => __( 'Configure payments', 'woocommerce' ),
+						'description'  => __( 'Choose payment providers', 'woocommerce' ),
 						'illustration' => '',
 						'status'       => 'visible',
 						'is_required'  => true,
@@ -210,44 +210,44 @@ class WC_Admin_REST_Onboarding_Levels_Controller extends WC_REST_Data_Controller
 			'properties' => array(
 				'id'    => array(
 					'type'        => 'string',
-					'description' => __( 'Level ID.', 'woocommerce-admin' ),
+					'description' => __( 'Level ID.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'tasks' => array(
 					'type'        => 'array',
-					'description' => __( 'Array of tasks under the level.', 'woocommerce-admin' ),
+					'description' => __( 'Array of tasks under the level.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'           => array(
-								'description' => __( 'Task ID.', 'woocommerce-admin' ),
+								'description' => __( 'Task ID.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'label'        => array(
-								'description' => __( 'Task label.', 'woocommerce-admin' ),
+								'description' => __( 'Task label.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'description'  => array(
-								'description' => __( 'Task description.', 'woocommerce-admin' ),
+								'description' => __( 'Task description.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'illustration' => array(
-								'description' => __( 'URL for illustration used.', 'woocommerce-admin' ),
+								'description' => __( 'URL for illustration used.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'status'       => array(
-								'description' => __( 'Task status.', 'woocommerce-admin' ),
+								'description' => __( 'Task status.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,

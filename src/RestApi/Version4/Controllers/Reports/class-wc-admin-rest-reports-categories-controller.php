@@ -4,18 +4,19 @@
  *
  * Handles requests to the /reports/categories endpoint.
  *
- * @package WooCommerce Admin/API
+ * @package WooCommerce/RestApi
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WC_Admin_REST_Reports_Controller;
+
 /**
- * REST API Reports categories controller class.
- *
- * @package WooCommerce/API
- * @extends WC_Admin_REST_Reports_Controller
+ * REST API Category Reports class.
  */
-class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_Controller {
+class Categories extends WC_Admin_REST_Reports_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -70,7 +71,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 		}
 
 		if ( ! isset( $report_data->data ) || ! isset( $report_data->page_no ) || ! isset( $report_data->pages ) ) {
-			return new WP_Error( 'woocommerce_rest_reports_categories_invalid_response', __( 'Invalid response from data store.', 'woocommerce-admin' ), array( 'status' => 500 ) );
+			return new WP_Error( 'woocommerce_rest_reports_categories_invalid_response', __( 'Invalid response from data store.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
 		$out_data = array();
@@ -162,31 +163,31 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 			'type'       => 'object',
 			'properties' => array(
 				'category_id'    => array(
-					'description' => __( 'Category ID.', 'woocommerce-admin' ),
+					'description' => __( 'Category ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'items_sold'     => array(
-					'description' => __( 'Amount of items sold.', 'woocommerce-admin' ),
+					'description' => __( 'Amount of items sold.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'net_revenue'    => array(
-					'description' => __( 'Gross revenue.', 'woocommerce-admin' ),
+					'description' => __( 'Gross revenue.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'orders_count'   => array(
-					'description' => __( 'Amount of orders.', 'woocommerce-admin' ),
+					'description' => __( 'Amount of orders.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'products_count' => array(
-					'description' => __( 'Amount of products.', 'woocommerce-admin' ),
+					'description' => __( 'Amount of products.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -196,7 +197,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 						'type'        => 'string',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Category name.', 'woocommerce-admin' ),
+						'description' => __( 'Category name.', 'woocommerce' ),
 					),
 				),
 			),
@@ -214,7 +215,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 		$params                  = array();
 		$params['context']       = $this->get_context_param( array( 'default' => 'view' ) );
 		$params['page']          = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce-admin' ),
+			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
@@ -222,7 +223,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 			'minimum'           => 1,
 		);
 		$params['per_page']      = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-admin' ),
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 1,
@@ -231,26 +232,26 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['after']         = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['before']        = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['order']         = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-admin' ),
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby']       = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce-admin' ),
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'category_id',
 			'enum'              => array(
@@ -264,7 +265,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['interval']      = array(
-			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce-admin' ),
+			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'week',
 			'enum'              => array(
@@ -278,7 +279,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['status_is']     = array(
-			'description'       => __( 'Limit result set to items that have the specified order status.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result set to items that have the specified order status.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -288,7 +289,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 			),
 		);
 		$params['status_is_not'] = array(
-			'description'       => __( 'Limit result set to items that don\'t have the specified order status.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result set to items that don\'t have the specified order status.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_slug_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -298,7 +299,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 			),
 		);
 		$params['categories']    = array(
-			'description'       => __( 'Limit result set to all items that have the specified term assigned in the categories taxonomy.', 'woocommerce-admin' ),
+			'description'       => __( 'Limit result set to all items that have the specified term assigned in the categories taxonomy.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -307,7 +308,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 			),
 		);
 		$params['extended_info'] = array(
-			'description'       => __( 'Add additional piece of info about each category to the report.', 'woocommerce-admin' ),
+			'description'       => __( 'Add additional piece of info about each category to the report.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
