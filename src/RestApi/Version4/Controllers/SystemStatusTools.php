@@ -11,12 +11,10 @@ namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Controller;
-
 /**
  * REST API System Status Tools controller class.
  */
-class SystemStatusTools extends WC_REST_Controller {
+class SystemStatusTools extends AbstractController {
 
 	/**
 	 * Route base.

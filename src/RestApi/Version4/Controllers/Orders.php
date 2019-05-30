@@ -11,12 +11,10 @@ namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_CRUD_Controller;
-
 /**
  * REST API Orders controller class.
  */
-class Orders extends WC_REST_CRUD_Controller {
+class Orders extends AbstractObjectsController {
 
 	/**
 	 * Route base.

@@ -11,12 +11,10 @@ namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Controller;
-
 /**
  * REST API Tax Class controller class.
  */
-class TaxClasses extends WC_REST_Controller {
+class TaxClasses extends AbstractController {
 
 	/**
 	 * Route base.

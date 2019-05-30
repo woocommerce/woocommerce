@@ -11,12 +11,10 @@ namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Controller;
-
 /**
  * REST API Coupons controller class.
  */
-class Data extends WC_REST_Controller {
+class Data extends AbstractController {
 
 	/**
 	 * Route base.

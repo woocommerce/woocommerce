@@ -20,7 +20,7 @@ use AbstractController;
  * @package WooCommerce/RestApi
  * @extends AbstractController
  */
-abstract class WC_REST_Shipping_Zones_Controller_Base extends AbstractController {
+abstract class AbstractShippingZonesController extends AbstractController {
 
 	/**
 	 * Route base.

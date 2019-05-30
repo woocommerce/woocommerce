@@ -11,8 +11,6 @@ namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use AbstractTermsContoller;
-
 /**
  * REST API Product Shipping Classes controller class.
  */

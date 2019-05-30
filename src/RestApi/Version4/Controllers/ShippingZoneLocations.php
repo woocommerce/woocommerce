@@ -5,25 +5,25 @@
  * Handles requests to the /shipping/zones/<id>/locations endpoint.
  *
  * @package WooCommerce/RestApi
- * @since   3.0.0
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Shipping Zone Locations class.
- *
- * @package WooCommerce/RestApi
- * @extends WC_REST_Shipping_Zones_Controller_Base
  */
-class WC_REST_Shipping_Zone_Locations_V2_Controller extends WC_REST_Shipping_Zones_Controller_Base {
+class ShippingZoneLocations extends AbstractShippingZonesController {
 
 	/**
 	 * Register the routes for Shipping Zone Locations.
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)/locations', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/locations',
+			array(
 				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique ID for the resource.', 'woocommerce' ),

@@ -11,8 +11,6 @@ namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WooCommerce\RestApi\Version4\Controllers\Orders as Orders;
-
 /**
  * REST API Order Refunds controller class.
  */

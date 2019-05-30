@@ -13,8 +13,6 @@ use AbstractPostsController;
 
 /**
  * CRUD Object Controller.
- *
- * @extends WC_REST_Posts_Controller
  */
 abstract class AbstractObjectsController extends AbstractPostsController {
 

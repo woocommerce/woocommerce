@@ -11,12 +11,10 @@ namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Controller;
-
 /**
  * REST API Product Reviews controller class.
  */
-class ProductReviews extends WC_REST_Controller {
+class ProductReviews extends AbstractController {
 
 	/**
 	 * Route base.

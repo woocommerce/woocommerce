@@ -11,12 +11,10 @@ namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Controller;
-
 /**
  * REST API Webhooks controller class.
  */
-class Webhooks extends WC_REST_Controller {
+class Webhooks extends AbstractController {
 
 	/**
 	 * Route base.

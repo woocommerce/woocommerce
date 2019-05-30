@@ -13,7 +13,7 @@
  * @package WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Version4;
+namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
