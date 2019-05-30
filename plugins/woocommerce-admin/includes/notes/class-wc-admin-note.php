@@ -356,6 +356,7 @@ class WC_Admin_Note extends WC_Data {
 					'valueless' => 'y',
 				),
 			),
+			'p'      => array(),
 		);
 
 		$content = wp_kses( $content, $allowed_html );
