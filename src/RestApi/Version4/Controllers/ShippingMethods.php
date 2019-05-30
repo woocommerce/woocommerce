@@ -5,25 +5,16 @@
  * Handles requests to the /shipping_methods endpoint.
  *
  * @package WooCommerce/RestApi
- * @since   3.0.0
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Shipping methods controller class.
- *
- * @package WooCommerce/RestApi
- * @extends WC_REST_Controller
  */
-class WC_REST_Shipping_Methods_V2_Controller extends WC_REST_Controller {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v2';
+class ShippingMethods extends AbstractController {
 
 	/**
 	 * Route base.
@@ -37,7 +28,9 @@ class WC_REST_Shipping_Methods_V2_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -48,7 +41,9 @@ class WC_REST_Shipping_Methods_V2_Controller extends WC_REST_Controller {
 			)
 		);
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\w-]+)', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\w-]+)',
+			array(
 				'args'   => array(
 					'id' => array(
 						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
