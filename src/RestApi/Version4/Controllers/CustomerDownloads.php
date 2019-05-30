@@ -4,30 +4,26 @@
  *
  * Handles requests to the /customers/<customer_id>/downloads endpoint.
  *
- * @author   WooThemes
- * @category API
  * @package WooCommerce/RestApi
- * @since    3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+namespace WooCommerce\RestApi\Version4\Controllers;
+
+defined( 'ABSPATH' ) || exit;
+
+use \WC_REST_Controller;
 
 /**
- * REST API Customers controller class.
- *
- * @package WooCommerce/RestApi
- * @extends WC_REST_Controller
+ * REST API Customer Downloads controller class.
  */
-class WC_REST_Customer_Downloads_V1_Controller extends WC_REST_Controller {
+class CustomerDownloads extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.
@@ -40,21 +36,25 @@ class WC_REST_Customer_Downloads_V1_Controller extends WC_REST_Controller {
 	 * Register the routes for customers.
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
-			'args' => array(
-				'customer_id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
-					'type'        => 'integer',
-				),
-			),
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base,
 			array(
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'get_items' ),
-				'permission_callback' => array( $this, 'get_items_permissions_check' ),
-				'args'                => $this->get_collection_params(),
-			),
-			'schema' => array( $this, 'get_public_item_schema' ),
-		) );
+				'args' => array(
+					'customer_id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -80,7 +80,7 @@ class WC_REST_Customer_Downloads_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Get all customer downloads.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request params.
 	 * @return array
 	 */
 	public function get_items( $request ) {
@@ -99,17 +99,24 @@ class WC_REST_Customer_Downloads_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single download output for response.
 	 *
-	 * @param stdObject $download Download object.
+	 * @param stdClass        $download Download object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $download, $request ) {
-		$data = (array) $download;
-		$data['access_expires']      = $data['access_expires'] ? wc_rest_prepare_date_response( $data['access_expires'] ) : 'never';
-		$data['downloads_remaining'] = '' === $data['downloads_remaining'] ? 'unlimited' : $data['downloads_remaining'];
-
-		// Remove "product_name" since it's new in 3.0.
-		unset( $data['product_name'] );
+		$data = array(
+			'download_id'         => $download->download_id,
+			'download_url'        => $download->download_url,
+			'product_id'          => $download->product_id,
+			'product_name'        => $download->product_name,
+			'download_name'       => $download->download_name,
+			'order_id'            => $download->order_id,
+			'order_key'           => $download->order_key,
+			'downloads_remaining' => '' === $download->downloads_remaining ? 'unlimited' : $download->downloads_remaining,
+			'access_expires'      => $download->access_expires ? wc_rest_prepare_date_response( $download->access_expires ) : 'never',
+			'access_expires_gmt'  => $download->access_expires ? wc_rest_prepare_date_response( get_gmt_from_date( $download->access_expires ) ) : 'never',
+			'file'                => $download->file,
+		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
@@ -124,7 +131,7 @@ class WC_REST_Customer_Downloads_V1_Controller extends WC_REST_Controller {
 		 * Filter customer download data returned from the REST API.
 		 *
 		 * @param WP_REST_Response $response  The response object.
-		 * @param stdObject        $download  Download object used to create response.
+		 * @param stdClass         $download  Download object used to create response.
 		 * @param WP_REST_Request  $request   Request object.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_customer_download', $response, $download, $request );
@@ -133,7 +140,7 @@ class WC_REST_Customer_Downloads_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param stdClass $download Download object.
+	 * @param stdClass        $download Download object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return array Links for the given customer download.
 	 */
@@ -165,37 +172,43 @@ class WC_REST_Customer_Downloads_V1_Controller extends WC_REST_Controller {
 			'title'      => 'customer_download',
 			'type'       => 'object',
 			'properties' => array(
-				'download_url' => array(
+				'download_id'         => array(
+					'description' => __( 'Download ID.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'download_url'        => array(
 					'description' => __( 'Download file URL.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'download_id' => array(
-					'description' => __( 'Download ID (MD5).', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => array( 'view' ),
-					'readonly'    => true,
-				),
-				'product_id' => array(
+				'product_id'          => array(
 					'description' => __( 'Downloadable product ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'download_name' => array(
+				'product_name'        => array(
+					'description' => __( 'Product name.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'download_name'       => array(
 					'description' => __( 'Downloadable file name.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'order_id' => array(
+				'order_id'            => array(
 					'description' => __( 'Order ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'order_key' => array(
+				'order_key'           => array(
 					'description' => __( 'Order key.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
@@ -207,18 +220,24 @@ class WC_REST_Customer_Downloads_V1_Controller extends WC_REST_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'access_expires' => array(
+				'access_expires'      => array(
 					'description' => __( "The date when download access expires, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'file' => array(
+				'access_expires_gmt'  => array(
+					'description' => __( 'The date when download access expires, as GMT.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'file'                => array(
 					'description' => __( 'File details.', 'woocommerce' ),
 					'type'        => 'object',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
-					'properties' => array(
+					'properties'  => array(
 						'name' => array(
 							'description' => __( 'File name.', 'woocommerce' ),
 							'type'        => 'string',
