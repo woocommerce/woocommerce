@@ -223,7 +223,7 @@
 	opacity: 1;
 	padding: $fallback-gutter;
 	padding: $gutter;
-	transition: opacity 1s, height 0s, padding 0s;
+	transition: opacity 0.6s, height 0s, padding 0s;
 
 	@include breakpoint( '<782px' ) {
 		grid-template-columns: 64px 1fr;
@@ -237,7 +237,7 @@
 		height: 0;
 		opacity: 0;
 		padding: 0;
-		transition: opacity 1s, height 0s 1s, padding 0s 1s;
+		transition: opacity 0.6s, height 0s 0.6s, padding 0s 0.6s;
 	}
 }
 
