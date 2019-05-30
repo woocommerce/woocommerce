@@ -4,18 +4,19 @@
  *
  * Handles requests to the /reports/stock/stats endpoint.
  *
- * @package WooCommerce Admin/API
+ * @package WooCommerce/RestApi
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Version4\Controllers\Reports as Reports;
+
 /**
- * REST API Reports stock stats controller class.
- *
- * @package WooCommerce/API
- * @extends WC_REST_Reports_Controller
+ * REST API StockStats Reports class.
  */
-class WC_Admin_REST_Reports_Stock_Stats_Controller extends WC_REST_Reports_Controller {
+class StockStats extends Reports {
 
 	/**
 	 * Endpoint namespace.

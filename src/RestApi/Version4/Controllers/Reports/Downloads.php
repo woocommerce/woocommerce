@@ -1,21 +1,22 @@
 <?php
 /**
- * REST API Reports downloads stats controller
+ * REST API Reports downloads controller
  *
- * Handles requests to the /reports/downloads/stats endpoint.
+ * Handles requests to the /reports/downloads endpoint.
  *
- * @package WooCommerce Admin/API
+ * @package WooCommerce/RestApi
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Version4\Controllers\Reports as Reports;
+
 /**
- * REST API Reports downloads stats controller class.
- *
- * @package WooCommerce/API
- * @extends WC_REST_Reports_Controller
+ * REST API Downloads Reports class.
  */
-class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_Controller {
+class Downloads extends Reports {
 
 	/**
 	 * Endpoint namespace.
@@ -29,63 +30,40 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'reports/downloads/stats';
+	protected $rest_base = 'reports/downloads';
 
 	/**
-	 * Maps query arguments from the REST request.
-	 *
-	 * @param array $request Request array.
-	 * @return array
-	 */
-	protected function prepare_reports_query( $request ) {
-		$args                        = array();
-		$args['before']              = $request['before'];
-		$args['after']               = $request['after'];
-		$args['interval']            = $request['interval'];
-		$args['page']                = $request['page'];
-		$args['per_page']            = $request['per_page'];
-		$args['orderby']             = $request['orderby'];
-		$args['order']               = $request['order'];
-		$args['match']               = $request['match'];
-		$args['product_includes']    = (array) $request['product_includes'];
-		$args['product_excludes']    = (array) $request['product_excludes'];
-		$args['customer_includes']   = (array) $request['customer_includes'];
-		$args['customer_excludes']   = (array) $request['customer_excludes'];
-		$args['order_includes']      = (array) $request['order_includes'];
-		$args['order_excludes']      = (array) $request['order_excludes'];
-		$args['ip_address_includes'] = (array) $request['ip_address_includes'];
-		$args['ip_address_excludes'] = (array) $request['ip_address_excludes'];
-
-		return $args;
-	}
-
-	/**
-	 * Get all reports.
+	 * Get items.
 	 *
 	 * @param WP_REST_Request $request Request data.
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$query_args      = $this->prepare_reports_query( $request );
-		$downloads_query = new WC_Admin_Reports_Downloads_Stats_Query( $query_args );
-		$report_data     = $downloads_query->get_data();
-
-		$out_data = array(
-			'totals'    => get_object_vars( $report_data->totals ),
-			'intervals' => array(),
-		);
-
-		foreach ( $report_data->intervals as $interval_data ) {
-			$item                    = $this->prepare_item_for_response( $interval_data, $request );
-			$out_data['intervals'][] = $this->prepare_response_for_collection( $item );
+		$args       = array();
+		$registered = array_keys( $this->get_collection_params() );
+		foreach ( $registered as $param_name ) {
+			if ( isset( $request[ $param_name ] ) ) {
+				$args[ $param_name ] = $request[ $param_name ];
+			}
 		}
 
-		$response = rest_ensure_response( $out_data );
-		$response->header( 'X-WP-Total', (int) $report_data->total );
-		$response->header( 'X-WP-TotalPages', (int) $report_data->pages );
+		$reports        = new WC_Admin_Reports_Downloads_Query( $args );
+		$downloads_data = $reports->get_data();
 
-		$page      = $report_data->page_no;
-		$max_pages = $report_data->pages;
+		$data = array();
+
+		foreach ( $downloads_data->data as $download_data ) {
+			$item   = $this->prepare_item_for_response( $download_data, $request );
+			$data[] = $this->prepare_response_for_collection( $item );
+		}
+
+		$response = rest_ensure_response( $data );
+
+		$response->header( 'X-WP-Total', (int) $downloads_data->total );
+		$response->header( 'X-WP-TotalPages', (int) $downloads_data->pages );
+
+		$page      = $downloads_data->page_no;
+		$max_pages = $downloads_data->pages;
 		$base      = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
 		if ( $page > 1 ) {
 			$prev_page = $page - 1;
@@ -120,6 +98,21 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
+		$response->add_links( $this->prepare_links( $report ) );
+
+		$response->data['date'] = get_date_from_gmt( $data['date_gmt'], 'Y-m-d H:i:s' );
+
+		// Figure out file name.
+		// Matches https://github.com/woocommerce/woocommerce/blob/4be0018c092e617c5d2b8c46b800eb71ece9ddef/includes/class-wc-download-handler.php#L197.
+		$product_id                     = intval( $data['product_id'] );
+		$_product                       = wc_get_product( $product_id );
+		$file_path                      = $_product->get_file_download_path( $data['download_id'] );
+		$filename                       = basename( $file_path );
+		$response->data['file_name']    = apply_filters( 'woocommerce_file_download_filename', $filename, $product_id );
+		$response->data['file_path']    = $file_path;
+		$customer                       = new WC_Customer( $data['user_id'] );
+		$response->data['username']     = $customer->get_username();
+		$response->data['order_number'] = $this->get_order_number( $data['order_id'] );
 
 		/**
 		 * Filter a report returned from the API.
@@ -130,7 +123,24 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 		 * @param object           $report   The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_report_downloads_stats', $response, $report, $request );
+		return apply_filters( 'woocommerce_rest_prepare_report_downloads', $response, $report, $request );
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param Array $object Object data.
+	 * @return array        Links for the given post.
+	 */
+	protected function prepare_links( $object ) {
+		$links = array(
+			'product' => array(
+				'href'       => rest_url( sprintf( '/%s/%s/%d', $this->namespace, 'products', $object['product_id'] ) ),
+				'embeddable' => true,
+			),
+		);
+
+		return $links;
 	}
 
 	/**
@@ -139,76 +149,88 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$totals = array(
-			'download_count' => array(
-				'description' => __( 'Number of downloads.', 'woocommerce' ),
-				'type'        => 'number',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-				'indicator'   => true,
-			),
-		);
-
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'report_orders_stats',
+			'title'      => 'report_downloads',
 			'type'       => 'object',
 			'properties' => array(
-				'totals'    => array(
-					'description' => __( 'Totals data.', 'woocommerce' ),
-					'type'        => 'object',
-					'context'     => array( 'view', 'edit' ),
+				'id'           => array(
+					'type'        => 'integer',
 					'readonly'    => true,
-					'properties'  => $totals,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'ID.', 'woocommerce' ),
 				),
-				'intervals' => array(
-					'description' => __( 'Reports data grouped by intervals.', 'woocommerce' ),
-					'type'        => 'array',
+				'product_id'   => array(
+					'type'        => 'integer',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'Product ID.', 'woocommerce' ),
+				),
+				'date'         => array(
+					'description' => __( "The date of the download, in the site's timezone.", 'woocommerce' ),
+					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
-					'items'       => array(
-						'type'       => 'object',
-						'properties' => array(
-							'interval'       => array(
-								'description' => __( 'Type of interval.', 'woocommerce' ),
-								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-								'enum'        => array( 'day', 'week', 'month', 'year' ),
-							),
-							'date_start'     => array(
-								'description' => __( "The date the report start, in the site's timezone.", 'woocommerce' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'date_start_gmt' => array(
-								'description' => __( 'The date the report start, as GMT.', 'woocommerce' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'date_end'       => array(
-								'description' => __( "The date the report end, in the site's timezone.", 'woocommerce' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'date_end_gmt'   => array(
-								'description' => __( 'The date the report end, as GMT.', 'woocommerce' ),
-								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'subtotals'      => array(
-								'description' => __( 'Interval subtotals.', 'woocommerce' ),
-								'type'        => 'object',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-								'properties'  => $totals,
-							),
-						),
-					),
+				),
+				'date_gmt'     => array(
+					'description' => __( 'The date of the download, as GMT.', 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'download_id'  => array(
+					'type'        => 'string',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'Download ID.', 'woocommerce' ),
+				),
+				'file_name'    => array(
+					'type'        => 'string',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'File name.', 'woocommerce' ),
+				),
+				'file_path'    => array(
+					'type'        => 'string',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'File URL.', 'woocommerce' ),
+				),
+				'product_id'   => array(
+					'type'        => 'integer',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'Product ID.', 'woocommerce' ),
+				),
+				'order_id'     => array(
+					'type'        => 'integer',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'Order ID.', 'woocommerce' ),
+				),
+				'order_number' => array(
+					'type'        => 'string',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'Order Number.', 'woocommerce' ),
+				),
+				'user_id'      => array(
+					'type'        => 'integer',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'User ID for the downloader.', 'woocommerce' ),
+				),
+				'username'     => array(
+					'type'        => 'string',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'User name of the downloader.', 'woocommerce' ),
+				),
+				'ip_address'   => array(
+					'type'        => 'string',
+					'readonly'    => true,
+					'context'     => array( 'view', 'edit' ),
+					'description' => __( 'IP address for the downloader.', 'woocommerce' ),
 				),
 			),
 		);
@@ -222,9 +244,9 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params                     = array();
-		$params['context']          = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['page']             = array(
+		$params                        = array();
+		$params['context']             = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['page']                = array(
 			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 1,
@@ -232,7 +254,7 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 			'validate_callback' => 'rest_validate_request_arg',
 			'minimum'           => 1,
 		);
-		$params['per_page']         = array(
+		$params['per_page']            = array(
 			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
 			'type'              => 'integer',
 			'default'           => 10,
@@ -241,51 +263,37 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['after']            = array(
+		$params['after']               = array(
 			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['before']           = array(
+		$params['before']              = array(
 			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['order']            = array(
+		$params['order']               = array(
 			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['orderby']          = array(
+		$params['orderby']             = array(
 			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'date',
 			'enum'              => array(
 				'date',
-				'download_count',
+				'product',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['interval']         = array(
-			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'week',
-			'enum'              => array(
-				'hour',
-				'day',
-				'week',
-				'month',
-				'quarter',
-				'year',
-			),
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['match']            = array(
-			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: status_is, status_is_not, product_includes, product_excludes, coupon_includes, coupon_excludes, customer, categories', 'woocommerce' ),
+		$params['match']               = array(
+			'description'       => __( 'Indicates whether all the conditions should be true for the resulting set, or if any one of them is sufficient. Match affects the following parameters: products, orders, username, ip_address.', 'woocommerce' ),
 			'type'              => 'string',
 			'default'           => 'all',
 			'enum'              => array(
@@ -294,7 +302,7 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['product_includes'] = array(
+		$params['product_includes']    = array(
 			'description'       => __( 'Limit result set to items that have the specified product(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -302,7 +310,7 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 			),
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
-
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['product_excludes']    = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified product(s) assigned.', 'woocommerce' ),
@@ -311,6 +319,7 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 				'type' => 'integer',
 			),
 			'default'           => array(),
+			'validate_callback' => 'rest_validate_request_arg',
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['order_includes']      = array(
@@ -332,7 +341,7 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 			),
 		);
 		$params['customer_includes']   = array(
-			'description'       => __( 'Limit response to objects that have the specified customer ids.', 'woocommerce' ),
+			'description'       => __( 'Limit response to objects that have the specified user ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -341,7 +350,7 @@ class WC_Admin_REST_Reports_Downloads_Stats_Controller extends WC_REST_Reports_C
 			),
 		);
 		$params['customer_excludes']   = array(
-			'description'       => __( 'Limit response to objects that don\'t have the specified customer ids.', 'woocommerce' ),
+			'description'       => __( 'Limit response to objects that don\'t have the specified user ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',

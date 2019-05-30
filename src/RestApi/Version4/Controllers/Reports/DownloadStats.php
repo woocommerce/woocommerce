@@ -1,21 +1,22 @@
 <?php
 /**
- * REST API Reports orders stats controller
+ * REST API Reports downloads stats controller
  *
- * Handles requests to the /reports/orders/stats endpoint.
+ * Handles requests to the /reports/downloads/stats endpoint.
  *
- * @package WooCommerce Admin/API
+ * @package WooCommerce/RestApi
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Version4\Controllers\Reports as Reports;
+
 /**
- * REST API Reports orders stats controller class.
- *
- * @package WooCommerce/API
- * @extends WC_Admin_REST_Reports_Controller
+ * REST API DownloadStats Reports class.
  */
-class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Reports_Controller {
+class DownloadStats extends Reports {
 
 	/**
 	 * Endpoint namespace.
@@ -29,7 +30,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'reports/orders/stats';
+	protected $rest_base = 'reports/downloads/stats';
 
 	/**
 	 * Maps query arguments from the REST request.
@@ -38,26 +39,23 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
-		$args             = array();
-		$args['before']   = $request['before'];
-		$args['after']    = $request['after'];
-		$args['interval'] = $request['interval'];
-		$args['page']     = $request['page'];
-		$args['per_page'] = $request['per_page'];
-		$args['orderby']  = $request['orderby'];
-		$args['order']    = $request['order'];
-
-		$args['match']            = $request['match'];
-		$args['status_is']        = (array) $request['status_is'];
-		$args['status_is_not']    = (array) $request['status_is_not'];
-		$args['product_includes'] = (array) $request['product_includes'];
-		$args['product_excludes'] = (array) $request['product_excludes'];
-		$args['coupon_includes']  = (array) $request['coupon_includes'];
-		$args['coupon_excludes']  = (array) $request['coupon_excludes'];
-		$args['customer']         = $request['customer'];
-		$args['refunds']          = $request['refunds'];
-		$args['categories']       = (array) $request['categories'];
-		$args['segmentby']        = $request['segmentby'];
+		$args                        = array();
+		$args['before']              = $request['before'];
+		$args['after']               = $request['after'];
+		$args['interval']            = $request['interval'];
+		$args['page']                = $request['page'];
+		$args['per_page']            = $request['per_page'];
+		$args['orderby']             = $request['orderby'];
+		$args['order']               = $request['order'];
+		$args['match']               = $request['match'];
+		$args['product_includes']    = (array) $request['product_includes'];
+		$args['product_excludes']    = (array) $request['product_excludes'];
+		$args['customer_includes']   = (array) $request['customer_includes'];
+		$args['customer_excludes']   = (array) $request['customer_excludes'];
+		$args['order_includes']      = (array) $request['order_includes'];
+		$args['order_excludes']      = (array) $request['order_excludes'];
+		$args['ip_address_includes'] = (array) $request['ip_address_includes'];
+		$args['ip_address_excludes'] = (array) $request['ip_address_excludes'];
 
 		return $args;
 	}
@@ -69,13 +67,9 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$query_args   = $this->prepare_reports_query( $request );
-		$orders_query = new WC_Admin_Reports_Orders_Stats_Query( $query_args );
-		try {
-			$report_data = $orders_query->get_data();
-		} catch ( WC_Admin_Reports_Parameter_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
-		}
+		$query_args      = $this->prepare_reports_query( $request );
+		$downloads_query = new WC_Admin_Reports_Downloads_Stats_Query( $query_args );
+		$report_data     = $downloads_query->get_data();
 
 		$out_data = array(
 			'totals'    => get_object_vars( $report_data->totals ),
@@ -137,7 +131,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 		 * @param object           $report   The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_report_orders_stats', $response, $report, $request );
+		return apply_filters( 'woocommerce_rest_prepare_report_downloads_stats', $response, $report, $request );
 	}
 
 	/**
@@ -146,106 +140,15 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$data_values = array(
-			'net_revenue'             => array(
-				'description' => __( 'Net revenue.', 'woocommerce' ),
-				'type'        => 'number',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-				'format'      => 'currency',
-			),
-			'orders_count'            => array(
-				'description' => __( 'Amount of orders', 'woocommerce' ),
-				'type'        => 'integer',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-				'indicator'   => true,
-			),
-			'avg_order_value'         => array(
-				'description' => __( 'Average order value.', 'woocommerce' ),
+		$totals = array(
+			'download_count' => array(
+				'description' => __( 'Number of downloads.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'indicator'   => true,
-				'format'      => 'currency',
-			),
-			'avg_items_per_order'     => array(
-				'description' => __( 'Average items per order', 'woocommerce' ),
-				'type'        => 'number',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
-			'num_items_sold'          => array(
-				'description' => __( 'Number of items sold', 'woocommerce' ),
-				'type'        => 'integer',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
-			'coupons'                 => array(
-				'description' => __( 'Amount discounted by coupons.', 'woocommerce' ),
-				'type'        => 'number',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
-			'coupons_count'           => array(
-				'description' => __( 'Unique coupons count.', 'woocommerce' ),
-				'type'        => 'number',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
-			'num_returning_customers' => array(
-				'description' => __( 'Number of orders done by returning customers', 'woocommerce' ),
-				'type'        => 'integer',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
-			'num_new_customers'       => array(
-				'description' => __( 'Number of orders done by new customers', 'woocommerce' ),
-				'type'        => 'integer',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
-			'products'                => array(
-				'description' => __( 'Number of distinct products sold.', 'woocommerce' ),
-				'type'        => 'number',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
 			),
 		);
-
-		$segments = array(
-			'segments' => array(
-				'description' => __( 'Reports data grouped by segment condition.', 'woocommerce' ),
-				'type'        => 'array',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-				'items'       => array(
-					'type'       => 'object',
-					'properties' => array(
-						'segment_id' => array(
-							'description' => __( 'Segment identificator.', 'woocommerce' ),
-							'type'        => 'integer',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-						),
-						'subtotals'  => array(
-							'description' => __( 'Interval subtotals.', 'woocommerce' ),
-							'type'        => 'object',
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-							'properties'  => $data_values,
-						),
-					),
-				),
-			),
-		);
-
-		$totals = array_merge( $data_values, $segments );
-
-		// Products is not shown in intervals.
-		unset( $data_values['products'] );
-
-		$intervals = array_merge( $data_values, $segments );
 
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
@@ -303,7 +206,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 								'type'        => 'object',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
-								'properties'  => $intervals,
+								'properties'  => $totals,
 							),
 						),
 					),
@@ -364,9 +267,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 			'default'           => 'date',
 			'enum'              => array(
 				'date',
-				'net_revenue',
-				'orders_count',
-				'avg_order_value',
+				'download_count',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
@@ -394,27 +295,6 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['status_is']        = array(
-			'description'       => __( 'Limit result set to items that have the specified order status.', 'woocommerce' ),
-			'type'              => 'array',
-			'sanitize_callback' => 'wp_parse_slug_list',
-			'validate_callback' => 'rest_validate_request_arg',
-			'default'           => null,
-			'items'             => array(
-				'enum' => $this->get_order_statuses(),
-				'type' => 'string',
-			),
-		);
-		$params['status_is_not']    = array(
-			'description'       => __( 'Limit result set to items that don\'t have the specified order status.', 'woocommerce' ),
-			'type'              => 'array',
-			'sanitize_callback' => 'wp_parse_slug_list',
-			'validate_callback' => 'rest_validate_request_arg',
-			'items'             => array(
-				'enum' => $this->get_order_statuses(),
-				'type' => 'string',
-			),
-		);
 		$params['product_includes'] = array(
 			'description'       => __( 'Limit result set to items that have the specified product(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
@@ -425,7 +305,7 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 			'sanitize_callback' => 'wp_parse_id_list',
 
 		);
-		$params['product_excludes'] = array(
+		$params['product_excludes']    = array(
 			'description'       => __( 'Limit result set to items that don\'t have the specified product(s) assigned.', 'woocommerce' ),
 			'type'              => 'array',
 			'items'             => array(
@@ -434,60 +314,60 @@ class WC_Admin_REST_Reports_Orders_Stats_Controller extends WC_Admin_REST_Report
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['coupon_includes']  = array(
-			'description'       => __( 'Limit result set to items that have the specified coupon(s) assigned.', 'woocommerce' ),
+		$params['order_includes']      = array(
+			'description'       => __( 'Limit result set to items that have the specified order ids.', 'woocommerce' ),
 			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
 			'items'             => array(
 				'type' => 'integer',
 			),
-			'default'           => array(),
-			'sanitize_callback' => 'wp_parse_id_list',
 		);
-		$params['coupon_excludes']  = array(
-			'description'       => __( 'Limit result set to items that don\'t have the specified coupon(s) assigned.', 'woocommerce' ),
+		$params['order_excludes']      = array(
+			'description'       => __( 'Limit result set to items that don\'t have the specified order ids.', 'woocommerce' ),
 			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
 			'items'             => array(
 				'type' => 'integer',
 			),
-			'default'           => array(),
+		);
+		$params['customer_includes']   = array(
+			'description'       => __( 'Limit response to objects that have the specified customer ids.', 'woocommerce' ),
+			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
-		);
-		$params['customer']         = array(
-			'description'       => __( 'Limit result set to items that don\'t have the specified coupon(s) assigned.', 'woocommerce' ),
-			'type'              => 'string',
-			'enum'              => array(
-				'new',
-				'returning',
-			),
 			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['refunds']          = array(
-			'description'       => __( 'Limit result set to specific types of refunds.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => '',
-			'enum'              => array(
-				'',
-				'all',
-				'partial',
-				'full',
-				'none',
+			'items'             => array(
+				'type' => 'integer',
 			),
-			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['segmentby']        = array(
-			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce' ),
-			'type'              => 'string',
-			'enum'              => array(
-				'product',
-				'category',
-				'variation',
-				'coupon',
-				'customer_type', // new vs returning.
-			),
+		$params['customer_excludes']   = array(
+			'description'       => __( 'Limit response to objects that don\'t have the specified customer ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
+		);
+		$params['ip_address_includes'] = array(
+			'description'       => __( 'Limit response to objects that have a specified ip address.', 'woocommerce' ),
+			'type'              => 'array',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'string',
+			),
+		);
+
+		$params['ip_address_excludes'] = array(
+			'description'       => __( 'Limit response to objects that don\'t have a specified ip address.', 'woocommerce' ),
+			'type'              => 'array',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'string',
+			),
 		);
 
 		return $params;
 	}
-
 }

@@ -124,10 +124,6 @@ class Reports extends WC_REST_Controller {
 				'description' => __( 'Product downloads detailed reports.', 'woocommerce' ),
 			),
 			array(
-				'slug'        => 'downloads/files',
-				'description' => __( 'Product download files detailed reports.', 'woocommerce' ),
-			),
-			array(
 				'slug'        => 'downloads/stats',
 				'description' => __( 'Stats about product downloads.', 'woocommerce' ),
 			),
@@ -300,19 +296,5 @@ class Reports extends WC_REST_Controller {
 		}
 
 		return $order_statuses;
-	}
-
-	/**
-	 * Check whether a given request has permission to read reports.
-	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'reports', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
 	}
 }

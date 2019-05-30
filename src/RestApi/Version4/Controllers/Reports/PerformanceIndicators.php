@@ -4,18 +4,19 @@
  *
  * Handles requests to the /reports/store-performance endpoint.
  *
- * @package WooCommerce Admin/API
+ * @package WooCommerce/RestApi
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Version4\Controllers\Reports as Reports;
+
 /**
- * REST API Reports Performance indicators controller class.
- *
- * @package WooCommerce/API
- * @extends WC_REST_Reports_Controller
+ * REST API PerformanceIndicators class.
  */
-class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Reports_Controller {
+class PerformanceIndicators extends Reports {
 
 	/**
 	 * Endpoint namespace.

@@ -4,18 +4,19 @@
  *
  * Handles requests to the /reports/customers/stats endpoint.
  *
- * @package WooCommerce Admin/API
+ * @package WooCommerce/RestApi
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Version4\Controllers\Reports as Reports;
+
 /**
- * REST API Reports customers stats controller class.
- *
- * @package WooCommerce/API
- * @extends WC_REST_Reports_Controller
+ * REST API CustomerStats Reports class.
  */
-class WC_Admin_REST_Reports_Customers_Stats_Controller extends WC_REST_Reports_Controller {
+class CustomerStats extends Reports {
 	/**
 	 * Endpoint namespace.
 	 *

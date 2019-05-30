@@ -4,18 +4,19 @@
  *
  * Handles requests to the /reports/orders endpoint.
  *
- * @package WooCommerce Admin/API
+ * @package WooCommerce/RestApi
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Version4\Controllers\Reports as Reports;
+
 /**
- * REST API Reports orders controller class.
- *
- * @package WooCommerce/API
- * @extends WC_Admin_REST_Reports_Controller
+ * REST API Orders Reports class.
  */
-class WC_Admin_REST_Reports_Orders_Controller extends WC_Admin_REST_Reports_Controller {
+class Orders extends Reports {
 
 	/**
 	 * Endpoint namespace.

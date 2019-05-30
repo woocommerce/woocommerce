@@ -1,21 +1,22 @@
 <?php
 /**
- * REST API Reports taxes stats controller
+ * REST API Reports revenue stats controller
  *
- * Handles requests to the /reports/taxes/stats endpoint.
+ * Handles requests to the /reports/revenue/stats endpoint.
  *
- * @package WooCommerce Admin/API
+ * @package WooCommerce/RestApi
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Version4\Controllers\Reports as Reports;
+
 /**
- * REST API Reports taxes stats controller class.
- *
- * @package WooCommerce/API
- * @extends WC_REST_Reports_Controller
+ * REST API RevenueStats Reports class.
  */
-class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Controller {
+class RevenueStats extends Reports {
 
 	/**
 	 * Endpoint namespace.
@@ -29,37 +30,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'reports/taxes/stats';
-
-	/**
-	 * Constructor.
-	 */
-	public function __construct() {
-		add_filter( 'woocommerce_reports_taxes_stats_select_query', array( $this, 'set_default_report_data' ) );
-	}
-
-	/**
-	 * Set the default results to 0 if API returns an empty array
-	 *
-	 * @param Mixed $results Report data.
-	 * @return object
-	 */
-	public function set_default_report_data( $results ) {
-		if ( empty( $results ) ) {
-			$results                       = new stdClass();
-			$results->total                = 0;
-			$results->totals               = new stdClass();
-			$results->totals->tax_codes    = 0;
-			$results->totals->total_tax    = 0;
-			$results->totals->order_tax    = 0;
-			$results->totals->shipping_tax = 0;
-			$results->totals->orders       = 0;
-			$results->intervals            = array();
-			$results->pages                = 1;
-			$results->page_no              = 1;
-		}
-		return $results;
-	}
+	protected $rest_base = 'reports/revenue/stats';
 
 	/**
 	 * Maps query arguments from the REST request.
@@ -76,7 +47,6 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 		$args['per_page']  = $request['per_page'];
 		$args['orderby']   = $request['orderby'];
 		$args['order']     = $request['order'];
-		$args['taxes']     = (array) $request['taxes'];
 		$args['segmentby'] = $request['segmentby'];
 
 		return $args;
@@ -89,9 +59,13 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$query_args  = $this->prepare_reports_query( $request );
-		$taxes_query = new WC_Admin_Reports_Taxes_Stats_Query( $query_args );
-		$report_data = $taxes_query->get_data();
+		$query_args      = $this->prepare_reports_query( $request );
+		$reports_revenue = new WC_Admin_Reports_Revenue_Query( $query_args );
+		try {
+			$report_data = $reports_revenue->get_data();
+		} catch ( WC_Admin_Reports_Parameter_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
 
 		$out_data = array(
 			'totals'    => get_object_vars( $report_data->totals ),
@@ -99,7 +73,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 		);
 
 		foreach ( $report_data->intervals as $interval_data ) {
-			$item                    = $this->prepare_item_for_response( (object) $interval_data, $request );
+			$item                    = $this->prepare_item_for_response( $interval_data, $request );
 			$out_data['intervals'][] = $this->prepare_response_for_collection( $item );
 		}
 
@@ -130,12 +104,12 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param stdClass        $report  Report data.
+	 * @param Array           $report  Report data.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
-		$data = get_object_vars( $report );
+		$data = $report;
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
@@ -153,7 +127,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 		 * @param object           $report   The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_report_taxes_stats', $response, $report, $request );
+		return apply_filters( 'woocommerce_rest_prepare_report_revenue_stats', $response, $report, $request );
 	}
 
 	/**
@@ -163,38 +137,72 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 	 */
 	public function get_item_schema() {
 		$data_values = array(
-			'total_tax'    => array(
-				'description' => __( 'Total tax.', 'woocommerce' ),
+			'gross_revenue'  => array(
+				'description' => __( 'Gross revenue.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'indicator'   => true,
 				'format'      => 'currency',
 			),
-			'order_tax'    => array(
-				'description' => __( 'Order tax.', 'woocommerce' ),
+			'net_revenue'    => array(
+				'description' => __( 'Net revenue.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'indicator'   => true,
 				'format'      => 'currency',
 			),
-			'shipping_tax' => array(
-				'description' => __( 'Shipping tax.', 'woocommerce' ),
+			'coupons'        => array(
+				'description' => __( 'Amount discounted by coupons.', 'woocommerce' ),
+				'type'        => 'number',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'coupons_count'  => array(
+				'description' => __( 'Unique coupons count.', 'woocommerce' ),
+				'type'        => 'number',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+				'format'      => 'currency',
+			),
+			'shipping'       => array(
+				'description' => __( 'Total of shipping.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'indicator'   => true,
 				'format'      => 'currency',
 			),
-			'orders_count' => array(
+			'taxes'          => array(
+				'description' => __( 'Total of taxes.', 'woocommerce' ),
+				'type'        => 'number',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+				'format'      => 'currency',
+			),
+			'refunds'        => array(
+				'description' => __( 'Total of refunds.', 'woocommerce' ),
+				'type'        => 'number',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+				'indicator'   => true,
+				'format'      => 'currency',
+			),
+			'orders_count'   => array(
 				'description' => __( 'Amount of orders.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'tax_codes'    => array(
-				'description' => __( 'Amount of tax codes.', 'woocommerce' ),
+			'num_items_sold' => array(
+				'description' => __( 'Items sold.', 'woocommerce' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'products'       => array(
+				'description' => __( 'Products sold.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -230,9 +238,14 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 
 		$totals = array_merge( $data_values, $segments );
 
+		// Products is not shown in intervals.
+		unset( $data_values['products'] );
+
+		$intervals = array_merge( $data_values, $segments );
+
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'report_taxes_stats',
+			'title'      => 'report_revenue_stats',
 			'type'       => 'object',
 			'properties' => array(
 				'totals'    => array(
@@ -286,7 +299,7 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 								'type'        => 'object',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
-								'properties'  => $totals,
+								'properties'  => $intervals,
 							),
 						),
 					),
@@ -347,10 +360,14 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 			'default'           => 'date',
 			'enum'              => array(
 				'date',
-				'items_sold',
 				'gross_revenue',
+				'coupons',
+				'refunds',
+				'shipping',
+				'taxes',
+				'net_revenue',
 				'orders_count',
-				'products_count',
+				'items_sold',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
@@ -368,20 +385,15 @@ class WC_Admin_REST_Reports_Taxes_Stats_Controller extends WC_REST_Reports_Contr
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['taxes']     = array(
-			'description'       => __( 'Limit result set to all items that have the specified term assigned in the taxes taxonomy.', 'woocommerce' ),
-			'type'              => 'array',
-			'sanitize_callback' => 'wp_parse_id_list',
-			'validate_callback' => 'rest_validate_request_arg',
-			'items'             => array(
-				'type' => 'integer',
-			),
-		);
 		$params['segmentby'] = array(
 			'description'       => __( 'Segment the response by additional constraint.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array(
-				'tax_rate_id',
+				'product',
+				'category',
+				'variation',
+				'coupon',
+				'customer_type', // new vs returning.
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);

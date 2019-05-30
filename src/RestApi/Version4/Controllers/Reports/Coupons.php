@@ -1,8 +1,8 @@
 <?php
 /**
- * REST API Reports categories controller
+ * REST API Reports coupons controller
  *
- * Handles requests to the /reports/categories endpoint.
+ * Handles requests to the /reports/coupons endpoint.
  *
  * @package WooCommerce/RestApi
  */
@@ -11,12 +11,12 @@ namespace WooCommerce\RestApi\Version4\Controllers\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_Admin_REST_Reports_Controller;
+use \WooCommerce\RestApi\Version4\Controllers\Reports as Reports;
 
 /**
- * REST API Category Reports class.
+ * REST API Coupons Reports class.
  */
-class Categories extends WC_Admin_REST_Reports_Controller {
+class Coupons extends Reports {
 
 	/**
 	 * Endpoint namespace.
@@ -30,7 +30,7 @@ class Categories extends WC_Admin_REST_Reports_Controller {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'reports/categories';
+	protected $rest_base = 'reports/coupons';
 
 	/**
 	 * Maps query arguments from the REST request.
@@ -42,16 +42,12 @@ class Categories extends WC_Admin_REST_Reports_Controller {
 		$args                  = array();
 		$args['before']        = $request['before'];
 		$args['after']         = $request['after'];
-		$args['interval']      = $request['interval'];
 		$args['page']          = $request['page'];
 		$args['per_page']      = $request['per_page'];
 		$args['orderby']       = $request['orderby'];
 		$args['order']         = $request['order'];
+		$args['coupons']       = (array) $request['coupons'];
 		$args['extended_info'] = $request['extended_info'];
-		$args['categories']    = (array) $request['categories'];
-		$args['status_is']     = (array) $request['status_is'];
-		$args['status_is_not'] = (array) $request['status_is_not'];
-
 		return $args;
 	}
 
@@ -62,26 +58,18 @@ class Categories extends WC_Admin_REST_Reports_Controller {
 	 * @return array|WP_Error
 	 */
 	public function get_items( $request ) {
-		$query_args       = $this->prepare_reports_query( $request );
-		$categories_query = new WC_Admin_Reports_Categories_Query( $query_args );
-		$report_data      = $categories_query->get_data();
+		$query_args    = $this->prepare_reports_query( $request );
+		$coupons_query = new WC_Admin_Reports_Coupons_Query( $query_args );
+		$report_data   = $coupons_query->get_data();
 
-		if ( is_wp_error( $report_data ) ) {
-			return $report_data;
+		$data = array();
+
+		foreach ( $report_data->data as $coupons_data ) {
+			$item   = $this->prepare_item_for_response( $coupons_data, $request );
+			$data[] = $this->prepare_response_for_collection( $item );
 		}
 
-		if ( ! isset( $report_data->data ) || ! isset( $report_data->page_no ) || ! isset( $report_data->pages ) ) {
-			return new WP_Error( 'woocommerce_rest_reports_categories_invalid_response', __( 'Invalid response from data store.', 'woocommerce' ), array( 'status' => 500 ) );
-		}
-
-		$out_data = array();
-
-		foreach ( $report_data->data as $datum ) {
-			$item       = $this->prepare_item_for_response( $datum, $request );
-			$out_data[] = $this->prepare_response_for_collection( $item );
-		}
-
-		$response = rest_ensure_response( $out_data );
+		$response = rest_ensure_response( $data );
 		$response->header( 'X-WP-Total', (int) $report_data->total );
 		$response->header( 'X-WP-TotalPages', (int) $report_data->pages );
 
@@ -132,19 +120,19 @@ class Categories extends WC_Admin_REST_Reports_Controller {
 		 * @param object           $report   The original report object.
 		 * @param WP_REST_Request  $request  Request used to generate the response.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_report_categories', $response, $report, $request );
+		return apply_filters( 'woocommerce_rest_prepare_report_coupons', $response, $report, $request );
 	}
 
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Admin_Reports_Query $object Object data.
+	 * @param WC_Reports_Query $object Object data.
 	 * @return array
 	 */
 	protected function prepare_links( $object ) {
 		$links = array(
-			'category' => array(
-				'href' => rest_url( sprintf( '/%s/products/categories/%d', $this->namespace, $object['category_id'] ) ),
+			'coupon' => array(
+				'href' => rest_url( sprintf( '/%s/coupons/%d', $this->namespace, $object['coupon_id'] ) ),
 			),
 		);
 
@@ -159,45 +147,64 @@ class Categories extends WC_Admin_REST_Reports_Controller {
 	public function get_item_schema() {
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'report_categories',
+			'title'      => 'report_coupons',
 			'type'       => 'object',
 			'properties' => array(
-				'category_id'    => array(
-					'description' => __( 'Category ID.', 'woocommerce' ),
+				'coupon_id'     => array(
+					'description' => __( 'Coupon ID.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'items_sold'     => array(
-					'description' => __( 'Amount of items sold.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'net_revenue'    => array(
-					'description' => __( 'Gross revenue.', 'woocommerce' ),
+				'amount'        => array(
+					'description' => __( 'Net discount amount.', 'woocommerce' ),
 					'type'        => 'number',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'orders_count'   => array(
+				'orders_count'  => array(
 					'description' => __( 'Amount of orders.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'products_count' => array(
-					'description' => __( 'Amount of products.', 'woocommerce' ),
-					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'extended_info'  => array(
-					'name' => array(
+				'extended_info' => array(
+					'code'             => array(
 						'type'        => 'string',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Category name.', 'woocommerce' ),
+						'description' => __( 'Coupon code.', 'woocommerce' ),
+					),
+					'date_created'     => array(
+						'type'        => 'date-time',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Coupon creation date.', 'woocommerce' ),
+					),
+					'date_created_gmt' => array(
+						'type'        => 'date-time',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Coupon creation date in GMT.', 'woocommerce' ),
+					),
+					'date_expires'     => array(
+						'type'        => 'date-time',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Coupon expiration date.', 'woocommerce' ),
+					),
+					'date_expires_gmt' => array(
+						'type'        => 'date-time',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Coupon expiration date in GMT.', 'woocommerce' ),
+					),
+					'discount_type'    => array(
+						'type'        => 'string',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'enum'        => array_keys( wc_get_coupon_types() ),
+						'description' => __( 'Coupon discount type.', 'woocommerce' ),
 					),
 				),
 			),
@@ -253,53 +260,17 @@ class Categories extends WC_Admin_REST_Reports_Controller {
 		$params['orderby']       = array(
 			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
 			'type'              => 'string',
-			'default'           => 'category_id',
+			'default'           => 'coupon_id',
 			'enum'              => array(
-				'category_id',
-				'items_sold',
-				'net_revenue',
+				'coupon_id',
+				'code',
+				'amount',
 				'orders_count',
-				'products_count',
-				'category',
 			),
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['interval']      = array(
-			'description'       => __( 'Time interval to use for buckets in the returned data.', 'woocommerce' ),
-			'type'              => 'string',
-			'default'           => 'week',
-			'enum'              => array(
-				'hour',
-				'day',
-				'week',
-				'month',
-				'quarter',
-				'year',
-			),
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-		$params['status_is']     = array(
-			'description'       => __( 'Limit result set to items that have the specified order status.', 'woocommerce' ),
-			'type'              => 'array',
-			'sanitize_callback' => 'wp_parse_slug_list',
-			'validate_callback' => 'rest_validate_request_arg',
-			'items'             => array(
-				'enum' => $this->get_order_statuses(),
-				'type' => 'string',
-			),
-		);
-		$params['status_is_not'] = array(
-			'description'       => __( 'Limit result set to items that don\'t have the specified order status.', 'woocommerce' ),
-			'type'              => 'array',
-			'sanitize_callback' => 'wp_parse_slug_list',
-			'validate_callback' => 'rest_validate_request_arg',
-			'items'             => array(
-				'enum' => $this->get_order_statuses(),
-				'type' => 'string',
-			),
-		);
-		$params['categories']    = array(
-			'description'       => __( 'Limit result set to all items that have the specified term assigned in the categories taxonomy.', 'woocommerce' ),
+		$params['coupons']       = array(
+			'description'       => __( 'Limit result set to coupons assigned specific coupon IDs.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -308,7 +279,7 @@ class Categories extends WC_Admin_REST_Reports_Controller {
 			),
 		);
 		$params['extended_info'] = array(
-			'description'       => __( 'Add additional piece of info about each category to the report.', 'woocommerce' ),
+			'description'       => __( 'Add additional piece of info about each coupon to the report.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
@@ -317,5 +288,4 @@ class Categories extends WC_Admin_REST_Reports_Controller {
 
 		return $params;
 	}
-
 }

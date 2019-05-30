@@ -4,18 +4,19 @@
  *
  * Handles requests to /reports/import
  *
- * @package WooCommerce Admin/API
+ * @package WooCommerce/RestApi
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Version4\Controllers\Reports as Reports;
+
 /**
- * Reports Imports controller.
- *
- * @package WooCommerce Admin/API
- * @extends WC_REST_Data_Controller
+ * REST API Import Reports class.
  */
-class WC_Admin_REST_Reports_Import_Controller extends WC_Admin_REST_Reports_Controller {
+class Import extends Reports {
 	/**
 	 * Endpoint namespace.
 	 *

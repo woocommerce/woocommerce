@@ -4,18 +4,19 @@
  *
  * Handles requests to the /reports/taxes endpoint.
  *
- * @package WooCommerce Admin/API
+ * @package WooCommerce/RestApi
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Version4\Controllers\Reports as Reports;
+
 /**
- * REST API Reports taxes controller class.
- *
- * @package WooCommerce/API
- * @extends WC_REST_Reports_Controller
+ * REST API Taxes Reports class.
  */
-class WC_Admin_REST_Reports_Taxes_Controller extends WC_REST_Reports_Controller {
+class Taxes extends Reports {
 
 	/**
 	 * Endpoint namespace.
