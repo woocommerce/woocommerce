@@ -2,6 +2,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { Component, createElement, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
@@ -21,8 +22,8 @@ import ProfileWizardHeader from './header';
 import Plugins from './steps/plugins';
 import Start from './steps/start';
 import Industry from './steps/industry';
+import StoreDetails from './steps/store-details';
 import './style.scss';
-import { __ } from '@wordpress/i18n';
 
 const getSteps = () => {
 	const steps = [];
@@ -36,7 +37,7 @@ const getSteps = () => {
 	} );
 	steps.push( {
 		key: 'store-details',
-		container: Fragment,
+		container: StoreDetails,
 		label: __( 'Store Details', 'woocommerce-admin' ),
 	} );
 	steps.push( {

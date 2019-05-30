@@ -15,6 +15,8 @@
 	}
 
 	.woocommerce-card {
+		margin-top: $gap;
+
 		h1,
 		h2,
 		h3 {
@@ -26,6 +28,13 @@
 		button {
 			display: flex;
 			margin: 0 auto;
+			min-width: 310px;
+			max-width: 100%;
+			justify-content: center;
+
+			&:disabled {
+				display: none;
+			}
 		}
 	}
 
@@ -37,7 +46,7 @@
 		&.is-active,
 		&.is-complete {
 			.woocommerce-stepper__step-icon {
-				background: $muriel-gray-900;
+				background: $muriel-hot-purple-600;
 				color: $muriel-white;
 			}
 
@@ -47,7 +56,7 @@
 		}
 
 		.woocommerce-spinner__circle {
-			stroke: $muriel-gray-900;
+			stroke: $muriel-hot-purple-600;
 		}
 	}
 
@@ -73,6 +82,16 @@
 		font-size: 24px;
 		line-height: 32px;
 		font-weight: 400;
+		margin-bottom: $gap-smaller;
+	}
+
+	.woocommerce-profile-wizard__header-subtitle {
+		color: $muriel-gray-600;
+		font-size: 16px;
+		line-height: 24px;
+		font-weight: 400;
+		margin-top: $gap-smaller;
+		margin-bottom: $gap;
 	}
 
 	.woocommerce-profile-wizard__container {
@@ -116,7 +135,7 @@
 			}
 
 			input {
-				top: 15px;
+				top: 14px;
 			}
 		}
 
@@ -146,14 +165,25 @@
 		margin-top: -$gap-smallest;
 	}
 
+	.muriel-input-text,
+	.muriel-select {
+		&.with-value,
+		&.active {
+			label {
+				top: 8px;
+			}
+
+			input,
+			select {
+				top: 24px;
+			}
+		}
+	}
+
 	.muriel-input-text.active,
 	.muriel-select.active {
-		border: 2px solid $muriel-hot-purple-600;
-
-		input,
-		select {
-			top: 25px;
-		}
+		box-shadow: 0 0 0 2px $muriel-hot-purple-600;
+		border-color: transparent;
 	}
 
 	.muriel-checkbox input[type='checkbox'] {
@@ -241,6 +271,8 @@
 		min-height: 28px;
 
 		button {
+			height: 40px;
+			min-width: none;
 			display: initial;
 		}
 	}
