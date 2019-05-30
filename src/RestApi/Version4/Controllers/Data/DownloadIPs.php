@@ -4,18 +4,19 @@
  *
  * Handles requests to /data/download-ips
  *
- * @package WooCommerce Admin/API
+ * @package WooCommerce/RestApi
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers\Data;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Version4\Controllers\Data as DataController;
+
 /**
  * Data Download IP controller.
- *
- * @package WooCommerce Admin/API
- * @extends WC_REST_Data_Controller
  */
-class WC_Admin_REST_Data_Download_Ips_Controller extends WC_REST_Data_Controller {
+class DownloadIPs extends DataController {
 	/**
 	 * Endpoint namespace.
 	 *

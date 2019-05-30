@@ -5,25 +5,25 @@
  * Handles requests to the /data endpoint.
  *
  * @package WooCommerce/RestApi
- * @since   3.5.0
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WC_REST_Controller;
+
 /**
- * REST API Data controller class.
- *
- * @package WooCommerce/RestApi
- * @extends WC_REST_Controller
+ * REST API Coupons controller class.
  */
-class WC_REST_Data_Controller extends WC_REST_Controller {
+class Data extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v3';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.
@@ -39,7 +39,9 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -99,6 +101,10 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 			array(
 				'slug'        => 'currencies',
 				'description' => __( 'List of supported currencies.', 'woocommerce' ),
+			),
+			array(
+				'slug'        => 'download-ips',
+				'description' => __( 'An endpoint used for searching download logs for a specific IP address.', 'woocommerce' ),
 			),
 		);
 

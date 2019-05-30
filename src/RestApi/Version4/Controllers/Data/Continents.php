@@ -5,25 +5,25 @@
  * Handles requests to the /data/continents endpoint.
  *
  * @package WooCommerce/RestApi
- * @since   3.5.0
  */
+
+namespace WooCommerce\RestApi\Version4\Controllers\Data;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Version4\Controllers\Data as DataController;
+
 /**
- * REST API Data continents controller class.
- *
- * @package WooCommerce/RestApi
- * @extends WC_REST_Controller
+ * REST API Data Continents controller class.
  */
-class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
+class Continents extends DataController {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v3';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.
@@ -39,7 +39,9 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base, array(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -49,7 +51,9 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 			)
 		);
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<location>[\w-]+)', array(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<location>[\w-]+)',
+			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
@@ -104,7 +108,8 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 				if ( array_key_exists( $country_code, $locale_info ) ) {
 					// Defensive programming against unexpected changes in locale-info.php.
 					$country_data = wp_parse_args(
-						$locale_info[ $country_code ], array(
+						$locale_info[ $country_code ],
+						array(
 							'currency_code'  => 'USD',
 							'currency_pos'   => 'left',
 							'decimal_sep'    => '.',
