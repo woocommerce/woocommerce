@@ -4,30 +4,26 @@
  *
  * Handles requests to the /orders/<order_id>/notes endpoint.
  *
- * @author   WooThemes
- * @category API
  * @package WooCommerce/RestApi
- * @since    3.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+namespace WooCommerce\RestApi\Version4\Controllers;
+
+defined( 'ABSPATH' ) || exit;
+
+use \WC_REST_Controller;
 
 /**
  * REST API Order Notes controller class.
- *
- * @package WooCommerce/RestApi
- * @extends WC_REST_Controller
  */
-class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
+class OrderNotes extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
 	 */
-	protected $namespace = 'wc/v1';
+	protected $namespace = 'wc/v4';
 
 	/**
 	 * Route base.
@@ -175,7 +171,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Get order notes from an order.
 	 *
-	 * @param WP_REST_Request $request
+	 * @param WP_REST_Request $request Request data.
 	 *
 	 * @return array|WP_Error
 	 */
@@ -191,6 +187,24 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 			'approve' => 'approve',
 			'type'    => 'order_note',
 		);
+
+		// Allow filter by order note type.
+		if ( 'customer' === $request['type'] ) {
+			$args['meta_query'] = array( // WPCS: slow query ok.
+				array(
+					'key'     => 'is_customer_note',
+					'value'   => 1,
+					'compare' => '=',
+				),
+			);
+		} elseif ( 'internal' === $request['type'] ) {
+			$args['meta_query'] = array( // WPCS: slow query ok.
+				array(
+					'key'     => 'is_customer_note',
+					'compare' => 'NOT EXISTS',
+				),
+			);
+		}
 
 		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
 
@@ -227,7 +241,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 		}
 
 		// Create the note.
-		$note_id = $order->add_order_note( $request['note'], $request['customer_note'] );
+		$note_id = $order->add_order_note( $request['note'], $request['customer_note'], $request['added_by_user'] );
 
 		if ( ! $note_id ) {
 			return new WP_Error( 'woocommerce_api_cannot_create_order_note', __( 'Cannot create order note, please try again.', 'woocommerce' ), array( 'status' => 500 ) );
@@ -331,16 +345,18 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 	/**
 	 * Prepare a single order note output for response.
 	 *
-	 * @param WP_Comment $note Order note object.
+	 * @param WP_Comment      $note    Order note object.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $note, $request ) {
 		$data = array(
-			'id'            => (int) $note->comment_ID,
-			'date_created'  => wc_rest_prepare_date_response( $note->comment_date_gmt ),
-			'note'          => $note->comment_content,
-			'customer_note' => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
+			'id'               => (int) $note->comment_ID,
+			'author'           => __( 'WooCommerce', 'woocommerce' ) === $note->comment_author ? 'system' : $note->comment_author,
+			'date_created'     => wc_rest_prepare_date_response( $note->comment_date ),
+			'date_created_gmt' => wc_rest_prepare_date_response( $note->comment_date_gmt ),
+			'note'             => $note->comment_content,
+			'customer_note'    => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
 		);
 
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -397,28 +413,46 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 			'title'      => 'order_note',
 			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
+				'id'               => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'date_created' => array(
+				'author'           => array(
+					'description' => __( 'Order note author.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'date_created'     => array(
 					'description' => __( "The date the order note was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'note' => array(
-					'description' => __( 'Order note.', 'woocommerce' ),
+				'date_created_gmt' => array(
+					'description' => __( 'The date the order note was created, as GMT.', 'woocommerce' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'note'             => array(
+					'description' => __( 'Order note content.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'customer_note' => array(
-					'description' => __( 'Shows/define if the note is only for reference or for the customer (the user will be notified).', 'woocommerce' ),
+				'customer_note'    => array(
+					'description' => __( 'If true, the note will be shown to customers and they will be notified. If false, the note will be for admin reference only.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),
+				),
+				'added_by_user'    => array(
+					'description' => __( 'If true, this note will be attributed to the current user. If false, the note will be attributed to the system.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'default'     => false,
+					'context'     => array( 'edit' ),
 				),
 			),
 		);
@@ -432,8 +466,17 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 	 * @return array
 	 */
 	public function get_collection_params() {
-		return array(
-			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+		$params            = array();
+		$params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['type']    = array(
+			'default'           => 'any',
+			'description'       => __( 'Limit result to customers or internal notes.', 'woocommerce' ),
+			'type'              => 'string',
+			'enum'              => array( 'any', 'customer', 'internal' ),
+			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
+
+		return $params;
 	}
 }
