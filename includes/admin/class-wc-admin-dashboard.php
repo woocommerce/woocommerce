@@ -407,6 +407,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * @return array
 		 */
 		public function php_wp_nag_class( $classes ) {
+			global $wp_version;
+			$php_version = phpversion();
 			if ( version_compare( $php_version, WC_MIN_PHP_VERSION, '<' ) || version_compare( $wp_version, WC_MIN_WP_VERSION, '<' ) ) {
 				$classes[] = 'wp-php-insecure';
 			}
