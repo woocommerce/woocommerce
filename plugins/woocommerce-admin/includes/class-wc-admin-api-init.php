@@ -108,9 +108,6 @@ class WC_Admin_Api_Init {
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-data-countries-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-data-download-ips-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-leaderboards-controller.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-onboarding-levels-controller.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-onboarding-profile-controller.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-onboarding-plugins-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-orders-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-products-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-product-categories-controller.php';
@@ -142,51 +139,62 @@ class WC_Admin_Api_Init {
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-taxes-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-customers-controller.php';
 
-		$controllers = apply_filters(
-			'woocommerce_admin_rest_controllers',
-			array(
-				'WC_Admin_REST_Admin_Notes_Controller',
-				'WC_Admin_REST_Coupons_Controller',
-				'WC_Admin_REST_Customers_Controller',
-				'WC_Admin_REST_Data_Controller',
-				'WC_Admin_REST_Data_Countries_Controller',
-				'WC_Admin_REST_Data_Download_Ips_Controller',
-				'WC_Admin_REST_Leaderboards_Controller',
-				'WC_Admin_REST_Onboarding_Levels_Controller',
-				'WC_Admin_REST_Onboarding_Profile_Controller',
-				'WC_Admin_REST_Onboarding_Plugins_Controller',
-				'WC_Admin_REST_Orders_Controller',
-				'WC_Admin_REST_Products_Controller',
-				'WC_Admin_REST_Product_Categories_Controller',
-				'WC_Admin_REST_Product_Variations_Controller',
-				'WC_Admin_REST_Product_Reviews_Controller',
-				'WC_Admin_REST_Product_Variations_Controller',
-				'WC_Admin_REST_Reports_Controller',
-				'WC_Admin_REST_Setting_Options_Controller',
-				'WC_Admin_REST_Reports_Import_Controller',
-				'WC_Admin_REST_Reports_Products_Controller',
-				'WC_Admin_REST_Reports_Variations_Controller',
-				'WC_Admin_REST_Reports_Products_Stats_Controller',
-				'WC_Admin_REST_Reports_Revenue_Stats_Controller',
-				'WC_Admin_REST_Reports_Orders_Controller',
-				'WC_Admin_REST_Reports_Orders_Stats_Controller',
-				'WC_Admin_REST_Reports_Categories_Controller',
-				'WC_Admin_REST_Reports_Taxes_Controller',
-				'WC_Admin_REST_Reports_Taxes_Stats_Controller',
-				'WC_Admin_REST_Reports_Coupons_Controller',
-				'WC_Admin_REST_Reports_Coupons_Stats_Controller',
-				'WC_Admin_REST_Reports_Stock_Controller',
-				'WC_Admin_REST_Reports_Stock_Stats_Controller',
-				'WC_Admin_REST_Reports_Downloads_Controller',
-				'WC_Admin_REST_Reports_Downloads_Stats_Controller',
-				'WC_Admin_REST_Reports_Customers_Controller',
-				'WC_Admin_REST_Reports_Customers_Stats_Controller',
-				'WC_Admin_REST_Taxes_Controller',
-			)
+		$controllers = array(
+			'WC_Admin_REST_Admin_Notes_Controller',
+			'WC_Admin_REST_Coupons_Controller',
+			'WC_Admin_REST_Customers_Controller',
+			'WC_Admin_REST_Data_Controller',
+			'WC_Admin_REST_Data_Countries_Controller',
+			'WC_Admin_REST_Data_Download_Ips_Controller',
+			'WC_Admin_REST_Leaderboards_Controller',
+			'WC_Admin_REST_Orders_Controller',
+			'WC_Admin_REST_Products_Controller',
+			'WC_Admin_REST_Product_Categories_Controller',
+			'WC_Admin_REST_Product_Variations_Controller',
+			'WC_Admin_REST_Product_Reviews_Controller',
+			'WC_Admin_REST_Product_Variations_Controller',
+			'WC_Admin_REST_Reports_Controller',
+			'WC_Admin_REST_Setting_Options_Controller',
+			'WC_Admin_REST_Reports_Import_Controller',
+			'WC_Admin_REST_Reports_Products_Controller',
+			'WC_Admin_REST_Reports_Variations_Controller',
+			'WC_Admin_REST_Reports_Products_Stats_Controller',
+			'WC_Admin_REST_Reports_Revenue_Stats_Controller',
+			'WC_Admin_REST_Reports_Orders_Controller',
+			'WC_Admin_REST_Reports_Orders_Stats_Controller',
+			'WC_Admin_REST_Reports_Categories_Controller',
+			'WC_Admin_REST_Reports_Taxes_Controller',
+			'WC_Admin_REST_Reports_Taxes_Stats_Controller',
+			'WC_Admin_REST_Reports_Coupons_Controller',
+			'WC_Admin_REST_Reports_Coupons_Stats_Controller',
+			'WC_Admin_REST_Reports_Stock_Controller',
+			'WC_Admin_REST_Reports_Stock_Stats_Controller',
+			'WC_Admin_REST_Reports_Downloads_Controller',
+			'WC_Admin_REST_Reports_Downloads_Stats_Controller',
+			'WC_Admin_REST_Reports_Customers_Controller',
+			'WC_Admin_REST_Reports_Customers_Stats_Controller',
+			'WC_Admin_REST_Taxes_Controller',
 		);
+
+		if ( WC_Admin_Loader::is_feature_enabled( 'onboarding' ) ) {
+			require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-onboarding-levels-controller.php';
+			require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-onboarding-profile-controller.php';
+			require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-onboarding-plugins-controller.php';
+
+			$controllers = array_merge(
+				$controllers,
+				array(
+					'WC_Admin_REST_Onboarding_Levels_Controller',
+					'WC_Admin_REST_Onboarding_Profile_Controller',
+					'WC_Admin_REST_Onboarding_Plugins_Controller',
+				)
+			);
+		}
 
 		// The performance indicators controller must be registered last, after other /stats endpoints have been registered.
 		$controllers[] = 'WC_Admin_REST_Reports_Performance_Indicators_Controller';
+
+		$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
 
 		foreach ( $controllers as $controller ) {
 			$this->$controller = new $controller();

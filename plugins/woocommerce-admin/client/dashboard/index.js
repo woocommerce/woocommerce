@@ -62,6 +62,10 @@ class Dashboard extends Component {
 
 export default compose(
 	withSelect( select => {
+		if ( ! window.wcAdminFeatures.onboarding ) {
+			return;
+		}
+
 		const { getProfileItems } = select( 'wc-api' );
 		const profileItems = getProfileItems();
 
