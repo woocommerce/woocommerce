@@ -261,11 +261,13 @@ ul.woocommerce_stats {
 	h2 {
 
 		&::before {
-			font-family: dashicons;
-			content: "\f227";
-			color: #df3232;
-			padding-right: 6px;
-
+			display: inline-block;
+			border-radius: 60px;
+			background-color: #df3232;
+			content: "!";
+			color: #fff;
+			padding: 0.2em 0.7em;
+			margin-right: 6px;
 		}
 	}
 
