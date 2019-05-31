@@ -3,7 +3,6 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import apiFetch from '@wordpress/api-fetch';
 import { Component, createElement, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { pick } from 'lodash';
@@ -17,13 +16,13 @@ import { updateQueryString } from '@woocommerce/navigation';
 /**
  * Internal depdencies
  */
-import { NAMESPACE } from 'wc-api/onboarding/constants';
 import ProfileWizardHeader from './header';
 import Plugins from './steps/plugins';
 import Start from './steps/start';
 import Industry from './steps/industry';
 import StoreDetails from './steps/store-details';
 import ProductTypes from './steps/product-types';
+import withSelect from 'wc-api/with-select';
 import './style.scss';
 
 const getSteps = () => {
@@ -68,7 +67,6 @@ class ProfileWizard extends Component {
 	constructor() {
 		super( ...arguments );
 		this.goToNextStep = this.goToNextStep.bind( this );
-		this.updateProfile = this.updateProfile.bind( this );
 	}
 
 	componentDidMount() {
@@ -92,30 +90,25 @@ class ProfileWizard extends Component {
 		return currentStep;
 	}
 
-	goToNextStep() {
+	async goToNextStep() {
+		const { addNotice, isError, updateProfileItems } = this.props;
 		const currentStep = this.getCurrentStep();
 		const currentStepIndex = getSteps().findIndex( s => s.key === currentStep.key );
 		const nextStep = getSteps()[ currentStepIndex + 1 ];
 
-		if ( 'undefined' === nextStep ) {
-			this.updateProfile( { complete: true } );
+		if ( 'undefined' === typeof nextStep ) {
+			await updateProfileItems( { completed: true } );
+
+			if ( isError ) {
+				addNotice( {
+					status: 'error',
+					message: __( 'There was a problem completing the profiler.', 'woocommerce-admin' ),
+				} );
+			}
+			return;
 		}
 
 		return updateQueryString( { step: nextStep.key } );
-	}
-
-	updateProfile( params ) {
-		const { addNotice } = this.props;
-
-		return apiFetch( {
-			path: `${ NAMESPACE }/onboarding/profile`,
-			method: 'POST',
-			data: params,
-		} ).catch( error => {
-			if ( error && error.message ) {
-				addNotice( { status: 'error', message: error.message } );
-			}
-		} );
 	}
 
 	render() {
@@ -126,7 +119,6 @@ class ProfileWizard extends Component {
 			query,
 			step,
 			goToNextStep: this.goToNextStep,
-			updateProfile: this.updateProfile,
 		} );
 		const steps = getSteps().map( _step => pick( _step, [ 'key', 'label' ] ) );
 
@@ -140,11 +132,19 @@ class ProfileWizard extends Component {
 }
 
 export default compose(
+	withSelect( select => {
+		const { getProfileItemsError } = select( 'wc-api' );
+
+		const isError = Boolean( getProfileItemsError() );
+
+		return { isError };
+	} ),
 	withDispatch( dispatch => {
-		const { addNotice } = dispatch( 'wc-admin' );
+		const { addNotice, updateProfileItems } = dispatch( 'wc-api' );
 
 		return {
 			addNotice,
+			updateProfileItems,
 		};
 	} )
 )( ProfileWizard );

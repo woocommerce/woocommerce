@@ -6,7 +6,9 @@ import { __ } from '@wordpress/i18n';
 import { FormToggle } from '@wordpress/components';
 import { Button, CheckboxControl } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
+import { compose } from '@wordpress/compose';
 import interpolateComponents from 'interpolate-components';
+import { withDispatch } from '@wordpress/data';
 
 /**
  * Internal depdencies
@@ -17,6 +19,7 @@ import SalesTaxIcon from './images/local_atm';
 import SpeedIcon from './images/flash_on';
 import MobileAppIcon from './images/phone_android';
 import './style.scss';
+import withSelect from 'wc-api/with-select';
 
 const benefits = [
 	{
@@ -53,12 +56,12 @@ const benefits = [
 	},
 ];
 
-export default class Start extends Component {
+class Start extends Component {
 	constructor() {
 		super( ...arguments );
 
 		this.state = {
-			trackingChecked: true,
+			allowTracking: true,
 		};
 
 		this.onTrackingChange = this.onTrackingChange.bind( this );
@@ -66,18 +69,38 @@ export default class Start extends Component {
 		this.skipWizard = this.skipWizard.bind( this );
 	}
 
-	skipWizard() {
-		this.props.updateProfile( { skipped: true } );
+	async skipWizard() {
+		const { addNotice, isProfileItemsError, updateProfileItems } = this.props;
+
+		await updateProfileItems( { skipped: true } );
+
+		if ( isProfileItemsError ) {
+			addNotice( {
+				status: 'error',
+				message: __( 'There was a problem updating your preferences.', 'woocommerce-admin' ),
+			} );
+		}
 	}
 
-	startWizard() {
-		// @todo This should update the settings with the tracking selection. See #2281.
-		this.props.goToNextStep();
+	async startWizard() {
+		const { addNotice, isSettingsError, updateSettings } = this.props;
+
+		const allowTracking = this.state.allowTracking ? 'yes' : 'no';
+		await updateSettings( { advanced: { woocommerce_allow_tracking: allowTracking } } );
+
+		if ( ! isSettingsError ) {
+			this.props.goToNextStep();
+		} else {
+			addNotice( {
+				status: 'error',
+				message: __( 'There was a problem updating your preferences.', 'woocommerce-admin' ),
+			} );
+		}
 	}
 
 	onTrackingChange() {
 		this.setState( {
-			trackingChecked: ! this.state.trackingChecked,
+			allowTracking: ! this.state.allowTracking,
 		} );
 	}
 
@@ -96,7 +119,7 @@ export default class Start extends Component {
 	}
 
 	render() {
-		const { trackingChecked } = this.state;
+		const { allowTracking } = this.state;
 
 		const trackingLabel = interpolateComponents( {
 			mixedString: __(
@@ -137,14 +160,14 @@ export default class Start extends Component {
 					<div className="woocommerce-profile-wizard__tracking">
 						<CheckboxControl
 							className="woocommerce-profile-wizard__tracking-checkbox"
-							checked={ trackingChecked }
+							checked={ allowTracking }
 							label={ __( trackingLabel, 'woocommerce-admin' ) }
 							onChange={ this.onTrackingChange }
 						/>
 
 						<FormToggle
 							aria-hidden="true"
-							checked={ trackingChecked }
+							checked={ allowTracking }
 							onChange={ this.onTrackingChange }
 							onClick={ e => e.stopPropagation() }
 							tabIndex="-1"
@@ -169,3 +192,26 @@ export default class Start extends Component {
 		);
 	}
 }
+
+export default compose(
+	withSelect( select => {
+		const { getProfileItemsError, getSettings, getSettingsError, isGetSettingsRequesting } = select(
+			'wc-api'
+		);
+
+		const isSettingsError = Boolean( getSettingsError( 'advanced' ) );
+		const isSettingsRequesting = isGetSettingsRequesting( 'advanced' );
+		const isProfileItemsError = Boolean( getProfileItemsError() );
+
+		return { getSettings, isSettingsError, isProfileItemsError, isSettingsRequesting };
+	} ),
+	withDispatch( dispatch => {
+		const { addNotice, updateProfileItems, updateSettings } = dispatch( 'wc-api' );
+
+		return {
+			addNotice,
+			updateProfileItems,
+			updateSettings,
+		};
+	} )
+)( Start );
