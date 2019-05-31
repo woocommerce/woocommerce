@@ -36,6 +36,18 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * Init dashboard widgets.
 		 */
 		public function init() {
+			global $wp_version;
+
+			// PHP & WP Upgrade notice Widget.
+			if ( current_user_can( 'manage_woocommerce' ) ) {
+				$php_version = phpversion();
+				if ( version_compare( $php_version, WC_MIN_PHP_VERSION, '<' ) || version_compare( $wp_version, WC_MIN_WP_VERSION, '<' ) ) {
+					add_filter( 'postbox_classes_dashboard_woocommerce_php_wp_nag', array( $this, 'php_wp_nag_class' ) );
+					wp_add_dashboard_widget( 'woocommerce_php_wp_nag', __( 'Update Required', 'woocommerce' ), array( $this, 'php_wp_update_widget' ) );
+				}
+			}
+
+			// Reviews Widget.
 			if ( current_user_can( 'publish_shop_orders' ) && post_type_supports( 'product', 'comments' ) ) {
 				wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce Recent Reviews', 'woocommerce' ), array( $this, 'recent_reviews' ) );
 			}
@@ -386,6 +398,89 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			<?php // @codingStandardsIgnoreEnd ?>
 		</div>
 			<?php
+		}
+
+		/**
+		 * Add class to PHP WP upgrade nag widget.
+		 *
+		 * @param array $classes Array of html classes.
+		 * @return array
+		 */
+		public function php_wp_nag_class( $classes ) {
+			if ( version_compare( $php_version, WC_MIN_PHP_VERSION, '<' ) || version_compare( $wp_version, WC_MIN_WP_VERSION, '<' ) ) {
+				$classes[] = 'wp-php-insecure';
+			}
+			return $classes;
+		}
+
+		/**
+		 * Display a PHP and WordPress update widget.
+		 *
+		 * @return void
+		 */
+		public function php_wp_update_widget() {
+			global $wp_version;
+
+			// Check if the nag has been dismissed or if we should bypass based on filter.
+			if ( apply_filters( 'woocommerce_php_wp_nag_dismissed', get_option( 'woocommerce_php_wp_nag_dismissed', false ) ) ) {
+				return;
+			}
+
+			$php_version         = phpversion();
+			$php_update_required = version_compare( $php_version, WC_MIN_PHP_VERSION, '<' );
+			$wp_update_required  = version_compare( $wp_version, WC_MIN_WP_VERSION, '<' );
+
+			if ( ! $php_update_required && ! $wp_update_required ) {
+				return;
+			}
+
+			if ( $php_update_required && $wp_update_required ) {
+				$msg = __( 'WooCommerce has detected that your store is running on outdated versions of WordPress and PHP. In future releases of WooCommerce we will not be supporting these outdated versions.', 'woocommerce' );
+			} elseif ( $php_update_required ) {
+				$msg = __( 'WooCommerce has detected that your store is running on an outdated version of PHP. In future releases of WooCommerce we will not be supporting this outdated version.', 'woocommerce' );
+			} else {
+				$msg = __( 'WooCommerce has detected that your store is running on an outdated version of WordPress.  In future releases of WooCommerce we will not be supporting this outdated version.', 'woocommerce' );
+			}
+
+			?>
+			<p><?php echo esc_html( $msg ); ?></p>
+			<?php
+
+			if ( $php_update_required ) {
+				?>
+				<strong><?php esc_html_e( 'What is PHP and how does it affect my store?', 'woocommerce' ); ?></strong>
+				<p><?php esc_html_e( 'PHP is the programming language we use to build and maintain WooCommerce. Newer versions of PHP are both faster and more secure, so updating will have a positive effect on your store&#8217;s performance and security.', 'woocommerce' ); ?></p>
+				<p class="button-container">
+				<?php
+				printf(
+					'<a class="button button-primary" href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a>',
+					esc_url( wc_get_update_php_url() ),
+					esc_html__( 'Learn more about updating PHP', 'woocommerce' ),
+					/* translators: accessibility text */
+					esc_html__( '(opens in a new tab)', 'woocommerce' )
+				);
+				?>
+				</p>
+				<?php
+			}
+
+			if ( $wp_update_required ) {
+				?>
+				<strong><?php esc_html_e( 'What is WordPress and how does it affect my store?', 'woocommerce' ); ?></strong>
+				<p><?php esc_html_e( 'WordPress is the software that is powering your store and allows you to run WooCommerce. Newer versions of WordPress are both more secure and offer newer functionality, so updating will provide you with the latest WooCommerce features as we roll them out.', 'woocommerce' ); ?></p>
+				<p class="button-container">
+				<?php
+				printf(
+					'<a class="button button-primary" href="%1$s" target="_blank" rel="noopener noreferrer">%2$s <span class="screen-reader-text">%3$s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a>',
+					esc_url( wc_get_update_wp_url() ),
+					esc_html__( 'Learn more about updating WordPress', 'woocommerce' ),
+					/* translators: accessibility text */
+					esc_html__( '(opens in a new tab)', 'woocommerce' )
+				);
+				?>
+				</p>
+				<?php
+			}
 		}
 
 	}
