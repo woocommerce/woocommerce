@@ -22,7 +22,7 @@
     "@woocommerce/block-library": "2.0.1"
   },
   "devDependencies": {
-    "autoprefixer": "9.5.1",
+    "autoprefixer": "9.6.0",
     "babel": "6.23.0",
     "babel-cli": "6.26.0",
     "babel-eslint": "10.0.1",
