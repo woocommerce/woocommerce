@@ -885,9 +885,10 @@ class WC_Order extends WC_Abstract_Order {
 		$address = '';
 
 		if ( $this->has_shipping_address() ) {
-			$address = apply_filters( 'woocommerce_order_formatted_shipping_address', $this->get_address( 'shipping' ), $this );
-			$address = WC()->countries->get_formatted_address( $address );
+			$address = WC()->countries->get_formatted_address( $this->get_address( 'shipping' ) );
 		}
+
+		$address = apply_filters( 'woocommerce_order_formatted_shipping_address', $address, $this );
 
 		return $address ? $address : $empty_content;
 	}
