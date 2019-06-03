@@ -959,7 +959,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// Check specific for guest checkouts here as well since WC_Cart handles that seperately in check_customer_coupons.
 		if ( $data_store && 0 === $this->get_customer_id() ) {
 			$usage_count = $data_store->get_usage_by_email( $coupon, $this->get_billing_email() );
-			if ( ! empty( $usage_count ) && $usage_count >= $coupon->get_usage_limit_per_user() ) {
+			if ( 0 < $coupon->get_usage_limit_per_user() && $usage_count >= $coupon->get_usage_limit_per_user() ) {
 				return new WP_Error(
 					'invalid_coupon',
 					$coupon->get_coupon_error( 106 ),
