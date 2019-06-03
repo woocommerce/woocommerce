@@ -324,7 +324,10 @@ class WC_Session_Handler extends WC_Session {
 				$value = $default;
 			}
 
-			wp_cache_add( $this->get_cache_prefix() . $customer_id, $value, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
+			$cache_duration = $this->_session_expiration - time();
+			if ($cache_duration > 0){
+				wp_cache_add( $this->get_cache_prefix() . $customer_id, $value, WC_SESSION_CACHE_GROUP, $cache_duration );
+			}
 		}
 
 		return maybe_unserialize( $value );
