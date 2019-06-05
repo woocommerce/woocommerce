@@ -101,7 +101,7 @@
     "react-click-outside": "3.0.1",
     "react-dates": "17.2.0",
     "react-live": "1.12.0",
-    "react-router-dom": "5.0.0",
+    "react-router-dom": "5.0.1",
     "react-slot-fill": "2.0.1",
     "react-transition-group": "2.9.0",
     "redux": "4.0.1"
