@@ -131,7 +131,7 @@ class Customers extends AbstractController {
 	/**
 	 * Check whether a given request has permission to read customers.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -145,7 +145,7 @@ class Customers extends AbstractController {
 	/**
 	 * Check if a given request has access create customers.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|\WP_Error
 	 */
@@ -160,7 +160,7 @@ class Customers extends AbstractController {
 	/**
 	 * Check if a given request has access to read a customer.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -176,7 +176,7 @@ class Customers extends AbstractController {
 	/**
 	 * Check if a given request has access update a customer.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|\WP_Error
 	 */
@@ -193,7 +193,7 @@ class Customers extends AbstractController {
 	/**
 	 * Check if a given request has access delete a customer.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|\WP_Error
 	 */
@@ -210,7 +210,7 @@ class Customers extends AbstractController {
 	/**
 	 * Check if a given request has access batch create, update and delete items.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|\WP_Error
 	 */
@@ -264,7 +264,7 @@ class Customers extends AbstractController {
 	/**
 	 * Get all customers.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -308,7 +308,7 @@ class Customers extends AbstractController {
 		 * @see https://developer.wordpress.org/reference/classes/\ WP_User_Query/
 		 *
 		 * @param array           $prepared_args Array of arguments for \ WP_User_Query.
-		 * @param WP_REST_Request $request       The current request.
+		 * @param \WP_REST_Request $request       The current request.
 		 */
 		$prepared_args = apply_filters( 'woocommerce_rest_customer_query', $prepared_args, $request );
 
@@ -362,7 +362,7 @@ class Customers extends AbstractController {
 	 * Create a single customer.
 	 *
 	 * @throws WC_REST_Exception On invalid params.
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
@@ -396,7 +396,7 @@ class Customers extends AbstractController {
 			 * Fires after a customer is created or updated via the REST API.
 			 *
 			 * @param WP_User         $user_data Data used to create the customer.
-			 * @param WP_REST_Request $request   Request object.
+			 * @param \WP_REST_Request $request   Request object.
 			 * @param boolean         $creating  True when creating customer, false when updating customer.
 			 */
 			do_action( 'woocommerce_rest_insert_customer', $user_data, $request, true );
@@ -416,7 +416,7 @@ class Customers extends AbstractController {
 	/**
 	 * Get a single customer.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -437,7 +437,7 @@ class Customers extends AbstractController {
 	 * Update a single user.
 	 *
 	 * @throws WC_REST_Exception On invalid params.
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
@@ -481,7 +481,7 @@ class Customers extends AbstractController {
 			 * Fires after a customer is created or updated via the REST API.
 			 *
 			 * @param WP_User         $customer  Data used to create the customer.
-			 * @param WP_REST_Request $request   Request object.
+			 * @param \WP_REST_Request $request   Request object.
 			 * @param boolean         $creating  True when creating customer, false when updating customer.
 			 */
 			do_action( 'woocommerce_rest_insert_customer', $user_data, $request, false );
@@ -498,7 +498,7 @@ class Customers extends AbstractController {
 	/**
 	 * Delete a single customer.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function delete_item( $request ) {
@@ -545,7 +545,7 @@ class Customers extends AbstractController {
 		 *
 		 * @param WP_User          $user_data User data.
 		 * @param WP_REST_Response $response  The response returned from the API.
-		 * @param WP_REST_Request  $request   The request sent to the API.
+		 * @param \WP_REST_Request  $request   The request sent to the API.
 		 */
 		do_action( 'woocommerce_rest_delete_customer', $user_data, $response, $request );
 
@@ -556,7 +556,7 @@ class Customers extends AbstractController {
 	 * Prepare a single customer output for response.
 	 *
 	 * @param  WP_User         $user_data User object.
-	 * @param  WP_REST_Request $request   Request object.
+	 * @param  \WP_REST_Request $request   Request object.
 	 * @return WP_REST_Response $response  Response data.
 	 */
 	public function prepare_item_for_response( $user_data, $request ) {
@@ -573,7 +573,7 @@ class Customers extends AbstractController {
 		 *
 		 * @param WP_REST_Response $response   The response object.
 		 * @param WP_User          $user_data  User object used to create response.
-		 * @param WP_REST_Request  $request    Request object.
+		 * @param \WP_REST_Request  $request    Request object.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_customer', $response, $user_data, $request );
 	}
@@ -582,7 +582,7 @@ class Customers extends AbstractController {
 	 * Update customer meta fields.
 	 *
 	 * @param WC_Customer     $customer Customer being updated.
-	 * @param WP_REST_Request $request Request params.
+	 * @param \WP_REST_Request $request Request params.
 	 */
 	protected function update_customer_meta_fields( $customer, $request ) {
 		$schema = $this->get_item_schema();

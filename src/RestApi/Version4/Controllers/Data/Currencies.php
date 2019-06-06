@@ -77,7 +77,7 @@ class Currencies extends DataController {
 	 * Get currency information.
 	 *
 	 * @param  string          $code    Currency code.
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return array|mixed Response data, ready for insertion into collection data.
 	 */
 	public function get_currency( $code = false, $request ) {
@@ -100,7 +100,7 @@ class Currencies extends DataController {
 	/**
 	 * Return the list of currencies.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -117,7 +117,7 @@ class Currencies extends DataController {
 	/**
 	 * Return information for a specific currency.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -131,7 +131,7 @@ class Currencies extends DataController {
 	/**
 	 * Return information for the current site currency.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_current_item( $request ) {
@@ -143,7 +143,7 @@ class Currencies extends DataController {
 	 * Prepare the data object for response.
 	 *
 	 * @param object          $item Data object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
@@ -158,7 +158,7 @@ class Currencies extends DataController {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $item     Currency data.
-		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_data_currency', $response, $item, $request );
 	}

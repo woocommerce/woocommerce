@@ -111,7 +111,7 @@ class Webhooks extends AbstractController {
 	/**
 	 * Check whether a given request has permission to read webhooks.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -125,7 +125,7 @@ class Webhooks extends AbstractController {
 	/**
 	 * Check if a given request has access create webhooks.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|\WP_Error
 	 */
@@ -140,7 +140,7 @@ class Webhooks extends AbstractController {
 	/**
 	 * Check if a given request has access to read a webhook.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -154,7 +154,7 @@ class Webhooks extends AbstractController {
 	/**
 	 * Check if a given request has access update a webhook.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|\WP_Error
 	 */
@@ -169,7 +169,7 @@ class Webhooks extends AbstractController {
 	/**
 	 * Check if a given request has access delete a webhook.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|\WP_Error
 	 */
@@ -184,7 +184,7 @@ class Webhooks extends AbstractController {
 	/**
 	 * Check if a given request has access batch create, update and delete items.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|\WP_Error
 	 */
@@ -209,7 +209,7 @@ class Webhooks extends AbstractController {
 	/**
 	 * Get all webhooks.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -232,7 +232,7 @@ class Webhooks extends AbstractController {
 		 * Filter arguments, before passing to WC_Webhook_Data_Store->search_webhooks, when querying webhooks via the REST API.
 		 *
 		 * @param array           $args    Array of arguments for $wpdb->get_results().
-		 * @param WP_REST_Request $request The current request.
+		 * @param \WP_REST_Request $request The current request.
 		 */
 		$prepared_args = apply_filters( 'woocommerce_rest_webhook_query', $args, $request );
 		unset( $prepared_args['page'] );
@@ -279,7 +279,7 @@ class Webhooks extends AbstractController {
 	/**
 	 * Get a single item.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -298,7 +298,7 @@ class Webhooks extends AbstractController {
 	/**
 	 * Create a single webhook.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
@@ -338,7 +338,7 @@ class Webhooks extends AbstractController {
 		 * Fires after a single item is created or updated via the REST API.
 		 *
 		 * @param WC_Webhook      $webhook  Webhook data.
-		 * @param WP_REST_Request $request  Request object.
+		 * @param \WP_REST_Request $request  Request object.
 		 * @param bool            $creating True when creating item, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_webhook_object", $webhook, $request, true );
@@ -358,7 +358,7 @@ class Webhooks extends AbstractController {
 	/**
 	 * Update a single webhook.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
@@ -418,7 +418,7 @@ class Webhooks extends AbstractController {
 		 * Fires after a single item is created or updated via the REST API.
 		 *
 		 * @param WC_Webhook      $webhook  Webhook data.
-		 * @param WP_REST_Request $request  Request object.
+		 * @param \WP_REST_Request $request  Request object.
 		 * @param bool            $creating True when creating item, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_webhook_object", $webhook, $request, false );
@@ -432,7 +432,7 @@ class Webhooks extends AbstractController {
 	/**
 	 * Delete a single webhook.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
@@ -464,7 +464,7 @@ class Webhooks extends AbstractController {
 		 *
 		 * @param WC_Webhook       $webhook     The deleted or trashed item.
 		 * @param WP_REST_Response $response The response data.
-		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( "woocommerce_rest_delete_webhook_object", $webhook, $response, $request );
 
@@ -474,7 +474,7 @@ class Webhooks extends AbstractController {
 	/**
 	 * Prepare a single webhook for create or update.
 	 *
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_Error|stdClass $data Post object.
 	 */
 	protected function prepare_item_for_database( $request ) {
@@ -519,7 +519,7 @@ class Webhooks extends AbstractController {
 		 *
 		 * @param stdClass        $data An object representing a single item prepared
 		 *                                       for inserting or updating the database.
-		 * @param WP_REST_Request $request       Request object.
+		 * @param \WP_REST_Request $request       Request object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $data, $request );
 	}
@@ -528,7 +528,7 @@ class Webhooks extends AbstractController {
 	 * Prepare a single webhook output for response.
 	 *
 	 * @param int             $id       Webhook ID.
-	 * @param WP_REST_Request $request  Request object.
+	 * @param \WP_REST_Request $request  Request object.
 	 * @return WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $id, $request ) {
@@ -567,7 +567,7 @@ class Webhooks extends AbstractController {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Webhook       $webhook  Webhook object used to create response.
-		 * @param WP_REST_Request  $request  Request object.
+		 * @param \WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $webhook, $request );
 	}

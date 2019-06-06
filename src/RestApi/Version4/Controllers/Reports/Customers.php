@@ -76,7 +76,7 @@ class Customers extends Reports {
 	/**
 	 * Get all reports.
 	 *
-	 * @param WP_REST_Request $request Request data.
+	 * @param \WP_REST_Request $request Request data.
 	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
@@ -119,7 +119,7 @@ class Customers extends Reports {
 	 * Prepare a report object for serialization.
 	 *
 	 * @param array           $report  Report data.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
@@ -141,7 +141,7 @@ class Customers extends Reports {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param object           $report   The original report object.
-		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_customers', $response, $report, $request );
 	}

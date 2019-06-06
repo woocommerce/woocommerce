@@ -51,7 +51,7 @@ class CustomerDownloads extends AbstractController {
 	/**
 	 * Check whether a given request has permission to read customers.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -71,7 +71,7 @@ class CustomerDownloads extends AbstractController {
 	/**
 	 * Get all customer downloads.
 	 *
-	 * @param WP_REST_Request $request Request params.
+	 * @param \WP_REST_Request $request Request params.
 	 * @return array
 	 */
 	public function get_items( $request ) {
@@ -91,7 +91,7 @@ class CustomerDownloads extends AbstractController {
 	 * Prepare a single download output for response.
 	 *
 	 * @param stdClass        $download Download object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $download, $request ) {
@@ -123,7 +123,7 @@ class CustomerDownloads extends AbstractController {
 		 *
 		 * @param WP_REST_Response $response  The response object.
 		 * @param stdClass         $download  Download object used to create response.
-		 * @param WP_REST_Request  $request   Request object.
+		 * @param \WP_REST_Request  $request   Request object.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_customer_download', $response, $download, $request );
 	}
@@ -132,7 +132,7 @@ class CustomerDownloads extends AbstractController {
 	 * Prepare links for the request.
 	 *
 	 * @param stdClass        $download Download object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return array Links for the given customer download.
 	 */
 	protected function prepare_links( $download, $request ) {

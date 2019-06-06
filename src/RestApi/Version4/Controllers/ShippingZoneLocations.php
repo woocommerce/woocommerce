@@ -49,7 +49,7 @@ class ShippingZoneLocations extends AbstractShippingZonesController {
 	/**
 	 * Get all Shipping Zone Locations.
 	 *
-	 * @param WP_REST_Request $request Request data.
+	 * @param \WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function get_items( $request ) {
@@ -74,7 +74,7 @@ class ShippingZoneLocations extends AbstractShippingZonesController {
 	/**
 	 * Update all Shipping Zone Locations.
 	 *
-	 * @param WP_REST_Request $request Request data.
+	 * @param \WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function update_items( $request ) {
@@ -118,7 +118,7 @@ class ShippingZoneLocations extends AbstractShippingZonesController {
 	 * Prepare the Shipping Zone Location for the REST response.
 	 *
 	 * @param array           $item Shipping Zone Location.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $item, $request ) {

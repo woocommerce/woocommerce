@@ -284,7 +284,7 @@ class Orders extends AbstractObjectsController {
 	 *
 	 * @since  3.0.0
 	 * @param  WC_Data         $object  Object data.
-	 * @param  WP_REST_Request $request Request object.
+	 * @param  \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
@@ -305,7 +305,7 @@ class Orders extends AbstractObjectsController {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
-		 * @param WP_REST_Request  $request  Request object.
+		 * @param \WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
 	}
@@ -314,7 +314,7 @@ class Orders extends AbstractObjectsController {
 	 * Prepare links for the request.
 	 *
 	 * @param WC_Data         $object  Object data.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return array                   Links for the given post.
 	 */
 	protected function prepare_links( $object, $request ) {
@@ -346,7 +346,7 @@ class Orders extends AbstractObjectsController {
 	 * Prepare objects query.
 	 *
 	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
@@ -412,7 +412,7 @@ class Orders extends AbstractObjectsController {
 	 * Prepare a single order for create or update.
 	 *
 	 * @throws WC_REST_Exception When fails to set any item.
-	 * @param  WP_REST_Request $request Request object.
+	 * @param  \WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return \WP_Error|WC_Data
 	 */
@@ -474,7 +474,7 @@ class Orders extends AbstractObjectsController {
 		 * refers to the object type slug.
 		 *
 		 * @param WC_Data         $order    Object object.
-		 * @param WP_REST_Request $request  Request object.
+		 * @param \WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $order, $request, $creating );
@@ -485,7 +485,7 @@ class Orders extends AbstractObjectsController {
 	 *
 	 * @since  3.0.0
 	 * @throws WC_REST_Exception But all errors are validated before returning any data.
-	 * @param  WP_REST_Request $request  Full details about the request.
+	 * @param  \WP_REST_Request $request  Full details about the request.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WC_Data|\WP_Error
 	 */
@@ -1696,7 +1696,7 @@ class Orders extends AbstractObjectsController {
 	 * Calculate coupons.
 	 *
 	 * @throws WC_REST_Exception When fails to set any item.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @param WC_Order        $order   Order data.
 	 * @return bool
 	 */

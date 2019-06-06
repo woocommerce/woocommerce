@@ -131,7 +131,7 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 	 * Prepare a single product attribute term output for response.
 	 *
 	 * @param WP_Term         $item Term object.
-	 * @param WP_REST_Request $request Request params.
+	 * @param \WP_REST_Request $request Request params.
 	 * @return WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
@@ -162,7 +162,7 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 		 *
 		 * @param WP_REST_Response  $response  The response object.
 		 * @param object            $item      The original term object.
-		 * @param WP_REST_Request   $request   Request used to generate the response.
+		 * @param \WP_REST_Request   $request   Request used to generate the response.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->taxonomy}", $response, $item, $request );
 	}
@@ -171,7 +171,7 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 	 * Update term meta fields.
 	 *
 	 * @param WP_Term         $term Term object.
-	 * @param WP_REST_Request $request Request params.
+	 * @param \WP_REST_Request $request Request params.
 	 * @return bool|\WP_Error
 	 */
 	protected function update_term_meta_fields( $term, $request ) {

@@ -81,7 +81,7 @@ class Plugins extends WC_REST_Data_Controller {
 	/**
 	 * Check if a given request has access to manage plugins.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
@@ -107,7 +107,7 @@ class Plugins extends WC_REST_Data_Controller {
 	/**
 	 * Installs the requested plugin.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return array Plugin Status
 	 */
 	public function install_plugin( $request ) {
@@ -168,7 +168,7 @@ class Plugins extends WC_REST_Data_Controller {
 	/**
 	 * Activate the requested plugin.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return array Plugin Status
 	 */
 	public function activate_plugin( $request ) {

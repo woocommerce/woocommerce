@@ -67,7 +67,7 @@ class Countries extends DataController {
 	 * Get a list of countries and states.
 	 *
 	 * @param  string          $country_code Country code.
-	 * @param  WP_REST_Request $request      Request data.
+	 * @param  \WP_REST_Request $request      Request data.
 	 * @return array|mixed Response data, ready for insertion into collection data.
 	 */
 	public function get_country( $country_code = false, $request ) {
@@ -101,7 +101,7 @@ class Countries extends DataController {
 	 * Return the list of states for all countries.
 	 *
 	 * @since  3.5.0
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -121,7 +121,7 @@ class Countries extends DataController {
 	 * Return the list of states for a given country.
 	 *
 	 * @since  3.5.0
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -137,7 +137,7 @@ class Countries extends DataController {
 	 *
 	 * @since  3.5.0
 	 * @param object          $item Data object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
@@ -154,7 +154,7 @@ class Countries extends DataController {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $data     The original country's states list.
-		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_data_country', $response, $item, $request );
 	}

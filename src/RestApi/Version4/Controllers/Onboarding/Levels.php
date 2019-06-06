@@ -123,7 +123,7 @@ class Levels extends WC_REST_Data_Controller {
 	/**
 	 * Return all level items and child tasks.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -147,7 +147,7 @@ class Levels extends WC_REST_Data_Controller {
 	 * Prepare the data object for response.
 	 *
 	 * @param object          $item Data object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
@@ -162,7 +162,7 @@ class Levels extends WC_REST_Data_Controller {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $item     The original item.
-		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_onboarding_level', $response, $item, $request );
 	}

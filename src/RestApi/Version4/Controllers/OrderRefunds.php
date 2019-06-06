@@ -173,7 +173,7 @@ class OrderRefunds extends Orders {
 	 * @since  3.0.0
 	 *
 	 * @param  WC_Data         $object  Object data.
-	 * @param  WP_REST_Request $request Request object.
+	 * @param  \WP_REST_Request $request Request object.
 	 *
 	 * @return \WP_Error|WP_REST_Response
 	 */
@@ -208,7 +208,7 @@ class OrderRefunds extends Orders {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
-		 * @param WP_REST_Request  $request  Request object.
+		 * @param \WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
 	}
@@ -217,7 +217,7 @@ class OrderRefunds extends Orders {
 	 * Prepare a single order refund output for response.
 	 *
 	 * @param WP_Post         $post Post object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 *
 	 * @return \WP_Error|WP_REST_Response
 	 */
@@ -326,7 +326,7 @@ class OrderRefunds extends Orders {
 		 *
 		 * @param WP_REST_Response   $response   The response object.
 		 * @param WP_Post            $post       Post object.
-		 * @param WP_REST_Request    $request    Request object.
+		 * @param \WP_REST_Request    $request    Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $post, $request );
 	}
@@ -335,7 +335,7 @@ class OrderRefunds extends Orders {
 	 * Prepare links for the request.
 	 *
 	 * @param WC_Data         $object  Object data.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return array                   Links for the given post.
 	 */
 	protected function prepare_links( $object, $request ) {
@@ -359,7 +359,7 @@ class OrderRefunds extends Orders {
 	 * Prepare objects query.
 	 *
 	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
@@ -374,7 +374,7 @@ class OrderRefunds extends Orders {
 	/**
 	 * Create a single item.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
@@ -419,7 +419,7 @@ class OrderRefunds extends Orders {
 		 * Fires after a single item is created or updated via the REST API.
 		 *
 		 * @param WP_Post         $post      Post object.
-		 * @param WP_REST_Request $request   Request object.
+		 * @param \WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, true );
@@ -437,7 +437,7 @@ class OrderRefunds extends Orders {
 	 * Prepares one object for create or update operation.
 	 *
 	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Request object.
+	 * @param  \WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return \WP_Error|WC_Data The prepared item, or \WP_Error object on failure.
 	 */
@@ -486,7 +486,7 @@ class OrderRefunds extends Orders {
 		 * refers to the object type slug.
 		 *
 		 * @param WC_Data         $coupon   Object object.
-		 * @param WP_REST_Request $request  Request object.
+		 * @param \WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $refund, $request, $creating );
@@ -496,7 +496,7 @@ class OrderRefunds extends Orders {
 	 * Save an object data.
 	 *
 	 * @since  3.0.0
-	 * @param  WP_REST_Request $request  Full details about the request.
+	 * @param  \WP_REST_Request $request  Full details about the request.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WC_Data|\WP_Error
 	 */

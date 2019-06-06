@@ -72,7 +72,7 @@ class PaymentGateways extends AbstractController {
 	/**
 	 * Check whether a given request has permission to view payment gateways.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -85,7 +85,7 @@ class PaymentGateways extends AbstractController {
 	/**
 	 * Check if a given request has access to read a payment gateway.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -98,7 +98,7 @@ class PaymentGateways extends AbstractController {
 	/**
 	 * Check whether a given request has permission to edit payment gateways.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function update_items_permissions_check( $request ) {
@@ -111,7 +111,7 @@ class PaymentGateways extends AbstractController {
 	/**
 	 * Get payment gateways.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -129,7 +129,7 @@ class PaymentGateways extends AbstractController {
 	/**
 	 * Get a single payment gateway.
 	 *
-	 * @param WP_REST_Request $request Request data.
+	 * @param \WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function get_item( $request ) {
@@ -146,7 +146,7 @@ class PaymentGateways extends AbstractController {
 	/**
 	 * Update A Single Payment Method.
 	 *
-	 * @param WP_REST_Request $request Request data.
+	 * @param \WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function update_item( $request ) {
@@ -220,7 +220,7 @@ class PaymentGateways extends AbstractController {
 	/**
 	 * Get a gateway based on the current request object.
 	 *
-	 * @param WP_REST_Request $request Request data.
+	 * @param \WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|null
 	 */
 	public function get_gateway( $request ) {
@@ -240,7 +240,7 @@ class PaymentGateways extends AbstractController {
 	 * Prepare a payment gateway for response.
 	 *
 	 * @param  WC_Payment_Gateway $gateway    Payment gateway object.
-	 * @param  WP_REST_Request    $request    Request object.
+	 * @param  \WP_REST_Request    $request    Request object.
 	 * @return WP_REST_Response   $response   Response data.
 	 */
 	public function prepare_item_for_response( $gateway, $request ) {
@@ -269,7 +269,7 @@ class PaymentGateways extends AbstractController {
 		 *
 		 * @param WP_REST_Response   $response The response object.
 		 * @param WC_Payment_Gateway $gateway  Payment gateway object.
-		 * @param WP_REST_Request    $request  Request object.
+		 * @param \WP_REST_Request    $request  Request object.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_payment_gateway', $response, $gateway, $request );
 	}
@@ -317,7 +317,7 @@ class PaymentGateways extends AbstractController {
 	 * Prepare links for the request.
 	 *
 	 * @param  WC_Payment_Gateway $gateway    Payment gateway object.
-	 * @param  WP_REST_Request    $request    Request object.
+	 * @param  \WP_REST_Request    $request    Request object.
 	 * @return array
 	 */
 	protected function prepare_links( $gateway, $request ) {

@@ -35,7 +35,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	/**
 	 * Check if a given request has access to read an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -51,7 +51,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	/**
 	 * Check if a given request has access to update an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
@@ -67,7 +67,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	/**
 	 * Check if a given request has access to delete an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return bool|\WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
@@ -95,7 +95,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 *
 	 * @since  3.0.0
 	 * @param  WC_Data         $object  Object data.
-	 * @param  WP_REST_Request $request Request object.
+	 * @param  \WP_REST_Request $request Request object.
 	 * @return \WP_Error|WP_REST_Response Response object on success, or \WP_Error object on failure.
 	 */
 	protected function prepare_object_for_response( $object, $request ) {
@@ -107,7 +107,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * Prepares one object for create or update operation.
 	 *
 	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Request object.
+	 * @param  \WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return \WP_Error|WC_Data The prepared item, or \WP_Error object on failure.
 	 */
@@ -119,7 +119,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	/**
 	 * Get a single item.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -143,7 +143,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * Save an object data.
 	 *
 	 * @since  3.0.0
-	 * @param  WP_REST_Request $request  Full details about the request.
+	 * @param  \WP_REST_Request $request  Full details about the request.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WC_Data|\WP_Error
 	 */
@@ -168,7 +168,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	/**
 	 * Create a single item.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
@@ -197,7 +197,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 		 * Fires after a single object is created or updated via the REST API.
 		 *
 		 * @param WC_Data         $object    Inserted object.
-		 * @param WP_REST_Request $request   Request object.
+		 * @param \WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating object, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_{$this->post_type}_object", $object, $request, true );
@@ -214,7 +214,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	/**
 	 * Update a single post.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
@@ -242,7 +242,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 		 * Fires after a single object is created or updated via the REST API.
 		 *
 		 * @param WC_Data         $object    Inserted object.
-		 * @param WP_REST_Request $request   Request object.
+		 * @param \WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating object, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_{$this->post_type}_object", $object, $request, false );
@@ -256,7 +256,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * Prepare objects query.
 	 *
 	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
@@ -298,7 +298,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 		 * collection request.
 		 *
 		 * @param array           $args    Key value array of query var to query value.
-		 * @param WP_REST_Request $request The request used.
+		 * @param \WP_REST_Request $request The request used.
 		 */
 		$args = apply_filters( "woocommerce_rest_{$this->post_type}_object_query", $args, $request );
 
@@ -335,7 +335,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	/**
 	 * Get a collection of posts.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -395,7 +395,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	/**
 	 * Delete a single item.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
@@ -460,7 +460,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 		 *
 		 * @param WC_Data          $object   The deleted or trashed object.
 		 * @param WP_REST_Response $response The response data.
-		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( "woocommerce_rest_delete_{$this->post_type}_object", $object, $response, $request );
 
@@ -471,7 +471,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * Prepare links for the request.
 	 *
 	 * @param WC_Data         $object  Object data.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return array                   Links for the given post.
 	 */
 	protected function prepare_links( $object, $request ) {

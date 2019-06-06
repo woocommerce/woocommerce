@@ -148,7 +148,7 @@ class ProductVariations extends Products {
 	/**
 	 * Check if a given request has access to update an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
@@ -170,7 +170,7 @@ class ProductVariations extends Products {
 	 * Prepare a single variation output for response.
 	 *
 	 * @param  WC_Data         $object  Object data.
-	 * @param  WP_REST_Request $request Request object.
+	 * @param  \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
@@ -237,7 +237,7 @@ class ProductVariations extends Products {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
-		 * @param WP_REST_Request  $request  Request object.
+		 * @param \WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
 	}
@@ -330,7 +330,7 @@ class ProductVariations extends Products {
 	 * Prepare objects query.
 	 *
 	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
@@ -415,7 +415,7 @@ class ProductVariations extends Products {
 	/**
 	 * Prepare a single variation for create or update.
 	 *
-	 * @param  WP_REST_Request $request Request object.
+	 * @param  \WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return \WP_Error|WC_Data
 	 */
@@ -615,7 +615,7 @@ class ProductVariations extends Products {
 		 * refers to the object type slug.
 		 *
 		 * @param WC_Data         $variation Object object.
-		 * @param WP_REST_Request $request   Request object.
+		 * @param \WP_REST_Request $request   Request object.
 		 * @param bool            $creating  If is creating a new object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $variation, $request, $creating );
@@ -634,7 +634,7 @@ class ProductVariations extends Products {
 	/**
 	 * Delete a variation.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|\WP_Error|WP_REST_Response
 	 */
@@ -725,7 +725,7 @@ class ProductVariations extends Products {
 		 *
 		 * @param WC_Data          $object   The deleted or trashed object.
 		 * @param WP_REST_Response $response The response data.
-		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( "woocommerce_rest_delete_{$this->post_type}_object", $object, $response, $request );
 
@@ -736,7 +736,7 @@ class ProductVariations extends Products {
 	 * Bulk create, update and delete items.
 	 *
 	 * @since  3.0.0
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return array Of \WP_Error or WP_REST_Response.
 	 */
 	public function batch_items( $request ) {
@@ -759,7 +759,7 @@ class ProductVariations extends Products {
 			}
 		}
 
-		$request = new WP_REST_Request( $request->get_method() );
+		$request = new \WP_REST_Request( $request->get_method() );
 		$request->set_body_params( $body_params );
 
 		return parent::batch_items( $request );
@@ -769,7 +769,7 @@ class ProductVariations extends Products {
 	 * Prepare links for the request.
 	 *
 	 * @param WC_Data         $object  Object data.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return array                   Links for the given post.
 	 */
 	protected function prepare_links( $object, $request ) {
@@ -1200,7 +1200,7 @@ class ProductVariations extends Products {
 	/**
 	 * Get a collection of posts and add the post title filter option to \WP_Query.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {

@@ -28,7 +28,7 @@ class StockStats extends Reports {
 	/**
 	 * Get Stock Status Totals.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
@@ -44,7 +44,7 @@ class StockStats extends Reports {
 	 * Prepare a report object for serialization.
 	 *
 	 * @param  WC_Product      $report  Report data.
-	 * @param  WP_REST_Request $request Request object.
+	 * @param  \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
@@ -64,7 +64,7 @@ class StockStats extends Reports {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Product       $product   The original bject.
-		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_stock_stats', $response, $product, $request );
 	}

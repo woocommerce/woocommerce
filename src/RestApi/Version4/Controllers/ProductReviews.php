@@ -129,7 +129,7 @@ class ProductReviews extends AbstractController {
 	/**
 	 * Check whether a given request has permission to read webhook deliveries.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -143,7 +143,7 @@ class ProductReviews extends AbstractController {
 	/**
 	 * Check if a given request has access to read a product review.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -160,7 +160,7 @@ class ProductReviews extends AbstractController {
 	/**
 	 * Check if a given request has access to create a new product review.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
@@ -174,7 +174,7 @@ class ProductReviews extends AbstractController {
 	/**
 	 * Check if a given request has access to update a product review.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
@@ -191,7 +191,7 @@ class ProductReviews extends AbstractController {
 	/**
 	 * Check if a given request has access to delete a product review.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function delete_item_permissions_check( $request ) {
@@ -208,7 +208,7 @@ class ProductReviews extends AbstractController {
 	/**
 	 * Check if a given request has access batch create, update and delete items.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return boolean|\WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
@@ -222,7 +222,7 @@ class ProductReviews extends AbstractController {
 	/**
 	 * Get all reviews.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
@@ -299,7 +299,7 @@ class ProductReviews extends AbstractController {
 		 * @since 3.5.0
 		 * @link https://developer.wordpress.org/reference/classes/wp_comment_query/
 		 * @param array           $prepared_args Array of arguments for WP_Comment_Query.
-		 * @param WP_REST_Request $request       The current request.
+		 * @param \WP_REST_Request $request       The current request.
 		 */
 		$prepared_args = apply_filters( 'woocommerce_rest_product_review_query', $prepared_args, $request );
 
@@ -364,7 +364,7 @@ class ProductReviews extends AbstractController {
 	/**
 	 * Create a single review.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
@@ -445,7 +445,7 @@ class ProductReviews extends AbstractController {
 		 *
 		 * @since 3.5.0
 		 * @param array|\WP_Error  $prepared_review The prepared review data for wp_insert_comment().
-		 * @param WP_REST_Request $request          Request used to insert the review.
+		 * @param \WP_REST_Request $request          Request used to insert the review.
 		 */
 		$prepared_review = apply_filters( 'woocommerce_rest_pre_insert_product_review', $prepared_review, $request );
 		if ( is_wp_error( $prepared_review ) ) {
@@ -470,7 +470,7 @@ class ProductReviews extends AbstractController {
 		 * Fires after a comment is created or updated via the REST API.
 		 *
 		 * @param WP_Comment      $review   Inserted or updated comment object.
-		 * @param WP_REST_Request $request  Request object.
+		 * @param \WP_REST_Request $request  Request object.
 		 * @param bool            $creating True when creating a comment, false when updating.
 		 */
 		do_action( 'woocommerce_rest_insert_product_review', $review, $request, true );
@@ -495,7 +495,7 @@ class ProductReviews extends AbstractController {
 	/**
 	 * Get a single product review.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -513,7 +513,7 @@ class ProductReviews extends AbstractController {
 	/**
 	 * Updates a review.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response Response object on success, or error object on failure.
 	 */
 	public function update_item( $request ) {
@@ -599,7 +599,7 @@ class ProductReviews extends AbstractController {
 	/**
 	 * Deletes a review.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response Response object on success, or error object on failure.
 	 */
 	public function delete_item( $request ) {
@@ -658,7 +658,7 @@ class ProductReviews extends AbstractController {
 		 *
 		 * @param WP_Comment       $review   The deleted review data.
 		 * @param WP_REST_Response $response The response returned from the API.
-		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( 'woocommerce_rest_delete_review', $review, $response, $request );
 
@@ -669,7 +669,7 @@ class ProductReviews extends AbstractController {
 	 * Prepare a single product review output for response.
 	 *
 	 * @param WP_Comment      $review Product review object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $review, $request ) {
@@ -724,7 +724,7 @@ class ProductReviews extends AbstractController {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param WP_Comment       $review   Product review object used to create response.
-		 * @param WP_REST_Request  $request  Request object.
+		 * @param \WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_product_review', $response, $review, $request );
 	}
@@ -732,7 +732,7 @@ class ProductReviews extends AbstractController {
 	/**
 	 * Prepare a single product review to be inserted into the database.
 	 *
-	 * @param  WP_REST_Request $request Request object.
+	 * @param  \WP_REST_Request $request Request object.
 	 * @return array|\WP_Error  $prepared_review
 	 */
 	protected function prepare_item_for_database( $request ) {
@@ -777,7 +777,7 @@ class ProductReviews extends AbstractController {
 		 *
 		 * @since 3.5.0
 		 * @param array           $prepared_review The prepared review data for `wp_insert_comment`.
-		 * @param WP_REST_Request $request         The current request.
+		 * @param \WP_REST_Request $request         The current request.
 		 */
 		return apply_filters( 'woocommerce_rest_preprocess_product_review', $prepared_review, $request );
 	}

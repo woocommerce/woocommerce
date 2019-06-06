@@ -77,7 +77,7 @@ class TaxClasses extends AbstractController {
 	/**
 	 * Check whether a given request has permission to read tax classes.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -91,7 +91,7 @@ class TaxClasses extends AbstractController {
 	/**
 	 * Check if a given request has access create tax classes.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|\WP_Error
 	 */
@@ -106,7 +106,7 @@ class TaxClasses extends AbstractController {
 	/**
 	 * Check if a given request has access delete a tax.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|\WP_Error
 	 */
@@ -121,7 +121,7 @@ class TaxClasses extends AbstractController {
 	/**
 	 * Get all tax classes.
 	 *
-	 * @param WP_REST_Request $request Request params.
+	 * @param \WP_REST_Request $request Request params.
 	 * @return array
 	 */
 	public function get_items( $request ) {
@@ -155,7 +155,7 @@ class TaxClasses extends AbstractController {
 	/**
 	 * Create a single tax.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
@@ -190,7 +190,7 @@ class TaxClasses extends AbstractController {
 		 * Fires after a tax class is created or updated via the REST API.
 		 *
 		 * @param stdClass        $tax_class Data used to create the tax class.
-		 * @param WP_REST_Request $request   Request object.
+		 * @param \WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating tax class, false when updating tax class.
 		 */
 		do_action( 'woocommerce_rest_insert_tax_class', (object) $tax_class, $request, true );
@@ -207,7 +207,7 @@ class TaxClasses extends AbstractController {
 	/**
 	 * Delete a single tax class.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function delete_item( $request ) {
@@ -268,7 +268,7 @@ class TaxClasses extends AbstractController {
 		 *
 		 * @param stdClass         $tax_class The tax data.
 		 * @param WP_REST_Response $response  The response returned from the API.
-		 * @param WP_REST_Request  $request   The request sent to the API.
+		 * @param \WP_REST_Request  $request   The request sent to the API.
 		 */
 		do_action( 'woocommerce_rest_delete_tax', (object) $tax_class, $response, $request );
 
@@ -279,7 +279,7 @@ class TaxClasses extends AbstractController {
 	 * Prepare a single tax class output for response.
 	 *
 	 * @param array           $tax_class Tax class data.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $tax_class, $request ) {
@@ -299,7 +299,7 @@ class TaxClasses extends AbstractController {
 		 *
 		 * @param WP_REST_Response $response  The response object.
 		 * @param stdClass         $tax_class Tax object used to create response.
-		 * @param WP_REST_Request  $request   Request object.
+		 * @param \WP_REST_Request  $request   Request object.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_tax', $response, (object) $tax_class, $request );
 	}

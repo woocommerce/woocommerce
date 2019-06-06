@@ -119,7 +119,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	/**
 	 * Check if a given request has access to read the terms.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -138,7 +138,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	/**
 	 * Check if a given request has access to create a term.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
@@ -157,7 +157,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	/**
 	 * Check if a given request has access to read a term.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -176,7 +176,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	/**
 	 * Check if a given request has access to update a term.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
@@ -195,7 +195,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	/**
 	 * Check if a given request has access to delete a term.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function delete_item_permissions_check( $request ) {
@@ -214,7 +214,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	/**
 	 * Check if a given request has access batch create, update and delete items.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return boolean|\WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
@@ -233,7 +233,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	/**
 	 * Check permissions.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @param string          $context Request context.
 	 * @return bool|\WP_Error
 	 */
@@ -262,7 +262,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	/**
 	 * Get terms associated with a taxonomy.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function get_items( $request ) {
@@ -308,7 +308,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		 *
 		 * @param array           $prepared_args Array of arguments to be
 		 *                                       passed to get_terms.
-		 * @param WP_REST_Request $request       The current request.
+		 * @param \WP_REST_Request $request       The current request.
 		 */
 		$prepared_args = apply_filters( "woocommerce_rest_{$taxonomy}_query", $prepared_args, $request );
 
@@ -372,8 +372,8 @@ abstract class AbstractTermsContoller extends AbstractController {
 	/**
 	 * Create a single term for a taxonomy.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|\WP_Error
+	 * @param \WP_REST_Request $request Full details about the request.
+	 * @return \WP_REST_Request|\WP_Error
 	 */
 	public function create_item( $request ) {
 		$taxonomy = $this->get_taxonomy( $request );
@@ -424,7 +424,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		 * Fires after a single term is created or updated via the REST API.
 		 *
 		 * @param WP_Term         $term      Inserted Term object.
-		 * @param WP_REST_Request $request   Request object.
+		 * @param \WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating term, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_{$taxonomy}", $term, $request, true );
@@ -447,8 +447,8 @@ abstract class AbstractTermsContoller extends AbstractController {
 	/**
 	 * Get a single term from a taxonomy.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|\WP_Error
+	 * @param \WP_REST_Request $request Full details about the request.
+	 * @return \WP_REST_Request|\WP_Error
 	 */
 	public function get_item( $request ) {
 		$taxonomy = $this->get_taxonomy( $request );
@@ -466,8 +466,8 @@ abstract class AbstractTermsContoller extends AbstractController {
 	/**
 	 * Update a single term from a taxonomy.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|\WP_Error
+	 * @param \WP_REST_Request $request Full details about the request.
+	 * @return \WP_REST_Request|\WP_Error
 	 */
 	public function update_item( $request ) {
 		$taxonomy      = $this->get_taxonomy( $request );
@@ -513,7 +513,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		 * Fires after a single term is created or updated via the REST API.
 		 *
 		 * @param WP_Term         $term      Inserted Term object.
-		 * @param WP_REST_Request $request   Request object.
+		 * @param \WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating term, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_{$taxonomy}", $term, $request, false );
@@ -526,7 +526,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	/**
 	 * Delete a single term from a taxonomy.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
@@ -560,7 +560,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		 *
 		 * @param WP_Term          $term     The deleted term.
 		 * @param WP_REST_Response $response The response data.
-		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( "woocommerce_rest_delete_{$taxonomy}", $term, $response, $request );
 
@@ -571,7 +571,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Prepare links for the request.
 	 *
 	 * @param object          $term   Term object.
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return array Links for the given term.
 	 */
 	protected function prepare_links( $term, $request ) {
@@ -606,7 +606,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Update term meta fields.
 	 *
 	 * @param WP_Term         $term    Term object.
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return bool|\WP_Error
 	 */
 	protected function update_term_meta_fields( $term, $request ) {
@@ -622,7 +622,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * are instead treated as a full query.
 	 *
 	 * @param array           $prepared_args Arguments for `get_terms()`.
-	 * @param WP_REST_Request $request       Full details about the request.
+	 * @param \WP_REST_Request $request       Full details about the request.
 	 * @return array List of term objects. (Total count in `$this->total_terms`).
 	 */
 	protected function get_terms_for_product( $prepared_args, $request ) {
@@ -784,7 +784,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	/**
 	 * Get taxonomy.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return int|\WP_Error
 	 */
 	protected function get_taxonomy( $request ) {

@@ -69,7 +69,7 @@ class Profile extends WC_REST_Data_Controller {
 	/**
 	 * Check whether a given request has permission to read onboarding profile data.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -83,7 +83,7 @@ class Profile extends WC_REST_Data_Controller {
 	/**
 	 * Check whether a given request has permission to edit onboarding profile data.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function update_items_permissions_check( $request ) {
@@ -97,7 +97,7 @@ class Profile extends WC_REST_Data_Controller {
 	/**
 	 * Return all onboarding profile data.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -118,7 +118,7 @@ class Profile extends WC_REST_Data_Controller {
 	/**
 	 * Update onboarding profile data.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_items( $request ) {
@@ -173,7 +173,7 @@ class Profile extends WC_REST_Data_Controller {
 	 * Prepare the data object for response.
 	 *
 	 * @param object          $item Data object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
@@ -186,7 +186,7 @@ class Profile extends WC_REST_Data_Controller {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $item     The original item.
-		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_onboarding_profile', $response, $item, $request );
 	}

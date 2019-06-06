@@ -96,7 +96,7 @@ class Import extends Reports {
 	/**
 	 * Makes sure the current user has access to WRITE the settings APIs.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param \WP_REST_Request $request Full data about the request.
 	 * @return \WP_Error|bool
 	 */
 	public function import_permissions_check( $request ) {
@@ -109,7 +109,7 @@ class Import extends Reports {
 	/**
 	 * Import data based on user request params.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function import_items( $request ) {
@@ -137,7 +137,7 @@ class Import extends Reports {
 	/**
 	 * Prepare request object as query args.
 	 *
-	 * @param WP_REST_Request $request Request data.
+	 * @param \WP_REST_Request $request Request data.
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
@@ -152,7 +152,7 @@ class Import extends Reports {
 	 * Prepare the data object for response.
 	 *
 	 * @param object          $item Data object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
@@ -165,7 +165,7 @@ class Import extends Reports {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $item     The original item.
-		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_reports_import', $response, $item, $request );
 	}
@@ -226,7 +226,7 @@ class Import extends Reports {
 	/**
 	 * Cancel all queued import actions.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function cancel_import( $request ) {
@@ -246,7 +246,7 @@ class Import extends Reports {
 	/**
 	 * Delete all imported items.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function delete_imported_items( $request ) {
@@ -273,7 +273,7 @@ class Import extends Reports {
 	/**
 	 * Get the status of the current import.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_import_status( $request ) {
@@ -295,7 +295,7 @@ class Import extends Reports {
 	/**
 	 * Get the total orders and customers based on user supplied params.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_import_totals( $request ) {

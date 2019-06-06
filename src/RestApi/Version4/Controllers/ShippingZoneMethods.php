@@ -99,7 +99,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	/**
 	 * Get a single Shipping Zone Method.
 	 *
-	 * @param WP_REST_Request $request Request data.
+	 * @param \WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function get_item( $request ) {
@@ -132,7 +132,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	/**
 	 * Get all Shipping Zone Methods.
 	 *
-	 * @param WP_REST_Request $request Request data.
+	 * @param \WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function get_items( $request ) {
@@ -156,8 +156,8 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	/**
 	 * Create a new shipping zone method instance.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|\WP_Error
+	 * @param \WP_REST_Request $request Full details about the request.
+	 * @return \WP_REST_Request|\WP_Error
 	 */
 	public function create_item( $request ) {
 		$method_id = $request['method_id'];
@@ -192,7 +192,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	/**
 	 * Delete a shipping method instance.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function delete_item( $request ) {
@@ -238,7 +238,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 		 *
 		 * @param object           $method
 		 * @param WP_REST_Response $response        The response data.
-		 * @param WP_REST_Request  $request         The request sent to the API.
+		 * @param \WP_REST_Request  $request         The request sent to the API.
 		 */
 		do_action( 'rest_delete_product_review', $method, $response, $request );
 
@@ -248,7 +248,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	/**
 	 * Update A Single Shipping Zone Method.
 	 *
-	 * @param WP_REST_Request $request Request data.
+	 * @param \WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function update_item( $request ) {
@@ -286,7 +286,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	 *
 	 * @param int                $instance_id Instance ID.
 	 * @param WC_Shipping_Method $method      Shipping method data.
-	 * @param WP_REST_Request    $request     Request data.
+	 * @param \WP_REST_Request    $request     Request data.
 	 *
 	 * @return WC_Shipping_Method
 	 */
@@ -341,7 +341,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	 * Prepare the Shipping Zone Method for the REST response.
 	 *
 	 * @param array           $item Shipping Zone Method.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $item, $request ) {

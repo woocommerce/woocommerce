@@ -58,7 +58,7 @@ class Settings extends AbstractController {
 	/**
 	 * Makes sure the current user has access to WRITE the settings APIs.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param \WP_REST_Request $request Full data about the request.
 	 * @return \WP_Error|bool
 	 */
 	public function update_items_permissions_check( $request ) {
@@ -72,7 +72,7 @@ class Settings extends AbstractController {
 	/**
 	 * Update a setting.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
@@ -86,7 +86,7 @@ class Settings extends AbstractController {
 	 * Get all settings groups items.
 	 *
 	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -142,7 +142,7 @@ class Settings extends AbstractController {
 	 *
 	 * @since  3.0.0
 	 * @param array           $item Group object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
@@ -203,7 +203,7 @@ class Settings extends AbstractController {
 	 * Makes sure the current user has access to READ the settings APIs.
 	 *
 	 * @since  3.0.0
-	 * @param WP_REST_Request $request Full data about the request.
+	 * @param \WP_REST_Request $request Full data about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {

@@ -203,7 +203,7 @@ class Coupons extends AbstractPostsController {
 	 *
 	 * @since  3.0.0
 	 * @param  WC_Data         $object  Object data.
-	 * @param  WP_REST_Request $request Request object.
+	 * @param  \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
@@ -222,7 +222,7 @@ class Coupons extends AbstractPostsController {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
-		 * @param WP_REST_Request  $request  Request object.
+		 * @param \WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
 	}
@@ -231,7 +231,7 @@ class Coupons extends AbstractPostsController {
 	 * Prepare objects query.
 	 *
 	 * @since  3.0.0
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
@@ -256,7 +256,7 @@ class Coupons extends AbstractPostsController {
 	/**
 	 * Prepare a single coupon for create or update.
 	 *
-	 * @param  WP_REST_Request $request Request object.
+	 * @param  \WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return \WP_Error|WC_Data
 	 */
@@ -314,7 +314,7 @@ class Coupons extends AbstractPostsController {
 		 * refers to the object type slug.
 		 *
 		 * @param WC_Data         $coupon   Object object.
-		 * @param WP_REST_Request $request  Request object.
+		 * @param \WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $coupon, $request, $creating );
@@ -550,7 +550,7 @@ class Coupons extends AbstractPostsController {
 	 * Query args.
 	 *
 	 * @param array           $args Query args.
-	 * @param WP_REST_Request $request Request data.
+	 * @param \WP_REST_Request $request Request data.
 	 * @return array
 	 */
 	public function query_args( $args, $request ) {
@@ -566,7 +566,7 @@ class Coupons extends AbstractPostsController {
 	 * Prepare a single coupon output for response.
 	 *
 	 * @param WP_Post         $post Post object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $data
 	 */
 	public function prepare_item_for_response( $post, $request ) {
@@ -636,7 +636,7 @@ class Coupons extends AbstractPostsController {
 		 *
 		 * @param WP_REST_Response   $response   The response object.
 		 * @param WP_Post            $post       Post object.
-		 * @param WP_REST_Request    $request    Request object.
+		 * @param \WP_REST_Request    $request    Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $post, $request );
 	}
@@ -654,7 +654,7 @@ class Coupons extends AbstractPostsController {
 	/**
 	 * Prepare a single coupon for create or update.
 	 *
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_Error|stdClass $data Post object.
 	 */
 	protected function prepare_item_for_database( $request ) {
@@ -717,7 +717,7 @@ class Coupons extends AbstractPostsController {
 		 * prepared for insertion.
 		 *
 		 * @param WC_Coupon       $coupon        The coupon object.
-		 * @param WP_REST_Request $request       Request object.
+		 * @param \WP_REST_Request $request       Request object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $coupon, $request );
 	}
@@ -725,7 +725,7 @@ class Coupons extends AbstractPostsController {
 	/**
 	 * Create a single item.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
@@ -748,7 +748,7 @@ class Coupons extends AbstractPostsController {
 		 * Fires after a single item is created or updated via the REST API.
 		 *
 		 * @param WP_Post         $post      Post object.
-		 * @param WP_REST_Request $request   Request object.
+		 * @param \WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, true );
@@ -764,7 +764,7 @@ class Coupons extends AbstractPostsController {
 	/**
 	 * Update a single coupon.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
@@ -787,7 +787,7 @@ class Coupons extends AbstractPostsController {
 			 * Fires after a single item is created or updated via the REST API.
 			 *
 			 * @param WP_Post         $post      Post object.
-			 * @param WP_REST_Request $request   Request object.
+			 * @param \WP_REST_Request $request   Request object.
 			 * @param boolean         $creating  True when creating item, false when updating.
 			 */
 			do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, false );
@@ -803,7 +803,7 @@ class Coupons extends AbstractPostsController {
 	/**
 	 * Get a collection of posts and add the code search option to \WP_Query.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {

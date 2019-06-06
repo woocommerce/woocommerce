@@ -89,7 +89,7 @@ class ShippingZones extends AbstractShippingZonesController {
 	/**
 	 * Get a single Shipping Zone.
 	 *
-	 * @param WP_REST_Request $request Request data.
+	 * @param \WP_REST_Request $request Request data.
 	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function get_item( $request ) {
@@ -109,7 +109,7 @@ class ShippingZones extends AbstractShippingZonesController {
 	/**
 	 * Get all Shipping Zones.
 	 *
-	 * @param WP_REST_Request $request Request data.
+	 * @param \WP_REST_Request $request Request data.
 	 * @return WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -131,8 +131,8 @@ class ShippingZones extends AbstractShippingZonesController {
 	/**
 	 * Create a single Shipping Zone.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|\WP_Error
+	 * @param \WP_REST_Request $request Full details about the request.
+	 * @return \WP_REST_Request|\WP_Error
 	 */
 	public function create_item( $request ) {
 		$zone = new \WC_Shipping_Zone( null );
@@ -161,8 +161,8 @@ class ShippingZones extends AbstractShippingZonesController {
 	/**
 	 * Update a single Shipping Zone.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|\WP_Error
+	 * @param \WP_REST_Request $request Full details about the request.
+	 * @return \WP_REST_Request|\WP_Error
 	 */
 	public function update_item( $request ) {
 		$zone = $this->get_zone( $request->get_param( 'id' ) );
@@ -197,8 +197,8 @@ class ShippingZones extends AbstractShippingZonesController {
 	/**
 	 * Delete a single Shipping Zone.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|\WP_Error
+	 * @param \WP_REST_Request $request Full details about the request.
+	 * @return \WP_REST_Request|\WP_Error
 	 */
 	public function delete_item( $request ) {
 		$zone = $this->get_zone( $request->get_param( 'id' ) );
@@ -224,7 +224,7 @@ class ShippingZones extends AbstractShippingZonesController {
 	 * Prepare the Shipping Zone for the REST response.
 	 *
 	 * @param array           $item Shipping Zone.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $item, $request ) {

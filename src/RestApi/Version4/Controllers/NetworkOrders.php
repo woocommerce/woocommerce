@@ -82,7 +82,7 @@ class NetworkOrders extends Orders {
 	/**
 	 * Does a permissions check for the proper requested blog
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool $permission
 	 */
@@ -102,7 +102,7 @@ class NetworkOrders extends Orders {
 	/**
 	 * Get a collection of orders from the requested blog id
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return WP_REST_Response
 	 */

@@ -40,7 +40,7 @@ abstract class AbstractPostsController extends AbstractController {
 	/**
 	 * Check if a given request has access to read items.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -54,7 +54,7 @@ abstract class AbstractPostsController extends AbstractController {
 	/**
 	 * Check if a given request has access to create an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
@@ -68,7 +68,7 @@ abstract class AbstractPostsController extends AbstractController {
 	/**
 	 * Check if a given request has access to read an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -84,7 +84,7 @@ abstract class AbstractPostsController extends AbstractController {
 	/**
 	 * Check if a given request has access to update an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
@@ -100,7 +100,7 @@ abstract class AbstractPostsController extends AbstractController {
 	/**
 	 * Check if a given request has access to delete an item.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return bool|\WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
@@ -116,7 +116,7 @@ abstract class AbstractPostsController extends AbstractController {
 	/**
 	 * Check if a given request has access batch create, update and delete items.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return boolean|\WP_Error
 	 */
@@ -131,7 +131,7 @@ abstract class AbstractPostsController extends AbstractController {
 	/**
 	 * Get a single item.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -157,7 +157,7 @@ abstract class AbstractPostsController extends AbstractController {
 	/**
 	 * Create a single item.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
@@ -201,7 +201,7 @@ abstract class AbstractPostsController extends AbstractController {
 		 * Fires after a single item is created or updated via the REST API.
 		 *
 		 * @param WP_Post         $post      Post object.
-		 * @param WP_REST_Request $request   Request object.
+		 * @param \WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, true );
@@ -219,7 +219,7 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Add post meta fields.
 	 *
 	 * @param WP_Post         $post Post Object.
-	 * @param WP_REST_Request $request WP_REST_Request Object.
+	 * @param \WP_REST_Request $request \WP_REST_Request Object.
 	 * @return bool|\WP_Error
 	 */
 	protected function add_post_meta_fields( $post, $request ) {
@@ -238,7 +238,7 @@ abstract class AbstractPostsController extends AbstractController {
 	/**
 	 * Update a single post.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
@@ -279,7 +279,7 @@ abstract class AbstractPostsController extends AbstractController {
 		 * Fires after a single item is created or updated via the REST API.
 		 *
 		 * @param WP_Post         $post      Post object.
-		 * @param WP_REST_Request $request   Request object.
+		 * @param \WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
 		 */
 		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, false );
@@ -292,7 +292,7 @@ abstract class AbstractPostsController extends AbstractController {
 	/**
 	 * Get a collection of posts.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -337,7 +337,7 @@ abstract class AbstractPostsController extends AbstractController {
 		 * collection request.
 		 *
 		 * @param array           $args    Key value array of query var to query value.
-		 * @param WP_REST_Request $request The request used.
+		 * @param \WP_REST_Request $request The request used.
 		 */
 		$args = apply_filters( "woocommerce_rest_{$this->post_type}_query", $args, $request );
 		$query_args = $this->prepare_items_query( $args, $request );
@@ -400,7 +400,7 @@ abstract class AbstractPostsController extends AbstractController {
 	/**
 	 * Delete a single item.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
@@ -463,7 +463,7 @@ abstract class AbstractPostsController extends AbstractController {
 		 *
 		 * @param object           $post     The deleted or trashed item.
 		 * @param WP_REST_Response $response The response data.
-		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( "woocommerce_rest_delete_{$this->post_type}", $post, $response, $request );
 
@@ -474,7 +474,7 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Prepare links for the request.
 	 *
 	 * @param WP_Post         $post Post object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return array Links for the given post.
 	 */
 	protected function prepare_links( $post, $request ) {
@@ -495,7 +495,7 @@ abstract class AbstractPostsController extends AbstractController {
 	 * prepare for \WP_Query.
 	 *
 	 * @param array           $prepared_args Prepared arguments.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return array          $query_args
 	 */
 	protected function prepare_items_query( $prepared_args = array(), $request = null ) {
@@ -705,7 +705,7 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Update post meta fields.
 	 *
 	 * @param WP_Post         $post Post object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return bool|\WP_Error
 	 */
 	protected function update_post_meta_fields( $post, $request ) {

@@ -111,7 +111,7 @@ class PerformanceIndicators extends Reports {
 			return true;
 		}
 
-		$request       = new WP_REST_Request( 'GET', '/wc/v4/reports' );
+		$request       = new \WP_REST_Request( 'GET', '/wc/v4/reports' );
 		$response      = rest_do_request( $request );
 		$endpoints     = $response->get_data();
 		$allowed_stats = array();
@@ -121,7 +121,7 @@ class PerformanceIndicators extends Reports {
 
 		foreach ( $endpoints as $endpoint ) {
 			if ( '/stats' === substr( $endpoint['slug'], -6 ) ) {
-				$request  = new WP_REST_Request( 'OPTIONS', $endpoint['path'] );
+				$request  = new \WP_REST_Request( 'OPTIONS', $endpoint['path'] );
 				$response = rest_do_request( $request );
 				$data     = $response->get_data();
 
@@ -155,7 +155,7 @@ class PerformanceIndicators extends Reports {
 	/**
 	 * Returns a list of allowed performance indicators.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return array|\WP_Error
 	 */
 	public function get_allowed_items( $request ) {
@@ -244,7 +244,7 @@ class PerformanceIndicators extends Reports {
 	/**
 	 * Get all reports.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
@@ -271,7 +271,7 @@ class PerformanceIndicators extends Reports {
 			}
 
 			$request_url = $this->endpoints[ $report ];
-			$request     = new WP_REST_Request( 'GET', $request_url );
+			$request     = new \WP_REST_Request( 'GET', $request_url );
 			$request->set_param( 'before', $query_args['before'] );
 			$request->set_param( 'after', $query_args['after'] );
 
@@ -322,7 +322,7 @@ class PerformanceIndicators extends Reports {
 	 * Prepare a report object for serialization.
 	 *
 	 * @param stdClass        $stat_data    Report data.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $stat_data, $request ) {
@@ -342,7 +342,7 @@ class PerformanceIndicators extends Reports {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param object           $report   The original report object.
-		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_performance_indicators', $response, $stat_data, $request );
 	}

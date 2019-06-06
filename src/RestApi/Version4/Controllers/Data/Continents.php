@@ -68,7 +68,7 @@ class Continents extends DataController {
 	 *
 	 * @since  3.5.0
 	 * @param  string          $continent_code Continent code.
-	 * @param  WP_REST_Request $request        Request data.
+	 * @param  \WP_REST_Request $request        Request data.
 	 * @return array|mixed Response data, ready for insertion into collection data.
 	 */
 	public function get_continent( $continent_code = false, $request ) {
@@ -154,7 +154,7 @@ class Continents extends DataController {
 	 * Return the list of states for all continents.
 	 *
 	 * @since  3.5.0
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -174,7 +174,7 @@ class Continents extends DataController {
 	 * Return the list of locations for a given continent.
 	 *
 	 * @since  3.5.0
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -190,7 +190,7 @@ class Continents extends DataController {
 	 *
 	 * @since  3.5.0
 	 * @param object          $item Data object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
@@ -207,7 +207,7 @@ class Continents extends DataController {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $item     The original list of continent(s), countries, and states.
-		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_data_continent', $response, $item, $request );
 	}

@@ -28,7 +28,7 @@ class Stock extends Reports {
 	/**
 	 * Maps query arguments from the REST request.
 	 *
-	 * @param  WP_REST_Request $request Request array.
+	 * @param  \WP_REST_Request $request Request array.
 	 * @return array
 	 */
 	protected function prepare_reports_query( $request ) {
@@ -139,7 +139,7 @@ class Stock extends Reports {
 	/**
 	 * Get all reports.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return array|\WP_Error
 	 */
 	public function get_items( $request ) {
@@ -182,7 +182,7 @@ class Stock extends Reports {
 	 * Prepare a report object for serialization.
 	 *
 	 * @param  WC_Product      $product  Report data.
-	 * @param  WP_REST_Request $request Request object.
+	 * @param  \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $product, $request ) {
@@ -211,7 +211,7 @@ class Stock extends Reports {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Product       $product   The original product object.
-		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_report_stock', $response, $product, $request );
 	}

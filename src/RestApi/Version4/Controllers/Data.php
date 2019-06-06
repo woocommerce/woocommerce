@@ -46,7 +46,7 @@ class Data extends AbstractController {
 	/**
 	 * Check whether a given request has permission to read site data.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -60,7 +60,7 @@ class Data extends AbstractController {
 	/**
 	 * Check whether a given request has permission to read site settings.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -75,7 +75,7 @@ class Data extends AbstractController {
 	 * Return the list of data resources.
 	 *
 	 * @since  3.5.0
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -111,7 +111,7 @@ class Data extends AbstractController {
 	 * Prepare a data resource object for serialization.
 	 *
 	 * @param stdClass        $resource Resource data.
-	 * @param WP_REST_Request $request  Request object.
+	 * @param \WP_REST_Request $request  Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $resource, $request ) {

@@ -344,7 +344,7 @@ class Leaderboards extends AbstractController {
 	/**
 	 * Return all leaderboards.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -365,7 +365,7 @@ class Leaderboards extends AbstractController {
 	/**
 	 * Returns a list of allowed leaderboards.
 	 *
-	 * @param  WP_REST_Request $request Request data.
+	 * @param  \WP_REST_Request $request Request data.
 	 * @return array|\WP_Error
 	 */
 	public function get_allowed_items( $request ) {
@@ -399,7 +399,7 @@ class Leaderboards extends AbstractController {
 	 * Prepare the data object for response.
 	 *
 	 * @param object          $item Data object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
@@ -412,7 +412,7 @@ class Leaderboards extends AbstractController {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param array            $item     The original item.
-		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_leaderboard', $response, $item, $request );
 	}

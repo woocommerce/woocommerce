@@ -34,7 +34,7 @@ class ProductCategories extends AbstractTermsContoller {
 	 * Prepare a single product category output for response.
 	 *
 	 * @param WP_Term         $item    Term object.
-	 * @param WP_REST_Request $request Request instance.
+	 * @param \WP_REST_Request $request Request instance.
 	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
@@ -88,7 +88,7 @@ class ProductCategories extends AbstractTermsContoller {
 		 *
 		 * @param WP_REST_Response  $response  The response object.
 		 * @param object            $item      The original term object.
-		 * @param WP_REST_Request   $request   Request used to generate the response.
+		 * @param \WP_REST_Request   $request   Request used to generate the response.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->taxonomy}", $response, $item, $request );
 	}
@@ -97,7 +97,7 @@ class ProductCategories extends AbstractTermsContoller {
 	 * Update term meta fields.
 	 *
 	 * @param WP_Term         $term    Term object.
-	 * @param WP_REST_Request $request Request instance.
+	 * @param \WP_REST_Request $request Request instance.
 	 * @return bool|\WP_Error
 	 *
 	 * @since 3.5.5

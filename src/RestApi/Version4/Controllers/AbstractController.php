@@ -118,7 +118,7 @@ abstract class AbstractController extends WP_REST_Controller {
 	/**
 	 * Bulk create, update and delete items.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return array Of \WP_Error or WP_REST_Response.
 	 */
 	public function batch_items( $request ) {
@@ -141,7 +141,7 @@ abstract class AbstractController extends WP_REST_Controller {
 
 		if ( ! empty( $items['create'] ) ) {
 			foreach ( $items['create'] as $item ) {
-				$_item = new WP_REST_Request( 'POST' );
+				$_item = new \WP_REST_Request( 'POST' );
 
 				// Default parameters.
 				$defaults = array();
@@ -174,7 +174,7 @@ abstract class AbstractController extends WP_REST_Controller {
 
 		if ( ! empty( $items['update'] ) ) {
 			foreach ( $items['update'] as $item ) {
-				$_item = new WP_REST_Request( 'PUT' );
+				$_item = new \WP_REST_Request( 'PUT' );
 				$_item->set_body_params( $item );
 				$_response = $this->update_item( $_item );
 
@@ -201,7 +201,7 @@ abstract class AbstractController extends WP_REST_Controller {
 					continue;
 				}
 
-				$_item = new WP_REST_Request( 'DELETE' );
+				$_item = new \WP_REST_Request( 'DELETE' );
 				$_item->set_query_params(
 					array(
 						'id'    => $id,
@@ -432,7 +432,7 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * Introduced to support WordPress 4.9.6 changes.
 	 *
 	 * @since 3.5.0
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return array Fields to be included in the response.
 	 */
 	public function get_fields_for_response( $request ) {

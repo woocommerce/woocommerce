@@ -100,7 +100,7 @@ class OrderNotes extends AbstractController {
 	/**
 	 * Check whether a given request has permission to read order notes.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -114,7 +114,7 @@ class OrderNotes extends AbstractController {
 	/**
 	 * Check if a given request has access create order notes.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|\WP_Error
 	 */
@@ -129,7 +129,7 @@ class OrderNotes extends AbstractController {
 	/**
 	 * Check if a given request has access to read a order note.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -145,7 +145,7 @@ class OrderNotes extends AbstractController {
 	/**
 	 * Check if a given request has access delete a order note.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|\WP_Error
 	 */
@@ -162,7 +162,7 @@ class OrderNotes extends AbstractController {
 	/**
 	 * Get order notes from an order.
 	 *
-	 * @param WP_REST_Request $request Request data.
+	 * @param \WP_REST_Request $request Request data.
 	 *
 	 * @return array|\WP_Error
 	 */
@@ -216,7 +216,7 @@ class OrderNotes extends AbstractController {
 	/**
 	 * Create a single order note.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
@@ -245,7 +245,7 @@ class OrderNotes extends AbstractController {
 		 * Fires after a order note is created or updated via the REST API.
 		 *
 		 * @param WP_Comment      $note      New order note object.
-		 * @param WP_REST_Request $request   Request object.
+		 * @param \WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
 		 */
 		do_action( 'woocommerce_rest_insert_order_note', $note, $request, true );
@@ -262,7 +262,7 @@ class OrderNotes extends AbstractController {
 	/**
 	 * Get a single order note.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
@@ -288,7 +288,7 @@ class OrderNotes extends AbstractController {
 	/**
 	 * Delete a single order note.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
@@ -326,7 +326,7 @@ class OrderNotes extends AbstractController {
 		 *
 		 * @param WP_Comment       $note     The deleted or trashed order note.
 		 * @param WP_REST_Response $response The response data.
-		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( 'woocommerce_rest_delete_order_note', $note, $response, $request );
 
@@ -337,7 +337,7 @@ class OrderNotes extends AbstractController {
 	 * Prepare a single order note output for response.
 	 *
 	 * @param WP_Comment      $note    Order note object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $note, $request ) {
@@ -364,7 +364,7 @@ class OrderNotes extends AbstractController {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param WP_Comment       $note     Order note object used to create response.
-		 * @param WP_REST_Request  $request  Request object.
+		 * @param \WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_order_note', $response, $note, $request );
 	}

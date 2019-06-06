@@ -46,7 +46,7 @@ abstract class AbstractShippingZonesController extends AbstractController {
 	/**
 	 * Check whether a given request has permission to read Shipping Zones.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -64,7 +64,7 @@ abstract class AbstractShippingZonesController extends AbstractController {
 	/**
 	 * Check if a given request has access to create Shipping Zones.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
@@ -82,7 +82,7 @@ abstract class AbstractShippingZonesController extends AbstractController {
 	/**
 	 * Check whether a given request has permission to edit Shipping Zones.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function update_items_permissions_check( $request ) {
@@ -100,7 +100,7 @@ abstract class AbstractShippingZonesController extends AbstractController {
 	/**
 	 * Check whether a given request has permission to delete Shipping Zones.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function delete_items_permissions_check( $request ) {

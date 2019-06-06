@@ -121,7 +121,7 @@ class ProductAttributes extends AbstractController {
 	/**
 	 * Check if a given request has access to read the attributes.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
@@ -135,7 +135,7 @@ class ProductAttributes extends AbstractController {
 	/**
 	 * Check if a given request has access to create a attribute.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
@@ -149,7 +149,7 @@ class ProductAttributes extends AbstractController {
 	/**
 	 * Check if a given request has access to read a attribute.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
@@ -167,7 +167,7 @@ class ProductAttributes extends AbstractController {
 	/**
 	 * Check if a given request has access to update a attribute.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
@@ -185,7 +185,7 @@ class ProductAttributes extends AbstractController {
 	/**
 	 * Check if a given request has access to delete a attribute.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
 	public function delete_item_permissions_check( $request ) {
@@ -203,7 +203,7 @@ class ProductAttributes extends AbstractController {
 	/**
 	 * Check if a given request has access batch create, update and delete items.
 	 *
-	 * @param  WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return bool|\WP_Error
 	 */
@@ -218,7 +218,7 @@ class ProductAttributes extends AbstractController {
 	/**
 	 * Get all attributes.
 	 *
-	 * @param WP_REST_Request $request Request params.
+	 * @param \WP_REST_Request $request Request params.
 	 * @return array
 	 */
 	public function get_items( $request ) {
@@ -236,8 +236,8 @@ class ProductAttributes extends AbstractController {
 	/**
 	 * Create a single attribute.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|\WP_Error
+	 * @param \WP_REST_Request $request Full details about the request.
+	 * @return \WP_REST_Request|\WP_Error
 	 */
 	public function create_item( $request ) {
 		global $wpdb;
@@ -269,7 +269,7 @@ class ProductAttributes extends AbstractController {
 		 * Fires after a single product attribute is created or updated via the REST API.
 		 *
 		 * @param stdObject       $attribute Inserted attribute object.
-		 * @param WP_REST_Request $request   Request object.
+		 * @param \WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating attribute, false when updating.
 		 */
 		do_action( 'woocommerce_rest_insert_product_attribute', $attribute, $request, true );
@@ -286,8 +286,8 @@ class ProductAttributes extends AbstractController {
 	/**
 	 * Get a single attribute.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|\WP_Error
+	 * @param \WP_REST_Request $request Full details about the request.
+	 * @return \WP_REST_Request|\WP_Error
 	 */
 	public function get_item( $request ) {
 		$attribute = $this->get_attribute( (int) $request['id'] );
@@ -304,8 +304,8 @@ class ProductAttributes extends AbstractController {
 	/**
 	 * Update a single term from a taxonomy.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|\WP_Error
+	 * @param \WP_REST_Request $request Full details about the request.
+	 * @return \WP_REST_Request|\WP_Error
 	 */
 	public function update_item( $request ) {
 		global $wpdb;
@@ -339,7 +339,7 @@ class ProductAttributes extends AbstractController {
 		 * Fires after a single product attribute is created or updated via the REST API.
 		 *
 		 * @param stdObject       $attribute Inserted attribute object.
-		 * @param WP_REST_Request $request   Request object.
+		 * @param \WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating attribute, false when updating.
 		 */
 		do_action( 'woocommerce_rest_insert_product_attribute', $attribute, $request, false );
@@ -353,7 +353,7 @@ class ProductAttributes extends AbstractController {
 	/**
 	 * Delete a single attribute.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
@@ -384,7 +384,7 @@ class ProductAttributes extends AbstractController {
 		 *
 		 * @param stdObject        $attribute     The deleted attribute.
 		 * @param WP_REST_Response $response The response data.
-		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( 'woocommerce_rest_delete_product_attribute', $attribute, $response, $request );
 
@@ -395,7 +395,7 @@ class ProductAttributes extends AbstractController {
 	 * Prepare a single product attribute output for response.
 	 *
 	 * @param obj             $item Term object.
-	 * @param WP_REST_Request $request Request params.
+	 * @param \WP_REST_Request $request Request params.
 	 * @return WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
@@ -423,7 +423,7 @@ class ProductAttributes extends AbstractController {
 		 *
 		 * @param WP_REST_Response  $response  The response object.
 		 * @param object            $item      The original attribute object.
-		 * @param WP_REST_Request   $request   Request used to generate the response.
+		 * @param \WP_REST_Request   $request   Request used to generate the response.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_product_attribute', $response, $item, $request );
 	}
@@ -522,7 +522,7 @@ class ProductAttributes extends AbstractController {
 	/**
 	 * Get attribute name.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return string
 	 */
 	protected function get_taxonomy( $request ) {

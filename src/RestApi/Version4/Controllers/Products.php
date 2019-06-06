@@ -143,7 +143,7 @@ class Products extends AbstractObjectsController {
 	 * Prepare a single product output for response.
 	 *
 	 * @param WC_Data         $object  Object data.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 *
 	 * @since  3.0.0
 	 * @return WP_REST_Response
@@ -175,7 +175,7 @@ class Products extends AbstractObjectsController {
 		 *
 		 * @param WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
-		 * @param WP_REST_Request  $request  Request object.
+		 * @param \WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
 	}
@@ -183,7 +183,7 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Prepare a single product for create or update.
 	 *
-	 * @param  WP_REST_Request $request Request object.
+	 * @param  \WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return \WP_Error|WC_Data
 	 */
@@ -584,7 +584,7 @@ class Products extends AbstractObjectsController {
 		 * refers to the object type slug.
 		 *
 		 * @param WC_Data         $product  Object object.
-		 * @param WP_REST_Request $request  Request object.
+		 * @param \WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $product, $request, $creating );
@@ -593,7 +593,7 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Get a collection of posts and add the post title filter option to \WP_Query.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
@@ -689,7 +689,7 @@ class Products extends AbstractObjectsController {
 	 * Make extra product orderby features supported by WooCommerce available to the WC API.
 	 * This includes 'price', 'popularity', and 'rating'.
 	 *
-	 * @param WP_REST_Request $request Request data.
+	 * @param \WP_REST_Request $request Request data.
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
@@ -1171,7 +1171,7 @@ class Products extends AbstractObjectsController {
 	 * Prepare links for the request.
 	 *
 	 * @param WC_Data         $object  Object data.
-	 * @param WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 *
 	 * @return array                   Links for the given post.
 	 */
@@ -1365,7 +1365,7 @@ class Products extends AbstractObjectsController {
 	 * Save default attributes.
 	 *
 	 * @param WC_Product      $product Product instance.
-	 * @param WP_REST_Request $request Request data.
+	 * @param \WP_REST_Request $request Request data.
 	 *
 	 * @since  3.0.0
 	 * @return WC_Product
@@ -1435,7 +1435,7 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Delete a single item.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request $request Full details about the request.
 	 *
 	 * @return WP_REST_Response|\WP_Error
 	 */
@@ -1565,7 +1565,7 @@ class Products extends AbstractObjectsController {
 		 *
 		 * @param WC_Data          $object   The deleted or trashed object.
 		 * @param WP_REST_Response $response The response data.
-		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( "woocommerce_rest_delete_{$this->post_type}_object", $object, $response, $request );
 
