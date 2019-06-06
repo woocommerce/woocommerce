@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Leaderboards class.
  */
-class Leaderboards extends AbstractController {
+class Leaderboards extends Data {
 
 	/**
 	 * Route base.
