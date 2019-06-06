@@ -544,6 +544,15 @@ class SystemStatus extends AbstractController {
 						'type' => 'string',
 					),
 				),
+				'post_type_counts' => array(
+					'description' => __( 'Post type counts.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+					'items'       => array(
+						'type' => 'string',
+					),
+				),
 			),
 		);
 
@@ -566,6 +575,7 @@ class SystemStatus extends AbstractController {
 			'settings'           => $this->get_settings(),
 			'security'           => $this->get_security_info(),
 			'pages'              => $this->get_pages(),
+			'post_type_counts'   => $this->get_post_type_counts(),
 		);
 	}
 
@@ -745,13 +755,13 @@ class SystemStatus extends AbstractController {
 		);
 
 		$site_tables_prefix = $wpdb->get_blog_prefix( get_current_blog_id() );
-		$global_tables = $wpdb->tables( 'global', true );
+		$global_tables      = $wpdb->tables( 'global', true );
 		foreach ( $database_table_information as $table ) {
 			// Only include tables matching the prefix of the current site, this is to prevent displaying all tables on a MS install not relating to the current.
 			if ( is_multisite() && 0 !== strpos( $table->name, $site_tables_prefix ) && ! in_array( $table->name, $global_tables, true ) ) {
 				continue;
 			}
-			$table_type = in_array( $table->name, $core_tables ) ? 'woocommerce' : 'other';
+			$table_type = in_array( $table->name, $core_tables, true ) ? 'woocommerce' : 'other';
 
 			$tables[ $table_type ][ $table->name ] = array(
 				'data'   => $table->data,
