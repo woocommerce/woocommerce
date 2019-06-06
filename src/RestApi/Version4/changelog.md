@@ -5,6 +5,7 @@
 - All endpoints - Rewritten with namespaces as standalone classes.
 - Coupons - Added `search` parameter.
 - Orders - Added order number to schema.
+- Orders - Added currency_symbol to schema.
 - Product Reviews - Updated response links.
 - Products - Added `low_in_stock` and `search` parameter.
 - Product Variations - Added `search` parameter.

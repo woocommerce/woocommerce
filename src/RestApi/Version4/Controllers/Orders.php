@@ -237,6 +237,10 @@ class Orders extends AbstractObjectsController {
 			);
 		}
 
+		// Currency symbols.
+		$currency_symbol         = get_woocommerce_currency_symbol( $data['currency'] );
+		$data['currency_symbol'] = html_entity_decode( $currency_symbol );
+
 		return array(
 			'id'                   => $object->get_id(),
 			'parent_id'            => $data['parent_id'],
@@ -246,6 +250,7 @@ class Orders extends AbstractObjectsController {
 			'version'              => $data['version'],
 			'status'               => $data['status'],
 			'currency'             => $data['currency'],
+			'currency_symbol'      => $data['currency_symbol'],
 			'date_created'         => $data['date_created'],
 			'date_created_gmt'     => $data['date_created_gmt'],
 			'date_modified'        => $data['date_modified'],
@@ -868,6 +873,12 @@ class Orders extends AbstractObjectsController {
 					'default'     => get_woocommerce_currency(),
 					'enum'        => array_keys( get_woocommerce_currencies() ),
 					'context'     => array( 'view', 'edit' ),
+				),
+				'currency_symbol'      => array(
+					'description' => __( 'Currency symbol.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 				'date_created'         => array(
 					'description' => __( "The date the order was created, in the site's timezone.", 'woocommerce' ),
