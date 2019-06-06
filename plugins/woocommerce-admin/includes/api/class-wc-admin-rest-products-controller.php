@@ -124,21 +124,25 @@ class WC_Admin_REST_Products_Controller extends WC_REST_Products_Controller {
 			$search = $wpdb->esc_like( $search );
 			$search = "'%" . $search . "%'";
 			$where .= " AND ({$wpdb->posts}.post_title LIKE {$search}";
-			$where .= wc_product_sku_enabled() ? ' OR ps_post_meta.meta_key = "_sku" AND ps_post_meta.meta_value LIKE ' . $search . ')' : ')';
+			$where .= wc_product_sku_enabled() ? ' OR wc_product_meta_lookup.sku LIKE ' . $search . ')' : ')';
 		}
 
 		if ( $wp_query->get( 'low_in_stock' ) ) {
 			$low_stock_amount = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
-			$where           .= " AND lis_postmeta2.meta_key = '_manage_stock'
-			AND lis_postmeta2.meta_value = 'yes'
-			AND lis_postmeta.meta_key = '_stock'
-			AND lis_postmeta.meta_value IS NOT NULL
-			AND lis_postmeta3.meta_key = '_low_stock_amount'
+			$where           .= "
+			AND wc_product_meta_lookup.stock_quantity IS NOT NULL
+			AND wc_product_meta_lookup.stock_status = 'instock'
 			AND (
-				lis_postmeta3.meta_value > ''
-				AND CAST(lis_postmeta.meta_value AS SIGNED) <= CAST(lis_postmeta3.meta_value AS SIGNED)
-				OR lis_postmeta3.meta_value <= ''
-				AND CAST(lis_postmeta.meta_value AS SIGNED) <= {$low_stock_amount}
+				(
+					low_stock_amount_meta.meta_value > ''
+					AND wc_product_meta_lookup.stock_quantity <= CAST(low_stock_amount_meta.meta_value AS SIGNED)
+				)
+				OR (
+					(
+						low_stock_amount_meta.meta_value IS NULL OR low_stock_amount_meta.meta_value <= ''
+					)
+					AND wc_product_meta_lookup.stock_quantity <= {$low_stock_amount}
+				)
 			)";
 		}
 
@@ -157,16 +161,30 @@ class WC_Admin_REST_Products_Controller extends WC_REST_Products_Controller {
 
 		$search = $wp_query->get( 'search' );
 		if ( $search && wc_product_sku_enabled() ) {
-			$join .= " INNER JOIN {$wpdb->postmeta} AS ps_post_meta ON ps_post_meta.post_id = {$wpdb->posts}.ID";
+			$join = self::append_product_sorting_table_join( $join );
 		}
 
 		if ( $wp_query->get( 'low_in_stock' ) ) {
-			$join .= " INNER JOIN {$wpdb->postmeta} AS lis_postmeta ON {$wpdb->posts}.ID = lis_postmeta.post_id
-			INNER JOIN {$wpdb->postmeta} AS lis_postmeta2 ON {$wpdb->posts}.ID = lis_postmeta2.post_id
-			INNER JOIN {$wpdb->postmeta} AS lis_postmeta3 ON {$wpdb->posts}.ID = lis_postmeta3.post_id";
+			$join  = self::append_product_sorting_table_join( $join );
+			$join .= " LEFT JOIN {$wpdb->postmeta} AS low_stock_amount_meta ON {$wpdb->posts}.ID = low_stock_amount_meta.post_id AND low_stock_amount_meta.meta_key = '_low_stock_amount' ";
 		}
 
 		return $join;
+	}
+
+	/**
+	 * Join wc_product_meta_lookup to posts if not already joined.
+	 *
+	 * @param string $sql SQL join.
+	 * @return string
+	 */
+	protected static function append_product_sorting_table_join( $sql ) {
+		global $wpdb;
+
+		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
+			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
+		}
+		return $sql;
 	}
 
 	/**

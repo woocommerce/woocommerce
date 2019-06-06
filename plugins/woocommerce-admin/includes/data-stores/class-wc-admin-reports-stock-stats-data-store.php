@@ -51,35 +51,45 @@ class WC_Admin_Reports_Stock_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 	}
 
 	/**
-	 * Get low stock count.
+	 * Get low stock count (products with stock < low stock amount, but greater than no stock amount).
 	 *
 	 * @return int Low stock count.
 	 */
 	private function get_low_stock_count() {
-		$query_args               = array();
-		$query_args['post_type']  = array( 'product', 'product_variation' );
-		$low_stock                = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
-		$no_stock                 = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
-		$query_args['meta_query'] = array( // WPCS: slow query ok.
-			array(
-				'key'   => '_manage_stock',
-				'value' => 'yes',
-			),
-			array(
-				'key'     => '_stock',
-				'value'   => array( $no_stock, $low_stock ),
-				'compare' => 'BETWEEN',
-				'type'    => 'NUMERIC',
-			),
-			array(
-				'key'   => '_stock_status',
-				'value' => 'instock',
-			),
-		);
+		global $wpdb;
 
-		$query = new WP_Query();
-		$query->query( $query_args );
-		return intval( $query->found_posts );
+		$no_stock_amount  = absint( max( get_option( 'woocommerce_notify_no_stock_amount' ), 0 ) );
+		$low_stock_amount = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
+
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"
+				SELECT count( DISTINCT posts.ID ) FROM {$wpdb->posts} posts
+				LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
+				LEFT JOIN {$wpdb->postmeta} low_stock_amount_meta ON posts.ID = low_stock_amount_meta.post_id AND low_stock_amount_meta.meta_key = '_low_stock_amount'
+				WHERE posts.post_type IN ( 'product', 'product_variation' )
+				AND wc_product_meta_lookup.stock_quantity IS NOT NULL
+				AND wc_product_meta_lookup.stock_status = 'instock'
+				AND (
+					(
+						low_stock_amount_meta.meta_value > ''
+						AND wc_product_meta_lookup.stock_quantity <= CAST(low_stock_amount_meta.meta_value AS SIGNED)
+						AND wc_product_meta_lookup.stock_quantity > %d
+					)
+					OR (
+						(
+							low_stock_amount_meta.meta_value IS NULL OR low_stock_amount_meta.meta_value <= ''
+						)
+						AND wc_product_meta_lookup.stock_quantity <= %d
+						AND wc_product_meta_lookup.stock_quantity > %d
+					)
+				)
+				",
+				$no_stock_amount,
+				$low_stock_amount,
+				$no_stock_amount
+			)
+		);
 	}
 
 	/**
@@ -89,18 +99,19 @@ class WC_Admin_Reports_Stock_Stats_Data_Store extends WC_Admin_Reports_Data_Stor
 	 * @return int Count.
 	 */
 	private function get_count( $status ) {
-		$query_args               = array();
-		$query_args['post_type']  = array( 'product', 'product_variation' );
-		$query_args['meta_query'] = array( // WPCS: slow query ok.
-			array(
-				'key'   => '_stock_status',
-				'value' => $status,
-			),
-		);
+		global $wpdb;
 
-		$query = new WP_Query();
-		$query->query( $query_args );
-		return intval( $query->found_posts );
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"
+				SELECT count( DISTINCT posts.ID ) FROM {$wpdb->posts} posts
+				LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
+				WHERE posts.post_type IN ( 'product', 'product_variation' )
+				AND wc_product_meta_lookup.stock_status = %s
+				",
+				$status
+			)
+		);
 	}
 
 	/**
