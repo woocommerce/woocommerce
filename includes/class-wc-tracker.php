@@ -349,14 +349,14 @@ class WC_Tracker {
 	 */
 	private static function get_review_counts() {
 		global $wpdb;
-		$review_count    = array( 'total' => 0 );
-		$status_map      = array(
+		$review_count = array( 'total' => 0 );
+		$status_map   = array(
 			'0'     => 'pending',
 			'1'     => 'approved',
 			'trash' => 'trash',
 			'spam'  => 'spam',
-			);
-		$counts          = $wpdb->get_results(
+		);
+		$counts       = $wpdb->get_results(
 			"
 			SELECT comment_approved, COUNT(*) AS num_reviews
 			FROM {$wpdb->comments}
