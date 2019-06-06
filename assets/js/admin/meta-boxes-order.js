@@ -125,7 +125,8 @@ jQuery( function ( $ ) {
 				$edit_address  = $wrapper.find( 'div.edit_address' ),
 				$address       = $wrapper.find( 'div.address' ),
 				$country_input = $edit_address.find( '.js_field-country' ),
-				$state_input   = $edit_address.find( '.js_field-state' );
+				$state_input   = $edit_address.find( '.js_field-state' ),
+				is_billing     = Boolean( $edit_address.find( 'input[name^="_billing_"]' ).length );
 
 			$address.hide();
 			$this.parent().find( 'a' ).toggle();
@@ -136,6 +137,12 @@ jQuery( function ( $ ) {
 			}
 
 			$edit_address.show();
+
+			var event_name = is_billing ? 'order_edit_billing_address_click' : 'order_edit_shipping_address_click';
+			window.wcTracks.recordEvent( event_name, {
+				order_id: data.order_id,
+				status: $( '#order_status' ).val(),
+			} );
 		},
 
 		change_customer_user: function() {
