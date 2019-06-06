@@ -242,6 +242,9 @@ class TaxClasses extends AbstractController {
 			return new \WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
+		$request->set_param( 'context', 'edit' );
+		$previous = $this->prepare_item_for_response( $tax_class, $request );
+
 		update_option( 'woocommerce_tax_classes', implode( "\n", $classes ) );
 
 		// Delete tax rate locations locations from the selected class.
@@ -262,8 +265,13 @@ class TaxClasses extends AbstractController {
 		// Delete tax rates in the selected class.
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_class' => $tax_class['slug'] ), array( '%s' ) );
 
-		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_item_for_response( $tax_class, $request );
+		$response = new WP_REST_Response();
+		$response->set_data(
+			array(
+				'deleted'  => true,
+				'previous' => $previous->get_data(),
+			)
+		);
 
 		/**
 		 * Fires after a tax class is deleted via the REST API.

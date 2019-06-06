@@ -374,13 +374,20 @@ class ProductAttributes extends AbstractController {
 		}
 
 		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_item_for_response( $attribute, $request );
-
-		$deleted = wc_delete_attribute( $attribute->attribute_id );
+		$previous = $this->prepare_item_for_response( $attribute, $request );
+		$deleted  = wc_delete_attribute( $attribute->attribute_id );
 
 		if ( false === $deleted ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
+
+		$response = new WP_REST_Response();
+		$response->set_data(
+			array(
+				'deleted'  => true,
+				'previous' => $previous->get_data(),
+			)
+		);
 
 		/**
 		 * Fires after a single attribute is deleted via the REST API.

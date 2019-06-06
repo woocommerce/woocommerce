@@ -321,13 +321,20 @@ class OrderNotes extends AbstractController {
 		}
 
 		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_item_for_response( $note, $request );
-
-		$result = wc_delete_order_note( $note->comment_ID );
+		$previous = $this->prepare_item_for_response( $note, $request );
+		$result   = wc_delete_order_note( $note->comment_ID );
 
 		if ( ! $result ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), 'order_note' ), array( 'status' => 500 ) );
 		}
+
+		$response = new WP_REST_Response();
+		$response->set_data(
+			array(
+				'deleted'  => true,
+				'previous' => $previous->get_data(),
+			)
+		);
 
 		/**
 		 * Fires after a order note is deleted or trashed via the REST API.

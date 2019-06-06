@@ -1492,30 +1492,21 @@ class Products extends AbstractObjectsController {
 		}
 
 		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_object_for_response( $object, $request );
 
 		// If we're forcing, then delete permanently.
 		if ( $force ) {
-			if ( $object->is_type( 'variable' ) ) {
-				foreach ( $object->get_children() as $child_id ) {
-					$child = wc_get_product( $child_id );
-					if ( ! empty( $child ) ) {
-						$child->delete( true );
-					}
-				}
-			} else {
-				// For other product types, if the product has children, remove the relationship.
-				foreach ( $object->get_children() as $child_id ) {
-					$child = wc_get_product( $child_id );
-					if ( ! empty( $child ) ) {
-						$child->set_parent_id( 0 );
-						$child->save();
-					}
-				}
-			}
+			$previous = $this->prepare_object_for_response( $object, $request );
 
 			$object->delete( true );
 			$result = 0 === $object->get_id();
+
+			$response = new WP_REST_Response();
+			$response->set_data(
+				array(
+					'deleted'  => true,
+					'previous' => $previous->get_data(),
+				)
+			);
 		} else {
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
@@ -1545,6 +1536,8 @@ class Products extends AbstractObjectsController {
 				$object->delete();
 				$result = 'trash' === $object->get_status();
 			}
+
+			$response = $this->prepare_object_for_response( $object, $request );
 		}
 
 		if ( ! $result ) {
@@ -1556,11 +1549,6 @@ class Products extends AbstractObjectsController {
 					'status' => 500,
 				)
 			);
-		}
-
-		// Delete parent product transients.
-		if ( 0 !== $object->get_parent_id() ) {
-			wc_delete_product_transients( $object->get_parent_id() );
 		}
 
 		/**

@@ -206,6 +206,11 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 		$instance_id = (int) $request['instance_id'];
 		$force       = $request['force'];
 
+		// We don't support trashing for this type, error out.
+		if ( ! $force ) {
+			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Shipping methods do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+		}
+
 		$methods = $zone->get_shipping_methods();
 		$method  = false;
 
@@ -226,23 +231,26 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 		}
 
 		$request->set_param( 'context', 'view' );
-		$response = $this->prepare_item_for_response( $method, $request );
+		$previous = $this->prepare_item_for_response( $method, $request );
 
 		// Actually delete.
-		if ( $force ) {
-			$zone->delete_shipping_method( $instance_id );
-		} else {
-			return new \WP_Error( 'rest_trash_not_supported', __( 'Shipping methods do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
-		}
+		$zone->delete_shipping_method( $instance_id );
+		$response = new WP_REST_Response();
+		$response->set_data(
+			array(
+				'deleted'  => true,
+				'previous' => $previous,
+			)
+		);
 
 		/**
-		 * Fires after a product review is deleted via the REST API.
+		 * Fires after a method is deleted via the REST API.
 		 *
 		 * @param object           $method
 		 * @param WP_REST_Response $response        The response data.
 		 * @param \WP_REST_Request  $request         The request sent to the API.
 		 */
-		do_action( 'rest_delete_product_review', $method, $response, $request );
+		do_action( 'woocommerce_rest_delete_shipping_zone_method', $method, $response, $request );
 
 		return $response;
 	}

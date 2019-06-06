@@ -676,12 +676,21 @@ class ProductVariations extends Products {
 		}
 
 		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_object_for_response( $object, $request );
 
 		// If we're forcing, then delete permanently.
 		if ( $force ) {
+			$previous = $this->prepare_object_for_response( $object, $request );
+
 			$object->delete( true );
-			$result = 0 === $object->get_id();
+
+			$result   = 0 === $object->get_id();
+			$response = new WP_REST_Response();
+			$response->set_data(
+				array(
+					'deleted'  => true,
+					'previous' => $previous->get_data(),
+				)
+			);
 		} else {
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
@@ -707,6 +716,8 @@ class ProductVariations extends Products {
 				$object->delete();
 				$result = 'trash' === $object->get_status();
 			}
+
+			$response = $this->prepare_object_for_response( $object, $request );
 		}
 
 		if ( ! $result ) {
@@ -716,11 +727,6 @@ class ProductVariations extends Products {
 					'status' => 500,
 				)
 			);
-		}
-
-		// Delete parent product transients.
-		if ( 0 !== $object->get_parent_id() ) {
-			wc_delete_product_transients( $object->get_parent_id() );
 		}
 
 		/**

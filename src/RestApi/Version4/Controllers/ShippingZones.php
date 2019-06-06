@@ -211,13 +211,20 @@ class ShippingZones extends AbstractShippingZonesController {
 
 		$force = $request['force'];
 
-		$response = $this->get_item( $request );
-
-		if ( $force ) {
-			$zone->delete();
-		} else {
-			return new \WP_Error( 'rest_trash_not_supported', __( 'Shipping zones do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+		// We don't support trashing for this type, error out.
+		if ( ! $force ) {
+			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Shipping zones do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
 		}
+
+		$previous = $this->get_item( $request );
+		$zone->delete();
+		$response = new WP_REST_Response();
+		$response->set_data(
+			array(
+				'deleted'  => true,
+				'previous' => $previous->get_data(),
+			)
+		);
 
 		return $response;
 	}
