@@ -5,6 +5,10 @@ This repository is home to the WooCommerce REST API package.
 
 The stable version of this package is bundled with [WooCommerce core](https://github.com/woocommerce/woocommerce)  releases, but it can also be used as a standalone plugin so bleeding-edge API features can be tested or used by other feature plugins.
 
+## Using this repo
+
+After checking out the code, you'll need to run `composer install` in it's root directory to install dependencies and to enable the autoloader.
+
 ## Using this package
 
 This package is [hosted on Packagist](https://packagist.org/packages/woocommerce/woocommerce-rest-api) and can be included using composer.json:
