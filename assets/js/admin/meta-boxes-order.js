@@ -1,6 +1,10 @@
 /*global woocommerce_admin_meta_boxes, woocommerce_admin, accounting, woocommerce_admin_meta_boxes_order, wcSetClipboard, wcClearClipboard */
 jQuery( function ( $ ) {
 
+	// Stand-in wcTracks.recordEvent in case tracks is not available (for any reason).
+	window.wcTracks = window.wcTracks || {};
+	window.wcTracks.recordEvent = window.wcTracks.recordEvent  || function() { };
+
 	/**
 	 * Order Data Panel
 	 */
@@ -625,8 +629,19 @@ jQuery( function ( $ ) {
 							window.alert( response.data.error );
 						}
 						wc_meta_boxes_order_items.unblock();
+					},
+					complete: function() {
+						window.wcTracks.recordEvent( 'order_delete_tax', {
+							order_id: data.order_id,
+							status: $( '#order_status' ).val(),
+						} );
 					}
 				});
+			} else {
+				window.wcTracks.recordEvent( 'order_delete_tax_cancel', {
+					order_id: woocommerce_admin_meta_boxes.post_id,
+					status: $( '#order_status' ).val(),
+				} );
 			}
 			return false;
 		},
