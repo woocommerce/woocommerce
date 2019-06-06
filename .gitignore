@@ -37,3 +37,6 @@ tests/cli/vendor
 
 # Logs
 /logs
+
+# composer
+vendor/

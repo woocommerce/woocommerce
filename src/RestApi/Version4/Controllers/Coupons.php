@@ -765,6 +765,30 @@ class Coupons extends AbstractPostsController {
 	}
 
 	/**
+	 * Saves a coupon to the database.
+	 *
+	 * @since 3.0.0
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|int
+	 */
+	protected function save_coupon( $request ) {
+		try {
+			$coupon = $this->prepare_item_for_database( $request );
+
+			if ( is_wp_error( $coupon ) ) {
+				return $coupon;
+			}
+
+			$coupon->save();
+			return $coupon->get_id();
+		} catch ( WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+		} catch ( WC_REST_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
 	 * Update a single coupon.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.

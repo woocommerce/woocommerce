@@ -9,6 +9,9 @@
   "require" : {
     "composer/installers" : "~1.0"
   },
+  "require-dev": {
+    "phpunit/phpunit": "6.5.14"
+  },
   "autoload": {
     "classmap": ["src"]
   }
