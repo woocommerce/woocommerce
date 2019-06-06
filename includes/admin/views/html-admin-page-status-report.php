@@ -9,21 +9,17 @@ defined( 'ABSPATH' ) || exit;
 
 global $wpdb;
 
-if ( ! class_exists( 'WC_REST_System_Status_Controller' ) ) {
-	wp_die( 'Cannot load the REST API to access WC_REST_System_Status_Controller.' );
-}
-
-$system_status      = new WC_REST_System_Status_Controller();
-$environment        = $system_status->get_environment_info();
-$database           = $system_status->get_database_info();
-$post_type_counts   = $system_status->get_post_type_counts();
-$active_plugins     = $system_status->get_active_plugins();
-$inactive_plugins   = $system_status->get_inactive_plugins();
-$dropins_mu_plugins = $system_status->get_dropins_mu_plugins();
-$theme              = $system_status->get_theme_info();
-$security           = $system_status->get_security_info();
-$settings           = $system_status->get_settings();
-$wp_pages           = $system_status->get_pages();
+$report             = \WooCommerce\RestApi::instance()->get_endpoint_data( '/wc/v4/system_status' );
+$environment        = $report['environment'];
+$database           = $report['database'];
+$post_type_counts   = $report['post_type_counts'];
+$active_plugins     = $report['active_plugins'];
+$inactive_plugins   = $report['inactive_plugins'];
+$dropins_mu_plugins = $report['dropins_mu_plugins'];
+$theme              = $report['theme'];
+$security           = $report['security'];
+$settings           = $report['settings'];
+$wp_pages           = $report['pages'];
 $plugin_updates     = new WC_Plugin_Updates();
 $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'minor' );
 ?>
