@@ -560,6 +560,7 @@ jQuery( function ( $ ) {
 			$( this ).hide();
 			$( 'button.add-line-item' ).click();
 			$( 'button.cancel-action' ).attr( 'data-reload', true );
+			window.wcTracks.recordEvent( 'order_edit_edit_item_click' );
 			return false;
 		},
 
@@ -605,6 +606,9 @@ jQuery( function ( $ ) {
 							window.alert( response.data.error );
 						}
 						wc_meta_boxes_order_items.unblock();
+					},
+					complete: function() {
+						window.wcTracks.recordEvent( 'order_edit_remove_item' );
 					}
 				});
 			}
@@ -708,8 +712,16 @@ jQuery( function ( $ ) {
 					},
 					complete: function( response ) {
 						$( document.body ).trigger( 'order-totals-recalculate-complete', response );
+
+						window.wcTracks.recordEvent( 'order_edit_recalc_totals', {
+							OK_cancel: 'OK'
+						} );
 					}
 				});
+			} else {
+				window.wcTracks.recordEvent( 'order_edit_recalc_totals', {
+					OK_cancel: 'cancel'
+				} );
 			}
 
 			return false;
@@ -746,6 +758,9 @@ jQuery( function ( $ ) {
 						wc_meta_boxes_order_items.unblock();
 						window.alert( response.data.error );
 					}
+				},
+				complete: function() {
+					window.wcTracks.recordEvent( 'order_edit_save_line_items' );
 				}
 			});
 
