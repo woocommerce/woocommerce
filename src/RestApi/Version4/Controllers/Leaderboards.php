@@ -42,7 +42,8 @@ class Leaderboards extends AbstractController {
 					'args'                => $this->get_collection_params(),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-			)
+			),
+			true
 		);
 
 		register_rest_route(
@@ -55,7 +56,8 @@ class Leaderboards extends AbstractController {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
 				'schema' => array( $this, 'get_public_allowed_item_schema' ),
-			)
+			),
+			true
 		);
 	}
 

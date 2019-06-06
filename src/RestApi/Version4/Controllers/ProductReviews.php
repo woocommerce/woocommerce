@@ -68,7 +68,8 @@ class ProductReviews extends AbstractController {
 					),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-			)
+			),
+			true
 		);
 
 		register_rest_route(
@@ -108,7 +109,8 @@ class ProductReviews extends AbstractController {
 					),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-			)
+			),
+			true
 		);
 
 		register_rest_route(
@@ -122,7 +124,8 @@ class ProductReviews extends AbstractController {
 					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_batch_schema' ),
-			)
+			),
+			true
 		);
 	}
 

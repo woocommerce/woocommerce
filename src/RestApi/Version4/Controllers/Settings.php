@@ -39,7 +39,8 @@ class Settings extends AbstractController {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-			)
+			),
+			true
 		);
 		register_rest_route(
 			$this->namespace,
@@ -51,7 +52,8 @@ class Settings extends AbstractController {
 					'permission_callback' => array( $this, 'update_items_permissions_check' ),
 				),
 				'schema' => array( $this, 'get_public_batch_schema' ),
-			)
+			),
+			true
 		);
 	}
 

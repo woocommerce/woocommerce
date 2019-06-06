@@ -51,7 +51,8 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 					),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-			)
+			),
+			true
 		);
 
 		register_rest_route(
@@ -92,7 +93,8 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 					),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-			)
+			),
+			true
 		);
 	}
 

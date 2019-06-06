@@ -38,7 +38,8 @@ class ShippingMethods extends AbstractController {
 					'args'                => $this->get_collection_params(),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-			)
+			),
+			true
 		);
 		register_rest_route(
 			$this->namespace,
@@ -59,7 +60,8 @@ class ShippingMethods extends AbstractController {
 					),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-			)
+			),
+			true
 		);
 	}
 

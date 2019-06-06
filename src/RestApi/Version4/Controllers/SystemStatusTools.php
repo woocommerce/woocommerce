@@ -38,7 +38,8 @@ class SystemStatusTools extends AbstractController {
 					'args'                => $this->get_collection_params(),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-			)
+			),
+			true
 		);
 
 		register_rest_route(
@@ -63,7 +64,8 @@ class SystemStatusTools extends AbstractController {
 					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-			)
+			),
+			true
 		);
 	}
 

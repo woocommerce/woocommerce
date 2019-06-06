@@ -38,7 +38,8 @@ class Reports extends AbstractController {
 					'args'                => $this->get_collection_params(),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-			)
+			),
+			true
 		);
 	}
 

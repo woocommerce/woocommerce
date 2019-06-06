@@ -38,7 +38,8 @@ class PaymentGateways extends AbstractController {
 					'args'                => $this->get_collection_params(),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-			)
+			),
+			true
 		);
 		register_rest_route(
 			$this->namespace,
@@ -65,7 +66,8 @@ class PaymentGateways extends AbstractController {
 					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-			)
+			),
+			true
 		);
 	}
 
