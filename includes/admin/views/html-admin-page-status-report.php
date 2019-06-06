@@ -504,9 +504,9 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 		foreach ( $post_type_counts as $ptype ) {
 			?>
 			<tr>
-				<td><?php echo esc_html( $ptype->type ); ?></td>
+				<td><?php echo esc_html( $ptype['type'] ); ?></td>
 				<td class="help">&nbsp;</td>
-				<td><?php echo absint( $ptype->count ); ?></td>
+				<td><?php echo absint( $ptype['count'] ); ?></td>
 			</tr>
 			<?php
 		}
