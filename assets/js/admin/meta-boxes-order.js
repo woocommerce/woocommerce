@@ -262,6 +262,7 @@ jQuery( function ( $ ) {
 				.on( 'click', 'a.remove-coupon', this.remove_coupon )
 				.on( 'click', 'button.refund-items', this.refund_items )
 				.on( 'click', '.cancel-action', this.cancel )
+				.on( 'click', '.refund-actions .cancel-action', this.track_cancel )
 				.on( 'click', 'button.add-order-item', this.add_item )
 				.on( 'click', 'button.add-order-fee', this.add_fee )
 				.on( 'click', 'button.add-order-shipping', this.add_shipping )
@@ -470,6 +471,12 @@ jQuery( function ( $ ) {
 			$( 'div.wc-order-totals-items' ).slideUp();
 			$( '#woocommerce-order-items' ).find( 'div.refund' ).show();
 			$( '.wc-order-edit-line-item .wc-order-edit-line-item-actions' ).hide();
+
+			window.wcTracks.recordEvent( 'order_refund_button_click', {
+				order_id: woocommerce_admin_meta_boxes.post_id,
+				status: $( '#order_status' ).val(),
+			} );
+
 			return false;
 		},
 
@@ -486,6 +493,13 @@ jQuery( function ( $ ) {
 			}
 
 			return false;
+		},
+
+		track_cancel: function() {
+			window.wcTracks.recordEvent( 'order_refund_cancel', {
+				order_id: woocommerce_admin_meta_boxes.post_id,
+				status: $( '#order_status' ).val(),
+			} );
 		},
 
 		add_item: function() {
@@ -824,16 +838,30 @@ jQuery( function ( $ ) {
 						security              : woocommerce_admin_meta_boxes.order_item_nonce
 					};
 
-					$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-						if ( true === response.success ) {
-							// Redirect to same page for show the refunded status
-							window.location.reload();
-						} else {
-							window.alert( response.data.error );
-							wc_meta_boxes_order_items.reload_items();
-							wc_meta_boxes_order_items.unblock();
+					$.ajax( {
+						url:     woocommerce_admin_meta_boxes.ajax_url,
+						data:    data,
+						type:    'POST',
+						success: function( response ) {
+							if ( true === response.success ) {
+								// Redirect to same page for show the refunded status
+								window.location.reload();
+							} else {
+								window.alert( response.data.error );
+								wc_meta_boxes_order_items.reload_items();
+								wc_meta_boxes_order_items.unblock();
+							}
+						},
+						complete: function() {
+							window.wcTracks.recordEvent( 'order_refunded', {
+								order_id: data.order_id,
+								status: $( '#order_status' ).val(),
+								api_refund: data.api_refund,
+								has_reason: Boolean( data.refund_reason.length ),
+								restock: 'true' === data.restock_refunded_items,
+							} );
 						}
-					});
+					} );
 				} else {
 					wc_meta_boxes_order_items.unblock();
 				}
