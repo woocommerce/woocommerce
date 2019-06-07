@@ -297,11 +297,11 @@ class ProductReviews extends AbstractController {
 		}
 
 		/**
-		 * Filters arguments, before passing to WP_Comment_Query, when querying reviews via the REST API.
+		 * Filters arguments, before passing to \WP_Comment_Query, when querying reviews via the REST API.
 		 *
 		 * @since 3.5.0
-		 * @link https://developer.wordpress.org/reference/classes/wp_comment_query/
-		 * @param array           $prepared_args Array of arguments for WP_Comment_Query.
+		 * @link https://developer.wordpress.org/reference/classes/\WP_Comment_Query/
+		 * @param array           $prepared_args Array of arguments for \WP_Comment_Query.
 		 * @param \WP_REST_Request $request       The current request.
 		 */
 		$prepared_args = apply_filters( 'woocommerce_rest_product_review_query', $prepared_args, $request );
@@ -310,7 +310,7 @@ class ProductReviews extends AbstractController {
 		$prepared_args['type'] = 'review';
 
 		// Query reviews.
-		$query        = new WP_Comment_Query();
+		$query        = new \WP_Comment_Query();
 		$query_result = $query->query( $prepared_args );
 		$reviews      = array();
 
@@ -330,7 +330,7 @@ class ProductReviews extends AbstractController {
 			// Out-of-bounds, run the query again without LIMIT for total count.
 			unset( $prepared_args['number'], $prepared_args['offset'] );
 
-			$query                  = new WP_Comment_Query();
+			$query                  = new \WP_Comment_Query();
 			$prepared_args['count'] = true;
 
 			$total_reviews = $query->query( $prepared_args );
@@ -368,7 +368,7 @@ class ProductReviews extends AbstractController {
 	 * Create a single review.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
@@ -499,7 +499,7 @@ class ProductReviews extends AbstractController {
 	 * Get a single product review.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$review = $this->get_review( $request['id'] );
@@ -517,7 +517,7 @@ class ProductReviews extends AbstractController {
 	 * Updates a review.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response Response object on success, or error object on failure.
+	 * @return \WP_Error|\WP_REST_Response Response object on success, or error object on failure.
 	 */
 	public function update_item( $request ) {
 		$review = $this->get_review( $request['id'] );
@@ -603,7 +603,7 @@ class ProductReviews extends AbstractController {
 	 * Deletes a review.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response Response object on success, or error object on failure.
+	 * @return \WP_Error|\WP_REST_Response Response object on success, or error object on failure.
 	 */
 	public function delete_item( $request ) {
 		$review = $this->get_review( $request['id'] );
@@ -629,7 +629,7 @@ class ProductReviews extends AbstractController {
 		if ( $force ) {
 			$previous = $this->prepare_item_for_response( $review, $request );
 			$result   = wp_delete_comment( $review->comment_ID, true );
-			$response = new WP_REST_Response();
+			$response = new \WP_REST_Response();
 			$response->set_data(
 				array(
 					'deleted'  => true,
@@ -660,7 +660,7 @@ class ProductReviews extends AbstractController {
 		 * Fires after a review is deleted via the REST API.
 		 *
 		 * @param WP_Comment       $review   The deleted review data.
-		 * @param WP_REST_Response $response The response returned from the API.
+		 * @param \WP_REST_Response $response The response returned from the API.
 		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( 'woocommerce_rest_delete_review', $review, $response, $request );
@@ -673,7 +673,7 @@ class ProductReviews extends AbstractController {
 	 *
 	 * @param WP_Comment      $review Product review object.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @return \WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $review, $request ) {
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -725,7 +725,7 @@ class ProductReviews extends AbstractController {
 		/**
 		 * Filter product reviews object returned from the REST API.
 		 *
-		 * @param WP_REST_Response $response The response object.
+		 * @param \WP_REST_Response $response The response object.
 		 * @param WP_Comment       $review   Product review object used to create response.
 		 * @param \WP_REST_Request  $request  Request object.
 		 */
@@ -1021,8 +1021,8 @@ class ProductReviews extends AbstractController {
 		 * Filter collection parameters for the reviews controller.
 		 *
 		 * This filter registers the collection parameter, but does not map the
-		 * collection parameter to an internal WP_Comment_Query parameter. Use the
-		 * `wc_rest_review_query` filter to set WP_Comment_Query parameters.
+		 * collection parameter to an internal \WP_Comment_Query parameter. Use the
+		 * `wc_rest_review_query` filter to set \WP_Comment_Query parameters.
 		 *
 		 * @since 3.5.0
 		 * @param array $params JSON Schema-formatted collection parameters.

@@ -371,8 +371,7 @@ class Orders extends AbstractRestApiTest {
 	 * Test read.
 	 */
 	public function test_guest_create() {
-		parent::test_guest_create();
-
+		wp_set_current_user( 0 );
 		$product = \WC_Helper_Product::create_simple_product();
 		$data    = [
 			'currency'             => 'ZAR',
@@ -428,8 +427,7 @@ class Orders extends AbstractRestApiTest {
 	 * Test read.
 	 */
 	public function test_guest_read() {
-		parent::test_guest_read();
-
+		wp_set_current_user( 0 );
 		$response = $this->do_request( '/wc/v4/orders', 'GET' );
 		$this->assertExpectedResponse( $response, 401 );
 	}
@@ -438,8 +436,7 @@ class Orders extends AbstractRestApiTest {
 	 * Test update.
 	 */
 	public function test_guest_update() {
-		parent::test_guest_update();
-
+		wp_set_current_user( 0 );
 		$order    = \WC_Helper_Order::create_order();
 		$data     = [
 			'payment_method' => 'test-update',
@@ -460,8 +457,7 @@ class Orders extends AbstractRestApiTest {
 	 * Test delete.
 	 */
 	public function test_guest_delete() {
-		parent::test_guest_delete();
-
+		wp_set_current_user( 0 );
 		$order    = \WC_Helper_Order::create_order();
 		$response = $this->do_request( '/wc/v4/orders/' . $order->get_id(), 'DELETE', [ 'force' => true ] );
 		$this->assertEquals( 401, $response->status );
@@ -547,7 +543,7 @@ class Orders extends AbstractRestApiTest {
 
 		$fee_data = current( $order->get_items( 'fee' ) );
 		$response = $this->do_request(
-			'/wc/v3/orders/' . $order->get_id(),
+			'/wc/v4/orders/' . $order->get_id(),
 			'PUT',
 			[
 				'fee_lines' => array(
@@ -575,7 +571,7 @@ class Orders extends AbstractRestApiTest {
 		$coupon->save();
 
 		$response = $this->do_request(
-			'/wc/v3/orders/' . $order->get_id(),
+			'/wc/v4/orders/' . $order->get_id(),
 			'PUT',
 			[
 				'coupon_lines' => array(
@@ -609,7 +605,7 @@ class Orders extends AbstractRestApiTest {
 
 		$coupon_data = current( $order->get_items( 'coupon' ) );
 		$response    = $this->do_request(
-			'/wc/v3/orders/' . $order->get_id(),
+			'/wc/v4/orders/' . $order->get_id(),
 			'PUT',
 			[
 				'coupon_lines' => array(
@@ -640,7 +636,7 @@ class Orders extends AbstractRestApiTest {
 	public function test_invalid_coupon() {
 		$order    = \WC_Helper_Order::create_order();
 		$response = $this->do_request(
-			'/wc/v3/orders/' . $order->get_id(),
+			'/wc/v4/orders/' . $order->get_id(),
 			'PUT',
 			[
 				'coupon_lines' => array(

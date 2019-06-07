@@ -189,8 +189,7 @@ class Coupons extends AbstractRestApiTest {
 	 * Test read.
 	 */
 	public function test_guest_create() {
-		parent::test_guest_create();
-
+		wp_set_current_user( 0 );
 		$valid_data = [
 			'code'                        => 'test-coupon',
 			'amount'                      => '5.00',
@@ -225,8 +224,7 @@ class Coupons extends AbstractRestApiTest {
 	 * Test read.
 	 */
 	public function test_guest_read() {
-		parent::test_guest_read();
-
+		wp_set_current_user( 0 );
 		$response = $this->do_request( '/wc/v4/coupons', 'GET' );
 		$this->assertExpectedResponse( $response, 401 );
 	}
@@ -235,8 +233,7 @@ class Coupons extends AbstractRestApiTest {
 	 * Test update.
 	 */
 	public function test_guest_update() {
-		parent::test_guest_update();
-
+		wp_set_current_user( 0 );
 		$coupon   = \WC_Helper_Coupon::create_coupon( 'testcoupon-1' );
 		$response = $this->do_request(
 			'/wc/v4/coupons/' . $coupon->get_id(),
@@ -253,8 +250,7 @@ class Coupons extends AbstractRestApiTest {
 	 * Test delete.
 	 */
 	public function test_guest_delete() {
-		parent::test_guest_delete();
-
+		wp_set_current_user( 0 );
 		$coupon = \WC_Helper_Coupon::create_coupon( 'testcoupon-1' );
 		$result = $this->do_request( '/wc/v4/coupons/' . $coupon->get_id(), 'DELETE', [ 'force' => false ] );
 		$this->assertEquals( 401, $result->status );

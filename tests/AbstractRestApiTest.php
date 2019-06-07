@@ -90,59 +90,27 @@ abstract class AbstractRestApiTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Classes should test creation using this method.
+	 * Test creation using this method.
 	 * If read-only, test to confirm this.
 	 */
 	abstract public function test_create();
 
 	/**
-	 * Classes should test get/read using this method.
+	 * Test get/read using this method.
 	 */
 	abstract public function test_read();
 
 	/**
-	 * Classes should test updates using this method.
+	 * Test updates using this method.
 	 * If read-only, test to confirm this.
 	 */
 	abstract public function test_update();
 
 	/**
-	 * Classes should test delete using this method.
+	 * Test delete using this method.
 	 * If read-only, test to confirm this.
 	 */
 	abstract public function test_delete();
-
-	/**
-	 * Tests delete when there is no user logged in.
-	 */
-	public function test_guest_create() {
-		wp_set_current_user( 0 );
-		$this->assertEquals( 0, get_current_user_id() );
-	}
-
-	/**
-	 * Tests delete when there is no user logged in.
-	 */
-	public function test_guest_read() {
-		wp_set_current_user( 0 );
-		$this->assertEquals( 0, get_current_user_id() );
-	}
-
-	/**
-	 * Tests delete when there is no user logged in.
-	 */
-	public function test_guest_update() {
-		wp_set_current_user( 0 );
-		$this->assertEquals( 0, get_current_user_id() );
-	}
-
-	/**
-	 * Tests delete when there is no user logged in.
-	 */
-	public function test_guest_delete() {
-		wp_set_current_user( 0 );
-		$this->assertEquals( 0, get_current_user_id() );
-	}
 
 	/**
 	 * Perform a request and return the status and returned data.
@@ -153,7 +121,7 @@ abstract class AbstractRestApiTest extends WC_REST_Unit_Test_Case {
 	 * @return object
 	 */
 	protected function do_request( $endpoint, $type = 'GET', $params = [] ) {
-		$request = new \WP_REST_Request( $type, $endpoint );
+		$request = new \WP_REST_Request( $type, untrailingslashit( $endpoint ) );
 		'GET' === $type ? $request->set_query_params( $params ) : $request->set_body_params( $params );
 		$response = $this->server->dispatch( $request );
 
