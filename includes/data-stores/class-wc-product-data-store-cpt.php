@@ -1079,19 +1079,21 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Get the attributes of the variations.
 		$query = $wpdb->prepare(
 			"
-			SELECT post_id, meta_key, meta_value FROM {$wpdb->postmeta}
-			WHERE post_id IN (
+			SELECT postmeta.post_id, postmeta.meta_key, postmeta.meta_value, posts.menu_order FROM {$wpdb->postmeta} as postmeta
+			LEFT JOIN {$wpdb->posts} as posts ON postmeta.post_id=posts.ID
+			WHERE postmeta.post_id IN (
 				SELECT ID FROM {$wpdb->posts}
 				WHERE {$wpdb->posts}.post_parent = %d
 				AND {$wpdb->posts}.post_status = 'publish'
 				AND {$wpdb->posts}.post_type = 'product_variation'
-				ORDER BY menu_order ASC, ID ASC
 			)
 			",
 			$product->get_id()
 		);
 
-		$query .= ' AND meta_key IN ( "' . implode( '","', array_map( 'esc_sql', $meta_attribute_names ) ) . '" );';
+		$query .= ' AND postmeta.meta_key IN ( "' . implode( '","', array_map( 'esc_sql', $meta_attribute_names ) ) . '" )';
+
+		$query.=' ORDER BY posts.menu_order ASC, postmeta.post_id ASC;';
 
 		$attributes = $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
