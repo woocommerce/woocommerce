@@ -140,8 +140,8 @@ jQuery( function ( $ ) {
 
 			var event_name = is_billing ? 'order_edit_billing_address_click' : 'order_edit_shipping_address_click';
 			window.wcTracks.recordEvent( event_name, {
-				order_id: data.order_id,
-				status: $( '#order_status' ).val(),
+				order_id: woocommerce_admin_meta_boxes.post_id,
+				status: $( '#order_status' ).val()
 			} );
 		},
 
@@ -474,7 +474,7 @@ jQuery( function ( $ ) {
 
 			window.wcTracks.recordEvent( 'order_refund_button_click', {
 				order_id: woocommerce_admin_meta_boxes.post_id,
-				status: $( '#order_status' ).val(),
+				status: $( '#order_status' ).val()
 			} );
 
 			return false;
@@ -498,7 +498,7 @@ jQuery( function ( $ ) {
 		track_cancel: function() {
 			window.wcTracks.recordEvent( 'order_refund_cancel', {
 				order_id: woocommerce_admin_meta_boxes.post_id,
-				status: $( '#order_status' ).val(),
+				status: $( '#order_status' ).val()
 			} );
 		},
 
@@ -658,14 +658,14 @@ jQuery( function ( $ ) {
 					complete: function() {
 						window.wcTracks.recordEvent( 'order_delete_tax', {
 							order_id: data.order_id,
-							status: $( '#order_status' ).val(),
+							status: $( '#order_status' ).val()
 						} );
 					}
 				});
 			} else {
 				window.wcTracks.recordEvent( 'order_delete_tax_cancel', {
 					order_id: woocommerce_admin_meta_boxes.post_id,
-					status: $( '#order_status' ).val(),
+					status: $( '#order_status' ).val()
 				} );
 			}
 			return false;
@@ -858,7 +858,7 @@ jQuery( function ( $ ) {
 								status: $( '#order_status' ).val(),
 								api_refund: data.api_refund,
 								has_reason: Boolean( data.refund_reason.length ),
-								restock: 'true' === data.restock_refunded_items,
+								restock: 'true' === data.restock_refunded_items
 							} );
 						}
 					} );
