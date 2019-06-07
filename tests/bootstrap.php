@@ -43,6 +43,7 @@ require $tests_dir . '/includes/bootstrap.php';
 require $wc_tests_dir . '/bootstrap.php';
 
 // Framework.
+require_once __DIR__ . '/AbstractRestApiTest.php';
 require_once $wc_tests_dir . '/framework/class-wc-unit-test-factory.php';
 require_once $wc_tests_dir . '/framework/class-wc-mock-session-handler.php';
 require_once $wc_tests_dir . '/framework/class-wc-mock-wc-data.php';

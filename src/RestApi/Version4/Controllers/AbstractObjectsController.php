@@ -221,7 +221,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( ! $object || 0 === $object->get_id() ) {
-			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$object = $this->save_object( $request, false );
@@ -272,6 +272,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 		$args['post_parent__in']     = $request['parent'];
 		$args['post_parent__not_in'] = $request['parent_exclude'];
 		$args['s']                   = $request['search'];
+		$args['fields']              = 'ids';
 
 		if ( 'date' === $args['orderby'] ) {
 			$args['orderby'] = 'date ID';
@@ -348,7 +349,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 				continue;
 			}
 
-			$data = $this->prepare_object_for_response( $object, $request );
+			$data      = $this->prepare_object_for_response( $object, $request );
 			$objects[] = $this->prepare_response_for_collection( $data );
 		}
 
@@ -407,17 +408,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$supports_trash = EMPTY_TRASH_DAYS > 0 && is_callable( array( $object, 'get_status' ) );
-
-		/**
-		 * Filter whether an object is trashable.
-		 *
-		 * Return false to disable trash support for the object.
-		 *
-		 * @param boolean $supports_trash Whether the object type support trashing.
-		 * @param WC_Data $object         The object being considered for trashing support.
-		 */
-		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );
+		$supports_trash = $this->supports_trash( $object );
 
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
 			/* translators: %s: post type */
@@ -425,7 +416,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 		}
 
 		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_object_for_response( $object, $request );
+		$previous = $this->prepare_object_for_response( $object, $request );
 
 		// If we're forcing, then delete permanently.
 		if ( $force ) {
@@ -439,14 +430,12 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 			}
 
 			// Otherwise, only trash if we haven't already.
-			if ( is_callable( array( $object, 'get_status' ) ) ) {
-				if ( 'trash' === $object->get_status() ) {
-					/* translators: %s: post type */
-					return new \WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 410 ) );
-				}
-
+			if ( is_callable( array( $object, 'get_status' ) ) && 'trash' === $object->get_status() ) {
+				/* translators: %s: post type */
+				return new \WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 410 ) );
+			} else {
 				$object->delete();
-				$result = 'trash' === $object->get_status();
+				$result = is_callable( array( $object, 'get_status' ) ) ? 'trash' === $object->get_status() : true;
 			}
 		}
 
@@ -454,6 +443,14 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 			/* translators: %s: post type */
 			return new \WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
 		}
+
+		$response = new \WP_REST_Response();
+		$response->set_data(
+			array(
+				'deleted'  => true,
+				'previous' => $previous->get_data(),
+			)
+		);
 
 		/**
 		 * Fires after a single object is deleted or trashed via the REST API.
@@ -468,9 +465,29 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	}
 
 	/**
+	 * Can this object be trashed?
+	 *
+	 * @oaram  object $object Object to check.
+	 * @return boolean
+	 */
+	protected function supports_trash( $object ) {
+		$supports_trash = EMPTY_TRASH_DAYS > 0;
+
+		/**
+		 * Filter whether an object is trashable.
+		 *
+		 * Return false to disable trash support for the object.
+		 *
+		 * @param boolean $supports_trash Whether the object type support trashing.
+		 * @param WC_Data $object         The object being considered for trashing support.
+		 */
+		return apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );
+	}
+
+	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Data         $object  Object data.
+	 * @param WC_Data          $object  Object data.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return array                   Links for the given post.
 	 */

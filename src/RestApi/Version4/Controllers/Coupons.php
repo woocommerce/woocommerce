@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Coupons controller class.
  */
-class Coupons extends AbstractPostsController {
+class Coupons extends AbstractObjectsController {
 
 	/**
 	 * Route base.
@@ -29,13 +29,6 @@ class Coupons extends AbstractPostsController {
 	 * @var string
 	 */
 	protected $post_type = 'shop_coupon';
-
-	/**
-	 * Coupons actions.
-	 */
-	public function __construct() {
-		add_filter( "woocommerce_rest_{$this->post_type}_query", array( $this, 'query_args' ), 10, 2 );
-	}
 
 	/**
 	 * Register the routes for coupons.
@@ -205,7 +198,7 @@ class Coupons extends AbstractPostsController {
 	 * Prepare a single coupon output for response.
 	 *
 	 * @since  3.0.0
-	 * @param  WC_Data         $object  Object data.
+	 * @param  WC_Data          $object  Object data.
 	 * @param  \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
@@ -250,9 +243,6 @@ class Coupons extends AbstractPostsController {
 			$args['s']      = false;
 		}
 
-		// Get only ids.
-		$args['fields'] = 'ids';
-
 		return $args;
 	}
 
@@ -260,7 +250,7 @@ class Coupons extends AbstractPostsController {
 	 * Prepare a single coupon for create or update.
 	 *
 	 * @param  \WP_REST_Request $request Request object.
-	 * @param  bool            $creating If is creating a new object.
+	 * @param  bool             $creating If is creating a new object.
 	 * @return \WP_Error|WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
@@ -550,101 +540,6 @@ class Coupons extends AbstractPostsController {
 	}
 
 	/**
-	 * Query args.
-	 *
-	 * @param array           $args Query args.
-	 * @param \WP_REST_Request $request Request data.
-	 * @return array
-	 */
-	public function query_args( $args, $request ) {
-		if ( ! empty( $request['code'] ) ) {
-			$id               = wc_get_coupon_id_by_code( $request['code'] );
-			$args['post__in'] = array( $id );
-		}
-
-		return $args;
-	}
-
-	/**
-	 * Prepare a single coupon output for response.
-	 *
-	 * @param WP_Post         $post Post object.
-	 * @param \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $data
-	 */
-	public function prepare_item_for_response( $post, $request ) {
-		$coupon = new \WC_Coupon( (int) $post->ID );
-		$_data  = $coupon->get_data();
-
-		$format_decimal  = array( 'amount', 'minimum_amount', 'maximum_amount' );
-		$format_date     = array( 'date_created', 'date_modified' );
-		$format_date_utc = array( 'date_expires' );
-		$format_null     = array( 'usage_limit', 'usage_limit_per_user' );
-
-		// Format decimal values.
-		foreach ( $format_decimal as $key ) {
-			$_data[ $key ] = wc_format_decimal( $_data[ $key ], 2 );
-		}
-
-		// Format date values.
-		foreach ( $format_date as $key ) {
-			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( $_data[ $key ], false ) : null;
-		}
-		foreach ( $format_date_utc as $key ) {
-			$_data[ $key ] = $_data[ $key ] ? wc_rest_prepare_date_response( $_data[ $key ] ) : null;
-		}
-
-		// Format null values.
-		foreach ( $format_null as $key ) {
-			$_data[ $key ] = $_data[ $key ] ? $_data[ $key ] : null;
-		}
-
-		$data = array(
-			'id'                          => $_data['id'],
-			'code'                        => $_data['code'],
-			'date_created'                => $_data['date_created'],
-			'date_modified'               => $_data['date_modified'],
-			'discount_type'               => $_data['discount_type'],
-			'description'                 => $_data['description'],
-			'amount'                      => $_data['amount'],
-			'expiry_date'                 => $_data['date_expires'],
-			'usage_count'                 => $_data['usage_count'],
-			'individual_use'              => $_data['individual_use'],
-			'product_ids'                 => $_data['product_ids'],
-			'exclude_product_ids'         => $_data['excluded_product_ids'],
-			'usage_limit'                 => $_data['usage_limit'],
-			'usage_limit_per_user'        => $_data['usage_limit_per_user'],
-			'limit_usage_to_x_items'      => $_data['limit_usage_to_x_items'],
-			'free_shipping'               => $_data['free_shipping'],
-			'product_categories'          => $_data['product_categories'],
-			'excluded_product_categories' => $_data['excluded_product_categories'],
-			'exclude_sale_items'          => $_data['exclude_sale_items'],
-			'minimum_amount'              => $_data['minimum_amount'],
-			'maximum_amount'              => $_data['maximum_amount'],
-			'email_restrictions'          => $_data['email_restrictions'],
-			'used_by'                     => $_data['used_by'],
-		);
-
-		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data     = $this->add_additional_fields_to_object( $data, $request );
-		$data     = $this->filter_response_by_context( $data, $context );
-		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $post, $request ) );
-
-		/**
-		 * Filter the data for a response.
-		 *
-		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
-		 * prepared for the response.
-		 *
-		 * @param WP_REST_Response   $response   The response object.
-		 * @param WP_Post            $post       Post object.
-		 * @param \WP_REST_Request    $request    Request object.
-		 */
-		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $post, $request );
-	}
-
-	/**
 	 * Only return writable props from schema.
 	 *
 	 * @param  array $schema Schema array.
@@ -655,188 +550,15 @@ class Coupons extends AbstractPostsController {
 	}
 
 	/**
-	 * Prepare a single coupon for create or update.
-	 *
-	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_Error|stdClass $data Post object.
-	 */
-	protected function prepare_item_for_database( $request ) {
-		$id        = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
-		$coupon    = new \WC_Coupon( $id );
-		$schema    = $this->get_item_schema();
-		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
-
-		// Update to schema to make compatible with CRUD schema.
-		if ( $request['exclude_product_ids'] ) {
-			$request['excluded_product_ids'] = $request['exclude_product_ids'];
-		}
-		if ( $request['expiry_date'] ) {
-			$request['date_expires'] = $request['expiry_date'];
-		}
-
-		// Validate required POST fields.
-		if ( 'POST' === $request->get_method() && 0 === $coupon->get_id() ) {
-			if ( empty( $request['code'] ) ) {
-				return new \WP_Error( 'woocommerce_rest_empty_coupon_code', sprintf( __( 'The coupon code cannot be empty.', 'woocommerce' ), 'code' ), array( 'status' => 400 ) );
-			}
-		}
-
-		// Handle all writable props.
-		foreach ( $data_keys as $key ) {
-			$value = $request[ $key ];
-
-			if ( ! is_null( $value ) ) {
-				switch ( $key ) {
-					case 'code':
-						$coupon_code  = wc_format_coupon_code( $value );
-						$id           = $coupon->get_id() ? $coupon->get_id() : 0;
-						$id_from_code = wc_get_coupon_id_by_code( $coupon_code, $id );
-
-						if ( $id_from_code ) {
-							return new \WP_Error( 'woocommerce_rest_coupon_code_already_exists', __( 'The coupon code already exists', 'woocommerce' ), array( 'status' => 400 ) );
-						}
-
-						$coupon->set_code( $coupon_code );
-						break;
-					case 'description':
-						$coupon->set_description( wp_filter_post_kses( $value ) );
-						break;
-					case 'expiry_date':
-						$coupon->set_date_expires( $value );
-						break;
-					default:
-						if ( is_callable( array( $coupon, "set_{$key}" ) ) ) {
-							$coupon->{"set_{$key}"}( $value );
-						}
-						break;
-				}
-			}
-		}
-
-		/**
-		 * Filter the query_vars used in `get_items` for the constructed query.
-		 *
-		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
-		 * prepared for insertion.
-		 *
-		 * @param WC_Coupon       $coupon        The coupon object.
-		 * @param \WP_REST_Request $request       Request object.
-		 */
-		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}", $coupon, $request );
-	}
-
-	/**
-	 * Create a single item.
-	 *
-	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
-	 */
-	public function create_item( $request ) {
-		if ( ! empty( $request['id'] ) ) {
-			/* translators: %s: post type */
-			return new \WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
-		}
-
-		$coupon_id = $this->save_coupon( $request );
-		if ( is_wp_error( $coupon_id ) ) {
-			return $coupon_id;
-		}
-
-		$post = get_post( $coupon_id );
-		$this->update_additional_fields_for_object( $post, $request );
-
-		$this->add_post_meta_fields( $post, $request );
-
-		/**
-		 * Fires after a single item is created or updated via the REST API.
-		 *
-		 * @param WP_Post         $post      Post object.
-		 * @param \WP_REST_Request $request   Request object.
-		 * @param boolean         $creating  True when creating item, false when updating.
-		 */
-		do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, true );
-		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_item_for_response( $post, $request );
-		$response = rest_ensure_response( $response );
-		$response->set_status( 201 );
-		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $post->ID ) ) );
-
-		return $response;
-	}
-
-	/**
-	 * Saves a coupon to the database.
-	 *
-	 * @since 3.0.0
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|int
-	 */
-	protected function save_coupon( $request ) {
-		try {
-			$coupon = $this->prepare_item_for_database( $request );
-
-			if ( is_wp_error( $coupon ) ) {
-				return $coupon;
-			}
-
-			$coupon->save();
-			return $coupon->get_id();
-		} catch ( WC_Data_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
-		} catch ( WC_REST_Exception $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
-		}
-	}
-
-	/**
-	 * Update a single coupon.
-	 *
-	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
-	 */
-	public function update_item( $request ) {
-		try {
-			$post_id = (int) $request['id'];
-
-			if ( empty( $post_id ) || get_post_type( $post_id ) !== $this->post_type ) {
-				return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
-			}
-
-			$coupon_id = $this->save_coupon( $request );
-			if ( is_wp_error( $coupon_id ) ) {
-				return $coupon_id;
-			}
-
-			$post = get_post( $coupon_id );
-			$this->update_additional_fields_for_object( $post, $request );
-
-			/**
-			 * Fires after a single item is created or updated via the REST API.
-			 *
-			 * @param WP_Post         $post      Post object.
-			 * @param \WP_REST_Request $request   Request object.
-			 * @param boolean         $creating  True when creating item, false when updating.
-			 */
-			do_action( "woocommerce_rest_insert_{$this->post_type}", $post, $request, false );
-			$request->set_param( 'context', 'edit' );
-			$response = $this->prepare_item_for_response( $post, $request );
-			return rest_ensure_response( $response );
-
-		} catch ( Exception $e ) {
-			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
-		}
-	}
-
-	/**
 	 * Get a collection of posts and add the code search option to \WP_Query.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_search_code_filter' ), 10, 2 );
+		add_filter( 'posts_where', array( $this, 'add_wp_query_search_code_filter' ), 10, 2 );
 		$response = parent::get_items( $request );
-		remove_filter( 'posts_where', array( __CLASS__, 'add_wp_query_search_code_filter' ), 10 );
+		remove_filter( 'posts_where', array( $this, 'add_wp_query_search_code_filter' ), 10 );
 		return $response;
 	}
 
@@ -847,7 +569,7 @@ class Coupons extends AbstractPostsController {
 	 * @param object $wp_query \WP_Query object.
 	 * @return string
 	 */
-	public static function add_wp_query_search_code_filter( $where, $wp_query ) {
+	public function add_wp_query_search_code_filter( $where, $wp_query ) {
 		global $wpdb;
 
 		$search = $wp_query->get( 'search' );

@@ -291,7 +291,7 @@ class Orders extends AbstractObjectsController {
 	 * Prepare a single order output for response.
 	 *
 	 * @since  3.0.0
-	 * @param  WC_Data         $object  Object data.
+	 * @param  \WC_Data         $object  Object data.
 	 * @param  \WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */
@@ -321,7 +321,7 @@ class Orders extends AbstractObjectsController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Data         $object  Object data.
+	 * @param WC_Data          $object  Object data.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return array                   Links for the given post.
 	 */
@@ -381,6 +381,47 @@ class Orders extends AbstractObjectsController {
 		// Put the statuses back for further processing (next/prev links, etc).
 		$request['status'] = $statuses;
 
+		// Customer.
+		if ( isset( $request['customer'] ) ) {
+			if ( ! empty( $args['meta_query'] ) ) {
+				$args['meta_query'] = array(); // WPCS: slow query ok.
+			}
+
+			$args['meta_query'][] = array(
+				'key'   => '_customer_user',
+				'value' => $request['customer'],
+				'type'  => 'NUMERIC',
+			);
+		}
+
+		// Search by product.
+		if ( ! empty( $request['product'] ) ) {
+			$order_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT order_id
+					FROM {$wpdb->prefix}woocommerce_order_items
+					WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_key = '_product_id' AND meta_value = %d )
+					AND order_item_type = 'line_item'",
+					$request['product']
+				)
+			);
+
+			// Force WP_Query return empty if don't found any order.
+			$order_ids = ! empty( $order_ids ) ? $order_ids : array( 0 );
+
+			$args['post__in'] = $order_ids;
+		}
+
+		// Search.
+		if ( ! empty( $args['s'] ) ) {
+			$order_ids = wc_order_search( $args['s'] );
+
+			if ( ! empty( $order_ids ) ) {
+				unset( $args['s'] );
+				$args['post__in'] = array_merge( $order_ids, array( 0 ) );
+			}
+		}
+
 		// Search by partial order number.
 		if ( ! empty( $request['number'] ) ) {
 			$partial_number = trim( $request['number'] );
@@ -421,7 +462,7 @@ class Orders extends AbstractObjectsController {
 	 *
 	 * @throws WC_REST_Exception When fails to set any item.
 	 * @param  \WP_REST_Request $request Request object.
-	 * @param  bool            $creating If is creating a new object.
+	 * @param  bool             $creating If is creating a new object.
 	 * @return \WP_Error|WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
@@ -490,12 +531,11 @@ class Orders extends AbstractObjectsController {
 
 	/**
 	 * Save an object data.
-	 *
-	 * @since  3.0.0
-	 * @throws WC_REST_Exception But all errors are validated before returning any data.
+	 *	 *
 	 * @param  \WP_REST_Request $request  Full details about the request.
-	 * @param  bool            $creating If is creating a new object.
+	 * @param  bool             $creating If is creating a new object.
 	 * @return WC_Data|\WP_Error
+	 * @throws \WC_REST_Exception But all errors are validated before returning any data.
 	 */
 	protected function save_object( $request, $creating = false ) {
 		try {
@@ -574,9 +614,9 @@ class Orders extends AbstractObjectsController {
 	/**
 	 * Gets the product ID from the SKU or posted ID.
 	 *
-	 * @throws WC_REST_Exception When SKU or ID is not valid.
 	 * @param array $posted Request data.
 	 * @return int
+	 * @throws \WC_REST_Exception When SKU or ID is not valid.
 	 */
 	protected function get_product_id( $posted ) {
 		if ( ! empty( $posted['sku'] ) ) {
@@ -1711,7 +1751,7 @@ class Orders extends AbstractObjectsController {
 	 *
 	 * @throws WC_REST_Exception When fails to set any item.
 	 * @param \WP_REST_Request $request Request object.
-	 * @param WC_Order        $order   Order data.
+	 * @param WC_Order         $order   Order data.
 	 * @return bool
 	 */
 	protected function calculate_coupons( $request, $order ) {
