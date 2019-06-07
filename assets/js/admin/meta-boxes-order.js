@@ -1230,6 +1230,11 @@ jQuery( function ( $ ) {
 				$( 'ul.order_notes' ).prepend( response );
 				$( '#woocommerce-order-notes' ).unblock();
 				$( '#add_order_note' ).val( '' );
+				window.wcTracks.recordEvent( 'order_edit_add_order_note', {
+					order_id: data.post_id,
+					note_type: data.note_type || 'private',
+					status: $( '#order_status' ).val()
+				} );
 			});
 
 			return false;
