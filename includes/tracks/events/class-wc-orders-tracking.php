@@ -55,6 +55,7 @@ class WC_Orders_Tracking {
 			'next_status'     => $next_status,
 			'previous_status' => $previous_status,
 			'date_created'    => $date->date( 'Y-m-d' ),
+			'payment_method'  => $order->get_payment_method(),
 		);
 
 		WC_Tracks::record_event( 'orders_edit_status_change', $properties );
