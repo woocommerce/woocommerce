@@ -18,6 +18,8 @@ class WC_Orders_Tracking {
 		add_action( 'woocommerce_order_status_changed', array( $this, 'track_order_status_change' ), 10, 3 );
 		add_action( 'load-edit.php', array( $this, 'track_orders_view' ), 10 );
 		add_action( 'pre_post_update', array( $this, 'track_created_date_change' ), 10 );
+		// WC_Meta_Box_Order_Actions::save() hooks in at priority 50.
+		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'track_order_action' ), 51 );
 	}
 
 	/**
@@ -89,5 +91,26 @@ class WC_Orders_Tracking {
 
 			WC_Tracks::record_event( 'order_edit_date_created', $properties );
 		}
+	}
+
+	/**
+	 * Track order actions taken.
+	 *
+	 * @param int $order_id Order ID.
+	 */
+	public function track_order_action( $order_id ) {
+		// phpcs:disable WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! empty( $_POST['wc_order_action'] ) ) {
+			$order      = wc_get_order( $order_id );
+			$action     = wc_clean( wp_unslash( $_POST['wc_order_action'] ) );
+			$properties = array(
+				'order_id' => $order_id,
+				'status'   => $order->get_status(),
+				'action'   => $action,
+			);
+
+			WC_Tracks::record_event( 'orders_edit_order_action', $properties );
+		}
+		// phpcs:enable
 	}
 }
