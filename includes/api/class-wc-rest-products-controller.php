@@ -234,6 +234,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			foreach ( $images as $index => $image ) {
 				$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
 
+				$attachment_id = apply_filters( 'woocommerce_rest_check_product_image_attachment_exist', $attachment_id,  $image );
+				
 				if ( 0 === $attachment_id && isset( $image['src'] ) ) {
 					$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
 
