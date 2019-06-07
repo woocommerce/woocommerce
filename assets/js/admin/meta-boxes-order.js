@@ -513,6 +513,8 @@ jQuery( function ( $ ) {
 				wc_meta_boxes_order_items.reload_items();
 			}
 
+			window.wcTracks.recordEvent( 'order_edit_add_items_cancelled' );
+
 			return false;
 		},
 
@@ -551,6 +553,7 @@ jQuery( function ( $ ) {
 							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
 							wc_meta_boxes_order_items.reloaded_items();
 							wc_meta_boxes_order_items.unblock();
+							window.wcTracks.recordEvent( 'order_edit_add_fee' );
 					} else {
 						window.alert( response.data.error );
 					}
@@ -573,6 +576,7 @@ jQuery( function ( $ ) {
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 				if ( response.success ) {
 					$( 'table.woocommerce_order_items tbody#order_shipping_line_items' ).append( response.data.html );
+					window.wcTracks.recordEvent( 'order_edit_add_shipping' );
 				} else {
 					window.alert( response.data.error );
 				}
@@ -1118,6 +1122,9 @@ jQuery( function ( $ ) {
 							window.alert( response.data.error );
 						}
 					},
+					complete: function() {
+						window.wcTracks.recordEvent( 'order_edit_add_products' );
+					},
 					dataType: 'json'
 				});
 			},
@@ -1160,6 +1167,9 @@ jQuery( function ( $ ) {
 								window.alert( response.data.error );
 							}
 							wc_meta_boxes_order_items.unblock();
+						},
+						complete: function() {
+							window.wcTracks.recordEvent( 'order_edit_add_tax' );
 						}
 					});
 				} else {
