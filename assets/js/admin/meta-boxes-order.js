@@ -513,7 +513,10 @@ jQuery( function ( $ ) {
 				wc_meta_boxes_order_items.reload_items();
 			}
 
-			window.wcTracks.recordEvent( 'order_edit_add_items_cancelled' );
+			window.wcTracks.recordEvent( 'order_edit_add_items_cancelled',{
+				order_id: woocommerce_admin_meta_boxes.post_id,
+				status: $( '#order_status' ).val()
+			} );
 
 			return false;
 		},
@@ -553,7 +556,10 @@ jQuery( function ( $ ) {
 							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
 							wc_meta_boxes_order_items.reloaded_items();
 							wc_meta_boxes_order_items.unblock();
-							window.wcTracks.recordEvent( 'order_edit_add_fee' );
+							window.wcTracks.recordEvent( 'order_edit_add_fee', {
+								order_id: data.post_id,
+								status: $( '#order_status' ).val()
+							} );
 					} else {
 						window.alert( response.data.error );
 					}
@@ -576,7 +582,10 @@ jQuery( function ( $ ) {
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
 				if ( response.success ) {
 					$( 'table.woocommerce_order_items tbody#order_shipping_line_items' ).append( response.data.html );
-					window.wcTracks.recordEvent( 'order_edit_add_shipping' );
+					window.wcTracks.recordEvent( 'order_edit_add_shipping', {
+						order_id: data.post_id,
+						status: $( '#order_status' ).val()
+					} );
 				} else {
 					window.alert( response.data.error );
 				}
@@ -599,7 +608,10 @@ jQuery( function ( $ ) {
 			$( this ).hide();
 			$( 'button.add-line-item' ).click();
 			$( 'button.cancel-action' ).attr( 'data-reload', true );
-			window.wcTracks.recordEvent( 'order_edit_edit_item_click' );
+			window.wcTracks.recordEvent( 'order_edit_edit_item_click', {
+				order_id: woocommerce_admin_meta_boxes.post_id,
+				status: $( '#order_status' ).val()
+			} );
 			return false;
 		},
 
@@ -647,7 +659,10 @@ jQuery( function ( $ ) {
 						wc_meta_boxes_order_items.unblock();
 					},
 					complete: function() {
-						window.wcTracks.recordEvent( 'order_edit_remove_item' );
+						window.wcTracks.recordEvent( 'order_edit_remove_item', {
+							order_id: data.post_id,
+							status: $( '#order_status' ).val()
+						} );
 					}
 				});
 			}
@@ -753,13 +768,17 @@ jQuery( function ( $ ) {
 						$( document.body ).trigger( 'order-totals-recalculate-complete', response );
 
 						window.wcTracks.recordEvent( 'order_edit_recalc_totals', {
-							OK_cancel: 'OK'
+							order_id: data.post_id,
+							OK_cancel: 'OK',
+							status: $( '#order_status' ).val()
 						} );
 					}
 				});
 			} else {
 				window.wcTracks.recordEvent( 'order_edit_recalc_totals', {
-					OK_cancel: 'cancel'
+					order_id: woocommerce_admin_meta_boxes.post_id,
+					OK_cancel: 'cancel',
+					status: $( '#order_status' ).val()
 				} );
 			}
 
@@ -799,7 +818,10 @@ jQuery( function ( $ ) {
 					}
 				},
 				complete: function() {
-					window.wcTracks.recordEvent( 'order_edit_save_line_items' );
+					window.wcTracks.recordEvent( 'order_edit_save_line_items', {
+						order_id: data.post_id,
+						status: $( '#order_status' ).val()
+					} );
 				}
 			});
 
@@ -1123,7 +1145,10 @@ jQuery( function ( $ ) {
 						}
 					},
 					complete: function() {
-						window.wcTracks.recordEvent( 'order_edit_add_products' );
+						window.wcTracks.recordEvent( 'order_edit_add_products', {
+							order_id: data.post_id,
+							status: $( '#order_status' ).val()
+						} );
 					},
 					dataType: 'json'
 				});
@@ -1169,7 +1194,10 @@ jQuery( function ( $ ) {
 							wc_meta_boxes_order_items.unblock();
 						},
 						complete: function() {
-							window.wcTracks.recordEvent( 'order_edit_add_tax' );
+							window.wcTracks.recordEvent( 'order_edit_add_tax', {
+								order_id: data.post_id,
+								status: $( '#order_status' ).val()
+							} );
 						}
 					});
 				} else {
