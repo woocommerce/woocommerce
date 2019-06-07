@@ -110,7 +110,7 @@ class WC_Orders_Tracking {
 				'action'   => $action,
 			);
 
-			WC_Tracks::record_event( 'orders_edit_order_action', $properties );
+			WC_Tracks::record_event( 'order_edit_order_action', $properties );
 		}
 		// phpcs:enable
 	}
@@ -140,7 +140,7 @@ class WC_Orders_Tracking {
 					isset( $referring_args['post'] ) &&
 					'shop_order' === get_post_type( $referring_args['post'] )
 				) {
-					WC_Tracks::record_event( 'orders_add_order_from_edit' );
+					WC_Tracks::record_event( 'order_edit_add_order' );
 				}
 			}
 		}

@@ -407,7 +407,7 @@ jQuery( function ( $ ) {
 		},
 
 		add_coupon: function() {
-			window.wcTracks.recordEvent( 'order_add_coupon_click', {
+			window.wcTracks.recordEvent( 'order_edit_add_coupon_click', {
 				order_id: woocommerce_admin_meta_boxes.post_id,
 				status: $( '#order_status' ).val()
 			} );
@@ -415,7 +415,7 @@ jQuery( function ( $ ) {
 			var value = window.prompt( woocommerce_admin_meta_boxes.i18n_apply_coupon );
 
 			if ( null == value ) {
-				window.wcTracks.recordEvent( 'order_add_coupon_cancel', {
+				window.wcTracks.recordEvent( 'order_edit_add_coupon_cancel', {
 					order_id: woocommerce_admin_meta_boxes.post_id,
 					status: $( '#order_status' ).val()
 				} );
@@ -451,7 +451,7 @@ jQuery( function ( $ ) {
 						wc_meta_boxes_order_items.unblock();
 					},
 					complete: function() {
-						window.wcTracks.recordEvent( 'order_added_coupon', {
+						window.wcTracks.recordEvent( 'order_edit_added_coupon', {
 							order_id: data.order_id,
 							status: $( '#order_status' ).val()
 						} );
@@ -493,7 +493,7 @@ jQuery( function ( $ ) {
 			$( '#woocommerce-order-items' ).find( 'div.refund' ).show();
 			$( '.wc-order-edit-line-item .wc-order-edit-line-item-actions' ).hide();
 
-			window.wcTracks.recordEvent( 'order_refund_button_click', {
+			window.wcTracks.recordEvent( 'order_edit_refund_button_click', {
 				order_id: woocommerce_admin_meta_boxes.post_id,
 				status: $( '#order_status' ).val()
 			} );
@@ -519,7 +519,7 @@ jQuery( function ( $ ) {
 		},
 
 		track_cancel: function() {
-			window.wcTracks.recordEvent( 'order_refund_cancel', {
+			window.wcTracks.recordEvent( 'order_edit_refund_cancel', {
 				order_id: woocommerce_admin_meta_boxes.post_id,
 				status: $( '#order_status' ).val()
 			} );
@@ -681,14 +681,14 @@ jQuery( function ( $ ) {
 						wc_meta_boxes_order_items.unblock();
 					},
 					complete: function() {
-						window.wcTracks.recordEvent( 'order_delete_tax', {
+						window.wcTracks.recordEvent( 'order_edit_delete_tax', {
 							order_id: data.order_id,
 							status: $( '#order_status' ).val()
 						} );
 					}
 				});
 			} else {
-				window.wcTracks.recordEvent( 'order_delete_tax_cancel', {
+				window.wcTracks.recordEvent( 'order_edit_delete_tax_cancel', {
 					order_id: woocommerce_admin_meta_boxes.post_id,
 					status: $( '#order_status' ).val()
 				} );
@@ -878,7 +878,7 @@ jQuery( function ( $ ) {
 							}
 						},
 						complete: function() {
-							window.wcTracks.recordEvent( 'order_refunded', {
+							window.wcTracks.recordEvent( 'order_edit_refunded', {
 								order_id: data.order_id,
 								status: $( '#order_status' ).val(),
 								api_refund: data.api_refund,
