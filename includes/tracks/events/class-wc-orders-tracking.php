@@ -20,6 +20,7 @@ class WC_Orders_Tracking {
 		add_action( 'pre_post_update', array( $this, 'track_created_date_change' ), 10 );
 		// WC_Meta_Box_Order_Actions::save() hooks in at priority 50.
 		add_action( 'woocommerce_process_shop_order_meta', array( $this, 'track_order_action' ), 51 );
+		add_action( 'load-post-new.php', array( $this, 'track_add_order_from_edit' ), 10 );
 	}
 
 	/**
@@ -54,6 +55,7 @@ class WC_Orders_Tracking {
 			'next_status'     => $next_status,
 			'previous_status' => $previous_status,
 			'date_created'    => $date->date( 'Y-m-d' ),
+			'payment_method'  => $order->get_payment_method(),
 		);
 
 		WC_Tracks::record_event( 'orders_edit_status_change', $properties );
@@ -109,8 +111,39 @@ class WC_Orders_Tracking {
 				'action'   => $action,
 			);
 
-			WC_Tracks::record_event( 'orders_edit_order_action', $properties );
+			WC_Tracks::record_event( 'order_edit_order_action', $properties );
 		}
 		// phpcs:enable
+	}
+
+	/**
+	 * Track "add order" button on the Edit Order screen.
+	 */
+	public function track_add_order_from_edit() {
+		// phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( isset( $_GET['post_type'] ) && 'shop_order' === wp_unslash( $_GET['post_type'] ) ) {
+			$referer = wp_get_referer();
+
+			if ( $referer ) {
+				$referring_page = parse_url( $referer );
+				$referring_args = array();
+				$post_edit_page = parse_url( admin_url( 'post.php' ) );
+
+				if ( ! empty( $referring_page['query'] ) ) {
+					parse_str( $referring_page['query'], $referring_args );
+				}
+
+				// Determine if we arrived from an Order Edit screen.
+				if (
+					$post_edit_page['path'] === $referring_page['path'] &&
+					isset( $referring_args['action'] ) &&
+					'edit' === $referring_args['action'] &&
+					isset( $referring_args['post'] ) &&
+					'shop_order' === get_post_type( $referring_args['post'] )
+				) {
+					WC_Tracks::record_event( 'order_edit_add_order' );
+				}
+			}
+		}
 	}
 }
