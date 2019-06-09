@@ -32,8 +32,6 @@ WooCommerce Admin also allows store owners to customize a new dashboard screen w
 
 == Getting Started ==
 
-Once again: This plugin is under active development and, as such, we advise you to first install WooCommerce Admin in a staging/test environment. While this code is being run in production on sites, we recommend you first verify it works for you in a test environment, the same as any plugin for WooCommerce.
-
 = Minimum Requirements =
 
 * WordPress 5.0
