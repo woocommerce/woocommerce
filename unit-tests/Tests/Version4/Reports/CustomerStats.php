@@ -11,6 +11,10 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4\Reports;
 defined( 'ABSPATH' ) || exit;
 
 use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
+use \WP_REST_Request;
+use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use \WooCommerce\RestApi\UnitTests\Helpers\QueueHelper;
+use \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
 
 /**
  * Reports Customers Stats REST API Test Class
@@ -85,7 +89,7 @@ class CustomerStats extends AbstractReportsTest {
 		$test_customers[2]->save();
 
 		// Create a test product for use in an order.
-		$product = new WC_Product_Simple();
+		$product = new \WC_Product_Simple();
 		$product->set_name( 'Test Product' );
 		$product->set_regular_price( 25 );
 		$product->save();

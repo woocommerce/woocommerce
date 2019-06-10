@@ -10,6 +10,9 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4;
 defined( 'ABSPATH' ) || exit;
 
 use \WooCommerce\RestApi\UnitTests\AbstractRestApiTest;
+use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+use \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
 
 /**
  * Abstract Rest API Test Class

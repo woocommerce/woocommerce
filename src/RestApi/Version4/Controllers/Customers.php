@@ -364,7 +364,7 @@ class Customers extends AbstractController {
 	/**
 	 * Create a single customer.
 	 *
-	 * @throws WC_REST_Exception On invalid params.
+	 * @throws \WC_REST_Exception On invalid params.
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error\WP_REST_Response
 	 */
@@ -411,7 +411,7 @@ class Customers extends AbstractController {
 			$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $customer->get_id() ) ) );
 
 			return $response;
-		} catch ( Exception $e ) {
+		} catch ( \Exception $e ) {
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -439,7 +439,8 @@ class Customers extends AbstractController {
 	/**
 	 * Update a single user.
 	 *
-	 * @throws WC_REST_Exception On invalid params.
+	 * @throws \WC_REST_Exception On invalid params.
+	 * 
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error\WP_REST_Response
 	 */

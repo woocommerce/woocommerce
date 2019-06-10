@@ -158,9 +158,9 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 			$object->save();
 
 			return $this->get_object( $object->get_id() );
-		} catch ( WC_Data_Exception $e ) {
+		} catch ( \WC_Data_Exception $e ) {
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
-		} catch ( WC_REST_Exception $e ) {
+		} catch ( \WC_REST_Exception $e ) {
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -185,10 +185,10 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 
 		try {
 			$this->update_additional_fields_for_object( $object, $request );
-		} catch ( WC_Data_Exception $e ) {
+		} catch ( \WC_Data_Exception $e ) {
 			$object->delete();
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
-		} catch ( WC_REST_Exception $e ) {
+		} catch ( \WC_REST_Exception $e ) {
 			$object->delete();
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
@@ -232,9 +232,9 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 
 		try {
 			$this->update_additional_fields_for_object( $object, $request );
-		} catch ( WC_Data_Exception $e ) {
+		} catch ( \WC_Data_Exception $e ) {
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
-		} catch ( WC_REST_Exception $e ) {
+		} catch ( \WC_REST_Exception $e ) {
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 

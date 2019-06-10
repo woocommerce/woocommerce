@@ -232,14 +232,14 @@ class WC_Tests_API_Functions extends WC_Unit_Test_Case {
 		} elseif ( 'http://somedomain.com/invalid-image-2.png' === $url ) {
 			// image with an unsupported mime type.
 			// we need to manually copy the file as we are mocking the request. without this an empty file is created.
-			copy( WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/file.txt', $request['filename'] );
+			copy( WooCommerce\RestApi\UnitTests\Bootstrap::instance()->get_dir() . '/data/file.txt', $request['filename'] );
 
 			$mocked_response = array(
 				'response' => array( 'code' => 200 ),
 			);
 		} elseif ( 'http://somedomain.com/' . $this->file_name === $url ) {
 			// we need to manually copy the file as we are mocking the request. without this an empty file is created.
-			copy( WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png', $request['filename'] );
+			copy( WooCommerce\RestApi\UnitTests\Bootstrap::instance()->get_dir() . '/data/Dr1Bczxq4q.png', $request['filename'] );
 
 			$mocked_response = array(
 				'response' => array( 'code' => 200 ),

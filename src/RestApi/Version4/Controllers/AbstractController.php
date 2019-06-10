@@ -8,7 +8,7 @@
  * It's required to follow "Controller Classes" guide before extending this class:
  * <https://developer.wordpress.org/rest-api/extending-the-rest-api/controller-classes/>
  *
- * @class   WC_REST_Controller
+ * @class   \WC_REST_Controller
  * @see     https://developer.wordpress.org/rest-api/extending-the-rest-api/controller-classes/
  * @package WooCommerce/RestApi
  */

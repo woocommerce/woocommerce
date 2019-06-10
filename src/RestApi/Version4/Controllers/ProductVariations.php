@@ -177,10 +177,11 @@ class ProductVariations extends Products {
 	 * @return \WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$data = array(
+		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$data    = array(
 			'id'                    => $object->get_id(),
 			'name'                  => $object->get_name( $context ),
-			'type'                  =>  $object->get_type(),
+			'type'                  => $object->get_type(),
 			'parent_id'             => $object->get_parent_id( $context ),
 			'date_created'          => wc_rest_prepare_date_response( $object->get_date_created(), false ),
 			'date_created_gmt'      => wc_rest_prepare_date_response( $object->get_date_created() ),
@@ -284,9 +285,10 @@ class ProductVariations extends Products {
 	/**
 	 * Set variation image.
 	 *
-	 * @throws WC_REST_Exception REST API exceptions.
-	 * @param  WC_Product_Variation $variation Variation instance.
-	 * @param  array                $image    Image data.
+	 * @throws \WC_REST_Exception REST API exceptions.
+	 * 
+	 * @param  \WC_Product_Variation $variation Variation instance.
+	 * @param  array                 $image     Image data.
 	 * @return WC_Product_Variation
 	 */
 	protected function set_variation_image( $variation, $image ) {
@@ -1197,7 +1199,7 @@ class ProductVariations extends Products {
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		
+
 		$params['search'] = array(
 			'description'       => __( 'Search by similar product name or sku.', 'woocommerce' ),
 			'type'              => 'string',
@@ -1214,13 +1216,13 @@ class ProductVariations extends Products {
 	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		add_filter( 'posts_where', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_filter' ), 10, 2 );
-		add_filter( 'posts_join', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_join' ), 10, 2 );
-		add_filter( 'posts_groupby', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_group_by' ), 10, 2 );
+		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10, 2 );
+		add_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10, 2 );
+		add_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_group_by' ), 10, 2 );
 		$response = parent::get_items( $request );
-		remove_filter( 'posts_where', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_filter' ), 10 );
-		remove_filter( 'posts_join', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_join' ), 10 );
-		remove_filter( 'posts_groupby', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_group_by' ), 10 );
+		remove_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10 );
+		remove_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10 );
+		remove_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_group_by' ), 10 );
 		return $response;
 	}
 }

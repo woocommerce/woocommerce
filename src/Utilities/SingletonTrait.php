@@ -9,8 +9,6 @@
 
 namespace WooCommerce\Utilities;
 
-defined( 'ABSPATH' ) || exit;
-
 /**
  * Singleton trait.
  */

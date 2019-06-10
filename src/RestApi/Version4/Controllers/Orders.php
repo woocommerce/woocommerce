@@ -589,9 +589,9 @@ class Orders extends AbstractObjectsController {
 			}
 
 			return $this->get_object( $object->get_id() );
-		} catch ( WC_Data_Exception $e ) {
+		} catch ( \WC_Data_Exception $e ) {
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
-		} catch ( WC_REST_Exception $e ) {
+		} catch ( \WC_REST_Exception $e ) {
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
@@ -1749,9 +1749,10 @@ class Orders extends AbstractObjectsController {
 	/**
 	 * Calculate coupons.
 	 *
-	 * @throws WC_REST_Exception When fails to set any item.
+	 * @throws \WC_REST_Exception When fails to set any item.
+	 *
 	 * @param \WP_REST_Request $request Request object.
-	 * @param WC_Order         $order   Order data.
+	 * @param \WC_Order        $order   Order data.
 	 * @return bool
 	 */
 	protected function calculate_coupons( $request, $order ) {

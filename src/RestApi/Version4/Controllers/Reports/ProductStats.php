@@ -72,7 +72,7 @@ class ProductStats extends Reports {
 		$query = new \WC_Admin_Reports_Products_Stats_Query( $query_args );
 		try {
 			$report_data = $query->get_data();
-		} catch ( WC_Admin_Reports_Parameter_Exception $e ) {
+		} catch ( \WC_Admin_Reports_Parameter_Exception $e ) {
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 

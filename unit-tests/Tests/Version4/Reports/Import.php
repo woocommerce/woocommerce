@@ -10,6 +10,9 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4\Reports;
 defined( 'ABSPATH' ) || exit;
 
 use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
+use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use \WooCommerce\RestApi\UnitTests\Helpers\QueueHelper;
+use \WP_REST_Request;
 
 /**
  * Reports Customers Stats REST API Test Class
@@ -31,12 +34,6 @@ class Import extends AbstractReportsTest {
 	 */
 	public function setUp() {
 		parent::setUp();
-
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
 
 		$this->customer = $this->factory->user->create(
 			array(
@@ -70,8 +67,6 @@ class Import extends AbstractReportsTest {
 	 * Test reports schema.
 	 */
 	public function test_reports_schema() {
-		wp_set_current_user( $this->user );
-
 		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
@@ -95,8 +90,6 @@ class Import extends AbstractReportsTest {
 	 */
 	public function test_import_params() {
 		global $wpdb;
-		wp_set_current_user( $this->user );
-
 		// Populate all of the data.
 		$product = new \WC_Product_Simple();
 		$product->set_name( 'Test Product' );
@@ -197,8 +190,6 @@ class Import extends AbstractReportsTest {
 	 * Test cancelling import actions.
 	 */
 	public function test_cancel_import() {
-		wp_set_current_user( $this->user );
-
 		// Populate all of the data.
 		$product = new \WC_Product_Simple();
 		$product->set_name( 'Test Product' );
@@ -232,7 +223,6 @@ class Import extends AbstractReportsTest {
 	 */
 	public function test_delete_stats() {
 		global $wpdb;
-		wp_set_current_user( $this->user );
 
 		// Populate all of the data.
 		$product = new \WC_Product_Simple();
@@ -300,8 +290,6 @@ class Import extends AbstractReportsTest {
 	public function test_import_status() {
 		// Delete any pending actions that weren't fully run.
 		\WC_Admin_Reports_Sync::clear_queued_actions();
-
-		wp_set_current_user( $this->user );
 
 		// Populate all of the data.
 		$product = new \WC_Product_Simple();

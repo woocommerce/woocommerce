@@ -10,6 +10,11 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4\Reports;
 defined( 'ABSPATH' ) || exit;
 
 use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
+use \WP_REST_Request;
+use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use \WooCommerce\RestApi\UnitTests\Helpers\QueueHelper;
+use \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
+use \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
 
 /**
  * Class CouponsStats
@@ -38,7 +43,7 @@ class CouponsStats extends AbstractReportsTest {
 	public function test_get_reports() {
 		// Populate all of the data.
 		// Simple product.
-		$product = new WC_Product_Simple();
+		$product = new \WC_Product_Simple();
 		$product->set_name( 'Test Product' );
 		$product->set_regular_price( 25 );
 		$product->save();

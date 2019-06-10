@@ -9,10 +9,6 @@ defined( 'ABSPATH' ) || exit;
 
 use \WooCommerce\RestApi\UnitTests\Bootstrap;
 use \WC_REST_Unit_Test_Case;
-use \WP_REST_Request;
-use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\QueueHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
 
 /**
  * Class AbstractReportsTest.

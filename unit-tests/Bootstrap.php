@@ -6,34 +6,48 @@
  */
 namespace WooCommerce\RestApi\UnitTests;
 
+require __DIR__ . '/../src/Utilities/SingletonTrait.php';
+
+use WooCommerce\Utilities\SingletonTrait;
+
 class Bootstrap {
+	use SingletonTrait;
 
 	/**
 	 * Directory path to WP core tests.
 	 *
 	 * @var string
 	 */
-	protected static $wp_tests_dir;
+	protected $wp_tests_dir;
 
 	/**
 	 * Directory path to woocommerce core tests.
 	 *
 	 * @var string
 	 */
-	protected static $wc_tests_dir;
+	protected $wc_tests_dir;
 	/**
 	 * Init unit testing library.
 	 */
-	public static function init() {
-		self::$wc_tests_dir = dirname( dirname( dirname( __FILE__ ) ) ) . '/woocommerce/tests';
-		self::$wp_tests_dir = getenv( 'WP_TESTS_DIR' );
+	public function init() {
+		$this->wc_tests_dir = dirname( dirname( dirname( __FILE__ ) ) ) . '/woocommerce/tests';
+		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' );
 
-		if ( ! self::$wp_tests_dir ) {
-			self::$wp_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
+		if ( ! $this->wp_tests_dir ) {
+			$this->wp_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
 		}
 
-		self::setup_hooks();
-		self::load_framework();
+		$this->setup_hooks();
+		$this->load_framework();
+	}
+
+	/**
+	 * Get tests dir.
+	 *
+	 * @return string
+	 */
+	public function get_dir() {
+		return __DIR__;
 	}
 
 	/**
@@ -41,22 +55,22 @@ class Bootstrap {
 	 *
 	 * @return boolean
 	 */
-	protected static function wc_admin_exists() {
+	protected function wc_admin_exists() {
 		return file_exists( dirname( dirname( __DIR__ ) ) . '/woocommerce-admin/woocommerce-admin.php' );
 	}
 
 	/**
 	 * Setup hooks.
 	 */
-	protected static function setup_hooks() {
+	protected function setup_hooks() {
 		// Give access to tests_add_filter() function.
-		require_once self::$wp_tests_dir . '/includes/functions.php';
+		require_once $this->wp_tests_dir . '/includes/functions.php';
 
 		\tests_add_filter( 'muplugins_loaded', function() {
 			require_once dirname( dirname( __DIR__ ) ) . '/woocommerce/woocommerce.php';
 			require_once dirname( __DIR__ ) . '/woocommerce-rest-api.php';
 
-			if ( self::wc_admin_exists() ) {
+			if ( $this->wc_admin_exists() ) {
 				require_once dirname( dirname( __DIR__ ) ) . '/woocommerce-admin/woocommerce-admin.php';
 			}
 		} );
@@ -70,7 +84,7 @@ class Bootstrap {
 
 			\WC_Install::install();
 
-			if ( self::wc_admin_exists() ) {
+			if ( $this->wc_admin_exists() ) {
 				echo esc_html( 'Installing WooCommerce Admin...' . PHP_EOL );
 				require_once dirname( dirname( __DIR__ ) ) . '/woocommerce-admin/includes/class-wc-admin-install.php';
 				\WC_Admin_Install::create_tables();
@@ -85,16 +99,16 @@ class Bootstrap {
 	/**
 	 * Load the testing framework.
 	 */
-	protected static function load_framework() {
+	protected function load_framework() {
 		// Start up the WP testing environment.
-		require_once self::$wp_tests_dir . '/includes/bootstrap.php';
+		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
 		// WooCommerce Core Testing Framework.
-		require_once self::$wc_tests_dir . '/framework/class-wc-unit-test-factory.php';
-		require_once self::$wc_tests_dir . '/framework/vendor/class-wp-test-spy-rest-server.php';
-		require_once self::$wc_tests_dir . '/includes/wp-http-testcase.php';
-		require_once self::$wc_tests_dir . '/framework/class-wc-unit-test-case.php';
-		require_once self::$wc_tests_dir . '/framework/class-wc-rest-unit-test-case.php';
+		require_once $this->wc_tests_dir . '/framework/class-wc-unit-test-factory.php';
+		require_once $this->wc_tests_dir . '/framework/vendor/class-wp-test-spy-rest-server.php';
+		require_once $this->wc_tests_dir . '/includes/wp-http-testcase.php';
+		require_once $this->wc_tests_dir . '/framework/class-wc-unit-test-case.php';
+		require_once $this->wc_tests_dir . '/framework/class-wc-rest-unit-test-case.php';
 
 		require_once __DIR__ . '/Helpers/AdminNotesHelper.php';
 		require_once __DIR__ . '/Helpers/CouponHelper.php';
@@ -109,4 +123,4 @@ class Bootstrap {
 	}
 }
 
-Bootstrap::init();
+Bootstrap::instance()->init();

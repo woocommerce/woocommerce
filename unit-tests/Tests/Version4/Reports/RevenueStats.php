@@ -11,6 +11,10 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4\Reports;
 defined( 'ABSPATH' ) || exit;
 
 use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
+use \WP_REST_Request;
+use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use \WooCommerce\RestApi\UnitTests\Helpers\QueueHelper;
+use \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
 
 /**
  * Class RevenueStats
@@ -48,8 +52,6 @@ class RevenueStats extends AbstractReportsTest {
 	 * @since 3.5.0
 	 */
 	public function test_get_reports() {
-		wp_set_current_user( $this->user );
-
 		// @todo update after report interface is done.
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$data     = $response->get_data();
@@ -76,8 +78,6 @@ class RevenueStats extends AbstractReportsTest {
 	 * @since 3.5.0
 	 */
 	public function test_reports_schema() {
-		wp_set_current_user( $this->user );
-
 		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();

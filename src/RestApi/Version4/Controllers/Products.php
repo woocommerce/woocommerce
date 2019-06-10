@@ -1200,7 +1200,8 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Set product images.
 	 *
-	 * @throws WC_REST_Exception REST API exceptions.
+	 * @throws \WC_REST_Exception REST API exceptions.
+	 * 
 	 * @param WC_Product $product Product instance.
 	 * @param array      $images  Images data.
 	 * @return WC_Product

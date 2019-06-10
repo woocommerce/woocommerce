@@ -54,7 +54,7 @@ class QueueHelper {
 	public static function process_pending() {
 		$jobs = self::get_all_pending();
 
-		$queue_runner = new ActionScheduler_QueueRunner();
+		$queue_runner = new \ActionScheduler_QueueRunner();
 		foreach ( $jobs as $job_id => $job ) {
 			$queue_runner->process_action( $job_id );
 		}

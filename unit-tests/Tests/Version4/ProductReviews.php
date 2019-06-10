@@ -350,7 +350,6 @@ class ProductReviews extends AbstractRestApiTest {
 	 * @since 3.5.0
 	 */
 	public function test_product_reviews_batch() {
-		wp_set_current_user( $this->user );
 		$product = ProductHelper::create_simple_product();
 
 		$review_1_id = ProductHelper::create_product_review( $product->get_id() );

@@ -57,7 +57,7 @@ class CouponStats extends Reports {
 		$coupons_query = new \WC_Admin_Reports_Coupons_Stats_Query( $query_args );
 		try {
 			$report_data = $coupons_query->get_data();
-		} catch ( WC_Admin_Reports_Parameter_Exception $e ) {
+		} catch ( \WC_Admin_Reports_Parameter_Exception $e ) {
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 

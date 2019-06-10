@@ -252,7 +252,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 			)
 		);
 		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 404, $response->get_status() );
 	}
 
 	/**
@@ -369,7 +369,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 		$this->assertContains( 'Updated description.', $data['update'][0]['description'] );
 		$this->assertEquals( 'DUMMY SKU VARIABLE MEDIUM', $data['create'][0]['sku'] );
 		$this->assertEquals( 'medium', $data['create'][0]['attributes'][0]['option'] );
-		$this->assertEquals( $children[1], $data['delete'][0]['id'] );
+		$this->assertEquals( $children[1], $data['delete'][0]['previous']['id'] );
 
 		$request  = new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() . '/variations' );
 		$response = $this->server->dispatch( $request );
@@ -390,7 +390,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 37, count( $properties ) );
+		$this->assertEquals( 40, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'date_created', $properties );
 		$this->assertArrayHasKey( 'date_modified', $properties );

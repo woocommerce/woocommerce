@@ -67,7 +67,7 @@ class OrderStats extends Reports {
 		$orders_query = new \WC_Admin_Reports_Orders_Stats_Query( $query_args );
 		try {
 			$report_data = $orders_query->get_data();
-		} catch ( WC_Admin_Reports_Parameter_Exception $e ) {
+		} catch ( \WC_Admin_Reports_Parameter_Exception $e ) {
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 

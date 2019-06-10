@@ -500,7 +500,7 @@ class OrderRefunds extends Orders {
 	 * @since  3.0.0
 	 * @param  \WP_REST_Request $request  Full details about the request.
 	 * @param  bool            $creating If is creating a new object.
-	 * @return WC_Data|\WP_Error
+	 * @return \WC_Data|\WP_Error
 	 */
 	protected function save_object( $request, $creating = false ) {
 		try {
@@ -511,9 +511,9 @@ class OrderRefunds extends Orders {
 			}
 
 			return $this->get_object( $object->get_id() );
-		} catch ( WC_Data_Exception $e ) {
+		} catch ( \WC_Data_Exception $e ) {
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
-		} catch ( WC_REST_Exception $e ) {
+		} catch ( \WC_REST_Exception $e ) {
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
