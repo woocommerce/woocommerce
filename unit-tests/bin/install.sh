@@ -176,29 +176,15 @@ install_deps() {
 	php wp-cli.phar core config --dbname=$DB_NAME --dbuser=$DB_USER --dbpass=$DB_PASS --dbhost=$DB_HOST --dbprefix=wptests_
 	php wp-cli.phar core install --url="$WP_SITE_URL" --title="Example" --admin_user=admin --admin_password=password --admin_email=info@example.com --path=$WP_CORE_DIR --skip-email
 
-	# Install WooCommerce
+	# Install WooCommerce and WooCommerce Admin
 	cd "wp-content/plugins/"
-	# As zip file does not include tests, we have to get it from git repo.
+
 	git clone --depth 1 https://github.com/woocommerce/woocommerce.git
+	git clone --depth 1 https://github.com/woocommerce/woocommerce-admin.git
+
 	cd "$WP_CORE_DIR"
 	php wp-cli.phar plugin activate woocommerce
-
-	if [ "$TRAVIS_PULL_REQUEST_BRANCH" != "" ]; then
-		BRANCH="$(sed 's/#/%23/' <<<$BRANCH)"
-		# Install woocommerce-admin, the correct branch, if running from Travis CI.
-		php wp-cli.phar plugin install https://github.com/$REPO/archive/$BRANCH.zip --activate
-	fi
-
-	# Install WooCommerce-Admin
-	git clone --depth 1 https://github.com/woocommerce/woocommerce-admin.git
-	cd "$WP_CORE_DIR"
 	php wp-cli.phar plugin activate woocommerce-admin
-
-	if [ "$TRAVIS_PULL_REQUEST_BRANCH" != "" ]; then
-		BRANCH="$(sed 's/#/%23/' <<<$BRANCH)"
-		# Install woocommerce-admin, the correct branch, if running from Travis CI.
-		php wp-cli.phar plugin install https://github.com/$REPO/archive/$BRANCH.zip --activate
-	fi
 
 	# Back to original dir
 	cd "$WORKING_DIR"
