@@ -4,7 +4,7 @@ sudo: false
 
 matrix:
   include:
-  - name: "PHP 7.2 unit tests, PHP Coding standards check and JS tests"
+  - name: "PHP 7.2 unit tests, PHP Coding standards check"
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress RUN_PHPCS=1
   - name: "PHP 7.1 unit tests"
