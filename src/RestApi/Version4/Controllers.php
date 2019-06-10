@@ -56,12 +56,6 @@ class Controllers {
 			'webhooks'                 => __NAMESPACE__ . '\Controllers\Webhooks',
 		];
 
-		if ( class_exists( 'WC_Admin_Onboarding' ) ) {
-			$controllers['onboarding-levels']  = __NAMESPACE__ . '\Controllers\Onboarding\Levels';
-			$controllers['onboarding-plugins'] = __NAMESPACE__ . '\Controllers\Onboarding\Plugins';
-			$controllers['onboarding-profile'] = __NAMESPACE__ . '\Controllers\Onboarding\Profile';
-		}
-
 		if ( class_exists( 'WC_Admin_Reports_Sync' ) ) {
 			$controllers['reports-categories']             = __NAMESPACE__ . '\Controllers\Reports\Categories';
 			$controllers['reports-coupons']                = __NAMESPACE__ . '\Controllers\Reports\Coupons';
