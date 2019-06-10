@@ -7,6 +7,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import '../css/editor.scss';
+import '../css/style.scss';
 import { IconWoo } from './components/icons';
 
 setCategories( [
