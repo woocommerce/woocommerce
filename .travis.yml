@@ -1,6 +1,6 @@
 language: php
 
-sudo: false
+sudo: required
 
 matrix:
   include:
@@ -19,9 +19,10 @@ matrix:
 
 before_script:
   - phpenv config-rm xdebug.ini
-  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - export PATH="$WP_CORE_DIR/wp-content/plugins/woocommerce-rest-api/vendor/bin:$PATH"
   - bash unit-tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
   - bash unit-tests/bin/travis.sh before
+  - timedatectl
 
 script:
   - bash unit-tests/bin/phpunit.sh
