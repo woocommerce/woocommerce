@@ -20,29 +20,42 @@ use \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
 abstract class AbstractReportsTest extends WC_REST_Unit_Test_Case {
 
 	/**
-	 * Setup test reports categories data.
+	 * User variable.
+	 *
+	 * @var WP_User
 	 */
-	public function setUp() {
-		if ( Bootstrap::skip_report_tests() ) {
-			$this->markTestSkipped( 'Skipping reports tests - woocommerce-admin not found.' );
-			return;
-		}
+	protected static $user;
 
-		parent::setUp();
-
-		$this->user = $this->factory->user->create(
+	/**
+	 * Setup once before running tests.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user = $factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
 		);
+	}
 
-		wp_set_current_user( $this->user );
+	/**
+	 * Setup test reports categories data.
+	 */
+	public function setUp() {
+		if ( ! class_exists( '\WC_Admin_Reports_Sync' ) ) {
+			$this->markTestSkipped( 'Skipping reports tests - WC_Admin_Reports_Sync class not found.' );
+			return;
+		}
+
+		parent::setUp();
+		wp_set_current_user( self::$user );
 
 		global $wpdb;
-		$wpdb->query( "DELETE FROM $wpdb->prefix" . WC_Admin_Reports_Orders_Stats_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
-		$wpdb->query( "DELETE FROM $wpdb->prefix" . WC_Admin_Reports_Products_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
-		$wpdb->query( "DELETE FROM $wpdb->prefix" . WC_Admin_Reports_Coupons_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
-		$wpdb->query( "DELETE FROM $wpdb->prefix" . WC_Admin_Reports_Customers_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
+		$wpdb->query( "DELETE FROM $wpdb->prefix" . \WC_Admin_Reports_Orders_Stats_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
+		$wpdb->query( "DELETE FROM $wpdb->prefix" . \WC_Admin_Reports_Products_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
+		$wpdb->query( "DELETE FROM $wpdb->prefix" . \WC_Admin_Reports_Coupons_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
+		$wpdb->query( "DELETE FROM $wpdb->prefix" . \WC_Admin_Reports_Customers_Data_Store::TABLE_NAME ); // @codingStandardsIgnoreLine.
 	}
 
 }

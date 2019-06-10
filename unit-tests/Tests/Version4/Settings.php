@@ -10,22 +10,40 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WP_REST_Request;
 use \WC_REST_Unit_Test_Case;
 use \WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper;
 
 class Settings extends WC_REST_Unit_Test_Case {
 
 	/**
-	 * Setup our test server, endpoints, and user info.
+	 * User variable.
+	 *
+	 * @var WP_User
 	 */
-	public function setUp() {
-		parent::setUp();
-		SettingsHelper::register();
-		$this->user = $this->factory->user->create(
+	protected static $user;
+
+	/**
+	 * Setup once before running tests.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user = $factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
 		);
+	}
+
+	/**
+	 * Setup our test server, endpoints, and user info.
+	 */
+	public function setUp() {
+		parent::setUp();
+		wp_set_current_user( self::$user );
+		SettingsHelper::register();
+		$this->zones = array();
 	}
 
 	/**
@@ -46,8 +64,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_groups() {
-		wp_set_current_user( $this->user );
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings' ) );
 		$data     = $response->get_data();
 
@@ -109,8 +125,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @covers WC_Rest_Settings_Controller::get_items
 	 */
 	public function test_get_groups_none_registered() {
-		wp_set_current_user( $this->user );
-
 		remove_all_filters( 'woocommerce_settings_groups' );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings' ) );
@@ -166,11 +180,9 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_group() {
-		wp_set_current_user( $this->user );
-
 		// test route callback receiving an empty group id
-		$result = $this->endpoint->get_group_settings( '' );
-		$this->assertIsWPError( $result );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings/' ) );
+		$this->assertEquals( 404, $response->get_status() );
 
 		// test getting a group that does not exist
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings/not-real' ) );
@@ -206,8 +218,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_update_setting() {
-		wp_set_current_user( $this->user );
-
 		// test defaults first
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings/test/woocommerce_shop_page_display' ) );
 		$data     = $response->get_data();
@@ -257,8 +267,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_update_settings() {
-		wp_set_current_user( $this->user );
-
 		// test defaults first
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings/test' ) );
 		$data     = $response->get_data();
@@ -306,8 +314,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_setting() {
-		wp_set_current_user( $this->user );
-
 		// test getting an invalid setting from a group that does not exist
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings/not-real/woocommerce_shop_page_display' ) );
 		$data     = $response->get_data();
@@ -349,9 +355,8 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_setting_empty_setting_id() {
-		$result = $this->endpoint->get_setting( 'test', '' );
-
-		$this->assertIsWPError( $result );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings/test/' ) );
+		$this->assertEquals( 404, $response->get_status() );
 	}
 
 	/**
@@ -360,9 +365,8 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_setting_invalid_setting_id() {
-		$result = $this->endpoint->get_setting( 'test', 'invalid' );
-
-		$this->assertIsWPError( $result );
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings/test/invalid' ) );
+		$this->assertEquals( 404, $response->get_status() );
 	}
 
 	/**
@@ -438,8 +442,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @covers WC_Rest_Setting_Options_Controller::update_item
 	 */
 	public function test_update_setting_bad_setting_id() {
-		wp_set_current_user( $this->user );
-
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/test/invalid' );
 		$request->set_body_params(
 			array(
@@ -456,8 +458,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_classic_settings() {
-		wp_set_current_user( $this->user );
-
 		// Make sure the group is properly registered
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings/products' ) );
 		$data     = $response->get_data();
@@ -513,8 +513,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_email_settings() {
-		wp_set_current_user( $this->user );
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings/email_new_order' ) );
 		$settings = $response->get_data();
 
@@ -619,8 +617,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_validation_checkbox() {
-		wp_set_current_user( $this->user );
-
 		// test bogus value
 		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v4/settings/%s/%s', 'email_cancelled_order', 'enabled' ) );
 		$request->set_body_params(
@@ -658,8 +654,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_validation_radio() {
-		wp_set_current_user( $this->user );
-
 		// not a valid option
 		$request = new WP_REST_Request( 'PUT', sprintf( '/wc/v4/settings/%s/%s', 'shipping', 'woocommerce_ship_to_destination' ) );
 		$request->set_body_params(
@@ -687,8 +681,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_validation_multiselect() {
-		wp_set_current_user( $this->user );
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', sprintf( '/wc/v4/settings/%s/%s', 'general', 'woocommerce_specific_allowed_countries' ) ) );
 		$setting  = $response->get_data();
 		$this->assertEmpty( $setting['value'] );
@@ -710,8 +702,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_validation_select() {
-		wp_set_current_user( $this->user );
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', sprintf( '/wc/v4/settings/%s/%s', 'products', 'woocommerce_weight_unit' ) ) );
 		$setting  = $response->get_data();
 		$this->assertEquals( 'kg', $setting['value'] );
@@ -746,7 +736,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_woocommerce_default_country() {
-		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings/general/woocommerce_default_country' ) );
 		$setting  = $response->get_data();
 
@@ -761,7 +750,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_woocommerce_store_address() {
-		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings/general/woocommerce_store_address' ) );
 		$setting  = $response->get_data();
 		$this->assertEquals( 'text', $setting['type'] );
@@ -797,7 +785,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_woocommerce_store_address_2() {
-		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings/general/woocommerce_store_address_2' ) );
 		$setting  = $response->get_data();
 		$this->assertEquals( 'text', $setting['type'] );
@@ -833,7 +820,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_woocommerce_store_city() {
-		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings/general/woocommerce_store_city' ) );
 		$setting  = $response->get_data();
 		$this->assertEquals( 'text', $setting['type'] );
@@ -869,7 +855,6 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_woocommerce_store_postcode() {
-		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings/general/woocommerce_store_postcode' ) );
 		$setting  = $response->get_data();
 		$this->assertEquals( 'text', $setting['type'] );

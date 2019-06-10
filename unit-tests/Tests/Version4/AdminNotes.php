@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use \WooCommerce\RestApi\UnitTests\Helpers\AdminNotesHelper;
 use \WC_REST_Unit_Test_Case;
+use \WP_REST_Request;
 
 /**
  * Class AdminNotes
@@ -25,19 +26,38 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 	protected $endpoint = '/wc/v4/admin/notes';
 
 	/**
+	 * User variable.
+	 *
+	 * @var WP_User
+	 */
+	protected static $user;
+
+	/**
+	 * Setup once before running tests.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+	}
+
+	/**
 	 * Setup test admin notes data. Called before every test.
 	 *
 	 * @since 3.5.0
 	 */
 	public function setUp() {
+		if ( ! class_exists( '\WC_Admin_Note' ) ) {
+			$this->markTestSkipped( 'Skipping admin notes tests - WC_Admin_Note class not found.' );
+			return;
+		}
+
 		parent::setUp();
-
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-
+		wp_set_current_user( self::$user );
 		AdminNotesHelper::reset_notes_dbs();
 		AdminNotesHelper::add_notes_for_tests();
 	}
@@ -59,8 +79,6 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_note() {
-		wp_set_current_user( $this->user );
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/1' ) );
 		$note     = $response->get_data();
 
@@ -68,7 +86,7 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 1, $note['id'] );
 		$this->assertEquals( 'PHPUNIT_TEST_NOTE_NAME', $note['name'] );
-		$this->assertEquals( WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL, $note['type'] );
+		$this->assertEquals( \WC_Admin_Note::E_WC_ADMIN_NOTE_INFORMATIONAL, $note['type'] );
 		$this->assertArrayHasKey( 'locale', $note );
 		$this->assertEquals( 'PHPUNIT_TEST_NOTE_1_TITLE', $note['title'] );
 
@@ -76,7 +94,7 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'info', $note['icon'] );
 		$this->assertArrayHasKey( 'content_data', $note );
 		$this->assertEquals( 1.23, $note['content_data']->amount );
-		$this->assertEquals( WC_Admin_Note::E_WC_ADMIN_NOTE_UNACTIONED, $note['status'] );
+		$this->assertEquals( \WC_Admin_Note::E_WC_ADMIN_NOTE_UNACTIONED, $note['status'] );
 		$this->assertEquals( 'PHPUNIT_TEST', $note['source'] );
 
 		$this->assertArrayHasKey( 'date_created', $note );
@@ -95,8 +113,6 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_invalid_note() {
-		wp_set_current_user( $this->user );
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/999' ) );
 		$note     = $response->get_data();
 
@@ -109,6 +125,7 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_note_without_permission() {
+		wp_set_current_user( 0 );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/1' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
@@ -117,8 +134,6 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 	 * Test updating a single note.
 	 */
 	public function test_update_note() {
-		wp_set_current_user( $this->user );
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint . '/1' ) );
 		$note     = $response->get_data();
 
@@ -142,6 +157,7 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 	 * Test updating a single note without permission. It should fail.
 	 */
 	public function test_update_note_without_permission() {
+		wp_set_current_user( 0 );
 		$request = new WP_REST_Request( 'PUT', $this->endpoint . '/1' );
 		$request->set_body_params(
 			array(
@@ -158,8 +174,6 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_notes() {
-		wp_set_current_user( $this->user );
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$notes    = $response->get_data();
 
@@ -173,8 +187,6 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_warning_notes() {
-		wp_set_current_user( $this->user );
-
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params( array( 'type' => 'warning' ) );
 		$response = $this->server->dispatch( $request );
@@ -190,8 +202,6 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 	 * Test getting notes of a certain status.
 	 */
 	public function test_get_actioned_notes() {
-		wp_set_current_user( $this->user );
-
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params( array( 'status' => 'actioned' ) );
 		$response = $this->server->dispatch( $request );
@@ -214,8 +224,6 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 	 * Test note "unsnoozing".
 	 */
 	public function test_note_unsnoozing() {
-		wp_set_current_user( $this->user );
-
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params( array( 'status' => 'snoozed' ) );
 		$response = $this->server->dispatch( $request );
@@ -226,7 +234,7 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $notes[0]['title'], 'PHPUNIT_TEST_NOTE_3_TITLE' );
 
 		// The test snoozed note's reminder date is an hour ago.
-		WC_Admin_Notes::unsnooze_notes();
+		\WC_Admin_Notes::unsnooze_notes();
 
 		$response = $this->server->dispatch( $request );
 		$notes    = $response->get_data();
@@ -239,8 +247,6 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 	 * Test ordering of notes.
 	 */
 	public function test_order_notes() {
-		wp_set_current_user( $this->user );
-
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
@@ -268,9 +274,9 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 		$notes    = $response->get_data();
 
 		$this->assertEquals( 3, count( $notes ) );
-		$this->assertEquals( $notes[0]['status'], WC_Admin_Note::E_WC_ADMIN_NOTE_UNACTIONED );
-		$this->assertEquals( $notes[1]['status'], WC_Admin_Note::E_WC_ADMIN_NOTE_SNOOZED );
-		$this->assertEquals( $notes[2]['status'], WC_Admin_Note::E_WC_ADMIN_NOTE_ACTIONED );
+		$this->assertEquals( $notes[0]['status'], \WC_Admin_Note::E_WC_ADMIN_NOTE_UNACTIONED );
+		$this->assertEquals( $notes[1]['status'], \WC_Admin_Note::E_WC_ADMIN_NOTE_SNOOZED );
+		$this->assertEquals( $notes[2]['status'], \WC_Admin_Note::E_WC_ADMIN_NOTE_ACTIONED );
 	}
 
 	/**
@@ -279,6 +285,7 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_notes_without_permission() {
+		wp_set_current_user( 0 );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
@@ -289,8 +296,6 @@ class AdminNotes extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_notes_schema() {
-		wp_set_current_user( $this->user );
-
 		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();

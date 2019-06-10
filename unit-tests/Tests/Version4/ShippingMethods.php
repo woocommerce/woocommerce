@@ -10,21 +10,38 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WP_REST_Request;
 use \WC_REST_Unit_Test_Case;
 
 class ShippingMethods extends WC_REST_Unit_Test_Case {
+
+	/**
+	 * User variable.
+	 *
+	 * @var WP_User
+	 */
+	protected static $user;
+
+	/**
+	 * Setup once before running tests.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+	}
 
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->endpoint = new \WC_REST_Shipping_Methods_Controller();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		wp_set_current_user( self::$user );
+		$this->zones = array();
 	}
 
 	/**
@@ -44,8 +61,6 @@ class ShippingMethods extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_shipping_methods() {
-		wp_set_current_user( $this->user );
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/shipping_methods' ) );
 		$methods  = $response->get_data();
 
@@ -89,8 +104,6 @@ class ShippingMethods extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_shipping_method() {
-		wp_set_current_user( $this->user );
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/shipping_methods/local_pickup' ) );
 		$method   = $response->get_data();
 
@@ -123,7 +136,6 @@ class ShippingMethods extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_shipping_method_invalid_id() {
-		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/shipping_methods/fake_method' ) );
 		$this->assertEquals( 404, $response->get_status() );
 	}
@@ -134,8 +146,6 @@ class ShippingMethods extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_shipping_method_schema() {
-		wp_set_current_user( $this->user );
-
 		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v4/shipping_methods' );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();

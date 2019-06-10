@@ -56,7 +56,11 @@ class Controllers {
 			'webhooks'                 => __NAMESPACE__ . '\Controllers\Webhooks',
 		];
 
-		if ( class_exists( 'WC_Admin_Reports_Sync' ) ) {
+		if ( class_exists( '\WC_Admin_Note' ) ) {
+			$controllers['admin-notes'] = __NAMESPACE__ . '\Controllers\AdminNotes';
+		}
+
+		if ( class_exists( '\WC_Admin_Reports_Sync' ) ) {
 			$controllers['reports-categories']             = __NAMESPACE__ . '\Controllers\Reports\Categories';
 			$controllers['reports-coupons']                = __NAMESPACE__ . '\Controllers\Reports\Coupons';
 			$controllers['reports-coupon-stats']           = __NAMESPACE__ . '\Controllers\Reports\CouponStats';

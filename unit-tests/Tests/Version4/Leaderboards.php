@@ -9,6 +9,7 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WP_REST_Request;
 use \WC_REST_Unit_Test_Case;
 
 /**
@@ -23,11 +24,19 @@ class Leaderboards extends WC_REST_Unit_Test_Case {
 	protected $endpoint = '/wc/v4/leaderboards';
 
 	/**
-	 * Setup test data. Called before every test.
+	 * User variable.
+	 *
+	 * @var WP_User
 	 */
-	public function setUp() {
-		parent::setUp();
-		$this->user = $this->factory->user->create(
+	protected static $user;
+
+	/**
+	 * Setup once before running tests.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user = $factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
@@ -35,11 +44,17 @@ class Leaderboards extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Setup our test server, endpoints, and user info.
+	 */
+	public function setUp() {
+		parent::setUp();
+		wp_set_current_user( self::$user );
+	}
+
+	/**
 	 * Test that leaderboards are returned by the endpoint.
 	 */
 	public function test_get_leaderboards() {
-		wp_set_current_user( $this->user );
-
 		$request  = new WP_REST_Request( 'GET', $this->endpoint );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -55,8 +70,6 @@ class Leaderboards extends WC_REST_Unit_Test_Case {
 	 * Test reports schema.
 	 */
 	public function test_schema() {
-		wp_set_current_user( $this->user );
-
 		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
@@ -114,8 +127,6 @@ class Leaderboards extends WC_REST_Unit_Test_Case {
 	 * Test that leaderboards response changes based on applied filters.
 	 */
 	public function test_filter_leaderboards() {
-		wp_set_current_user( $this->user );
-
 		add_filter(
 			'woocommerce_leaderboards',
 			function( $leaderboards, $per_page, $after, $before, $persisted_query ) {

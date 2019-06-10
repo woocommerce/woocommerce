@@ -1197,6 +1197,7 @@ class ProductVariations extends Products {
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+		
 		$params['search'] = array(
 			'description'       => __( 'Search by similar product name or sku.', 'woocommerce' ),
 			'type'              => 'string',

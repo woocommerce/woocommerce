@@ -19,21 +19,35 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 
 	protected $endpoint;
 
-	protected $user;
-
 	protected $zones;
+
+	/**
+	 * User variable.
+	 *
+	 * @var WP_User
+	 */
+	protected static $user;
+
+	/**
+	 * Setup once before running tests.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+	}
 
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-		$this->zones    = array();
+		wp_set_current_user( self::$user );
+		$this->zones = array();
 	}
 
 	/**
@@ -75,8 +89,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_zones() {
-		wp_set_current_user( $this->user );
-
 		// "Rest of the World" zone exists by default
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/shipping/zones' ) );
 		$data     = $response->get_data();
@@ -162,8 +174,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_shipping_zones_disabled_shipping() {
-		wp_set_current_user( $this->user );
-
 		add_filter( 'wc_shipping_enabled', '__return_false' );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/shipping/zones' ) );
@@ -195,8 +205,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_create_shipping_zone() {
-		wp_set_current_user( $this->user );
-
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping/zones' );
 		$request->set_body_params(
 			array(
@@ -260,8 +268,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_update_shipping_zone() {
-		wp_set_current_user( $this->user );
-
 		$zone = $this->create_shipping_zone( 'Test Zone' );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping/zones/' . $zone->get_id() );
@@ -308,8 +314,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_update_shipping_zone_invalid_id() {
-		wp_set_current_user( $this->user );
-
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping/zones/555555' );
 		$request->set_body_params(
 			array(
@@ -328,7 +332,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_delete_shipping_zone() {
-		wp_set_current_user( $this->user );
 		$zone = $this->create_shipping_zone( 'Zone 1' );
 
 		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping/zones/' . $zone->get_id() );
@@ -360,7 +363,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_delete_shipping_zone_invalid_id() {
-		wp_set_current_user( $this->user );
 		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/shipping/zones/555555' );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 404, $response->get_status() );
@@ -372,8 +374,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_single_shipping_zone() {
-		wp_set_current_user( $this->user );
-
 		$zone     = $this->create_shipping_zone( 'Test Zone' );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/shipping/zones/' . $zone->get_id() ) );
 		$data     = $response->get_data();
@@ -412,8 +412,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_single_shipping_zone_invalid_id() {
-		wp_set_current_user( $this->user );
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/shipping/zones/1' ) );
 
 		$this->assertEquals( 404, $response->get_status() );
@@ -425,8 +423,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_locations() {
-		wp_set_current_user( $this->user );
-
 		// Create a zone
 		$zone = $this->create_shipping_zone(
 			'Zone 1',
@@ -473,8 +469,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_locations_invalid_id() {
-		wp_set_current_user( $this->user );
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/shipping/zones/1/locations' ) );
 
 		$this->assertEquals( 404, $response->get_status() );
@@ -486,8 +480,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_update_locations() {
-		wp_set_current_user( $this->user );
-
 		$zone = $this->create_shipping_zone( 'Test Zone' );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping/zones/' . $zone->get_id() . '/locations' );
@@ -577,8 +569,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_update_locations_invalid_id() {
-		wp_set_current_user( $this->user );
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'PUT', '/wc/v4/shipping/zones/1/locations' ) );
 
 		$this->assertEquals( 404, $response->get_status() );
@@ -590,8 +580,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_methods() {
-		wp_set_current_user( $this->user );
-
 		// Create a shipping method and make sure it's in the response
 		$zone        = $this->create_shipping_zone( 'Zone 1' );
 		$instance_id = $zone->add_shipping_method( 'flat_rate' );
@@ -665,8 +653,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_methods_invalid_zone_id() {
-		wp_set_current_user( $this->user );
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/shipping/zones/1/methods' ) );
 
 		$this->assertEquals( 404, $response->get_status() );
@@ -682,8 +668,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_methods_invalid_method_id() {
-		wp_set_current_user( $this->user );
-
 		$zone     = $this->create_shipping_zone( 'Zone 1' );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/shipping/zones/' . $zone->get_id() . '/methods/1' ) );
 
@@ -696,8 +680,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_update_methods() {
-		wp_set_current_user( $this->user );
-
 		$zone        = $this->create_shipping_zone( 'Zone 1' );
 		$instance_id = $zone->add_shipping_method( 'flat_rate' );
 		$methods     = $zone->get_shipping_methods();
@@ -793,7 +775,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_create_method() {
-		wp_set_current_user( $this->user );
 		$zone    = $this->create_shipping_zone( 'Zone 1' );
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping/zones/' . $zone->get_id() . '/methods' );
 		$request->set_body_params(
@@ -818,7 +799,6 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_delete_method() {
-		wp_set_current_user( $this->user );
 		$zone        = $this->create_shipping_zone( 'Zone 1' );
 		$instance_id = $zone->add_shipping_method( 'flat_rate' );
 		$methods     = $zone->get_shipping_methods();

@@ -10,6 +10,7 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4;
 defined( 'ABSPATH' ) || exit;
 
 use \WooCommerce\RestApi\UnitTests\AbstractRestApiTest;
+use \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
 
 /**
  * Abstract Rest API Test Class
@@ -101,10 +102,10 @@ class Coupons extends AbstractRestApiTest {
 	 * Test read.
 	 */
 	public function test_read() {
-		$coupon1 = \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'testcoupon-1' );
-		$coupon2 = \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'testcoupon-2' );
-		$coupon3 = \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'anothertestcoupon-3' );
-		$coupon4 = \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'anothertestcoupon-4' );
+		$coupon1 = CouponHelper::create_coupon( 'testcoupon-1' );
+		$coupon2 = CouponHelper::create_coupon( 'testcoupon-2' );
+		$coupon3 = CouponHelper::create_coupon( 'anothertestcoupon-3' );
+		$coupon4 = CouponHelper::create_coupon( 'anothertestcoupon-4' );
 
 		// Collection.
 		$response = $this->do_request( '/wc/v4/coupons', 'GET' );
@@ -142,7 +143,7 @@ class Coupons extends AbstractRestApiTest {
 		$this->assertExpectedResponse( $response, 404 );
 
 		// Update existing.
-		$coupon   = \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'testcoupon-1' );
+		$coupon   = CouponHelper::create_coupon( 'testcoupon-1' );
 		$response = $this->do_request(
 			'/wc/v4/coupons/' . $coupon->get_id(),
 			'POST',
@@ -171,14 +172,14 @@ class Coupons extends AbstractRestApiTest {
 		$this->assertEquals( 404, $result->status );
 
 		// Trash.
-		$coupon = \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'testcoupon-1' );
+		$coupon = CouponHelper::create_coupon( 'testcoupon-1' );
 
 		$result = $this->do_request( '/wc/v4/coupons/' . $coupon->get_id(), 'DELETE', [ 'force' => false ] );
 		$this->assertEquals( 200, $result->status );
 		$this->assertEquals( 'trash', get_post_status( $coupon->get_id() ) );
 
 		// Force.
-		$coupon = \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'testcoupon-2' );
+		$coupon = CouponHelper::create_coupon( 'testcoupon-2' );
 
 		$result = $this->do_request( '/wc/v4/coupons/' . $coupon->get_id(), 'DELETE', [ 'force' => true ] );
 		$this->assertEquals( 200, $result->status );
@@ -234,7 +235,7 @@ class Coupons extends AbstractRestApiTest {
 	 */
 	public function test_guest_update() {
 		wp_set_current_user( 0 );
-		$coupon   = \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'testcoupon-1' );
+		$coupon   = CouponHelper::create_coupon( 'testcoupon-1' );
 		$response = $this->do_request(
 			'/wc/v4/coupons/' . $coupon->get_id(),
 			'POST',
@@ -251,7 +252,7 @@ class Coupons extends AbstractRestApiTest {
 	 */
 	public function test_guest_delete() {
 		wp_set_current_user( 0 );
-		$coupon = \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'testcoupon-1' );
+		$coupon = CouponHelper::create_coupon( 'testcoupon-1' );
 		$result = $this->do_request( '/wc/v4/coupons/' . $coupon->get_id(), 'DELETE', [ 'force' => false ] );
 		$this->assertEquals( 401, $result->status );
 	}
@@ -278,10 +279,10 @@ class Coupons extends AbstractRestApiTest {
 	 * Test a batch update.
 	 */
 	public function test_batch() {
-		$coupon_1 = \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'batchcoupon-1' );
-		$coupon_2 = \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'batchcoupon-2' );
-		$coupon_3 = \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'batchcoupon-3' );
-		$coupon_4 = \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'batchcoupon-4' );
+		$coupon_1 = CouponHelper::create_coupon( 'batchcoupon-1' );
+		$coupon_2 = CouponHelper::create_coupon( 'batchcoupon-2' );
+		$coupon_3 = CouponHelper::create_coupon( 'batchcoupon-3' );
+		$coupon_4 = CouponHelper::create_coupon( 'batchcoupon-4' );
 
 		$result = $this->do_request(
 			'/wc/v4/coupons/batch',

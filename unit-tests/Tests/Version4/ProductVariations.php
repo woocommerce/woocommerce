@@ -10,21 +10,38 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WP_REST_Request;
 use \WC_REST_Unit_Test_Case;
+use \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 
 class ProductVariations extends WC_REST_Unit_Test_Case {
+
+	/**
+	 * User variable.
+	 *
+	 * @var WP_User
+	 */
+	protected static $user;
+
+	/**
+	 * Setup once before running tests.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+	}
 
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->endpoint = new WC_REST_Product_Variations_Controller();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		wp_set_current_user( self::$user );
 	}
 
 	/**
@@ -45,8 +62,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_variations() {
-		wp_set_current_user( $this->user );
-		$product    = \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product    = ProductHelper::create_variation_product();
 		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() . '/variations' ) );
 		$variations = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
@@ -62,7 +78,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_variations_without_permission() {
 		wp_set_current_user( 0 );
-		$product  = \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product  = ProductHelper::create_variation_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() . '/variations' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
@@ -73,8 +89,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_variation() {
-		wp_set_current_user( $this->user );
-		$product      = \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product      = ProductHelper::create_variation_product();
 		$children     = $product->get_children();
 		$variation_id = $children[0];
 
@@ -93,7 +108,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_variation_without_permission() {
 		wp_set_current_user( 0 );
-		$product      = \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product      = ProductHelper::create_variation_product();
 		$children     = $product->get_children();
 		$variation_id = $children[0];
 		$response     = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() . '/variations/' . $variation_id ) );
@@ -106,8 +121,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_delete_variation() {
-		wp_set_current_user( $this->user );
-		$product      = \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product      = ProductHelper::create_variation_product();
 		$children     = $product->get_children();
 		$variation_id = $children[0];
 
@@ -128,7 +142,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_variation_without_permission() {
 		wp_set_current_user( 0 );
-		$product      = \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product      = ProductHelper::create_variation_product();
 		$children     = $product->get_children();
 		$variation_id = $children[0];
 
@@ -145,7 +159,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_variation_with_invalid_id() {
 		wp_set_current_user( 0 );
-		$product = \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product = ProductHelper::create_variation_product();
 		$request = new WP_REST_Request( 'DELETE', '/wc/v4/products/' . $product->get_id() . '/variations/0' );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
@@ -158,8 +172,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_update_variation() {
-		wp_set_current_user( $this->user );
-		$product      = \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product      = ProductHelper::create_variation_product();
 		$children     = $product->get_children();
 		$variation_id = $children[0];
 
@@ -211,7 +224,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_variation_without_permission() {
 		wp_set_current_user( 0 );
-		$product      = \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product      = ProductHelper::create_variation_product();
 		$children     = $product->get_children();
 		$variation_id = $children[0];
 
@@ -231,8 +244,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_update_variation_with_invalid_id() {
-		wp_set_current_user( $this->user );
-		$product = \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product = ProductHelper::create_variation_product();
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/products/' . $product->get_id() . '/variations/0' );
 		$request->set_body_params(
 			array(
@@ -249,8 +261,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_create_variation() {
-		wp_set_current_user( $this->user );
-		$product = \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product = ProductHelper::create_variation_product();
 
 		$response   = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() . '/variations' ) );
 		$variations = $response->get_data();
@@ -292,7 +303,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_create_variation_without_permission() {
 		wp_set_current_user( 0 );
-		$product = \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product = ProductHelper::create_variation_product();
 
 		$request = new WP_REST_Request( 'POST', '/wc/v4/products/' . $product->get_id() . '/variations' );
 		$request->set_body_params(
@@ -318,8 +329,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_product_variations_batch() {
-		wp_set_current_user( $this->user );
-		$product  = \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product  = ProductHelper::create_variation_product();
 		$children = $product->get_children();
 		$request  = new WP_REST_Request( 'POST', '/wc/v4/products/' . $product->get_id() . '/variations/batch' );
 		$request->set_body_params(
@@ -374,8 +384,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_variation_schema() {
-		wp_set_current_user( $this->user );
-		$product    = \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$product    = ProductHelper::create_simple_product();
 		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v4/products/' . $product->get_id() . '/variations' );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
@@ -424,9 +433,7 @@ class ProductVariations extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_update_variation_manage_stock() {
-		wp_set_current_user( $this->user );
-
-		$product = \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_variation_product();
+		$product = ProductHelper::create_variation_product();
 		$product->set_manage_stock( false );
 		$product->save();
 

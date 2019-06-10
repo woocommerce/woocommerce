@@ -48,18 +48,31 @@ abstract class AbstractRestApiTest extends WC_REST_Unit_Test_Case {
 	protected $routes = [];
 
 	/**
-	 * Setup test class.
+	 * User variable.
+	 *
+	 * @var WP_User
 	 */
-	public function setUp() {
-		parent::setUp();
+	protected static $user;
 
-		$this->user = $this->factory->user->create(
+	/**
+	 * Setup once before running tests.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user = $factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
 		);
+	}
 
-		wp_set_current_user( $this->user );
+	/**
+	 * Setup test class.
+	 */
+	public function setUp() {
+		parent::setUp();
+		wp_set_current_user( self::$user );
 	}
 
 	/**

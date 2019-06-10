@@ -37,12 +37,12 @@ class Bootstrap {
 	}
 
 	/**
-	 * Should we skip WC Admin Reports tests?
+	 * Does WC Admin exist?
 	 *
 	 * @return boolean
 	 */
-	public static function skip_report_tests() {
-		return ! file_exists( dirname( dirname( __DIR__ ) ) . '/woocommerce-admin/woocommerce-admin.php' );
+	protected static function wc_admin_exists() {
+		return file_exists( dirname( dirname( __DIR__ ) ) . '/woocommerce-admin/woocommerce-admin.php' );
 	}
 
 	/**
@@ -56,7 +56,7 @@ class Bootstrap {
 			require_once dirname( dirname( __DIR__ ) ) . '/woocommerce/woocommerce.php';
 			require_once dirname( __DIR__ ) . '/woocommerce-rest-api.php';
 
-			if ( file_exists( dirname( dirname( __DIR__ ) ) . '/woocommerce-admin/woocommerce-admin.php' ) ) {
+			if ( self::wc_admin_exists() ) {
 				require_once dirname( dirname( __DIR__ ) ) . '/woocommerce-admin/woocommerce-admin.php';
 			}
 		} );
@@ -70,7 +70,7 @@ class Bootstrap {
 
 			\WC_Install::install();
 
-			if ( ! self::skip_report_tests() ) {
+			if ( self::wc_admin_exists() ) {
 				echo esc_html( 'Installing WooCommerce Admin...' . PHP_EOL );
 				require_once dirname( dirname( __DIR__ ) ) . '/woocommerce-admin/includes/class-wc-admin-install.php';
 				\WC_Admin_Install::create_tables();

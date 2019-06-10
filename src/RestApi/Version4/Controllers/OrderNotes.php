@@ -35,7 +35,8 @@ class OrderNotes extends AbstractController {
 	 */
 	public function register_routes() {
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base,
+			$this->namespace, 
+			'/' . $this->rest_base,
 			array(
 				'args' => array(
 					'order_id'  => array(
@@ -67,7 +68,8 @@ class OrderNotes extends AbstractController {
 		);
 
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)',
+			$this->namespace, 
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
 			array(
 				'args' => array(
 					'id' => array(
