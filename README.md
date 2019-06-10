@@ -3,7 +3,7 @@ WooCommerce REST API
 
 <a href="https://packagist.org/packages/woocommerce/woocommerce-rest-api"><img src="https://poser.pugx.org/woocommerce/woocommerce-rest-api/license" alt="license"></a> 
 <a href="https://packagist.org/packages/woocommerce/woocommerce-rest-api"><img src="https://poser.pugx.org/woocommerce/woocommerce-rest-api/v/stable" alt="Latest Stable Version"></a>
-<a href="https://travis-ci.org/woocommerce/woocommerce-rest-api/"><img src="https://travis-ci.org/woocommerce/woocommerce-rest-api/.svg?branch=master" alt="Build Status"></a>
+<a href="https://travis-ci.org/woocommerce/woocommerce-rest-api/"><img src="https://travis-ci.org/woocommerce/woocommerce-rest-api.svg?branch=master" alt="Build Status"></a>
 <a href="https://scrutinizer-ci.com/g/woocommerce/woocommerce-rest-api/?branch=master"><img src="https://scrutinizer-ci.com/g/woocommerce/woocommerce-rest-api/badges/quality-score.png?b=master" alt="Scrutinizer Code Quality"></a>
 
 This repository is home to the WooCommerce REST API package. 
