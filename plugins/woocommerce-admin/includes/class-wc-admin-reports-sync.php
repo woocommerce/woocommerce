@@ -342,6 +342,7 @@ class WC_Admin_Reports_Sync {
 		}
 
 		if ( $skip_existing ) {
+			$offset        = 0;
 			$where_clause .= " AND NOT EXISTS (
 				SELECT 1 FROM {$wpdb->prefix}wc_order_stats
 				WHERE {$wpdb->prefix}wc_order_stats.order_id = {$wpdb->posts}.ID
@@ -571,6 +572,7 @@ class WC_Admin_Reports_Sync {
 		}
 
 		if ( $skip_existing ) {
+			$query_args['paged'] = 1;
 			add_action( 'pre_user_query', array( __CLASS__, 'exclude_existing_customers_from_query' ) );
 		}
 
