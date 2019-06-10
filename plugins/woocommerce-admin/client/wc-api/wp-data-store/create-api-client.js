@@ -19,11 +19,6 @@ function createStore( name ) {
 function createDataHandlers( store ) {
 	return {
 		dataRequested: resourceNames => {
-			const { resources } = store.getState();
-			const newResources = resourceNames.some( resourceName => ! resources[ resourceName ] );
-			if ( ! newResources && document.hidden ) {
-				return;
-			}
 			store.dispatch( {
 				type: 'FRESH_DATA_REQUESTED',
 				resourceNames,
