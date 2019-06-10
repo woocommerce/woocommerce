@@ -21,15 +21,31 @@ use \WC_REST_Unit_Test_Case;
 class SystemStatus extends WC_REST_Unit_Test_Case {
 
 	/**
-	 * Setup our test server.
+	 * User variable.
+	 *
+	 * @var WP_User
 	 */
-	public function setUp() {
-		parent::setUp();
-		$this->user = $this->factory->user->create(
+	protected static $user;
+
+	/**
+	 * Setup once before running tests.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user = $factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
 		);
+	}
+
+	/**
+	 * Setup our test server.
+	 */
+	public function setUp() {
+		parent::setUp();
+		wp_set_current_user( self::$user );
 
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
@@ -63,7 +79,6 @@ class SystemStatus extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_system_status_info_returns_root_properties() {
-		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/system_status' ) );
 		$data     = $response->get_data();
 
@@ -82,7 +97,6 @@ class SystemStatus extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_system_status_info_environment() {
-		wp_set_current_user( $this->user );
 		$response    = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/system_status' ) );
 		$data        = $response->get_data();
 		$environment = (array) $data['environment'];
@@ -103,7 +117,6 @@ class SystemStatus extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_system_status_info_database() {
 		global $wpdb;
-		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/system_status' ) );
 		$data     = $response->get_data();
 		$database = (array) $data['database'];
@@ -121,8 +134,6 @@ class SystemStatus extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_system_status_info_active_plugins() {
-		wp_set_current_user( $this->user );
-
 		$actual_plugins = array( 'hello.php' );
 		update_option( 'active_plugins', $actual_plugins );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/system_status' ) );
@@ -141,7 +152,6 @@ class SystemStatus extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_system_status_info_theme() {
-		wp_set_current_user( $this->user );
 		$active_theme = wp_get_theme();
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/system_status' ) );
@@ -158,8 +168,6 @@ class SystemStatus extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_system_status_info_settings() {
-		wp_set_current_user( $this->user );
-
 		$term_response = array();
 		$terms         = get_terms( 'product_type', array( 'hide_empty' => 0 ) );
 		foreach ( $terms as $term ) {
@@ -182,8 +190,6 @@ class SystemStatus extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_system_status_info_security() {
-		wp_set_current_user( $this->user );
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/system_status' ) );
 		$data     = $response->get_data();
 		$settings = (array) $data['security'];
@@ -199,7 +205,6 @@ class SystemStatus extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_system_status_info_pages() {
-		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/system_status' ) );
 		$data     = $response->get_data();
 		$pages    = $data['pages'];
@@ -216,7 +221,7 @@ class SystemStatus extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 9, count( $properties ) );
+		$this->assertEquals( 10, count( $properties ) );
 		$this->assertArrayHasKey( 'environment', $properties );
 		$this->assertArrayHasKey( 'database', $properties );
 		$this->assertArrayHasKey( 'active_plugins', $properties );
@@ -232,16 +237,10 @@ class SystemStatus extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_system_tools() {
-		wp_set_current_user( $this->user );
-
-		$tools_controller = new WC_REST_System_Status_Tools_Controller();
-		$raw_tools        = $tools_controller->get_tools();
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/system_status/tools' ) );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( count( $raw_tools ), count( $data ) );
 		$this->assertContains(
 			array(
 				'id'          => 'regenerate_thumbnails',
@@ -269,7 +268,6 @@ class SystemStatus extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( count( $raw_tools ), count( $data ) );
 		$this->assertContains(
 			array(
 				'id'   => 'regenerate_thumbnails',
@@ -309,12 +307,6 @@ class SystemStatus extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_system_tool() {
-		wp_set_current_user( $this->user );
-
-		$tools_controller = new WC_REST_System_Status_Tools_Controller();
-		$raw_tools        = $tools_controller->get_tools();
-		$raw_tool         = $raw_tools['recount_terms'];
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/system_status/tools/recount_terms' ) );
 		$data     = $response->get_data();
 
@@ -365,12 +357,6 @@ class SystemStatus extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_execute_system_tool() {
-		wp_set_current_user( $this->user );
-
-		$tools_controller = new WC_REST_System_Status_Tools_Controller();
-		$raw_tools        = $tools_controller->get_tools();
-		$raw_tool         = $raw_tools['recount_terms'];
-
 		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v4/system_status/tools/recount_terms' ) );
 		$data     = $response->get_data();
 
