@@ -102,7 +102,7 @@ class Countries extends DataController {
 	 *
 	 * @since  3.5.0
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$countries = WC()->countries->get_countries();
@@ -122,7 +122,7 @@ class Countries extends DataController {
 	 *
 	 * @since  3.5.0
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$data = $this->get_country( strtoupper( $request['location'] ), $request );
@@ -138,7 +138,7 @@ class Countries extends DataController {
 	 * @since  3.5.0
 	 * @param object          $item Data object.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @return \WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$data     = $this->add_additional_fields_to_object( $item, $request );
@@ -152,7 +152,7 @@ class Countries extends DataController {
 		 *
 		 * Allows modification of the loction data right before it is returned.
 		 *
-		 * @param WP_REST_Response $response The response object.
+		 * @param \WP_REST_Response $response The response object.
 		 * @param array            $data     The original country's states list.
 		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */

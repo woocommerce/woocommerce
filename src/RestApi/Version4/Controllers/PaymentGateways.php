@@ -114,7 +114,7 @@ class PaymentGateways extends AbstractController {
 	 * Get payment gateways.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
@@ -132,7 +132,7 @@ class PaymentGateways extends AbstractController {
 	 * Get a single payment gateway.
 	 *
 	 * @param \WP_REST_Request $request Request data.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function get_item( $request ) {
 		$gateway = $this->get_gateway( $request );
@@ -149,7 +149,7 @@ class PaymentGateways extends AbstractController {
 	 * Update A Single Payment Method.
 	 *
 	 * @param \WP_REST_Request $request Request data.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function update_item( $request ) {
 		$gateway = $this->get_gateway( $request );
@@ -223,7 +223,7 @@ class PaymentGateways extends AbstractController {
 	 * Get a gateway based on the current request object.
 	 *
 	 * @param \WP_REST_Request $request Request data.
-	 * @return WP_REST_Response|null
+	 * @return \WP_REST_Response|null
 	 */
 	public function get_gateway( $request ) {
 		$gateway          = null;
@@ -243,7 +243,7 @@ class PaymentGateways extends AbstractController {
 	 *
 	 * @param  WC_Payment_Gateway $gateway    Payment gateway object.
 	 * @param  \WP_REST_Request    $request    Request object.
-	 * @return WP_REST_Response   $response   Response data.
+	 * @return \WP_REST_Response   $response   Response data.
 	 */
 	public function prepare_item_for_response( $gateway, $request ) {
 		$order = (array) get_option( 'woocommerce_gateway_order' );
@@ -269,7 +269,7 @@ class PaymentGateways extends AbstractController {
 		/**
 		 * Filter payment gateway objects returned from the REST API.
 		 *
-		 * @param WP_REST_Response   $response The response object.
+		 * @param \WP_REST_Response   $response The response object.
 		 * @param WC_Payment_Gateway $gateway  Payment gateway object.
 		 * @param \WP_REST_Request    $request  Request object.
 		 */

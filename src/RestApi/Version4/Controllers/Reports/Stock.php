@@ -183,7 +183,7 @@ class Stock extends Reports {
 	 *
 	 * @param  WC_Product      $product  Report data.
 	 * @param  \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @return \WP_REST_Response
 	 */
 	public function prepare_item_for_response( $product, $request ) {
 		$data = array(
@@ -209,7 +209,7 @@ class Stock extends Reports {
 		 *
 		 * Allows modification of the report data right before it is returned.
 		 *
-		 * @param WP_REST_Response $response The response object.
+		 * @param \WP_REST_Response $response The response object.
 		 * @param WC_Product       $product   The original product object.
 		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */

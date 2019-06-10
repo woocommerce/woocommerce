@@ -26,7 +26,7 @@ class Bootstrap {
 	 */
 	public static function init() {
 		self::$wc_tests_dir = dirname( dirname( dirname( __FILE__ ) ) ) . '/woocommerce/tests';
-		self::$wp_tests_dir   = getenv( 'WP_TESTS_DIR' );
+		self::$wp_tests_dir = getenv( 'WP_TESTS_DIR' );
 
 		if ( ! self::$wp_tests_dir ) {
 			self::$wp_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
@@ -34,6 +34,15 @@ class Bootstrap {
 
 		self::setup_hooks();
 		self::load_framework();
+	}
+
+	/**
+	 * Should we skip WC Admin Reports tests?
+	 *
+	 * @return boolean
+	 */
+	public static function skip_report_tests() {
+		return ! file_exists( dirname( dirname( __DIR__ ) ) . '/woocommerce-admin/woocommerce-admin.php' );
 	}
 
 	/**
@@ -46,6 +55,10 @@ class Bootstrap {
 		\tests_add_filter( 'muplugins_loaded', function() {
 			require_once dirname( dirname( __DIR__ ) ) . '/woocommerce/woocommerce.php';
 			require_once dirname( __DIR__ ) . '/woocommerce-rest-api.php';
+
+			if ( file_exists( dirname( dirname( __DIR__ ) ) . '/woocommerce-admin/woocommerce-admin.php' ) ) {
+				require_once dirname( dirname( __DIR__ ) ) . '/woocommerce-admin/woocommerce-admin.php';
+			}
 		} );
 
 		\tests_add_filter( 'setup_theme', function() {
@@ -56,6 +69,13 @@ class Bootstrap {
 			include dirname( dirname( __DIR__ ) ) . '/woocommerce/uninstall.php';
 
 			\WC_Install::install();
+
+			if ( ! self::skip_report_tests() ) {
+				echo esc_html( 'Installing WooCommerce Admin...' . PHP_EOL );
+				require_once dirname( dirname( __DIR__ ) ) . '/woocommerce-admin/includes/class-wc-admin-install.php';
+				\WC_Admin_Install::create_tables();
+				\WC_Admin_Install::create_events();
+			}
 
 			$GLOBALS['wp_roles'] = null; // WPCS: override ok.
 			\wp_roles();
@@ -83,9 +103,9 @@ class Bootstrap {
 		require_once __DIR__ . '/Helpers/ProductHelper.php';
 		require_once __DIR__ . '/Helpers/ShippingHelper.php';
 		require_once __DIR__ . '/Helpers/SettingsHelper.php';
-		require_once __DIR__ . '/Helpers/ReportsHelper.php';
 		require_once __DIR__ . '/Helpers/QueueHelper.php';
 		require_once __DIR__ . '/AbstractRestApiTest.php';
+		require_once __DIR__ . '/AbstractReportsTest.php';
 	}
 }
 

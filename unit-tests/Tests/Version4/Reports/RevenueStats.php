@@ -10,13 +10,12 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Unit_Test_Case;
-use \WP_REST_Request;
+use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
 
 /**
  * Class RevenueStats
  */
-class RevenueStats extends WC_REST_Unit_Test_Case {
+class RevenueStats extends AbstractReportsTest {
 
 	/**
 	 * Endpoints.
@@ -31,21 +30,6 @@ class RevenueStats extends WC_REST_Unit_Test_Case {
 	 * @var array
 	 */
 	protected $orders = array();
-
-	/**
-	 * Setup test reports revenue data.
-	 *
-	 * @since 3.5.0
-	 */
-	public function setUp() {
-		parent::setUp();
-
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-	}
 
 	/**
 	 * Test route registration.

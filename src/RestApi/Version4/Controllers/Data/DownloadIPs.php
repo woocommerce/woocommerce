@@ -50,7 +50,7 @@ class DownloadIPs extends DataController {
 	 *
 	 * @since  3.5.0
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		global $wpdb;
@@ -86,7 +86,7 @@ class DownloadIPs extends DataController {
 	 * @since  3.5.0
 	 * @param object          $item Data object.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @return \WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$data     = $this->add_additional_fields_to_object( $item, $request );
@@ -98,7 +98,7 @@ class DownloadIPs extends DataController {
 		/**
 		 * Filter the list returned from the API.
 		 *
-		 * @param WP_REST_Response $response The response object.
+		 * @param \WP_REST_Response $response The response object.
 		 * @param array            $item     The original item.
 		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */

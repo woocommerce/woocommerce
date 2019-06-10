@@ -10,6 +10,7 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WP_REST_Request;
 use \WC_REST_Unit_Test_Case;
 
 class ShippingZones extends WC_REST_Unit_Test_Case {
@@ -27,8 +28,7 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->endpoint = new WC_REST_Shipping_Zones_Controller();
-		$this->user     = $this->factory->user->create(
+		$this->user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
@@ -44,7 +44,7 @@ class ShippingZones extends WC_REST_Unit_Test_Case {
 	 * @return WC_Shipping_Zone
 	 */
 	protected function create_shipping_zone( $name, $order = 0, $locations = array() ) {
-		$zone = new WC_Shipping_Zone( null );
+		$zone = new \WC_Shipping_Zone( null );
 		$zone->set_zone_name( $name );
 		$zone->set_zone_order( $order );
 		$zone->set_locations( $locations );

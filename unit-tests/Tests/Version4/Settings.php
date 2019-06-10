@@ -11,6 +11,7 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4;
 defined( 'ABSPATH' ) || exit;
 
 use \WC_REST_Unit_Test_Case;
+use \WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper;
 
 class Settings extends WC_REST_Unit_Test_Case {
 
@@ -19,8 +20,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->endpoint = new WC_REST_Setting_Options_Controller();
-		\WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper::register();
+		SettingsHelper::register();
 		$this->user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
@@ -116,7 +116,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/settings' ) );
 		$this->assertEquals( 500, $response->get_status() );
 
-		\WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper::register();
+		SettingsHelper::register();
 	}
 
 	/**
@@ -377,7 +377,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$controller
 			->expects( $this->any() )
 			->method( 'get_group_settings' )
-			->will( $this->returnValue( \WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper::register_test_settings( array() ) ) );
+			->will( $this->returnValue( SettingsHelper::register_test_settings( array() ) ) );
 
 		$controller
 			->expects( $this->any() )

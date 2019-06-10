@@ -200,7 +200,7 @@ class Coupons extends AbstractObjectsController {
 	 * @since  3.0.0
 	 * @param  WC_Data          $object  Object data.
 	 * @param  \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @return \WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
 		$data     = $this->get_formatted_item_data( $object );
@@ -216,7 +216,7 @@ class Coupons extends AbstractObjectsController {
 		 * The dynamic portion of the hook name, $this->post_type,
 		 * refers to object type being prepared for the response.
 		 *
-		 * @param WP_REST_Response $response The response object.
+		 * @param \WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
 		 * @param \WP_REST_Request  $request  Request object.
 		 */
@@ -553,7 +553,7 @@ class Coupons extends AbstractObjectsController {
 	 * Get a collection of posts and add the code search option to \WP_Query.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		add_filter( 'posts_where', array( $this, 'add_wp_query_search_code_filter' ), 10, 2 );

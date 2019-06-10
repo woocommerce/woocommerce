@@ -197,7 +197,7 @@ class Taxes extends AbstractController {
 	 * Get all taxes and allow filtering by tax code.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		global $wpdb;
@@ -376,7 +376,7 @@ class Taxes extends AbstractController {
 	 * Create a single tax.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
@@ -409,7 +409,7 @@ class Taxes extends AbstractController {
 	 * Get a single tax.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$id      = (int) $request['id'];
@@ -429,7 +429,7 @@ class Taxes extends AbstractController {
 	 * Update a single tax.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$id      = (int) $request['id'];
@@ -463,7 +463,7 @@ class Taxes extends AbstractController {
 	 * Delete a single tax.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function delete_item( $request ) {
 		global $wpdb;
@@ -495,7 +495,7 @@ class Taxes extends AbstractController {
 		 * Fires after a tax is deleted via the REST API.
 		 *
 		 * @param stdClass         $tax      The tax data.
-		 * @param WP_REST_Response $response The response returned from the API.
+		 * @param \WP_REST_Response $response The response returned from the API.
 		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( 'woocommerce_rest_delete_tax', $tax, $response, $request );
@@ -508,7 +508,7 @@ class Taxes extends AbstractController {
 	 *
 	 * @param stdClass        $tax Tax object.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @return \WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $tax, $request ) {
 		global $wpdb;
@@ -559,7 +559,7 @@ class Taxes extends AbstractController {
 		/**
 		 * Filter tax object returned from the REST API.
 		 *
-		 * @param WP_REST_Response $response The response object.
+		 * @param \WP_REST_Response $response The response object.
 		 * @param stdClass         $tax      Tax object used to create response.
 		 * @param \WP_REST_Request  $request  Request object.
 		 */

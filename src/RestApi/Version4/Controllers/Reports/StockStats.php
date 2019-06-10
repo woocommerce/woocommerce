@@ -45,7 +45,7 @@ class StockStats extends Reports {
 	 *
 	 * @param  WC_Product      $report  Report data.
 	 * @param  \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @return \WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
 		$data = $report;
@@ -62,7 +62,7 @@ class StockStats extends Reports {
 		 *
 		 * Allows modification of the report data right before it is returned.
 		 *
-		 * @param WP_REST_Response $response The response object.
+		 * @param \WP_REST_Response $response The response object.
 		 * @param WC_Product       $product   The original bject.
 		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */

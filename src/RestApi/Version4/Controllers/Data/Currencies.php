@@ -101,7 +101,7 @@ class Currencies extends DataController {
 	 * Return the list of currencies.
 	 *
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$currencies = get_woocommerce_currencies();
@@ -118,7 +118,7 @@ class Currencies extends DataController {
 	 * Return information for a specific currency.
 	 *
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$data = $this->get_currency( strtoupper( $request['currency'] ), $request );
@@ -132,7 +132,7 @@ class Currencies extends DataController {
 	 * Return information for the current site currency.
 	 *
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_current_item( $request ) {
 		$currency = get_option( 'woocommerce_currency' );
@@ -144,7 +144,7 @@ class Currencies extends DataController {
 	 *
 	 * @param object          $item Data object.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @return \WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$data     = $this->add_additional_fields_to_object( $item, $request );
@@ -156,7 +156,7 @@ class Currencies extends DataController {
 		/**
 		 * Filter currency returned from the API.
 		 *
-		 * @param WP_REST_Response $response The response object.
+		 * @param \WP_REST_Response $response The response object.
 		 * @param array            $item     Currency data.
 		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */

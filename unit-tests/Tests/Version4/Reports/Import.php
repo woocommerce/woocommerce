@@ -9,10 +9,7 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Unit_Test_Case;
-use \WP_REST_Request;
-use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\QueueHelper;
+use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
 
 /**
  * Reports Customers Stats REST API Test Class
@@ -20,7 +17,7 @@ use \WooCommerce\RestApi\UnitTests\Helpers\QueueHelper;
  * @package WooCommerce\Tests\API
  * @since 3.5.0
  */
-class Import extends WC_REST_Unit_Test_Case {
+class Import extends AbstractReportsTest {
 
 	/**
 	 * Endpoint.

@@ -9,6 +9,7 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WP_REST_Request;
 use \WC_REST_Unit_Test_Case;
 
 /**
@@ -24,8 +25,7 @@ class SystemStatus extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$this->endpoint = new WC_REST_System_Status_Controller();
-		$this->user     = $this->factory->user->create(
+		$this->user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
@@ -110,7 +110,7 @@ class SystemStatus extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( get_option( 'woocommerce_db_version' ), $database['wc_database_version'] );
 		$this->assertEquals( $wpdb->prefix, $database['database_prefix'] );
-		$this->assertEquals( WC_Geolocation::get_local_database_path(), $database['maxmind_geoip_database'] );
+		$this->assertEquals( \WC_Geolocation::get_local_database_path(), $database['maxmind_geoip_database'] );
 		$this->assertArrayHasKey( 'woocommerce', $database['database_tables'], wc_print_r( $database, true ) );
 		$this->assertArrayHasKey( $wpdb->prefix . 'woocommerce_payment_tokens', $database['database_tables']['woocommerce'], wc_print_r( $database, true ) );
 	}
@@ -443,7 +443,7 @@ class SystemStatus extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Provides a mocked response for external requests performed by WC_REST_System_Status_Controller.
+	 * Provides a mocked response for external requests.
 	 * This way it is not necessary to perform a regular request to an external server which would
 	 * significantly slow down the tests.
 	 *

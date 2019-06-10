@@ -10,16 +10,12 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Unit_Test_Case;
-use \WP_REST_Request;
-use \WooCommerce\RestApi\UnitTests\Helpers\ReportsHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\QueueHelper;
+use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
 
 /**
  * TaxStats
  */
-class TaxStats extends WC_REST_Unit_Test_Case {
+class TaxStats extends AbstractReportsTest {
 
 	/**
 	 * Endpoints.
@@ -27,21 +23,6 @@ class TaxStats extends WC_REST_Unit_Test_Case {
 	 * @var string
 	 */
 	protected $endpoint = '/wc/v4/reports/taxes/stats';
-
-	/**
-	 * Setup test reports taxes data.
-	 *
-	 * @since 3.5.0
-	 */
-	public function setUp() {
-		parent::setUp();
-
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-	}
 
 	/**
 	 * Test route registration.
@@ -61,11 +42,9 @@ class TaxStats extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_reports() {
 		global $wpdb;
-		wp_set_current_user( $this->user );
-		ReportsHelper::reset_stats_dbs();
 
 		// Populate all of the data.
-		$tax = WC_Tax::_insert_tax_rate(
+		$tax = \WC_Tax::_insert_tax_rate(
 			array(
 				'tax_rate_country'  => 'US',
 				'tax_rate_state'    => '',
@@ -143,8 +122,6 @@ class TaxStats extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_reports_schema() {
-		wp_set_current_user( $this->user );
-
 		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();

@@ -158,7 +158,7 @@ class TaxClasses extends AbstractController {
 	 * Create a single tax.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		$exists    = false;
@@ -210,7 +210,7 @@ class TaxClasses extends AbstractController {
 	 * Delete a single tax class.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function delete_item( $request ) {
 		global $wpdb;
@@ -265,7 +265,7 @@ class TaxClasses extends AbstractController {
 		// Delete tax rates in the selected class.
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_tax_rates', array( 'tax_rate_class' => $tax_class['slug'] ), array( '%s' ) );
 
-		$response = new WP_REST_Response();
+		$response = new \WP_REST_Response();
 		$response->set_data(
 			array(
 				'deleted'  => true,
@@ -277,7 +277,7 @@ class TaxClasses extends AbstractController {
 		 * Fires after a tax class is deleted via the REST API.
 		 *
 		 * @param stdClass         $tax_class The tax data.
-		 * @param WP_REST_Response $response  The response returned from the API.
+		 * @param \WP_REST_Response $response  The response returned from the API.
 		 * @param \WP_REST_Request  $request   The request sent to the API.
 		 */
 		do_action( 'woocommerce_rest_delete_tax', (object) $tax_class, $response, $request );
@@ -290,7 +290,7 @@ class TaxClasses extends AbstractController {
 	 *
 	 * @param array           $tax_class Tax class data.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @return \WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $tax_class, $request ) {
 		$data = $tax_class;
@@ -307,7 +307,7 @@ class TaxClasses extends AbstractController {
 		/**
 		 * Filter tax object returned from the REST API.
 		 *
-		 * @param WP_REST_Response $response  The response object.
+		 * @param \WP_REST_Response $response  The response object.
 		 * @param stdClass         $tax_class Tax object used to create response.
 		 * @param \WP_REST_Request  $request   Request object.
 		 */

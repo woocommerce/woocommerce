@@ -9,13 +9,12 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Unit_Test_Case;
-use \WP_REST_Request;
+use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
 
 /**
  * Class OrderStats
  */
-class OrderStats extends WC_REST_Unit_Test_Case {
+class OrderStats extends AbstractReportsTest {
 
 	/**
 	 * Endpoints.
@@ -23,21 +22,6 @@ class OrderStats extends WC_REST_Unit_Test_Case {
 	 * @var string
 	 */
 	protected $endpoint = '/wc/v4/reports/orders/stats';
-
-	/**
-	 * Setup test reports orders data.
-	 *
-	 * @since 3.5.0
-	 */
-	public function setUp() {
-		parent::setUp();
-
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-	}
 
 	/**
 	 * Test route registration.
@@ -56,8 +40,6 @@ class OrderStats extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_reports() {
-		wp_set_current_user( $this->user );
-
 		// @todo Update after report interface is done.
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
 		$reports  = $response->get_data();
@@ -85,8 +67,6 @@ class OrderStats extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_reports_schema() {
-		wp_set_current_user( $this->user );
-
 		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();

@@ -9,17 +9,12 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Unit_Test_Case;
-use \WP_REST_Request;
-use \WooCommerce\RestApi\UnitTests\Helpers\ReportsHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\QueueHelper;
+use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
 
 /**
  * Class Coupons
  */
-class Coupons extends WC_REST_Unit_Test_Case {
+class Coupons extends AbstractReportsTest {
 
 	/**
 	 * Endpoints.
@@ -27,19 +22,6 @@ class Coupons extends WC_REST_Unit_Test_Case {
 	 * @var string
 	 */
 	protected $endpoint = '/wc/v4/reports/coupons';
-
-	/**
-	 * Setup test reports products data.
-	 */
-	public function setUp() {
-		parent::setUp();
-
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-	}
 
 	/**
 	 * Test route registration.
@@ -54,9 +36,6 @@ class Coupons extends WC_REST_Unit_Test_Case {
 	 * Test getting basic reports.
 	 */
 	public function test_get_reports() {
-		wp_set_current_user( $this->user );
-		ReportsHelper::reset_stats_dbs();
-
 		// Simple product.
 		$product = new WC_Product_Simple();
 		$product->set_name( 'Test Product' );
@@ -118,9 +97,6 @@ class Coupons extends WC_REST_Unit_Test_Case {
 	 * Test getting basic reports with the `coupons` param.
 	 */
 	public function test_get_reports_coupons_param() {
-		wp_set_current_user( $this->user );
-		ReportsHelper::reset_stats_dbs();
-
 		// Simple product.
 		$product = new WC_Product_Simple();
 		$product->set_name( 'Test Product' );
@@ -183,8 +159,6 @@ class Coupons extends WC_REST_Unit_Test_Case {
 	 * Test reports schema.
 	 */
 	public function test_reports_schema() {
-		wp_set_current_user( $this->user );
-
 		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();

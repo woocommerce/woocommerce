@@ -9,10 +9,7 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Unit_Test_Case;
-use \WP_REST_Request;
-use \WooCommerce\RestApi\UnitTests\Helpers\ReportsHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
 
 /**
  * Reports Customers Stats REST API Test Class
@@ -20,7 +17,7 @@ use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
  * @package WooCommerce\Tests\API
  * @since 3.5.0
  */
-class Downloads extends WC_REST_Unit_Test_Case {
+class Downloads extends AbstractReportsTest {
 
 	/**
 	 * Endpoints.
@@ -28,19 +25,6 @@ class Downloads extends WC_REST_Unit_Test_Case {
 	 * @var string
 	 */
 	protected $endpoint = '/wc/v4/reports/downloads';
-
-	/**
-	 * Setup test reports downloads data.
-	 */
-	public function setUp() {
-		parent::setUp();
-
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-	}
 
 	/**
 	 * Test route registration.
@@ -56,8 +40,6 @@ class Downloads extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_report() {
 		global $wpdb;
-		wp_set_current_user( $this->user );
-		ReportsHelper::reset_stats_dbs();
 
 		// Populate all of the data.
 		$prod_download = new \WC_Product_Download();
@@ -112,8 +94,7 @@ class Downloads extends WC_REST_Unit_Test_Case {
 	 */
 	public function filter_setup() {
 		global $wpdb;
-		wp_set_current_user( $this->user );
-		ReportsHelper::reset_stats_dbs();
+
 		$time = time();
 
 		// First set of data.
@@ -402,8 +383,6 @@ class Downloads extends WC_REST_Unit_Test_Case {
 	 * Test reports schema.
 	 */
 	public function test_reports_schema() {
-		wp_set_current_user( $this->user );
-
 		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();

@@ -106,7 +106,7 @@ class SettingsOptions extends AbstractController {
 	 *
 	 * @since  3.0.0
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$setting = $this->get_setting( $request['group_id'], $request['id'] );
@@ -125,7 +125,7 @@ class SettingsOptions extends AbstractController {
 	 *
 	 * @since  3.0.0
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$settings = $this->get_group_settings( $request['group_id'] );
@@ -277,7 +277,7 @@ class SettingsOptions extends AbstractController {
 	 *
 	 * @since  3.0.0
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return array Of \WP_Error or WP_REST_Response.
+	 * @return array Of \WP_Error or \WP_REST_Response.
 	 */
 	public function batch_items( $request ) {
 		// Get the request params.
@@ -304,7 +304,7 @@ class SettingsOptions extends AbstractController {
 	 *
 	 * @since  3.0.0
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$setting = $this->get_setting( $request['group_id'], $request['id'] );
@@ -347,7 +347,7 @@ class SettingsOptions extends AbstractController {
 	 * @since  3.0.0
 	 * @param object          $item Setting object.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @return \WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		unset( $item['option_key'] );

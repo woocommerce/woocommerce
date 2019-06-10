@@ -77,7 +77,7 @@ class Data extends AbstractController {
 	 *
 	 * @since  3.5.0
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$data      = array();
@@ -113,7 +113,7 @@ class Data extends AbstractController {
 	 *
 	 * @param stdClass        $resource Resource data.
 	 * @param \WP_REST_Request $request  Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @return \WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $resource, $request ) {
 		$data = array(

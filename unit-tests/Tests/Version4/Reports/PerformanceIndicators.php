@@ -9,16 +9,12 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Unit_Test_Case;
-use \WP_REST_Request;
-use \WooCommerce\RestApi\UnitTests\Helpers\ReportsHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\QueueHelper;
+use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
 
 /**
  * PerformanceIndicators
  */
-class PerformanceIndicators extends WC_REST_Unit_Test_Case {
+class PerformanceIndicators extends AbstractReportsTest {
 
 	/**
 	 * Endpoints.
@@ -26,19 +22,6 @@ class PerformanceIndicators extends WC_REST_Unit_Test_Case {
 	 * @var string
 	 */
 	protected $endpoint = '/wc/v4/reports/performance-indicators';
-
-	/**
-	 * Setup tests.
-	 */
-	public function setUp() {
-		parent::setUp();
-
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-	}
 
 	/**
 	 * Test route registration.
@@ -55,8 +38,6 @@ class PerformanceIndicators extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_indicators() {
 		global $wpdb;
-		wp_set_current_user( $this->user );
-		ReportsHelper::reset_stats_dbs();
 
 		// Populate all of the data. We'll create an order and a download.
 		$prod_download = new \WC_Product_Download();
@@ -129,8 +110,6 @@ class PerformanceIndicators extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_indicators_empty_request() {
 		global $wpdb;
-		wp_set_current_user( $this->user );
-		ReportsHelper::reset_stats_dbs();
 
 		$time    = time();
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
@@ -159,8 +138,6 @@ class PerformanceIndicators extends WC_REST_Unit_Test_Case {
 	 * Test schema.
 	 */
 	public function test_indicators_schema() {
-		wp_set_current_user( $this->user );
-
 		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
@@ -178,8 +155,6 @@ class PerformanceIndicators extends WC_REST_Unit_Test_Case {
 	 * Test schema for /allowed indicators endpoint.
 	 */
 	public function test_indicators_schema_allowed() {
-		wp_set_current_user( $this->user );
-
 		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint . '/allowed' );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();

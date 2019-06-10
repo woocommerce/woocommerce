@@ -119,7 +119,7 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * Bulk create, update and delete items.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return array Of \WP_Error or WP_REST_Response.
+	 * @return array Of \WP_Error or \WP_REST_Response.
 	 */
 	public function batch_items( $request ) {
 		/**

@@ -266,7 +266,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Get terms associated with a taxonomy.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$taxonomy      = $this->get_taxonomy( $request );
@@ -530,7 +530,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Delete a single term from a taxonomy.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
 		$taxonomy = $this->get_taxonomy( $request );
@@ -562,7 +562,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		 * Fires after a single term is deleted via the REST API.
 		 *
 		 * @param WP_Term          $term     The deleted term.
-		 * @param WP_REST_Response $response The response data.
+		 * @param \WP_REST_Response $response The response data.
 		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( "woocommerce_rest_delete_{$taxonomy}", $term, $response, $request );

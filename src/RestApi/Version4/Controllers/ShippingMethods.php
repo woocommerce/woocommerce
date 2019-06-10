@@ -95,7 +95,7 @@ class ShippingMethods extends AbstractController {
 	 * Get shipping methods.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$wc_shipping = \WC_Shipping::instance();
@@ -112,7 +112,7 @@ class ShippingMethods extends AbstractController {
 	 * Get a single Shipping Method.
 	 *
 	 * @param \WP_REST_Request $request Request data.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function get_item( $request ) {
 		$wc_shipping = \WC_Shipping::instance();
@@ -132,7 +132,7 @@ class ShippingMethods extends AbstractController {
 	 *
 	 * @param  WC_Shipping_Method $method   Shipping method object.
 	 * @param  \WP_REST_Request    $request  Request object.
-	 * @return WP_REST_Response   $response Response data.
+	 * @return \WP_REST_Response   $response Response data.
 	 */
 	public function prepare_item_for_response( $method, $request ) {
 		$data = array(
@@ -153,7 +153,7 @@ class ShippingMethods extends AbstractController {
 		/**
 		 * Filter shipping methods object returned from the REST API.
 		 *
-		 * @param WP_REST_Response   $response The response object.
+		 * @param \WP_REST_Response   $response The response object.
 		 * @param WC_Shipping_Method $method   Shipping method object used to create response.
 		 * @param \WP_REST_Request    $request  Request object.
 		 */

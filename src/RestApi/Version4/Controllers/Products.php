@@ -149,7 +149,7 @@ class Products extends AbstractObjectsController {
 	 * @param \WP_REST_Request $request Request object.
 	 *
 	 * @since  3.0.0
-	 * @return WP_REST_Response
+	 * @return \WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
@@ -176,7 +176,7 @@ class Products extends AbstractObjectsController {
 		 * The dynamic portion of the hook name, $this->post_type,
 		 * refers to object type being prepared for the response.
 		 *
-		 * @param WP_REST_Response $response The response object.
+		 * @param \WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
 		 * @param \WP_REST_Request  $request  Request object.
 		 */
@@ -597,7 +597,7 @@ class Products extends AbstractObjectsController {
 	 * Get a collection of posts and add the post title filter option to \WP_Query.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10, 2 );
@@ -1440,7 +1440,7 @@ class Products extends AbstractObjectsController {
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
 	 *
-	 * @return WP_REST_Response|\WP_Error
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
 		$id     = (int) $request['id'];
@@ -1500,7 +1500,7 @@ class Products extends AbstractObjectsController {
 			$object->delete( true );
 			$result = 0 === $object->get_id();
 
-			$response = new WP_REST_Response();
+			$response = new \WP_REST_Response();
 			$response->set_data(
 				array(
 					'deleted'  => true,
@@ -1555,7 +1555,7 @@ class Products extends AbstractObjectsController {
 		 * Fires after a single object is deleted or trashed via the REST API.
 		 *
 		 * @param WC_Data          $object   The deleted or trashed object.
-		 * @param WP_REST_Response $response The response data.
+		 * @param \WP_REST_Response $response The response data.
 		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( "woocommerce_rest_delete_{$this->post_type}_object", $object, $response, $request );

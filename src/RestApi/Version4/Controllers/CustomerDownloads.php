@@ -93,7 +93,7 @@ class CustomerDownloads extends AbstractController {
 	 *
 	 * @param stdClass        $download Download object.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @return \WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $download, $request ) {
 		$data = array(
@@ -122,7 +122,7 @@ class CustomerDownloads extends AbstractController {
 		/**
 		 * Filter customer download data returned from the REST API.
 		 *
-		 * @param WP_REST_Response $response  The response object.
+		 * @param \WP_REST_Response $response  The response object.
 		 * @param stdClass         $download  Download object used to create response.
 		 * @param \WP_REST_Request  $request   Request object.
 		 */

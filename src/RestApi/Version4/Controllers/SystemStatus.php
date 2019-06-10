@@ -60,7 +60,7 @@ class SystemStatus extends AbstractController {
 	 * Get a system status info, by section.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$schema   = $this->get_item_schema();
@@ -1162,7 +1162,7 @@ class SystemStatus extends AbstractController {
 	 *
 	 * @param  array           $system_status System status data.
 	 * @param  \WP_REST_Request $request       Request object.
-	 * @return WP_REST_Response
+	 * @return \WP_REST_Response
 	 */
 	public function prepare_item_for_response( $system_status, $request ) {
 		$data = $this->add_additional_fields_to_object( $system_status, $request );
@@ -1173,7 +1173,7 @@ class SystemStatus extends AbstractController {
 		/**
 		 * Filter the system status returned from the REST API.
 		 *
-		 * @param WP_REST_Response   $response The response object.
+		 * @param \WP_REST_Response   $response The response object.
 		 * @param mixed              $system_status System status
 		 * @param \WP_REST_Request    $request  Request object.
 		 */

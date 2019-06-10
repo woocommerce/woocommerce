@@ -35,7 +35,7 @@ class ProductShippingClasses extends AbstractTermsContoller {
 	 *
 	 * @param obj             $item Term object.
 	 * @param \WP_REST_Request $request Request params.
-	 * @return WP_REST_Response $response
+	 * @return \WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$data = array(
@@ -59,7 +59,7 @@ class ProductShippingClasses extends AbstractTermsContoller {
 		 *
 		 * Allows modification of the term data right before it is returned.
 		 *
-		 * @param WP_REST_Response  $response  The response object.
+		 * @param \WP_REST_Response  $response  The response object.
 		 * @param object            $item      The original term object.
 		 * @param \WP_REST_Request   $request   Request used to generate the response.
 		 */

@@ -10,12 +10,7 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Unit_Test_Case;
-use \WP_REST_Request;
-use \WooCommerce\RestApi\UnitTests\Helpers\ReportsHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\QueueHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
+use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
 
 /**
  * Reports Customers REST API Test Class
@@ -23,28 +18,13 @@ use \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
  * @package WooCommerce\Tests\API
  * @since 3.5.0
  */
-class Customers extends WC_REST_Unit_Test_Case {
+class Customers extends AbstractReportsTest {
 	/**
 	 * Endpoint.
 	 *
 	 * @var string
 	 */
 	protected $endpoint = '/wc/v4/reports/customers';
-
-	/**
-	 * Setup test reports products data.
-	 *
-	 * @since 3.5.0
-	 */
-	public function setUp() {
-		parent::setUp();
-
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-	}
 
 	/**
 	 * Test route registration.
@@ -148,12 +128,12 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$product->set_regular_price( 25 );
 		$product->save();
 
-		$order = \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $admin_id, $product );
+		$order = OrderHelper::create_order( $admin_id, $product );
 		$order->set_status( 'processing' );
 		$order->set_total( 100 );
 		$order->save();
 
-		\WooCommerce\RestApi\UnitTests\Helpers\QueueHelper::run_all_pending();
+		QueueHelper::run_all_pending();
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params( array( 'per_page' => 10 ) );
@@ -166,7 +146,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $admin_id, $reports[0]['user_id'] );
 
 		// Creating a customer should show up regardless of orders.
-		$customer = \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'customer', 'password', 'customer@example.com' );
+		$customer = CustomerHelper::create_customer( 'customer', 'password', 'customer@example.com' );
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
@@ -194,9 +174,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 	public function test_get_reports() {
 		global $wpdb;
 
-		wp_set_current_user( $this->user );
-		\WooCommerce\RestApi\UnitTests\Helpers\ReportsHelper::reset_stats_dbs();
-
 		$test_customers = array();
 
 		$customer_names = array( 'Alice', 'Betty', 'Catherine', 'Dan', 'Eric', 'Fred', 'Greg', 'Henry', 'Ivan', 'Justin' );
@@ -205,25 +182,25 @@ class Customers extends WC_REST_Unit_Test_Case {
 		for ( $i = 1; $i <= 10; $i++ ) {
 			$name     = $customer_names[ $i - 1 ];
 			$email    = 'customer+' . strtolower( $name ) . '@example.com';
-			$customer = \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( "customer{$i}", 'password', $email );
+			$customer = CustomerHelper::create_customer( "customer{$i}", 'password', $email );
 			$customer->set_first_name( $name );
 			$customer->save();
 			$test_customers[] = $customer;
 		}
 
 		// Create a test product for use in an order.
-		$product = new WC_Product_Simple();
+		$product = new \WC_Product_Simple();
 		$product->set_name( 'Test Product' );
 		$product->set_regular_price( 25 );
 		$product->save();
 
 		// Place an order for the first test customer.
-		$order = \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $test_customers[0]->get_id(), $product );
+		$order = OrderHelper::create_order( $test_customers[0]->get_id(), $product );
 		$order->set_status( 'processing' );
 		$order->set_total( 100 );
 		$order->save();
 
-		\WooCommerce\RestApi\UnitTests\Helpers\QueueHelper::run_all_pending();
+		QueueHelper::run_all_pending();
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
@@ -342,8 +319,6 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 * Test customer first and last name.
 	 */
 	public function test_customer_name() {
-		wp_set_current_user( $this->user );
-
 		$customer = wp_insert_user(
 			array(
 				'user_login' => 'daenerys',
@@ -353,7 +328,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		);
 
 		// Test shipping name and empty billing name.
-		$order = \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $customer );
+		$order = OrderHelper::create_order( $customer );
 		$order->set_billing_first_name( '' );
 		$order->set_billing_last_name( '' );
 		$order->set_shipping_first_name( 'Daenerys' );
@@ -362,7 +337,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$order->set_total( 100 );
 		$order->save();
 
-		\WooCommerce\RestApi\UnitTests\Helpers\QueueHelper::run_all_pending();
+		QueueHelper::run_all_pending();
 
 		$request  = new WP_REST_Request( 'GET', $this->endpoint );
 		$response = $this->server->dispatch( $request );
@@ -379,7 +354,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		$order->save();
 		do_action( 'woocommerce_update_customer', $customer );
 
-		\WooCommerce\RestApi\UnitTests\Helpers\QueueHelper::run_all_pending();
+		QueueHelper::run_all_pending();
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params( array( 'orderby' => 'username' ) ); // Cache busting.
@@ -401,7 +376,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		);
 		do_action( 'woocommerce_update_customer', $customer );
 
-		\WooCommerce\RestApi\UnitTests\Helpers\QueueHelper::run_all_pending();
+		QueueHelper::run_all_pending();
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params( array( 'orderby' => 'name' ) ); // Cache busting.

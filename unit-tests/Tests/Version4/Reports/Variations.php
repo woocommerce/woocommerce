@@ -10,10 +10,7 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Unit_Test_Case;
-use \WP_REST_Request;
-use \WooCommerce\RestApi\UnitTests\Helpers\ReportsHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
 
 /**
  * Reports Customers Stats REST API Test Class
@@ -21,7 +18,7 @@ use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
  * @package WooCommerce\Tests\API
  * @since 3.5.0
  */
-class Variations extends WC_REST_Unit_Test_Case {
+class Variations extends AbstractReportsTest {
 
 	/**
 	 * Endpoints.
@@ -29,21 +26,6 @@ class Variations extends WC_REST_Unit_Test_Case {
 	 * @var string
 	 */
 	protected $endpoint = '/wc/v4/reports/variations';
-
-	/**
-	 * Setup test reports products data.
-	 *
-	 * @since 3.5.0
-	 */
-	public function setUp() {
-		parent::setUp();
-
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-	}
 
 	/**
 	 * Test route registration.
@@ -62,9 +44,6 @@ class Variations extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_reports() {
-		wp_set_current_user( $this->user );
-		ReportsHelper::reset_stats_dbs();
-
 		// Populate all of the data.
 		$variation = new \WC_Product_Variation();
 		$variation->set_name( 'Test Variation' );
@@ -102,9 +81,6 @@ class Variations extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_reports_variations_param() {
-		wp_set_current_user( $this->user );
-		ReportsHelper::reset_stats_dbs();
-
 		// Populate all of the data.
 		$variation = new \WC_Product_Variation();
 		$variation->set_name( 'Test Variation' );
@@ -177,8 +153,6 @@ class Variations extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_reports_schema() {
-		wp_set_current_user( $this->user );
-
 		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();

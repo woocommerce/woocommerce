@@ -35,7 +35,7 @@ class ProductCategories extends AbstractTermsContoller {
 	 *
 	 * @param WP_Term         $item    Term object.
 	 * @param \WP_REST_Request $request Request instance.
-	 * @return WP_REST_Response
+	 * @return \WP_REST_Response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		// Get category display type.
@@ -86,7 +86,7 @@ class ProductCategories extends AbstractTermsContoller {
 		 *
 		 * Allows modification of the term data right before it is returned.
 		 *
-		 * @param WP_REST_Response  $response  The response object.
+		 * @param \WP_REST_Response  $response  The response object.
 		 * @param object            $item      The original term object.
 		 * @param \WP_REST_Request   $request   Request used to generate the response.
 		 */

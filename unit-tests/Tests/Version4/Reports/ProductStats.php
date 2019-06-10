@@ -10,16 +10,12 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Unit_Test_Case;
-use \WP_REST_Request;
-use \WooCommerce\RestApi\UnitTests\Helpers\ReportsHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\QueueHelper;
+use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
 
 /**
  * Class ProductStats
  */
-class ProductStats extends WC_REST_Unit_Test_Case {
+class ProductStats extends AbstractReportsTest {
 
 	/**
 	 * Endpoints.
@@ -27,21 +23,6 @@ class ProductStats extends WC_REST_Unit_Test_Case {
 	 * @var string
 	 */
 	protected $endpoint = '/wc/v4/reports/products/stats';
-
-	/**
-	 * Setup test reports products stats data.
-	 *
-	 * @since 3.5.0
-	 */
-	public function setUp() {
-		parent::setUp();
-
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-	}
 
 	/**
 	 * Test route registration.
@@ -60,9 +41,6 @@ class ProductStats extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_reports() {
-		ReportsHelper::reset_stats_dbs();
-		wp_set_current_user( $this->user );
-
 		// Populate all of the data.
 		$product = new \WC_Product_Simple();
 		$product->set_name( 'Test Product' );
@@ -144,8 +122,6 @@ class ProductStats extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_reports_schema() {
-		wp_set_current_user( $this->user );
-
 		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();

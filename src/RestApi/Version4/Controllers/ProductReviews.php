@@ -726,7 +726,7 @@ class ProductReviews extends AbstractController {
 		 * Filter product reviews object returned from the REST API.
 		 *
 		 * @param \WP_REST_Response $response The response object.
-		 * @param WP_Comment       $review   Product review object used to create response.
+		 * @param \WP_Comment       $review   Product review object used to create response.
 		 * @param \WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_product_review', $response, $review, $request );

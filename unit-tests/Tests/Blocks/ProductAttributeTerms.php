@@ -3,12 +3,20 @@
  * @package WooCommerce\Tests\API
  */
 
+namespace WooCommerce\RestApi\UnitTests\Tests\Blocks;
+
+defined( 'ABSPATH' ) || exit;
+
+use \WP_REST_Request;
+use \WC_REST_Unit_Test_Case;
+use \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+
 /**
  * Product Controller "products attributes terms" REST API Test
  *
  * @since 3.6.0
  */
-class WC_Tests_API_Products_Attributes_Terms_Controller extends WC_REST_Unit_Test_Case {
+class ProductAttributeTerms extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Endpoints.

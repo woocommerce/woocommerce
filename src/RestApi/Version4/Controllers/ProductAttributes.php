@@ -357,7 +357,7 @@ class ProductAttributes extends AbstractController {
 	 * Delete a single attribute.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
 		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
@@ -381,7 +381,7 @@ class ProductAttributes extends AbstractController {
 			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
-		$response = new WP_REST_Response();
+		$response = new \WP_REST_Response();
 		$response->set_data(
 			array(
 				'deleted'  => true,
@@ -393,7 +393,7 @@ class ProductAttributes extends AbstractController {
 		 * Fires after a single attribute is deleted via the REST API.
 		 *
 		 * @param stdObject        $attribute     The deleted attribute.
-		 * @param WP_REST_Response $response The response data.
+		 * @param \WP_REST_Response $response The response data.
 		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( 'woocommerce_rest_delete_product_attribute', $attribute, $response, $request );
@@ -406,7 +406,7 @@ class ProductAttributes extends AbstractController {
 	 *
 	 * @param obj             $item Term object.
 	 * @param \WP_REST_Request $request Request params.
-	 * @return WP_REST_Response $response
+	 * @return \WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$data = array(
@@ -431,7 +431,7 @@ class ProductAttributes extends AbstractController {
 		 *
 		 * Allows modification of the product attribute data right before it is returned.
 		 *
-		 * @param WP_REST_Response  $response  The response object.
+		 * @param \WP_REST_Response  $response  The response object.
 		 * @param object            $item      The original attribute object.
 		 * @param \WP_REST_Request   $request   Request used to generate the response.
 		 */

@@ -10,11 +10,7 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Unit_Test_Case;
-use \WP_REST_Request;
-use \WooCommerce\RestApi\UnitTests\Helpers\ReportsHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\QueueHelper;
+use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
 
 /**
  * Reports Orders REST API Test Class
@@ -22,7 +18,7 @@ use \WooCommerce\RestApi\UnitTests\Helpers\QueueHelper;
  * @package WooCommerce\Tests\API
  * @since 3.5.0
  */
-class Orders extends WC_REST_Unit_Test_Case {
+class Orders extends AbstractReportsTest {
 
 	/**
 	 * Endpoints.
@@ -30,21 +26,6 @@ class Orders extends WC_REST_Unit_Test_Case {
 	 * @var string
 	 */
 	protected $endpoint = '/wc/v4/reports/orders';
-
-	/**
-	 * Setup test reports orders data.
-	 *
-	 * @since 3.5.0
-	 */
-	public function setUp() {
-		parent::setUp();
-
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-	}
 
 	/**
 	 * Test route registration.
@@ -63,11 +44,8 @@ class Orders extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_get_reports() {
-		wp_set_current_user( $this->user );
-		ReportsHelper::reset_stats_dbs();
-
 		// Populate all of the data.
-		$product = new WC_Product_Simple();
+		$product = new \WC_Product_Simple();
 		$product->set_name( 'Test Product' );
 		$product->set_regular_price( 25 );
 		$product->save();
@@ -117,8 +95,6 @@ class Orders extends WC_REST_Unit_Test_Case {
 	 * @since 3.5.0
 	 */
 	public function test_reports_schema() {
-		wp_set_current_user( $this->user );
-
 		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();

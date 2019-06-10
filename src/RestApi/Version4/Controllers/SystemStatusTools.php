@@ -206,7 +206,7 @@ class SystemStatusTools extends AbstractController {
 	 * Get a list of system status tools.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$tools = array();
@@ -232,7 +232,7 @@ class SystemStatusTools extends AbstractController {
 	 * Return a single tool.
 	 *
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$tools = $this->get_tools();
@@ -257,7 +257,7 @@ class SystemStatusTools extends AbstractController {
 	 * Update (execute) a tool.
 	 *
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$tools = $this->get_tools();
@@ -294,7 +294,7 @@ class SystemStatusTools extends AbstractController {
 	 *
 	 * @param  array           $item     Object.
 	 * @param  \WP_REST_Request $request  Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @return \WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$context = empty( $request['context'] ) ? 'view' : $request['context'];

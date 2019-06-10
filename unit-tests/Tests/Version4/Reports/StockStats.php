@@ -9,14 +9,12 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4\Reports;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WC_REST_Unit_Test_Case;
-use \WP_REST_Request;
-use \WooCommerce\RestApi\UnitTests\Helpers\ReportsHelper;
+use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
 
 /**
  * Class StockStats
  */
-class StockStats extends WC_REST_Unit_Test_Case {
+class StockStats extends AbstractReportsTest {
 
 	/**
 	 * Endpoints.
@@ -24,19 +22,6 @@ class StockStats extends WC_REST_Unit_Test_Case {
 	 * @var string
 	 */
 	protected $endpoint = '/wc/v4/reports/stock/stats';
-
-	/**
-	 * Setup test reports stock data.
-	 */
-	public function setUp() {
-		parent::setUp();
-
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-	}
 
 	/**
 	 * Test route registration.
@@ -51,9 +36,6 @@ class StockStats extends WC_REST_Unit_Test_Case {
 	 * Test getting reports.
 	 */
 	public function test_get_reports() {
-		wp_set_current_user( $this->user );
-		ReportsHelper::reset_stats_dbs();
-
 		$number_of_low_stock = 3;
 		for ( $i = 1; $i <= $number_of_low_stock; $i++ ) {
 			$low_stock = new \WC_Product_Simple();
@@ -128,8 +110,6 @@ class StockStats extends WC_REST_Unit_Test_Case {
 	 * Test reports schema.
 	 */
 	public function test_reports_schema() {
-		wp_set_current_user( $this->user );
-
 		$request    = new WP_REST_Request( 'OPTIONS', $this->endpoint );
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();

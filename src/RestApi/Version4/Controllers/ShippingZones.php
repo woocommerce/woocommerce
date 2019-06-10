@@ -92,7 +92,7 @@ class ShippingZones extends AbstractShippingZonesController {
 	 * Get a single Shipping Zone.
 	 *
 	 * @param \WP_REST_Request $request Request data.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function get_item( $request ) {
 		$zone = $this->get_zone( $request->get_param( 'id' ) );
@@ -112,7 +112,7 @@ class ShippingZones extends AbstractShippingZonesController {
 	 * Get all Shipping Zones.
 	 *
 	 * @param \WP_REST_Request $request Request data.
-	 * @return WP_REST_Response
+	 * @return \WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$rest_of_the_world = \WC_Shipping_Zones::get_zone_by( 'zone_id', 0 );
@@ -218,7 +218,7 @@ class ShippingZones extends AbstractShippingZonesController {
 
 		$previous = $this->get_item( $request );
 		$zone->delete();
-		$response = new WP_REST_Response();
+		$response = new \WP_REST_Response();
 		$response->set_data(
 			array(
 				'deleted'  => true,
@@ -234,7 +234,7 @@ class ShippingZones extends AbstractShippingZonesController {
 	 *
 	 * @param array           $item Shipping Zone.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response
+	 * @return \WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$data = array(

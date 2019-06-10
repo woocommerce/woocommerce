@@ -132,7 +132,7 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Get a single item.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$id   = (int) $request['id'];
@@ -158,7 +158,7 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Create a single item.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
@@ -239,7 +239,7 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Update a single post.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$id   = (int) $request['id'];
@@ -293,7 +293,7 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Get a collection of posts.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$args                         = array();
@@ -401,7 +401,7 @@ abstract class AbstractPostsController extends AbstractController {
 	 * Delete a single item.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
 		$id    = (int) $request['id'];
@@ -462,7 +462,7 @@ abstract class AbstractPostsController extends AbstractController {
 		 * Fires after a single item is deleted or trashed via the REST API.
 		 *
 		 * @param object           $post     The deleted or trashed item.
-		 * @param WP_REST_Response $response The response data.
+		 * @param \WP_REST_Response $response The response data.
 		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( "woocommerce_rest_delete_{$this->post_type}", $post, $response, $request );

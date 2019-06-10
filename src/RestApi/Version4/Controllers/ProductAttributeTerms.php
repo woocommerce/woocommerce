@@ -135,7 +135,7 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 	 *
 	 * @param WP_Term         $item Term object.
 	 * @param \WP_REST_Request $request Request params.
-	 * @return WP_REST_Response $response
+	 * @return \WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		// Get term order.
@@ -163,7 +163,7 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 		 *
 		 * Allows modification of the term data right before it is returned.
 		 *
-		 * @param WP_REST_Response  $response  The response object.
+		 * @param \WP_REST_Response  $response  The response object.
 		 * @param object            $item      The original term object.
 		 * @param \WP_REST_Request   $request   Request used to generate the response.
 		 */

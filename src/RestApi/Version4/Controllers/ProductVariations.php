@@ -174,7 +174,7 @@ class ProductVariations extends Products {
 	 *
 	 * @param  WC_Data         $object  Object data.
 	 * @param  \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @return \WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
 		$data = array(
@@ -238,7 +238,7 @@ class ProductVariations extends Products {
 		 * The dynamic portion of the hook name, $this->post_type,
 		 * refers to object type being prepared for the response.
 		 *
-		 * @param WP_REST_Response $response The response object.
+		 * @param \WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
 		 * @param \WP_REST_Request  $request  Request object.
 		 */
@@ -639,7 +639,7 @@ class ProductVariations extends Products {
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|\WP_Error|WP_REST_Response
+	 * @return bool|\WP_Error\WP_REST_Response
 	 */
 	public function delete_item( $request ) {
 		$force  = (bool) $request['force'];
@@ -684,7 +684,7 @@ class ProductVariations extends Products {
 			$object->delete( true );
 
 			$result   = 0 === $object->get_id();
-			$response = new WP_REST_Response();
+			$response = new \WP_REST_Response();
 			$response->set_data(
 				array(
 					'deleted'  => true,
@@ -733,7 +733,7 @@ class ProductVariations extends Products {
 		 * Fires after a single object is deleted or trashed via the REST API.
 		 *
 		 * @param WC_Data          $object   The deleted or trashed object.
-		 * @param WP_REST_Response $response The response data.
+		 * @param \WP_REST_Response $response The response data.
 		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( "woocommerce_rest_delete_{$this->post_type}_object", $object, $response, $request );
@@ -746,7 +746,7 @@ class ProductVariations extends Products {
 	 *
 	 * @since  3.0.0
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return array Of \WP_Error or WP_REST_Response.
+	 * @return array Of \WP_Error or \WP_REST_Response.
 	 */
 	public function batch_items( $request ) {
 		$items       = array_filter( $request->get_params() );
@@ -1210,7 +1210,7 @@ class ProductVariations extends Products {
 	 * Get a collection of posts and add the post title filter option to \WP_Query.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		add_filter( 'posts_where', array( 'WC_Admin_REST_Products_Controller', 'add_wp_query_filter' ), 10, 2 );

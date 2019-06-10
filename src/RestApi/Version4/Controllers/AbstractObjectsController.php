@@ -96,7 +96,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * @since  3.0.0
 	 * @param  WC_Data         $object  Object data.
 	 * @param  \WP_REST_Request $request Request object.
-	 * @return \WP_Error|WP_REST_Response Response object on success, or \WP_Error object on failure.
+	 * @return \WP_Error|\WP_REST_Response Response object on success, or \WP_Error object on failure.
 	 */
 	protected function prepare_object_for_response( $object, $request ) {
 		// translators: %s: Class method name.
@@ -120,7 +120,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * Get a single item.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$object = $this->get_object( (int) $request['id'] );
@@ -169,7 +169,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * Create a single item.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
@@ -215,7 +215,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * Update a single post.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$object = $this->get_object( (int) $request['id'] );
@@ -337,7 +337,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * Get a collection of posts.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$query_args    = $this->prepare_objects_query( $request );
@@ -397,7 +397,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 	 * Delete a single item.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
 		$force  = (bool) $request['force'];
@@ -456,7 +456,7 @@ abstract class AbstractObjectsController extends AbstractPostsController {
 		 * Fires after a single object is deleted or trashed via the REST API.
 		 *
 		 * @param WC_Data          $object   The deleted or trashed object.
-		 * @param WP_REST_Response $response The response data.
+		 * @param \WP_REST_Response $response The response data.
 		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( "woocommerce_rest_delete_{$this->post_type}_object", $object, $response, $request );

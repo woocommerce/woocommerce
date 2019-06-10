@@ -110,7 +110,7 @@ class Import extends Reports {
 	 * Import data based on user request params.
 	 *
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function import_items( $request ) {
 		$query_args = $this->prepare_objects_query( $request );
@@ -153,7 +153,7 @@ class Import extends Reports {
 	 *
 	 * @param object          $item Data object.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @return \WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$data     = $this->add_additional_fields_to_object( $item, $request );
@@ -163,7 +163,7 @@ class Import extends Reports {
 		/**
 		 * Filter the list returned from the API.
 		 *
-		 * @param WP_REST_Response $response The response object.
+		 * @param \WP_REST_Response $response The response object.
 		 * @param array            $item     The original item.
 		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */
@@ -227,7 +227,7 @@ class Import extends Reports {
 	 * Cancel all queued import actions.
 	 *
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function cancel_import( $request ) {
 		\WC_Admin_Reports_Sync::clear_queued_actions();
@@ -247,7 +247,7 @@ class Import extends Reports {
 	 * Delete all imported items.
 	 *
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function delete_imported_items( $request ) {
 		$delete = \WC_Admin_Reports_Sync::delete_report_data();
@@ -274,7 +274,7 @@ class Import extends Reports {
 	 * Get the status of the current import.
 	 *
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_import_status( $request ) {
 		$result = array(
@@ -296,7 +296,7 @@ class Import extends Reports {
 	 * Get the total orders and customers based on user supplied params.
 	 *
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_import_totals( $request ) {
 		$query_args = $this->prepare_objects_query( $request );

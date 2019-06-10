@@ -268,7 +268,7 @@ class Customers extends AbstractController {
 	 * Get all customers.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$prepared_args = array();
@@ -366,7 +366,7 @@ class Customers extends AbstractController {
 	 *
 	 * @throws WC_REST_Exception On invalid params.
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		try {
@@ -420,7 +420,7 @@ class Customers extends AbstractController {
 	 * Get a single customer.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$id        = (int) $request['id'];
@@ -441,7 +441,7 @@ class Customers extends AbstractController {
 	 *
 	 * @throws WC_REST_Exception On invalid params.
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		try {
@@ -502,7 +502,7 @@ class Customers extends AbstractController {
 	 * Delete a single customer.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function delete_item( $request ) {
 		$id       = (int) $request['id'];
@@ -547,7 +547,7 @@ class Customers extends AbstractController {
 		 * Fires after a customer is deleted via the REST API.
 		 *
 		 * @param WP_User          $user_data User data.
-		 * @param WP_REST_Response $response  The response returned from the API.
+		 * @param \WP_REST_Response $response  The response returned from the API.
 		 * @param \WP_REST_Request  $request   The request sent to the API.
 		 */
 		do_action( 'woocommerce_rest_delete_customer', $user_data, $response, $request );
@@ -560,7 +560,7 @@ class Customers extends AbstractController {
 	 *
 	 * @param  WP_User         $user_data User object.
 	 * @param  \WP_REST_Request $request   Request object.
-	 * @return WP_REST_Response $response  Response data.
+	 * @return \WP_REST_Response $response  Response data.
 	 */
 	public function prepare_item_for_response( $user_data, $request ) {
 		$customer = new \WC_Customer( $user_data->ID );
@@ -574,7 +574,7 @@ class Customers extends AbstractController {
 		/**
 		 * Filter customer data returned from the REST API.
 		 *
-		 * @param WP_REST_Response $response   The response object.
+		 * @param \WP_REST_Response $response   The response object.
 		 * @param WP_User          $user_data  User object used to create response.
 		 * @param \WP_REST_Request  $request    Request object.
 		 */

@@ -115,7 +115,7 @@ class ProductStats extends Reports {
 	 *
 	 * @param Array           $report  Report data.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @return \WP_REST_Response
 	 */
 	public function prepare_item_for_response( $report, $request ) {
 		$data = $report;
@@ -132,7 +132,7 @@ class ProductStats extends Reports {
 		 *
 		 * Allows modification of the report data right before it is returned.
 		 *
-		 * @param WP_REST_Response $response The response object.
+		 * @param \WP_REST_Response $response The response object.
 		 * @param object           $report   The original report object.
 		 * @param \WP_REST_Request  $request  Request used to generate the response.
 		 */

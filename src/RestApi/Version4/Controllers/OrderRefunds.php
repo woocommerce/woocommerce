@@ -177,7 +177,7 @@ class OrderRefunds extends Orders {
 	 * @param  WC_Data         $object  Object data.
 	 * @param  \WP_REST_Request $request Request object.
 	 *
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
 		$this->request       = $request;
@@ -208,7 +208,7 @@ class OrderRefunds extends Orders {
 		 * The dynamic portion of the hook name, $this->post_type,
 		 * refers to object type being prepared for the response.
 		 *
-		 * @param WP_REST_Response $response The response object.
+		 * @param \WP_REST_Response $response The response object.
 		 * @param WC_Data          $object   Object data.
 		 * @param \WP_REST_Request  $request  Request object.
 		 */
@@ -221,7 +221,7 @@ class OrderRefunds extends Orders {
 	 * @param WP_Post         $post Post object.
 	 * @param \WP_REST_Request $request Request object.
 	 *
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function prepare_item_for_response( $post, $request ) {
 		$order = wc_get_order( (int) $request['order_id'] );
@@ -326,7 +326,7 @@ class OrderRefunds extends Orders {
 		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
 		 * prepared for the response.
 		 *
-		 * @param WP_REST_Response   $response   The response object.
+		 * @param \WP_REST_Response   $response   The response object.
 		 * @param WP_Post            $post       Post object.
 		 * @param \WP_REST_Request    $request    Request object.
 		 */
@@ -377,7 +377,7 @@ class OrderRefunds extends Orders {
 	 * Create a single item.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {

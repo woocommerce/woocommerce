@@ -102,7 +102,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	 * Get a single Shipping Zone Method.
 	 *
 	 * @param \WP_REST_Request $request Request data.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function get_item( $request ) {
 		$zone = $this->get_zone( $request['zone_id'] );
@@ -135,7 +135,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	 * Get all Shipping Zone Methods.
 	 *
 	 * @param \WP_REST_Request $request Request data.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function get_items( $request ) {
 		$zone = $this->get_zone( $request['zone_id'] );
@@ -235,7 +235,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 
 		// Actually delete.
 		$zone->delete_shipping_method( $instance_id );
-		$response = new WP_REST_Response();
+		$response = new \WP_REST_Response();
 		$response->set_data(
 			array(
 				'deleted'  => true,
@@ -247,7 +247,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 		 * Fires after a method is deleted via the REST API.
 		 *
 		 * @param object           $method
-		 * @param WP_REST_Response $response        The response data.
+		 * @param \WP_REST_Response $response        The response data.
 		 * @param \WP_REST_Request  $request         The request sent to the API.
 		 */
 		do_action( 'woocommerce_rest_delete_shipping_zone_method', $method, $response, $request );
@@ -259,7 +259,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	 * Update A Single Shipping Zone Method.
 	 *
 	 * @param \WP_REST_Request $request Request data.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function update_item( $request ) {
 		$zone = $this->get_zone( $request['zone_id'] );
@@ -352,7 +352,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	 *
 	 * @param array           $item Shipping Zone Method.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response
+	 * @return \WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $item, $request ) {
 		$method = array(

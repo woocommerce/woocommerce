@@ -225,7 +225,7 @@ class OrderNotes extends AbstractController {
 	 * Create a single order note.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
@@ -271,7 +271,7 @@ class OrderNotes extends AbstractController {
 	 * Get a single order note.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$id    = (int) $request['id'];
@@ -297,7 +297,7 @@ class OrderNotes extends AbstractController {
 	 * Delete a single order note.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
 		$id    = (int) $request['id'];
@@ -328,7 +328,7 @@ class OrderNotes extends AbstractController {
 			return new \WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), 'order_note' ), array( 'status' => 500 ) );
 		}
 
-		$response = new WP_REST_Response();
+		$response = new \WP_REST_Response();
 		$response->set_data(
 			array(
 				'deleted'  => true,
@@ -340,7 +340,7 @@ class OrderNotes extends AbstractController {
 		 * Fires after a order note is deleted or trashed via the REST API.
 		 *
 		 * @param WP_Comment       $note     The deleted or trashed order note.
-		 * @param WP_REST_Response $response The response data.
+		 * @param \WP_REST_Response $response The response data.
 		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( 'woocommerce_rest_delete_order_note', $note, $response, $request );
@@ -353,7 +353,7 @@ class OrderNotes extends AbstractController {
 	 *
 	 * @param WP_Comment      $note    Order note object.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return WP_REST_Response $response Response data.
+	 * @return \WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $note, $request ) {
 		$data = array(
@@ -377,7 +377,7 @@ class OrderNotes extends AbstractController {
 		/**
 		 * Filter order note object returned from the REST API.
 		 *
-		 * @param WP_REST_Response $response The response object.
+		 * @param \WP_REST_Response $response The response object.
 		 * @param WP_Comment       $note     Order note object used to create response.
 		 * @param \WP_REST_Request  $request  Request object.
 		 */

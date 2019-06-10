@@ -222,7 +222,7 @@ class Webhooks extends AbstractController {
 	 * Get all webhooks.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$args            = array();
@@ -292,7 +292,7 @@ class Webhooks extends AbstractController {
 	 * Get a single item.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$id = (int) $request['id'];
@@ -311,7 +311,7 @@ class Webhooks extends AbstractController {
 	 * Create a single webhook.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
@@ -371,7 +371,7 @@ class Webhooks extends AbstractController {
 	 * Update a single webhook.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|WP_REST_Response
+	 * @return \WP_Error\WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$id      = (int) $request['id'];
@@ -445,7 +445,7 @@ class Webhooks extends AbstractController {
 	 * Delete a single webhook.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Response|\WP_Error
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function delete_item( $request ) {
 		$id    = (int) $request['id'];
@@ -469,7 +469,7 @@ class Webhooks extends AbstractController {
 			/* translators: %s: post type */
 			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
 		}
-		$response = new WP_REST_Response();
+		$response = new \WP_REST_Response();
 		$response->set_data(
 			array(
 				'deleted'  => true,
@@ -481,7 +481,7 @@ class Webhooks extends AbstractController {
 		 * Fires after a single item is deleted or trashed via the REST API.
 		 *
 		 * @param WC_Webhook       $webhook     The deleted or trashed item.
-		 * @param WP_REST_Response $response The response data.
+		 * @param \WP_REST_Response $response The response data.
 		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
 		do_action( 'woocommerce_rest_delete_webhook_object', $webhook, $response, $request );
@@ -547,7 +547,7 @@ class Webhooks extends AbstractController {
 	 *
 	 * @param int             $id       Webhook ID.
 	 * @param \WP_REST_Request $request  Request object.
-	 * @return WP_REST_Response $response
+	 * @return \WP_REST_Response $response
 	 */
 	public function prepare_item_for_response( $id, $request ) {
 		$webhook = wc_get_webhook( $id );
@@ -583,7 +583,7 @@ class Webhooks extends AbstractController {
 		/**
 		 * Filter webhook object returned from the REST API.
 		 *
-		 * @param WP_REST_Response $response The response object.
+		 * @param \WP_REST_Response $response The response object.
 		 * @param WC_Webhook       $webhook  Webhook object used to create response.
 		 * @param \WP_REST_Request  $request  Request object.
 		 */
