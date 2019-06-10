@@ -24,16 +24,9 @@ none
 # Windows junk
 Thumbs.db
 
-# Behat/CLI Tests
-tests/cli/installer
-tests/cli/composer.phar
-tests/cli/composer.lock
-tests/cli/composer.json
-tests/cli/vendor
-
 # Unit tests
 /tmp
-/tests/bin/tmp
+/unit-tests/bin/tmp
 
 # Logs
 /logs

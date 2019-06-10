@@ -20,9 +20,9 @@ matrix:
 before_script:
   - phpenv config-rm xdebug.ini
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
-  - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
-  - bash bin/travis.sh before
+  - bash unit-tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
+  - bash unit-tests/bin/travis.sh before
 
 script:
   - bash unit-tests/bin/phpunit.sh
-  - bash unit-tests/tests/bin/phpcs.sh
+  - bash unit-tests/bin/phpcs.sh
