@@ -15,9 +15,11 @@ matrix:
     env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress
 
 before_script:
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
   - phpenv config-rm xdebug.ini
   - composer install
-  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - composer global require "phpunit/phpunit=4.8.*|6.5.*"
+  - composer require woocommerce/woocommerce-sniffs
   - bash unit-tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
 
 script:
