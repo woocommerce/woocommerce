@@ -8,6 +8,11 @@ import { find } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
+ * WooCommerce dependencies
+ */
+import { updateQueryString } from '@woocommerce/navigation';
+
+/**
  * Internal dependencies
  */
 import AdvancedFilters from './advanced';
@@ -26,6 +31,7 @@ class ReportFilters extends Component {
 	constructor() {
 		super();
 		this.renderCard = this.renderCard.bind( this );
+		this.onRangeSelect = this.onRangeSelect.bind( this );
 	}
 
 	renderCard( config ) {
@@ -56,6 +62,11 @@ class ReportFilters extends Component {
 		}
 	}
 
+	onRangeSelect( data ) {
+		const { query, path } = this.props;
+		updateQueryString( data, path, query );
+	}
+
 	render() {
 		const { filters, query, path, showDatePicker } = this.props;
 		return (
@@ -64,7 +75,11 @@ class ReportFilters extends Component {
 				<Section component="div" className="woocommerce-filters">
 					<div className="woocommerce-filters__basic-filters">
 						{ showDatePicker && (
-							<DateRangeFilterPicker key={ JSON.stringify( query ) } query={ query } path={ path } />
+							<DateRangeFilterPicker
+								key={ JSON.stringify( query ) }
+								query={ query }
+								onRangeSelect={ this.onRangeSelect }
+							/>
 						) }
 						{ filters.map( config => {
 							if ( config.showFilters( query ) ) {

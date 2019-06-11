@@ -11,7 +11,6 @@ import PropTypes from 'prop-types';
  * WooCommerce dependencies
  */
 import { getCurrentDates, getDateParamsFromQuery, isoDateFormat } from '@woocommerce/date';
-import { updateQueryString } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -57,7 +56,7 @@ class DateRangeFilterPicker extends Component {
 	}
 
 	onSelect( selectedTab, onClose ) {
-		const { path, query } = this.props;
+		const { onRangeSelect } = this.props;
 		return event => {
 			const { period, compare, after, before } = this.state;
 			const data = {
@@ -71,7 +70,7 @@ class DateRangeFilterPicker extends Component {
 				data.after = undefined;
 				data.before = undefined;
 			}
-			updateQueryString( data, path, query );
+			onRangeSelect( data );
 			onClose( event );
 		};
 	}
@@ -158,9 +157,9 @@ class DateRangeFilterPicker extends Component {
 
 DateRangeFilterPicker.propTypes = {
 	/**
-	 * The `path` parameter supplied by React-Router.
+	 * Callback called when selection is made.
 	 */
-	path: PropTypes.string.isRequired,
+	onRangeSelect: PropTypes.func.isRequired,
 	/**
 	 * The query string represented in object form.
 	 */

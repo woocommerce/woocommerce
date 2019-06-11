@@ -12,6 +12,7 @@
 - Card component: updated default Muriel design.
 - Card component: new `description` prop.
 - Card component: new `isInactive` prop.
+- DateRangeFilterPicker (breaking change): Introduced `onRangeSelect` prop and remove `path` prop better control.
 
 # 2.0.0
 - Chart legend component now uses withInstanceId HOC so the ids used in several HTML elements are unique.
