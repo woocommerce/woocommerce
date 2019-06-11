@@ -54,7 +54,7 @@
     "grunt-shell": "3.0.1",
     "grunt-stylelint": "0.11.0",
     "grunt-wp-i18n": "1.0.3",
-    "husky": "2.4.0",
+    "husky": "2.4.1",
     "istanbul": "1.0.0-alpha.2",
     "lint-staged": "8.2.0",
     "mocha": "6.1.4",
