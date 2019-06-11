@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { BlockControls, InspectorControls, ServerSideRender } from '@wordpress/editor';
+import {
+	BlockControls,
+	InspectorControls,
+	ServerSideRender,
+} from '@wordpress/editor';
 import {
 	Button,
 	Disabled,

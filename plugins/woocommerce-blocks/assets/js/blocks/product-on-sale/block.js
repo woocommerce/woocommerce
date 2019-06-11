@@ -84,13 +84,13 @@ class ProductOnSaleBlock extends Component {
 	}
 
 	render() {
-		const { attributes } = this.props;
+		const { attributes, name } = this.props;
 
 		return (
 			<Fragment>
 				{ this.getInspectorControls() }
 				<Disabled>
-					<ServerSideRender block="woocommerce/product-on-sale" attributes={ attributes } />
+					<ServerSideRender block={ name } attributes={ attributes } />
 				</Disabled>
 			</Fragment>
 		);
