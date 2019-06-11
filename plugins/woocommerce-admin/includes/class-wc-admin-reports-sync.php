@@ -395,7 +395,15 @@ class WC_Admin_Reports_Sync {
 	 */
 	public static function orders_lookup_import_batch( $batch_number, $days, $skip_existing ) {
 		$batch_size = self::get_batch_size( self::ORDERS_IMPORT_BATCH_ACTION );
-		$orders     = self::get_orders( $batch_size, $batch_number, $days, $skip_existing );
+
+		$properties = array(
+			'batch_number' => $batch_number,
+			'batch_size'   => $batch_size,
+			'type'         => 'order',
+		);
+		self::record_event( 'import_job_start', $properties );
+
+		$orders = self::get_orders( $batch_size, $batch_number, $days, $skip_existing );
 
 		foreach ( $orders->order_ids as $order_id ) {
 			self::orders_lookup_import_order( $order_id );
@@ -403,6 +411,10 @@ class WC_Admin_Reports_Sync {
 
 		$imported_count = get_option( 'wc_admin_import_orders_count', 0 );
 		update_option( 'wc_admin_import_orders_count', $imported_count + count( $orders->order_ids ) );
+
+		$properties['imported_count'] = $imported_count;
+
+		self::record_event( 'import_job_complete', $properties );
 	}
 
 	/**
@@ -631,7 +643,15 @@ class WC_Admin_Reports_Sync {
 	 * @return void
 	 */
 	public static function customer_lookup_import_batch( $batch_number, $days, $skip_existing ) {
-		$batch_size     = self::get_batch_size( self::CUSTOMERS_IMPORT_BATCH_ACTION );
+		$batch_size = self::get_batch_size( self::CUSTOMERS_IMPORT_BATCH_ACTION );
+
+		$properties = array(
+			'batch_number' => $batch_number,
+			'batch_size'   => $batch_size,
+			'type'         => 'customer',
+		);
+		self::record_event( 'import_job_start', $properties );
+
 		$customer_roles = apply_filters( 'woocommerce_admin_import_customer_roles', array( 'customer' ) );
 		$customer_query = self::get_user_ids_for_batch(
 			$days,
@@ -655,6 +675,10 @@ class WC_Admin_Reports_Sync {
 
 		$imported_count = get_option( 'wc_admin_import_customers_count', 0 );
 		update_option( 'wc_admin_import_customers_count', $imported_count + count( $customer_ids ) );
+
+		$properties['imported_count'] = $imported_count;
+
+		self::record_event( 'import_job_complete', $properties );
 	}
 
 	/**
@@ -679,6 +703,9 @@ class WC_Admin_Reports_Sync {
 	 */
 	public static function customer_lookup_delete_batch() {
 		global $wpdb;
+
+		self::record_event( 'delete_import_data_job_start', array( 'type' => 'customer' ) );
+
 		$batch_size   = self::get_batch_size( self::CUSTOMERS_DELETE_BATCH_ACTION );
 		$customer_ids = $wpdb->get_col(
 			$wpdb->prepare(
@@ -690,6 +717,8 @@ class WC_Admin_Reports_Sync {
 		foreach ( $customer_ids as $customer_id ) {
 			WC_Admin_Reports_Customers_Data_Store::delete_customer( $customer_id );
 		}
+
+		self::record_event( 'delete_import_data_job_complete', array( 'type' => 'customer' ) );
 	}
 
 	/**
@@ -716,6 +745,9 @@ class WC_Admin_Reports_Sync {
 	 */
 	public static function orders_lookup_delete_batch() {
 		global $wpdb;
+
+		self::record_event( 'delete_import_data_job_start', array( 'type' => 'order' ) );
+
 		$batch_size = self::get_batch_size( self::ORDERS_DELETE_BATCH_ACTION );
 		$order_ids  = $wpdb->get_col(
 			$wpdb->prepare(
@@ -727,8 +759,30 @@ class WC_Admin_Reports_Sync {
 		foreach ( $order_ids as $order_id ) {
 			WC_Admin_Reports_Orders_Stats_Data_Store::delete_order( $order_id );
 		}
+
+		self::record_event( 'delete_import_data_job_complete', array( 'type' => 'order' ) );
 	}
 
+	/**
+	 * Record an event using Tracks.
+	 *
+	 * @internal WooCommerce core only includes Tracks in admin, not the REST API, so we need to include it.
+	 * @param string $event_name Event name for tracks.
+	 * @param array  $properties Properties to pass along with event.
+	 */
+	protected static function record_event( $event_name, $properties = array() ) {
+		if ( ! class_exists( 'WC_Tracks' ) ) {
+			if ( ! defined( 'WC_ABSPATH' ) || ! file_exists( WC_ABSPATH . 'includes/tracks/class-wc-tracks.php' ) ) {
+				return;
+			}
+			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
+			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
+			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
+			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
+			include_once WC_ABSPATH . 'includes/tracks/class-wc-site-tracking.php';
+		}
+		WC_Tracks::record_event( $event_name, $properties );
+	}
 }
 
 WC_Admin_Reports_Sync::init();
