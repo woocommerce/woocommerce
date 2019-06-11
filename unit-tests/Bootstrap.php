@@ -52,11 +52,19 @@ class Bootstrap {
 	 * Init unit testing library.
 	 */
 	public function init() {
+		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
 		$this->tests_dir    = dirname( __FILE__ );
 		$this->plugin_dir   = dirname( $this->tests_dir );
-		$this->plugins_dir  = dirname( $this->plugin_dir );
+		
+		if ( file_exists( dirname( $this->plugin_dir ) . '/woocommerce/woocommerce.php' ) ) {
+			// From plugin directory.
+			$this->plugins_dir = dirname( $this->plugin_dir );
+		} else {
+			// Travis.
+			$this->plugins_dir = getenv( 'WP_CORE_DIR' ) . 'wp-content/plugins';
+		}
+
 		$this->wc_tests_dir = $this->plugins_dir . '/woocommerce/tests';
-		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
 
 		$this->setup_hooks();
 		$this->load_framework();
