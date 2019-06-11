@@ -129,7 +129,7 @@
     "chalk": "2.4.2",
     "concurrently": "4.1.0",
     "color-studio": "github:automattic/color-studio#1.0.4",
-    "copy-webpack-plugin": "4.6.0",
+    "copy-webpack-plugin": "5.0.3",
     "cross-env": "5.2.0",
     "css-loader": "2.1.1",
     "deasync": "0.1.15",
