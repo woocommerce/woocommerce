@@ -6,7 +6,6 @@ if [[ ${RUN_PHPCS} == 1 ]]; then
 
 	if [ "$CHANGED_FILES" != "" ]; then
 		echo "Running Code Sniffer."
-		cd "$WP_CORE_DIR/wp-content/plugins/woocommerce-rest-api/"
-		./vendor/bin/phpcs --ignore=$IGNORE --encoding=utf-8 -s -n -p $CHANGED_FILES
+		phpcs --ignore=$IGNORE --encoding=utf-8 -s -n -p $CHANGED_FILES
 	fi
 fi
