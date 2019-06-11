@@ -180,9 +180,16 @@ install_deps() {
 	cd "wp-content/plugins/"
 
 	git clone --depth 1 https://github.com/woocommerce/woocommerce.git
+	git clone --depth 1 https://github.com/woocommerce/woocommerce-admin.git
+
+	cd "woocommerce-admin"
+	composer install
+	npm install
+	npm run build
 
 	cd "$WP_CORE_DIR"
 	php wp-cli.phar plugin activate woocommerce
+	php wp-cli.phar plugin activate woocommerce-admin
 
 	if [ "$BRANCH" != "" ]; then
 		# Install the correct branch of the plugin, if running from Travis CI.
