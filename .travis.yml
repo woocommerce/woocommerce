@@ -19,5 +19,6 @@ before_script:
   - bash unit-tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
 
 script:
+  - composer install
   - bash unit-tests/bin/phpunit.sh
   - bash unit-tests/bin/phpcs.sh
