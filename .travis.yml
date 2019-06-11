@@ -1,7 +1,10 @@
 language: php
 dist: trusty
 sudo: required
-
+cache:
+  directories:
+    - vendor
+    - $HOME/.composer/cache
 matrix:
   include:
   - name: "PHP 7.2 unit tests, PHP Coding standards check"
@@ -17,6 +20,5 @@ before_script:
 
 script:
   - composer install
-  - export PATH="$WP_CORE_DIR/wp-content/plugins/woocommerce-rest-api/vendor/bin:$PATH"
   - bash unit-tests/bin/phpunit.sh
   - bash unit-tests/bin/phpcs.sh
