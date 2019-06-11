@@ -57,13 +57,15 @@ class RestApi {
 	 * @return array List of Namespaces and Main controller classes.
 	 */
 	protected function get_rest_namespaces() {
-		return [
-			'wc/v1'        => 'WC_REST_Controllers_V1',
-			'wc/v2'        => 'WC_REST_Controllers_V2',
-			'wc/v3'        => 'WC_REST_Controllers_V3',
-			'wc/v4'        => '\WooCommerce\RestApi\Version4\Controllers',
-			'wc-blocks/v1' => 'WC_REST_Blocks_Controllers',
-		];
+		return apply_filters(
+			'woocommerce_rest_api_get_rest_namespaces',
+			[
+				'wc/v1' => 'WC_REST_Controllers_V1',
+				'wc/v2' => 'WC_REST_Controllers_V2',
+				'wc/v3' => 'WC_REST_Controllers_V3',
+				'wc/v4' => '\WooCommerce\RestApi\Version4\Controllers',
+			]
+		);
 	}
 
 	/**
