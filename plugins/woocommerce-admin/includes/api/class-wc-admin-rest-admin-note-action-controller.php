@@ -99,7 +99,10 @@ class WC_Admin_REST_Admin_Note_Action_Controller extends WC_Admin_REST_Admin_Not
 		do_action( 'woocommerce_admin_note_action_' . $triggered_action->name, $note );
 
 		// Update the note with the status for this action.
-		$note->set_status( $triggered_action->status );
+		if ( ! empty( $triggered_action->status ) ) {
+			$note->set_status( $triggered_action->status );
+		}
+
 		$note->save();
 
 		$data = $note->get_data();
