@@ -39,6 +39,19 @@ class WC_Admin_Notes_New_Sales_Record {
 	 * Possibly add a sales record note.
 	 */
 	public static function possibly_add_sales_record_note() {
+		/**
+		 * Filter to allow for disabling sales record milestones.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param boolean default true
+		 */
+		$sales_record_notes_enabled = apply_filters( 'woocommerce_admin_sales_record_milestone_enabled', true );
+
+		if ( ! $sales_record_notes_enabled ) {
+			return;
+		}
+
 		$yesterday = date( 'Y-m-d', current_time( 'timestamp', 0 ) - DAY_IN_SECONDS );
 		$total     = self::sum_sales_for_date( $yesterday );
 

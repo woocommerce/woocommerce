@@ -124,6 +124,11 @@ class WC_Admin_Notes_Order_Milestones {
 	 * Used to avoid celebrating milestones that were reached before plugin activation.
 	 */
 	public function backfill_last_milestone() {
+		// If the milestone notes have been disabled via filter, bail.
+		if ( ! $this->are_milestones_enabled() ) {
+			return;
+		}
+
 		$this->set_last_milestone( $this->get_current_milestone() );
 	}
 
@@ -263,9 +268,32 @@ class WC_Admin_Notes_Order_Milestones {
 	}
 
 	/**
+	 * Convenience method to see if the milestone notes are enabled.
+	 *
+	 * @return boolean True if milestone notifications are enabled.
+	 */
+	public function are_milestones_enabled() {
+		/**
+		 * Filter to allow for disabling order milestones.
+		 *
+		 * @since 3.7.0
+		 *
+		 * @param boolean default true
+		 */
+		$milestone_notes_enabled = apply_filters( 'woocommerce_admin_order_milestones_enabled', true );
+
+		return $milestone_notes_enabled;
+	}
+
+	/**
 	 * Add milestone notes for other significant thresholds.
 	 */
 	public function other_milestones() {
+		// If the milestone notes have been disabled via filter, bail.
+		if ( ! $this->are_milestones_enabled() ) {
+			return;
+		}
+
 		$last_milestone    = $this->get_last_milestone();
 		$current_milestone = $this->get_current_milestone();
 
