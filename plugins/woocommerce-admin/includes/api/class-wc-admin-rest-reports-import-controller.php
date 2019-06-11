@@ -187,7 +187,7 @@ class WC_Admin_REST_Reports_Import_Controller extends WC_Admin_REST_Reports_Cont
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
-			'minimum'           => 1,
+			'minimum'           => 0,
 		);
 		$params['skip_existing'] = array(
 			'description'       => __( 'Skip importing existing order data.', 'woocommerce-admin' ),
@@ -284,10 +284,10 @@ class WC_Admin_REST_Reports_Import_Controller extends WC_Admin_REST_Reports_Cont
 	public function get_import_status( $request ) {
 		$result = array(
 			'is_importing'    => WC_Admin_Reports_Sync::is_importing(),
-			'customers_total' => get_option( 'wc_admin_import_customers_total', 0 ),
-			'customers_count' => get_option( 'wc_admin_import_customers_count', 0 ),
-			'orders_total'    => get_option( 'wc_admin_import_orders_total', 0 ),
-			'orders_count'    => get_option( 'wc_admin_import_orders_count', 0 ),
+			'customers_total' => (int) get_option( 'wc_admin_import_customers_total', 0 ),
+			'customers_count' => (int) get_option( 'wc_admin_import_customers_count', 0 ),
+			'orders_total'    => (int) get_option( 'wc_admin_import_orders_total', 0 ),
+			'orders_count'    => (int) get_option( 'wc_admin_import_orders_count', 0 ),
 			'imported_from'   => get_option( 'wc_admin_imported_from_date', false ),
 		);
 
