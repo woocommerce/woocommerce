@@ -47,7 +47,7 @@ class Bootstrap {
 	 * @return string
 	 */
 	public function get_dir() {
-		return __DIR__;
+		return dirname( __FILE__ );
 	}
 
 	/**
@@ -56,7 +56,7 @@ class Bootstrap {
 	 * @return boolean
 	 */
 	protected function wc_admin_exists() {
-		return file_exists( dirname( dirname( __DIR__ ) ) . '/woocommerce-admin/woocommerce-admin.php' );
+		return file_exists( dirname( dirname( dirname( __FILE__ ) ) ) . '/woocommerce-admin/woocommerce-admin.php' );
 	}
 
 	/**
@@ -67,11 +67,11 @@ class Bootstrap {
 		require_once $this->wp_tests_dir . '/includes/functions.php';
 
 		\tests_add_filter( 'muplugins_loaded', function() {
-			require_once dirname( dirname( __DIR__ ) ) . '/woocommerce/woocommerce.php';
-			require_once dirname( __DIR__ ) . '/woocommerce-rest-api.php';
+			require_once dirname( dirname( dirname( __FILE__ ) ) ) . '/woocommerce/woocommerce.php';
+			require_once dirname( dirname( __FILE__ ) ) . '/woocommerce-rest-api.php';
 
 			if ( $this->wc_admin_exists() ) {
-				require_once dirname( dirname( __DIR__ ) ) . '/woocommerce-admin/woocommerce-admin.php';
+				require_once dirname( dirname( dirname( __FILE__ ) ) ) . '/woocommerce-admin/woocommerce-admin.php';
 			}
 		} );
 
@@ -80,13 +80,13 @@ class Bootstrap {
 
 			define( 'WP_UNINSTALL_PLUGIN', true );
 			define( 'WC_REMOVE_ALL_DATA', true );
-			include dirname( dirname( __DIR__ ) ) . '/woocommerce/uninstall.php';
+			include dirname( dirname( dirname( __FILE__ ) ) ) . '/woocommerce/uninstall.php';
 
 			\WC_Install::install();
 
 			if ( $this->wc_admin_exists() ) {
 				echo esc_html( 'Installing WooCommerce Admin...' . PHP_EOL );
-				require_once dirname( dirname( __DIR__ ) ) . '/woocommerce-admin/includes/class-wc-admin-install.php';
+				require_once dirname( dirname( dirname( __FILE__ ) ) ) . '/woocommerce-admin/includes/class-wc-admin-install.php';
 				\WC_Admin_Install::create_tables();
 				\WC_Admin_Install::create_events();
 			}
@@ -110,16 +110,16 @@ class Bootstrap {
 		require_once $this->wc_tests_dir . '/framework/class-wc-unit-test-case.php';
 		require_once $this->wc_tests_dir . '/framework/class-wc-rest-unit-test-case.php';
 
-		require_once __DIR__ . '/Helpers/AdminNotesHelper.php';
-		require_once __DIR__ . '/Helpers/CouponHelper.php';
-		require_once __DIR__ . '/Helpers/CustomerHelper.php';
-		require_once __DIR__ . '/Helpers/OrderHelper.php';
-		require_once __DIR__ . '/Helpers/ProductHelper.php';
-		require_once __DIR__ . '/Helpers/ShippingHelper.php';
-		require_once __DIR__ . '/Helpers/SettingsHelper.php';
-		require_once __DIR__ . '/Helpers/QueueHelper.php';
-		require_once __DIR__ . '/AbstractRestApiTest.php';
-		require_once __DIR__ . '/AbstractReportsTest.php';
+		require_once dirname( __FILE__ ) . '/Helpers/AdminNotesHelper.php';
+		require_once dirname( __FILE__ ) . '/Helpers/CouponHelper.php';
+		require_once dirname( __FILE__ ) . '/Helpers/CustomerHelper.php';
+		require_once dirname( __FILE__ ) . '/Helpers/OrderHelper.php';
+		require_once dirname( __FILE__ ) . '/Helpers/ProductHelper.php';
+		require_once dirname( __FILE__ ) . '/Helpers/ShippingHelper.php';
+		require_once dirname( __FILE__ ) . '/Helpers/SettingsHelper.php';
+		require_once dirname( __FILE__ ) . '/Helpers/QueueHelper.php';
+		require_once dirname( __FILE__ ) . '/AbstractRestApiTest.php';
+		require_once dirname( __FILE__ ) . '/AbstractReportsTest.php';
 	}
 }
 
