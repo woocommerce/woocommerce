@@ -56,7 +56,7 @@ class Bootstrap {
 		$this->plugin_dir   = dirname( $this->tests_dir );
 		$this->plugins_dir  = dirname( $this->plugin_dir );
 		$this->wc_tests_dir = $this->plugins_dir . '/woocommerce/tests';
-		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' );
+		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' ) ? getenv( 'WP_TESTS_DIR' ) : rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
 
 		$this->setup_hooks();
 		$this->load_framework();
