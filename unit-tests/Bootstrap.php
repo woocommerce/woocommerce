@@ -21,21 +21,42 @@ class Bootstrap {
 	protected $wp_tests_dir;
 
 	/**
-	 * Directory path to woocommerce core tests.
+	 * unit-tests directory.
+	 *
+	 * @var string
+	 */
+	protected $tests_dir;
+
+	/**
+	 * WC Core unit-tests directory.
 	 *
 	 * @var string
 	 */
 	protected $wc_tests_dir;
+	
+	/**
+	 * This plugin directory.
+	 *
+	 * @var string
+	 */
+	protected $plugin_dir;
+
+	/**
+	 * Plugins directory.
+	 *
+	 * @var string
+	 */
+	protected $plugins_dir;
+
 	/**
 	 * Init unit testing library.
 	 */
 	public function init() {
-		$this->wc_tests_dir = dirname( dirname( dirname( __FILE__ ) ) ) . '/woocommerce/tests';
+		$this->tests_dir    = dirname( __FILE__ );
+		$this->plugin_dir   = dirname( $this->tests_dir );
+		$this->plugins_dir  = dirname( $this->plugin_dir );
+		$this->wc_tests_dir = $this->plugins_dir . '/woocommerce/tests';
 		$this->wp_tests_dir = getenv( 'WP_TESTS_DIR' );
-
-		if ( ! $this->wp_tests_dir ) {
-			$this->wp_tests_dir = rtrim( sys_get_temp_dir(), '/\\' ) . '/wordpress-tests-lib';
-		}
 
 		$this->setup_hooks();
 		$this->load_framework();
@@ -56,7 +77,7 @@ class Bootstrap {
 	 * @return boolean
 	 */
 	protected function wc_admin_exists() {
-		return file_exists( dirname( dirname( dirname( __FILE__ ) ) ) . '/woocommerce-admin/woocommerce-admin.php' );
+		return file_exists( $this->plugins_dir . '/woocommerce-admin/woocommerce-admin.php' );
 	}
 
 	/**
@@ -67,11 +88,11 @@ class Bootstrap {
 		require_once $this->wp_tests_dir . '/includes/functions.php';
 
 		\tests_add_filter( 'muplugins_loaded', function() {
-			require_once dirname( dirname( dirname( __FILE__ ) ) ) . '/woocommerce/woocommerce.php';
-			require_once dirname( dirname( __FILE__ ) ) . '/woocommerce-rest-api.php';
+			require_once $this->plugins_dir . '/woocommerce/woocommerce.php';
+			require_once $this->plugin_dir . '/woocommerce-rest-api.php';
 
 			if ( $this->wc_admin_exists() ) {
-				require_once dirname( dirname( dirname( __FILE__ ) ) ) . '/woocommerce-admin/woocommerce-admin.php';
+				require_once $this->plugins_dir . '/woocommerce-admin/woocommerce-admin.php';
 			}
 		} );
 
@@ -80,13 +101,13 @@ class Bootstrap {
 
 			define( 'WP_UNINSTALL_PLUGIN', true );
 			define( 'WC_REMOVE_ALL_DATA', true );
-			include dirname( dirname( dirname( __FILE__ ) ) ) . '/woocommerce/uninstall.php';
+			include $this->plugins_dir . '/woocommerce/uninstall.php';
 
 			\WC_Install::install();
 
 			if ( $this->wc_admin_exists() ) {
 				echo esc_html( 'Installing WooCommerce Admin...' . PHP_EOL );
-				require_once dirname( dirname( dirname( __FILE__ ) ) ) . '/woocommerce-admin/includes/class-wc-admin-install.php';
+				require_once $this->plugins_dir . '/woocommerce-admin/includes/class-wc-admin-install.php';
 				\WC_Admin_Install::create_tables();
 				\WC_Admin_Install::create_events();
 			}
@@ -110,16 +131,16 @@ class Bootstrap {
 		require_once $this->wc_tests_dir . '/framework/class-wc-unit-test-case.php';
 		require_once $this->wc_tests_dir . '/framework/class-wc-rest-unit-test-case.php';
 
-		require_once dirname( __FILE__ ) . '/Helpers/AdminNotesHelper.php';
-		require_once dirname( __FILE__ ) . '/Helpers/CouponHelper.php';
-		require_once dirname( __FILE__ ) . '/Helpers/CustomerHelper.php';
-		require_once dirname( __FILE__ ) . '/Helpers/OrderHelper.php';
-		require_once dirname( __FILE__ ) . '/Helpers/ProductHelper.php';
-		require_once dirname( __FILE__ ) . '/Helpers/ShippingHelper.php';
-		require_once dirname( __FILE__ ) . '/Helpers/SettingsHelper.php';
-		require_once dirname( __FILE__ ) . '/Helpers/QueueHelper.php';
-		require_once dirname( __FILE__ ) . '/AbstractRestApiTest.php';
-		require_once dirname( __FILE__ ) . '/AbstractReportsTest.php';
+		require_once $this->tests_dir . '/Helpers/AdminNotesHelper.php';
+		require_once $this->tests_dir . '/Helpers/CouponHelper.php';
+		require_once $this->tests_dir . '/Helpers/CustomerHelper.php';
+		require_once $this->tests_dir . '/Helpers/OrderHelper.php';
+		require_once $this->tests_dir . '/Helpers/ProductHelper.php';
+		require_once $this->tests_dir . '/Helpers/ShippingHelper.php';
+		require_once $this->tests_dir . '/Helpers/SettingsHelper.php';
+		require_once $this->tests_dir . '/Helpers/QueueHelper.php';
+		require_once $this->tests_dir . '/AbstractRestApiTest.php';
+		require_once $this->tests_dir . '/AbstractReportsTest.php';
 	}
 }
 
