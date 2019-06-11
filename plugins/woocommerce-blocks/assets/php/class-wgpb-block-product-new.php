@@ -23,12 +23,24 @@ class WGPB_Block_Product_New extends WGPB_Block_Grid_Base {
 	protected $block_name = 'product-new';
 
 	/**
+	 * Get the block's attributes.
+	 *
+	 * @param array $attributes Block attributes. Default empty array.
+	 * @return array  Block attributes merged with defaults.
+	 */
+	protected function parse_attributes( $attributes ) {
+		$attributes = parent::parse_attributes( $attributes );
+
+		// Force orderby to date.
+		$attributes['orderby'] = 'date';
+
+		return $attributes;
+	}
+
+	/**
 	 * Set args specific to this block
 	 *
 	 * @param array $query_args Query args.
 	 */
-	protected function set_block_query_args( &$query_args ) {
-		$query_args['orderby'] = 'date';
-		$query_args['order']   = 'DESC';
-	}
+	protected function set_block_query_args( &$query_args ) {}
 }

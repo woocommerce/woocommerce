@@ -37,13 +37,6 @@ abstract class WGPB_Block_Grid_Base {
 	protected $content = '';
 
 	/**
-	 * Query args.
-	 *
-	 * @var array
-	 */
-	protected $query_args = array();
-
-	/**
 	 * Initialize block.
 	 *
 	 * @param array  $attributes Block attributes. Default empty array.
@@ -52,7 +45,6 @@ abstract class WGPB_Block_Grid_Base {
 	public function __construct( $attributes = array(), $content = '' ) {
 		$this->attributes = $this->parse_attributes( $attributes );
 		$this->content    = $content;
-		$this->query_args = $this->parse_query_args();
 	}
 
 	/**
@@ -76,63 +68,15 @@ abstract class WGPB_Block_Grid_Base {
 			),
 		);
 
-		return wp_parse_args( $attributes, $defaults );
-	}
+		$attributes = wp_parse_args( $attributes, $defaults );
 
-	/**
-	 * Parse query args.
-	 *
-	 * @return array
-	 */
-	protected function parse_query_args() {
-		$query_args = array(
-			'post_type'           => 'product',
-			'post_status'         => 'publish',
-			'ignore_sticky_posts' => true,
-			'no_found_rows'       => false,
-			'orderby'             => '',
-			'order'               => '',
-		);
-
-		if ( isset( $this->attributes['orderby'] ) ) {
-			if ( 'price_desc' === $this->attributes['orderby'] ) {
-				$query_args['orderby'] = 'price';
-				$query_args['order']   = 'DESC';
-			} elseif ( 'price_asc' === $this->attributes['orderby'] ) {
-				$query_args['orderby'] = 'price';
-				$query_args['order']   = 'ASC';
-			} elseif ( 'date' === $this->attributes['orderby'] ) {
-				$query_args['orderby'] = 'date';
-				$query_args['order']   = 'DESC';
-			} else {
-				$query_args['orderby'] = $this->attributes['orderby'];
-			}
+		if ( ! empty( $attributes['rows'] ) && ! empty( $attributes['columns'] ) ) {
+			$attributes['limit'] = intval( $attributes['columns'] ) * intval( $attributes['rows'] );
+		} else {
+			$attributes['limit'] = -1;
 		}
 
-		if ( ! empty( $this->attributes['rows'] ) ) {
-			$this->attributes['limit'] = intval( $this->attributes['columns'] ) * intval( $this->attributes['rows'] );
-		}
-
-		$query_args['posts_per_page'] = intval( $this->attributes['limit'] );
-		$query_args['meta_query']     = WC()->query->get_meta_query(); // phpcs:ignore WordPress.DB.SlowDBQuery
-		$query_args['tax_query']      = array(); // phpcs:ignore WordPress.DB.SlowDBQuery
-
-		$this->set_block_query_args( $query_args );
-
-		$ordering_args         = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
-		$query_args['orderby'] = $ordering_args['orderby'];
-		$query_args['order']   = $ordering_args['order'];
-		if ( $ordering_args['meta_key'] ) {
-			$query_args['meta_key'] = $ordering_args['meta_key']; // phpcs:ignore WordPress.DB.SlowDBQuery
-		}
-
-		// Categories.
-		$this->set_categories_query_args( $query_args );
-
-		// Always query only IDs.
-		$query_args['fields'] = 'ids';
-
-		return $query_args;
+		return $attributes;
 	}
 
 	/**
@@ -143,14 +87,38 @@ abstract class WGPB_Block_Grid_Base {
 	abstract protected function set_block_query_args( &$query_args );
 
 	/**
+	 * Set orderby/order query args.
+	 *
+	 * @param array $query_args Query args.
+	 */
+	protected function set_ordering_query_args( &$query_args ) {
+		$orderby = '';
+		$order   = '';
+
+		if ( isset( $this->attributes['orderby'] ) ) {
+			if ( 'price_desc' === $this->attributes['orderby'] ) {
+				$orderby = 'price';
+				$order   = 'DESC';
+			} elseif ( 'price_asc' === $this->attributes['orderby'] ) {
+				$orderby = 'price';
+				$order   = 'ASC';
+			} else {
+				$orderby = $this->attributes['orderby'];
+			}
+		}
+
+		// This handles orderby queries and hooks in custom orderby functions.
+		$query_args = array_merge( $query_args, WC()->query->get_catalog_ordering_args( $orderby, $order ) );
+	}
+
+	/**
 	 * Set categories query args.
 	 *
 	 * @param array $query_args Query args.
 	 */
 	protected function set_categories_query_args( &$query_args ) {
 		if ( ! empty( $this->attributes['categories'] ) ) {
-			$categories = array_map( 'absint', $this->attributes['categories'] );
-
+			$categories                = array_map( 'absint', $this->attributes['categories'] );
 			$query_args['tax_query'][] = array(
 				'taxonomy'         => 'product_cat',
 				'terms'            => $categories,
@@ -167,28 +135,58 @@ abstract class WGPB_Block_Grid_Base {
 	}
 
 	/**
+	 * Get all product query args for WP_Query.
+	 *
+	 * @return array
+	 */
+	protected function get_products_query_args() {
+		$query_args = array(
+			'post_type'           => 'product',
+			'post_status'         => 'publish',
+			'fields'              => 'ids',
+			'ignore_sticky_posts' => true,
+			'no_found_rows'       => false,
+			'posts_per_page'      => intval( $this->attributes['limit'] ),
+			'tax_query'           => array(), // phpcs:ignore WordPress.DB.SlowDBQuery
+			'meta_query'          => array(), // phpcs:ignore WordPress.DB.SlowDBQuery
+		);
+		$this->set_ordering_query_args( $query_args );
+		$this->set_categories_query_args( $query_args );
+		$this->set_block_query_args( $query_args );
+
+		return $query_args;
+	}
+
+	/**
 	 * Run the query and return an array of product IDs
 	 *
 	 * @return array List of product IDs
 	 */
 	protected function get_products() {
-		if ( 'product-top-rated' === $this->block_name ) {
-			add_filter( 'posts_clauses', array( WC()->query, 'order_by_rating_post_clauses' ) );
-			$query = new WP_Query( $this->query_args );
-			remove_filter( 'posts_clauses', array( WC()->query, 'order_by_rating_post_clauses' ) );
-		} else {
-			$query = new WP_Query( $this->query_args );
-		}
+		$query_hash        = md5( wp_json_encode( $this->attributes ) . __CLASS__ );
+		$transient_name    = 'wc_block_' . $query_hash;
+		$transient_value   = get_transient( $transient_name );
+		$transient_version = WC_Cache_Helper::get_transient_version( 'product_query' );
 
-		$results = wp_parse_id_list( $query->posts );
+		if ( isset( $transient_value['value'], $transient_value['version'] ) && $transient_value['version'] === $transient_version ) {
+			$results = $transient_value['value'];
+		} else {
+			$query           = new WP_Query( $this->get_products_query_args() );
+			$results         = wp_parse_id_list( $query->posts );
+			$transient_value = array(
+				'version' => $transient_version,
+				'value'   => $results,
+			);
+			set_transient( $transient_name, $transient_value, DAY_IN_SECONDS * 30 );
+
+			// Remove ordering query arguments which may have been added by get_catalog_ordering_args.
+			WC()->query->remove_ordering_args();
+		}
 
 		// Prime caches to reduce future queries.
 		if ( is_callable( '_prime_post_caches' ) ) {
 			_prime_post_caches( $results );
 		}
-
-		// Remove ordering query arguments which may have been added by get_catalog_ordering_args.
-		WC()->query->remove_ordering_args();
 
 		return $results;
 	}

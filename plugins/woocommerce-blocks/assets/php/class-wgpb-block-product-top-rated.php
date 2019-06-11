@@ -23,7 +23,22 @@ class WGPB_Block_Product_Top_Rated extends WGPB_Block_Grid_Base {
 	protected $block_name = 'product-top-rated';
 
 	/**
-	 * This function is not necessary in this block.
+	 * Get the block's attributes.
+	 *
+	 * @param array $attributes Block attributes. Default empty array.
+	 * @return array  Block attributes merged with defaults.
+	 */
+	protected function parse_attributes( $attributes ) {
+		$attributes = parent::parse_attributes( $attributes );
+
+		// Force orderby to rating.
+		$attributes['orderby'] = 'rating';
+
+		return $attributes;
+	}
+
+	/**
+	 * Set args specific to this block
 	 *
 	 * @param array $query_args Query args.
 	 */
