@@ -3,6 +3,7 @@
 ## Changes
 
 - All endpoints - Rewritten with namespaces as standalone classes.
+- All endpoints - Normalized DELETE responses to return previous object.
 - Coupons - Added `search` parameter.
 - Orders - Added order number to schema.
 - Orders - Added currency_symbol to schema.
