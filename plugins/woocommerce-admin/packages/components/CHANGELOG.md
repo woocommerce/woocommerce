@@ -6,6 +6,7 @@
 - Tweaks to SummaryListPlaceholder height in order to better match SummaryNumber.
 - EllipsisMenu component (breaking change): Remove `children` prop in favor of a render prop `renderContent` so that function arguments `isOpen`, `onToggle`, and `onClose` can be passed down.
 - Chart has a new prop named `yBelow1Format` which overrides the `yFormat` for values between -1 and 1 (not included).
+- Add a `totals` prop to Chart component that allows overwriting the total values shown in the legend.
 - Add new component `<Stepper />` for showing a list of steps and progress.
 - Add new `<Spinner />` component.
 - Card component: updated default Muriel design.

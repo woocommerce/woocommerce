@@ -103,7 +103,16 @@ export class ReportChart extends Component {
 		return chartData;
 	}
 
-	renderChart( mode, isRequesting, chartData ) {
+	getTimeChartTotals() {
+		const { primaryData, secondaryData, selectedChart } = this.props;
+
+		return {
+			primary: get( primaryData, [ 'data', 'totals', selectedChart.key ], null ),
+			secondary: get( secondaryData, [ 'data', 'totals', selectedChart.key ], null ),
+		};
+	}
+
+	renderChart( mode, isRequesting, chartData, legendTotals ) {
 		const {
 			emptySearchResults,
 			filterParam,
@@ -134,6 +143,7 @@ export class ReportChart extends Component {
 				isRequesting={ isRequesting }
 				itemsLabel={ itemsLabel }
 				legendPosition={ legendPosition }
+				legendTotals={ legendTotals }
 				mode={ mode }
 				path={ path }
 				query={ query }
@@ -174,8 +184,9 @@ export class ReportChart extends Component {
 		const isChartRequesting =
 			isRequesting || primaryData.isRequesting || secondaryData.isRequesting;
 		const chartData = this.getTimeChartData();
+		const legendTotals = this.getTimeChartTotals();
 
-		return this.renderChart( 'time-comparison', isChartRequesting, chartData );
+		return this.renderChart( 'time-comparison', isChartRequesting, chartData, legendTotals );
 	}
 
 	render() {
