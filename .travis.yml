@@ -1,5 +1,5 @@
 language: php
-
+dist: trusty
 sudo: required
 
 matrix:
@@ -10,20 +10,13 @@ matrix:
   - name: "PHP 7.1 unit tests"
     php: 7.1
     env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress
-  - name: "PHP 7.0 unit tests"
-    php: 7.0
-    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress
-  - name: "PHP 5.6 unit tests"
-    php: 5.6
-    env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress
 
 before_script:
   - phpenv config-rm xdebug.ini
   - export PATH="$WP_CORE_DIR/wp-content/plugins/woocommerce-rest-api/vendor/bin:$PATH"
   - bash unit-tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
-  - bash unit-tests/bin/travis.sh before
-  - timedatectl
 
 script:
+  - composer install
   - bash unit-tests/bin/phpunit.sh
   - bash unit-tests/bin/phpcs.sh
