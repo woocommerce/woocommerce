@@ -211,6 +211,7 @@ class WC_Admin_Setup_Wizard {
 			array(
 				'pending_jetpack_install' => $pending_jetpack ? 'yes' : 'no',
 				'states'                  => WC()->countries->get_states(),
+				'postcodes'               => wp_list_pluck( WC()->countries->get_country_locale(), 'postcode' ),
 				'current_step'            => isset( $this->steps[ $this->step ] ) ? $this->step : false,
 				'i18n'                    => array(
 					'extra_plugins' => array(
