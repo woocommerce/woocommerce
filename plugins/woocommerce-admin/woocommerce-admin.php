@@ -56,6 +56,7 @@ class WC_Admin_Feature_Plugin {
 	public function init() {
 		$this->define_constants();
 		register_activation_hook( WC_ADMIN_PLUGIN_FILE, array( $this, 'on_activation' ) );
+		register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, array( $this, 'on_deactivation' ) );
 		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ) );
 		add_filter( 'action_scheduler_store_class', array( $this, 'replace_actionscheduler_store_class' ) );
 	}
@@ -69,6 +70,16 @@ class WC_Admin_Feature_Plugin {
 		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-install.php';
 		WC_Admin_Install::create_tables();
 		WC_Admin_Install::create_events();
+	}
+
+	/**
+	 * Remove WooCommerce Admin related table data.
+	 *
+	 * @return void
+	 */
+	public function on_deactivation() {
+		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-install.php';
+		WC_Admin_Install::delete_table_data();
 	}
 
 	/**
