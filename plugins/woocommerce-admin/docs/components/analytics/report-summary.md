@@ -53,6 +53,10 @@ Whether there is an API call running.
 - **Required**
 - Type: Object
   - key: String - Key of the selected chart.
+  - label: String - Chart label.
+  - order: One of: 'asc', 'desc'
+  - orderby: String - Order by query argument.
+  - type: One of: 'average', 'number', 'currency'
 - Default: null
 
 Properties of the selected chart.

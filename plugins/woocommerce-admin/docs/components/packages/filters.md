@@ -152,13 +152,13 @@ Select a range of dates or single dates.
 Props
 -----
 
-### `path`
+### `onRangeSelect`
 
 - **Required**
-- Type: String
+- Type: Function
 - Default: null
 
-The `path` parameter supplied by React-Router.
+Callback called when selection is made.
 
 ### `query`
 
