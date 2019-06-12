@@ -3536,7 +3536,7 @@
 * Feature - Allow setting the product post type slug to a static (non-translatable) text, mainly to be used for translating and WPML setups.
 * Feature - Added lost password shortcode / email notification (thanks Max Rice).
 * Feature - Simplified permalink/base settings now found in Settings > Permalinks.
-* Feature - Support more permalink structures (from https://codex.wordpress.org/Using_Permalinks)
+* Feature - Support more permalink structures (from https://wordpress.org/support/article/using-permalinks/)
 * Feature - Added option to resend order emails, checkboxes select which one.
 * Feature - New layered nav current filters widget. This lists active filters from all layered nav for de-selection.
 * Feature - Added the option to sell products individually (only allow 1 in the cart).
