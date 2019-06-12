@@ -342,7 +342,6 @@ class WC_Admin_Reports_Sync {
 		}
 
 		if ( $skip_existing ) {
-			$offset        = 0;
 			$where_clause .= " AND NOT EXISTS (
 				SELECT 1 FROM {$wpdb->prefix}wc_order_stats
 				WHERE {$wpdb->prefix}wc_order_stats.order_id = {$wpdb->posts}.ID
@@ -386,7 +385,10 @@ class WC_Admin_Reports_Sync {
 	 */
 	public static function orders_lookup_import_batch( $batch_number, $days, $skip_existing ) {
 		$batch_size = self::get_batch_size( self::ORDERS_IMPORT_BATCH_ACTION );
-		$orders     = self::get_orders( $batch_size, $batch_number, $days, $skip_existing );
+		// When we are skipping already imported orders, the table of orders to import gets smaller in
+		// every batch, so we want to always import the first page.
+		$page   = $skip_existing ? 1 : $batch_number;
+		$orders = self::get_orders( $batch_size, $page, $days, $skip_existing );
 
 		foreach ( $orders->order_ids as $order_id ) {
 			self::orders_lookup_import_order( $order_id );
@@ -572,7 +574,6 @@ class WC_Admin_Reports_Sync {
 		}
 
 		if ( $skip_existing ) {
-			$query_args['paged'] = 1;
 			add_action( 'pre_user_query', array( __CLASS__, 'exclude_existing_customers_from_query' ) );
 		}
 
@@ -625,6 +626,9 @@ class WC_Admin_Reports_Sync {
 	public static function customer_lookup_import_batch( $batch_number, $days, $skip_existing ) {
 		$batch_size     = self::get_batch_size( self::CUSTOMERS_IMPORT_BATCH_ACTION );
 		$customer_roles = apply_filters( 'woocommerce_admin_import_customer_roles', array( 'customer' ) );
+		// When we are skipping already imported customers, the table of orders to import gets smaller in
+		// every batch, so we want to always import the first page.
+		$page           = $skip_existing ? 1 : $batch_number;
 		$customer_query = self::get_user_ids_for_batch(
 			$days,
 			$skip_existing,
@@ -633,7 +637,7 @@ class WC_Admin_Reports_Sync {
 				'orderby'  => 'ID',
 				'order'    => 'ASC',
 				'number'   => $batch_size,
-				'paged'    => $batch_number,
+				'paged'    => $page,
 				'role__in' => $customer_roles,
 			)
 		);
