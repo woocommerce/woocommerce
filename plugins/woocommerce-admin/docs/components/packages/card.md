@@ -20,6 +20,20 @@ One "primary" action for this card, appears in the card header.
 
 Additional CSS classes.
 
+### `description`
+
+- Type: One of type: string, node
+- Default: null
+
+The description displayed beneath the title.
+
+### `isInactive`
+
+- Type: Boolean
+- Default: null
+
+Boolean representing whether the card is inactive or not.
+
 ### `menu`
 
 - Type: (custom validator)

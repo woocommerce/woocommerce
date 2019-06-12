@@ -124,6 +124,13 @@ Render a chart placeholder to signify an in-flight data request.
 Position the legend must be displayed in. If it's not defined, it's calculated
 depending on the viewport width and the mode.
 
+### `legendTotals`
+
+- Type: Object
+- Default: null
+
+Values to overwrite the legend totals. If not defined, the sum of all line values will be used.
+
 ### `screenReaderFormat`
 
 - Type: One of type: string, func
