@@ -32,4 +32,6 @@ Thumbs.db
 /logs
 
 # composer
-vendor/
+vendor/*
+!vendor/autoload.php
+!vendor/composer/
