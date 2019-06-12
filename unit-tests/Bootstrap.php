@@ -8,7 +8,7 @@ namespace WooCommerce\RestApi\UnitTests;
 
 require __DIR__ . '/../src/Utilities/SingletonTrait.php';
 
-use WooCommerce\Utilities\SingletonTrait;
+use WooCommerce\RestApi\Utilities\SingletonTrait;
 
 class Bootstrap {
 	use SingletonTrait;
@@ -33,7 +33,7 @@ class Bootstrap {
 	 * @var string
 	 */
 	protected $wc_tests_dir;
-	
+
 	/**
 	 * This plugin directory.
 	 *
@@ -80,15 +80,6 @@ class Bootstrap {
 	}
 
 	/**
-	 * Does WC Admin exist?
-	 *
-	 * @return boolean
-	 */
-	protected function wc_admin_exists() {
-		return file_exists( $this->plugins_dir . '/woocommerce-admin/woocommerce-admin.php' );
-	}
-
-	/**
 	 * Setup hooks.
 	 */
 	protected function setup_hooks() {
@@ -98,10 +89,6 @@ class Bootstrap {
 		\tests_add_filter( 'muplugins_loaded', function() {
 			require_once $this->plugins_dir . '/woocommerce/woocommerce.php';
 			require_once $this->plugin_dir . '/woocommerce-rest-api.php';
-
-			if ( $this->wc_admin_exists() ) {
-				require_once $this->plugins_dir . '/woocommerce-admin/woocommerce-admin.php';
-			}
 		} );
 
 		\tests_add_filter( 'setup_theme', function() {
@@ -112,13 +99,6 @@ class Bootstrap {
 			include $this->plugins_dir . '/woocommerce/uninstall.php';
 
 			\WC_Install::install();
-
-			if ( $this->wc_admin_exists() ) {
-				echo esc_html( 'Installing WooCommerce Admin...' . PHP_EOL );
-				require_once $this->plugins_dir . '/woocommerce-admin/includes/class-wc-admin-install.php';
-				\WC_Admin_Install::create_tables();
-				\WC_Admin_Install::create_events();
-			}
 
 			$GLOBALS['wp_roles'] = null; // WPCS: override ok.
 			\wp_roles();

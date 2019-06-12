@@ -6,6 +6,6 @@
  */
 
 return function() {
-	require __DIR__ . '/src/RestApi.php';
-	\WooCommerce\RestApi::instance()->init();
+	require __DIR__ . '/src/Server.php';
+	\WooCommerce\RestApi\Server::instance()->init();
 };

@@ -5,4 +5,4 @@
  * @package WooCommerce/RestApi
  */
 
-return '1.1.1';
+return '1.0.0';
