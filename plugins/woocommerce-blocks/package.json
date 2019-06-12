@@ -34,6 +34,7 @@
     "@wordpress/blocks": "6.3.0",
     "@wordpress/components": "7.4.0",
     "@wordpress/date": "3.3.0",
+    "@wordpress/dependency-extraction-webpack-plugin": "1.0.1",
     "@wordpress/editor": "9.3.0",
     "@wordpress/element": "2.4.0",
     "@wordpress/i18n": "3.4.0",
