@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 global $wpdb;
 
-$report             = \WooCommerce\RestApi::instance()->get_endpoint_data( '/wc/v4/system_status' );
+$report             = wc()->api->get_endpoint_data( '/wc/v4/system_status' );
 $environment        = $report['environment'];
 $database           = $report['database'];
 $post_type_counts   = $report['post_type_counts'];

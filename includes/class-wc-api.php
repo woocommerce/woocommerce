@@ -98,9 +98,9 @@ class WC_API extends WC_Legacy_API {
 	 * @since 3.7.0
 	 */
 	protected function register_core_api() {
-		if ( file_exists( __DIR__ . '/rest-api/init.php' ) ) {
-			$version       = include __DIR__ . '/rest-api/version.php';
-			$init_callback = include __DIR__ . '/rest-api/init.php';
+		if ( file_exists( WC_ABSPATH . 'packages/rest-api/init.php' ) ) {
+			$version       = include WC_ABSPATH . 'packages/rest-api/version.php';
+			$init_callback = include WC_ABSPATH . 'packages/rest-api/init.php';
 		} else {
 			// Build step required.
 			$version       = 0;
@@ -142,13 +142,39 @@ class WC_API extends WC_Legacy_API {
 	}
 
 	/**
+	 * Get data from a WooCommerce API endpoint.
+	 *
+	 * @since 3.7.0
+	 * @param string $endpoint Endpoint.
+	 * @param array  $params Params to passwith request.
+	 * @return array|WP_Error
+	 */
+	public function get_endpoint_data( $endpoint, $params = array() ) {
+		if ( ! $this->is_rest_api_loaded() ) {
+			$this->rest_api_init();
+		}
+
+		$request = new \WP_REST_Request( 'GET', $endpoint );
+
+		if ( $params ) {
+			$request->set_query_params( $params );
+		}
+
+		$response = \rest_do_request( $request );
+		$server   = \rest_get_server();
+		$json     = wp_json_encode( $server->response_to_data( $response, false ) );
+
+		return json_decode( $json, true );
+	}
+
+	/**
 	 * Return if the rest API classes were already loaded.
 	 *
 	 * @since 3.7.0
 	 * @return boolean
 	 */
 	protected function is_rest_api_loaded() {
-		return class_exists( '\WooCommerce\RestApi', false );
+		return class_exists( '\WooCommerce\RestApi\Server', false );
 	}
 
 	/**

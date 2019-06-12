@@ -398,7 +398,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 					$resource_id = $resource_id->get_id();
 				}
 				$version = str_replace( 'wp_api_', '', $this->get_api_version() );
-				$payload = \WooCommerce\RestApi::instance()->get_endpoint_data( "/wc/{$version}/{$resource}s/{$resource_id}" );
+				$payload = wc()->api->get_endpoint_data( "/wc/{$version}/{$resource}s/{$resource_id}" );
 				break;
 
 			// Custom topics include the first hook argument.

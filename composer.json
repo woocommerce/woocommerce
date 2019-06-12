@@ -8,7 +8,7 @@
   "minimum-stability": "dev",
   "require": {
     "composer/installers": "1.6.0",
-    "woocommerce/woocommerce-rest-api": ">0"
+    "woocommerce/woocommerce-rest-api": "1.0.0"
   },
   "require-dev": {
     "apigen/apigen": "4.1.2",
@@ -36,7 +36,7 @@
     ]
   },
   "autoload": {
-    "exclude-from-classmap": ["/includes/rest-api"]
+    "exclude-from-classmap": ["/packages"]
   },
   "extra": {
     "scripts-description": {
@@ -45,7 +45,7 @@
       "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
     },
     "installer-paths": {
-      "includes/rest-api": ["woocommerce/woocommerce-rest-api"]
+      "packages/rest-api": ["woocommerce/woocommerce-rest-api"]
     }
   }
 }
