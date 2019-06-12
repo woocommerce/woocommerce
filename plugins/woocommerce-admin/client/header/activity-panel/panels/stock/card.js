@@ -4,8 +4,10 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { BaseControl, Button } from '@wordpress/components';
+import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
+import { get } from 'lodash';
 import { withDispatch } from '@wordpress/data';
 
 /**
@@ -131,12 +133,27 @@ class ProductStockCard extends Component {
 				.join( ', ' );
 		}
 
+		const productImage = get( product, [ 'images', 0 ] ) || get( product, [ 'image' ] );
+		const productImageClasses = classnames(
+			'woocommerce-stock-activity-card__image-overlay__product',
+			{
+				'is-placeholder': ! productImage || ! productImage.src,
+			}
+		);
+		const icon = (
+			<div className="woocommerce-stock-activity-card__image-overlay">
+				<div className={ productImageClasses }>
+					<ProductImage product={ product } />
+				</div>
+			</div>
+		);
+
 		return (
 			<ActivityCard
 				className="woocommerce-stock-activity-card"
 				title={ title }
 				subtitle={ subtitle }
-				icon={ <ProductImage product={ product } /> }
+				icon={ icon }
 				actions={ this.getActions() }
 			>
 				{ this.getBody() }

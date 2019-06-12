@@ -209,7 +209,7 @@ class ReviewsPanel extends Component {
 
 		return (
 			<ActivityCard
-				className="woocommerce-empty-review-activity-card"
+				className="woocommerce-empty-activity-card"
 				title={ title }
 				icon={ <Gridicon icon="time" size={ 48 } /> }
 				actions={

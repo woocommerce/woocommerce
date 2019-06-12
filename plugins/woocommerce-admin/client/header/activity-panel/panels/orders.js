@@ -42,7 +42,7 @@ class OrdersPanel extends Component {
 		if ( hasNonActionableOrders ) {
 			return (
 				<ActivityCard
-					className="woocommerce-empty-review-activity-card"
+					className="woocommerce-empty-activity-card"
 					title={ __( 'You have no orders to fulfill', 'woocommerce-admin' ) }
 					icon={ <Gridicon icon="checkmark" size={ 48 } /> }
 				>
@@ -53,7 +53,7 @@ class OrdersPanel extends Component {
 
 		return (
 			<ActivityCard
-				className="woocommerce-empty-review-activity-card"
+				className="woocommerce-empty-activity-card"
 				title={ __( 'You have no orders to fulfill', 'woocommerce-admin' ) }
 				icon={ <Gridicon icon="time" size={ 48 } /> }
 				actions={

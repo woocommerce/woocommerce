@@ -26,7 +26,7 @@ class StockPanel extends Component {
 	renderEmptyCard() {
 		return (
 			<ActivityCard
-				className="woocommerce-empty-review-activity-card"
+				className="woocommerce-empty-activity-card"
 				title={ __( 'Your stock is in good shape.', 'woocommerce-admin' ) }
 				icon={ <Gridicon icon="checkmark" size={ 48 } /> }
 			>

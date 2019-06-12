@@ -35,15 +35,6 @@
 .woocommerce-activity-card__icon {
 	grid-area: icon;
 	fill: $core-grey-light-600;
-
-	@include breakpoint( '<782px' ) {
-		.gridicon,
-		img {
-			height: 24px;
-			width: 24px;
-			margin-left: $gap-small;
-		}
-	}
 }
 
 .woocommerce-activity-card__header {
@@ -163,14 +154,14 @@
 			height: 48px;
 			width: 48px;
 		}
+	}
 
-		@include breakpoint( '<782px' ) {
-			.gridicon,
-			img,
+	&.woocommerce-stock-activity-card,
+	&.woocommerce-review-activity-card {
+		.woocommerce-activity-card__icon {
 			.is-placeholder {
-				height: 24px;
-				width: 24px;
-				margin-left: $gap-small;
+				height: 60px;
+				width: 60px;
 			}
 		}
 	}
@@ -247,6 +238,16 @@
 }
 
 .woocommerce-review-activity-card {
+	.woocommerce-activity-card__body > span > p {
+		&:first-child {
+			margin-top: 0;
+		}
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+	}
+
 	.woocommerce-review-activity-card__verified {
 		margin-left: $gap-small;
 		display: inline-flex;
@@ -262,32 +263,14 @@
 	}
 
 	.woocommerce-review-activity-card__image-overlay {
-		margin-left: -$gap-large;
+		position: relative;
+
 		img.woocommerce-gravatar {
-			left: $gap-large;
-			position: relative;
-			top: -42px;
 			border: 2px solid $white;
+			left: 0;
+			position: absolute;
+			top: -6px;
 			z-index: 2;
-		}
-
-		.woocommerce-review-activity-card__image-overlay__product {
-			display: inline-block;
-			height: 60px;
-			position: relative;
-			width: 60px;
-
-			&.is-placeholder::before {
-				background-color: $core-grey-dark-500;
-				border-radius: 50%;
-				content: '';
-				position: absolute;
-				left: 0;
-				right: 0;
-				bottom: 0;
-				top: 0;
-				opacity: 0.1;
-			}
 		}
 	}
 
@@ -304,12 +287,25 @@
 			top: -28px;
 			z-index: 1;
 		}
+	}
+}
 
-		.woocommerce-review-activity-card__image-overlay__product,
-		.woocommerce-review-activity-card__image-overlay__product .woocommerce-product-image {
-			width: 38px;
-			height: 38px;
-		}
+.woocommerce-review-activity-card__image-overlay__product,
+.woocommerce-stock-activity-card__image-overlay__product {
+	height: 60px;
+	position: relative;
+	width: 60px;
+
+	&.is-placeholder::before {
+		background-color: $core-grey-dark-500;
+		border-radius: 50%;
+		content: '';
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		top: 0;
+		opacity: 0.1;
 	}
 }
 
@@ -358,6 +354,10 @@
 	}
 }
 
-.woocommerce-empty-review-activity-card {
+.woocommerce-empty-activity-card {
 	grid-template-columns: 72px 1fr;
+
+	@include breakpoint( '<782px' ) {
+		grid-template-columns: 64px 1fr;
+	}
 }

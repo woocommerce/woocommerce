@@ -36,7 +36,7 @@ class InboxPanel extends Component {
 	renderEmptyCard() {
 		return (
 			<ActivityCard
-				className="woocommerce-empty-review-activity-card"
+				className="woocommerce-empty-activity-card"
 				title={ __( 'Your inbox is empty', 'woocommerce-admin' ) }
 				icon={ <Gridicon icon="checkmark" size={ 48 } /> }
 			>
