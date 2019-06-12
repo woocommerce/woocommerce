@@ -50,27 +50,6 @@ class Server {
 	}
 
 	/**
-	 * Get data from a WooCommerce API endpoint.
-	 *
-	 * @param string $endpoint Endpoint.
-	 * @param array  $params Params to passwith request.
-	 * @return array|WP_Error
-	 */
-	public function get_endpoint_data( $endpoint, $params = array() ) {
-		$request = new \WP_REST_Request( 'GET', $endpoint );
-
-		if ( $params ) {
-			$request->set_query_params( $params );
-		}
-
-		$response = \rest_do_request( $request );
-		$server   = \rest_get_server();
-		$json     = wp_json_encode( $server->response_to_data( $response, false ) );
-
-		return json_decode( $json, true );
-	}
-
-	/**
 	 * Get API namespaces - new namespaces should be registered here.
 	 *
 	 * @return array List of Namespaces and Main controller classes.
