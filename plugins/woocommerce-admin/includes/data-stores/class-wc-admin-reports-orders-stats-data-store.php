@@ -410,6 +410,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 			'order_id'           => $order->get_id(),
 			'parent_id'          => $order->get_parent_id(),
 			'date_created'       => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
+			'date_created_gmt'   => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ),
 			'num_items_sold'     => self::get_num_items_sold( $order ),
 			'gross_total'        => $order->get_total(),
 			'tax_total'          => $order->get_total_tax(),
@@ -422,6 +423,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		$format = array(
 			'%d',
 			'%d',
+			'%s',
 			'%s',
 			'%d',
 			'%f',
