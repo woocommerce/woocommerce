@@ -157,55 +157,61 @@ class WC_Admin_REST_Reports_Orders_Controller extends WC_Admin_REST_Reports_Cont
 			'title'      => 'report_orders',
 			'type'       => 'object',
 			'properties' => array(
-				'order_id'       => array(
+				'order_id'         => array(
 					'description' => __( 'Order ID.', 'woocommerce-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'order_number'   => array(
+				'order_number'     => array(
 					'description' => __( 'Order Number.', 'woocommerce-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'date_created'   => array(
-					'description' => __( 'Date the order was created.', 'woocommerce-admin' ),
-					'type'        => 'string',
+				'date_created'     => array(
+					'description' => __( "Date the order was created, in the site's timezone.", 'woocommerce-admin' ),
+					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'status'         => array(
+				'date_created_gmt' => array(
+					'description' => __( 'Date the order was created, as GMT.', 'woocommerce-admin' ),
+					'type'        => 'date-time',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'status'           => array(
 					'description' => __( 'Order status.', 'woocommerce-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'customer_id'    => array(
+				'customer_id'      => array(
 					'description' => __( 'Customer ID.', 'woocommerce-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'num_items_sold' => array(
+				'num_items_sold'   => array(
 					'description' => __( 'Number of items sold.', 'woocommerce-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'net_total'      => array(
+				'net_total'        => array(
 					'description' => __( 'Net total revenue.', 'woocommerce-admin' ),
 					'type'        => 'float',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'customer_type'  => array(
+				'customer_type'    => array(
 					'description' => __( 'Returning or new customer.', 'woocommerce-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'extended_info'  => array(
+				'extended_info'    => array(
 					'products'   => array(
 						'type'        => 'array',
 						'readonly'    => true,

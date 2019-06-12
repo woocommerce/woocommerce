@@ -25,6 +25,7 @@ for ( let i = 1; i <= 20; i++ ) {
 }
 
 const GlobalPrices = () => {
+	const average = data.reduce( ( total, item ) => total + item.primary.value, 0 ) / data.length;
 	return (
 		<Card className="woocommerce-dashboard__chart-block woocommerce-analytics__card" title="Global Apple Prices">
 			<Chart
@@ -32,6 +33,7 @@ const GlobalPrices = () => {
 				interval="day"
 				data={ data.reverse() }
 				dateParser="%Y-%m-%dT%H:%M:%S"
+				legendTotals={ { primary: average } }
 				showHeaderControls={ false }
 				valueType={ 'currency' }
 				tooltipValueFormat={ formatCurrency }

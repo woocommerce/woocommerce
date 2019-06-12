@@ -72,6 +72,7 @@ build_files=$(ls dist/*/*.{js,css})
 status "Creating archive... 🎁"
 zip -r woocommerce-admin.zip \
 	woocommerce-admin.php \
+	uninstall.php \
 	includes/ \
 	images/ \
 	$build_files \

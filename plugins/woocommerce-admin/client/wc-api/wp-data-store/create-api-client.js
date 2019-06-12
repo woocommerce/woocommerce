@@ -19,11 +19,12 @@ function createStore( name ) {
 function createDataHandlers( store ) {
 	return {
 		dataRequested: resourceNames => {
-			const { resources } = store.getState();
-			const newResources = resourceNames.some( resourceName => ! resources[ resourceName ] );
-			if ( ! newResources && document.hidden ) {
+			// This is a temporary fix until it can be resolved upstream in fresh-data.
+			// See: https://github.com/woocommerce/woocommerce-admin/pull/2387/files#r292355276
+			if ( document.hidden ) {
 				return;
 			}
+
 			store.dispatch( {
 				type: 'FRESH_DATA_REQUESTED',
 				resourceNames,

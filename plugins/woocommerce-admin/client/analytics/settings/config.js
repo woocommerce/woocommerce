@@ -15,8 +15,10 @@ import { Link } from '@woocommerce/components';
  * Internal dependencies
  */
 import { DEFAULT_ACTIONABLE_STATUSES } from 'wc-api/constants';
+import DefaultDate from './default-date';
 
 const SETTINGS_FILTER = 'woocommerce_admin_analytics_settings';
+const DEFAUTL_DATE_RANGE = 'period=month&compare=previous_year';
 
 const defaultOrderStatuses = [
 	'completed',
@@ -67,7 +69,8 @@ export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 				moreLink: <Link href="#" type="external" />, // @todo This needs to be replaced with a real link.
 			},
 		} ),
-		initialValue: wcSettings.wcAdminSettings.woocommerce_excluded_report_order_statuses || [],
+		initialValue:
+			[ ...wcSettings.wcAdminSettings.woocommerce_excluded_report_order_statuses ] || [],
 		defaultValue: [ 'pending', 'cancelled', 'failed' ],
 	},
 	{
@@ -90,7 +93,20 @@ export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 				'These orders will show up in the Orders tab under the activity panel.',
 			'woocommerce-admin'
 		),
-		initialValue: wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses || [],
+		initialValue: [ ...wcSettings.wcAdminSettings.woocommerce_actionable_order_statuses ] || [],
 		defaultValue: DEFAULT_ACTIONABLE_STATUSES,
+	},
+	{
+		name: 'woocommerce_default_date_range',
+		label: __( 'Default Date Range:', 'woocommerce-admin' ),
+		inputType: 'component',
+		component: DefaultDate,
+		helpText: __(
+			'Select a default date range. When no range is selected, reports will be viewed by ' +
+				'the default date range.',
+			'woocommerce-admin'
+		),
+		initialValue: wcSettings.wcAdminSettings.woocommerce_default_date_range || DEFAUTL_DATE_RANGE,
+		defaultValue: DEFAUTL_DATE_RANGE,
 	},
 ] );

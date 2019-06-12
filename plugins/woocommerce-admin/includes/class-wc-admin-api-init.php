@@ -89,13 +89,6 @@ class WC_Admin_Api_Init {
 		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-customers-data-store.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-customers-stats-data-store.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-stock-stats-data-store.php';
-
-		// Data triggers.
-		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-notes-data-store.php';
-
-		// CRUD classes.
-		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-note.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes.php';
 	}
 
 	/**
@@ -103,6 +96,7 @@ class WC_Admin_Api_Init {
 	 */
 	public function rest_api_init() {
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-admin-notes-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-admin-note-action-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-coupons-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-data-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-data-countries-controller.php';
@@ -141,6 +135,7 @@ class WC_Admin_Api_Init {
 
 		$controllers = array(
 			'WC_Admin_REST_Admin_Notes_Controller',
+			'WC_Admin_REST_Admin_Note_Action_Controller',
 			'WC_Admin_REST_Coupons_Controller',
 			'WC_Admin_REST_Customers_Controller',
 			'WC_Admin_REST_Data_Controller',

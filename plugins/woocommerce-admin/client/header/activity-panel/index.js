@@ -254,11 +254,13 @@ class ActivityPanel extends Component {
 							className="woocommerce-layout__activity-panel-tabs"
 						>
 							{ tabs && tabs.map( this.renderTab ) }
-							<WordPressNotices
-								showNotices={ 'wpnotices' === currentTab }
-								togglePanel={ this.togglePanel }
-								onCountUpdate={ this.updateNoticeFlag }
-							/>
+							{ Boolean( document.getElementById( 'wp__notice-list' ) ) && (
+								<WordPressNotices
+									showNotices={ 'wpnotices' === currentTab }
+									togglePanel={ this.togglePanel }
+									onCountUpdate={ this.updateNoticeFlag }
+								/>
+							) }
 						</NavigableMenu>
 						{ this.renderPanel() }
 					</div>

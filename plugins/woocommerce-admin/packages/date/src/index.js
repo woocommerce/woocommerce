@@ -5,12 +5,7 @@
 import moment from 'moment';
 import { find } from 'lodash';
 import { __ } from '@wordpress/i18n';
-
-const QUERY_DEFAULTS = {
-	pageSize: 25,
-	period: 'month',
-	compare: 'previous_year',
-};
+import { parse } from 'qs';
 
 export const isoDateFormat = 'YYYY-MM-DD';
 
@@ -73,7 +68,9 @@ export const appendTimestamp = ( date, timeOfDay ) => {
 	if ( timeOfDay === 'end' ) {
 		return date + 'T23:59:59';
 	}
-	throw new Error( 'appendTimestamp requires second parameter to be either `start`, `now` or `end`' );
+	throw new Error(
+		'appendTimestamp requires second parameter to be either `start`, `now` or `end`'
+	);
 };
 
 /**
@@ -268,11 +265,26 @@ function getDateValue( period, compare, after, before ) {
  * @return {DateParams} - date parameters derived from query parameters with added defaults
  */
 export const getDateParamsFromQuery = ( { period, compare, after, before } ) => {
+	if ( period && compare ) {
+		return {
+			period,
+			compare,
+			after: after ? moment( after ) : null,
+			before: before ? moment( before ) : null,
+		};
+	}
+
+	const defaultDateRange =
+		wcSettings.wcAdminSettings.woocommerce_default_date_range ||
+		'period=month&compare=previous_year';
+
+	const queryDefaults = parse( defaultDateRange.replace( /&amp;/g, '&' ) );
+
 	return {
-		period: period || QUERY_DEFAULTS.period,
-		compare: compare || QUERY_DEFAULTS.compare,
-		after: after ? moment( after ) : null,
-		before: before ? moment( before ) : null,
+		period: queryDefaults.period,
+		compare: queryDefaults.compare,
+		after: queryDefaults.after ? moment( queryDefaults.after ) : null,
+		before: queryDefaults.before ? moment( queryDefaults.before ) : null,
 	};
 };
 

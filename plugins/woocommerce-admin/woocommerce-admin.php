@@ -56,12 +56,13 @@ class WC_Admin_Feature_Plugin {
 	public function init() {
 		$this->define_constants();
 		register_activation_hook( WC_ADMIN_PLUGIN_FILE, array( $this, 'on_activation' ) );
+		register_deactivation_hook( WC_ADMIN_PLUGIN_FILE, array( $this, 'on_deactivation' ) );
 		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ) );
 		add_filter( 'action_scheduler_store_class', array( $this, 'replace_actionscheduler_store_class' ) );
 	}
 
 	/**
-	 * Install DB and create cron events when activated,
+	 * Install DB and create cron events when activated.
 	 *
 	 * @return void
 	 */
@@ -69,6 +70,18 @@ class WC_Admin_Feature_Plugin {
 		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-install.php';
 		WC_Admin_Install::create_tables();
 		WC_Admin_Install::create_events();
+	}
+
+	/**
+	 * Remove WooCommerce Admin scheduled actions on deactivate.
+	 *
+	 * @return void
+	 */
+	public function on_deactivation() {
+		$this->includes();
+		WC_Admin_Reports_Sync::clear_queued_actions();
+		WC_Admin_Notes::clear_queued_actions();
+		wp_clear_scheduled_hook( 'wc_admin_daily' );
 	}
 
 	/**
@@ -124,6 +137,13 @@ class WC_Admin_Feature_Plugin {
 		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-install.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-events.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-api-init.php';
+
+		// Data triggers.
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-notes-data-store.php';
+
+		// CRUD classes.
+		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-note.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes.php';
 
 		// Admin note providers.
 		// @todo These should be bundled in the features/ folder, but loading them from there currently has a load order issue.

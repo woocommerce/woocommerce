@@ -16,13 +16,15 @@ const HISTORICAL_DATA_STATUS_FILTER = 'woocommerce_admin_import_status';
 
 function HistoricalDataStatus( { importDate, status } ) {
 	const statusLabels = applyFilters( HISTORICAL_DATA_STATUS_FILTER, {
+		nothing: __( 'Nothing To Import', 'woocommerce-admin' ),
 		ready: __( 'Ready To Import', 'woocommerce-admin' ),
+		initializing: [ __( 'Initializing', 'woocommerce-admin' ), <Spinner key="spinner" /> ],
 		customers: [ __( 'Importing Customers', 'woocommerce-admin' ), <Spinner key="spinner" /> ],
 		orders: [ __( 'Importing Orders', 'woocommerce-admin' ), <Spinner key="spinner" /> ],
 		finalizing: [ __( 'Finalizing', 'woocommerce-admin' ), <Spinner key="spinner" /> ],
 		finished: sprintf(
 			__( 'Historical data from %s onward imported', 'woocommerce-admin' ),
-			moment( importDate ).format( 'll' )
+			importDate !== '-1' ? moment( importDate ).format( 'll' ) : ''
 		),
 	} );
 

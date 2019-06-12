@@ -4,11 +4,14 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
+import { isNil } from 'lodash';
+import { SECOND } from '@fresh-data/framework';
 
 /**
  * Internal dependencies
  */
-import { formatParams } from './utils';
+import { DEFAULT_REQUIREMENT } from 'wc-api/constants';
+import { formatParams, getStatus } from './utils';
 import HistoricalDataActions from './actions';
 import HistoricalDataPeriodSelector from './period-selector';
 import HistoricalDataProgress from './progress';
@@ -18,46 +21,18 @@ import withSelect from 'wc-api/with-select';
 import './style.scss';
 
 class HistoricalDataLayout extends Component {
-	getStatus() {
-		const {
-			customersProgress,
-			customersTotal,
-			inProgress,
-			ordersProgress,
-			ordersTotal,
-		} = this.props;
-
-		if ( inProgress ) {
-			if ( customersProgress < customersTotal ) {
-				return 'customers';
-			}
-			if ( ordersProgress < ordersTotal ) {
-				return 'orders';
-			}
-			return 'finalizing';
-		}
-		if (
-			( customersTotal > 0 || ordersTotal > 0 ) &&
-			customersProgress === customersTotal &&
-			ordersProgress === ordersTotal
-		) {
-			return 'finished';
-		}
-		return 'ready';
-	}
-
 	render() {
 		const {
 			customersProgress,
 			customersTotal,
 			dateFormat,
-			hasImportedData,
 			importDate,
 			inProgress,
 			onPeriodChange,
 			onDateChange,
 			onSkipChange,
 			onDeletePreviousData,
+			onReimportData,
 			onStartImport,
 			onStopImport,
 			ordersProgress,
@@ -65,14 +40,13 @@ class HistoricalDataLayout extends Component {
 			period,
 			skipChecked,
 		} = this.props;
-		const hasImportedAllData =
-			! inProgress &&
-			hasImportedData &&
-			customersProgress === customersTotal &&
-			ordersProgress === ordersTotal;
-		// @todo When the import status endpoint is hooked up,
-		// this bool should be removed and assume it's true.
-		const showImportStatus = false;
+		const status = getStatus( {
+			customersProgress,
+			customersTotal,
+			inProgress,
+			ordersProgress,
+			ordersTotal,
+		} );
 
 		return (
 			<Fragment>
@@ -88,7 +62,7 @@ class HistoricalDataLayout extends Component {
 								'woocommerce-admin'
 							) }
 						</span>
-						{ ! hasImportedAllData && (
+						{ status !== 'finished' && (
 							<Fragment>
 								<HistoricalDataPeriodSelector
 									dateFormat={ dateFormat }
@@ -102,37 +76,28 @@ class HistoricalDataLayout extends Component {
 									checked={ skipChecked }
 									onChange={ onSkipChange }
 								/>
-								{ showImportStatus && (
-									<Fragment>
-										<HistoricalDataProgress
-											label={ __( 'Registered Customers', 'woocommerce-admin' ) }
-											progress={ customersProgress }
-											total={ customersTotal }
-										/>
-										<HistoricalDataProgress
-											label={ __( 'Orders', 'woocommerce-admin' ) }
-											progress={ ordersProgress }
-											total={ ordersTotal }
-										/>
-									</Fragment>
-								) }
+								<HistoricalDataProgress
+									label={ __( 'Registered Customers', 'woocommerce-admin' ) }
+									progress={ customersProgress }
+									total={ customersTotal }
+								/>
+								<HistoricalDataProgress
+									label={ __( 'Orders', 'woocommerce-admin' ) }
+									progress={ ordersProgress }
+									total={ ordersTotal }
+								/>
 							</Fragment>
 						) }
-						{ showImportStatus && (
-							<HistoricalDataStatus importDate={ importDate } status={ this.getStatus() } />
-						) }
+						<HistoricalDataStatus importDate={ importDate } status={ status } />
 					</div>
 				</div>
 				<HistoricalDataActions
-					customersProgress={ customersProgress }
-					customersTotal={ customersTotal }
-					hasImportedData={ hasImportedData }
-					inProgress={ inProgress }
+					importDate={ importDate }
 					onDeletePreviousData={ onDeletePreviousData }
+					onReimportData={ onReimportData }
 					onStartImport={ onStartImport }
 					onStopImport={ onStopImport }
-					ordersProgress={ ordersProgress }
-					ordersTotal={ ordersTotal }
+					status={ status }
 				/>
 			</Fragment>
 		);
@@ -140,19 +105,75 @@ class HistoricalDataLayout extends Component {
 }
 
 export default withSelect( ( select, props ) => {
-	const { getImportTotals } = select( 'wc-api' );
-	const { period, skipChecked } = props;
+	const { getImportStatus, isGetImportStatusRequesting, getImportTotals } = select( 'wc-api' );
+	const {
+		activeImport,
+		dateFormat,
+		lastImportStartTimestamp,
+		lastImportStopTimestamp,
+		onImportStarted,
+		onImportFinished,
+		period,
+		skipChecked,
+	} = props;
 
-	const { customers: customersTotal, orders: ordersTotal } = getImportTotals(
-		formatParams( period, skipChecked )
+	const inProgress =
+		( typeof lastImportStartTimestamp !== 'undefined' &&
+			typeof lastImportStopTimestamp === 'undefined' ) ||
+		lastImportStartTimestamp > lastImportStopTimestamp;
+
+	const params = formatParams( dateFormat, period, skipChecked );
+	// Use timestamp to invalidate previous totals when the import finished/stopped
+	const { customers, orders } = getImportTotals( params, lastImportStopTimestamp );
+	const requirement = inProgress
+		? {
+				freshness: 3 * SECOND,
+				timeout: 3 * SECOND,
+			}
+		: DEFAULT_REQUIREMENT;
+
+	// Use timestamp to invalidate previous status when a new import starts
+	const {
+		customers_count: customersProgress,
+		customers_total: customersTotal,
+		imported_from: importDate,
+		is_importing: isImporting,
+		orders_count: ordersProgress,
+		orders_total: ordersTotal,
+	} = getImportStatus( lastImportStartTimestamp, requirement );
+	const isStatusLoading = isGetImportStatusRequesting( lastImportStartTimestamp );
+
+	const hasImportStarted = Boolean(
+		! lastImportStartTimestamp && ! isStatusLoading && ! inProgress && isImporting === true
 	);
+	if ( hasImportStarted ) {
+		onImportStarted();
+	}
+	const hasImportFinished = Boolean(
+		! isStatusLoading &&
+			inProgress &&
+			isImporting === false &&
+			( ( customersProgress === customersTotal && customersTotal > 0 ) ||
+				( ordersProgress === ordersTotal && ordersTotal > 0 ) )
+	);
+	if ( hasImportFinished ) {
+		onImportFinished();
+	}
+
+	if ( ! activeImport ) {
+		return {
+			customersTotal: customers,
+			importDate,
+			ordersTotal: orders,
+		};
+	}
 
 	return {
-		customersProgress: 0,
-		customersTotal,
-		hasImportedData: false,
-		importDate: '2019-04-01',
-		ordersProgress: 0,
-		ordersTotal,
+		customersProgress,
+		customersTotal: isNil( customersTotal ) ? customers : customersTotal,
+		importDate,
+		inProgress,
+		ordersProgress,
+		ordersTotal: isNil( ordersTotal ) ? orders : ordersTotal,
 	};
 } )( HistoricalDataLayout );

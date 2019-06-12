@@ -20,7 +20,10 @@ function read( resourceNames, fetch = apiFetch ) {
 }
 
 function update( resourceNames, data, fetch = apiFetch ) {
-	return [ ...updateNote( resourceNames, data, fetch ) ];
+	return [
+		...updateNote( resourceNames, data, fetch ),
+		...triggerAction( resourceNames, data, fetch ),
+	];
 }
 
 function readNoteQueries( resourceNames, fetch ) {
@@ -93,7 +96,26 @@ function updateNote( resourceNames, data, fetch ) {
 	return [];
 }
 
+function triggerAction( resourceNames, data, fetch ) {
+	const resourceName = 'note-action';
+	if ( resourceNames.includes( resourceName ) ) {
+		const { noteId, actionId } = data[ resourceName ];
+		const url = `${ NAMESPACE }/admin/notes/${ noteId }/action/${ actionId }`;
+		return [
+			fetch( { path: url, method: 'POST' } )
+				.then( note => {
+					return { [ 'note:' + noteId ]: { data: note } };
+				} )
+				.catch( error => {
+					return { [ 'note:' + noteId ]: { error } };
+				} ),
+		];
+	}
+	return [];
+}
+
 export default {
 	read,
 	update,
+	triggerAction,
 };

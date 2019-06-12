@@ -198,17 +198,31 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	private function read_actions( &$note ) {
 		global $wpdb;
 
-		$actions = $wpdb->get_results(
+		$db_actions = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT name, label, query, status, is_primary FROM {$wpdb->prefix}wc_admin_note_actions WHERE note_id = %d",
+				"SELECT action_id, name, label, query, status, is_primary
+				FROM {$wpdb->prefix}wc_admin_note_actions
+				WHERE note_id = %d",
 				$note->get_id()
 			)
 		);
-		if ( $actions ) {
-			foreach ( $actions as $action ) {
-				$note->add_action( $action->name, $action->label, $action->query, $action->status, $action->is_primary );
+
+		$note_actions = array();
+
+		if ( $db_actions ) {
+			foreach ( $db_actions as $action ) {
+				$note_actions[] = (object) array(
+					'id'      => (int) $action->action_id,
+					'name'    => $action->name,
+					'label'   => $action->label,
+					'query'   => $action->query,
+					'status'  => $action->status,
+					'primary' => (bool) $action->is_primary,
+				);
 			}
 		}
+
+		$note->set_actions( $note_actions );
 	}
 
 	/**
@@ -220,24 +234,42 @@ class WC_Admin_Notes_Data_Store extends WC_Data_Store_WP implements WC_Object_Da
 	 * @return bool|void
 	 */
 	private function save_actions( &$note ) {
+		global $wpdb;
+
 		$changed_props = array_keys( $note->get_changes() );
+
 		if ( ! in_array( 'actions', $changed_props, true ) ) {
 			return false;
 		}
 
-		global $wpdb;
-		$wpdb->delete( $wpdb->prefix . 'wc_admin_note_actions', array( 'note_id' => $note->get_id() ) );
 		foreach ( $note->get_actions( 'edit' ) as $action ) {
-			$wpdb->insert(
+			$action_data = array(
+				'note_id'    => $note->get_id(),
+				'name'       => $action->name,
+				'label'      => $action->label,
+				'query'      => $action->query,
+				'status'     => $action->status,
+				'is_primary' => $action->primary,
+			);
+
+			$data_format = array(
+				'%d',
+				'%s',
+				'%s',
+				'%s',
+				'%s',
+				'%d',
+			);
+
+			if ( ! empty( $action->id ) ) {
+				$action_data['action_id'] = $action->id;
+				$data_format[]            = '%d';
+			}
+
+			$wpdb->replace(
 				$wpdb->prefix . 'wc_admin_note_actions',
-				array(
-					'note_id'    => $note->get_id(),
-					'name'       => $action->name,
-					'label'      => $action->label,
-					'query'      => $action->query,
-					'status'     => $action->status,
-					'is_primary' => $action->primary,
-				)
+				$action_data,
+				$data_format
 			);
 		}
 	}
