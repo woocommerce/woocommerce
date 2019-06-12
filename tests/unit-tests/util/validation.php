@@ -98,7 +98,19 @@ class WC_Tests_Validation extends WC_Unit_Test_Case {
 			array( false, WC_Validation::is_postcode( '0A0A0A', 'CA' ) ),
 		);
 
-		return array_merge( $it, $gb, $us, $ch, $br, $ca );
+		$nl = array(
+			array( true, WC_Validation::is_postcode( '1073LP', 'NL' ) ),
+			array( true, WC_Validation::is_postcode( '1073 LP', 'NL' ) ),
+			array( false, WC_Validation::is_postcode( '0073LP', 'NL' ) ),
+			array( false, WC_Validation::is_postcode( '0073 LP', 'NL' ) ),
+			array( false, WC_Validation::is_postcode( '107 3LP', 'NL' ) ),
+			array( false, WC_Validation::is_postcode( 'A073LP', 'NL' ) ),
+			array( false, WC_Validation::is_postcode( '1073SA', 'NL' ) ),
+			array( false, WC_Validation::is_postcode( '1073SD', 'NL' ) ),
+			array( false, WC_Validation::is_postcode( '1073SS', 'NL' ) ),
+		);
+
+		return array_merge( $it, $gb, $us, $ch, $br, $ca, $nl );
 	}
 
 	/**

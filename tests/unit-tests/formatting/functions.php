@@ -774,6 +774,10 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		// JP postcode.
 		$this->assertEquals( '999-9999', wc_format_postcode( '9999999', 'JP' ) );
+
+		// NL postcodes.
+		$this->assertSame( '1073 LP', wc_format_postcode( '1073LP', 'NL' ) );
+		$this->assertSame( '1073 LP', wc_format_postcode( '1073 LP', 'NL' ) );
 	}
 
 	/**
