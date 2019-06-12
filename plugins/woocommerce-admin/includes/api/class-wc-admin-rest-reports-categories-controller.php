@@ -180,7 +180,7 @@ class WC_Admin_REST_Reports_Categories_Controller extends WC_Admin_REST_Reports_
 					'readonly'    => true,
 				),
 				'orders_count'   => array(
-					'description' => __( 'Amount of orders.', 'woocommerce-admin' ),
+					'description' => __( 'Number of orders.', 'woocommerce-admin' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
