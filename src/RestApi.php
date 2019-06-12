@@ -28,7 +28,7 @@ class RestApi {
 	 *
 	 * @var array
 	 */
-	protected $endpoints = [];
+	protected $controllers = [];
 
 	/**
 	 * Hook into WordPress ready to init the REST API as needed.
@@ -45,8 +45,8 @@ class RestApi {
 			$controllers = $namespace_class::get_controllers();
 
 			foreach ( $controllers as $controller_name => $controller_class ) {
-				$this->endpoints[ $namespace ][ $controller_name ] = new $controller_class();
-				$this->endpoints[ $namespace ][ $controller_name ]->register_routes();
+				$this->controllers[ $namespace ][ $controller_name ] = new $controller_class();
+				$this->controllers[ $namespace ][ $controller_name ]->register_routes();
 			}
 		}
 	}
