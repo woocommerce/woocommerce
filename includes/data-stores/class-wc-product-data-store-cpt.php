@@ -1115,7 +1115,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			foreach ( $match_attributes as $attribute_key => $attribute_value ) {
 				if ( array_key_exists( $attribute_key, $variation ) ) {
-					if ( $variation[ $attribute_key ] !== $attribute_value && ! empty( $variation[ $attribute_key ] ) ) {
+					if ( $variation[ $attribute_key ] !== $attribute_value && ( '0' === $variation[ $attribute_key ] || $variation[ $attribute_key ] ) ) {
 						$match = false;
 					}
 				}
