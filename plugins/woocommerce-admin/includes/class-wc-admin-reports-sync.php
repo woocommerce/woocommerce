@@ -656,7 +656,7 @@ class WC_Admin_Reports_Sync {
 		self::record_event( 'import_job_start', $properties );
 
 		$customer_roles = apply_filters( 'woocommerce_admin_import_customer_roles', array( 'customer' ) );
-		// When we are skipping already imported customers, the table of orders to import gets smaller in
+		// When we are skipping already imported customers, the table of customers to import gets smaller in
 		// every batch, so we want to always import the first page.
 		$page           = $skip_existing ? 1 : $batch_number;
 		$customer_query = self::get_user_ids_for_batch(
