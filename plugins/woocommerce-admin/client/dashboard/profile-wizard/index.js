@@ -16,12 +16,13 @@ import { updateQueryString } from '@woocommerce/navigation';
 /**
  * Internal depdencies
  */
-import ProfileWizardHeader from './header';
-import Plugins from './steps/plugins';
-import Start from './steps/start';
+import BusinessDetails from './steps/business-details';
 import Industry from './steps/industry';
-import StoreDetails from './steps/store-details';
+import Plugins from './steps/plugins';
 import ProductTypes from './steps/product-types';
+import ProfileWizardHeader from './header';
+import Start from './steps/start';
+import StoreDetails from './steps/store-details';
 import withSelect from 'wc-api/with-select';
 import './style.scss';
 
@@ -52,7 +53,7 @@ const getSteps = () => {
 	} );
 	steps.push( {
 		key: 'business-details',
-		container: Fragment,
+		container: BusinessDetails,
 		label: __( 'Business Details', 'woocommerce-admin' ),
 	} );
 	steps.push( {
