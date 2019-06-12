@@ -9,12 +9,6 @@ namespace WooCommerce\RestApi;
 
 defined( 'ABSPATH' ) || exit;
 
-if ( file_exists( __DIR__ . '/../vendor/autoload.php' ) ) {
-	require __DIR__ . '/../vendor/autoload.php';
-} else {
-	wp_die( 'WooCommerce Rest API build required' );
-}
-
 use WooCommerce\RestApi\Utilities\SingletonTrait;
 
 /**

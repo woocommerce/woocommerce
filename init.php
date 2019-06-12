@@ -6,6 +6,12 @@
  */
 
 return function() {
-	require __DIR__ . '/src/Server.php';
+	if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+		require __DIR__ . '/vendor/autoload.php';
+	} else {
+		require __DIR__ . '/src/Autoloader.php';
+		$classmap = require 'classmap.php';
+		\WooCommerce\RestApi\Autoloader::register( $classmap );
+	}
 	\WooCommerce\RestApi\Server::instance()->init();
 };

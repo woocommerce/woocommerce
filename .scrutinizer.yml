@@ -27,3 +27,4 @@ filter:
     - src/RestApi/Version2/
     - src/RestApi/Version3/
     - unit-tests/
+    - vendor/

@@ -4,11 +4,26 @@
   "homepage": "https://github.com/woocommerce/woocommerce-rest-api",
   "type": "project",
   "license": "GPL-3.0-or-later",
+  "type": "wordpress-plugin",
   "prefer-stable": true,
   "minimum-stability": "dev",
   "require-dev": {
     "phpunit/phpunit": "6.5.14",
-    "woocommerce/woocommerce-sniffs": "0.0.6"
+    "woocommerce/woocommerce-sniffs": "0.0.6",
+    "slowprog/composer-copy-file": "~0.3"
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "composer dump-autoload"
+    ],
+    "post-update-cmd": [
+      "composer dump-autoload"
+    ],
+    "pre-autoload-dump": [
+      "composer dump-autoload --no-dev --no-scripts",
+      "SlowProg\\CopyFile\\ScriptHandler::copy",
+      "sed -i '' 's/\\$baseDir = dirname(\\$vendorDir)/\\$baseDir = __DIR__/g' classmap.php"
+    ]
   },
   "autoload": {
     "classmap": [
@@ -18,6 +33,14 @@
     ],
     "psr-4": {
       "WooCommerce\\RestApi\\": "src/"
+    }
+  },
+  "extra": {
+    "copy-file": {
+        "vendor/composer/autoload_classmap.php": "classmap.php"
+    },
+    "copy-file-dev": {
+      "vendor/composer/autoload_classmap.php": "classmap.php"
     }
   }
 }
