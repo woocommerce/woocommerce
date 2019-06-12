@@ -202,7 +202,6 @@ class Server {
 			'data-countries'           => $namespace . 'Data\Countries',
 			'data-currencies'          => $namespace . 'Data\Currencies',
 			'data-download-ips'        => $namespace . 'Data\DownloadIPs',
-			'leaderboards'             => $namespace . 'Leaderboards',
 			'network-orders'           => $namespace . 'NetworkOrders',
 			'order-notes'              => $namespace . 'OrderNotes',
 			'order-refunds'            => $namespace . 'OrderRefunds',
@@ -216,7 +215,6 @@ class Server {
 			'product-shipping-classes' => $namespace . 'ProductShippingClasses',
 			'product-tags'             => $namespace . 'ProductTags',
 			'product-variations'       => $namespace . 'ProductVariations',
-			'reports'                  => $namespace . 'Reports',
 			'settings'                 => $namespace . 'Settings',
 			'settings-options'         => $namespace . 'SettingsOptions',
 			'shipping-methods'         => $namespace . 'ShippingMethods',
@@ -229,32 +227,6 @@ class Server {
 			'taxes'                    => $namespace . 'Taxes',
 			'webhooks'                 => $namespace . 'Webhooks',
 		];
-
-		if ( class_exists( '\WC_Admin_Note' ) ) {
-			$controllers['admin-notes'] = $namespace . 'AdminNotes';
-		}
-
-		if ( class_exists( '\WC_Admin_Reports_Sync' ) ) {
-			$controllers['reports-categories']             = $namespace . 'Reports\Categories';
-			$controllers['reports-coupons']                = $namespace . 'Reports\Coupons';
-			$controllers['reports-coupon-stats']           = $namespace . 'Reports\CouponStats';
-			$controllers['reports-customers']              = $namespace . 'Reports\Customers';
-			$controllers['reports-customer-stats']         = $namespace . 'Reports\CustomerStats';
-			$controllers['reports-downloads']              = $namespace . 'Reports\Downloads';
-			$controllers['reports-download-stats']         = $namespace . 'Reports\DownloadStats';
-			$controllers['reports-import']                 = $namespace . 'Reports\Import';
-			$controllers['reports-orders']                 = $namespace . 'Reports\Orders';
-			$controllers['reports-order-stats']            = $namespace . 'Reports\OrderStats';
-			$controllers['reports-performance-indicators'] = $namespace . 'Reports\PerformanceIndicators';
-			$controllers['reports-products']               = $namespace . 'Reports\Products';
-			$controllers['reports-product-stats']          = $namespace . 'Reports\ProductStats';
-			$controllers['reports-revenue-stats']          = $namespace . 'Reports\RevenueStats';
-			$controllers['reports-stock']                  = $namespace . 'Reports\Stock';
-			$controllers['reports-stock-stats']            = $namespace . 'Reports\StockStats';
-			$controllers['reports-taxes']                  = $namespace . 'Reports\Taxes';
-			$controllers['reports-tax-stats']              = $namespace . 'Reports\TaxStats';
-			$controllers['reports-variations']             = $namespace . 'Reports\Variations';
-		}
 
 		return $controllers;
 	}
