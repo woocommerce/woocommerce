@@ -77,13 +77,17 @@ class WGPB_Block_Library {
 	 *
 	 * @param string $handle    Name of the script. Should be unique.
 	 * @param string $src       Full URL of the script, or path of the script relative to the WordPress root directory.
-	 * @param array  $deps      Optional. An array of registered script handles this script depends on. Default empty array.
+	 * @param array  $deps      Optional. An array of extra registered script handles this script depends on. Default empty array.
 	 * @param bool   $has_i18n  Optional. Whether to add a script translation call to this file. Default 'true'.
 	 */
 	protected static function register_script( $handle, $src, $deps = array(), $has_i18n = true ) {
-		$filename = str_replace( plugins_url( '/', WGPB_PLUGIN_FILE ), '', $src );
-		$ver      = self::get_file_version( $filename );
-		wp_register_script( $handle, $src, $deps, $ver, true );
+		$filename     = str_replace( plugins_url( '/', WGPB_PLUGIN_FILE ), '', $src );
+		$ver          = self::get_file_version( $filename );
+		$deps_path    = WGPB_ABSPATH . str_replace( '.js', '.deps.json', $filename );
+		$dependencies = file_exists( $deps_path ) ? json_decode( file_get_contents( $deps_path ) ) : array(); // phpcs:ignore WordPress.WP.AlternativeFunctions
+		$dependencies = array_merge( $dependencies, $deps );
+
+		wp_register_script( $handle, $src, $dependencies, $ver, true );
 		if ( $has_i18n && function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $handle, 'woo-gutenberg-products-block', WGPB_ABSPATH . 'languages' );
 		}
@@ -119,32 +123,15 @@ class WGPB_Block_Library {
 		self::register_script( 'wc-blocks', plugins_url( 'build/blocks.js', WGPB_PLUGIN_FILE ), array(), false );
 		self::register_script( 'wc-vendors', plugins_url( 'build/vendors.js', WGPB_PLUGIN_FILE ), array(), false );
 
-		$block_dependencies = array(
-			'wp-api-fetch',
-			'wp-blocks',
-			'wp-components',
-			'wp-compose',
-			'wp-data',
-			'wp-date',
-			'wp-dom',
-			'wp-element',
-			'wp-editor',
-			'wp-hooks',
-			'wp-i18n',
-			'wp-url',
-			'lodash',
-			'wc-blocks',
-			'wc-vendors',
-		);
-
-		self::register_script( 'wc-handpicked-products', plugins_url( 'build/handpicked-products.js', WGPB_PLUGIN_FILE ), $block_dependencies );
-		self::register_script( 'wc-product-best-sellers', plugins_url( 'build/product-best-sellers.js', WGPB_PLUGIN_FILE ), $block_dependencies );
-		self::register_script( 'wc-product-category', plugins_url( 'build/product-category.js', WGPB_PLUGIN_FILE ), $block_dependencies );
-		self::register_script( 'wc-product-new', plugins_url( 'build/product-new.js', WGPB_PLUGIN_FILE ), $block_dependencies );
-		self::register_script( 'wc-product-on-sale', plugins_url( 'build/product-on-sale.js', WGPB_PLUGIN_FILE ), $block_dependencies );
-		self::register_script( 'wc-product-top-rated', plugins_url( 'build/product-top-rated.js', WGPB_PLUGIN_FILE ), $block_dependencies );
-		self::register_script( 'wc-products-attribute', plugins_url( 'build/products-attribute.js', WGPB_PLUGIN_FILE ), $block_dependencies );
-		self::register_script( 'wc-featured-product', plugins_url( 'build/featured-product.js', WGPB_PLUGIN_FILE ), $block_dependencies );
+		// Individual blocks.
+		self::register_script( 'wc-handpicked-products', plugins_url( 'build/handpicked-products.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-product-best-sellers', plugins_url( 'build/product-best-sellers.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-product-category', plugins_url( 'build/product-category.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-product-new', plugins_url( 'build/product-new.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-product-on-sale', plugins_url( 'build/product-on-sale.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-product-top-rated', plugins_url( 'build/product-top-rated.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-products-attribute', plugins_url( 'build/products-attribute.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-featured-product', plugins_url( 'build/featured-product.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-blocks' ) );
 	}
 
 	/**
