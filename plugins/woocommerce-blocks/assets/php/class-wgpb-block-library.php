@@ -369,7 +369,7 @@ class WGPB_Block_Library {
 	protected static function get_schema_orderby() {
 		return array(
 			'type'    => 'string',
-			'enum'    => array( 'date', 'popularity', 'price_asc', 'price_desc', 'rating', 'title' ),
+			'enum'    => array( 'date', 'popularity', 'price_asc', 'price_desc', 'rating', 'title', 'menu_order' ),
 			'default' => 'date',
 		);
 	}
