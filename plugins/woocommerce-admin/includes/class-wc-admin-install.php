@@ -273,6 +273,19 @@ class WC_Admin_Install {
 		WC_Admin_Notes_Historical_Data::add_note();
 		WC_Admin_Notes_Welcome_Message::add_welcome_note();
 	}
+
+	/**
+	 * Delete all data from tables.
+	 */
+	public static function delete_table_data() {
+		global $wpdb;
+
+		$tables = self::get_tables();
+
+		foreach ( $tables as $table ) {
+			$wpdb->query( "TRUNCATE TABLE {$table}" ); // WPCS: unprepared SQL ok.
+		}
+	}
 }
 
 WC_Admin_Install::init();

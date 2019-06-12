@@ -89,13 +89,6 @@ class WC_Admin_Api_Init {
 		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-customers-data-store.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-customers-stats-data-store.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-reports-stock-stats-data-store.php';
-
-		// Data triggers.
-		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-notes-data-store.php';
-
-		// CRUD classes.
-		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-note.php';
-		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes.php';
 	}
 
 	/**

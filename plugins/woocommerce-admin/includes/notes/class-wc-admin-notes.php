@@ -23,6 +23,26 @@ class WC_Admin_Notes {
 	const QUEUE_GROUP = 'wc-admin-notes';
 
 	/**
+	 * Queue instance.
+	 *
+	 * @var WC_Queue_Interface
+	 */
+	protected static $queue = null;
+
+	/**
+	 * Get queue instance.
+	 *
+	 * @return WC_Queue_Interface
+	 */
+	public static function queue() {
+		if ( is_null( self::$queue ) ) {
+			self::$queue = WC()->queue();
+		}
+
+		return self::$queue;
+	}
+
+	/**
 	 * Hook appropriate actions.
 	 */
 	public static function init() {

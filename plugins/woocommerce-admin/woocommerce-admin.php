@@ -61,7 +61,7 @@ class WC_Admin_Feature_Plugin {
 	}
 
 	/**
-	 * Install DB and create cron events when activated,
+	 * Install DB and create cron events when activated.
 	 *
 	 * @return void
 	 */
@@ -124,6 +124,13 @@ class WC_Admin_Feature_Plugin {
 		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-install.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-events.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-api-init.php';
+
+		// Data triggers.
+		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-notes-data-store.php';
+
+		// CRUD classes.
+		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-note.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/notes/class-wc-admin-notes.php';
 
 		// Admin note providers.
 		// @todo These should be bundled in the features/ folder, but loading them from there currently has a load order issue.
