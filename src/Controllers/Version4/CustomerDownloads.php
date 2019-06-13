@@ -62,7 +62,7 @@ class CustomerDownloads extends AbstractController {
 			return new \WP_Error( 'woocommerce_rest_customer_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		if ( ! wc_rest_check_user_permissions( 'read', $customer->get_id() ) ) {
+		if ( ! wc_rest_check_user_permissions( 'read', $customer->ID ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
