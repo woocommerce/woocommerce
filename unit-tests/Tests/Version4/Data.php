@@ -14,7 +14,7 @@ use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
 /**
  * WC Tests API Data
  */
-class Data extends AbstractReportsTest {
+class Data {
 
 	/**
 	 * Endpoints.

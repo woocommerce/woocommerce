@@ -2,7 +2,6 @@
   "name": "woocommerce/woocommerce-rest-api",
   "description": "The WooCommerce core REST API.",
   "homepage": "https://github.com/woocommerce/woocommerce-rest-api",
-  "type": "project",
   "license": "GPL-3.0-or-later",
   "type": "wordpress-plugin",
   "prefer-stable": true,
@@ -22,7 +21,7 @@
     "pre-autoload-dump": [
       "composer dump-autoload --no-dev --no-scripts",
       "SlowProg\\CopyFile\\ScriptHandler::copy",
-      "sed -i '' 's/\\$baseDir = dirname(\\$vendorDir)/\\$baseDir = __DIR__/g' classmap.php"
+      "sed -i.bak -e 's/\\$baseDir = dirname(\\$vendorDir)/\\$baseDir = __DIR__/g' classmap.php"
     ]
   },
   "autoload": {
