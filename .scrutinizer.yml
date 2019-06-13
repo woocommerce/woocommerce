@@ -32,6 +32,9 @@ filter:
     - vendor/
     - classmap.php
 build:
+  tests:
+        override:
+            command: "php -v"
     nodes:
         analysis:
             dependencies:
