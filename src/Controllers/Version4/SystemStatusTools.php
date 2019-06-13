@@ -136,7 +136,7 @@ class SystemStatusTools extends AbstractController {
 				'button' => __( 'Clean up download permissions', 'woocommerce' ),
 				'desc'   => __( 'This tool will delete expired download permissions and permissions with 0 remaining downloads.', 'woocommerce' ),
 			),
-			'regenerate_product_lookup_tables' => array(
+			'regenerate_product_lookup_tables'   => array(
 				'name'   => __( 'Product lookup tables', 'woocommerce' ),
 				'button' => __( 'Regenerate', 'woocommerce' ),
 				'desc'   => __( 'This tool will regenerate product lookup table data. This process may take a while.', 'woocommerce' ),
@@ -292,7 +292,7 @@ class SystemStatusTools extends AbstractController {
 	/**
 	 * Prepare a tool item for serialization.
 	 *
-	 * @param  array           $item     Object.
+	 * @param  array            $item     Object.
 	 * @param  \WP_REST_Request $request  Request object.
 	 * @return \WP_REST_Response $response Response data.
 	 */
@@ -402,155 +402,224 @@ class SystemStatusTools extends AbstractController {
 	/**
 	 * Actually executes a tool.
 	 *
+	 * @throws Exception When the tool cannot run.
 	 * @param  string $tool Tool.
 	 * @return array
 	 */
 	public function execute_tool( $tool ) {
-		global $wpdb;
-		$ran = true;
-		switch ( $tool ) {
-			case 'clear_transients':
-				wc_delete_product_transients();
-				wc_delete_shop_order_transients();
-				delete_transient( 'wc_count_comments' );
+		$ran   = false;
+		$tools = $this->get_tools();
 
-				$attribute_taxonomies = wc_get_attribute_taxonomies();
+		try {
+			if ( ! isset( $tools[ $tool ] ) ) {
+				throw new Exception( __( 'There was an error calling this tool. There is no callback present.', 'woocommerce' ) );
+			}
 
-				if ( ! empty( $attribute_taxonomies ) ) {
-					foreach ( $attribute_taxonomies as $attribute ) {
-						delete_transient( 'wc_layered_nav_counts_pa_' . $attribute->attribute_name );
-					}
-				}
+			$callback = isset( $tools[ $tool ]['callback'] ) ? $tools[ $tool ]['callback'] : array( $this, $tool );
 
-				\WC_Cache_Helper::get_transient_version( 'shipping', true );
-				$message = __( 'Product transients cleared', 'woocommerce' );
-				break;
+			if ( ! is_callable( $callback ) ) {
+				throw new Exception( __( 'There was an error calling this tool. Invalid callback.', 'woocommerce' ) );
+			}
 
-			case 'clear_expired_transients':
-				/* translators: %d: amount of expired transients */
-				$message = sprintf( __( '%d transients rows cleared', 'woocommerce' ), wc_delete_expired_transients() );
-				break;
+			$message = call_user_func( $callback );
 
-			case 'delete_orphaned_variations':
-				// Delete orphans.
-				$result = absint(
-					$wpdb->query(
-						"DELETE products
-					FROM {$wpdb->posts} products
-					LEFT JOIN {$wpdb->posts} wp ON wp.ID = products.post_parent
-					WHERE wp.ID IS NULL AND products.post_type = 'product_variation';"
-					)
-				);
-				/* translators: %d: amount of orphaned variations */
-				$message = sprintf( __( '%d orphaned variations deleted', 'woocommerce' ), $result );
-				break;
+			if ( false === $message ) {
+				throw new Exception( __( 'There was an error calling this tool. Invalid callback.', 'woocommerce' ) );
+			}
 
-			case 'clear_expired_download_permissions':
-				// Delete expired download permissions and ones with 0 downloads remaining.
-				$result = absint(
-					$wpdb->query(
-						$wpdb->prepare(
-							"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
-							WHERE ( downloads_remaining != '' AND downloads_remaining = 0 ) OR ( access_expires IS NOT NULL AND access_expires < %s )",
-							date( 'Y-m-d', current_time( 'timestamp' ) )
-						)
-					)
-				);
-				/* translators: %d: amount of permissions */
-				$message = sprintf( __( '%d permissions deleted', 'woocommerce' ), $result );
-				break;
-
-			case 'regenerate_product_lookup_tables':
-				if ( ! wc_update_product_lookup_tables_is_running() ) {
-					wc_update_product_lookup_tables();
-				}
-				$message = __( 'Lookup tables are regenerating', 'woocommerce' );
-				break;
-			case 'reset_roles':
-				// Remove then re-add caps and roles.
-				\WC_Install::remove_roles();
-				\WC_Install::create_roles();
-				$message = __( 'Roles successfully reset', 'woocommerce' );
-				break;
-
-			case 'recount_terms':
-				$product_cats = get_terms(
-					'product_cat',
-					array(
-						'hide_empty' => false,
-						'fields'     => 'id=>parent',
-					)
-				);
-				_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), true, false );
-				$product_tags = get_terms(
-					'product_tag',
-					array(
-						'hide_empty' => false,
-						'fields'     => 'id=>parent',
-					)
-				);
-				_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), true, false );
-				$message = __( 'Terms successfully recounted', 'woocommerce' );
-				break;
-
-			case 'clear_sessions':
-				$wpdb->query( "TRUNCATE {$wpdb->prefix}woocommerce_sessions" );
-				$result = absint( $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key='_woocommerce_persistent_cart_" . get_current_blog_id() . "';" ) ); // WPCS: unprepared SQL ok.
-				wp_cache_flush();
-				/* translators: %d: amount of sessions */
-				$message = sprintf( __( 'Deleted all active sessions, and %d saved carts.', 'woocommerce' ), absint( $result ) );
-				break;
-
-			case 'install_pages':
-				\WC_Install::create_pages();
-				$message = __( 'All missing WooCommerce pages successfully installed', 'woocommerce' );
-				break;
-
-			case 'delete_taxes':
-				$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rates;" );
-				$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations;" );
-				\WC_Cache_Helper::incr_cache_prefix( 'taxes' );
-				$message = __( 'Tax rates successfully deleted', 'woocommerce' );
-				break;
-
-			case 'regenerate_thumbnails':
-				\WC_Regenerate_Images::queue_image_regeneration();
-				$message = __( 'Thumbnail regeneration has been scheduled to run in the background.', 'woocommerce' );
-				break;
-
-			case 'db_update_routine':
-				$blog_id = get_current_blog_id();
-				// Used to fire an action added in WP_Background_Process::_construct() that calls WP_Background_Process::handle_cron_healthcheck().
-				// This method will make sure the database updates are executed even if cron is disabled. Nothing will happen if the updates are already running.
-				do_action( 'wp_' . $blog_id . '_wc_updater_cron' );
-				$message = __( 'Database upgrade routine has been scheduled to run in the background.', 'woocommerce' );
-				break;
-
-			default:
-				$tools = $this->get_tools();
-				if ( isset( $tools[ $tool ]['callback'] ) ) {
-					$callback = $tools[ $tool ]['callback'];
-					$return   = call_user_func( $callback );
-					if ( is_string( $return ) ) {
-						$message = $return;
-					} elseif ( false === $return ) {
-						$callback_string = is_array( $callback ) ? get_class( $callback[0] ) . '::' . $callback[1] : $callback;
-						$ran             = false;
-						/* translators: %s: callback string */
-						$message = sprintf( __( 'There was an error calling %s', 'woocommerce' ), $callback_string );
-					} else {
-						$message = __( 'Tool ran.', 'woocommerce' );
-					}
-				} else {
-					$ran     = false;
-					$message = __( 'There was an error calling this tool. There is no callback present.', 'woocommerce' );
-				}
-				break;
+			if ( empty( $message ) || ! is_string( $message ) ) {
+				$message = __( 'Tool ran.', 'woocommerce' );
+			}
+		} catch ( Exception $e ) {
+			$message = $e->getMessage();
+			$ran     = false;
 		}
 
 		return array(
 			'success' => $ran,
 			'message' => $message,
 		);
+	}
+
+	/**
+	 * Tool: clear_transients.
+	 *
+	 * @return string Success message.
+	 */
+	protected function clear_transients() {
+		wc_delete_product_transients();
+		wc_delete_shop_order_transients();
+		delete_transient( 'wc_count_comments' );
+
+		$attribute_taxonomies = wc_get_attribute_taxonomies();
+
+		if ( ! empty( $attribute_taxonomies ) ) {
+			foreach ( $attribute_taxonomies as $attribute ) {
+				delete_transient( 'wc_layered_nav_counts_pa_' . $attribute->attribute_name );
+			}
+		}
+
+		\WC_Cache_Helper::get_transient_version( 'shipping', true );
+		return __( 'Product transients cleared', 'woocommerce' );
+	}
+
+	/**
+	 * Tool: clear_expired_transients.
+	 *
+	 * @return string Success message.
+	 */
+	protected function clear_expired_transients() {
+		/* translators: %d: amount of expired transients */
+		return sprintf( __( '%d transients rows cleared', 'woocommerce' ), wc_delete_expired_transients() );
+	}
+
+	/**
+	 * Tool: delete_orphaned_variations.
+	 *
+	 * @return string Success message.
+	 */
+	protected function delete_orphaned_variations() {
+		global $wpdb;
+
+		$result = absint(
+			$wpdb->query(
+				"DELETE products
+			FROM {$wpdb->posts} products
+			LEFT JOIN {$wpdb->posts} wp ON wp.ID = products.post_parent
+			WHERE wp.ID IS NULL AND products.post_type = 'product_variation';"
+			)
+		);
+		/* translators: %d: amount of orphaned variations */
+		return sprintf( __( '%d orphaned variations deleted', 'woocommerce' ), $result );
+	}
+
+	/**
+	 * Tool: clear_expired_download_permissions.
+	 *
+	 * @return string Success message.
+	 */
+	protected function clear_expired_download_permissions() {
+		global $wpdb;
+
+		$result = absint(
+			$wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions
+					WHERE ( downloads_remaining != '' AND downloads_remaining = 0 ) OR ( access_expires IS NOT NULL AND access_expires < %s )",
+					date( 'Y-m-d', current_time( 'timestamp' ) )
+				)
+			)
+		);
+		/* translators: %d: amount of permissions */
+		return sprintf( __( '%d permissions deleted', 'woocommerce' ), $result );
+	}
+
+	/**
+	 * Tool: regenerate_product_lookup_tables.
+	 *
+	 * @return string Success message.
+	 */
+	protected function regenerate_product_lookup_tables() {
+		if ( ! wc_update_product_lookup_tables_is_running() ) {
+			wc_update_product_lookup_tables();
+		}
+		return __( 'Lookup tables are regenerating', 'woocommerce' );
+	}
+
+	/**
+	 * Tool: reset_roles.
+	 *
+	 * @return string Success message.
+	 */
+	protected function reset_roles() {
+		\WC_Install::remove_roles();
+		\WC_Install::create_roles();
+		return __( 'Roles successfully reset', 'woocommerce' );
+	}
+
+	/**
+	 * Tool: recount_terms.
+	 *
+	 * @return string Success message.
+	 */
+	protected function recount_terms() {
+		$product_cats = get_terms(
+			'product_cat',
+			array(
+				'hide_empty' => false,
+				'fields'     => 'id=>parent',
+			)
+		);
+		_wc_term_recount( $product_cats, get_taxonomy( 'product_cat' ), true, false );
+		$product_tags = get_terms(
+			'product_tag',
+			array(
+				'hide_empty' => false,
+				'fields'     => 'id=>parent',
+			)
+		);
+		_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), true, false );
+		return __( 'Terms successfully recounted', 'woocommerce' );
+	}
+
+	/**
+	 * Tool: clear_sessions.
+	 *
+	 * @return string Success message.
+	 */
+	protected function clear_sessions() {
+		global $wpdb;
+
+		$wpdb->query( "TRUNCATE {$wpdb->prefix}woocommerce_sessions" );
+		$result = absint( $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key='_woocommerce_persistent_cart_" . get_current_blog_id() . "';" ) ); // WPCS: unprepared SQL ok.
+		wp_cache_flush();
+		/* translators: %d: amount of sessions */
+		return sprintf( __( 'Deleted all active sessions, and %d saved carts.', 'woocommerce' ), absint( $result ) );
+	}
+
+	/**
+	 * Tool: install_pages.
+	 *
+	 * @return string Success message.
+	 */
+	protected function install_pages() {
+		\WC_Install::create_pages();
+		return __( 'All missing WooCommerce pages successfully installed', 'woocommerce' );
+	}
+
+	/**
+	 * Tool: delete_taxes.
+	 *
+	 * @return string Success message.
+	 */
+	protected function delete_taxes() {
+		global $wpdb;
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rates;" );
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations;" );
+		\WC_Cache_Helper::incr_cache_prefix( 'taxes' );
+		return __( 'Tax rates successfully deleted', 'woocommerce' );
+	}
+
+	/**
+	 * Tool: regenerate_thumbnails.
+	 *
+	 * @return string Success message.
+	 */
+	protected function regenerate_thumbnails() {
+		\WC_Regenerate_Images::queue_image_regeneration();
+		return __( 'Thumbnail regeneration has been scheduled to run in the background.', 'woocommerce' );
+	}
+
+	/**
+	 * Tool: db_update_routine.
+	 *
+	 * @return string Success message.
+	 */
+	protected function db_update_routine() {
+		$blog_id = get_current_blog_id();
+		// Used to fire an action added in WP_Background_Process::_construct() that calls WP_Background_Process::handle_cron_healthcheck().
+		// This method will make sure the database updates are executed even if cron is disabled. Nothing will happen if the updates are already running.
+		do_action( 'wp_' . $blog_id . '_wc_updater_cron' );
+		return __( 'Database upgrade routine has been scheduled to run in the background.', 'woocommerce' );
 	}
 }
