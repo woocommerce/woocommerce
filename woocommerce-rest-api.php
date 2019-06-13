@@ -31,7 +31,7 @@ $register_callback = function() use ( $version, $init_callback ) {
 	if ( ! is_callable( array( wc()->api, 'register' ) ) ) {
 		return;
 	}
-	wc()->api->register( $version, $init_callback );
+	wc()->api->register( $version, $init_callback, __DIR__ );
 };
 
 add_action( 'woocommerce_loaded', $register_callback );
