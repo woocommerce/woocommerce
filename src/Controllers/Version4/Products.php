@@ -600,92 +600,76 @@ class Products extends AbstractObjectsController {
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10, 2 );
-		add_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10, 2 );
-		add_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_group_by' ), 10, 2 );
+		add_filter( 'posts_clauses', array( $this, 'get_items_query_clauses' ), 10, 2 );
 		$response = parent::get_items( $request );
-		remove_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10 );
-		remove_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10 );
-		remove_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_group_by' ), 10 );
+		remove_filter( 'posts_clauses', array( $this, 'get_items_query_clauses' ), 10 );
 		return $response;
 	}
 
 	/**
 	 * Add in conditional search filters for products.
 	 *
-	 * @param string $where Where clause used to search posts.
-	 * @param object $wp_query \WP_Query object.
-	 * @return string
+	 * @param array     $args Query args.
+	 * @param \WC_Query $wp_query WC_Query object.
+	 * @return array
 	 */
-	public static function add_wp_query_filter( $where, $wp_query ) {
+	public function get_items_query_clauses( $args, $wp_query ) {
 		global $wpdb;
 
-		$search = $wp_query->get( 'search' );
-		if ( $search ) {
-			$search = $wpdb->esc_like( $search );
-			$search = "'%" . $search . "%'";
-			$where .= " AND ({$wpdb->posts}.post_title LIKE {$search}";
-			$where .= wc_product_sku_enabled() ? ' OR ps_post_meta.meta_key = "_sku" AND ps_post_meta.meta_value LIKE ' . $search . ')' : ')';
+		if ( $wp_query->get( 'search' ) ) {
+			$search         = "'%" . $wpdb->esc_like( $wp_query->get( 'search' ) ) . "%'";
+			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+			$args['where'] .= " AND ({$wpdb->posts}.post_title LIKE {$search}";
+			$args['where'] .= wc_product_sku_enabled() ? ' OR wc_product_meta_lookup.sku LIKE ' . $search . ')' : ')';
+		}
+
+		if ( $wp_query->get( 'sku' ) ) {
+			$skus = explode( ',', $wp_query->get( 'sku' ) );
+			// Include the current string as a SKU too.
+			if ( 1 < count( $skus ) ) {
+				$skus[] = $wp_query->get( 'sku' );
+			}
+			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+			$args['where'] .= ' AND wc_product_meta_lookup.sku IN ("' . implode( '","', array_map( 'esc_sql', $skus ) ) . '")';
+		}
+
+		if ( $wp_query->get( 'min_price' ) ) {
+			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.min_price >= %f ', floatval( $wp_query->get( 'min_price' ) ) );
+		}
+
+		if ( $wp_query->get( 'max_price' ) ) {
+			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.max_price <= %f ', floatval( $wp_query->get( 'max_price' ) ) );
+		}
+
+		if ( $wp_query->get( 'stock_status' ) ) {
+			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status = %s ', $wp_query->get( 'stock_status' ) );
 		}
 
 		if ( $wp_query->get( 'low_in_stock' ) ) {
-			$low_stock_amount = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
-			$where           .= " AND lis_postmeta2.meta_key = '_manage_stock'
-			AND lis_postmeta2.meta_value = 'yes'
-			AND lis_postmeta.meta_key = '_stock'
-			AND lis_postmeta.meta_value IS NOT NULL
-			AND lis_postmeta3.meta_key = '_low_stock_amount'
-			AND (
-				lis_postmeta3.meta_value > ''
-				AND CAST(lis_postmeta.meta_value AS SIGNED) <= CAST(lis_postmeta3.meta_value AS SIGNED)
-				OR lis_postmeta3.meta_value <= ''
-				AND CAST(lis_postmeta.meta_value AS SIGNED) <= {$low_stock_amount}
-			)";
+			$low_stock      = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
+			$args['join']   = $this->append_product_sorting_table_join( $args['join'] );
+			$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_quantity <= %d', $low_stock );
 		}
 
-		return $where;
+		return $args;
 	}
 
 	/**
-	 * Join posts meta tables when product search or low stock query is present.
+	 * Join wc_product_meta_lookup to posts if not already joined.
 	 *
-	 * @param string $join Join clause used to search posts.
-	 * @param object $wp_query \WP_Query object.
+	 * @param string $sql SQL join.
 	 * @return string
 	 */
-	public static function add_wp_query_join( $join, $wp_query ) {
+	protected function append_product_sorting_table_join( $sql ) {
 		global $wpdb;
 
-		$search = $wp_query->get( 'search' );
-		if ( $search && wc_product_sku_enabled() ) {
-			$join .= " INNER JOIN {$wpdb->postmeta} AS ps_post_meta ON ps_post_meta.post_id = {$wpdb->posts}.ID";
+		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
+			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
 		}
-
-		if ( $wp_query->get( 'low_in_stock' ) ) {
-			$join .= " INNER JOIN {$wpdb->postmeta} AS lis_postmeta ON {$wpdb->posts}.ID = lis_postmeta.post_id
-			INNER JOIN {$wpdb->postmeta} AS lis_postmeta2 ON {$wpdb->posts}.ID = lis_postmeta2.post_id
-			INNER JOIN {$wpdb->postmeta} AS lis_postmeta3 ON {$wpdb->posts}.ID = lis_postmeta3.post_id";
-		}
-
-		return $join;
-	}
-
-	/**
-	 * Group by post ID to prevent duplicates.
-	 *
-	 * @param string $groupby Group by clause used to organize posts.
-	 * @param object $wp_query \WP_Query object.
-	 * @return string
-	 */
-	public static function add_wp_query_group_by( $groupby, $wp_query ) {
-		global $wpdb;
-
-		$search       = $wp_query->get( 'search' );
-		$low_in_stock = $wp_query->get( 'low_in_stock' );
-		if ( empty( $groupby ) && ( $search || $low_in_stock ) ) {
-			$groupby = $wpdb->posts . '.ID';
-		}
-		return $groupby;
+		return $sql;
 	}
 
 	/**
@@ -700,6 +684,20 @@ class Products extends AbstractObjectsController {
 
 		// Set post_status.
 		$args['post_status'] = $request['status'];
+
+		// Set custom args to handle later during clauses.
+		$custom_keys = array(
+			'sku',
+			'min_price',
+			'max_price',
+			'stock_status',
+			'low_in_stock',
+		);
+		foreach ( $custom_keys as $key ) {
+			if ( ! empty( $request[ $key ] ) ) {
+				$args[ $key ] = $request[ $key ];
+			}
+		}
 
 		// Taxonomy query to filter products by type, category,
 		// tag, shipping class, and attribute.
@@ -762,24 +760,6 @@ class Products extends AbstractObjectsController {
 			);
 		}
 
-		// Filter by sku.
-		if ( ! empty( $request['sku'] ) ) {
-			$skus = explode( ',', $request['sku'] );
-			// Include the current string as a SKU too.
-			if ( 1 < count( $skus ) ) {
-				$skus[] = $request['sku'];
-			}
-
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args,
-				array(
-					'key'     => '_sku',
-					'value'   => $skus,
-					'compare' => 'IN',
-				)
-			);
-		}
-
 		// Filter by tax class.
 		if ( ! empty( $request['tax_class'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
@@ -787,22 +767,6 @@ class Products extends AbstractObjectsController {
 				array(
 					'key'   => '_tax_class',
 					'value' => 'standard' !== $request['tax_class'] ? $request['tax_class'] : '',
-				)
-			);
-		}
-
-		// Price filter.
-		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
-		}
-
-		// Filter product by stock_status.
-		if ( ! empty( $request['stock_status'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args,
-				array(
-					'key'   => '_stock_status',
-					'value' => $request['stock_status'],
 				)
 			);
 		}

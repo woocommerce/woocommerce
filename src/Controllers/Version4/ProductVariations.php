@@ -345,22 +345,18 @@ class ProductVariations extends Products {
 		// Set post_status.
 		$args['post_status'] = $request['status'];
 
-		// Filter by sku.
-		if ( ! empty( $request['sku'] ) ) {
-			$skus = explode( ',', $request['sku'] );
-			// Include the current string as a SKU too.
-			if ( 1 < count( $skus ) ) {
-				$skus[] = $request['sku'];
+		// Set custom args to handle later during clauses.
+		$custom_keys = array(
+			'sku',
+			'min_price',
+			'max_price',
+			'stock_status',
+			'low_in_stock',
+		);
+		foreach ( $custom_keys as $key ) {
+			if ( ! empty( $request[ $key ] ) ) {
+				$args[ $key ] = $request[ $key ];
 			}
-
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args,
-				array(
-					'key'     => '_sku',
-					'value'   => $skus,
-					'compare' => 'IN',
-				)
-			);
 		}
 
 		// Filter by tax class.
@@ -370,22 +366,6 @@ class ProductVariations extends Products {
 				array(
 					'key'   => '_tax_class',
 					'value' => 'standard' !== $request['tax_class'] ? $request['tax_class'] : '',
-				)
-			);
-		}
-
-		// Price filter.
-		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
-		}
-
-		// Filter product based on stock_status.
-		if ( ! empty( $request['stock_status'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args,
-				array(
-					'key'   => '_stock_status',
-					'value' => $request['stock_status'],
 				)
 			);
 		}
@@ -1209,22 +1189,5 @@ class ProductVariations extends Products {
 		);
 
 		return $params;
-	}
-
-	/**
-	 * Get a collection of posts and add the post title filter option to \WP_Query.
-	 *
-	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|\WP_REST_Response
-	 */
-	public function get_items( $request ) {
-		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10, 2 );
-		add_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10, 2 );
-		add_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_group_by' ), 10, 2 );
-		$response = parent::get_items( $request );
-		remove_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10 );
-		remove_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10 );
-		remove_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_group_by' ), 10 );
-		return $response;
 	}
 }
