@@ -422,13 +422,13 @@ class Products extends AbstractObjectsController {
 			}
 
 			if ( $product->is_type( 'grouped' ) ) {
-				$product->set_manage_stock( 'no' );
-				$product->set_backorders( 'no' );
+				$product->set_manage_stock( false );
+				$product->set_backorders( false );
 				$product->set_stock_quantity( '' );
 				$product->set_stock_status( $stock_status );
 			} elseif ( $product->is_type( 'external' ) ) {
-				$product->set_manage_stock( 'no' );
-				$product->set_backorders( 'no' );
+				$product->set_manage_stock( false );
+				$product->set_backorders( false );
 				$product->set_stock_quantity( '' );
 				$product->set_stock_status( 'instock' );
 			} elseif ( $product->get_manage_stock() ) {
@@ -447,7 +447,7 @@ class Products extends AbstractObjectsController {
 				}
 			} else {
 				// Don't manage stock.
-				$product->set_manage_stock( 'no' );
+				$product->set_manage_stock( false );
 				$product->set_stock_quantity( '' );
 				$product->set_stock_status( $stock_status );
 			}
