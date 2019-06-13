@@ -11,7 +11,13 @@
 	}
 
 	.wrap {
-		padding: 20px;
+		padding: 20px 20px 0;
+
+		@include breakpoint( '<782px' ) {
+			p.search-box {
+				width: calc(100% - 40px);
+			}
+		}
 	}
 
 	#woocommerce-embedded-root.is-embed-loading + #wpbody .wrap {
