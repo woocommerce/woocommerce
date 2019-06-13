@@ -331,7 +331,7 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @return string|\WP_Error
 	 */
 	public function validate_setting_checkbox_field( $value, $setting ) {
-		if ( in_array( $value, array( 'yes', 'no' ) ) ) {
+		if ( in_array( $value, array( 'yes', 'no' ), true ) ) {
 			return $value;
 		} elseif ( empty( $value ) ) {
 			$value = isset( $setting['default'] ) ? $setting['default'] : 'no';
@@ -377,7 +377,7 @@ abstract class AbstractController extends WP_REST_Controller {
 	 */
 	protected function add_meta_query( $args, $meta_query ) {
 		if ( empty( $args['meta_query'] ) ) {
-			$args['meta_query'] = array();
+			$args['meta_query'] = []; // phpcs:ignore
 		}
 
 		$args['meta_query'][] = $meta_query;
@@ -401,7 +401,7 @@ abstract class AbstractController extends WP_REST_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
-						'type'    => 'object',
+						'type' => 'object',
 					),
 				),
 				'update' => array(
@@ -409,7 +409,7 @@ abstract class AbstractController extends WP_REST_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
-						'type'    => 'object',
+						'type' => 'object',
 					),
 				),
 				'delete' => array(
@@ -417,7 +417,7 @@ abstract class AbstractController extends WP_REST_Controller {
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
-						'type'    => 'integer',
+						'type' => 'integer',
 					),
 				),
 			),
