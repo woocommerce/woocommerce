@@ -120,7 +120,7 @@ class OrderRefunds extends Orders {
 	 *
 	 * @since  3.0.0
 	 * @param  int $id Object ID.
-	 * @return WC_Data
+	 * @return \WC_Data
 	 */
 	protected function get_object( $id ) {
 		return wc_get_order( $id );
@@ -130,7 +130,7 @@ class OrderRefunds extends Orders {
 	 * Get formatted item data.
 	 *
 	 * @since  3.0.0
-	 * @param  WC_Data $object WC_Data instance.
+	 * @param  \WC_Data $object WC_Data instance.
 	 * @return array
 	 */
 	protected function get_formatted_item_data( $object ) {
@@ -174,10 +174,10 @@ class OrderRefunds extends Orders {
 	 *
 	 * @since  3.0.0
 	 *
-	 * @param  WC_Data         $object  Object data.
+	 * @param  \WC_Data         $object  Object data.
 	 * @param  \WP_REST_Request $request Request object.
 	 *
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
 		$this->request       = $request;
@@ -209,7 +209,7 @@ class OrderRefunds extends Orders {
 		 * refers to object type being prepared for the response.
 		 *
 		 * @param \WP_REST_Response $response The response object.
-		 * @param WC_Data          $object   Object data.
+		 * @param \WC_Data          $object   Object data.
 		 * @param \WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
@@ -218,10 +218,10 @@ class OrderRefunds extends Orders {
 	/**
 	 * Prepare a single order refund output for response.
 	 *
-	 * @param WP_Post         $post Post object.
+	 * @param \WP_Post         $post Post object.
 	 * @param \WP_REST_Request $request Request object.
 	 *
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function prepare_item_for_response( $post, $request ) {
 		$order = wc_get_order( (int) $request['order_id'] );
@@ -248,7 +248,7 @@ class OrderRefunds extends Orders {
 
 		// Add line items.
 		foreach ( $refund->get_items() as $item_id => $item ) {
-			$product      = $refund->get_product_from_item( $item );
+			$product      = $item->get_product();
 			$product_id   = 0;
 			$variation_id = 0;
 			$product_sku  = null;
@@ -327,7 +327,7 @@ class OrderRefunds extends Orders {
 		 * prepared for the response.
 		 *
 		 * @param \WP_REST_Response   $response   The response object.
-		 * @param WP_Post            $post       Post object.
+		 * @param \WP_Post            $post       Post object.
 		 * @param \WP_REST_Request    $request    Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $post, $request );
@@ -336,7 +336,7 @@ class OrderRefunds extends Orders {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Data         $object  Object data.
+	 * @param \WC_Data         $object  Object data.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return array                   Links for the given post.
 	 */
@@ -377,7 +377,7 @@ class OrderRefunds extends Orders {
 	 * Create a single item.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
@@ -420,7 +420,7 @@ class OrderRefunds extends Orders {
 		/**
 		 * Fires after a single item is created or updated via the REST API.
 		 *
-		 * @param WP_Post         $post      Post object.
+		 * @param \WP_Post         $post      Post object.
 		 * @param \WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating item, false when updating.
 		 */
@@ -440,8 +440,8 @@ class OrderRefunds extends Orders {
 	 *
 	 * @since  3.0.0
 	 * @param  \WP_REST_Request $request Request object.
-	 * @param  bool            $creating If is creating a new object.
-	 * @return \WP_Error|WC_Data The prepared item, or \WP_Error object on failure.
+	 * @param  bool             $creating If is creating a new object.
+	 * @return \WP_Error|\WC_Data The prepared item, or \WP_Error object on failure.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		$order = wc_get_order( (int) $request['order_id'] );
@@ -487,7 +487,7 @@ class OrderRefunds extends Orders {
 		 * The dynamic portion of the hook name, `$this->post_type`,
 		 * refers to the object type slug.
 		 *
-		 * @param WC_Data         $coupon   Object object.
+		 * @param \WC_Data         $coupon   Object object.
 		 * @param \WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
 		 */
@@ -499,7 +499,7 @@ class OrderRefunds extends Orders {
 	 *
 	 * @since  3.0.0
 	 * @param  \WP_REST_Request $request  Full details about the request.
-	 * @param  bool            $creating If is creating a new object.
+	 * @param  bool             $creating If is creating a new object.
 	 * @return \WC_Data|\WP_Error
 	 */
 	protected function save_object( $request, $creating = false ) {
