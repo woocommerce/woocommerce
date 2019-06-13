@@ -189,7 +189,7 @@ class WC_Admin_REST_Reports_Revenue_Stats_Controller extends WC_REST_Reports_Con
 				'format'      => 'currency',
 			),
 			'orders_count'   => array(
-				'description' => __( 'Amount of orders.', 'woocommerce-admin' ),
+				'description' => __( 'Number of orders.', 'woocommerce-admin' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
