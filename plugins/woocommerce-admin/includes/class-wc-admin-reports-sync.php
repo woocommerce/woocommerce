@@ -123,6 +123,10 @@ class WC_Admin_Reports_Sync {
 	 * @return string
 	 */
 	public static function regenerate_report_data( $days, $skip_existing ) {
+		if ( self::is_importing() ) {
+			return new WP_Error( 'wc_admin_import_in_progress', __( 'An import is already in progress.  Please allow the previous import to complete before beginning a new one.', 'woocommerce-admin' ) );
+		}
+
 		self::reset_import_stats( $days, $skip_existing );
 		self::customer_lookup_import_batch_init( $days, $skip_existing );
 		self::queue_dependent_action( self::ORDERS_IMPORT_BATCH_INIT, array( $days, $skip_existing ), self::CUSTOMERS_IMPORT_BATCH_ACTION );

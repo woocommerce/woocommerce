@@ -349,7 +349,14 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, $report['orders'] );
 
-		// Test import status.
+		// Cancel any pending imports, import, and check import status.
+		$request  = new WP_REST_Request( 'POST', $this->endpoint . '/cancel' );
+		$response = $this->server->dispatch( $request );
+		$report   = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'success', $report['status'] );
+
 		$request  = new WP_REST_Request( 'POST', $this->endpoint );
 		$response = $this->server->dispatch( $request );
 		$report   = $response->get_data();
