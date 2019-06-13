@@ -284,7 +284,7 @@ class Coupons extends AbstractObjectsController {
 					case 'meta_data':
 						if ( is_array( $value ) ) {
 							foreach ( $value as $meta ) {
-								$coupon->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+								$coupon->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : 0 );
 							}
 						}
 						break;
