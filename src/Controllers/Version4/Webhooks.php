@@ -228,7 +228,7 @@ class Webhooks extends AbstractController {
 	 * Get all webhooks.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$args            = array();
@@ -298,7 +298,7 @@ class Webhooks extends AbstractController {
 	 * Get a single item.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$id = (int) $request['id'];
@@ -317,7 +317,7 @@ class Webhooks extends AbstractController {
 	 * Create a single webhook.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
@@ -377,7 +377,7 @@ class Webhooks extends AbstractController {
 	 * Update a single webhook.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$id      = (int) $request['id'];
@@ -541,7 +541,7 @@ class Webhooks extends AbstractController {
 		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
 		 * prepared for insertion.
 		 *
-		 * @param stdClass        $data An object representing a single item prepared
+		 * @param \stdClass        $data An object representing a single item prepared
 		 *                                       for inserting or updating the database.
 		 * @param \WP_REST_Request $request       Request object.
 		 */
@@ -584,7 +584,7 @@ class Webhooks extends AbstractController {
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 
-		$response->add_links( $this->prepare_links( $webhook->get_id(), $request ) );
+		$response->add_links( $this->prepare_links( $webhook->get_id() ) );
 
 		/**
 		 * Filter webhook object returned from the REST API.

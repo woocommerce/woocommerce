@@ -268,7 +268,7 @@ class Customers extends AbstractController {
 	 * Get all customers.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$prepared_args = array();
@@ -366,7 +366,7 @@ class Customers extends AbstractController {
 	 *
 	 * @throws \WC_REST_Exception On invalid params.
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		try {
@@ -420,7 +420,7 @@ class Customers extends AbstractController {
 	 * Get a single customer.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$id        = (int) $request['id'];
@@ -442,7 +442,7 @@ class Customers extends AbstractController {
 	 * @throws \WC_REST_Exception On invalid params.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		try {
@@ -503,7 +503,7 @@ class Customers extends AbstractController {
 	 * Delete a single customer.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function delete_item( $request ) {
 		$id       = (int) $request['id'];

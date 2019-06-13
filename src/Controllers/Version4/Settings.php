@@ -75,7 +75,7 @@ class Settings extends AbstractController {
 	 * Update a setting.
 	 *
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$options_controller = new \WC_REST_Setting_Options_Controller();
@@ -89,7 +89,7 @@ class Settings extends AbstractController {
 	 *
 	 * @since  3.0.0
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$groups = apply_filters( 'woocommerce_settings_groups', array() );

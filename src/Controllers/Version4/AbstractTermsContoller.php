@@ -29,6 +29,20 @@ abstract class AbstractTermsContoller extends AbstractController {
 	protected $taxonomy = '';
 
 	/**
+	 * Store total terms.
+	 *
+	 * @var integer
+	 */
+	protected $total_terms = 0;
+
+	/**
+	 * Store sort column.
+	 *
+	 * @var string
+	 */
+	protected $sort_column = '';
+
+	/**
 	 * Register the routes for terms.
 	 */
 	public function register_routes() {
@@ -669,8 +683,8 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 *
 	 * Uses `$this->sort_column` to determine field to sort by.
 	 *
-	 * @param stdClass $left Term object.
-	 * @param stdClass $right Term object.
+	 * @param \stdClass $left Term object.
+	 * @param \stdClass $right Term object.
 	 * @return int <0 if left is higher "priority" than right, 0 if equal, >0 if right is higher "priority" than left.
 	 */
 	protected function compare_terms( $left, $right ) {

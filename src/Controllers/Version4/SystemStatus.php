@@ -24,6 +24,13 @@ class SystemStatus extends AbstractController {
 	protected $rest_base = 'system_status';
 
 	/**
+	 * Store available updates.
+	 *
+	 * @var array
+	 */
+	protected $available_updates = array();
+
+	/**
 	 * Register the route for /system_status
 	 */
 	public function register_routes() {
@@ -60,7 +67,7 @@ class SystemStatus extends AbstractController {
 	 * Get a system status info, by section.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$schema   = $this->get_item_schema();

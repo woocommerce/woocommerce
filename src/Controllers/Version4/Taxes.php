@@ -197,7 +197,7 @@ class Taxes extends AbstractController {
 	 * Get all taxes and allow filtering by tax code.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		global $wpdb;
@@ -306,7 +306,7 @@ class Taxes extends AbstractController {
 	 * Take tax data from the request and return the updated or newly created rate.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @param stdClass|null   $current Existing tax object.
+	 * @param \stdClass|null   $current Existing tax object.
 	 * @return object
 	 */
 	protected function create_or_update_tax( $request, $current = null ) {
@@ -376,7 +376,7 @@ class Taxes extends AbstractController {
 	 * Create a single tax.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
@@ -390,7 +390,7 @@ class Taxes extends AbstractController {
 		/**
 		 * Fires after a tax is created or updated via the REST API.
 		 *
-		 * @param stdClass        $tax       Data used to create the tax.
+		 * @param \stdClass        $tax       Data used to create the tax.
 		 * @param \WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating tax, false when updating tax.
 		 */
@@ -409,7 +409,7 @@ class Taxes extends AbstractController {
 	 * Get a single tax.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$id      = (int) $request['id'];
@@ -429,7 +429,7 @@ class Taxes extends AbstractController {
 	 * Update a single tax.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$id      = (int) $request['id'];
@@ -446,7 +446,7 @@ class Taxes extends AbstractController {
 		/**
 		 * Fires after a tax is created or updated via the REST API.
 		 *
-		 * @param stdClass        $tax       Data used to create the tax.
+		 * @param \stdClass        $tax       Data used to create the tax.
 		 * @param \WP_REST_Request $request   Request object.
 		 * @param boolean         $creating  True when creating tax, false when updating tax.
 		 */
@@ -463,7 +463,7 @@ class Taxes extends AbstractController {
 	 * Delete a single tax.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function delete_item( $request ) {
 		global $wpdb;
@@ -494,7 +494,7 @@ class Taxes extends AbstractController {
 		/**
 		 * Fires after a tax is deleted via the REST API.
 		 *
-		 * @param stdClass         $tax      The tax data.
+		 * @param \stdClass         $tax      The tax data.
 		 * @param \WP_REST_Response $response The response returned from the API.
 		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
@@ -506,7 +506,7 @@ class Taxes extends AbstractController {
 	/**
 	 * Prepare a single tax output for response.
 	 *
-	 * @param stdClass        $tax Tax object.
+	 * @param \stdClass        $tax Tax object.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response $response Response data.
 	 */
@@ -560,7 +560,7 @@ class Taxes extends AbstractController {
 		 * Filter tax object returned from the REST API.
 		 *
 		 * @param \WP_REST_Response $response The response object.
-		 * @param stdClass         $tax      Tax object used to create response.
+		 * @param \stdClass         $tax      Tax object used to create response.
 		 * @param \WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_tax', $response, $tax, $request );
@@ -569,7 +569,7 @@ class Taxes extends AbstractController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param stdClass $tax Tax object.
+	 * @param \stdClass $tax Tax object.
 	 * @return array Links for the given tax.
 	 */
 	protected function prepare_links( $tax ) {

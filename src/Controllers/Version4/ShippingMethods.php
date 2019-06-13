@@ -95,7 +95,7 @@ class ShippingMethods extends AbstractController {
 	 * Get shipping methods.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$wc_shipping = \WC_Shipping::instance();

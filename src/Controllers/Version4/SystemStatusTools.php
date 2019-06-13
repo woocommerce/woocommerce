@@ -206,7 +206,7 @@ class SystemStatusTools extends AbstractController {
 	 * Get a list of system status tools.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$tools = array();
@@ -232,7 +232,7 @@ class SystemStatusTools extends AbstractController {
 	 * Return a single tool.
 	 *
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$tools = $this->get_tools();
@@ -257,7 +257,7 @@ class SystemStatusTools extends AbstractController {
 	 * Update (execute) a tool.
 	 *
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$tools = $this->get_tools();
@@ -416,7 +416,7 @@ class SystemStatusTools extends AbstractController {
 
 				$attribute_taxonomies = wc_get_attribute_taxonomies();
 
-				if ( $attribute_taxonomies ) {
+				if ( ! empty( $attribute_taxonomies ) ) {
 					foreach ( $attribute_taxonomies as $attribute ) {
 						delete_transient( 'wc_layered_nav_counts_pa_' . $attribute->attribute_name );
 					}

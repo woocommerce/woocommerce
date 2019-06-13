@@ -91,7 +91,7 @@ class CustomerDownloads extends AbstractController {
 	/**
 	 * Prepare a single download output for response.
 	 *
-	 * @param stdClass        $download Download object.
+	 * @param \stdClass        $download Download object.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response $response Response data.
 	 */
@@ -123,7 +123,7 @@ class CustomerDownloads extends AbstractController {
 		 * Filter customer download data returned from the REST API.
 		 *
 		 * @param \WP_REST_Response $response  The response object.
-		 * @param stdClass         $download  Download object used to create response.
+		 * @param \stdClass         $download  Download object used to create response.
 		 * @param \WP_REST_Request  $request   Request object.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_customer_download', $response, $download, $request );
@@ -132,7 +132,7 @@ class CustomerDownloads extends AbstractController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param stdClass        $download Download object.
+	 * @param \stdClass        $download Download object.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return array Links for the given customer download.
 	 */

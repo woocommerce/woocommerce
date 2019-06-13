@@ -553,7 +553,7 @@ class Coupons extends AbstractObjectsController {
 	 * Get a collection of posts and add the code search option to \WP_Query.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		add_filter( 'posts_where', array( $this, 'add_wp_query_search_code_filter' ), 10, 2 );

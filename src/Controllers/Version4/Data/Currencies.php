@@ -101,7 +101,7 @@ class Currencies extends DataController {
 	 * Return the list of currencies.
 	 *
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$currencies = get_woocommerce_currencies();
@@ -118,7 +118,7 @@ class Currencies extends DataController {
 	 * Return information for a specific currency.
 	 *
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$data = $this->get_currency( strtoupper( $request['currency'] ), $request );
@@ -132,7 +132,7 @@ class Currencies extends DataController {
 	 * Return information for the current site currency.
 	 *
 	 * @param  \WP_REST_Request $request Request data.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_current_item( $request ) {
 		$currency = get_option( 'woocommerce_currency' );

@@ -1213,7 +1213,7 @@ class ProductVariations extends Products {
 	 * Get a collection of posts and add the post title filter option to \WP_Query.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10, 2 );

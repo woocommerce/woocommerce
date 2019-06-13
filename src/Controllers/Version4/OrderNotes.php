@@ -207,7 +207,7 @@ class OrderNotes extends AbstractController {
 			);
 		}
 
-		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
+		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10 );
 
 		$notes = get_comments( $args );
 
@@ -227,7 +227,7 @@ class OrderNotes extends AbstractController {
 	 * Create a single order note.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
@@ -273,7 +273,7 @@ class OrderNotes extends AbstractController {
 	 * Get a single order note.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$id    = (int) $request['id'];

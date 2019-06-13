@@ -114,7 +114,7 @@ class PaymentGateways extends AbstractController {
 	 * Get payment gateways.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error\WP_REST_Response
+	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
