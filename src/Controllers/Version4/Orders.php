@@ -131,7 +131,7 @@ class Orders extends AbstractObjectsController {
 	 *
 	 * @since  3.0.0
 	 * @param  int $id Object ID.
-	 * @return WC_Data|bool
+	 * @return \WC_Data|bool
 	 */
 	protected function get_object( $id ) {
 		$order = wc_get_order( $id );
@@ -146,7 +146,7 @@ class Orders extends AbstractObjectsController {
 	/**
 	 * Expands an order item to get its data.
 	 *
-	 * @param WC_Order_item $item Order item data.
+	 * @param \WC_Order_item $item Order item data.
 	 * @return array
 	 */
 	protected function get_order_item_data( $item ) {
@@ -198,7 +198,7 @@ class Orders extends AbstractObjectsController {
 	 * Get formatted item data.
 	 *
 	 * @since  3.0.0
-	 * @param  WC_Data $object WC_Data instance.
+	 * @param  \WC_Data $object WC_Data instance.
 	 * @return array
 	 */
 	protected function get_formatted_item_data( $object ) {
@@ -312,7 +312,7 @@ class Orders extends AbstractObjectsController {
 		 * refers to object type being prepared for the response.
 		 *
 		 * @param \WP_REST_Response $response The response object.
-		 * @param WC_Data          $object   Object data.
+		 * @param \WC_Data          $object   Object data.
 		 * @param \WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
@@ -460,7 +460,7 @@ class Orders extends AbstractObjectsController {
 	/**
 	 * Prepare a single order for create or update.
 	 *
-	 * @throws WC_REST_Exception When fails to set any item.
+	 * @throws \WC_REST_Exception When fails to set any item.
 	 * @param  \WP_REST_Request $request Request object.
 	 * @param  bool             $creating If is creating a new object.
 	 * @return \WP_Error|WC_Data
@@ -522,7 +522,7 @@ class Orders extends AbstractObjectsController {
 		 * The dynamic portion of the hook name, `$this->post_type`,
 		 * refers to the object type slug.
 		 *
-		 * @param WC_Data         $order    Object object.
+		 * @param \WC_Data         $order    Object object.
 		 * @param \WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
 		 */
@@ -531,10 +531,10 @@ class Orders extends AbstractObjectsController {
 
 	/**
 	 * Save an object data.
-	 *	 *
+	 *
 	 * @param  \WP_REST_Request $request  Full details about the request.
 	 * @param  bool             $creating If is creating a new object.
-	 * @return WC_Data|\WP_Error
+	 * @return \WC_Data|\WP_Error
 	 * @throws \WC_REST_Exception But all errors are validated before returning any data.
 	 */
 	protected function save_object( $request, $creating = false ) {
@@ -710,8 +710,8 @@ class Orders extends AbstractObjectsController {
 	 * @param array  $posted $shipping Item data.
 	 * @param string $action 'create' to add shipping or 'update' to update it.
 	 * @param object $item Passed when updating an item. Null during creation.
-	 * @return WC_Order_Item_Shipping
-	 * @throws WC_REST_Exception Invalid data, server error.
+	 * @return \WC_Order_Item_Shipping
+	 * @throws \WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_shipping_lines( $posted, $action = 'create', $item = null ) {
 		$item = is_null( $item ) ? new \WC_Order_Item_Shipping( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
@@ -734,8 +734,8 @@ class Orders extends AbstractObjectsController {
 	 * @param array  $posted Item data.
 	 * @param string $action 'create' to add fee or 'update' to update it.
 	 * @param object $item Passed when updating an item. Null during creation.
-	 * @return WC_Order_Item_Fee
-	 * @throws WC_REST_Exception Invalid data, server error.
+	 * @return \WC_Order_Item_Fee
+	 * @throws \WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_fee_lines( $posted, $action = 'create', $item = null ) {
 		$item = is_null( $item ) ? new \WC_Order_Item_Fee( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
@@ -758,8 +758,8 @@ class Orders extends AbstractObjectsController {
 	 * @param array  $posted Item data.
 	 * @param string $action 'create' to add coupon or 'update' to update it.
 	 * @param object $item Passed when updating an item. Null during creation.
-	 * @return WC_Order_Item_Coupon
-	 * @throws WC_REST_Exception Invalid data, server error.
+	 * @return \WC_Order_Item_Coupon
+	 * @throws \WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_coupon_lines( $posted, $action = 'create', $item = null ) {
 		$item = is_null( $item ) ? new \WC_Order_Item_Coupon( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
@@ -781,10 +781,10 @@ class Orders extends AbstractObjectsController {
 	 * When updating, the item ID provided is checked to ensure it is associated
 	 * with the order.
 	 *
-	 * @param WC_Order $order order object.
-	 * @param string   $item_type The item type.
-	 * @param array    $posted item provided in the request body.
-	 * @throws WC_REST_Exception If item ID is not associated with order.
+	 * @param \WC_Order $order order object.
+	 * @param string    $item_type The item type.
+	 * @param array     $posted item provided in the request body.
+	 * @throws \WC_REST_Exception If item ID is not associated with order.
 	 */
 	protected function set_item( $order, $item_type, $posted ) {
 		global $wpdb;
@@ -1707,7 +1707,7 @@ class Orders extends AbstractObjectsController {
 	public function get_collection_params() {
 		$params = parent::get_collection_params();
 
-		$params['status'] = array(
+		$params['status']   = array(
 			'default'           => 'any',
 			'description'       => __( 'Limit result set to orders which have specific statuses.', 'woocommerce' ),
 			'type'              => 'array',

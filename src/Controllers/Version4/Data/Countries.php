@@ -66,7 +66,7 @@ class Countries extends DataController {
 	/**
 	 * Get a list of countries and states.
 	 *
-	 * @param  string          $country_code Country code.
+	 * @param  string           $country_code Country code.
 	 * @param  \WP_REST_Request $request      Request data.
 	 * @return array|mixed Response data, ready for insertion into collection data.
 	 */
@@ -136,7 +136,7 @@ class Countries extends DataController {
 	 * Prepare the data object for response.
 	 *
 	 * @since  3.5.0
-	 * @param object          $item Data object.
+	 * @param object           $item Data object.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response $response Response data.
 	 */

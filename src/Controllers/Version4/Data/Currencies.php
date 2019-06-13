@@ -76,7 +76,7 @@ class Currencies extends DataController {
 	/**
 	 * Get currency information.
 	 *
-	 * @param  string          $code    Currency code.
+	 * @param  string           $code    Currency code.
 	 * @param  \WP_REST_Request $request Request data.
 	 * @return array|mixed Response data, ready for insertion into collection data.
 	 */
@@ -142,7 +142,7 @@ class Currencies extends DataController {
 	/**
 	 * Prepare the data object for response.
 	 *
-	 * @param object          $item Data object.
+	 * @param object           $item Data object.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response $response Response data.
 	 */

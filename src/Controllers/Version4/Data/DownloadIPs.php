@@ -84,7 +84,7 @@ class DownloadIPs extends DataController {
 	 * Prepare the data object for response.
 	 *
 	 * @since  3.5.0
-	 * @param object          $item Data object.
+	 * @param object           $item Data object.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response $response Response data.
 	 */

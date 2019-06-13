@@ -23,8 +23,9 @@ checks:
     verify_property_names: false
 filter:
   excluded_paths:
-    - src/RestApi/Version1/
-    - src/RestApi/Version2/
-    - src/RestApi/Version3/
+    - src/Controllers/Version1/
+    - src/Controllers/Version2/
+    - src/Controllers/Version3/
     - unit-tests/
     - vendor/
+    - classmap.php

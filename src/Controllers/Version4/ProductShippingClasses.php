@@ -33,7 +33,7 @@ class ProductShippingClasses extends AbstractTermsContoller {
 	/**
 	 * Prepare a single product shipping class output for response.
 	 *
-	 * @param obj             $item Term object.
+	 * @param object           $item Term object.
 	 * @param \WP_REST_Request $request Request params.
 	 * @return \WP_REST_Response $response
 	 */

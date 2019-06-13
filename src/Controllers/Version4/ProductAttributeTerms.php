@@ -31,7 +31,7 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 			$this->namespace,
 			'/' . $this->rest_base,
 			array(
-				'args' => array(
+				'args'   => array(
 					'attribute_id' => array(
 						'description' => __( 'Unique identifier for the attribute of the terms.', 'woocommerce' ),
 						'type'        => 'integer',
@@ -67,8 +67,8 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
 			array(
-				'args' => array(
-					'id' => array(
+				'args'   => array(
+					'id'           => array(
 						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
@@ -133,7 +133,7 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 	/**
 	 * Prepare a single product attribute term output for response.
 	 *
-	 * @param WP_Term         $item Term object.
+	 * @param \WP_Term         $item Term object.
 	 * @param \WP_REST_Request $request Request params.
 	 * @return \WP_REST_Response $response
 	 */
@@ -173,7 +173,7 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 	/**
 	 * Update term meta fields.
 	 *
-	 * @param WP_Term         $term Term object.
+	 * @param \WP_Term         $term Term object.
 	 * @param \WP_REST_Request $request Request params.
 	 * @return bool|\WP_Error
 	 */

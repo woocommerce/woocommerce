@@ -136,7 +136,7 @@ class Products extends AbstractObjectsController {
 	 * @param int $id Object ID.
 	 *
 	 * @since  3.0.0
-	 * @return WC_Data
+	 * @return \WC_Data
 	 */
 	protected function get_object( $id ) {
 		return wc_get_product( $id );
@@ -145,7 +145,7 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Prepare a single product output for response.
 	 *
-	 * @param WC_Data         $object  Object data.
+	 * @param \WC_Data         $object  Object data.
 	 * @param \WP_REST_Request $request Request object.
 	 *
 	 * @since  3.0.0
@@ -177,7 +177,7 @@ class Products extends AbstractObjectsController {
 		 * refers to object type being prepared for the response.
 		 *
 		 * @param \WP_REST_Response $response The response object.
-		 * @param WC_Data          $object   Object data.
+		 * @param \WC_Data          $object   Object data.
 		 * @param \WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
@@ -187,8 +187,8 @@ class Products extends AbstractObjectsController {
 	 * Prepare a single product for create or update.
 	 *
 	 * @param  \WP_REST_Request $request Request object.
-	 * @param  bool            $creating If is creating a new object.
-	 * @return \WP_Error|WC_Data
+	 * @param  bool             $creating If is creating a new object.
+	 * @return \WP_Error|\WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		$id = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
@@ -1173,7 +1173,7 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Data         $object  Object data.
+	 * @param \WC_Data         $object  Object data.
 	 * @param \WP_REST_Request $request Request object.
 	 *
 	 * @return array                   Links for the given post.
@@ -1368,11 +1368,9 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Save default attributes.
 	 *
-	 * @param WC_Product      $product Product instance.
+	 * @param \WC_Product      $product Product instance.
 	 * @param \WP_REST_Request $request Request data.
-	 *
-	 * @since  3.0.0
-	 * @return WC_Product
+	 * @return \WC_Product
 	 */
 	protected function save_default_attributes( $product, $request ) {
 		if ( isset( $request['default_attributes'] ) && is_array( $request['default_attributes'] ) ) {
@@ -2187,12 +2185,13 @@ class Products extends AbstractObjectsController {
 	public function get_collection_params() {
 		$params = parent::get_collection_params();
 
-		$params['slug']           = array(
+		$params['slug'] = array(
 			'description'       => __( 'Limit result set to products with a specific slug.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['status']         = array(
+
+		$params['status'] = array(
 			'default'           => 'any',
 			'description'       => __( 'Limit result set to products assigned a specific status.', 'woocommerce' ),
 			'type'              => 'string',
@@ -2200,49 +2199,57 @@ class Products extends AbstractObjectsController {
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['type']           = array(
+
+		$params['type'] = array(
 			'description'       => __( 'Limit result set to products assigned a specific type.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array_keys( wc_get_product_types() ),
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['sku']            = array(
+
+		$params['sku'] = array(
 			'description'       => __( 'Limit result set to products with specific SKU(s). Use commas to separate.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['featured']       = array(
+
+		$params['featured'] = array(
 			'description'       => __( 'Limit result set to featured products.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['category']       = array(
+
+		$params['category'] = array(
 			'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['tag']            = array(
+
+		$params['tag'] = array(
 			'description'       => __( 'Limit result set to products assigned a specific tag ID.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+
 		$params['shipping_class'] = array(
 			'description'       => __( 'Limit result set to products assigned a specific shipping class ID.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
-		$params['attribute']      = array(
+
+		$params['attribute'] = array(
 			'description'       => __( 'Limit result set to products with a specific attribute. Use the taxonomy name/attribute slug.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+
 		$params['attribute_term'] = array(
 			'description'       => __( 'Limit result set to products with a specific attribute term ID (required an assigned attribute).', 'woocommerce' ),
 			'type'              => 'string',
@@ -2259,24 +2266,28 @@ class Products extends AbstractObjectsController {
 				'validate_callback' => 'rest_validate_request_arg',
 			);
 		}
-		$params['on_sale']   = array(
+
+		$params['on_sale'] = array(
 			'description'       => __( 'Limit result set to products on sale.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+
 		$params['min_price'] = array(
 			'description'       => __( 'Limit result set to products based on a minimum price.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+
 		$params['max_price'] = array(
 			'description'       => __( 'Limit result set to products based on a maximum price.', 'woocommerce' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+
 		$params['stock_status'] = array(
 			'description'       => __( 'Limit result set to products with specified stock status.', 'woocommerce' ),
 			'type'              => 'string',
@@ -2284,17 +2295,20 @@ class Products extends AbstractObjectsController {
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+
 		$params['low_in_stock'] = array(
 			'description'       => __( 'Limit result set to products that are low or out of stock.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'sanitize_callback' => 'wc_string_to_bool',
 		);
-		$params['search']       = array(
+
+		$params['search'] = array(
 			'description'       => __( 'Search by similar product name or sku.', 'woocommerce' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+
 		$params['orderby']['enum'] = array_merge( $params['orderby']['enum'], array( 'price', 'popularity', 'rating' ) );
 
 		return $params;
