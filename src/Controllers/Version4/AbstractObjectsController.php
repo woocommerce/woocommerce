@@ -143,12 +143,9 @@ abstract class AbstractObjectsController extends AbstractController {
 	 * @since  3.0.0
 	 * @param  \WC_Data         $object  Object data.
 	 * @param  \WP_REST_Request $request Request object.
-	 * @return \WP_Error|\WP_REST_Response Response object on success, or \WP_Error object on failure.
+	 * @return \WP_REST_Response Response object on success, or \WP_Error object on failure.
 	 */
-	protected function prepare_object_for_response( $object, $request ) {
-		// translators: %s: Class method name.
-		return new \WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
-	}
+	abstract protected function prepare_object_for_response( $object, $request );
 
 	/**
 	 * Prepares one object for create or update operation.
@@ -156,12 +153,9 @@ abstract class AbstractObjectsController extends AbstractController {
 	 * @since  3.0.0
 	 * @param  \WP_REST_Request $request Request object.
 	 * @param  bool             $creating If is creating a new object.
-	 * @return \WP_Error|\WC_Data The prepared item, or \WP_Error object on failure.
+	 * @return \WC_Data The prepared item, or \WP_Error object on failure.
 	 */
-	protected function prepare_object_for_database( $request, $creating = false ) {
-		// translators: %s: Class method name.
-		return new \WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
-	}
+	abstract protected function prepare_object_for_database( $request, $creating = false );
 
 	/**
 	 * Get a single item.
