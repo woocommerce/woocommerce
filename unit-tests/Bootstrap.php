@@ -128,7 +128,6 @@ class Bootstrap {
 		require_once $this->tests_dir . '/Helpers/SettingsHelper.php';
 		require_once $this->tests_dir . '/Helpers/QueueHelper.php';
 		require_once $this->tests_dir . '/AbstractRestApiTest.php';
-		require_once $this->tests_dir . '/AbstractReportsTest.php';
 	}
 }
 

@@ -9,8 +9,6 @@ namespace WooCommerce\RestApi\UnitTests\Tests\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WooCommerce\RestApi\UnitTests\AbstractReportsTest;
-
 /**
  * WC Tests API Data
  */
