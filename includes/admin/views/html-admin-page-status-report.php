@@ -821,7 +821,7 @@ if ( 0 < count( $dropins_mu_plugins['mu_plugins'] ) ) :
 				$found_error = true;
 			} elseif ( ! $_page['page_visible'] ) {
 				/* Translators: %s: docs link. */
-				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . wp_kses_post( sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://codex.wordpress.org/Content_Visibility' ) ) . '</mark>';
+				echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . wp_kses_post( sprintf( __( 'Page visibility should be <a href="%s" target="_blank">public</a>', 'woocommerce' ), 'https://wordpress.org/support/article/content-visibility/' ) ) . '</mark>';
 				$found_error = true;
 			} else {
 				// Shortcode check.

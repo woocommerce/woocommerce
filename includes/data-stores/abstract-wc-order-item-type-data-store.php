@@ -18,7 +18,7 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 
 	/**
 	 * Meta type. This should match up with
-	 * the types available at https://codex.wordpress.org/Function_Reference/add_metadata.
+	 * the types available at https://developer.wordpress.org/reference/functions/add_metadata/.
 	 * WP defines 'post', 'user', 'comment', and 'term'.
 	 *
 	 * @var string
