@@ -45,7 +45,6 @@ tests/cli/vendor
 
 # Composer
 /vendor/
-/includes/rest-api/
 contributors.md
 
 # Screenshots for e2e tests failures
