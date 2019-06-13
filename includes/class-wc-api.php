@@ -46,13 +46,18 @@ class WC_API extends WC_Legacy_API {
 	 * @since 3.7.0
 	 * @param string $version Version of the REST API being registered.
 	 * @param mixed  $callback Callback function to load the REST API.
+	 * @param string $path Path to package.
 	 * @return bool
 	 */
-	public function register( $version, $callback ) {
+	public function register( $version, $callback, $path ) {
 		if ( isset( $this->packages[ $version ] ) ) {
 			return false;
 		}
-		$this->packages[ $version ] = $callback;
+		$this->packages[ $version ] = array(
+			'version'  => $version,
+			'callback' => $callback,
+			'path'     => $path,
+		);
 		return true;
 	}
 
@@ -81,15 +86,29 @@ class WC_API extends WC_Legacy_API {
 	}
 
 	/**
-	 * Get latest version number of the registered REST API packages.
+	 * Get path to the registered REST API package.
+	 *
+	 * @since 3.7.0
+	 * @return string|bool
+	 */
+	public function get_latest_package_path() {
+		$packages = $this->get_rest_api_packages();
+		$latest   = end( $packages );
+
+		return $latest['path'];
+	}
+
+	/**
+	 * Get callback of the latest version of the REST API package.
 	 *
 	 * @since 3.7.0
 	 * @return string|bool
 	 */
 	public function get_latest_package_callback() {
 		$packages = $this->get_rest_api_packages();
+		$latest   = end( $packages );
 
-		return end( $packages );
+		return $latest['callback'];
 	}
 
 	/**
@@ -121,7 +140,7 @@ class WC_API extends WC_Legacy_API {
 				);
 			};
 		}
-		$this->register( $version, $init_callback );
+		$this->register( $version, $init_callback, WC_ABSPATH . 'packages/rest-api' );
 	}
 
 	/**
