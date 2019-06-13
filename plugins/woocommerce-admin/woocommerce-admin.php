@@ -78,6 +78,12 @@ class WC_Admin_Feature_Plugin {
 	 * @return void
 	 */
 	public function on_deactivation() {
+		// Check if we are deactivating due to dependencies not being satisfied.
+		// If WooCommerce is disabled we can't include files that depend upon it.
+		if ( ! $this->check_dependencies() ) {
+			return;
+		}
+
 		$this->includes();
 		WC_Admin_Reports_Sync::clear_queued_actions();
 		WC_Admin_Notes::clear_queued_actions();
