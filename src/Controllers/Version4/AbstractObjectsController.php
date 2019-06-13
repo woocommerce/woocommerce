@@ -32,12 +32,9 @@ abstract class AbstractObjectsController extends AbstractController {
 	 * Get object.
 	 *
 	 * @param  int $id Object ID.
-	 * @return \WP_Error|\WC_Data
+	 * @return \WC_Data
 	 */
-	protected function get_object( $id ) {
-		// translators: %s: Class method name.
-		return new \WP_Error( 'invalid-method', sprintf( __( "Method '%s' not implemented. Must be overridden in subclass.", 'woocommerce' ), __METHOD__ ), array( 'status' => 405 ) );
-	}
+	abstract protected function get_object( $id );
 
 	/**
 	 * Check if a given request has access to read items.
