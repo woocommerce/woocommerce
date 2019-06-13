@@ -430,6 +430,8 @@ class SystemStatusTools extends AbstractController {
 			if ( empty( $message ) || ! is_string( $message ) ) {
 				$message = __( 'Tool ran.', 'woocommerce' );
 			}
+
+			$ran = true;
 		} catch ( Exception $e ) {
 			$message = $e->getMessage();
 			$ran     = false;

@@ -32,7 +32,7 @@ abstract class AbstractObjectsController extends AbstractController {
 	 * Get object.
 	 *
 	 * @param  int $id Object ID.
-	 * @return \WC_Data
+	 * @return \WC_Data|bool
 	 */
 	abstract protected function get_object( $id );
 

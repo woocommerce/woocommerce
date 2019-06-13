@@ -136,7 +136,7 @@ class Products extends AbstractObjectsController {
 	 * @param int $id Object ID.
 	 *
 	 * @since  3.0.0
-	 * @return \WC_Data
+	 * @return \WC_Data|bool
 	 */
 	protected function get_object( $id ) {
 		return wc_get_product( $id );

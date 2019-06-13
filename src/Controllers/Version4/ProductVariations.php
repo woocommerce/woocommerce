@@ -143,7 +143,7 @@ class ProductVariations extends Products {
 	 *
 	 * @since  3.0.0
 	 * @param  int $id Object ID.
-	 * @return \WC_Data
+	 * @return \WC_Data|bool
 	 */
 	protected function get_object( $id ) {
 		return wc_get_product( $id );
