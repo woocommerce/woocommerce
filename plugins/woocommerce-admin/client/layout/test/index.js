@@ -1,10 +1,5 @@
 /** @format */
 /**
- * WooCommerce dependencies
- */
-import { stringifyQuery } from '@woocommerce/navigation';
-
-/**
  * Internal dependencies
  */
 import { updateLinkHref } from '../controller';
@@ -12,25 +7,25 @@ import { updateLinkHref } from '../controller';
 describe( 'updateLinkHref', () => {
 	const timeExcludedScreens = [ 'devdocs', 'stock', 'settings', 'customers' ];
 
-	const REPORT_URL =
-		'http://example.com/wp-admin/admin.php?page=wc-admin#/analytics/orders?period=today&compare=previous_year';
-	const DASHBOARD_URL =
-		'http://example.com/wp-admin/admin.php?page=wc-admin#/?period=week&compare=previous_year';
-	const DASHBOARD_URL_NO_HASH = 'http://example.com/wp-admin/admin.php?page=wc-admin';
+	const REPORT_URL = 'http://example.com/wp-admin/admin.php?page=wc-admin&path=/analytics/orders';
+	const DASHBOARD_URL = 'http://example.com/wp-admin/admin.php?page=wc-admin';
+	const REPORT_URL_TIME_EXCLUDED =
+		'http://example.com/wp-admin/admin.php?page=wc-admin&path=/analytics/settings';
 	const WOO_URL = 'http://example.com/wp-admin/edit.php?post_type=shop_coupon';
 	const WP_ADMIN_URL = 'http://example.com/wp-admin/edit-comments.php';
 
-	const nextQuery = stringifyQuery( {
+	const nextQuery = {
 		fruit: 'apple',
 		dish: 'cobbler',
-	} );
+	};
 
 	it( 'should update report urls', () => {
 		const item = { href: REPORT_URL };
 		updateLinkHref( item, nextQuery, timeExcludedScreens );
+		const encodedPath = encodeURIComponent( '/analytics/orders' );
 
 		expect( item.href ).toBe(
-			'http://example.com/wp-admin/admin.php?page=wc-admin#/analytics/orders?fruit=apple&dish=cobbler'
+			`admin.php?page=wc-admin&path=${ encodedPath }&fruit=apple&dish=cobbler`
 		);
 	} );
 
@@ -38,18 +33,15 @@ describe( 'updateLinkHref', () => {
 		const item = { href: DASHBOARD_URL };
 		updateLinkHref( item, nextQuery, timeExcludedScreens );
 
-		expect( item.href ).toBe(
-			'http://example.com/wp-admin/admin.php?page=wc-admin#/?fruit=apple&dish=cobbler'
-		);
+		expect( item.href ).toBe( 'admin.php?page=wc-admin&fruit=apple&dish=cobbler' );
 	} );
 
-	it( 'should update dashboard urls with no hash', () => {
-		const item = { href: DASHBOARD_URL_NO_HASH };
+	it( 'should not add the nextQuery to a time excluded screen', () => {
+		const item = { href: REPORT_URL_TIME_EXCLUDED };
 		updateLinkHref( item, nextQuery, timeExcludedScreens );
+		const encodedPath = encodeURIComponent( '/analytics/settings' );
 
-		expect( item.href ).toBe(
-			'http://example.com/wp-admin/admin.php?page=wc-admin#/?fruit=apple&dish=cobbler'
-		);
+		expect( item.href ).toBe( `admin.php?page=wc-admin&path=${ encodedPath }` );
 	} );
 
 	it( 'should not update WooCommerce urls', () => {
