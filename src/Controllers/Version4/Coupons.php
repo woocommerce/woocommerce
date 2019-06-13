@@ -136,7 +136,7 @@ class Coupons extends AbstractObjectsController {
 	 * Get formatted item data.
 	 *
 	 * @since  3.0.0
-	 * @param  WC_Data $object WC_Data instance.
+	 * @param  \WC_Data $object WC_Data instance.
 	 * @return array
 	 */
 	protected function get_formatted_item_data( $object ) {
@@ -198,7 +198,7 @@ class Coupons extends AbstractObjectsController {
 	 * Prepare a single coupon output for response.
 	 *
 	 * @since  3.0.0
-	 * @param  WC_Data          $object  Object data.
+	 * @param  \WC_Data         $object  Object data.
 	 * @param  \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response
 	 */
@@ -251,7 +251,7 @@ class Coupons extends AbstractObjectsController {
 	 *
 	 * @param  \WP_REST_Request $request Request object.
 	 * @param  bool             $creating If is creating a new object.
-	 * @return \WP_Error|WC_Data
+	 * @return \WP_Error|\WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		$id        = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
