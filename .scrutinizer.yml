@@ -33,10 +33,10 @@ filter:
     - classmap.php
 build:
   tests:
-        override:
-            command: "php -v"
-    nodes:
-        analysis:
-            dependencies:
-                before:
-                    - composer require --dev johnpbloch/wordpress
+    override:
+      command: "php -v"
+  nodes:
+    analysis:
+      dependencies:
+        before:
+          - composer require --dev johnpbloch/wordpress
