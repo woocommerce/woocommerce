@@ -389,7 +389,7 @@ abstract class AbstractObjectsController extends AbstractController {
 	 * Get a collection of posts.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|\WP_REST_Response
+	 * @return \WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		$query_args    = $this->prepare_objects_query( $request );
