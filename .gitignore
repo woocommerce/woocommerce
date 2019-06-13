@@ -45,6 +45,7 @@ tests/cli/vendor
 
 # Composer
 /vendor/
+/packages/
 contributors.md
 
 # Screenshots for e2e tests failures
