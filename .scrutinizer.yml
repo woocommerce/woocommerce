@@ -3,8 +3,6 @@ tools:
     config:
       standard: WordPress
   sensiolabs_security_checker: true
-  external_code_coverage:
-    timeout: 2500
 checks:
   php:
     avoid_closing_tag: false
