@@ -451,7 +451,7 @@ abstract class AbstractController extends WP_REST_Controller {
 		if ( ! isset( $request['_fields'] ) ) {
 			return $fields;
 		}
-		$requested_fields = is_array( $request['_fields'] ) ? $request['_fields'] : preg_split( '/[\s,]+/', $request['_fields'] );
+		$requested_fields = array_filter( is_array( $request['_fields'] ) ? $request['_fields'] : (array) preg_split( '/[\s,]+/', $request['_fields'] ) );
 		if ( 0 === count( $requested_fields ) ) {
 			return $fields;
 		}

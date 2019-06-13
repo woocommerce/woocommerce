@@ -117,7 +117,8 @@ class ProductVariations extends Products {
 			true
 		);
 		register_rest_route(
-			$this->namespace, '/' . $this->rest_base . '/batch',
+			$this->namespace,
+			'/' . $this->rest_base . '/batch',
 			array(
 				'args'   => array(
 					'product_id' => array(
@@ -142,7 +143,7 @@ class ProductVariations extends Products {
 	 *
 	 * @since  3.0.0
 	 * @param  int $id Object ID.
-	 * @return WC_Data
+	 * @return \WC_Data
 	 */
 	protected function get_object( $id ) {
 		return wc_get_product( $id );
@@ -172,7 +173,7 @@ class ProductVariations extends Products {
 	/**
 	 * Prepare a single variation output for response.
 	 *
-	 * @param  WC_Data         $object  Object data.
+	 * @param  \WC_Data         $object  Object data.
 	 * @param  \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response
 	 */
@@ -240,7 +241,7 @@ class ProductVariations extends Products {
 		 * refers to object type being prepared for the response.
 		 *
 		 * @param \WP_REST_Response $response The response object.
-		 * @param WC_Data          $object   Object data.
+		 * @param \WC_Data          $object   Object data.
 		 * @param \WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
@@ -249,7 +250,7 @@ class ProductVariations extends Products {
 	/**
 	 * Get the image for a product variation.
 	 *
-	 * @param WC_Product_Variation $variation Variation data.
+	 * @param \WC_Product_Variation $variation Variation data.
 	 * @return array
 	 */
 	protected function get_image( $variation ) {
@@ -289,7 +290,7 @@ class ProductVariations extends Products {
 	 *
 	 * @param  \WC_Product_Variation $variation Variation instance.
 	 * @param  array                 $image     Image data.
-	 * @return WC_Product_Variation
+	 * @return \WC_Product_Variation
 	 */
 	protected function set_variation_image( $variation, $image ) {
 		$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
@@ -421,8 +422,8 @@ class ProductVariations extends Products {
 	 * Prepare a single variation for create or update.
 	 *
 	 * @param  \WP_REST_Request $request Request object.
-	 * @param  bool            $creating If is creating a new object.
-	 * @return \WP_Error|WC_Data
+	 * @param  bool             $creating If is creating a new object.
+	 * @return \WP_Error|\WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		if ( isset( $request['id'] ) ) {
@@ -619,7 +620,7 @@ class ProductVariations extends Products {
 		 * The dynamic portion of the hook name, `$this->post_type`,
 		 * refers to the object type slug.
 		 *
-		 * @param WC_Data         $variation Object object.
+		 * @param \WC_Data         $variation Object object.
 		 * @param \WP_REST_Request $request   Request object.
 		 * @param bool            $creating  If is creating a new object.
 		 */
@@ -629,7 +630,7 @@ class ProductVariations extends Products {
 	/**
 	 * Clear caches here so in sync with any new variations.
 	 *
-	 * @param WC_Data $object Object data.
+	 * @param \WC_Data $object Object data.
 	 */
 	public function clear_transients( $object ) {
 		wc_delete_product_transients( $object->get_parent_id() );
@@ -641,7 +642,7 @@ class ProductVariations extends Products {
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool|\WP_Error\WP_REST_Response
+	 * @return bool|\WP_Error|\WP_REST_Response
 	 */
 	public function delete_item( $request ) {
 		$force  = (bool) $request['force'];
@@ -663,8 +664,8 @@ class ProductVariations extends Products {
 		 *
 		 * Return false to disable trash support for the object.
 		 *
-		 * @param boolean $supports_trash Whether the object type support trashing.
-		 * @param WC_Data $object         The object being considered for trashing support.
+		 * @param boolean  $supports_trash Whether the object type support trashing.
+		 * @param \WC_Data $object         The object being considered for trashing support.
 		 */
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );
 
@@ -734,7 +735,7 @@ class ProductVariations extends Products {
 		/**
 		 * Fires after a single object is deleted or trashed via the REST API.
 		 *
-		 * @param WC_Data          $object   The deleted or trashed object.
+		 * @param \WC_Data          $object   The deleted or trashed object.
 		 * @param \WP_REST_Response $response The response data.
 		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */
@@ -763,7 +764,8 @@ class ProductVariations extends Products {
 					$injected_items[] = is_array( $item ) ? array_merge(
 						array(
 							'product_id' => $product_id,
-						), $item
+						),
+						$item
 					) : $item;
 				}
 				$body_params[ $batch_type ] = $injected_items;
@@ -779,7 +781,7 @@ class ProductVariations extends Products {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Data         $object  Object data.
+	 * @param \WC_Data         $object  Object data.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return array                   Links for the given post.
 	 */
