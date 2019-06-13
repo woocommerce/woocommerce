@@ -182,10 +182,6 @@ abstract class AbstractObjectsController extends AbstractController {
 		$data     = $this->prepare_object_for_response( $object, $request );
 		$response = rest_ensure_response( $data );
 
-		if ( $this->public ) {
-			$response->link_header( 'alternate', $this->get_permalink( $object ), array( 'type' => 'text/html' ) );
-		}
-
 		return $response;
 	}
 
