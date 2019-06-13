@@ -22,6 +22,7 @@ checks:
 filter:
   dependency_paths:
     - wordpress/
+    - woocommerce/
   excluded_paths:
     - src/Controllers/Version1/
     - src/Controllers/Version2/
@@ -37,4 +38,5 @@ build:
     analysis:
       dependencies:
         before:
-          - composer require --dev johnpbloch/wordpress
+          - composer require --dev johnpbloch/wordpress-core
+          - composer require --dev woocommerce/woocommerce
