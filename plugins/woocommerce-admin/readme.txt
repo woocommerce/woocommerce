@@ -71,7 +71,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
-= 0.13.0 2019-06-12
+= 0.13.0 2019-06-12 =
 
 - Fix: Notes: update sales record link #2397
 - Enhancement: Settings: Add default date settings #2292 (Components, Dashboard, Packages)
@@ -114,9 +114,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Hook up import/totals endpoint to Historical Data Import screen #2208
 - Fix: Refactor main file into singleton class structure #2226
 
-== Changelog ==
-
-= 0.12.0 2019-05-14
+= 0.12.0 2019-05-14 =
 
 - Fix: dashboard issues #2194
 - Fix: Dashboard: re-arrange section dropdown order #2216
@@ -149,9 +147,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Dev: Scroll to top of the table when navigating table pages #2051
 - Dev: Add empty state for the Reviews panels #2124
 
-== Changelog ==
-
-= 0.11.0 2019-04-17
+= 0.11.0 2019-04-17 =
 
 - Dev: Extend report submenu items #2033
 - Dev: Extension Examples #2018
@@ -186,7 +182,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Enhancement: Scroll to top only when URL changes #1989
 - Enhancement: Allow negative values in charts #1979
 
-= 0.10.0 2019-04-02
+= 0.10.0 2019-04-02 =
 
 - Dev: Properly namespaced methods in wc-admin.php. props @ronakganatra9 #1804
 - Dev: Changed text-domain to `woocommerce-admin` #1795
