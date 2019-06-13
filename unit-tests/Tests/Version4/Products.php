@@ -281,7 +281,7 @@ class Products extends WC_REST_Unit_Test_Case {
 		);
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
-var_dump($data);
+
 		$this->assertEquals( 'Test API Update', $data['button_text'] );
 		$this->assertEquals( 'http://automattic.com', $data['external_url'] );
 	}

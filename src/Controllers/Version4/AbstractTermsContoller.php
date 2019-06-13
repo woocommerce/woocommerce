@@ -802,7 +802,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Get taxonomy.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return int|\WP_Error
+	 * @return string
 	 */
 	protected function get_taxonomy( $request ) {
 		// Check if taxonomy is defined.
