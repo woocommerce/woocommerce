@@ -325,6 +325,7 @@ abstract class AbstractObjectsController extends AbstractController {
 		}
 
 		$args['date_query'] = array();
+
 		// Set before into date query. Date query must be specified as an array of an array.
 		if ( isset( $request['before'] ) ) {
 			$args['date_query'][0]['before'] = $request['before'];
@@ -333,6 +334,11 @@ abstract class AbstractObjectsController extends AbstractController {
 		// Set after into date query. Date query must be specified as an array of an array.
 		if ( isset( $request['after'] ) ) {
 			$args['date_query'][0]['after'] = $request['after'];
+		}
+
+		// Set date query colummn. Defaults to post_date.
+		if ( isset( $request['date_column'] ) && ! empty( $args['date_query'][0] ) ) {
+			$args['date_query'][0]['column'] = 'post_' . $request['date_column'];
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
@@ -587,14 +593,34 @@ abstract class AbstractObjectsController extends AbstractController {
 		);
 
 		$params['after'] = array(
-			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
+			'description'       => __( 'Limit response to resources created after a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['before'] = array(
-			'description'       => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
+			'description'       => __( 'Limit response to resources created before a given ISO8601 compliant date.', 'woocommerce' ),
+			'type'              => 'string',
+			'format'            => 'date-time',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['date_column'] = array(
+			'description'       => __( 'When limiting response using after/before, which date column to compare against.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'date',
+			'enum'              => array(
+				'date',
+				'date_gmt',
+				'modified',
+				'modified_gmt',
+			),
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['modified_before'] = array(
+			'description'       => __( 'Limit response to resources modified before a given ISO8601 compliant date.', 'woocommerce' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
@@ -641,6 +667,7 @@ abstract class AbstractObjectsController extends AbstractController {
 			'default'           => 'date',
 			'enum'              => array(
 				'date',
+				'modified',
 				'id',
 				'include',
 				'title',

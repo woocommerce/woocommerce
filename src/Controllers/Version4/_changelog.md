@@ -13,6 +13,8 @@
 - Product Variations - Added `name`, `type`, `parent_id` to schema.
 - Reports - Updated with updated list of available reports.
 - Taxes - Added `code` and `include` params.
+- Coupons/Orders/Products - Allow to sort by `modified` date.
+- Coupons/Orders/Products - Added `date_column` property to use date, date_gmt, modified, modified_gmt in conjunction with before/after.
 
 ## New endpoints
 
