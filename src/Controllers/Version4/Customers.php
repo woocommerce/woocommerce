@@ -228,7 +228,7 @@ class Customers extends AbstractController {
 	/**
 	 * Get formatted item data.
 	 *
-	 * @param WC_Data $object WC_Data instance.
+	 * @param \WC_Data $object WC_Data instance.
 	 *
 	 * @since  3.0.0
 	 * @return array

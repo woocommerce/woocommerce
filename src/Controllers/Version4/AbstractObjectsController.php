@@ -191,7 +191,7 @@ abstract class AbstractObjectsController extends AbstractController {
 	 * @since  3.0.0
 	 * @param  \WP_REST_Request $request  Full details about the request.
 	 * @param  bool             $creating If is creating a new object.
-	 * @return WC_Data|\WP_Error
+	 * @return \WC_Data|\WP_Error
 	 */
 	protected function save_object( $request, $creating = false ) {
 		try {
@@ -531,7 +531,7 @@ abstract class AbstractObjectsController extends AbstractController {
 		 * Return false to disable trash support for the object.
 		 *
 		 * @param boolean $supports_trash Whether the object type support trashing.
-		 * @param WC_Data $object         The object being considered for trashing support.
+		 * @param \WC_Data $object         The object being considered for trashing support.
 		 */
 		return apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );
 	}

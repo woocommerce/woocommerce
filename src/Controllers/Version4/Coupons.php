@@ -126,7 +126,7 @@ class Coupons extends AbstractObjectsController {
 	 *
 	 * @since  3.0.0
 	 * @param  int $id Object ID.
-	 * @return WC_Data
+	 * @return \WC_Data
 	 */
 	protected function get_object( $id ) {
 		return new \WC_Coupon( $id );
@@ -217,7 +217,7 @@ class Coupons extends AbstractObjectsController {
 		 * refers to object type being prepared for the response.
 		 *
 		 * @param \WP_REST_Response $response The response object.
-		 * @param WC_Data          $object   Object data.
+		 * @param \WC_Data          $object   Object data.
 		 * @param \WP_REST_Request  $request  Request object.
 		 */
 		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
@@ -306,7 +306,7 @@ class Coupons extends AbstractObjectsController {
 		 * The dynamic portion of the hook name, `$this->post_type`,
 		 * refers to the object type slug.
 		 *
-		 * @param WC_Data         $coupon   Object object.
+		 * @param \WC_Data         $coupon   Object object.
 		 * @param \WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
 		 */

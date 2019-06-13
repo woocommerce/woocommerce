@@ -586,7 +586,7 @@ class Products extends AbstractObjectsController {
 		 * The dynamic portion of the hook name, `$this->post_type`,
 		 * refers to the object type slug.
 		 *
-		 * @param WC_Data         $product  Object object.
+		 * @param \WC_Data         $product  Object object.
 		 * @param \WP_REST_Request $request  Request object.
 		 * @param bool            $creating If is creating a new object.
 		 */
@@ -1391,7 +1391,7 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Clear caches here so in sync with any new variations/children.
 	 *
-	 * @param WC_Data $object Object data.
+	 * @param \WC_Data $object Object data.
 	 */
 	public function clear_transients( $object ) {
 		wc_delete_product_transients( $object->get_id() );
@@ -1439,7 +1439,7 @@ class Products extends AbstractObjectsController {
 		 * Return false to disable trash support for the object.
 		 *
 		 * @param boolean $supports_trash Whether the object type support trashing.
-		 * @param WC_Data $object         The object being considered for trashing support.
+		 * @param \WC_Data $object         The object being considered for trashing support.
 		 */
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );
 
@@ -1517,7 +1517,7 @@ class Products extends AbstractObjectsController {
 		/**
 		 * Fires after a single object is deleted or trashed via the REST API.
 		 *
-		 * @param WC_Data          $object   The deleted or trashed object.
+		 * @param \WC_Data          $object   The deleted or trashed object.
 		 * @param \WP_REST_Response $response The response data.
 		 * @param \WP_REST_Request  $request  The request sent to the API.
 		 */

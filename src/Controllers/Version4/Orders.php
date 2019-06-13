@@ -321,7 +321,7 @@ class Orders extends AbstractObjectsController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Data          $object  Object data.
+	 * @param \WC_Data          $object  Object data.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return array                   Links for the given post.
 	 */
