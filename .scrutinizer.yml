@@ -22,6 +22,8 @@ checks:
     verify_argument_usable_as_reference: false
     verify_property_names: false
 filter:
+  dependency_paths:
+    - wordpress/
   excluded_paths:
     - src/Controllers/Version1/
     - src/Controllers/Version2/
@@ -29,3 +31,9 @@ filter:
     - unit-tests/
     - vendor/
     - classmap.php
+build:
+    nodes:
+        analysis:
+            dependencies:
+                before:
+                    - composer require --dev johnpbloch/wordpress
