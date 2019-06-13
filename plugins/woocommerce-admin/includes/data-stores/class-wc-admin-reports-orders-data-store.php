@@ -79,7 +79,11 @@ class WC_Admin_Reports_Orders_Data_Store extends WC_Admin_Reports_Data_Store imp
 
 		$status_subquery = $this->get_status_subquery( $query_args );
 		if ( $status_subquery ) {
-			$sql_query_params['where_clause'] .= " AND {$status_subquery}";
+			if ( empty( $query_args['status_is'] ) && empty( $query_args['status_is_not'] ) ) {
+				$sql_query_params['where_clause'] .= " AND {$status_subquery}";
+			} else {
+				$where_subquery[] = $status_subquery;
+			}
 		}
 
 		if ( $query_args['customer_type'] ) {
