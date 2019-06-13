@@ -143,7 +143,7 @@ class Settings extends AbstractController {
 	 * Prepare a report sales object for serialization.
 	 *
 	 * @since  3.0.0
-	 * @param array           $item Group object.
+	 * @param array            $item Group object.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response $response Response data.
 	 */

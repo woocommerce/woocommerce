@@ -805,7 +805,7 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Get the downloads for a product or product variation.
 	 *
-	 * @param WC_Product|WC_Product_Variation $product Product instance.
+	 * @param \WC_Product|WC_Product_Variation $product Product instance.
 	 *
 	 * @return array
 	 */
@@ -828,8 +828,8 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Get taxonomy terms.
 	 *
-	 * @param WC_Product $product  Product instance.
-	 * @param string     $taxonomy Taxonomy slug.
+	 * @param \WC_Product $product  Product instance.
+	 * @param string      $taxonomy Taxonomy slug.
 	 *
 	 * @return array
 	 */
@@ -850,7 +850,7 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Get the images for a product or product variation.
 	 *
-	 * @param WC_Product|WC_Product_Variation $product Product instance.
+	 * @param \WC_Product|WC_Product_Variation $product Product instance.
 	 * @return array
 	 */
 	protected function get_images( $product ) {
@@ -910,8 +910,8 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Get product attribute taxonomy name.
 	 *
-	 * @param string     $slug    Taxonomy name.
-	 * @param WC_Product $product Product data.
+	 * @param string      $slug    Taxonomy name.
+	 * @param \WC_Product $product Product data.
 	 *
 	 * @since  3.0.0
 	 * @return string
@@ -946,7 +946,7 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Get default attributes.
 	 *
-	 * @param WC_Product $product Product instance.
+	 * @param \WC_Product $product Product instance.
 	 *
 	 * @return array
 	 */
@@ -1001,7 +1001,7 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Get the attributes for a product or product variation.
 	 *
-	 * @param WC_Product|WC_Product_Variation $product Product instance.
+	 * @param \WC_Product|WC_Product_Variation $product Product instance.
 	 *
 	 * @return array
 	 */
@@ -1052,8 +1052,8 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Get product data.
 	 *
-	 * @param WC_Product $product Product instance.
-	 * @param string     $context Request context.
+	 * @param \WC_Product $product Product instance.
+	 * @param string      $context Request context.
 	 *                            Options: 'view' and 'edit'.
 	 *
 	 * @return array
@@ -1166,9 +1166,9 @@ class Products extends AbstractObjectsController {
 	 *
 	 * @throws \WC_REST_Exception REST API exceptions.
 	 *
-	 * @param WC_Product $product Product instance.
-	 * @param array      $images  Images data.
-	 * @return WC_Product
+	 * @param \WC_Product $product Product instance.
+	 * @param array       $images  Images data.
+	 * @return \WC_Product
 	 */
 	protected function set_product_images( $product, $images ) {
 		$images = is_array( $images ) ? array_filter( $images ) : array();
@@ -1234,10 +1234,10 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Save product shipping data.
 	 *
-	 * @param WC_Product $product Product instance.
-	 * @param array      $data    Shipping data.
+	 * @param \WC_Product $product Product instance.
+	 * @param array       $data    Shipping data.
 	 *
-	 * @return WC_Product
+	 * @return \WC_Product
 	 */
 	protected function save_product_shipping_data( $product, $data ) {
 		// Virtual.
@@ -1280,11 +1280,11 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Save downloadable files.
 	 *
-	 * @param WC_Product $product    Product instance.
-	 * @param array      $downloads  Downloads data.
-	 * @param int        $deprecated Deprecated since 3.0.
+	 * @param \WC_Product $product    Product instance.
+	 * @param array       $downloads  Downloads data.
+	 * @param int         $deprecated Deprecated since 3.0.
 	 *
-	 * @return WC_Product
+	 * @return \WC_Product
 	 */
 	protected function save_downloadable_files( $product, $downloads, $deprecated = 0 ) {
 		if ( $deprecated ) {
@@ -1311,11 +1311,11 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Save taxonomy terms.
 	 *
-	 * @param WC_Product $product  Product instance.
-	 * @param array      $terms    Terms data.
-	 * @param string     $taxonomy Taxonomy name.
+	 * @param \WC_Product $product  Product instance.
+	 * @param array        $terms    Terms data.
+	 * @param string       $taxonomy Taxonomy name.
 	 *
-	 * @return WC_Product
+	 * @return \WC_Product
 	 */
 	protected function save_taxonomy_terms( $product, $terms, $taxonomy = 'cat' ) {
 		$term_ids = wp_list_pluck( $terms, 'id' );

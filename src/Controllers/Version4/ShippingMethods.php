@@ -130,7 +130,7 @@ class ShippingMethods extends AbstractController {
 	/**
 	 * Prepare a shipping method for response.
 	 *
-	 * @param  WC_Shipping_Method $method   Shipping method object.
+	 * @param  \WC_Shipping_Method $method   Shipping method object.
 	 * @param  \WP_REST_Request    $request  Request object.
 	 * @return \WP_REST_Response   $response Response data.
 	 */
@@ -154,7 +154,7 @@ class ShippingMethods extends AbstractController {
 		 * Filter shipping methods object returned from the REST API.
 		 *
 		 * @param \WP_REST_Response   $response The response object.
-		 * @param WC_Shipping_Method $method   Shipping method object used to create response.
+		 * @param \WC_Shipping_Method $method   Shipping method object used to create response.
 		 * @param \WP_REST_Request    $request  Request object.
 		 */
 		return apply_filters( 'woocommerce_rest_prepare_shipping_method', $response, $method, $request );
@@ -163,7 +163,7 @@ class ShippingMethods extends AbstractController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WC_Shipping_Method $method Shipping method object.
+	 * @param \WC_Shipping_Method $method Shipping method object.
 	 * @param \WP_REST_Request    $request Request object.
 	 * @return array
 	 */

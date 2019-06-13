@@ -251,7 +251,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * Check permissions.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @param string          $context Request context.
+	 * @param string           $context Request context.
 	 * @return bool|\WP_Error
 	 */
 	protected function check_permissions( $request, $context = 'read' ) {
@@ -587,7 +587,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param object          $term   Term object.
+	 * @param object           $term   Term object.
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return array Links for the given term.
 	 */
@@ -622,7 +622,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	/**
 	 * Update term meta fields.
 	 *
-	 * @param WP_Term         $term    Term object.
+	 * @param \WP_Term         $term    Term object.
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return bool|\WP_Error
 	 */
@@ -638,7 +638,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 	 * supported, notably `include`, `exclude`. In `self::get_items()` these
 	 * are instead treated as a full query.
 	 *
-	 * @param array           $prepared_args Arguments for `get_terms()`.
+	 * @param array            $prepared_args Arguments for `get_terms()`.
 	 * @param \WP_REST_Request $request       Full details about the request.
 	 * @return array List of term objects. (Total count in `$this->total_terms`).
 	 */
