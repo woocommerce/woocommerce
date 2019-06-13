@@ -530,7 +530,12 @@ class WC_Admin_Loader {
 
 		if ( ! empty( $preload_data_endpoints ) ) {
 			foreach ( $preload_data_endpoints as $key => $endpoint ) {
-				$settings['dataEndpoints'][ $key ] = $preload_data[ $endpoint ]['body'];
+				// Handle error case: rest_do_request() doesn't guarantee success.
+				if ( empty( $preload_data[ $endpoint ] ) ) {
+					$settings['dataEndpoints'][ $key ] = array();
+				} else {
+					$settings['dataEndpoints'][ $key ] = $preload_data[ $endpoint ]['body'];
+				}
 			}
 		}
 		$settings = self::get_custom_settings( $settings );
