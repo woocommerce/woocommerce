@@ -805,7 +805,7 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Get the downloads for a product or product variation.
 	 *
-	 * @param \WC_Product|WC_Product_Variation $product Product instance.
+	 * @param \WC_Product|\WC_Product_Variation $product Product instance.
 	 *
 	 * @return array
 	 */
@@ -850,7 +850,7 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Get the images for a product or product variation.
 	 *
-	 * @param \WC_Product|WC_Product_Variation $product Product instance.
+	 * @param \WC_Product|\WC_Product_Variation $product Product instance.
 	 * @return array
 	 */
 	protected function get_images( $product ) {
@@ -1001,7 +1001,7 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Get the attributes for a product or product variation.
 	 *
-	 * @param \WC_Product|WC_Product_Variation $product Product instance.
+	 * @param \WC_Product|\WC_Product_Variation $product Product instance.
 	 *
 	 * @return array
 	 */
