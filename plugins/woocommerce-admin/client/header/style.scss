@@ -12,7 +12,7 @@
 	position: fixed;
 	width: 100%;
 	top: $adminbar-height;
-	z-index: 99991; /* higher than component-popover (99990), lower than notification dropdown at 99999 */
+	z-index: 2; /* on top of components-popover */
 
 	&.is-scrolled {
 		box-shadow: 0 8px 8px 0 rgba(85, 93, 102, 0.3);
