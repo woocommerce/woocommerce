@@ -19,23 +19,37 @@ trait BatchTrait {
 	 * @return array Of \WP_Error or \WP_REST_Response.
 	 */
 	public function batch_items( $request ) {
-		$items = array_filter( $request->get_params() );
+		$items = $request->get_params();
 		$limit = $this->check_batch_limit( $items );
 		if ( is_wp_error( $limit ) ) {
 			return $limit;
 		}
 
-		$response = [];
 		$batches  = [ 'create', 'update', 'delete' ];
+		$response = [];
+
 		foreach ( $batches as $batch ) {
-			if ( ! isset( $items[ $batch ] ) ) {
-				continue;
-			}
-			$items[ $batch ]    = wp_parse_id_list( $items[ $batch ] );
-			$response[ $batch ] = $this->{"batch_$batch"}( $items[ $batch ] );
+			$response[ $batch ] = $this->{"batch_$batch"}( $this->get_batch_of_items_from_request( $request, $batch ) );
 		}
 
-		return $response;
+		return array_filter( $response );
+	}
+
+	/**
+	 * Get batch of items from requst.
+	 *
+	 * @param \WP_REST_Request $request Full details about the request.
+	 * @param string           $batch_type Batch type; one of create, update, delete.
+	 * @return array
+	 */
+	protected function get_batch_of_items_from_request( $request, $batch_type ) {
+		$params = $request->get_params();
+
+		if ( ! isset( $params[ $batch_type ] ) ) {
+			return array();
+		}
+
+		return array_filter( $params[ $batch_type ] );
 	}
 
 	/**
@@ -44,7 +58,9 @@ trait BatchTrait {
 	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return boolean|\WP_Error
 	 */
-	abstract public function batch_items_permissions_check( $request );
+	public function batch_items_permissions_check( $request ) {
+		return update_items_permissions_check( $request );
+	}
 
 	/**
 	 * Register route for batch requests.
@@ -123,16 +139,15 @@ trait BatchTrait {
 	 * @return bool|\WP_Error
 	 */
 	protected function check_batch_limit( $items ) {
-		$limit = apply_filters( 'woocommerce_rest_batch_items_limit', 100, $this->get_normalized_rest_base() );
-		$total = 0;
+		$limit   = apply_filters( 'woocommerce_rest_batch_items_limit', 100, $this->get_normalized_rest_base() );
+		$total   = 0;
+		$batches = [ 'create', 'update', 'delete' ];
 
-		$batches  = [ 'create', 'update', 'delete' ];
 		foreach ( $batches as $batch ) {
 			if ( ! isset( $items[ $batch ] ) ) {
 				continue;
 			}
-			$items[ $batch ] = wp_parse_id_list( $items[ $batch ] );
-			$total           = $total + count( $items[ $batch ] );
+			$total = $total + count( $items[ $batch ] );
 		}
 
 		if ( $total > $limit ) {
@@ -162,40 +177,42 @@ trait BatchTrait {
 	/**
 	 * Batch create items.
 	 *
-	 * @param array $items Array of item ids.
+	 * @param array $items Array of items.
 	 * @return array Response data.
 	 */
 	protected function batch_create( $items ) {
-		$response = [];
+		$batch_response = [];
 
-		foreach ( $items as $id ) {
-			$item = new \WP_REST_Request( 'POST' );
-			$item->set_default_params( $this->get_default_params() );
-			$item->set_body_params( $item );
-			$item_response = $this->create_item( $item );
-			$response[]    = $this->format_response( $id, $item_response );
+		foreach ( $items as $item ) {
+			$request = new \WP_REST_Request( 'POST' );
+			$request->set_default_params( $this->get_default_params() );
+			$request->set_body_params( $item );
+
+			$response         = $this->create_item( $request );
+			$batch_response[] = $this->format_response( 0, $response );
 		}
 
-		return $response;
+		return $batch_response;
 	}
 
 	/**
 	 * Batch update items.
 	 *
-	 * @param array $items Array of item ids.
+	 * @param array $items Array of items.
 	 * @return array Response data.
 	 */
 	protected function batch_update( $items ) {
-		$response = [];
+		$batch_response = [];
 
-		foreach ( $items as $id ) {
-			$item = new \WP_REST_Request( 'PUT' );
-			$item->set_body_params( $item );
-			$item_response = $this->update_item( $item );
-			$response[]    = $this->format_response( $id, $item_response );
+		foreach ( $items as $item ) {
+			$request = new \WP_REST_Request( 'PUT' );
+			$request->set_body_params( $item );
+
+			$response         = $this->update_item( $request );
+			$batch_response[] = $this->format_response( $item['id'], $response );
 		}
 
-		return $response;
+		return $batch_response;
 	}
 
 	/**
@@ -205,21 +222,22 @@ trait BatchTrait {
 	 * @return array Response data.
 	 */
 	protected function batch_delete( $items ) {
-		$response = [];
+		$batch_response = [];
+		$items          = wp_parse_id_list( $items );
 
 		foreach ( $items as $id ) {
-			$item = new \WP_REST_Request( 'DELETE' );
-			$item->set_query_params(
+			$request = new \WP_REST_Request( 'DELETE' );
+			$request->set_query_params(
 				[
 					'id'    => $id,
 					'force' => true,
 				]
 			);
-			$item_response = $this->delete_item( $item );
-			$response[]    = $this->format_response( $id, $item_response );
+			$response         = $this->delete_item( $request );
+			$batch_response[] = $this->format_response( $id, $response );
 		}
 
-		return $response;
+		return $batch_response;
 	}
 
 	/**
@@ -237,12 +255,12 @@ trait BatchTrait {
 		 */
 		global $wp_rest_server;
 
-		if ( is_wp_error( $response ) ) {
-			return $this->format_error_response( $response );
+		if ( ! is_wp_error( $response ) ) {
+			return $wp_rest_server->response_to_data( $response, '' );
 		} else {
 			return array(
 				'id'    => $id,
-				'error' => $wp_rest_server->response_to_data( $response, '' ),
+				'error' => $this->format_error_response( $response ),
 			);
 		}
 	}

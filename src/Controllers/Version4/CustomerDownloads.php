@@ -27,26 +27,7 @@ class CustomerDownloads extends AbstractController {
 	 * Register the routes for customers.
 	 */
 	public function register_routes() {
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base,
-			array(
-				'args' => array(
-					'customer_id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
-						'type'        => 'integer',
-					),
-				),
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args'                => $this->get_collection_params(),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			),
-			true
-		);
+		$this->register_items_route( [ 'read' ] );
 	}
 
 	/**

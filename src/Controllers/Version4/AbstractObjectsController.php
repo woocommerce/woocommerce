@@ -13,7 +13,6 @@ defined( 'ABSPATH' ) || exit;
  * CRUD Object Controller.
  */
 abstract class AbstractObjectsController extends AbstractController {
-	use BatchTrait;
 
 	/**
 	 * If object is hierarchical.

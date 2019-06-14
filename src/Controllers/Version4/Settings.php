@@ -42,19 +42,7 @@ class Settings extends AbstractController {
 			),
 			true
 		);
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/batch',
-			array(
-				array(
-					'methods'             => \WP_REST_Server::EDITABLE,
-					'callback'            => array( $this, 'batch_items' ),
-					'permission_callback' => array( $this, 'update_items_permissions_check' ),
-				),
-				'schema' => array( $this, 'get_public_batch_schema' ),
-			),
-			true
-		);
+		$this->register_batch_route();
 	}
 
 	/**

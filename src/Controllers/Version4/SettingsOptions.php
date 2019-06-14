@@ -274,30 +274,32 @@ class SettingsOptions extends AbstractController {
 	}
 
 	/**
-	 * Bulk create, update and delete items.
+	 * Get batch of items from requst.
 	 *
-	 * @since  3.0.0
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return array Of \WP_Error or \WP_REST_Response.
+	 * @param string           $batch_type Batch type; one of create, update, delete.
+	 * @return array
 	 */
-	public function batch_items( $request ) {
-		// Get the request params.
-		$items = array_filter( $request->get_params() );
+	protected function get_batch_of_items_from_request( $request, $batch_type ) {
+		$params = $request->get_params();
 
-		/*
+		if ( ! isset( $params[ $batch_type ] ) ) {
+			return array();
+		}
+
+		/**
 		 * Since our batch settings update is group-specific and matches based on the route,
 		 * we inject the URL parameters (containing group) into the batch items
 		 */
-		if ( ! empty( $items['update'] ) ) {
-			$to_update = array();
-			foreach ( $items['update'] as $item ) {
-				$to_update[] = array_merge( $request->get_url_params(), $item );
+		$items = array_filter( $params[ $batch_type ] );
+
+		if ( 'update' === $batch_type ) {
+			foreach ( $items as $key => $item ) {
+				$items[ $key ] = array_merge( $request->get_url_params(), $item );
 			}
-			$request = new \WP_REST_Request( $request->get_method() );
-			$request->set_body_params( array( 'update' => $to_update ) );
 		}
 
-		return parent::batch_items( $request );
+		return array_filter( $items );
 	}
 
 	/**
@@ -345,8 +347,7 @@ class SettingsOptions extends AbstractController {
 	/**
 	 * Prepare a single setting object for response.
 	 *
-	 * @since  3.0.0
-	 * @param object          $item Setting object.
+	 * @param object           $item Setting object.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response $response Response data.
 	 */
@@ -363,7 +364,6 @@ class SettingsOptions extends AbstractController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @since  3.0.0
 	 * @param string $setting_id Setting ID.
 	 * @param string $group_id Group ID.
 	 * @return array Links for the given setting.

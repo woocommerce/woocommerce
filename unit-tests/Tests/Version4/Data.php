@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * WC Tests API Data
  */
-class Data {
+class Data extends \WC_REST_Unit_Test_Case {
 
 	/**
 	 * Endpoints.
@@ -20,6 +20,34 @@ class Data {
 	 * @var string
 	 */
 	protected $endpoint = '/wc/v4/data';
+
+	/**
+	 * User variable.
+	 *
+	 * @var WP_User
+	 */
+	protected static $user;
+
+	/**
+	 * Setup once before running tests.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+	}
+
+	/**
+	 * Setup test class.
+	 */
+	public function setUp() {
+		parent::setUp();
+		wp_set_current_user( self::$user );
+	}
 
 	/**
 	 * Test that the list of data endpoints includes download-ips.

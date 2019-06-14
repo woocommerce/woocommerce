@@ -13,5 +13,8 @@
 		<testsuite name="WooCommerce REST API Test Suite">
 			<directory suffix=".php">./unit-tests/Tests</directory>
 		</testsuite>
+		<testsuite name="v4">
+			<directory suffix=".php">./unit-tests/Tests/Version4</directory>
+		</testsuite>
 	</testsuites>
 </phpunit>

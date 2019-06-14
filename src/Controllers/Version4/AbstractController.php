@@ -24,6 +24,7 @@ use \WP_REST_Controller;
  * @version  2.6.0
  */
 abstract class AbstractController extends WP_REST_Controller {
+	use BatchTrait;
 
 	/**
 	 * Endpoint namespace.
@@ -41,76 +42,97 @@ abstract class AbstractController extends WP_REST_Controller {
 
 	/**
 	 * Register route for items requests.
+	 *
+	 * @param array $methods Supported methods. read, create.
 	 */
-	protected function register_items_route() {
+	protected function register_items_route( $methods = [ 'read', 'create' ] ) {
+		$routes           = [];
+		$routes['schema'] = [ $this, 'get_public_item_schema' ];
+
+		if ( in_array( 'read', $methods, true ) ) {
+			$routes[] = array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_items' ),
+				'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				'args'                => $this->get_collection_params(),
+			);
+		}
+
+		if ( in_array( 'create', $methods, true ) ) {
+			$routes[] = array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'create_item' ),
+				'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
+			);
+		}
+
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
-			array(
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args'                => $this->get_collection_params(),
-				),
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'create_item' ),
-					'permission_callback' => array( $this, 'create_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			),
+			$routes,
 			true
 		);
 	}
 
 	/**
 	 * Register route for item create/get/delete/update requests.
+	 *
+	 * @param array $methods Supported methods. read, create.
 	 */
-	protected function register_item_route() {
+	protected function register_item_route( $methods = [ 'read', 'edit', 'delete' ] ) {
+		$routes           = [];
+		$routes['schema'] = [ $this, 'get_public_item_schema' ];
+		$routes['args']   = [
+			'id' => [
+				'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+				'type'        => 'integer',
+			],
+		];
+
+		if ( in_array( 'read', $methods, true ) ) {
+			$routes[] = array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_item' ),
+				'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				'args'                => array(
+					'context' => $this->get_context_param(
+						array(
+							'default' => 'view',
+						)
+					),
+				),
+			);
+		}
+
+		if ( in_array( 'edit', $methods, true ) ) {
+			$routes[] = array(
+				'methods'             => \WP_REST_Server::EDITABLE,
+				'callback'            => array( $this, 'update_item' ),
+				'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
+			);
+		}
+
+		if ( in_array( 'delete', $methods, true ) ) {
+			$routes[] = array(
+				'methods'             => \WP_REST_Server::DELETABLE,
+				'callback'            => array( $this, 'delete_item' ),
+				'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+				'args'                => array(
+					'force' => array(
+						'default'     => false,
+						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+						'type'        => 'boolean',
+					),
+				),
+			);
+		}
+
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
-			array(
-				'args'   => array(
-					'id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
-						'type'        => 'integer',
-					),
-				),
-				array(
-					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_item' ),
-					'permission_callback' => array( $this, 'get_item_permissions_check' ),
-					'args'                => array(
-						'context' => $this->get_context_param(
-							array(
-								'default' => 'view',
-							)
-						),
-					),
-				),
-				array(
-					'methods'             => \WP_REST_Server::EDITABLE,
-					'callback'            => array( $this, 'update_item' ),
-					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
-				),
-				array(
-					'methods'             => \WP_REST_Server::DELETABLE,
-					'callback'            => array( $this, 'delete_item' ),
-					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
-					'args'                => array(
-						'force' => array(
-							'default'     => false,
-							'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
-							'type'        => 'boolean',
-						),
-					),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			),
+			$routes,
 			true
 		);
 	}

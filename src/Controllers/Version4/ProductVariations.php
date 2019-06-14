@@ -725,37 +725,35 @@ class ProductVariations extends Products {
 	}
 
 	/**
-	 * Bulk create, update and delete items.
+	 * Get batch of items from requst.
 	 *
-	 * @since  3.0.0
 	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return array Of \WP_Error or \WP_REST_Response.
+	 * @param string           $batch_type Batch type; one of create, update, delete.
+	 * @return array
 	 */
-	public function batch_items( $request ) {
-		$items       = array_filter( $request->get_params() );
-		$params      = $request->get_url_params();
-		$product_id  = $params['product_id'];
-		$body_params = array();
+	protected function get_batch_of_items_from_request( $request, $batch_type ) {
+		$params     = $request->get_params();
+		$url_params = $request->get_url_params();
+		$product_id = $url_params['product_id'];
 
-		foreach ( array( 'update', 'create', 'delete' ) as $batch_type ) {
-			if ( ! empty( $items[ $batch_type ] ) ) {
-				$injected_items = array();
-				foreach ( $items[ $batch_type ] as $item ) {
-					$injected_items[] = is_array( $item ) ? array_merge(
-						array(
-							'product_id' => $product_id,
-						),
-						$item
-					) : $item;
-				}
-				$body_params[ $batch_type ] = $injected_items;
+		if ( ! isset( $params[ $batch_type ] ) ) {
+			return array();
+		}
+
+		$items = array_filter( $params[ $batch_type ] );
+
+		if ( 'update' === $batch_type || 'create' === $batch_type ) {
+			foreach ( $items as $key => $item ) {
+				$items[ $key ] = array_merge(
+					array(
+						'product_id' => $product_id,
+					),
+					$item
+				);
 			}
 		}
 
-		$request = new \WP_REST_Request( $request->get_method() );
-		$request->set_body_params( $body_params );
-
-		return parent::batch_items( $request );
+		return array_filter( $items );
 	}
 
 	/**
