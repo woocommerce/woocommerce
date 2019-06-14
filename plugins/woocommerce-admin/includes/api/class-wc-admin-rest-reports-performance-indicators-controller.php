@@ -117,19 +117,30 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 			return true;
 		}
 
-		$request       = new WP_REST_Request( 'GET', '/wc/v4/reports' );
-		$response      = rest_do_request( $request );
-		$endpoints     = $response->get_data();
-		$allowed_stats = array();
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/reports' );
+		$response = rest_do_request( $request );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
 		if ( 200 !== $response->get_status() ) {
 			return new WP_Error( 'woocommerce_reports_performance_indicators_result_failed', __( 'Sorry, fetching performance indicators failed.', 'woocommerce-admin' ) );
 		}
+
+		$endpoints     = $response->get_data();
+		$allowed_stats = array();
 
 		foreach ( $endpoints as $endpoint ) {
 			if ( '/stats' === substr( $endpoint['slug'], -6 ) ) {
 				$request  = new WP_REST_Request( 'OPTIONS', $endpoint['path'] );
 				$response = rest_do_request( $request );
-				$data     = $response->get_data();
+
+				if ( is_wp_error( $response ) ) {
+					return $response;
+				}
+
+				$data = $response->get_data();
 
 				$prefix = substr( $endpoint['slug'], 0, -6 );
 
@@ -282,6 +293,10 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 			$request->set_param( 'after', $query_args['after'] );
 
 			$response = rest_do_request( $request );
+
+			if ( is_wp_error( $response ) ) {
+				return $response;
+			}
 
 			$data   = $response->get_data();
 			$format = $this->formats[ $stat ];
