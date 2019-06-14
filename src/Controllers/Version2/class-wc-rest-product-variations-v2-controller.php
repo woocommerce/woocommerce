@@ -40,14 +40,6 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	protected $post_type = 'product_variation';
 
 	/**
-	 * Initialize product actions (parent).
-	 */
-	public function __construct() {
-		add_filter( "woocommerce_rest_{$this->post_type}_query", array( $this, 'add_product_id' ), 9, 2 );
-		parent::__construct();
-	}
-
-	/**
 	 * Register the routes for products.
 	 */
 	public function register_routes() {
