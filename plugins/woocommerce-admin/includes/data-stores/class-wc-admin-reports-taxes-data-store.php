@@ -311,7 +311,12 @@ class WC_Admin_Reports_Taxes_Data_Store extends WC_Admin_Reports_Data_Store impl
 	 */
 	public static function sync_order_taxes( $order_id ) {
 		global $wpdb;
-		$order       = wc_get_order( $order_id );
+
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			return -1;
+		}
+
 		$tax_items   = $order->get_items( 'tax' );
 		$num_updated = 0;
 
