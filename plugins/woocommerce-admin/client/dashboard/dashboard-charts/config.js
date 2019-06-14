@@ -21,9 +21,9 @@ const DASHBOARD_CHARTS_FILTER = 'woocommerce_admin_dashboard_charts_filter';
 const allCharts = applyFilters(
 	DASHBOARD_CHARTS_FILTER,
 	revenueCharts
-		.map( d => ( { ...d, endpoint: 'orders' } ) )
+		.map( d => ( { ...d, endpoint: 'revenue' } ) )
 		.concat(
-			ordersCharts.map( d => ( { ...d, endpoint: 'revenue' } ) ),
+			ordersCharts.map( d => ( { ...d, endpoint: 'orders' } ) ),
 			productsCharts.map( d => ( { ...d, endpoint: 'products' } ) ),
 			categoriesCharts.map( d => ( { ...d, endpoint: 'categories' } ) ),
 			couponsCharts.map( d => ( { ...d, endpoint: 'orders' } ) ),
