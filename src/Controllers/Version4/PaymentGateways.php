@@ -15,6 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * Payment gateways controller class.
  */
 class PaymentGateways extends AbstractController {
+	use SettingsTrait;
 
 	/**
 	 * Route base.

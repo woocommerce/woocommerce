@@ -15,6 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * REST API Setting Options controller class.
  */
 class SettingsOptions extends AbstractController {
+	use SettingsTrait;
 
 	/**
 	 * Route base.

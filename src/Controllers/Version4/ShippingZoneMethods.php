@@ -15,6 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * REST API Shipping Zone Methods class.
  */
 class ShippingZoneMethods extends AbstractShippingZonesController {
+	use SettingsTrait;
 
 	/**
 	 * Register the routes for Shipping Zone Methods.

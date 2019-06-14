@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * CRUD Object Controller.
  */
 abstract class AbstractObjectsController extends AbstractController {
+	use BatchTrait;
 
 	/**
 	 * If object is hierarchical.
@@ -35,6 +36,35 @@ abstract class AbstractObjectsController extends AbstractController {
 	 * @return \WC_Data|bool
 	 */
 	abstract protected function get_object( $id );
+
+	/**
+	 * Prepares the object for the REST response.
+	 *
+	 * @since  3.0.0
+	 * @param  \WC_Data         $object  Object data.
+	 * @param  \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response Response object on success, or \WP_Error object on failure.
+	 */
+	abstract protected function prepare_object_for_response( $object, $request );
+
+	/**
+	 * Prepares one object for create or update operation.
+	 *
+	 * @since  3.0.0
+	 * @param  \WP_REST_Request $request Request object.
+	 * @param  bool             $creating If is creating a new object.
+	 * @return \WC_Data The prepared item, or \WP_Error object on failure.
+	 */
+	abstract protected function prepare_object_for_database( $request, $creating = false );
+
+	/**
+	 * Register the routes for products.
+	 */
+	public function register_routes() {
+		$this->register_items_route();
+		$this->register_item_route();
+		$this->register_batch_route();
+	}
 
 	/**
 	 * Check if a given request has access to read items.
@@ -126,36 +156,6 @@ abstract class AbstractObjectsController extends AbstractController {
 
 		return true;
 	}
-
-	/**
-	 * Get object permalink.
-	 *
-	 * @param  object $object Object.
-	 * @return string
-	 */
-	protected function get_permalink( $object ) {
-		return '';
-	}
-
-	/**
-	 * Prepares the object for the REST response.
-	 *
-	 * @since  3.0.0
-	 * @param  \WC_Data         $object  Object data.
-	 * @param  \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response Response object on success, or \WP_Error object on failure.
-	 */
-	abstract protected function prepare_object_for_response( $object, $request );
-
-	/**
-	 * Prepares one object for create or update operation.
-	 *
-	 * @since  3.0.0
-	 * @param  \WP_REST_Request $request Request object.
-	 * @param  bool             $creating If is creating a new object.
-	 * @return \WC_Data The prepared item, or \WP_Error object on failure.
-	 */
-	abstract protected function prepare_object_for_database( $request, $creating = false );
 
 	/**
 	 * Get a single item.
@@ -813,5 +813,23 @@ abstract class AbstractObjectsController extends AbstractController {
 		$valid_vars = apply_filters( 'woocommerce_rest_query_vars', $valid_vars );
 
 		return $valid_vars;
+	}
+
+	/**
+	 * Add meta query.
+	 *
+	 * @since 3.0.0
+	 * @param array $args       Query args.
+	 * @param array $meta_query Meta query.
+	 * @return array
+	 */
+	protected function add_meta_query( $args, $meta_query ) {
+		if ( empty( $args['meta_query'] ) ) {
+			$args['meta_query'] = []; // phpcs:ignore
+		}
+
+		$args['meta_query'][] = $meta_query;
+
+		return $args['meta_query'];
 	}
 }
