@@ -665,8 +665,8 @@ class ProductSchema {
 			'status'                => $object->get_status( $context ),
 			'featured'              => $object->is_featured(),
 			'catalog_visibility'    => $object->get_catalog_visibility( $context ),
-			'description'           => 'view' === $context ? wpautop( do_shortcode( $object->get_description() ) ) : $object->get_description( $context ),
-			'short_description'     => 'view' === $context ? apply_filters( 'woocommerce_short_description', $object->get_short_description() ) : $object->get_short_description( $context ),
+			'description'           => $object->get_description( $context ),
+			'short_description'     => $object->get_short_description( $context ),
 			'sku'                   => $object->get_sku( $context ),
 			'price'                 => $object->get_price( $context ),
 			'regular_price'         => $object->get_regular_price( $context ),
@@ -684,8 +684,8 @@ class ProductSchema {
 			'downloads'             => self::get_downloads( $object ),
 			'download_limit'        => $object->get_download_limit( $context ),
 			'download_expiry'       => $object->get_download_expiry( $context ),
-			'external_url'          => $object->is_type( 'external' ) ? $object->get_product_url( $context ) : '',
-			'button_text'           => $object->is_type( 'external' ) ? $object->get_button_text( $context ) : '',
+			'external_url'          => '',
+			'button_text'           => '',
 			'tax_status'            => $object->get_tax_status( $context ),
 			'tax_class'             => $object->get_tax_class( $context ),
 			'manage_stock'          => $object->managing_stock(),
@@ -706,13 +706,13 @@ class ProductSchema {
 			'shipping_class'        => $object->get_shipping_class(),
 			'shipping_class_id'     => $object->get_shipping_class_id( $context ),
 			'reviews_allowed'       => $object->get_reviews_allowed( $context ),
-			'average_rating'        => 'view' === $context ? wc_format_decimal( $object->get_average_rating(), 2 ) : $object->get_average_rating( $context ),
+			'average_rating'        => $object->get_average_rating( $context ),
 			'rating_count'          => $object->get_rating_count(),
-			'related_ids'           => array_map( 'absint', array_values( wc_get_related_products( $object->get_id() ) ) ),
-			'upsell_ids'            => array_map( 'absint', $object->get_upsell_ids( $context ) ),
-			'cross_sell_ids'        => array_map( 'absint', $object->get_cross_sell_ids( $context ) ),
+			'related_ids'           => wp_parse_id_list( wc_get_related_products( $object->get_id() ) ),
+			'upsell_ids'            => wp_parse_id_list( $object->get_upsell_ids( $context ) ),
+			'cross_sell_ids'        => wp_parse_id_list( $object->get_cross_sell_ids( $context ) ),
 			'parent_id'             => $object->get_parent_id( $context ),
-			'purchase_note'         => 'view' === $context ? wpautop( do_shortcode( wp_kses_post( $object->get_purchase_note() ) ) ) : $object->get_purchase_note( $context ),
+			'purchase_note'         => $object->get_purchase_note( $context ),
 			'categories'            => self::get_taxonomy_terms( $object ),
 			'tags'                  => self::get_taxonomy_terms( $object, 'tag' ),
 			'images'                => self::get_images( $object ),
@@ -725,13 +725,26 @@ class ProductSchema {
 		);
 
 		// Add variations to variable products.
-		if ( $object->is_type( 'variable' ) && $object->has_child() ) {
+		if ( $object->is_type( 'variable' ) ) {
 			$data['variations'] = $object->get_children();
 		}
 
 		// Add grouped products data.
-		if ( $object->is_type( 'grouped' ) && $object->has_child() ) {
+		if ( $object->is_type( 'grouped' ) ) {
 			$data['grouped_products'] = $object->get_children();
+		}
+
+		// Add external product data.
+		if ( $object->is_type( 'external' ) ) {
+			$data['external_url'] = $object->get_product_url( $context );
+			$data['button_text']  = $object->get_button_text( $context );
+		}
+
+		if ( 'view' === $context ) {
+			$data['description']       = wpautop( do_shortcode( $data['description'] ) );
+			$data['short_description'] = apply_filters( 'woocommerce_short_description', $data['short_description'] );
+			$data['average_rating']    = wc_format_decimal( $data['average_rating'], 2 );
+			$data['purchase_note']     = wpautop( do_shortcode( $data['purchase_note'] ) );
 		}
 
 		return $data;
