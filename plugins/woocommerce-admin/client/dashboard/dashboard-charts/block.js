@@ -59,7 +59,6 @@ class ChartBlock extends Component {
 						sprintf( __( '%s Report', 'woocommerce-admin' ), charts[ 0 ].label ) }
 					</a>
 					<ReportChart
-						charts={ charts }
 						endpoint={ endpoint }
 						query={ query }
 						interactiveLegend={ false }

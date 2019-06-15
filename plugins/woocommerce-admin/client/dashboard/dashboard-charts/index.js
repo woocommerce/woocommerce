@@ -21,7 +21,7 @@ import { getAllowedIntervalsForQuery } from '@woocommerce/date';
  * Internal dependencies
  */
 import ChartBlock from './block';
-import { getChartFromKey, uniqCharts } from './config';
+import { uniqCharts } from './config';
 import withSelect from 'wc-api/with-select';
 import './style.scss';
 
@@ -68,11 +68,11 @@ class DashboardCharts extends Component {
 						{ uniqCharts.map( chart => {
 							return (
 								<MenuItem
-									checked={ ! hiddenBlocks.includes( chart.key ) }
+									checked={ ! hiddenBlocks.includes( chart.endpoint + '_' + chart.key ) }
 									isCheckbox
 									isClickable
-									key={ chart.key }
-									onInvoke={ () => onToggleHiddenBlock( chart.key )() }
+									key={ chart.endpoint + '_' + chart.key }
+									onInvoke={ () => onToggleHiddenBlock( chart.endpoint + '_' + chart.key )() }
 								>
 									{ __( `${ chart.label }`, 'woocommerce-admin' ) }
 								</MenuItem>
@@ -178,11 +178,11 @@ class DashboardCharts extends Component {
 					</SectionHeader>
 					<div className="woocommerce-dashboard__columns">
 						{ uniqCharts.map( chart => {
-							return hiddenBlocks.includes( chart.key ) ? null : (
+							return hiddenBlocks.includes( chart.endpoint + '_' + chart.key ) ? null : (
 								<ChartBlock
-									charts={ getChartFromKey( chart.key ) }
+									charts={ [ chart ] }
 									endpoint={ chart.endpoint }
-									key={ chart.key }
+									key={ chart.endpoint + '_' + chart.key }
 									path={ path }
 									query={ query }
 								/>
