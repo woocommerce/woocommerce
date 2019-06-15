@@ -795,7 +795,8 @@ class ProductSchema {
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	protected static function set_object_data( &$object, $request ) {
-		$props_to_set = [
+		$values    = $request->get_params();
+		$prop_keys = [
 			'name',
 			'sku',
 			'description',
@@ -826,84 +827,82 @@ class ProductSchema {
 			'button_text',
 			'download_limit',
 			'download_expiry',
+			'date_created',
+			'date_created_gmt',
+			'upsell_ids',
+			'cross_sell_ids',
 		];
 
-		foreach ( $props_to_set as $prop ) {
-			if ( isset( $request[ $prop ] ) && is_callable( array( $object, "set_$prop" ) ) ) {
-				$object->{"set_$prop"}( $request[ $prop ] );
+		$props_to_set = array_intersect_key( $values, array_flip( $prop_keys ) );
+		$props_to_set = array_filter(
+			$props_to_set,
+			function ( $prop ) use ( $object ) {
+				return is_callable( array( $object, "set_$prop" ) );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
+
+		foreach ( $props_to_set as $prop => $value ) {
+			switch ( $prop ) {
+				case 'date_created':
+				case 'date_created_gmt':
+					$value = rest_parse_date( $value );
+					break;
+				case 'upsell_ids':
+				case 'cross_sell_ids':
+					$value = wp_parse_id_list( $value );
+					break;
 			}
+			$object->{"set_$prop"}( $value );
 		}
 
-		if ( isset( $request['external_url'] ) && is_callable( array( $object, 'set_product_url' ) ) ) {
-			$object->set_product_url( $request['external_url'] );
-		}
-
-		if ( ! empty( $request['date_created'] ) ) {
-			$date = rest_parse_date( $request['date_created'] );
-
-			if ( $date ) {
-				$object->set_date_created( $date );
-			}
-		}
-
-		if ( ! empty( $request['date_created_gmt'] ) ) {
-			$date = rest_parse_date( $request['date_created_gmt'], true );
-
-			if ( $date ) {
-				$object->set_date_created( $date );
-			}
-		}
-
-		if ( isset( $request['upsell_ids'] ) ) {
-			$object->set_upsell_ids( wp_parse_id_list( $request['upsell_ids'] ) );
-		}
-
-		if ( isset( $request['cross_sell_ids'] ) ) {
-			$object->set_cross_sell_ids( wp_parse_id_list( $request['cross_sell_ids'] ) );
+		if ( isset( $values['external_url'] ) && is_callable( array( $object, 'set_product_url' ) ) ) {
+			$object->set_product_url( $values['external_url'] );
 		}
 
 		// Set children for a grouped product.
-		if ( $object->is_type( 'grouped' ) && isset( $request['grouped_products'] ) ) {
-			$object->set_children( $request['grouped_products'] );
+		if ( $object->is_type( 'grouped' ) && isset( $values['grouped_products'] ) ) {
+			$object->set_children( $values['grouped_products'] );
 		}
 
 		// Allow set meta_data.
-		if ( isset( $request['meta_data'] ) ) {
-			foreach ( $request['meta_data'] as $meta ) {
+		if ( isset( $values['meta_data'] ) ) {
+			foreach ( $values['meta_data'] as $meta ) {
 				$object->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
 			}
 		}
 
 		// Save default attributes for variable products.
-		if ( $object->is_type( 'variable' ) && isset( $request['default_attributes'] ) ) {
-			self::set_default_attributes( $object, $request['default_attributes'] );
+		if ( $object->is_type( 'variable' ) && isset( $values['default_attributes'] ) ) {
+			self::set_default_attributes( $object, $values['default_attributes'] );
 		}
 
 		// Check for featured/gallery images, upload it and set it.
-		if ( isset( $request['images'] ) ) {
-			self::set_images( $object, $request['images'] );
+		if ( isset( $values['images'] ) ) {
+			self::set_images( $object, $values['images'] );
 		}
 
 		// Product categories.
-		if ( isset( $request['categories'] ) ) {
-			self::set_taxonomy_terms( $object, $request['categories'] );
+		if ( isset( $values['categories'] ) ) {
+			self::set_taxonomy_terms( $object, $values['categories'] );
 		}
 
 		// Product tags.
-		if ( isset( $request['tags'] ) ) {
-			self::set_taxonomy_terms( $object, $request['tags'], 'tag' );
+		if ( isset( $values['tags'] ) ) {
+			self::set_taxonomy_terms( $object, $values['tags'], 'tag' );
 		}
 
 		// Downloadable files.
-		if ( isset( $request['downloads'] ) && is_array( $request['downloads'] ) ) {
-			self::set_downloadable_files( $object, $request['downloads'] );
+		if ( isset( $values['downloads'] ) && is_array( $values['downloads'] ) ) {
+			self::set_downloadable_files( $object, $values['downloads'] );
 		}
 
-		if ( isset( $request['attributes'] ) ) {
-			self::set_attributes( $object, $request['attributes'] );
+		// Attributes.
+		if ( isset( $values['attributes'] ) ) {
+			self::set_attributes( $object, $values['attributes'] );
 		}
 
-		self::set_shipping_data( $object, $request );
+		self::set_shipping_data( $object, $values );
 
 		return $object;
 	}

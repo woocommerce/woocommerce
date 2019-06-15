@@ -479,7 +479,8 @@ class ProductVariationSchema extends ProductSchema {
 	 * @param \WP_REST_Request      $request Request object.
 	 */
 	protected static function set_object_data( &$object, $request ) {
-		$props_to_set = [
+		$values    = $request->get_params();
+		$prop_keys = [
 			'status',
 			'sku',
 			'virtual',
@@ -501,34 +502,41 @@ class ProductVariationSchema extends ProductSchema {
 			'stock_quantity',
 		];
 
-		foreach ( $props_to_set as $prop ) {
-			if ( isset( $request[ $prop ] ) && is_callable( array( $object, "set_$prop" ) ) ) {
-				$object->{"set_$prop"}( $request[ $prop ] );
-			}
+		$props_to_set = array_intersect_key( $values, array_flip( $prop_keys ) );
+		$props_to_set = array_filter(
+			$props_to_set,
+			function ( $prop ) use ( $object ) {
+				return is_callable( array( $object, "set_$prop" ) );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
+
+		foreach ( $props_to_set as $prop => $value ) {
+			$object->{"set_$prop"}( $value );
 		}
 
 		// Allow set meta_data.
-		if ( isset( $request['meta_data'] ) ) {
-			foreach ( $request['meta_data'] as $meta ) {
+		if ( isset( $values['meta_data'] ) ) {
+			foreach ( $values['meta_data'] as $meta ) {
 				$object->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
 			}
 		}
 
 		// Check for featured/gallery images, upload it and set it.
-		if ( isset( $request['image'] ) ) {
-			self::set_image( $object, $request['image'] );
+		if ( isset( $values['image'] ) ) {
+			self::set_image( $object, $values['image'] );
 		}
 
 		// Downloadable files.
-		if ( isset( $request['downloads'] ) && is_array( $request['downloads'] ) ) {
-			self::set_downloadable_files( $object, $request['downloads'] );
+		if ( isset( $values['downloads'] ) && is_array( $values['downloads'] ) ) {
+			self::set_downloadable_files( $object, $values['downloads'] );
 		}
 
-		if ( isset( $request['attributes'] ) ) {
-			self::set_attributes( $object, $request['attributes'] );
+		if ( isset( $values['attributes'] ) ) {
+			self::set_attributes( $object, $values['attributes'] );
 		}
 
-		self::set_shipping_data( $object, $request );
+		self::set_shipping_data( $object, $values );
 	}
 
 	/**
