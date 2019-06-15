@@ -46,6 +46,20 @@ const isCollaborator = async ( username ) => {
 		});
 }
 
+const isMergedPullRequest = async ( pullRequestUrl ) => {
+	const options =  {
+		url: pullRequestUrl,
+		headers,
+		json: true,
+	};
+	return requestPromise( options )
+		.then( data => data.merged )
+		.catch( err => {
+			console.log( '🤯' );
+			console.log( err.message );
+		});
+}
+
 const writeEntry = async ( content_url ) => {
 	const options = {
 		url: content_url,
@@ -55,13 +69,16 @@ const writeEntry = async ( content_url ) => {
 	return requestPromise( options )
 		.then( async data => {
 			if ( data.pull_request ) {
-				const collaborator = await isCollaborator( data.user.login );
-				const type = getPullRequestType( data.labels );
-				const labels = getLabels( data.labels );
-				const labelTag = labels.length ? `(${ labels })` : '';
-				const authorTag = collaborator ? '' : `👏 @${ data.user.login }`;
-				const entry = `- ${ type }: ${ data.title } #${ data.number } ${ labelTag } ${ authorTag }`;
-				console.log( entry );
+				const isMerged = await isMergedPullRequest( data.pull_request.url );
+				if ( isMerged ) {
+					const collaborator = await isCollaborator( data.user.login );
+					const type = getPullRequestType( data.labels );
+					const labels = getLabels( data.labels );
+					const labelTag = labels.length ? `(${ labels })` : '';
+					const authorTag = collaborator ? '' : `👏 @${ data.user.login }`;
+					const entry = `- ${ type }: ${ data.title } #${ data.number } ${ labelTag } ${ authorTag }`;
+					console.log( entry );
+				}
 			}
 		} )
 		.catch( err => {
