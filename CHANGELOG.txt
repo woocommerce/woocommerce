@@ -1,5 +1,17 @@
 == Changelog ==
 
+= 3.6.4 - 2019-05-27 =
+* Enhancement - Add notice to install WooCommerce Admin. #23659
+* Fix - Tracks: Add check for OBW is-opting-in. #23772
+* Fix - Use HTTP protocol for schema.org's availability. #23774
+* Fix - Coupon usage limit checks based on email never ran when orders are created via wp-admin. #23775
+* Fix - Duplicate out of stock notices when navigating from cart to checkout and back to cart. #23791
+* Fix - Remove sensitive information from refund reason when manually refunding an order, and move it to an order note. #23739
+* Tweak - Tracks: set cookie on admin_init instead of wp_loaded. #23787
+* Dev - Fixed number of arguments for all occurrences of the woocommerce_valid_order_statuses_for_cancel filter. #23704
+* Dev - REST API - Stop order creation if invalid data is sent. #23325
+* Dev - Introduce new wc_load_cart function for dynamically loading and initializing the cart. #23794
+
 = 3.6.3 - 2019-05-16 =
 * Fix - State not required for Serbia. #23430
 * Fix - # symbol in product category name broke product export. #23454
@@ -3536,7 +3548,7 @@
 * Feature - Allow setting the product post type slug to a static (non-translatable) text, mainly to be used for translating and WPML setups.
 * Feature - Added lost password shortcode / email notification (thanks Max Rice).
 * Feature - Simplified permalink/base settings now found in Settings > Permalinks.
-* Feature - Support more permalink structures (from https://codex.wordpress.org/Using_Permalinks)
+* Feature - Support more permalink structures (from https://wordpress.org/support/article/using-permalinks/)
 * Feature - Added option to resend order emails, checkboxes select which one.
 * Feature - New layered nav current filters widget. This lists active filters from all layered nav for de-selection.
 * Feature - Added the option to sell products individually (only allow 1 in the cart).

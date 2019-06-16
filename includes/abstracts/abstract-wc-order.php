@@ -965,6 +965,21 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return $applied;
 		}
 
+		// Check specific for guest checkouts here as well since WC_Cart handles that seperately in check_customer_coupons.
+		if ( 0 === $this->get_customer_id() ) {
+			$data_store  = $coupon->get_data_store();
+			$usage_count = $data_store->get_usage_by_email( $coupon, $this->get_billing_email() );
+			if ( 0 < $coupon->get_usage_limit_per_user() && $usage_count >= $coupon->get_usage_limit_per_user() ) {
+				return new WP_Error(
+					'invalid_coupon',
+					$coupon->get_coupon_error( 106 ),
+					array(
+						'status' => 400,
+					)
+				);
+			}
+		}
+
 		$this->set_coupon_discount_amounts( $discounts );
 		$this->save();
 
@@ -1327,11 +1342,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Default to base.
 		if ( 'base' === $tax_based_on || empty( $args['country'] ) ) {
-			$default          = wc_get_base_location();
-			$args['country']  = $default['country'];
-			$args['state']    = $default['state'];
-			$args['postcode'] = '';
-			$args['city']     = '';
+			$args['country']  = WC()->countries->get_base_country();
+			$args['state']    = WC()->countries->get_base_state();
+			$args['postcode'] = WC()->countries->get_base_postcode();
+			$args['city']     = WC()->countries->get_base_city();
 		}
 
 		return $args;

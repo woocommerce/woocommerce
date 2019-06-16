@@ -1492,53 +1492,14 @@ class WC_Admin_Setup_Wizard {
 			return $can_paypal ? array( 'paypal' => $gateways['paypal'] ) : array();
 		}
 
-		$spotlight = '';
+		$klarna_or_square = false;
 
 		if ( $this->is_klarna_checkout_supported_country( $country ) ) {
-			$spotlight = 'klarna_checkout';
+			$klarna_or_square = 'klarna_checkout';
 		} elseif ( $this->is_klarna_payments_supported_country( $country ) ) {
-			$spotlight = 'klarna_payments';
+			$klarna_or_square = 'klarna_payments';
 		} elseif ( $this->is_square_supported_country( $country ) && get_option( 'woocommerce_sell_in_person' ) ) {
-			$spotlight = 'square';
-		}
-
-		if ( $spotlight ) {
-			$offered_gateways = array();
-
-			if ( $can_stripe ) {
-				$gateways['stripe']['enabled']  = true;
-				$gateways['stripe']['featured'] = true;
-				$offered_gateways              += array( 'stripe' => $gateways['stripe'] );
-			} elseif ( $can_paypal ) {
-				$gateways['ppec_paypal']['enabled'] = true;
-			}
-
-			if ( in_array( $spotlight, array( 'klarna_checkout', 'klarna_payments' ), true ) ) {
-				$gateways[ $spotlight ]['enabled']  = true;
-				$gateways[ $spotlight ]['featured'] = false;
-				$offered_gateways += array(
-					$spotlight => $gateways[ $spotlight ],
-				);
-
-			} else {
-				$offered_gateways += array(
-					$spotlight => $gateways[ $spotlight ],
-				);
-			}
-
-			if ( $can_paypal ) {
-				$offered_gateways += array( 'ppec_paypal' => $gateways['ppec_paypal'] );
-			}
-
-			if ( $can_eway ) {
-				$offered_gateways += array( 'eway' => $gateways['eway'] );
-			}
-
-			if ( $can_payfast ) {
-				$offered_gateways += array( 'payfast' => $gateways['payfast'] );
-			}
-
-			return $offered_gateways;
+			$klarna_or_square = 'square';
 		}
 
 		$offered_gateways = array();
@@ -1549,6 +1510,20 @@ class WC_Admin_Setup_Wizard {
 			$offered_gateways              += array( 'stripe' => $gateways['stripe'] );
 		} elseif ( $can_paypal ) {
 			$gateways['ppec_paypal']['enabled'] = true;
+		}
+
+		if ( $klarna_or_square ) {
+			if ( in_array( $klarna_or_square, array( 'klarna_checkout', 'klarna_payments' ), true ) ) {
+				$gateways[ $klarna_or_square ]['enabled']  = true;
+				$gateways[ $klarna_or_square ]['featured'] = false;
+				$offered_gateways                          += array(
+					$klarna_or_square => $gateways[ $klarna_or_square ],
+				);
+			} else {
+				$offered_gateways += array(
+					$klarna_or_square => $gateways[ $klarna_or_square ],
+				);
+			}
 		}
 
 		if ( $can_paypal ) {

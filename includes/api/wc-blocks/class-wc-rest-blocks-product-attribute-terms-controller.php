@@ -41,7 +41,8 @@ class WC_REST_Blocks_Product_Attribute_Terms_Controller extends WC_REST_Product_
 					'args'                => $this->get_collection_params(),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-			)
+			),
+			true
 		);
 
 		register_rest_route(
@@ -67,7 +68,8 @@ class WC_REST_Blocks_Product_Attribute_Terms_Controller extends WC_REST_Product_
 					),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-			)
+			),
+			true
 		);
 	}
 
