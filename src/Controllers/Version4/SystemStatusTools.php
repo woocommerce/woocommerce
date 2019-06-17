@@ -24,6 +24,13 @@ class SystemStatusTools extends AbstractController {
 	protected $rest_base = 'system_status/tools';
 
 	/**
+	 * Permission to check.
+	 *
+	 * @var string
+	 */
+	protected $resource_type = 'system_status';
+
+	/**
 	 * Register the routes for /system_status/tools/*.
 	 */
 	public function register_routes() {
@@ -67,45 +74,6 @@ class SystemStatusTools extends AbstractController {
 			),
 			true
 		);
-	}
-
-	/**
-	 * Check whether a given request has permission to view system status tools.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-		return true;
-	}
-
-	/**
-	 * Check whether a given request has permission to view a specific system status tool.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function get_item_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-		return true;
-	}
-
-	/**
-	 * Check whether a given request has permission to execute a specific system status tool.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function update_item_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'system_status', 'edit' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot update resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-		return true;
 	}
 
 	/**

@@ -59,7 +59,7 @@ trait BatchTrait {
 	 * @return boolean|\WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
-		return update_items_permissions_check( $request );
+		return update_item_permissions_check( $request );
 	}
 
 	/**

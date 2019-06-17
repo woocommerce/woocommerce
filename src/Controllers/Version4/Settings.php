@@ -24,6 +24,13 @@ class Settings extends AbstractController {
 	protected $rest_base = 'settings';
 
 	/**
+	 * Permission to check.
+	 *
+	 * @var string
+	 */
+	protected $resource_type = 'settings';
+
+	/**
 	 * Register routes.
 	 *
 	 * @since 3.0.0
@@ -43,20 +50,6 @@ class Settings extends AbstractController {
 			true
 		);
 		$this->register_batch_route();
-	}
-
-	/**
-	 * Makes sure the current user has access to WRITE the settings APIs.
-	 *
-	 * @param \WP_REST_Request $request Full data about the request.
-	 * @return \WP_Error|bool
-	 */
-	public function update_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
 	}
 
 	/**
@@ -187,21 +180,6 @@ class Settings extends AbstractController {
 			'parent_id'   => '',
 			'sub_groups'  => array(),
 		);
-	}
-
-	/**
-	 * Makes sure the current user has access to READ the settings APIs.
-	 *
-	 * @since  3.0.0
-	 * @param \WP_REST_Request $request Full data about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
 	}
 
 	/**

@@ -11,11 +11,20 @@ namespace WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Controllers\Version4\Utilities\SettingsTrait;
+
 /**
  * REST API Setting Options controller class.
  */
 class SettingsOptions extends AbstractController {
 	use SettingsTrait;
+
+	/**
+	 * Permission to check.
+	 *
+	 * @var string
+	 */
+	protected $resource_type = 'settings';
 
 	/**
 	 * Route base.
@@ -63,7 +72,7 @@ class SettingsOptions extends AbstractController {
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'batch_items' ),
-					'permission_callback' => array( $this, 'update_items_permissions_check' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_batch_schema' ),
@@ -93,7 +102,7 @@ class SettingsOptions extends AbstractController {
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
-					'permission_callback' => array( $this, 'update_items_permissions_check' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
@@ -380,36 +389,6 @@ class SettingsOptions extends AbstractController {
 		);
 
 		return $links;
-	}
-
-	/**
-	 * Makes sure the current user has access to READ the settings APIs.
-	 *
-	 * @since  3.0.0
-	 * @param \WP_REST_Request $request Full data about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Makes sure the current user has access to WRITE the settings APIs.
-	 *
-	 * @since  3.0.0
-	 * @param \WP_REST_Request $request Full data about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function update_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
 	}
 
 	/**

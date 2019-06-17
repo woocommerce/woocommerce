@@ -15,6 +15,7 @@ namespace WooCommerce\RestApi\Controllers\Version4;
 defined( 'ABSPATH' ) || exit;
 
 use \WP_REST_Controller;
+use \WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
 
 /**
  * Abstract Rest Controller Class
@@ -39,6 +40,13 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @var string
 	 */
 	protected $rest_base = '';
+
+	/**
+	 * Permission to check.
+	 *
+	 * @var string
+	 */
+	protected $resource_type = '';
 
 	/**
 	 * Register route for items requests.
@@ -148,5 +156,93 @@ abstract class AbstractController extends WP_REST_Controller {
 		$object_type          = $schema['title'];
 		$schema['properties'] = apply_filters( 'woocommerce_rest_' . $object_type . '_schema', $schema['properties'] );
 		return $schema;
+	}
+
+	/**
+	 * Check whether a given request has permission to read webhooks.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|boolean
+	 */
+	public function get_items_permissions_check( $request ) {
+		if ( ! Permissions::check_resource( $this->resource_type, 'read' ) ) {
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access create webhooks.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 *
+	 * @return bool|\WP_Error
+	 */
+	public function create_item_permissions_check( $request ) {
+		if ( ! Permissions::check_resource( $this->resource_type, 'create' ) ) {
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to read a webhook.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|boolean
+	 */
+	public function get_item_permissions_check( $request ) {
+		$id = $request->get_param( 'id' );
+
+		if ( 0 !== $id && ! Permissions::check_resource( $this->resource_type, 'read', $id ) ) {
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access update a webhook.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 *
+	 * @return bool|\WP_Error
+	 */
+	public function update_item_permissions_check( $request ) {
+		$id = $request->get_param( 'id' );
+
+		if ( 0 !== $id && ! Permissions::check_resource( $this->resource_type, 'edit', $id ) ) {
+			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access delete a webhook.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 *
+	 * @return bool|\WP_Error
+	 */
+	public function delete_item_permissions_check( $request ) {
+		$id = $request->get_param( 'id' );
+
+		if ( 0 !== $id && ! Permissions::check_resource( $this->resource_type, 'delete', $id ) ) {
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access batch create, update and delete items.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 *
+	 * @return bool|\WP_Error
+	 */
+	public function batch_items_permissions_check( $request ) {
+		if ( ! Permissions::check_resource( $this->resource_type, 'batch' ) ) {
+			return new \WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+		return true;
 	}
 }

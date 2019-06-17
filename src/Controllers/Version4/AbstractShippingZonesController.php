@@ -28,6 +28,13 @@ abstract class AbstractShippingZonesController extends AbstractController {
 	protected $rest_base = 'shipping/zones';
 
 	/**
+	 * Permission to check.
+	 *
+	 * @var string
+	 */
+	protected $resource_type = 'settings';
+
+	/**
 	 * Retrieve a Shipping Zone by it's ID.
 	 *
 	 * @param int $zone_id Shipping Zone ID.
@@ -53,12 +60,7 @@ abstract class AbstractShippingZonesController extends AbstractController {
 		if ( ! wc_shipping_enabled() ) {
 			return new \WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
-
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
+		return parent::get_items_permissions_check( $request );
 	}
 
 	/**
@@ -71,12 +73,7 @@ abstract class AbstractShippingZonesController extends AbstractController {
 		if ( ! wc_shipping_enabled() ) {
 			return new \WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
-
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
+		return parent::create_item_permissions_check( $request );
 	}
 
 	/**
@@ -85,16 +82,11 @@ abstract class AbstractShippingZonesController extends AbstractController {
 	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
-	public function update_items_permissions_check( $request ) {
+	public function update_item_permissions_check( $request ) {
 		if ( ! wc_shipping_enabled() ) {
 			return new \WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
-
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
+		return parent::update_item_permissions_check( $request );
 	}
 
 	/**
@@ -103,16 +95,10 @@ abstract class AbstractShippingZonesController extends AbstractController {
 	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
-	public function delete_items_permissions_check( $request ) {
+	public function delete_item_permissions_check( $request ) {
 		if ( ! wc_shipping_enabled() ) {
 			return new \WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
-
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'delete' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
+		return parent::delete_item_permissions_check( $request );
 	}
-
 }

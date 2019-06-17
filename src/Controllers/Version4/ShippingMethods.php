@@ -24,6 +24,13 @@ class ShippingMethods extends AbstractController {
 	protected $rest_base = 'shipping_methods';
 
 	/**
+	 * Permission to check.
+	 *
+	 * @var string
+	 */
+	protected $resource_type = 'shipping_methods';
+
+	/**
 	 * Register the route for /shipping_methods and /shipping_methods/<method>
 	 */
 	public function register_routes() {
@@ -63,32 +70,6 @@ class ShippingMethods extends AbstractController {
 			),
 			true
 		);
-	}
-
-	/**
-	 * Check whether a given request has permission to view shipping methods.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'shipping_methods', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access to read a shipping method.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function get_item_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'shipping_methods', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-		return true;
 	}
 
 	/**

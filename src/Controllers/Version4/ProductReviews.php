@@ -24,6 +24,13 @@ class ProductReviews extends AbstractController {
 	protected $rest_base = 'products/reviews';
 
 	/**
+	 * Permission to check.
+	 *
+	 * @var string
+	 */
+	protected $resource_type = 'product_reviews';
+
+	/**
 	 * Register the routes for product reviews.
 	 */
 	public function register_routes() {
@@ -114,99 +121,6 @@ class ProductReviews extends AbstractController {
 		);
 
 		$this->register_batch_route();
-	}
-
-	/**
-	 * Check whether a given request has permission to read webhook deliveries.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_product_reviews_permissions( 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access to read a product review.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function get_item_permissions_check( $request ) {
-		$id     = (int) $request['id'];
-		$review = get_comment( $id );
-
-		if ( $review && ! wc_rest_check_product_reviews_permissions( 'read', $review->comment_ID ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access to create a new product review.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function create_item_permissions_check( $request ) {
-		if ( ! wc_rest_check_product_reviews_permissions( 'create' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access to update a product review.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function update_item_permissions_check( $request ) {
-		$id     = (int) $request['id'];
-		$review = get_comment( $id );
-
-		if ( $review && ! wc_rest_check_product_reviews_permissions( 'edit', $review->comment_ID ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access to delete a product review.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function delete_item_permissions_check( $request ) {
-		$id     = (int) $request['id'];
-		$review = get_comment( $id );
-
-		if ( $review && ! wc_rest_check_product_reviews_permissions( 'delete', $review->comment_ID ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access batch create, update and delete items.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return boolean|\WP_Error
-	 */
-	public function batch_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_product_reviews_permissions( 'create' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
 	}
 
 	/**

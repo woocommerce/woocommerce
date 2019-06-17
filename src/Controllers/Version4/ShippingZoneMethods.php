@@ -11,6 +11,8 @@ namespace WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Controllers\Version4\Utilities\SettingsTrait;
+
 /**
  * REST API Shipping Zone Methods class.
  */
@@ -78,13 +80,13 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
-					'permission_callback' => array( $this, 'update_items_permissions_check' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				array(
 					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
-					'permission_callback' => array( $this, 'delete_items_permissions_check' ),
+					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 					'args'                => array(
 						'force' => array(
 							'default'     => false,

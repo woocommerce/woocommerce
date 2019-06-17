@@ -11,6 +11,8 @@ namespace WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Controllers\Version4\Utilities\SettingsTrait;
+
 /**
  * Payment gateways controller class.
  */
@@ -23,6 +25,13 @@ class PaymentGateways extends AbstractController {
 	 * @var string
 	 */
 	protected $rest_base = 'payment_gateways';
+
+	/**
+	 * Permission to check.
+	 *
+	 * @var string
+	 */
+	protected $resource_type = 'payment_gateways';
 
 	/**
 	 * Register the route for /payment_gateways and /payment_gateways/<id>
@@ -63,52 +72,13 @@ class PaymentGateways extends AbstractController {
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
-					'permission_callback' => array( $this, 'update_items_permissions_check' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			),
 			true
 		);
-	}
-
-	/**
-	 * Check whether a given request has permission to view payment gateways.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'payment_gateways', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access to read a payment gateway.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function get_item_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'payment_gateways', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-		return true;
-	}
-
-	/**
-	 * Check whether a given request has permission to edit payment gateways.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function update_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'payment_gateways', 'edit' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-		return true;
 	}
 
 	/**

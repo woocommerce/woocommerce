@@ -26,6 +26,13 @@ class Customers extends AbstractController {
 	protected $rest_base = 'customers';
 
 	/**
+	 * Permission to check.
+	 *
+	 * @var string
+	 */
+	protected $resource_type = 'customers';
+
+	/**
 	 * Register the routes for customers.
 	 */
 	public function register_routes() {
@@ -47,19 +54,19 @@ class Customers extends AbstractController {
 						$this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
 						array(
 							'email' => array(
-								'required' => true,
-								'type'     => 'string',
+								'required'    => true,
+								'type'        => 'string',
 								'description' => __( 'New user email address.', 'woocommerce' ),
 							),
 							'username' => array(
-								'required' => 'no' === get_option( 'woocommerce_registration_generate_username', 'yes' ),
+								'required'    => 'no' === get_option( 'woocommerce_registration_generate_username', 'yes' ),
 								'description' => __( 'New user username.', 'woocommerce' ),
-								'type'     => 'string',
+								'type'        => 'string',
 							),
 							'password' => array(
-								'required' => 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ),
+								'required'    => 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ),
 								'description' => __( 'New user password.', 'woocommerce' ),
-								'type'     => 'string',
+								'type'        => 'string',
 							),
 						)
 					),
@@ -116,100 +123,6 @@ class Customers extends AbstractController {
 		);
 
 		$this->register_batch_route();
-	}
-
-	/**
-	 * Check whether a given request has permission to read customers.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_user_permissions( 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access create customers.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 *
-	 * @return bool|\WP_Error
-	 */
-	public function create_item_permissions_check( $request ) {
-		if ( ! wc_rest_check_user_permissions( 'create' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access to read a customer.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function get_item_permissions_check( $request ) {
-		$id = (int) $request['id'];
-
-		if ( ! wc_rest_check_user_permissions( 'read', $id ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access update a customer.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 *
-	 * @return bool|\WP_Error
-	 */
-	public function update_item_permissions_check( $request ) {
-		$id = (int) $request['id'];
-
-		if ( ! wc_rest_check_user_permissions( 'edit', $id ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access delete a customer.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 *
-	 * @return bool|\WP_Error
-	 */
-	public function delete_item_permissions_check( $request ) {
-		$id = (int) $request['id'];
-
-		if ( ! wc_rest_check_user_permissions( 'delete', $id ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access batch create, update and delete items.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 *
-	 * @return bool|\WP_Error
-	 */
-	public function batch_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_user_permissions( 'batch' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
 	}
 
 	/**

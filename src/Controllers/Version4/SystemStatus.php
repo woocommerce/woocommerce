@@ -24,6 +24,13 @@ class SystemStatus extends AbstractController {
 	protected $rest_base = 'system_status';
 
 	/**
+	 * Permission to check.
+	 *
+	 * @var string
+	 */
+	protected $resource_type = 'system_status';
+
+	/**
 	 * Register the route for /system_status
 	 */
 	public function register_routes() {
@@ -41,19 +48,6 @@ class SystemStatus extends AbstractController {
 			),
 			true
 		);
-	}
-
-	/**
-	 * Check whether a given request has permission to view system status.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-		return true;
 	}
 
 	/**

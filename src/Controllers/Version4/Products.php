@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 use WooCommerce\RestApi\Controllers\Version4\Requests\ProductRequest;
 use WooCommerce\RestApi\Controllers\Version4\Responses\ProductResponse;
+use WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
 
 /**
  * REST API Products controller class.
@@ -1160,7 +1161,7 @@ class Products extends AbstractObjectsController {
 		 */
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );
 
-		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
+		if ( ! Permissions::check_post_object( $this->post_type, 'delete', $object->get_id() ) ) {
 			return new \WP_Error(
 				"woocommerce_rest_user_cannot_delete_{$this->post_type}",
 				/* translators: %s: post type */

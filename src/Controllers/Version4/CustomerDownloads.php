@@ -11,6 +11,8 @@ namespace WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
+
 /**
  * REST API Customer Downloads controller class.
  */
@@ -22,6 +24,13 @@ class CustomerDownloads extends AbstractController {
 	 * @var string
 	 */
 	protected $rest_base = 'customers/(?P<customer_id>[\d]+)/downloads';
+
+	/**
+	 * Permission to check.
+	 *
+	 * @var string
+	 */
+	protected $resource_type = 'customers';
 
 	/**
 	 * Register the routes for customers.
@@ -43,7 +52,7 @@ class CustomerDownloads extends AbstractController {
 			return new \WP_Error( 'woocommerce_rest_customer_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		if ( ! wc_rest_check_user_permissions( 'read', $customer->ID ) ) {
+		if ( ! Permissions::user_can( $this->resource_type, 'read', $customer->ID ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 

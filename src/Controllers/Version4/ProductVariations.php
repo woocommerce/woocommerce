@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 use WooCommerce\RestApi\Controllers\Version4\Requests\ProductVariationRequest;
 use WooCommerce\RestApi\Controllers\Version4\Responses\ProductVariationResponse;
+use \WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
 
 /**
  * REST API variations controller class.
@@ -568,7 +569,7 @@ class ProductVariations extends Products {
 	public function update_item_permissions_check( $request ) {
 		$object = $this->get_object( (int) $request['id'] );
 
-		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'edit', $object->get_id() ) ) {
+		if ( $object && 0 !== $object->get_id() && ! Permissions::check_post_object( $this->post_type, 'edit', $object->get_id() ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -736,7 +737,7 @@ class ProductVariations extends Products {
 		 */
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );
 
-		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
+		if ( ! Permissions::check_post_object( $this->post_type, 'delete', $object->get_id() ) ) {
 			return new \WP_Error(
 				/* translators: %s: post type */
 				"woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array(

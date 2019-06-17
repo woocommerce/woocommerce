@@ -11,6 +11,8 @@ namespace WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
+use WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
+
 /**
  * REST API Order Notes controller class.
  */
@@ -117,7 +119,7 @@ class OrderNotes extends AbstractController {
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
+		if ( ! Permissions::check_post_object( $this->post_type, 'read' ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -132,7 +134,7 @@ class OrderNotes extends AbstractController {
 	 * @return bool|\WP_Error
 	 */
 	public function create_item_permissions_check( $request ) {
-		if ( ! wc_rest_check_post_permissions( $this->post_type, 'create' ) ) {
+		if ( ! Permissions::check_post_object( $this->post_type, 'create' ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -148,7 +150,7 @@ class OrderNotes extends AbstractController {
 	public function get_item_permissions_check( $request ) {
 		$order = wc_get_order( (int) $request['order_id'] );
 
-		if ( $order && ! wc_rest_check_post_permissions( $this->post_type, 'read', $order->get_id() ) ) {
+		if ( $order && ! Permissions::check_post_object( $this->post_type, 'read', $order->get_id() ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -165,7 +167,7 @@ class OrderNotes extends AbstractController {
 	public function delete_item_permissions_check( $request ) {
 		$order = wc_get_order( (int) $request['order_id'] );
 
-		if ( $order && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $order->get_id() ) ) {
+		if ( $order && ! Permissions::check_post_object( $this->post_type, 'delete', $order->get_id() ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 

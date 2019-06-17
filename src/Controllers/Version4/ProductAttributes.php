@@ -24,6 +24,13 @@ class ProductAttributes extends AbstractController {
 	protected $rest_base = 'products/attributes';
 
 	/**
+	 * Permission to check.
+	 *
+	 * @var string
+	 */
+	protected $resource_type = 'attributes';
+
+	/**
 	 * Attribute name.
 	 *
 	 * @var string
@@ -106,103 +113,6 @@ class ProductAttributes extends AbstractController {
 		);
 
 		$this->register_batch_route();
-	}
-
-	/**
-	 * Check if a given request has access to read the attributes.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'attributes', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access to create a attribute.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function create_item_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'attributes', 'create' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you cannot create new resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access to read a attribute.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function get_item_permissions_check( $request ) {
-		if ( ! $this->get_taxonomy( $request ) ) {
-			return new \WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		if ( ! wc_rest_check_manager_permissions( 'attributes', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access to update a attribute.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function update_item_permissions_check( $request ) {
-		if ( ! $this->get_taxonomy( $request ) ) {
-			return new \WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		if ( ! wc_rest_check_manager_permissions( 'attributes', 'edit' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot update resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access to delete a attribute.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function delete_item_permissions_check( $request ) {
-		if ( ! $this->get_taxonomy( $request ) ) {
-			return new \WP_Error( 'woocommerce_rest_taxonomy_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
-		if ( ! wc_rest_check_manager_permissions( 'attributes', 'delete' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access batch create, update and delete items.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 *
-	 * @return bool|\WP_Error
-	 */
-	public function batch_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'attributes', 'batch' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
 	}
 
 	/**

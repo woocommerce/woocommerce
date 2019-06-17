@@ -9,6 +9,8 @@ namespace WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
+
 /**
  * CRUD Object Controller.
  */
@@ -72,7 +74,7 @@ abstract class AbstractObjectsController extends AbstractController {
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
+		if ( ! Permissions::check_post_object( $this->post_type, 'read' ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -86,9 +88,10 @@ abstract class AbstractObjectsController extends AbstractController {
 	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
-		$object = $this->get_object( (int) $request['id'] );
+		$id = $request->get_param( 'id' );
 
 		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'read', $object->get_id() ) ) {
+		if ( 0 !== $id && ! Permissions::check_post_object( $this->post_type, 'read', $id ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -102,7 +105,7 @@ abstract class AbstractObjectsController extends AbstractController {
 	 * @return \WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
-		if ( ! wc_rest_check_post_permissions( $this->post_type, 'create' ) ) {
+		if ( ! Permissions::check_post_object( $this->post_type, 'create' ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -116,9 +119,9 @@ abstract class AbstractObjectsController extends AbstractController {
 	 * @return \WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
-		$object = $this->get_object( (int) $request['id'] );
+		$id = $request->get_param( 'id' );
 
-		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'edit', $object->get_id() ) ) {
+		if ( 0 !== $id && ! Permissions::check_post_object( $this->post_type, 'edit', $id ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -132,9 +135,9 @@ abstract class AbstractObjectsController extends AbstractController {
 	 * @return bool|\WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
-		$object = $this->get_object( (int) $request['id'] );
+		$id = $request->get_param( 'id' );
 
-		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
+		if ( 0 !== $id && ! Permissions::check_post_object( $this->post_type, 'delete', $id ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -149,7 +152,7 @@ abstract class AbstractObjectsController extends AbstractController {
 	 * @return boolean|\WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_post_permissions( $this->post_type, 'batch' ) ) {
+		if ( ! Permissions::check_post_object( $this->post_type, 'batch' ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
@@ -387,7 +390,7 @@ abstract class AbstractObjectsController extends AbstractController {
 
 		$objects = array();
 		foreach ( $query_results['objects'] as $object ) {
-			if ( ! wc_rest_check_post_permissions( $this->post_type, 'read', $object->get_id() ) ) {
+			if ( ! Permissions::check_post_object( $this->post_type, 'read', $object->get_id() ) ) {
 				continue;
 			}
 
@@ -452,7 +455,7 @@ abstract class AbstractObjectsController extends AbstractController {
 
 		$supports_trash = $this->supports_trash( $object );
 
-		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
+		if ( ! Permissions::check_post_object( $this->post_type, 'delete', $object->get_id() ) ) {
 			/* translators: %s: post type */
 			return new \WP_Error( "woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
 		}

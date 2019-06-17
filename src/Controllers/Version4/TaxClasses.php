@@ -24,6 +24,13 @@ class TaxClasses extends AbstractController {
 	protected $rest_base = 'taxes/classes';
 
 	/**
+	 * Permission to check.
+	 *
+	 * @var string
+	 */
+	protected $resource_type = 'settings';
+
+	/**
 	 * Register the routes for tax classes.
 	 */
 	public function register_routes() {
@@ -74,50 +81,6 @@ class TaxClasses extends AbstractController {
 			),
 			true
 		);
-	}
-
-	/**
-	 * Check whether a given request has permission to read tax classes.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access create tax classes.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 *
-	 * @return bool|\WP_Error
-	 */
-	public function create_item_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'create' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access delete a tax.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 *
-	 * @return bool|\WP_Error
-	 */
-	public function delete_item_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'delete' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
 	}
 
 	/**
