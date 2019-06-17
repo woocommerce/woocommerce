@@ -5,14 +5,14 @@
  * @package WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4\Schema;
+namespace WooCommerce\RestApi\Controllers\Version4\Responses;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * AbstractResponse class.
+ * AbstractObjectResponse class.
  */
-abstract class AbstractResponse {
+abstract class AbstractObjectResponse {
 
 	/**
 	 * Convert object to match data in the schema.

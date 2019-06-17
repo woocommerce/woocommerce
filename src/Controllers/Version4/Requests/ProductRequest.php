@@ -5,7 +5,7 @@
  * @package WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4\Schema;
+namespace WooCommerce\RestApi\Controllers\Version4\Requests;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -14,7 +14,7 @@ use \WooCommerce\RestApi\Utilities\ImageAttachment;
 /**
  * ProductRequest class.
  */
-class ProductRequest extends AbstractRequest {
+class ProductRequest extends AbstractObjectRequest {
 
 	/**
 	 * Convert request to object.

@@ -5,7 +5,7 @@
  * @package WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4\Schema;
+namespace WooCommerce\RestApi\Controllers\Version4\Responses;
 
 defined( 'ABSPATH' ) || exit;
 

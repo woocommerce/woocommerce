@@ -11,8 +11,8 @@ namespace WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
-use WooCommerce\RestApi\Controllers\Version4\Schema\OrderRequest;
-use WooCommerce\RestApi\Controllers\Version4\Schema\OrderResponse;
+use WooCommerce\RestApi\Controllers\Version4\Requests\OrderRequest;
+use WooCommerce\RestApi\Controllers\Version4\Responses\OrderResponse;
 
 /**
  * REST API Orders controller class.

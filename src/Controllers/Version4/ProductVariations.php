@@ -11,8 +11,8 @@ namespace WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
-use WooCommerce\RestApi\Controllers\Version4\Schema\ProductVariationRequest;
-use WooCommerce\RestApi\Controllers\Version4\Schema\ProductVariationResponse;
+use WooCommerce\RestApi\Controllers\Version4\Requests\ProductVariationRequest;
+use WooCommerce\RestApi\Controllers\Version4\Responses\ProductVariationResponse;
 
 /**
  * REST API variations controller class.

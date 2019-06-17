@@ -5,14 +5,14 @@
  * @package WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4\Schema;
+namespace WooCommerce\RestApi\Controllers\Version4\Requests;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * AbstractRequest class.
+ * AbstractObjectRequest class.
  */
-abstract class AbstractRequest {
+abstract class AbstractObjectRequest {
 
 	/**
 	 * Request data.

@@ -5,14 +5,14 @@
  * @package WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4\Schema;
+namespace WooCommerce\RestApi\Controllers\Version4\Requests;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * OrderRequest class.
  */
-class OrderRequest extends AbstractRequest {
+class OrderRequest extends AbstractObjectRequest {
 
 	/**
 	 * Convert request to object.
@@ -126,9 +126,9 @@ class OrderRequest extends AbstractRequest {
 	/**
 	 * Maybe set an item prop if the value was posted.
 	 *
-	 * @param WC_Order_Item $item   Order item.
-	 * @param string        $prop   Order property.
-	 * @param array         $posted Request data.
+	 * @param \WC_Order_Item $item   Order item.
+	 * @param string         $prop   Order property.
+	 * @param array          $posted Request data.
 	 */
 	protected function maybe_set_item_prop( $item, $prop, $posted ) {
 		if ( isset( $posted[ $prop ] ) ) {
@@ -139,9 +139,9 @@ class OrderRequest extends AbstractRequest {
 	/**
 	 * Maybe set item props if the values were posted.
 	 *
-	 * @param WC_Order_Item $item   Order item data.
-	 * @param string[]      $props  Properties.
-	 * @param array         $posted Request data.
+	 * @param \WC_Order_Item $item   Order item data.
+	 * @param string[]       $props  Properties.
+	 * @param array          $posted Request data.
 	 */
 	protected function maybe_set_item_props( $item, $props, $posted ) {
 		foreach ( $props as $prop ) {
@@ -152,8 +152,8 @@ class OrderRequest extends AbstractRequest {
 	/**
 	 * Maybe set item meta if posted.
 	 *
-	 * @param WC_Order_Item $item   Order item data.
-	 * @param array         $posted Request data.
+	 * @param \WC_Order_Item $item   Order item data.
+	 * @param array          $posted Request data.
 	 */
 	protected function maybe_set_item_meta_data( $item, $posted ) {
 		if ( ! empty( $posted['meta_data'] ) && is_array( $posted['meta_data'] ) ) {
@@ -192,8 +192,8 @@ class OrderRequest extends AbstractRequest {
 	 * @param array  $posted Line item data.
 	 * @param string $action 'create' to add line item or 'update' to update it.
 	 * @param object $item Passed when updating an item. Null during creation.
-	 * @return WC_Order_Item_Product
-	 * @throws WC_REST_Exception Invalid data, server error.
+	 * @return \WC_Order_Item_Product
+	 * @throws \WC_REST_Exception Invalid data, server error.
 	 */
 	protected function prepare_line_items( $posted, $action = 'create', $item = null ) {
 		$item    = is_null( $item ) ? new \WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;

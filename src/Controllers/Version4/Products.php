@@ -11,8 +11,8 @@ namespace WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
-use WooCommerce\RestApi\Controllers\Version4\Schema\ProductRequest;
-use WooCommerce\RestApi\Controllers\Version4\Schema\ProductResponse;
+use WooCommerce\RestApi\Controllers\Version4\Requests\ProductRequest;
+use WooCommerce\RestApi\Controllers\Version4\Responses\ProductResponse;
 
 /**
  * REST API Products controller class.

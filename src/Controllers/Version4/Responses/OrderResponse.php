@@ -5,14 +5,14 @@
  * @package WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4\Schema;
+namespace WooCommerce\RestApi\Controllers\Version4\Responses;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * OrderResponse class.
  */
-class OrderResponse extends AbstractResponse {
+class OrderResponse extends AbstractObjectResponse {
 
 	/**
 	 * Decimal places to round to.
