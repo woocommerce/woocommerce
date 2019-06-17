@@ -1,6 +1,6 @@
 <?php
 /**
- * Convert data in the product schema format to a product object.
+ * Convert data in the order schema format to a product object.
  *
  * @package WooCommerce/RestApi
  */
