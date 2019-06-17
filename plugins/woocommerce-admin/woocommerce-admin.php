@@ -122,6 +122,8 @@ class WC_Admin_Feature_Plugin {
 		$this->define( 'WC_ADMIN_DIST_CSS_FOLDER', 'dist/' );
 		$this->define( 'WC_ADMIN_FEATURES_PATH', WC_ADMIN_ABSPATH . 'includes/features/' );
 		$this->define( 'WC_ADMIN_PLUGIN_FILE', __FILE__ );
+		// WARNING: Do not directly edit this version number constant.
+		// It is updated as part of the prebuild process from the package.json value.
 		$this->define( 'WC_ADMIN_VERSION_NUMBER', '0.13.2' );
 	}
 
