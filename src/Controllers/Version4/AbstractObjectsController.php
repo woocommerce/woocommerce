@@ -90,7 +90,6 @@ abstract class AbstractObjectsController extends AbstractController {
 	public function get_item_permissions_check( $request ) {
 		$id = $request->get_param( 'id' );
 
-		if ( $object && 0 !== $object->get_id() && ! wc_rest_check_post_permissions( $this->post_type, 'read', $object->get_id() ) ) {
 		if ( 0 !== $id && ! Permissions::check_post_object( $this->post_type, 'read', $id ) ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
