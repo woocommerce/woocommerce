@@ -432,6 +432,26 @@ class WC_Admin_Reports_Sync {
 	 * @return void
 	 */
 	public static function orders_lookup_import_order( $order_id ) {
+
+		$order = wc_get_order( $order_id );
+
+		// If the order isn't found for some reason, skip the sync.
+		if ( ! $order ) {
+			return;
+		}
+
+		$type = $order->get_type();
+
+		// If the order isn't the right type, skip sync.
+		if ( 'shop_order' !== $type && 'shop_order_refund' !== $type ) {
+			return;
+		}
+
+		// If the order has no id or date created, skip sync.
+		if ( ! $order->get_id() || ! $order->get_date_created() ) {
+			return;
+		}
+
 		$result = array_sum(
 			array(
 				WC_Admin_Reports_Orders_Stats_Data_Store::sync_order( $order_id ),
