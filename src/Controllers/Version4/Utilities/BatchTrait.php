@@ -5,7 +5,7 @@
  * @package WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4;
+namespace WooCommerce\RestApi\Controllers\Version4\Utilities;
 
 /**
  * BatchTrait.

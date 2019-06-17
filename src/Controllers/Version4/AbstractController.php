@@ -16,6 +16,7 @@ defined( 'ABSPATH' ) || exit;
 
 use \WP_REST_Controller;
 use \WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
+use \WooCommerce\RestApi\Controllers\Version4\Utilities\BatchTrait;
 
 /**
  * Abstract Rest Controller Class
