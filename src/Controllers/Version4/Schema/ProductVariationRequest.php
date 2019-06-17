@@ -9,6 +9,8 @@ namespace WooCommerce\RestApi\Controllers\Version4\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
+use \WooCommerce\RestApi\Utilities\ImageAttachment;
+
 /**
  * ProductVariationRequest class.
  */
@@ -167,39 +169,20 @@ class ProductVariationRequest extends ProductRequest {
 		}
 
 		$attachment_id = isset( $image['id'] ) ? absint( $image['id'] ) : 0;
+		$attachment    = new ImageAttachment( $attachment_id, $object->get_id() );
 
-		if ( 0 === $attachment_id && isset( $image['src'] ) ) {
-			$upload = wc_rest_upload_image_from_url( esc_url_raw( $image['src'] ) );
-
-			if ( is_wp_error( $upload ) ) {
-				if ( ! apply_filters( 'woocommerce_rest_suppress_image_upload_error', false, $upload, $object->get_id(), array( $image ) ) ) {
-					throw new \WC_REST_Exception( 'woocommerce_variation_image_upload_error', $upload->get_error_message(), 400 );
-				}
-			}
-
-			$attachment_id = wc_rest_set_uploaded_image_as_attachment( $upload, $object->get_id() );
+		if ( 0 === $attachment->id && ! empty( $image['src'] ) ) {
+			$attachment->upload_image_from_src( $image['src'] );
 		}
 
-		if ( ! wp_attachment_is_image( $attachment_id ) ) {
-			/* translators: %s: attachment ID */
-			throw new \WC_REST_Exception( 'woocommerce_variation_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $attachment_id ), 400 );
-		}
-
-		// Set the image alt if present.
 		if ( ! empty( $image['alt'] ) ) {
-			update_post_meta( $attachment_id, '_wp_attachment_image_alt', wc_clean( $image['alt'] ) );
+			$attachment->update_alt_text( $image['alt'] );
 		}
 
-		// Set the image name if present.
 		if ( ! empty( $image['name'] ) ) {
-			wp_update_post(
-				array(
-					'ID'         => $attachment_id,
-					'post_title' => $image['name'],
-				)
-			);
+			$attachment->update_name( $image['name'] );
 		}
 
-		return $attachment_id;
+		return $attachment->id;
 	}
 }
