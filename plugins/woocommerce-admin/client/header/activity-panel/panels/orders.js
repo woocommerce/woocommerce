@@ -8,22 +8,12 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import Gridicon from 'gridicons';
 import PropTypes from 'prop-types';
-import { noop } from 'lodash';
 import interpolateComponents from 'interpolate-components';
 
 /**
  * WooCommerce dependencies
  */
-import {
-	EllipsisMenu,
-	EmptyContent,
-	Flag,
-	Link,
-	MenuTitle,
-	MenuItem,
-	OrderStatus,
-	Section,
-} from '@woocommerce/components';
+import { EmptyContent, Flag, Link, OrderStatus, Section } from '@woocommerce/components';
 import { formatCurrency } from '@woocommerce/currency';
 import { getAdminLink, getNewPath } from '@woocommerce/navigation';
 
@@ -226,18 +216,6 @@ class OrdersPanel extends Component {
 			);
 		}
 
-		const menu = (
-			<EllipsisMenu
-				label="Demo Menu"
-				renderContent={ () => (
-					<Fragment>
-						<MenuTitle>Test</MenuTitle>
-						<MenuItem onInvoke={ noop }>Test</MenuItem>
-					</Fragment>
-				) }
-			/>
-		);
-
 		const title =
 			isRequesting || orders.length
 				? __( 'Orders', 'woocommerce-admin' )
@@ -245,7 +223,7 @@ class OrdersPanel extends Component {
 
 		return (
 			<Fragment>
-				<ActivityHeader title={ title } menu={ menu } />
+				<ActivityHeader title={ title } />
 				<Section>
 					{ isRequesting ? (
 						<ActivityCardPlaceholder
