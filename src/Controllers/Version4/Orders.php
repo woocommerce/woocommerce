@@ -11,6 +11,9 @@ namespace WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
+use WooCommerce\RestApi\Controllers\Version4\Schema\OrderRequest;
+use WooCommerce\RestApi\Controllers\Version4\Schema\OrderResponse;
+
 /**
  * REST API Orders controller class.
  */
@@ -113,99 +116,6 @@ class Orders extends AbstractObjectsController {
 	}
 
 	/**
-	 * Get formatted item data.
-	 *
-	 * @since  3.0.0
-	 * @param  \WC_Data $object WC_Data instance.
-	 * @return array
-	 */
-	protected function get_formatted_item_data( $object ) {
-		$data              = $object->get_data();
-		$format_decimal    = array( 'discount_total', 'discount_tax', 'shipping_total', 'shipping_tax', 'shipping_total', 'shipping_tax', 'cart_tax', 'total', 'total_tax' );
-		$format_date       = array( 'date_created', 'date_modified', 'date_completed', 'date_paid' );
-		$format_line_items = array( 'line_items', 'tax_lines', 'shipping_lines', 'fee_lines', 'coupon_lines' );
-
-		// Format decimal values.
-		foreach ( $format_decimal as $key ) {
-			$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
-		}
-
-		// Format date values.
-		foreach ( $format_date as $key ) {
-			$datetime              = $data[ $key ];
-			$data[ $key ]          = wc_rest_prepare_date_response( $datetime, false );
-			$data[ $key . '_gmt' ] = wc_rest_prepare_date_response( $datetime );
-		}
-
-		// Format the order status.
-		$data['status'] = 'wc-' === substr( $data['status'], 0, 3 ) ? substr( $data['status'], 3 ) : $data['status'];
-
-		// Format line items.
-		foreach ( $format_line_items as $key ) {
-			$data[ $key ] = array_values( array_map( array( $this, 'get_order_item_data' ), $data[ $key ] ) );
-		}
-
-		// Refunds.
-		$data['refunds'] = array();
-		foreach ( $object->get_refunds() as $refund ) {
-			$data['refunds'][] = array(
-				'id'     => $refund->get_id(),
-				'reason' => $refund->get_reason() ? $refund->get_reason() : '',
-				'total'  => '-' . wc_format_decimal( $refund->get_amount(), $this->request['dp'] ),
-			);
-		}
-
-		// Currency symbols.
-		$currency_symbol         = get_woocommerce_currency_symbol( $data['currency'] );
-		$data['currency_symbol'] = html_entity_decode( $currency_symbol );
-
-		return array(
-			'id'                   => $object->get_id(),
-			'parent_id'            => $data['parent_id'],
-			'number'               => $data['number'],
-			'order_key'            => $data['order_key'],
-			'created_via'          => $data['created_via'],
-			'version'              => $data['version'],
-			'status'               => $data['status'],
-			'currency'             => $data['currency'],
-			'currency_symbol'      => $data['currency_symbol'],
-			'date_created'         => $data['date_created'],
-			'date_created_gmt'     => $data['date_created_gmt'],
-			'date_modified'        => $data['date_modified'],
-			'date_modified_gmt'    => $data['date_modified_gmt'],
-			'discount_total'       => $data['discount_total'],
-			'discount_tax'         => $data['discount_tax'],
-			'shipping_total'       => $data['shipping_total'],
-			'shipping_tax'         => $data['shipping_tax'],
-			'cart_tax'             => $data['cart_tax'],
-			'total'                => $data['total'],
-			'total_tax'            => $data['total_tax'],
-			'prices_include_tax'   => $data['prices_include_tax'],
-			'customer_id'          => $data['customer_id'],
-			'customer_ip_address'  => $data['customer_ip_address'],
-			'customer_user_agent'  => $data['customer_user_agent'],
-			'customer_note'        => $data['customer_note'],
-			'billing'              => $data['billing'],
-			'shipping'             => $data['shipping'],
-			'payment_method'       => $data['payment_method'],
-			'payment_method_title' => $data['payment_method_title'],
-			'transaction_id'       => $data['transaction_id'],
-			'date_paid'            => $data['date_paid'],
-			'date_paid_gmt'        => $data['date_paid_gmt'],
-			'date_completed'       => $data['date_completed'],
-			'date_completed_gmt'   => $data['date_completed_gmt'],
-			'cart_hash'            => $data['cart_hash'],
-			'meta_data'            => $data['meta_data'],
-			'line_items'           => $data['line_items'],
-			'tax_lines'            => $data['tax_lines'],
-			'shipping_lines'       => $data['shipping_lines'],
-			'fee_lines'            => $data['fee_lines'],
-			'coupon_lines'         => $data['coupon_lines'],
-			'refunds'              => $data['refunds'],
-		);
-	}
-
-	/**
 	 * Prepare a single order output for response.
 	 *
 	 * @since  3.0.0
@@ -214,13 +124,17 @@ class Orders extends AbstractObjectsController {
 	 * @return \WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$this->request       = $request;
-		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : absint( $this->request['dp'] );
-		$data                = $this->get_formatted_item_data( $object );
-		$context             = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data                = $this->add_additional_fields_to_object( $data, $request );
-		$data                = $this->filter_response_by_context( $data, $context );
-		$response            = rest_ensure_response( $data );
+		$context        = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$order_response = new OrderResponse();
+
+		if ( ! is_null( $request['dp'] ) ) {
+			$order_response->set_dp( $request['dp'] );
+		}
+
+		$data     = $order_response->prepare_response( $object, $context );
+		$data     = $this->add_additional_fields_to_object( $data, $request );
+		$data     = $this->filter_response_by_context( $data, $context );
+		$response = rest_ensure_response( $data );
 		$response->add_links( $this->prepare_links( $object, $request ) );
 
 		/**
@@ -239,7 +153,7 @@ class Orders extends AbstractObjectsController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param \WC_Data          $object  Object data.
+	 * @param \WC_Data         $object  Object data.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return array                   Links for the given post.
 	 */
@@ -365,17 +279,6 @@ class Orders extends AbstractObjectsController {
 	}
 
 	/**
-	 * Only return writable props from schema.
-	 *
-	 * @param  array $schema Schema.
-	 * @return bool
-	 */
-	protected function filter_writable_props( $schema ) {
-		return empty( $schema['readonly'] );
-	}
-
-
-	/**
 	 * Prepare a single order for create or update.
 	 *
 	 * @throws \WC_REST_Exception When fails to set any item.
@@ -384,54 +287,11 @@ class Orders extends AbstractObjectsController {
 	 * @return \WP_Error|\WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
-		$id        = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
-		$order     = new \WC_Order( $id );
-		$schema    = $this->get_item_schema();
-		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
-
-		// Handle all writable props.
-		foreach ( $data_keys as $key ) {
-			$value = $request[ $key ];
-
-			if ( ! is_null( $value ) ) {
-				switch ( $key ) {
-					case 'coupon_lines':
-					case 'status':
-						// Change should be done later so transitions have new data.
-						break;
-					case 'billing':
-					case 'shipping':
-						$this->update_address( $order, $value, $key );
-						break;
-					case 'line_items':
-					case 'shipping_lines':
-					case 'fee_lines':
-						if ( is_array( $value ) ) {
-							foreach ( $value as $item ) {
-								if ( is_array( $item ) ) {
-									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
-										$order->remove_item( $item['id'] );
-									} else {
-										$this->set_item( $order, $key, $item );
-									}
-								}
-							}
-						}
-						break;
-					case 'meta_data':
-						if ( is_array( $value ) ) {
-							foreach ( $value as $meta ) {
-								$order->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-							}
-						}
-						break;
-					default:
-						if ( is_callable( array( $order, "set_{$key}" ) ) ) {
-							$order->{"set_{$key}"}( $value );
-						}
-						break;
-				}
-			}
+		try {
+			$order_request = new OrderRequest( $request );
+			$order         = $order_request->prepare_object();
+		} catch ( \WC_REST_Exception $e ) {
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 
 		/**
@@ -466,18 +326,6 @@ class Orders extends AbstractObjectsController {
 			// Make sure gateways are loaded so hooks from gateways fire on save/create.
 			WC()->payment_gateways();
 
-			if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
-				// Make sure customer exists.
-				if ( false === get_user_by( 'id', $request['customer_id'] ) ) {
-					throw new \WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
-				}
-
-				// Make sure customer is part of blog.
-				if ( is_multisite() && ! is_user_member_of_blog( $request['customer_id'] ) ) {
-					add_user_to_blog( get_current_blog_id(), $request['customer_id'], 'customer' );
-				}
-			}
-
 			if ( $creating ) {
 				$object->set_created_via( 'rest-api' );
 				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
@@ -489,21 +337,11 @@ class Orders extends AbstractObjectsController {
 				}
 			}
 
-			// Set coupons.
-			$this->calculate_coupons( $request, $object );
-
-			// Set status.
-			if ( ! empty( $request['status'] ) ) {
-				$object->set_status( $request['status'] );
-			}
-
 			$object->save();
 
 			// Actions for after the order is saved.
-			if ( true === $request['set_paid'] ) {
-				if ( $creating || $object->needs_payment() ) {
-					$object->payment_complete( $request['transaction_id'] );
-				}
+			if ( true === $request['set_paid'] && ( $creating || $object->needs_payment() ) ) {
+				$object->payment_complete();
 			}
 
 			return $this->get_object( $object->get_id() );
@@ -512,249 +350,6 @@ class Orders extends AbstractObjectsController {
 		} catch ( \WC_REST_Exception $e ) {
 			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
-	}
-
-	/**
-	 * Update address.
-	 *
-	 * @param WC_Order $order  Order data.
-	 * @param array    $posted Posted data.
-	 * @param string   $type   Address type.
-	 */
-	protected function update_address( $order, $posted, $type = 'billing' ) {
-		foreach ( $posted as $key => $value ) {
-			if ( is_callable( array( $order, "set_{$type}_{$key}" ) ) ) {
-				$order->{"set_{$type}_{$key}"}( $value );
-			}
-		}
-	}
-
-	/**
-	 * Gets the product ID from the SKU or posted ID.
-	 *
-	 * @param array $posted Request data.
-	 * @return int
-	 * @throws \WC_REST_Exception When SKU or ID is not valid.
-	 */
-	protected function get_product_id( $posted ) {
-		if ( ! empty( $posted['sku'] ) ) {
-			$product_id = (int) wc_get_product_id_by_sku( $posted['sku'] );
-		} elseif ( ! empty( $posted['product_id'] ) && empty( $posted['variation_id'] ) ) {
-			$product_id = (int) $posted['product_id'];
-		} elseif ( ! empty( $posted['variation_id'] ) ) {
-			$product_id = (int) $posted['variation_id'];
-		} else {
-			throw new \WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
-		}
-		return $product_id;
-	}
-
-	/**
-	 * Maybe set an item prop if the value was posted.
-	 *
-	 * @param WC_Order_Item $item   Order item.
-	 * @param string        $prop   Order property.
-	 * @param array         $posted Request data.
-	 */
-	protected function maybe_set_item_prop( $item, $prop, $posted ) {
-		if ( isset( $posted[ $prop ] ) ) {
-			$item->{"set_$prop"}( $posted[ $prop ] );
-		}
-	}
-
-	/**
-	 * Maybe set item props if the values were posted.
-	 *
-	 * @param WC_Order_Item $item   Order item data.
-	 * @param string[]      $props  Properties.
-	 * @param array         $posted Request data.
-	 */
-	protected function maybe_set_item_props( $item, $props, $posted ) {
-		foreach ( $props as $prop ) {
-			$this->maybe_set_item_prop( $item, $prop, $posted );
-		}
-	}
-
-	/**
-	 * Maybe set item meta if posted.
-	 *
-	 * @param WC_Order_Item $item   Order item data.
-	 * @param array         $posted Request data.
-	 */
-	protected function maybe_set_item_meta_data( $item, $posted ) {
-		if ( ! empty( $posted['meta_data'] ) && is_array( $posted['meta_data'] ) ) {
-			foreach ( $posted['meta_data'] as $meta ) {
-				if ( isset( $meta['key'] ) ) {
-					$value = isset( $meta['value'] ) ? $meta['value'] : null;
-					$item->update_meta_data( $meta['key'], $value, isset( $meta['id'] ) ? $meta['id'] : '' );
-				}
-			}
-		}
-	}
-
-	/**
-	 * Create or update a line item.
-	 *
-	 * @param array  $posted Line item data.
-	 * @param string $action 'create' to add line item or 'update' to update it.
-	 * @param object $item Passed when updating an item. Null during creation.
-	 * @return WC_Order_Item_Product
-	 * @throws WC_REST_Exception Invalid data, server error.
-	 */
-	protected function prepare_line_items( $posted, $action = 'create', $item = null ) {
-		$item    = is_null( $item ) ? new \WC_Order_Item_Product( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
-		$product = wc_get_product( $this->get_product_id( $posted ) );
-
-		if ( $product !== $item->get_product() ) {
-			$item->set_product( $product );
-
-			if ( 'create' === $action ) {
-				$quantity = isset( $posted['quantity'] ) ? $posted['quantity'] : 1;
-				$total    = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
-				$item->set_total( $total );
-				$item->set_subtotal( $total );
-			}
-		}
-
-		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
-		$this->maybe_set_item_meta_data( $item, $posted );
-
-		return $item;
-	}
-
-	/**
-	 * Create or update an order shipping method.
-	 *
-	 * @param array  $posted $shipping Item data.
-	 * @param string $action 'create' to add shipping or 'update' to update it.
-	 * @param object $item Passed when updating an item. Null during creation.
-	 * @return \WC_Order_Item_Shipping
-	 * @throws \WC_REST_Exception Invalid data, server error.
-	 */
-	protected function prepare_shipping_lines( $posted, $action = 'create', $item = null ) {
-		$item = is_null( $item ) ? new \WC_Order_Item_Shipping( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
-
-		if ( 'create' === $action ) {
-			if ( empty( $posted['method_id'] ) ) {
-				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_shipping_item', __( 'Shipping method ID is required.', 'woocommerce' ), 400 );
-			}
-		}
-
-		$this->maybe_set_item_props( $item, array( 'method_id', 'method_title', 'total' ), $posted );
-		$this->maybe_set_item_meta_data( $item, $posted );
-
-		return $item;
-	}
-
-	/**
-	 * Create or update an order fee.
-	 *
-	 * @param array  $posted Item data.
-	 * @param string $action 'create' to add fee or 'update' to update it.
-	 * @param object $item Passed when updating an item. Null during creation.
-	 * @return \WC_Order_Item_Fee
-	 * @throws \WC_REST_Exception Invalid data, server error.
-	 */
-	protected function prepare_fee_lines( $posted, $action = 'create', $item = null ) {
-		$item = is_null( $item ) ? new \WC_Order_Item_Fee( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
-
-		if ( 'create' === $action ) {
-			if ( empty( $posted['name'] ) ) {
-				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_fee_item', __( 'Fee name is required.', 'woocommerce' ), 400 );
-			}
-		}
-
-		$this->maybe_set_item_props( $item, array( 'name', 'tax_class', 'tax_status', 'total' ), $posted );
-		$this->maybe_set_item_meta_data( $item, $posted );
-
-		return $item;
-	}
-
-	/**
-	 * Create or update an order coupon.
-	 *
-	 * @param array  $posted Item data.
-	 * @param string $action 'create' to add coupon or 'update' to update it.
-	 * @param object $item Passed when updating an item. Null during creation.
-	 * @return \WC_Order_Item_Coupon
-	 * @throws \WC_REST_Exception Invalid data, server error.
-	 */
-	protected function prepare_coupon_lines( $posted, $action = 'create', $item = null ) {
-		$item = is_null( $item ) ? new \WC_Order_Item_Coupon( ! empty( $posted['id'] ) ? $posted['id'] : '' ) : $item;
-
-		if ( 'create' === $action ) {
-			if ( empty( $posted['code'] ) ) {
-				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
-			}
-		}
-
-		$this->maybe_set_item_props( $item, array( 'code', 'discount' ), $posted );
-		$this->maybe_set_item_meta_data( $item, $posted );
-
-		return $item;
-	}
-
-	/**
-	 * Wrapper method to create/update order items.
-	 * When updating, the item ID provided is checked to ensure it is associated
-	 * with the order.
-	 *
-	 * @param \WC_Order $order order object.
-	 * @param string    $item_type The item type.
-	 * @param array     $posted item provided in the request body.
-	 * @throws \WC_REST_Exception If item ID is not associated with order.
-	 */
-	protected function set_item( $order, $item_type, $posted ) {
-		global $wpdb;
-
-		if ( ! empty( $posted['id'] ) ) {
-			$action = 'update';
-		} else {
-			$action = 'create';
-		}
-
-		$method = 'prepare_' . $item_type;
-		$item   = null;
-
-		// Verify provided line item ID is associated with order.
-		if ( 'update' === $action ) {
-			$item = $order->get_item( absint( $posted['id'] ), false );
-
-			if ( ! $item ) {
-				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_item_id', __( 'Order item ID provided is not associated with order.', 'woocommerce' ), 400 );
-			}
-		}
-
-		// Prepare item data.
-		$item = $this->$method( $posted, $action, $item );
-
-		do_action( 'woocommerce_rest_set_order_item', $item, $posted );
-
-		// If creating the order, add the item to it.
-		if ( 'create' === $action ) {
-			$order->add_item( $item );
-		} else {
-			$item->save();
-		}
-	}
-
-	/**
-	 * Helper method to check if the resource ID associated with the provided item is null.
-	 * Items can be deleted by setting the resource ID to null.
-	 *
-	 * @param array $item Item provided in the request body.
-	 * @return bool True if the item resource ID is null, false otherwise.
-	 */
-	protected function item_is_null( $item ) {
-		$keys = array( 'product_id', 'method_id', 'method_title', 'name', 'code' );
-
-		foreach ( $keys as $key ) {
-			if ( array_key_exists( $key, $item ) && is_null( $item[ $key ] ) ) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**
@@ -1662,43 +1257,5 @@ class Orders extends AbstractObjectsController {
 		);
 
 		return $params;
-	}
-
-	/**
-	 * Calculate coupons.
-	 *
-	 * @throws \WC_REST_Exception When fails to set any item.
-	 *
-	 * @param \WP_REST_Request $request Request object.
-	 * @param \WC_Order        $order   Order data.
-	 * @return bool
-	 */
-	protected function calculate_coupons( $request, $order ) {
-		if ( ! isset( $request['coupon_lines'] ) || ! is_array( $request['coupon_lines'] ) ) {
-			return false;
-		}
-
-		// Remove all coupons first to ensure calculation is correct.
-		foreach ( $order->get_items( 'coupon' ) as $coupon ) {
-			$order->remove_coupon( $coupon->get_code() );
-		}
-
-		foreach ( $request['coupon_lines'] as $item ) {
-			if ( is_array( $item ) ) {
-				if ( empty( $item['id'] ) ) {
-					if ( empty( $item['code'] ) ) {
-						throw new \WC_REST_Exception( 'woocommerce_rest_invalid_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
-					}
-
-					$results = $order->apply_coupon( wc_clean( $item['code'] ) );
-
-					if ( is_wp_error( $results ) ) {
-						throw new \WC_REST_Exception( 'woocommerce_rest_' . $results->get_error_code(), $results->get_error_message(), 400 );
-					}
-				}
-			}
-		}
-
-		return true;
 	}
 }

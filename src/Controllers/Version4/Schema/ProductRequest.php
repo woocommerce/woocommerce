@@ -144,10 +144,10 @@ class ProductRequest extends AbstractRequest {
 					$prop_values = array_merge( $prop_values, $images );
 					break;
 				case 'categories':
-					$prop_values['category_ids'] = $this->parse_terms_field( $value );
+					$prop_values['category_ids'] = wp_list_pluck( $value, 'id' );
 					break;
 				case 'tags':
-					$prop_values['tag_ids'] = $this->parse_terms_field( $value );
+					$prop_values['tag_ids'] = wp_list_pluck( $value, 'id' );
 					break;
 				case 'attributes':
 					$prop_values['attributes'] = $this->parse_attributes_field( $value );
@@ -246,7 +246,6 @@ class ProductRequest extends AbstractRequest {
 		$attributes = array();
 
 		foreach ( $raw_attributes as $attribute ) {
-			// Check ID for global attributes or name for product attributes.
 			if ( ! empty( $attribute['id'] ) ) {
 				$attribute_id   = absint( $attribute['id'] );
 				$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
@@ -260,7 +259,6 @@ class ProductRequest extends AbstractRequest {
 			}
 
 			if ( ! is_array( $attribute['options'] ) ) {
-				// Text based attributes - Posted values are term names.
 				$attribute['options'] = explode( \WC_DELIMITER, $attribute['options'] );
 			}
 
@@ -403,16 +401,6 @@ class ProductRequest extends AbstractRequest {
 			$files[] = $download;
 		}
 		return $files;
-	}
-
-	/**
-	 * Save taxonomy terms.
-	 *
-	 * @param array $terms Terms data.
-	 * @return array
-	 */
-	protected function parse_terms_field( $terms ) {
-		return wp_list_pluck( $terms, 'id' );
 	}
 
 	/**
