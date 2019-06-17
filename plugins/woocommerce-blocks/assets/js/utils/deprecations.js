@@ -17,7 +17,7 @@ export const deprecatedConvertToShortcode = ( blockType ) => {
 		const {
 			align,
 			contentVisibility,
-		} = props.attributes; /* eslint-disable-line react/prop-types */
+		} = props.attributes;
 		const classes = classnames( align ? `align${ align }` : '', {
 			'is-hidden-title': ! contentVisibility.title,
 			'is-hidden-price': ! contentVisibility.price,
