@@ -46,4 +46,19 @@ abstract class AbstractRequest {
 	 * @throws \WC_REST_Exception Will throw an exception if the resulting product object is invalid.
 	 */
 	abstract public function prepare_object();
+
+	/**
+	 * Set meta data.
+	 *
+	 * @param mixed $object Product object reference.
+	 */
+	protected function set_meta_data( &$object ) {
+		$meta_data = $this->get_param( 'meta_data', null );
+
+		if ( ! is_null( $meta_data ) ) {
+			foreach ( $meta_data as $meta ) {
+				$object->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+			}
+		}
+	}
 }

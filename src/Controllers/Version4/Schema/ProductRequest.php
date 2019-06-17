@@ -237,21 +237,6 @@ class ProductRequest extends AbstractRequest {
 	}
 
 	/**
-	 * Set meta data.
-	 *
-	 * @param \WC_Product_Simple|\WC_Product_Grouped|\WC_Product_Variable|\WC_Product_External $object Product object reference.
-	 */
-	protected function set_meta_data( &$object ) {
-		$meta_data = $this->get_param( 'meta_data', null );
-
-		if ( ! is_null( $meta_data ) ) {
-			foreach ( $meta_data as $meta ) {
-				$object->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-			}
-		}
-	}
-
-	/**
 	 * Set product object's attributes.
 	 *
 	 * @param array $raw_attributes Attribute data from request.
