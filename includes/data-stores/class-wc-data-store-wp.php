@@ -18,7 +18,7 @@ class WC_Data_Store_WP {
 
 	/**
 	 * Meta type. This should match up with
-	 * the types available at https://codex.wordpress.org/Function_Reference/add_metadata.
+	 * the types available at https://developer.wordpress.org/reference/functions/add_metadata/.
 	 * WP defines 'post', 'user', 'comment', and 'term'.
 	 *
 	 * @var string
