@@ -52,7 +52,9 @@ class WGPB_Block_Library {
 		}
 		self::register_blocks();
 		self::register_assets();
-		add_action( 'admin_print_footer_scripts', array( 'WGPB_Block_Library', 'print_script_settings' ), 1 );
+		add_action( 'admin_print_footer_scripts', array( 'WGPB_Block_Library', 'print_script_wc_settings' ), 1 );
+		add_action( 'admin_print_footer_scripts', array( 'WGPB_Block_Library', 'print_script_block_data' ), 1 );
+		add_action( 'wp_print_footer_scripts', array( 'WGPB_Block_Library', 'print_script_block_data' ), 1 );
 		add_action( 'body_class', array( 'WGPB_Block_Library', 'add_theme_body_class' ), 1 );
 	}
 
@@ -122,30 +124,28 @@ class WGPB_Block_Library {
 		// Shared libraries and components across all blocks.
 		self::register_script( 'wc-blocks', plugins_url( 'build/blocks.js', WGPB_PLUGIN_FILE ), array(), false );
 		self::register_script( 'wc-vendors', plugins_url( 'build/vendors.js', WGPB_PLUGIN_FILE ), array(), false );
+		self::register_script( 'wc-packages', plugins_url( 'build/packages.js', WGPB_PLUGIN_FILE ), array(), false );
+		self::register_script( 'wc-frontend', plugins_url( 'build/frontend.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors' ) );
 
 		// Individual blocks.
-		self::register_script( 'wc-handpicked-products', plugins_url( 'build/handpicked-products.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-blocks' ) );
-		self::register_script( 'wc-product-best-sellers', plugins_url( 'build/product-best-sellers.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-blocks' ) );
-		self::register_script( 'wc-product-category', plugins_url( 'build/product-category.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-blocks' ) );
-		self::register_script( 'wc-product-new', plugins_url( 'build/product-new.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-blocks' ) );
-		self::register_script( 'wc-product-on-sale', plugins_url( 'build/product-on-sale.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-blocks' ) );
-		self::register_script( 'wc-product-top-rated', plugins_url( 'build/product-top-rated.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-blocks' ) );
-		self::register_script( 'wc-products-attribute', plugins_url( 'build/products-attribute.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-blocks' ) );
-		self::register_script( 'wc-featured-product', plugins_url( 'build/featured-product.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-blocks' ) );
+		self::register_script( 'wc-handpicked-products', plugins_url( 'build/handpicked-products.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
+		self::register_script( 'wc-product-best-sellers', plugins_url( 'build/product-best-sellers.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
+		self::register_script( 'wc-product-category', plugins_url( 'build/product-category.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
+		self::register_script( 'wc-product-new', plugins_url( 'build/product-new.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
+		self::register_script( 'wc-product-on-sale', plugins_url( 'build/product-on-sale.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
+		self::register_script( 'wc-product-top-rated', plugins_url( 'build/product-top-rated.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
+		self::register_script( 'wc-products-attribute', plugins_url( 'build/products-attribute.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
+		self::register_script( 'wc-featured-product', plugins_url( 'build/featured-product.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
+		self::register_script( 'wc-product-categories', plugins_url( 'build/product-categories.js', WGPB_PLUGIN_FILE ), array( 'wc-vendors', 'wc-packages', 'wc-blocks' ) );
 	}
 
 	/**
-	 * Output useful globals before printing any script tags.
-	 *
 	 * These are used by @woocommerce/components & the block library to set up defaults
-	 * based on user-controlled settings from WordPress.
-	 *
-	 * @since 2.0.0
+	 * based on user-controlled settings from WordPress. Only use this in wp-admin.
 	 */
-	public static function print_script_settings() {
+	public static function print_script_wc_settings() {
 		global $wp_locale;
-		$code           = get_woocommerce_currency();
-		$product_counts = wp_count_posts( 'product' );
+		$code = get_woocommerce_currency();
 
 		// NOTE: wcSettings is not used directly, it's only for @woocommerce/components
 		//
@@ -174,7 +174,29 @@ class WGPB_Block_Library {
 		);
 		// NOTE: wcSettings is not used directly, it's only for @woocommerce/components.
 		$settings = apply_filters( 'woocommerce_components_settings', $settings );
+		?>
+		<script type="text/javascript">
+			var wcSettings = wcSettings || JSON.parse( decodeURIComponent( '<?php echo rawurlencode( wp_json_encode( $settings ) ); ?>' ) );
+		</script>
+		<?php
+	}
 
+	/**
+	 * Output block-related data on a global object.
+	 *
+	 * This is used to map site settings & data into JS-accessible variables.
+	 *
+	 * @since 2.0.0
+	 */
+	public static function print_script_block_data() {
+		$product_counts     = wp_count_posts( 'product' );
+		$product_categories = get_terms(
+			'product_cat',
+			array(
+				'hide_empty' => false,
+				'pad_counts' => true,
+			)
+		);
 		// Global settings used in each block.
 		$block_settings = array(
 			'min_columns'       => wc_get_theme_support( 'product_blocks::min_columns', 1 ),
@@ -188,10 +210,10 @@ class WGPB_Block_Library {
 			'min_height'        => wc_get_theme_support( 'featured_block::min_height', 500 ),
 			'default_height'    => wc_get_theme_support( 'featured_block::default_height', 500 ),
 			'isLargeCatalog'    => $product_counts->publish > 200,
+			'productCategories' => $product_categories,
 		);
 		?>
 		<script type="text/javascript">
-			var wcSettings = wcSettings || JSON.parse( decodeURIComponent( '<?php echo rawurlencode( wp_json_encode( $settings ) ); ?>' ) );
 			var wc_product_block_data = JSON.parse( decodeURIComponent( '<?php echo rawurlencode( wp_json_encode( $block_settings ) ); ?>' ) );
 		</script>
 		<?php
@@ -327,6 +349,15 @@ class WGPB_Block_Library {
 				'editor_script'   => 'wc-featured-product',
 				'editor_style'    => 'wc-block-editor',
 				'style'           => 'wc-block-style',
+			)
+		);
+		register_block_type(
+			'woocommerce/product-categories',
+			array(
+				'editor_script' => 'wc-product-categories',
+				'editor_style'  => 'wc-block-editor',
+				'style'         => 'wc-block-style',
+				'script'        => 'wc-frontend',
 			)
 		);
 	}

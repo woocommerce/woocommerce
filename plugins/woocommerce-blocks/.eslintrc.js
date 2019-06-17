@@ -101,7 +101,7 @@ module.exports = {
 		'react/jsx-key': 'error',
 		'react/jsx-tag-spacing': 'error',
 		'react/no-children-prop': 'off',
-		'react/prop-types': 'warn',
+		'react/prop-types': [ 'warn', { 'skipUndeclared': true } ],
 		'react/react-in-jsx-scope': 'off',
 		semi: 'error',
 		'semi-spacing': 'error',

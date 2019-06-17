@@ -27,10 +27,12 @@ const GutenbergBlocksConfig = {
 	entry: {
 		// Shared blocks code
 		blocks: './assets/js/index.js',
+		frontend: [ './assets/js/blocks/product-categories/frontend.js' ],
 		// Blocks
 		'handpicked-products': './assets/js/blocks/handpicked-products/index.js',
 		'product-best-sellers': './assets/js/blocks/product-best-sellers/index.js',
 		'product-category': './assets/js/blocks/product-category/index.js',
+		'product-categories': './assets/js/blocks/product-categories/index.js',
 		'product-new': './assets/js/blocks/product-new/index.js',
 		'product-on-sale': './assets/js/blocks/product-on-sale/index.js',
 		'product-top-rated': './assets/js/blocks/product-top-rated/index.js',
@@ -50,6 +52,13 @@ const GutenbergBlocksConfig = {
 	optimization: {
 		splitChunks: {
 			cacheGroups: {
+				packages: {
+					test: /[\\/]node_modules[\\/]@woocommerce/,
+					name: 'packages',
+					chunks: 'all',
+					enforce: true,
+					priority: 10, // Higher priority to ensure @woocommerce/* packages are caught here.
+				},
 				commons: {
 					test: /[\\/]node_modules[\\/]/,
 					name: 'vendors',
