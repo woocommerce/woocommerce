@@ -76,7 +76,22 @@ const writeEntry = async ( content_url ) => {
 					const labels = getLabels( data.labels );
 					const labelTag = labels.length ? `(${ labels })` : '';
 					const authorTag = collaborator ? '' : `👏 @${ data.user.login }`;
-					const entry = `- ${ type }: ${ data.title } #${ data.number } ${ labelTag } ${ authorTag }`;
+					let title;
+					if ( /### Changelog Note/.test( data.body ) ) {
+						const bodyParts = data.body.split( '### Changelog Note:' );
+						const note = bodyParts[ bodyParts.length - 1 ];
+						title = note
+							// Remove comment prompt
+							.replace( /<!---(.*)--->/gm, '' )
+							// Remove new lines and whitespace
+							.trim();
+						if ( ! title.length ) {
+							title = `${ type }: ${ data.title }`;
+						}
+					} else {
+						title = `${ type }: ${ data.title }`;
+					}
+					const entry = `- ${ title } #${ data.number } ${ labelTag } ${ authorTag }`;
 					console.log( entry );
 				}
 			}
