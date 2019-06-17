@@ -54,6 +54,8 @@ class WC_Admin_REST_Reports_Orders_Controller extends WC_Admin_REST_Reports_Cont
 		$args['customer_type']    = $request['customer_type'];
 		$args['extended_info']    = $request['extended_info'];
 		$args['refunds']          = $request['refunds'];
+		$args['match']            = $request['match'];
+
 		return $args;
 	}
 
