@@ -11,6 +11,9 @@ namespace WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
+use WooCommerce\RestApi\Controllers\Version4\Responses\ProductReviewResponse;
+use WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
+
 /**
  * REST API Product Reviews controller class.
  */
@@ -216,7 +219,7 @@ class ProductReviews extends AbstractController {
 		$reviews      = array();
 
 		foreach ( $query_result as $review ) {
-			if ( ! wc_rest_check_product_reviews_permissions( 'read', $review->comment_ID ) ) {
+			if ( ! Permissions::check_resource( $this->resource_type, 'read', $review->comment_ID ) ) {
 				continue;
 			}
 
@@ -572,54 +575,19 @@ class ProductReviews extends AbstractController {
 	/**
 	 * Prepare a single product review output for response.
 	 *
-	 * @param WP_Comment      $review Product review object.
+	 * @param \WP_Comment      $review Product review object.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $review, $request ) {
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$fields  = $this->get_fields_for_response( $request );
-		$data    = array();
-
-		if ( in_array( 'id', $fields, true ) ) {
-			$data['id'] = (int) $review->comment_ID;
-		}
-		if ( in_array( 'date_created', $fields, true ) ) {
-			$data['date_created'] = wc_rest_prepare_date_response( $review->comment_date );
-		}
-		if ( in_array( 'date_created_gmt', $fields, true ) ) {
-			$data['date_created_gmt'] = wc_rest_prepare_date_response( $review->comment_date_gmt );
-		}
-		if ( in_array( 'product_id', $fields, true ) ) {
-			$data['product_id'] = (int) $review->comment_post_ID;
-		}
-		if ( in_array( 'status', $fields, true ) ) {
-			$data['status'] = $this->prepare_status_response( (string) $review->comment_approved );
-		}
-		if ( in_array( 'reviewer', $fields, true ) ) {
-			$data['reviewer'] = $review->comment_author;
-		}
-		if ( in_array( 'reviewer_email', $fields, true ) ) {
-			$data['reviewer_email'] = $review->comment_author_email;
-		}
-		if ( in_array( 'review', $fields, true ) ) {
-			$data['review'] = 'view' === $context ? wpautop( $review->comment_content ) : $review->comment_content;
-		}
-		if ( in_array( 'rating', $fields, true ) ) {
-			$data['rating'] = (int) get_comment_meta( $review->comment_ID, 'rating', true );
-		}
-		if ( in_array( 'verified', $fields, true ) ) {
-			$data['verified'] = wc_review_is_from_verified_owner( $review->comment_ID );
-		}
-		if ( in_array( 'reviewer_avatar_urls', $fields, true ) ) {
-			$data['reviewer_avatar_urls'] = rest_get_avatar_urls( $review->comment_author_email );
-		}
-
-		$data = $this->add_additional_fields_to_object( $data, $request );
-		$data = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
+		$context         = ! empty( $request['context'] ) ? $request['context'] : 'view';
+		$fields          = $this->get_fields_for_response( $request );
+		$review_response = new ProductReviewResponse();
+		$data            = $review_response->prepare_response( $review, $context );
+		$data            = array_intersect_key( $data, array_flip( $fields ) );
+		$data            = $this->add_additional_fields_to_object( $data, $request );
+		$data            = $this->filter_response_by_context( $data, $context );
+		$response        = rest_ensure_response( $data );
 
 		$response->add_links( $this->prepare_links( $review ) );
 
@@ -990,32 +958,7 @@ class ProductReviews extends AbstractController {
 		return $normalized;
 	}
 
-	/**
-	 * Checks comment_approved to set comment status for single comment output.
-	 *
-	 * @since 3.5.0
-	 * @param string|int $comment_approved comment status.
-	 * @return string Comment status.
-	 */
-	protected function prepare_status_response( $comment_approved ) {
-		switch ( $comment_approved ) {
-			case 'hold':
-			case '0':
-				$status = 'hold';
-				break;
-			case 'approve':
-			case '1':
-				$status = 'approved';
-				break;
-			case 'spam':
-			case 'trash':
-			default:
-				$status = $comment_approved;
-				break;
-		}
 
-		return $status;
-	}
 
 	/**
 	 * Sets the comment_status of a given review object when creating or updating a review.
