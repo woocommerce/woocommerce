@@ -60,7 +60,7 @@ class Orders extends AbstractObjectsController {
 	/**
 	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param \WP_Comment      $object Object to prepare.
+	 * @param \WC_Order        $object Object to prepare.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return array Array of data in the correct format.
 	 */
