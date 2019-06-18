@@ -131,43 +131,23 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 	}
 
 	/**
-	 * Prepare a single product attribute term output for response.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param \WP_Term         $item Term object.
-	 * @param \WP_REST_Request $request Request params.
-	 * @return \WP_REST_Response $response
+	 * @param \WP_Term         $object Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array Array of data in the correct format.
 	 */
-	public function prepare_item_for_response( $item, $request ) {
-		// Get term order.
-		$menu_order = get_term_meta( $item->term_id, 'order_' . $this->taxonomy, true );
+	protected function get_data_for_response( $object, $request ) {
+		$menu_order = get_term_meta( $object->term_id, 'order_' . $this->taxonomy, true );
 
-		$data = array(
-			'id'          => (int) $item->term_id,
-			'name'        => $item->name,
-			'slug'        => $item->slug,
-			'description' => $item->description,
+		return array(
+			'id'          => (int) $object->term_id,
+			'name'        => $object->name,
+			'slug'        => $object->slug,
+			'description' => $object->description,
 			'menu_order'  => (int) $menu_order,
-			'count'       => (int) $item->count,
+			'count'       => (int) $object->count,
 		);
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $item, $request ) );
-
-		/**
-		 * Filter a term item returned from the API.
-		 *
-		 * Allows modification of the term data right before it is returned.
-		 *
-		 * @param \WP_REST_Response  $response  The response object.
-		 * @param object            $item      The original term object.
-		 * @param \WP_REST_Request   $request   Request used to generate the response.
-		 */
-		return apply_filters( "woocommerce_rest_prepare_{$this->taxonomy}", $response, $item, $request );
 	}
 
 	/**

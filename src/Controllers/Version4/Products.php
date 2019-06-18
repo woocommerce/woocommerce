@@ -42,6 +42,15 @@ class Products extends AbstractObjectsController {
 	protected $hierarchical = true;
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'product';
+
+	/**
 	 * Get the Product's schema, conforming to JSON Schema.
 	 *
 	 * @return array
@@ -822,34 +831,16 @@ class Products extends AbstractObjectsController {
 	}
 
 	/**
-	 * Prepare a single product output for response.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param \WC_Data         $object  Object data.
+	 * @param \WC_Product      $object Object to prepare.
 	 * @param \WP_REST_Request $request Request object.
-	 *
-	 * @since  3.0.0
-	 * @return \WP_REST_Response
+	 * @return array Array of data in the correct format.
 	 */
-	public function prepare_object_for_response( $object, $request ) {
-		$context          = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$product_response = new ProductResponse();
-		$data             = $product_response->prepare_response( $object, $context );
-		$data             = $this->add_additional_fields_to_object( $data, $request );
-		$data             = $this->filter_response_by_context( $data, $context );
-		$response         = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $object, $request ) );
+	protected function get_data_for_response( $object, $request ) {
+		$formatter = new ProductResponse();
 
-		/**
-		 * Filter the data for a response.
-		 *
-		 * The dynamic portion of the hook name, $this->post_type,
-		 * refers to object type being prepared for the response.
-		 *
-		 * @param \WP_REST_Response $response The response object.
-		 * @param \WC_Data          $object   Object data.
-		 * @param \WP_REST_Request  $request  Request object.
-		 */
-		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
+		return $formatter->prepare_response( $object, $this->get_request_context( $request ) );
 	}
 
 	/**
@@ -1175,7 +1166,7 @@ class Products extends AbstractObjectsController {
 
 		// If we're forcing, then delete permanently.
 		if ( $force ) {
-			$previous = $this->prepare_object_for_response( $object, $request );
+			$previous = $this->prepare_item_for_response( $object, $request );
 
 			$object->delete( true );
 			$result = 0 === $object->get_id();
@@ -1217,7 +1208,7 @@ class Products extends AbstractObjectsController {
 				$result = 'trash' === $object->get_status();
 			}
 
-			$response = $this->prepare_object_for_response( $object, $request );
+			$response = $this->prepare_item_for_response( $object, $request );
 		}
 
 		if ( ! $result ) {

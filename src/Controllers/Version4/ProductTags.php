@@ -31,39 +31,29 @@ class ProductTags extends AbstractTermsContoller {
 	protected $taxonomy = 'product_tag';
 
 	/**
-	 * Prepare a single product tag output for response.
+	 * Singular name for resource type.
 	 *
-	 * @param object           $item Term object.
-	 * @param \WP_REST_Request $request Request params.
-	 * @return \WP_REST_Response $response
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
 	 */
-	public function prepare_item_for_response( $item, $request ) {
-		$data = array(
-			'id'          => (int) $item->term_id,
-			'name'        => $item->name,
-			'slug'        => $item->slug,
-			'description' => $item->description,
-			'count'       => (int) $item->count,
+	protected $singular = 'product_tag';
+
+	/**
+	 * Get data for this object in the format of this endpoint's schema.
+	 *
+	 * @param \WP_Term         $object Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array Array of data in the correct format.
+	 */
+	protected function get_data_for_response( $object, $request ) {
+		return array(
+			'id'          => (int) $object->term_id,
+			'name'        => $object->name,
+			'slug'        => $object->slug,
+			'description' => $object->description,
+			'count'       => (int) $object->count,
 		);
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $item, $request ) );
-
-		/**
-		 * Filter a term item returned from the API.
-		 *
-		 * Allows modification of the term data right before it is returned.
-		 *
-		 * @param \WP_REST_Response  $response  The response object.
-		 * @param object            $item      The original term object.
-		 * @param \WP_REST_Request   $request   Request used to generate the response.
-		 */
-		return apply_filters( "woocommerce_rest_prepare_{$this->taxonomy}", $response, $item, $request );
 	}
 
 	/**

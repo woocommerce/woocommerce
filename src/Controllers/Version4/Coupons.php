@@ -104,35 +104,6 @@ class Coupons extends AbstractObjectsController {
 	}
 
 	/**
-	 * Prepare a single coupon output for response.
-	 *
-	 * @since  3.0.0
-	 * @param  \WC_Data         $object  Object data.
-	 * @param  \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response
-	 */
-	public function prepare_object_for_response( $object, $request ) {
-		$data     = $this->get_data_for_response( $object, $request );
-		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data     = $this->add_additional_fields_to_object( $data, $request );
-		$data     = $this->filter_response_by_context( $data, $context );
-		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $object, $request ) );
-
-		/**
-		 * Filter the data for a response.
-		 *
-		 * The dynamic portion of the hook name, $this->post_type,
-		 * refers to object type being prepared for the response.
-		 *
-		 * @param \WP_REST_Response $response The response object.
-		 * @param \WC_Data          $object   Object data.
-		 * @param \WP_REST_Request  $request  Request object.
-		 */
-		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
-	}
-
-	/**
 	 * Prepare objects query.
 	 *
 	 * @since  3.0.0

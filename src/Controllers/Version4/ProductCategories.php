@@ -31,33 +31,37 @@ class ProductCategories extends AbstractTermsContoller {
 	protected $taxonomy = 'product_cat';
 
 	/**
-	 * Prepare a single product category output for response.
+	 * Singular name for resource type.
 	 *
-	 * @param WP_Term         $item    Term object.
-	 * @param \WP_REST_Request $request Request instance.
-	 * @return \WP_REST_Response
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
 	 */
-	public function prepare_item_for_response( $item, $request ) {
-		// Get category display type.
-		$display_type = get_term_meta( $item->term_id, 'display_type', true );
+	protected $singular = 'product_cat';
 
-		// Get category order.
-		$menu_order = get_term_meta( $item->term_id, 'order', true );
-
-		$data = array(
-			'id'          => (int) $item->term_id,
-			'name'        => $item->name,
-			'slug'        => $item->slug,
-			'parent'      => (int) $item->parent,
-			'description' => $item->description,
+	/**
+	 * Get data for this object in the format of this endpoint's schema.
+	 *
+	 * @param \WP_Term    $object Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array Array of data in the correct format.
+	 */
+	protected function get_data_for_response( $object, $request ) {
+		$display_type = get_term_meta( $object->term_id, 'display_type', true );
+		$menu_order   = get_term_meta( $object->term_id, 'order', true );
+		$image_id     = get_term_meta( $object->term_id, 'thumbnail_id', true );
+		$data         = array(
+			'id'          => (int) $object->term_id,
+			'name'        => $object->name,
+			'slug'        => $object->slug,
+			'parent'      => (int) $object->parent,
+			'description' => $object->description,
 			'display'     => $display_type ? $display_type : 'default',
 			'image'       => null,
 			'menu_order'  => (int) $menu_order,
-			'count'       => (int) $item->count,
+			'count'       => (int) $object->count,
 		);
 
-		// Get category image.
-		$image_id = get_term_meta( $item->term_id, 'thumbnail_id', true );
 		if ( $image_id ) {
 			$attachment = get_post( $image_id );
 
@@ -72,31 +76,13 @@ class ProductCategories extends AbstractTermsContoller {
 				'alt'               => get_post_meta( $image_id, '_wp_attachment_image_alt', true ),
 			);
 		}
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $item, $request ) );
-
-		/**
-		 * Filter a term item returned from the API.
-		 *
-		 * Allows modification of the term data right before it is returned.
-		 *
-		 * @param \WP_REST_Response  $response  The response object.
-		 * @param object            $item      The original term object.
-		 * @param \WP_REST_Request   $request   Request used to generate the response.
-		 */
-		return apply_filters( "woocommerce_rest_prepare_{$this->taxonomy}", $response, $item, $request );
+		return $data;
 	}
 
 	/**
 	 * Update term meta fields.
 	 *
-	 * @param WP_Term         $term    Term object.
+	 * @param \WP_Term         $term    Term object.
 	 * @param \WP_REST_Request $request Request instance.
 	 * @return bool|\WP_Error
 	 *

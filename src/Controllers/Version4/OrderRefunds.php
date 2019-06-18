@@ -31,13 +31,6 @@ class OrderRefunds extends Orders {
 	protected $post_type = 'shop_order_refund';
 
 	/**
-	 * Stores the request.
-	 *
-	 * @var array
-	 */
-	protected $request = array();
-
-	/**
 	 * Order refunds actions.
 	 */
 	public function __construct() {
@@ -129,19 +122,32 @@ class OrderRefunds extends Orders {
 	/**
 	 * Get data for this object in the format of this endpoint's schema.
 	 *
+	 * @throws \WC_REST_Exception Exception on invalid data.
+	 *
 	 * @param mixed            $object Object to prepare.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return array Array of data in the correct format.
 	 */
 	protected function get_data_for_response( $object, $request ) {
+		$order = wc_get_order( (int) $request['order_id'] );
+
+		if ( ! $order ) {
+			throw new \WC_REST_Exception( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), 404 );
+		}
+
+		if ( ! $object || $object->get_parent_id() !== $order->get_id() ) {
+			throw new \WC_REST_Exception( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
+		}
+
 		$data              = $object->get_data();
 		$format_decimal    = array( 'amount' );
 		$format_date       = array( 'date_created' );
 		$format_line_items = array( 'line_items' );
+		$dp                = is_null( $request['dp'] ) ? wc_get_price_decimals() : absint( $request['dp'] );
 
 		// Format decimal values.
 		foreach ( $format_decimal as $key ) {
-			$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
+			$data[ $key ] = wc_format_decimal( $data[ $key ], $dp );
 		}
 
 		// Format date values.
@@ -153,7 +159,7 @@ class OrderRefunds extends Orders {
 
 		// Format line items.
 		foreach ( $format_line_items as $key ) {
-			$data[ $key ] = array_values( array_map( array( $this, 'get_order_item_data' ), $data[ $key ] ) );
+			$data[ $key ] = array_values( array_map( array( $this, 'get_order_item_data' ), $data[ $key ], $request ) );
 		}
 
 		return array(
@@ -170,167 +176,56 @@ class OrderRefunds extends Orders {
 	}
 
 	/**
-	 * Prepare a single order output for response.
+	 * Expands an order item to get its data.
 	 *
-	 * @since  3.0.0
-	 *
-	 * @param  \WC_Data         $object  Object data.
-	 * @param  \WP_REST_Request $request Request object.
-	 *
-	 * @return \WP_Error|\WP_REST_Response
+	 * @param \WC_Order_item    $item Order item data.
+	 * @param \WP_REST_Response $response The response object.
+	 * @return array
 	 */
-	public function prepare_object_for_response( $object, $request ) {
-		$this->request       = $request;
-		$this->request['dp'] = is_null( $this->request['dp'] ) ? wc_get_price_decimals() : absint( $this->request['dp'] );
-		$order               = wc_get_order( (int) $request['order_id'] );
+	protected function get_order_item_data( $item, $request ) {
+		$data           = $item->get_data();
+		$format_decimal = array( 'subtotal', 'subtotal_tax', 'total', 'total_tax', 'tax_total', 'shipping_tax_total' );
+		$dp             = is_null( $request['dp'] ) ? wc_get_price_decimals() : absint( $request['dp'] );
 
-		if ( ! $order ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), 404 );
-		}
-
-		if ( ! $object || $object->get_parent_id() !== $order->get_id() ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
-		}
-
-		$data    = $this->get_data_for_response( $object, $request );
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $object, $request ) );
-
-		/**
-		 * Filter the data for a response.
-		 *
-		 * The dynamic portion of the hook name, $this->post_type,
-		 * refers to object type being prepared for the response.
-		 *
-		 * @param \WP_REST_Response $response The response object.
-		 * @param \WC_Data          $object   Object data.
-		 * @param \WP_REST_Request  $request  Request object.
-		 */
-		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
-	}
-
-	/**
-	 * Prepare a single order refund output for response.
-	 *
-	 * @param \WP_Post         $post Post object.
-	 * @param \WP_REST_Request $request Request object.
-	 *
-	 * @return \WP_Error|\WP_REST_Response
-	 */
-	public function prepare_item_for_response( $post, $request ) {
-		$order = wc_get_order( (int) $request['order_id'] );
-
-		if ( ! $order ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_order_id', __( 'Invalid order ID.', 'woocommerce' ), 404 );
-		}
-
-		$refund = wc_get_order( $post );
-
-		if ( ! $refund || $refund->get_parent_id() !== $order->get_id() ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
-		}
-
-		$dp = is_null( $request['dp'] ) ? wc_get_price_decimals() : absint( $request['dp'] );
-
-		$data = array(
-			'id'           => $refund->get_id(),
-			'date_created' => wc_rest_prepare_date_response( $refund->get_date_created() ),
-			'amount'       => wc_format_decimal( $refund->get_amount(), $dp ),
-			'reason'       => $refund->get_reason(),
-			'line_items'   => array(),
-		);
-
-		// Add line items.
-		foreach ( $refund->get_items() as $item_id => $item ) {
-			$product      = $item->get_product();
-			$product_id   = 0;
-			$variation_id = 0;
-			$product_sku  = null;
-
-			// Check if the product exists.
-			if ( is_object( $product ) ) {
-				$product_id   = $item->get_product_id();
-				$variation_id = $item->get_variation_id();
-				$product_sku  = $product->get_sku();
+		// Format decimal values.
+		foreach ( $format_decimal as $key ) {
+			if ( isset( $data[ $key ] ) ) {
+				$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
 			}
+		}
 
-			$item_meta = array();
+		// Add SKU and PRICE to products.
+		if ( is_callable( array( $item, 'get_product' ) ) ) {
+			$data['sku']   = $item->get_product() ? $item->get_product()->get_sku() : null;
+			$data['price'] = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
+		}
 
-			$hideprefix = 'true' === $request['all_item_meta'] ? null : '_';
+		// Format taxes.
+		if ( ! empty( $data['taxes']['total'] ) ) {
+			$taxes = array();
 
-			foreach ( $item->get_formatted_meta_data( $hideprefix, true ) as $meta_key => $formatted_meta ) {
-				$item_meta[] = array(
-					'key'   => $formatted_meta->key,
-					'label' => $formatted_meta->display_key,
-					'value' => wc_clean( $formatted_meta->display_value ),
+			foreach ( $data['taxes']['total'] as $tax_rate_id => $tax ) {
+				$taxes[] = array(
+					'id'       => $tax_rate_id,
+					'total'    => $tax,
+					'subtotal' => isset( $data['taxes']['subtotal'][ $tax_rate_id ] ) ? $data['taxes']['subtotal'][ $tax_rate_id ] : '',
 				);
 			}
-
-			$line_item = array(
-				'id'           => $item_id,
-				'name'         => $item['name'],
-				'sku'          => $product_sku,
-				'product_id'   => (int) $product_id,
-				'variation_id' => (int) $variation_id,
-				'quantity'     => wc_stock_amount( $item['qty'] ),
-				'tax_class'    => ! empty( $item['tax_class'] ) ? $item['tax_class'] : '',
-				'price'        => wc_format_decimal( $refund->get_item_total( $item, false, false ), $dp ),
-				'subtotal'     => wc_format_decimal( $refund->get_line_subtotal( $item, false, false ), $dp ),
-				'subtotal_tax' => wc_format_decimal( $item['line_subtotal_tax'], $dp ),
-				'total'        => wc_format_decimal( $refund->get_line_total( $item, false, false ), $dp ),
-				'total_tax'    => wc_format_decimal( $item['line_tax'], $dp ),
-				'taxes'        => array(),
-				'meta'         => $item_meta,
-			);
-
-			$item_line_taxes = maybe_unserialize( $item['line_tax_data'] );
-			if ( isset( $item_line_taxes['total'] ) ) {
-				$line_tax = array();
-
-				foreach ( $item_line_taxes['total'] as $tax_rate_id => $tax ) {
-					$line_tax[ $tax_rate_id ] = array(
-						'id'       => $tax_rate_id,
-						'total'    => $tax,
-						'subtotal' => '',
-					);
-				}
-
-				foreach ( $item_line_taxes['subtotal'] as $tax_rate_id => $tax ) {
-					$line_tax[ $tax_rate_id ]['subtotal'] = $tax;
-				}
-
-				$line_item['taxes'] = array_values( $line_tax );
-			}
-
-			$data['line_items'][] = $line_item;
+			$data['taxes'] = $taxes;
+		} elseif ( isset( $data['taxes'] ) ) {
+			$data['taxes'] = array();
 		}
 
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
+		// Remove names for coupons, taxes and shipping.
+		if ( isset( $data['code'] ) || isset( $data['rate_code'] ) || isset( $data['method_title'] ) ) {
+			unset( $data['name'] );
+		}
 
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
+		// Remove props we don't want to expose.
+		unset( $data['order_id'] );
+		unset( $data['type'] );
 
-		$response->add_links( $this->prepare_links( $refund, $request ) );
-
-		/**
-		 * Filter the data for a response.
-		 *
-		 * The dynamic portion of the hook name, $this->post_type, refers to post_type of the post being
-		 * prepared for the response.
-		 *
-		 * @param \WP_REST_Response   $response   The response object.
-		 * @param \WP_Post            $post       Post object.
-		 * @param \WP_REST_Request    $request    Request object.
-		 */
-		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $post, $request );
+		return $data;
 	}
 
 	/**

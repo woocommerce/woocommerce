@@ -169,7 +169,13 @@ class Webhooks extends AbstractController {
 		$webhook_ids = $results->webhooks;
 
 		foreach ( $webhook_ids as $webhook_id ) {
-			$data       = $this->prepare_item_for_response( $webhook_id, $request );
+			$object = $this->get_object( $webhook_id );
+
+			if ( ! $object || 0 === $object->get_id() ) {
+				continue;
+			}
+
+			$data       = $this->prepare_item_for_response( $object, $request );
 			$webhooks[] = $this->prepare_response_for_collection( $data );
 		}
 
@@ -201,22 +207,35 @@ class Webhooks extends AbstractController {
 	}
 
 	/**
+	 * Get object.
+	 *
+	 * @param  int $id Object ID.
+	 * @return \WC_Webhook|bool
+	 */
+	protected function get_object( $id ) {
+		$webhook = wc_get_webhook( $id );
+
+		if ( empty( $webhook ) || is_null( $webhook ) ) {
+			return false;
+		}
+
+		return $webhook;
+	}
+
+	/**
 	 * Get a single item.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|\WP_REST_Response
 	 */
 	public function get_item( $request ) {
-		$id = (int) $request['id'];
+		$object = $this->get_object( (int) $request['id'] );
 
-		if ( empty( $id ) ) {
+		if ( ! $object || 0 === $object->get_id() ) {
 			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$data     = $this->prepare_item_for_response( $id, $request );
-		$response = rest_ensure_response( $data );
-
-		return $response;
+		return $this->prepare_item_for_response( $object, $request );
 	}
 
 	/**
@@ -268,7 +287,7 @@ class Webhooks extends AbstractController {
 		do_action( 'woocommerce_rest_insert_webhook_object', $webhook, $request, true );
 
 		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_item_for_response( $webhook->get_id(), $request );
+		$response = $this->prepare_item_for_response( $webhook, $request );
 		$response = rest_ensure_response( $response );
 		$response->set_status( 201 );
 		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $webhook->get_id() ) ) );
@@ -348,7 +367,7 @@ class Webhooks extends AbstractController {
 		do_action( 'woocommerce_rest_insert_webhook_object', $webhook, $request, false );
 
 		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_item_for_response( $webhook->get_id(), $request );
+		$response = $this->prepare_item_for_response( $webhook, $request );
 
 		return rest_ensure_response( $response );
 	}
@@ -455,51 +474,27 @@ class Webhooks extends AbstractController {
 	}
 
 	/**
-	 * Prepare a single webhook output for response.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param int              $id       Webhook ID.
-	 * @param \WP_REST_Request $request  Request object.
-	 * @return \WP_REST_Response $response
+	 * @param \WP_Comment      $object Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array Array of data in the correct format.
 	 */
-	public function prepare_item_for_response( $id, $request ) {
-		$webhook = wc_get_webhook( $id );
-
-		if ( empty( $webhook ) || is_null( $webhook ) ) {
-			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
-		}
-
-		$data = array(
-			'id'                => $webhook->get_id(),
-			'name'              => $webhook->get_name(),
-			'status'            => $webhook->get_status(),
-			'topic'             => $webhook->get_topic(),
-			'resource'          => $webhook->get_resource(),
-			'event'             => $webhook->get_event(),
-			'hooks'             => $webhook->get_hooks(),
-			'delivery_url'      => $webhook->get_delivery_url(),
-			'date_created'      => wc_rest_prepare_date_response( $webhook->get_date_created(), false ),
-			'date_created_gmt'  => wc_rest_prepare_date_response( $webhook->get_date_created() ),
-			'date_modified'     => wc_rest_prepare_date_response( $webhook->get_date_modified(), false ),
-			'date_modified_gmt' => wc_rest_prepare_date_response( $webhook->get_date_modified() ),
+	protected function get_data_for_response( $object, $request ) {
+		return array(
+			'id'                => $object->get_id(),
+			'name'              => $object->get_name(),
+			'status'            => $object->get_status(),
+			'topic'             => $object->get_topic(),
+			'resource'          => $object->get_resource(),
+			'event'             => $object->get_event(),
+			'hooks'             => $object->get_hooks(),
+			'delivery_url'      => $object->get_delivery_url(),
+			'date_created'      => wc_rest_prepare_date_response( $object->get_date_created(), false ),
+			'date_created_gmt'  => wc_rest_prepare_date_response( $object->get_date_created() ),
+			'date_modified'     => wc_rest_prepare_date_response( $object->get_date_modified(), false ),
+			'date_modified_gmt' => wc_rest_prepare_date_response( $object->get_date_modified() ),
 		);
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $webhook, $request ) );
-
-		/**
-		 * Filter webhook object returned from the REST API.
-		 *
-		 * @param \WP_REST_Response $response The response object.
-		 * @param WC_Webhook       $webhook  Webhook object used to create response.
-		 * @param \WP_REST_Request  $request  Request object.
-		 */
-		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}", $response, $webhook, $request );
 	}
 
 	/**
@@ -693,5 +688,15 @@ class Webhooks extends AbstractController {
 		);
 
 		return $params;
+	}
+
+	/**
+	 * Return suffix for item action hooks.
+	 *
+	 * @param mixed $item Object used to create response.
+	 * @return string
+	 */
+	protected function get_hook_suffix( $item ) {
+		return $this->post_type;
 	}
 }

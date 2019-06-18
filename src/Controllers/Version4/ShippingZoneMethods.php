@@ -20,6 +20,15 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	use SettingsTrait;
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'shipping_zone_method';
+
+	/**
 	 * Register the routes for Shipping Zone Methods.
 	 */
 	public function register_routes() {
@@ -351,36 +360,36 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	}
 
 	/**
-	 * Prepare the Shipping Zone Method for the REST response.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param array           $item Shipping Zone Method.
+	 * @param array            $object Object to prepare.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response $response
+	 * @return array Array of data in the correct format.
+	 */
+	protected function get_data_for_response( $object, $request ) {
+		return array(
+			'id'                 => $object->instance_id,
+			'instance_id'        => $object->instance_id,
+			'title'              => $object->instance_settings['title'],
+			'order'              => $object->method_order,
+			'enabled'            => ( 'yes' === $object->enabled ),
+			'method_id'          => $object->id,
+			'method_title'       => $object->method_title,
+			'method_description' => $object->method_description,
+			'settings'           => $this->get_settings( $object ),
+		);
+	}
+
+	/**
+	 * Prepare a single item for response.
+	 *
+	 * @param mixed            $item Object used to create response.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response $response Response data.
 	 */
 	public function prepare_item_for_response( $item, $request ) {
-		$method = array(
-			'id'                 => $item->instance_id,
-			'instance_id'        => $item->instance_id,
-			'title'              => $item->instance_settings['title'],
-			'order'              => $item->method_order,
-			'enabled'            => ( 'yes' === $item->enabled ),
-			'method_id'          => $item->id,
-			'method_title'       => $item->method_title,
-			'method_description' => $item->method_description,
-			'settings'           => $this->get_settings( $item ),
-		);
-
-		$context = empty( $request['context'] ) ? 'view' : $request['context'];
-		$data    = $this->add_additional_fields_to_object( $method, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $item, $request ) );
-
+		$response = parent::prepare_item_for_response( $item, $request );
 		$response = $this->prepare_response_for_collection( $response );
-
 		return $response;
 	}
 

@@ -26,6 +26,15 @@ class Continents extends DataController {
 	protected $rest_base = 'data/continents';
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'continent';
+
+	/**
 	 * Register routes.
 	 *
 	 * @since 3.5.0
@@ -186,30 +195,14 @@ class Continents extends DataController {
 	}
 
 	/**
-	 * Prepare the data object for response.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @since  3.5.0
-	 * @param object           $item Data object.
+	 * @param mixed            $object Object to prepare.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response $response Response data.
+	 * @return mixed Array of data in the correct format.
 	 */
-	public function prepare_item_for_response( $item, $request ) {
-		$data     = $this->add_additional_fields_to_object( $item, $request );
-		$data     = $this->filter_response_by_context( $data, 'view' );
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $item, $request ) );
-
-		/**
-		 * Filter the location list returned from the API.
-		 *
-		 * Allows modification of the loction data right before it is returned.
-		 *
-		 * @param \WP_REST_Response $response The response object.
-		 * @param array             $item     The original list of continent(s), countries, and states.
-		 * @param \WP_REST_Request  $request  Request used to generate the response.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_data_continent', $response, $item, $request );
+	protected function get_data_for_response( $object, $request ) {
+		return $object;
 	}
 
 	/**

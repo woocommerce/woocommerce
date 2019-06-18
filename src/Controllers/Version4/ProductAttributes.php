@@ -38,6 +38,15 @@ class ProductAttributes extends AbstractController {
 	protected $attribute = '';
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'product_attribute';
+
+	/**
 	 * Register the routes for product attributes.
 	 */
 	public function register_routes() {
@@ -299,40 +308,21 @@ class ProductAttributes extends AbstractController {
 	}
 
 	/**
-	 * Prepare a single product attribute output for response.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param obj             $item Term object.
-	 * @param \WP_REST_Request $request Request params.
-	 * @return \WP_REST_Response $response
+	 * @param object           $object Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array Array of data in the correct format.
 	 */
-	public function prepare_item_for_response( $item, $request ) {
-		$data = array(
-			'id'           => (int) $item->attribute_id,
-			'name'         => $item->attribute_label,
-			'slug'         => wc_attribute_taxonomy_name( $item->attribute_name ),
-			'type'         => $item->attribute_type,
-			'order_by'     => $item->attribute_orderby,
-			'has_archives' => (bool) $item->attribute_public,
+	protected function get_data_for_response( $object, $request ) {
+		return array(
+			'id'           => (int) $object->attribute_id,
+			'name'         => $object->attribute_label,
+			'slug'         => wc_attribute_taxonomy_name( $object->attribute_name ),
+			'type'         => $object->attribute_type,
+			'order_by'     => $object->attribute_orderby,
+			'has_archives' => (bool) $object->attribute_public,
 		);
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $item, $request ) );
-
-		/**
-		 * Filter a attribute item returned from the API.
-		 *
-		 * Allows modification of the product attribute data right before it is returned.
-		 *
-		 * @param \WP_REST_Response  $response  The response object.
-		 * @param object            $item      The original attribute object.
-		 * @param \WP_REST_Request   $request   Request used to generate the response.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_product_attribute', $response, $item, $request );
 	}
 
 	/**

@@ -34,6 +34,15 @@ class SettingsOptions extends AbstractController {
 	protected $rest_base = 'settings/(?P<group_id>[\w-]+)';
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'setting_option';
+
+	/**
 	 * Register routes.
 	 *
 	 * @since 3.0.0
@@ -354,20 +363,15 @@ class SettingsOptions extends AbstractController {
 	}
 
 	/**
-	 * Prepare a single setting object for response.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param object           $item Setting object.
-	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response $response Response data.
+	 * @param \WC_Shipping_Method $object Object to prepare.
+	 * @param \WP_REST_Request    $request Request object.
+	 * @return array Array of data in the correct format.
 	 */
-	public function prepare_item_for_response( $item, $request ) {
-		unset( $item['option_key'] );
-		$data     = $this->filter_setting( $item );
-		$data     = $this->add_additional_fields_to_object( $data, $request );
-		$data     = $this->filter_response_by_context( $data, empty( $request['context'] ) ? 'view' : $request['context'] );
-		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $data, $request ) );
-		return $response;
+	protected function get_data_for_response( $object, $request ) {
+		unset( $object['option_key'] );
+		return $this->filter_setting( $object );
 	}
 
 	/**

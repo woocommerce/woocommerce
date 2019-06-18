@@ -31,6 +31,15 @@ class Settings extends AbstractController {
 	protected $resource_type = 'settings';
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'setting';
+
+	/**
 	 * Register routes.
 	 *
 	 * @since 3.0.0
@@ -119,26 +128,6 @@ class Settings extends AbstractController {
 		);
 
 		return $links;
-	}
-
-	/**
-	 * Prepare a report sales object for serialization.
-	 *
-	 * @since  3.0.0
-	 * @param array            $item Group object.
-	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response $response Response data.
-	 */
-	public function prepare_item_for_response( $item, $request ) {
-		$context = empty( $request['context'] ) ? 'view' : $request['context'];
-		$data    = $this->add_additional_fields_to_object( $item, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $item, $request ) );
-
-		return $response;
 	}
 
 	/**

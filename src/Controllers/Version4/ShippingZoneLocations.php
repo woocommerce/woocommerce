@@ -17,6 +17,15 @@ defined( 'ABSPATH' ) || exit;
 class ShippingZoneLocations extends AbstractShippingZonesController {
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'shipping_zone_location';
+
+	/**
 	 * Register the routes for Shipping Zone Locations.
 	 */
 	public function register_routes() {
@@ -64,7 +73,7 @@ class ShippingZoneLocations extends AbstractShippingZonesController {
 		$data      = array();
 
 		foreach ( $locations as $location_obj ) {
-			$location = $this->prepare_item_for_response( $location_obj, $request );
+			$location = $this->prepare_item_for_response( (array) $location_obj, $request );
 			$location = $this->prepare_response_for_collection( $location );
 			$data[]   = $location;
 		}
@@ -113,26 +122,6 @@ class ShippingZoneLocations extends AbstractShippingZonesController {
 		$zone->save();
 
 		return $this->get_items( $request );
-	}
-
-	/**
-	 * Prepare the Shipping Zone Location for the REST response.
-	 *
-	 * @param array           $item Shipping Zone Location.
-	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response $response
-	 */
-	public function prepare_item_for_response( $item, $request ) {
-		$context = empty( $request['context'] ) ? 'view' : $request['context'];
-		$data    = $this->add_additional_fields_to_object( $item, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $item, $request ) );
-
-		return $response;
 	}
 
 	/**

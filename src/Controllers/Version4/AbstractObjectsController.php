@@ -39,16 +39,6 @@ abstract class AbstractObjectsController extends AbstractController {
 	abstract protected function get_object( $id );
 
 	/**
-	 * Prepares the object for the REST response.
-	 *
-	 * @since  3.0.0
-	 * @param  \WC_Data         $object  Object data.
-	 * @param  \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response Response object on success, or \WP_Error object on failure.
-	 */
-	abstract protected function prepare_object_for_response( $object, $request );
-
-	/**
 	 * Prepares one object for create or update operation.
 	 *
 	 * @since  3.0.0
@@ -171,7 +161,7 @@ abstract class AbstractObjectsController extends AbstractController {
 			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$data     = $this->prepare_object_for_response( $object, $request );
+		$data     = $this->prepare_item_for_response( $object, $request );
 		$response = rest_ensure_response( $data );
 
 		return $response;
@@ -241,7 +231,7 @@ abstract class AbstractObjectsController extends AbstractController {
 		do_action( "woocommerce_rest_insert_{$this->post_type}_object", $object, $request, true );
 
 		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_object_for_response( $object, $request );
+		$response = $this->prepare_item_for_response( $object, $request );
 		$response = rest_ensure_response( $response );
 		$response->set_status( 201 );
 		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $object->get_id() ) ) );
@@ -286,7 +276,7 @@ abstract class AbstractObjectsController extends AbstractController {
 		do_action( "woocommerce_rest_insert_{$this->post_type}_object", $object, $request, false );
 
 		$request->set_param( 'context', 'edit' );
-		$response = $this->prepare_object_for_response( $object, $request );
+		$response = $this->prepare_item_for_response( $object, $request );
 		return rest_ensure_response( $response );
 	}
 
@@ -393,7 +383,7 @@ abstract class AbstractObjectsController extends AbstractController {
 				continue;
 			}
 
-			$data      = $this->prepare_object_for_response( $object, $request );
+			$data      = $this->prepare_item_for_response( $object, $request );
 			$objects[] = $this->prepare_response_for_collection( $data );
 		}
 
@@ -460,7 +450,7 @@ abstract class AbstractObjectsController extends AbstractController {
 		}
 
 		$request->set_param( 'context', 'edit' );
-		$previous = $this->prepare_object_for_response( $object, $request );
+		$previous = $this->prepare_item_for_response( $object, $request );
 
 		// If we're forcing, then delete permanently.
 		if ( $force ) {
@@ -832,5 +822,15 @@ abstract class AbstractObjectsController extends AbstractController {
 		$args['meta_query'][] = $meta_query;
 
 		return $args['meta_query'];
+	}
+
+	/**
+	 * Return suffix for item action hooks.
+	 *
+	 * @param mixed $item Object used to create response.
+	 * @return string
+	 */
+	protected function get_hook_suffix( $item ) {
+		return $this->post_type . '_object';
 	}
 }

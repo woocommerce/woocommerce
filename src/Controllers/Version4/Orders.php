@@ -41,13 +41,6 @@ class Orders extends AbstractObjectsController {
 	protected $hierarchical = true;
 
 	/**
-	 * Stores the request.
-	 *
-	 * @var array
-	 */
-	protected $request = array();
-
-	/**
 	 * Get object. Return false if object is not of required type.
 	 *
 	 * @since  3.0.0
@@ -65,89 +58,20 @@ class Orders extends AbstractObjectsController {
 	}
 
 	/**
-	 * Expands an order item to get its data.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param \WC_Order_item $item Order item data.
-	 * @return array
+	 * @param \WP_Comment      $object Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array Array of data in the correct format.
 	 */
-	protected function get_order_item_data( $item ) {
-		$data           = $item->get_data();
-		$format_decimal = array( 'subtotal', 'subtotal_tax', 'total', 'total_tax', 'tax_total', 'shipping_tax_total' );
-
-		// Format decimal values.
-		foreach ( $format_decimal as $key ) {
-			if ( isset( $data[ $key ] ) ) {
-				$data[ $key ] = wc_format_decimal( $data[ $key ], $this->request['dp'] );
-			}
-		}
-
-		// Add SKU and PRICE to products.
-		if ( is_callable( array( $item, 'get_product' ) ) ) {
-			$data['sku']   = $item->get_product() ? $item->get_product()->get_sku() : null;
-			$data['price'] = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
-		}
-
-		// Format taxes.
-		if ( ! empty( $data['taxes']['total'] ) ) {
-			$taxes = array();
-
-			foreach ( $data['taxes']['total'] as $tax_rate_id => $tax ) {
-				$taxes[] = array(
-					'id'       => $tax_rate_id,
-					'total'    => $tax,
-					'subtotal' => isset( $data['taxes']['subtotal'][ $tax_rate_id ] ) ? $data['taxes']['subtotal'][ $tax_rate_id ] : '',
-				);
-			}
-			$data['taxes'] = $taxes;
-		} elseif ( isset( $data['taxes'] ) ) {
-			$data['taxes'] = array();
-		}
-
-		// Remove names for coupons, taxes and shipping.
-		if ( isset( $data['code'] ) || isset( $data['rate_code'] ) || isset( $data['method_title'] ) ) {
-			unset( $data['name'] );
-		}
-
-		// Remove props we don't want to expose.
-		unset( $data['order_id'] );
-		unset( $data['type'] );
-
-		return $data;
-	}
-
-	/**
-	 * Prepare a single order output for response.
-	 *
-	 * @since  3.0.0
-	 * @param  \WC_Data         $object  Object data.
-	 * @param  \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response
-	 */
-	public function prepare_object_for_response( $object, $request ) {
-		$context        = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$order_response = new OrderResponse();
+	protected function get_data_for_response( $object, $request ) {
+		$formatter = new OrderResponse();
 
 		if ( ! is_null( $request['dp'] ) ) {
-			$order_response->set_dp( $request['dp'] );
+			$formatter->set_dp( $request['dp'] );
 		}
 
-		$data     = $order_response->prepare_response( $object, $context );
-		$data     = $this->add_additional_fields_to_object( $data, $request );
-		$data     = $this->filter_response_by_context( $data, $context );
-		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $object, $request ) );
-
-		/**
-		 * Filter the data for a response.
-		 *
-		 * The dynamic portion of the hook name, $this->post_type,
-		 * refers to object type being prepared for the response.
-		 *
-		 * @param \WP_REST_Response $response The response object.
-		 * @param \WC_Data          $object   Object data.
-		 * @param \WP_REST_Request  $request  Request object.
-		 */
-		return apply_filters( "woocommerce_rest_prepare_{$this->post_type}_object", $response, $object, $request );
+		return $formatter->prepare_response( $object, $this->get_request_context( $request ) );
 	}
 
 	/**

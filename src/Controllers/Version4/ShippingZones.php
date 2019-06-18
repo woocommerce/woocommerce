@@ -17,6 +17,15 @@ defined( 'ABSPATH' ) || exit;
 class ShippingZones extends AbstractShippingZonesController {
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'shipping_zone';
+
+	/**
 	 * Register the routes for Shipping Zones.
 	 */
 	public function register_routes() {
@@ -230,29 +239,18 @@ class ShippingZones extends AbstractShippingZonesController {
 	}
 
 	/**
-	 * Prepare the Shipping Zone for the REST response.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param array           $item Shipping Zone.
+	 * @param \WP_Comment      $object Object to prepare.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response $response
+	 * @return array Array of data in the correct format.
 	 */
-	public function prepare_item_for_response( $item, $request ) {
-		$data = array(
-			'id'    => (int) $item['id'],
-			'name'  => $item['zone_name'],
-			'order' => (int) $item['zone_order'],
+	protected function get_data_for_response( $object, $request ) {
+		return array(
+			'id'    => (int) $object['id'],
+			'name'  => $object['zone_name'],
+			'order' => (int) $object['zone_order'],
 		);
-
-		$context = empty( $request['context'] ) ? 'view' : $request['context'];
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $data, $request ) );
-
-		return $response;
 	}
 
 	/**

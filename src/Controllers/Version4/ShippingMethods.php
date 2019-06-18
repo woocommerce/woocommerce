@@ -31,6 +31,15 @@ class ShippingMethods extends AbstractController {
 	protected $resource_type = 'shipping_methods';
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'shipping_method';
+
+	/**
 	 * Register the route for /shipping_methods and /shipping_methods/<method>
 	 */
 	public function register_routes() {
@@ -109,36 +118,18 @@ class ShippingMethods extends AbstractController {
 	}
 
 	/**
-	 * Prepare a shipping method for response.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param  \WC_Shipping_Method $method   Shipping method object.
-	 * @param  \WP_REST_Request    $request  Request object.
-	 * @return \WP_REST_Response   $response Response data.
+	 * @param \WC_Shipping_Method $object Object to prepare.
+	 * @param \WP_REST_Request    $request Request object.
+	 * @return array Array of data in the correct format.
 	 */
-	public function prepare_item_for_response( $method, $request ) {
-		$data = array(
-			'id'          => $method->id,
-			'title'       => $method->method_title,
-			'description' => $method->method_description,
+	protected function get_data_for_response( $object, $request ) {
+		return array(
+			'id'          => $object->id,
+			'title'       => $object->method_title,
+			'description' => $object->method_description,
 		);
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $method, $request ) );
-
-		/**
-		 * Filter shipping methods object returned from the REST API.
-		 *
-		 * @param \WP_REST_Response   $response The response object.
-		 * @param \WC_Shipping_Method $method   Shipping method object used to create response.
-		 * @param \WP_REST_Request    $request  Request object.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_shipping_method', $response, $method, $request );
 	}
 
 	/**
