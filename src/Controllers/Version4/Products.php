@@ -42,15 +42,6 @@ class Products extends AbstractObjectsController {
 	protected $hierarchical = true;
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'product';
-
-	/**
 	 * Get the Product's schema, conforming to JSON Schema.
 	 *
 	 * @return array

@@ -35,15 +35,6 @@ class Customers extends AbstractController {
 	protected $resource_type = 'customers';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'customer';
-
-	/**
 	 * Register the routes for customers.
 	 */
 	public function register_routes() {

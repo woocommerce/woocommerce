@@ -31,15 +31,6 @@ class Taxes extends AbstractController {
 	protected $resource_type = 'settings';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'tax';
-
-	/**
 	 * Register the routes for taxes.
 	 */
 	public function register_routes() {

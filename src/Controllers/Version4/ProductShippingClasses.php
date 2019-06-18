@@ -31,15 +31,6 @@ class ProductShippingClasses extends AbstractTermsContoller {
 	protected $taxonomy = 'product_shipping_class';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'product_shipping_class';
-
-	/**
 	 * Get data for this object in the format of this endpoint's schema.
 	 *
 	 * @param \WP_Term         $object Object to prepare.

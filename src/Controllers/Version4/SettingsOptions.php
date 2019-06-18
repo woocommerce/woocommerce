@@ -34,15 +34,6 @@ class SettingsOptions extends AbstractController {
 	protected $rest_base = 'settings/(?P<group_id>[\w-]+)';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'setting_option';
-
-	/**
 	 * Register routes.
 	 *
 	 * @since 3.0.0

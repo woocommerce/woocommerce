@@ -34,15 +34,6 @@ class PaymentGateways extends AbstractController {
 	protected $resource_type = 'payment_gateways';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'payment_gateway';
-
-	/**
 	 * Register the route for /payment_gateways and /payment_gateways/<id>
 	 */
 	public function register_routes() {

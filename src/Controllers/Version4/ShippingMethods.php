@@ -31,15 +31,6 @@ class ShippingMethods extends AbstractController {
 	protected $resource_type = 'shipping_methods';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'shipping_method';
-
-	/**
 	 * Register the route for /shipping_methods and /shipping_methods/<method>
 	 */
 	public function register_routes() {

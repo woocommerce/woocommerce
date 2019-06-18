@@ -31,15 +31,6 @@ class Data extends AbstractController {
 	protected $resource_type = 'settings';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'data';
-
-	/**
 	 * Register routes.
 	 *
 	 * @since 3.5.0

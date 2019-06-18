@@ -26,15 +26,6 @@ class Countries extends DataController {
 	protected $rest_base = 'data/countries';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'country';
-
-	/**
 	 * Register routes.
 	 *
 	 * @since 3.5.0
@@ -183,7 +174,7 @@ class Countries extends DataController {
 	public function get_item_schema() {
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'data_countries',
+			'title'      => 'country',
 			'type'       => 'object',
 			'properties' => array(
 				'code'   => array(

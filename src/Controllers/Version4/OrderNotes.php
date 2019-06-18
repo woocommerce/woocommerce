@@ -33,15 +33,6 @@ class OrderNotes extends AbstractController {
 	protected $post_type = 'shop_order';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'order_note';
-
-	/**
 	 * Register the routes for order notes.
 	 */
 	public function register_routes() {

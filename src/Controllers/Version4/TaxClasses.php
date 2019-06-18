@@ -31,15 +31,6 @@ class TaxClasses extends AbstractController {
 	protected $resource_type = 'settings';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'tax_class';
-
-	/**
 	 * Register the routes for tax classes.
 	 */
 	public function register_routes() {

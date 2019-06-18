@@ -31,15 +31,6 @@ class Settings extends AbstractController {
 	protected $resource_type = 'settings';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'setting';
-
-	/**
 	 * Register routes.
 	 *
 	 * @since 3.0.0

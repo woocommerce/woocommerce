@@ -17,15 +17,6 @@ defined( 'ABSPATH' ) || exit;
 class ShippingZoneLocations extends AbstractShippingZonesController {
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'shipping_zone_location';
-
-	/**
 	 * Register the routes for Shipping Zone Locations.
 	 */
 	public function register_routes() {

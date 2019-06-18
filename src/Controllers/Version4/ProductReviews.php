@@ -34,15 +34,6 @@ class ProductReviews extends AbstractController {
 	protected $resource_type = 'product_reviews';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'product_reviews';
-
-	/**
 	 * Register the routes for product reviews.
 	 */
 	public function register_routes() {

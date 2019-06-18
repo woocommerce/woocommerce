@@ -38,15 +38,6 @@ class ProductAttributes extends AbstractController {
 	protected $attribute = '';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'product_attribute';
-
-	/**
 	 * Register the routes for product attributes.
 	 */
 	public function register_routes() {

@@ -50,15 +50,6 @@ abstract class AbstractController extends WP_REST_Controller {
 	protected $resource_type = '';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = '';
-
-	/**
 	 * Register route for items requests.
 	 *
 	 * @param array $methods Supported methods. read, create.
@@ -294,17 +285,17 @@ abstract class AbstractController extends WP_REST_Controller {
 		 * @param mixed             $item     Object used to create response.
 		 * @param \WP_REST_Request  $request  Request object.
 		 */
-		return apply_filters( 'woocommerce_rest_prepare_' . $this->get_hook_suffix( $item ), $response, $item, $request );
+		return apply_filters( 'woocommerce_rest_prepare_' . $this->get_hook_suffix(), $response, $item, $request );
 	}
 
 	/**
 	 * Return suffix for item action hooks.
 	 *
-	 * @param mixed $item Object used to create response.
 	 * @return string
 	 */
-	protected function get_hook_suffix( $item ) {
-		return $this->singular;
+	protected function get_hook_suffix() {
+		$schema = $this->get_item_schema();
+		return $schema['title'];
 	}
 
 	/**

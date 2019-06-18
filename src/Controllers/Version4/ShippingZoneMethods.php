@@ -20,15 +20,6 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	use SettingsTrait;
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'shipping_zone_method';
-
-	/**
 	 * Register the routes for Shipping Zone Methods.
 	 */
 	public function register_routes() {

@@ -31,15 +31,6 @@ class SystemStatus extends AbstractController {
 	protected $resource_type = 'system_status';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'system_status';
-
-	/**
 	 * Register the route for /system_status
 	 */
 	public function register_routes() {

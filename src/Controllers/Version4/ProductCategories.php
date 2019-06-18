@@ -31,15 +31,6 @@ class ProductCategories extends AbstractTermsContoller {
 	protected $taxonomy = 'product_cat';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'product_cat';
-
-	/**
 	 * Get data for this object in the format of this endpoint's schema.
 	 *
 	 * @param \WP_Term    $object Object to prepare.

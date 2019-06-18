@@ -26,15 +26,6 @@ class Continents extends DataController {
 	protected $rest_base = 'data/continents';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'continent';
-
-	/**
 	 * Register routes.
 	 *
 	 * @since 3.5.0
@@ -234,7 +225,7 @@ class Continents extends DataController {
 	public function get_item_schema() {
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'data_continents',
+			'title'      => 'continent',
 			'type'       => 'object',
 			'properties' => array(
 				'code'      => array(

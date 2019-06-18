@@ -35,15 +35,6 @@ class ProductVariations extends Products {
 	protected $post_type = 'product_variation';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'product_variation';
-
-	/**
 	 * Register the routes for products.
 	 */
 	public function register_routes() {

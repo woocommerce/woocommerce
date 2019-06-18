@@ -26,15 +26,6 @@ class Currencies extends DataController {
 	protected $rest_base = 'data/currencies';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'currency';
-
-	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
@@ -189,7 +180,7 @@ class Currencies extends DataController {
 	public function get_item_schema() {
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'data_currencies',
+			'title'      => 'currency',
 			'type'       => 'object',
 			'properties' => array(
 				'code'   => array(

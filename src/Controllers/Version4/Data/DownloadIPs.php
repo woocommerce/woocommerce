@@ -26,15 +26,6 @@ class DownloadIPs extends DataController {
 	protected $rest_base = 'data/download-ips';
 
 	/**
-	 * Singular name for resource type.
-	 *
-	 * Used in filter/action names for single resources.
-	 *
-	 * @var string
-	 */
-	protected $singular = 'download_ip';
-
-	/**
 	 * Register routes.
 	 *
 	 * @since 3.5.0
@@ -141,7 +132,7 @@ class DownloadIPs extends DataController {
 	public function get_item_schema() {
 		$schema = array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'data_download_ips',
+			'title'      => 'download_ip',
 			'type'       => 'object',
 			'properties' => array(
 				'user_ip_address' => array(

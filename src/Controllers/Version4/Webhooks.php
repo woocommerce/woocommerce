@@ -693,10 +693,9 @@ class Webhooks extends AbstractController {
 	/**
 	 * Return suffix for item action hooks.
 	 *
-	 * @param mixed $item Object used to create response.
 	 * @return string
 	 */
-	protected function get_hook_suffix( $item ) {
+	protected function get_hook_suffix() {
 		return $this->post_type;
 	}
 }
