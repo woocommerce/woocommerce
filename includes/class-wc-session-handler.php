@@ -325,7 +325,7 @@ class WC_Session_Handler extends WC_Session {
 			}
 
 			$cache_duration = $this->_session_expiration - time();
-			if ($cache_duration > 0){
+			if ( 0 < $cache_duration ) {
 				wp_cache_add( $this->get_cache_prefix() . $customer_id, $value, WC_SESSION_CACHE_GROUP, $cache_duration );
 			}
 		}
