@@ -561,24 +561,72 @@ class ProductVariations extends Products {
 	}
 
 	/**
-	 * Check if a given request has access to update an item.
+	 * Check if a given ID is valid.
 	 *
 	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return \WP_Error|boolean
 	 */
-	public function update_item_permissions_check( $request ) {
-		$object = $this->get_object( (int) $request['id'] );
+	protected function check_valid_variation_id( $request ) {
+		$id     = $request->get_param( 'id' );
+		$object = $this->get_object( $id );
 
-		if ( $object && 0 !== $object->get_id() && ! Permissions::check_post_object( $this->post_type, 'edit', $object->get_id() ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		if ( ! $object || 0 === $object->get_id() ) {
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		// Check if variation belongs to the correct parent product.
 		if ( $object && 0 !== $object->get_parent_id() && absint( $request['product_id'] ) !== $object->get_parent_id() ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Parent product does not match current variation.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-
 		return true;
+	}
+
+	/**
+	 * Check if a given request has access to read a webhook.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|boolean
+	 */
+	public function get_item_permissions_check( $request ) {
+		$check_valid = $this->check_valid_variation_id( $request );
+
+		if ( is_wp_error( $check_valid ) ) {
+			return $check_valid;
+		}
+
+		return parent::get_item_permissions_check( $request );
+	}
+
+	/**
+	 * Check if a given request has access to delete an item.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|boolean
+	 */
+	public function delete_item_permissions_check( $request ) {
+		$check_valid = $this->check_valid_variation_id( $request );
+
+		if ( is_wp_error( $check_valid ) ) {
+			return $check_valid;
+		}
+
+		return parent::delete_item_permissions_check( $request );
+	}
+
+	/**
+	 * Check if a given request has access to update an item.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|boolean
+	 */
+	public function update_item_permissions_check( $request ) {
+		$check_valid = $this->check_valid_variation_id( $request );
+
+		if ( is_wp_error( $check_valid ) ) {
+			return $check_valid;
+		}
+
+		return parent::update_item_permissions_check( $request );
 	}
 
 	/**
@@ -721,7 +769,7 @@ class ProductVariations extends Products {
 		 */
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );
 
-		if ( ! Permissions::check_post_object( $this->post_type, 'delete', $object->get_id() ) ) {
+		if ( ! Permissions::user_can_delete( $this->post_type, $object->get_id() ) ) {
 			return new \WP_Error(
 				/* translators: %s: post type */
 				"woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array(

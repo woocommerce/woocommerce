@@ -159,6 +159,8 @@ abstract class AbstractController extends WP_REST_Controller {
 		return $schema;
 	}
 
+
+
 	/**
 	 * Check whether a given request has permission to read webhooks.
 	 *
@@ -166,10 +168,13 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @return \WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		if ( ! Permissions::check_resource( $this->resource_type, 'read' ) ) {
+		$permission = Permissions::user_can_list( $this->get_item_title() );
+
+		if ( false === $permission ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-		return true;
+
+		return $permission;
 	}
 
 	/**
@@ -180,10 +185,13 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function create_item_permissions_check( $request ) {
-		if ( ! Permissions::check_resource( $this->resource_type, 'create' ) ) {
+		$permission = Permissions::user_can_create( $this->get_item_title() );
+
+		if ( false === $permission ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-		return true;
+
+		return $permission;
 	}
 
 	/**
@@ -193,12 +201,14 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @return \WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
-		$id = $request->get_param( 'id' );
+		$id         = $request->get_param( 'id' );
+		$permission = Permissions::user_can_read( $this->get_item_title(), $id );
 
-		if ( 0 !== $id && ! Permissions::check_resource( $this->resource_type, 'read', $id ) ) {
+		if ( false === $permission ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-		return true;
+
+		return $permission;
 	}
 
 	/**
@@ -209,12 +219,14 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function update_item_permissions_check( $request ) {
-		$id = $request->get_param( 'id' );
+		$id         = $request->get_param( 'id' );
+		$permission = Permissions::user_can_edit( $this->get_item_title(), $id );
 
-		if ( 0 !== $id && ! Permissions::check_resource( $this->resource_type, 'edit', $id ) ) {
+		if ( false === $permission ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-		return true;
+
+		return $permission;
 	}
 
 	/**
@@ -225,12 +237,14 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
-		$id = $request->get_param( 'id' );
+		$id         = $request->get_param( 'id' );
+		$permission = Permissions::user_can_delete( $this->get_item_title(), $id );
 
-		if ( 0 !== $id && ! Permissions::check_resource( $this->resource_type, 'delete', $id ) ) {
+		if ( false === $permission ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-		return true;
+
+		return $permission;
 	}
 
 	/**
@@ -241,10 +255,13 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @return bool|\WP_Error
 	 */
 	public function batch_items_permissions_check( $request ) {
-		if ( ! Permissions::check_resource( $this->resource_type, 'batch' ) ) {
+		$permission = Permissions::user_can_batch( $this->get_item_title() );
+
+		if ( false === $permission ) {
 			return new \WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
-		return true;
+
+		return $permission;
 	}
 
 	/**
@@ -293,9 +310,18 @@ abstract class AbstractController extends WP_REST_Controller {
 	 *
 	 * @return string
 	 */
-	protected function get_hook_suffix() {
+	protected function get_item_title() {
 		$schema = $this->get_item_schema();
 		return $schema['title'];
+	}
+
+	/**
+	 * Return suffix for item action hooks.
+	 *
+	 * @return string
+	 */
+	protected function get_hook_suffix() {
+		return $this->get_item_title();
 	}
 
 	/**

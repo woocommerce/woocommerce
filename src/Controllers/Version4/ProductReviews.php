@@ -219,7 +219,7 @@ class ProductReviews extends AbstractController {
 		$reviews      = array();
 
 		foreach ( $query_result as $review ) {
-			if ( ! Permissions::check_resource( $this->resource_type, 'read', $review->comment_ID ) ) {
+			if ( ! Permissions::user_can_read( 'product_review', $review->comment_ID ) ) {
 				continue;
 			}
 
@@ -982,5 +982,56 @@ class ProductReviews extends AbstractController {
 		}
 
 		return $changed;
+	}
+
+	/**
+	 * Check if a given request has access to read a webhook.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|boolean
+	 */
+	public function get_item_permissions_check( $request ) {
+		$id          = $request->get_param( 'id' );
+		$check_valid = $this->get_review( $id );
+
+		if ( is_wp_error( $check_valid ) ) {
+			return $check_valid;
+		}
+
+		return parent::get_item_permissions_check( $request );
+	}
+
+	/**
+	 * Check if a given request has access to delete an item.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|boolean
+	 */
+	public function delete_item_permissions_check( $request ) {
+		$id          = $request->get_param( 'id' );
+		$check_valid = $this->get_review( $id );
+
+		if ( is_wp_error( $check_valid ) ) {
+			return $check_valid;
+		}
+
+		return parent::delete_item_permissions_check( $request );
+	}
+
+	/**
+	 * Check if a given request has access to update an item.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|boolean
+	 */
+	public function update_item_permissions_check( $request ) {
+		$id          = $request->get_param( 'id' );
+		$check_valid = $this->get_review( $id );
+
+		if ( is_wp_error( $check_valid ) ) {
+			return $check_valid;
+		}
+
+		return parent::update_item_permissions_check( $request );
 	}
 }

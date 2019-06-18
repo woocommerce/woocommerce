@@ -17,94 +17,222 @@ defined( 'ABSPATH' ) || exit;
 class Permissions {
 
 	/**
-	 * Resource permissions required.
+	 * Items not defined here will default to manage_woocommerce permission.
 	 *
 	 * @var array
 	 */
-	protected static $resource_permissions = [
-		'settings'         => 'manage_woocommerce',
-		'system_status'    => 'manage_woocommerce',
-		'attributes'       => 'manage_product_terms',
-		'shipping_methods' => 'manage_woocommerce',
-		'payment_gateways' => 'manage_woocommerce',
-		'webhooks'         => 'manage_woocommerce',
-		'product_reviews'  => 'moderate_comments',
-		'customers'        => [
+	protected static $capabilities = array(
+		'shop_coupon'            => [
+			'read'   => 'read_shop_coupon',
+			'list'   => 'read_private_shop_coupons',
+			'create' => 'publish_shop_coupons',
+			'edit'   => 'edit_shop_coupon',
+			'delete' => 'delete_shop_coupon',
+			'batch'  => 'edit_others_shop_coupons',
+		],
+		'customer_download'      => [
+			'read'   => 'read_shop_order',
+			'list'   => 'read_private_shop_orders',
+			'create' => 'publish_shop_orders',
+			'edit'   => 'edit_shop_order',
+			'delete' => 'delete_shop_order',
+			'batch'  => 'edit_others_shop_orders',
+		],
+		'customer'               => [
 			'read'   => 'list_users',
-			'create' => 'promote_users', // Check if current user can create users, shop managers are not allowed to create users.
+			'list'   => 'list_users',
+			'create' => 'promote_users',
 			'edit'   => 'edit_users',
 			'delete' => 'delete_users',
 			'batch'  => 'promote_users',
 		],
-	];
+		'shop_order'             => [
+			'read'   => 'read_shop_order',
+			'list'   => 'read_private_shop_orders',
+			'create' => 'publish_shop_orders',
+			'edit'   => 'edit_shop_order',
+			'delete' => 'delete_shop_order',
+			'batch'  => 'edit_others_shop_orders',
+		],
+		'product_attribute'      => 'edit_product_terms',
+		'product_attribute_term' => [
+			'read'   => 'manage_product_terms',
+			'list'   => 'manage_product_terms',
+			'create' => 'edit_product_terms',
+			'edit'   => 'edit_product_terms',
+			'delete' => 'delete_product_terms',
+			'batch'  => 'edit_product_terms',
+		],
+		'product_cat'            => [
+			'read'   => 'manage_product_terms',
+			'list'   => 'manage_product_terms',
+			'create' => 'edit_product_terms',
+			'edit'   => 'edit_product_terms',
+			'delete' => 'delete_product_terms',
+			'batch'  => 'edit_product_terms',
+		],
+		'product_review'         => 'moderate_comments',
+		'product'                => [
+			'read'   => 'read_product',
+			'list'   => 'read_private_products',
+			'create' => 'publish_products',
+			'edit'   => 'edit_product',
+			'delete' => 'delete_product',
+			'batch'  => 'edit_others_products',
+		],
+		'product_shipping_class' => [
+			'read'   => 'manage_product_terms',
+			'list'   => 'manage_product_terms',
+			'create' => 'edit_product_terms',
+			'edit'   => 'edit_product_terms',
+			'delete' => 'delete_product_terms',
+			'batch'  => 'edit_product_terms',
+		],
+		'product_tag'            => [
+			'read'   => 'manage_product_terms',
+			'list'   => 'manage_product_terms',
+			'create' => 'edit_product_terms',
+			'edit'   => 'edit_product_terms',
+			'delete' => 'delete_product_terms',
+			'batch'  => 'edit_product_terms',
+		],
+		'product_variation'      => [
+			'read'   => 'read_product',
+			'list'   => 'read_private_products',
+			'create' => 'publish_products',
+			'edit'   => 'edit_product',
+			'delete' => 'delete_product',
+			'batch'  => 'edit_others_products',
+		],
+	);
 
 	/**
-	 * See if the current user can do something to a resource.
+	 * Get capabilities required for a resource for a given context.
 	 *
-	 * @param string $resource Type of permission required.
-	 * @param string $context Context. One of read, edit, create, update, delete, batch.
-	 * @param int    $resource_id Optional resource ID.
+	 * @param string $type Item/resource type. Comes from schema title.
+	 * @param string $context Read, edit, delete, batch, create.
+	 * @return array List of caps to check. Defaults to manage_woocommerce.
+	 */
+	protected static function get_capabilities_for_type( $type, $context = 'read' ) {
+		if ( isset( self::$capabilities[ $type ][ $context ] ) ) {
+			$caps = self::$capabilities[ $type ][ $context ];
+		} elseif ( isset( self::$capabilities[ $type ] ) ) {
+			$caps = self::$capabilities[ $type ];
+		} else {
+			$caps = 'manage_woocommerce';
+		}
+		return is_array( $caps ) ? $caps : array( $caps );
+	}
+
+	/**
+	 * Check if user has a list of caps.
+	 *
+	 * @param array $capabilities List of caps to check.
+	 * @param int   $object_id Object ID to check. Optional.
 	 * @return boolean
 	 */
-	public static function check_resource( $resource, $context = 'read', $resource_id = 0 ) {
-		if ( ! isset( self::$resource_permissions[ $resource ] ) ) {
+	protected static function has_required_capabilities( $capabilities, $object_id = null ) {
+		$permission = true;
+
+		foreach ( $capabilities as $capability ) {
+			if ( ! current_user_can( $capability, $object_id ) ) {
+				$permission = false;
+			}
+		}
+
+		return $permission;
+	}
+
+	/**
+	 * Check if user can list a collection of resources.
+	 *
+	 * @param string $type Item/resource type. Comes from schema title.
+	 * @return bool True on success.
+	 */
+	public static function user_can_list( $type ) {
+		$capabilities = self::get_capabilities_for_type( $type, 'list' );
+		$permission   = self::has_required_capabilities( $capabilities );
+
+		return apply_filters( 'woocommerce_rest_user_can_list', $permission, $type );
+	}
+
+	/**
+	 * Check if user can read a resource.
+	 *
+	 * @param string $type Item/resource type. Comes from schema title.
+	 * @param int    $object_id Resource ID. 0 to check access to read all.
+	 * @return bool True on success.
+	 */
+	public static function user_can_read( $type, $object_id = 0 ) {
+		if ( 0 === $object_id ) {
 			return false;
 		}
-		$permissions = self::$resource_permissions[ $resource ];
-		$capability  = is_array( $permissions ) ? $permissions[ $context ] : $permissions;
-		$permission  = current_user_can( $capability );
 
-		return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $resource_id, $resource );
+		$capabilities = self::get_capabilities_for_type( $type, 'read' );
+		$permission   = self::has_required_capabilities( $capabilities, $object_id );
+
+		return apply_filters( 'woocommerce_rest_user_can_read', $permission, $type, $object_id );
 	}
 
 	/**
-	 * See if the current user can do something to a resource.
+	 * Check if user can read a resource.
 	 *
-	 * @param string $taxonomy Taxonomy name.
-	 * @param string $context Context. One of read, edit, create, update, delete, batch.
-	 * @param int    $object_id Optional object ID.
-	 * @return boolean
+	 * @param string $type Item/resource type. Comes from schema title.
+	 * @param int    $object_id Resource ID.
+	 * @return bool True on success.
 	 */
-	public static function check_taxonomy( $taxonomy, $context = 'read', $object_id = 0 ) {
-		$contexts        = array(
-			'read'   => 'manage_terms',
-			'create' => 'edit_terms',
-			'edit'   => 'edit_terms',
-			'delete' => 'delete_terms',
-			'batch'  => 'edit_terms',
-		);
-		$cap             = $contexts[ $context ];
-		$taxonomy_object = get_taxonomy( $taxonomy );
-		$permission      = current_user_can( $taxonomy_object->cap->$cap, $object_id );
-
-		return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, $taxonomy );
-	}
-
-	/**
-	 * Check permissions of posts on REST API.
-	 *
-	 * @param string $post_type Post type.
-	 * @param string $context   Request context.
-	 * @param int    $object_id Post ID.
-	 * @return bool
-	 */
-	public static function check_post_object( $post_type, $context = 'read', $object_id = 0 ) {
-		$contexts = array(
-			'read'   => 'read_private_posts',
-			'create' => 'publish_posts',
-			'edit'   => 'edit_post',
-			'delete' => 'delete_post',
-			'batch'  => 'edit_others_posts',
-		);
-
-		if ( 'revision' === $post_type ) {
-			$permission = false;
-		} else {
-			$cap              = $contexts[ $context ];
-			$post_type_object = get_post_type_object( $post_type );
-			$permission       = current_user_can( $post_type_object->cap->$cap, $object_id );
+	public static function user_can_edit( $type, $object_id ) {
+		if ( 0 === $object_id ) {
+			return false;
 		}
 
-		return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, $post_type );
+		$capabilities = self::get_capabilities_for_type( $type, 'edit' );
+		$permission   = self::has_required_capabilities( $capabilities, $object_id );
+
+		return apply_filters( 'woocommerce_rest_user_can_edit', $permission, $type, $object_id );
+	}
+
+	/**
+	 * Check if user can create a resource.
+	 *
+	 * @param string $type Item/resource type. Comes from schema title.
+	 * @return bool True on success.
+	 */
+	public static function user_can_create( $type ) {
+		$capabilities = self::get_capabilities_for_type( $type, 'create' );
+		$permission   = self::has_required_capabilities( $capabilities );
+
+		return apply_filters( 'woocommerce_rest_user_can_create', $permission, $type );
+	}
+
+	/**
+	 * Check if user can delete a resource.
+	 *
+	 * @param string $type Item/resource type. Comes from schema title.
+	 * @param int    $object_id Resource ID.
+	 * @return bool True on success.
+	 */
+	public static function user_can_delete( $type, $object_id ) {
+		if ( 0 === $object_id ) {
+			return false;
+		}
+
+		$capabilities = self::get_capabilities_for_type( $type, 'delete' );
+		$permission   = self::has_required_capabilities( $capabilities, $object_id );
+
+		return apply_filters( 'woocommerce_rest_user_can_delete', $permission, $type, $object_id );
+	}
+
+	/**
+	 * Check if user can batch update a resource.
+	 *
+	 * @param string $type Item/resource type. Comes from schema title.
+	 * @return bool True on success.
+	 */
+	public static function user_can_batch( $type ) {
+		$capabilities = self::get_capabilities_for_type( $type, 'batch' );
+		$permission   = self::has_required_capabilities( $capabilities );
+
+		return apply_filters( 'woocommerce_rest_user_can_batch', $permission, $type );
 	}
 }

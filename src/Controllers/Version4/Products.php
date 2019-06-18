@@ -1142,7 +1142,7 @@ class Products extends AbstractObjectsController {
 		 */
 		$supports_trash = apply_filters( "woocommerce_rest_{$this->post_type}_object_trashable", $supports_trash, $object );
 
-		if ( ! Permissions::check_post_object( $this->post_type, 'delete', $object->get_id() ) ) {
+		if ( ! Permissions::user_can_delete( $this->post_type, $object->get_id() ) ) {
 			return new \WP_Error(
 				"woocommerce_rest_user_cannot_delete_{$this->post_type}",
 				/* translators: %s: post type */

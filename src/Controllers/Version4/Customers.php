@@ -740,4 +740,68 @@ class Customers extends AbstractController {
 		);
 		return $params;
 	}
+
+	/**
+	 * Check if a given ID is valid.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|boolean
+	 */
+	protected function check_valid_customer_id( $request ) {
+		$id   = $request->get_param( 'id' );
+		$user = get_userdata( $id );
+
+		if ( false === $user ) {
+			return new \WP_Error( 'woocommerce_rest_customer_invalid_id', __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to read a webhook.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|boolean
+	 */
+	public function get_item_permissions_check( $request ) {
+		$check_valid = $this->check_valid_customer_id( $request );
+
+		if ( is_wp_error( $check_valid ) ) {
+			return $check_valid;
+		}
+
+		return parent::get_item_permissions_check( $request );
+	}
+
+	/**
+	 * Check if a given request has access to delete an item.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|boolean
+	 */
+	public function delete_item_permissions_check( $request ) {
+		$check_valid = $this->check_valid_customer_id( $request );
+
+		if ( is_wp_error( $check_valid ) ) {
+			return $check_valid;
+		}
+
+		return parent::delete_item_permissions_check( $request );
+	}
+
+	/**
+	 * Check if a given request has access to update an item.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return \WP_Error|boolean
+	 */
+	public function update_item_permissions_check( $request ) {
+		$check_valid = $this->check_valid_customer_id( $request );
+
+		if ( is_wp_error( $check_valid ) ) {
+			return $check_valid;
+		}
+
+		return parent::update_item_permissions_check( $request );
+	}
 }
