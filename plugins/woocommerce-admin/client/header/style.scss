@@ -12,7 +12,7 @@
 	position: fixed;
 	width: 100%;
 	top: $adminbar-height;
-	z-index: 2; /* on top of components-popover */
+	z-index: 1001; /* on top of #wp-content-editor-tools */
 
 	&.is-scrolled {
 		box-shadow: 0 8px 8px 0 rgba(85, 93, 102, 0.3);
