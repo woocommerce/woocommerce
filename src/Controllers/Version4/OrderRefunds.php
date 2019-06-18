@@ -127,13 +127,13 @@ class OrderRefunds extends Orders {
 	}
 
 	/**
-	 * Get formatted item data.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @since  3.0.0
-	 * @param  \WC_Data $object WC_Data instance.
-	 * @return array
+	 * @param mixed            $object Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array Array of data in the correct format.
 	 */
-	protected function get_formatted_item_data( $object ) {
+	protected function get_data_for_response( $object, $request ) {
 		$data              = $object->get_data();
 		$format_decimal    = array( 'amount' );
 		$format_date       = array( 'date_created' );
@@ -192,7 +192,7 @@ class OrderRefunds extends Orders {
 			return new \WP_Error( 'woocommerce_rest_invalid_order_refund_id', __( 'Invalid order refund ID.', 'woocommerce' ), 404 );
 		}
 
-		$data    = $this->get_formatted_item_data( $object );
+		$data    = $this->get_data_for_response( $object, $request );
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $data, $request );
 		$data    = $this->filter_response_by_context( $data, $context );
@@ -336,21 +336,21 @@ class OrderRefunds extends Orders {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param \WC_Data         $object  Object data.
+	 * @param mixed            $item Object to prepare.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return array                   Links for the given post.
+	 * @return array
 	 */
-	protected function prepare_links( $object, $request ) {
-		$base  = str_replace( '(?P<order_id>[\d]+)', $object->get_parent_id(), $this->rest_base );
+	protected function prepare_links( $item, $request ) {
+		$base  = str_replace( '(?P<order_id>[\d]+)', $item->get_parent_id(), $this->rest_base );
 		$links = array(
 			'self'       => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $object->get_id() ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $item->get_id() ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
 			),
 			'up'         => array(
-				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $object->get_parent_id() ) ),
+				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $item->get_parent_id() ) ),
 			),
 		);
 

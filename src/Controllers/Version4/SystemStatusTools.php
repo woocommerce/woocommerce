@@ -31,6 +31,15 @@ class SystemStatusTools extends AbstractController {
 	protected $resource_type = 'system_status';
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'system_status_tool';
+
+	/**
 	 * Register the routes for /system_status/tools/*.
 	 */
 	public function register_routes() {
@@ -258,25 +267,6 @@ class SystemStatusTools extends AbstractController {
 	}
 
 	/**
-	 * Prepare a tool item for serialization.
-	 *
-	 * @param  array            $item     Object.
-	 * @param  \WP_REST_Request $request  Request object.
-	 * @return \WP_REST_Response $response Response data.
-	 */
-	public function prepare_item_for_response( $item, $request ) {
-		$context = empty( $request['context'] ) ? 'view' : $request['context'];
-		$data    = $this->add_additional_fields_to_object( $item, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $item['id'] ) );
-
-		return $response;
-	}
-
-	/**
 	 * Get the system status tools schema, conforming to JSON Schema.
 	 *
 	 * @return array
@@ -341,14 +331,15 @@ class SystemStatusTools extends AbstractController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param string $id ID.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return array
 	 */
-	protected function prepare_links( $id ) {
+	protected function prepare_links( $item, $request ) {
 		$base  = '/' . $this->namespace . '/' . $this->rest_base;
 		$links = array(
 			'item' => array(
-				'href'       => rest_url( trailingslashit( $base ) . $id ),
+				'href'       => rest_url( trailingslashit( $base ) . $item['id'] ),
 				'embeddable' => true,
 			),
 		);

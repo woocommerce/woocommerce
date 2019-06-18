@@ -321,7 +321,7 @@ class ProductAttributes extends AbstractController {
 
 		$response = rest_ensure_response( $data );
 
-		$response->add_links( $this->prepare_links( $item ) );
+		$response->add_links( $this->prepare_links( $item, $request ) );
 
 		/**
 		 * Filter a attribute item returned from the API.
@@ -338,14 +338,15 @@ class ProductAttributes extends AbstractController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param object $attribute Attribute object.
-	 * @return array Links for the given attribute.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array
 	 */
-	protected function prepare_links( $attribute ) {
+	protected function prepare_links( $item, $request ) {
 		$base  = '/' . $this->namespace . '/' . $this->rest_base;
 		$links = array(
 			'self' => array(
-				'href' => rest_url( trailingslashit( $base ) . $attribute->attribute_id ),
+				'href' => rest_url( trailingslashit( $base ) . $item->attribute_id ),
 			),
 			'collection' => array(
 				'href' => rest_url( $base ),

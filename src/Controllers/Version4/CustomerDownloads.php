@@ -33,6 +33,15 @@ class CustomerDownloads extends AbstractController {
 	protected $resource_type = 'customers';
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'customer_download';
+
+	/**
 	 * Register the routes for customers.
 	 */
 	public function register_routes() {
@@ -79,64 +88,46 @@ class CustomerDownloads extends AbstractController {
 	}
 
 	/**
-	 * Prepare a single download output for response.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param \stdClass        $download Download object.
+	 * @param \WP_Comment      $object Object to prepare.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response $response Response data.
+	 * @return array Array of data in the correct format.
 	 */
-	public function prepare_item_for_response( $download, $request ) {
-		$data = array(
-			'download_id'         => $download->download_id,
-			'download_url'        => $download->download_url,
-			'product_id'          => $download->product_id,
-			'product_name'        => $download->product_name,
-			'download_name'       => $download->download_name,
-			'order_id'            => $download->order_id,
-			'order_key'           => $download->order_key,
-			'downloads_remaining' => '' === $download->downloads_remaining ? 'unlimited' : $download->downloads_remaining,
-			'access_expires'      => $download->access_expires ? wc_rest_prepare_date_response( $download->access_expires ) : 'never',
-			'access_expires_gmt'  => $download->access_expires ? wc_rest_prepare_date_response( get_gmt_from_date( $download->access_expires ) ) : 'never',
-			'file'                => $download->file,
+	protected function get_data_for_response( $object, $request ) {
+		return array(
+			'download_id'         => $object->download_id,
+			'download_url'        => $object->download_url,
+			'product_id'          => $object->product_id,
+			'product_name'        => $object->product_name,
+			'download_name'       => $object->download_name,
+			'order_id'            => $object->order_id,
+			'order_key'           => $object->order_key,
+			'downloads_remaining' => '' === $object->downloads_remaining ? 'unlimited' : $object->downloads_remaining,
+			'access_expires'      => $object->access_expires ? wc_rest_prepare_date_response( $object->access_expires ) : 'never',
+			'access_expires_gmt'  => $object->access_expires ? wc_rest_prepare_date_response( get_gmt_from_date( $object->access_expires ) ) : 'never',
+			'file'                => $object->file,
 		);
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $download, $request ) );
-
-		/**
-		 * Filter customer download data returned from the REST API.
-		 *
-		 * @param \WP_REST_Response $response  The response object.
-		 * @param \stdClass         $download  Download object used to create response.
-		 * @param \WP_REST_Request  $request   Request object.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_customer_download', $response, $download, $request );
 	}
 
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param \stdClass        $download Download object.
+	 * @param mixed            $item Object to prepare.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return array Links for the given customer download.
+	 * @return array
 	 */
-	protected function prepare_links( $download, $request ) {
+	protected function prepare_links( $item, $request ) {
 		$base  = str_replace( '(?P<customer_id>[\d]+)', $request['customer_id'], $this->rest_base );
 		$links = array(
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
 			),
 			'product' => array(
-				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $download->product_id ) ),
+				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $item->product_id ) ),
 			),
 			'order' => array(
-				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $download->order_id ) ),
+				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $item->order_id ) ),
 			),
 		);
 

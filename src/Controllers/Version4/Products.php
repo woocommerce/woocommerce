@@ -1092,24 +1092,23 @@ class Products extends AbstractObjectsController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param \WC_Data         $object  Object data.
+	 * @param mixed            $item Object to prepare.
 	 * @param \WP_REST_Request $request Request object.
-	 *
-	 * @return array                   Links for the given post.
+	 * @return array
 	 */
-	protected function prepare_links( $object, $request ) {
+	protected function prepare_links( $item, $request ) {
 		$links = array(
 			'self'       => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $object->get_id() ) ),  // @codingStandardsIgnoreLine.
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $item->get_id() ) ),  // @codingStandardsIgnoreLine.
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),  // @codingStandardsIgnoreLine.
 			),
 		);
 
-		if ( $object->get_parent_id() ) {
+		if ( $item->get_parent_id() ) {
 			$links['up'] = array(
-				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $object->get_parent_id() ) ),  // @codingStandardsIgnoreLine.
+				'href' => rest_url( sprintf( '/%s/products/%d', $this->namespace, $item->get_parent_id() ) ),  // @codingStandardsIgnoreLine.
 			);
 		}
 

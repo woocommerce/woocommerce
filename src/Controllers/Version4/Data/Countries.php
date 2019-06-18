@@ -145,7 +145,7 @@ class Countries extends DataController {
 		$data     = $this->filter_response_by_context( $data, 'view' );
 		$response = rest_ensure_response( $data );
 
-		$response->add_links( $this->prepare_links( $item ) );
+		$response->add_links( $this->prepare_links( $item, $request ) );
 
 		/**
 		 * Filter the states list for a country returned from the API.
@@ -162,10 +162,11 @@ class Countries extends DataController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param object $item Data object.
-	 * @return array Links for the given country.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array
 	 */
-	protected function prepare_links( $item ) {
+	protected function prepare_links( $item, $request ) {
 		$country_code = strtolower( $item['code'] );
 		$links        = array(
 			'self'       => array(

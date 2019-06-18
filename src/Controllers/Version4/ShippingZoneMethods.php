@@ -297,8 +297,8 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	/**
 	 * Updates settings, order, and enabled status on create.
 	 *
-	 * @param int                $instance_id Instance ID.
-	 * @param WC_Shipping_Method $method      Shipping method data.
+	 * @param int                 $instance_id Instance ID.
+	 * @param \WC_Shipping_Method $method      Shipping method data.
 	 * @param \WP_REST_Request    $request     Request data.
 	 *
 	 * @return WC_Shipping_Method
@@ -377,7 +377,7 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 
-		$response->add_links( $this->prepare_links( $request['zone_id'], $item->instance_id ) );
+		$response->add_links( $this->prepare_links( $item, $request ) );
 
 		$response = $this->prepare_response_for_collection( $response );
 
@@ -416,15 +416,15 @@ class ShippingZoneMethods extends AbstractShippingZonesController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param int $zone_id Given Shipping Zone ID.
-	 * @param int $instance_id Given Shipping Zone Method Instance ID.
-	 * @return array Links for the given Shipping Zone Method.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array
 	 */
-	protected function prepare_links( $zone_id, $instance_id ) {
-		$base  = '/' . $this->namespace . '/' . $this->rest_base . '/' . $zone_id;
+	protected function prepare_links( $item, $request ) {
+		$base  = '/' . $this->namespace . '/' . $this->rest_base . '/' . $request['zone_id'];
 		$links = array(
 			'self'       => array(
-				'href' => rest_url( $base . '/methods/' . $instance_id ),
+				'href' => rest_url( $base . '/methods/' . $item->instance_id ),
 			),
 			'collection' => array(
 				'href' => rest_url( $base . '/methods' ),

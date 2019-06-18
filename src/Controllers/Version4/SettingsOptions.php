@@ -11,7 +11,7 @@ namespace WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WooCommerce\RestApi\Controllers\Version4\Utilities\SettingsTrait;
+use WooCommerce\RestApi\Controllers\Version4\Utilities\SettingsTrait;
 
 /**
  * REST API Setting Options controller class.
@@ -366,22 +366,22 @@ class SettingsOptions extends AbstractController {
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, empty( $request['context'] ) ? 'view' : $request['context'] );
 		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $data['id'], $request['group_id'] ) );
+		$response->add_links( $this->prepare_links( $data, $request ) );
 		return $response;
 	}
 
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param string $setting_id Setting ID.
-	 * @param string $group_id Group ID.
-	 * @return array Links for the given setting.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array
 	 */
-	protected function prepare_links( $setting_id, $group_id ) {
-		$base  = str_replace( '(?P<group_id>[\w-]+)', $group_id, $this->rest_base );
+	protected function prepare_links( $item, $request ) {
+		$base  = str_replace( '(?P<group_id>[\w-]+)', $request['group_id'], $this->rest_base );
 		$links = array(
 			'self'       => array(
-				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $base, $setting_id ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $base, $item['id'] ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),

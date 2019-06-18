@@ -517,11 +517,11 @@ abstract class AbstractTermsContoller extends AbstractController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param object           $term   Term object.
-	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return array Links for the given term.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array
 	 */
-	protected function prepare_links( $term, $request ) {
+	protected function prepare_links( $item, $request ) {
 		$base = '/' . $this->namespace . '/' . $this->rest_base;
 
 		if ( ! empty( $request['attribute_id'] ) ) {
@@ -530,15 +530,15 @@ abstract class AbstractTermsContoller extends AbstractController {
 
 		$links = array(
 			'self'       => array(
-				'href' => rest_url( trailingslashit( $base ) . $term->term_id ),
+				'href' => rest_url( trailingslashit( $base ) . $item->term_id ),
 			),
 			'collection' => array(
 				'href' => rest_url( $base ),
 			),
 		);
 
-		if ( $term->parent ) {
-			$parent_term = get_term( (int) $term->parent, $term->taxonomy );
+		if ( $item->parent ) {
+			$parent_term = get_term( (int) $item->parent, $item->taxonomy );
 			if ( $parent_term ) {
 				$links['up'] = array(
 					'href' => rest_url( trailingslashit( $base ) . $parent_term->term_id ),

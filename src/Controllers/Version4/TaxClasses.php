@@ -31,6 +31,15 @@ class TaxClasses extends AbstractController {
 	protected $resource_type = 'settings';
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'tax_class';
+
+	/**
 	 * Register the routes for tax classes.
 	 */
 	public function register_routes() {
@@ -243,46 +252,19 @@ class TaxClasses extends AbstractController {
 		 * @param \WP_REST_Response $response  The response returned from the API.
 		 * @param \WP_REST_Request  $request   The request sent to the API.
 		 */
-		do_action( 'woocommerce_rest_delete_tax', (object) $tax_class, $response, $request );
+		do_action( 'woocommerce_rest_delete_tax_class', (object) $tax_class, $response, $request );
 
 		return $response;
 	}
 
 	/**
-	 * Prepare a single tax class output for response.
-	 *
-	 * @param array           $tax_class Tax class data.
-	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response $response Response data.
-	 */
-	public function prepare_item_for_response( $tax_class, $request ) {
-		$data = $tax_class;
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links() );
-
-		/**
-		 * Filter tax object returned from the REST API.
-		 *
-		 * @param \WP_REST_Response $response  The response object.
-		 * @param \stdClass         $tax_class Tax object used to create response.
-		 * @param \WP_REST_Request  $request   Request object.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_tax', $response, (object) $tax_class, $request );
-	}
-
-	/**
 	 * Prepare links for the request.
 	 *
-	 * @return array Links for the given tax class.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array
 	 */
-	protected function prepare_links() {
+	protected function prepare_links( $item, $request ) {
 		$links = array(
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),

@@ -31,6 +31,15 @@ class Data extends AbstractController {
 	protected $resource_type = 'settings';
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'data';
+
+	/**
 	 * Register routes.
 	 *
 	 * @since 3.5.0
@@ -88,35 +97,27 @@ class Data extends AbstractController {
 	}
 
 	/**
-	 * Prepare a data resource object for serialization.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param \stdClass        $resource Resource data.
-	 * @param \WP_REST_Request $request  Request object.
-	 * @return \WP_REST_Response $response Response data.
+	 * @param \stdClass        $object Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array Array of data in the correct format.
 	 */
-	public function prepare_item_for_response( $resource, $request ) {
-		$data = array(
-			'slug'        => $resource->slug,
-			'description' => $resource->description,
+	protected function get_data_for_response( $object, $request ) {
+		return array(
+			'slug'        => $object->slug,
+			'description' => $object->description,
 		);
-
-		$data = $this->add_additional_fields_to_object( $data, $request );
-		$data = $this->filter_response_by_context( $data, 'view' );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $resource ) );
-
-		return $response;
 	}
 
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param object $item Data object.
-	 * @return array Links for the given country.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array
 	 */
-	protected function prepare_links( $item ) {
+	protected function prepare_links( $item, $request ) {
 		$links = array(
 			'self'       => array(
 				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $item->slug ) ),

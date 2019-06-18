@@ -531,14 +531,14 @@ abstract class AbstractObjectsController extends AbstractController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param \WC_Data         $object  Object data.
+	 * @param mixed            $item Object to prepare.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return array                   Links for the given post.
+	 * @return array
 	 */
-	protected function prepare_links( $object, $request ) {
+	protected function prepare_links( $item, $request ) {
 		$links = array(
 			'self'       => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $object->get_id() ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $item->get_id() ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),

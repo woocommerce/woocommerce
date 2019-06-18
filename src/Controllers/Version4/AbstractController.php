@@ -50,6 +50,15 @@ abstract class AbstractController extends WP_REST_Controller {
 	protected $resource_type = '';
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = '';
+
+	/**
 	 * Register route for items requests.
 	 *
 	 * @param array $methods Supported methods. read, create.
@@ -245,5 +254,64 @@ abstract class AbstractController extends WP_REST_Controller {
 			return new \WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
+	}
+
+	/**
+	 * Get context for the request.
+	 *
+	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @return string
+	 */
+	protected function get_request_context( $request ) {
+		return ! empty( $request['context'] ) ? $request['context'] : 'view';
+	}
+
+	/**
+	 * Prepare a single item for response.
+	 *
+	 * @param mixed            $item Object used to create response.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response $response Response data.
+	 */
+	public function prepare_item_for_response( $item, $request ) {
+		$context  = $this->get_request_context( $request );
+		$fields   = $this->get_fields_for_response( $request );
+		$data     = array_intersect_key( $this->get_data_for_response( $item, $request ), array_flip( $fields ) );
+		$data     = $this->add_additional_fields_to_object( $data, $request );
+		$data     = $this->filter_response_by_context( $data, $context );
+		$response = rest_ensure_response( $data );
+
+		$response->add_links( $this->prepare_links( $item, $request ) );
+
+		/**
+		 * Filter object returned from the REST API.
+		 *
+		 * @param \WP_REST_Response $response The response object.
+		 * @param mixed             $item     Object used to create response.
+		 * @param \WP_REST_Request  $request  Request object.
+		 */
+		return apply_filters( "woocommerce_rest_prepare_{$this->singular}", $response, $item, $request );
+	}
+
+	/**
+	 * Get data for this object in the format of this endpoint's schema.
+	 *
+	 * @param mixed            $object Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return mixed Array of data in the correct format.
+	 */
+	protected function get_data_for_response( $object, $request ) {
+		return $object;
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array
+	 */
+	protected function prepare_links( $item, $request ) {
+		return array();
 	}
 }

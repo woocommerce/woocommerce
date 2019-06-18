@@ -35,6 +35,15 @@ class Customers extends AbstractController {
 	protected $resource_type = 'customers';
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'customer';
+
+	/**
 	 * Register the routes for customers.
 	 */
 	public function register_routes() {
@@ -387,48 +396,34 @@ class Customers extends AbstractController {
 	}
 
 	/**
-	 * Prepare a single customer output for response.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param  \WC_Customer     $customer User object.
-	 * @param  \WP_REST_Request $request   Request object.
-	 * @return \WP_REST_Response $response  Response data.
+	 * @param \WP_Comment      $object Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array Array of data in the correct format.
 	 */
-	public function prepare_item_for_response( $customer, $request ) {
-		$context           = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$customer_response = new CustomerResponse();
+	protected function get_data_for_response( $object, $request ) {
+		$formatter = new CustomerResponse();
 
-		$data     = $customer_response->prepare_response( $customer, $context );
-		$data     = $this->add_additional_fields_to_object( $data, $request );
-		$data     = $this->filter_response_by_context( $data, $context );
-		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $customer ) );
-
-		/**
-		 * Filter customer data returned from the REST API.
-		 *
-		 * @param \WP_REST_Response $response   The response object.
-		 * @param \WC_Customer      $customer  User object used to create response.
-		 * @param \WP_REST_Request  $request    Request object.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_customer_object', $response, $customer, $request );
+		return $formatter->prepare_response( $object, $this->get_request_context( $request ) );
 	}
 
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param \WC_Customer $customer Customer object.
-	 * @return array Links for the given customer.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array
 	 */
-	protected function prepare_links( $customer ) {
+	protected function prepare_links( $item, $request ) {
 		$links = array(
 			'self' => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $customer->get_id() ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $item->get_id() ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
 			),
 		);
-
 		return $links;
 	}
 

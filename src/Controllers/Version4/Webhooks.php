@@ -490,7 +490,7 @@ class Webhooks extends AbstractController {
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 
-		$response->add_links( $this->prepare_links( $webhook->get_id() ) );
+		$response->add_links( $this->prepare_links( $webhook, $request ) );
 
 		/**
 		 * Filter webhook object returned from the REST API.
@@ -505,13 +505,14 @@ class Webhooks extends AbstractController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param int $id Webhook ID.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return array
 	 */
-	protected function prepare_links( $id ) {
+	protected function prepare_links( $item, $request ) {
 		$links = array(
 			'self'       => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $id ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $item->get_id() ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),

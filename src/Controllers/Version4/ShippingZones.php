@@ -250,7 +250,7 @@ class ShippingZones extends AbstractShippingZonesController {
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
 
-		$response->add_links( $this->prepare_links( $data['id'] ) );
+		$response->add_links( $this->prepare_links( $data, $request ) );
 
 		return $response;
 	}
@@ -258,20 +258,21 @@ class ShippingZones extends AbstractShippingZonesController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param int $zone_id Given Shipping Zone ID.
-	 * @return array Links for the given Shipping Zone.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array
 	 */
-	protected function prepare_links( $zone_id ) {
+	protected function prepare_links( $item, $request ) {
 		$base  = '/' . $this->namespace . '/' . $this->rest_base;
 		$links = array(
 			'self'        => array(
-				'href' => rest_url( trailingslashit( $base ) . $zone_id ),
+				'href' => rest_url( trailingslashit( $base ) . $item['id'] ),
 			),
 			'collection'  => array(
 				'href' => rest_url( $base ),
 			),
 			'describedby' => array(
-				'href' => rest_url( trailingslashit( $base ) . $zone_id . '/locations' ),
+				'href' => rest_url( trailingslashit( $base ) . $item['id'] . '/locations' ),
 			),
 		);
 

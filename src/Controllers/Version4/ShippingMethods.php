@@ -144,14 +144,14 @@ class ShippingMethods extends AbstractController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param \WC_Shipping_Method $method Shipping method object.
-	 * @param \WP_REST_Request    $request Request object.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return array
 	 */
-	protected function prepare_links( $method, $request ) {
+	protected function prepare_links( $item, $request ) {
 		$links = array(
 			'self'       => array(
-				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $method->id ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $item->id ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),

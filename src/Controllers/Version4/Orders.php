@@ -153,29 +153,29 @@ class Orders extends AbstractObjectsController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param \WC_Data         $object  Object data.
+	 * @param mixed            $item Object to prepare.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return array                   Links for the given post.
+	 * @return array
 	 */
-	protected function prepare_links( $object, $request ) {
+	protected function prepare_links( $item, $request ) {
 		$links = array(
 			'self'       => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $object->get_id() ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $item->get_id() ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
 			),
 		);
 
-		if ( 0 !== (int) $object->get_customer_id() ) {
+		if ( 0 !== (int) $item->get_customer_id() ) {
 			$links['customer'] = array(
-				'href' => rest_url( sprintf( '/%s/customers/%d', $this->namespace, $object->get_customer_id() ) ),
+				'href' => rest_url( sprintf( '/%s/customers/%d', $this->namespace, $item->get_customer_id() ) ),
 			);
 		}
 
-		if ( 0 !== (int) $object->get_parent_id() ) {
+		if ( 0 !== (int) $item->get_parent_id() ) {
 			$links['up'] = array(
-				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $object->get_parent_id() ) ),
+				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $item->get_parent_id() ) ),
 			);
 		}
 

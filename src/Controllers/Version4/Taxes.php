@@ -31,6 +31,15 @@ class Taxes extends AbstractController {
 	protected $resource_type = 'settings';
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'tax';
+
+	/**
 	 * Register the routes for taxes.
 	 */
 	public function register_routes() {
@@ -410,29 +419,29 @@ class Taxes extends AbstractController {
 	}
 
 	/**
-	 * Prepare a single tax output for response.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param \stdClass        $tax Tax object.
+	 * @param \stdClass        $object Object to prepare.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response $response Response data.
+	 * @return array Array of data in the correct format.
 	 */
-	public function prepare_item_for_response( $tax, $request ) {
+	protected function get_data_for_response( $object, $request ) {
 		global $wpdb;
 
-		$id   = (int) $tax->tax_rate_id;
+		$id   = (int) $object->tax_rate_id;
 		$data = array(
 			'id'       => $id,
-			'country'  => $tax->tax_rate_country,
-			'state'    => $tax->tax_rate_state,
+			'country'  => $object->tax_rate_country,
+			'state'    => $object->tax_rate_state,
 			'postcode' => '',
 			'city'     => '',
-			'rate'     => $tax->tax_rate,
-			'name'     => $tax->tax_rate_name,
-			'priority' => (int) $tax->tax_rate_priority,
-			'compound' => (bool) $tax->tax_rate_compound,
-			'shipping' => (bool) $tax->tax_rate_shipping,
-			'order'    => (int) $tax->tax_rate_order,
-			'class'    => $tax->tax_rate_class ? $tax->tax_rate_class : 'standard',
+			'rate'     => $object->tax_rate,
+			'name'     => $object->tax_rate_name,
+			'priority' => (int) $object->tax_rate_priority,
+			'compound' => (bool) $object->tax_rate_compound,
+			'shipping' => (bool) $object->tax_rate_shipping,
+			'order'    => (int) $object->tax_rate_order,
+			'class'    => $object->tax_rate_class ? $object->tax_rate_class : 'standard',
 		);
 
 		// Get locales from a tax rate.
@@ -447,41 +456,25 @@ class Taxes extends AbstractController {
 			)
 		);
 
-		if ( ! is_wp_error( $tax ) && ! is_null( $tax ) ) {
+		if ( ! is_wp_error( $locales ) && ! is_null( $locales ) ) {
 			foreach ( $locales as $locale ) {
 				$data[ $locale->location_type ] = $locale->location_code;
 			}
 		}
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $tax ) );
-
-		/**
-		 * Filter tax object returned from the REST API.
-		 *
-		 * @param \WP_REST_Response $response The response object.
-		 * @param \stdClass         $tax      Tax object used to create response.
-		 * @param \WP_REST_Request  $request  Request object.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_tax', $response, $tax, $request );
+		return $data;
 	}
 
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param \stdClass $tax Tax object.
-	 * @return array Links for the given tax.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array
 	 */
-	protected function prepare_links( $tax ) {
+	protected function prepare_links( $item, $request ) {
 		$links = array(
 			'self' => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $tax->tax_rate_id ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $item->tax_rate_id ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),

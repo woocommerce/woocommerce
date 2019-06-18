@@ -42,13 +42,13 @@ class Coupons extends AbstractObjectsController {
 	}
 
 	/**
-	 * Get formatted item data.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @since  3.0.0
-	 * @param  \WC_Data $object WC_Data instance.
-	 * @return array
+	 * @param \WP_Comment      $object Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array Array of data in the correct format.
 	 */
-	protected function get_formatted_item_data( $object ) {
+	protected function get_data_for_response( $object, $request ) {
 		$data = $object->get_data();
 
 		$format_decimal = array( 'amount', 'minimum_amount', 'maximum_amount' );
@@ -112,7 +112,7 @@ class Coupons extends AbstractObjectsController {
 	 * @return \WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$data     = $this->get_formatted_item_data( $object );
+		$data     = $this->get_data_for_response( $object, $request );
 		$context  = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data     = $this->add_additional_fields_to_object( $data, $request );
 		$data     = $this->filter_response_by_context( $data, $context );

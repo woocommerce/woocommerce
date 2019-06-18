@@ -31,6 +31,15 @@ class SystemStatus extends AbstractController {
 	protected $resource_type = 'system_status';
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'system_status';
+
+	/**
 	 * Register the route for /system_status
 	 */
 	public function register_routes() {
@@ -584,27 +593,5 @@ class SystemStatus extends AbstractController {
 		return array(
 			'context' => $this->get_context_param( array( 'default' => 'view' ) ),
 		);
-	}
-
-	/**
-	 * Prepare the system status response
-	 *
-	 * @param  array            $system_status System status data.
-	 * @param  \WP_REST_Request $request       Request object.
-	 * @return \WP_REST_Response
-	 */
-	public function prepare_item_for_response( $system_status, $request ) {
-		$data     = $this->add_additional_fields_to_object( $system_status, $request );
-		$data     = $this->filter_response_by_context( $data, 'view' );
-		$response = rest_ensure_response( $data );
-
-		/**
-		 * Filter the system status returned from the REST API.
-		 *
-		 * @param \WP_REST_Response   $response The response object.
-		 * @param mixed              $system_status System status
-		 * @param \WP_REST_Request    $request  Request object.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_system_status', $response, $system_status, $request );
 	}
 }

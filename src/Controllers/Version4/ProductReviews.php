@@ -34,6 +34,15 @@ class ProductReviews extends AbstractController {
 	protected $resource_type = 'product_reviews';
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'product_reviews';
+
+	/**
 	 * Register the routes for product reviews.
 	 */
 	public function register_routes() {
@@ -391,7 +400,6 @@ class ProductReviews extends AbstractController {
 		$request->set_param( 'context', $context );
 
 		$response = $this->prepare_item_for_response( $review, $request );
-		$response = rest_ensure_response( $response );
 
 		$response->set_status( 201 );
 		$response->header( 'Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $review_id ) ) );
@@ -411,10 +419,7 @@ class ProductReviews extends AbstractController {
 			return $review;
 		}
 
-		$data     = $this->prepare_item_for_response( $review, $request );
-		$response = rest_ensure_response( $data );
-
-		return $response;
+		return $this->prepare_item_for_response( $review, $request );
 	}
 
 	/**
@@ -498,9 +503,7 @@ class ProductReviews extends AbstractController {
 
 		$request->set_param( 'context', 'edit' );
 
-		$response = $this->prepare_item_for_response( $review, $request );
-
-		return rest_ensure_response( $response );
+		return $this->prepare_item_for_response( $review, $request );
 	}
 
 	/**
@@ -573,32 +576,16 @@ class ProductReviews extends AbstractController {
 	}
 
 	/**
-	 * Prepare a single product review output for response.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param \WP_Comment      $review Product review object.
+	 * @param \WP_Comment      $object Object to prepare.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response $response Response data.
+	 * @return array Array of data in the correct format.
 	 */
-	public function prepare_item_for_response( $review, $request ) {
-		$context         = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$fields          = $this->get_fields_for_response( $request );
-		$review_response = new ProductReviewResponse();
-		$data            = $review_response->prepare_response( $review, $context );
-		$data            = array_intersect_key( $data, array_flip( $fields ) );
-		$data            = $this->add_additional_fields_to_object( $data, $request );
-		$data            = $this->filter_response_by_context( $data, $context );
-		$response        = rest_ensure_response( $data );
+	protected function get_data_for_response( $object, $request ) {
+		$formatter = new ProductReviewResponse();
 
-		$response->add_links( $this->prepare_links( $review ) );
-
-		/**
-		 * Filter product reviews object returned from the REST API.
-		 *
-		 * @param \WP_REST_Response $response The response object.
-		 * @param \WP_Comment       $review   Product review object used to create response.
-		 * @param \WP_REST_Request  $request  Request object.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_product_review', $response, $review, $request );
+		return $formatter->prepare_response( $object, $this->get_request_context( $request ) );
 	}
 
 	/**
@@ -657,27 +644,28 @@ class ProductReviews extends AbstractController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WP_Comment $review Product review object.
-	 * @return array Links for the given product review.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array
 	 */
-	protected function prepare_links( $review ) {
+	protected function prepare_links( $item, $request ) {
 		$links = array(
 			'self'       => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $review->comment_ID ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $item->comment_ID ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
 			),
 		);
-		if ( 0 !== (int) $review->comment_post_ID ) {
+		if ( 0 !== (int) $item->comment_post_ID ) {
 			$links['up'] = array(
-				'href'       => rest_url( sprintf( '/%s/products/%d', $this->namespace, $review->comment_post_ID ) ),
+				'href'       => rest_url( sprintf( '/%s/products/%d', $this->namespace, $item->comment_post_ID ) ),
 				'embeddable' => true,
 			);
 		}
-		if ( 0 !== (int) $review->user_id ) {
+		if ( 0 !== (int) $item->user_id ) {
 			$links['reviewer'] = array(
-				'href'       => rest_url( 'wp/v2/users/' . $review->user_id ),
+				'href'       => rest_url( 'wp/v2/users/' . $item->user_id ),
 				'embeddable' => true,
 			);
 		}

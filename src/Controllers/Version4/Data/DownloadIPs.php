@@ -93,7 +93,7 @@ class DownloadIPs extends DataController {
 		$data     = $this->filter_response_by_context( $data, 'view' );
 		$response = rest_ensure_response( $data );
 
-		$response->add_links( $this->prepare_links( $item ) );
+		$response->add_links( $this->prepare_links( $item, $request ) );
 
 		/**
 		 * Filter the list returned from the API.
@@ -108,10 +108,11 @@ class DownloadIPs extends DataController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param object $item Data object.
-	 * @return array Links for the given object.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array
 	 */
-	protected function prepare_links( $item ) {
+	protected function prepare_links( $item, $request ) {
 		$links = array(
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),

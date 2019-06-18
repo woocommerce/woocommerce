@@ -34,6 +34,15 @@ class PaymentGateways extends AbstractController {
 	protected $resource_type = 'payment_gateways';
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'payment_gateway';
+
+	/**
 	 * Register the route for /payment_gateways and /payment_gateways/<id>
 	 */
 	public function register_routes() {
@@ -210,41 +219,25 @@ class PaymentGateways extends AbstractController {
 	}
 
 	/**
-	 * Prepare a payment gateway for response.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param  WC_Payment_Gateway $gateway    Payment gateway object.
-	 * @param  \WP_REST_Request    $request    Request object.
-	 * @return \WP_REST_Response   $response   Response data.
+	 * @param \WC_Payment_Gateway $object Object to prepare.
+	 * @param \WP_REST_Request    $request Request object.
+	 * @return array Array of data in the correct format.
 	 */
-	public function prepare_item_for_response( $gateway, $request ) {
+	protected function get_data_for_response( $object, $request ) {
 		$order = (array) get_option( 'woocommerce_gateway_order' );
-		$item  = array(
-			'id'                 => $gateway->id,
-			'title'              => $gateway->title,
-			'description'        => $gateway->description,
-			'order'              => isset( $order[ $gateway->id ] ) ? $order[ $gateway->id ] : '',
-			'enabled'            => ( 'yes' === $gateway->enabled ),
-			'method_title'       => $gateway->get_method_title(),
-			'method_description' => $gateway->get_method_description(),
-			'method_supports'    => $gateway->supports,
-			'settings'           => $this->get_settings( $gateway ),
+		return array(
+			'id'                 => $object->id,
+			'title'              => $object->title,
+			'description'        => $object->description,
+			'order'              => isset( $order[ $object->id ] ) ? $order[ $object->id ] : '',
+			'enabled'            => ( 'yes' === $object->enabled ),
+			'method_title'       => $object->get_method_title(),
+			'method_description' => $object->get_method_description(),
+			'method_supports'    => $object->supports,
+			'settings'           => $this->get_settings( $object ),
 		);
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $item, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		$response = rest_ensure_response( $data );
-		$response->add_links( $this->prepare_links( $gateway, $request ) );
-
-		/**
-		 * Filter payment gateway objects returned from the REST API.
-		 *
-		 * @param \WP_REST_Response   $response The response object.
-		 * @param WC_Payment_Gateway $gateway  Payment gateway object.
-		 * @param \WP_REST_Request    $request  Request object.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_payment_gateway', $response, $gateway, $request );
 	}
 
 	/**
@@ -289,14 +282,14 @@ class PaymentGateways extends AbstractController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param  WC_Payment_Gateway $gateway    Payment gateway object.
-	 * @param  \WP_REST_Request    $request    Request object.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return array
 	 */
-	protected function prepare_links( $gateway, $request ) {
+	protected function prepare_links( $item, $request ) {
 		$links = array(
 			'self'       => array(
-				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $gateway->id ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%s', $this->namespace, $this->rest_base, $item->id ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),

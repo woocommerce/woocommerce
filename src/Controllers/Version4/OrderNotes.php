@@ -33,6 +33,15 @@ class OrderNotes extends AbstractController {
 	protected $post_type = 'shop_order';
 
 	/**
+	 * Singular name for resource type.
+	 *
+	 * Used in filter/action names for single resources.
+	 *
+	 * @var string
+	 */
+	protected $singular = 'order_note';
+
+	/**
 	 * Register the routes for order notes.
 	 */
 	public function register_routes() {
@@ -356,53 +365,36 @@ class OrderNotes extends AbstractController {
 	}
 
 	/**
-	 * Prepare a single order note output for response.
+	 * Get data for this object in the format of this endpoint's schema.
 	 *
-	 * @param \WP_Comment      $note    Order note object.
+	 * @param \WP_Comment      $object Object to prepare.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response $response Response data.
+	 * @return array Array of data in the correct format.
 	 */
-	public function prepare_item_for_response( $note, $request ) {
-		$data = array(
-			'id'               => (int) $note->comment_ID,
-			'author'           => __( 'WooCommerce', 'woocommerce' ) === $note->comment_author ? 'system' : $note->comment_author,
-			'date_created'     => wc_rest_prepare_date_response( $note->comment_date ),
-			'date_created_gmt' => wc_rest_prepare_date_response( $note->comment_date_gmt ),
-			'note'             => $note->comment_content,
-			'customer_note'    => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
+	protected function get_data_for_response( $object, $request ) {
+		return array(
+			'id'               => (int) $object->comment_ID,
+			'author'           => __( 'WooCommerce', 'woocommerce' ) === $object->comment_author ? 'system' : $object->comment_author,
+			'date_created'     => wc_rest_prepare_date_response( $object->comment_date ),
+			'date_created_gmt' => wc_rest_prepare_date_response( $object->comment_date_gmt ),
+			'note'             => $object->comment_content,
+			'customer_note'    => (bool) get_comment_meta( $object->comment_ID, 'is_customer_note', true ),
 		);
-
-		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
-		$data    = $this->add_additional_fields_to_object( $data, $request );
-		$data    = $this->filter_response_by_context( $data, $context );
-
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $data );
-
-		$response->add_links( $this->prepare_links( $note ) );
-
-		/**
-		 * Filter order note object returned from the REST API.
-		 *
-		 * @param \WP_REST_Response $response The response object.
-		 * @param \WP_Comment       $note     Order note object used to create response.
-		 * @param \WP_REST_Request  $request  Request object.
-		 */
-		return apply_filters( 'woocommerce_rest_prepare_order_note', $response, $note, $request );
 	}
 
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param WP_Comment $note Delivery order_note object.
-	 * @return array Links for the given order note.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array
 	 */
-	protected function prepare_links( $note ) {
-		$order_id = (int) $note->comment_post_ID;
+	protected function prepare_links( $item, $request ) {
+		$order_id = (int) $item->comment_post_ID;
 		$base     = str_replace( '(?P<order_id>[\d]+)', $order_id, $this->rest_base );
 		$links    = array(
 			'self' => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $note->comment_ID ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $item->comment_ID ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),

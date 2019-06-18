@@ -106,14 +106,15 @@ class Settings extends AbstractController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param string $group_id Group ID.
-	 * @return array Links for the given group.
+	 * @param mixed            $item Object to prepare.
+	 * @param \WP_REST_Request $request Request object.
+	 * @return array
 	 */
-	protected function prepare_links( $group_id ) {
+	protected function prepare_links( $item, $request ) {
 		$base  = '/' . $this->namespace . '/' . $this->rest_base;
 		$links = array(
 			'options' => array(
-				'href' => rest_url( trailingslashit( $base ) . $group_id ),
+				'href' => rest_url( trailingslashit( $base ) . $item['id'] ),
 			),
 		);
 
@@ -135,7 +136,7 @@ class Settings extends AbstractController {
 
 		$response = rest_ensure_response( $data );
 
-		$response->add_links( $this->prepare_links( $item['id'] ) );
+		$response->add_links( $this->prepare_links( $item, $request ) );
 
 		return $response;
 	}

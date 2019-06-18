@@ -847,16 +847,16 @@ class ProductVariations extends Products {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param \WC_Data         $object  Object data.
+	 * @param mixed            $item Object to prepare.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return array                   Links for the given post.
+	 * @return array
 	 */
-	protected function prepare_links( $object, $request ) {
+	protected function prepare_links( $item, $request ) {
 		$product_id = (int) $request['product_id'];
 		$base       = str_replace( '(?P<product_id>[\d]+)', $product_id, $this->rest_base );
 		$links      = array(
 			'self'       => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $object->get_id() ) ),
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $item->get_id() ) ),
 			),
 			'collection' => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
