@@ -7,6 +7,7 @@ import { BaseControl, Button } from '@wordpress/components';
 import classnames from 'classnames';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
+import { ESCAPE } from '@wordpress/keycodes';
 import { get } from 'lodash';
 import { withDispatch } from '@wordpress/data';
 
@@ -31,6 +32,7 @@ class ProductStockCard extends Component {
 		this.beginEdit = this.beginEdit.bind( this );
 		this.cancelEdit = this.cancelEdit.bind( this );
 		this.onQuantityChange = this.onQuantityChange.bind( this );
+		this.handleKeyDown = this.handleKeyDown.bind( this );
 		this.updateStock = this.updateStock.bind( this );
 	}
 
@@ -47,6 +49,12 @@ class ProductStockCard extends Component {
 			editing: false,
 			quantity: this.props.product.stock_quantity,
 		} );
+	}
+
+	handleKeyDown( event ) {
+		if ( event.keyCode === ESCAPE ) {
+			this.cancelEdit();
+		}
 	}
 
 	onQuantityChange( event ) {
@@ -72,10 +80,10 @@ class ProductStockCard extends Component {
 
 		if ( editing ) {
 			return [
-				<Button onClick={ this.updateStock } isPrimary>
+				<Button type="submit" isPrimary>
 					{ __( 'Save', 'woocommerce-admin' ) }
 				</Button>,
-				<Button onClick={ this.cancelEdit }>{ __( 'Cancel', 'woocommerce-admin' ) }</Button>,
+				<Button type="reset">{ __( 'Cancel', 'woocommerce-admin' ) }</Button>,
 			];
 		}
 
@@ -97,6 +105,7 @@ class ProductStockCard extends Component {
 							className="components-text-control__input"
 							type="number"
 							value={ quantity }
+							onKeyDown={ this.handleKeyDown }
 							onChange={ this.onQuantityChange }
 							ref={ input => {
 								this.quantityInput = input;
@@ -117,6 +126,7 @@ class ProductStockCard extends Component {
 
 	render() {
 		const { product } = this.props;
+		const { editing } = this.state;
 		const title = (
 			<Link
 				href={ 'post.php?action=edit&post=' + ( product.parent_id || product.id ) }
@@ -148,7 +158,7 @@ class ProductStockCard extends Component {
 			</div>
 		);
 
-		return (
+		const activityCard = (
 			<ActivityCard
 				className="woocommerce-stock-activity-card"
 				title={ title }
@@ -159,6 +169,16 @@ class ProductStockCard extends Component {
 				{ this.getBody() }
 			</ActivityCard>
 		);
+
+		if ( editing ) {
+			return (
+				<form onReset={ this.cancelEdit } onSubmit={ this.updateStock }>
+					{ activityCard }
+				</form>
+			);
+		}
+
+		return activityCard;
 	}
 }
 
