@@ -23,4 +23,4 @@ be sure to detail parts affected in Release Notes --->
 
 ### Changelog Note:
 
-<!--- Please follow the WooCommerce core format using prefixes of Enhancement, Tweak, Dev, Fix  --->
+<!--- Optional: Enter a changelog note following the WooCommerce core format using prefixes of Enhancement:, Tweak:, Dev:, Fix:, Performance:. If no note is entered, one will be constructed from the title and labels. --->
