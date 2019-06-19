@@ -10,6 +10,7 @@
   "license": "GPL-3.0+",
   "main": "Gruntfile.js",
   "scripts": {
+    "prebuild": "npm install && composer install --no-dev",
     "build": "grunt",
     "build-watch": "grunt watch",
     "lint:js": "eslint assets/js --ext=js",
