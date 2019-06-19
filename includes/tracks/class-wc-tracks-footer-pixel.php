@@ -90,7 +90,7 @@ class WC_Tracks_Footer_Pixel {
 				continue;
 			}
 
-			echo '<img src="', esc_url( $pixel ), '" />';
+			echo '<img style="position: fixed;" src="', esc_url( $pixel ), '" />';
 		}
 
 		$this->events = array();
