@@ -137,6 +137,7 @@ class WC_Install {
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'check_version' ), 5 );
+		add_action( 'init', array( __CLASS__, 'manual_database_update' ), 20 );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
 		add_filter( 'plugin_action_links_' . WC_PLUGIN_BASENAME, array( __CLASS__, 'plugin_action_links' ) );
@@ -155,6 +156,24 @@ class WC_Install {
 			self::install();
 			do_action( 'woocommerce_updated' );
 		}
+	}
+
+	/**
+	 * Performan manual database update when triggered by WooCommerce System Tools.
+	 *
+	 * @since 3.6.5
+	 */
+	public static function manual_database_update() {
+		$blog_id = get_current_blog_id();
+
+		add_action( 'wp_' . $blog_id . '_wc_updater_cron', array( __CLASS__, 'run_manual_database_update' ) );
+	}
+
+	/**
+	 * Run manual database update.
+	 */
+	public static function run_manual_database_update() {
+		self::update();
 	}
 
 	/**
