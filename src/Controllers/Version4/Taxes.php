@@ -11,6 +11,8 @@ namespace WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
+use WooCommerce\RestApi\Controllers\Version4\Utilities\Pagination;
+
 /**
  * REST API Taxes controller class.
  */
@@ -175,8 +177,6 @@ class Taxes extends AbstractController {
 			$taxes[] = $this->prepare_response_for_collection( $data );
 		}
 
-		$response = rest_ensure_response( $taxes );
-
 		// Store pagination values for headers then unset for count query.
 		$per_page = (int) $prepared_args['number'];
 		$page     = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
@@ -186,24 +186,10 @@ class Taxes extends AbstractController {
 
 		// Calculate totals.
 		$total_taxes = (int) $wpdb->num_rows;
-		$response->header( 'X-WP-Total', (int) $total_taxes );
-		$max_pages = ceil( $total_taxes / $per_page );
-		$response->header( 'X-WP-TotalPages', (int) $max_pages );
+		$max_pages   = ceil( $total_taxes / $per_page );
 
-		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
-		if ( $page > 1 ) {
-			$prev_page = $page - 1;
-			if ( $prev_page > $max_pages ) {
-				$prev_page = $max_pages;
-			}
-			$prev_link = add_query_arg( 'page', $prev_page, $base );
-			$response->link_header( 'prev', $prev_link );
-		}
-		if ( $max_pages > $page ) {
-			$next_page = $page + 1;
-			$next_link = add_query_arg( 'page', $next_page, $base );
-			$response->link_header( 'next', $next_link );
-		}
+		$response = rest_ensure_response( $taxes );
+		$response = Pagination::add_pagination_headers( $response, $request, $total_taxes, $max_pages );
 
 		return $response;
 	}

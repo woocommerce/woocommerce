@@ -11,6 +11,8 @@ namespace WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
+use WooCommerce\RestApi\Controllers\Version4\Utilities\Pagination;
+
 /**
  * REST API Webhooks controller class.
  */
@@ -179,29 +181,11 @@ class Webhooks extends AbstractController {
 			$webhooks[] = $this->prepare_response_for_collection( $data );
 		}
 
-		$response       = rest_ensure_response( $webhooks );
-		$per_page       = (int) $prepared_args['limit'];
-		$page           = ceil( ( ( (int) $prepared_args['offset'] ) / $per_page ) + 1 );
+
 		$total_webhooks = $results->total;
 		$max_pages      = $results->max_num_pages;
-		$base           = add_query_arg( $request->get_query_params(), rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
-
-		$response->header( 'X-WP-Total', $total_webhooks );
-		$response->header( 'X-WP-TotalPages', $max_pages );
-
-		if ( $page > 1 ) {
-			$prev_page = $page - 1;
-			if ( $prev_page > $max_pages ) {
-				$prev_page = $max_pages;
-			}
-			$prev_link = add_query_arg( 'page', $prev_page, $base );
-			$response->link_header( 'prev', $prev_link );
-		}
-		if ( $max_pages > $page ) {
-			$next_page = $page + 1;
-			$next_link = add_query_arg( 'page', $next_page, $base );
-			$response->link_header( 'next', $next_link );
-		}
+		$response       = rest_ensure_response( $webhooks );
+		$response       = Pagination::add_pagination_headers( $response, $request, $total_webhooks, $max_pages );
 
 		return $response;
 	}

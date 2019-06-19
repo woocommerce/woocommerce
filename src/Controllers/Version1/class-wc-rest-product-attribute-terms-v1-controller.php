@@ -40,7 +40,8 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 	 * Register the routes for terms.
 	 */
 	public function register_routes() {
-		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
+		register_rest_route( $this->namespace, '/' . $this->rest_base,
+		array(
 			'args' => array(
 				'attribute_id' => array(
 					'description' => __( 'Unique identifier for the attribute of the terms.', 'woocommerce' ),

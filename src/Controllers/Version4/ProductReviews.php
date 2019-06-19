@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 use WooCommerce\RestApi\Controllers\Version4\Responses\ProductReviewResponse;
 use WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
+use WooCommerce\RestApi\Controllers\Version4\Utilities\Pagination;
 
 /**
  * REST API Product Reviews controller class.
@@ -242,28 +243,7 @@ class ProductReviews extends AbstractController {
 		}
 
 		$response = rest_ensure_response( $reviews );
-		$response->header( 'X-WP-Total', $total_reviews );
-		$response->header( 'X-WP-TotalPages', $max_pages );
-
-		$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '%s/%s', $this->namespace, $this->rest_base ) ) );
-
-		if ( $request['page'] > 1 ) {
-			$prev_page = $request['page'] - 1;
-
-			if ( $prev_page > $max_pages ) {
-				$prev_page = $max_pages;
-			}
-
-			$prev_link = add_query_arg( 'page', $prev_page, $base );
-			$response->link_header( 'prev', $prev_link );
-		}
-
-		if ( $max_pages > $request['page'] ) {
-			$next_page = $request['page'] + 1;
-			$next_link = add_query_arg( 'page', $next_page, $base );
-
-			$response->link_header( 'next', $next_link );
-		}
+		$response = Pagination::add_pagination_headers( $response, $request, $total_reviews, $max_pages );
 
 		return $response;
 	}
