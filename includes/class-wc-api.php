@@ -43,9 +43,6 @@ class WC_API extends WC_Legacy_API {
 	 * @since 2.6.0
 	 */
 	private function rest_api_init() {
-		// Authentication needs to run early to handle basic auth.
-		include_once dirname( __FILE__ ) . '/api/class-wc-rest-authentication.php';
-
 		add_action( 'rest_api_init', array( $this, 'rest_api_includes' ), 5 );
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
 	}
