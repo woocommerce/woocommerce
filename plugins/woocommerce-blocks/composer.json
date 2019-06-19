@@ -1,8 +1,9 @@
 {
-  "name": "woocommerce/woocommerce-gutenberg-products-block",
-  "description": "Feature plugin for the WooCommerce Gutenberg Products block",
+  "name": "woocommerce/woocommerce-blocks",
+  "description": "WooCommerce blocks for the Gutenberg editor.",
   "homepage": "https://woocommerce.com/",
   "type": "wordpress-plugin",
+  "keywords": ["gutenberg","woocommerce","blocks"],
   "license": "GPL-3.0-or-later",
   "prefer-stable": true,
   "minimum-stability": "dev",
