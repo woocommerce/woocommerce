@@ -270,4 +270,23 @@ class WC_Legacy_API {
 		// Fire off the request.
 		$this->server->serve_request();
 	}
+
+	/**
+	 * Include REST API classes.
+	 *
+	 * @deprecated since 3.7.0 - REST API clases autoload.
+	 */
+	public function rest_api_includes() {
+		$this->rest_api_init();
+	}
+
+	/**
+	 * Register REST API routes.
+	 *
+	 * @deprecated since 3.7.0 - Not used.
+	 */
+	public function register_rest_routes() {
+		// Register settings to the REST API.
+		$this->register_wp_admin_settings();
+	}
 }

@@ -19,32 +19,52 @@ defined( 'ABSPATH' ) || exit;
 class WC_API extends WC_Legacy_API {
 
 	/**
-	 * Setup class.
-	 *
-	 * @since 2.0
+	 * Init the API by setting up action and filter hooks.
 	 */
-	public function __construct() {
-		$this->wc_api_init();
-		$this->rest_api_init();
-	}
-
-	/**
-	 * Init the WC API by adding endpoints for those requests.
-	 */
-	private function wc_api_init() {
-		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
+	public function init() {
+		parent::init();
 		add_action( 'init', array( $this, 'add_endpoint' ), 0 );
+		add_action( 'init', array( $this, 'rest_api_init' ) );
+		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
 		add_action( 'parse_request', array( $this, 'handle_api_requests' ), 0 );
+		add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
 	}
 
 	/**
-	 * Init WP REST API by hooking into `rest_api_init`.
+	 * Look though registered REST API packages and load the latest one.
+	 * Once loaded, it's class autoloader will be available for use.
 	 *
-	 * @since 2.6.0
+	 * Packages should be registered during plugins_loaded/woocommerce_loaded hook.
+	 *
+	 * @see \WooCommerce\Core\PackageManager::register().
+	 *
+	 * @since 3.7.0
 	 */
-	private function rest_api_init() {
-		add_action( 'rest_api_init', array( $this, 'rest_api_includes' ), 5 );
-		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
+	public function rest_api_init() {
+		if ( $this->is_rest_api_loaded() ) {
+			return;
+		}
+		$package = $this->get_latest_rest_api_package();
+		call_user_func( $package->callback );
+	}
+
+	/**
+	 * Get latest REST API package which includes information on version, path and it's callback.
+	 *
+	 * @return \WooCommerce\Core\Package
+	 */
+	public function get_latest_rest_api_package() {
+		return \WooCommerce\Core\PackageManager::get_package( 'woocommerce-rest-api' );
+	}
+
+	/**
+	 * Return if the rest API classes were already loaded.
+	 *
+	 * @since 3.7.0
+	 * @return boolean
+	 */
+	protected function is_rest_api_loaded() {
+		return class_exists( '\WooCommerce\RestApi\Server', false );
 	}
 
 	/**
@@ -111,24 +131,6 @@ class WC_API extends WC_Legacy_API {
 			ob_end_clean();
 			die( '-1' );
 		}
-	}
-
-	/**
-	 * Include REST API classes.
-	 *
-	 * @since 2.6.0
-	 */
-	public function rest_api_includes() {
-	}
-
-	/**
-	 * Register REST API routes.
-	 *
-	 * @since 2.6.0
-	 */
-	public function register_rest_routes() {
-		// Register settings to the REST API.
-		$this->register_wp_admin_settings();
 	}
 
 	/**
