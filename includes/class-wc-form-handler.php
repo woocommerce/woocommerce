@@ -1095,11 +1095,17 @@ class WC_Form_Handler {
 			$email    = wp_unslash( $_POST['email'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 			try {
-				$validation_error = new WP_Error();
-				$validation_error = apply_filters( 'woocommerce_process_registration_errors', $validation_error, $username, $password, $email );
+				$validation_error  = new WP_Error();
+				$validation_error  = apply_filters( 'woocommerce_process_registration_errors', $validation_error, $username, $password, $email );
+				$validation_errors = $validation_error->get_error_messages();
 
-				if ( $validation_error->get_error_code() ) {
+				if ( 1 === count( $validation_errors ) ) {
 					throw new Exception( $validation_error->get_error_message() );
+				} elseif ( $validation_errors ) {
+					foreach ( $validation_errors as $message ) {
+						wc_add_notice( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . $message, 'error' );
+					}
+					throw new Exception();
 				}
 
 				$new_customer = wc_create_new_customer( sanitize_email( $email ), wc_clean( $username ), $password );
@@ -1130,7 +1136,9 @@ class WC_Form_Handler {
 					exit;
 				}
 			} catch ( Exception $e ) {
-				wc_add_notice( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . $e->getMessage(), 'error' );
+				if ( $e->getMessage() ) {
+					wc_add_notice( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . $e->getMessage(), 'error' );
+				}
 			}
 		}
 	}
