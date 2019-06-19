@@ -5,7 +5,7 @@
  * @package WooCommerce/Utilities
  */
 
-namespace WooCommerce\RestApi\Utilities;
+namespace WooCommerce\RestApi\Controllers\Version4\Utilities;
 
 /**
  * PluginInformation class.

@@ -554,12 +554,12 @@ class SystemStatus extends AbstractController {
 	 * @return array
 	 */
 	public function get_item_mappings() {
-		$plugin_info     = new \WooCommerce\RestApi\Utilities\PluginInformation();
-		$theme_info      = new \WooCommerce\RestApi\Utilities\ThemeInformation();
-		$server          = new \WooCommerce\RestApi\Utilities\ServerEnvironment();
-		$database        = new \WooCommerce\RestApi\Utilities\DatabaseInformation();
-		$wp_environment  = new \WooCommerce\RestApi\Utilities\WPEnvironment();
-		$woo_environment = new \WooCommerce\RestApi\Utilities\WooEnvironment();
+		$plugin_info     = new \WooCommerce\RestApi\Controllers\Version4\Utilities\PluginInformation();
+		$theme_info      = new \WooCommerce\RestApi\Controllers\Version4\Utilities\ThemeInformation();
+		$server          = new \WooCommerce\RestApi\Controllers\Version4\Utilities\ServerEnvironment();
+		$database        = new \WooCommerce\RestApi\Controllers\Version4\Utilities\DatabaseInformation();
+		$wp_environment  = new \WooCommerce\RestApi\Controllers\Version4\Utilities\WPEnvironment();
+		$woo_environment = new \WooCommerce\RestApi\Controllers\Version4\Utilities\WooEnvironment();
 
 		return array(
 			'environment'        => $server->get_environment_info(),
