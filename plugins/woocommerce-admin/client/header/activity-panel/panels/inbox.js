@@ -33,6 +33,18 @@ class InboxPanel extends Component {
 		this.props.updateCurrentUserData( userDataFields );
 	}
 
+	handleActionClick( event, note_id, action_id ) {
+		const { triggerNoteAction } = this.props;
+		const href = event.target.href || '';
+
+		if ( 'http' === href.substr( 0, 4 ).toLowerCase() ) {
+			event.preventDefault();
+			window.open( href, '_blank' );
+		}
+
+		triggerNoteAction( note_id, action_id );
+	}
+
 	renderEmptyCard() {
 		return (
 			<ActivityCard
@@ -50,7 +62,7 @@ class InboxPanel extends Component {
 	}
 
 	renderNotes() {
-		const { lastRead, notes, triggerNoteAction } = this.props;
+		const { lastRead, notes } = this.props;
 
 		if ( 0 === Object.keys( notes ).length ) {
 			return this.renderEmptyCard();
@@ -65,7 +77,7 @@ class InboxPanel extends Component {
 					isDefault
 					isPrimary={ action.primary }
 					href={ action.url || undefined }
-					onClick={ () => triggerNoteAction( note.id, action.id ) }
+					onClick={ e => this.handleActionClick( e, note.id, action.id ) }
 				>
 					{ action.label }
 				</Button>
