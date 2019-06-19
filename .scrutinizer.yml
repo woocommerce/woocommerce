@@ -30,6 +30,82 @@ filter:
     - unit-tests/
     - vendor/
     - classmap.php
+coding_style:
+  php:
+    indentation:
+      general:
+        use_tabs: true
+        size: 4
+      switch:
+        indent_case: true
+    spaces:
+      around_operators:
+        concatenation: true
+        negation: true
+      within:
+        brackets: true
+        grouping: true
+        function_call: true
+        function_declaration: true
+        if: true
+        for: true
+        while: true
+        switch: true
+        catch: true
+      before_left_brace:
+        class: true
+        function: true
+        if: true
+        else: true
+        for: true
+        while: true
+        do: true
+        switch: true
+        try: true
+        catch: true
+        finally: true
+      before_keywords:
+        else: true
+        while: true
+        catch: true
+        finally: true
+      ternary_operator:
+        before_condition: true
+        after_condition: true
+        before_alternative: true
+        after_alternative: true
+        in_short_version: false
+      other:
+        before_comma: false
+        after_comma: true
+        before_semicolon: false
+        after_semicolon: true
+        after_type_cast: true
+      braces:
+        classes_functions:
+          class: end-of-line
+          function: end-of-line
+          closure: end-of-line
+        if:
+          opening: undefined
+          always: true
+          else_on_new_line: false
+        for:
+          opening: undefined
+          always: true
+        while:
+          opening: undefined
+          always: true
+        do_while:
+          opening: undefined
+          always: true
+          while_on_new_line: false
+        switch:
+          opening: undefined
+        try:
+          opening: undefined
+          catch_on_new_line: false
+          finally_on_new_line: false
 build:
   tests:
     override:
