@@ -7,13 +7,19 @@
   "prefer-stable": true,
   "minimum-stability": "dev",
   "require": {
-    "composer/installers": "1.6.0"
+    "composer/installers": "1.6.0",
+    "woocommerce/woocommerce-rest-api": "~1.0.0"
   },
   "require-dev": {
     "apigen/apigen": "4.1.2",
     "nette/utils": "2.5.3",
     "phpunit/phpunit": "6.5.14",
     "woocommerce/woocommerce-sniffs": "0.0.6"
+  },
+  "config": {
+    "preferred-install": {
+        "woocommerce/woocommerce-rest-api": "dist"
+    }
   },
   "scripts": {
     "test": [
@@ -29,11 +35,17 @@
       "phpcbf -p"
     ]
   },
+  "autoload": {
+    "exclude-from-classmap": ["/packages"]
+  },
   "extra": {
     "scripts-description": {
       "test": "Run unit tests",
       "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
       "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+    },
+    "installer-paths": {
+      "packages/woocommerce-rest-api": ["woocommerce/woocommerce-rest-api"]
     }
   }
 }
