@@ -81,31 +81,31 @@ coding_style:
         before_semicolon: false
         after_semicolon: true
         after_type_cast: true
-      braces:
-        classes_functions:
-          class: end-of-line
-          function: end-of-line
-          closure: end-of-line
-        if:
-          opening: undefined
-          always: true
-          else_on_new_line: false
-        for:
-          opening: undefined
-          always: true
-        while:
-          opening: undefined
-          always: true
-        do_while:
-          opening: undefined
-          always: true
-          while_on_new_line: false
-        switch:
-          opening: undefined
-        try:
-          opening: undefined
-          catch_on_new_line: false
-          finally_on_new_line: false
+    braces:
+      classes_functions:
+        class: end-of-line
+        function: end-of-line
+        closure: end-of-line
+      if:
+        opening: undefined
+        always: true
+        else_on_new_line: false
+      for:
+        opening: undefined
+        always: true
+      while:
+        opening: undefined
+        always: true
+      do_while:
+        opening: undefined
+        always: true
+        while_on_new_line: false
+      switch:
+        opening: undefined
+      try:
+        opening: undefined
+        catch_on_new_line: false
+        finally_on_new_line: false
 build:
   tests:
     override:
