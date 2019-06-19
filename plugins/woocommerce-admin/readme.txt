@@ -99,7 +99,7 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 - Tweak: Allow note action URLs to be empty. #2324 (Inbox)
 - Bug: Prevent inactive tabs from making requests #2377
 - Task: Remove second beta warning from readme #2362
-- Fix: Misspelling at update config.jp #2368  👏 @shoheitanaka
+- Fix: Misspelling at update config.js #2368  👏 @shoheitanaka
 - Dev: Transpile newspack-components package #2348 (Build)
 - Dev: Low stock handling inconsistencies with WooCommerce 3.6+ #2191
 - Dev: Remove d3-array dependency #2286 (Build)
