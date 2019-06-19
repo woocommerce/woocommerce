@@ -28,10 +28,10 @@ $init_callback = include __DIR__ . '/init.php';
  * This callback registers this version of the API with WooCommerce.
  */
 $register_callback = function() use ( $version, $init_callback ) {
-	if ( ! is_callable( array( wc()->api, 'register' ) ) ) {
+	if ( ! class_exists( '\WooCommerce\Core\PackageManager' ) ) {
 		return;
 	}
-	wc()->api->register( $version, $init_callback, __DIR__ );
+	\WooCommerce\Core\PackageManager::register( 'woocommerce-rest-api', $version, $init_callback, __DIR__ );
 };
 
 add_action( 'woocommerce_loaded', $register_callback );
