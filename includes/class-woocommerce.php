@@ -459,6 +459,8 @@ final class WooCommerce {
 		}
 
 		$this->theme_support_includes();
+
+		\WooCommerce\Core\PackageManager::init();
 		$this->query = new WC_Query();
 		$this->api   = new WC_API();
 		$this->api->init();
