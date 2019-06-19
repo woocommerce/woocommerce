@@ -1,6 +1,6 @@
 <?php
 /**
- * Abstract singleton class.
+ * Singleton class trait.
  *
  * @package WooCommerce/Utilities
  */
