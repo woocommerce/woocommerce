@@ -27,42 +27,41 @@ class WC_Autoloader {
 		if ( function_exists( '__autoload' ) ) {
 			spl_autoload_register( '__autoload' );
 		}
-
 		spl_autoload_register( array( $this, 'autoload' ) );
 
-		$this->include_path = untrailingslashit( plugin_dir_path( WC_PLUGIN_FILE ) ) . '/includes/';
+		$this->include_path = WC_ABSPATH . 'includes/';
 	}
 
 	/**
-	 * Take a class name and turn it into a file name.
-	 *
-	 * @param  string $class Class name.
-	 * @return string
-	 */
-	private function get_file_name_from_class( $class ) {
-		return 'class-' . str_replace( '_', '-', $class ) . '.php';
-	}
-
-	/**
-	 * Include a class file.
-	 *
-	 * @param  string $path File path.
-	 * @return bool Successful or not.
-	 */
-	private function load_file( $path ) {
-		if ( $path && is_readable( $path ) ) {
-			include_once $path;
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Auto-load WC classes on demand to reduce memory consumption.
+	 * Custom psr-4 autoloader for src/ directory and \WooCommerce\Core namespace.
 	 *
 	 * @param string $class Class name.
 	 */
 	public function autoload( $class ) {
+		$prefix   = 'WooCommerce\\Core\\';
+		$base_dir = WC_ABSPATH . 'src/';
+
+		// does the class use the namespace prefix?
+		$len = strlen( $prefix );
+
+		if ( strncmp( $prefix, $class, $len ) !== 0 ) {
+			return $this->autoload_wpcs_class( $class );
+		}
+
+		$relative_class = substr( $class, $len );
+		$file           = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
+
+		if ( file_exists( $file ) ) {
+			return include $file;
+		}
+	}
+
+	/**
+	 * Autoload WooCommerce classes using WPCS in the includes directory.
+	 *
+	 * @param string $class Class name.
+	 */
+	public function autoload_wpcs_class( $class ) {
 		$class = strtolower( $class );
 
 		if ( 0 !== strpos( $class, 'wc_' ) ) {
@@ -93,6 +92,29 @@ class WC_Autoloader {
 		if ( empty( $path ) || ! $this->load_file( $path . $file ) ) {
 			$this->load_file( $this->include_path . $file );
 		}
+	}
+
+	/**
+	 * Take a class name and turn it into a file name.
+	 *
+	 * @param  string $class Class name.
+	 * @return string
+	 */
+	private function get_file_name_from_class( $class ) {
+		return 'class-' . str_replace( '_', '-', $class ) . '.php';
+	}
+
+	/**
+	 * Include a class file.
+	 *
+	 * @param  string $path File path.
+	 * @return bool Successful or not.
+	 */
+	private function load_file( $path ) {
+		if ( $path && is_readable( $path ) ) {
+			return include $path;
+		}
+		return false;
 	}
 }
 
