@@ -993,6 +993,14 @@ function wc_update_250_currency() {
 		update_option( 'woocommerce_currency', 'LAK' );
 	}
 
+	if ( 'STD' === $current_currency ) {
+		update_option( 'woocommerce_currency', 'STN' );
+	}
+
+	if ( 'MRO' === $current_currency ) {
+		update_option( 'woocommerce_currency', 'MRU' );
+	}
+
 	// Update LAK currency code.
 	$wpdb->update(
 		$wpdb->postmeta,
@@ -1002,6 +1010,30 @@ function wc_update_250_currency() {
 		array(
 			'meta_key'   => '_order_currency',
 			'meta_value' => 'KIP',
+		)
+	);
+
+	// Update STN currency code.
+	$wpdb->update(
+		$wpdb->postmeta,
+		array(
+			'meta_value' => 'STN',
+		),
+		array(
+			'meta_key'   => '_order_currency',
+			'meta_value' => 'STD',
+		)
+	);
+
+	// Update MRU currency code.
+	$wpdb->update(
+		$wpdb->postmeta,
+		array(
+			'meta_value' => 'MRU',
+		),
+		array(
+			'meta_key'   => '_order_currency',
+			'meta_value' => 'MRO',
 		)
 	);
 }
