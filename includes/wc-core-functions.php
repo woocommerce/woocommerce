@@ -185,7 +185,16 @@ function wc_get_template_part( $slug, $name = '' ) {
 			);
 		}
 
-		wp_cache_set( $cache_key, $template, 'woocommerce' );
+		// Remove ABSPATH from template cache to avoid issues with multi container having different paths.
+		if ( 0 === strpos( $template, ABSPATH ) ) {
+			$template = str_replace( ABSPATH, '', $template );
+			wp_cache_set( $cache_key, $template, 'woocommerce' );
+		}
+	}
+
+	// Add back ABSPATH to template location so it loads correctly, only if it does not exist yet.
+	if ( false === strpos( $template, ABSPATH ) ) {
+		$template = ABSPATH . $template;
 	}
 
 	// Allow 3rd party plugins to filter template file from their plugin.
@@ -210,7 +219,16 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 
 	if ( ! $template ) {
 		$template = wc_locate_template( $template_name, $template_path, $default_path );
-		wp_cache_set( $cache_key, $template, 'woocommerce' );
+		// Remove ABSPATH from template cache to avoid issues with multi container having different paths.
+		if ( 0 === strpos( $template, ABSPATH ) ) {
+			$template = str_replace( ABSPATH, '', $template );
+			wp_cache_set( $cache_key, $template, 'woocommerce' );
+		}
+	}
+
+	// Add back ABSPATH to template location so it loads correctly, only if it does not exist yet.
+	if ( false === strpos( $template, ABSPATH ) ) {
+		$template = ABSPATH . $template;
 	}
 
 	// Allow 3rd party plugin filter template file from their plugin.
