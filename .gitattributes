@@ -1,5 +1,4 @@
 /.* export-ignore
-classmap.php.bak export-ignore
 phpcs.xml export-ignore
 phpunit.* export-ignore
 unit-tests export-ignore
