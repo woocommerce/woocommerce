@@ -21,7 +21,8 @@
     "pre-autoload-dump": [
       "composer dump-autoload --no-dev --no-scripts",
       "SlowProg\\CopyFile\\ScriptHandler::copy",
-      "sed -i.bak -e 's/\\$baseDir = dirname(\\$vendorDir)/\\$baseDir = __DIR__/g' classmap.php"
+      "sed -i.bak -e 's/\\$baseDir = dirname(\\$vendorDir)/\\$baseDir = __DIR__/g' classmap.php",
+      "rm classmap.php.bak"
     ]
   },
   "autoload": {
@@ -29,10 +30,7 @@
       "src/Controllers/Version1",
       "src/Controllers/Version2",
       "src/Controllers/Version3"
-    ],
-    "psr-4": {
-      "WooCommerce\\RestApi\\": "src/"
-    }
+    ]
   },
   "extra": {
     "copy-file": {

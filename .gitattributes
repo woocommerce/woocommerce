@@ -1,8 +1,6 @@
 /.* export-ignore
-composer.* export-ignore
-Gruntfile.js export-ignore
-package.json export-ignore
-package-lock.json export-ignore
+classmap.php.bak export-ignore
 phpcs.xml export-ignore
 phpunit.* export-ignore
-tests export-ignore
+unit-tests export-ignore
+vendor export-ignore
