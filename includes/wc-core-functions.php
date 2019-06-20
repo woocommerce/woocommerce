@@ -193,7 +193,7 @@ function wc_get_template_part( $slug, $name = '' ) {
 	}
 
 	// Add back ABSPATH to template location so it loads correctly, only if it does not exist yet.
-	if ( false === strpos( $template, ABSPATH ) ) {
+	if ( false === strpos( $template, ABSPATH ) && ! empty( $template ) ) {
 		$template = ABSPATH . $template;
 	}
 
@@ -227,7 +227,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 	}
 
 	// Add back ABSPATH to template location so it loads correctly, only if it does not exist yet.
-	if ( false === strpos( $template, ABSPATH ) ) {
+	if ( false === strpos( $template, ABSPATH ) && ! empty( $template ) ) {
 		$template = ABSPATH . $template;
 	}
 
