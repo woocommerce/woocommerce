@@ -442,9 +442,21 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 			return false;
 		}
 
+		global $wpdb;
 		$user_id = $order->get_customer_id();
 
 		if ( 0 === $user_id ) {
+			$customer_id = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT customer_id FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
+					$order->get_id()
+				)
+			);
+
+			if ( $customer_id ) {
+				return $customer_id;
+			}
+
 			$email = $order->get_billing_email( 'edit' );
 
 			if ( $email ) {
