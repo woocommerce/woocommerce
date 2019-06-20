@@ -95,11 +95,11 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$product->set_regular_price( 25 );
 		$product->save();
 
-		$order_1 = WC_Helper_Order::create_order( 1, $product );
+		$order_1 = WC_Helper_Order::create_order( $this->customer, $product );
 		$order_1->set_status( 'completed' );
 		$order_1->set_date_created( time() - ( 3 * DAY_IN_SECONDS ) );
 		$order_1->save();
-		$order_2 = WC_Helper_Order::create_order( 1, $product );
+		$order_2 = WC_Helper_Order::create_order( $this->customer, $product );
 		$order_2->set_total( 100 );
 		$order_2->set_status( 'completed' );
 		$order_2->save();
@@ -127,7 +127,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$reports  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 2, $reports );
+		$this->assertCount( 1, $reports );
 		$this->assertEquals( $this->customer, $reports[0]['user_id'] );
 
 		$request  = new WP_REST_Request( 'GET', '/wc/v4/reports/orders' );
@@ -172,7 +172,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$reports  = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 2, $reports );
+		$this->assertCount( 1, $reports );
 		$this->assertEquals( 'Steve User', $reports[0]['name'] );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/reports/orders' );
@@ -303,7 +303,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 
 		// Create 5 completed orders.
 		for ( $i = 0; $i < 5; $i++ ) {
-			$order = WC_Helper_Order::create_order( 1, $product );
+			$order = WC_Helper_Order::create_order( $this->customer, $product );
 			$order->set_status( 'completed' );
 			$order->set_date_created( time() - ( ( $i + 1 ) * DAY_IN_SECONDS ) );
 			$order->save();
@@ -314,7 +314,7 @@ class WC_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$order->save();
 
 		// Create 1 draft order - to be excluded from totals.
-		$order = WC_Helper_Order::create_order( 1, $product );
+		$order = WC_Helper_Order::create_order( $this->customer, $product );
 		$order->set_date_created( time() - ( 5 * DAY_IN_SECONDS ) );
 		$order->save();
 		wp_update_post(

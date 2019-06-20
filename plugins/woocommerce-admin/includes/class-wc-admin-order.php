@@ -66,4 +66,34 @@ class WC_Admin_Order extends WC_Order {
 	public function is_returning_customer() {
 		return WC_Admin_Reports_Orders_Stats_Data_Store::is_returning_customer( $this );
 	}
+
+	/**
+	 * Get the customer's first name.
+	 */
+	public function get_customer_first_name() {
+		if ( $this->get_user_id() ) {
+			return get_user_meta( $this->get_user_id(), 'first_name', true );
+		}
+
+		if ( '' !== $this->get_billing_first_name( 'edit' ) ) {
+			return $this->get_billing_first_name( 'edit' );
+		} else {
+			return $this->get_shipping_first_name( 'edit' );
+		}
+	}
+
+	/**
+	 * Get the customer's last name.
+	 */
+	public function get_customer_last_name() {
+		if ( $this->get_user_id() ) {
+			return get_user_meta( $this->get_user_id(), 'last_name', true );
+		}
+
+		if ( '' !== $this->get_billing_last_name( 'edit' ) ) {
+			return $this->get_billing_last_name( 'edit' );
+		} else {
+			return $this->get_shipping_last_name( 'edit' );
+		}
+	}
 }

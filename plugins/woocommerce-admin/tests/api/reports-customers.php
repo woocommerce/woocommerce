@@ -328,21 +328,77 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test customer first and last name.
+	 * Test customer user profile name priority.
 	 */
-	public function test_customer_name() {
+	public function test_customer_user_profile_name() {
 		wp_set_current_user( $this->user );
 
 		$customer = wp_insert_user(
 			array(
+				'first_name' => 'Tyrion',
+				'last_name'  => 'Lanister',
 				'user_login' => 'daenerys',
 				'user_pass'  => null,
 				'role'       => 'customer',
 			)
 		);
 
-		// Test shipping name and empty billing name.
 		$order = WC_Helper_Order::create_order( $customer );
+		$order->set_billing_first_name( 'Jon' );
+		$order->set_billing_last_name( 'Snow' );
+		$order->set_status( 'completed' );
+		$order->set_total( 100 );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		$request  = new WP_REST_Request( 'GET', $this->endpoint );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+		$headers  = $response->get_headers();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+		$this->assertEquals( 'Tyrion Lanister', $reports[0]['name'] );
+	}
+
+
+	/**
+	 * Test customer billing name priority.
+	 */
+	public function test_customer_billing_name() {
+		wp_set_current_user( $this->user );
+
+		// Test shipping name and empty billing name on a guest account.
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_billing_first_name( 'Jon' );
+		$order->set_billing_last_name( 'Snow' );
+		$order->set_shipping_first_name( 'IgnoredFirstName' );
+		$order->set_shipping_last_name( 'IgnoredLastName' );
+		$order->set_status( 'completed' );
+		$order->set_total( 100 );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending();
+
+		$request  = new WP_REST_Request( 'GET', $this->endpoint );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+		$headers  = $response->get_headers();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports );
+		$this->assertEquals( 'Jon Snow', $reports[0]['name'] );
+	}
+
+	/**
+	 * Test customer shipping name priority.
+	 */
+	public function test_customer_shipping_name() {
+		wp_set_current_user( $this->user );
+
+		// Test shipping name and empty billing name on a guest account.
+		$order = WC_Helper_Order::create_order( 0 );
 		$order->set_billing_first_name( '' );
 		$order->set_billing_last_name( '' );
 		$order->set_shipping_first_name( 'Daenerys' );
@@ -361,45 +417,5 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 1, $reports );
 		$this->assertEquals( 'Daenerys Targaryen', $reports[0]['name'] );
-
-		// Test billing name.
-		$order->set_billing_first_name( 'Jon' );
-		$order->set_billing_last_name( 'Snow' );
-		$order->save();
-		do_action( 'woocommerce_update_customer', $customer );
-
-		WC_Helper_Queue::run_all_pending();
-
-		$request = new WP_REST_Request( 'GET', $this->endpoint );
-		$request->set_query_params( array( 'orderby' => 'username' ) ); // Cache busting.
-		$response = $this->server->dispatch( $request );
-		$reports  = $response->get_data();
-		$headers  = $response->get_headers();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 1, $reports );
-		$this->assertEquals( 'Jon Snow', $reports[0]['name'] );
-
-		// Test user profile name.
-		wp_update_user(
-			array(
-				'ID'         => $customer,
-				'first_name' => 'Tyrion',
-				'last_name'  => 'Lanister',
-			)
-		);
-		do_action( 'woocommerce_update_customer', $customer );
-
-		WC_Helper_Queue::run_all_pending();
-
-		$request = new WP_REST_Request( 'GET', $this->endpoint );
-		$request->set_query_params( array( 'orderby' => 'name' ) ); // Cache busting.
-		$response = $this->server->dispatch( $request );
-		$reports  = $response->get_data();
-		$headers  = $response->get_headers();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 1, $reports );
-		$this->assertEquals( 'Tyrion Lanister', $reports[0]['name'] );
 	}
 }

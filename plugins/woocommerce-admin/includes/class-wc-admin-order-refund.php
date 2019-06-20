@@ -49,6 +49,11 @@ class WC_Admin_Order_Refund extends WC_Order_Refund {
 	 */
 	public function get_report_customer_id() {
 		$parent_order = wc_get_order( $this->get_parent_id() );
+
+		if ( ! $parent_order ) {
+			return null;
+		}
+
 		return WC_Admin_Reports_Customers_Data_Store::get_or_create_customer_from_order( $parent_order );
 	}
 
