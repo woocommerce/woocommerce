@@ -66,6 +66,13 @@ class Server {
 	 * @return array
 	 */
 	protected function get_v1_controllers() {
+		// Include legacy classes which are not autoloaded.
+		$controllers = glob( 'Version1/class-wc-*.php' );
+
+		foreach ( $controllers as $file ) {
+			include $file;
+		}
+
 		return [
 			'coupons'                  => 'WC_REST_Coupons_V1_Controller',
 			'customer-downloads'       => 'WC_REST_Customer_Downloads_V1_Controller',
@@ -96,6 +103,13 @@ class Server {
 	 * @return array
 	 */
 	protected function get_v2_controllers() {
+		// Include legacy classes which are not autoloaded.
+		$controllers = glob( 'Version2/class-wc-*.php' );
+
+		foreach ( $controllers as $file ) {
+			include $file;
+		}
+
 		return [
 			'coupons'                  => 'WC_REST_Coupons_V2_Controller',
 			'customer-downloads'       => 'WC_REST_Customer_Downloads_V2_Controller',
@@ -137,6 +151,13 @@ class Server {
 	 * @return array
 	 */
 	protected function get_v3_controllers() {
+		// Include legacy classes which are not autoloaded.
+		$controllers = glob( 'Version3/class-wc-*.php' );
+
+		foreach ( $controllers as $file ) {
+			include $file;
+		}
+
 		return [
 			'coupons'                  => 'WC_REST_Coupons_Controller',
 			'customer-downloads'       => 'WC_REST_Customer_Downloads_Controller',

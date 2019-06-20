@@ -18,20 +18,7 @@ if ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
 	return;
 }
 
-/**
- * Get API feature plugin version and callback function.
- */
-$version       = include __DIR__ . '/version.php';
-$init_callback = include __DIR__ . '/init.php';
-
-/**
- * This callback registers this version of the API with WooCommerce.
- */
-$register_callback = function() use ( $version, $init_callback ) {
-	if ( ! class_exists( '\WooCommerce\Core\PackageManager' ) ) {
-		return;
-	}
-	\WooCommerce\Core\PackageManager::register( 'woocommerce-rest-api', $version, $init_callback, __DIR__ );
-};
-
-add_action( 'woocommerce_loaded', $register_callback );
+$autoloader = __DIR__ . '/vendor/autoload_packages.php';
+if ( is_readable( $autoloader ) ) {
+	require $autoloader;
+}
