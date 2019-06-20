@@ -245,6 +245,7 @@ class WC_Admin_Loader {
 			'wc-components',
 			self::get_url( 'components/index.js' ),
 			array(
+				'wp-api-fetch',
 				'wp-components',
 				'wp-data',
 				'wp-element',
