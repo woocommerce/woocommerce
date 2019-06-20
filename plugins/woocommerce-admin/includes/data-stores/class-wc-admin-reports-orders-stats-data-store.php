@@ -436,9 +436,11 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 		);
 
 		if ( 'shop_order_refund' === $order->get_type() ) {
-			$parent_order      = wc_get_order( $order->get_parent_id() );
-			$data['parent_id'] = $parent_order->get_id();
-			$format[]          = '%d';
+			$parent_order = wc_get_order( $order->get_parent_id() );
+			if ( $parent_order ) {
+				$data['parent_id'] = $parent_order->get_id();
+				$format[]          = '%d';
+			}
 		} else {
 			$data['returning_customer'] = self::is_returning_customer( $order );
 		}
