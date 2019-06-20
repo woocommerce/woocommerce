@@ -8,7 +8,8 @@
   "minimum-stability": "dev",
   "require-dev": {
     "phpunit/phpunit": "6.5.14",
-    "woocommerce/woocommerce-sniffs": "0.0.6"
+    "woocommerce/woocommerce-sniffs": "0.0.6",
+    "slowprog/composer-copy-file": "~0.3"
   },
   "scripts": {
     "post-install-cmd": [
@@ -16,6 +17,12 @@
     ],
     "post-update-cmd": [
       "composer dump-autoload"
+    ],
+    "pre-autoload-dump": [
+      "composer dump-autoload --no-dev --no-scripts",
+      "SlowProg\\CopyFile\\ScriptHandler::copy",
+      "sed -i.bak -e 's/\\$baseDir = dirname(\\$vendorDir)/\\$baseDir = __DIR__/g' classmap.php",
+      "rm classmap.php.bak"
     ]
   },
   "autoload": {
@@ -23,9 +30,14 @@
       "src/Controllers/Version1",
       "src/Controllers/Version2",
       "src/Controllers/Version3"
-    ],
-    "psr-4": {
-      "WooCommerce\\RestApi\\": "src/"
+    ]
+  },
+  "extra": {
+    "copy-file": {
+        "vendor/composer/autoload_classmap.php": "classmap.php"
+    },
+    "copy-file-dev": {
+      "vendor/composer/autoload_classmap.php": "classmap.php"
     }
   }
 }
