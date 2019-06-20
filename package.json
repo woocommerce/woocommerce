@@ -60,7 +60,7 @@
     "mocha": "6.1.4",
     "node-sass": "4.12.0",
     "prettier": "github:automattic/calypso-prettier#c56b4251",
-    "stylelint": "10.0.1",
+    "stylelint": "10.1.0",
     "stylelint-config-wordpress": "14.0.0",
     "wc-e2e-page-objects": "0.10.0",
     "github-contributors-list": "https://github.com/woocommerce/github-contributors-list/tarball/master"
