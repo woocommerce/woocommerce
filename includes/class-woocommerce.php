@@ -540,6 +540,11 @@ final class WooCommerce {
 		$this->deprecated_hook_handlers['actions'] = new WC_Deprecated_Action_Hooks();
 		$this->deprecated_hook_handlers['filters'] = new WC_Deprecated_Filter_Hooks();
 
+		// Init any packages.
+		if ( version_compare( PHP_VERSION, '5.6.0', '>=' ) ) {
+			\Automattic\WooCommerce\Blocks\Library::instance()->init();
+		}
+
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
 			wc_load_cart();

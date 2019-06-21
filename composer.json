@@ -9,7 +9,7 @@
   "require": {
     "composer/installers": "1.6.0",
     "woocommerce/woocommerce-rest-api": "dev-test/jetpack-autoloader",
-    "woocommerce/woocommerce-blocks": "dev-add/build-config",
+    "woocommerce/woocommerce-blocks": "dev-refactor/php-classes",
     "automattic/jetpack-autoloader": "^1"
   },
   "require-dev": {
