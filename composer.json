@@ -23,6 +23,11 @@
     ]
   },
   "autoload": {
+    "classmap": [
+      "src/Controllers/Version1",
+      "src/Controllers/Version2",
+      "src/Controllers/Version3"
+    ],
     "psr-4": {
       "WooCommerce\\RestApi\\": "src"
     }
