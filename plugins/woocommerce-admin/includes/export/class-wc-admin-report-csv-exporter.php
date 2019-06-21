@@ -198,6 +198,10 @@ class WC_Admin_Report_CSV_Exporter extends WC_CSV_Batch_Exporter {
 			} elseif ( is_callable( array( $this, "get_column_value_{$column_name}" ) ) ) {
 				// Handle special columns which don't map 1:1 to item data.
 				$value = $this->{"get_column_value_{$column_name}"}( $item, $this->export_type );
+
+			} elseif ( ! is_scalar( $value ) ) {
+				// Ensure that the value is somewhat readable in CSV.
+				$value = wp_json_encode( $value );
 			}
 
 			$row[ $column_id ] = $value;
