@@ -19,32 +19,57 @@ defined( 'ABSPATH' ) || exit;
 class WC_API extends WC_Legacy_API {
 
 	/**
-	 * Setup class.
-	 *
-	 * @since 2.0
+	 * Init the API by setting up action and filter hooks.
 	 */
-	public function __construct() {
-		$this->wc_api_init();
-		$this->rest_api_init();
-	}
-
-	/**
-	 * Init the WC API by adding endpoints for those requests.
-	 */
-	private function wc_api_init() {
-		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
+	public function init() {
+		parent::init();
 		add_action( 'init', array( $this, 'add_endpoint' ), 0 );
+		add_action( 'init', array( $this, 'rest_api_init' ) );
+		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
 		add_action( 'parse_request', array( $this, 'handle_api_requests' ), 0 );
+		add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
 	}
 
 	/**
-	 * Init WP REST API by hooking into `rest_api_init`.
+	 * Call the Server class from the Rest API package.
 	 *
-	 * @since 2.6.0
+	 * @see \Automattic\WooCommerce\RestApi\Server
 	 */
-	private function rest_api_init() {
-		add_action( 'rest_api_init', array( $this, 'rest_api_includes' ), 5 );
-		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
+	public function rest_api_init() {
+		if ( $this->is_rest_api_loaded() || version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
+			return;
+		}
+		\Automattic\WooCommerce\RestApi\Server::instance()->init();
+	}
+
+	/**
+	 * Get the version of the REST API package being ran.
+	 *
+	 * @since 3.7.0
+	 * @return int|null
+	 */
+	public function get_rest_api_package_version() {
+		return null;
+	}
+
+	/**
+	 * Get the version of the REST API package being ran.
+	 *
+	 * @since 3.7.0
+	 * @return string
+	 */
+	public function get_rest_api_package_path() {
+		return '';
+	}
+
+	/**
+	 * Return if the rest API classes were already loaded.
+	 *
+	 * @since 3.7.0
+	 * @return boolean
+	 */
+	protected function is_rest_api_loaded() {
+		return class_exists( '\Automattic\WooCommerce\RestApi\Server', false );
 	}
 
 	/**
@@ -111,24 +136,6 @@ class WC_API extends WC_Legacy_API {
 			ob_end_clean();
 			die( '-1' );
 		}
-	}
-
-	/**
-	 * Include REST API classes.
-	 *
-	 * @since 2.6.0
-	 */
-	public function rest_api_includes() {
-	}
-
-	/**
-	 * Register REST API routes.
-	 *
-	 * @since 2.6.0
-	 */
-	public function register_rest_routes() {
-		// Register settings to the REST API.
-		$this->register_wp_admin_settings();
 	}
 
 	/**
