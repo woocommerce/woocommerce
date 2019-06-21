@@ -35,6 +35,7 @@ class WC_Admin_Notices {
 		'regenerating_lookup_table' => 'regenerating_lookup_table_notice',
 		'no_secure_connection'      => 'secure_connection_notice',
 		'wc_admin'                  => 'wc_admin_feature_plugin_notice',
+		'wp_php_min_requirements'   => 'wp_php_min_requirements_notice',
 	);
 
 	/**
@@ -80,6 +81,7 @@ class WC_Admin_Notices {
 	 * Reset notices for themes when switched or a new version of WC is installed.
 	 */
 	public static function reset_admin_notices() {
+		self::add_notice( 'wp_php_min_requirements' );
 		if ( ! self::is_ssl() ) {
 			self::add_notice( 'no_secure_connection' );
 		}
@@ -371,6 +373,26 @@ class WC_Admin_Notices {
 		}
 
 		include dirname( __FILE__ ) . '/views/html-notice-wc-admin.php';
+	}
+
+	/**
+	 * Notice about WordPress and PHP minimum requirements.
+	 *
+	 * @since 3.6.5
+	 * @return void
+	 */
+	public static function wp_php_min_requirements_notice() {
+		global $wp_version;
+
+		if ( apply_filters( 'woocommerce_hide_php_wp_nag', get_user_meta( get_current_user_id(), 'dismissed_wp_php_min_requirements_notice', true ) ) ) {
+			self::remove_notice( 'wp_php_min_requirements' );
+			return;
+		}
+
+		$php_version = phpversion();
+		$old_php     = version_compare( $php_version, WC_MIN_PHP_VERSION, '<' );
+		$old_wp      = version_compare( $wp_version, WC_MIN_WP_VERSION, '<' );
+		include dirname( __FILE__ ) . '/views/html-notice-wp-php-minimum-requirements.php';
 	}
 
 	/**

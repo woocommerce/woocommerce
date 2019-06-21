@@ -39,11 +39,16 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			global $wp_version;
 
 			// PHP & WP Upgrade notice Widget.
-			if ( current_user_can( 'manage_woocommerce' ) ) {
-				$php_version = phpversion();
-				if ( version_compare( $php_version, WC_MIN_PHP_VERSION, '<' ) || version_compare( $wp_version, WC_MIN_WP_VERSION, '<' ) ) {
-					add_filter( 'postbox_classes_dashboard_woocommerce_php_wp_nag', array( $this, 'php_wp_nag_class' ) );
-					wp_add_dashboard_widget( 'woocommerce_php_wp_nag', __( 'Update Required', 'woocommerce' ), array( $this, 'php_wp_update_widget' ) );
+			// Check if the nag has been dismissed or if we should bypass based on filter.
+			if ( ! apply_filters( 'woocommerce_hide_php_wp_nag', get_user_meta( get_current_user_id(), 'dismissed_wp_php_min_requirements_notice', true ) ) ) {
+				if ( current_user_can( 'manage_woocommerce' ) ) {
+					$php_version = phpversion();
+					$old_php     = version_compare( $php_version, WC_MIN_PHP_VERSION, '<' );
+					$old_wp      = version_compare( $wp_version, WC_MIN_WP_VERSION, '<' );
+					if ( $old_php || $old_wp ) {
+						add_filter( 'postbox_classes_dashboard_woocommerce_php_wp_nag', array( $this, 'php_wp_nag_class' ) );
+						wp_add_dashboard_widget( 'woocommerce_php_wp_nag', __( 'Update Required', 'woocommerce' ), array( $this, 'php_wp_update_widget' ) );
+					}
 				}
 			}
 
@@ -423,11 +428,6 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		public function php_wp_update_widget() {
 			global $wp_version;
 
-			// Check if the nag has been dismissed or if we should bypass based on filter.
-			if ( apply_filters( 'woocommerce_php_wp_nag_dismissed', get_option( 'woocommerce_php_wp_nag_dismissed', false ) ) ) {
-				return;
-			}
-
 			$php_version         = phpversion();
 			$php_update_required = version_compare( $php_version, WC_MIN_PHP_VERSION, '<' );
 			$wp_update_required  = version_compare( $wp_version, WC_MIN_WP_VERSION, '<' );
@@ -437,11 +437,11 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			}
 
 			if ( $php_update_required && $wp_update_required ) {
-				$msg = __( 'WooCommerce has detected that your store is running on outdated versions of WordPress and PHP. In future releases of WooCommerce we will not be supporting these outdated versions.', 'woocommerce' );
+				$msg = __( 'Your store is running on outdated versions of WordPress and PHP. In future releases of WooCommerce we will not be supporting these outdated versions.', 'woocommerce' );
 			} elseif ( $php_update_required ) {
-				$msg = __( 'WooCommerce has detected that your store is running on an outdated version of PHP. In future releases of WooCommerce we will not be supporting this outdated version.', 'woocommerce' );
+				$msg = __( 'Your store is running on an outdated version of PHP. In future releases of WooCommerce we will not be supporting this outdated version.', 'woocommerce' );
 			} else {
-				$msg = __( 'WooCommerce has detected that your store is running on an outdated version of WordPress.  In future releases of WooCommerce we will not be supporting this outdated version.', 'woocommerce' );
+				$msg = __( 'Your store is running on an outdated version of WordPress. In future releases of WooCommerce we will not be supporting this outdated version.', 'woocommerce' );
 			}
 
 			?>
