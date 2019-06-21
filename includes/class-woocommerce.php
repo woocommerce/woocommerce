@@ -180,6 +180,7 @@ final class WooCommerce {
 		register_shutdown_function( array( $this, 'log_errors' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), -1 );
+		add_action( 'plugins_loaded', array( $this, 'init_packages' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'init', array( $this, 'init' ), 0 );
@@ -189,6 +190,21 @@ final class WooCommerce {
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
+	}
+
+	/**
+	 * Load any WooCommerce packages.
+	 *
+	 * Most packages will have their own init routines, so this is used early once plugins are loaded.
+	 *
+	 * @since 3.7.0
+	 */
+	public function init_packages() {
+		if ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
+			return;
+		}
+		\Automattic\WooCommerce\Blocks\Library::instance()->init();
+		\Automattic\WooCommerce\RestApi\Server::instance()->init();
 	}
 
 	/**
@@ -539,11 +555,6 @@ final class WooCommerce {
 		$this->structured_data                     = new WC_Structured_Data();
 		$this->deprecated_hook_handlers['actions'] = new WC_Deprecated_Action_Hooks();
 		$this->deprecated_hook_handlers['filters'] = new WC_Deprecated_Filter_Hooks();
-
-		// Init any packages.
-		if ( version_compare( PHP_VERSION, '5.6.0', '>=' ) ) {
-			\Automattic\WooCommerce\Blocks\Library::instance()->init();
-		}
 
 		// Classes/actions loaded for the frontend and for ajax requests.
 		if ( $this->is_request( 'frontend' ) ) {
