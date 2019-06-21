@@ -418,4 +418,12 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 1, $reports );
 		$this->assertEquals( 'Daenerys Targaryen', $reports[0]['name'] );
 	}
+
+	/**
+	 * Test that bad order params don't cause PHP errors when retrieving customers.
+	 */
+	public function test_customer_retrieval_from_order_bad_order() {
+		$this->assertFalse( WC_Admin_Reports_Customers_Data_Store::get_existing_customer_id_from_order( false ) );
+		$this->assertFalse( WC_Admin_Reports_Customers_Data_Store::get_or_create_customer_from_order( false ) );
+	}
 }

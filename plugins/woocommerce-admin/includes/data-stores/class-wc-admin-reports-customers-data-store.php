@@ -438,11 +438,12 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 	 * @return int|bool
 	 */
 	public static function get_existing_customer_id_from_order( $order ) {
-		if ( ! $order ) {
+		global $wpdb;
+
+		if ( ! is_a( $order, 'WC_Order' ) ) {
 			return false;
 		}
 
-		global $wpdb;
 		$user_id = $order->get_customer_id();
 
 		if ( 0 === $user_id ) {
@@ -481,6 +482,11 @@ class WC_Admin_Reports_Customers_Data_Store extends WC_Admin_Reports_Data_Store 
 		}
 
 		global $wpdb;
+
+		if ( ! is_a( $order, 'WC_Order' ) ) {
+			return false;
+		}
+
 		$returning_customer_id = self::get_existing_customer_id_from_order( $order );
 
 		if ( $returning_customer_id ) {
