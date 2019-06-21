@@ -36,7 +36,7 @@ defined( 'ABSPATH' ) || exit;
 		$fields = $checkout->get_checkout_fields( 'billing' );
 
 		foreach ( $fields as $key => $field ) {
-			woocommerce_form_field( $key, $field, $checkout->get_value( $key ) );
+			woocommerce_form_field( $key, $field, isset($_GET[$key]) ? $_GET[$key] : $checkout->get_value( $key ) );
 		}
 		?>
 	</div>
