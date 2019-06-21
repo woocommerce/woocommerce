@@ -33,10 +33,13 @@ class WC_API extends WC_Legacy_API {
 	 * Get the version of the REST API package being ran.
 	 *
 	 * @since 3.7.0
-	 * @return int|null
+	 * @return string|null
 	 */
 	public function get_rest_api_package_version() {
-		return null;
+		if ( ! $this->is_rest_api_loaded() ) {
+			return null;
+		}
+		return \Automattic\WooCommerce\RestApi\Package::get_version();
 	}
 
 	/**
@@ -46,7 +49,10 @@ class WC_API extends WC_Legacy_API {
 	 * @return string
 	 */
 	public function get_rest_api_package_path() {
-		return '';
+		if ( ! $this->is_rest_api_loaded() ) {
+			return null;
+		}
+		return \Automattic\WooCommerce\RestApi\Package::get_path();
 	}
 
 	/**
@@ -56,7 +62,7 @@ class WC_API extends WC_Legacy_API {
 	 * @return boolean
 	 */
 	protected function is_rest_api_loaded() {
-		return class_exists( '\Automattic\WooCommerce\RestApi\Server', false );
+		return class_exists( '\Automattic\WooCommerce\RestApi\Package', false );
 	}
 
 	/**
