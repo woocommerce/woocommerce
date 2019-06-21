@@ -103,6 +103,8 @@
 		@include breakpoint( '<782px' ) {
 			padding-left: $gap;
 			padding-right: $gap;
+			margin-bottom: 56 + $gap; /* 56px is height of footer */
+			margin-top: 0;
 		}
 
 		p,
@@ -311,7 +313,8 @@
 	}
 
 	@include breakpoint( '<782px' ) {
-		position: absolute;
+		position: fixed;
+		z-index: 999;
 		width: 100%;
 		bottom: 0;
 		border-top: 1px solid $muriel-gray-50;
