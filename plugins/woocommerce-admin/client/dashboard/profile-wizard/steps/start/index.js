@@ -69,12 +69,19 @@ class Start extends Component {
 		this.skipWizard = this.skipWizard.bind( this );
 	}
 
+	async updateTracking() {
+		const { updateSettings } = this.props;
+		const allowTracking = this.state.allowTracking ? 'yes' : 'no';
+		await updateSettings( { advanced: { woocommerce_allow_tracking: allowTracking } } );
+	}
+
 	async skipWizard() {
-		const { addNotice, isProfileItemsError, updateProfileItems } = this.props;
+		const { addNotice, isProfileItemsError, updateProfileItems, isSettingsError } = this.props;
 
 		await updateProfileItems( { skipped: true } );
+		await this.updateTracking();
 
-		if ( isProfileItemsError ) {
+		if ( isProfileItemsError || isSettingsError ) {
 			addNotice( {
 				status: 'error',
 				message: __( 'There was a problem updating your preferences.', 'woocommerce-admin' ),
@@ -83,10 +90,9 @@ class Start extends Component {
 	}
 
 	async startWizard() {
-		const { addNotice, isSettingsError, updateSettings } = this.props;
+		const { addNotice, isSettingsError } = this.props;
 
-		const allowTracking = this.state.allowTracking ? 'yes' : 'no';
-		await updateSettings( { advanced: { woocommerce_allow_tracking: allowTracking } } );
+		await this.updateTracking();
 
 		if ( ! isSettingsError ) {
 			this.props.goToNextStep();
