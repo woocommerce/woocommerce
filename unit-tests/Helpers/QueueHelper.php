@@ -5,7 +5,7 @@
  * @package WooCommerce\Tests\Framework\Helpers
  */
 
-namespace WooCommerce\RestApi\UnitTests\Helpers;
+namespace Automattic\WooCommerce\RestApi\UnitTests\Helpers;
 
 defined( 'ABSPATH' ) || exit;
 

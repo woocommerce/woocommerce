@@ -43,7 +43,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	public function test_get_customers() {
 		wp_set_current_user( 1 );
 
-		$customer_1 = \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer();
+		$customer_1 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer();
 		\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'test2', 'test2', 'test2@woo.local' );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/customers' );
@@ -115,7 +115,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		);
 
 		update_option( 'timezone_tring', 'America/New York' );
-		$customer_3 = \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'timezonetest', 'timezonetest', 'timezonetest@woo.local' );
+		$customer_3 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'timezonetest', 'timezonetest', 'timezonetest@woo.local' );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/customers' );
 		$request->set_query_params(
@@ -368,7 +368,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_customer() {
 		wp_set_current_user( 1 );
-		$customer = \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'get_customer_test', 'test123', 'get_customer_test@woo.local' );
+		$customer = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'get_customer_test', 'test123', 'get_customer_test@woo.local' );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $customer->get_id() ) );
 		$data     = $response->get_data();
 
@@ -423,7 +423,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_customer_without_permission() {
 		wp_set_current_user( 0 );
-		$customer = \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'get_customer_test_without_permission', 'test123', 'get_customer_test_without_permission@woo.local' );
+		$customer = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'get_customer_test_without_permission', 'test123', 'get_customer_test_without_permission@woo.local' );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $customer->get_id() ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
@@ -446,7 +446,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_customer() {
 		wp_set_current_user( 1 );
-		$customer = \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'update_customer_test', 'test123', 'update_customer_test@woo.local' );
+		$customer = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'update_customer_test', 'test123', 'update_customer_test@woo.local' );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $customer->get_id() ) );
 		$data     = $response->get_data();
@@ -474,7 +474,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_customer_without_permission() {
 		wp_set_current_user( 0 );
-		$customer = \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'update_customer_test_without_permission', 'test123', 'update_customer_test_without_permission@woo.local' );
+		$customer = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'update_customer_test_without_permission', 'test123', 'update_customer_test_without_permission@woo.local' );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/customers/' . $customer->get_id() ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
@@ -498,7 +498,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_customer() {
 		wp_set_current_user( 1 );
-		$customer = \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'delete_customer_test', 'test123', 'delete_customer_test@woo.local' );
+		$customer = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'delete_customer_test', 'test123', 'delete_customer_test@woo.local' );
 		$request  = new WP_REST_Request( 'DELETE', '/wc/v3/customers/' . $customer->get_id() );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
@@ -525,7 +525,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_customer_without_permission() {
 		wp_set_current_user( 0 );
-		$customer = \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'delete_customer_test_without_permission', 'test123', 'delete_customer_test_without_permission@woo.local' );
+		$customer = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'delete_customer_test_without_permission', 'test123', 'delete_customer_test_without_permission@woo.local' );
 		$request  = new WP_REST_Request( 'DELETE', '/wc/v3/customers/' . $customer->get_id() );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
@@ -540,10 +540,10 @@ class Customers extends WC_REST_Unit_Test_Case {
 	public function test_batch_customer() {
 		wp_set_current_user( 1 );
 
-		$customer_1 = \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'test_batch_customer', 'test123', 'test_batch_customer@woo.local' );
-		$customer_2 = \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'test_batch_customer2', 'test123', 'test_batch_customer2@woo.local' );
-		$customer_3 = \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'test_batch_customer3', 'test123', 'test_batch_customer3@woo.local' );
-		$customer_4 = \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'test_batch_customer4', 'test123', 'test_batch_customer4@woo.local' );
+		$customer_1 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'test_batch_customer', 'test123', 'test_batch_customer@woo.local' );
+		$customer_2 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'test_batch_customer2', 'test123', 'test_batch_customer2@woo.local' );
+		$customer_3 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'test_batch_customer3', 'test123', 'test_batch_customer3@woo.local' );
+		$customer_4 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'test_batch_customer4', 'test123', 'test_batch_customer4@woo.local' );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/customers/batch' );
 		$request->set_body_params(

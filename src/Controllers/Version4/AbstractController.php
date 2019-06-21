@@ -7,21 +7,21 @@
  *
  * @class   \WC_REST_Controller
  * @see     https://developer.wordpress.org/rest-api/extending-the-rest-api/controller-classes/
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4;
+namespace Automattic\WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
 use \WP_REST_Controller;
-use \WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
-use \WooCommerce\RestApi\Controllers\Version4\Utilities\BatchTrait;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\BatchTrait;
 
 /**
  * Abstract Rest Controller Class
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @extends  WP_REST_Controller
  * @version  2.6.0
  */

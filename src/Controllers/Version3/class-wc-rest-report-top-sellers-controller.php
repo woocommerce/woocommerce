@@ -4,7 +4,7 @@
  *
  * Handles requests to the reports/top_sellers endpoint.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @since   2.6.0
  */
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Report Top Sellers controller class.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @extends WC_REST_Report_Top_Sellers_V2_Controller
  */
 class WC_REST_Report_Top_Sellers_Controller extends WC_REST_Report_Top_Sellers_V2_Controller {

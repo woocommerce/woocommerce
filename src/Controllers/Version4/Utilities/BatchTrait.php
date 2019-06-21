@@ -2,10 +2,10 @@
 /**
  * Batch trait.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4\Utilities;
+namespace Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities;
 
 /**
  * BatchTrait.

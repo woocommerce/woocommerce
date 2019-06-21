@@ -4,7 +4,7 @@
  *
  * Handles requests to the /webhooks endpoint.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @since    3.0.0
  */
 
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * REST API Webhooks controller class.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @extends WC_REST_Controller
  */
 class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {

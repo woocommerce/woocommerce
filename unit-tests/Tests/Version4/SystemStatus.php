@@ -2,10 +2,10 @@
 /**
  * Class WC_Tests_REST_System_Status file.
  *
- * @package WooCommerce/Tests
+ * @package Automattic/WooCommerce/Tests
  */
 
-namespace WooCommerce\RestApi\UnitTests\Tests\Version4;
+namespace Automattic\WooCommerce\RestApi\UnitTests\Tests\Version4;
 
 defined( 'ABSPATH' ) || exit;
 

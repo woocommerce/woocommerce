@@ -2,14 +2,14 @@
 /**
  * Initialize this version of the REST API.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi;
+namespace Automattic\WooCommerce\RestApi;
 
 defined( 'ABSPATH' ) || exit;
 
-use WooCommerce\RestApi\Utilities\SingletonTrait;
+use Automattic\WooCommerce\RestApi\Utilities\SingletonTrait;
 
 /**
  * Class responsible for loading the REST API and all REST API namespaces.

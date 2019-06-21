@@ -4,14 +4,14 @@
  *
  * Handles requests to the /shipping/zones/<id>/methods endpoint.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4;
+namespace Automattic\WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WooCommerce\RestApi\Controllers\Version4\Utilities\SettingsTrait;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\SettingsTrait;
 
 /**
  * REST API Shipping Zone Methods class.

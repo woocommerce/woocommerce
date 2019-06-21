@@ -4,15 +4,15 @@
  *
  * Handles requests to the /orders endpoint.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4;
+namespace Automattic\WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
-use WooCommerce\RestApi\Controllers\Version4\Requests\OrderRequest;
-use WooCommerce\RestApi\Controllers\Version4\Responses\OrderResponse;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Requests\OrderRequest;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Responses\OrderResponse;
 
 /**
  * REST API Orders controller class.

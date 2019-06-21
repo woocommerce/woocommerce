@@ -6,7 +6,7 @@
  * @since 3.5.0
  */
 
-namespace WooCommerce\RestApi\UnitTests\Tests\Version4;
+namespace Automattic\WooCommerce\RestApi\UnitTests\Tests\Version4;
 
 defined( 'ABSPATH' ) || exit;
 

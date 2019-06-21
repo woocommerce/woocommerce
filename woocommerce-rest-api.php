@@ -9,7 +9,7 @@
  * Requires PHP: 5.6
  * License: GPLv3
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
 defined( 'ABSPATH' ) || exit;

@@ -4,7 +4,7 @@
  *
  * Handles requests to /products/reviews.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @since   3.5.0
  */
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Product Reviews Controller Class.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @extends WC_REST_Controller
  */
 class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {

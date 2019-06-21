@@ -6,7 +6,7 @@
  *
  * @author   WooThemes
  * @category API
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @since    3.0.0
  */
 
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * REST API Tax Classes controller class.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @extends WC_REST_Controller
  */
 class WC_REST_Tax_Classes_V1_Controller extends WC_REST_Controller {

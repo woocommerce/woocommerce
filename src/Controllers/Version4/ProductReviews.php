@@ -4,16 +4,16 @@
  *
  * Handles requests to /products/<product_id>/reviews.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4;
+namespace Automattic\WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
-use WooCommerce\RestApi\Controllers\Version4\Responses\ProductReviewResponse;
-use WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
-use WooCommerce\RestApi\Controllers\Version4\Utilities\Pagination;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Responses\ProductReviewResponse;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\Pagination;
 
 /**
  * REST API Product Reviews controller class.

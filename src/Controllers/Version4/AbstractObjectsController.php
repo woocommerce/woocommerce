@@ -2,15 +2,15 @@
 /**
  * Abstract Rest CRUD Controller Class
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4;
+namespace Automattic\WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
-use WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
-use WooCommerce\RestApi\Controllers\Version4\Utilities\Pagination;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\Pagination;
 
 /**
  * CRUD Object Controller.

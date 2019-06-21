@@ -3,7 +3,7 @@
  * Abstract Rest Posts Controller Class
  *
  * @class WC_REST_Posts_Controller
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * WC_REST_Posts_Controller
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @version  2.6.0
  */
 abstract class WC_REST_Posts_Controller extends WC_REST_Controller {

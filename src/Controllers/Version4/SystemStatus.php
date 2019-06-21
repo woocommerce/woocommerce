@@ -4,10 +4,10 @@
  *
  * Handles requests to the /system_status endpoint.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4;
+namespace Automattic\WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -554,12 +554,12 @@ class SystemStatus extends AbstractController {
 	 * @return array
 	 */
 	public function get_item_mappings() {
-		$plugin_info     = new \WooCommerce\RestApi\Controllers\Version4\Utilities\PluginInformation();
-		$theme_info      = new \WooCommerce\RestApi\Controllers\Version4\Utilities\ThemeInformation();
-		$server          = new \WooCommerce\RestApi\Controllers\Version4\Utilities\ServerEnvironment();
-		$database        = new \WooCommerce\RestApi\Controllers\Version4\Utilities\DatabaseInformation();
-		$wp_environment  = new \WooCommerce\RestApi\Controllers\Version4\Utilities\WPEnvironment();
-		$woo_environment = new \WooCommerce\RestApi\Controllers\Version4\Utilities\WooEnvironment();
+		$plugin_info     = new \Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\PluginInformation();
+		$theme_info      = new \Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\ThemeInformation();
+		$server          = new \Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\ServerEnvironment();
+		$database        = new \Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\DatabaseInformation();
+		$wp_environment  = new \Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\WPEnvironment();
+		$woo_environment = new \Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\WooEnvironment();
 
 		return array(
 			'environment'        => $server->get_environment_info(),

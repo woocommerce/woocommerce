@@ -10,29 +10,9 @@ This repository is home to the WooCommerce REST API package.
 
 The stable version of this package is bundled with [WooCommerce core](https://github.com/woocommerce/woocommerce)  releases, but it can also be used as a standalone plugin so bleeding-edge API features can be tested or used by other feature plugins.
 
-## Using this repo
+## Using this package as a plugin
 
-After checking out the code, you'll need to run `composer install` in it's root directory to install dependencies and to enable the autoloader.
-
-## Using this package
-
-This package is [hosted on Packagist](https://packagist.org/packages/woocommerce/woocommerce-rest-api) and can be included using composer.json:
-
-```json
-"require": {
-    "woocommerce/woocommerce-rest-api": "1.0.0"
-},
-```
-
-Since multiple versions of this package may be included at the same time, WooCommerce handles loading __only the latest version__ by using a special loader. 
-
-After including the package and installing dependencies, include the main `woocommerce-rest-api.php` file in your code:
-
-```php
-include 'vendor/woocommerce-rest-api/woocommerce-rest-api.php';
-```
-
-This will register the version of the package with WooCommerce and make it available after the `woocommerce_loaded` hook is fired.
+After checking out the code to your `wp-content/plugins` directory, you'll need to run `composer install` in the plugin directory (`wp-content/plugins/woocommerce-rest-api`) to install dependencies and to enable the autoloader. Without performing this step, if you activate the plugin it will simply show an admin notice.
 
 ## API documentation
 
@@ -49,6 +29,30 @@ This will register the version of the package with WooCommerce and make it avail
 | `wc/v1`     | Deprecated - April 2019     | [Link](https://woocommerce.github.io/woocommerce-rest-api-docs/wp-api-v1.html)     |
 
 Note: API Versions are kept around for 2 years after being replaced, and may be removed in the next major version after that date passes.
+
+## Using this package in other projects
+
+This package is [hosted on Packagist](https://packagist.org/packages/woocommerce/woocommerce-rest-api) and can be included using composer.json:
+
+```json
+"require": {
+    "woocommerce/woocommerce-rest-api": "1.0.0"
+},
+```
+
+Since multiple versions of this package may be included at the same time, it includes a special package-version autoloader. This dependency is also on Packagist:
+
+```json
+  "automattic/jetpack-autoloader": "^1"
+```
+
+And using this autoloader requires the following include in your codebase:
+
+```
+$autoloader = __DIR__ . '/vendor/autoload_packages.php';
+```
+
+If you choose to use your own autoloader, please note you won't be able to determine which version of the package is running since it could use the version in WooCommerce core or your version. The namespaces would conflict. All of our feature plugins and packages use the package autoloader.
 
 ## Contributing
 

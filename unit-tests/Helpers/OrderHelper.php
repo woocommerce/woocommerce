@@ -3,7 +3,7 @@
  * Orders helper.
  */
 
-namespace WooCommerce\RestApi\UnitTests\Helpers;
+namespace Automattic\WooCommerce\RestApi\UnitTests\Helpers;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -53,7 +53,7 @@ class OrderHelper {
 	public static function create_order( $customer_id = 1, $product = null ) {
 
 		if ( ! is_a( $product, 'WC_Product' ) ) {
-			$product = \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+			$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		}
 
 		ShippingHelper::create_simple_flat_rate();

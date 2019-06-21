@@ -4,7 +4,7 @@
  *
  * Handles requests to the /data/continents endpoint.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @since   3.5.0
  */
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Data continents controller class.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @extends WC_REST_Controller
  */
 class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {

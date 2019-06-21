@@ -4,14 +4,14 @@
  *
  * Handles requests to the /data/currencies endpoint.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4\Data;
+namespace Automattic\WooCommerce\RestApi\Controllers\Version4\Data;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WooCommerce\RestApi\Controllers\Version4\Data as DataController;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Data as DataController;
 
 /**
  * REST API Data Currencies controller class.

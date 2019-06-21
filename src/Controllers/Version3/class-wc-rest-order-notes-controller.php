@@ -4,7 +4,7 @@
  *
  * Handles requests to the /orders/<order_id>/notes endpoint.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @since   2.6.0
  */
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Order Notes controller class.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @extends WC_REST_Order_Notes_V2_Controller
  */
 class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V2_Controller {

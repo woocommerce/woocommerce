@@ -4,7 +4,7 @@
  *
  * Handles requests to the /orders endpoint.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @since    2.6.0
  */
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Orders controller class.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @extends WC_REST_CRUD_Controller
  */
 class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {

@@ -4,14 +4,14 @@
  *
  * Handles requests to the /customers/<customer_id>/downloads endpoint.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4;
+namespace Automattic\WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
 
 /**
  * REST API Customer Downloads controller class.

@@ -370,7 +370,7 @@ class Settings_V2 extends WC_REST_Unit_Test_Case {
 		$controller
 			->expects( $this->any() )
 			->method( 'get_group_settings' )
-			->will( $this->returnValue( \WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper::register_test_settings( array() ) ) );
+			->will( $this->returnValue( \Automattic\WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper::register_test_settings( array() ) ) );
 
 		$controller
 			->expects( $this->any() )

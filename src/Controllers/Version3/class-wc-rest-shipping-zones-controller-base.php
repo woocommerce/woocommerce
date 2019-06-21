@@ -4,7 +4,7 @@
  *
  * Houses common functionality between Shipping Zones and Locations.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @since    3.0.0
  */
 
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * REST API Shipping Zones base class.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @extends WC_REST_Controller
  */
 abstract class WC_REST_Shipping_Zones_Controller_Base extends WC_REST_Controller {

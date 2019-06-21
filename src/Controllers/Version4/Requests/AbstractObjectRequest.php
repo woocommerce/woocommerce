@@ -2,10 +2,10 @@
 /**
  * Convert data in the product schema format to an object.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4\Requests;
+namespace Automattic\WooCommerce\RestApi\Controllers\Version4\Requests;
 
 defined( 'ABSPATH' ) || exit;
 

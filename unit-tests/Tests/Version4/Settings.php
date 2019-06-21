@@ -6,13 +6,13 @@
  * @since 3.5.0
  */
 
-namespace WooCommerce\RestApi\UnitTests\Tests\Version4;
+namespace Automattic\WooCommerce\RestApi\UnitTests\Tests\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
 use \WP_REST_Request;
 use \WC_REST_Unit_Test_Case;
-use \WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper;
 
 class Settings extends WC_REST_Unit_Test_Case {
 

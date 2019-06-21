@@ -2,17 +2,17 @@
 /**
  * Orders REST API tests.
  *
- * @package WooCommerce/RestApi/Tests
+ * @package Automattic/WooCommerce/RestApi/Tests
  */
 
-namespace WooCommerce\RestApi\UnitTests\Tests\Version4;
+namespace Automattic\WooCommerce\RestApi\UnitTests\Tests\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WooCommerce\RestApi\UnitTests\AbstractRestApiTest;
-use \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
-use \WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\AbstractRestApiTest;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
 
 /**
  * Abstract Rest API Test Class
@@ -569,7 +569,7 @@ class Orders extends AbstractRestApiTest {
 	public function test_update_order_add_coupons() {
 		$order      = OrderHelper::create_order();
 		$order_item = current( $order->get_items() );
-		$coupon     = \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'fake-coupon' );
+		$coupon     = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'fake-coupon' );
 		$coupon->set_amount( 5 );
 		$coupon->save();
 
@@ -597,7 +597,7 @@ class Orders extends AbstractRestApiTest {
 	public function test_update_order_remove_coupons() {
 		$order      = OrderHelper::create_order();
 		$order_item = current( $order->get_items() );
-		$coupon     = \WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'fake-coupon' );
+		$coupon     = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'fake-coupon' );
 		$coupon->set_amount( 5 );
 		$coupon->save();
 		$order->apply_coupon( $coupon );

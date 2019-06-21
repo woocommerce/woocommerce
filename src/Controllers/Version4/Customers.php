@@ -4,17 +4,17 @@
  *
  * Handles requests to the /customers endpoint.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4;
+namespace Automattic\WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
 use \WP_REST_Server;
-use WooCommerce\RestApi\Controllers\Version4\Requests\CustomerRequest;
-use WooCommerce\RestApi\Controllers\Version4\Responses\CustomerResponse;
-use WooCommerce\RestApi\Controllers\Version4\Utilities\Pagination;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Requests\CustomerRequest;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Responses\CustomerResponse;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\Pagination;
 
 /**
  * REST API Customers controller class.

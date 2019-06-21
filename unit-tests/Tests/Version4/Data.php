@@ -5,7 +5,7 @@
  * @package WooCommerce Admin\Tests\API
  */
 
-namespace WooCommerce\RestApi\UnitTests\Tests\Version4;
+namespace Automattic\WooCommerce\RestApi\UnitTests\Tests\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -77,7 +77,7 @@ class Data extends \WC_REST_Unit_Test_Case {
 		$product->set_regular_price( 25 );
 		$product->save();
 
-		$order = \WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( 1, $product );
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( 1, $product );
 		$order->set_status( 'completed' );
 		$order->set_total( 100 );
 		$order->save();

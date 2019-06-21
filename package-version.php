@@ -1,8 +1,10 @@
 <?php
 /**
- * Returns the package version.
+ * Returns the package version so classes know for certain what package version is being used.
  *
- * Used by the autoloader to support classmap autoloading for a particular package.
+ * Used by the package autoloader.
+ *
+ * @package Automattic/WooCommerce/RestApi
  */
 
-return '1.0.0';
+return '1.0.0-dev';

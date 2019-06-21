@@ -29,7 +29,7 @@
       "src/Controllers/Version3"
     ],
     "psr-4": {
-      "WooCommerce\\RestApi\\": "src"
+      "Automattic\\WooCommerce\\RestApi\\": "src"
     }
   }
 }

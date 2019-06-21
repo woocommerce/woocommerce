@@ -2,10 +2,10 @@
 /**
  * Singleton class trait.
  *
- * @package WooCommerce/Utilities
+ * @package Automattic/WooCommerce/Utilities
  */
 
-namespace WooCommerce\RestApi\Utilities;
+namespace Automattic\WooCommerce\RestApi\Utilities;
 
 /**
  * Singleton trait.

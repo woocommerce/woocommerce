@@ -6,7 +6,7 @@
  *
  * @author   WooThemes
  * @category API
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @since    2.6.0
  */
 
@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * REST API Order Refunds controller class.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @extends WC_REST_Orders_V1_Controller
  */
 class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Orders_V1_Controller {

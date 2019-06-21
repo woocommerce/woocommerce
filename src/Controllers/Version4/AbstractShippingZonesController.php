@@ -4,18 +4,18 @@
  *
  * Houses common functionality between Shipping Zones and Locations.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @since    3.0.0
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4;
+namespace Automattic\WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Shipping Zones base class.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @extends AbstractController
  */
 abstract class AbstractShippingZonesController extends AbstractController {

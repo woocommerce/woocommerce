@@ -2,13 +2,13 @@
 /**
  * PHPUnit bootstrap file
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
-namespace WooCommerce\RestApi\UnitTests;
+namespace Automattic\WooCommerce\RestApi\UnitTests;
 
 require __DIR__ . '/../src/Utilities/SingletonTrait.php';
 
-use WooCommerce\RestApi\Utilities\SingletonTrait;
+use Automattic\WooCommerce\RestApi\Utilities\SingletonTrait;
 
 class Bootstrap {
 	use SingletonTrait;

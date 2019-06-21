@@ -4,16 +4,16 @@
  *
  * Handles requests to the /products endpoint.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4;
+namespace Automattic\WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
-use WooCommerce\RestApi\Controllers\Version4\Requests\ProductRequest;
-use WooCommerce\RestApi\Controllers\Version4\Responses\ProductResponse;
-use WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Requests\ProductRequest;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Responses\ProductResponse;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
 
 /**
  * REST API Products controller class.

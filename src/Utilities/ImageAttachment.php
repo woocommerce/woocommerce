@@ -2,10 +2,10 @@
 /**
  * Helper to upload files via the REST API.
  *
- * @package WooCommerce/Utilities
+ * @package Automattic/WooCommerce/Utilities
  */
 
-namespace WooCommerce\RestApi\Utilities;
+namespace Automattic\WooCommerce\RestApi\Utilities;
 
 /**
  * ImageAttachment class.

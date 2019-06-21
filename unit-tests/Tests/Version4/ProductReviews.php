@@ -2,15 +2,15 @@
 /**
  * Product Reviews REST API tests.
  *
- * @package WooCommerce/RestApi/Tests
+ * @package Automattic/WooCommerce/RestApi/Tests
  */
 
-namespace WooCommerce\RestApi\UnitTests\Tests\Version4;
+namespace Automattic\WooCommerce\RestApi\UnitTests\Tests\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
-use \WooCommerce\RestApi\UnitTests\AbstractRestApiTest;
-use \WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\AbstractRestApiTest;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 
 /**
  * Abstract Rest API Test Class

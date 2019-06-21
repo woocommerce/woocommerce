@@ -5,7 +5,7 @@
  * This helper class should ONLY be used for unit tests!.
  */
 
-namespace WooCommerce\RestApi\UnitTests\Helpers;
+namespace Automattic\WooCommerce\RestApi\UnitTests\Helpers;
 
 defined( 'ABSPATH' ) || exit;
 

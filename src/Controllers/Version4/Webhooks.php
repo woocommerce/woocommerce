@@ -4,14 +4,14 @@
  *
  * Handles requests to the /webhooks endpoint.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4;
+namespace Automattic\WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
-use WooCommerce\RestApi\Controllers\Version4\Utilities\Pagination;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\Pagination;
 
 /**
  * REST API Webhooks controller class.

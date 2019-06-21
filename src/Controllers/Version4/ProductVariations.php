@@ -4,16 +4,16 @@
  *
  * Handles requests to the /products/<product_id>/variations endpoints.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4;
+namespace Automattic\WooCommerce\RestApi\Controllers\Version4;
 
 defined( 'ABSPATH' ) || exit;
 
-use WooCommerce\RestApi\Controllers\Version4\Requests\ProductVariationRequest;
-use WooCommerce\RestApi\Controllers\Version4\Responses\ProductVariationResponse;
-use \WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Requests\ProductVariationRequest;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Responses\ProductVariationResponse;
+use Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities\Permissions;
 
 /**
  * REST API variations controller class.

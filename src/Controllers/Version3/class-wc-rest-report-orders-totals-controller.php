@@ -4,7 +4,7 @@
  *
  * Handles requests to the /reports/orders/count endpoint.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @since   3.5.0
  */
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Reports Orders Totals controller class.
  *
- * @package WooCommerce/RestApi
+ * @package Automattic/WooCommerce/RestApi
  * @extends WC_REST_Reports_Controller
  */
 class WC_REST_Report_Orders_Totals_Controller extends WC_REST_Reports_Controller {

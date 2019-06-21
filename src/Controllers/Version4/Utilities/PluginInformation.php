@@ -2,10 +2,10 @@
 /**
  * Plugin information for status report.
  *
- * @package WooCommerce/Utilities
+ * @package Automattic/WooCommerce/Utilities
  */
 
-namespace WooCommerce\RestApi\Controllers\Version4\Utilities;
+namespace Automattic\WooCommerce\RestApi\Controllers\Version4\Utilities;
 
 /**
  * PluginInformation class.
