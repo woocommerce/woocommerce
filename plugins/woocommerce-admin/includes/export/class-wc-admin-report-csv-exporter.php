@@ -177,8 +177,14 @@ class WC_Admin_Report_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 		// Expand extended info.
 		if ( isset( $item['extended_info'] ) ) {
+			// Pull extended info property from report item object.
 			$extended_info = $item['extended_info'];
 			unset( $item['extended_info'] );
+
+			// Remove columns with questionable CSV values, like markup.
+			$extended_info = array_diff_key( $extended_info, array( 'image' => '' ) );
+
+			// Merge extended info columns into report item object.
 			$item = array_merge( $item, $extended_info );
 		}
 
