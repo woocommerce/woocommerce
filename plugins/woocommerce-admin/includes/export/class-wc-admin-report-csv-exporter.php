@@ -187,11 +187,11 @@ class WC_Admin_Report_CSV_Exporter extends WC_CSV_Batch_Exporter {
 
 			if ( has_filter( "woocommerce_export_{$this->export_type}_column_{$column_name}" ) ) {
 				// Filter for 3rd parties.
-				$value = apply_filters( "woocommerce_export_{$this->export_type}_column_{$column_name}", '', $item, $column_name );
+				$value = apply_filters( "woocommerce_export_{$this->export_type}_column_{$column_name}", '', $item );
 
 			} elseif ( is_callable( array( $this, "get_column_value_{$column_name}" ) ) ) {
 				// Handle special columns which don't map 1:1 to item data.
-				$value = $this->{"get_column_value_{$column_name}"}( $item );
+				$value = $this->{"get_column_value_{$column_name}"}( $item, $this->export_type );
 			}
 
 			$row[ $column_id ] = $value;
