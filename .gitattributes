@@ -3,6 +3,5 @@
 /phpunit.* export-ignore
 /unit-tests export-ignore
 /vendor export-ignore
-/woocommerce-rest-api.php export-ignore
 /README.md export-ignore
 /readme.txt export-ignore

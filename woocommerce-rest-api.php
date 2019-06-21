@@ -10,13 +10,10 @@
  * License: GPLv3
  *
  * @package Automattic/WooCommerce/RestApi
+ * @internal This file is only used when running the REST API as a feature plugin.
  */
 
 defined( 'ABSPATH' ) || exit;
-
-/**
- * This file is only used when running the REST API as a feature plugin. Core (and other packages) should not include it.
- */
 
 if ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
 	return;
