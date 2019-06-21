@@ -9,26 +9,16 @@ defined( 'ABSPATH' ) || exit;
 
 global $wpdb;
 
-// This screen requires classes from the REST API.
-if ( ! did_action( 'rest_api_init' ) ) {
-	WC()->api->rest_api_includes();
-}
-
-if ( ! class_exists( 'WC_REST_System_Status_Controller', false ) ) {
-	wp_die( 'Cannot load the REST API to access WC_REST_System_Status_Controller.' );
-}
-
-$system_status      = new WC_REST_System_Status_Controller();
-$environment        = $system_status->get_environment_info();
-$database           = $system_status->get_database_info();
-$post_type_counts   = $system_status->get_post_type_counts();
-$active_plugins     = $system_status->get_active_plugins();
-$inactive_plugins   = $system_status->get_inactive_plugins();
-$dropins_mu_plugins = $system_status->get_dropins_mu_plugins();
-$theme              = $system_status->get_theme_info();
-$security           = $system_status->get_security_info();
-$settings           = $system_status->get_settings();
-$wp_pages           = $system_status->get_pages();
+$report             = wc()->api->get_endpoint_data( '/wc/v3/system_status' );
+$environment        = $report['environment'];
+$database           = $report['database'];
+$active_plugins     = $report['active_plugins'];
+$inactive_plugins   = $report['inactive_plugins'];
+$dropins_mu_plugins = $report['dropins_mu_plugins'];
+$theme              = $report['theme'];
+$security           = $report['security'];
+$settings           = $report['settings'];
+$wp_pages           = $report['pages'];
 $plugin_updates     = new WC_Plugin_Updates();
 $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'minor' );
 ?>
@@ -510,26 +500,6 @@ $untested_plugins   = $plugin_updates->get_untested_plugins( WC()->version, 'min
 				</td>
 			</tr>
 		<?php } ?>
-	</tbody>
-</table>
-<table class="wc_status_table widefat" cellspacing="0">
-	<thead>
-	<tr>
-		<th colspan="3" data-export-label="Post Type Counts"><h2><?php esc_html_e( 'Post Type Counts', 'woocommerce' ); ?></h2></th>
-	</tr>
-	</thead>
-	<tbody>
-		<?php
-		foreach ( $post_type_counts as $ptype ) {
-			?>
-			<tr>
-				<td><?php echo esc_html( $ptype->type ); ?></td>
-				<td class="help">&nbsp;</td>
-				<td><?php echo absint( $ptype->count ); ?></td>
-			</tr>
-			<?php
-		}
-		?>
 	</tbody>
 </table>
 <table class="wc_status_table widefat" cellspacing="0">
