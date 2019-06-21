@@ -305,11 +305,6 @@ final class WooCommerce {
 	 */
 	public function includes() {
 		/**
-		 * Class autoloader.
-		 */
-		include_once WC_ABSPATH . 'includes/class-wc-autoloader.php';
-
-		/**
 		 * Interfaces.
 		 */
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-abstract-order-data-store-interface.php';
@@ -453,7 +448,6 @@ final class WooCommerce {
 
 		$this->theme_support_includes();
 
-		\WooCommerce\Core\PackageManager::init();
 		$this->query = new WC_Query();
 		$this->api   = new WC_API();
 		$this->api->init();

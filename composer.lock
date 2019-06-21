@@ -4,8 +4,44 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4fbb633f25a6dec4f40e4412a43e9f16",
+    "content-hash": "4dc356daa44c09455df4b77f409f7a4e",
     "packages": [
+        {
+            "name": "automattic/jetpack-autoloader",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Automattic/jetpack-autoloader.git",
+                "reference": "cf08e893a481e71feec6e61164efff0eeee98ccd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Automattic/jetpack-autoloader/zipball/cf08e893a481e71feec6e61164efff0eeee98ccd",
+                "reference": "cf08e893a481e71feec6e61164efff0eeee98ccd",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^1.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5.7 || ^6.5 || ^7.5"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "Automattic\\Jetpack\\Autoloader\\CustomAutoloaderPlugin"
+            },
+            "autoload": {
+                "psr-4": {
+                    "Automattic\\Jetpack\\Autoloader\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "description": "Creates a custom autoloader for a plugin or theme.",
+            "time": "2019-06-17T13:03:00+00:00"
+        },
         {
             "name": "composer/installers",
             "version": "v1.6.0",
@@ -127,18 +163,56 @@
             "time": "2018-08-27T06:10:37+00:00"
         },
         {
-            "name": "woocommerce/woocommerce-rest-api",
-            "version": "v1.0.0",
+            "name": "woocommerce/woocommerce-blocks",
+            "version": "dev-add/build-config",
             "source": {
                 "type": "git",
-                "url": "https://github.com/woocommerce/woocommerce-rest-api.git",
-                "reference": "14a8e0533b291c489f162a882e0af3b79ab68213"
+                "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
+                "reference": "be2a243d0e999af6f4318f7b242cdac2565d36d8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-rest-api/zipball/14a8e0533b291c489f162a882e0af3b79ab68213",
-                "reference": "14a8e0533b291c489f162a882e0af3b79ab68213",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/be2a243d0e999af6f4318f7b242cdac2565d36d8",
+                "reference": "be2a243d0e999af6f4318f7b242cdac2565d36d8",
                 "shasum": ""
+            },
+            "require": {
+                "composer/installers": "1.6.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "6.5.14",
+                "woocommerce/woocommerce-sniffs": "0.0.6"
+            },
+            "type": "wordpress-plugin",
+            "autoload": {
+                "psr-4": {
+                    "WooCommerce\\Blocks\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "description": "Feature plugin for the WooCommerce Gutenberg Products block",
+            "homepage": "https://woocommerce.com/",
+            "time": "2019-06-20T14:53:51+00:00"
+        },
+        {
+            "name": "woocommerce/woocommerce-rest-api",
+            "version": "dev-test/jetpack-autoloader",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/woocommerce/woocommerce-rest-api.git",
+                "reference": "46453550e8d7468f6a1f46b47fefd2fdc482c801"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-rest-api/zipball/46453550e8d7468f6a1f46b47fefd2fdc482c801",
+                "reference": "46453550e8d7468f6a1f46b47fefd2fdc482c801",
+                "shasum": ""
+            },
+            "require": {
+                "automattic/jetpack-autoloader": "^1"
             },
             "require-dev": {
                 "phpunit/phpunit": "6.5.14",
@@ -146,14 +220,6 @@
                 "woocommerce/woocommerce-sniffs": "0.0.6"
             },
             "type": "wordpress-plugin",
-            "extra": {
-                "copy-file": {
-                    "vendor/composer/autoload_classmap.php": "classmap.php"
-                },
-                "copy-file-dev": {
-                    "vendor/composer/autoload_classmap.php": "classmap.php"
-                }
-            },
             "autoload": {
                 "classmap": [
                     "src/Controllers/Version1",
@@ -161,7 +227,7 @@
                     "src/Controllers/Version3"
                 ],
                 "psr-4": {
-                    "WooCommerce\\RestApi\\": "src/"
+                    "Automattic\\WooCommerce\\RestApi\\": "src"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -170,7 +236,7 @@
             ],
             "description": "The WooCommerce core REST API.",
             "homepage": "https://github.com/woocommerce/woocommerce-rest-api",
-            "time": "2019-06-19T15:02:39+00:00"
+            "time": "2019-06-21T09:40:39+00:00"
         }
     ],
     "packages-dev": [
@@ -4140,7 +4206,10 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "woocommerce/woocommerce-rest-api": 20,
+        "woocommerce/woocommerce-blocks": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": [],

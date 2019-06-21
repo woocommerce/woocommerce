@@ -24,7 +24,7 @@ class WC_API extends WC_Legacy_API {
 	public function init() {
 		parent::init();
 		add_action( 'init', array( $this, 'add_endpoint' ), 0 );
-		add_action( 'init', array( $this, 'rest_api_init' ) );
+		//add_action( 'init', array( $this, 'rest_api_init' ) );
 		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
 		add_action( 'parse_request', array( $this, 'handle_api_requests' ), 0 );
 		add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
@@ -44,8 +44,7 @@ class WC_API extends WC_Legacy_API {
 		if ( $this->is_rest_api_loaded() ) {
 			return;
 		}
-		$package = $this->get_latest_rest_api_package();
-		call_user_func( $package->callback );
+		\Automattic\WooCommerce\RestApi\Server::instance()->init();
 	}
 
 	/**
@@ -54,7 +53,7 @@ class WC_API extends WC_Legacy_API {
 	 * @return \WooCommerce\Core\Package
 	 */
 	public function get_latest_rest_api_package() {
-		return \WooCommerce\Core\PackageManager::get_package( 'woocommerce-rest-api' );
+		//return \WooCommerce\Core\PackageManager::get_package( 'woocommerce-rest-api' );
 	}
 
 	/**
@@ -64,7 +63,7 @@ class WC_API extends WC_Legacy_API {
 	 * @return boolean
 	 */
 	protected function is_rest_api_loaded() {
-		return class_exists( '\WooCommerce\RestApi\Server', false );
+		return class_exists( '\Automattic\WooCommerce\RestApi\Server', false );
 	}
 
 	/**
