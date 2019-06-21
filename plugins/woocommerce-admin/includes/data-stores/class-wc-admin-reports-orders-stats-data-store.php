@@ -66,7 +66,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 			'num_items_sold'          => "SUM({$table_name}.num_items_sold) as num_items_sold",
 			'gross_revenue'           => "SUM({$table_name}.gross_total) AS gross_revenue",
 			'coupons'                 => 'SUM(discount_amount) AS coupons',
-			'coupons_count'           => 'COUNT(DISTINCT coupon_id) as coupons_count',
+			'coupons_count'           => 'coupons_count',
 			'refunds'                 => "ABS( SUM( CASE WHEN {$table_name}.gross_total < 0 THEN {$table_name}.gross_total END ) ) AS refunds",
 			'taxes'                   => "SUM({$table_name}.tax_total) AS taxes",
 			'shipping'                => "SUM({$table_name}.shipping_total) AS shipping",
@@ -236,6 +236,17 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 			$selections      = $this->selected_columns( $query_args );
 			$totals_query    = $this->get_time_period_sql_params( $query_args, $table_name );
 			$intervals_query = $this->get_intervals_sql_params( $query_args, $table_name );
+			$coupon_join     = "LEFT JOIN (
+						SELECT
+							order_id,
+							SUM(discount_amount) AS discount_amount,
+							COUNT(DISTINCT coupon_id) AS coupons_count
+						FROM
+							{$wpdb->prefix}wc_order_coupon_lookup
+						GROUP BY
+							order_id
+						) order_coupon_lookup
+						ON order_coupon_lookup.order_id = {$wpdb->prefix}wc_order_stats.order_id";
 
 			// Additional filtering for Orders report.
 			$this->orders_stats_sql_filter( $query_args, $totals_query, $intervals_query );
@@ -246,9 +257,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 					FROM
 						{$table_name}
 						{$totals_query['from_clause']}
-					LEFT JOIN
-						{$wpdb->prefix}wc_order_coupon_lookup
-						ON {$wpdb->prefix}wc_order_coupon_lookup.order_id = {$wpdb->prefix}wc_order_stats.order_id
+						{$coupon_join}
 					WHERE
 						1=1
 						{$totals_query['where_time_clause']}
@@ -271,9 +280,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 						FROM
 							{$table_name}
 							{$intervals_query['from_clause']}
-						LEFT JOIN
-							{$wpdb->prefix}wc_order_coupon_lookup
-							ON {$wpdb->prefix}wc_order_coupon_lookup.order_id = {$wpdb->prefix}wc_order_stats.order_id
+							{$coupon_join}
 						WHERE
 							1=1
 							{$intervals_query['where_time_clause']}
@@ -304,9 +311,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 						FROM
 							{$table_name}
 							{$intervals_query['from_clause']}
-						LEFT JOIN
-							{$wpdb->prefix}wc_order_coupon_lookup
-							ON {$wpdb->prefix}wc_order_coupon_lookup.order_id = {$wpdb->prefix}wc_order_stats.order_id
+							{$coupon_join}
 						WHERE
 							1=1
 							{$intervals_query['where_time_clause']}
