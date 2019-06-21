@@ -8,7 +8,7 @@
 defined( 'ABSPATH' ) || exit;
 if ( $old_php && $old_wp ) {
 	$msg = __( 'Your store is running on outdated versions of WordPress and PHP. In future releases of WooCommerce we will not be supporting these outdated versions.', 'woocommerce' );
-} elseif ( $php_update_required ) {
+} elseif ( $old_php ) {
 	$msg = __( 'Your store is running on an outdated version of PHP. In future releases of WooCommerce we will not be supporting this outdated version.', 'woocommerce' );
 } else {
 	$msg = __( 'Your store is running on an outdated version of WordPress. In future releases of WooCommerce we will not be supporting this outdated version.', 'woocommerce' );

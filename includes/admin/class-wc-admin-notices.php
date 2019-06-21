@@ -81,7 +81,12 @@ class WC_Admin_Notices {
 	 * Reset notices for themes when switched or a new version of WC is installed.
 	 */
 	public static function reset_admin_notices() {
-		self::add_notice( 'wp_php_min_requirements' );
+		global $wp_version;
+		$php_version = phpversion();
+
+		if ( version_compare( $php_version, WC_MIN_PHP_VERSION, '<' ) || version_compare( $wp_version, WC_MIN_WP_VERSION, '<' ) ) {
+			self::add_notice( 'wp_php_min_requirements' );
+		}
 		if ( ! self::is_ssl() ) {
 			self::add_notice( 'no_secure_connection' );
 		}
