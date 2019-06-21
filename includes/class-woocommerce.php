@@ -203,8 +203,8 @@ final class WooCommerce {
 		if ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
 			return;
 		}
-		\Automattic\WooCommerce\Blocks\Library::instance()->init();
-		\Automattic\WooCommerce\RestApi\Server::instance()->init();
+		\Automattic\WooCommerce\Blocks\Package::init();
+		\Automattic\WooCommerce\RestApi\Package::init();
 	}
 
 	/**
