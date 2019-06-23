@@ -118,7 +118,7 @@ class ReportTable extends Component {
 		 * @param {array} reportTableData.rows - table rows data.
 		 * @param {object} reportTableData.totals - total aggregates for request.
 		 * @param {array} reportTableData.summary - summary numbers data.
-		 * @param {array} reportTableData.items - response from api requerst.
+		 * @param {object} reportTableData.items - response from api requerst.
 		 */
 		const { headers, ids, rows, summary } = applyFilters( TABLE_FILTER, {
 			endpoint,
