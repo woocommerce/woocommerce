@@ -30,7 +30,7 @@ class OrderHelper {
 
 		// Delete all products in the order.
 		foreach ( $order->get_items() as $item ) {
-			\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::delete_product( $item['product_id'] );
+			\Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::delete_product( $item['product_id'] );
 		}
 
 		ShippingHelper::delete_simple_flat_rate();

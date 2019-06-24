@@ -14,7 +14,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 	public function setUp() {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Setting_Options_Controller();
-		\WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper::register();
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper::register();
 		$this->user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
@@ -110,7 +110,7 @@ class Settings extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/settings' ) );
 		$this->assertEquals( 500, $response->get_status() );
 
-		\WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper::register();
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper::register();
 	}
 
 	/**

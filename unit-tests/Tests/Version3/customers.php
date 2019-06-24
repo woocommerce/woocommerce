@@ -44,7 +44,7 @@ class Customers extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( 1 );
 
 		$customer_1 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer();
-		\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'test2', 'test2', 'test2@woo.local' );
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper::create_customer( 'test2', 'test2', 'test2@woo.local' );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/customers' );
 		$request->set_query_params(
