@@ -118,19 +118,19 @@ class WC_REST_Report_Coupons_Totals_Controller extends WC_REST_Reports_Controlle
 			'type'       => 'object',
 			'properties' => array(
 				'slug'  => array(
-					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce' ),
+					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'name'  => array(
-					'description' => __( 'Coupon type name.', 'woocommerce' ),
+					'description' => __( 'Coupon type name.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'total' => array(
-					'description' => __( 'Amount of coupons.', 'woocommerce' ),
+					'description' => __( 'Amount of coupons.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,

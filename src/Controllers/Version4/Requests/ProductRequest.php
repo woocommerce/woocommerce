@@ -71,11 +71,11 @@ class ProductRequest extends AbstractObjectRequest {
 		}
 
 		if ( ! $object ) {
-			throw new \WC_REST_Exception( 'woocommerce_rest_invalid_product_id', __( 'Invalid product.', 'woocommerce' ), 404 );
+			throw new \WC_REST_Exception( 'woocommerce_rest_invalid_product_id', __( 'Invalid product.', 'woocommerce-rest-api' ), 404 );
 		}
 
 		if ( $object->is_type( 'variation' ) ) {
-			throw new \WC_REST_Exception( 'woocommerce_rest_invalid_product_id', __( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce' ), 404 );
+			throw new \WC_REST_Exception( 'woocommerce_rest_invalid_product_id', __( 'To manipulate product variations you should use the /products/&lt;product_id&gt;/variations/&lt;id&gt; endpoint.', 'woocommerce-rest-api' ), 404 );
 		}
 
 		return $object;

@@ -157,7 +157,7 @@ class ServerEnvironment {
 			$curl_version = curl_version();
 			$curl_version = $curl_version['version'] . ', ' . $curl_version['ssl_version'];
 		} elseif ( extension_loaded( 'curl' ) ) {
-			$curl_version = __( 'cURL installed but unable to retrieve version.', 'woocommerce' );
+			$curl_version = __( 'cURL installed but unable to retrieve version.', 'woocommerce-rest-api' );
 		}
 		return $curl_version;
 	}

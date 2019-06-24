@@ -60,12 +60,12 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 					'topic' => array(
 						'required'    => true,
 						'type'        => 'string',
-						'description' => __( 'Webhook topic.', 'woocommerce' ),
+						'description' => __( 'Webhook topic.', 'woocommerce-rest-api' ),
 					),
 					'delivery_url' => array(
 						'required'    => true,
 						'type'        => 'string',
-						'description' => __( 'Webhook delivery URL.', 'woocommerce' ),
+						'description' => __( 'Webhook delivery URL.', 'woocommerce-rest-api' ),
 					),
 				) ),
 			),
@@ -75,7 +75,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
 			'args' => array(
 				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 				),
 			),
@@ -101,7 +101,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 					'force' => array(
 						'default'     => false,
 						'type'        => 'boolean',
-						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
+						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce-rest-api' ),
 					),
 				),
 			),
@@ -127,7 +127,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'webhooks', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -142,7 +142,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'webhooks', 'create' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -156,7 +156,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	 */
 	public function get_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'webhooks', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -171,7 +171,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'webhooks', 'edit' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -186,7 +186,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	 */
 	public function delete_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'webhooks', 'delete' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -201,7 +201,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	 */
 	public function batch_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'webhooks', 'batch' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -297,7 +297,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		$id = (int) $request['id'];
 
 		if ( empty( $id ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$data     = $this->prepare_item_for_response( $id, $request );
@@ -315,17 +315,17 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
 			/* translators: %s: post type */
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce-rest-api' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
 		// Validate topic.
 		if ( empty( $request['topic'] ) || ! wc_is_webhook_valid_topic( strtolower( $request['topic'] ) ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_topic", __( 'Webhook topic is required and must be valid.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_topic", __( 'Webhook topic is required and must be valid.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 
 		// Validate delivery URL.
 		if ( empty( $request['delivery_url'] ) || ! wc_is_valid_url( $request['delivery_url'] ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_delivery_url", __( 'Webhook delivery URL must be a valid URL starting with http:// or https://.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_delivery_url", __( 'Webhook delivery URL must be a valid URL starting with http:// or https://.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 
 		$post = $this->prepare_item_for_database( $request );
@@ -377,7 +377,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		$webhook = wc_get_webhook( $id );
 
 		if ( empty( $webhook ) || is_null( $webhook ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 
 		// Update topic.
@@ -385,7 +385,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			if ( wc_is_webhook_valid_topic( strtolower( $request['topic'] ) ) ) {
 				$webhook->set_topic( $request['topic'] );
 			} else {
-				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_topic", __( 'Webhook topic must be valid.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_topic", __( 'Webhook topic must be valid.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 			}
 		}
 
@@ -394,7 +394,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			if ( wc_is_valid_url( $request['delivery_url'] ) ) {
 				$webhook->set_delivery_url( $request['delivery_url'] );
 			} else {
-				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_delivery_url", __( 'Webhook delivery URL must be a valid URL starting with http:// or https://.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_delivery_url", __( 'Webhook delivery URL must be a valid URL starting with http:// or https://.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 			}
 		}
 
@@ -408,7 +408,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			if ( wc_is_webhook_valid_status( strtolower( $request['status'] ) ) ) {
 				$webhook->set_status( $request['status'] );
 			} else {
-				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_status", __( 'Webhook status must be valid.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_status", __( 'Webhook status must be valid.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 			}
 		}
 
@@ -452,13 +452,13 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 
 		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
-			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Webhooks do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Webhooks do not support trashing.', 'woocommerce-rest-api' ), array( 'status' => 501 ) );
 		}
 
 		$webhook = wc_get_webhook( $id );
 
 		if ( empty( $webhook ) || is_null( $webhook ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -467,7 +467,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 
 		if ( ! $result ) {
 			/* translators: %s: post type */
-			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
+			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce-rest-api' ), $this->post_type ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -498,7 +498,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 
 		// Validate required POST fields.
 		if ( 'POST' === $request->get_method() && empty( $data->ID ) ) {
-			$data->post_title = ! empty( $request['name'] ) ? $request['name'] : sprintf( __( 'Webhook created on %s', 'woocommerce' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce' ) ) ); // @codingStandardsIgnoreLine
+			$data->post_title = ! empty( $request['name'] ) ? $request['name'] : sprintf( __( 'Webhook created on %s', 'woocommerce-rest-api' ), strftime( _x( '%b %d, %Y @ %I:%M %p', 'Webhook created on date parsed by strftime', 'woocommerce-rest-api' ) ) ); // @codingStandardsIgnoreLine
 
 			// Post author.
 			$data->post_author = get_current_user_id();
@@ -546,7 +546,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		$webhook = wc_get_webhook( $id );
 
 		if ( empty( $webhook ) || is_null( $webhook ) ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 
 		$data    = array(
@@ -612,42 +612,42 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'name' => array(
-					'description' => __( 'A friendly name for the webhook.', 'woocommerce' ),
+					'description' => __( 'A friendly name for the webhook.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'status' => array(
-					'description' => __( 'Webhook status.', 'woocommerce' ),
+					'description' => __( 'Webhook status.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'default'     => 'active',
 					'enum'        => array_keys( wc_get_webhook_statuses() ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'topic' => array(
-					'description' => __( 'Webhook topic.', 'woocommerce' ),
+					'description' => __( 'Webhook topic.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'resource' => array(
-					'description' => __( 'Webhook resource.', 'woocommerce' ),
+					'description' => __( 'Webhook resource.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'event' => array(
-					'description' => __( 'Webhook event.', 'woocommerce' ),
+					'description' => __( 'Webhook event.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'hooks' => array(
-					'description' => __( 'WooCommerce action names associated with the webhook.', 'woocommerce' ),
+					'description' => __( 'WooCommerce action names associated with the webhook.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -656,25 +656,25 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 					),
 				),
 				'delivery_url' => array(
-					'description' => __( 'The URL where the webhook payload is delivered.', 'woocommerce' ),
+					'description' => __( 'The URL where the webhook payload is delivered.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'secret' => array(
-					'description' => __( "Secret key used to generate a hash of the delivered webhook and provided in the request headers. This will default to a MD5 hash from the current user's ID|username if not provided.", 'woocommerce' ),
+					'description' => __( "Secret key used to generate a hash of the delivered webhook and provided in the request headers. This will default to a MD5 hash from the current user's ID|username if not provided.", 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'edit' ),
 				),
 				'date_created' => array(
-					'description' => __( "The date the webhook was created, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the webhook was created, in the site's timezone.", 'woocommerce-rest-api' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_modified' => array(
-					'description' => __( "The date the webhook was last modified, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the webhook was last modified, in the site's timezone.", 'woocommerce-rest-api' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -696,19 +696,19 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		$params['context']['default'] = 'view';
 
 		$params['after'] = array(
-			'description'        => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
+			'description'        => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-rest-api' ),
 			'type'               => 'string',
 			'format'             => 'date-time',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['before'] = array(
-			'description'        => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce' ),
+			'description'        => __( 'Limit response to resources published before a given ISO8601 compliant date.', 'woocommerce-rest-api' ),
 			'type'               => 'string',
 			'format'             => 'date-time',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['exclude'] = array(
-			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
+			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce-rest-api' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type'          => 'integer',
@@ -717,7 +717,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['include'] = array(
-			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to specific ids.', 'woocommerce-rest-api' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type'          => 'integer',
@@ -726,20 +726,20 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['offset'] = array(
-			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
+			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce-rest-api' ),
 			'type'               => 'integer',
 			'sanitize_callback'  => 'absint',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['order'] = array(
-			'description'        => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
+			'description'        => __( 'Order sort attribute ascending or descending.', 'woocommerce-rest-api' ),
 			'type'               => 'string',
 			'default'            => 'desc',
 			'enum'               => array( 'asc', 'desc' ),
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['orderby'] = array(
-			'description'        => __( 'Sort collection by object attribute.', 'woocommerce' ),
+			'description'        => __( 'Sort collection by object attribute.', 'woocommerce-rest-api' ),
 			'type'               => 'string',
 			'default'            => 'date',
 			'enum'               => array(
@@ -751,7 +751,7 @@ class WC_REST_Webhooks_V1_Controller extends WC_REST_Controller {
 		);
 		$params['status'] = array(
 			'default'           => 'all',
-			'description'       => __( 'Limit result set to webhooks assigned a specific status.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to webhooks assigned a specific status.', 'woocommerce-rest-api' ),
 			'type'              => 'string',
 			'enum'              => array( 'all', 'active', 'paused', 'disabled' ),
 			'sanitize_callback' => 'sanitize_key',

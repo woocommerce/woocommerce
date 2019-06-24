@@ -25,7 +25,7 @@ class CustomerRequest extends AbstractObjectRequest {
 		$object = new \WC_Customer( $id );
 
 		if ( $id !== $object->get_id() ) {
-			throw new \WC_REST_Exception( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), 400 );
+			throw new \WC_REST_Exception( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce-rest-api' ), 400 );
 		}
 
 		$this->set_props( $object );
@@ -60,13 +60,13 @@ class CustomerRequest extends AbstractObjectRequest {
 			switch ( $prop ) {
 				case 'email':
 					if ( email_exists( $value ) && $value !== $object->get_email() ) {
-						throw new \WC_REST_Exception( 'woocommerce_rest_customer_invalid_email', __( 'Email address is invalid.', 'woocommerce' ), 400 );
+						throw new \WC_REST_Exception( 'woocommerce_rest_customer_invalid_email', __( 'Email address is invalid.', 'woocommerce-rest-api' ), 400 );
 					}
 					$prop_values[ $prop ] = $value;
 					break;
 				case 'username':
 					if ( $object->get_id() && $value !== $object->get_username() ) {
-						throw new \WC_REST_Exception( 'woocommerce_rest_customer_invalid_argument', __( "Username isn't editable.", 'woocommerce' ), 400 );
+						throw new \WC_REST_Exception( 'woocommerce_rest_customer_invalid_argument', __( "Username isn't editable.", 'woocommerce-rest-api' ), 400 );
 					}
 					$prop_values[ $prop ] = $value;
 					break;

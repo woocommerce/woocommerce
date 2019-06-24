@@ -102,19 +102,19 @@ class WC_REST_Report_Orders_Totals_Controller extends WC_REST_Reports_Controller
 			'type'       => 'object',
 			'properties' => array(
 				'slug'  => array(
-					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce' ),
+					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'name'  => array(
-					'description' => __( 'Order status name.', 'woocommerce' ),
+					'description' => __( 'Order status name.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'total' => array(
-					'description' => __( 'Amount of orders.', 'woocommerce' ),
+					'description' => __( 'Amount of orders.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,

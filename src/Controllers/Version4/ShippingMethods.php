@@ -54,7 +54,7 @@ class ShippingMethods extends AbstractController {
 			array(
 				'args'   => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 						'type'        => 'string',
 					),
 				),
@@ -99,7 +99,7 @@ class ShippingMethods extends AbstractController {
 		$wc_shipping = \WC_Shipping::instance();
 		$methods     = $wc_shipping->get_shipping_methods();
 		if ( empty( $methods[ $request['id'] ] ) ) {
-			return new \WP_Error( 'woocommerce_rest_shipping_method_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_shipping_method_invalid', __( 'Resource does not exist.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$method   = $methods[ $request['id'] ];
@@ -155,19 +155,19 @@ class ShippingMethods extends AbstractController {
 			'type'       => 'object',
 			'properties' => array(
 				'id'          => array(
-					'description' => __( 'Method ID.', 'woocommerce' ),
+					'description' => __( 'Method ID.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'title'       => array(
-					'description' => __( 'Shipping method title.', 'woocommerce' ),
+					'description' => __( 'Shipping method title.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'description' => array(
-					'description' => __( 'Shipping method description.', 'woocommerce' ),
+					'description' => __( 'Shipping method description.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,

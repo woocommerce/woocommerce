@@ -36,7 +36,7 @@ trait SettingsTrait {
 		if ( array_key_exists( $value, $setting['options'] ) ) {
 			return $value;
 		} else {
-			return new \WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 	}
 
@@ -54,7 +54,7 @@ trait SettingsTrait {
 		}
 
 		if ( ! is_array( $values ) ) {
-			return new \WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 
 		$final_values = array();
@@ -77,7 +77,7 @@ trait SettingsTrait {
 	 */
 	public function validate_setting_image_width_field( $values, $setting ) {
 		if ( ! is_array( $values ) ) {
-			return new \WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 
 		$current = $setting['value'];
@@ -120,7 +120,7 @@ trait SettingsTrait {
 			$value = isset( $setting['default'] ) ? $setting['default'] : 'no';
 			return $value;
 		} else {
-			return new \WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 	}
 

@@ -59,13 +59,13 @@ class ProductShippingClasses extends AbstractTermsContoller {
 			'type'                 => 'object',
 			'properties'           => array(
 				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'name' => array(
-					'description' => __( 'Shipping class name.', 'woocommerce' ),
+					'description' => __( 'Shipping class name.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -73,7 +73,7 @@ class ProductShippingClasses extends AbstractTermsContoller {
 					),
 				),
 				'slug' => array(
-					'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woocommerce' ),
+					'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -81,7 +81,7 @@ class ProductShippingClasses extends AbstractTermsContoller {
 					),
 				),
 				'description' => array(
-					'description' => __( 'HTML description of the resource.', 'woocommerce' ),
+					'description' => __( 'HTML description of the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -89,7 +89,7 @@ class ProductShippingClasses extends AbstractTermsContoller {
 					),
 				),
 				'count' => array(
-					'description' => __( 'Number of published products for the resource.', 'woocommerce' ),
+					'description' => __( 'Number of published products for the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

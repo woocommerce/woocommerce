@@ -58,7 +58,7 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -72,7 +72,7 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 	 */
 	public function get_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -90,15 +90,15 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 		$resources = array(
 			array(
 				'slug'        => 'continents',
-				'description' => __( 'List of supported continents, countries, and states.', 'woocommerce' ),
+				'description' => __( 'List of supported continents, countries, and states.', 'woocommerce-rest-api' ),
 			),
 			array(
 				'slug'        => 'countries',
-				'description' => __( 'List of supported states in a given country.', 'woocommerce' ),
+				'description' => __( 'List of supported states in a given country.', 'woocommerce-rest-api' ),
 			),
 			array(
 				'slug'        => 'currencies',
-				'description' => __( 'List of supported currencies.', 'woocommerce' ),
+				'description' => __( 'List of supported currencies.', 'woocommerce-rest-api' ),
 			),
 		);
 
@@ -165,13 +165,13 @@ class WC_REST_Data_Controller extends WC_REST_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'slug'        => array(
-					'description' => __( 'Data resource ID.', 'woocommerce' ),
+					'description' => __( 'Data resource ID.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'description' => array(
-					'description' => __( 'Data resource description.', 'woocommerce' ),
+					'description' => __( 'Data resource description.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,

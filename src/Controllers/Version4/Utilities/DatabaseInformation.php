@@ -78,7 +78,7 @@ class DatabaseInformation {
 		 * To ensure we include all WC tables, even if they do not exist, pre-populate the WC array with all the tables.
 		 */
 		$tables = array(
-			'woocommerce' => array_fill_keys( $core_tables, false ),
+			'woocommerce-rest-api' => array_fill_keys( $core_tables, false ),
 			'other'       => array(),
 		);
 
@@ -94,7 +94,7 @@ class DatabaseInformation {
 			if ( is_multisite() && 0 !== strpos( $table->name, $site_tables_prefix ) && ! in_array( $table->name, $global_tables, true ) ) {
 				continue;
 			}
-			$table_type = in_array( $table->name, $core_tables, true ) ? 'woocommerce' : 'other';
+			$table_type = in_array( $table->name, $core_tables, true ) ? 'woocommerce-rest-api' : 'other';
 
 			$tables[ $table_type ][ $table->name ] = array(
 				'data'   => $table->data,

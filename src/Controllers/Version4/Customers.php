@@ -59,16 +59,16 @@ class Customers extends AbstractController {
 							'email' => array(
 								'required'    => true,
 								'type'        => 'string',
-								'description' => __( 'New user email address.', 'woocommerce' ),
+								'description' => __( 'New user email address.', 'woocommerce-rest-api' ),
 							),
 							'username' => array(
 								'required'    => 'no' === get_option( 'woocommerce_registration_generate_username', 'yes' ),
-								'description' => __( 'New user username.', 'woocommerce' ),
+								'description' => __( 'New user username.', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 							),
 							'password' => array(
 								'required'    => 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ),
-								'description' => __( 'New user password.', 'woocommerce' ),
+								'description' => __( 'New user password.', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 							),
 						)
@@ -85,7 +85,7 @@ class Customers extends AbstractController {
 			array(
 				'args' => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 						'type'        => 'integer',
 					),
 				),
@@ -111,12 +111,12 @@ class Customers extends AbstractController {
 						'force' => array(
 							'default'     => false,
 							'type'        => 'boolean',
-							'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
+							'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce-rest-api' ),
 						),
 						'reassign' => array(
 							'default'     => 0,
 							'type'        => 'integer',
-							'description' => __( 'ID to reassign posts to.', 'woocommerce' ),
+							'description' => __( 'ID to reassign posts to.', 'woocommerce-rest-api' ),
 						),
 					),
 				),
@@ -223,7 +223,7 @@ class Customers extends AbstractController {
 	public function create_item( $request ) {
 		try {
 			if ( ! empty( $request['id'] ) ) {
-				throw new \WC_REST_Exception( 'woocommerce_rest_customer_exists', __( 'Cannot create existing resource.', 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_customer_exists', __( 'Cannot create existing resource.', 'woocommerce-rest-api' ), 400 );
 			}
 
 			$customer_request = new CustomerRequest( $request );
@@ -231,7 +231,7 @@ class Customers extends AbstractController {
 			$customer->save();
 
 			if ( ! $customer->get_id() ) {
-				throw new \WC_REST_Exception( 'woocommerce_rest_cannot_create', __( 'This resource cannot be created.', 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_cannot_create', __( 'This resource cannot be created.', 'woocommerce-rest-api' ), 400 );
 			}
 
 			$this->update_additional_fields_for_object( $customer, $request );
@@ -268,7 +268,7 @@ class Customers extends AbstractController {
 		$customer = new \WC_Customer( $id );
 
 		if ( empty( $id ) || ! $customer->get_id() ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$response = $this->prepare_item_for_response( $customer, $request );
@@ -328,16 +328,16 @@ class Customers extends AbstractController {
 
 		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
-			return new \WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Customers do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+			return new \WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Customers do not support trashing.', 'woocommerce-rest-api' ), array( 'status' => 501 ) );
 		}
 
 		if ( ! get_userdata( $id ) ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 
 		if ( ! empty( $reassign ) ) {
 			if ( $reassign === $id || ! get_userdata( $reassign ) ) {
-				return new \WP_Error( 'woocommerce_rest_customer_invalid_reassign', __( 'Invalid resource id for reassignment.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new \WP_Error( 'woocommerce_rest_customer_invalid_reassign', __( 'Invalid resource id for reassignment.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 			}
 		}
 
@@ -356,7 +356,7 @@ class Customers extends AbstractController {
 		}
 
 		if ( ! $result ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce-rest-api' ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -415,43 +415,43 @@ class Customers extends AbstractController {
 			'type'       => 'object',
 			'properties' => array(
 				'id'                 => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_created'       => array(
-					'description' => __( "The date the customer was created, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the customer was created, in the site's timezone.", 'woocommerce-rest-api' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_created_gmt'   => array(
-					'description' => __( 'The date the customer was created, as GMT.', 'woocommerce' ),
+					'description' => __( 'The date the customer was created, as GMT.', 'woocommerce-rest-api' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_modified'      => array(
-					'description' => __( "The date the customer was last modified, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the customer was last modified, in the site's timezone.", 'woocommerce-rest-api' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_modified_gmt'  => array(
-					'description' => __( 'The date the customer was last modified, as GMT.', 'woocommerce' ),
+					'description' => __( 'The date the customer was last modified, as GMT.', 'woocommerce-rest-api' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'email'              => array(
-					'description' => __( 'The email address for the customer.', 'woocommerce' ),
+					'description' => __( 'The email address for the customer.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'format'      => 'email',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'first_name'         => array(
-					'description' => __( 'Customer first name.', 'woocommerce' ),
+					'description' => __( 'Customer first name.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -459,7 +459,7 @@ class Customers extends AbstractController {
 					),
 				),
 				'last_name'          => array(
-					'description' => __( 'Customer last name.', 'woocommerce' ),
+					'description' => __( 'Customer last name.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -467,13 +467,13 @@ class Customers extends AbstractController {
 					),
 				),
 				'role'               => array(
-					'description' => __( 'Customer role.', 'woocommerce' ),
+					'description' => __( 'Customer role.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'username'           => array(
-					'description' => __( 'Customer login name.', 'woocommerce' ),
+					'description' => __( 'Customer login name.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -481,157 +481,157 @@ class Customers extends AbstractController {
 					),
 				),
 				'password'           => array(
-					'description' => __( 'Customer password.', 'woocommerce' ),
+					'description' => __( 'Customer password.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'edit' ),
 				),
 				'billing'            => array(
-					'description' => __( 'List of billing address data.', 'woocommerce' ),
+					'description' => __( 'List of billing address data.', 'woocommerce-rest-api' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'first_name' => array(
-							'description' => __( 'First name.', 'woocommerce' ),
+							'description' => __( 'First name.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'last_name'  => array(
-							'description' => __( 'Last name.', 'woocommerce' ),
+							'description' => __( 'Last name.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'company'    => array(
-							'description' => __( 'Company name.', 'woocommerce' ),
+							'description' => __( 'Company name.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_1'  => array(
-							'description' => __( 'Address line 1', 'woocommerce' ),
+							'description' => __( 'Address line 1', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_2'  => array(
-							'description' => __( 'Address line 2', 'woocommerce' ),
+							'description' => __( 'Address line 2', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'city'       => array(
-							'description' => __( 'City name.', 'woocommerce' ),
+							'description' => __( 'City name.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'state'      => array(
-							'description' => __( 'ISO code or name of the state, province or district.', 'woocommerce' ),
+							'description' => __( 'ISO code or name of the state, province or district.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'postcode'   => array(
-							'description' => __( 'Postal code.', 'woocommerce' ),
+							'description' => __( 'Postal code.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'country'    => array(
-							'description' => __( 'ISO code of the country.', 'woocommerce' ),
+							'description' => __( 'ISO code of the country.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'email'      => array(
-							'description' => __( 'Email address.', 'woocommerce' ),
+							'description' => __( 'Email address.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'format'      => 'email',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'phone'      => array(
-							'description' => __( 'Phone number.', 'woocommerce' ),
+							'description' => __( 'Phone number.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 					),
 				),
 				'shipping'           => array(
-					'description' => __( 'List of shipping address data.', 'woocommerce' ),
+					'description' => __( 'List of shipping address data.', 'woocommerce-rest-api' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'first_name' => array(
-							'description' => __( 'First name.', 'woocommerce' ),
+							'description' => __( 'First name.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'last_name'  => array(
-							'description' => __( 'Last name.', 'woocommerce' ),
+							'description' => __( 'Last name.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'company'    => array(
-							'description' => __( 'Company name.', 'woocommerce' ),
+							'description' => __( 'Company name.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_1'  => array(
-							'description' => __( 'Address line 1', 'woocommerce' ),
+							'description' => __( 'Address line 1', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_2'  => array(
-							'description' => __( 'Address line 2', 'woocommerce' ),
+							'description' => __( 'Address line 2', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'city'       => array(
-							'description' => __( 'City name.', 'woocommerce' ),
+							'description' => __( 'City name.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'state'      => array(
-							'description' => __( 'ISO code or name of the state, province or district.', 'woocommerce' ),
+							'description' => __( 'ISO code or name of the state, province or district.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'postcode'   => array(
-							'description' => __( 'Postal code.', 'woocommerce' ),
+							'description' => __( 'Postal code.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'country'    => array(
-							'description' => __( 'ISO code of the country.', 'woocommerce' ),
+							'description' => __( 'ISO code of the country.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 					),
 				),
 				'is_paying_customer' => array(
-					'description' => __( 'Is the customer a paying customer?', 'woocommerce' ),
+					'description' => __( 'Is the customer a paying customer?', 'woocommerce-rest-api' ),
 					'type'        => 'bool',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'avatar_url'         => array(
-					'description' => __( 'Avatar URL.', 'woocommerce' ),
+					'description' => __( 'Avatar URL.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'meta_data'          => array(
-					'description' => __( 'Meta data.', 'woocommerce' ),
+					'description' => __( 'Meta data.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'    => array(
-								'description' => __( 'Meta ID.', 'woocommerce' ),
+								'description' => __( 'Meta ID.', 'woocommerce-rest-api' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'key'   => array(
-								'description' => __( 'Meta key.', 'woocommerce' ),
+								'description' => __( 'Meta key.', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'value' => array(
-								'description' => __( 'Meta value.', 'woocommerce' ),
+								'description' => __( 'Meta value.', 'woocommerce-rest-api' ),
 								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
@@ -666,7 +666,7 @@ class Customers extends AbstractController {
 		$params['context']['default'] = 'view';
 
 		$params['exclude'] = array(
-			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
+			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce-rest-api' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type'          => 'integer',
@@ -675,7 +675,7 @@ class Customers extends AbstractController {
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['include'] = array(
-			'description'       => __( 'Limit result set to specific IDs.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to specific IDs.', 'woocommerce-rest-api' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type'          => 'integer',
@@ -684,14 +684,14 @@ class Customers extends AbstractController {
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['offset'] = array(
-			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
+			'description'        => __( 'Offset the result set by a specific number of items.', 'woocommerce-rest-api' ),
 			'type'               => 'integer',
 			'sanitize_callback'  => 'absint',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['order'] = array(
 			'default'            => 'asc',
-			'description'        => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
+			'description'        => __( 'Order sort attribute ascending or descending.', 'woocommerce-rest-api' ),
 			'enum'               => array( 'asc', 'desc' ),
 			'sanitize_callback'  => 'sanitize_key',
 			'type'               => 'string',
@@ -699,7 +699,7 @@ class Customers extends AbstractController {
 		);
 		$params['orderby'] = array(
 			'default'            => 'name',
-			'description'        => __( 'Sort collection by object attribute.', 'woocommerce' ),
+			'description'        => __( 'Sort collection by object attribute.', 'woocommerce-rest-api' ),
 			'enum'               => array(
 				'id',
 				'include',
@@ -711,13 +711,13 @@ class Customers extends AbstractController {
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['email'] = array(
-			'description'        => __( 'Limit result set to resources with a specific email.', 'woocommerce' ),
+			'description'        => __( 'Limit result set to resources with a specific email.', 'woocommerce-rest-api' ),
 			'type'               => 'string',
 			'format'             => 'email',
 			'validate_callback'  => 'rest_validate_request_arg',
 		);
 		$params['role'] = array(
-			'description'        => __( 'Limit result set to resources with a specific role.', 'woocommerce' ),
+			'description'        => __( 'Limit result set to resources with a specific role.', 'woocommerce-rest-api' ),
 			'type'               => 'string',
 			'default'            => 'customer',
 			'enum'               => array_merge( array( 'all' ), $this->get_role_names() ),
@@ -737,7 +737,7 @@ class Customers extends AbstractController {
 		$user = get_userdata( $id );
 
 		if ( false === $user ) {
-			return new \WP_Error( 'woocommerce_rest_customer_invalid_id', __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_customer_invalid_id', __( 'Invalid ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 		return true;
 	}

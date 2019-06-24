@@ -11,8 +11,7 @@
   },
   "require-dev": {
     "phpunit/phpunit": "6.5.14",
-    "woocommerce/woocommerce-sniffs": "0.0.6",
-    "slowprog/composer-copy-file": "~0.3"
+    "woocommerce/woocommerce-sniffs": "0.0.6"
   },
   "scripts": {
     "post-install-cmd": [

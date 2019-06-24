@@ -57,23 +57,23 @@ class ProductReviews extends AbstractController {
 						array(
 							'product_id'     => array(
 								'required'    => true,
-								'description' => __( 'Unique identifier for the product.', 'woocommerce' ),
+								'description' => __( 'Unique identifier for the product.', 'woocommerce-rest-api' ),
 								'type'        => 'integer',
 							),
 							'review'         => array(
 								'required'    => true,
 								'type'        => 'string',
-								'description' => __( 'Review content.', 'woocommerce' ),
+								'description' => __( 'Review content.', 'woocommerce-rest-api' ),
 							),
 							'reviewer'       => array(
 								'required'    => true,
 								'type'        => 'string',
-								'description' => __( 'Name of the reviewer.', 'woocommerce' ),
+								'description' => __( 'Name of the reviewer.', 'woocommerce-rest-api' ),
 							),
 							'reviewer_email' => array(
 								'required'    => true,
 								'type'        => 'string',
-								'description' => __( 'Email of the reviewer.', 'woocommerce' ),
+								'description' => __( 'Email of the reviewer.', 'woocommerce-rest-api' ),
 							),
 						)
 					),
@@ -89,7 +89,7 @@ class ProductReviews extends AbstractController {
 			array(
 				'args'   => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 						'type'        => 'integer',
 					),
 				),
@@ -115,7 +115,7 @@ class ProductReviews extends AbstractController {
 						'force' => array(
 							'default'     => false,
 							'type'        => 'boolean',
-							'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+							'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce-rest-api' ),
 						),
 					),
 				),
@@ -256,13 +256,13 @@ class ProductReviews extends AbstractController {
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
-			return new \WP_Error( 'woocommerce_rest_review_exists', __( 'Cannot create existing product review.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_review_exists', __( 'Cannot create existing product review.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 
 		$product_id = (int) $request['product_id'];
 
 		if ( 'product' !== get_post_type( $product_id ) ) {
-			return new \WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$prepared_review = $this->prepare_item_for_database( $request );
@@ -276,7 +276,7 @@ class ProductReviews extends AbstractController {
 		 * Do not allow a comment to be created with missing or empty comment_content. See wp_handle_comment_submission().
 		 */
 		if ( empty( $prepared_review['comment_content'] ) ) {
-			return new \WP_Error( 'woocommerce_rest_review_content_invalid', __( 'Invalid review content.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_review_content_invalid', __( 'Invalid review content.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 
 		// Setting remaining values before wp_insert_comment so we can use wp_allow_comment().
@@ -301,7 +301,7 @@ class ProductReviews extends AbstractController {
 		$check_comment_lengths = wp_check_comment_data_max_lengths( $prepared_review );
 		if ( is_wp_error( $check_comment_lengths ) ) {
 			$error_code = str_replace( array( 'comment_author', 'comment_content' ), array( 'reviewer', 'review_content' ), $check_comment_lengths->get_error_code() );
-			return new \WP_Error( 'woocommerce_rest_' . $error_code, __( 'Product review field exceeds maximum length allowed.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_' . $error_code, __( 'Product review field exceeds maximum length allowed.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 
 		$prepared_review['comment_parent']     = 0;
@@ -342,7 +342,7 @@ class ProductReviews extends AbstractController {
 		$review_id = wp_insert_comment( wp_filter_comment( wp_slash( (array) $prepared_review ) ) );
 
 		if ( ! $review_id ) {
-			return new \WP_Error( 'woocommerce_rest_review_failed_create', __( 'Creating product review failed.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_review_failed_create', __( 'Creating product review failed.', 'woocommerce-rest-api' ), array( 'status' => 500 ) );
 		}
 
 		if ( isset( $request['status'] ) ) {
@@ -408,7 +408,7 @@ class ProductReviews extends AbstractController {
 		$id = (int) $review->comment_ID;
 
 		if ( isset( $request['type'] ) && 'review' !== get_comment_type( $id ) ) {
-			return new \WP_Error( 'woocommerce_rest_review_invalid_type', __( 'Sorry, you are not allowed to change the comment type.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_review_invalid_type', __( 'Sorry, you are not allowed to change the comment type.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$prepared_args = $this->prepare_item_for_database( $request );
@@ -418,7 +418,7 @@ class ProductReviews extends AbstractController {
 
 		if ( ! empty( $prepared_args['comment_post_ID'] ) ) {
 			if ( 'product' !== get_post_type( (int) $prepared_args['comment_post_ID'] ) ) {
-				return new \WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+				return new \WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 			}
 		}
 
@@ -427,7 +427,7 @@ class ProductReviews extends AbstractController {
 			$change = $this->handle_status_param( $request['status'], $id );
 
 			if ( ! $change ) {
-				return new \WP_Error( 'woocommerce_rest_review_failed_edit', __( 'Updating review status failed.', 'woocommerce' ), array( 'status' => 500 ) );
+				return new \WP_Error( 'woocommerce_rest_review_failed_edit', __( 'Updating review status failed.', 'woocommerce-rest-api' ), array( 'status' => 500 ) );
 			}
 		} elseif ( ! empty( $prepared_args ) ) {
 			if ( is_wp_error( $prepared_args ) ) {
@@ -435,7 +435,7 @@ class ProductReviews extends AbstractController {
 			}
 
 			if ( isset( $prepared_args['comment_content'] ) && empty( $prepared_args['comment_content'] ) ) {
-				return new \WP_Error( 'woocommerce_rest_review_content_invalid', __( 'Invalid review content.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new \WP_Error( 'woocommerce_rest_review_content_invalid', __( 'Invalid review content.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 			}
 
 			$prepared_args['comment_ID'] = $id;
@@ -443,13 +443,13 @@ class ProductReviews extends AbstractController {
 			$check_comment_lengths = wp_check_comment_data_max_lengths( $prepared_args );
 			if ( is_wp_error( $check_comment_lengths ) ) {
 				$error_code = str_replace( array( 'comment_author', 'comment_content' ), array( 'reviewer', 'review_content' ), $check_comment_lengths->get_error_code() );
-				return new \WP_Error( 'woocommerce_rest_' . $error_code, __( 'Product review field exceeds maximum length allowed.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new \WP_Error( 'woocommerce_rest_' . $error_code, __( 'Product review field exceeds maximum length allowed.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 			}
 
 			$updated = wp_update_comment( wp_slash( (array) $prepared_args ) );
 
 			if ( false === $updated ) {
-				return new \WP_Error( 'woocommerce_rest_comment_failed_edit', __( 'Updating review failed.', 'woocommerce' ), array( 'status' => 500 ) );
+				return new \WP_Error( 'woocommerce_rest_comment_failed_edit', __( 'Updating review failed.', 'woocommerce-rest-api' ), array( 'status' => 500 ) );
 			}
 
 			if ( isset( $request['status'] ) ) {
@@ -518,11 +518,11 @@ class ProductReviews extends AbstractController {
 			// If this type doesn't support trashing, error out.
 			if ( ! $supports_trash ) {
 				/* translators: %s: force=true */
-				return new \WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( "The object does not support trashing. Set '%s' to delete.", 'woocommerce' ), 'force=true' ), array( 'status' => 501 ) );
+				return new \WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( "The object does not support trashing. Set '%s' to delete.", 'woocommerce-rest-api' ), 'force=true' ), array( 'status' => 501 ) );
 			}
 
 			if ( 'trash' === $review->comment_approved ) {
-				return new \WP_Error( 'woocommerce_rest_already_trashed', __( 'The object has already been trashed.', 'woocommerce' ), array( 'status' => 410 ) );
+				return new \WP_Error( 'woocommerce_rest_already_trashed', __( 'The object has already been trashed.', 'woocommerce-rest-api' ), array( 'status' => 410 ) );
 			}
 
 			$result   = wp_trash_comment( $review->comment_ID );
@@ -531,7 +531,7 @@ class ProductReviews extends AbstractController {
 		}
 
 		if ( ! $result ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'The object cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'The object cannot be deleted.', 'woocommerce-rest-api' ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -655,48 +655,48 @@ class ProductReviews extends AbstractController {
 			'type'       => 'object',
 			'properties' => array(
 				'id'               => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_created'     => array(
-					'description' => __( "The date the review was created, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the review was created, in the site's timezone.", 'woocommerce-rest-api' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_created_gmt' => array(
-					'description' => __( 'The date the review was created, as GMT.', 'woocommerce' ),
+					'description' => __( 'The date the review was created, as GMT.', 'woocommerce-rest-api' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'product_id'       => array(
-					'description' => __( 'Unique identifier for the product that the review belongs to.', 'woocommerce' ),
+					'description' => __( 'Unique identifier for the product that the review belongs to.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'status'           => array(
-					'description' => __( 'Status of the review.', 'woocommerce' ),
+					'description' => __( 'Status of the review.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'default'     => 'approved',
 					'enum'        => array( 'approved', 'hold', 'spam', 'unspam', 'trash', 'untrash' ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'reviewer'         => array(
-					'description' => __( 'Reviewer name.', 'woocommerce' ),
+					'description' => __( 'Reviewer name.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'reviewer_email'   => array(
-					'description' => __( 'Reviewer email.', 'woocommerce' ),
+					'description' => __( 'Reviewer email.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'format'      => 'email',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'review'           => array(
-					'description' => __( 'The content of the review.', 'woocommerce' ),
+					'description' => __( 'The content of the review.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -704,12 +704,12 @@ class ProductReviews extends AbstractController {
 					),
 				),
 				'rating'           => array(
-					'description' => __( 'Review rating (0 to 5).', 'woocommerce' ),
+					'description' => __( 'Review rating (0 to 5).', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'verified'         => array(
-					'description' => __( 'Shows if the reviewer bought the product or not.', 'woocommerce' ),
+					'description' => __( 'Shows if the reviewer bought the product or not.', 'woocommerce-rest-api' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -724,14 +724,14 @@ class ProductReviews extends AbstractController {
 			foreach ( $avatar_sizes as $size ) {
 				$avatar_properties[ $size ] = array(
 					/* translators: %d: avatar image size in pixels */
-					'description' => sprintf( __( 'Avatar URL with image size of %d pixels.', 'woocommerce' ), $size ),
+					'description' => sprintf( __( 'Avatar URL with image size of %d pixels.', 'woocommerce-rest-api' ), $size ),
 					'type'        => 'string',
 					'format'      => 'uri',
 					'context'     => array( 'embed', 'view', 'edit' ),
 				);
 			}
 			$schema['properties']['reviewer_avatar_urls'] = array(
-				'description' => __( 'Avatar URLs for the object reviewer.', 'woocommerce' ),
+				'description' => __( 'Avatar URLs for the object reviewer.', 'woocommerce-rest-api' ),
 				'type'        => 'object',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -753,17 +753,17 @@ class ProductReviews extends AbstractController {
 		$params['context']['default'] = 'view';
 
 		$params['after']            = array(
-			'description' => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce' ),
+			'description' => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-rest-api' ),
 			'type'        => 'string',
 			'format'      => 'date-time',
 		);
 		$params['before']           = array(
-			'description' => __( 'Limit response to reviews published before a given ISO8601 compliant date.', 'woocommerce' ),
+			'description' => __( 'Limit response to reviews published before a given ISO8601 compliant date.', 'woocommerce-rest-api' ),
 			'type'        => 'string',
 			'format'      => 'date-time',
 		);
 		$params['exclude']          = array(
-			'description' => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
+			'description' => __( 'Ensure result set excludes specific IDs.', 'woocommerce-rest-api' ),
 			'type'        => 'array',
 			'items'       => array(
 				'type' => 'integer',
@@ -771,7 +771,7 @@ class ProductReviews extends AbstractController {
 			'default'     => array(),
 		);
 		$params['include']          = array(
-			'description' => __( 'Limit result set to specific IDs.', 'woocommerce' ),
+			'description' => __( 'Limit result set to specific IDs.', 'woocommerce-rest-api' ),
 			'type'        => 'array',
 			'items'       => array(
 				'type' => 'integer',
@@ -779,11 +779,11 @@ class ProductReviews extends AbstractController {
 			'default'     => array(),
 		);
 		$params['offset']           = array(
-			'description' => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
+			'description' => __( 'Offset the result set by a specific number of items.', 'woocommerce-rest-api' ),
 			'type'        => 'integer',
 		);
 		$params['order']            = array(
-			'description' => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
+			'description' => __( 'Order sort attribute ascending or descending.', 'woocommerce-rest-api' ),
 			'type'        => 'string',
 			'default'     => 'desc',
 			'enum'        => array(
@@ -792,7 +792,7 @@ class ProductReviews extends AbstractController {
 			),
 		);
 		$params['orderby']          = array(
-			'description' => __( 'Sort collection by object attribute.', 'woocommerce' ),
+			'description' => __( 'Sort collection by object attribute.', 'woocommerce-rest-api' ),
 			'type'        => 'string',
 			'default'     => 'date_gmt',
 			'enum'        => array(
@@ -804,14 +804,14 @@ class ProductReviews extends AbstractController {
 			),
 		);
 		$params['reviewer']         = array(
-			'description' => __( 'Limit result set to reviews assigned to specific user IDs.', 'woocommerce' ),
+			'description' => __( 'Limit result set to reviews assigned to specific user IDs.', 'woocommerce-rest-api' ),
 			'type'        => 'array',
 			'items'       => array(
 				'type' => 'integer',
 			),
 		);
 		$params['reviewer_exclude'] = array(
-			'description' => __( 'Ensure result set excludes reviews assigned to specific user IDs.', 'woocommerce' ),
+			'description' => __( 'Ensure result set excludes reviews assigned to specific user IDs.', 'woocommerce-rest-api' ),
 			'type'        => 'array',
 			'items'       => array(
 				'type' => 'integer',
@@ -819,13 +819,13 @@ class ProductReviews extends AbstractController {
 		);
 		$params['reviewer_email']   = array(
 			'default'     => null,
-			'description' => __( 'Limit result set to that from a specific author email.', 'woocommerce' ),
+			'description' => __( 'Limit result set to that from a specific author email.', 'woocommerce-rest-api' ),
 			'format'      => 'email',
 			'type'        => 'string',
 		);
 		$params['product']          = array(
 			'default'     => array(),
-			'description' => __( 'Limit result set to reviews assigned to specific product IDs.', 'woocommerce' ),
+			'description' => __( 'Limit result set to reviews assigned to specific product IDs.', 'woocommerce-rest-api' ),
 			'type'        => 'array',
 			'items'       => array(
 				'type' => 'integer',
@@ -833,7 +833,7 @@ class ProductReviews extends AbstractController {
 		);
 		$params['status']           = array(
 			'default'           => 'approved',
-			'description'       => __( 'Limit result set to reviews assigned a specific status.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to reviews assigned a specific status.', 'woocommerce-rest-api' ),
 			'sanitize_callback' => 'sanitize_key',
 			'type'              => 'string',
 			'enum'              => array(
@@ -867,7 +867,7 @@ class ProductReviews extends AbstractController {
 	 */
 	protected function get_review( $id ) {
 		$id    = (int) $id;
-		$error = new \WP_Error( 'woocommerce_rest_review_invalid_id', __( 'Invalid review ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		$error = new \WP_Error( 'woocommerce_rest_review_invalid_id', __( 'Invalid review ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 
 		if ( 0 >= $id ) {
 			return $error;
@@ -882,7 +882,7 @@ class ProductReviews extends AbstractController {
 			$post = get_post( (int) $review->comment_post_ID );
 
 			if ( 'product' !== get_post_type( (int) $review->comment_post_ID ) ) {
-				return new \WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+				return new \WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 			}
 		}
 

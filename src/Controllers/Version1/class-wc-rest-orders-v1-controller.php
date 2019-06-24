@@ -73,7 +73,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
 			'args' => array(
 				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 				),
 			),
@@ -99,7 +99,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					'force' => array(
 						'default'     => false,
 						'type'        => 'boolean',
-						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce-rest-api' ),
 					),
 				),
 			),
@@ -531,7 +531,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		try {
 			// Make sure customer exists.
 			if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] && false === get_user_by( 'id', $request['customer_id'] ) ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id',__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id',__( 'Customer ID is invalid.', 'woocommerce-rest-api' ), 400 );
 			}
 
 			// Make sure customer is part of blog.
@@ -618,7 +618,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		} elseif ( ! empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['variation_id'];
 		} else {
-			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
+			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce-rest-api' ), 400 );
 		}
 		return $product_id;
 	}
@@ -690,7 +690,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 		if ( 'create' === $action ) {
 			if ( empty( $posted['method_id'] ) ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_shipping_item', __( 'Shipping method ID is required.', 'woocommerce' ), 400 );
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_shipping_item', __( 'Shipping method ID is required.', 'woocommerce-rest-api' ), 400 );
 			}
 		}
 
@@ -713,7 +713,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 		if ( 'create' === $action ) {
 			if ( empty( $posted['name'] ) ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_fee_item', __( 'Fee name is required.', 'woocommerce' ), 400 );
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_fee_item', __( 'Fee name is required.', 'woocommerce-rest-api' ), 400 );
 			}
 		}
 
@@ -736,7 +736,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 		if ( 'create' === $action ) {
 			if ( empty( $posted['code'] ) ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon_coupon', __( 'Coupon code is required.', 'woocommerce-rest-api' ), 400 );
 			}
 		}
 
@@ -774,7 +774,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 				absint( $order->get_id() )
 			) );
 			if ( is_null( $result ) ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_item_id', __( 'Order item ID provided is not associated with order.', 'woocommerce' ), 400 );
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_item_id', __( 'Order item ID provided is not associated with order.', 'woocommerce-rest-api' ), 400 );
 			}
 		}
 
@@ -823,7 +823,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
 			/* translators: %s: post type */
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce-rest-api' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
 		$order_id = $this->create_order( $request );
@@ -862,7 +862,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$post_id = (int) $request['id'];
 
 			if ( empty( $post_id ) || get_post_type( $post_id ) !== $this->post_type ) {
-				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 			}
 
 			$order_id = $this->update_order( $request );
@@ -916,236 +916,236 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'parent_id' => array(
-					'description' => __( 'Parent order ID.', 'woocommerce' ),
+					'description' => __( 'Parent order ID.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'status' => array(
-					'description' => __( 'Order status.', 'woocommerce' ),
+					'description' => __( 'Order status.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'default'     => 'pending',
 					'enum'        => $this->get_order_statuses(),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'order_key' => array(
-					'description' => __( 'Order key.', 'woocommerce' ),
+					'description' => __( 'Order key.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'number' => array(
-					'description' => __( 'Order number.', 'woocommerce' ),
+					'description' => __( 'Order number.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'currency' => array(
-					'description' => __( 'Currency the order was created with, in ISO format.', 'woocommerce' ),
+					'description' => __( 'Currency the order was created with, in ISO format.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'default'     => get_woocommerce_currency(),
 					'enum'        => array_keys( get_woocommerce_currencies() ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'version' => array(
-					'description' => __( 'Version of WooCommerce which last updated the order.', 'woocommerce' ),
+					'description' => __( 'Version of WooCommerce which last updated the order.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'prices_include_tax' => array(
-					'description' => __( 'True the prices included tax during checkout.', 'woocommerce' ),
+					'description' => __( 'True the prices included tax during checkout.', 'woocommerce-rest-api' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_created' => array(
-					'description' => __( "The date the order was created, as GMT.", 'woocommerce' ),
+					'description' => __( "The date the order was created, as GMT.", 'woocommerce-rest-api' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_modified' => array(
-					'description' => __( "The date the order was last modified, as GMT.", 'woocommerce' ),
+					'description' => __( "The date the order was last modified, as GMT.", 'woocommerce-rest-api' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'customer_id' => array(
-					'description' => __( 'User ID who owns the order. 0 for guests.', 'woocommerce' ),
+					'description' => __( 'User ID who owns the order. 0 for guests.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 					'default'     => 0,
 					'context'     => array( 'view', 'edit' ),
 				),
 				'discount_total' => array(
-					'description' => __( 'Total discount amount for the order.', 'woocommerce' ),
+					'description' => __( 'Total discount amount for the order.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'discount_tax' => array(
-					'description' => __( 'Total discount tax amount for the order.', 'woocommerce' ),
+					'description' => __( 'Total discount tax amount for the order.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'shipping_total' => array(
-					'description' => __( 'Total shipping amount for the order.', 'woocommerce' ),
+					'description' => __( 'Total shipping amount for the order.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'shipping_tax' => array(
-					'description' => __( 'Total shipping tax amount for the order.', 'woocommerce' ),
+					'description' => __( 'Total shipping tax amount for the order.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'cart_tax' => array(
-					'description' => __( 'Sum of line item taxes only.', 'woocommerce' ),
+					'description' => __( 'Sum of line item taxes only.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'total' => array(
-					'description' => __( 'Grand total.', 'woocommerce' ),
+					'description' => __( 'Grand total.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'total_tax' => array(
-					'description' => __( 'Sum of all taxes.', 'woocommerce' ),
+					'description' => __( 'Sum of all taxes.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'billing' => array(
-					'description' => __( 'Billing address.', 'woocommerce' ),
+					'description' => __( 'Billing address.', 'woocommerce-rest-api' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'first_name' => array(
-							'description' => __( 'First name.', 'woocommerce' ),
+							'description' => __( 'First name.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'last_name' => array(
-							'description' => __( 'Last name.', 'woocommerce' ),
+							'description' => __( 'Last name.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'company' => array(
-							'description' => __( 'Company name.', 'woocommerce' ),
+							'description' => __( 'Company name.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_1' => array(
-							'description' => __( 'Address line 1.', 'woocommerce' ),
+							'description' => __( 'Address line 1.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_2' => array(
-							'description' => __( 'Address line 2.', 'woocommerce' ),
+							'description' => __( 'Address line 2.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'city' => array(
-							'description' => __( 'City name.', 'woocommerce' ),
+							'description' => __( 'City name.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'state' => array(
-							'description' => __( 'ISO code or name of the state, province or district.', 'woocommerce' ),
+							'description' => __( 'ISO code or name of the state, province or district.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'postcode' => array(
-							'description' => __( 'Postal code.', 'woocommerce' ),
+							'description' => __( 'Postal code.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'country' => array(
-							'description' => __( 'Country code in ISO 3166-1 alpha-2 format.', 'woocommerce' ),
+							'description' => __( 'Country code in ISO 3166-1 alpha-2 format.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'email' => array(
-							'description' => __( 'Email address.', 'woocommerce' ),
+							'description' => __( 'Email address.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'format'      => 'email',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'phone' => array(
-							'description' => __( 'Phone number.', 'woocommerce' ),
+							'description' => __( 'Phone number.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 					),
 				),
 				'shipping' => array(
-					'description' => __( 'Shipping address.', 'woocommerce' ),
+					'description' => __( 'Shipping address.', 'woocommerce-rest-api' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'first_name' => array(
-							'description' => __( 'First name.', 'woocommerce' ),
+							'description' => __( 'First name.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'last_name' => array(
-							'description' => __( 'Last name.', 'woocommerce' ),
+							'description' => __( 'Last name.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'company' => array(
-							'description' => __( 'Company name.', 'woocommerce' ),
+							'description' => __( 'Company name.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_1' => array(
-							'description' => __( 'Address line 1.', 'woocommerce' ),
+							'description' => __( 'Address line 1.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'address_2' => array(
-							'description' => __( 'Address line 2.', 'woocommerce' ),
+							'description' => __( 'Address line 2.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'city' => array(
-							'description' => __( 'City name.', 'woocommerce' ),
+							'description' => __( 'City name.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'state' => array(
-							'description' => __( 'ISO code or name of the state, province or district.', 'woocommerce' ),
+							'description' => __( 'ISO code or name of the state, province or district.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'postcode' => array(
-							'description' => __( 'Postal code.', 'woocommerce' ),
+							'description' => __( 'Postal code.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'country' => array(
-							'description' => __( 'Country code in ISO 3166-1 alpha-2 format.', 'woocommerce' ),
+							'description' => __( 'Country code in ISO 3166-1 alpha-2 format.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 					),
 				),
 				'payment_method' => array(
-					'description' => __( 'Payment method ID.', 'woocommerce' ),
+					'description' => __( 'Payment method ID.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'payment_method_title' => array(
-					'description' => __( 'Payment method title.', 'woocommerce' ),
+					'description' => __( 'Payment method title.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -1153,131 +1153,131 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					),
 				),
 				'set_paid' => array(
-					'description' => __( 'Define if the order is paid. It will set the status to processing and reduce stock items.', 'woocommerce' ),
+					'description' => __( 'Define if the order is paid. It will set the status to processing and reduce stock items.', 'woocommerce-rest-api' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'edit' ),
 				),
 				'transaction_id' => array(
-					'description' => __( 'Unique transaction ID.', 'woocommerce' ),
+					'description' => __( 'Unique transaction ID.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'customer_ip_address' => array(
-					'description' => __( "Customer's IP address.", 'woocommerce' ),
+					'description' => __( "Customer's IP address.", 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'customer_user_agent' => array(
-					'description' => __( 'User agent of the customer.', 'woocommerce' ),
+					'description' => __( 'User agent of the customer.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'created_via' => array(
-					'description' => __( 'Shows where the order was created.', 'woocommerce' ),
+					'description' => __( 'Shows where the order was created.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'customer_note' => array(
-					'description' => __( 'Note left by customer during checkout.', 'woocommerce' ),
+					'description' => __( 'Note left by customer during checkout.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'date_completed' => array(
-					'description' => __( "The date the order was completed, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the order was completed, in the site's timezone.", 'woocommerce-rest-api' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_paid' => array(
-					'description' => __( "The date the order was paid, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the order was paid, in the site's timezone.", 'woocommerce-rest-api' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'cart_hash' => array(
-					'description' => __( 'MD5 hash of cart items to ensure orders are not modified.', 'woocommerce' ),
+					'description' => __( 'MD5 hash of cart items to ensure orders are not modified.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'line_items' => array(
-					'description' => __( 'Line items data.', 'woocommerce' ),
+					'description' => __( 'Line items data.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id' => array(
-								'description' => __( 'Item ID.', 'woocommerce' ),
+								'description' => __( 'Item ID.', 'woocommerce-rest-api' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'name' => array(
-								'description' => __( 'Product name.', 'woocommerce' ),
+								'description' => __( 'Product name.', 'woocommerce-rest-api' ),
 								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'sku' => array(
-								'description' => __( 'Product SKU.', 'woocommerce' ),
+								'description' => __( 'Product SKU.', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'product_id' => array(
-								'description' => __( 'Product ID.', 'woocommerce' ),
+								'description' => __( 'Product ID.', 'woocommerce-rest-api' ),
 								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'variation_id' => array(
-								'description' => __( 'Variation ID, if applicable.', 'woocommerce' ),
+								'description' => __( 'Variation ID, if applicable.', 'woocommerce-rest-api' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'quantity' => array(
-								'description' => __( 'Quantity ordered.', 'woocommerce' ),
+								'description' => __( 'Quantity ordered.', 'woocommerce-rest-api' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'tax_class' => array(
-								'description' => __( 'Tax class of product.', 'woocommerce' ),
+								'description' => __( 'Tax class of product.', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'price' => array(
-								'description' => __( 'Product price.', 'woocommerce' ),
+								'description' => __( 'Product price.', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'subtotal' => array(
-								'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
+								'description' => __( 'Line subtotal (before discounts).', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'subtotal_tax' => array(
-								'description' => __( 'Line subtotal tax (before discounts).', 'woocommerce' ),
+								'description' => __( 'Line subtotal tax (before discounts).', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'total' => array(
-								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
+								'description' => __( 'Line total (after discounts).', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'total_tax' => array(
-								'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
+								'description' => __( 'Line total tax (after discounts).', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'taxes' => array(
-								'description' => __( 'Line taxes.', 'woocommerce' ),
+								'description' => __( 'Line taxes.', 'woocommerce-rest-api' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -1285,19 +1285,19 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 									'type'       => 'object',
 									'properties' => array(
 										'id' => array(
-											'description' => __( 'Tax rate ID.', 'woocommerce' ),
+											'description' => __( 'Tax rate ID.', 'woocommerce-rest-api' ),
 											'type'        => 'integer',
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
 										),
 										'total' => array(
-											'description' => __( 'Tax total.', 'woocommerce' ),
+											'description' => __( 'Tax total.', 'woocommerce-rest-api' ),
 											'type'        => 'string',
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
 										),
 										'subtotal' => array(
-											'description' => __( 'Tax subtotal.', 'woocommerce' ),
+											'description' => __( 'Tax subtotal.', 'woocommerce-rest-api' ),
 											'type'        => 'string',
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
@@ -1306,7 +1306,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 								),
 							),
 							'meta' => array(
-								'description' => __( 'Line item meta data.', 'woocommerce' ),
+								'description' => __( 'Line item meta data.', 'woocommerce-rest-api' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -1314,19 +1314,19 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 									'type'       => 'object',
 									'properties' => array(
 										'key' => array(
-											'description' => __( 'Meta key.', 'woocommerce' ),
+											'description' => __( 'Meta key.', 'woocommerce-rest-api' ),
 											'type'        => 'string',
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
 										),
 										'label' => array(
-											'description' => __( 'Meta label.', 'woocommerce' ),
+											'description' => __( 'Meta label.', 'woocommerce-rest-api' ),
 											'type'        => 'string',
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
 										),
 										'value' => array(
-											'description' => __( 'Meta value.', 'woocommerce' ),
+											'description' => __( 'Meta value.', 'woocommerce-rest-api' ),
 											'type'        => 'mixed',
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
@@ -1338,7 +1338,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					),
 				),
 				'tax_lines' => array(
-					'description' => __( 'Tax lines data.', 'woocommerce' ),
+					'description' => __( 'Tax lines data.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -1346,43 +1346,43 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 						'type'       => 'object',
 						'properties' => array(
 							'id' => array(
-								'description' => __( 'Item ID.', 'woocommerce' ),
+								'description' => __( 'Item ID.', 'woocommerce-rest-api' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'rate_code' => array(
-								'description' => __( 'Tax rate code.', 'woocommerce' ),
+								'description' => __( 'Tax rate code.', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'rate_id' => array(
-								'description' => __( 'Tax rate ID.', 'woocommerce' ),
+								'description' => __( 'Tax rate ID.', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'label' => array(
-								'description' => __( 'Tax rate label.', 'woocommerce' ),
+								'description' => __( 'Tax rate label.', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'compound' => array(
-								'description' => __( 'Show if is a compound tax rate.', 'woocommerce' ),
+								'description' => __( 'Show if is a compound tax rate.', 'woocommerce-rest-api' ),
 								'type'        => 'boolean',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'tax_total' => array(
-								'description' => __( 'Tax total (not including shipping taxes).', 'woocommerce' ),
+								'description' => __( 'Tax total (not including shipping taxes).', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'shipping_tax_total' => array(
-								'description' => __( 'Shipping tax total.', 'woocommerce' ),
+								'description' => __( 'Shipping tax total.', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -1391,41 +1391,41 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					),
 				),
 				'shipping_lines' => array(
-					'description' => __( 'Shipping lines data.', 'woocommerce' ),
+					'description' => __( 'Shipping lines data.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id' => array(
-								'description' => __( 'Item ID.', 'woocommerce' ),
+								'description' => __( 'Item ID.', 'woocommerce-rest-api' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'method_title' => array(
-								'description' => __( 'Shipping method name.', 'woocommerce' ),
+								'description' => __( 'Shipping method name.', 'woocommerce-rest-api' ),
 								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'method_id' => array(
-								'description' => __( 'Shipping method ID.', 'woocommerce' ),
+								'description' => __( 'Shipping method ID.', 'woocommerce-rest-api' ),
 								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'total' => array(
-								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
+								'description' => __( 'Line total (after discounts).', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'total_tax' => array(
-								'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
+								'description' => __( 'Line total tax (after discounts).', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'taxes' => array(
-								'description' => __( 'Line taxes.', 'woocommerce' ),
+								'description' => __( 'Line taxes.', 'woocommerce-rest-api' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -1433,13 +1433,13 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 									'type'       => 'object',
 									'properties' => array(
 										'id' => array(
-											'description' => __( 'Tax rate ID.', 'woocommerce' ),
+											'description' => __( 'Tax rate ID.', 'woocommerce-rest-api' ),
 											'type'        => 'integer',
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
 										),
 										'total' => array(
-											'description' => __( 'Tax total.', 'woocommerce' ),
+											'description' => __( 'Tax total.', 'woocommerce-rest-api' ),
 											'type'        => 'string',
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
@@ -1451,46 +1451,46 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					),
 				),
 				'fee_lines' => array(
-					'description' => __( 'Fee lines data.', 'woocommerce' ),
+					'description' => __( 'Fee lines data.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id' => array(
-								'description' => __( 'Item ID.', 'woocommerce' ),
+								'description' => __( 'Item ID.', 'woocommerce-rest-api' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'name' => array(
-								'description' => __( 'Fee name.', 'woocommerce' ),
+								'description' => __( 'Fee name.', 'woocommerce-rest-api' ),
 								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'tax_class' => array(
-								'description' => __( 'Tax class of fee.', 'woocommerce' ),
+								'description' => __( 'Tax class of fee.', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'tax_status' => array(
-								'description' => __( 'Tax status of fee.', 'woocommerce' ),
+								'description' => __( 'Tax status of fee.', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'enum'        => array( 'taxable', 'none' ),
 							),
 							'total' => array(
-								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
+								'description' => __( 'Line total (after discounts).', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'total_tax' => array(
-								'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
+								'description' => __( 'Line total tax (after discounts).', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'taxes' => array(
-								'description' => __( 'Line taxes.', 'woocommerce' ),
+								'description' => __( 'Line taxes.', 'woocommerce-rest-api' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -1498,19 +1498,19 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 									'type'       => 'object',
 									'properties' => array(
 										'id' => array(
-											'description' => __( 'Tax rate ID.', 'woocommerce' ),
+											'description' => __( 'Tax rate ID.', 'woocommerce-rest-api' ),
 											'type'        => 'integer',
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
 										),
 										'total' => array(
-											'description' => __( 'Tax total.', 'woocommerce' ),
+											'description' => __( 'Tax total.', 'woocommerce-rest-api' ),
 											'type'        => 'string',
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
 										),
 										'subtotal' => array(
-											'description' => __( 'Tax subtotal.', 'woocommerce' ),
+											'description' => __( 'Tax subtotal.', 'woocommerce-rest-api' ),
 											'type'        => 'string',
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
@@ -1522,30 +1522,30 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					),
 				),
 				'coupon_lines' => array(
-					'description' => __( 'Coupons line data.', 'woocommerce' ),
+					'description' => __( 'Coupons line data.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id' => array(
-								'description' => __( 'Item ID.', 'woocommerce' ),
+								'description' => __( 'Item ID.', 'woocommerce-rest-api' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'code' => array(
-								'description' => __( 'Coupon code.', 'woocommerce' ),
+								'description' => __( 'Coupon code.', 'woocommerce-rest-api' ),
 								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'discount' => array(
-								'description' => __( 'Discount total.', 'woocommerce' ),
+								'description' => __( 'Discount total.', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'discount_tax' => array(
-								'description' => __( 'Discount total tax.', 'woocommerce' ),
+								'description' => __( 'Discount total tax.', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -1554,7 +1554,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 					),
 				),
 				'refunds' => array(
-					'description' => __( 'List of refunds.', 'woocommerce' ),
+					'description' => __( 'List of refunds.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -1562,19 +1562,19 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 						'type'       => 'object',
 						'properties' => array(
 							'id' => array(
-								'description' => __( 'Refund ID.', 'woocommerce' ),
+								'description' => __( 'Refund ID.', 'woocommerce-rest-api' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'reason' => array(
-								'description' => __( 'Refund reason.', 'woocommerce' ),
+								'description' => __( 'Refund reason.', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'total' => array(
-								'description' => __( 'Refund total.', 'woocommerce' ),
+								'description' => __( 'Refund total.', 'woocommerce-rest-api' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -1598,27 +1598,27 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 		$params['status'] = array(
 			'default'           => 'any',
-			'description'       => __( 'Limit result set to orders assigned a specific status.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to orders assigned a specific status.', 'woocommerce-rest-api' ),
 			'type'              => 'string',
 			'enum'              => array_merge( array( 'any' ), $this->get_order_statuses() ),
 			'sanitize_callback' => 'sanitize_key',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['customer'] = array(
-			'description'       => __( 'Limit result set to orders assigned a specific customer.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to orders assigned a specific customer.', 'woocommerce-rest-api' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['product'] = array(
-			'description'       => __( 'Limit result set to orders assigned a specific product.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to orders assigned a specific product.', 'woocommerce-rest-api' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['dp'] = array(
 			'default'           => wc_get_price_decimals(),
-			'description'       => __( 'Number of decimal points to use in each resource.', 'woocommerce' ),
+			'description'       => __( 'Number of decimal points to use in each resource.', 'woocommerce-rest-api' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',

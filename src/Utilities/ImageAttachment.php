@@ -58,7 +58,7 @@ class ImageAttachment {
 
 		if ( ! wp_attachment_is_image( $this->id ) ) {
 			/* translators: %s: image ID */
-			throw new \WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce' ), $this->id ), 400 );
+			throw new \WC_REST_Exception( 'woocommerce_product_invalid_image_id', sprintf( __( '#%s is an invalid image ID.', 'woocommerce-rest-api' ), $this->id ), 400 );
 		}
 	}
 

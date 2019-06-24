@@ -26,7 +26,7 @@ class WC_REST_Shipping_Zone_Locations_V2_Controller extends WC_REST_Shipping_Zon
 			$this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)/locations', array(
 				'args'   => array(
 					'id' => array(
-						'description' => __( 'Unique ID for the resource.', 'woocommerce' ),
+						'description' => __( 'Unique ID for the resource.', 'woocommerce-rest-api' ),
 						'type'        => 'integer',
 					),
 				),
@@ -85,7 +85,7 @@ class WC_REST_Shipping_Zone_Locations_V2_Controller extends WC_REST_Shipping_Zon
 		}
 
 		if ( 0 === $zone->get_id() ) {
-			return new WP_Error( 'woocommerce_rest_shipping_zone_locations_invalid_zone', __( 'The "locations not covered by your other zones" zone cannot be updated.', 'woocommerce' ), array( 'status' => 403 ) );
+			return new WP_Error( 'woocommerce_rest_shipping_zone_locations_invalid_zone', __( 'The "locations not covered by your other zones" zone cannot be updated.', 'woocommerce-rest-api' ), array( 'status' => 403 ) );
 		}
 
 		$raw_locations = $request->get_json_params();
@@ -166,12 +166,12 @@ class WC_REST_Shipping_Zone_Locations_V2_Controller extends WC_REST_Shipping_Zon
 			'type'       => 'object',
 			'properties' => array(
 				'code' => array(
-					'description' => __( 'Shipping zone location code.', 'woocommerce' ),
+					'description' => __( 'Shipping zone location code.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'type' => array(
-					'description' => __( 'Shipping zone location type.', 'woocommerce' ),
+					'description' => __( 'Shipping zone location type.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'default'     => 'country',
 					'enum'        => array(

@@ -63,19 +63,19 @@ class Data extends AbstractController {
 		$resources = array(
 			array(
 				'slug'        => 'continents',
-				'description' => __( 'List of supported continents, countries, and states.', 'woocommerce' ),
+				'description' => __( 'List of supported continents, countries, and states.', 'woocommerce-rest-api' ),
 			),
 			array(
 				'slug'        => 'countries',
-				'description' => __( 'List of supported states in a given country.', 'woocommerce' ),
+				'description' => __( 'List of supported states in a given country.', 'woocommerce-rest-api' ),
 			),
 			array(
 				'slug'        => 'currencies',
-				'description' => __( 'List of supported currencies.', 'woocommerce' ),
+				'description' => __( 'List of supported currencies.', 'woocommerce-rest-api' ),
 			),
 			array(
 				'slug'        => 'download-ips',
-				'description' => __( 'An endpoint used for searching download logs for a specific IP address.', 'woocommerce' ),
+				'description' => __( 'An endpoint used for searching download logs for a specific IP address.', 'woocommerce-rest-api' ),
 			),
 		);
 
@@ -134,13 +134,13 @@ class Data extends AbstractController {
 			'type'       => 'object',
 			'properties' => array(
 				'slug'        => array(
-					'description' => __( 'Data resource ID.', 'woocommerce' ),
+					'description' => __( 'Data resource ID.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'description' => array(
-					'description' => __( 'Data resource description.', 'woocommerce' ),
+					'description' => __( 'Data resource description.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,

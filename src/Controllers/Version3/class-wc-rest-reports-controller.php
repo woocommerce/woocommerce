@@ -36,35 +36,35 @@ class WC_REST_Reports_Controller extends WC_REST_Reports_V2_Controller {
 
 		$reports[] = array(
 			'slug'        => 'orders/totals',
-			'description' => __( 'Orders totals.', 'woocommerce' ),
+			'description' => __( 'Orders totals.', 'woocommerce-rest-api' ),
 		);
 		$reports[] = array(
 			'slug'        => 'products/totals',
-			'description' => __( 'Products totals.', 'woocommerce' ),
+			'description' => __( 'Products totals.', 'woocommerce-rest-api' ),
 		);
 		$reports[] = array(
 			'slug'        => 'customers/totals',
-			'description' => __( 'Customers totals.', 'woocommerce' ),
+			'description' => __( 'Customers totals.', 'woocommerce-rest-api' ),
 		);
 		$reports[] = array(
 			'slug'        => 'coupons/totals',
-			'description' => __( 'Coupons totals.', 'woocommerce' ),
+			'description' => __( 'Coupons totals.', 'woocommerce-rest-api' ),
 		);
 		$reports[] = array(
 			'slug'        => 'reviews/totals',
-			'description' => __( 'Reviews totals.', 'woocommerce' ),
+			'description' => __( 'Reviews totals.', 'woocommerce-rest-api' ),
 		);
 		$reports[] = array(
 			'slug'        => 'categories/totals',
-			'description' => __( 'Categories totals.', 'woocommerce' ),
+			'description' => __( 'Categories totals.', 'woocommerce-rest-api' ),
 		);
 		$reports[] = array(
 			'slug'        => 'tags/totals',
-			'description' => __( 'Tags totals.', 'woocommerce' ),
+			'description' => __( 'Tags totals.', 'woocommerce-rest-api' ),
 		);
 		$reports[] = array(
 			'slug'        => 'attributes/totals',
-			'description' => __( 'Attributes totals.', 'woocommerce' ),
+			'description' => __( 'Attributes totals.', 'woocommerce-rest-api' ),
 		);
 
 		return $reports;

@@ -44,7 +44,7 @@ abstract class AbstractShippingZonesController extends AbstractController {
 		$zone = \WC_Shipping_Zones::get_zone_by( 'zone_id', $zone_id );
 
 		if ( false === $zone ) {
-			return new \WP_Error( 'woocommerce_rest_shipping_zone_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_shipping_zone_invalid', __( 'Resource does not exist.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		return $zone;
@@ -58,7 +58,7 @@ abstract class AbstractShippingZonesController extends AbstractController {
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_shipping_enabled() ) {
-			return new \WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 		return parent::get_items_permissions_check( $request );
 	}
@@ -71,7 +71,7 @@ abstract class AbstractShippingZonesController extends AbstractController {
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! wc_shipping_enabled() ) {
-			return new \WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 		return parent::create_item_permissions_check( $request );
 	}
@@ -84,7 +84,7 @@ abstract class AbstractShippingZonesController extends AbstractController {
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! wc_shipping_enabled() ) {
-			return new \WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 		return parent::update_item_permissions_check( $request );
 	}
@@ -97,7 +97,7 @@ abstract class AbstractShippingZonesController extends AbstractController {
 	 */
 	public function delete_item_permissions_check( $request ) {
 		if ( ! wc_shipping_enabled() ) {
-			return new \WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 		return parent::delete_item_permissions_check( $request );
 	}

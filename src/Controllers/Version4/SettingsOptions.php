@@ -45,7 +45,7 @@ class SettingsOptions extends AbstractController {
 			array(
 				'args'   => array(
 					'group' => array(
-						'description' => __( 'Settings group ID.', 'woocommerce' ),
+						'description' => __( 'Settings group ID.', 'woocommerce-rest-api' ),
 						'type'        => 'string',
 					),
 				),
@@ -65,7 +65,7 @@ class SettingsOptions extends AbstractController {
 			array(
 				'args'   => array(
 					'group' => array(
-						'description' => __( 'Settings group ID.', 'woocommerce' ),
+						'description' => __( 'Settings group ID.', 'woocommerce-rest-api' ),
 						'type'        => 'string',
 					),
 				),
@@ -86,11 +86,11 @@ class SettingsOptions extends AbstractController {
 			array(
 				'args'   => array(
 					'group' => array(
-						'description' => __( 'Settings group ID.', 'woocommerce' ),
+						'description' => __( 'Settings group ID.', 'woocommerce-rest-api' ),
 						'type'        => 'string',
 					),
 					'id'    => array(
-						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 						'type'        => 'string',
 					),
 				),
@@ -165,13 +165,13 @@ class SettingsOptions extends AbstractController {
 	 */
 	public function get_group_settings( $group_id ) {
 		if ( empty( $group_id ) ) {
-			return new \WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$settings = apply_filters( 'woocommerce_settings-' . $group_id, array() ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 
 		if ( empty( $settings ) ) {
-			return new \WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$filtered_settings = array();
@@ -252,7 +252,7 @@ class SettingsOptions extends AbstractController {
 	 */
 	public function get_setting( $group_id, $setting_id ) {
 		if ( empty( $setting_id ) ) {
-			return new \WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$settings = $this->get_group_settings( $group_id );
@@ -264,13 +264,13 @@ class SettingsOptions extends AbstractController {
 		$array_key = array_keys( wp_list_pluck( $settings, 'id' ), $setting_id );
 
 		if ( empty( $array_key ) ) {
-			return new \WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$setting = $settings[ $array_key[0] ];
 
 		if ( ! $this->is_setting_type_valid( $setting['type'] ) ) {
-			return new \WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'rest_setting_setting_invalid', __( 'Invalid setting.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		if ( is_wp_error( $setting ) ) {
@@ -493,7 +493,7 @@ class SettingsOptions extends AbstractController {
 			'type'       => 'object',
 			'properties' => array(
 				'id'          => array(
-					'description' => __( 'A unique identifier for the setting.', 'woocommerce' ),
+					'description' => __( 'A unique identifier for the setting.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_title',
@@ -502,7 +502,7 @@ class SettingsOptions extends AbstractController {
 					'readonly'    => true,
 				),
 				'group_id'    => array(
-					'description' => __( 'An identifier for the group this setting belongs to.', 'woocommerce' ),
+					'description' => __( 'An identifier for the group this setting belongs to.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_title',
@@ -511,7 +511,7 @@ class SettingsOptions extends AbstractController {
 					'readonly'    => true,
 				),
 				'label'       => array(
-					'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
+					'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -520,7 +520,7 @@ class SettingsOptions extends AbstractController {
 					'readonly'    => true,
 				),
 				'description' => array(
-					'description' => __( 'A human readable description for the setting used in interfaces.', 'woocommerce' ),
+					'description' => __( 'A human readable description for the setting used in interfaces.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -529,18 +529,18 @@ class SettingsOptions extends AbstractController {
 					'readonly'    => true,
 				),
 				'value'       => array(
-					'description' => __( 'Setting value.', 'woocommerce' ),
+					'description' => __( 'Setting value.', 'woocommerce-rest-api' ),
 					'type'        => 'mixed',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'default'     => array(
-					'description' => __( 'Default value for the setting.', 'woocommerce' ),
+					'description' => __( 'Default value for the setting.', 'woocommerce-rest-api' ),
 					'type'        => 'mixed',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'tip'         => array(
-					'description' => __( 'Additional help text shown to the user about the setting.', 'woocommerce' ),
+					'description' => __( 'Additional help text shown to the user about the setting.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -549,7 +549,7 @@ class SettingsOptions extends AbstractController {
 					'readonly'    => true,
 				),
 				'placeholder' => array(
-					'description' => __( 'Placeholder text to be displayed in text inputs.', 'woocommerce' ),
+					'description' => __( 'Placeholder text to be displayed in text inputs.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -558,7 +558,7 @@ class SettingsOptions extends AbstractController {
 					'readonly'    => true,
 				),
 				'type'        => array(
-					'description' => __( 'Type of setting.', 'woocommerce' ),
+					'description' => __( 'Type of setting.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'arg_options' => array(
 						'sanitize_callback' => 'sanitize_text_field',
@@ -568,7 +568,7 @@ class SettingsOptions extends AbstractController {
 					'readonly'    => true,
 				),
 				'options'     => array(
-					'description' => __( 'Array of options (key value pairs) for inputs such as select, multiselect, and radio buttons.', 'woocommerce' ),
+					'description' => __( 'Array of options (key value pairs) for inputs such as select, multiselect, and radio buttons.', 'woocommerce-rest-api' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

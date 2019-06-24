@@ -181,7 +181,7 @@ class OrderRequest extends AbstractObjectRequest {
 		} elseif ( ! empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['variation_id'];
 		} else {
-			throw new \WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
+			throw new \WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce-rest-api' ), 400 );
 		}
 		return $product_id;
 	}
@@ -230,7 +230,7 @@ class OrderRequest extends AbstractObjectRequest {
 
 		if ( 'create' === $action ) {
 			if ( empty( $posted['method_id'] ) ) {
-				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_shipping_item', __( 'Shipping method ID is required.', 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_shipping_item', __( 'Shipping method ID is required.', 'woocommerce-rest-api' ), 400 );
 			}
 		}
 
@@ -254,7 +254,7 @@ class OrderRequest extends AbstractObjectRequest {
 
 		if ( 'create' === $action ) {
 			if ( empty( $posted['name'] ) ) {
-				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_fee_item', __( 'Fee name is required.', 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_fee_item', __( 'Fee name is required.', 'woocommerce-rest-api' ), 400 );
 			}
 		}
 
@@ -289,7 +289,7 @@ class OrderRequest extends AbstractObjectRequest {
 			$item = $order->get_item( absint( $posted['id'] ), false );
 
 			if ( ! $item ) {
-				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_item_id', __( 'Order item ID provided is not associated with order.', 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_item_id', __( 'Order item ID provided is not associated with order.', 'woocommerce-rest-api' ), 400 );
 			}
 		}
 
@@ -335,7 +335,7 @@ class OrderRequest extends AbstractObjectRequest {
 		if ( 0 !== $customer_id ) {
 			// Make sure customer exists.
 			if ( false === get_user_by( 'id', $customer_id ) ) {
-				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce-rest-api' ), 400 );
 			}
 
 			// Make sure customer is part of blog.
@@ -370,7 +370,7 @@ class OrderRequest extends AbstractObjectRequest {
 			if ( is_array( $item ) ) {
 				if ( empty( $item['id'] ) ) {
 					if ( empty( $item['code'] ) ) {
-						throw new \WC_REST_Exception( 'woocommerce_rest_invalid_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
+						throw new \WC_REST_Exception( 'woocommerce_rest_invalid_coupon', __( 'Coupon code is required.', 'woocommerce-rest-api' ), 400 );
 					}
 
 					$results = $order->apply_coupon( wc_clean( $item['code'] ) );

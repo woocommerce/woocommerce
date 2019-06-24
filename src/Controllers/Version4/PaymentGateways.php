@@ -57,7 +57,7 @@ class PaymentGateways extends AbstractController {
 			array(
 				'args'   => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 						'type'        => 'string',
 					),
 				),
@@ -109,7 +109,7 @@ class PaymentGateways extends AbstractController {
 		$gateway = $this->get_gateway( $request );
 
 		if ( is_null( $gateway ) ) {
-			return new \WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( 'Resource does not exist.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$gateway = $this->prepare_item_for_response( $gateway, $request );
@@ -126,7 +126,7 @@ class PaymentGateways extends AbstractController {
 		$gateway = $this->get_gateway( $request );
 
 		if ( is_null( $gateway ) ) {
-			return new \WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_payment_gateway_invalid', __( 'Resource does not exist.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		// Get settings.
@@ -152,7 +152,7 @@ class PaymentGateways extends AbstractController {
 			}
 
 			if ( $errors_found ) {
-				return new \WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new \WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 			}
 		}
 
@@ -302,23 +302,23 @@ class PaymentGateways extends AbstractController {
 			'type'       => 'object',
 			'properties' => array(
 				'id'                 => array(
-					'description' => __( 'Payment gateway ID.', 'woocommerce' ),
+					'description' => __( 'Payment gateway ID.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'title'              => array(
-					'description' => __( 'Payment gateway title on checkout.', 'woocommerce' ),
+					'description' => __( 'Payment gateway title on checkout.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'description'        => array(
-					'description' => __( 'Payment gateway description on checkout.', 'woocommerce' ),
+					'description' => __( 'Payment gateway description on checkout.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'order'              => array(
-					'description' => __( 'Payment gateway sort order.', 'woocommerce' ),
+					'description' => __( 'Payment gateway sort order.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -326,24 +326,24 @@ class PaymentGateways extends AbstractController {
 					),
 				),
 				'enabled'            => array(
-					'description' => __( 'Payment gateway enabled status.', 'woocommerce' ),
+					'description' => __( 'Payment gateway enabled status.', 'woocommerce-rest-api' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'method_title'       => array(
-					'description' => __( 'Payment gateway method title.', 'woocommerce' ),
+					'description' => __( 'Payment gateway method title.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'method_description' => array(
-					'description' => __( 'Payment gateway method description.', 'woocommerce' ),
+					'description' => __( 'Payment gateway method description.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'method_supports'    => array(
-					'description' => __( 'Supported features for this payment gateway.', 'woocommerce' ),
+					'description' => __( 'Supported features for this payment gateway.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -352,54 +352,54 @@ class PaymentGateways extends AbstractController {
 					),
 				),
 				'settings'           => array(
-					'description' => __( 'Payment gateway settings.', 'woocommerce' ),
+					'description' => __( 'Payment gateway settings.', 'woocommerce-rest-api' ),
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'id'          => array(
-							'description' => __( 'A unique identifier for the setting.', 'woocommerce' ),
+							'description' => __( 'A unique identifier for the setting.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'label'       => array(
-							'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
+							'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'description' => array(
-							'description' => __( 'A human readable description for the setting used in interfaces.', 'woocommerce' ),
+							'description' => __( 'A human readable description for the setting used in interfaces.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'type'        => array(
-							'description' => __( 'Type of setting.', 'woocommerce' ),
+							'description' => __( 'Type of setting.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'enum'        => array( 'text', 'email', 'number', 'color', 'password', 'textarea', 'select', 'multiselect', 'radio', 'image_width', 'checkbox' ),
 							'readonly'    => true,
 						),
 						'value'       => array(
-							'description' => __( 'Setting value.', 'woocommerce' ),
+							'description' => __( 'Setting value.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
 						'default'     => array(
-							'description' => __( 'Default value for the setting.', 'woocommerce' ),
+							'description' => __( 'Default value for the setting.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'tip'         => array(
-							'description' => __( 'Additional help text shown to the user about the setting.', 'woocommerce' ),
+							'description' => __( 'Additional help text shown to the user about the setting.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
 						'placeholder' => array(
-							'description' => __( 'Placeholder text to be displayed in text inputs.', 'woocommerce' ),
+							'description' => __( 'Placeholder text to be displayed in text inputs.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,

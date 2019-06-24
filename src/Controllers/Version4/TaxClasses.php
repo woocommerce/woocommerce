@@ -61,7 +61,7 @@ class TaxClasses extends AbstractController {
 			array(
 				'args' => array(
 					'slug' => array(
-						'description' => __( 'Unique slug for the resource.', 'woocommerce' ),
+						'description' => __( 'Unique slug for the resource.', 'woocommerce-rest-api' ),
 						'type'        => 'string',
 					),
 				),
@@ -73,7 +73,7 @@ class TaxClasses extends AbstractController {
 						'force' => array(
 							'default'     => false,
 							'type'        => 'boolean',
-							'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
+							'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce-rest-api' ),
 						),
 					),
 				),
@@ -95,7 +95,7 @@ class TaxClasses extends AbstractController {
 		// Add standard class.
 		$tax_classes[] = array(
 			'slug' => 'standard',
-			'name' => __( 'Standard rate', 'woocommerce' ),
+			'name' => __( 'Standard rate', 'woocommerce-rest-api' ),
 		);
 
 		$classes = \WC_Tax::get_tax_classes();
@@ -141,7 +141,7 @@ class TaxClasses extends AbstractController {
 
 		// Return error if tax class already exists.
 		if ( $exists ) {
-			return new \WP_Error( 'woocommerce_rest_tax_class_exists', __( 'Cannot create existing resource.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_tax_class_exists', __( 'Cannot create existing resource.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 
 		// Add the new class.
@@ -182,7 +182,7 @@ class TaxClasses extends AbstractController {
 
 		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
-			return new \WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Taxes do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+			return new \WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Taxes do not support trashing.', 'woocommerce-rest-api' ), array( 'status' => 501 ) );
 		}
 
 		$tax_class = array(
@@ -202,7 +202,7 @@ class TaxClasses extends AbstractController {
 		}
 
 		if ( ! $deleted ) {
-			return new \WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new \WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource id.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -277,13 +277,13 @@ class TaxClasses extends AbstractController {
 			'type'       => 'object',
 			'properties' => array(
 				'slug' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'name' => array(
-					'description' => __( 'Tax class name.', 'woocommerce' ),
+					'description' => __( 'Tax class name.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'required'    => true,

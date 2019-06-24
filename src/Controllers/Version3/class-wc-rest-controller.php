@@ -110,7 +110,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 
 		if ( $total > $limit ) {
 			/* translators: %s: items limit */
-			return new WP_Error( 'woocommerce_rest_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), array( 'status' => 413 ) );
+			return new WP_Error( 'woocommerce_rest_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce-rest-api' ), $limit ), array( 'status' => 413 ) );
 		}
 
 		return true;
@@ -254,7 +254,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		if ( array_key_exists( $value, $setting['options'] ) ) {
 			return $value;
 		} else {
-			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 	}
 
@@ -272,7 +272,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 		}
 
 		if ( ! is_array( $values ) ) {
-			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 
 		$final_values = array();
@@ -295,7 +295,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 	 */
 	public function validate_setting_image_width_field( $values, $setting ) {
 		if ( ! is_array( $values ) ) {
-			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 
 		$current = $setting['value'];
@@ -338,7 +338,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 			$value = isset( $setting['default'] ) ? $setting['default'] : 'no';
 			return $value;
 		} else {
-			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 		}
 	}
 
@@ -398,7 +398,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'create' => array(
-					'description' => __( 'List of created resources.', 'woocommerce' ),
+					'description' => __( 'List of created resources.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
@@ -406,7 +406,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 					),
 				),
 				'update' => array(
-					'description' => __( 'List of updated resources.', 'woocommerce' ),
+					'description' => __( 'List of updated resources.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
@@ -414,7 +414,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 					),
 				),
 				'delete' => array(
-					'description' => __( 'List of delete resources.', 'woocommerce' ),
+					'description' => __( 'List of delete resources.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(

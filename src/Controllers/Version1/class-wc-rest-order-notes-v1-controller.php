@@ -50,7 +50,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 		register_rest_route( $this->namespace, '/' . $this->rest_base, array(
 			'args' => array(
 				'order_id'  => array(
-					'description' => __( 'The order ID.', 'woocommerce' ),
+					'description' => __( 'The order ID.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 				),
 			),
@@ -67,7 +67,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 				'args'                => array_merge( $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ), array(
 					'note' => array(
 						'type'        => 'string',
-						'description' => __( 'Order note content.', 'woocommerce' ),
+						'description' => __( 'Order note content.', 'woocommerce-rest-api' ),
 						'required'    => true,
 					),
 				) ),
@@ -78,11 +78,11 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 		register_rest_route( $this->namespace, '/' . $this->rest_base . '/(?P<id>[\d]+)', array(
 			'args' => array(
 				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 				),
 				'order_id'  => array(
-					'description' => __( 'The order ID.', 'woocommerce' ),
+					'description' => __( 'The order ID.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 				),
 			),
@@ -102,7 +102,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 					'force' => array(
 						'default'     => false,
 						'type'        => 'boolean',
-						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
+						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce-rest-api' ),
 					),
 				),
 			),
@@ -118,7 +118,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -133,7 +133,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'create' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -149,7 +149,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 		$order = wc_get_order( (int) $request['order_id'] );
 
 		if ( $order && ! wc_rest_check_post_permissions( $this->post_type, 'read', $order->get_id() ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -166,7 +166,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 		$order = wc_get_order( (int) $request['order_id'] );
 
 		if ( $order && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $order->get_id() ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -183,7 +183,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 		$order = wc_get_order( (int) $request['order_id'] );
 
 		if ( ! $order || $this->post_type !== $order->get_type() ) {
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid order ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$args = array(
@@ -217,20 +217,20 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
 			/* translators: %s: post type */
-			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce-rest-api' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
 		$order = wc_get_order( (int) $request['order_id'] );
 
 		if ( ! $order || $this->post_type !== $order->get_type() ) {
-			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		// Create the note.
 		$note_id = $order->add_order_note( $request['note'], $request['customer_note'] );
 
 		if ( ! $note_id ) {
-			return new WP_Error( 'woocommerce_api_cannot_create_order_note', __( 'Cannot create order note, please try again.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new WP_Error( 'woocommerce_api_cannot_create_order_note', __( 'Cannot create order note, please try again.', 'woocommerce-rest-api' ), array( 'status' => 500 ) );
 		}
 
 		$note = get_comment( $note_id );
@@ -265,13 +265,13 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 		$order = wc_get_order( (int) $request['order_id'] );
 
 		if ( ! $order || $this->post_type !== $order->get_type() ) {
-			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$note = get_comment( $id );
 
 		if ( empty( $id ) || empty( $note ) || intval( $note->comment_post_ID ) !== intval( $order->get_id() ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$order_note = $this->prepare_item_for_response( $note, $request );
@@ -292,19 +292,19 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 
 		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
-			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Webhooks do not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+			return new WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Webhooks do not support trashing.', 'woocommerce-rest-api' ), array( 'status' => 501 ) );
 		}
 
 		$order = wc_get_order( (int) $request['order_id'] );
 
 		if ( ! $order || $this->post_type !== $order->get_type() ) {
-			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_order_invalid_id', __( 'Invalid order ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$note = get_comment( $id );
 
 		if ( empty( $id ) || empty( $note ) || intval( $note->comment_post_ID ) !== intval( $order->get_id() ) ) {
-			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_invalid_id', __( 'Invalid resource ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -313,7 +313,7 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 		$result = wc_delete_order_note( $note->comment_ID );
 
 		if ( ! $result ) {
-			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), 'order_note' ), array( 'status' => 500 ) );
+			return new WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce-rest-api' ), 'order_note' ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -398,24 +398,24 @@ class WC_REST_Order_Notes_V1_Controller extends WC_REST_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_created' => array(
-					'description' => __( "The date the order note was created, in the site's timezone.", 'woocommerce' ),
+					'description' => __( "The date the order note was created, in the site's timezone.", 'woocommerce-rest-api' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'note' => array(
-					'description' => __( 'Order note.', 'woocommerce' ),
+					'description' => __( 'Order note.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'customer_note' => array(
-					'description' => __( 'Shows/define if the note is only for reference or for the customer (the user will be notified).', 'woocommerce' ),
+					'description' => __( 'Shows/define if the note is only for reference or for the customer (the user will be notified).', 'woocommerce-rest-api' ),
 					'type'        => 'boolean',
 					'default'     => false,
 					'context'     => array( 'view', 'edit' ),

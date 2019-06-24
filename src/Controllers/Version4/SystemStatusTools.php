@@ -55,7 +55,7 @@ class SystemStatusTools extends AbstractController {
 			array(
 				'args'   => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 						'type'        => 'string',
 					),
 				),
@@ -85,79 +85,79 @@ class SystemStatusTools extends AbstractController {
 	public function get_tools() {
 		$tools = array(
 			'clear_transients'                   => array(
-				'name'   => __( 'WooCommerce transients', 'woocommerce' ),
-				'button' => __( 'Clear transients', 'woocommerce' ),
-				'desc'   => __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
+				'name'   => __( 'WooCommerce transients', 'woocommerce-rest-api' ),
+				'button' => __( 'Clear transients', 'woocommerce-rest-api' ),
+				'desc'   => __( 'This tool will clear the product/shop transients cache.', 'woocommerce-rest-api' ),
 			),
 			'clear_expired_transients'           => array(
-				'name'   => __( 'Expired transients', 'woocommerce' ),
-				'button' => __( 'Clear transients', 'woocommerce' ),
-				'desc'   => __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce' ),
+				'name'   => __( 'Expired transients', 'woocommerce-rest-api' ),
+				'button' => __( 'Clear transients', 'woocommerce-rest-api' ),
+				'desc'   => __( 'This tool will clear ALL expired transients from WordPress.', 'woocommerce-rest-api' ),
 			),
 			'delete_orphaned_variations'         => array(
-				'name'   => __( 'Orphaned variations', 'woocommerce' ),
-				'button' => __( 'Delete orphaned variations', 'woocommerce' ),
-				'desc'   => __( 'This tool will delete all variations which have no parent.', 'woocommerce' ),
+				'name'   => __( 'Orphaned variations', 'woocommerce-rest-api' ),
+				'button' => __( 'Delete orphaned variations', 'woocommerce-rest-api' ),
+				'desc'   => __( 'This tool will delete all variations which have no parent.', 'woocommerce-rest-api' ),
 			),
 			'clear_expired_download_permissions' => array(
-				'name'   => __( 'Used-up download permissions', 'woocommerce' ),
-				'button' => __( 'Clean up download permissions', 'woocommerce' ),
-				'desc'   => __( 'This tool will delete expired download permissions and permissions with 0 remaining downloads.', 'woocommerce' ),
+				'name'   => __( 'Used-up download permissions', 'woocommerce-rest-api' ),
+				'button' => __( 'Clean up download permissions', 'woocommerce-rest-api' ),
+				'desc'   => __( 'This tool will delete expired download permissions and permissions with 0 remaining downloads.', 'woocommerce-rest-api' ),
 			),
 			'regenerate_product_lookup_tables'   => array(
-				'name'   => __( 'Product lookup tables', 'woocommerce' ),
-				'button' => __( 'Regenerate', 'woocommerce' ),
-				'desc'   => __( 'This tool will regenerate product lookup table data. This process may take a while.', 'woocommerce' ),
+				'name'   => __( 'Product lookup tables', 'woocommerce-rest-api' ),
+				'button' => __( 'Regenerate', 'woocommerce-rest-api' ),
+				'desc'   => __( 'This tool will regenerate product lookup table data. This process may take a while.', 'woocommerce-rest-api' ),
 			),
 			'recount_terms'                      => array(
-				'name'   => __( 'Term counts', 'woocommerce' ),
-				'button' => __( 'Recount terms', 'woocommerce' ),
-				'desc'   => __( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', 'woocommerce' ),
+				'name'   => __( 'Term counts', 'woocommerce-rest-api' ),
+				'button' => __( 'Recount terms', 'woocommerce-rest-api' ),
+				'desc'   => __( 'This tool will recount product terms - useful when changing your settings in a way which hides products from the catalog.', 'woocommerce-rest-api' ),
 			),
 			'reset_roles'                        => array(
-				'name'   => __( 'Capabilities', 'woocommerce' ),
-				'button' => __( 'Reset capabilities', 'woocommerce' ),
-				'desc'   => __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce' ),
+				'name'   => __( 'Capabilities', 'woocommerce-rest-api' ),
+				'button' => __( 'Reset capabilities', 'woocommerce-rest-api' ),
+				'desc'   => __( 'This tool will reset the admin, customer and shop_manager roles to default. Use this if your users cannot access all of the WooCommerce admin pages.', 'woocommerce-rest-api' ),
 			),
 			'clear_sessions'                     => array(
-				'name'   => __( 'Clear customer sessions', 'woocommerce' ),
-				'button' => __( 'Clear', 'woocommerce' ),
+				'name'   => __( 'Clear customer sessions', 'woocommerce-rest-api' ),
+				'button' => __( 'Clear', 'woocommerce-rest-api' ),
 				'desc'   => sprintf(
 					'<strong class="red">%1$s</strong> %2$s',
-					__( 'Note:', 'woocommerce' ),
-					__( 'This tool will delete all customer session data from the database, including current carts and saved carts in the database.', 'woocommerce' )
+					__( 'Note:', 'woocommerce-rest-api' ),
+					__( 'This tool will delete all customer session data from the database, including current carts and saved carts in the database.', 'woocommerce-rest-api' )
 				),
 			),
 			'install_pages'                      => array(
-				'name'   => __( 'Create default WooCommerce pages', 'woocommerce' ),
-				'button' => __( 'Create pages', 'woocommerce' ),
+				'name'   => __( 'Create default WooCommerce pages', 'woocommerce-rest-api' ),
+				'button' => __( 'Create pages', 'woocommerce-rest-api' ),
 				'desc'   => sprintf(
 					'<strong class="red">%1$s</strong> %2$s',
-					__( 'Note:', 'woocommerce' ),
-					__( 'This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce' )
+					__( 'Note:', 'woocommerce-rest-api' ),
+					__( 'This tool will install all the missing WooCommerce pages. Pages already defined and set up will not be replaced.', 'woocommerce-rest-api' )
 				),
 			),
 			'delete_taxes'                       => array(
-				'name'   => __( 'Delete WooCommerce tax rates', 'woocommerce' ),
-				'button' => __( 'Delete tax rates', 'woocommerce' ),
+				'name'   => __( 'Delete WooCommerce tax rates', 'woocommerce-rest-api' ),
+				'button' => __( 'Delete tax rates', 'woocommerce-rest-api' ),
 				'desc'   => sprintf(
 					'<strong class="red">%1$s</strong> %2$s',
-					__( 'Note:', 'woocommerce' ),
-					__( 'This option will delete ALL of your tax rates, use with caution. This action cannot be reversed.', 'woocommerce' )
+					__( 'Note:', 'woocommerce-rest-api' ),
+					__( 'This option will delete ALL of your tax rates, use with caution. This action cannot be reversed.', 'woocommerce-rest-api' )
 				),
 			),
 			'regenerate_thumbnails'              => array(
-				'name'   => __( 'Regenerate shop thumbnails', 'woocommerce' ),
-				'button' => __( 'Regenerate', 'woocommerce' ),
-				'desc'   => __( 'This will regenerate all shop thumbnails to match your theme and/or image settings.', 'woocommerce' ),
+				'name'   => __( 'Regenerate shop thumbnails', 'woocommerce-rest-api' ),
+				'button' => __( 'Regenerate', 'woocommerce-rest-api' ),
+				'desc'   => __( 'This will regenerate all shop thumbnails to match your theme and/or image settings.', 'woocommerce-rest-api' ),
 			),
 			'db_update_routine'                  => array(
-				'name'   => __( 'Update database', 'woocommerce' ),
-				'button' => __( 'Update database', 'woocommerce' ),
+				'name'   => __( 'Update database', 'woocommerce-rest-api' ),
+				'button' => __( 'Update database', 'woocommerce-rest-api' ),
 				'desc'   => sprintf(
 					'<strong class="red">%1$s</strong> %2$s',
-					__( 'Note:', 'woocommerce' ),
-					__( 'This tool will update your WooCommerce database to the latest version. Please ensure you make sufficient backups before proceeding.', 'woocommerce' )
+					__( 'Note:', 'woocommerce-rest-api' ),
+					__( 'This tool will update your WooCommerce database to the latest version. Please ensure you make sufficient backups before proceeding.', 'woocommerce-rest-api' )
 				),
 			),
 		);
@@ -205,7 +205,7 @@ class SystemStatusTools extends AbstractController {
 	public function get_item( $request ) {
 		$tools = $this->get_tools();
 		if ( empty( $tools[ $request['id'] ] ) ) {
-			return new \WP_Error( 'woocommerce_rest_system_status_tool_invalid_id', __( 'Invalid tool ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_system_status_tool_invalid_id', __( 'Invalid tool ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 		$tool = $tools[ $request['id'] ];
 		return rest_ensure_response(
@@ -230,7 +230,7 @@ class SystemStatusTools extends AbstractController {
 	public function update_item( $request ) {
 		$tools = $this->get_tools();
 		if ( empty( $tools[ $request['id'] ] ) ) {
-			return new \WP_Error( 'woocommerce_rest_system_status_tool_invalid_id', __( 'Invalid tool ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_system_status_tool_invalid_id', __( 'Invalid tool ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$tool = $tools[ $request['id'] ];
@@ -269,7 +269,7 @@ class SystemStatusTools extends AbstractController {
 			'type'       => 'object',
 			'properties' => array(
 				'id'          => array(
-					'description' => __( 'A unique identifier for the tool.', 'woocommerce' ),
+					'description' => __( 'A unique identifier for the tool.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -277,7 +277,7 @@ class SystemStatusTools extends AbstractController {
 					),
 				),
 				'name'        => array(
-					'description' => __( 'Tool name.', 'woocommerce' ),
+					'description' => __( 'Tool name.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -285,7 +285,7 @@ class SystemStatusTools extends AbstractController {
 					),
 				),
 				'action'      => array(
-					'description' => __( 'What running the tool will do.', 'woocommerce' ),
+					'description' => __( 'What running the tool will do.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -293,7 +293,7 @@ class SystemStatusTools extends AbstractController {
 					),
 				),
 				'description' => array(
-					'description' => __( 'Tool description.', 'woocommerce' ),
+					'description' => __( 'Tool description.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -301,12 +301,12 @@ class SystemStatusTools extends AbstractController {
 					),
 				),
 				'success'     => array(
-					'description' => __( 'Did the tool run successfully?', 'woocommerce' ),
+					'description' => __( 'Did the tool run successfully?', 'woocommerce-rest-api' ),
 					'type'        => 'boolean',
 					'context'     => array( 'edit' ),
 				),
 				'message'     => array(
-					'description' => __( 'Tool return message.', 'woocommerce' ),
+					'description' => __( 'Tool return message.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'edit' ),
 					'arg_options' => array(
@@ -362,23 +362,23 @@ class SystemStatusTools extends AbstractController {
 
 		try {
 			if ( ! isset( $tools[ $tool ] ) ) {
-				throw new Exception( __( 'There was an error calling this tool. There is no callback present.', 'woocommerce' ) );
+				throw new Exception( __( 'There was an error calling this tool. There is no callback present.', 'woocommerce-rest-api' ) );
 			}
 
 			$callback = isset( $tools[ $tool ]['callback'] ) ? $tools[ $tool ]['callback'] : array( $this, $tool );
 
 			if ( ! is_callable( $callback ) ) {
-				throw new Exception( __( 'There was an error calling this tool. Invalid callback.', 'woocommerce' ) );
+				throw new Exception( __( 'There was an error calling this tool. Invalid callback.', 'woocommerce-rest-api' ) );
 			}
 
 			$message = call_user_func( $callback );
 
 			if ( false === $message ) {
-				throw new Exception( __( 'There was an error calling this tool. Invalid callback.', 'woocommerce' ) );
+				throw new Exception( __( 'There was an error calling this tool. Invalid callback.', 'woocommerce-rest-api' ) );
 			}
 
 			if ( empty( $message ) || ! is_string( $message ) ) {
-				$message = __( 'Tool ran.', 'woocommerce' );
+				$message = __( 'Tool ran.', 'woocommerce-rest-api' );
 			}
 
 			$ran = true;
@@ -412,7 +412,7 @@ class SystemStatusTools extends AbstractController {
 		}
 
 		\WC_Cache_Helper::get_transient_version( 'shipping', true );
-		return __( 'Product transients cleared', 'woocommerce' );
+		return __( 'Product transients cleared', 'woocommerce-rest-api' );
 	}
 
 	/**
@@ -422,7 +422,7 @@ class SystemStatusTools extends AbstractController {
 	 */
 	protected function clear_expired_transients() {
 		/* translators: %d: amount of expired transients */
-		return sprintf( __( '%d transients rows cleared', 'woocommerce' ), wc_delete_expired_transients() );
+		return sprintf( __( '%d transients rows cleared', 'woocommerce-rest-api' ), wc_delete_expired_transients() );
 	}
 
 	/**
@@ -442,7 +442,7 @@ class SystemStatusTools extends AbstractController {
 			)
 		);
 		/* translators: %d: amount of orphaned variations */
-		return sprintf( __( '%d orphaned variations deleted', 'woocommerce' ), $result );
+		return sprintf( __( '%d orphaned variations deleted', 'woocommerce-rest-api' ), $result );
 	}
 
 	/**
@@ -463,7 +463,7 @@ class SystemStatusTools extends AbstractController {
 			)
 		);
 		/* translators: %d: amount of permissions */
-		return sprintf( __( '%d permissions deleted', 'woocommerce' ), $result );
+		return sprintf( __( '%d permissions deleted', 'woocommerce-rest-api' ), $result );
 	}
 
 	/**
@@ -475,7 +475,7 @@ class SystemStatusTools extends AbstractController {
 		if ( ! wc_update_product_lookup_tables_is_running() ) {
 			wc_update_product_lookup_tables();
 		}
-		return __( 'Lookup tables are regenerating', 'woocommerce' );
+		return __( 'Lookup tables are regenerating', 'woocommerce-rest-api' );
 	}
 
 	/**
@@ -486,7 +486,7 @@ class SystemStatusTools extends AbstractController {
 	protected function reset_roles() {
 		\WC_Install::remove_roles();
 		\WC_Install::create_roles();
-		return __( 'Roles successfully reset', 'woocommerce' );
+		return __( 'Roles successfully reset', 'woocommerce-rest-api' );
 	}
 
 	/**
@@ -511,7 +511,7 @@ class SystemStatusTools extends AbstractController {
 			)
 		);
 		_wc_term_recount( $product_tags, get_taxonomy( 'product_tag' ), true, false );
-		return __( 'Terms successfully recounted', 'woocommerce' );
+		return __( 'Terms successfully recounted', 'woocommerce-rest-api' );
 	}
 
 	/**
@@ -526,7 +526,7 @@ class SystemStatusTools extends AbstractController {
 		$result = absint( $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key='_woocommerce_persistent_cart_" . get_current_blog_id() . "';" ) ); // WPCS: unprepared SQL ok.
 		wp_cache_flush();
 		/* translators: %d: amount of sessions */
-		return sprintf( __( 'Deleted all active sessions, and %d saved carts.', 'woocommerce' ), absint( $result ) );
+		return sprintf( __( 'Deleted all active sessions, and %d saved carts.', 'woocommerce-rest-api' ), absint( $result ) );
 	}
 
 	/**
@@ -536,7 +536,7 @@ class SystemStatusTools extends AbstractController {
 	 */
 	protected function install_pages() {
 		\WC_Install::create_pages();
-		return __( 'All missing WooCommerce pages successfully installed', 'woocommerce' );
+		return __( 'All missing WooCommerce pages successfully installed', 'woocommerce-rest-api' );
 	}
 
 	/**
@@ -549,7 +549,7 @@ class SystemStatusTools extends AbstractController {
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rates;" );
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}woocommerce_tax_rate_locations;" );
 		\WC_Cache_Helper::incr_cache_prefix( 'taxes' );
-		return __( 'Tax rates successfully deleted', 'woocommerce' );
+		return __( 'Tax rates successfully deleted', 'woocommerce-rest-api' );
 	}
 
 	/**
@@ -559,7 +559,7 @@ class SystemStatusTools extends AbstractController {
 	 */
 	protected function regenerate_thumbnails() {
 		\WC_Regenerate_Images::queue_image_regeneration();
-		return __( 'Thumbnail regeneration has been scheduled to run in the background.', 'woocommerce' );
+		return __( 'Thumbnail regeneration has been scheduled to run in the background.', 'woocommerce-rest-api' );
 	}
 
 	/**
@@ -572,6 +572,6 @@ class SystemStatusTools extends AbstractController {
 		// Used to fire an action added in WP_Background_Process::_construct() that calls WP_Background_Process::handle_cron_healthcheck().
 		// This method will make sure the database updates are executed even if cron is disabled. Nothing will happen if the updates are already running.
 		do_action( 'wp_' . $blog_id . '_wc_updater_cron' );
-		return __( 'Database upgrade routine has been scheduled to run in the background.', 'woocommerce' );
+		return __( 'Database upgrade routine has been scheduled to run in the background.', 'woocommerce-rest-api' );
 	}
 }

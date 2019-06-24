@@ -94,7 +94,7 @@ abstract class AbstractController extends WP_REST_Controller {
 		$routes['schema'] = [ $this, 'get_public_item_schema' ];
 		$routes['args']   = [
 			'id' => [
-				'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+				'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 				'type'        => 'integer',
 			],
 		];
@@ -131,7 +131,7 @@ abstract class AbstractController extends WP_REST_Controller {
 				'args'                => array(
 					'force' => array(
 						'default'     => false,
-						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+						'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce-rest-api' ),
 						'type'        => 'boolean',
 					),
 				),
@@ -171,7 +171,7 @@ abstract class AbstractController extends WP_REST_Controller {
 		$permission = Permissions::user_can_list( $this->get_item_title() );
 
 		if ( false === $permission ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return $permission;
@@ -188,7 +188,7 @@ abstract class AbstractController extends WP_REST_Controller {
 		$permission = Permissions::user_can_create( $this->get_item_title() );
 
 		if ( false === $permission ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return $permission;
@@ -205,7 +205,7 @@ abstract class AbstractController extends WP_REST_Controller {
 		$permission = Permissions::user_can_read( $this->get_item_title(), $id );
 
 		if ( false === $permission ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return $permission;
@@ -223,7 +223,7 @@ abstract class AbstractController extends WP_REST_Controller {
 		$permission = Permissions::user_can_edit( $this->get_item_title(), $id );
 
 		if ( false === $permission ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you are not allowed to edit this resource.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return $permission;
@@ -241,7 +241,7 @@ abstract class AbstractController extends WP_REST_Controller {
 		$permission = Permissions::user_can_delete( $this->get_item_title(), $id );
 
 		if ( false === $permission ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Sorry, you are not allowed to delete this resource.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return $permission;
@@ -258,7 +258,7 @@ abstract class AbstractController extends WP_REST_Controller {
 		$permission = Permissions::user_can_batch( $this->get_item_title() );
 
 		if ( false === $permission ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_batch', __( 'Sorry, you are not allowed to batch manipulate this resource.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return $permission;

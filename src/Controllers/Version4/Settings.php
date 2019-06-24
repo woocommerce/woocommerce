@@ -75,7 +75,7 @@ class Settings extends AbstractController {
 	public function get_items( $request ) {
 		$groups = apply_filters( 'woocommerce_settings_groups', array() );
 		if ( empty( $groups ) ) {
-			return new \WP_Error( 'rest_setting_groups_empty', __( 'No setting groups have been registered.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'rest_setting_groups_empty', __( 'No setting groups have been registered.', 'woocommerce-rest-api' ), array( 'status' => 500 ) );
 		}
 
 		$defaults        = $this->group_defaults();
@@ -176,27 +176,27 @@ class Settings extends AbstractController {
 			'type'       => 'object',
 			'properties' => array(
 				'id'          => array(
-					'description' => __( 'A unique identifier that can be used to link settings together.', 'woocommerce' ),
+					'description' => __( 'A unique identifier that can be used to link settings together.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'label'       => array(
-					'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce' ),
+					'description' => __( 'A human readable label for the setting used in interfaces.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'description' => array(
-					'description' => __( 'A human readable description for the setting used in interfaces.', 'woocommerce' ),
+					'description' => __( 'A human readable description for the setting used in interfaces.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'parent_id'   => array(
-					'description' => __( 'ID of parent grouping.', 'woocommerce' ),
+					'description' => __( 'ID of parent grouping.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'sub_groups'  => array(
-					'description' => __( 'IDs for settings sub groups.', 'woocommerce' ),
+					'description' => __( 'IDs for settings sub groups.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),

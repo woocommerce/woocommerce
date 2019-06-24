@@ -47,7 +47,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			if ( is_array( $item ) ) {
 				if ( empty( $item['id'] ) ) {
 					if ( empty( $item['code'] ) ) {
-						throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon', __( 'Coupon code is required.', 'woocommerce' ), 400 );
+						throw new WC_REST_Exception( 'woocommerce_rest_invalid_coupon', __( 'Coupon code is required.', 'woocommerce-rest-api' ), 400 );
 					}
 
 					$results = $order->apply_coupon( wc_clean( $item['code'] ) );
@@ -157,7 +157,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
 				// Make sure customer exists.
 				if ( false === get_user_by( 'id', $request['customer_id'] ) ) {
-					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
+					throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce-rest-api' ), 400 );
 				}
 
 				// Make sure customer is part of blog.
@@ -257,7 +257,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		$params['status'] = array(
 			'default'           => 'any',
-			'description'       => __( 'Limit result set to orders which have specific statuses.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to orders which have specific statuses.', 'woocommerce-rest-api' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'string',

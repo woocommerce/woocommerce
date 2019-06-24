@@ -33,7 +33,7 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 			array(
 				'args'   => array(
 					'attribute_id' => array(
-						'description' => __( 'Unique identifier for the attribute of the terms.', 'woocommerce' ),
+						'description' => __( 'Unique identifier for the attribute of the terms.', 'woocommerce-rest-api' ),
 						'type'        => 'integer',
 					),
 				),
@@ -52,7 +52,7 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 						array(
 							'name' => array(
 								'type'        => 'string',
-								'description' => __( 'Name for the resource.', 'woocommerce' ),
+								'description' => __( 'Name for the resource.', 'woocommerce-rest-api' ),
 								'required'    => true,
 							),
 						)
@@ -69,11 +69,11 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 			array(
 				'args'   => array(
 					'id'           => array(
-						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 						'type'        => 'integer',
 					),
 					'attribute_id' => array(
-						'description' => __( 'Unique identifier for the attribute of the terms.', 'woocommerce' ),
+						'description' => __( 'Unique identifier for the attribute of the terms.', 'woocommerce-rest-api' ),
 						'type'        => 'integer',
 					),
 				),
@@ -99,7 +99,7 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 						'force' => array(
 							'default'     => false,
 							'type'        => 'boolean',
-							'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
+							'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce-rest-api' ),
 						),
 					),
 				),
@@ -114,7 +114,7 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 			array(
 				'args' => array(
 					'attribute_id' => array(
-						'description' => __( 'Unique identifier for the attribute of the terms.', 'woocommerce' ),
+						'description' => __( 'Unique identifier for the attribute of the terms.', 'woocommerce-rest-api' ),
 						'type'        => 'integer',
 					),
 				),
@@ -177,13 +177,13 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 			'type'                 => 'object',
 			'properties'           => array(
 				'id' => array(
-					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+					'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'name' => array(
-					'description' => __( 'Term name.', 'woocommerce' ),
+					'description' => __( 'Term name.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -191,7 +191,7 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 					),
 				),
 				'slug' => array(
-					'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woocommerce' ),
+					'description' => __( 'An alphanumeric identifier for the resource unique to its type.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -199,7 +199,7 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 					),
 				),
 				'description' => array(
-					'description' => __( 'HTML description of the resource.', 'woocommerce' ),
+					'description' => __( 'HTML description of the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
@@ -207,12 +207,12 @@ class ProductAttributeTerms extends AbstractTermsContoller {
 					),
 				),
 				'menu_order' => array(
-					'description' => __( 'Menu order, used to custom sort the resource.', 'woocommerce' ),
+					'description' => __( 'Menu order, used to custom sort the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'count' => array(
-					'description' => __( 'Number of published products for the resource.', 'woocommerce' ),
+					'description' => __( 'Number of published products for the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,

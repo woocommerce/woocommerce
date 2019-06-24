@@ -59,7 +59,7 @@ class WC_REST_Reports_V1_Controller extends WC_REST_Controller {
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'reports', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce-rest-api' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		return true;
@@ -75,11 +75,11 @@ class WC_REST_Reports_V1_Controller extends WC_REST_Controller {
 		return array(
 			array(
 				'slug'        => 'sales',
-				'description' => __( 'List of sales reports.', 'woocommerce' ),
+				'description' => __( 'List of sales reports.', 'woocommerce-rest-api' ),
 			),
 			array(
 				'slug'        => 'top_sellers',
-				'description' => __( 'List of top sellers products.', 'woocommerce' ),
+				'description' => __( 'List of top sellers products.', 'woocommerce-rest-api' ),
 			),
 		);
 	}
@@ -154,13 +154,13 @@ class WC_REST_Reports_V1_Controller extends WC_REST_Controller {
 			'type'       => 'object',
 			'properties' => array(
 				'slug' => array(
-					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce' ),
+					'description' => __( 'An alphanumeric identifier for the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'description' => array(
-					'description' => __( 'A human-readable description of the resource.', 'woocommerce' ),
+					'description' => __( 'A human-readable description of the resource.', 'woocommerce-rest-api' ),
 					'type'        => 'string',
 					'context'     => array( 'view' ),
 					'readonly'    => true,

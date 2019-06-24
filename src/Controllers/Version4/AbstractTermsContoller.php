@@ -68,7 +68,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 						array(
 							'name' => array(
 								'type'        => 'string',
-								'description' => __( 'Name for the resource.', 'woocommerce' ),
+								'description' => __( 'Name for the resource.', 'woocommerce-rest-api' ),
 								'required'    => true,
 							),
 						)
@@ -85,7 +85,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 			array(
 				'args'   => array(
 					'id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce-rest-api' ),
 						'type'        => 'integer',
 					),
 				),
@@ -111,7 +111,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 						'force' => array(
 							'default'     => false,
 							'type'        => 'boolean',
-							'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
+							'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce-rest-api' ),
 						),
 					),
 				),
@@ -234,7 +234,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		}
 		if ( isset( $request['parent'] ) ) {
 			if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
-				return new \WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new \WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 			}
 			$args['parent'] = $request['parent'];
 		}
@@ -331,7 +331,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		}
 		if ( isset( $request['parent'] ) ) {
 			if ( ! is_taxonomy_hierarchical( $taxonomy ) ) {
-				return new \WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce' ), array( 'status' => 400 ) );
+				return new \WP_Error( 'woocommerce_rest_taxonomy_not_hierarchical', __( 'Can not set resource parent, taxonomy is not hierarchical.', 'woocommerce-rest-api' ), array( 'status' => 400 ) );
 			}
 			$prepared_args['parent'] = $request['parent'];
 		}
@@ -380,7 +380,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 
 		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
-			return new \WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Resource does not support trashing.', 'woocommerce' ), array( 'status' => 501 ) );
+			return new \WP_Error( 'woocommerce_rest_trash_not_supported', __( 'Resource does not support trashing.', 'woocommerce-rest-api' ), array( 'status' => 501 ) );
 		}
 
 		$term = get_term( (int) $request['id'], $taxonomy );
@@ -389,7 +389,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 
 		// Prevent deleting the default product category.
 		if ( $default_category_id === (int) $request['id'] ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Default product category cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'Default product category cannot be deleted.', 'woocommerce-rest-api' ), array( 'status' => 500 ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -397,7 +397,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 
 		$retval = wp_delete_term( $term->term_id, $term->taxonomy );
 		if ( ! $retval ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', __( 'The resource cannot be deleted.', 'woocommerce-rest-api' ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -545,7 +545,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 		$params['context']['default'] = 'view';
 
 		$params['exclude'] = array(
-			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
+			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce-rest-api' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -554,7 +554,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 		$params['include'] = array(
-			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to specific ids.', 'woocommerce-rest-api' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -564,14 +564,14 @@ abstract class AbstractTermsContoller extends AbstractController {
 		);
 		if ( ! $taxonomy->hierarchical ) {
 			$params['offset'] = array(
-				'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
+				'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce-rest-api' ),
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 				'validate_callback' => 'rest_validate_request_arg',
 			);
 		}
 		$params['order']      = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-rest-api' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_key',
 			'default'           => 'asc',
@@ -582,7 +582,7 @@ abstract class AbstractTermsContoller extends AbstractController {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['orderby']    = array(
-			'description'       => __( 'Sort collection by resource attribute.', 'woocommerce' ),
+			'description'       => __( 'Sort collection by resource attribute.', 'woocommerce-rest-api' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_key',
 			'default'           => 'name',
@@ -598,27 +598,27 @@ abstract class AbstractTermsContoller extends AbstractController {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['hide_empty'] = array(
-			'description'       => __( 'Whether to hide resources not assigned to any products.', 'woocommerce' ),
+			'description'       => __( 'Whether to hide resources not assigned to any products.', 'woocommerce-rest-api' ),
 			'type'              => 'boolean',
 			'default'           => false,
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		if ( $taxonomy->hierarchical ) {
 			$params['parent'] = array(
-				'description'       => __( 'Limit result set to resources assigned to a specific parent.', 'woocommerce' ),
+				'description'       => __( 'Limit result set to resources assigned to a specific parent.', 'woocommerce-rest-api' ),
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 				'validate_callback' => 'rest_validate_request_arg',
 			);
 		}
 		$params['product'] = array(
-			'description'       => __( 'Limit result set to resources assigned to a specific product.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to resources assigned to a specific product.', 'woocommerce-rest-api' ),
 			'type'              => 'integer',
 			'default'           => null,
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 		$params['slug']    = array(
-			'description'       => __( 'Limit result set to resources with a specific slug.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to resources with a specific slug.', 'woocommerce-rest-api' ),
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

@@ -29,7 +29,7 @@ class ProductVariationRequest extends ProductRequest {
 		$parent = wc_get_product( $object->get_parent_id() );
 
 		if ( ! $parent ) {
-			throw new \WC_REST_Exception( 'woocommerce_rest_product_variation_invalid_parent', __( 'Invalid parent product.', 'woocommerce' ), 404 );
+			throw new \WC_REST_Exception( 'woocommerce_rest_product_variation_invalid_parent', __( 'Invalid parent product.', 'woocommerce-rest-api' ), 404 );
 		}
 
 		$this->set_common_props( $object );

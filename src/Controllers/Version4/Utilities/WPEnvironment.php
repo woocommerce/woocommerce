@@ -46,23 +46,23 @@ class WPEnvironment {
 	public function get_pages() {
 		// WC pages to check against.
 		$check_pages = array(
-			_x( 'Shop base', 'Page setting', 'woocommerce' ) => array(
+			_x( 'Shop base', 'Page setting', 'woocommerce-rest-api' ) => array(
 				'option'    => 'woocommerce_shop_page_id',
 				'shortcode' => '',
 			),
-			_x( 'Cart', 'Page setting', 'woocommerce' ) => array(
+			_x( 'Cart', 'Page setting', 'woocommerce-rest-api' ) => array(
 				'option'    => 'woocommerce_cart_page_id',
 				'shortcode' => '[' . apply_filters( 'woocommerce_cart_shortcode_tag', 'woocommerce_cart' ) . ']',
 			),
-			_x( 'Checkout', 'Page setting', 'woocommerce' ) => array(
+			_x( 'Checkout', 'Page setting', 'woocommerce-rest-api' ) => array(
 				'option'    => 'woocommerce_checkout_page_id',
 				'shortcode' => '[' . apply_filters( 'woocommerce_checkout_shortcode_tag', 'woocommerce_checkout' ) . ']',
 			),
-			_x( 'My account', 'Page setting', 'woocommerce' ) => array(
+			_x( 'My account', 'Page setting', 'woocommerce-rest-api' ) => array(
 				'option'    => 'woocommerce_myaccount_page_id',
 				'shortcode' => '[' . apply_filters( 'woocommerce_my_account_shortcode_tag', 'woocommerce_my_account' ) . ']',
 			),
-			_x( 'Terms and conditions', 'Page setting', 'woocommerce' ) => array(
+			_x( 'Terms and conditions', 'Page setting', 'woocommerce-rest-api' ) => array(
 				'option'    => 'woocommerce_terms_page_id',
 				'shortcode' => '',
 			),

@@ -63,7 +63,7 @@ class Currencies extends DataController {
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
 						'location' => array(
-							'description' => __( 'ISO4217 currency code.', 'woocommerce' ),
+							'description' => __( 'ISO4217 currency code.', 'woocommerce-rest-api' ),
 							'type'        => 'string',
 						),
 					),
@@ -123,7 +123,7 @@ class Currencies extends DataController {
 	public function get_item( $request ) {
 		$data = $this->get_currency( strtoupper( $request['currency'] ), $request );
 		if ( empty( $data ) ) {
-			return new \WP_Error( 'woocommerce_rest_data_invalid_currency', __( 'There are no currencies matching these parameters.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( 'woocommerce_rest_data_invalid_currency', __( 'There are no currencies matching these parameters.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 		return $this->prepare_item_for_response( $data, $request );
 	}
@@ -185,19 +185,19 @@ class Currencies extends DataController {
 			'properties' => array(
 				'code'   => array(
 					'type'        => 'string',
-					'description' => __( 'ISO4217 currency code.', 'woocommerce' ),
+					'description' => __( 'ISO4217 currency code.', 'woocommerce-rest-api' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'name'   => array(
 					'type'        => 'string',
-					'description' => __( 'Full name of currency.', 'woocommerce' ),
+					'description' => __( 'Full name of currency.', 'woocommerce-rest-api' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
 				'symbol' => array(
 					'type'        => 'string',
-					'description' => __( 'Currency symbol.', 'woocommerce' ),
+					'description' => __( 'Currency symbol.', 'woocommerce-rest-api' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),

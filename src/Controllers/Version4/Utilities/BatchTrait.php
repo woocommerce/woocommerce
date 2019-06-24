@@ -94,7 +94,7 @@ trait BatchTrait {
 			'type'       => 'object',
 			'properties' => array(
 				'create' => array(
-					'description' => __( 'List of created resources.', 'woocommerce' ),
+					'description' => __( 'List of created resources.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
@@ -102,7 +102,7 @@ trait BatchTrait {
 					),
 				),
 				'update' => array(
-					'description' => __( 'List of updated resources.', 'woocommerce' ),
+					'description' => __( 'List of updated resources.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
@@ -110,7 +110,7 @@ trait BatchTrait {
 					),
 				),
 				'delete' => array(
-					'description' => __( 'List of delete resources.', 'woocommerce' ),
+					'description' => __( 'List of delete resources.', 'woocommerce-rest-api' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
@@ -152,7 +152,7 @@ trait BatchTrait {
 
 		if ( $total > $limit ) {
 			/* translators: %s: items limit */
-			return new \WP_Error( 'woocommerce_rest_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), array( 'status' => 413 ) );
+			return new \WP_Error( 'woocommerce_rest_request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce-rest-api' ), $limit ), array( 'status' => 413 ) );
 		}
 
 		return true;

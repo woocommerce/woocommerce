@@ -68,7 +68,7 @@ abstract class AbstractObjectsController extends AbstractController {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( ! $object || 0 === $object->get_id() ) {
-			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$data     = $this->prepare_item_for_response( $object, $request );
@@ -112,7 +112,7 @@ abstract class AbstractObjectsController extends AbstractController {
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
 			/* translators: %s: post type */
-			return new \WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_exists", sprintf( __( 'Cannot create existing %s.', 'woocommerce-rest-api' ), $this->post_type ), array( 'status' => 400 ) );
 		}
 
 		$object = $this->save_object( $request, true );
@@ -159,7 +159,7 @@ abstract class AbstractObjectsController extends AbstractController {
 		$object = $this->get_object( (int) $request['id'] );
 
 		if ( ! $object || 0 === $object->get_id() ) {
-			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$object = $this->save_object( $request, false );
@@ -318,14 +318,14 @@ abstract class AbstractObjectsController extends AbstractController {
 		$result = false;
 
 		if ( ! $object || 0 === $object->get_id() ) {
-			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		$supports_trash = $this->supports_trash( $object );
 
 		if ( ! Permissions::user_can_delete( $this->post_type, $object->get_id() ) ) {
 			/* translators: %s: post type */
-			return new \WP_Error( "woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( "woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce-rest-api' ), $this->post_type ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -339,13 +339,13 @@ abstract class AbstractObjectsController extends AbstractController {
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
 				/* translators: %s: post type */
-				return new \WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ), array( 'status' => 501 ) );
+				return new \WP_Error( 'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce-rest-api' ), $this->post_type ), array( 'status' => 501 ) );
 			}
 
 			// Otherwise, only trash if we haven't already.
 			if ( is_callable( array( $object, 'get_status' ) ) && 'trash' === $object->get_status() ) {
 				/* translators: %s: post type */
-				return new \WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 410 ) );
+				return new \WP_Error( 'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce-rest-api' ), $this->post_type ), array( 'status' => 410 ) );
 			} else {
 				$object->delete();
 				$result = is_callable( array( $object, 'get_status' ) ) ? 'trash' === $object->get_status() : true;
@@ -354,7 +354,7 @@ abstract class AbstractObjectsController extends AbstractController {
 
 		if ( ! $result ) {
 			/* translators: %s: post type */
-			return new \WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array( 'status' => 500 ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce-rest-api' ), $this->post_type ), array( 'status' => 500 ) );
 		}
 
 		$response = new \WP_REST_Response();
@@ -428,7 +428,7 @@ abstract class AbstractObjectsController extends AbstractController {
 		$params['context']['default'] = 'view';
 
 		$params['page'] = array(
-			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
+			'description'       => __( 'Current page of the collection.', 'woocommerce-rest-api' ),
 			'type'              => 'integer',
 			'default'           => 1,
 			'sanitize_callback' => 'absint',
@@ -437,7 +437,7 @@ abstract class AbstractObjectsController extends AbstractController {
 		);
 
 		$params['per_page'] = array(
-			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
+			'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce-rest-api' ),
 			'type'              => 'integer',
 			'default'           => 10,
 			'minimum'           => 1,
@@ -447,28 +447,28 @@ abstract class AbstractObjectsController extends AbstractController {
 		);
 
 		$params['search'] = array(
-			'description'       => __( 'Limit results to those matching a string.', 'woocommerce' ),
+			'description'       => __( 'Limit results to those matching a string.', 'woocommerce-rest-api' ),
 			'type'              => 'string',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['after'] = array(
-			'description'       => __( 'Limit response to resources created after a given ISO8601 compliant date.', 'woocommerce' ),
+			'description'       => __( 'Limit response to resources created after a given ISO8601 compliant date.', 'woocommerce-rest-api' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['before'] = array(
-			'description'       => __( 'Limit response to resources created before a given ISO8601 compliant date.', 'woocommerce' ),
+			'description'       => __( 'Limit response to resources created before a given ISO8601 compliant date.', 'woocommerce-rest-api' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['date_column'] = array(
-			'description'       => __( 'When limiting response using after/before, which date column to compare against.', 'woocommerce' ),
+			'description'       => __( 'When limiting response using after/before, which date column to compare against.', 'woocommerce-rest-api' ),
 			'type'              => 'string',
 			'default'           => 'date',
 			'enum'              => array(
@@ -481,14 +481,14 @@ abstract class AbstractObjectsController extends AbstractController {
 		);
 
 		$params['modified_before'] = array(
-			'description'       => __( 'Limit response to resources modified before a given ISO8601 compliant date.', 'woocommerce' ),
+			'description'       => __( 'Limit response to resources modified before a given ISO8601 compliant date.', 'woocommerce-rest-api' ),
 			'type'              => 'string',
 			'format'            => 'date-time',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['exclude'] = array(
-			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
+			'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce-rest-api' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -498,7 +498,7 @@ abstract class AbstractObjectsController extends AbstractController {
 		);
 
 		$params['include'] = array(
-			'description'       => __( 'Limit result set to specific ids.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to specific ids.', 'woocommerce-rest-api' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type' => 'integer',
@@ -508,14 +508,14 @@ abstract class AbstractObjectsController extends AbstractController {
 		);
 
 		$params['offset'] = array(
-			'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
+			'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce-rest-api' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['order'] = array(
-			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
+			'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce-rest-api' ),
 			'type'              => 'string',
 			'default'           => 'desc',
 			'enum'              => array( 'asc', 'desc' ),
@@ -523,7 +523,7 @@ abstract class AbstractObjectsController extends AbstractController {
 		);
 
 		$params['orderby'] = array(
-			'description'       => __( 'Sort collection by object attribute.', 'woocommerce' ),
+			'description'       => __( 'Sort collection by object attribute.', 'woocommerce-rest-api' ),
 			'type'              => 'string',
 			'default'           => 'date',
 			'enum'              => array(
@@ -539,7 +539,7 @@ abstract class AbstractObjectsController extends AbstractController {
 
 		if ( $this->hierarchical ) {
 			$params['parent'] = array(
-				'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce' ),
+				'description'       => __( 'Limit result set to those of particular parent IDs.', 'woocommerce-rest-api' ),
 				'type'              => 'array',
 				'items'             => array(
 					'type' => 'integer',
@@ -549,7 +549,7 @@ abstract class AbstractObjectsController extends AbstractController {
 			);
 
 			$params['parent_exclude'] = array(
-				'description'       => __( 'Limit result set to all items except those of a particular parent ID.', 'woocommerce' ),
+				'description'       => __( 'Limit result set to all items except those of a particular parent ID.', 'woocommerce-rest-api' ),
 				'type'              => 'array',
 				'items'             => array(
 					'type' => 'integer',
@@ -723,7 +723,7 @@ abstract class AbstractObjectsController extends AbstractController {
 		$object = $this->get_object( $id );
 
 		if ( ! $object || 0 === $object->get_id() ) {
-			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		return parent::get_item_permissions_check( $request );
@@ -741,7 +741,7 @@ abstract class AbstractObjectsController extends AbstractController {
 		$object = $this->get_object( $id );
 
 		if ( ! $object || 0 === $object->get_id() ) {
-			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		return parent::update_item_permissions_check( $request );
@@ -759,7 +759,7 @@ abstract class AbstractObjectsController extends AbstractController {
 		$object = $this->get_object( $id );
 
 		if ( ! $object || 0 === $object->get_id() ) {
-			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new \WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'Invalid ID.', 'woocommerce-rest-api' ), array( 'status' => 404 ) );
 		}
 
 		return parent::delete_item_permissions_check( $request );
