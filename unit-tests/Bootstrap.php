@@ -21,14 +21,14 @@ class Bootstrap {
 	protected $wp_tests_dir;
 
 	/**
-	 * unit-tests directory.
+	 * Tests directory.
 	 *
 	 * @var string
 	 */
 	protected $tests_dir;
 
 	/**
-	 * WC Core unit-tests directory.
+	 * WC Core unit tests directory.
 	 *
 	 * @var string
 	 */

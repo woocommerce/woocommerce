@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit
-	bootstrap="unit-tests/Bootstrap.php"
+	bootstrap="tests/Bootstrap.php"
 	backupGlobals="false"
 	colors="true"
 	convertErrorsToExceptions="true"
@@ -11,10 +11,10 @@
 	>
 	<testsuites>
 		<testsuite name="WooCommerce REST API Test Suite">
-			<directory suffix=".php">./unit-tests/Tests</directory>
+			<directory suffix=".php">./tests/Tests</directory>
 		</testsuite>
 		<testsuite name="v4">
-			<directory suffix=".php">./unit-tests/Tests/Version4</directory>
+			<directory suffix=".php">./tests/Tests/Version4</directory>
 		</testsuite>
 	</testsuites>
 </phpunit>

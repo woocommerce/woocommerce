@@ -27,7 +27,7 @@ filter:
     - src/Controllers/Version1/
     - src/Controllers/Version2/
     - src/Controllers/Version3/
-    - unit-tests/
+    - tests/
     - vendor/
     - classmap.php
 coding_style:

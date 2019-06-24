@@ -1,7 +1,7 @@
 /.* export-ignore
 /phpcs.xml export-ignore
 /phpunit.* export-ignore
-/unit-tests export-ignore
+/tests export-ignore
 /vendor export-ignore
 /README.md export-ignore
 /readme.txt export-ignore
