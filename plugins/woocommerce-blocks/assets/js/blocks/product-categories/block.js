@@ -23,7 +23,7 @@ function getCategories( { hasEmpty, isDropdown, isHierarchical } ) {
 /**
  * Component displaying the categories as dropdown or list.
  */
-const ProductCategoriesBlock = ( { attributes } ) => {
+const ProductCategoriesBlock = ( { attributes, isPreview = false } ) => {
 	const { hasCount, isDropdown } = attributes;
 	const categories = getCategories( attributes );
 	const parentKey = 'parent-' + categories[ 0 ].term_id;
@@ -33,10 +33,10 @@ const ProductCategoriesBlock = ( { attributes } ) => {
 			{ items.map( ( cat ) => {
 				const count = hasCount ? <span>({ cat.count })</span> : null;
 				return [
-					<li key={ cat.term_id }><a>{ cat.name }</a> { count }</li>, // eslint-disable-line
-					!! cat.children &&
-						!! cat.children.length &&
-						renderList( cat.children ),
+					<li key={ cat.term_id }>
+						<a href={ isPreview ? null : cat.link }>{ cat.name }</a> { count } { /* eslint-disable-line */ }
+					</li>,
+					!! cat.children && !! cat.children.length && renderList( cat.children ),
 				];
 			} ) }
 		</ul>
@@ -65,6 +65,10 @@ ProductCategoriesBlock.propTypes = {
 	 * The attributes for this block
 	 */
 	attributes: PropTypes.object.isRequired,
+	/**
+	 * Whether this is the block preview or frontend display.
+	 */
+	isPreview: PropTypes.bool,
 };
 
 export default ProductCategoriesBlock;
