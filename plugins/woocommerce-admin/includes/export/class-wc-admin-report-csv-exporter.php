@@ -155,7 +155,17 @@ class WC_Admin_Report_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * Prepare data for export.
 	 */
 	public function prepare_data_to_export() {
-		$request = new WP_REST_Request( 'GET', "/wc/v4/reports/{$this->report_type}" );
+		$request  = new WP_REST_Request( 'GET', "/wc/v4/reports/{$this->report_type}" );
+		$params   = $this->controller->get_collection_params();
+		$defaults = array();
+
+		foreach ( $params as $arg => $options ) {
+			if ( isset( $options['default'] ) ) {
+				$defaults[ $arg ] = $options['default'];
+			}
+		}
+
+		$request->set_default_params( $defaults );
 		$request->set_query_params( $this->report_args );
 
 		$response         = $this->controller->get_items( $request );
