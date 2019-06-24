@@ -214,17 +214,23 @@ class WC_Admin_REST_Reports_Orders_Controller extends WC_Admin_REST_Reports_Cont
 					'readonly'    => true,
 				),
 				'extended_info'    => array(
-					'products'   => array(
+					'products' => array(
 						'type'        => 'array',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'List of product IDs and names.', 'woocommerce-admin' ),
+						'description' => __( 'List of order product IDs, names, quantities.', 'woocommerce-admin' ),
 					),
-					'categories' => array(
+					'coupons'  => array(
 						'type'        => 'array',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Category IDs.', 'woocommerce-admin' ),
+						'description' => __( 'List of order coupons.', 'woocommerce-admin' ),
+					),
+					'customer' => array(
+						'type'        => 'object',
+						'readonly'    => true,
+						'context'     => array( 'view', 'edit' ),
+						'description' => __( 'Order customer information.', 'woocommerce-admin' ),
 					),
 				),
 			),
