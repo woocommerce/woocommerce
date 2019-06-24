@@ -744,7 +744,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		 * To ensure we include all WC tables, even if they do not exist, pre-populate the WC array with all the tables.
 		 */
 		$tables = array(
-			'woocommerce-rest-api' => array_fill_keys( $core_tables, false ),
+			'woocommerce' => array_fill_keys( $core_tables, false ),
 			'other'       => array(),
 		);
 
@@ -760,7 +760,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			if ( is_multisite() && 0 !== strpos( $table->name, $site_tables_prefix ) && ! in_array( $table->name, $global_tables, true ) ) {
 				continue;
 			}
-			$table_type = in_array( $table->name, $core_tables ) ? 'woocommerce-rest-api' : 'other';
+			$table_type = in_array( $table->name, $core_tables ) ? 'woocommerce' : 'other';
 
 			$tables[ $table_type ][ $table->name ] = array(
 				'data'   => $table->data,
@@ -1001,7 +1001,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'version_latest'          => WC_Admin_Status::get_latest_theme_version( $active_theme ),
 			'author_url'              => esc_url_raw( $active_theme->{'Author URI'} ),
 			'is_child_theme'          => is_child_theme(),
-			'has_woocommerce_support' => current_theme_supports( 'woocommerce-rest-api' ),
+			'has_woocommerce_support' => current_theme_supports( 'woocommerce' ),
 			'has_woocommerce_file'    => ( file_exists( get_stylesheet_directory() . '/woocommerce.php' ) || file_exists( get_template_directory() . '/woocommerce.php' ) ),
 			'has_outdated_templates'  => $outdated_templates,
 			'overrides'               => $override_files,

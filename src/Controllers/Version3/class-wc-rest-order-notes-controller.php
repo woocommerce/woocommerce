@@ -35,7 +35,7 @@ class WC_REST_Order_Notes_Controller extends WC_REST_Order_Notes_V2_Controller {
 	public function prepare_item_for_response( $note, $request ) {
 		$data = array(
 			'id'               => (int) $note->comment_ID,
-			'author'           => __( 'woocommerce-rest-api', 'woocommerce-rest-api' ) === $note->comment_author ? 'system' : $note->comment_author,
+			'author'           => __( 'woocommerce', 'woocommerce-rest-api' ) === $note->comment_author ? 'system' : $note->comment_author,
 			'date_created'     => wc_rest_prepare_date_response( $note->comment_date ),
 			'date_created_gmt' => wc_rest_prepare_date_response( $note->comment_date_gmt ),
 			'note'             => $note->comment_content,

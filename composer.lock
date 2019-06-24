@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0654700fc5735080c502c67e64be6c00",
+    "content-hash": "751413f93c1471f67dbcdbc9dd05c134",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -1640,54 +1640,6 @@
             "description": "Library that helps with managing the version number of Git-hosted PHP projects",
             "homepage": "https://github.com/sebastianbergmann/version",
             "time": "2016-10-03T07:35:21+00:00"
-        },
-        {
-            "name": "slowprog/composer-copy-file",
-            "version": "0.3.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/slowprog/CopyFile.git",
-                "reference": "5a82ba4613948f70b2d4b041c13c1c9259fc6477"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/slowprog/CopyFile/zipball/5a82ba4613948f70b2d4b041c13c1c9259fc6477",
-                "reference": "5a82ba4613948f70b2d4b041c13c1c9259fc6477",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.6"
-            },
-            "require-dev": {
-                "composer/composer": "1.0.*@dev",
-                "mikey179/vfsstream": "~1",
-                "php-mock/php-mock-phpunit": "~1",
-                "phpunit/phpunit": "5.7.27",
-                "symfony/filesystem": "~2.7",
-                "symfony/finder": "~2.7"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "SlowProg\\CopyFile\\": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Andrey Tyshev",
-                    "email": "slowprog@gmail.com"
-                }
-            ],
-            "description": "Composer script copying your files after install",
-            "homepage": "https://github.com/SlowProg/composer-copy-file",
-            "keywords": [
-                "copy file"
-            ],
-            "time": "2019-01-10T05:06:10+00:00"
         },
         {
             "name": "squizlabs/php_codesniffer",

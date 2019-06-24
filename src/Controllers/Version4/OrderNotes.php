@@ -336,7 +336,7 @@ class OrderNotes extends AbstractController {
 	protected function get_data_for_response( $object, $request ) {
 		return array(
 			'id'               => (int) $object->comment_ID,
-			'author'           => __( 'woocommerce-rest-api', 'woocommerce-rest-api' ) === $object->comment_author ? 'system' : $object->comment_author,
+			'author'           => __( 'woocommerce', 'woocommerce-rest-api' ) === $object->comment_author ? 'system' : $object->comment_author,
 			'date_created'     => wc_rest_prepare_date_response( $object->comment_date ),
 			'date_created_gmt' => wc_rest_prepare_date_response( $object->comment_date_gmt ),
 			'note'             => $object->comment_content,

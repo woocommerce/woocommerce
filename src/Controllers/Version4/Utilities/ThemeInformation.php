@@ -85,7 +85,7 @@ class ThemeInformation {
 			'version_latest'          => \WC_Admin_Status::get_latest_theme_version( $active_theme ),
 			'author_url'              => esc_url_raw( $active_theme->{'Author URI'} ),
 			'is_child_theme'          => is_child_theme(),
-			'has_woocommerce_support' => current_theme_supports( 'woocommerce-rest-api' ),
+			'has_woocommerce_support' => current_theme_supports( 'woocommerce' ),
 			'has_woocommerce_file'    => ( file_exists( get_stylesheet_directory() . '/woocommerce.php' ) || file_exists( get_template_directory() . '/woocommerce.php' ) ),
 			'has_outdated_templates'  => $outdated_templates,
 			'overrides'               => $override_files,
