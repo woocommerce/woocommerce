@@ -268,11 +268,13 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
 			}
 
-			$unique_products       = $this->get_unique_product_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
-			$totals[0]['products'] = $unique_products;
-			$segmenting            = new WC_Admin_Reports_Orders_Stats_Segmenting( $query_args, $this->report_columns );
-			$totals[0]['segments'] = $segmenting->get_totals_segments( $totals_query, $table_name );
-			$totals                = (object) $this->cast_numbers( $totals[0] );
+			$unique_products            = $this->get_unique_product_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
+			$totals[0]['products']      = $unique_products;
+			$segmenting                 = new WC_Admin_Reports_Orders_Stats_Segmenting( $query_args, $this->report_columns );
+			$unique_coupons             = $this->get_unique_coupon_count( $totals_query['from_clause'], $totals_query['where_time_clause'], $totals_query['where_clause'] );
+			$totals[0]['coupons_count'] = $unique_coupons;
+			$totals[0]['segments']      = $segmenting->get_totals_segments( $totals_query, $table_name );
+			$totals                     = (object) $this->cast_numbers( $totals[0] );
 
 			$db_intervals = $wpdb->get_col(
 				"SELECT
@@ -328,6 +330,11 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
 			}
 
+			if ( isset( $intervals[0] ) && isset( $intervals[0]['coupons_count'] ) ) {
+				$unique_coupons                = $this->get_unique_coupon_count( $intervals_query['from_clause'], $intervals_query['where_time_clause'], $intervals_query['where_clause'], true );
+				$intervals[0]['coupons_count'] = $unique_coupons;
+			}
+
 			$data = (object) array(
 				'totals'    => $totals,
 				'intervals' => $intervals,
@@ -369,7 +376,32 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 			"SELECT
 					COUNT( DISTINCT {$wpdb->prefix}wc_order_product_lookup.product_id )
 				FROM
-				    {$wpdb->prefix}wc_order_product_lookup JOIN {$table_name} ON {$wpdb->prefix}wc_order_product_lookup.order_id = {$table_name}.order_id
+					{$wpdb->prefix}wc_order_product_lookup JOIN {$table_name} ON {$wpdb->prefix}wc_order_product_lookup.order_id = {$table_name}.order_id
+					{$from_clause}
+				WHERE
+					1=1
+					{$where_time_clause}
+					{$where_clause}"
+		); // WPCS: cache ok, DB call ok, unprepared SQL ok.
+	}
+
+	/**
+	 * Get unique coupons based on user time query
+	 *
+	 * @param string $from_clause       From clause with date query.
+	 * @param string $where_time_clause Where clause with date query.
+	 * @param string $where_clause      Where clause with date query.
+	 * @return integer Unique product count.
+	 */
+	public function get_unique_coupon_count( $from_clause, $where_time_clause, $where_clause ) {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . self::TABLE_NAME;
+		return $wpdb->get_var(
+			"SELECT
+					COUNT(DISTINCT coupon_id)
+				FROM
+					{$wpdb->prefix}wc_order_coupon_lookup JOIN {$table_name} ON {$wpdb->prefix}wc_order_coupon_lookup.order_id = {$table_name}.order_id
 					{$from_clause}
 				WHERE
 					1=1
