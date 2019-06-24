@@ -66,7 +66,7 @@ export default function( { attributes, setAttributes } ) {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<Block attributes={ attributes } />
+			<Block attributes={ attributes } isPreview />
 		</Fragment>
 	);
 }

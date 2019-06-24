@@ -197,6 +197,10 @@ class WGPB_Block_Library {
 				'pad_counts' => true,
 			)
 		);
+		foreach ( $product_categories as &$category ) {
+			$category->link = get_term_link( $category->term_id, 'product_cat' );
+		}
+
 		// Global settings used in each block.
 		$block_settings = array(
 			'min_columns'       => wc_get_theme_support( 'product_blocks::min_columns', 1 ),
