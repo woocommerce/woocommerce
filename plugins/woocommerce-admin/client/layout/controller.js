@@ -31,13 +31,11 @@ const getPages = () => {
 			container: DevDocs,
 			path: '/devdocs',
 			wpOpenMenu: 'toplevel_page_woocommerce',
-			wpClosedMenu: 'toplevel_page_wc-admin--analytics-revenue',
 		} );
 		pages.push( {
 			container: DevDocs,
 			path: '/devdocs/:component',
 			wpOpenMenu: 'toplevel_page_woocommerce',
-			wpClosedMenu: 'toplevel_page_wc-admin--analytics-revenue',
 		} );
 	}
 
@@ -46,7 +44,6 @@ const getPages = () => {
 			container: Dashboard,
 			path: '/',
 			wpOpenMenu: 'toplevel_page_woocommerce',
-			wpClosedMenu: 'toplevel_page_wc-admin--analytics-revenue',
 		} );
 	}
 
@@ -55,19 +52,16 @@ const getPages = () => {
 			container: Analytics,
 			path: '/analytics',
 			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
-			wpClosedMenu: 'toplevel_page_woocommerce',
 		} );
 		pages.push( {
 			container: AnalyticsSettings,
 			path: '/analytics/settings',
 			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
-			wpClosedMenu: 'toplevel_page_woocommerce',
 		} );
 		pages.push( {
 			container: AnalyticsReport,
 			path: '/analytics/:report',
 			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
-			wpClosedMenu: 'toplevel_page_woocommerce',
 		} );
 	}
 
@@ -170,9 +164,9 @@ window.wpNavMenuUrlUpdate = function( page, query ) {
 	] );
 	const nextQuery = stringifyQuery( getPersistedQuery( query ) );
 
-	Array.from(
-		document.querySelectorAll( `#${ page.wpOpenMenu } a, #${ page.wpClosedMenu } a` )
-	).forEach( item => updateLinkHref( item, nextQuery, excludedScreens ) );
+	Array.from( document.querySelectorAll( '#adminmenu a' ) ).forEach( item =>
+		updateLinkHref( item, nextQuery, excludedScreens )
+	);
 };
 
 // When the route changes, we need to update wp-admin's menu with the correct section & current link
@@ -207,14 +201,6 @@ window.wpNavMenuClassChange = function( page ) {
 		currentMenu.classList.add( 'wp-has-current-submenu' );
 		currentMenu.classList.add( 'wp-menu-open' );
 		currentMenu.classList.add( 'current' );
-	}
-
-	// Sometimes navigating from the subMenu to Dashboard does not close subMenu
-	if ( page.wpClosedMenu ) {
-		const closedMenu = document.querySelector( '#' + page.wpClosedMenu );
-		closedMenu.classList.remove( 'wp-has-current-submenu' );
-		closedMenu.classList.remove( 'wp-menu-open' );
-		closedMenu.classList.add( 'wp-not-current-submenu' );
 	}
 
 	const wpWrap = document.querySelector( '#wpwrap' );
