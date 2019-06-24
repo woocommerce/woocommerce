@@ -36,6 +36,8 @@ class WC_Admin_REST_Orders_Controller extends WC_REST_Orders_Controller {
 			'type'              => 'string',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
+		// Fix the default 'status' value until it can be patched in core.
+		$params['status']['default'] = array( 'any' );
 		return $params;
 	}
 
