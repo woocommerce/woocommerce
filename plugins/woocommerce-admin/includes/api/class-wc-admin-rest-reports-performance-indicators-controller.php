@@ -501,7 +501,9 @@ class WC_Admin_REST_Reports_Performance_Indicators_Controller extends WC_REST_Re
 			'validate_callback' => 'rest_validate_request_arg',
 			'items'             => array(
 				'type' => 'string',
+				'enum' => $this->allowed_stats,
 			),
+			'default'           => $this->allowed_stats,
 		);
 		$params['after']   = array(
 			'description'       => __( 'Limit response to resources published after a given ISO8601 compliant date.', 'woocommerce-admin' ),
