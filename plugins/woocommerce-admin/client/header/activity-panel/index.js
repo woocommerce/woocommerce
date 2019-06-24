@@ -25,6 +25,7 @@ import {
 import InboxPanel from './panels/inbox';
 import OrdersPanel from './panels/orders';
 import StockPanel from './panels/stock';
+import { recordEvent } from 'lib/tracks';
 import ReviewsPanel from './panels/reviews';
 import withSelect from 'wc-api/with-select';
 import WordPressNotices from './wordpress-notices';
@@ -45,6 +46,13 @@ class ActivityPanel extends Component {
 	}
 
 	togglePanel( tabName ) {
+		const { isPanelOpen, currentTab } = this.state;
+
+		// If no panel is open, or if a new panel is opening, record a track.
+		if ( ! isPanelOpen || tabName !== currentTab ) {
+			recordEvent( 'wcadmin_activity_panel_open', { tab: tabName } );
+		}
+
 		// The WordPress Notices tab is handled differently, since they are displayed inline, so the panel should be closed,
 		// Close behavior of the expanded notices is based on current tab.
 		if ( 'wpnotices' === tabName ) {
