@@ -34,8 +34,10 @@ class WC_Tests_API_Report_Controllers extends WP_UnitTestCase {
 	 * Ensure that every REST controller works with their defaults.
 	 */
 	public function test_default_params() {
-		// This list intentionall missing `WC_Admin_REST_Setting_Options_Controller`
-		// because it's just a version override.
+		// These controllers intentionally missing:
+		// - `WC_Admin_REST_Setting_Options_Controller`
+		// - `WC_Admin_REST_Data_Download_Ips_Controller`
+		// because they don't have defaults for required params.
 		$controller_classes = array(
 			'WC_Admin_REST_Admin_Notes_Controller',
 			'WC_Admin_REST_Admin_Note_Action_Controller',
@@ -43,7 +45,6 @@ class WC_Tests_API_Report_Controllers extends WP_UnitTestCase {
 			'WC_Admin_REST_Customers_Controller',
 			'WC_Admin_REST_Data_Controller',
 			'WC_Admin_REST_Data_Countries_Controller',
-			'WC_Admin_REST_Data_Download_Ips_Controller',
 			'WC_Admin_REST_Leaderboards_Controller',
 			'WC_Admin_REST_Orders_Controller',
 			'WC_Admin_REST_Products_Controller',
