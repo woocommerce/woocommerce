@@ -18,7 +18,10 @@ output() {
 output 3 "Updating package textdomains..."
 
 # Find woo-gutenberg-products-block textdomain and replace with woocommerce
-find ./packages -iname '*.php' -exec sed -i.bak -e "s/'woo-gutenberg-products-block'/'woocommerce'/g" {} \;
+find ./packages/woocommerce-blocks -iname '*.php' -exec sed -i.bak -e "s/'woo-gutenberg-products-block'/'woocommerce'/g" {} \;
+
+# Find woocommerce-rest-api textdomain and replace with woocommerce
+find ./packages/woocommerce-rest-api -iname '*.php' -exec sed -i.bak -e "s/'woocommerce-rest-api'/'woocommerce'/g" {} \;
 
 # Cleanup backup files
 find ./packages -name "*.bak" -type f -delete
