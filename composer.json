@@ -32,12 +32,10 @@
   },
   "scripts": {
     "post-install-cmd": [
-      "composer dump-autoload --no-dev",
-      "sh ./bin/replace-package-textdomains.sh"
+      "sh ./bin/package-update.sh"
     ],
     "post-update-cmd": [
-      "composer dump-autoload --no-dev",
-      "sh ./bin/replace-package-textdomains.sh"
+      "sh ./bin/package-update.sh --updating"
     ],
     "test": [
       "phpunit"
