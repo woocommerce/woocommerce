@@ -255,23 +255,3 @@ ul.woocommerce_stats {
 	font-family: "WooCommerce";
 	content: "\e01d";
 }
-
-#woocommerce_php_wp_nag {
-
-	h2 {
-
-		&::before {
-			display: inline-block;
-			border-radius: 60px;
-			background-color: #df3232;
-			content: "!";
-			color: #fff;
-			padding: 0.2em 0.7em;
-			margin-right: 6px;
-		}
-	}
-
-	h3 {
-		font-weight: 600;
-	}
-}
