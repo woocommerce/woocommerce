@@ -110,6 +110,7 @@ class WC_Admin_Report_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		);
 
 		if ( isset( $controller_map[ $this->report_type ] ) ) {
+			// @todo: load the controllers if accessing outside a context where the REST API is loaded?
 			return new $controller_map[ $this->report_type ]();
 		}
 
