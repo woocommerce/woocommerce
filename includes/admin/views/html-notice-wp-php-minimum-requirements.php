@@ -23,7 +23,7 @@ if ( $old_php && $old_wp ) {
 			sprintf(
 				/* translators: %s: WP & PHP Upgrade URL */
 				$msg . '<p><a href="%s" class="button button-primary">Learn to upgrade</a></p>',
-				'https://docs.woocommerce.com/' // @todo: Add link to external docs
+				'https://docs.woocommerce.com/document/update-php-and-wordpress/'
 			)
 		);
 		?>
