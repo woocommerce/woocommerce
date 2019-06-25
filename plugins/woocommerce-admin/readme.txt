@@ -71,15 +71,40 @@ Release and roadmap notes are available on the [WooCommerce Developers Blog](htt
 
 == Changelog ==
 
-= 0.13.2 2019-06-13 = 
+= 0.14.0 2019-06-24 =
+
+- Dev: Action Scheduler: fix potential endless sync #2425
+- Dev: Fix Activity Panel being overlapped by editor toolbar #2446 (Activity Panel)
+- Bug: add match=any support for advanced orders table filter #2228
+- Dev: update tested to version in plugin repo readme.txt #2443
+- Fix: PHP errors on missing refund orders during import. #2464 (Analytics)
+- Dev: Allow keyboard interaction in Stock Activity Panel form #2447 (Accessibility, Activity Panel)
+- Dev: Fix mobile onboarding stepper positioning #2472 (Onboarding)
+- Dev: Activity Panels: Add track event when panels are opened. #2498 (Build)
+- Dev: Add wp-api-fetch script to dependencies #2460
+- Dev: Remove the "wpClosedMenu" page setting #2441 (Build)
+- Enhancement: Report Tables: Add example extension #2440 (Build, Components, Extensibility, Packages)
+- Dev: Update onboarding track setting #2468 (Onboarding)
+- Fix: fix type in readme changelog for 0.13.0 #2457 (Documentation)
+- Tweak: Add test to catch missing version updates. #2424 (Build)
+- Dev: Fix revenue and orders charts using the wrong endpoint in the Dashboard #2417 (Dashboard)
+- Fix: handle internal `rest_do_request()` error conditions. #2423 (Dashboard)
+- Dev: Fix conflicts with WordPress.com toolbar #2431 (Activity Panel)
+- Task: Remove test menu from Orders panel #2438 (Activity Panel)
+- Dev: Table queries: remove befor/after from no interval endpoints #2422
+- Tweak: Reduce style dependencies on WP core, avoid errantly including WP core's Google Fonts. #2432 (Components)
+- Dev: Update Dashboard Charts naming and order #2429 (Dashboard)
+- Bug: Fix search bar in Orders page not being tapable on mobile #2384
+
+= 0.13.2 2019-06-13 =
 
 - Fix: Bump plugin version for database update.
 
-= 0.13.1 2019-06-12 = 
+= 0.13.1 2019-06-12 =
 
 - Fix: Exit deactivate early if WooCommerce not active. #2410
 
-= 0.13.0 2019-06-12
+= 0.13.0 2019-06-12 =
 
 - Fix: Notes: update sales record link #2397
 - Enhancement: Settings: Add default date settings #2292 (Components, Dashboard, Packages)
