@@ -20,8 +20,8 @@ before_script:
   - composer install
   - composer global require "phpunit/phpunit=4.8.*|6.5.*"
   - composer require woocommerce/woocommerce-sniffs
-  - bash tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
+  - bash unit-tests/bin/install.sh woocommerce_test root '' localhost $WP_VERSION
 
 script:
-  - bash tests/bin/phpunit.sh
-  - bash tests/bin/phpcs.sh
+  - bash unit-tests/bin/phpunit.sh
+  - bash unit-tests/bin/phpcs.sh
