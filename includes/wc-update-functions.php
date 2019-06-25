@@ -993,14 +993,6 @@ function wc_update_250_currency() {
 		update_option( 'woocommerce_currency', 'LAK' );
 	}
 
-	if ( 'STD' === $current_currency ) {
-		update_option( 'woocommerce_currency', 'STN' );
-	}
-
-	if ( 'MRO' === $current_currency ) {
-		update_option( 'woocommerce_currency', 'MRU' );
-	}
-
 	// Update LAK currency code.
 	$wpdb->update(
 		$wpdb->postmeta,
@@ -1013,29 +1005,6 @@ function wc_update_250_currency() {
 		)
 	);
 
-	// Update STN currency code.
-	$wpdb->update(
-		$wpdb->postmeta,
-		array(
-			'meta_value' => 'STN',
-		),
-		array(
-			'meta_key'   => '_order_currency',
-			'meta_value' => 'STD',
-		)
-	);
-
-	// Update MRU currency code.
-	$wpdb->update(
-		$wpdb->postmeta,
-		array(
-			'meta_value' => 'MRU',
-		),
-		array(
-			'meta_key'   => '_order_currency',
-			'meta_value' => 'MRO',
-		)
-	);
 }
 
 /**
@@ -2004,4 +1973,48 @@ function wc_update_360_downloadable_product_permissions_index() {
  */
 function wc_update_360_db_version() {
 	WC_Install::update_db_version( '3.6.0' );
+}
+
+/**
+ * Update currency settings for 3.7.0
+ *
+ * @return void
+ */
+function wc_update_370_mro_std_currency() {
+	global $wpdb;
+	// Fix currency settings for MRU  and STNcurrency.
+	$current_currency = get_option( 'woocommerce_currency' );
+
+	if ( 'MRO' === $current_currency ) {
+		update_option( 'woocommerce_currency', 'MRU' );
+	}
+
+	if ( 'STD' === $current_currency ) {
+		update_option( 'woocommerce_currency', 'STN' );
+	}
+
+	// Update MRU currency code.
+	$wpdb->update(
+		$wpdb->postmeta,
+		array(
+			'meta_value' => 'MRU',
+		),
+		array(
+			'meta_key'   => '_order_currency',
+			'meta_value' => 'MRO',
+		)
+	);
+
+	// Update STN currency code.
+	$wpdb->update(
+		$wpdb->postmeta,
+		array(
+			'meta_value' => 'STN',
+		),
+		array(
+			'meta_key'   => '_order_currency',
+			'meta_value' => 'STD',
+		)
+	);
+
 }

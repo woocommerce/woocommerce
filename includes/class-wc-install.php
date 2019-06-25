@@ -130,6 +130,9 @@ class WC_Install {
 			'wc_update_360_downloadable_product_permissions_index',
 			'wc_update_360_db_version',
 		),
+		'3.7.0' => array(
+			'wc_update_370_mro_std_currency',
+		)
 	);
 
 	/**
