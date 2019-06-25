@@ -22,7 +22,7 @@ if ( $old_php && $old_wp ) {
 		echo wp_kses_post(
 			sprintf(
 				/* translators: %s: WP & PHP Upgrade URL */
-				$msg . '<p><a href="%s" class="button button-primary">Learn to upgrade</a></p>',
+				$msg . '<p><a href="%s" class="button button-primary">Learn how to upgrade</a></p>',
 				'https://docs.woocommerce.com/document/update-php-and-wordpress/'
 			)
 		);
