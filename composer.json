@@ -28,7 +28,10 @@
     "exclude-from-classmap": [
       "includes/legacy",
       "includes/libraries"
-    ]
+    ],
+    "psr-4": {
+      "Automattic\\WooCommerce\\": "src/"
+    }
   },
   "scripts": {
     "post-install-cmd": [
