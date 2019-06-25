@@ -1,4 +1,13 @@
 /** @format */
+/**
+ * External dependencies
+ */
+import debug from 'debug';
+
+/**
+ * Module variables
+ */
+const tracksDebug = debug( 'wc-admin:tracks' );
 
 /**
  * Record an event to Tracks
@@ -8,6 +17,8 @@
  */
 
 export function recordEvent( eventName, eventProperties ) {
+	tracksDebug( 'recordevent %s %o', eventName, eventProperties );
+
 	if (
 		! window.wcTracks ||
 		'function' !== typeof window.wcTracks.recordEvent ||
