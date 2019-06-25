@@ -23,7 +23,15 @@ if ( $old_php && $old_wp ) {
 			sprintf(
 				/* translators: %s: WP & PHP Upgrade URL */
 				$msg . '<p><a href="%s" class="button button-primary">Learn how to upgrade</a></p>',
-				'https://docs.woocommerce.com/document/update-php-and-wordpress/'
+				add_query_arg(
+					array(
+						'utm_source'   => 'wpphpupdatebanner',
+						'utm_medium'   => 'product',
+						'utm_campaign' => 'woocommerceplugin',
+						'utm_content'  => 'docs',
+					),
+					'https://docs.woocommerce.com/document/update-php-and-wordpress/'
+				)
 			)
 		);
 		?>
