@@ -48,7 +48,7 @@ class ActivityPanel extends Component {
 	togglePanel( tabName ) {
 		const { isPanelOpen, currentTab } = this.state;
 
-		// If no panel is open, or if a new panel is opening, record a track.
+		// If a panel is being opened, or if an existing panel is already open and a different one is being opened, record a track.
 		if ( ! isPanelOpen || tabName !== currentTab ) {
 			recordEvent( 'wcadmin_activity_panel_open', { tab: tabName } );
 		}
