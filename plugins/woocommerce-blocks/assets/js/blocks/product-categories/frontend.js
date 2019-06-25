@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { forEach } from 'lodash';
 import { render } from '@wordpress/element';
 
 /**
@@ -13,7 +14,7 @@ const containers = document.querySelectorAll(
 );
 
 if ( containers.length ) {
-	containers.forEach( ( el ) => {
+	forEach( containers, ( el ) => {
 		const data = JSON.parse( JSON.stringify( el.dataset ) );
 		const attributes = {
 			hasCount: data.hasCount === 'true',

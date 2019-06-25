@@ -8,6 +8,7 @@ import { registerBlockType } from '@wordpress/blocks';
  * Internal dependencies
  */
 import './editor.scss';
+import './style.scss';
 import edit from './edit.js';
 import { IconFolder } from '../../components/icons';
 
