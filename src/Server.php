@@ -55,7 +55,6 @@ class Server {
 				'wc/v1' => $this->get_v1_controllers(),
 				'wc/v2' => $this->get_v2_controllers(),
 				'wc/v3' => $this->get_v3_controllers(),
-				'wc/v4' => $this->get_v4_controllers(),
 			]
 		);
 	}
@@ -178,50 +177,5 @@ class Server {
 			'data-countries'           => 'WC_REST_Data_Countries_Controller',
 			'data-currencies'          => 'WC_REST_Data_Currencies_Controller',
 		];
-	}
-
-	/**
-	 * List of controllers in the wc/v4 namespace.
-	 *
-	 * @return array
-	 */
-	protected function get_v4_controllers() {
-		$namespace   = __NAMESPACE__ . '\\Controllers\\Version4\\';
-		$controllers = [
-			'coupons'                  => $namespace . 'Coupons',
-			'customer-downloads'       => $namespace . 'CustomerDownloads',
-			'customers'                => $namespace . 'Customers',
-			'data'                     => $namespace . 'Data',
-			'data-continents'          => $namespace . 'Data\Continents',
-			'data-countries'           => $namespace . 'Data\Countries',
-			'data-currencies'          => $namespace . 'Data\Currencies',
-			'data-download-ips'        => $namespace . 'Data\DownloadIPs',
-			'network-orders'           => $namespace . 'NetworkOrders',
-			'order-notes'              => $namespace . 'OrderNotes',
-			'order-refunds'            => $namespace . 'OrderRefunds',
-			'orders'                   => $namespace . 'Orders',
-			'payment-gateways'         => $namespace . 'PaymentGateways',
-			'product-attributes'       => $namespace . 'ProductAttributes',
-			'product-attribute-terms'  => $namespace . 'ProductAttributeTerms',
-			'product-categories'       => $namespace . 'ProductCategories',
-			'product-reviews'          => $namespace . 'ProductReviews',
-			'products'                 => $namespace . 'Products',
-			'product-shipping-classes' => $namespace . 'ProductShippingClasses',
-			'product-tags'             => $namespace . 'ProductTags',
-			'product-variations'       => $namespace . 'ProductVariations',
-			'settings'                 => $namespace . 'Settings',
-			'settings-options'         => $namespace . 'SettingsOptions',
-			'shipping-methods'         => $namespace . 'ShippingMethods',
-			'shipping-zone-locations'  => $namespace . 'ShippingZoneLocations',
-			'shipping-zone-methods'    => $namespace . 'ShippingZoneMethods',
-			'shipping-zones'           => $namespace . 'ShippingZones',
-			'system-status'            => $namespace . 'SystemStatus',
-			'system-status-tools'      => $namespace . 'SystemStatusTools',
-			'tax-classes'              => $namespace . 'TaxClasses',
-			'taxes'                    => $namespace . 'Taxes',
-			'webhooks'                 => $namespace . 'Webhooks',
-		];
-
-		return $controllers;
 	}
 }

@@ -19,7 +19,7 @@ class Package {
 	 *
 	 * @var string
 	 */
-	const VERSION = '1.1.0-dev';
+	const VERSION = '1.0.0';
 
 	/**
 	 * Init the package - load the REST API Server class.
