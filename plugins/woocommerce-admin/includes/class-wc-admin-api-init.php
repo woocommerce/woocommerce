@@ -132,6 +132,7 @@ class WC_Admin_Api_Init {
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-stock-stats-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-taxes-controller.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-customers-controller.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/api/class-wc-admin-rest-reports-export-controller.php';
 
 		$controllers = array(
 			'WC_Admin_REST_Admin_Notes_Controller',
@@ -151,6 +152,7 @@ class WC_Admin_Api_Init {
 			'WC_Admin_REST_Reports_Controller',
 			'WC_Admin_REST_Setting_Options_Controller',
 			'WC_Admin_REST_Reports_Import_Controller',
+			'WC_Admin_REST_Reports_Export_Controller',
 			'WC_Admin_REST_Reports_Products_Controller',
 			'WC_Admin_REST_Reports_Variations_Controller',
 			'WC_Admin_REST_Reports_Products_Stats_Controller',

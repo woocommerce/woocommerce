@@ -78,6 +78,7 @@ class WC_Admin_Report_Exporter {
 		$num_batches = (int) ceil( $total_rows / $batch_size );
 		$start_time  = time() + 5;
 
+		// @todo - batch these batches, like initial import.
 		for ( $batch = 1; $batch <= $num_batches; $batch++ ) {
 			$report_batch_args = array_merge(
 				$report_args,
