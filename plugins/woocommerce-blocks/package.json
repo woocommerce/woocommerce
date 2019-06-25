@@ -52,7 +52,7 @@
     "cross-env": "5.2.0",
     "css-loader": "3.0.0",
     "cssnano": "4.1.10",
-    "eslint": "6.0.0",
+    "eslint": "6.0.1",
     "eslint-config-wordpress": "2.0.0",
     "eslint-plugin-jest": "22.7.1",
     "eslint-plugin-jsx-a11y": "6.2.1",
