@@ -119,7 +119,7 @@ class WGPB_Block_Library {
 	 */
 	public static function register_assets() {
 		self::register_style( 'wc-block-editor', plugins_url( 'build/editor.css', WGPB_PLUGIN_FILE ), array( 'wp-edit-blocks' ) );
-		self::register_style( 'wc-block-style', plugins_url( 'build/style.css', WGPB_PLUGIN_FILE ), array() );
+		self::register_style( 'wc-block-style', plugins_url( 'build/style.css', WGPB_PLUGIN_FILE ), array( 'wp-components' ) );
 
 		// Shared libraries and components across all blocks.
 		self::register_script( 'wc-blocks', plugins_url( 'build/blocks.js', WGPB_PLUGIN_FILE ), array(), false );
@@ -215,6 +215,7 @@ class WGPB_Block_Library {
 			'default_height'    => wc_get_theme_support( 'featured_block::default_height', 500 ),
 			'isLargeCatalog'    => $product_counts->publish > 200,
 			'productCategories' => $product_categories,
+			'homeUrl'           => esc_js( home_url( '/' ) ),
 		);
 		?>
 		<script type="text/javascript">

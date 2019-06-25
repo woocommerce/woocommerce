@@ -42,18 +42,16 @@ export default function( { attributes, setAttributes } ) {
 						checked={ hasCount }
 						onChange={ () => setAttributes( { hasCount: ! hasCount } ) }
 					/>
-					{ ! isDropdown && (
-						<ToggleControl
-							label={ __( 'Show hierarchy', 'woo-gutenberg-products-block' ) }
-							help={
-								isHierarchical ?
-									__( 'Hierarchy is visible.', 'woo-gutenberg-products-block' ) :
-									__( 'Hierarchy is hidden.', 'woo-gutenberg-products-block' )
-							}
-							checked={ isHierarchical }
-							onChange={ () => setAttributes( { isHierarchical: ! isHierarchical } ) }
-						/>
-					) }
+					<ToggleControl
+						label={ __( 'Show hierarchy', 'woo-gutenberg-products-block' ) }
+						help={
+							isHierarchical ?
+								__( 'Hierarchy is visible.', 'woo-gutenberg-products-block' ) :
+								__( 'Hierarchy is hidden.', 'woo-gutenberg-products-block' )
+						}
+						checked={ isHierarchical }
+						onChange={ () => setAttributes( { isHierarchical: ! isHierarchical } ) }
+					/>
 					<ToggleControl
 						label={ __( 'Show empty categories', 'woo-gutenberg-products-block' ) }
 						help={

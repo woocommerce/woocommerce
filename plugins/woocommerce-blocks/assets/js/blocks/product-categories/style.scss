@@ -1,0 +1,11 @@
+.wc-block-product-categories {
+	margin-bottom: 1em;
+
+	&.is-dropdown {
+		display: flex;
+	}
+
+	select {
+		margin-right: 0.5em;
+	}
+}
