@@ -7,7 +7,12 @@ import { addFilter } from '@wordpress/hooks';
 import { Rating } from '@woocommerce/components';
 
 addFilter( 'woocommerce_admin_report_table', 'plugin-domain', reportTableData => {
-	if ( 'products' !== reportTableData.endpoint || ! reportTableData.items.data.length ) {
+	if (
+		'products' !== reportTableData.endpoint ||
+		! reportTableData.items ||
+		! reportTableData.items.data ||
+		! reportTableData.items.data.length
+	) {
 		return reportTableData;
 	}
 
@@ -33,7 +38,9 @@ addFilter( 'woocommerce_admin_report_table', 'plugin-domain', reportTableData =>
 			},
 			// average_rating can be found on extended_info on productData.
 			{
-				display: <Rating rating={ Number( product.extended_info.average_rating ) } totalStars={ 5 } />,
+				display: (
+					<Rating rating={ Number( product.extended_info.average_rating ) } totalStars={ 5 } />
+				),
 				value: product.extended_info.average_rating,
 			},
 		];
