@@ -22,8 +22,8 @@ if ( $old_php && $old_wp ) {
 		echo wp_kses_post(
 			sprintf(
 				/* translators: %s: WP & PHP Upgrade URL */
-				$msg . '<p><a href="%s" class="button button-primary">Learn More</a></p>',
-				get_admin_url( null, '#woocommerce_php_wp_nag' )
+				$msg . '<p><a href="%s" class="button button-primary">Learn to upgrade</a></p>',
+				'https://docs.woocommerce.com/' // @todo: Add link to external docs
 			)
 		);
 		?>
