@@ -146,6 +146,7 @@ class WC_Admin_Feature_Plugin {
 		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-events.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/class-wc-admin-api-init.php';
 		require_once WC_ADMIN_ABSPATH . 'includes/export/class-wc-admin-report-csv-exporter.php';
+		require_once WC_ADMIN_ABSPATH . 'includes/export/class-wc-admin-report-exporter.php';
 
 		// Data triggers.
 		require_once WC_ADMIN_ABSPATH . 'includes/data-stores/class-wc-admin-notes-data-store.php';
