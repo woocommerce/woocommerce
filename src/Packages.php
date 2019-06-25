@@ -48,6 +48,16 @@ class Packages {
 	}
 
 	/**
+	 * Checks a package exists by looking for it's directory.
+	 *
+	 * @param string $package Package name.
+	 * @return boolean
+	 */
+	public static function package_exists( $package ) {
+		return file_exists( dirname( __DIR__ ) . '/packages/' . $package );
+	}
+
+	/**
 	 * Loads packages after plugins_loaded hook.
 	 *
 	 * Each package should include an init file which loads the package so it can be used by core.
@@ -60,16 +70,6 @@ class Packages {
 			}
 			call_user_func( [ $package_class, 'init' ] );
 		}
-	}
-
-	/**
-	 * Checks a package exists by looking for it's directory.
-	 *
-	 * @param string $package Package name.
-	 * @return boolean
-	 */
-	protected static function package_exists( $package ) {
-		return file_exists( dirname( __DIR__ ) . '/packages/' . $package );
 	}
 
 	/**

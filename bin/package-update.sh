@@ -30,7 +30,7 @@ done
 
 # Autoloader
 output 3 "Updating autoloader classmaps..."
-composer dump-autoload --no-dev
+composer dump-autoload
 output 2 "Done"
 
 # Convert textdomains
