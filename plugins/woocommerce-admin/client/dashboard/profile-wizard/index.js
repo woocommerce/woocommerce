@@ -23,6 +23,7 @@ import ProductTypes from './steps/product-types';
 import ProfileWizardHeader from './header';
 import Start from './steps/start';
 import StoreDetails from './steps/store-details';
+import Theme from './steps/theme';
 import withSelect from 'wc-api/with-select';
 import './style.scss';
 
@@ -58,7 +59,7 @@ const getSteps = () => {
 	} );
 	steps.push( {
 		key: 'theme',
-		container: Fragment,
+		container: Theme,
 		label: __( 'Theme', 'woocommerce-admin' ),
 	} );
 	return steps;

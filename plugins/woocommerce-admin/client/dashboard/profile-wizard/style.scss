@@ -98,7 +98,12 @@
 		margin-top: $gap-larger;
 		margin-left: auto;
 		margin-right: auto;
-		max-width: 476px;
+
+		> * {
+			max-width: 476px;
+			margin-left: auto;
+			margin-right: auto;
+		}
 
 		@include breakpoint( '<782px' ) {
 			padding-left: $gap;

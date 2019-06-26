@@ -74,7 +74,6 @@ class WC_Admin_Onboarding {
 	/**
 	 * Get a list of allowed product types for the onboarding wizard.
 	 *
-	 * @todo Prices for products should be pulled dynamically.
 	 * @return array
 	 */
 	public static function get_allowed_product_types() {
@@ -108,6 +107,26 @@ class WC_Admin_Onboarding {
 		);
 
 		return apply_filters( 'woocommerce_admin_onboarding_product_types', $product_types );
+	}
+
+	/**
+	 * Get a list of themes for the onboarding wizard.
+	 *
+	 * @return array
+	 */
+	public static function get_themes() {
+		$theme_data_transient_name = 'wc_onboarding_themes';
+		$theme_data                = get_transient( $theme_data_transient_name );
+		if ( false === $theme_data ) {
+			// @todo This should be replaced with the real wccom URL once
+			// https://github.com/Automattic/woocommerce.com/pull/6035 is merged and deployed.
+			$theme_data = wp_remote_get( 'http://woocommerce.test/wp-json/wccom-extensions/1.0/search?category=themes' );
+			set_transient( $theme_data_transient_name, $theme_data, DAY_IN_SECONDS );
+		}
+
+		$theme_data = json_decode( $theme_data['body'] );
+
+		return apply_filters( 'woocommerce_admin_onboarding_themes', $theme_data->products );
 	}
 
 	/**
@@ -160,6 +179,7 @@ class WC_Admin_Onboarding {
 		// Only fetch if the onboarding wizard is incomplete.
 		if ( $this->should_show_profiler() ) {
 			$settings['onboarding']['productTypes'] = self::get_allowed_product_types();
+			$settings['onboarding']['themes']       = self::get_themes();
 		}
 
 		return $settings;

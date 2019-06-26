@@ -1,0 +1,106 @@
+/** @format */
+.woocommerce-profile-wizard__body .woocommerce-profile-wizard__container {
+	> .woocommerce-profile-wizard__themes-tab-panel {
+		margin-bottom: $gap-large;
+
+		@include breakpoint( '>782px' ) {
+			max-width: 810px;
+
+			.woocommerce-profile-wizard__themes {
+				display: grid;
+				grid-gap: $gap-large;
+				grid-template-columns: 1fr 1fr;
+			}
+		}
+	}
+}
+
+.woocommerce-profile-wizard__themes-tab-panel .components-tab-panel__tabs {
+	display: flex;
+	justify-content: space-between;
+	background: $white;
+	box-shadow: $muriel-box-shadow-1dp;
+	border-radius: 3px;
+	margin-top: $gap-large;
+	margin-bottom: $gap-large;
+
+	button {
+		border: 0;
+		border-bottom: 1px solid transparent;
+		color: $muriel-gray-500;
+		display: flex;
+		background: transparent;
+		height: 48px;
+		width: 100%;
+		@include font-size(14);
+		font-weight: 500;
+		outline: none;
+		padding: 0 $gap-large;
+
+		&.is-active {
+			border-bottom: 1px solid $muriel-hot-pink-500;
+			color: $muriel-hot-pink-500;
+		}
+	}
+}
+
+.woocommerce-profile-wizard__body .woocommerce-profile-wizard__theme.woocommerce-card {
+	overflow: hidden;
+
+	@include breakpoint( '>782px' ) {
+		margin: 0;
+	}
+
+	.woocommerce-card__body {
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
+
+	.woocommerce-profile-wizard__theme-image {
+		display: block;
+		width: 100%;
+	}
+
+	.woocommerce-profile-wizard__theme-name {
+		margin-top: 0;
+		margin-bottom: $gap-smaller;
+		@include font-size(24);
+		font-weight: 400;
+	}
+
+	.woocommerce-profile-wizard__theme-details {
+		padding: $gap;
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
+
+	.woocommerce-profile-wizard__theme-price {
+		margin: 0;
+		font-size: 14px;
+	}
+
+	.woocommerce-profile-wizard__theme-learn-more {
+		display: inline-block;
+	}
+
+	.woocommerce-profile-wizard__theme-actions {
+		margin-top: auto;
+
+		button.components-button {
+			display: block;
+			float: left;
+			min-width: 106px;
+			height: 40px;
+			margin-right: $gap-smaller;
+			box-shadow: none;
+
+			&.is-default {
+				border-color: $muriel-hot-pink-500;
+				color: $muriel-hot-pink-500;
+			}
+		}
+	}
+}
