@@ -7,7 +7,10 @@
   "prefer-stable": true,
   "minimum-stability": "dev",
   "require": {
-    "composer/installers": "1.6.0"
+    "composer/installers": "1.6.0",
+    "woocommerce/woocommerce-rest-api": "dev-test/jetpack-autoloader",
+    "woocommerce/woocommerce-blocks": "dev-add/build-config",
+    "automattic/jetpack-autoloader": "^1"
   },
   "require-dev": {
     "apigen/apigen": "4.1.2",
@@ -15,7 +18,25 @@
     "phpunit/phpunit": "6.5.14",
     "woocommerce/woocommerce-sniffs": "0.0.6"
   },
+  "config": {
+    "preferred-install": {
+        "woocommerce/woocommerce-rest-api": "dist",
+        "woocommerce/woocommerce-blocks": "dist"
+    }
+  },
+  "autoload": {
+    "exclude-from-classmap": [
+      "includes/legacy",
+      "includes/libraries"
+    ]
+  },
   "scripts": {
+    "post-install-cmd": [
+      "composer dump-autoload --no-dev"
+    ],
+    "post-update-cmd": [
+      "composer dump-autoload --no-dev"
+    ],
     "test": [
       "phpunit"
     ],
@@ -30,6 +51,10 @@
     ]
   },
   "extra": {
+    "installer-paths": {
+      "vendor/woocommerce-rest-api": ["woocommerce/woocommerce-rest-api"],
+      "vendor/woocommerce-blocks": ["woocommerce/woocommerce-blocks"]
+    },
     "scripts-description": {
       "test": "Run unit tests",
       "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
