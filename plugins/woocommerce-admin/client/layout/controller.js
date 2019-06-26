@@ -23,7 +23,9 @@ import DevDocs from 'devdocs';
 
 const TIME_EXCLUDED_SCREENS_FILTER = 'woocommerce_admin_time_excluded_screens';
 
-const getPages = () => {
+export const PAGES_FILTER = 'woocommerce_admin_pages_list';
+
+export const getPages = () => {
 	const pages = [];
 
 	if ( window.wcAdminFeatures.devdocs ) {
@@ -65,10 +67,10 @@ const getPages = () => {
 		} );
 	}
 
-	return pages;
+	return applyFilters( PAGES_FILTER, pages );
 };
 
-class Controller extends Component {
+export class Controller extends Component {
 	componentDidMount() {
 		window.document.documentElement.scrollTop = 0;
 	}
@@ -206,5 +208,3 @@ window.wpNavMenuClassChange = function( page ) {
 	const wpWrap = document.querySelector( '#wpwrap' );
 	wpWrap.classList.remove( 'wp-responsive-open' );
 };
-
-export { Controller, getPages };
