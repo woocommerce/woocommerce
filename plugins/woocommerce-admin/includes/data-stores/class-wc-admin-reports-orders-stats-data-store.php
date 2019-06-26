@@ -330,7 +330,7 @@ class WC_Admin_Reports_Orders_Stats_Data_Store extends WC_Admin_Reports_Data_Sto
 				return new WP_Error( 'woocommerce_reports_revenue_result_failed', __( 'Sorry, fetching revenue data failed.', 'woocommerce-admin' ) );
 			}
 
-			if ( isset( $intervals[0] ) && isset( $intervals[0]['coupons_count'] ) ) {
+			if ( isset( $intervals[0] ) ) {
 				$unique_coupons                = $this->get_unique_coupon_count( $intervals_query['from_clause'], $intervals_query['where_time_clause'], $intervals_query['where_clause'], true );
 				$intervals[0]['coupons_count'] = $unique_coupons;
 			}
