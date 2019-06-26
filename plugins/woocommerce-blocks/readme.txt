@@ -83,6 +83,14 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 2.2.0 - 2019-06-26 =
+
+- Feature: Add Product Categories List navigation block for showing a list of categories on your site.
+- Enhancement: All grid blocks are now rendered directly by the blocks code, not using the shortcode.
+- Enhancement: Brand the WooCommerce Blocks for better discoverability in the block inserter.
+- Build: Update build process to dynamically generate required WordPress dependencies.
+- Build: Update packages.
+
 = 2.1.0 - 2019-05-14 =
 
 - Feature: Add focal point picker to the Featured Product block, so you can adjust the background image position (only available on WP 5.2+ or with Gutenberg plugin).
