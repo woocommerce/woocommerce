@@ -115,25 +115,35 @@ class WC_Admin_Report_Exporter {
 		$exporter->set_filename( "wc-{$report_type}-report-export-{$user_id}-{$export_id}" );
 		$exporter->generate_file();
 
-		self::update_export_percentage_complete( $report_type, $export_id, $exporter->get_percent_complete() );
+		self::update_export_percentage_complete( $user_id, $report_type, $export_id, $exporter->get_percent_complete() );
+	}
+
+	/**
+	 * Generate a key to reference an export status.
+	 *
+	 * @param int    $user_id User ID who requested the export.
+	 * @param string $report_type Report type. E.g. 'customers'.
+	 * @param string $export_id Unique ID for report (timestamp expected).
+	 * @return string Status key.
+	 */
+	protected static function get_status_key( $user_id, $report_type, $export_id ) {
+		return implode( ':', array( $user_id, $report_type, $export_id ) );
 	}
 
 	/**
 	 * Update the completion percentage of a report export.
 	 *
+	 * @param int    $user_id User ID who requested the export.
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @param string $export_id Unique ID for report (timestamp expected).
 	 * @param int    $percentage Completion percentage.
 	 * @return void
 	 */
-	public static function update_export_percentage_complete( $report_type, $export_id, $percentage ) {
+	public static function update_export_percentage_complete( $user_id, $report_type, $export_id, $percentage ) {
 		$exports_status = get_option( self::EXPORT_STATUS_OPTION, array() );
+		$status_key     = self::get_status_key( $user_id, $report_type, $export_id );
 
-		if ( ! isset( $exports_status[ $report_type ] ) ) {
-			$exports_status[ $report_type ] = array();
-		}
-
-		$exports_status[ $report_type ][ $export_id ] = $percentage;
+		$exports_status[ $status_key ] = $percentage;
 
 		update_option( self::EXPORT_STATUS_OPTION, $exports_status );
 	}
@@ -141,18 +151,17 @@ class WC_Admin_Report_Exporter {
 	/**
 	 * Get the completion percentage of a report export.
 	 *
+	 * @param int    $user_id User ID who requested the export.
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @param string $export_id Unique ID for report (timestamp expected).
 	 * @return bool|int Completion percentage, or false if export not found.
 	 */
-	public static function get_export_percentage_complete( $report_type, $export_id ) {
+	public static function get_export_percentage_complete( $user_id, $report_type, $export_id ) {
 		$exports_status = get_option( self::EXPORT_STATUS_OPTION, array() );
+		$status_key     = self::get_status_key( $user_id, $report_type, $export_id );
 
-		if (
-			isset( $exports_status[ $report_type ] ) &&
-			isset( $exports_status[ $report_type ][ $export_id ] )
-		) {
-			return $exports_status[ $report_type ][ $export_id ];
+		if ( isset( $exports_status[ $status_key ] ) ) {
+			return $exports_status[ $status_key ];
 		}
 
 		return false;
