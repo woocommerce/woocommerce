@@ -62,7 +62,7 @@ class WC_Admin_Report_Exporter {
 	 */
 	public static function init() {
 		// Initialize scheduled action handlers.
-		add_action( self::REPORT_EXPORT_ACTION, array( __CLASS__, 'report_export_action' ), 10, 4 );
+		add_action( self::REPORT_EXPORT_ACTION, array( __CLASS__, 'report_export_action' ), 10, 5 );
 	}
 
 	/**
@@ -83,21 +83,11 @@ class WC_Admin_Report_Exporter {
 		$num_batches = (int) ceil( $total_rows / $batch_size );
 		$start_time  = time() + 5;
 
-		// @todo - batch these batches, like initial import.
-		for ( $batch = 1; $batch <= $num_batches; $batch++ ) {
-			$report_batch_args = array_merge(
-				$report_args,
-				array(
-					'page' => $batch,
-				)
-			);
+		// Create batches, like initial import.
+		$report_batch_args = array( $user_id, $export_id, $report_type, $report_args );
 
-			self::queue()->schedule_single(
-				$action_timestamp,
-				self::REPORT_EXPORT_ACTION,
-				array( $user_id, $export_id, $report_type, $report_batch_args ),
-				self::QUEUE_GROUP
-			);
+		if ( 0 < $num_batches ) {
+			WC_Admin_Reports_Sync::queue_batches( 1, $num_batches, self::REPORT_EXPORT_ACTION, $report_batch_args );
 		}
 
 		return $total_rows;
@@ -106,13 +96,16 @@ class WC_Admin_Report_Exporter {
 	/**
 	 * Process a report export action.
 	 *
+	 * @param int    $page_number Page number for this action.
 	 * @param int    $user_id User requesting export.
 	 * @param string $export_id Unique ID for report (timestamp expected).
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @param array  $report_args Report parameters, passed to data query.
 	 * @return void
 	 */
-	public static function report_export_action( $user_id, $export_id, $report_type, $report_args ) {
+	public static function report_export_action( $page_number, $user_id, $export_id, $report_type, $report_args ) {
+		$report_args['page'] = $page_number;
+
 		$exporter = new WC_Admin_Report_CSV_Exporter( $report_type, $report_args );
 		$exporter->set_filename( "wc-{$report_type}-report-export-{$user_id}-{$export_id}" );
 		$exporter->generate_file();
