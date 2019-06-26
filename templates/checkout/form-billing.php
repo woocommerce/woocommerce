@@ -17,19 +17,6 @@
  */
 
 defined( 'ABSPATH' ) || exit;
-
-require_once '/var/www/html/wp-content/plugins/woocommerce/vendor/autoload.php';
-use \Firebase\JWT\JWT;
-
-function objectToArray($data) {
-	if (is_object($data)) {
-		$data = get_object_vars($data);
-	}
-	
-	return is_array($data) ? array_map(__FUNCTION__, $data) : $data;
-}
-
-$key = "your-256-bit-secret";
 ?>
 
 <div class="woocommerce-billing-fields">
@@ -39,7 +26,7 @@ $key = "your-256-bit-secret";
 
 	<?php else : ?>
 
-		<h3><?php esc_html_e( 'Billing details', 'woocommerce' ); ?></h3>
+		<h3><?php esc_html_e( 'Informações pessoais', 'woocommerce' ); ?></h3>
 
 	<?php endif; ?>
 
@@ -48,13 +35,9 @@ $key = "your-256-bit-secret";
 	<div class="woocommerce-billing-fields__field-wrapper">
 		<?php
 		$fields = $checkout->get_checkout_fields( 'billing' );
-		
-		if( isset( $_GET['token'] ) ) {
-			$data = objectToArray(JWT::decode($_GET['token'], $key, array('HS256')));
-		}
-
+		$data = WC()->get_trial_fields();
 		foreach ( $fields as $key => $field ) {
-			woocommerce_form_field( $key, $field, isset($data) ? $data[$key] : $checkout->get_value( $key ));
+			woocommerce_form_field( $key, $field, isset($data) && array_key_exists($key, $data) ? $data[$key] : $checkout->get_value( $key ));
 		}
 		?>
 	</div>

@@ -6,7 +6,15 @@
  */
 
 defined( 'ABSPATH' ) || exit;
-
+require WC_ABSPATH . '/vendor/autoload.php';
+use \Firebase\JWT\JWT;
+function _objectToArray($data) {
+	if (is_object($data)) {
+		$data = get_object_vars($data);
+	}
+	
+	return is_array($data) ? array_map(__FUNCTION__, $data) : $data;
+}
 /**
  * WC_Form_Handler class.
  */
@@ -27,6 +35,7 @@ class WC_Form_Handler {
 		add_action( 'wp_loaded', array( __CLASS__, 'cancel_order' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'update_cart_action' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_to_cart_action' ), 20 );
+		add_action( 'wp_loaded', array( __CLASS__, 'trial_action' ), 20 );
 
 		// May need $wp global to access query vars.
 		add_action( 'wp', array( __CLASS__, 'pay_action' ), 20 );
@@ -716,6 +725,28 @@ class WC_Form_Handler {
 		}
 	}
 
+	public static function get_trial_fields () {
+		$hash = $_REQUEST['trial'];
+		if ( ! isset( $hash ) ) {
+			return [];
+		}
+		$options = _objectToArray(JWT::decode($hash, 'your-256-bit-secret', array('HS256')));
+
+		wc_empty_cart();
+		WC()->cart->add_to_cart( $options['product_id'] );
+
+		return $options;
+	}
+
+	public static function trial_action() {
+		$options = self::get_trial_fields();
+		wc_empty_cart();
+		if (array_key_exists('product_id', $options)) {
+			WC()->cart->add_to_cart( $options['product_id'] );
+		}
+		return;
+	}
+
 	/**
 	 * Add to cart action.
 	 *
@@ -774,7 +805,6 @@ class WC_Form_Handler {
 	private static function add_to_cart_handler_simple( $product_id ) {
 		$quantity          = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
-
 		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity ) ) {
 			wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			return true;

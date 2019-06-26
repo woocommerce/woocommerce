@@ -597,6 +597,11 @@ final class WooCommerce {
 		add_post_type_support( 'product', 'thumbnail' );
 	}
 
+
+	public function get_trial_fields() {
+		return WC_Form_Handler::get_trial_fields();
+	}
+
 	/**
 	 * Add WC Image sizes to WP.
 	 *
