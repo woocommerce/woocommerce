@@ -49,8 +49,8 @@ class WC_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 
 		// Populate all of the data.
 		$prod_download = new WC_Product_Download();
-		$prod_download->set_file( plugin_dir_url( __FILE__ ) . '/assets/images/help.png' );
-		$prod_download->set_id( 1 );
+		$prod_download->set_file( plugin_dir_url( __FILE__ ) . 'assets/images/help.png' );
+		$prod_download->set_id( '1' );
 
 		$product = new WC_Product_Simple();
 		$product->set_name( 'Test Product' );
@@ -92,7 +92,7 @@ class WC_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $this->user, $download_report['user_id'] );
 		$this->assertEquals( '1.2.3.4', $download_report['ip_address'] );
 		$this->assertEquals( 'help.png', $download_report['file_name'] );
-		$this->assertEquals( plugin_dir_url( __FILE__ ) . '/assets/images/help.png', $download_report['file_path'] );
+		$this->assertEquals( plugin_dir_url( __FILE__ ) . 'assets/images/help.png', $download_report['file_path'] );
 	}
 
 	/**
@@ -106,7 +106,7 @@ class WC_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 
 		// First set of data.
 		$prod_download = new WC_Product_Download();
-		$prod_download->set_file( plugin_dir_url( __FILE__ ) . '/assets/images/help.png' );
+		$prod_download->set_file( plugin_dir_url( __FILE__ ) . 'assets/images/help.png' );
 		$prod_download->set_id( 1 );
 
 		$product = new WC_Product_Simple();
@@ -138,7 +138,7 @@ class WC_Tests_API_Reports_Downloads extends WC_REST_Unit_Test_Case {
 
 		// Second set of data.
 		$prod_download = new WC_Product_Download();
-		$prod_download->set_file( plugin_dir_url( __FILE__ ) . '/assets/images/test.png' );
+		$prod_download->set_file( plugin_dir_url( __FILE__ ) . 'assets/images/test.png' );
 		$prod_download->set_id( 2 );
 
 		$product = new WC_Product_Simple();
