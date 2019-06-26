@@ -14,8 +14,7 @@ defined( 'ABSPATH' ) || exit;
 		<?php
 		echo wp_kses_post(
 			sprintf(
-				/* translators: %s: WP & PHP Upgrade URL */
-				$msg . '<p><a href="%s" class="button button-primary">Learn how to upgrade</a></p>',
+				$msg . '<p><a href="%s" class="button button-primary">' . __( 'Learn how to upgrade', 'woocommerce' ) . '</a></p>',
 				add_query_arg(
 					array(
 						'utm_source'   => 'wpphpupdatebanner',
