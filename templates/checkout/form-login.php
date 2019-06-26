@@ -29,7 +29,7 @@ if ( is_user_logged_in() || 'no' === get_option( 'woocommerce_enable_checkout_lo
 
 woocommerce_login_form(
 	array(
-		'message'  => __( 'If you have shopped with us before, please enter your details below. If you are a new customer, please proceed to the Billing &amp; Shipping section.', 'woocommerce' ),
+		'message'  => __( 'If you have shopped with us before, please enter your details below. If you are a new customer, please proceed to the Billing section.', 'woocommerce' ),
 		'redirect' => wc_get_page_permalink( 'checkout' ),
 		'hidden'   => true,
 	)

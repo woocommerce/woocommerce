@@ -1126,7 +1126,6 @@ class WC_Countries {
 						),
 						'city'  => array(
 							'required' => false,
-							'hidden'   => true,
 						),
 					),
 					'SK' => array(
