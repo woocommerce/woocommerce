@@ -1,8 +1,8 @@
 <?php
 /**
- * WooCommerce API class loader.
+ * WC-API endpoint handler.
  *
- * This handles APIs in WooCommerce. These include:
+ * This handles API related functionality in WooCommerce.
  * - wc-api endpoint - Commonly used by Payment gateways for callbacks.
  * - Legacy REST API - Deprecated in 2.6.0. @see class-wc-legacy-api.php
  * - WP REST API - The main REST API in WooCommerce which is built on top of the WP REST API.
@@ -24,32 +24,22 @@ class WC_API extends WC_Legacy_API {
 	public function init() {
 		parent::init();
 		add_action( 'init', array( $this, 'add_endpoint' ), 0 );
-		add_action( 'init', array( $this, 'rest_api_init' ) );
 		add_filter( 'query_vars', array( $this, 'add_query_vars' ), 0 );
 		add_action( 'parse_request', array( $this, 'handle_api_requests' ), 0 );
 		add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
 	}
 
 	/**
-	 * Call the Server class from the Rest API package.
-	 *
-	 * @see \Automattic\WooCommerce\RestApi\Server
-	 */
-	public function rest_api_init() {
-		if ( $this->is_rest_api_loaded() || version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
-			return;
-		}
-		\Automattic\WooCommerce\RestApi\Server::instance()->init();
-	}
-
-	/**
 	 * Get the version of the REST API package being ran.
 	 *
 	 * @since 3.7.0
-	 * @return int|null
+	 * @return string|null
 	 */
 	public function get_rest_api_package_version() {
-		return null;
+		if ( ! $this->is_rest_api_loaded() ) {
+			return null;
+		}
+		return \Automattic\WooCommerce\RestApi\Package::get_version();
 	}
 
 	/**
@@ -59,7 +49,10 @@ class WC_API extends WC_Legacy_API {
 	 * @return string
 	 */
 	public function get_rest_api_package_path() {
-		return '';
+		if ( ! $this->is_rest_api_loaded() ) {
+			return null;
+		}
+		return \Automattic\WooCommerce\RestApi\Package::get_path();
 	}
 
 	/**
@@ -69,7 +62,7 @@ class WC_API extends WC_Legacy_API {
 	 * @return boolean
 	 */
 	protected function is_rest_api_loaded() {
-		return class_exists( '\Automattic\WooCommerce\RestApi\Server', false );
+		return class_exists( '\Automattic\WooCommerce\RestApi\Package', false );
 	}
 
 	/**
@@ -82,7 +75,7 @@ class WC_API extends WC_Legacy_API {
 	 */
 	public function get_endpoint_data( $endpoint, $params = array() ) {
 		if ( ! $this->is_rest_api_loaded() ) {
-			$this->rest_api_init();
+			return new WP_Error( 'rest_api_unavailable', __( 'The Rest API is unavailable.', 'woocommerce' ) );
 		}
 		$request = new \WP_REST_Request( 'GET', $endpoint );
 		if ( $params ) {

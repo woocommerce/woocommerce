@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b26e3ab11a27accf12e540dc6cb540a4",
+    "content-hash": "bd3583eea7bbf9c0401e52371ae1baf9",
     "packages": [
         {
             "name": "automattic/jetpack-autoloader",
@@ -164,19 +164,20 @@
         },
         {
             "name": "woocommerce/woocommerce-blocks",
-            "version": "dev-add/build-config",
+            "version": "dev-build/2.2.0-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-gutenberg-products-block.git",
-                "reference": "be2a243d0e999af6f4318f7b242cdac2565d36d8"
+                "reference": "64fdbe613ee66d5444696428567f3b683b1a2b06"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/be2a243d0e999af6f4318f7b242cdac2565d36d8",
-                "reference": "be2a243d0e999af6f4318f7b242cdac2565d36d8",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-gutenberg-products-block/zipball/64fdbe613ee66d5444696428567f3b683b1a2b06",
+                "reference": "64fdbe613ee66d5444696428567f3b683b1a2b06",
                 "shasum": ""
             },
             "require": {
+                "automattic/jetpack-autoloader": "^1",
                 "composer/installers": "1.6.0"
             },
             "require-dev": {
@@ -184,9 +185,15 @@
                 "woocommerce/woocommerce-sniffs": "0.0.6"
             },
             "type": "wordpress-plugin",
+            "extra": {
+                "scripts-description": {
+                    "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
+                    "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+                }
+            },
             "autoload": {
                 "psr-4": {
-                    "WooCommerce\\Blocks\\": "src/"
+                    "Automattic\\WooCommerce\\Blocks\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -195,7 +202,7 @@
             ],
             "description": "Feature plugin for the WooCommerce Gutenberg Products block",
             "homepage": "https://woocommerce.com/",
-            "time": "2019-06-20T14:53:51+00:00"
+            "time": "2019-06-21T18:08:00+00:00"
         },
         {
             "name": "woocommerce/woocommerce-rest-api",
@@ -203,12 +210,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/woocommerce/woocommerce-rest-api.git",
-                "reference": "46453550e8d7468f6a1f46b47fefd2fdc482c801"
+                "reference": "2943708bb12f70b845f32e5f26893436a926a1ee"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/woocommerce/woocommerce-rest-api/zipball/46453550e8d7468f6a1f46b47fefd2fdc482c801",
-                "reference": "46453550e8d7468f6a1f46b47fefd2fdc482c801",
+                "url": "https://api.github.com/repos/woocommerce/woocommerce-rest-api/zipball/2943708bb12f70b845f32e5f26893436a926a1ee",
+                "reference": "2943708bb12f70b845f32e5f26893436a926a1ee",
                 "shasum": ""
             },
             "require": {
@@ -236,7 +243,7 @@
             ],
             "description": "The WooCommerce core REST API.",
             "homepage": "https://github.com/woocommerce/woocommerce-rest-api",
-            "time": "2019-06-21T09:40:39+00:00"
+            "time": "2019-06-21T13:57:26+00:00"
         }
     ],
     "packages-dev": [
