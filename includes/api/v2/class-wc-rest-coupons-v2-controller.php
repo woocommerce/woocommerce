@@ -293,6 +293,8 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_Legacy_Coupons_Controller {
 							foreach ( $value as $meta ) {
 								$coupon->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
 							}
+							$date_modified_gmt = current_time( 'mysql', 1 );
+							$coupon->set_date_modified( $date_modified_gmt );
 						}
 						break;
 					case 'description':
@@ -301,6 +303,8 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_Legacy_Coupons_Controller {
 					default:
 						if ( is_callable( array( $coupon, "set_{$key}" ) ) ) {
 							$coupon->{"set_{$key}"}( $value );
+							$date_modified_gmt = current_time( 'mysql', 1 );
+							$coupon->set_date_modified( $date_modified_gmt );
 						}
 						break;
 				}
