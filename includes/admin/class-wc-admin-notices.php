@@ -353,9 +353,7 @@ class WC_Admin_Notices {
 	 * @todo  Remove this notice and associated code once the feature plugin has been merged into core.
 	 */
 	public static function add_wc_admin_feature_plugin_notice() {
-		$wordpress_version            = get_bloginfo( 'version' );
-
-		if ( version_compare( $wordpress_version, '5.0', '>=' ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), '5.0', '>=' ) ) {
 			self::add_notice( 'wc_admin' );
 		}
 	}
@@ -381,10 +379,7 @@ class WC_Admin_Notices {
 	 * @since 3.6.5
 	 */
 	public static function add_min_version_notice() {
-		$php_version = phpversion();
-		$wp_version  = get_bloginfo( 'version' );
-
-		if ( version_compare( $php_version, WC_MIN_PHP_VERSION, '<' ) || version_compare( $wp_version, WC_MIN_WP_VERSION, '<' ) ) {
+		if ( version_compare( phpversion(), WC_MIN_PHP_VERSION, '<' ) || version_compare( get_bloginfo( 'version' ), WC_MIN_WP_VERSION, '<' ) ) {
 			self::add_notice( 'wp_php_min_requirements' );
 		}
 	}
@@ -396,16 +391,13 @@ class WC_Admin_Notices {
 	 * @return void
 	 */
 	public static function wp_php_min_requirements_notice() {
-		$wp_version = get_bloginfo( 'version' );
-
 		if ( apply_filters( 'woocommerce_hide_php_wp_nag', get_user_meta( get_current_user_id(), 'dismissed_wp_php_min_requirements_notice', true ) ) ) {
 			self::remove_notice( 'wp_php_min_requirements' );
 			return;
 		}
 
-		$php_version = phpversion();
-		$old_php     = version_compare( $php_version, WC_MIN_PHP_VERSION, '<' );
-		$old_wp      = version_compare( $wp_version, WC_MIN_WP_VERSION, '<' );
+		$old_php = version_compare( phpversion(), WC_MIN_PHP_VERSION, '<' );
+		$old_wp  = version_compare( get_bloginfo( 'version' ), WC_MIN_WP_VERSION, '<' );
 
 		// Both PHP and WordPress up to date version => no notice.
 		if ( ! $old_php && ! $old_wp ) {
