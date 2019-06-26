@@ -396,7 +396,7 @@ class WC_Admin_Notices {
 	 * @return void
 	 */
 	public static function wp_php_min_requirements_notice() {
-		global $wp_version;
+		$wp_version = get_bloginfo( 'version' );
 
 		if ( apply_filters( 'woocommerce_hide_php_wp_nag', get_user_meta( get_current_user_id(), 'dismissed_wp_php_min_requirements_notice', true ) ) ) {
 			self::remove_notice( 'wp_php_min_requirements' );
