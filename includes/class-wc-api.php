@@ -241,6 +241,8 @@ class WC_API extends WC_Legacy_API {
 		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-product-attribute-terms-controller.php';
 		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-product-categories-controller.php';
 		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-products-controller.php';
+
+		// Helper REST API v1 controllers.
 	}
 
 	/**
