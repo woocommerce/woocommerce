@@ -9,3 +9,12 @@
 		margin-right: 0.5em;
 	}
 }
+
+.wp-block-woocommerce-product-categories.is-loading .wc-block-product-categories__placeholder {
+	display: inline-block;
+	height: 1em;
+	width: 50%;
+	min-width: 200px;
+	background: currentColor;
+	opacity: 0.2;
+}

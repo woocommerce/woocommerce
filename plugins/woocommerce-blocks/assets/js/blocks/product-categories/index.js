@@ -81,19 +81,31 @@ registerBlockType( 'woocommerce/product-categories', {
 	 */
 	save( { attributes } ) {
 		const { hasCount, hasEmpty, isDropdown, isHierarchical } = attributes;
-		const props = {};
+		const data = {};
 		if ( hasCount ) {
-			props[ 'data-has-count' ] = true;
+			data[ 'data-has-count' ] = true;
 		}
 		if ( hasEmpty ) {
-			props[ 'data-has-empty' ] = true;
+			data[ 'data-has-empty' ] = true;
 		}
 		if ( isDropdown ) {
-			props[ 'data-is-dropdown' ] = true;
+			data[ 'data-is-dropdown' ] = true;
 		}
 		if ( isHierarchical ) {
-			props[ 'data-is-hierarchical' ] = true;
+			data[ 'data-is-hierarchical' ] = true;
 		}
-		return <div { ...props }>LOADING</div>;
+		return (
+			<div className="is-loading" { ...data }>
+				{ isDropdown ? (
+					<span aria-hidden className="wc-block-product-categories__placeholder" />
+				) : (
+					<ul aria-hidden>
+						<li><span className="wc-block-product-categories__placeholder" /></li>
+						<li><span className="wc-block-product-categories__placeholder" /></li>
+						<li><span className="wc-block-product-categories__placeholder" /></li>
+					</ul>
+				) }
+			</div>
+		);
 	},
 } );
