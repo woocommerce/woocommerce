@@ -49,6 +49,19 @@ class WC_Admin_REST_Reports_Export_Controller extends WC_Admin_REST_Reports_Cont
 				'schema' => array( $this, 'get_export_public_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<export_id>[a-z0-9]+)/status',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'export_status' ),
+					'permission_callback' => array( $this, 'export_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_export_status_public_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -81,7 +94,7 @@ class WC_Admin_REST_Reports_Export_Controller extends WC_Admin_REST_Reports_Cont
 	}
 
 	/**
-	 * Get the Report's schema, conforming to JSON Schema.
+	 * Get the Report Export's schema, conforming to JSON Schema.
 	 *
 	 * @return array
 	 */
@@ -110,6 +123,35 @@ class WC_Admin_REST_Reports_Export_Controller extends WC_Admin_REST_Reports_Cont
 	}
 
 	/**
+	 * Get the Export status schema, conforming to JSON Schema.
+	 *
+	 * @return array
+	 */
+	public function get_export_status_public_schema() {
+		$schema = array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'report_export_status',
+			'type'       => 'object',
+			'properties' => array(
+				'percent_complete' => array(
+					'description' => __( 'Percentage complete.', 'woocommerce-admin' ),
+					'type'        => 'int',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'download_url'     => array(
+					'description' => __( 'Export download URL.', 'woocommerce-admin' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+			),
+		);
+
+		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
 	 * Export data based on user request params.
 	 *
 	 * @param  WP_REST_Request $request Request data.
@@ -122,6 +164,7 @@ class WC_Admin_REST_Reports_Export_Controller extends WC_Admin_REST_Reports_Cont
 		$export_id   = str_replace( '.', '', microtime( true ) );
 
 		WC_Admin_Report_Exporter::queue_report_export( $user_id, $export_id, $report_type, $report_args );
+		WC_Admin_Report_Exporter::update_export_percentage_complete( $report_type, $export_id, 0 );
 
 		// @todo: handle error case?
 		$result = array(
@@ -135,6 +178,50 @@ class WC_Admin_REST_Reports_Export_Controller extends WC_Admin_REST_Reports_Cont
 		$response->add_links(
 			array(
 				'status' => array(
+					'href' => rest_url( sprintf( '%s/reports/%s/export/%s/status', $this->namespace, $report_type, $export_id ) ),
+				),
+			)
+		);
+
+		$data = $this->prepare_response_for_collection( $response );
+
+		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Export status based on user request params.
+	 *
+	 * @param  WP_REST_Request $request Request data.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function export_status( $request ) {
+		$report_type = $request['type'];
+		$export_id   = $request['export_id'];
+		$percentage  = WC_Admin_Report_Exporter::get_export_percentage_complete( $report_type, $export_id );
+
+		if ( false === $percentage ) {
+			return new WP_Error(
+				'woocommerce_admin_reports_export_invalid_id',
+				__( 'Sorry, there is no export with that ID.', 'woocommerce-admin' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$result = array(
+			'percent_complete' => $percentage,
+		);
+
+		// @todo - add thing in the links below instead?
+		if ( 100 === $percentage ) {
+			$result['download_url'] = rest_url( sprintf( '%s/reports/%s/export/%s/download', $this->namespace, $report_type, $export_id ) );
+		}
+
+		// Wrap the data in a response object.
+		$response = rest_ensure_response( $result );
+		// Include a link to the export status endpoint.
+		$response->add_links(
+			array(
+				'self' => array(
 					'href' => rest_url( sprintf( '%s/reports/%s/export/%s/status', $this->namespace, $report_type, $export_id ) ),
 				),
 			)
