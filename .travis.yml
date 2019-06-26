@@ -54,7 +54,7 @@ before_script:
     else
       echo "xdebug.ini does not exist"
     fi
-  - composer install
+  - composer install --no-dev
   - |
     # Install WP Test suite, install PHPUnit globally if needed:
     if [[ ! -z "$WP_VERSION" ]]; then
