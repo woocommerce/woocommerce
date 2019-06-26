@@ -37,7 +37,7 @@ class InboxPanel extends Component {
 		const { triggerNoteAction } = this.props;
 		const href = event.target.href || '';
 
-		if ( href.length && href.indexOf( 'wc-admin#/' ) <= 0 ) {
+		if ( ! href.startsWith( wcSettings.adminUrl ) ) {
 			event.preventDefault();
 			window.open( href, '_blank' );
 		}
