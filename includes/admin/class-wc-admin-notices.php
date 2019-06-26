@@ -81,17 +81,12 @@ class WC_Admin_Notices {
 	 * Reset notices for themes when switched or a new version of WC is installed.
 	 */
 	public static function reset_admin_notices() {
-		$php_version = phpversion();
-		$wp_version  = get_bloginfo( 'version' );
-
-		if ( version_compare( $php_version, WC_MIN_PHP_VERSION, '<' ) || version_compare( $wp_version, WC_MIN_WP_VERSION, '<' ) ) {
-			self::add_notice( 'wp_php_min_requirements' );
-		}
 		if ( ! self::is_ssl() ) {
 			self::add_notice( 'no_secure_connection' );
 		}
 		self::add_wc_admin_feature_plugin_notice();
 		self::add_notice( 'template_files' );
+		self::add_min_version_notice();
 	}
 
 	/**
@@ -378,6 +373,20 @@ class WC_Admin_Notices {
 		}
 
 		include dirname( __FILE__ ) . '/views/html-notice-wc-admin.php';
+	}
+
+	/**
+	 * Add notice about minimum PHP and WordPress requirement.
+	 *
+	 * @since 3.6.5
+	 */
+	public static function add_min_version_notice() {
+		$php_version = phpversion();
+		$wp_version  = get_bloginfo( 'version' );
+
+		if ( version_compare( $php_version, WC_MIN_PHP_VERSION, '<' ) || version_compare( $wp_version, WC_MIN_WP_VERSION, '<' ) ) {
+			self::add_notice( 'wp_php_min_requirements' );
+		}
 	}
 
 	/**
