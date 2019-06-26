@@ -61,6 +61,8 @@ Finally, you will need to tell core to load your package. Edit `src/Packages.php
 	];
 ```
 
+You can add tests to ensure your package is loaded to the WooCommerce unit-tests. Some tests exist in `unit-tests/tests/packages/packages.php` which you can use as an example.
+
 ## Installing packages
 
 Once you have defined your package requirements, run
