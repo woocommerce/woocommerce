@@ -72,7 +72,7 @@ class WC_Admin_Report_Exporter {
 	 * @param string $export_id Unique ID for report (timestamp expected).
 	 * @param string $report_type Report type. E.g. 'customers'.
 	 * @param array  $report_args Report parameters, passed to data query.
-	 * @return void
+	 * @return int Number of items to export.
 	 */
 	public static function queue_report_export( $user_id, $export_id, $report_type, $report_args = array() ) {
 		$exporter = new WC_Admin_Report_CSV_Exporter( $report_type, $report_args );
@@ -99,6 +99,8 @@ class WC_Admin_Report_Exporter {
 				self::QUEUE_GROUP
 			);
 		}
+
+		return $total_rows;
 	}
 
 	/**

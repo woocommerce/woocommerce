@@ -163,25 +163,35 @@ class WC_Admin_REST_Reports_Export_Controller extends WC_Admin_REST_Reports_Cont
 		$user_id     = get_current_user_id();
 		$export_id   = str_replace( '.', '', microtime( true ) );
 
-		WC_Admin_Report_Exporter::queue_report_export( $user_id, $export_id, $report_type, $report_args );
-		WC_Admin_Report_Exporter::update_export_percentage_complete( $user_id, $report_type, $export_id, 0 );
+		$total_rows = WC_Admin_Report_Exporter::queue_report_export( $user_id, $export_id, $report_type, $report_args );
 
-		// @todo: handle error case?
-		$result = array(
-			'status'  => 'success',
-			'message' => __( 'Your report file is being generated.', 'woocommerce-admin' ),
-		);
+		if ( 0 === $total_rows ) {
+			$response = rest_ensure_response(
+				array(
+					'status'  => 'error',
+					'message' => __( 'There is no data to export for the given request.', 'woocommerce-admin' ),
+				)
+			);
 
-		// Wrap the data in a response object.
-		$response = rest_ensure_response( $result );
-		// Include a link to the export status endpoint.
-		$response->add_links(
-			array(
-				'status' => array(
-					'href' => rest_url( sprintf( '%s/reports/%s/export/%s/status', $this->namespace, $report_type, $export_id ) ),
-				),
-			)
-		);
+		} else {
+			$response = rest_ensure_response(
+				array(
+					'status'  => 'success',
+					'message' => __( 'Your report file is being generated.', 'woocommerce-admin' ),
+				)
+			);
+
+			// Include a link to the export status endpoint.
+			$response->add_links(
+				array(
+					'status' => array(
+						'href' => rest_url( sprintf( '%s/reports/%s/export/%s/status', $this->namespace, $report_type, $export_id ) ),
+					),
+				)
+			);
+
+			WC_Admin_Report_Exporter::update_export_percentage_complete( $user_id, $report_type, $export_id, 0 );
+		}
 
 		$data = $this->prepare_response_for_collection( $response );
 
