@@ -132,6 +132,7 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 
 		// Get the request params.
 		$items    = array_filter( $request->get_params() );
+		$query    = $request->get_query_params();
 		$response = array();
 
 		// Check batch limit.
@@ -156,6 +157,10 @@ abstract class WC_REST_Controller extends WP_REST_Controller {
 
 				// Set request parameters.
 				$_item->set_body_params( $item );
+
+				// Set query (GET) parameters.
+				$_item->set_query_params( $query );
+
 				$_response = $this->create_item( $_item );
 
 				if ( is_wp_error( $_response ) ) {
