@@ -24,8 +24,6 @@ class WC_API extends WC_Legacy_API {
 	 * @since 2.0
 	 */
 	public function __construct() {
-		parent::__construct();
-
 		$this->wc_api_init();
 		$this->rest_api_init();
 	}

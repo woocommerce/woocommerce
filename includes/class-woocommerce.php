@@ -459,6 +459,7 @@ final class WooCommerce {
 		$this->theme_support_includes();
 		$this->query = new WC_Query();
 		$this->api   = new WC_API();
+		$this->api->init();
 	}
 
 	/**
