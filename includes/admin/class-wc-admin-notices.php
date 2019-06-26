@@ -422,8 +422,8 @@ class WC_Admin_Notices {
 		} elseif ( $old_php ) {
 			$msg = sprintf(
 				/* translators: %s: Minimum PHP version */
-				 __( 'Your store is running on an outdated version of PHP. In future releases of WooCommerce we will require PHP version %s or newer.', 'woocommerce' ),
-				 WC_MIN_PHP_VERSION
+				__( 'Your store is running on an outdated version of PHP. In future releases of WooCommerce we will require PHP version %s or newer.', 'woocommerce' ),
+				WC_MIN_PHP_VERSION
 			);
 		} elseif ( $old_wp ) {
 			$msg = sprintf(
