@@ -180,7 +180,6 @@ final class WooCommerce {
 		register_shutdown_function( array( $this, 'log_errors' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), -1 );
-		add_action( 'plugins_loaded', array( $this, 'init_packages' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
 		add_action( 'after_setup_theme', array( $this, 'include_template_functions' ), 11 );
 		add_action( 'init', array( $this, 'init' ), 0 );
@@ -190,21 +189,6 @@ final class WooCommerce {
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
-	}
-
-	/**
-	 * Load any WooCommerce packages.
-	 *
-	 * Most packages will have their own init routines, so this is used early once plugins are loaded.
-	 *
-	 * @since 3.7.0
-	 */
-	public function init_packages() {
-		if ( version_compare( PHP_VERSION, '5.6.0', '<' ) ) {
-			return;
-		}
-		\Automattic\WooCommerce\Blocks\Package::init();
-		\Automattic\WooCommerce\RestApi\Package::init();
 	}
 
 	/**
