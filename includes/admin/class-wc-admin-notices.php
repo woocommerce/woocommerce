@@ -398,6 +398,11 @@ class WC_Admin_Notices {
 		$old_php     = version_compare( $php_version, WC_MIN_PHP_VERSION, '<' );
 		$old_wp      = version_compare( $wp_version, WC_MIN_WP_VERSION, '<' );
 
+		// Both PHP and WordPress up to date version => no notice.
+		if ( ! $old_php && ! $old_wp ) {
+			return;
+		}
+
 		if ( $old_php && $old_wp ) {
 			$msg = sprintf(
 				/* translators: 1: Minimum PHP version 2: Minimum WordPress version */
