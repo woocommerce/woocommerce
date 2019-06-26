@@ -407,20 +407,20 @@ class WC_Admin_Notices {
 		if ( $old_php && $old_wp ) {
 			$msg = sprintf(
 				/* translators: 1: Minimum PHP version 2: Minimum WordPress version */
-				__( 'Your store is running on outdated versions of WordPress and PHP. In future releases of WooCommerce we will require PHP version %1$s or newer and WordPress version %2$s or newer.', 'woocommerce' ),
+				__( 'Update required: WooCommerce will soon require PHP version %1$s and WordPress version %2$s or newer.', 'woocommerce' ),
 				WC_MIN_PHP_VERSION,
 				WC_MIN_WP_VERSION
 			);
 		} elseif ( $old_php ) {
 			$msg = sprintf(
 				/* translators: %s: Minimum PHP version */
-				__( 'Your store is running on an outdated version of PHP. In future releases of WooCommerce we will require PHP version %s or newer.', 'woocommerce' ),
+				__( 'Update required: WooCommerce will soon require PHP version %s or newer.', 'woocommerce' ),
 				WC_MIN_PHP_VERSION
 			);
 		} elseif ( $old_wp ) {
 			$msg = sprintf(
 				/* translators: %s: Minimum WordPress version */
-				__( 'Your store is running on an outdated version of WordPress. In future releases of WooCommerce we will require WordPress version %s or newer.', 'woocommerce' ),
+				__( 'Update required: WooCommerce will soon require WordPress version %s or newer.', 'woocommerce' ),
 				WC_MIN_WP_VERSION
 			);
 		}
