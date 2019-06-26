@@ -388,31 +388,18 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return array
 	 */
 	private function get_wp_api_payload( $resource, $resource_id, $event ) {
-		$rest_api_versions = wc_get_webhook_rest_api_versions();
-		$version_suffix    = end( $rest_api_versions ) !== $this->get_api_version() ? strtoupper( str_replace( 'wp_api', '', $this->get_api_version() ) ) : '';
-
-		// Load REST API endpoints to generate payload.
-		if ( ! did_action( 'rest_api_init' ) ) {
-			WC()->api->rest_api_includes();
-		}
-
 		switch ( $resource ) {
 			case 'coupon':
 			case 'customer':
 			case 'order':
 			case 'product':
-				$class      = 'WC_REST_' . ucfirst( $resource ) . 's' . $version_suffix . '_Controller';
-				$request    = new WP_REST_Request( 'GET' );
-				$controller = new $class();
-
 				// Bulk and quick edit action hooks return a product object instead of an ID.
 				if ( 'product' === $resource && 'updated' === $event && is_a( $resource_id, 'WC_Product' ) ) {
 					$resource_id = $resource_id->get_id();
 				}
 
-				$request->set_param( 'id', $resource_id );
-				$result  = $controller->get_item( $request );
-				$payload = isset( $result->data ) ? $result->data : array();
+				$version = str_replace( 'wp_api_', '', $this->get_api_version() );
+				$payload = wc()->api->get_endpoint_data( "/wc/{$version}/{$resource}s/{$resource_id}" );
 				break;
 
 			// Custom topics include the first hook argument.
