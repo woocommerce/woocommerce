@@ -200,11 +200,11 @@ class WC_Admin_REST_Reports_Products_Controller extends WC_REST_Reports_Controll
 						'context'     => array( 'view', 'edit' ),
 						'description' => __( 'Product link.', 'woocommerce-admin' ),
 					),
-					'attributes'       => array(
+					'category_ids'     => array(
 						'type'        => 'array',
 						'readonly'    => true,
 						'context'     => array( 'view', 'edit' ),
-						'description' => __( 'Product attributes.', 'woocommerce-admin' ),
+						'description' => __( 'Product category IDs.', 'woocommerce-admin' ),
 					),
 					'stock_status'     => array(
 						'type'        => 'string',

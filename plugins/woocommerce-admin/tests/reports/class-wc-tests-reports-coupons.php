@@ -267,5 +267,61 @@ class WC_Tests_Reports_Coupons extends WC_Unit_Test_Case {
 		);
 		$this->assertEquals( $expected_data, $data );
 
+		// Test the CSV export.
+		$expected_csv_columns = array(
+			'coupon_id',
+			'amount',
+			'orders_count',
+			'code',
+			'date_created',
+			'date_created_gmt',
+			'date_expires',
+			'date_expires_gmt',
+			'discount_type',
+		);
+
+		// Expected CSV for Coupon 2.
+		$coupon_2_csv = array(
+			$coupon_2_response['coupon_id'],
+			$coupon_2_response['amount'],
+			$coupon_2_response['orders_count'],
+			$coupon_2_response['extended_info']['code'],
+			$coupon_2_response['extended_info']['date_created'],
+			$coupon_2_response['extended_info']['date_created_gmt'],
+			$coupon_2_response['extended_info']['date_expires'],
+			$coupon_2_response['extended_info']['date_expires_gmt'],
+			$coupon_2_response['extended_info']['discount_type'],
+		);
+
+		// Expected CSV for Coupon 1.
+		$coupon_1_csv = array(
+			$coupon_1_response['coupon_id'],
+			$coupon_1_response['amount'],
+			$coupon_1_response['orders_count'],
+			$coupon_1_response['extended_info']['code'],
+			$coupon_1_response['extended_info']['date_created'],
+			$coupon_1_response['extended_info']['date_created_gmt'],
+			$coupon_1_response['extended_info']['date_expires'],
+			$coupon_1_response['extended_info']['date_expires_gmt'],
+			$coupon_1_response['extended_info']['discount_type'],
+		);
+
+		// Build the expected CSV data, including Excel header (see: WC_CSV_Exporter::export).
+		$expected_csv  = chr( 239 ) . chr( 187 ) . chr( 191 );
+		$expected_csv .= implode( ',', $expected_csv_columns ) . PHP_EOL;
+		$expected_csv .= implode( ',', $coupon_2_csv ) . PHP_EOL;
+		$expected_csv .= implode( ',', $coupon_1_csv ) . PHP_EOL;
+
+		// Ensure our exporter and report controller have been loaded.
+		do_action( 'rest_api_init' );
+
+		// Run the export and compare values.
+		$export = new WC_Admin_Report_CSV_Exporter( 'coupons', $args );
+		$export->generate_file();
+		$actual_csv = $export->get_file();
+
+		$this->assertEquals( 100, $export->get_percent_complete() );
+		$this->assertEquals( 2, $export->get_total_exported() );
+		$this->assertEquals( $expected_csv, $actual_csv );
 	}
 }
