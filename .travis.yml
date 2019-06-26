@@ -24,13 +24,6 @@ env:
 matrix:
   fast_finish: true
   include:
-  - php: 5.3
-    dist: precise
-    env: WP_VERSION=5.1.1 WP_MULTISITE=0 RUN_PHPCS=0
-  - php: 5.2
-    dist: precise
-    env: WP_VERSION=5.1.1 WP_MULTISITE=0 RUN_PHPCS=0
-  - name: "Coding standard check"
     php: 7.2
     env: WP_VERSION=latest WP_MULTISITE=0 RUN_PHPCS=1
   - name: "e2e tests"
@@ -60,6 +53,7 @@ before_script:
     else
       echo "xdebug.ini does not exist"
     fi
+  - composer install
   - |
     # Install WP Test suite, install PHPUnit globally if needed:
     if [[ ! -z "$WP_VERSION" ]]; then
