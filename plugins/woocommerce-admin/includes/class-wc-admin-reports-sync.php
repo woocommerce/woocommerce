@@ -515,11 +515,15 @@ class WC_Admin_Reports_Sync {
 		if ( $range_size > $batch_size ) {
 			// If the current batch range is larger than a single batch,
 			// split the range into $queue_batch_size chunks.
-			$chunk_size = ceil( $range_size / $batch_size );
+			$chunk_size = (int) ceil( $range_size / $batch_size );
 
 			for ( $i = 0; $i < $batch_size; $i++ ) {
-				$batch_start = $range_start + ( $i * $chunk_size );
-				$batch_end   = min( $range_end, $range_start + ( $chunk_size * ( $i + 1 ) ) - 1 );
+				$batch_start = (int) ( $range_start + ( $i * $chunk_size ) );
+				$batch_end   = (int) min( $range_end, $range_start + ( $chunk_size * ( $i + 1 ) ) - 1 );
+
+				if ( $batch_start > $range_end ) {
+					return;
+				}
 
 				self::queue()->schedule_single(
 					$action_timestamp,
