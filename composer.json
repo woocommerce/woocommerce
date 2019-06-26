@@ -32,10 +32,10 @@
   },
   "scripts": {
     "post-install-cmd": [
-      "composer dump-autoload --no-dev"
+      "sh ./bin/package-update.sh"
     ],
     "post-update-cmd": [
-      "composer dump-autoload --no-dev"
+      "sh ./bin/package-update.sh --updating"
     ],
     "test": [
       "phpunit"
@@ -52,8 +52,8 @@
   },
   "extra": {
     "installer-paths": {
-      "vendor/woocommerce-rest-api": ["woocommerce/woocommerce-rest-api"],
-      "vendor/woocommerce-blocks": ["woocommerce/woocommerce-blocks"]
+      "packages/woocommerce-rest-api": ["woocommerce/woocommerce-rest-api"],
+      "packages/woocommerce-blocks": ["woocommerce/woocommerce-blocks"]
     },
     "scripts-description": {
       "test": "Run unit tests",
