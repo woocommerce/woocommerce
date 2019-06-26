@@ -247,13 +247,6 @@ module.exports = function( grunt ) {
 				stdout: true,
 				stderr: true
 			},
-			apidocs: {
-				command: [
-					'vendor/bin/apigen generate -q',
-					'cd apigen',
-					'php hook-docs.php'
-				].join( '&&' )
-			},
 			e2e_test: {
 				command: 'npm run --silent test:single tests/e2e-tests/' + grunt.option( 'file' )
 			},
@@ -295,9 +288,6 @@ module.exports = function( grunt ) {
 
 		// Clean the directory.
 		clean: {
-			apidocs: {
-				src: [ 'wc-apidocs' ]
-			},
 			blocks: {
 				src: [
 					'<%= dirs.js %>/blocks',
@@ -437,11 +427,6 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'blocks', [
 		'clean:blocks',
 		'copy'
-	]);
-
-	grunt.registerTask( 'docs', [
-		'clean:apidocs',
-		'shell:apidocs'
 	]);
 
 	grunt.registerTask( 'contributors', [
