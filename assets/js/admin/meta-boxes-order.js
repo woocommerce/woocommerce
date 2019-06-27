@@ -537,9 +537,19 @@ jQuery( function ( $ ) {
 		},
 
 		add_fee: function() {
+			window.wcTracks.recordEvent( 'order_edit_add_fee_click', {
+				order_id: woocommerce_admin_meta_boxes.post_id,
+				status: $( '#order_status' ).val()
+			} );
+
 			var value = window.prompt( woocommerce_admin_meta_boxes.i18n_add_fee );
 
-			if ( value != null ) {
+			if ( null == value ) {
+				window.wcTracks.recordEvent( 'order_edit_add_fee_cancel', {
+					order_id: woocommerce_admin_meta_boxes.post_id,
+					status: $( '#order_status' ).val()
+				} );
+			} else {
 				wc_meta_boxes_order_items.block();
 
 				var data = $.extend( {}, wc_meta_boxes_order_items.get_taxable_address(), {
