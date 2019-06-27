@@ -188,6 +188,53 @@ class WC_Tests_Cart extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test for subtotal when multiple tax slabs are present and round at subtotal is enabled.
+	 *
+	 * Ticket: @link https://github.com/woocommerce/woocommerce/issues/23917
+	 */
+	public function test_cart_calculate_total_rounding_23917() {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
+
+		$tax_rate    = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '24.0000',
+			'tax_rate_name'     => 'CGST',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '0',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => 'tax_1',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rate   = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '24.0000',
+			'tax_rate_name'     => 'SGST',
+			'tax_rate_priority' => '2',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '0',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => 'tax_2',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		// Create a product with price 599.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 599 );
+		$product->save();
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+		$this->assertEquals( 599, WC()->cart->subtotal );
+		$this->assertEquals( 599, WC()->cart->total );
+	}
+
+	/**
 	 * Test some discount logic which has caused issues in the past.
 	 * Ticket:
 	 *  https://github.com/woocommerce/woocommerce/issues/10963
