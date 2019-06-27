@@ -57,6 +57,7 @@ abstract class WGPB_Block_Grid_Base {
 		$defaults = array(
 			'columns'           => wc_get_theme_support( 'product_blocks::default_columns', 3 ),
 			'rows'              => wc_get_theme_support( 'product_blocks::default_rows', 1 ),
+			'alignButtons'      => false,
 			'categories'        => array(),
 			'catOperator'       => 'any',
 			'contentVisibility' => array(
@@ -222,6 +223,10 @@ abstract class WGPB_Block_Grid_Base {
 
 		if ( isset( $this->attributes['align'] ) ) {
 			$classes[] = "align{$this->attributes['align']}";
+		}
+
+		if ( ! empty( $this->attributes['alignButtons'] ) ) {
+			$classes[] = 'has-aligned-buttons';
 		}
 
 		return implode( ' ', $classes );

@@ -28,6 +28,7 @@ class ProductOnSaleBlock extends Component {
 			contentVisibility,
 			rows,
 			orderby,
+			alignButtons,
 		} = attributes;
 
 		return (
@@ -39,6 +40,7 @@ class ProductOnSaleBlock extends Component {
 					<GridLayoutControl
 						columns={ columns }
 						rows={ rows }
+						alignButtons={ alignButtons }
 						setAttributes={ setAttributes }
 					/>
 				</PanelBody>
