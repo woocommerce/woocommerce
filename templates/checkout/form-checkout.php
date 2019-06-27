@@ -37,11 +37,11 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 		<div class="col-8" id="customer_details">
 			<div class="row">
-				<div class="col-12" style="display: none">
+				<div class="col-12 personal-information-form" >
 					<?php do_action( 'woocommerce_checkout_billing' ); ?>
-					<button type="button" class="btn-block next-button">Continuar ></button>
+					<button type="button" class="btn-block next-button to-billing">Continuar ></button>
 				</div>
-				<div class="col-12">
+				<div class="col-12 billing-information-form" style="display: none">
 					<?php do_action( 'woocommerce_checkout_order_review_payment' ); ?>
 				</div>
 <!-- 
