@@ -150,6 +150,7 @@ install_deps() {
 	cd "wp-content/plugins/"
 	# As zip file does not include tests, we have to get it from git repo.
 	git clone --depth 1 https://github.com/woocommerce/woocommerce.git
+
 	cd "$WP_CORE_DIR"
 	php wp-cli.phar plugin activate woocommerce
 
@@ -157,6 +158,11 @@ install_deps() {
 		# Install the correct branch of the plugin, if running from Travis CI.
 		php wp-cli.phar plugin install https://github.com/$REPO/archive/$BRANCH.zip --activate
 	fi
+
+	cd "wp-content/plugins/woocommerce-gutenberg-products-block"
+
+	# Run composer in plugin dir.
+	composer install --no-dev
 
 	# Back to original dir
 	cd "$WORKING_DIR"

@@ -56,6 +56,7 @@ class WGPB_Block_Library {
 		add_action( 'admin_print_footer_scripts', array( 'WGPB_Block_Library', 'print_script_block_data' ), 1 );
 		add_action( 'wp_print_footer_scripts', array( 'WGPB_Block_Library', 'print_script_block_data' ), 1 );
 		add_action( 'body_class', array( 'WGPB_Block_Library', 'add_theme_body_class' ), 1 );
+		add_action( 'rest_api_init', array( WooCommerce\Blocks\RestApi::instance(), 'register_rest_routes' ), 10 );
 	}
 
 	/**

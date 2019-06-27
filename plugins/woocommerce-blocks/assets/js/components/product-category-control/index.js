@@ -27,7 +27,7 @@ class ProductCategoryControl extends Component {
 
 	componentDidMount() {
 		apiFetch( {
-			path: addQueryArgs( '/wc-blocks/v1/products/categories', { per_page: -1 } ),
+			path: addQueryArgs( '/wc/blocks/products/categories', { per_page: -1 } ),
 		} )
 			.then( ( list ) => {
 				this.setState( { list, loading: false } );
