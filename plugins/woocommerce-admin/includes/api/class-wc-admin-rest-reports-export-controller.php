@@ -160,10 +160,9 @@ class WC_Admin_REST_Reports_Export_Controller extends WC_Admin_REST_Reports_Cont
 	public function export_items( $request ) {
 		$report_type = $request['type'];
 		$report_args = empty( $request['report_args'] ) ? array() : $request['report_args'];
-		$user_id     = get_current_user_id();
 		$export_id   = str_replace( '.', '', microtime( true ) );
 
-		$total_rows = WC_Admin_Report_Exporter::queue_report_export( $user_id, $export_id, $report_type, $report_args );
+		$total_rows = WC_Admin_Report_Exporter::queue_report_export( $export_id, $report_type, $report_args );
 
 		if ( 0 === $total_rows ) {
 			$response = rest_ensure_response(
@@ -190,7 +189,7 @@ class WC_Admin_REST_Reports_Export_Controller extends WC_Admin_REST_Reports_Cont
 				)
 			);
 
-			WC_Admin_Report_Exporter::update_export_percentage_complete( $user_id, $report_type, $export_id, 0 );
+			WC_Admin_Report_Exporter::update_export_percentage_complete( $report_type, $export_id, 0 );
 		}
 
 		$data = $this->prepare_response_for_collection( $response );
@@ -207,8 +206,7 @@ class WC_Admin_REST_Reports_Export_Controller extends WC_Admin_REST_Reports_Cont
 	public function export_status( $request ) {
 		$report_type = $request['type'];
 		$export_id   = $request['export_id'];
-		$user_id     = get_current_user_id();
-		$percentage  = WC_Admin_Report_Exporter::get_export_percentage_complete( $user_id, $report_type, $export_id );
+		$percentage  = WC_Admin_Report_Exporter::get_export_percentage_complete( $report_type, $export_id );
 
 		if ( false === $percentage ) {
 			return new WP_Error(
