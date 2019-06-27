@@ -593,7 +593,7 @@ class WC_Admin_Report {
 			$tooltip = sprintf( __( 'Sold %1$s worth in the last %2$d days', 'woocommerce' ), strip_tags( wc_price( $total ) ), $days );
 		} else {
 			/* translators: 1: total items sold 2: days */
-			$tooltip = sprintf( _n( 'Sold 1 item in the last %2$d days', 'Sold %1$d items in the last %2$d days', $total, 'woocommerce' ), $total, $days );
+			$tooltip = sprintf( _n( 'Sold %1$d item in the last %2$d days', 'Sold %1$d items in the last %2$d days', $total, 'woocommerce' ), $total, $days );
 		}
 
 		$sparkline_data = array_values( $this->prepare_chart_data( $data, 'post_date', 'sparkline_value', $days - 1, strtotime( 'midnight -' . ( $days - 1 ) . ' days', current_time( 'timestamp' ) ), 'day' ) );
