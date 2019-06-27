@@ -556,7 +556,7 @@ jQuery( function ( $ ) {
 							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
 							wc_meta_boxes_order_items.reloaded_items();
 							wc_meta_boxes_order_items.unblock();
-							window.wcTracks.recordEvent( 'order_edit_add_fee', {
+							window.wcTracks.recordEvent( 'order_edit_added_fee', {
 								order_id: data.post_id,
 								status: $( '#order_status' ).val()
 							} );
