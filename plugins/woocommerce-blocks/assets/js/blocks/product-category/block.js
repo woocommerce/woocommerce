@@ -39,6 +39,7 @@ class ProductByCategoryBlock extends Component {
 			editMode,
 			orderby,
 			rows,
+			alignButtons,
 		} = attributes;
 
 		return (
@@ -66,6 +67,7 @@ class ProductByCategoryBlock extends Component {
 					<GridLayoutControl
 						columns={ columns }
 						rows={ rows }
+						alignButtons={ alignButtons }
 						setAttributes={ setAttributes }
 					/>
 				</PanelBody>

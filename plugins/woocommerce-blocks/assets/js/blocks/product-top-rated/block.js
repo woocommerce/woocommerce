@@ -27,6 +27,7 @@ class ProductTopRatedBlock extends Component {
 			columns,
 			contentVisibility,
 			rows,
+			alignButtons,
 		} = attributes;
 
 		return (
@@ -38,6 +39,7 @@ class ProductTopRatedBlock extends Component {
 					<GridLayoutControl
 						columns={ columns }
 						rows={ rows }
+						alignButtons={ alignButtons }
 						setAttributes={ setAttributes }
 					/>
 				</PanelBody>

@@ -40,6 +40,7 @@ class ProductsByAttributeBlock extends Component {
 			contentVisibility,
 			orderby,
 			rows,
+			alignButtons,
 		} = this.props.attributes;
 
 		return (
@@ -51,6 +52,7 @@ class ProductsByAttributeBlock extends Component {
 					<GridLayoutControl
 						columns={ columns }
 						rows={ rows }
+						alignButtons={ alignButtons }
 						setAttributes={ setAttributes }
 					/>
 				</PanelBody>

@@ -26,6 +26,7 @@ class ProductNewestBlock extends Component {
 			columns,
 			contentVisibility,
 			rows,
+			alignButtons,
 		} = attributes;
 
 		return (
@@ -37,6 +38,7 @@ class ProductNewestBlock extends Component {
 					<GridLayoutControl
 						columns={ columns }
 						rows={ rows }
+						alignButtons={ alignButtons }
 						setAttributes={ setAttributes }
 					/>
 				</PanelBody>
