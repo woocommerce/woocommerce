@@ -18,7 +18,7 @@ class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var integer
 	 */
-	public $queue_batch_size = 10;
+	public $queue_batch_size = 100;
 
 	/**
 	 * Customers batch size.
@@ -79,24 +79,26 @@ class WC_Tests_Reports_Regenerate_Batching extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_queue_batches_splits_into_batches_correctly() {
 		$num_customers = 1234; // 1234 / 5 = 247 batches
-		$num_batches   = ceil( $num_customers / $this->customers_batch_size );
+		$num_batches   = (int) ceil( $num_customers / $this->customers_batch_size );
+		$chunk_size    = (int) ceil( $num_batches / $this->queue_batch_size );
+		$num_chunks    = (int) ceil( $num_batches / $chunk_size );
 
 		WC_Admin_Reports_Sync::queue_batches( 1, $num_batches, WC_Admin_Reports_Sync::CUSTOMERS_IMPORT_BATCH_ACTION );
 
-		$this->assertCount( $this->queue_batch_size, $this->queue->actions );
+		$this->assertCount( $num_chunks, $this->queue->actions );
 		$this->assertArraySubset(
 			array(
 				'hook' => WC_Admin_Reports_Sync::QUEUE_BATCH_ACTION,
-				'args' => array( 1, 25, WC_Admin_Reports_Sync::CUSTOMERS_IMPORT_BATCH_ACTION ),
+				'args' => array( 1, $chunk_size, WC_Admin_Reports_Sync::CUSTOMERS_IMPORT_BATCH_ACTION ),
 			),
 			$this->queue->actions[0]
 		);
 		$this->assertArraySubset(
 			array(
 				'hook' => WC_Admin_Reports_Sync::QUEUE_BATCH_ACTION,
-				'args' => array( 226, 247, WC_Admin_Reports_Sync::CUSTOMERS_IMPORT_BATCH_ACTION ),
+				'args' => array( 247, 247, WC_Admin_Reports_Sync::CUSTOMERS_IMPORT_BATCH_ACTION ),
 			),
-			$this->queue->actions[ $this->queue_batch_size - 1 ]
+			$this->queue->actions[ $num_chunks - 1 ]
 		);
 	}
 
