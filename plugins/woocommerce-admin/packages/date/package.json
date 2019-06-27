@@ -1,6 +1,6 @@
 {
   "name": "@woocommerce/date",
-  "version": "1.0.7",
+  "version": "1.2.0",
   "description": "WooCommerce date utilities.",
   "author": "Automattic",
   "license": "GPL-3.0-or-later",

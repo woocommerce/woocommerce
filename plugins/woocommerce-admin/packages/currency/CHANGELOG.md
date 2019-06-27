@@ -1,3 +1,7 @@
+# 1.1.2
+
+- Update liscence to GPL-3.0-or-later
+
 # 1.1.1
 
 - Change text domain on i18n functions.

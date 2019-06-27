@@ -1,3 +1,7 @@
+# 1.1.1
+
+- Update liscence to GPL-3.0-or-later
+
 # 1.1.0
 
 - Fix error in `getCSVRows` when there is a null or undefined column value.
