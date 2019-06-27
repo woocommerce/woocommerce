@@ -50,7 +50,7 @@ class ActivityPanel extends Component {
 
 		// If a panel is being opened, or if an existing panel is already open and a different one is being opened, record a track.
 		if ( ! isPanelOpen || tabName !== currentTab ) {
-			recordEvent( 'wcadmin_activity_panel_open', { tab: tabName } );
+			recordEvent( 'activity_panel_open', { tab: tabName } );
 		}
 
 		// The WordPress Notices tab is handled differently, since they are displayed inline, so the panel should be closed,
