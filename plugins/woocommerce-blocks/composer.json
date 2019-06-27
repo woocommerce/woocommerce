@@ -14,6 +14,16 @@
     "phpunit/phpunit": "6.5.14",
     "woocommerce/woocommerce-sniffs": "0.0.6"
   },
+  "autoload": {
+    "psr-4": {
+      "Automattic\\WooCommerce\\Blocks\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Automattic\\WooCommerce\\Blocks\\Tests\\": "tests/php/"
+    }
+  },
   "scripts": {
     "phpcs": [
       "phpcs --extensions=php -s -p"
@@ -26,12 +36,6 @@
     "scripts-description": {
       "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
       "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
-    }
-  },
-  "autoload": {
-    "psr-4": {
-      "WooCommerce\\Blocks\\": "src/",
-      "WooCommerce\\Blocks\\Tests\\": "tests/php/"
     }
   }
 }

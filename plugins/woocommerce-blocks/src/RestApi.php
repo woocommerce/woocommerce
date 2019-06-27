@@ -5,34 +5,31 @@
  * @package WooCommerce/Blocks
  */
 
-namespace WooCommerce\Blocks;
+namespace Automattic\WooCommerce\Blocks;
 
 defined( 'ABSPATH' ) || exit;
-
-use WooCommerce\Blocks\Utilities\SingletonTrait;
 
 /**
  * RestApi class.
  */
 class RestApi {
-	use SingletonTrait;
 
 	/**
-	 * REST API controllers.
-	 *
-	 * @var array
+	 * Initialize class features.
 	 */
-	protected $controllers = [];
+	public static function init() {
+		add_action( 'rest_api_init', array( __CLASS__, 'register_rest_routes' ), 10 );
+	}
 
 	/**
 	 * Register REST API routes.
 	 */
-	public function register_rest_routes() {
-		$controllers = $this->get_controllers();
+	public static function register_rest_routes() {
+		$controllers = self::get_controllers();
 
-		foreach ( $controllers as $controller_name => $controller_class ) {
-			$this->controllers[ $controller_name ] = new $controller_class();
-			$this->controllers[ $controller_name ]->register_routes();
+		foreach ( $controllers as $name => $class ) {
+			$instance = new $class();
+			$instance->register_routes();
 		}
 	}
 
