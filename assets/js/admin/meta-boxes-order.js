@@ -513,7 +513,7 @@ jQuery( function ( $ ) {
 				wc_meta_boxes_order_items.reload_items();
 			}
 
-			window.wcTracks.recordEvent( 'order_edit_add_items_cancelled',{
+			window.wcTracks.recordEvent( 'order_edit_add_items_cancelled', {
 				order_id: woocommerce_admin_meta_boxes.post_id,
 				status: $( '#order_status' ).val()
 			} );
