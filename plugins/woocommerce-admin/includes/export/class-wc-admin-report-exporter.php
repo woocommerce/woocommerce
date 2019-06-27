@@ -29,6 +29,11 @@ class WC_Admin_Report_Exporter {
 	const EXPORT_STATUS_OPTION = 'wc_admin_report_export_status';
 
 	/**
+	 * Export file download action.
+	 */
+	const DOWNLOAD_EXPORT_ACTION = 'woocommerce_admin_download_report_csv';
+
+	/**
 	 * Queue instance.
 	 *
 	 * @var WC_Queue_Interface
@@ -63,6 +68,8 @@ class WC_Admin_Report_Exporter {
 	public static function init() {
 		// Initialize scheduled action handlers.
 		add_action( self::REPORT_EXPORT_ACTION, array( __CLASS__, 'report_export_action' ), 10, 4 );
+		// Report download handler.
+		add_action( 'admin_init', array( __CLASS__, 'download_export_file' ) );
 	}
 
 	/**
@@ -155,6 +162,22 @@ class WC_Admin_Report_Exporter {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Serve the export file.
+	 */
+	public static function download_export_file() {
+		// @todo - add nonce? (nonces are good for 24 hours)
+		if (
+			isset( $_GET['action'] ) &&
+			! empty( $_GET['filename'] ) &&
+			self::DOWNLOAD_EXPORT_ACTION === wp_unslash( $_GET['action'] ) // WPCS: input var ok, sanitization ok.
+		) {
+			$exporter = new WC_Admin_Report_CSV_Exporter();
+			$exporter->set_filename( wp_unslash( $_GET['filename'] ) ); // WPCS: input var ok, sanitization ok.
+			$exporter->export();
+		}
 	}
 }
 

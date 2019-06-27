@@ -222,7 +222,12 @@ class WC_Admin_REST_Reports_Export_Controller extends WC_Admin_REST_Reports_Cont
 
 		// @todo - add thing in the links below instead?
 		if ( 100 === $percentage ) {
-			$result['download_url'] = rest_url( sprintf( '%s/reports/%s/export/%s/download', $this->namespace, $report_type, $export_id ) );
+			$query_args = array(
+				'action'   => WC_Admin_Report_Exporter::DOWNLOAD_EXPORT_ACTION,
+				'filename' => "wc-{$report_type}-report-export-{$export_id}",
+			);
+
+			$result['download_url'] = add_query_arg( $query_args, admin_url() );
 		}
 
 		// Wrap the data in a response object.

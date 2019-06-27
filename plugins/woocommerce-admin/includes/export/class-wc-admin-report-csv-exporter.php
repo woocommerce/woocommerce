@@ -47,12 +47,17 @@ class WC_Admin_Report_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * @param string $type Report type. E.g. 'customers'.
 	 * @param array  $args Report parameters.
 	 */
-	public function __construct( $type, $args ) {
+	public function __construct( $type = false, $args = array() ) {
 		parent::__construct();
 
-		$this->set_report_type( $type );
-		$this->set_report_args( $args );
-		$this->set_column_names( $this->get_report_columns() );
+		if ( ! empty( $type ) ) {
+			$this->set_report_type( $type );
+			$this->set_column_names( $this->get_report_columns() );
+		}
+
+		if ( ! empty( $args ) ) {
+			$this->set_report_args( $args );
+		}
 	}
 
 	/**
