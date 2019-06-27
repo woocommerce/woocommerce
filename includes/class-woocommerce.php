@@ -597,6 +597,9 @@ final class WooCommerce {
 		add_post_type_support( 'product', 'thumbnail' );
 	}
 
+	public function is_trial() {
+		return WC_Form_Handler::is_trial();
+	}
 
 	public function get_trial_fields() {
 		return WC_Form_Handler::get_trial_fields();

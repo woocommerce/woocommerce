@@ -282,7 +282,7 @@ class WC_Shortcode_Checkout {
 				wc_add_notice( __( 'The order totals have been updated. Please confirm your order by pressing the "Place order" button at the bottom of the page.', 'woocommerce' ) );
 			}
 
-			wc_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout ) );
+			wc_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout, 'trial' => WC()->is_trial() ) );
 
 		}
 	}

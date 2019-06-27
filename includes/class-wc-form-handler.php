@@ -738,6 +738,10 @@ class WC_Form_Handler {
 		return $options;
 	}
 
+	public static function is_trial() {
+		return isset($_REQUEST['trial']);
+	}
+
 	public static function trial_action() {
 		$options = self::get_trial_fields();
 		if (array_key_exists('product_id', $options)) {
