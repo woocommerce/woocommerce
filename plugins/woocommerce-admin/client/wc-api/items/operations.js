@@ -115,7 +115,19 @@ function update( resourceNames, data, fetch = apiFetch ) {
 	} );
 }
 
+function updateLocally( resourceNames, data ) {
+	const updateableTypes = [ 'items-query-products-item' ];
+	const filteredNames = resourceNames.filter( name => {
+		return updateableTypes.includes( getResourcePrefix( name ) );
+	} );
+
+	return filteredNames.map( async resourceName => {
+		return { [ resourceName ]: { data: data[ resourceName ] } };
+	} );
+}
+
 export default {
 	read,
 	update,
+	updateLocally,
 };

@@ -27,27 +27,36 @@ class ProductStockCard extends Component {
 		this.state = {
 			quantity: props.product.stock_quantity,
 			editing: false,
+			edited: false,
 		};
 
 		this.beginEdit = this.beginEdit.bind( this );
 		this.cancelEdit = this.cancelEdit.bind( this );
 		this.onQuantityChange = this.onQuantityChange.bind( this );
 		this.handleKeyDown = this.handleKeyDown.bind( this );
-		this.updateStock = this.updateStock.bind( this );
-	}
-
-	componentDidUpdate() {
-		this.quantityInput && this.quantityInput.focus();
+		this.onSubmit = this.onSubmit.bind( this );
 	}
 
 	beginEdit() {
-		this.setState( { editing: true } );
+		const { product } = this.props;
+
+		this.setState(
+			{
+				editing: true,
+				quantity: product.stock_quantity,
+			},
+			() => {
+				this.quantityInput && this.quantityInput.focus();
+			}
+		);
 	}
 
 	cancelEdit() {
+		const { product } = this.props;
+
 		this.setState( {
 			editing: false,
-			quantity: this.props.product.stock_quantity,
+			quantity: product.stock_quantity,
 		} );
 	}
 
@@ -61,18 +70,13 @@ class ProductStockCard extends Component {
 		this.setState( { quantity: event.target.value } );
 	}
 
-	updateStock() {
-		const { product, updateItem } = this.props;
+	onSubmit() {
+		const { product, updateProductStock } = this.props;
+		const { quantity } = this.state;
 
-		this.setState( { editing: false }, () => {
-			const data = {
-				stock_quantity: this.state.quantity,
-				type: product.type,
-				parent_id: product.parent_id,
-			};
+		this.setState( { editing: false, edited: true } );
 
-			updateItem( 'products', product.id, data );
-		} );
+		updateProductStock( product, quantity );
 	}
 
 	getActions() {
@@ -95,6 +99,7 @@ class ProductStockCard extends Component {
 	}
 
 	getBody() {
+		const { product } = this.props;
 		const { editing, quantity } = this.state;
 
 		if ( editing ) {
@@ -119,14 +124,27 @@ class ProductStockCard extends Component {
 
 		return (
 			<span className="woocommerce-stock-activity-card__stock-quantity">
-				{ sprintf( __( '%d in stock', 'woocommerce-admin' ), quantity ) }
+				{ sprintf( __( '%d in stock', 'woocommerce-admin' ), product.stock_quantity ) }
 			</span>
 		);
 	}
 
 	render() {
 		const { product } = this.props;
-		const { editing } = this.state;
+		const { edited, editing } = this.state;
+		const { notifyLowStockAmount } = wcSettings;
+		const lowStockAmount = Number.isFinite( product.low_stock_amount )
+			? product.low_stock_amount
+			: notifyLowStockAmount;
+		const isLowStock = product.stock_quantity <= lowStockAmount;
+
+		// Hide cards that are not in low stock and have not been edited.
+		// This allows clearing cards which are no longer in low stock after
+		// closing & opening the panel without having to make another request.
+		if ( ! isLowStock && ! edited ) {
+			return null;
+		}
+
 		const title = (
 			<Link
 				href={ 'post.php?action=edit&post=' + ( product.parent_id || product.id ) }
@@ -157,10 +175,13 @@ class ProductStockCard extends Component {
 				</div>
 			</div>
 		);
+		const activityCardClasses = classnames( 'woocommerce-stock-activity-card', {
+			'is-dimmed': ! editing && ! isLowStock,
+		} );
 
 		const activityCard = (
 			<ActivityCard
-				className="woocommerce-stock-activity-card"
+				className={ activityCardClasses }
 				title={ title }
 				subtitle={ subtitle }
 				icon={ icon }
@@ -172,7 +193,7 @@ class ProductStockCard extends Component {
 
 		if ( editing ) {
 			return (
-				<form onReset={ this.cancelEdit } onSubmit={ this.updateStock }>
+				<form onReset={ this.cancelEdit } onSubmit={ this.onSubmit }>
 					{ activityCard }
 				</form>
 			);
@@ -184,9 +205,10 @@ class ProductStockCard extends Component {
 
 export default compose(
 	withDispatch( dispatch => {
-		const { updateItem } = dispatch( 'wc-api' );
+		const { updateProductStock } = dispatch( 'wc-api' );
+
 		return {
-			updateItem,
+			updateProductStock,
 		};
 	} )
 )( ProductStockCard );

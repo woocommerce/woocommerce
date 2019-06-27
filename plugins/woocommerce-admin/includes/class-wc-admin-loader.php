@@ -519,12 +519,13 @@ class WC_Admin_Loader {
 			$current_user_data[ $user_field ] = json_decode( get_user_meta( get_current_user_id(), 'wc_admin_' . $user_field, true ) );
 		}
 
-		$settings['orderStatuses']     = self::get_order_statuses( wc_get_order_statuses() );
-		$settings['currentUserData']   = $current_user_data;
-		$settings['currency']          = self::get_currency_settings();
-		$settings['reviewsEnabled']    = get_option( 'woocommerce_enable_reviews' );
-		$settings['manageStock']       = get_option( 'woocommerce_manage_stock' );
-		$settings['commentModeration'] = get_option( 'comment_moderation' );
+		$settings['orderStatuses']        = self::get_order_statuses( wc_get_order_statuses() );
+		$settings['currentUserData']      = $current_user_data;
+		$settings['currency']             = self::get_currency_settings();
+		$settings['reviewsEnabled']       = get_option( 'woocommerce_enable_reviews' );
+		$settings['manageStock']          = get_option( 'woocommerce_manage_stock' );
+		$settings['commentModeration']    = get_option( 'comment_moderation' );
+		$settings['notifyLowStockAmount'] = get_option( 'woocommerce_notify_low_stock_amount' );
 		// @todo On merge, once plugin images are added to core WooCommerce, `wcAdminAssetUrl` can be retired,
 		// and `wcAssetUrl` can be used in its place throughout the codebase.
 		$settings['wcAdminAssetUrl'] = plugins_url( 'images/', plugin_dir_path( dirname( __FILE__ ) ) . 'woocommerce-admin.php' );

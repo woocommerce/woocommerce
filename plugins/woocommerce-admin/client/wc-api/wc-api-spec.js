@@ -62,6 +62,9 @@ function createWcApiSpec() {
 					...user.operations.update( resourceNames, data ),
 				];
 			},
+			updateLocally( resourceNames, data ) {
+				return [ ...items.operations.updateLocally( resourceNames, data ) ];
+			},
 		},
 	};
 }

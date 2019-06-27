@@ -99,14 +99,44 @@ class WC_Admin_REST_Products_Controller extends WC_REST_Products_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
+		add_filter( 'posts_fields', array( __CLASS__, 'add_wp_query_fields' ), 10, 2 );
 		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10, 2 );
 		add_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10, 2 );
 		add_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_group_by' ), 10, 2 );
 		$response = parent::get_items( $request );
+		remove_filter( 'posts_fields', array( __CLASS__, 'add_wp_query_fields' ), 10 );
 		remove_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10 );
 		remove_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10 );
 		remove_filter( 'posts_groupby', array( __CLASS__, 'add_wp_query_group_by' ), 10 );
 		return $response;
+	}
+
+	/**
+	 * Add `low_stock_amount` property to product data
+	 *
+	 * @param WC_Data         $object  Object data.
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
+	 */
+	public function prepare_object_for_response( $object, $request ) {
+		$data = parent::prepare_object_for_response( $object, $request );
+		if ( $request->get_param( 'low_in_stock' ) && is_numeric( $object->low_stock_amount ) ) {
+			$data->data['low_stock_amount'] = $object->low_stock_amount;
+		}
+		return $data;
+	}
+
+	/**
+	 * Add in conditional select fields to the query.
+	 *
+	 * @param string $select Select clause used to select fields from the query.
+	 * @param object $wp_query WP_Query object.
+	 * @return string
+	 */
+	public static function add_wp_query_fields( $select, $wp_query ) {
+		if ( $wp_query->get( 'low_in_stock' ) ) {
+			return $select . ', low_stock_amount_meta.meta_value AS low_stock_amount';
+		}
 	}
 
 	/**
