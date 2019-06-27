@@ -12,7 +12,7 @@
  * @package WooCommerce\Tests\API
  * @since 3.6.4
  */
-class WC_Tests_API_Report_Controllers extends WP_UnitTestCase {
+class WC_Tests_API_Report_Controllers extends WC_REST_Unit_Test_Case {
 	/**
 	 * Setup test admin notes data. Called before every test.
 	 *
@@ -35,66 +35,50 @@ class WC_Tests_API_Report_Controllers extends WP_UnitTestCase {
 	 */
 	public function test_default_params() {
 		// These controllers intentionally missing:
+		// - `WC_Admin_REST_Admin_Note_Action_Controller`
 		// - `WC_Admin_REST_Setting_Options_Controller`
 		// - `WC_Admin_REST_Data_Download_Ips_Controller`
-		// because they don't have defaults for required params.
-		$controller_classes = array(
-			'WC_Admin_REST_Admin_Notes_Controller',
-			'WC_Admin_REST_Admin_Note_Action_Controller',
-			'WC_Admin_REST_Coupons_Controller',
-			'WC_Admin_REST_Customers_Controller',
-			'WC_Admin_REST_Data_Controller',
-			'WC_Admin_REST_Data_Countries_Controller',
-			'WC_Admin_REST_Leaderboards_Controller',
-			'WC_Admin_REST_Orders_Controller',
-			'WC_Admin_REST_Products_Controller',
-			'WC_Admin_REST_Product_Categories_Controller',
-			'WC_Admin_REST_Product_Variations_Controller',
-			'WC_Admin_REST_Product_Reviews_Controller',
-			'WC_Admin_REST_Product_Variations_Controller',
-			'WC_Admin_REST_Reports_Controller',
-			'WC_Admin_REST_Reports_Import_Controller',
-			'WC_Admin_REST_Reports_Products_Controller',
-			'WC_Admin_REST_Reports_Variations_Controller',
-			'WC_Admin_REST_Reports_Products_Stats_Controller',
-			'WC_Admin_REST_Reports_Revenue_Stats_Controller',
-			'WC_Admin_REST_Reports_Orders_Controller',
-			'WC_Admin_REST_Reports_Orders_Stats_Controller',
-			'WC_Admin_REST_Reports_Categories_Controller',
-			'WC_Admin_REST_Reports_Taxes_Controller',
-			'WC_Admin_REST_Reports_Taxes_Stats_Controller',
-			'WC_Admin_REST_Reports_Coupons_Controller',
-			'WC_Admin_REST_Reports_Coupons_Stats_Controller',
-			'WC_Admin_REST_Reports_Stock_Controller',
-			'WC_Admin_REST_Reports_Stock_Stats_Controller',
-			'WC_Admin_REST_Reports_Downloads_Controller',
-			'WC_Admin_REST_Reports_Downloads_Stats_Controller',
-			'WC_Admin_REST_Reports_Customers_Controller',
-			'WC_Admin_REST_Reports_Customers_Stats_Controller',
-			'WC_Admin_REST_Taxes_Controller',
-			'WC_Admin_REST_Onboarding_Levels_Controller',
-			'WC_Admin_REST_Onboarding_Profile_Controller',
-			'WC_Admin_REST_Onboarding_Plugins_Controller',
-			'WC_Admin_REST_Reports_Performance_Indicators_Controller',
+		// - `WC_Admin_REST_Product_Variations_Controller`
+		// - `WC_Admin_REST_Reports_Import_Controller`
+		// because they don't have defaults for required params or a get_items() method.
+		$endpoints = array(
+			'/wc/v4/admin/notes',
+			'/wc/v4/coupons',
+			'/wc/v4/customers',
+			'/wc/v4/data',
+			'/wc/v4/data/countries',
+			'/wc/v4/leaderboards',
+			'/wc/v4/orders',
+			'/wc/v4/products',
+			'/wc/v4/products/categories',
+			'/wc/v4/reports',
+			'/wc/v4/reports/products',
+			'/wc/v4/reports/variations',
+			'/wc/v4/reports/products/stats',
+			'/wc/v4/reports/revenue/stats',
+			'/wc/v4/reports/orders',
+			'/wc/v4/reports/orders/stats',
+			'/wc/v4/reports/categories',
+			'/wc/v4/reports/taxes',
+			'/wc/v4/reports/taxes/stats',
+			'/wc/v4/reports/coupons',
+			'/wc/v4/reports/coupons/stats',
+			'/wc/v4/reports/stock',
+			'/wc/v4/reports/stock/stats',
+			'/wc/v4/reports/downloads',
+			'/wc/v4/reports/downloads/stats',
+			'/wc/v4/reports/customers',
+			'/wc/v4/reports/customers/stats',
+			'/wc/v4/taxes',
+			'/wc/v4/reports/performance-indicators',
+			'/wc-admin/v1/onboarding/levels',
+			'/wc-admin/v1/onboarding/profile',
+			'/wc-admin/v1/onboarding/plugins',
 		);
 
-		// Force REST controllers to load.
-		do_action( 'rest_api_init' );
-
-		foreach ( $controller_classes as $controller_class ) {
-			$controller = new $controller_class();
-			$params     = $controller->get_collection_params();
-			$defaults   = array();
-
-			foreach ( $params as $arg => $options ) {
-				if ( isset( $options['default'] ) ) {
-					$defaults[ $arg ] = $options['default'];
-				}
-			}
-
-			$request = new WP_REST_Request();
-			$request->set_default_params( $defaults );
-			$response = $controller->get_items( $request );
+		foreach ( $endpoints as $endpoint ) {
+			$request  = new WP_REST_Request( 'GET', $endpoint );
+			$response = $this->server->dispatch( $request );
 
 			// Surface any errors for easier debugging.
 			if ( is_wp_error( $response ) ) {
