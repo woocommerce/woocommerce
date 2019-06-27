@@ -34,3 +34,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="current-price">R$ <span><?php echo str_replace(".", ",", $produtPrice) ?></span></div>
 	<div class="subtext">No boleto ou cartão em até 18x</div>
 </div>
+<div class='security-check'>
+	<img src="https://s3.amazonaws.com/store.newlaw/imgs/lock.svg" alt="security">
+	Seus pagamentos são efetuados com criptografia SSL de 128 bits, o que significa que são 100% seguros.
+</div>
