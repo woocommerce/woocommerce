@@ -90,6 +90,8 @@ function _manually_load_plugin() {
 	define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 	define( 'WC_USE_TRANSACTIONS', false );
 	update_option( 'woocommerce_enable_coupons', 'yes' );
+	update_option( 'woocommerce_calc_taxes', 'yes' );
+
 	require_once wc_dir() . '/woocommerce.php';
 
 	wc_admin_install();
