@@ -403,6 +403,12 @@ jQuery( function ( $ ) {
 		add_line_item: function() {
 			$( 'div.wc-order-add-item' ).slideDown();
 			$( 'div.wc-order-data-row-toggle' ).not( 'div.wc-order-add-item' ).slideUp();
+
+			window.wcTracks.recordEvent( 'order_edit_add_items_click', {
+				order_id: woocommerce_admin_meta_boxes.post_id,
+				status: $( '#order_status' ).val()
+			} );
+
 			return false;
 		},
 
