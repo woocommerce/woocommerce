@@ -20,7 +20,7 @@ class WC_Admin_Report {
 	 * @var array List of transients name that have been updated and need persisting.
 	 */
 	protected static $transients_to_update = array();
-	
+
 	/**
 	 * @var array The list of transients.
 	 */
@@ -333,8 +333,8 @@ class WC_Admin_Report {
 			$query['limit'] = "LIMIT {$limit}";
 		}
 
-		$query          = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
-		$query          = implode( ' ', $query );
+		$query = apply_filters( 'woocommerce_reports_get_order_report_query', $query );
+		$query = implode( ' ', $query );
 
 		if ( $debug ) {
 			echo '<pre>';
@@ -348,7 +348,7 @@ class WC_Admin_Report {
 			$result = apply_filters( 'woocommerce_reports_get_order_report_data', $wpdb->$query_type( $query ), $data );
 		} else {
 			$query_hash = md5( $query_type . $query );
-			$result = $this->get_cached_query( $query_hash );
+			$result     = $this->get_cached_query( $query_hash );
 			if ( $result === null ) {
 				self::enable_big_selects();
 
@@ -368,7 +368,7 @@ class WC_Admin_Report {
 			add_action( 'shutdown', array( 'WC_Admin_Report', 'maybe_update_transients' ) );
 		}
 	}
-	
+
 	/**
 	 * Enables big mysql selects for reports, just once for this session.
 	 */
@@ -392,11 +392,11 @@ class WC_Admin_Report {
 	 */
 	protected function get_cached_query( $query_hash ) {
 		$class = strtolower( get_class( $this ) );
-		
+
 		if ( ! isset( self::$cached_results[ $class ] ) ) {
 			self::$cached_results[ $class ] = get_transient( strtolower( get_class( $this ) ) );
 		}
-		
+
 		if ( isset( self::$cached_results[ $class ][ $query_hash ] ) ) {
 			return self::$cached_results[ $class ][ $query_hash ];
 		}
@@ -412,13 +412,13 @@ class WC_Admin_Report {
 	 */
 	protected function set_cached_query( $query_hash, $data ) {
 		$class = strtolower( get_class( $this ) );
-		
+
 		if ( ! isset( self::$cached_results[ $class ] ) ) {
 			self::$cached_results[ $class ] = get_transient( strtolower( get_class( $this ) ) );
 		}
-		
+
 		self::add_update_transients_hook();
-		
+
 		self::$transients_to_update[ $class ]          = $class;
 		self::$cached_results[ $class ][ $query_hash ] = $data;
 	}
