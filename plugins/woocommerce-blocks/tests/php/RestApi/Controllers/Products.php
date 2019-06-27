@@ -5,7 +5,7 @@
  * @package WooCommerce\Blocks\Tests
  */
 
-namespace WooCommerce\Blocks\Tests\RestApi\Controllers;
+namespace Automattic\WooCommerce\Blocks\Tests\RestApi\Controllers;
 
 use \WP_REST_Request;
 use \WC_REST_Unit_Test_Case;

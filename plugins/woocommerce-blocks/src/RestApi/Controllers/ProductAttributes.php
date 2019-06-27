@@ -8,7 +8,7 @@
  * @package WooCommerce/Blocks
  */
 
-namespace WooCommerce\Blocks\RestApi\Controllers;
+namespace Automattic\WooCommerce\Blocks\RestApi\Controllers;
 
 defined( 'ABSPATH' ) || exit;
 
