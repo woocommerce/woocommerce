@@ -17,6 +17,7 @@
 
 			.wc-block-grid__product-link {
 				text-decoration: none;
+				border: 0;
 			}
 
 			.wc-block-grid__product-image {
@@ -146,6 +147,16 @@
 					}
 				}
 			}
+		}
+	}
+
+	&.has-aligned-buttons {
+		.wc-block-grid__product {
+			display: flex;
+			flex-direction: column;
+		}
+		.wc-block-grid__product-add-to-cart {
+			margin-top: auto !important;
 		}
 	}
 

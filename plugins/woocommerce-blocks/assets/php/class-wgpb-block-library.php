@@ -243,6 +243,7 @@ class WGPB_Block_Library {
 				'style'           => 'wc-block-style',
 				'attributes'      => array(
 					'align'             => self::get_schema_align(),
+					'alignButtons'      => self::get_schema_boolean( false ),
 					'columns'           => self::get_schema_number( wc_get_theme_support( 'product_blocks::default_columns', 3 ) ),
 					'editMode'          => self::get_schema_boolean( true ),
 					'orderby'           => self::get_schema_orderby(),
@@ -321,6 +322,7 @@ class WGPB_Block_Library {
 				'style'           => 'wc-block-style',
 				'attributes'      => array(
 					'align'             => self::get_schema_align(),
+					'alignButtons'      => self::get_schema_boolean( false ),
 					'attributes'        => array(
 						'type'    => 'array',
 						'items'   => array(
@@ -467,6 +469,7 @@ class WGPB_Block_Library {
 			),
 			'contentVisibility' => self::get_schema_content_visibility(),
 			'align'             => self::get_schema_align(),
+			'alignButtons'      => self::get_schema_boolean( false ),
 		);
 	}
 

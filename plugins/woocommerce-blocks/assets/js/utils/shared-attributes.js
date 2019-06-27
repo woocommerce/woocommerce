@@ -25,6 +25,14 @@ export default {
 	},
 
 	/**
+	 * How to align cart buttons.
+	 */
+	alignButtons: {
+		type: 'boolean',
+		default: false,
+	},
+
+	/**
 	 * Product category, used to display only products in the given categories.
 	 */
 	categories: {
