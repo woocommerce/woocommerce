@@ -8,11 +8,6 @@ import { compose } from '@wordpress/compose';
 import PropTypes from 'prop-types';
 
 /**
- * WooCommerce dependencies
- */
-import { ReportFilters } from '@woocommerce/components';
-
-/**
  * Internal dependencies
  */
 import { charts, filters } from './config';
@@ -23,6 +18,7 @@ import ReportError from 'analytics/components/report-error';
 import ReportSummary from 'analytics/components/report-summary';
 import VariationsReportTable from './table-variations';
 import withSelect from 'wc-api/with-select';
+import ReportFilters from 'analytics/components/report-filters';
 
 class ProductsReport extends Component {
 	getChartMeta() {
@@ -68,7 +64,7 @@ class ProductsReport extends Component {
 
 		return (
 			<Fragment>
-				<ReportFilters query={ query } path={ path } filters={ filters } />
+				<ReportFilters query={ query } path={ path } filters={ filters } report="products" />
 				<ReportSummary
 					mode={ mode }
 					charts={ charts }

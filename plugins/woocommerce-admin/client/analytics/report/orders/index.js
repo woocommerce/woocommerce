@@ -6,11 +6,6 @@ import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 
 /**
- * WooCommerce dependencies
- */
-import { ReportFilters } from '@woocommerce/components';
-
-/**
  * Internal dependencies
  */
 import { advancedFilters, charts, filters } from './config';
@@ -18,6 +13,7 @@ import getSelectedChart from 'lib/get-selected-chart';
 import OrdersReportTable from './table';
 import ReportChart from 'analytics/components/report-chart';
 import ReportSummary from 'analytics/components/report-summary';
+import ReportFilters from 'analytics/components/report-filters';
 
 export default class OrdersReport extends Component {
 	render() {
@@ -30,6 +26,7 @@ export default class OrdersReport extends Component {
 					path={ path }
 					filters={ filters }
 					advancedFilters={ advancedFilters }
+					report="orders"
 				/>
 				<ReportSummary
 					charts={ charts }

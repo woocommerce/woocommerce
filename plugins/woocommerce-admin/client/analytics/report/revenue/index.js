@@ -6,11 +6,6 @@ import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 
 /**
- * WooCommerce dependencies
- */
-import { ReportFilters } from '@woocommerce/components';
-
-/**
  * Internal dependencies
  */
 import { charts } from './config';
@@ -18,6 +13,7 @@ import getSelectedChart from 'lib/get-selected-chart';
 import ReportChart from 'analytics/components/report-chart';
 import ReportSummary from 'analytics/components/report-summary';
 import RevenueReportTable from './table';
+import ReportFilters from 'analytics/components/report-filters';
 
 export default class RevenueReport extends Component {
 	render() {
@@ -25,7 +21,7 @@ export default class RevenueReport extends Component {
 
 		return (
 			<Fragment>
-				<ReportFilters query={ query } path={ path } />
+				<ReportFilters query={ query } path={ path } report="revenue" />
 				<ReportSummary
 					charts={ charts }
 					endpoint="revenue"

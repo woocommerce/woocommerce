@@ -7,11 +7,6 @@ import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 
 /**
- * WooCommerce dependencies
- */
-import { ReportFilters } from '@woocommerce/components';
-
-/**
  * Internal dependencies
  */
 import { charts, filters } from './config';
@@ -19,6 +14,7 @@ import CouponsReportTable from './table';
 import getSelectedChart from 'lib/get-selected-chart';
 import ReportChart from 'analytics/components/report-chart';
 import ReportSummary from 'analytics/components/report-summary';
+import ReportFilters from 'analytics/components/report-filters';
 
 export default class CouponsReport extends Component {
 	getChartMeta() {
@@ -49,7 +45,7 @@ export default class CouponsReport extends Component {
 
 		return (
 			<Fragment>
-				<ReportFilters query={ query } path={ path } filters={ filters } />
+				<ReportFilters query={ query } path={ path } filters={ filters } report="coupons" />
 				<ReportSummary
 					charts={ charts }
 					endpoint="coupons"

@@ -6,15 +6,11 @@ import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 
 /**
- * WooCommerce dependencies
- */
-import { ReportFilters } from '@woocommerce/components';
-
-/**
  * Internal dependencies
  */
 import { filters, advancedFilters } from './config';
 import CustomersReportTable from './table';
+import ReportFilters from 'analytics/components/report-filters';
 
 export default class CustomersReport extends Component {
 	render() {
@@ -33,6 +29,7 @@ export default class CustomersReport extends Component {
 					filters={ filters }
 					showDatePicker={ false }
 					advancedFilters={ advancedFilters }
+					report="customers"
 				/>
 				<CustomersReportTable
 					isRequesting={ isRequesting }

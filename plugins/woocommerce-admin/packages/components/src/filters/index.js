@@ -35,7 +35,7 @@ class ReportFilters extends Component {
 	}
 
 	renderCard( config ) {
-		const { advancedFilters, query, path } = this.props;
+		const { advancedFilters, query, path, onAdvancedFilterAction } = this.props;
 		const { filters, param } = config;
 		if ( ! query[ param ] ) {
 			return null;
@@ -56,19 +56,25 @@ class ReportFilters extends Component {
 		if ( 'advanced' === query[ param ] ) {
 			return (
 				<div key={ param } className="woocommerce-filters__advanced-filters">
-					<AdvancedFilters config={ advancedFilters } path={ path } query={ query } />
+					<AdvancedFilters
+						config={ advancedFilters }
+						path={ path }
+						query={ query }
+						onAdvancedFilterAction={ onAdvancedFilterAction }
+					/>
 				</div>
 			);
 		}
 	}
 
 	onRangeSelect( data ) {
-		const { query, path } = this.props;
+		const { query, path, onDateSelect } = this.props;
 		updateQueryString( data, path, query );
+		onDateSelect( data );
 	}
 
 	render() {
-		const { filters, query, path, showDatePicker } = this.props;
+		const { filters, query, path, showDatePicker, onFilterSelect } = this.props;
 		return (
 			<Fragment>
 				<H className="screen-reader-text">{ __( 'Filters', 'woocommerce-admin' ) }</H>
@@ -89,6 +95,7 @@ class ReportFilters extends Component {
 										config={ config }
 										query={ query }
 										path={ path }
+										onFilterSelect={ onFilterSelect }
 									/>
 								);
 							}
@@ -119,9 +126,21 @@ ReportFilters.propTypes = {
 	 */
 	query: PropTypes.object,
 	/**
-	 * Whether the date picker must be shown..
+	 * Whether the date picker must be shown.
 	 */
 	showDatePicker: PropTypes.bool,
+	/**
+	 * Function to be called after date selection.
+	 */
+	onDateSelect: PropTypes.func,
+	/**
+	 * Function to be called after filter selection.
+	 */
+	onFilterSelect: PropTypes.func,
+	/**
+	 * Function to be called after an advanced filter action has been taken.
+	 */
+	onAdvancedFilterAction: PropTypes.func,
 };
 
 ReportFilters.defaultProps = {
@@ -129,6 +148,7 @@ ReportFilters.defaultProps = {
 	filters: [],
 	query: {},
 	showDatePicker: true,
+	onDateSelect: () => {},
 };
 
 export default ReportFilters;
