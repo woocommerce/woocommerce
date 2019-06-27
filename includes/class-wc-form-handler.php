@@ -740,7 +740,6 @@ class WC_Form_Handler {
 
 	public static function trial_action() {
 		$options = self::get_trial_fields();
-		wc_empty_cart();
 		if (array_key_exists('product_id', $options)) {
 			WC()->cart->add_to_cart( $options['product_id'] );
 		}
