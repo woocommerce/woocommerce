@@ -11,6 +11,7 @@
     "composer/installers": "1.6.0"
   },
   "require-dev": {
+    "phpunit/phpunit": "6.5.14",
     "woocommerce/woocommerce-sniffs": "0.0.6"
   },
   "scripts": {
@@ -25,6 +26,12 @@
     "scripts-description": {
       "phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
       "phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier"
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "WooCommerce\\Blocks\\": "src/",
+      "WooCommerce\\Blocks\\Tests\\": "tests/php/"
     }
   }
 }

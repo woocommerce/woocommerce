@@ -34,7 +34,7 @@ class ProductAttributeControl extends Component {
 	componentDidMount() {
 		const { selected } = this.props;
 		apiFetch( {
-			path: addQueryArgs( '/wc-blocks/v1/products/attributes', { per_page: -1 } ),
+			path: addQueryArgs( '/wc/blocks/products/attributes', { per_page: -1 } ),
 		} )
 			.then( ( list ) => {
 				list = list.map( ( item ) => ( { ...item, parent: 0 } ) );
@@ -67,7 +67,7 @@ class ProductAttributeControl extends Component {
 		}
 
 		apiFetch( {
-			path: addQueryArgs( `/wc-blocks/v1/products/attributes/${ attribute }/terms`, {
+			path: addQueryArgs( `/wc/blocks/products/attributes/${ attribute }/terms`, {
 				per_page: -1,
 			} ),
 		} )
