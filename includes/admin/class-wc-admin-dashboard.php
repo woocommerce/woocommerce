@@ -36,6 +36,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * Init dashboard widgets.
 		 */
 		public function init() {
+			// Reviews Widget.
 			if ( current_user_can( 'publish_shop_orders' ) && post_type_supports( 'product', 'comments' ) ) {
 				wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce Recent Reviews', 'woocommerce' ), array( $this, 'recent_reviews' ) );
 			}
@@ -387,7 +388,6 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		</div>
 			<?php
 		}
-
 	}
 
 endif;
