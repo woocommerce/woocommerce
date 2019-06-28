@@ -4,7 +4,6 @@
 
 	<!-- Exclude paths -->
 	<exclude-pattern>tests/cli/</exclude-pattern>
-	<exclude-pattern>apigen/</exclude-pattern>
 	<exclude-pattern>includes/libraries/</exclude-pattern>
 	<exclude-pattern>includes/legacy/</exclude-pattern>
 	<exclude-pattern>includes/api/legacy/</exclude-pattern>

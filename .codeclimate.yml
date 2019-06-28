@@ -18,7 +18,6 @@ ratings:
    - "includes/*"
 exclude_paths:
 - "tests/"
-- "apigen/"
 - "sample-data/"
 - "i18n/"
 - "includes/api/legacy/"

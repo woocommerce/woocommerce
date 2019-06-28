@@ -197,7 +197,6 @@ module.exports = function( grunt ) {
 				options: {
 					potFilename: 'woocommerce.pot',
 					exclude: [
-						'apigen/.*',
 						'vendor/.*',
 						'tests/.*',
 						'tmp/.*'
@@ -230,7 +229,6 @@ module.exports = function( grunt ) {
 			files: {
 				src:  [
 					'**/*.php',               // Include all files
-					'!apigen/**',             // Exclude apigen/
 					'!includes/libraries/**', // Exclude libraries/
 					'!node_modules/**',       // Exclude node_modules/
 					'!tests/**',              // Exclude tests/
@@ -305,7 +303,6 @@ module.exports = function( grunt ) {
 			dist: {
 				src:  [
 					'**/*.php', // Include all php files.
-					'!apigen/**',
 					'!includes/api/legacy/**',
 					'!includes/libraries/**',
 					'!node_modules/**',
