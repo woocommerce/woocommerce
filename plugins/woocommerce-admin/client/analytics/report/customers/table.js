@@ -87,7 +87,7 @@ export default class CustomersReportTable extends Component {
 				isSortable: true,
 			},
 			{
-				label: __( 'State', 'woocommerce-admin' ),
+				label: __( 'Region', 'woocommerce-admin' ),
 				key: 'state',
 				hiddenByDefault: true,
 				isSortable: true,
