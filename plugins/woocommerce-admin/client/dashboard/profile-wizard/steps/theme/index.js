@@ -7,7 +7,8 @@ import { Button } from 'newspack-components';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { decodeEntities } from '@wordpress/html-entities';
-import { TabPanel } from '@wordpress/components';
+import Gridicon from 'gridicons';
+import { TabPanel, Tooltip } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 
 /**
@@ -55,7 +56,7 @@ class Theme extends Component {
 	}
 
 	renderTheme( theme ) {
-		const { image, price, slug, title } = theme;
+		const { demo_url, has_woocommerce_support, image, slug, title } = theme;
 
 		return (
 			<Card className="woocommerce-profile-wizard__theme" key={ theme.slug }>
@@ -63,23 +64,54 @@ class Theme extends Component {
 					<img alt={ title } src={ image } className="woocommerce-profile-wizard__theme-image" />
 				) }
 				<div className="woocommerce-profile-wizard__theme-details">
-					<H className="woocommerce-profile-wizard__theme-name">{ title }</H>
-					<p className="woocommerce-profile-wizard__theme-price">
-						{ this.getPriceValue( price ) <= 0
-							? __( 'Free', 'woocommerce-admin' )
-							: sprintf( __( '%s per year', 'woocommerce-admin' ), decodeEntities( price ) ) }
+					<H className="woocommerce-profile-wizard__theme-name">
+						{ title }
+						{ ! has_woocommerce_support && (
+							<Tooltip
+								text={ __( 'This theme does not support WooCommerce.', 'woocommerce-admin' ) }
+							>
+								<span>
+									<Gridicon icon="info" role="img" aria-hidden="true" focusable="false" />
+								</span>
+							</Tooltip>
+						) }
+					</H>
+					<p className="woocommerce-profile-wizard__theme-status">
+						{ this.getThemeStatus( theme ) }
 					</p>
 					<div className="woocommerce-profile-wizard__theme-actions">
-						<Button isPrimary onClick={ () => this.onChoose( slug ) }>
+						<Button
+							isPrimary={ Boolean( demo_url ) }
+							isDefault={ ! Boolean( demo_url ) }
+							onClick={ () => this.onChoose( slug ) }
+						>
 							{ __( 'Choose', 'woocommerce-admin' ) }
 						</Button>
-						<Button isDefault onClick={ () => this.openDemo( slug ) }>
-							{ __( 'Live Demo', 'woocommerce-admin' ) }
-						</Button>
+						{ demo_url && (
+							<Button isDefault onClick={ () => this.openDemo( slug ) }>
+								{ __( 'Live Demo', 'woocommerce-admin' ) }
+							</Button>
+						) }
 					</div>
 				</div>
 			</Card>
 		);
+	}
+
+	getThemeStatus( theme ) {
+		const { installed, price, slug } = theme;
+		const { activeTheme } = wcSettings.onboarding;
+
+		if ( activeTheme === slug ) {
+			return __( 'Currently active theme', 'woocommerce-admin' );
+		}
+		if ( installed ) {
+			return __( 'Installed', 'woocommerce-admin' );
+		} else if ( this.getPriceValue( price ) <= 0 ) {
+			return __( 'Free', 'woocommerce-admin' );
+		}
+
+		return sprintf( __( '%s per year', 'woocommerce-admin' ), decodeEntities( price ) );
 	}
 
 	onSelectTab( tab ) {
@@ -137,7 +169,7 @@ class Theme extends Component {
 				>
 					{ () => (
 						<div className="woocommerce-profile-wizard__themes">
-							{ themes.map( theme => this.renderTheme( theme ) ) }
+							{ themes && themes.map( theme => this.renderTheme( theme ) ) }
 						</div>
 					) }
 				</TabPanel>

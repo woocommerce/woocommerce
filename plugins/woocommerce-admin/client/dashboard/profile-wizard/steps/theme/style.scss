@@ -68,6 +68,16 @@
 		margin-bottom: $gap-smaller;
 		@include font-size(24);
 		font-weight: 400;
+
+		svg {
+			max-width: 18px;
+			height: 18px;
+			margin-left: $gap-smaller;
+
+			path {
+				fill: $muriel-red-500;
+			}
+		}
 	}
 
 	.woocommerce-profile-wizard__theme-details {
@@ -77,7 +87,7 @@
 		height: 100%;
 	}
 
-	.woocommerce-profile-wizard__theme-price {
+	.woocommerce-profile-wizard__theme-status {
 		margin: 0;
 		font-size: 14px;
 	}

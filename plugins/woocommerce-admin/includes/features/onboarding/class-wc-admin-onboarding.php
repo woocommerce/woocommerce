@@ -115,18 +115,59 @@ class WC_Admin_Onboarding {
 	 * @return array
 	 */
 	public static function get_themes() {
-		$theme_data_transient_name = 'wc_onboarding_themes';
-		$theme_data                = get_transient( $theme_data_transient_name );
-		if ( false === $theme_data ) {
-			// @todo This should be replaced with the real wccom URL once
-			// https://github.com/Automattic/woocommerce.com/pull/6035 is merged and deployed.
-			$theme_data = wp_remote_get( 'http://woocommerce.test/wp-json/wccom-extensions/1.0/search?category=themes' );
-			set_transient( $theme_data_transient_name, $theme_data, DAY_IN_SECONDS );
+		$themes_transient_name = 'wc_onboarding_themes';
+		$themes                = get_transient( $themes_transient_name );
+		if ( false === $themes ) {
+			$theme_data = wp_remote_get( 'http://woocommerce.com/wp-json/wccom-extensions/1.0/search?category=themes' );
+			$theme_data = json_decode( $theme_data['body'] );
+			$themes     = array();
+
+			foreach ( $theme_data->products as $theme ) {
+				$slug                                       = sanitize_title( $theme->slug );
+				$themes[ $slug ]                            = (array) $theme;
+				$themes[ $slug ]['is_installed']            = false;
+				$themes[ $slug ]['has_woocommerce_support'] = true;
+			}
+
+			$installed_themes = wp_get_themes();
+
+			foreach ( $installed_themes as $slug => $theme ) {
+				$themes[ $slug ] = array(
+					'slug'                    => sanitize_title( $slug ),
+					'title'                   => $theme->get( 'Name' ),
+					'price'                   => '0.00',
+					'is_installed'            => true,
+					'image'                   => $theme->get_screenshot(),
+					'has_woocommerce_support' => self::has_woocommerce_support( $theme ),
+				);
+			}
+
+			set_transient( $themes_transient_name, $themes, DAY_IN_SECONDS );
 		}
 
-		$theme_data = json_decode( $theme_data['body'] );
+		$themes = apply_filters( 'woocommerce_admin_onboarding_themes', $themes );
+		return array_values( $themes );
+	}
 
-		return apply_filters( 'woocommerce_admin_onboarding_themes', $theme_data->products );
+	/**
+	 * Check if theme has declared support for WooCommerce
+	 *
+	 * @param WP_Theme $theme Theme to check.
+	 * @return bool
+	 */
+	public static function has_woocommerce_support( $theme ) {
+		$directory = new RecursiveDirectoryIterator( $theme->theme_root . '/' . $theme->stylesheet );
+		$iterator  = new RecursiveIteratorIterator( $directory );
+		$files     = new RegexIterator( $iterator, '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH );
+
+		foreach ( $files as $file ) {
+			$content = file_get_contents( $file[0] );
+			if ( preg_match( '/add_theme_support\(([^(]*)(\'|\")woocommerce(\'|\")([^(]*)/si', $content, $matches ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -180,6 +221,7 @@ class WC_Admin_Onboarding {
 		if ( $this->should_show_profiler() ) {
 			$settings['onboarding']['productTypes'] = self::get_allowed_product_types();
 			$settings['onboarding']['themes']       = self::get_themes();
+			$settings['onboarding']['activeTheme']  = get_option( 'stylesheet' );
 		}
 
 		return $settings;
