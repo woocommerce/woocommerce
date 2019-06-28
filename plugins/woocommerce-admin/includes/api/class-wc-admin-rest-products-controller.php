@@ -135,8 +135,10 @@ class WC_Admin_REST_Products_Controller extends WC_REST_Products_Controller {
 	 */
 	public static function add_wp_query_fields( $select, $wp_query ) {
 		if ( $wp_query->get( 'low_in_stock' ) ) {
-			return $select . ', low_stock_amount_meta.meta_value AS low_stock_amount';
+			$select .= ', low_stock_amount_meta.meta_value AS low_stock_amount';
 		}
+
+		return $select;
 	}
 
 	/**
