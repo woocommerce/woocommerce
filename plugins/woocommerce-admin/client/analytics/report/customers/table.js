@@ -78,16 +78,25 @@ export default class CustomersReportTable extends Component {
 			{
 				label: __( 'Country', 'woocommerce-admin' ),
 				key: 'country',
+				isSortable: true,
 			},
 			{
 				label: __( 'City', 'woocommerce-admin' ),
 				key: 'city',
 				hiddenByDefault: true,
+				isSortable: true,
+			},
+			{
+				label: __( 'Region', 'woocommerce-admin' ),
+				key: 'state',
+				hiddenByDefault: true,
+				isSortable: true,
 			},
 			{
 				label: __( 'Postal Code', 'woocommerce-admin' ),
-				key: 'postal_code',
+				key: 'postcode',
 				hiddenByDefault: true,
+				isSortable: true,
 			},
 		];
 	}
@@ -112,6 +121,7 @@ export default class CustomersReportTable extends Component {
 				total_spend,
 				postcode,
 				city,
+				state,
 				country,
 			} = customer;
 			const countryName = this.getCountryName( country );
@@ -181,6 +191,10 @@ export default class CustomersReportTable extends Component {
 				{
 					display: city,
 					value: city,
+				},
+				{
+					display: state,
+					value: state,
 				},
 				{
 					display: postcode,

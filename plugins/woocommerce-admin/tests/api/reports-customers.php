@@ -58,6 +58,7 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'username', $schema );
 		$this->assertArrayHasKey( 'country', $schema );
 		$this->assertArrayHasKey( 'city', $schema );
+		$this->assertArrayHasKey( 'state', $schema );
 		$this->assertArrayHasKey( 'postcode', $schema );
 		$this->assertArrayHasKey( 'date_registered', $schema );
 		$this->assertArrayHasKey( 'date_registered_gmt', $schema );
@@ -81,7 +82,7 @@ class WC_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertCount( 14, $properties );
+		$this->assertCount( 15, $properties );
 		$this->assert_report_item_schema( $properties );
 	}
 
