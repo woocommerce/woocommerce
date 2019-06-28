@@ -218,7 +218,7 @@ class WC_Admin_REST_Reports_Customers_Controller extends WC_REST_Reports_Control
 					'readonly'    => true,
 				),
 				'state'                 => array(
-					'description' => __( 'State.', 'woocommerce-admin' ),
+					'description' => __( 'Region.', 'woocommerce-admin' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
