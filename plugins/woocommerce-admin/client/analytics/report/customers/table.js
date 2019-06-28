@@ -94,7 +94,7 @@ export default class CustomersReportTable extends Component {
 			},
 			{
 				label: __( 'Postal Code', 'woocommerce-admin' ),
-				key: 'postal_code',
+				key: 'postcode',
 				hiddenByDefault: true,
 				isSortable: true,
 			},
