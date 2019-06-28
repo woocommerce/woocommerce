@@ -12,10 +12,6 @@
 		width: auto;
 	}
 
-	&:hover {
-		box-shadow: $muriel-box-shadow-8dp;
-	}
-
 	&.is-inactive {
 		background-color: $muriel-gray-0;
 		box-shadow: none;
