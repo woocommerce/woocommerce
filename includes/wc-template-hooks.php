@@ -249,7 +249,7 @@ add_action( 'wp_footer', 'woocommerce_demo_store' );
  * @see woocommerce_order_again_button()
  */
 add_action( 'woocommerce_view_order', 'woocommerce_order_details_table', 10 );
-add_action( 'woocommerce_thankyou', 'woocommerce_order_details_table', 10 );
+add_action( 'woocommerce_thankyou', 'thankyoupage_redirect', 10 );
 add_action( 'woocommerce_order_details_after_order_table', 'woocommerce_order_again_button' );
 
 /**

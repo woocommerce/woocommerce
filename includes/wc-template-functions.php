@@ -9,6 +9,8 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+require WC_ABSPATH . '/vendor/autoload.php';
+use \Firebase\JWT\JWT;
 
 /**
  * Handle redirects before content is output - hooked into template_redirect so is_page works.
@@ -2516,6 +2518,33 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 			} else {
 				echo '<img src="' . esc_url( $image ) . '" alt="' . esc_attr( $category->name ) . '" width="' . esc_attr( $dimensions['width'] ) . '" height="' . esc_attr( $dimensions['height'] ) . '" />';
 			}
+		}
+	}
+}
+
+if ( ! function_exists( 'thankyoupage_redirect' ) ) {
+
+	/**
+	 * Displays order details in a table.
+	 *
+	 * @param mixed $order_id Order ID.
+	 */
+	function thankyoupage_redirect( $order_id ) {
+
+		$order = wc_get_order( $order_id );
+
+		$key = "order_secret";
+		$token = array(
+			"order_id" => $order_id
+		);
+		$url = get_site_url(null, '/thank-you/?data=' . JWT::encode($token, $key));
+
+		if ( $order->status != 'failed' ) {
+			wp_safe_redirect( $url );
+			exit;
+		}
+		if ( ! $order_id ) {
+			return;
 		}
 	}
 }
