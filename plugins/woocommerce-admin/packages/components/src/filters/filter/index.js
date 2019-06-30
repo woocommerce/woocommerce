@@ -106,7 +106,7 @@ class FilterPicker extends Component {
 	}
 
 	update( value, additionalQueries = {} ) {
-		const { path, query, config } = this.props;
+		const { path, query, config, onFilterSelect } = this.props;
 		// Keep only time related queries when updating to a new filter
 		const persistedQuery = getPersistedQuery( query );
 		const update = {
@@ -118,6 +118,7 @@ class FilterPicker extends Component {
 			update[ param ] = query[ param ];
 		} );
 		updateQueryString( update, path, persistedQuery );
+		onFilterSelect( update );
 	}
 
 	onTagChange( filter, onClose, config, tags ) {
@@ -308,10 +309,15 @@ FilterPicker.propTypes = {
 	 * The query string represented in object form.
 	 */
 	query: PropTypes.object,
+	/**
+	 * Function to be called after filter selection.
+	 */
+	onFilterSelect: PropTypes.func,
 };
 
 FilterPicker.defaultProps = {
 	query: {},
+	onFilterSelect: () => {},
 };
 
 export default FilterPicker;

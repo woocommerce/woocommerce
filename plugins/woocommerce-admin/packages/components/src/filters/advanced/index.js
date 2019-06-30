@@ -58,6 +58,7 @@ class AdvancedFilters extends Component {
 		this.clearFilters = this.clearFilters.bind( this );
 		this.getUpdateHref = this.getUpdateHref.bind( this );
 		this.updateFilter = this.updateFilter.bind( this );
+		this.onFilter = this.onFilter.bind( this );
 	}
 
 	componentDidUpdate( prevProps ) {
@@ -100,8 +101,10 @@ class AdvancedFilters extends Component {
 	}
 
 	removeFilter( key ) {
+		const { onAdvancedFilterAction } = this.props;
 		const activeFilters = [ ...this.state.activeFilters ];
 		const index = findIndex( activeFilters, filter => filter.key === key );
+		onAdvancedFilterAction( 'remove', activeFilters[ index ] );
 		activeFilters.splice( index, 1 );
 		this.setState( { activeFilters } );
 		if ( 0 === activeFilters.length ) {
@@ -136,7 +139,8 @@ class AdvancedFilters extends Component {
 	}
 
 	addFilter( key, onClose ) {
-		const filterConfig = this.props.config.filters[ key ];
+		const { onAdvancedFilterAction, config } = this.props;
+		const filterConfig = config.filters[ key ];
 		const newFilter = { key };
 		if ( Array.isArray( filterConfig.rules ) && filterConfig.rules.length ) {
 			newFilter.rule = filterConfig.rules[ 0 ].value;
@@ -152,6 +156,7 @@ class AdvancedFilters extends Component {
 				activeFilters: [ ...state.activeFilters, newFilter ],
 			};
 		} );
+		onAdvancedFilterAction( 'add', newFilter );
 		onClose();
 		// after render, focus the newly added filter's first focusable element
 		setTimeout( () => {
@@ -161,6 +166,8 @@ class AdvancedFilters extends Component {
 	}
 
 	clearFilters() {
+		const { onAdvancedFilterAction } = this.props;
+		onAdvancedFilterAction( 'clear_all' );
 		this.setState( {
 			activeFilters: [],
 			match: 'all',
@@ -177,6 +184,13 @@ class AdvancedFilters extends Component {
 	isEnglish() {
 		const { siteLocale } = wcSettings;
 		return /en-/.test( siteLocale );
+	}
+
+	onFilter() {
+		const { onAdvancedFilterAction, query, config } = this.props;
+		const { activeFilters, match } = this.state;
+		const updatedQuery = getQueryFromActiveFilters( activeFilters, query, config.filters );
+		onAdvancedFilterAction( 'filter', { ...updatedQuery, match } );
 	}
 
 	render() {
@@ -298,6 +312,7 @@ class AdvancedFilters extends Component {
 							className="components-button is-primary is-button"
 							type="wc-admin"
 							href={ updateHref }
+							onClick={ this.onFilter }
 						>
 							{ __( 'Filter', 'woocommerce-admin' ) }
 						</Link>
@@ -341,10 +356,15 @@ AdvancedFilters.propTypes = {
 	 * The query string represented in object form.
 	 */
 	query: PropTypes.object,
+	/**
+	 * Function to be called after an advanced filter action has been taken.
+	 */
+	onAdvancedFilterAction: PropTypes.func,
 };
 
 AdvancedFilters.defaultProps = {
 	query: {},
+	onAdvancedFilterAction: () => {},
 };
 
 export default AdvancedFilters;

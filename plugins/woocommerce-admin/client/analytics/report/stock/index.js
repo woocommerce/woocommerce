@@ -6,15 +6,11 @@ import { Component, Fragment } from '@wordpress/element';
 import PropTypes from 'prop-types';
 
 /**
- * WooCommerce dependencies
- */
-import { ReportFilters } from '@woocommerce/components';
-
-/**
  * Internal dependencies
  */
 import { showDatePicker, filters } from './config';
 import StockReportTable from './table';
+import ReportFilters from 'analytics/components/report-filters';
 
 export default class StockReport extends Component {
 	render() {
@@ -27,6 +23,7 @@ export default class StockReport extends Component {
 					path={ path }
 					showDatePicker={ showDatePicker }
 					filters={ filters }
+					report="stock"
 				/>
 				<StockReportTable query={ query } filters={ filters } />
 			</Fragment>

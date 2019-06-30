@@ -12,12 +12,12 @@ const tracksDebug = debug( 'wc-admin:tracks' );
 /**
  * Record an event to Tracks
  *
- * @param {String} eventName The name of the event to record, always prefixed with wc_admin_
+ * @param {String} eventName The name of the event to record, don't include the wcadmin_ prefix
  * @param {Object} eventProperties event properties to include in the event
  */
 
 export function recordEvent( eventName, eventProperties ) {
-	tracksDebug( 'recordevent %s %o', 'wc_admin_' + eventName, eventProperties );
+	tracksDebug( 'recordevent %s %o', 'wcadmin_' + eventName, eventProperties );
 
 	if (
 		! window.wcTracks ||
