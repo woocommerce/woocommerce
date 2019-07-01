@@ -53,17 +53,17 @@ export const getPages = () => {
 		pages.push( {
 			container: Analytics,
 			path: '/analytics',
-			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
+			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
 		} );
 		pages.push( {
 			container: AnalyticsSettings,
 			path: '/analytics/settings',
-			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
+			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
 		} );
 		pages.push( {
 			container: AnalyticsReport,
 			path: '/analytics/:report',
-			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
+			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
 		} );
 	}
 
