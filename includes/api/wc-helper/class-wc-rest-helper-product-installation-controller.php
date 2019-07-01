@@ -73,7 +73,17 @@ class WC_REST_Helper_Product_Installation_Controller extends WC_REST_Controller 
 	public function install( $request ) {
 		require_once( WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php' );
 
-		// TODO:
+		$body = WP_REST_Server::get_raw_data();
+		if ( empty( $body ) ) {
+			return new WP_Error( 'empty_body', __( 'Request body is empty.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$data = json_decode( $body, true );
+		if ( empty( $data['products'] ) || ! is_array( $data['products'] ) ) {
+			return new WP_Error( 'missing_products', __( 'Missing products in request body.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		return rest_ensure_response( WC_Helper_Product_Install::install( $data['products'] ) );
 	}
 
 	public function reset_install( $request ) {
