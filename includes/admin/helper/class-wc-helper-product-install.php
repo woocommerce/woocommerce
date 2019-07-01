@@ -111,6 +111,7 @@ class WC_Helper_Product_Install {
 
 		WP_Filesystem();
 		$upgrader = new WP_Upgrader( new Automatic_Upgrader_Skin() );
+		$upgrader->init();
 		wp_clean_plugins_cache();
 
 		foreach ( $products as $product_id ) {
@@ -250,6 +251,9 @@ class WC_Helper_Product_Install {
 	 * @param int $product_id Product ID.
 	 */
 	private static function activate_product( $product_id ) {
+		// Clear plugins cache used in `WC_Helper::get_local_woo_plugins`.
+		wp_clean_plugins_cache();
+
 		$plugins = wp_list_filter(
 			WC_Helper::get_local_woo_plugins(),
 			array(
