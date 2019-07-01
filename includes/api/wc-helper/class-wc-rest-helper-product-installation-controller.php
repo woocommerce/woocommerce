@@ -58,17 +58,29 @@ class WC_REST_Helper_Product_Installation_Controller extends WC_REST_Controller 
 	}
 
 	public function check_permission( $request ) {
+		if ( ! current_user_can( 'install_plugins' ) || ! current_user_can( 'install_themes' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_install_product', __( 'You do not have permission to install plugin or theme', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		return true;
 	}
 
 	public function get_install_state( $request ) {
+		require_once( WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php' );
 		return rest_ensure_response( WC_Helper_Product_Install::get_state() );
 	}
 
 	public function install( $request ) {
+		require_once( WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php' );
 
+		// TODO:
 	}
 
 	public function reset_install( $request ) {
+		require_once( WC_ABSPATH . 'includes/admin/helper/class-wc-helper.php' );
+		$resp = rest_ensure_response( WC_Helper_Product_Install::reset_state() );
+		$resp->set_status( 204 );
 
+		return $resp;
 	}
 }
