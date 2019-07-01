@@ -31,6 +31,7 @@ import {
 } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
 import './style.scss';
+import { recordEvent } from 'lib/tracks';
 
 class StorePerformance extends Component {
 	renderMenu() {
@@ -65,7 +66,13 @@ class StorePerformance extends Component {
 									isCheckbox
 									isClickable
 									key={ i }
-									onInvoke={ () => onToggleHiddenBlock( indicator.stat )() }
+									onInvoke={ () => {
+										onToggleHiddenBlock( indicator.stat )();
+										recordEvent( 'dash_indicators_toggle', {
+											status: checked ? 'off' : 'on',
+											key: indicator.stat,
+										} );
+									} }
 								>
 									{ sprintf( __( 'Show %s', 'woocommerce-admin' ), indicator.label ) }
 								</MenuItem>
@@ -152,6 +159,9 @@ class StorePerformance extends Component {
 								prevLabel={ prevLabel }
 								prevValue={ secondaryValue }
 								delta={ delta }
+								onLinkClickCallback={ () => {
+									recordEvent( 'dash_indicators_click', { key: indicator.stat } );
+								} }
 							/>
 						);
 					} )

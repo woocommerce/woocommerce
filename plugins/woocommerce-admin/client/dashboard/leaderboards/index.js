@@ -19,6 +19,7 @@ import { EllipsisMenu, MenuItem, MenuTitle, SectionHeader } from '@woocommerce/c
  */
 import Leaderboard from 'analytics/components/leaderboard';
 import withSelect from 'wc-api/with-select';
+import { recordEvent } from 'lib/tracks';
 import './style.scss';
 
 class Leaderboards extends Component {
@@ -64,13 +65,20 @@ class Leaderboards extends Component {
 					<Fragment>
 						<MenuTitle>{ __( 'Leaderboards', 'woocommerce-admin' ) }</MenuTitle>
 						{ allLeaderboards.map( leaderboard => {
+							const checked = ! hiddenBlocks.includes( leaderboard.id );
 							return (
 								<MenuItem
-									checked={ ! hiddenBlocks.includes( leaderboard.id ) }
+									checked={ checked }
 									isCheckbox
 									isClickable
 									key={ leaderboard.id }
-									onInvoke={ () => onToggleHiddenBlock( leaderboard.id )() }
+									onInvoke={ () => {
+										onToggleHiddenBlock( leaderboard.id )();
+										recordEvent( 'dash_leaderboards_toggle', {
+											status: checked ? 'off' : 'on',
+											key: leaderboard.id,
+										} );
+									} }
 								>
 									{ leaderboard.label }
 								</MenuItem>
