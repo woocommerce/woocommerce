@@ -118,7 +118,34 @@ class WC_Helper_Product_Install {
 			self::install_product( $product_id, $upgrader );
 		}
 
-		return self::get_state();
+		return self::finish_installation();
+	}
+
+	/**
+	 * Finish installation by updating the state.
+	 *
+	 * @return array State.
+	 */
+	private static function finish_installation() {
+		$state = self::get_state();
+		if ( empty( $state['steps'] ) ) {
+			return $state;
+		}
+
+		foreach ( $state['steps'] as $step ) {
+			if ( ! empty( $step['last_error'] ) ) {
+				$state['status'] = 'has_error';
+				break;
+			}
+		}
+
+		if ( 'has_error' !== $state['status'] ) {
+			$state['status'] = 'finished';
+		}
+
+		WC_Helper_Options::update( 'product_install', $state );
+
+		return $state;
 	}
 
 	/**
