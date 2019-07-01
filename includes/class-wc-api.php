@@ -243,6 +243,7 @@ class WC_API extends WC_Legacy_API {
 		include_once dirname( __FILE__ ) . '/api/wc-blocks/class-wc-rest-blocks-products-controller.php';
 
 		// Helper REST API v1 controllers.
+		include_once dirname( __FILE__ ) . '/api/wc-helper/class-wc-rest-helper-product-installation-controller.php';
 	}
 
 	/**
@@ -356,6 +357,9 @@ class WC_API extends WC_Legacy_API {
 			'WC_REST_Blocks_Product_Attribute_Terms_Controller',
 			'WC_REST_Blocks_Product_Categories_Controller',
 			'WC_REST_Blocks_Products_Controller',
+
+			// Helper REST API v1 Controllers.
+			'WC_REST_Helper_Product_Installation_Controller',
 		);
 
 		foreach ( $controllers as $controller ) {
