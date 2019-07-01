@@ -229,6 +229,10 @@ abstract class WGPB_Block_Grid_Base {
 			$classes[] = 'has-aligned-buttons';
 		}
 
+		if ( ! empty( $this->attributes['className'] ) ) {
+			$classes[] = $this->attributes['className'];
+		}
+
 		return implode( ' ', $classes );
 	}
 
