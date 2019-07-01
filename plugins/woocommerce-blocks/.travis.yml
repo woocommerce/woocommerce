@@ -1,35 +1,55 @@
-sudo: required
+language: php
 
 dist: trusty
 
-language: php
+sudo: false
+
+cache:
+  directories:
+    - vendor
+    - node_modules
+    - $HOME/.npm
+    - $HOME/.composer/cache
+
+matrix:
+  include:
+    - php: 7.1
+      env: WP_VERSION=latest
+    - php: 5.6
+      env: WP_VERSION=latest
+    - php: 7.1
+      env: WP_TRAVISCI=phpcs
 
 before_install:
-  - nvm install && nvm use
-  - npm install npm -g
+  - timedatectl
+  - npm install
+  - npm run build
 
 before_script:
-  - phpenv config-rm xdebug.ini
-  - bash tests/bin/install-wp-tests.sh wgpb_admin root '' localhost $WP_VERSION
-  - node --version
-  - npm --version
-  - timedatectl
-
-jobs:
-  include:
-    - stage: test
-      env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress
-      php: 7.1
-      script:
-        - composer install
-        - npm install
-        - npm run lint
-        - npm run build
-        - npm test
-        - bash tests/bin/phpunit.sh
-
-    - stage: test
-      env: WP_VERSION=latest WP_MULTISITE=0 WP_CORE_DIR=/tmp/wordpress
-      php: 5.6
-      script:
-        - bash tests/bin/phpunit.sh
+  - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  - |
+    if [ -f ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini ]; then
+      phpenv config-rm xdebug.ini
+    else
+      echo "xdebug.ini does not exist"
+    fi
+  - |
+    if [[ ! -z "$WP_VERSION" ]] ; then
+      composer install --no-dev
+      bash tests/bin/install-wp-tests.sh wgpb_admin root '' localhost $WP_VERSION
+      composer global require "phpunit/phpunit=4.8.*|5.7.*"
+    fi
+  - |
+    if [[ "$WP_TRAVISCI" == "phpcs" ]] ; then
+      composer install
+    fi
+script:
+  - |
+    if [[ ! -z "$WP_VERSION" ]] ; then
+      phpunit
+      npm test
+    fi
+  - |
+    if [[ "$WP_TRAVISCI" == "phpcs" ]] ; then
+      npm run lint
+    fi

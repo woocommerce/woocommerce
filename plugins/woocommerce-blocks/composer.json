@@ -8,7 +8,8 @@
   "prefer-stable": true,
   "minimum-stability": "dev",
   "require": {
-    "composer/installers": "1.6.0"
+    "composer/installers": "1.6.0",
+    "automattic/jetpack-autoloader": "1.2.0"
   },
   "require-dev": {
     "phpunit/phpunit": "6.5.14",
@@ -17,11 +18,6 @@
   "autoload": {
     "psr-4": {
       "Automattic\\WooCommerce\\Blocks\\": "src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Automattic\\WooCommerce\\Blocks\\Tests\\": "tests/php/"
     }
   },
   "scripts": {
