@@ -49,9 +49,9 @@ class ChartBlock extends Component {
 					<a
 						className="screen-reader-text"
 						href={ getAdminLink(
-							'admin.php?page=wc-admin#/analytics/' +
+							'admin.php?page=wc-admin&path=/analytics/' +
 								charts[ 0 ].endpoint +
-								'?chart=' +
+								'&chart=' +
 								charts[ 0 ].key
 						) }
 					>

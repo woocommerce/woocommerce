@@ -28,6 +28,6 @@ There are also some helper scripts:
 
 ## Dev Docs
 
-There is a "devdocs" page which is useful for displaying components individually outside of the application. It can be viewed via a normal `npm start` build at `http://<your-wp-site>/wp-admin/admin.php?page=wc-admin#/devdocs`.
+There is a "devdocs" page which is useful for displaying components individually outside of the application. It can be viewed via a normal `npm start` build at `http://<your-wp-site>/wp-admin/admin.php?page=wc-admin&path=/devdocs`.
 
 This is useful for viewing of [WooCommerce components](https://woocommerce.github.io/woocommerce-admin/#/components/) components and ad-hoc testing.

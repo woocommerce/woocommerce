@@ -99,7 +99,7 @@ class WC_Admin_Notes_New_Sales_Record {
 			// We only want one sales record note at any time in the inbox, so we delete any other first.
 			WC_Admin_Notes::delete_notes_with_name( self::NOTE_NAME );
 
-			$report_url = '?page=wc-admin#/analytics/revenue?period=custom&compare=previous_year&after=' . $yesterday . '&before=' . $yesterday;
+			$report_url = '?page=wc-admin&path=/analytics/revenue&period=custom&compare=previous_year&after=' . $yesterday . '&before=' . $yesterday;
 
 			// And now, create our new note.
 			$note = new WC_Admin_Note();

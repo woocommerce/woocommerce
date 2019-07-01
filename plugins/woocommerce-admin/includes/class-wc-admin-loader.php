@@ -384,7 +384,7 @@ class WC_Admin_Loader {
 				<div class="woocommerce-layout__header is-embed-loading">
 					<h1 class="woocommerce-layout__header-breadcrumbs">
 					<span>
-						<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-admin#/' ) ); ?>"><?php esc_html_e( 'WooCommerce', 'woocommerce-admin' ); ?></a>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-admin' ) ); ?>"><?php esc_html_e( 'WooCommerce', 'woocommerce-admin' ); ?></a>
 					</span>
 						<?php foreach ( $sections as $section ) : ?>
 							<?php self::output_breadcrumbs( $section ); ?>
