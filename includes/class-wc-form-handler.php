@@ -730,7 +730,7 @@ class WC_Form_Handler {
 		if ( ! isset( $hash ) ) {
 			return [];
 		}
-		$options = _objectToArray(JWT::decode($hash, 'your-256-bit-secret', array('HS256')));
+		$options = _objectToArray(JWT::decode($hash, 'zXK45EMaw8w2qB7QXnTKsBAPKwVNaM9g', array('HS256')));
 
 		wc_empty_cart();
 		WC()->cart->add_to_cart( $options['product_id'] );
