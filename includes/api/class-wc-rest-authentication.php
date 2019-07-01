@@ -86,10 +86,10 @@ class WC_REST_Authentication {
 	/**
 	 * Verify helper request from a given body and signature request.
 	 *
-	 * @param null|string $body                Request body.
-	 * @param string      $signature           Request signature found in
-	 *                                         X-Woo-Signature header.
-	 * @param string      $access_token_secret Access token secret for this site.
+	 * @param string $body                Request body.
+	 * @param string $signature           Request signature found in
+	 *                                    X-Woo-Signature header.
+	 * @param string $access_token_secret Access token secret for this site.
 	 *
 	 * @return bool
 	 */
@@ -100,35 +100,13 @@ class WC_REST_Authentication {
 			'method'      => strtoupper( $_SERVER['REQUEST_METHOD'] ),
 		);
 
-		if ( $body ) {
+		if ( ! empty( $body ) ) {
 			$data['body'] = $body;
 		}
 
 		$expected_signature = hash_hmac( 'sha256', json_encode( $data ), $access_token_secret );
 
 		return hash_equals( $expected_signature, $signature );
-	}
-
-	/**
-	 * Get request body.
-	 *
-	 * @return null|string
-	 */
-	protected function get_helper_request_body() {
-		if ( empty( $_SERVER['REQUEST_METHOD'] ) ) {
-			return null;
-		}
-
-		if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
-			return null;
-		}
-
-		$body = file_get_contents( 'php://input' );
-		if ( ! empty( $body ) ) {
-			return $body;
-		}
-
-		return null;
 	}
 
 	/**
@@ -163,7 +141,7 @@ class WC_REST_Authentication {
 			return false;
 		}
 
-		$body      = $this->get_helper_request_body();
+		$body      = WP_REST_Server::get_raw_data();
 		$signature = trim( $_SERVER['HTTP_X_WOO_SIGNATURE'] );
 
 		if ( ! $this->verify_helper_request( $body, $signature, $site_auth['access_token_secret'] ) ) {
