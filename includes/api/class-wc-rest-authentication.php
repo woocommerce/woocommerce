@@ -38,6 +38,7 @@ class WC_REST_Authentication {
 	 * Initialize authentication actions.
 	 */
 	public function __construct() {
+		add_filter( 'determine_current_user', array( $this, 'authenticate_helper' ), 14 );
 		add_filter( 'determine_current_user', array( $this, 'authenticate' ), 15 );
 		add_filter( 'rest_authentication_errors', array( $this, 'check_authentication_error' ), 15 );
 		add_filter( 'rest_post_dispatch', array( $this, 'send_unauthorized_headers' ), 50 );
@@ -65,6 +66,118 @@ class WC_REST_Authentication {
 
 		return apply_filters( 'woocommerce_rest_is_request_to_rest_api', $woocommerce || $third_party );
 	}
+
+	/**
+	 * Check if this is a request to Helper REST API.
+	 *
+	 * @return bool
+	 */
+	protected function is_request_to_helper_rest_api() {
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
+		}
+
+		$rest_prefix = trailingslashit( rest_get_url_prefix() );
+		$request_uri = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+
+		return false !== strpos( $request_uri, $rest_prefix . 'wc-helper/' );
+	}
+
+	/**
+	 * Verify helper request from a given body and signature request.
+	 *
+	 * @param null|string $body                Request body.
+	 * @param string      $signature           Request signature found in
+	 *                                         X-Woo-Signature header.
+	 * @param string      $access_token_secret Access token secret for this site.
+	 *
+	 * @return bool
+	 */
+	protected function verify_helper_request( $body, $signature, $access_token_secret ) {
+		$data = array(
+			'host'        => $_SERVER['HTTP_HOST'],
+			'request_uri' => $_SERVER['REQUEST_URI'],
+			'method'      => strtoupper( $_SERVER['REQUEST_METHOD'] ),
+		);
+
+		if ( $body ) {
+			$data['body'] = $body;
+		}
+
+		$expected_signature = hash_hmac( 'sha256', json_encode( $data ), $access_token_secret );
+
+		return hash_equals( $expected_signature, $signature );
+	}
+
+	/**
+	 * Get request body.
+	 *
+	 * @return null|string
+	 */
+	protected function get_helper_request_body() {
+		if ( empty( $_SERVER['REQUEST_METHOD'] ) ) {
+			return null;
+		}
+
+		if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
+			return null;
+		}
+
+		$body = file_get_contents( 'php://input' );
+		if ( ! empty( $body ) ) {
+			return $body;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Authenticate helper request.
+	 *
+	 * @param int|false $user_id User ID.
+	 *
+	 * @return int|false
+	 */
+	public function authenticate_helper( $user_id ) {
+		if ( ! empty( $user_id ) || ! $this->is_request_to_helper_rest_api() ) {
+			return $user_id;
+		}
+
+		if ( empty( $_SERVER['HTTP_AUTHORIZATION'] ) ) {
+			return false;
+		}
+
+		$request_auth = trim( $_SERVER['HTTP_AUTHORIZATION'] );
+		if ( stripos( $request_auth, 'Bearer ' ) !== 0 ) {
+			return false;
+		}
+
+		if ( empty( $_SERVER['HTTP_X_WOO_SIGNATURE'] ) ) {
+			return false;
+		}
+
+		require_once( WC_ABSPATH . 'includes/admin/helper/class-wc-helper-options.php' );
+		$access_token = trim( substr( $request_auth, 7 ) );
+		$site_auth    = WC_Helper_Options::get( 'auth' );
+		if ( empty( $site_auth['access_token'] ) || $access_token !== $site_auth['access_token'] ) {
+			return false;
+		}
+
+		$body      = $this->get_helper_request_body();
+		$signature = trim( $_SERVER['HTTP_X_WOO_SIGNATURE'] );
+
+		if ( ! $this->verify_helper_request( $body, $signature, $site_auth['access_token_secret'] ) ) {
+			return false;
+		}
+
+		$user = get_user_by( 'id', $site_auth['user_id'] );
+		if ( ! $user ) {
+			return false;
+		}
+
+		return $user;
+	}
+
 
 	/**
 	 * Authenticate user.
