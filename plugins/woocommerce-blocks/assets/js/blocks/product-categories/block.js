@@ -84,13 +84,16 @@ class ProductCategoriesBlock extends Component {
 
 	render() {
 		const { attributes, instanceId } = this.props;
-		const { isDropdown } = attributes;
+		const { className, isDropdown } = attributes;
 		const categories = getCategories( attributes );
-		const classes = classnames( {
-			'wc-block-product-categories': true,
-			'is-dropdown': isDropdown,
-			'is-list': ! isDropdown,
-		} );
+		const classes = classnames(
+			'wc-block-product-categories',
+			className,
+			{
+				'is-dropdown': isDropdown,
+				'is-list': ! isDropdown,
+			}
+		);
 
 		const selectId = `prod-categories-${ instanceId }`;
 
