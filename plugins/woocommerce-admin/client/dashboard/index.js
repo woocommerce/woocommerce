@@ -43,9 +43,9 @@ class Dashboard extends Component {
 		return (
 			<Fragment>
 				<ReportFilters query={ query } path={ path } />
-				<StorePerformance query={ query } />
-				<DashboardCharts query={ query } path={ path } />
-				<Leaderboards query={ query } />
+				<StorePerformance query={ query } hiddenBlocks={ [] } />
+				<DashboardCharts query={ query } path={ path } hiddenBlocks={ [] } />
+				<Leaderboards query={ query } hiddenBlocks={ [] } />
 			</Fragment>
 		);
 	}
