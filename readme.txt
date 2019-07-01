@@ -188,6 +188,33 @@ INTERESTED IN DEVELOPMENT?
 
 == Changelog ==
 
+= 3.6.5 - 2019-07-02 =
+* Enhancement - WordPress & PHP upgrade nudges when running older versions. #23975
+* Fix - "Filter by price" widget excludes category when combined with a product attribute. #23720
+* Fix - Add query parameter (GET) forwarding when processing batch API requests. #23769
+* Fix - Fixed query of top rated products shortcode. #23771
+* Fix - Typo in customers endpoint schema. #23812
+* Fix - Update Emogrifier library to fix problem with nth-child pseudo selector. #23824
+* Fix - Avoid outputting a rating of zero when product has comments without a review rating. #23828
+* Fix - Do not throw a PHP notice if including the rest API handlers manually. #23840
+* Fix - WooCommerce Tracker review count. #23849
+* Fix - Coupon usage limit issue when applying coupon to order in the backend. #23851
+* Fix - Fatal error when trying to apply virtual coupons to guest orders. #23877
+* Fix - AJAX update order review doesn't reload the page. #23891
+* Fix - Variation matching returns incorrect values when using a large number of variations combined with 0 values attributes. #23909
+* Fix - Password mismatch when user registered with password containing a double quote. #23926
+* Fix - Minor Shipping Zone UI issue due to conflict with some browser extensions. #23789
+* Fix - Make Products->Categories active when clicked on "Make Default" link under any product category. #23936
+* Fix - Update URL describing how to increase PHP memory limit on system status page. #23919
+* Fix - Sets the position of the tracking image to fixed, so it doesn't affect page layout. #23953
+* Fix - Button to manually update database in WooCommerce > Status > Tools. #23966
+* Fix - Tracks blog ID retrieval from Jetpack options. #24028
+* Fix - Fixed support to parentheses in phone numbers validation. #23967
+* Tweak - Improve tooltip text describing the product sale dates in the product admin page. #23935
+* Tweak - Made NL postcode validation more flexible, allowing lowercase and missing space. #23837
+* Localization - Display city field as optional for Singapore addresses. #23878
+* Dev - Add filters to file paths passed to the different xsendfile like backends. #23814
+
 = 3.6.4 - 2019-05-27 =
 * Enhancement - Add notice to install WooCommerce Admin. #23659
 * Fix - Tracks: Add check for OBW is-opting-in. #23772
