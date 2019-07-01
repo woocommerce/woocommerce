@@ -226,7 +226,7 @@ class WC_Helper_Product_Install {
 	private static function move_product( $product_id, $upgrader ) {
 		$steps = self::get_state( 'steps' );
 		if ( empty( $steps[ $product_id ]['unpacked_path'] ) ) {
-			return new WP_Error( 'missing_unpacked_path', __( 'Cound not found unpacked path.', 'woocommerce' ) );
+			return new WP_Error( 'missing_unpacked_path', __( 'Could not found unpacked path.', 'woocommerce' ) );
 		}
 
 		// TODO: handle theme.
