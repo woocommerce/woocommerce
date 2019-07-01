@@ -204,6 +204,7 @@ class WC_Helper_Product_Install {
 	}
 
 	/**
+	 * Unpack downloaded product.
 	 *
 	 * @param int          $product_id Product ID.
 	 * @param \WP_Upgrader $upgrader   Core class to handle installation.
@@ -219,6 +220,7 @@ class WC_Helper_Product_Install {
 	}
 
 	/**
+	 * Move product to plugins directory.
 	 *
 	 * @param int          $product_id Product ID.
 	 * @param \WP_Upgrader $upgrader   Core class to handle installation.
