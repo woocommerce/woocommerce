@@ -39,6 +39,7 @@ class WC_Helper_Product_Install {
 	 * @var array
 	 */
 	private static $install_steps = array(
+		'check_subscription',
 		'download_product',
 		'unpack_product',
 		'move_product',
@@ -86,6 +87,8 @@ class WC_Helper_Product_Install {
 	 * Install a given product IDs.
 	 *
 	 * @param array $products List of product IDs.
+	 *
+	 * @return array State.
 	 */
 	public static function install( $products ) {
 		$state  = self::get_state();
@@ -99,6 +102,8 @@ class WC_Helper_Product_Install {
 		$steps = array_fill_keys( $products, self::$default_step_state );
 		self::update_state( 'steps', $steps );
 
+		// TODO: async install? i.e. queue the job via Action Scheduler.
+
 		require_once( ABSPATH . 'wp-admin/includes/file.php' );
 		require_once( ABSPATH . 'wp-admin/includes/plugin-install.php' );
 		require_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
@@ -111,6 +116,8 @@ class WC_Helper_Product_Install {
 		foreach ( $products as $product_id ) {
 			self::install_product( $product_id, $upgrader );
 		}
+
+		return self::get_state();
 	}
 
 	/**
@@ -120,11 +127,7 @@ class WC_Helper_Product_Install {
 	 * @param \WP_Upgrader $upgrader   Core class to handle installation.
 	 */
 	private static function install_product( $product_id, $upgrader ) {
-		if ( ! WC_Helper::has_product_subscription( $product_id ) ) {
-			return new WP_Error( 'missing_subscription', __( 'Missing product subscription', 'woocommerce' ) );
-		}
-
-		foreach ( self::$steps as $step ) {
+		foreach ( self::$install_steps as $step ) {
 			self::do_install_step( $product_id, $step, $upgrader );
 		}
 	}
@@ -132,9 +135,9 @@ class WC_Helper_Product_Install {
 	/**
 	 * Perform product installation step.
 	 *
-	 * @param int    $product_id Product ID.
-	 * @param string $step       Installation step.
-	 * @param \WP_Upgrader $upgrader Core class to handle installation.
+	 * @param int          $product_id Product ID.
+	 * @param string       $step       Installation step.
+	 * @param \WP_Upgrader $upgrader   Core class to handle installation.
 	 */
 	private static function do_install_step( $product_id, $step, $upgrader ) {
 		$state_steps = self::get_state( 'steps' );
@@ -161,10 +164,25 @@ class WC_Helper_Product_Install {
 			$state_steps[ $product_id ]['download_path'] = $result;
 		}
 		if ( 'unpack_product' === $step && ! is_wp_error( $result ) ) {
-			$state_steps[ $product_id ]['unpack_product'] = $result;
+			$state_steps[ $product_id ]['unpacked_path'] = $result;
 		}
 
-		self::update_state( 'steps', $steps );
+		self::update_state( 'steps', $state_steps );
+	}
+
+	/**
+	 * Check subscription of a given product ID.
+	 *
+	 * @param int $product_id Product ID.
+	 *
+	 * @return bool|\WP_Error
+	 */
+	private static function check_subscription( $product_id ) {
+		if ( ! WC_Helper::has_product_subscription( $product_id ) ) {
+			return new WP_Error( 'missing_subscription', __( 'Missing product subscription', 'woocommerce' ) );
+		}
+
+		return true;
 	}
 
 	/**
