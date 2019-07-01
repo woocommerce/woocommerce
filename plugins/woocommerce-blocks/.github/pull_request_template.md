@@ -25,3 +25,7 @@ Fixes #
 3.
 
 <!-- If you can, add the appropriate labels -->
+
+### Changelog
+
+> Add suggested changelog entry here.
