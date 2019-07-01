@@ -34,7 +34,11 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 		<?php do_action( 'woocommerce_checkout_before_customer_details' ); ?>
 
+		<?php if (!wp_is_mobile()): ?>
 		<div class="col-8" id="customer_details">
+		<?php else: ?>
+		<div class="col-12" id="customer_details">
+		<?php endif; ?>
 			<div class="row">
 				<div class="col-12 personal-information-form" >
 					<?php do_action( 'woocommerce_checkout_billing' ); ?>
