@@ -57,6 +57,7 @@ class WC_Helper {
 		include_once dirname( __FILE__ ) . '/class-wc-helper-updater.php';
 		include_once dirname( __FILE__ ) . '/class-wc-helper-plugin-info.php';
 		include_once dirname( __FILE__ ) . '/class-wc-helper-compat.php';
+		include_once dirname( __FILE__ ) . '/class-wc-helper-product-install.php';
 	}
 
 	/**
