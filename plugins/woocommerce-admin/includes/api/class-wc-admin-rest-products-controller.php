@@ -119,10 +119,13 @@ class WC_Admin_REST_Products_Controller extends WC_REST_Products_Controller {
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
-		$data = parent::prepare_object_for_response( $object, $request );
-		if ( $request->get_param( 'low_in_stock' ) && is_numeric( $object->low_stock_amount ) ) {
-			$data->data['low_stock_amount'] = $object->low_stock_amount;
+		$data        = parent::prepare_object_for_response( $object, $request );
+		$object_data = $object->get_data();
+
+		if ( $request->get_param( 'low_in_stock' ) && is_numeric( $object_data['low_stock_amount'] ) ) {
+			$data->data['low_stock_amount'] = $object_data['low_stock_amount'];
 		}
+
 		return $data;
 	}
 
