@@ -21,6 +21,7 @@ import { Card, H } from '@woocommerce/components';
  */
 import withSelect from 'wc-api/with-select';
 import './style.scss';
+import { recordEvent } from 'lib/tracks';
 
 class Theme extends Component {
 	constructor() {
@@ -38,6 +39,7 @@ class Theme extends Component {
 	async onChoose( theme ) {
 		const { addNotice, goToNextStep, isError, updateProfileItems } = this.props;
 
+		recordEvent( 'storeprofiler_store_theme_choose', { theme } );
 		await updateProfileItems( { theme } );
 
 		if ( ! isError ) {
@@ -51,8 +53,10 @@ class Theme extends Component {
 		}
 	}
 
-	openDemo() {
+	openDemo( theme ) {
 		// @todo This should open a theme demo preview.
+
+		recordEvent( 'storeprofiler_store_theme_live_demo', { theme } );
 	}
 
 	renderTheme( theme ) {
@@ -115,6 +119,7 @@ class Theme extends Component {
 	}
 
 	onSelectTab( tab ) {
+		recordEvent( 'storeprofiler_store_theme_navigate', { navigation: tab } );
 		this.setState( { activeTab: tab } );
 	}
 

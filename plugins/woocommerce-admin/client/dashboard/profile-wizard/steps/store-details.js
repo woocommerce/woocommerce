@@ -8,6 +8,7 @@ import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { decodeEntities } from '@wordpress/html-entities';
 import { withDispatch } from '@wordpress/data';
+import { recordEvent } from 'lib/tracks';
 
 /**
  * Internal depdencies
@@ -53,6 +54,10 @@ class StoreDetails extends Component {
 
 		const { addNotice, goToNextStep, isError, updateSettings } = this.props;
 		const { addressLine1, addressLine2, city, countryState, postCode } = this.state;
+
+		recordEvent( 'storeprofiler_store_details_continue', {
+			store_country: countryState.split( ':' )[ 0 ],
+		} );
 
 		await updateSettings( {
 			general: {

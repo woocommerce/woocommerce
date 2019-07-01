@@ -15,6 +15,7 @@ import { withDispatch } from '@wordpress/data';
  */
 import { H, Card, Link } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
+import { recordEvent } from 'lib/tracks';
 
 class ProductTypes extends Component {
 	constructor() {
@@ -31,6 +32,9 @@ class ProductTypes extends Component {
 	async onContinue() {
 		const { addNotice, goToNextStep, isError, updateProfileItems } = this.props;
 
+		recordEvent( 'storeprofiler_store_product_type_continue', {
+			product_type: this.state.selected,
+		} );
 		await updateProfileItems( { product_types: this.state.selected } );
 
 		if ( ! isError ) {
@@ -61,6 +65,10 @@ class ProductTypes extends Component {
 		} );
 	}
 
+	onLearnMore( slug ) {
+		recordEvent( 'storeprofiler_store_product_type_learn_more', { product_type: slug } );
+	}
+
 	render() {
 		const { productTypes } = wcSettings.onboarding;
 		const { selected } = this.state;
@@ -80,7 +88,12 @@ class ProductTypes extends Component {
 									( productTypes[ slug ].more_url ? ' {{moreLink/}}' : '' ),
 								components: {
 									moreLink: productTypes[ slug ].more_url ? (
-										<Link href={ productTypes[ slug ].more_url } target="_blank" type="external">
+										<Link
+											href={ productTypes[ slug ].more_url }
+											target="_blank"
+											type="external"
+											onClick={ () => this.onLearnMore( slug ) }
+										>
 											{ __( 'Learn more', 'woocommerce-admin' ) }
 										</Link>
 									) : (

@@ -14,6 +14,7 @@ import { withDispatch } from '@wordpress/data';
  */
 import { H, Card } from '@woocommerce/components';
 import withSelect from 'wc-api/with-select';
+import { recordEvent } from 'lib/tracks';
 
 class Industry extends Component {
 	constructor() {
@@ -28,6 +29,7 @@ class Industry extends Component {
 	async onContinue() {
 		const { addNotice, goToNextStep, isError, updateProfileItems } = this.props;
 
+		recordEvent( 'storeprofiler_store_industry_continue', { store_industry: this.state.selected } );
 		await updateProfileItems( { industry: this.state.selected } );
 
 		if ( ! isError ) {

@@ -15,6 +15,7 @@ import { withDispatch } from '@wordpress/data';
  */
 import { H, Stepper, Card } from '@woocommerce/components';
 import { NAMESPACE } from 'wc-api/onboarding/constants';
+import { recordEvent } from 'lib/tracks';
 
 const plugins = [ 'jetpack', 'woocommerce-services' ];
 
@@ -82,6 +83,8 @@ class Plugins extends Component {
 		this.setState( {
 			isPending: true,
 		} );
+
+		recordEvent( 'storeprofiler_install_plugin' );
 
 		forEach( plugins, async plugin => {
 			const response = await this.doPluginAction( 'activate', plugin );

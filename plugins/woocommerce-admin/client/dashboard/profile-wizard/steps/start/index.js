@@ -20,6 +20,7 @@ import SpeedIcon from './images/flash_on';
 import MobileAppIcon from './images/phone_android';
 import './style.scss';
 import withSelect from 'wc-api/with-select';
+import { recordEvent } from 'lib/tracks';
 
 const benefits = [
 	{
@@ -78,6 +79,8 @@ class Start extends Component {
 	async skipWizard() {
 		const { addNotice, isProfileItemsError, updateProfileItems, isSettingsError } = this.props;
 
+		recordEvent( 'storeprofiler_welcome_clicked', { proceed_without_install: true } );
+
 		await updateProfileItems( { skipped: true } );
 		await this.updateTracking();
 
@@ -91,6 +94,8 @@ class Start extends Component {
 
 	async startWizard() {
 		const { addNotice, isSettingsError } = this.props;
+
+		recordEvent( 'storeprofiler_welcome_clicked', { get_started: true } );
 
 		await this.updateTracking();
 
