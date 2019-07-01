@@ -76,6 +76,13 @@ class WC_Helper_Product_Install {
 	}
 
 	/**
+	 * Reset product isntall state.
+	 */
+	public static function reset_state() {
+		WC_Helper_Options::update( 'product_install', self::$default_state );
+	}
+
+	/**
 	 * Install a given product IDs.
 	 *
 	 * @param array $products List of product IDs.
