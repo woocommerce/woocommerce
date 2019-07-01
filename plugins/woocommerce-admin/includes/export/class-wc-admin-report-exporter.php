@@ -172,7 +172,8 @@ class WC_Admin_Report_Exporter {
 		if (
 			isset( $_GET['action'] ) &&
 			! empty( $_GET['filename'] ) &&
-			self::DOWNLOAD_EXPORT_ACTION === wp_unslash( $_GET['action'] ) // WPCS: input var ok, sanitization ok.
+			self::DOWNLOAD_EXPORT_ACTION === wp_unslash( $_GET['action'] ) && // WPCS: input var ok, sanitization ok.
+			current_user_can( 'view_woocommerce_reports' )
 		) {
 			$exporter = new WC_Admin_Report_CSV_Exporter();
 			$exporter->set_filename( wp_unslash( $_GET['filename'] ) ); // WPCS: input var ok, sanitization ok.
