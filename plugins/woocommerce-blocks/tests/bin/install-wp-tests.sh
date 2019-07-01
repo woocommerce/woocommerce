@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# See https://raw.githubusercontent.com/wp-cli/scaffold-command/master/templates/install-wp-tests.sh
 
 if [ $# -lt 3 ]; then
 	echo "usage: $0 <db-name> <db-user> <db-pass> [db-host] [wp-version] [skip-database-creation]"
@@ -26,8 +25,15 @@ download() {
     fi
 }
 
-if [[ $WP_VERSION =~ [0-9]+\.[0-9]+(\.[0-9]+)? ]]; then
-	WP_TESTS_TAG="tags/$WP_VERSION"
+if [[ $WP_VERSION =~ ^[0-9]+\.[0-9]+$ ]]; then
+	WP_TESTS_TAG="branches/$WP_VERSION"
+elif [[ $WP_VERSION =~ [0-9]+\.[0-9]+\.[0-9]+ ]]; then
+	if [[ $WP_VERSION =~ [0-9]+\.[0-9]+\.[0] ]]; then
+		# version x.x.0 means the first release of the major version, so strip off the .0 and download version x.x
+		WP_TESTS_TAG="tags/${WP_VERSION%??}"
+	else
+		WP_TESTS_TAG="tags/$WP_VERSION"
+	fi
 elif [[ $WP_VERSION == 'nightly' || $WP_VERSION == 'trunk' ]]; then
 	WP_TESTS_TAG="trunk"
 else
@@ -53,18 +59,34 @@ install_wp() {
 	mkdir -p $WP_CORE_DIR
 
 	if [[ $WP_VERSION == 'nightly' || $WP_VERSION == 'trunk' ]]; then
-		mkdir -p /tmp/wordpress-nightly
-		download https://wordpress.org/nightly-builds/wordpress-latest.zip  /tmp/wordpress-nightly/wordpress-nightly.zip
-		unzip -q /tmp/wordpress-nightly/wordpress-nightly.zip -d /tmp/wordpress-nightly/
-		mv /tmp/wordpress-nightly/wordpress/* $WP_CORE_DIR
+		mkdir -p $TMPDIR/wordpress-nightly
+		download https://wordpress.org/nightly-builds/wordpress-latest.zip  $TMPDIR/wordpress-nightly/wordpress-nightly.zip
+		unzip -q $TMPDIR/wordpress-nightly/wordpress-nightly.zip -d $TMPDIR/wordpress-nightly/
+		mv $TMPDIR/wordpress-nightly/wordpress/* $WP_CORE_DIR
 	else
 		if [ $WP_VERSION == 'latest' ]; then
 			local ARCHIVE_NAME='latest'
+		elif [[ $WP_VERSION =~ [0-9]+\.[0-9]+ ]]; then
+			# https serves multiple offers, whereas http serves single.
+			download https://api.wordpress.org/core/version-check/1.7/ $TMPDIR/wp-latest.json
+			if [[ $WP_VERSION =~ [0-9]+\.[0-9]+\.[0] ]]; then
+				# version x.x.0 means the first release of the major version, so strip off the .0 and download version x.x
+				LATEST_VERSION=${WP_VERSION%??}
+			else
+				# otherwise, scan the releases and get the most up to date minor version of the major release
+				local VERSION_ESCAPED=`echo $WP_VERSION | sed 's/\./\\\\./g'`
+				LATEST_VERSION=$(grep -o '"version":"'$VERSION_ESCAPED'[^"]*' $TMPDIR/wp-latest.json | sed 's/"version":"//' | head -1)
+			fi
+			if [[ -z "$LATEST_VERSION" ]]; then
+				local ARCHIVE_NAME="wordpress-$WP_VERSION"
+			else
+				local ARCHIVE_NAME="wordpress-$LATEST_VERSION"
+			fi
 		else
 			local ARCHIVE_NAME="wordpress-$WP_VERSION"
 		fi
-		download https://wordpress.org/${ARCHIVE_NAME}.tar.gz  /tmp/wordpress.tar.gz
-		tar --strip-components=1 -zxmf /tmp/wordpress.tar.gz -C $WP_CORE_DIR
+		download https://wordpress.org/${ARCHIVE_NAME}.tar.gz  $TMPDIR/wordpress.tar.gz
+		tar --strip-components=1 -zxmf $TMPDIR/wordpress.tar.gz -C $WP_CORE_DIR
 	fi
 
 	download https://raw.github.com/markoheijnen/wp-mysqli/master/db.php $WP_CORE_DIR/wp-content/db.php
@@ -128,7 +150,6 @@ install_db() {
 install_deps() {
 
 	# Script Variables
-	WP_SITE_URL="http://local.wordpress.test"
 	BRANCH=$TRAVIS_BRANCH
 	REPO=$TRAVIS_REPO_SLUG
 	WORKING_DIR="$PWD"
@@ -138,31 +159,9 @@ install_deps() {
 		REPO=$TRAVIS_PULL_REQUEST_SLUG
 	fi
 
-	# Set up WordPress using wp-cli
-	mkdir -p "$WP_CORE_DIR"
-	cd "$WP_CORE_DIR"
-
-	curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-	php wp-cli.phar core config --dbname=$DB_NAME --dbuser=$DB_USER --dbpass=$DB_PASS --dbhost=$DB_HOST --dbprefix=wptests_
-	php wp-cli.phar core install --url="$WP_SITE_URL" --title="Example" --admin_user=admin --admin_password=password --admin_email=info@example.com --path=$WP_CORE_DIR --skip-email
-
-	# Install WooCommerce
-	cd "wp-content/plugins/"
-	# As zip file does not include tests, we have to get it from git repo.
-	git clone --depth 1 https://github.com/woocommerce/woocommerce.git
-
-	cd "$WP_CORE_DIR"
-	php wp-cli.phar plugin activate woocommerce
-
-	if [ "$BRANCH" != "" ]; then
-		# Install the correct branch of the plugin, if running from Travis CI.
-		php wp-cli.phar plugin install https://github.com/$REPO/archive/$BRANCH.zip --activate
-	fi
-
-	cd "wp-content/plugins/woocommerce-gutenberg-products-block"
-
-	# Run composer in plugin dir.
-	composer install --no-dev
+	# checkout dev version of woocommerce
+	cd "$WP_CORE_DIR/wp-content/plugins"
+	git clone --depth 1 "https://github.com/woocommerce/woocommerce.git"
 
 	# Back to original dir
 	cd "$WORKING_DIR"
