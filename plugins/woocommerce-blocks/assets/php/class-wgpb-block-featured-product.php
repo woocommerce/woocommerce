@@ -158,6 +158,10 @@ class WGPB_Block_Featured_Product {
 			$classes[] = "has-{$attributes['overlayColor']}-background-color";
 		}
 
+		if ( isset( $attributes['className'] ) ) {
+			$classes[] = $attributes['className'];
+		}
+
 		return implode( $classes, ' ' );
 	}
 
