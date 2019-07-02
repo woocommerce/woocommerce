@@ -379,7 +379,7 @@ class WC_Admin_Notices {
 	 * @since 3.6.5
 	 */
 	public static function add_min_version_notice() {
-		if ( version_compare( phpversion(), WC_MIN_PHP_VERSION, '<' ) || version_compare( get_bloginfo( 'version' ), WC_MIN_WP_VERSION, '<' ) ) {
+		if ( version_compare( phpversion(), WC_NOTICE_MIN_PHP_VERSION, '<' ) || version_compare( get_bloginfo( 'version' ), WC_NOTICE_MIN_WP_VERSION, '<' ) ) {
 			self::add_notice( 'wp_php_min_requirements' );
 		}
 	}
@@ -396,8 +396,8 @@ class WC_Admin_Notices {
 			return;
 		}
 
-		$old_php = version_compare( phpversion(), WC_MIN_PHP_VERSION, '<' );
-		$old_wp  = version_compare( get_bloginfo( 'version' ), WC_MIN_WP_VERSION, '<' );
+		$old_php = version_compare( phpversion(), WC_NOTICE_MIN_PHP_VERSION, '<' );
+		$old_wp  = version_compare( get_bloginfo( 'version' ), WC_NOTICE_MIN_WP_VERSION, '<' );
 
 		// Both PHP and WordPress up to date version => no notice.
 		if ( ! $old_php && ! $old_wp ) {
@@ -408,20 +408,20 @@ class WC_Admin_Notices {
 			$msg = sprintf(
 				/* translators: 1: Minimum PHP version 2: Minimum WordPress version */
 				__( 'Update required: WooCommerce will soon require PHP version %1$s and WordPress version %2$s or newer.', 'woocommerce' ),
-				WC_MIN_PHP_VERSION,
-				WC_MIN_WP_VERSION
+				WC_NOTICE_MIN_PHP_VERSION,
+				WC_NOTICE_MIN_WP_VERSION
 			);
 		} elseif ( $old_php ) {
 			$msg = sprintf(
 				/* translators: %s: Minimum PHP version */
 				__( 'Update required: WooCommerce will soon require PHP version %s or newer.', 'woocommerce' ),
-				WC_MIN_PHP_VERSION
+				WC_NOTICE_MIN_PHP_VERSION
 			);
 		} elseif ( $old_wp ) {
 			$msg = sprintf(
 				/* translators: %s: Minimum WordPress version */
 				__( 'Update required: WooCommerce will soon require WordPress version %s or newer.', 'woocommerce' ),
-				WC_MIN_WP_VERSION
+				WC_NOTICE_MIN_WP_VERSION
 			);
 		}
 
