@@ -143,8 +143,31 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 			'no_found_rows'       => false,
 			'orderby'             => '',
 			'order'               => '',
+			'meta_query'          => WC()->query->get_meta_query(), // phpcs:ignore WordPress.DB.SlowDBQuery
+			'tax_query'           => array(), // phpcs:ignore WordPress.DB.SlowDBQuery
+			'posts_per_page'      => $this->get_products_limit(),
 		);
 
+		$this->set_block_query_args( $query_args );
+		$this->set_ordering_query_args( $query_args );
+		$this->set_categories_query_args( $query_args );
+
+		return $query_args;
+	}
+
+	/**
+	 * Set args specific to this block
+	 *
+	 * @param array $query_args Query args.
+	 */
+	abstract protected function set_block_query_args( &$query_args );
+
+	/**
+	 * Set orderby/order query args.
+	 *
+	 * @param array $query_args Query args.
+	 */
+	protected function set_ordering_query_args( &$query_args ) {
 		if ( isset( $this->attributes['orderby'] ) ) {
 			if ( 'price_desc' === $this->attributes['orderby'] ) {
 				$query_args['orderby'] = 'price';
@@ -160,34 +183,11 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 			}
 		}
 
-		if ( ! empty( $this->attributes['rows'] ) ) {
-			$this->attributes['limit'] = intval( $this->attributes['columns'] ) * intval( $this->attributes['rows'] );
-		}
-
-		$query_args['posts_per_page'] = intval( $this->attributes['limit'] );
-		$query_args['meta_query']     = WC()->query->get_meta_query(); // phpcs:ignore WordPress.DB.SlowDBQuery
-		$query_args['tax_query']      = array(); // phpcs:ignore WordPress.DB.SlowDBQuery
-
-		$this->set_block_query_args( $query_args );
-
-		$ordering_args         = WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] );
-		$query_args['orderby'] = $ordering_args['orderby'];
-		$query_args['order']   = $ordering_args['order'];
-		if ( $ordering_args['meta_key'] ) {
-			$query_args['meta_key'] = $ordering_args['meta_key']; // phpcs:ignore WordPress.DB.SlowDBQuery
-		}
-
-		$this->set_categories_query_args( $query_args );
-
-		return $query_args;
+		$query_args = array_merge(
+			$query_args,
+			WC()->query->get_catalog_ordering_args( $query_args['orderby'], $query_args['order'] )
+		);
 	}
-
-	/**
-	 * Set args specific to this block
-	 *
-	 * @param array $query_args Query args.
-	 */
-	abstract protected function set_block_query_args( &$query_args );
 
 	/**
 	 * Set categories query args.
@@ -211,6 +211,18 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 				'include_children' => 'all' === $this->attributes['catOperator'] ? false : true,
 			);
 		}
+	}
+
+	/**
+	 * Works out the item limit based on rows and columns, or returns default.
+	 *
+	 * @return int
+	 */
+	protected function get_products_limit() {
+		if ( isset( $this->attributes['rows'], $this->attributes['columns'] ) && ! empty( $this->attributes['rows'] ) ) {
+			$this->attributes['limit'] = intval( $this->attributes['columns'] ) * intval( $this->attributes['rows'] );
+		}
+		return intval( $this->attributes['limit'] );
 	}
 
 	/**
