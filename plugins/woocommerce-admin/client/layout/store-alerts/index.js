@@ -23,6 +23,7 @@ import withSelect from 'wc-api/with-select';
 import { QUERY_DEFAULTS } from 'wc-api/constants';
 import sanitizeHTML from 'lib/sanitize-html';
 import StoreAlertsPlaceholder from './placeholder';
+import { recordEvent } from 'lib/tracks';
 
 import './style.scss';
 
@@ -118,10 +119,18 @@ class StoreAlerts extends Component {
 			},
 		];
 
-		const setReminderDate = ( newDate, onClose ) => {
+		const setReminderDate = ( snoozeOption, onClose ) => {
 			return () => {
 				onClose();
-				updateNote( alert.id, { status: 'snoozed', date_reminder: newDate } );
+				updateNote( alert.id, { status: 'snoozed', date_reminder: snoozeOption.newDate } );
+
+				const eventProps = {
+					alert_name: alert.name,
+					alert_title: alert.title,
+					snooze_duration: snoozeOption.newDate,
+					snooze_label: snoozeOption.label,
+				};
+				recordEvent( 'store_alert_snooze', eventProps );
 			};
 		};
 
@@ -143,7 +152,7 @@ class StoreAlerts extends Component {
 							<Button
 								className="components-dropdown-menu__menu-item"
 								key={ idx }
-								onClick={ setReminderDate( option.newDate, onClose ) }
+								onClick={ setReminderDate( option, onClose ) }
 							>
 								{ option.label }
 							</Button>
