@@ -118,31 +118,34 @@ class WC_Admin_Onboarding {
 		$themes_transient_name = 'wc_onboarding_themes';
 		$themes                = get_transient( $themes_transient_name );
 		if ( false === $themes ) {
-			$theme_data = wp_remote_get( 'http://woocommerce.com/wp-json/wccom-extensions/1.0/search?category=themes' );
-			$theme_data = json_decode( $theme_data['body'] );
+			$theme_data = wp_remote_get( 'https://woocommerce.com/wp-json/wccom-extensions/1.0/search?category=themes' );
 			$themes     = array();
 
-			foreach ( $theme_data->products as $theme ) {
-				$slug                                       = sanitize_title( $theme->slug );
-				$themes[ $slug ]                            = (array) $theme;
-				$themes[ $slug ]['is_installed']            = false;
-				$themes[ $slug ]['has_woocommerce_support'] = true;
+			if ( ! is_wp_error( $theme_data ) ) {
+				$theme_data = json_decode( $theme_data['body'] );
+
+				foreach ( $theme_data->products as $theme ) {
+					$slug                                       = sanitize_title( $theme->slug );
+					$themes[ $slug ]                            = (array) $theme;
+					$themes[ $slug ]['is_installed']            = false;
+					$themes[ $slug ]['has_woocommerce_support'] = true;
+				}
+
+				$installed_themes = wp_get_themes();
+
+				foreach ( $installed_themes as $slug => $theme ) {
+					$themes[ $slug ] = array(
+						'slug'                    => sanitize_title( $slug ),
+						'title'                   => $theme->get( 'Name' ),
+						'price'                   => '0.00',
+						'is_installed'            => true,
+						'image'                   => $theme->get_screenshot(),
+						'has_woocommerce_support' => self::has_woocommerce_support( $theme ),
+					);
+				}
+
+				set_transient( $themes_transient_name, $themes, DAY_IN_SECONDS );
 			}
-
-			$installed_themes = wp_get_themes();
-
-			foreach ( $installed_themes as $slug => $theme ) {
-				$themes[ $slug ] = array(
-					'slug'                    => sanitize_title( $slug ),
-					'title'                   => $theme->get( 'Name' ),
-					'price'                   => '0.00',
-					'is_installed'            => true,
-					'image'                   => $theme->get_screenshot(),
-					'has_woocommerce_support' => self::has_woocommerce_support( $theme ),
-				);
-			}
-
-			set_transient( $themes_transient_name, $themes, DAY_IN_SECONDS );
 		}
 
 		$themes = apply_filters( 'woocommerce_admin_onboarding_themes', $themes );
@@ -181,8 +184,13 @@ class WC_Admin_Onboarding {
 		$woocommerce_products        = get_transient( $product_data_transient_name );
 		if ( false === $woocommerce_products ) {
 			$woocommerce_products = wp_remote_get( 'https://woocommerce.com/wp-json/wccom-extensions/1.0/search?category=product-type' );
+			if ( is_wp_error( $woocommerce_products ) ) {
+				return $product_types;
+			}
+
 			set_transient( $product_data_transient_name, $woocommerce_products, DAY_IN_SECONDS );
 		}
+
 		$product_data = json_decode( $woocommerce_products['body'] );
 		$products     = array();
 
@@ -242,4 +250,4 @@ class WC_Admin_Onboarding {
 	}
 }
 
-new WC_Admin_Onboarding();
+WC_Admin_Onboarding::get_instance();
