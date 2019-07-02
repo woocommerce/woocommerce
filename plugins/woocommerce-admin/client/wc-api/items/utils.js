@@ -46,6 +46,8 @@ export function getLeaderboard( options ) {
 		return { ...response, isError: true };
 	}
 
+	console.log( leaderboard.rows );
+
 	return { ...response, rows: leaderboard.rows };
 }
 

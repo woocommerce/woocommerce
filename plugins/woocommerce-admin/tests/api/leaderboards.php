@@ -141,7 +141,7 @@ class WC_Tests_API_Leaderboards extends WC_REST_Unit_Test_Case {
 		$widgets_leaderboard = end( $data );
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'top_widgets', $widgets_leaderboard['id'] );
-		$this->assertEquals( admin_url( 'admin.php?page=wc-admin&path=test/path&persisted_param=1' ), $widgets_leaderboard['rows'][0]['display'] );
+		$this->assertEquals( admin_url( 'admin.php?page=wc-admin&path=/test/path&persisted_param=1' ), $widgets_leaderboard['rows'][0]['display'] );
 
 		$request  = new WP_REST_Request( 'GET', $this->endpoint . '/allowed' );
 		$response = $this->server->dispatch( $request );
