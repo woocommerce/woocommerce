@@ -8,6 +8,11 @@ import { isNil } from 'lodash';
 import { SECOND } from '@fresh-data/framework';
 
 /**
+ * WooCommerce dependencies
+ */
+import { SectionHeader } from '@woocommerce/components';
+
+/**
  * Internal dependencies
  */
 import { DEFAULT_REQUIREMENT } from 'wc-api/constants';
@@ -50,45 +55,45 @@ class HistoricalDataLayout extends Component {
 
 		return (
 			<Fragment>
-				<div className="woocommerce-setting">
-					<div className="woocommerce-setting__label" id="import-historical-data-label">
-						{ __( 'Import Historical Data:', 'woocommerce-admin' ) }
-					</div>
-					<div className="woocommerce-setting__input">
-						<span className="woocommerce-setting__help">
-							{ __(
-								'This tool populates historical analytics data by processing customers ' +
-									'and orders created prior to activating WooCommerce Admin.',
-								'woocommerce-admin'
+				<SectionHeader title={ __( 'Import Historical Data', 'woocommerce-admin' ) } />
+				<div className="woocommerce-settings__wrapper">
+					<div className="woocommerce-setting">
+						<div className="woocommerce-setting__input">
+							<span className="woocommerce-setting__help">
+								{ __(
+									'This tool populates historical analytics data by processing customers ' +
+										'and orders created prior to activating WooCommerce Admin.',
+									'woocommerce-admin'
+								) }
+							</span>
+							{ status !== 'finished' && (
+								<Fragment>
+									<HistoricalDataPeriodSelector
+										dateFormat={ dateFormat }
+										disabled={ inProgress }
+										onPeriodChange={ onPeriodChange }
+										onDateChange={ onDateChange }
+										value={ period }
+									/>
+									<HistoricalDataSkipCheckbox
+										disabled={ inProgress }
+										checked={ skipChecked }
+										onChange={ onSkipChange }
+									/>
+									<HistoricalDataProgress
+										label={ __( 'Registered Customers', 'woocommerce-admin' ) }
+										progress={ customersProgress }
+										total={ customersTotal }
+									/>
+									<HistoricalDataProgress
+										label={ __( 'Orders', 'woocommerce-admin' ) }
+										progress={ ordersProgress }
+										total={ ordersTotal }
+									/>
+								</Fragment>
 							) }
-						</span>
-						{ status !== 'finished' && (
-							<Fragment>
-								<HistoricalDataPeriodSelector
-									dateFormat={ dateFormat }
-									disabled={ inProgress }
-									onPeriodChange={ onPeriodChange }
-									onDateChange={ onDateChange }
-									value={ period }
-								/>
-								<HistoricalDataSkipCheckbox
-									disabled={ inProgress }
-									checked={ skipChecked }
-									onChange={ onSkipChange }
-								/>
-								<HistoricalDataProgress
-									label={ __( 'Registered Customers', 'woocommerce-admin' ) }
-									progress={ customersProgress }
-									total={ customersTotal }
-								/>
-								<HistoricalDataProgress
-									label={ __( 'Orders', 'woocommerce-admin' ) }
-									progress={ ordersProgress }
-									total={ ordersTotal }
-								/>
-							</Fragment>
-						) }
-						<HistoricalDataStatus importDate={ importDate } status={ status } />
+							<HistoricalDataStatus importDate={ importDate } status={ status } />
+						</div>
 					</div>
 				</div>
 				<HistoricalDataActions

@@ -36,9 +36,19 @@ class Settings extends Component {
 		this.state = {
 			settings,
 			saving: false,
+			isDirty: false,
 		};
 
 		this.handleInputChange = this.handleInputChange.bind( this );
+		this.warnIfUnsavedChanges = this.warnIfUnsavedChanges.bind( this );
+	}
+
+	componentDidMount() {
+		window.addEventListener( 'beforeunload', this.warnIfUnsavedChanges );
+	}
+
+	componentWillUnmount() {
+		window.removeEventListener( 'beforeunload', this.warnIfUnsavedChanges );
 	}
 
 	componentDidCatch( error ) {
@@ -48,6 +58,18 @@ class Settings extends Component {
 		/* eslint-disable no-console */
 		console.warn( error );
 		/* eslint-enable no-console */
+	}
+
+	warnIfUnsavedChanges( event ) {
+		const { isDirty } = this.state;
+
+		if ( isDirty ) {
+			event.returnValue = __(
+				'You have unsaved changes. If you proceed, they will be lost.',
+				'woocommerce-admin'
+			);
+			return event.returnValue;
+		}
 	}
 
 	resetDefaults = () => {
@@ -64,7 +86,8 @@ class Settings extends Component {
 
 	componentDidUpdate() {
 		const { addNotice, isError, isRequesting } = this.props;
-		const { saving } = this.state;
+		const { saving, isDirty } = this.state;
+		let newIsDirtyState = isDirty;
 
 		if ( saving && ! isRequesting ) {
 			if ( ! isError ) {
@@ -72,6 +95,7 @@ class Settings extends Component {
 					status: 'success',
 					message: __( 'Your settings have been successfully saved.', 'woocommerce-admin' ),
 				} );
+				newIsDirtyState = false;
 			} else {
 				addNotice( {
 					status: 'error',
@@ -82,7 +106,7 @@ class Settings extends Component {
 				} );
 			}
 			/* eslint-disable react/no-did-update-set-state */
-			this.setState( { saving: false } );
+			this.setState( { saving: false, isDirty: newIsDirtyState } );
 			/* eslint-enable react/no-did-update-set-state */
 		}
 	}
@@ -105,7 +129,9 @@ class Settings extends Component {
 	saveChanges = () => {
 		this.persistChanges( this.state );
 		this.props.updateSettings( { wc_admin: this.state.settings } );
-		this.setState( { saving: true } );
+
+		// TODO: remove this optimistic set of isDirty to false once #2541 is resolved.
+		this.setState( { saving: true, isDirty: false } );
 	};
 
 	handleInputChange( e ) {
@@ -122,7 +148,7 @@ class Settings extends Component {
 			settings[ name ] = value;
 		}
 
-		this.setState( { settings } );
+		this.setState( { settings, isDirty: true } );
 	}
 
 	render() {
@@ -155,11 +181,11 @@ class Settings extends Component {
 							{ __( 'Reset Defaults', 'woocommerce-admin' ) }
 						</Button>
 						<Button isPrimary onClick={ this.saveChanges }>
-							{ __( 'Save Changes', 'woocommerce-admin' ) }
+							{ __( 'Save Settings', 'woocommerce-admin' ) }
 						</Button>
 					</div>
-					<HistoricalData addNotice={ addNotice } />
 				</div>
+				<HistoricalData addNotice={ addNotice } />
 			</Fragment>
 		);
 	}
