@@ -123,7 +123,7 @@ class WC_Tests_API_Leaderboards extends WC_REST_Unit_Test_Case {
 					),
 					'rows'    => array(
 						array(
-							'display' => wc_admin_url( 'test/path', $persisted_query ),
+							'display' => wc_admin_url( '/test/path', $persisted_query ),
 							'value'   => null,
 						),
 					),
