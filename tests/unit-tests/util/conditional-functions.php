@@ -93,4 +93,16 @@ class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 	public function test_wc_is_valid_url( $assert, $values ) {
 		$this->assertEquals( $assert, $values );
 	}
+
+	/**
+	 * Test wc_is_file_valid_csv.
+	 *
+	 * @since 3.6.5
+	 */
+	public function test_wc_is_file_valid_csv() {
+		$this->assertTrue( wc_is_file_valid_csv( 'C:/wamp64/www/test.local/wp-content/uploads/2018/10/products_all_gg-1.csv' ) );
+		$this->assertTrue( wc_is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
+		$this->assertFalse( wc_is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/img.jpg' ) );
+		$this->assertFalse( wc_is_file_valid_csv( 'file:///srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
+	}
 }
