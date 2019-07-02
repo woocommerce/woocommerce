@@ -111,6 +111,11 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 * Track various events when a step is saved.
 	 */
 	public function add_step_save_events() {
+		// Always record a track on this page view.
+		if ( 'next_steps' === $this->get_current_step() ) {
+			add_action( 'admin_init', array( $this, 'track_next_steps' ), 1 );
+		}
+
 		if ( empty( $_POST['save_step'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			return;
 		}
@@ -239,6 +244,15 @@ class WC_Admin_Setup_Wizard_Tracking {
 	 */
 	public function track_jetpack_activate() {
 		WC_Tracks::record_event( 'obw_activate' );
+	}
+
+	/**
+	 * Tracks when last next_steps screen is viewed in the OBW.
+	 *
+	 * @return void
+	 */
+	public function track_next_steps() {
+		WC_Tracks::record_event( 'obw_ready_view' );
 	}
 
 	/**
