@@ -93,11 +93,10 @@ class WC_Admin_Setup_Wizard_Tracking {
 
 		wc_enqueue_js(
 			"
-			var form = $( '.newsletter-form-email' ).closest( 'form' );
-			$( document ).on( 'submit', form, function() {
+			jQuery( '#mc-embedded-subscribe' ).click( function() {
 				window.wcTracks.recordEvent( 'obw_marketing_signup' );
 			} );
-			$( '.wc-setup-content a' ).click( function trackNextScreen( e ) {
+			jQuery( '.wc-setup-content a' ).click( function trackNextScreen( e ) {
 				var properties = {
 					next_url: e.target.href,
 					button: e.target.textContent && e.target.textContent.trim()
