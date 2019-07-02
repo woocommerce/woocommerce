@@ -21,6 +21,7 @@ import './style.scss';
 import defaultSections from './default-sections';
 import Section from './section';
 import withSelect from 'wc-api/with-select';
+import { recordEvent } from 'lib/tracks';
 
 class CustomizableDashboard extends Component {
 	constructor( props ) {
@@ -101,6 +102,10 @@ class CustomizableDashboard extends Component {
 			const toggledSection = sections.splice( index, 1 ).shift();
 			toggledSection.isVisible = ! toggledSection.isVisible;
 			sections.push( toggledSection );
+
+			if ( ! toggledSection.isVisible ) {
+				recordEvent( 'dash_section_remove', { key: toggledSection.key } );
+			}
 
 			this.updateSections( sections );
 		};
