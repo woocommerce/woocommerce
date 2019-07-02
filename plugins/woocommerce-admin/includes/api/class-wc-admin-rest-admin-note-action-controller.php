@@ -105,6 +105,25 @@ class WC_Admin_REST_Admin_Note_Action_Controller extends WC_Admin_REST_Admin_Not
 
 		$note->save();
 
+		if ( in_array( $note->get_type(), array( 'error', 'update' ) ) ) {
+			$tracks_event = 'wcadmin_store_alert_action';
+		} else {
+			$tracks_event = 'wcadmin_inbox_action_click';
+		}
+
+		wc_admin_record_tracks_event(
+			$tracks_event,
+			array(
+				'note_name'    => $note->get_name(),
+				'note_type'    => $note->get_type(),
+				'note_title'   => $note->get_title(),
+				'note_content' => $note->get_content(),
+				'note_icon'    => $note->get_icon(),
+				'action_name'  => $triggered_action->name,
+				'action_label' => $triggered_action->label,
+			)
+		);
+
 		$data = $note->get_data();
 		$data = $this->prepare_item_for_response( $data, $request );
 		$data = $this->prepare_response_for_collection( $data );
