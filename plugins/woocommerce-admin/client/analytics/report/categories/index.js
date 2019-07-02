@@ -61,6 +61,7 @@ export default class CategoriesReport extends Component {
 					query={ chartQuery }
 					selectedChart={ getSelectedChart( query.chart, charts ) }
 					filters={ filters }
+					report="categories"
 				/>
 				<ReportChart
 					filters={ filters }

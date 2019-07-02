@@ -24,7 +24,7 @@ import { getReportChartData, getReportTableData } from 'wc-api/reports/utils';
 import { QUERY_DEFAULTS } from 'wc-api/constants';
 import withSelect from 'wc-api/with-select';
 import { extendTableData } from './utils';
-
+import { recordEvent } from 'lib/tracks';
 import './style.scss';
 
 const TABLE_FILTER = 'woocommerce_admin_report_table';
@@ -141,6 +141,9 @@ class ReportTable extends Component {
 				/>
 				<TableCard
 					downloadable={ downloadable }
+					onClickDownload={ () => {
+						recordEvent( 'analytics_table_download', { report: endpoint, rows: totalResults } );
+					} }
 					headers={ filteredHeaders }
 					ids={ ids }
 					isLoading={ isLoading }
