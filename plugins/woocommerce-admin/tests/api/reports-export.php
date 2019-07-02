@@ -52,6 +52,15 @@ class WC_Tests_API_Reports_Export extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test requesting export without valid permissions.
+	 */
+	public function test_request_export_without_permission() {
+		wp_set_current_user( 0 );
+		$response = $this->server->dispatch( new WP_REST_Request( 'POST', '/wc/v4/reports/taxes/export' ) );
+		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
 	 * Test the export of a taxes report.
 	 *
 	 * @since 3.5.0

@@ -43,7 +43,7 @@ class WC_Admin_REST_Reports_Export_Controller extends WC_Admin_REST_Reports_Cont
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'export_items' ),
-					'permission_callback' => array( $this, 'export_permissions_check' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_export_collection_params(),
 				),
 				'schema' => array( $this, 'get_export_public_schema' ),
@@ -57,25 +57,11 @@ class WC_Admin_REST_Reports_Export_Controller extends WC_Admin_REST_Reports_Cont
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'export_status' ),
-					'permission_callback' => array( $this, 'export_permissions_check' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
 				'schema' => array( $this, 'get_export_status_public_schema' ),
 			)
 		);
-	}
-
-	/**
-	 * Makes sure the current user has access to WRITE the settings APIs.
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 * @return WP_Error|bool
-	 */
-	public function export_permissions_check( $request ) {
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			// @todo: better message?
-			return new WP_Error( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce-admin' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-		return true;
 	}
 
 	/**
