@@ -189,6 +189,8 @@ INTERESTED IN DEVELOPMENT?
 == Changelog ==
 
 = 3.6.5 - 2019-07-02 =
+* Security - Introduce file type check for tax rate importer.
+* Security - Added nonce check to CSV importer actions.
 * Enhancement - WordPress & PHP upgrade nudges when running older versions. #23975
 * Fix - "Filter by price" widget excludes category when combined with a product attribute. #23720
 * Fix - Add query parameter (GET) forwarding when processing batch API requests. #23769
