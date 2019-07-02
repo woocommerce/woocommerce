@@ -148,7 +148,7 @@ class WC_Tracks_Client {
 					}
 				}
 			} else {
-				Automattic\Jetpack\Tracking::tracks_get_identity( $user_id );
+				return Automattic\Jetpack\Tracking::tracks_get_identity( $user_id );
 			}
 		}
 
