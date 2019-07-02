@@ -92,7 +92,7 @@ class WC_Admin_REST_Leaderboards_Controller extends WC_REST_Data_Controller {
 				),
 				$persisted_query
 			);
-			$coupon_url  = wc_admin_url( 'analytics/coupons', $url_query );
+			$coupon_url  = wc_admin_url( '/analytics/coupons', $url_query );
 			$coupon_code = isset( $coupon['extended_info'] ) && isset( $coupon['extended_info']['code'] ) ? $coupon['extended_info']['code'] : '';
 			$rows[]      = array(
 				array(
