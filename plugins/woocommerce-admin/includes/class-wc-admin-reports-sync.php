@@ -405,7 +405,7 @@ class WC_Admin_Reports_Sync {
 			'batch_size'   => $batch_size,
 			'type'         => 'order',
 		);
-		self::record_event( 'import_job_start', $properties );
+		wc_admin_record_tracks_event( 'import_job_start', $properties );
 
 		// When we are skipping already imported orders, the table of orders to import gets smaller in
 		// every batch, so we want to always import the first page.
@@ -421,7 +421,7 @@ class WC_Admin_Reports_Sync {
 
 		$properties['imported_count'] = $imported_count;
 
-		self::record_event( 'import_job_complete', $properties );
+		wc_admin_record_tracks_event( 'import_job_complete', $properties );
 	}
 
 	/**
@@ -681,7 +681,7 @@ class WC_Admin_Reports_Sync {
 			'batch_size'   => $batch_size,
 			'type'         => 'customer',
 		);
-		self::record_event( 'import_job_start', $properties );
+		wc_admin_record_tracks_event( 'import_job_start', $properties );
 
 		$customer_roles = apply_filters( 'woocommerce_admin_import_customer_roles', array( 'customer' ) );
 		// When we are skipping already imported customers, the table of customers to import gets smaller in
@@ -712,7 +712,7 @@ class WC_Admin_Reports_Sync {
 
 		$properties['imported_count'] = $imported_count;
 
-		self::record_event( 'import_job_complete', $properties );
+		wc_admin_record_tracks_event( 'import_job_complete', $properties );
 	}
 
 	/**
@@ -738,7 +738,7 @@ class WC_Admin_Reports_Sync {
 	public static function customer_lookup_delete_batch() {
 		global $wpdb;
 
-		self::record_event( 'delete_import_data_job_start', array( 'type' => 'customer' ) );
+		wc_admin_record_tracks_event( 'delete_import_data_job_start', array( 'type' => 'customer' ) );
 
 		$batch_size   = self::get_batch_size( self::CUSTOMERS_DELETE_BATCH_ACTION );
 		$customer_ids = $wpdb->get_col(
@@ -752,7 +752,7 @@ class WC_Admin_Reports_Sync {
 			WC_Admin_Reports_Customers_Data_Store::delete_customer( $customer_id );
 		}
 
-		self::record_event( 'delete_import_data_job_complete', array( 'type' => 'customer' ) );
+		wc_admin_record_tracks_event( 'delete_import_data_job_complete', array( 'type' => 'customer' ) );
 	}
 
 	/**
@@ -780,7 +780,7 @@ class WC_Admin_Reports_Sync {
 	public static function orders_lookup_delete_batch() {
 		global $wpdb;
 
-		self::record_event( 'delete_import_data_job_start', array( 'type' => 'order' ) );
+		wc_admin_record_tracks_event( 'delete_import_data_job_start', array( 'type' => 'order' ) );
 
 		$batch_size = self::get_batch_size( self::ORDERS_DELETE_BATCH_ACTION );
 		$order_ids  = $wpdb->get_col(
@@ -794,28 +794,7 @@ class WC_Admin_Reports_Sync {
 			WC_Admin_Reports_Orders_Stats_Data_Store::delete_order( $order_id );
 		}
 
-		self::record_event( 'delete_import_data_job_complete', array( 'type' => 'order' ) );
-	}
-
-	/**
-	 * Record an event using Tracks.
-	 *
-	 * @internal WooCommerce core only includes Tracks in admin, not the REST API, so we need to include it.
-	 * @param string $event_name Event name for tracks.
-	 * @param array  $properties Properties to pass along with event.
-	 */
-	protected static function record_event( $event_name, $properties = array() ) {
-		if ( ! class_exists( 'WC_Tracks' ) ) {
-			if ( ! defined( 'WC_ABSPATH' ) || ! file_exists( WC_ABSPATH . 'includes/tracks/class-wc-tracks.php' ) ) {
-				return;
-			}
-			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
-			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
-			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
-			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
-			include_once WC_ABSPATH . 'includes/tracks/class-wc-site-tracking.php';
-		}
-		WC_Tracks::record_event( $event_name, $properties );
+		wc_admin_record_tracks_event( 'delete_import_data_job_complete', array( 'type' => 'order' ) );
 	}
 }
 

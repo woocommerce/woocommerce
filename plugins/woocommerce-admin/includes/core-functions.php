@@ -42,3 +42,25 @@ function wc_admin_url( $path, $query = array() ) {
 
 	return admin_url( 'admin.php?page=wc-admin#' . $path, dirname( __FILE__ ) );
 }
+
+/**
+ * Record an event using Tracks.
+ *
+ * @internal WooCommerce core only includes Tracks in admin, not the REST API, so we need to include it.
+ * @param string $event_name Event name for tracks.
+ * @param array  $properties Properties to pass along with event.
+ */
+function wc_admin_record_tracks_event( $event_name, $properties = array() ) {
+	if ( ! class_exists( 'WC_Tracks' ) ) {
+		if ( ! defined( 'WC_ABSPATH' ) || ! file_exists( WC_ABSPATH . 'includes/tracks/class-wc-tracks.php' ) ) {
+			return;
+		}
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-footer-pixel.php';
+		include_once WC_ABSPATH . 'includes/tracks/class-wc-site-tracking.php';
+	}
+
+	WC_Tracks::record_event( $event_name, $properties );
+}
