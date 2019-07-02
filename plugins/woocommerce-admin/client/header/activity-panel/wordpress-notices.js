@@ -84,14 +84,15 @@ class WordPressNotices extends Component {
 			const notice = notices.children[ i ];
 			if ( ! notice ) {
 				continue;
+			} else if ( 0 === notice.innerHTML.length ) {
+				// Ignore empty elements in this part of the DOM.
+				continue;
 			} else if ( ! this.shouldCollapseNotice( notice ) ) {
 				uncollapsedTargetArea.insertAdjacentElement( 'afterend', notice );
 			} else {
 				count++;
 			}
 		}
-
-		count = count - 1; // Remove 1 for `wp-header-end` which is a child of wp__notice-list
 
 		this.props.onCountUpdate( count );
 		this.setState( { count, notices, noticesOpen, screenMeta, screenLinks } );
