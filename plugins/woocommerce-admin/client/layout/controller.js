@@ -104,19 +104,10 @@ export class Controller extends Component {
 		return query;
 	}
 
-	// @todo What should we display or do when a route/page doesn't exist?
-	render404() {
-		return null;
-	}
-
 	render() {
 		const { page, match, location } = this.props;
 		const { url, params } = match;
 		const query = this.getBaseQuery( location.search );
-
-		if ( ! page ) {
-			return this.render404();
-		}
 
 		window.wpNavMenuUrlUpdate( page, query );
 		window.wpNavMenuClassChange( page, url );
