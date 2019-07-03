@@ -7,11 +7,6 @@ import { applyFilters } from '@wordpress/hooks';
 import interpolateComponents from 'interpolate-components';
 
 /**
- * WooCommerce dependencies
- */
-import { Link } from '@woocommerce/components';
-
-/**
  * Internal dependencies
  */
 import { DEFAULT_ACTIONABLE_STATUSES } from 'wc-api/constants';
@@ -61,12 +56,11 @@ export const analyticsSettings = applyFilters( SETTINGS_FILTER, [
 		helpText: interpolateComponents( {
 			mixedString: __(
 				'Orders with these statuses are excluded from the totals in your reports. ' +
-					'The {{strong}}Refunded{{/strong}} status can not be excluded.  {{moreLink}}Learn more{{/moreLink}}',
+					'The {{strong}}Refunded{{/strong}} status can not be excluded.',
 				'woocommerce-admin'
 			),
 			components: {
 				strong: <strong />,
-				moreLink: <Link href="#" type="external" />, // @todo This needs to be replaced with a real link.
 			},
 		} ),
 		initialValue:
