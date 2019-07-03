@@ -1,6 +1,6 @@
 <?php
 /**
- * Handles reports CSV export.
+ * Handles reports CSV export batches.
  *
  * @package WooCommerce/Export
  */
@@ -47,13 +47,17 @@ class WC_Admin_Report_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 * @param string $type Report type. E.g. 'customers'.
 	 * @param array  $args Report parameters.
 	 */
-	public function __construct( $type, $args ) {
+	public function __construct( $type = false, $args = array() ) {
 		parent::__construct();
 
-		$this->set_limit( 10 );
-		$this->set_report_type( $type );
-		$this->set_report_args( $args );
-		$this->set_column_names( $this->get_report_columns() );
+		if ( ! empty( $type ) ) {
+			$this->set_report_type( $type );
+			$this->set_column_names( $this->get_report_columns() );
+		}
+
+		if ( ! empty( $args ) ) {
+			$this->set_report_args( $args );
+		}
 	}
 
 	/**
@@ -64,7 +68,7 @@ class WC_Admin_Report_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	public function set_report_type( $type ) {
 		$this->report_type = $type;
 		$this->export_type = "admin_{$type}_report";
-		$this->filename    = "wc-{$type}-report-export.csv";
+		$this->filename    = "wc-{$type}-report-export";
 		$this->controller  = $this->map_report_controller();
 	}
 
@@ -110,7 +114,11 @@ class WC_Admin_Report_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		);
 
 		if ( isset( $controller_map[ $this->report_type ] ) ) {
-			// @todo: load the controllers if accessing outside a context where the REST API is loaded?
+			// Load the controllers if accessing outside the REST API.
+			if ( ! did_action( 'rest_api_init' ) ) {
+				do_action( 'rest_api_init' );
+			}
+
 			return new $controller_map[ $this->report_type ]();
 		}
 
@@ -152,6 +160,15 @@ class WC_Admin_Report_CSV_Exporter extends WC_CSV_Batch_Exporter {
 	 */
 	public function get_percent_complete() {
 		return intval( parent::get_percent_complete() );
+	}
+
+	/**
+	 * Get total number of rows in export.
+	 *
+	 * @return int Number of rows to export.
+	 */
+	public function get_total_rows() {
+		return $this->total_rows;
 	}
 
 	/**

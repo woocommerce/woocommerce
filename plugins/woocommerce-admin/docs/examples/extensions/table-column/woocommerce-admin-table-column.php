@@ -32,6 +32,27 @@ function table_column_register_script() {
 add_action( 'admin_enqueue_scripts', 'table_column_register_script' );
 
 /**
+ * When adding fields to a REST API response, we need to update the schema
+ * to reflect these changes. Not only does this let API consumers know of
+ * the new fields, it also adds them to Report Exports.
+ *
+ * @param array $properties The endpoint item schema properties.
+ * @return array Filtered schema.
+ */
+function add_product_extended_attributes_schema( $properties ) {
+	$properties['extended_info']['average_rating'] = array(
+		'type'        => 'number',
+		'readonly'    => true,
+		'context'     => array( 'view', 'edit' ),
+		'description' => 'Average product rating.',
+	);
+
+	return $properties;
+}
+
+add_filter( 'woocommerce_rest_report_products_schema', 'add_product_extended_attributes_schema' );
+
+/**
  * Extended attributes can be used to obtain any attribute from a WC_Product instance that is
  * available by a `get_*` class method. In other words, we can add `average_rating` because
  * `get_average_rating` is an available method on a WC_Product instance.
