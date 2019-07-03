@@ -238,7 +238,7 @@ class WC_Comments {
 					"
 					SELECT comment_approved, COUNT(*) AS num_comments
 					FROM {$wpdb->comments}
-					WHERE comment_type NOT IN ('order_note', 'webhook_delivery')
+					WHERE comment_type NOT IN ('action_log', 'order_note', 'webhook_delivery')
 					GROUP BY comment_approved
 					",
 					ARRAY_A
