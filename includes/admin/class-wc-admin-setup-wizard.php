@@ -1962,6 +1962,7 @@ class WC_Admin_Setup_Wizard {
 		$setup_automated_tax    = isset( $_POST['setup_automated_taxes'] ) && 'yes' === $_POST['setup_automated_taxes'];
 		$setup_mailchimp        = isset( $_POST['setup_mailchimp'] ) && 'yes' === $_POST['setup_mailchimp'];
 		$setup_facebook         = isset( $_POST['setup_facebook'] ) && 'yes' === $_POST['setup_facebook'];
+		$setup_wc_admin         = isset( $_POST['setup_wc_admin'] ) && 'yes' === $_POST['setup_wc_admin'];
 
 		update_option( 'woocommerce_calc_taxes', $setup_automated_tax ? 'yes' : 'no' );
 		update_option( 'woocommerce_setup_automated_taxes', $setup_automated_tax );
@@ -1994,6 +1995,16 @@ class WC_Admin_Setup_Wizard {
 				array(
 					'name'      => __( 'Facebook for WooCommerce', 'woocommerce' ),
 					'repo-slug' => 'facebook-for-woocommerce',
+				)
+			);
+		}
+
+		if ( $setup_wc_admin ) {
+			$this->install_plugin(
+				'woocommerce-admin',
+				array(
+					'name'      => __( 'WooCommerce Admin', 'woocommerce' ),
+					'repo-slug' => 'woocommerce-admin',
 				)
 			);
 		}
