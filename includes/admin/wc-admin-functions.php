@@ -429,6 +429,7 @@ function wc_render_invalid_variation_notice( $product_object ) {
 		WHERE post_id in (" . implode( ',', array_map( 'absint', $variation_ids ) ) . ")
 		AND meta_key='_price'
 		AND meta_value >= 0
+		AND meta_value != ''
 		"
 	);
 	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
