@@ -799,12 +799,12 @@ final class WooCommerce {
 	 */
 	public function build_dependencies_satisfied() {
 		// Check if we have compiled CSS.
-		if ( ! file_exists( WC()->plugin_url() . '/assets/css/admin.css' ) ) {
+		if ( ! file_exists( WC()->plugin_path() . '/assets/css/admin.css' ) ) {
 			return false;
 		}
 
 		// Check if we have minified JS.
-		if ( ! file_exists( WC()->plugin_url() . '/assets/js/admin/woocommerce_admin.min.js' ) ) {
+		if ( ! file_exists( WC()->plugin_path() . '/assets/js/admin/woocommerce_admin.min.js' ) ) {
 			return false;
 		}
 
