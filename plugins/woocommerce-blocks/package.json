@@ -16,6 +16,7 @@
   },
   "license": "GPL-3.0+",
   "scripts": {
+    "deploy": "npm run build --loglevel error && sh ./bin/github-deploy.sh",
     "prepack": "npm install && npm run lint && npm run test && npm run build",
     "build": "cross-env BABEL_ENV=default NODE_ENV=production webpack",
     "start": "cross-env BABEL_ENV=default webpack --watch --info-verbosity none",
