@@ -145,6 +145,17 @@ class WC_Admin_Setup_Wizard {
 	}
 
 	/**
+	 * Should we show the WooCommerce Admin install option?
+	 * True only if the user can install plugins,
+	 * and up until the end date of the recommendation.
+	 *
+	 * @return boolean
+	 */
+	protected function should_show_wc_admin() {
+		return current_user_can( 'install_plugins' );
+	}
+
+	/**
 	 * Should we display the 'Recommended' step?
 	 * True if at least one of the recommendations will be displayed.
 	 *
@@ -154,7 +165,8 @@ class WC_Admin_Setup_Wizard {
 		return $this->should_show_theme()
 			|| $this->should_show_automated_tax()
 			|| $this->should_show_mailchimp()
-			|| $this->should_show_facebook();
+			|| $this->should_show_facebook()
+			|| $this->should_show_wc_admin();
 	}
 
 	/**
@@ -747,7 +759,7 @@ class WC_Admin_Setup_Wizard {
 	public function plugin_install_info() {
 		?>
 		<span class="plugin-install-info">
-			<span class="plugin-install-info-label"><?php esc_html_e( 'The following plugins will be installed and activated for you:', 'woocommerce' ); ?></span>
+			<span class="plugin-install-info-label"><?php esc_html_e( 'The following free plugins will be installed and activated for you:', 'woocommerce' ); ?></span>
 			<span class="plugin-install-info-list"></span>
 		</span>
 		<?php
@@ -1866,7 +1878,7 @@ class WC_Admin_Setup_Wizard {
 		?>
 		<h1><?php esc_html_e( 'Recommended for All WooCommerce Stores', 'woocommerce' ); ?></h1>
 		<p>
-			<?php esc_html_e( 'Enhance your store with these recommended features.', 'woocommerce' ); ?>
+			<?php esc_html_e( 'Enhance your store with these recommended free features.', 'woocommerce' ); ?>
 		</p>
 		<form method="post">
 			<ul class="recommended-step">
@@ -1894,6 +1906,17 @@ class WC_Admin_Setup_Wizard {
 						'img_url'     => WC()->plugin_url() . '/assets/images/obw-taxes-icon.svg',
 						'img_alt'     => __( 'automated taxes icon', 'woocommerce' ),
 						'plugins'     => $this->get_wcs_requisite_plugins(),
+					) );
+				endif;
+
+				if ( $this->should_show_wc_admin() ) :
+					$this->display_recommended_item( array(
+						'type'        => 'wc_admin',
+						'title'       => __( 'WooCommerce Dashboard & Analytics', 'woocommerce' ),
+						'description' => __( 'New and improved interface for managing your store\'s reports as well as a dashboard to monitor key metrics.', 'woocommerce' ),
+						'img_url'     => WC()->plugin_url() . '/assets/images/obw-woocommerce-admin-icon.svg',
+						'img_alt'     => __( 'WooCommerce Admin icon', 'woocommerce' ),
+						'plugins'     => array( array( 'name' => __( 'WooCommerce Admin', 'woocommerce' ), 'slug' => 'woocommerce-admin' ) ),
 					) );
 				endif;
 
