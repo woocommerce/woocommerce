@@ -279,10 +279,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'wc-admin-coupon-meta-boxes',
 					'woocommerce_admin_meta_boxes_coupon',
 					array(
-						'characters' => apply_filters( 'woocommerce_coupon_code_generator_characters', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ012345678' ),
-						'char_limit' => apply_filters( 'woocommerce_coupon_code_generator_character_limit', 8 ),
-						'prefix'     => apply_filters( 'woocommerce_coupon_code_generator_prefix', '' ),
-						'postfix'    => apply_filters( 'woocommerce_coupon_code_generator_postfix', '' ),
+						'generate_button_text' => esc_html__( 'Generate coupon', 'woocommerce' ),
+						'characters'           => apply_filters( 'woocommerce_coupon_code_generator_characters', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ012345678' ),
+						'char_limit'           => apply_filters( 'woocommerce_coupon_code_generator_character_limit', 8 ),
+						'prefix'               => apply_filters( 'woocommerce_coupon_code_generator_prefix', '' ),
+						'postfix'              => apply_filters( 'woocommerce_coupon_code_generator_postfix', '' ),
 					)
 				);
 			}

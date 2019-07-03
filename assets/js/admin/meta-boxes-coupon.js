@@ -16,7 +16,9 @@ jQuery(function( $ ) {
 			// Add buttons to coupon screen
 			var $coupon_screen = $( '.post-new-php.post-type-shop_coupon' ),
 			$code_action       = $coupon_screen.find( '#title' );
-			$code_action.after( '<a href="#" class="button generate-coupon-code">Generate code</a>' );
+			$code_action.after(
+				'<a href="#" class="button generate-coupon-code">' + woocommerce_admin_meta_boxes_coupon.generate_button_text + '</a>'
+			);
 			$( '.button.generate-coupon-code' ).on( 'click', this.generate_coupon_code );
 		},
 
