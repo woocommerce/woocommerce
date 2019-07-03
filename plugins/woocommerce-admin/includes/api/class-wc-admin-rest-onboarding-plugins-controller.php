@@ -211,9 +211,10 @@ class WC_Admin_REST_Onboarding_Plugins_Controller extends WC_REST_Data_Controlle
 			add_query_arg(
 				array(
 					'page' => 'wc-admin',
+					'step' => $next_step_slug,
 				),
 				admin_url( 'admin.php' )
-			) . '#/?step=' . $next_step_slug
+			)
 		);
 
 		$connect_url = Jetpack::init()->build_connect_url( true, $redirect_url, 'woocommerce-setup-wizard' );

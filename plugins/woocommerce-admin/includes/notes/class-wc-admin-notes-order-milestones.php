@@ -256,7 +256,7 @@ class WC_Admin_Notes_Order_Milestones {
 				return array(
 					'name'  => 'review-orders',
 					'label' => __( 'Review your orders', 'woocommerce-admin' ),
-					'query' => '?page=wc-admin#/analytics/orders',
+					'query' => '?page=wc-admin&path=/analytics/orders',
 				);
 			default:
 				return array(

@@ -3,14 +3,14 @@
  * External dependencies
  */
 import { Component, createElement } from '@wordpress/element';
-import { parse } from 'qs';
-import { find, last, isEqual } from 'lodash';
+import { parse, stringify } from 'qs';
+import { isEqual, last } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
 
 /**
  * WooCommerce dependencies
  */
-import { getNewPath, getPersistedQuery, getHistory, stringifyQuery } from '@woocommerce/navigation';
+import { getNewPath, getPersistedQuery, getHistory } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -53,17 +53,17 @@ export const getPages = () => {
 		pages.push( {
 			container: Analytics,
 			path: '/analytics',
-			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
+			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
 		} );
 		pages.push( {
 			container: AnalyticsSettings,
 			path: '/analytics/settings',
-			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
+			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
 		} );
 		pages.push( {
 			container: AnalyticsReport,
 			path: '/analytics/:report',
-			wpOpenMenu: 'toplevel_page_wc-admin--analytics-revenue',
+			wpOpenMenu: 'toplevel_page_wc-admin-path--analytics-revenue',
 		} );
 	}
 
@@ -105,18 +105,13 @@ export class Controller extends Component {
 	}
 
 	render() {
-		// Pass URL parameters (example :report -> params.report) and query string parameters
-		const { path, url, params } = this.props.match;
-		const query = this.getQuery( this.props.location.search );
-		const page = find( getPages(), { path } );
-
-		if ( ! page ) {
-			return null; // @todo What should we display or do when a route/page doesn't exist?
-		}
+		const { page, match, location } = this.props;
+		const { url, params } = match;
+		const query = this.getBaseQuery( location.search );
 
 		window.wpNavMenuUrlUpdate( page, query );
-		window.wpNavMenuClassChange( page );
-		return createElement( page.container, { params, path: url, pathMatch: path, query } );
+		window.wpNavMenuClassChange( page, url );
+		return createElement( page.container, { params, path: url, pathMatch: page.path, query } );
 	}
 }
 
@@ -125,38 +120,34 @@ export class Controller extends Component {
  * as is.
  *
  * @param {HTMLElement} item - Sidebar anchor link.
- * @param {string} nextQuery - A query string to be added to updated hrefs.
+ * @param {object} nextQuery - A query object to be added to updated hrefs.
  * @param {Array} excludedScreens - wc-admin screens to avoid updating.
  */
 export function updateLinkHref( item, nextQuery, excludedScreens ) {
-	/**
-	 * Regular expression for finding any WooCommerce Admin screen.
-	 * The groupings are as follows:
-	 *
-	 * 0 - Full match
-	 * 1 - "#/" (optional)
-	 * 2 - "analytics/" (optional)
-	 * 3 - Any string, eg "orders"
-	 * 4 - "?" or end of line
-	 */
-	const _exp = /page=wc-admin(#\/)?(analytics\/)?(.*?)(\?|$)/;
-	const wcAdminMatches = item.href.match( _exp );
+	const isWCAdmin = /admin.php\?page=wc-admin/.test( item.href );
 
-	if ( wcAdminMatches ) {
-		// Get fourth grouping
-		const screen = wcAdminMatches[ 3 ];
+	if ( isWCAdmin ) {
+		const search = last( item.href.split( '?' ) );
+		const query = parse( search );
+		const path = query.path || 'dashboard';
+		const screen = path.replace( '/analytics', '' ).replace( '/', '' );
 
-		if ( ! excludedScreens.includes( screen ) ) {
-			const url = item.href.split( 'wc-admin' );
-			const hashUrl = last( url );
-			const base = hashUrl.split( '?' )[ 0 ];
-			const href = `${ url[ 0 ] }wc-admin${ '#' === base[ 0 ] ? '' : '#/' }${ base }${ nextQuery }`;
-			item.href = href;
-		}
+		const isExcludedScreen = excludedScreens.includes( screen );
+
+		const href =
+			'admin.php?' + stringify( Object.assign( query, isExcludedScreen ? {} : nextQuery ) );
+
+		// Replace the href so you can see the url on hover.
+		item.href = href;
+
+		item.onclick = e => {
+			e.preventDefault();
+			getHistory().push( href );
+		};
 	}
 }
 
-// Update links in wp-admin menu to persist time related queries
+// Update's wc-admin links in wp-admin menu
 window.wpNavMenuUrlUpdate = function( page, query ) {
 	const excludedScreens = applyFilters( TIME_EXCLUDED_SCREENS_FILTER, [
 		'devdocs',
@@ -164,7 +155,7 @@ window.wpNavMenuUrlUpdate = function( page, query ) {
 		'settings',
 		'customers',
 	] );
-	const nextQuery = stringifyQuery( getPersistedQuery( query ) );
+	const nextQuery = getPersistedQuery( query );
 
 	Array.from( document.querySelectorAll( '#adminmenu a' ) ).forEach( item =>
 		updateLinkHref( item, nextQuery, excludedScreens )
@@ -172,7 +163,7 @@ window.wpNavMenuUrlUpdate = function( page, query ) {
 };
 
 // When the route changes, we need to update wp-admin's menu with the correct section & current link
-window.wpNavMenuClassChange = function( page ) {
+window.wpNavMenuClassChange = function( page, url ) {
 	Array.from( document.getElementsByClassName( 'current' ) ).forEach( function( item ) {
 		item.classList.remove( 'current' );
 	} );
@@ -186,11 +177,14 @@ window.wpNavMenuClassChange = function( page ) {
 		element.classList.add( 'menu-top' );
 	} );
 
-	const pageHash = window.location.hash.split( '?' )[ 0 ];
+	const pageUrl =
+		'/' === url
+			? 'admin.php?page=wc-admin'
+			: 'admin.php?page=wc-admin&path=' + encodeURIComponent( url );
 	const currentItemsSelector =
-		pageHash === '#/'
-			? `li > a[href$="${ pageHash }"], li > a[href*="${ pageHash }?"]`
-			: `li > a[href*="${ pageHash }"]`;
+		url === '/'
+			? `li > a[href$="${ pageUrl }"], li > a[href*="${ pageUrl }?"]`
+			: `li > a[href*="${ pageUrl }"]`;
 	const currentItems = document.querySelectorAll( currentItemsSelector );
 
 	Array.from( currentItems ).forEach( function( item ) {

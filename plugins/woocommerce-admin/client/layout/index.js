@@ -102,9 +102,15 @@ class _PageLayout extends Component {
 			<Router history={ getHistory() }>
 				<Switch>
 					{ getPages().map( page => {
-						return <Route key={ page.path } path={ page.path } exact component={ Layout } />;
+						return (
+							<Route
+								key={ page.path }
+								path={ page.path }
+								exact
+								render={ props => <Layout page={ page } { ...props } /> }
+							/>
+						);
 					} ) }
-					<Route component={ Layout } />
 				</Switch>
 			</Router>
 		);

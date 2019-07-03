@@ -10,7 +10,7 @@ import { __, sprintf } from '@wordpress/i18n';
  * WooCommerce dependencies
  */
 import { Card } from '@woocommerce/components';
-import { getAdminLink, getHistory } from '@woocommerce/navigation';
+import { getAdminLink, getHistory, getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -26,8 +26,12 @@ class ChartBlock extends Component {
 			return null;
 		}
 
-		getHistory().push( 'analytics/' + charts[ 0 ].endpoint + '?chart=' + charts[ 0 ].key );
+		getHistory().push( this.getChartPath( charts[ 0 ] ) );
 	};
+
+	getChartPath( chart ) {
+		return getNewPath( { chart: chart.key }, '/analytics/' + chart.endpoint, getPersistedQuery() );
+	}
 
 	render() {
 		const { charts, endpoint, path, query } = this.props;
@@ -48,12 +52,7 @@ class ChartBlock extends Component {
 				>
 					<a
 						className="screen-reader-text"
-						href={ getAdminLink(
-							'admin.php?page=wc-admin#/analytics/' +
-								charts[ 0 ].endpoint +
-								'?chart=' +
-								charts[ 0 ].key
-						) }
+						href={ getAdminLink( this.getChartPath( charts[ 0 ] ) ) }
 					>
 						{ /* translators: %s is the chart type */
 						sprintf( __( '%s Report', 'woocommerce-admin' ), charts[ 0 ].label ) }

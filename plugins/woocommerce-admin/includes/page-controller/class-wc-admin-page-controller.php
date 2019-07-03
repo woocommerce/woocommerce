@@ -102,22 +102,16 @@ class WC_Admin_Page_Controller {
 			$current_url = esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) );
 		}
 
-		$current_path     = wp_parse_url( $current_url, PHP_URL_PATH );
-		$current_query    = wp_parse_url( $current_url, PHP_URL_QUERY );
-		$current_fragment = wp_parse_url( $current_url, PHP_URL_FRAGMENT );
+		$current_query = wp_parse_url( $current_url, PHP_URL_QUERY );
+		parse_str( $current_query, $current_pieces );
+		$current_path  = empty( $current_pieces['page'] ) ? '' : $current_pieces['page'];
+		$current_path .= empty( $current_pieces['path'] ) ? '' : '&path=' . $current_pieces['path'];
 
 		foreach ( $this->pages as $page ) {
 			if ( isset( $page['js_page'] ) && $page['js_page'] ) {
 				// Check registered admin pages.
-				$full_page_path = add_query_arg( 'page', $page['path'], admin_url( 'admin.php' ) );
-				$page_path      = wp_parse_url( $full_page_path, PHP_URL_PATH );
-				$page_query     = wp_parse_url( $full_page_path, PHP_URL_QUERY );
-				$page_fragment  = wp_parse_url( $full_page_path, PHP_URL_FRAGMENT );
-
 				if (
-					$page_path === $current_path &&
-					0 === strpos( $current_query, $page_query ) &&
-					$page_fragment === $current_fragment
+					$page['path'] === $current_path
 				) {
 					$this->current_page = $page;
 					return;
@@ -408,7 +402,7 @@ class WC_Admin_Page_Controller {
 		$options = wp_parse_args( $options, $defaults );
 
 		if ( 0 !== strpos( $options['path'], self::PAGE_ROOT ) ) {
-			$options['path'] = self::PAGE_ROOT . '#' . $options['path'];
+			$options['path'] = self::PAGE_ROOT . '&path=' . $options['path'];
 		}
 
 		if ( is_null( $options['parent'] ) ) {

@@ -189,7 +189,7 @@ class OrdersPanel extends Component {
 							'woocommerce-admin'
 						) }
 						actionLabel={ __( 'Settings', 'woocommerce-admin' ) }
-						actionURL={ getAdminLink( 'admin.php?page=wc-admin#/analytics/settings' ) }
+						actionURL={ getAdminLink( 'admin.php?page=wc-admin&path=/analytics/settings' ) }
 					/>
 				);
 			}
