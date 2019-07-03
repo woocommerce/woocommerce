@@ -11,6 +11,7 @@ import { PanelBody, ToggleControl } from '@wordpress/components';
  */
 import './editor.scss';
 import Block from './block.js';
+import ToggleButtonControl from '../../components/toggle-button-control';
 
 export default function( { attributes, setAttributes } ) {
 	const { hasCount, hasEmpty, isDropdown, isHierarchical } = attributes;
@@ -22,16 +23,6 @@ export default function( { attributes, setAttributes } ) {
 					title={ __( 'Content', 'woo-gutenberg-products-block' ) }
 					initialOpen
 				>
-					<ToggleControl
-						label={ __( 'Show as dropdown', 'woo-gutenberg-products-block' ) }
-						help={
-							isDropdown ?
-								__( 'Categories are shown in a dropdown.', 'woo-gutenberg-products-block' ) :
-								__( 'Categories are shown in a list.', 'woo-gutenberg-products-block' )
-						}
-						checked={ isDropdown }
-						onChange={ () => setAttributes( { isDropdown: ! isDropdown } ) }
-					/>
 					<ToggleControl
 						label={ __( 'Show product count', 'woo-gutenberg-products-block' ) }
 						help={
@@ -61,6 +52,20 @@ export default function( { attributes, setAttributes } ) {
 						}
 						checked={ hasEmpty }
 						onChange={ () => setAttributes( { hasEmpty: ! hasEmpty } ) }
+					/>
+				</PanelBody>
+				<PanelBody
+					title={ __( 'List Settings', 'woo-gutenberg-products-block' ) }
+					initialOpen
+				>
+					<ToggleButtonControl
+						label={ __( 'Display style', 'woo-gutenberg-products-block' ) }
+						value={ isDropdown ? 'dropdown' : 'list' }
+						options={ [
+							{ label: __( 'List', 'woo-gutenberg-products-block' ), value: 'list' },
+							{ label: __( 'Dropdown', 'woo-gutenberg-products-block' ), value: 'dropdown' },
+						] }
+						onChange={ ( value ) => setAttributes( { isDropdown: 'dropdown' === value } ) }
 					/>
 				</PanelBody>
 			</InspectorControls>
