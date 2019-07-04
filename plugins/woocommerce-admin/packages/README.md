@@ -75,7 +75,7 @@ To create a new package, add a new folder to `/packages`, containing…
 - Run `npm run publish-packages:check` to see which packages will be published
 - Create a PR with a CHANGELOG for each updated package (or try to add to the CHANGELOG with any PR editing `packages/`)
 - Run `npm run publish-packages:prod` to publish the package
-- _OR_ Run `npm run publish-packages:dev` to publish "next" releases (installed as `npm i @woocommerce/package@next`). Currently packages are published this way, but we should be using prod in the future. Only use `:dev` if you have a reason to.
+- _OR_ Run `npm run publish-packages:dev` to publish "next" releases (installed as `npm i @woocommerce/package@next`). Only use `:dev` if you have a reason to.
 - Both commands will run `build:packages` before the lerna task, just to catch any last updates.
 
 It will confirm with you once more before publishing:
