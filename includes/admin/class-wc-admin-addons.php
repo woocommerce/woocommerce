@@ -2,8 +2,6 @@
 /**
  * Addons Page
  *
- * @author   WooThemes
- * @category Admin
  * @package  WooCommerce/Admin
  * @version  2.5.0
  */
@@ -23,7 +21,8 @@ class WC_Admin_Addons {
 	 * @return array of objects
 	 */
 	public static function get_featured() {
-		if ( false === ( $featured = get_transient( 'wc_addons_featured' ) ) ) {
+		$featured = get_transient( 'wc_addons_featured' );
+		if ( false === $featured ) {
 			$raw_featured = wp_safe_remote_get( 'https://d3t0oesq8995hv.cloudfront.net/add-ons/featured-v2.json', array( 'user-agent' => 'WooCommerce Addons Page' ) );
 			if ( ! is_wp_error( $raw_featured ) ) {
 				$featured = json_decode( wp_remote_retrieve_body( $raw_featured ) );
@@ -42,9 +41,9 @@ class WC_Admin_Addons {
 	/**
 	 * Build url parameter string
 	 *
-	 * @param  string $category
-	 * @param  string $term
-	 * @param  string $country
+	 * @param  string $category Addon (sub) category.
+	 * @param  string $term     Search terms.
+	 * @param  string $country  Store country.
 	 *
 	 * @return string url parameter string
 	 */
@@ -62,9 +61,9 @@ class WC_Admin_Addons {
 	/**
 	 * Call API to get extensions
 	 *
-	 * @param  string $category
-	 * @param  string $term
-	 * @param  string $country
+	 * @param  string $category Addon (sub) category.
+	 * @param  string $term     Search terms.
+	 * @param  string $country  Store country.
 	 *
 	 * @return array of extensions
 	 */
@@ -103,7 +102,7 @@ class WC_Admin_Addons {
 	/**
 	 * Get section for the addons screen.
 	 *
-	 * @param  string $section_id
+	 * @param  string $section_id Required section ID.
 	 *
 	 * @return object|bool
 	 */
@@ -118,7 +117,7 @@ class WC_Admin_Addons {
 	/**
 	 * Get section content for the addons screen.
 	 *
-	 * @param  string $section_id
+	 * @param  string $section_id Required section ID.
 	 *
 	 * @return array
 	 */
@@ -127,7 +126,8 @@ class WC_Admin_Addons {
 		$section_data = '';
 
 		if ( ! empty( $section->endpoint ) ) {
-			if ( false === ( $section_data = get_transient( 'wc_addons_section_' . $section_id ) ) ) {
+			$section_data = get_transient( 'wc_addons_section_' . $section_id );
+			if ( false === $section_data ) {
 				$raw_section = wp_safe_remote_get( esc_url_raw( $section->endpoint ), array( 'user-agent' => 'WooCommerce Addons Page' ) );
 
 				if ( ! is_wp_error( $raw_section ) ) {
@@ -172,7 +172,8 @@ class WC_Admin_Addons {
 				'utm_medium'   => 'product',
 				'utm_campaign' => 'woocommerceplugin',
 				'utm_content'  => $utm_content,
-			), $url
+			),
+			$url
 		);
 
 		echo '<a href="' . esc_url( $url ) . '" class="add-new-h2">' . esc_html( $text ) . '</a>' . "\n";
@@ -181,7 +182,7 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a banner block.
 	 *
-	 * @param object $block
+	 * @param object $block Banner data.
 	 */
 	public static function output_banner_block( $block ) {
 		?>
@@ -218,7 +219,7 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a column.
 	 *
-	 * @param object $block
+	 * @param object $block Column data.
 	 */
 	public static function output_column( $block ) {
 		if ( isset( $block->container ) && 'column_container_start' === $block->container ) {
@@ -245,7 +246,7 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a column block.
 	 *
-	 * @param object $block
+	 * @param object $block Column block data.
 	 */
 	public static function output_column_block( $block ) {
 		?>
@@ -281,7 +282,7 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a small light block.
 	 *
-	 * @param object $block
+	 * @param object $block Block data.
 	 */
 	public static function output_small_light_block( $block ) {
 		?>
@@ -309,7 +310,7 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of a small dark block.
 	 *
-	 * @param object $block
+	 * @param object $block Block data.
 	 */
 	public static function output_small_dark_block( $block ) {
 		?>
@@ -341,7 +342,7 @@ class WC_Admin_Addons {
 	/**
 	 * Handles the outputting of the WooCommerce Services banner block.
 	 *
-	 * @param object $block
+	 * @param object $block Block data.
 	 */
 	public static function output_wcs_banner_block( $block = array() ) {
 		$is_active = is_plugin_active( 'woocommerce-services/woocommerce-services.php' );
@@ -382,7 +383,8 @@ class WC_Admin_Addons {
 					'title'       => __( 'Show Canada Post shipping rates', 'woocommerce' ),
 					'description' => __( 'Display live rates from Canada Post at checkout to make shipping a breeze. Powered by WooCommerce Services.', 'woocommerce' ),
 					'logos'       => array_merge(
-						$defaults['logos'], array(
+						$defaults['logos'],
+						array(
 							array(
 								'link' => WC()->plugin_url() . '/assets/images/wcs-canada-post-logo.jpg',
 								'alt'  => 'Canada Post logo',
@@ -394,7 +396,8 @@ class WC_Admin_Addons {
 			case 'US':
 				$local_defaults = array(
 					'logos' => array_merge(
-						$defaults['logos'], array(
+						$defaults['logos'],
+						array(
 							array(
 								'link' => WC()->plugin_url() . '/assets/images/wcs-usps-logo.png',
 								'alt'  => 'USPS logo',
@@ -440,13 +443,13 @@ class WC_Admin_Addons {
 				?>
 			</div>
 		</div>
-	<?php
+		<?php
 	}
 
 	/**
 	 * Handles the outputting of featured sections
 	 *
-	 * @param array $sections
+	 * @param array $sections Section data.
 	 */
 	public static function output_featured_sections( $sections ) {
 		foreach ( $sections as $section ) {
@@ -479,10 +482,10 @@ class WC_Admin_Addons {
 	/**
 	 * Outputs a button.
 	 *
-	 * @param string $url
-	 * @param string $text
-	 * @param string $theme
-	 * @param string $plugin
+	 * @param string $url    Destination URL.
+	 * @param string $text   Button label text.
+	 * @param string $theme  Button style class (not to be confused with WP theme!).
+	 * @param string $plugin The plugin the button is promoting.
 	 */
 	public static function output_button( $url, $text, $theme, $plugin = '' ) {
 		$theme = __( 'Free', 'woocommerce' ) === $text ? 'addons-button-outline-green' : $theme;
@@ -502,6 +505,9 @@ class WC_Admin_Addons {
 	 * Handles output of the addons page in admin.
 	 */
 	public static function output() {
+		$section = isset( $_GET['section'] ) ? sanitize_text_field( wp_unslash( $_GET['section'] ) ) : '_featured';
+		$search = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
+
 		if ( isset( $_GET['section'] ) && 'helper' === $_GET['section'] ) {
 			do_action( 'woocommerce_helper_output' );
 			return;
@@ -513,12 +519,12 @@ class WC_Admin_Addons {
 
 		$sections        = self::get_sections();
 		$theme           = wp_get_theme();
-		$current_section = isset( $_GET['section'] ) ? sanitize_text_field( $_GET['section'] ) : '_featured';
+		$current_section = isset( $_GET['section'] ) ? $section : '_featured';
 		$addons          = array();
 
 		if ( '_featured' !== $current_section ) {
-			$category = isset( $_GET['section'] ) ? $_GET['section'] : null;
-			$term     = isset( $_GET['search'] ) ? $_GET['search'] : null;
+			$category = $section ? $section : null;
+			$term     = $search ? $search : null;
 			$country  = WC()->countries->get_base_country();
 			$addons   = self::get_extension_data( $category, $term, $country );
 		}
@@ -555,7 +561,7 @@ class WC_Admin_Addons {
 	/**
 	 * Should an extension be shown on the featured page.
 	 *
-	 * @param object $item
+	 * @param object $item Item data.
 	 * @return boolean
 	 */
 	public static function show_extension( $item ) {
