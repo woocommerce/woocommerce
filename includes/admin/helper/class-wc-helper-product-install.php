@@ -26,6 +26,8 @@ class WC_Helper_Product_Install {
 	 * @var array
 	 */
 	private static $default_step_state = array(
+		'download_link' => '',
+		'product_type'  => '',
 		'last_step'     => '',
 		'last_error'    => '',
 		'download_path' => '',
@@ -39,7 +41,7 @@ class WC_Helper_Product_Install {
 	 * @var array
 	 */
 	private static $install_steps = array(
-		'check_subscription',
+		'get_product_info',
 		'download_product',
 		'unpack_product',
 		'move_product',
@@ -187,30 +189,73 @@ class WC_Helper_Product_Install {
 		$result = call_user_func( array( __CLASS__, $step ), $product_id, $upgrader );
 		if ( is_wp_error( $result ) ) {
 			$state_steps[ $product_id ]['last_error'] = $result->get_error_message();
-		}
-		if ( 'download_product' === $step && ! is_wp_error( $result ) ) {
-			$state_steps[ $product_id ]['download_path'] = $result;
-		}
-		if ( 'unpack_product' === $step && ! is_wp_error( $result ) ) {
-			$state_steps[ $product_id ]['unpacked_path'] = $result;
+		} else {
+			switch ( $step ) {
+				case 'get_product_info':
+					$state_steps[ $product_id ]['download_url'] = $result['download_url'];
+					$state_steps[ $product_id ]['product_type'] = $result['product_type'];
+					break;
+				case 'download_product':
+					$state_steps[ $product_id ]['download_path'] = $result;
+					break;
+				case 'unpack_product':
+					$state_steps[ $product_id ]['unpacked_path'] = $result;
+					break;
+			}
 		}
 
 		self::update_state( 'steps', $state_steps );
 	}
 
 	/**
-	 * Check subscription of a given product ID.
+	 * Get product info from its ID.
 	 *
 	 * @param int $product_id Product ID.
 	 *
-	 * @return bool|\WP_Error
+	 * @return \WP_Error|string
 	 */
-	private static function check_subscription( $product_id ) {
-		if ( ! WC_Helper::has_product_subscription( $product_id ) ) {
-			return new WP_Error( 'missing_subscription', __( 'Missing product subscription', 'woocommerce' ) );
+	private static function get_product_info( $product_id ) {
+		$product_info = array(
+			'download_url' => '',
+			'product_type' => '',
+		);
+
+		// Get product info from woocommerce.com.
+		$request = WC_Helper_API::get(
+			add_query_arg(
+				array( 'product_id' => absint( $product_id ) ),
+				'info'
+			),
+			array(
+				'authenticated' => true,
+			)
+		);
+
+		if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
+			return new WP_Error( 'product_info_failed', __( 'Failed to retrieve product info from woocommerce.com', 'woocommerce' ) );
 		}
 
-		return true;
+		$result = json_decode( wp_remote_retrieve_body( $request ), true );
+
+		$product_info['product_type'] = $result['_product_type'];
+
+		if ( ! empty( $result['_wporg_product'] ) && ! empty( $result['download_link'] ) ) {
+			// For wporg product, download is set already from info response.
+			$product_info['download_url'] = $result['download_link'];
+		} elseif ( ! WC_Helper::has_product_subscription( $product_id ) ) {
+			// Non-wporg product needs subscription.
+			return new WP_Error( 'missing_subscription', __( 'Missing product subscription', 'woocommerce' ) );
+		} else {
+			// Retrieve download URL for non-wporg product.
+			$updates = WC_Helper_Updater::get_update_data();
+			if ( empty( $updates[ $product_id ]['package'] ) ) {
+				return new WP_Error( 'missing_product_package', __( 'Could not found product package.', 'woocommerce' ) );
+			}
+
+			$product_info['download_url'] = $updates[ $product_id ]['package'];
+		}
+
+		return $product_info;
 	}
 
 	/**
@@ -222,13 +267,11 @@ class WC_Helper_Product_Install {
 	 * @return \WP_Error|string
 	 */
 	private static function download_product( $product_id, $upgrader ) {
-		// TODO: make sure wporg plugin/theme is supported.
-		$updates = WC_Helper_Updater::get_update_data();
-		if ( empty( $updates[ $product_id ]['package'] ) ) {
-			return new WP_Error( 'missing_product_package', __( 'Could not found product package.', 'woocommerce' ) );
+		$steps = self::get_state( 'steps' );
+		if ( empty( $steps[ $product_id ]['download_url'] ) ) {
+			return new WP_Error( 'missing_download_url', __( 'Could not found download url for the product.', 'woocommerce' ) );
 		}
-
-		return $upgrader->download_package( $updates[ $product_id ]['package'] );
+		return $upgrader->download_package( $steps[ $product_id ]['download_url'] );
 	}
 
 	/**
