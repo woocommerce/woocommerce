@@ -491,6 +491,13 @@ class WC_Admin_Addons {
 		$theme = __( 'Free', 'woocommerce' ) === $text ? 'addons-button-outline-green' : $theme;
 		$theme = is_plugin_active( $plugin ) ? 'addons-button-installed' : $theme;
 		$text  = is_plugin_active( $plugin ) ? __( 'Installed', 'woocommerce' ) : $text;
+		$url   = add_query_arg(
+			array(
+				'in-app-purchase-site'        => site_url(),
+				'in-app-purchase-woo-version' => WC_VERSION,
+			),
+			$url
+		);
 		?>
 		<a
 			class="addons-button <?php echo esc_attr( $theme ); ?>"
