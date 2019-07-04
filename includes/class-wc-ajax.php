@@ -2053,6 +2053,8 @@ class WC_AJAX {
 		);
 
 		if ( $variations ) {
+			wc_render_invalid_variation_notice( $product_object );
+
 			foreach ( $variations as $variation_object ) {
 				$variation_id   = $variation_object->get_id();
 				$variation      = get_post( $variation_id );
