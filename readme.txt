@@ -176,6 +176,7 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/w
 * Dev - Add $this parameter to email class filters. #23250
 * Dev - Add new WC_Abstract_Order::get_coupons() method for returning all coupon line item objects on an order. #23663
 * Dev - Added new action 'woocommerce_product_read'. #23181
+* Dev - Add filter 'woocommerce_admin_order_buyer_name' to change buyer name in orders list screen. #23741
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/master/CHANGELOG.txt).
 
