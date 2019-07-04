@@ -154,7 +154,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 */
 		public function init_form_fields() {
 			/* translators: %s: list of placeholders */
-			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>' );
+			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . implode( '</code>, <code>', array_keys( $this->placeholders ) ) . '</code>' );
 			$this->form_fields = array(
 				'enabled'    => array(
 					'title'   => __( 'Enable/Disable', 'woocommerce' ),
