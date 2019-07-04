@@ -480,6 +480,24 @@ class WC_Admin_Addons {
 	}
 
 	/**
+	 * Add in-app-purchase URL params to link.
+	 *
+	 * Adds various url parameters to a url to support a streamlined
+	 * flow for obtaining and setting up WooCommerce extensons.
+	 *
+	 * @param string $url    Destination URL.
+	 */
+	public static function add_in_app_purchase_url_params( $url ) {
+		return add_query_arg(
+			array(
+				'in-app-purchase-site'        => site_url(),
+				'in-app-purchase-woo-version' => WC_VERSION,
+			),
+			$url
+		);
+	}
+
+	/**
 	 * Outputs a button.
 	 *
 	 * @param string $url    Destination URL.
@@ -491,13 +509,7 @@ class WC_Admin_Addons {
 		$theme = __( 'Free', 'woocommerce' ) === $text ? 'addons-button-outline-green' : $theme;
 		$theme = is_plugin_active( $plugin ) ? 'addons-button-installed' : $theme;
 		$text  = is_plugin_active( $plugin ) ? __( 'Installed', 'woocommerce' ) : $text;
-		$url   = add_query_arg(
-			array(
-				'in-app-purchase-site'        => site_url(),
-				'in-app-purchase-woo-version' => WC_VERSION,
-			),
-			$url
-		);
+		$url   = self::add_in_app_purchase_url_params( $url );
 		?>
 		<a
 			class="addons-button <?php echo esc_attr( $theme ); ?>"

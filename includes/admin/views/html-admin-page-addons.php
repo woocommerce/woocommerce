@@ -96,7 +96,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				}
 				?>
 				<li class="product">
-					<a href="<?php echo esc_attr( $addon->link ); ?>">
+					<a href="<?php echo esc_attr( WC_Admin_Addons::add_in_app_purchase_url_params( $addon->link ) ); ?>">
 						<?php if ( ! empty( $addon->image ) ) : ?>
 							<span class="product-img-wrap"><img src="<?php echo esc_url( $addon->image ); ?>"/></span>
 						<?php else : ?>
