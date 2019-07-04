@@ -18,7 +18,6 @@ import SecurityIcon from './images/security';
 import SalesTaxIcon from './images/local_atm';
 import SpeedIcon from './images/flash_on';
 import MobileAppIcon from './images/phone_android';
-import './style.scss';
 import withSelect from 'wc-api/with-select';
 import { recordEvent } from 'lib/tracks';
 
@@ -182,6 +181,7 @@ class Start extends Component {
 							onChange={ this.onTrackingChange }
 							onClick={ e => e.stopPropagation() }
 							tabIndex="-1"
+							className="woocommerce-profile-wizard__toggle"
 						/>
 					</div>
 

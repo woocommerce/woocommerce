@@ -97,7 +97,7 @@ class WC_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertCount( 10, $properties );
+		$this->assertCount( 11, $properties );
 		$this->assertArrayHasKey( 'completed', $properties );
 		$this->assertArrayHasKey( 'skipped', $properties );
 		$this->assertArrayHasKey( 'account_type', $properties );
@@ -106,6 +106,7 @@ class WC_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'product_count', $properties );
 		$this->assertArrayHasKey( 'selling_venues', $properties );
 		$this->assertArrayHasKey( 'other_platform', $properties );
+		$this->assertArrayHasKey( 'business_extensions', $properties );
 		$this->assertArrayHasKey( 'theme', $properties );
 		$this->assertArrayHasKey( 'items_purchased', $properties );
 	}

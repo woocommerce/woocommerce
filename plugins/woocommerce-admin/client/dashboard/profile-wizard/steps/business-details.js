@@ -5,8 +5,10 @@
 import { __, _x, sprintf } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
+import { FormToggle } from '@wordpress/components';
 import { Button, SelectControl } from 'newspack-components';
 import { withDispatch } from '@wordpress/data';
+import { keys, pickBy } from 'lodash';
 
 /**
  * WooCommerce dependencies
@@ -28,6 +30,10 @@ class BusinessDetails extends Component {
 			other_platform: '',
 			product_count: '',
 			selling_venues: '',
+			extensions: {
+				facebook: true,
+				mailchimp: true,
+			},
 		};
 
 		this.onContinue = this.onContinue.bind( this );
@@ -36,14 +42,22 @@ class BusinessDetails extends Component {
 	async onContinue() {
 		const { addNotice, goToNextStep, isError, updateProfileItems } = this.props;
 		const { other_platform, product_count, selling_venues } = this.state;
+		const extensions = keys( pickBy( this.state.extensions ) );
 
 		recordEvent( 'storeprofiler_store_business_details_continue', {
 			product_number: product_count,
 			already_selling: 'no' !== selling_venues,
 			used_platform: other_platform,
+			install_facebook: this.state.extensions.facebook,
+			install_mailchimp: this.state.extensions.mailchimp,
 		} );
 
-		await updateProfileItems( { other_platform, product_count, selling_venues } );
+		await updateProfileItems( {
+			other_platform,
+			product_count,
+			selling_venues,
+			business_extensions: extensions,
+		} );
 
 		if ( ! isError ) {
 			goToNextStep();
@@ -87,6 +101,85 @@ class BusinessDetails extends Component {
 		if ( ! this.state[ key ].length ) {
 			this.setState( { [ key ]: options[ 0 ].value } );
 		}
+	}
+
+	onExtensionChange( extension ) {
+		this.setState( {
+			extensions: {
+				...this.state.extensions,
+				[ extension ]: ! this.state.extensions[ extension ],
+			},
+		} );
+	}
+
+	renderBusinessExtensionHelpText() {
+		const extensionSlugs = {
+			facebook: __( 'Facebook for WooCommerce', 'woocommerce-admin' ),
+			mailchimp: __( 'Mailchimp for WooCommerce', 'woocommerce-admin' ),
+		};
+
+		const extensions = keys( pickBy( this.state.extensions ) );
+		if ( 0 === extensions.length ) {
+			return null;
+		}
+
+		return (
+			<p>
+				{ sprintf(
+					__( 'The following plugins will be installed for free: %s' ),
+					extensions
+						.map( extension => {
+							return extensionSlugs[ extension ];
+						} )
+						.join( ', ' )
+				) }
+			</p>
+		);
+	}
+
+	renderBusinessExtensions() {
+		const extensionBenefits = [
+			{
+				slug: 'facebook',
+				title: __( 'Market on Facebook', 'woocommerce-admin' ),
+				icon: 'onboarding/facebook.png',
+				description: __(
+					'Grow your business by targeting the right people and driving sales with Facebook.',
+					'woocommerce-admin'
+				),
+			},
+			{
+				slug: 'mailchimp',
+				title: __( 'Contact customers with Mailchimp', 'woocommerce-admin' ),
+				icon: 'onboarding/mailchimp.png',
+				description: __(
+					'Send targeted campaigns, recover abandoned carts and much more with Mailchimp.',
+					'woocommerce-admin'
+				),
+			},
+		];
+		return (
+			<div className="woocommerce-profile-wizard__benefits">
+				{ extensionBenefits.map( benefit => (
+					<div className="woocommerce-profile-wizard__benefit" key={ benefit.title }>
+						<div className="woocommerce-profile-wizard__business-extension">
+							<img src={ wcSettings.wcAdminAssetUrl + benefit.icon } alt="" />
+						</div>
+						<div className="woocommerce-profile-wizard__benefit-content">
+							<H className="woocommerce-profile-wizard__benefit-title">{ benefit.title }</H>
+							<p>{ benefit.description }</p>
+						</div>
+						<div className="woocommerce-profile-wizard__benefit-toggle">
+							<FormToggle
+								checked={ this.state.extensions[ benefit.slug ] }
+								onChange={ () => this.onExtensionChange( benefit.slug ) }
+								className="woocommerce-profile-wizard__toggle"
+							/>
+						</div>
+					</div>
+				) ) }
+			</div>
+		);
 	}
 
 	render() {
@@ -156,6 +249,9 @@ class BusinessDetails extends Component {
 			},
 		];
 
+		// Show extensions when the currently selling elsewhere checkbox has been answered.
+		const showExtensions = '' !== this.state.selling_venues;
+
 		return (
 			<Fragment>
 				<H className="woocommerce-profile-wizard__header-title">
@@ -193,6 +289,8 @@ class BusinessDetails extends Component {
 						/>
 					) }
 
+					{ showExtensions && this.renderBusinessExtensions() }
+
 					<Button
 						isPrimary
 						className="woocommerce-profile-wizard__continue"
@@ -202,6 +300,8 @@ class BusinessDetails extends Component {
 						{ __( 'Continue', 'woocommerce-admin' ) }
 					</Button>
 				</Card>
+
+				{ showExtensions && this.renderBusinessExtensionHelpText() }
 			</Fragment>
 		);
 	}
