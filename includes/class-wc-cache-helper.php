@@ -34,7 +34,7 @@ class WC_Cache_Helper {
 	}
 
 	/**
-	 * Set additonal nocache headers.
+	 * Set additional nocache headers.
 	 *
 	 * @param array $headers Header names and field values.
 	 * @since 3.6.0
